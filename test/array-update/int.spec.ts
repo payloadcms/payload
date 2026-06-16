@@ -209,6 +209,9 @@ describe('array-update', () => {
           groupArray: [{ id: '6116a7f0f0f0f0f0f0f0f0f4', text: 'group value' }],
         },
         localizedArray: [{ id: '6116a7f0f0f0f0f0f0f0f0f5', text: 'localized value' }],
+        localizedGroup: {
+          localizedGroupArray: [{ id: '6116a7f0f0f0f0f0f0f0f0f6', text: 'localized group value' }],
+        },
       },
       where: { id: { in: [docA.id, docB.id] } },
     })
@@ -223,11 +226,16 @@ describe('array-update', () => {
     expect(updatedB.localizedArray?.[0].text).toBe('localized value')
     expect(updatedA.group?.groupArray?.[0].text).toBe('group value')
     expect(updatedB.group?.groupArray?.[0].text).toBe('group value')
+    expect(updatedA.localizedGroup?.localizedGroupArray?.[0].text).toBe('localized group value')
+    expect(updatedB.localizedGroup?.localizedGroupArray?.[0].text).toBe('localized group value')
     expect(updatedA.blocks?.[0].text).toBe('block value')
     expect(updatedB.blocks?.[0].text).toBe('block value')
 
     expect(updatedA.localizedArray?.[0].id).not.toBe(updatedB.localizedArray?.[0].id)
     expect(updatedA.group?.groupArray?.[0].id).not.toBe(updatedB.group?.groupArray?.[0].id)
+    expect(updatedA.localizedGroup?.localizedGroupArray?.[0].id).not.toBe(
+      updatedB.localizedGroup?.localizedGroupArray?.[0].id,
+    )
     expect(updatedA.blocks?.[0].id).not.toBe(updatedB.blocks?.[0].id)
     expect(updatedA.blocks?.[0].innerArray?.[0].id).not.toBe(
       updatedB.blocks?.[0].innerArray?.[0].id,

@@ -25,17 +25,30 @@ const buildLevelMap = (fields: Field[], map: Map<string, LevelEntry> = new Map()
           buildLevelMap(tab.fields, map)
         }
       }
-    } else if (field.type === 'group' && 'name' in field && field.name) {
-      map.set(field.name, {
-        type: 'subfields',
-        fields: field.fields,
-        localized: Boolean(field.localized),
-      })
+    } else if (field.type === 'group') {
+      if ('name' in field && field.name) {
+        map.set(field.name, {
+          type: 'subfields',
+          fields: field.fields,
+          localized: Boolean(field.localized),
+        })
+      } else {
+        buildLevelMap(field.fields, map)
+      }
     } else if ((field.type === 'array' || field.type === 'blocks') && field.name) {
       map.set(field.name, { type: 'rows', field, localized: Boolean(field.localized) })
     }
   }
   return map
+}
+
+const isLocaleKeyed = (value: object, config: SanitizedConfig): boolean => {
+  if (Array.isArray(value)) {
+    return false
+  }
+  const localeCodes = config.localization ? config.localization.localeCodes : []
+  const keys = Object.keys(value)
+  return keys.length > 0 && keys.every((key) => localeCodes.includes(key))
 }
 
 const resolveBlockFields = (
@@ -114,11 +127,13 @@ const copyObject = ({
       continue
     }
 
-    const localeKeyed = entry.localized && !parentIsLocalized
     const childParentIsLocalized = parentIsLocalized || entry.localized
 
     if (entry.type === 'subfields') {
-      result[key] = localeKeyed
+      const valueIsLocaleKeyed =
+        entry.localized && !parentIsLocalized && isLocaleKeyed(value, config)
+
+      result[key] = valueIsLocaleKeyed
         ? mapLocales(value, (localeValue) =>
             copyObject({
               config,
