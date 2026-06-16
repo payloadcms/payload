@@ -1,6 +1,7 @@
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { loadEnv } from 'payload/node'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -42,8 +43,10 @@ const ENV_VARIANT_TO_INTERNAL: Record<string, Variant> = {
 }
 
 export function setup() {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY must be set to run eval tests')
+  loadEnv()
+
+  if (!process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY) {
+    throw new Error('Set OPENAI_API_KEY or ANTHROPIC_API_KEY to run eval tests')
   }
 }
 
