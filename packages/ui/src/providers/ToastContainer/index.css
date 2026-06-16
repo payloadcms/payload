@@ -1,7 +1,5 @@
 @layer payload-default {
   .payload-toast-container {
-    --offset: calc(var(--gutter-h) / 2);
-
     padding: 0;
     margin: 0;
 
@@ -20,8 +18,7 @@
       align-items: center;
       gap: var(--spacer-2);
       min-height: var(--spacer-6);
-      left: 0;
-      right: 0;
+      inset-inline: 0;
       width: fit-content;
       margin-inline: auto;
       padding-inline: var(--spacer-2);
@@ -66,7 +63,7 @@
         color: var(--color-text-ondanger);
         background: var(--color-bg-danger);
         .icon--warning {
-          color: var(--color-text-oninverse);
+          color: var(--color-text-ondanger);
         }
       }
 
