@@ -1310,6 +1310,106 @@ export default buildConfigWithDefaults({
             width: 1920,
             height: 1080,
           },
+          {
+            name: 'carousel1',
+            height: 100,
+            width: 100,
+          },
+          {
+            name: 'carousel2',
+            height: 100,
+            width: 150,
+          },
+          {
+            name: 'carousel3',
+            height: 150,
+            width: 100,
+          },
+          {
+            name: 'carousel4',
+            height: 120,
+            width: 200,
+          },
+          {
+            name: 'carousel5',
+            height: 200,
+            width: 120,
+          },
+          {
+            name: 'carousel6',
+            height: 250,
+            width: 250,
+          },
+          {
+            name: 'carousel7',
+            height: 180,
+            width: 320,
+          },
+          {
+            name: 'carousel8',
+            height: 320,
+            width: 180,
+          },
+          {
+            name: 'carousel9',
+            height: 300,
+            width: 400,
+          },
+          {
+            name: 'carousel10',
+            height: 400,
+            width: 300,
+          },
+          {
+            name: 'carousel11',
+            height: 200,
+            width: 500,
+          },
+          {
+            name: 'carousel12',
+            height: 500,
+            width: 200,
+          },
+          {
+            name: 'carousel13',
+            height: 360,
+            width: 640,
+          },
+          {
+            name: 'carousel14',
+            height: 640,
+            width: 360,
+          },
+          {
+            name: 'carousel15',
+            height: 128,
+            width: 128,
+          },
+          {
+            name: 'carousel16',
+            height: 96,
+            width: 96,
+          },
+          {
+            name: 'carousel17',
+            height: 64,
+            width: 64,
+          },
+          {
+            name: 'carousel18',
+            height: 450,
+            width: 800,
+          },
+          {
+            name: 'carousel19',
+            height: 800,
+            width: 450,
+          },
+          {
+            name: 'carousel20',
+            height: 1000,
+            width: 1000,
+          },
         ],
         staticDir: path.resolve(dirname, './media'),
       },
