@@ -83,6 +83,23 @@ export default buildConfigWithDefaults({
           ],
         },
         {
+          name: 'localizedGroup',
+          type: 'group',
+          localized: true,
+          fields: [
+            {
+              name: 'localizedGroupArray',
+              type: 'array',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+        {
           name: 'blocks',
           type: 'blocks',
           blocks: [
