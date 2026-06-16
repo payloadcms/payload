@@ -29,8 +29,8 @@
     gap: var(--spacer-1);
     padding: var(--spacer-1) var(--spacer-2);
     border-radius: var(--radius-medium);
-    background: none;
-    border: none;
+    background: var(--color-bg);
+    border: var(--stroke-width-small) solid var(--special-border-translucent);
     cursor: pointer;
     color: var(--color-text);
     font-family: var(--text-body-medium-strong-font-family);
@@ -42,6 +42,10 @@
 
     &:hover {
       background: var(--color-bg-transparent-hover);
+    }
+
+    &:active {
+      background: var(--color-bg-transparent-pressed);
     }
   }
 

@@ -786,6 +786,15 @@ export function DefaultEditView({
               {upload && !BeforeFields && !isInDrawer ? (
                 <UploadControlsProvider>
                   <div className={`${baseClass}__upload-layout`}>
+                    {CustomUpload || (
+                      <FileManager
+                        collectionSlug={collectionConfig.slug}
+                        initialState={initialState}
+                        uploadConfig={upload}
+                        UploadControls={UploadControls}
+                        UploadFilePreview={UploadFilePreview}
+                      />
+                    )}
                     <DocumentFields
                       AfterFields={AfterFields}
                       BeforeFields={
@@ -815,15 +824,6 @@ export function DefaultEditView({
                       readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
                       schemaPathSegments={schemaPathSegments}
                     />
-                    {CustomUpload || (
-                      <FileManager
-                        collectionSlug={collectionConfig.slug}
-                        initialState={initialState}
-                        uploadConfig={upload}
-                        UploadControls={UploadControls}
-                        UploadFilePreview={UploadFilePreview}
-                      />
-                    )}
                   </div>
                 </UploadControlsProvider>
               ) : (

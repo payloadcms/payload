@@ -18,9 +18,15 @@
     flex-direction: row;
     align-items: flex-start;
 
+    /* The file manager renders before the fields in the DOM (so it stacks on top at mobile),
+       but on desktop it should sit after them in the row at 2fr. */
+    .file-manager {
+      order: 2;
+      flex: 2;
+    }
+
     .document-fields {
-      flex: 0 0 auto;
-      width: 347px;
+      flex: 1;
       border-inline-end: 1px solid var(--color-border);
     }
 
@@ -32,8 +38,15 @@
   @media (max-width: 1024px) {
     .collection-edit__upload-layout {
       flex-direction: column;
+      gap: var(--spacer-5);
+
+      .file-manager {
+        order: 0;
+        flex: 1 0 0;
+      }
 
       .document-fields {
+        flex: 0 0 auto;
         width: 100%;
       }
     }

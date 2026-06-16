@@ -73,7 +73,7 @@
 
   @media (max-width: 768px) {
     .file-preview {
-      flex-direction: column;
+      flex-direction: column-reverse;
     }
   }
 }

@@ -19,14 +19,6 @@
     &--size-expand {
       max-height: 100%;
       width: 100%;
-      padding-top: 100%;
-      position: relative;
-
-      img,
-      svg {
-        position: absolute;
-        top: 0;
-      }
     }
 
     &--size-large {
