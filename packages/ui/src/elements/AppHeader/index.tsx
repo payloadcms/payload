@@ -51,14 +51,6 @@ export function AppHeader({ CustomAvatar, settingsItems }: Props) {
   }, [])
 
   useEffect(() => {
-    const update = () =>
-      document.documentElement.style.setProperty('--scroll-y', `${window.scrollY}px`)
-    update()
-    window.addEventListener('scroll', update, { passive: true })
-    return () => window.removeEventListener('scroll', update)
-  }, [])
-
-  useEffect(() => {
     const checkIsScrollable = () => {
       const el = customControlsRef.current
       if (el) {

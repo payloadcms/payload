@@ -111,6 +111,7 @@ export { CopyLocaleData } from '../../elements/CopyLocaleData/index.js'
 export { CopyToClipboard } from '../../elements/CopyToClipboard/index.js'
 export { DeleteMany } from '../../elements/DeleteMany/index.js'
 export { DocumentControls } from '../../elements/DocumentControls/index.js'
+export { DocumentHeaderRoot } from '../../elements/DocumentHeader/DocumentHeaderRoot/index.js'
 export { Dropzone } from '../../elements/Dropzone/index.js'
 export { documentDrawerBaseClass, useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 export {

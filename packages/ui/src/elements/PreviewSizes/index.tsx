@@ -80,7 +80,7 @@ export type PreviewSizesProps = {
   doc: {
     sizes?: FilesSizesWithUrl
   } & Data
-  imageCacheTag?: string
+  imageCacheTag?: false | string
   uploadConfig: SanitizedCollectionConfig['upload']
 }
 

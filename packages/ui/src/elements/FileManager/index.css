@@ -1,0 +1,135 @@
+@layer payload-default {
+  .file-manager {
+    --mini-carousel-width: 72px;
+    position: relative;
+    flex: 1 0 0;
+    align-self: stretch;
+    width: 100%;
+    min-height: max(
+      500px,
+      calc(100dvh - var(--app-header-height) - var(--doc-controls-height) - var(--doc-header-height))
+    );
+    margin-bottom: 0;
+    border-radius: 0;
+    background: var(--color-bg-secondary);
+  }
+
+  /*
+   * The carousel lives inside the sticky panel, so its border-right only spans the
+   * viewport-height panel. This draws the same divider down the full height of the
+   * (potentially taller) box so it reaches the bottom even below the sticky panel.
+   */
+  .file-manager--has-side-carousel::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: var(--mini-carousel-width);
+    border-inline-end: 1px solid var(--color-border);
+    pointer-events: none;
+  }
+
+  .file-manager__panel {
+    position: sticky;
+    top: var(--doc-controls-height);
+    height: max(
+      500px,
+      calc(100dvh - var(--app-header-height) - var(--doc-controls-height) - var(--doc-header-height))
+    );
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .file-manager__content {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .file-manager__upload {
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-secondary);
+    padding: var(--spacer-4);
+    position: relative;
+  }
+
+  .file-manager__remove {
+    position: absolute;
+    top: var(--spacer-2);
+    right: var(--spacer-2);
+    margin: 0;
+    z-index: 1;
+  }
+
+  .file-manager__thumbnail-wrap {
+    position: relative;
+    width: 150px;
+  }
+
+  .file-manager__file-adjustments {
+    padding: var(--spacer-3);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+  }
+
+  .file-manager__hidden-input {
+    display: none;
+  }
+
+  .file-manager__dropzone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacer-2);
+    width: 100%;
+  }
+
+  .file-manager__dropzone-buttons {
+    display: flex;
+    gap: var(--spacer-2);
+    align-items: center;
+  }
+
+  .file-manager__or-text {
+    color: var(--color-text-tertiary);
+    text-transform: lowercase;
+  }
+
+  .file-manager__drag-text {
+    flex-shrink: 0;
+    margin: 0;
+    text-transform: lowercase;
+    color: var(--color-text-tertiary);
+  }
+
+  @media (max-width: 1024px) {
+    .file-manager {
+      min-height: 400px;
+    }
+
+    .file-manager__panel {
+      position: static;
+      height: auto;
+      min-height: 400px;
+    }
+
+    .file-manager__content {
+      flex-direction: column;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .file-manager--has-side-carousel::before {
+      display: none;
+    }
+  }
+}

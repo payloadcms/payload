@@ -26,7 +26,7 @@ type FocalPosition = {
 export type EditUploadProps = {
   fileName: string
   fileSrc: string
-  imageCacheTag?: string
+  imageCacheTag?: false | string
   initialCrop?: UploadEdits['crop']
   initialFocalPoint?: FocalPosition
   onSave?: (uploadEdits: UploadEdits) => void

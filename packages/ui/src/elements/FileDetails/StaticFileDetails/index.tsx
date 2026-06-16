@@ -20,7 +20,7 @@ export type StaticFileDetailsProps = {
   handleRemove?: () => void
   hasImageSizes?: boolean
   hideRemoveFile?: boolean
-  imageCacheTag?: string
+  imageCacheTag?: false | string
   uploadConfig: SanitizedCollectionConfig['upload']
 }
 

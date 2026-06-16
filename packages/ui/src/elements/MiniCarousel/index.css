@@ -5,7 +5,7 @@
     align-items: stretch;
     gap: var(--spacer-1);
     padding: var(--spacer-2-5);
-    width: 72px;
+    width: var(--mini-carousel-width, 72px);
     flex-shrink: 0;
     overflow-y: auto;
     background: var(--color-bg-secondary);
@@ -42,9 +42,33 @@
   }
 
   .mini-carousel__divider {
-    width: 32px;
+    width: 100%;
     height: 1px;
     background: var(--color-border);
     flex-shrink: 0;
+    margin: var(--spacer-2) 0;
+  }
+
+  @media (max-width: 768px) {
+    .mini-carousel {
+      flex-direction: row;
+      align-items: center;
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-right: 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .mini-carousel__item {
+      width: 52px;
+      height: 52px;
+    }
+
+    .mini-carousel__divider {
+      width: 1px;
+      height: 52px;
+      margin: 0 var(--spacer-2);
+    }
   }
 }

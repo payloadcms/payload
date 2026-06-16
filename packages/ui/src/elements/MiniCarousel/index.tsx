@@ -10,7 +10,7 @@ const baseClass = 'mini-carousel'
 
 type MiniCarouselItemProps = {
   active: boolean
-  imageCacheTag?: string
+  imageCacheTag?: false | string
   label: string
   onClick: () => void
   url: string
@@ -45,7 +45,7 @@ export type MiniCarouselProps = {
     sizes?: FileSizes
     url?: string
   } & Data
-  imageCacheTag?: string
+  imageCacheTag?: false | string
   onSelect: (sizeKey: null | string) => void
   selectedSize: null | string
   uploadConfig: SanitizedCollectionConfig['upload']

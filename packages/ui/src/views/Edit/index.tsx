@@ -17,6 +17,7 @@ import { DocumentFields } from '../../elements/DocumentFields/index.js'
 import { DocumentLocked } from '../../elements/DocumentLocked/index.js'
 import { DocumentStaleData } from '../../elements/DocumentStaleData/index.js'
 import { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
+import { FileManager } from '../../elements/FileManager/index.js'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 import { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'
 import { Upload } from '../../elements/Upload/index.js'
@@ -815,7 +816,7 @@ export function DefaultEditView({
                       schemaPathSegments={schemaPathSegments}
                     />
                     {CustomUpload || (
-                      <Upload
+                      <FileManager
                         collectionSlug={collectionConfig.slug}
                         initialState={initialState}
                         uploadConfig={upload}
