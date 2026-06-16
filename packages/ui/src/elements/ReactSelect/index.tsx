@@ -1,6 +1,6 @@
 'use client'
 import type { JSX, KeyboardEventHandler } from 'react'
-import type { GroupBase, MenuProps, StylesConfig } from 'react-select'
+import type { GroupBase, MenuListProps, MenuProps, StylesConfig } from 'react-select'
 
 import { arrayMove } from '@dnd-kit/sortable'
 import { getTranslation } from '@payloadcms/translations'
@@ -187,6 +187,10 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     () => ({
       ...externalClassNames,
       menu: menuClassName,
+      menuList: (state: MenuListProps<Option, boolean, GroupBase<Option>>) => {
+        const external = externalClassNames?.menuList?.(state) ?? ''
+        return ['scrollbar-thin', external].filter(Boolean).join(' ')
+      },
     }),
     [externalClassNames, menuClassName],
   )

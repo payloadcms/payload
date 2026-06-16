@@ -1150,7 +1150,9 @@ describe('Uploads', () => {
 
       await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
 
-      await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+      await editManyBulkUploadModal
+        .locator('.edit-many-bulk-uploads__header__actions button')
+        .click()
       await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
       await closeAllToasts(page)
 
@@ -1214,7 +1216,9 @@ describe('Uploads', () => {
 
       await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
 
-      await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+      await editManyBulkUploadModal
+        .locator('.edit-many-bulk-uploads__header__actions button')
+        .click()
 
       await saveButton.click()
       await expect(page.locator('.payload-toast-container')).toContainText(
@@ -1268,7 +1272,9 @@ describe('Uploads', () => {
 
       await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
 
-      await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+      await editManyBulkUploadModal
+        .locator('.edit-many-bulk-uploads__header__actions button')
+        .click()
 
       await bulkUploadModal.locator('.file-field__upload .file-field__remove').click()
 

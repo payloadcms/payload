@@ -51,7 +51,8 @@ function draft2020Violations(schema: unknown, rootPath: string): string[] {
 describe('@payloadcms/plugin-mcp', () => {
   it('should ping', async ({ mcp }) => {
     const apiKey = await getApiKey()
-    const pingResponse = await mcp.request({ apiKey, method: 'ping' })
+    const client = await mcp.connect(apiKey)
+    const pingResponse = await client.ping()
     expect(pingResponse).toBeDefined()
   })
 
@@ -96,8 +97,9 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      // The MCP endpoint is registered as POST only; a GET should not succeed.
-      expect(response.ok).toBe(false)
+      // MCP is POST-only; the optional GET stream answers 405 (Method Not Allowed)
+      // per the Streamable HTTP spec, so clients skip the server-push stream.
+      expect(response.status).toBe(405)
     })
 
     it('should not allow POST /api/mcp with unauthorized API key', async () => {
@@ -133,7 +135,8 @@ describe('@payloadcms/plugin-mcp', () => {
       const updateOneSpy = vi.spyOn(payload.db, 'updateOne')
 
       try {
-        await mcp.request({ apiKey: doc.apiKey as string, method: 'ping' })
+        const client = await mcp.connect(doc.apiKey)
+        await client.ping()
 
         expect(updateOneSpy).toHaveBeenCalledWith(
           expect.objectContaining({
@@ -162,17 +165,15 @@ describe('@payloadcms/plugin-mcp', () => {
   describe('List', () => {
     it('should list tools', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const toolsResponse = await mcp.listTools({ apiKey })
+      const client = await mcp.connect(apiKey)
+      const toolsResponse = await client.listTools()
       expect(toolsResponse).toBeDefined()
-      expect(toolsResponse.id).toBe(1)
-      expect(toolsResponse.jsonrpc).toBe('2.0')
-      expect(toolsResponse.result).toBeDefined()
-      expect(toolsResponse.result.tools).toBeDefined()
-      expect(Array.isArray(toolsResponse.result.tools)).toBe(true)
-      expect(toolsResponse.result.tools.length).toBeGreaterThan(0)
+      expect(toolsResponse.tools).toBeDefined()
+      expect(Array.isArray(toolsResponse.tools)).toBe(true)
+      expect(toolsResponse.tools.length).toBeGreaterThan(0)
 
       const toolsByName: Record<string, any> = Object.fromEntries(
-        toolsResponse.result.tools.map((t: { name: string }) => [t.name, t]),
+        toolsResponse.tools.map((t: { name: string }) => [t.name, t]),
       )
 
       const getConfigInfo = toolsByName['getConfigInfo']
@@ -194,7 +195,7 @@ describe('@payloadcms/plugin-mcp', () => {
         'Rolls a virtual dice with a specified number of sides',
       )
 
-      const createDocumentTools = toolsResponse.result.tools.filter(
+      const createDocumentTools = toolsResponse.tools.filter(
         (tool: { name: string }) => tool.name === 'createDocument',
       )
       expect(createDocumentTools).toHaveLength(1)
@@ -281,7 +282,8 @@ describe('@payloadcms/plugin-mcp', () => {
 
     it('should return config info', async ({ mcp }) => {
       const apiKey = await getApiKey({ globalFind: true, globalUpdate: true })
-      const response = await mcp.callTool({ apiKey, name: 'getConfigInfo' })
+      const client = await mcp.connect(apiKey)
+      const response = await client.callTool({ arguments: {}, name: 'getConfigInfo' })
       const text = getToolText(response)
 
       expect(text).toContain('Collections:')
@@ -312,7 +314,8 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const response = await mcp.callTool({ apiKey: doc.apiKey as string, name: 'getConfigInfo' })
+      const client = await mcp.connect(doc.apiKey)
+      const response = await client.callTool({ arguments: {}, name: 'getConfigInfo' })
       const text = getToolText(response)
 
       expect(text).toContain('posts')
@@ -333,8 +336,9 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const toolsResponse = await mcp.listTools({ apiKey: doc.apiKey as string })
-      const toolNames = toolsResponse.result.tools.map((tool: { name: string }) => tool.name)
+      const client = await mcp.connect(doc.apiKey)
+      const toolsResponse = await client.listTools()
+      const toolNames = toolsResponse.tools.map((tool: { name: string }) => tool.name)
 
       expect(toolNames).not.toContain('getConfigInfo')
     })
@@ -343,8 +347,9 @@ describe('@payloadcms/plugin-mcp', () => {
       mcp,
     }) => {
       const apiKey = await getApiKey()
-      const toolsResponse = await mcp.listTools({ apiKey })
-      const tools = toolsResponse.result.tools as Array<{ inputSchema?: object; name: string }>
+      const client = await mcp.connect(apiKey)
+      const toolsResponse = await client.listTools()
+      const tools = toolsResponse.tools as Array<{ inputSchema?: object; name: string }>
 
       // MCP clients validate each input_schema against the strict 2020-12 meta-schema. The SDK's own validator is
       // lenient (it only compiles), so lint for what the meta-schema enforces.
@@ -357,8 +362,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
     it('should list tools injected by other plugins via slug and options', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const toolsResponse = await mcp.listTools({ apiKey })
-      const toolNames = toolsResponse.result.tools.map((t: { name: string }) => t.name)
+      const client = await mcp.connect(apiKey)
+      const toolsResponse = await client.listTools()
+      const toolNames = toolsResponse.tools.map((t: { name: string }) => t.name)
 
       // Both plugins inject tools into mcp's options via slug discovery,
       // regardless of whether they are listed before or after mcp in the plugins array
@@ -368,53 +374,47 @@ describe('@payloadcms/plugin-mcp', () => {
 
     it('should list resources', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const resourcesResponse = await mcp.request({ apiKey, method: 'resources/list' })
+      const client = await mcp.connect(apiKey)
+      const resourcesResponse = await client.listResources()
 
       expect(resourcesResponse).toBeDefined()
-      expect(resourcesResponse.id).toBe(1)
-      expect(resourcesResponse.jsonrpc).toBe('2.0')
-      expect(resourcesResponse.result).toBeDefined()
-      expect(resourcesResponse.result.resources).toBeDefined()
-      expect(resourcesResponse.result.resources).toHaveLength(1)
-      expect(resourcesResponse.result.resources[0].name).toBe('data')
-      expect(resourcesResponse.result.resources[0].title).toBe('Data')
-      expect(resourcesResponse.result.resources[0].uri).toBe('data://app')
-      expect(resourcesResponse.result.resources[0].description).toBe(
+      expect(resourcesResponse.resources).toBeDefined()
+      expect(resourcesResponse.resources).toHaveLength(1)
+      expect(resourcesResponse.resources[0].name).toBe('data')
+      expect(resourcesResponse.resources[0].title).toBe('Data')
+      expect(resourcesResponse.resources[0].uri).toBe('data://app')
+      expect(resourcesResponse.resources[0].description).toBe(
         'Data is a resource that contains special data.',
       )
-      expect(resourcesResponse.result.resources[0].mimeType).toBe('text/plain')
+      expect(resourcesResponse.resources[0].mimeType).toBe('text/plain')
     })
 
     it('should list prompts', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const promptsResponse = await mcp.request({ apiKey, method: 'prompts/list' })
+      const client = await mcp.connect(apiKey)
+      const promptsResponse = await client.listPrompts()
 
       expect(promptsResponse).toBeDefined()
-      expect(promptsResponse.id).toBe(1)
-      expect(promptsResponse.jsonrpc).toBe('2.0')
-      expect(promptsResponse.result).toBeDefined()
-      expect(promptsResponse.result.prompts).toBeDefined()
-      expect(promptsResponse.result.prompts).toHaveLength(1)
-      expect(promptsResponse.result.prompts[0].name).toBe('echo')
-      expect(promptsResponse.result.prompts[0].title).toBe('Echo Prompt')
-      expect(promptsResponse.result.prompts[0].description).toBe(
-        'Creates a prompt to process a message',
-      )
-      expect(promptsResponse.result.prompts[0].arguments).toBeDefined()
-      expect(promptsResponse.result.prompts[0].arguments).toHaveLength(1)
-      expect(promptsResponse.result.prompts[0].arguments[0].name).toBe('message')
-      expect(promptsResponse.result.prompts[0].arguments[0].required).toBe(true)
+      expect(promptsResponse.prompts).toBeDefined()
+      expect(promptsResponse.prompts).toHaveLength(1)
+      expect(promptsResponse.prompts[0].name).toBe('echo')
+      expect(promptsResponse.prompts[0].title).toBe('Echo Prompt')
+      expect(promptsResponse.prompts[0].description).toBe('Creates a prompt to process a message')
+      expect(promptsResponse.prompts[0].arguments).toBeDefined()
+      expect(promptsResponse.prompts[0].arguments).toHaveLength(1)
+      expect(promptsResponse.prompts[0].arguments[0].name).toBe('message')
+      expect(promptsResponse.prompts[0].arguments[0].required).toBe(true)
     })
 
     it('should list globals', async ({ mcp }) => {
       const apiKey = await getApiKey({ globalFind: true, globalUpdate: true })
-      const toolsResponse = await mcp.listTools({ apiKey })
+      const client = await mcp.connect(apiKey)
+      const toolsResponse = await client.listTools()
 
       expect(toolsResponse).toBeDefined()
-      expect(toolsResponse.result).toBeDefined()
-      expect(toolsResponse.result.tools).toBeDefined()
+      expect(toolsResponse.tools).toBeDefined()
 
-      const findGlobalTool = toolsResponse.result.tools.find((t: any) => t.name === 'findGlobal')
+      const findGlobalTool = toolsResponse.tools.find((t: any) => t.name === 'findGlobal')
       expect(findGlobalTool).toBeDefined()
       expect(findGlobalTool.description).toContain('Find any Payload global')
       expect(findGlobalTool.inputSchema.properties.globalSlug.type).toBe('string')
@@ -426,9 +426,7 @@ describe('@payloadcms/plugin-mcp', () => {
         "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
       )
 
-      const updateGlobalTool = toolsResponse.result.tools.find(
-        (t: any) => t.name === 'updateGlobal',
-      )
+      const updateGlobalTool = toolsResponse.tools.find((t: any) => t.name === 'updateGlobal')
       expect(updateGlobalTool).toBeDefined()
       expect(updateGlobalTool.description).toContain('Update any Payload global')
       expect(updateGlobalTool.inputSchema.properties.globalSlug.type).toBe('string')
@@ -445,11 +443,10 @@ describe('@payloadcms/plugin-mcp', () => {
       mcp,
     }) => {
       const apiKey = await getApiKey({ enableUpdate: true })
-      const toolsResponse = await mcp.listTools({ apiKey })
+      const client = await mcp.connect(apiKey)
+      const toolsResponse = await client.listTools()
 
-      const updateToolSchema = toolsResponse.result.tools.find(
-        (t: any) => t.name === 'updateDocument',
-      )
+      const updateToolSchema = toolsResponse.tools.find((t: any) => t.name === 'updateDocument')
       expect(updateToolSchema).toBeDefined()
       expect(updateToolSchema.inputSchema.properties.select).toBeDefined()
       expect(updateToolSchema.inputSchema.properties.select.type).toBe('string')
@@ -462,26 +459,22 @@ describe('@payloadcms/plugin-mcp', () => {
   describe('Prompts', () => {
     it('should get echo prompt', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const promptResponse = await mcp.request({
-        apiKey,
-        method: 'prompts/get',
-        params: {
-          name: 'echo',
-          arguments: {
-            message: 'Hello, world!',
-          },
+      const client = await mcp.connect(apiKey)
+      const promptResponse = await client.getPrompt({
+        name: 'echo',
+        arguments: {
+          message: 'Hello, world!',
         },
       })
 
       expect(promptResponse).toBeDefined()
-      expect(promptResponse.result).toBeDefined()
-      expect(promptResponse.result.messages).toHaveLength(2)
-      expect(promptResponse.result.messages[0].content.type).toBe('text')
-      expect(promptResponse.result.messages[0].content.text).toContain(
+      expect(promptResponse.messages).toHaveLength(2)
+      expect(promptResponse.messages[0].content.type).toBe('text')
+      expect(promptResponse.messages[0].content.text).toContain(
         'This prompt was sent: Hello, world!',
       )
-      expect(promptResponse.result.messages[1].content.type).toBe('text')
-      expect(promptResponse.result.messages[1].content.text).toContain(
+      expect(promptResponse.messages[1].content.type).toBe('text')
+      expect(promptResponse.messages[1].content.text).toContain(
         `This prompt was sent by userId: ${userId}`,
       )
 
@@ -505,22 +498,16 @@ describe('@payloadcms/plugin-mcp', () => {
   describe('Resources', () => {
     it('should read the data resource', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const resourceResponse = await mcp.request({
-        apiKey,
-        method: 'resources/read',
-        params: {
-          uri: 'data://app',
-        },
+      const client = await mcp.connect(apiKey)
+      const resourceResponse = await client.readResource({
+        uri: 'data://app',
       })
 
       expect(resourceResponse).toBeDefined()
-      expect(resourceResponse.result).toBeDefined()
-      expect(resourceResponse.result.contents).toHaveLength(2)
-      expect(resourceResponse.result.contents[0].uri).toBe('data://app')
-      expect(resourceResponse.result.contents[0].text).toContain('My special data.')
-      expect(resourceResponse.result.contents[1].text).toContain(
-        `This was requested by user: ${userId}`,
-      )
+      expect(resourceResponse.contents).toHaveLength(2)
+      expect(resourceResponse.contents[0].uri).toBe('data://app')
+      expect(resourceResponse.contents[0].text).toContain('My special data.')
+      expect(resourceResponse.contents[1].text).toContain(`This was requested by user: ${userId}`)
 
       const { docs } = await payload.find({
         collection: 'returned-resources',
@@ -540,22 +527,16 @@ describe('@payloadcms/plugin-mcp', () => {
 
     it('should read the dataByID resource', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const resourceResponse = await mcp.request({
-        apiKey,
-        method: 'resources/read',
-        params: {
-          uri: 'data://app/1',
-        },
+      const client = await mcp.connect(apiKey)
+      const resourceResponse = await client.readResource({
+        uri: 'data://app/1',
       })
 
       expect(resourceResponse).toBeDefined()
-      expect(resourceResponse.result).toBeDefined()
-      expect(resourceResponse.result.contents).toHaveLength(2)
-      expect(resourceResponse.result.contents[0].uri).toBe('data://app/1')
-      expect(resourceResponse.result.contents[0].text).toContain('My special data for ID: 1')
-      expect(resourceResponse.result.contents[1].text).toContain(
-        `This was requested by user: ${userId}`,
-      )
+      expect(resourceResponse.contents).toHaveLength(2)
+      expect(resourceResponse.contents[0].uri).toBe('data://app/1')
+      expect(resourceResponse.contents[0].text).toContain('My special data for ID: 1')
+      expect(resourceResponse.contents[1].text).toContain(`This was requested by user: ${userId}`)
 
       const { docs } = await payload.find({
         collection: 'returned-resources',
@@ -577,9 +558,9 @@ describe('@payloadcms/plugin-mcp', () => {
   describe('Custom MCP Tools', () => {
     it('should call diceRoll', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           globalSlug: 'site-settings',
           collectionSlug: 'posts',
           sides: 6,
@@ -588,13 +569,12 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content).toHaveLength(1)
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain('**Sides:** 6')
-      expect(callResponse.result.content[0].text).toContain('**Result:**')
-      expect(callResponse.result.content[0].text).toContain('🎲 You rolled a **')
-      expect(callResponse.result.content[0].text).toContain('** on a 6-sided die!')
+      expect(callResponse.content).toHaveLength(1)
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain('**Sides:** 6')
+      expect(callResponse.content[0].text).toContain('**Result:**')
+      expect(callResponse.content[0].text).toContain('🎲 You rolled a **')
+      expect(callResponse.content[0].text).toContain('** on a 6-sided die!')
 
       const { docs } = await payload.find({
         collection: 'rolls',
@@ -616,9 +596,9 @@ describe('@payloadcms/plugin-mcp', () => {
   describe('Collections', () => {
     it('getCollectionSchema returns collection fields for createDocument', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const schemaResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const schemaResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
         },
         name: 'getCollectionSchema',
@@ -630,11 +610,11 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(schema.properties.badProperty).toBeUndefined()
     })
 
-    it('should call createDocument', async ({ mcp }) => {
+    it('should call createDocument with generic payload', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           data: {
             content: 'Content for test post.',
@@ -645,25 +625,24 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content).toHaveLength(2)
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain(
+      expect(callResponse.content).toHaveLength(2)
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain(
         'Document created successfully in collection "posts"!',
       )
-      expect(callResponse.result.content[0].text).toContain('Created document:')
-      expect(callResponse.result.content[0].text).toContain('```json')
-      expect(callResponse.result.content[0].text).toContain('"title":"Test Post"')
-      expect(callResponse.result.content[0].text).toContain('"content":"Content for test post."')
-      expect(callResponse.result.content[1].type).toBe('text')
-      expect(callResponse.result.content[1].text).toContain('Override MCP response for Posts!')
+      expect(callResponse.content[0].text).toContain('Created document:')
+      expect(callResponse.content[0].text).toContain('```json')
+      expect(callResponse.content[0].text).toContain('"title":"Test Post"')
+      expect(callResponse.content[0].text).toContain('"content":"Content for test post."')
+      expect(callResponse.content[1].type).toBe('text')
+      expect(callResponse.content[1].text).toContain('Override MCP response for Posts!')
     })
 
     it('should call createDocument with select to limit returned fields', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           data: {
             content: 'Content should be omitted',
@@ -675,31 +654,30 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content[0].text).toContain('"title":"Select Create Post"')
-      expect(callResponse.result.content[0].text).not.toContain('Content should be omitted')
+      expect(callResponse.content[0].text).toContain('"title":"Select Create Post"')
+      expect(callResponse.content[0].text).not.toContain('Content should be omitted')
     })
 
     it('should call getCollectionSchema', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
         },
         name: 'getCollectionSchema',
       })
 
-      expect(callResponse.result.content[0].text).toContain('Schema for collection "posts"')
-      expect(callResponse.result.content[0].text).toContain('"title"')
-      expect(callResponse.result.content[0].text).toContain('"content"')
+      expect(callResponse.content[0].text).toContain('Schema for collection "posts"')
+      expect(callResponse.content[0].text).toContain('"title"')
+      expect(callResponse.content[0].text).toContain('"content"')
     })
 
     it('should call createDocument', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           data: {
             content: 'Content for generic create.',
@@ -709,11 +687,11 @@ describe('@payloadcms/plugin-mcp', () => {
         name: 'createDocument',
       })
 
-      expect(callResponse.result.content[0].text).toContain(
+      expect(callResponse.content[0].text).toContain(
         'Document created successfully in collection "posts"!',
       )
-      expect(callResponse.result.content[0].text).toContain('"title":"Generic Create Post"')
-      expect(callResponse.result.content[1].text).toContain('Override MCP response for Posts!')
+      expect(callResponse.content[0].text).toContain('"title":"Generic Create Post"')
+      expect(callResponse.content[1].text).toContain('Override MCP response for Posts!')
     })
 
     it('should respect per-collection access for createDocument', async ({ mcp }) => {
@@ -731,16 +709,14 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const toolsResponse = await mcp.listTools({ apiKey: doc.apiKey as string })
-      const createDocument = toolsResponse.result.tools.find(
-        (tool) => tool.name === 'createDocument',
-      )
+      const client = await mcp.connect(doc.apiKey)
+      const toolsResponse = await client.listTools()
+      const createDocument = toolsResponse.tools.find((tool) => tool.name === 'createDocument')
       expect(createDocument.inputSchema.properties.collectionSlug.type).toBe('string')
       expect(createDocument.inputSchema.properties.collectionSlug.enum).toBeUndefined()
 
-      const callResponse = await mcp.callTool({
-        apiKey: doc.apiKey as string,
-        args: {
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           data: {
             content: 'Should not be created',
@@ -750,8 +726,8 @@ describe('@payloadcms/plugin-mcp', () => {
         name: 'createDocument',
       })
 
-      expect((callResponse.result as any).isError).toBe(true)
-      expect(callResponse.result.content[0].text).toContain(
+      expect((callResponse as any).isError).toBe(true)
+      expect(callResponse.content[0].text).toContain(
         'MCP access to "createDocument" is not enabled for collection "posts"',
       )
     })
@@ -766,9 +742,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           limit: 1,
           page: 1,
@@ -778,16 +754,15 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content).toHaveLength(2)
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain('Collection: "posts"')
-      expect(callResponse.result.content[0].text).toContain('Total: 1 documents')
-      expect(callResponse.result.content[0].text).toContain('Page: 1 of 1')
-      expect(callResponse.result.content[0].text).toContain('```json')
-      expect(callResponse.result.content[0].text).toContain('"content":"Content for test post."')
-      expect(callResponse.result.content[1].type).toBe('text')
-      expect(callResponse.result.content[1].text).toContain('Override MCP response for Posts!')
+      expect(callResponse.content).toHaveLength(2)
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain('Collection: "posts"')
+      expect(callResponse.content[0].text).toContain('Total: 1 documents')
+      expect(callResponse.content[0].text).toContain('Page: 1 of 1')
+      expect(callResponse.content[0].text).toContain('```json')
+      expect(callResponse.content[0].text).toContain('"content":"Content for test post."')
+      expect(callResponse.content[1].type).toBe('text')
+      expect(callResponse.content[1].text).toContain('Override MCP response for Posts!')
     })
 
     it('should call findDocuments with select and return only requested fields', async ({
@@ -802,9 +777,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           limit: 1,
           page: 1,
@@ -815,9 +790,8 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content).toHaveLength(2)
-      const responseText: string = callResponse.result.content[0].text
+      expect(callResponse.content).toHaveLength(2)
+      const responseText: string = callResponse.content[0].text
       expect(responseText).toContain('Collection: "posts"')
       expect(responseText).toContain('"title":"Select Test Post (MCP Hook Override)"')
       expect(responseText).not.toContain('"content": "Content that should be omitted"')
@@ -833,9 +807,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey({ enableUpdate: true, enableDelete: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           id: post.id,
           data: {
@@ -846,15 +820,14 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content).toHaveLength(2)
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain(
+      expect(callResponse.content).toHaveLength(2)
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain(
         'Document updated successfully in collection "posts"!',
       )
-      expect(callResponse.result.content[0].text).toContain('Updated document:')
-      expect(callResponse.result.content[0].text).toContain('```json')
-      expect(callResponse.result.content[0].text).toContain(
+      expect(callResponse.content[0].text).toContain('Updated document:')
+      expect(callResponse.content[0].text).toContain('```json')
+      expect(callResponse.content[0].text).toContain(
         '"content":"Updated content for test post to update."',
       )
     })
@@ -869,9 +842,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey({ enableUpdate: true, enableDelete: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           id: post.id,
           data: {
@@ -882,12 +855,11 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain(
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain(
         'Document updated successfully in collection "posts"!',
       )
-      expect(callResponse.result.content[0].text).toContain('"content":null')
+      expect(callResponse.content[0].text).toContain('"content":null')
 
       await payload.delete({ id: post.id, collection: 'posts' })
     })
@@ -901,9 +873,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey({ enableUpdate: true, enableDelete: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           id: post.id,
           data: {
@@ -914,9 +886,8 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain(
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain(
         'Document updated successfully in collection "posts"!',
       )
 
@@ -936,9 +907,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey({ enableUpdate: true, enableDelete: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           id: post.id,
           data: {
@@ -951,8 +922,7 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      const responseText: string = callResponse.result.content[0].text
+      const responseText: string = callResponse.content[0].text
       expect(responseText).toContain('"title":"Select Update Post Edited"')
       expect(responseText).not.toContain('Updated but should be omitted')
       expect(responseText).not.toContain('"content":')
@@ -968,9 +938,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey({ enableDelete: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           id: post.id,
         },
@@ -978,17 +948,14 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content).toHaveLength(2)
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain(
+      expect(callResponse.content).toHaveLength(2)
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain(
         'Document deleted successfully from collection "posts"!',
       )
-      expect(callResponse.result.content[0].text).toContain('Deleted document:')
-      expect(callResponse.result.content[0].text).toContain('```json')
-      expect(callResponse.result.content[0].text).toContain(
-        '"content":"Content for test post to delete."',
-      )
+      expect(callResponse.content[0].text).toContain('Deleted document:')
+      expect(callResponse.content[0].text).toContain('```json')
+      expect(callResponse.content[0].text).toContain('"content":"Content for test post to delete."')
     })
 
     it('should call updateDocument with object where clause', async ({ mcp }) => {
@@ -1008,9 +975,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey({ enableUpdate: true, enableDelete: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           data: {
             content: 'Updated by object where',
@@ -1026,10 +993,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain('Updated: 1 documents')
-      expect(callResponse.result.content[0].text).toContain('"content":"Updated by object where"')
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain('Updated: 1 documents')
+      expect(callResponse.content[0].text).toContain('"content":"Updated by object where"')
 
       const untouched = await payload.findByID({ id: excluded.id, collection: 'posts' })
 
@@ -1056,9 +1022,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey({ enableDelete: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           where: {
             or: [
@@ -1071,17 +1037,16 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain('Deleted: 2 documents')
-      expect(callResponse.result.content[0].text).toContain('Errors: 0')
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain('Deleted: 2 documents')
+      expect(callResponse.content[0].text).toContain('Errors: 0')
     })
 
     it('should reject a where clause with an invalid operator', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           where: { title: { equalz: 'whatever' } },
         },
@@ -1089,16 +1054,16 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       // The SDK surfaces schema validation failures as tool error results
-      expect(callResponse.result.isError).toBe(true)
-      expect(callResponse.result.content[0].text).toContain('Input validation error')
-      expect(callResponse.result.content[0].text).toContain('equalz')
+      expect(callResponse.isError).toBe(true)
+      expect(callResponse.content[0].text).toContain('Input validation error')
+      expect(callResponse.content[0].text).toContain('equalz')
     })
 
     it('should handle point fields with object format in createDocument', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           data: {
             content: 'Testing point field transformation',
@@ -1113,23 +1078,23 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content).toHaveLength(2)
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain('Document created successfully')
+      expect(callResponse.content).toHaveLength(2)
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain('Document created successfully')
 
       const createdDoc = getToolDoc(callResponse)
 
       expect(createdDoc.location).toEqual([-74.006, 40.7128])
 
-      expect(callResponse.result.content[1].type).toBe('text')
-      expect(callResponse.result.content[1].text).toContain('Override MCP response for Posts!')
+      expect(callResponse.content[1].type).toBe('text')
+      expect(callResponse.content[1].text).toContain('Override MCP response for Posts!')
 
       await payload.delete({ id: createdDoc.id, collection: 'posts' })
     })
 
     it('should handle point fields with object format in updateDocument', async ({ mcp }) => {
       const apiKey = await getApiKey({ enableUpdate: true })
+      const client = await mcp.connect(apiKey)
 
       const createdPost = await payload.create({
         collection: 'posts',
@@ -1139,9 +1104,8 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           id: createdPost.id,
           data: {
@@ -1155,17 +1119,16 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content).toHaveLength(2)
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain('Document updated successfully')
+      expect(callResponse.content).toHaveLength(2)
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain('Document updated successfully')
 
       const updatedDoc = getToolDoc(callResponse)
 
       expect(updatedDoc.location).toEqual([-0.1278, 51.5074])
 
-      expect(callResponse.result.content[1].type).toBe('text')
-      expect(callResponse.result.content[1].text).toContain('Override MCP response for Posts!')
+      expect(callResponse.content[1].type).toBe('text')
+      expect(callResponse.content[1].text).toContain('Override MCP response for Posts!')
 
       await payload.delete({ id: createdPost.id, collection: 'posts' })
     })
@@ -1195,15 +1158,15 @@ describe('@payloadcms/plugin-mcp', () => {
           user: userId,
         },
       })
-      return doc.apiKey as string
+      return doc.apiKey
     }
 
     it('should create a page with a block', async ({ mcp }) => {
       const apiKey = await getPagesApiKey()
+      const client = await mcp.connect(apiKey)
 
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'pages',
           data: {
             title: 'Hero Page',
@@ -1219,22 +1182,22 @@ describe('@payloadcms/plugin-mcp', () => {
         name: 'createDocument',
       })
 
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.isError).toBeFalsy()
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain('"title":"Hero Page"')
-      expect(callResponse.result.content[0].text).toContain('"blockType":"hero"')
-      expect(callResponse.result.content[0].text).toContain('"heading":"Welcome to our site"')
+      expect(callResponse).toBeDefined()
+      expect(callResponse.isError).toBeFalsy()
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain('"title":"Hero Page"')
+      expect(callResponse.content[0].text).toContain('"blockType":"hero"')
+      expect(callResponse.content[0].text).toContain('"heading":"Welcome to our site"')
 
       createdPageIds.push(getToolDoc(callResponse).id)
     })
 
     it('should create a page with multiple block types', async ({ mcp }) => {
       const apiKey = await getPagesApiKey()
+      const client = await mcp.connect(apiKey)
 
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'pages',
           data: {
             title: 'Multi-block Page',
@@ -1254,12 +1217,12 @@ describe('@payloadcms/plugin-mcp', () => {
         name: 'createDocument',
       })
 
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.isError).toBeFalsy()
-      expect(callResponse.result.content[0].text).toContain('"blockType":"hero"')
-      expect(callResponse.result.content[0].text).toContain('"blockType":"textContent"')
-      expect(callResponse.result.content[0].text).toContain('"heading":"Page Hero"')
-      expect(callResponse.result.content[0].text).toContain('"body":"This is the body text."')
+      expect(callResponse).toBeDefined()
+      expect(callResponse.isError).toBeFalsy()
+      expect(callResponse.content[0].text).toContain('"blockType":"hero"')
+      expect(callResponse.content[0].text).toContain('"blockType":"textContent"')
+      expect(callResponse.content[0].text).toContain('"heading":"Page Hero"')
+      expect(callResponse.content[0].text).toContain('"body":"This is the body text."')
 
       createdPageIds.push(getToolDoc(callResponse).id)
     })
@@ -1276,10 +1239,10 @@ describe('@payloadcms/plugin-mcp', () => {
       createdPageIds.push(page.id)
 
       const apiKey = await getPagesApiKey(true)
+      const client = await mcp.connect(apiKey)
 
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'pages',
           id: page.id,
           data: {
@@ -1298,12 +1261,12 @@ describe('@payloadcms/plugin-mcp', () => {
         name: 'updateDocument',
       })
 
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.isError).toBeFalsy()
-      expect(callResponse.result.content[0].text).toContain('"blockType":"hero"')
-      expect(callResponse.result.content[0].text).toContain('"heading":"Updated Hero Heading"')
-      expect(callResponse.result.content[0].text).toContain('"blockType":"textContent"')
-      expect(callResponse.result.content[0].text).toContain('"body":"Updated body text."')
+      expect(callResponse).toBeDefined()
+      expect(callResponse.isError).toBeFalsy()
+      expect(callResponse.content[0].text).toContain('"blockType":"hero"')
+      expect(callResponse.content[0].text).toContain('"heading":"Updated Hero Heading"')
+      expect(callResponse.content[0].text).toContain('"blockType":"textContent"')
+      expect(callResponse.content[0].text).toContain('"body":"Updated body text."')
 
       const updatedPage = await payload.findByID({
         collection: 'pages',
@@ -1319,9 +1282,9 @@ describe('@payloadcms/plugin-mcp', () => {
   describe('Virtual Fields', () => {
     it('should not include virtual fields in collection schema', async ({ mcp }) => {
       const apiKey = await getApiKey({ enableUpdate: true })
-      const schemaResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const schemaResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
         },
         name: 'getCollectionSchema',
@@ -1333,9 +1296,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
     it('should ignore virtual fields when creating a post via MCP', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           data: {
             title: 'Virtual Field Create Test',
@@ -1363,9 +1326,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey({ enableUpdate: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           id: post.id,
           data: { title: 'Virtual Field Updated Title' },
@@ -1393,9 +1356,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           limit: 1,
           page: 1,
@@ -1405,28 +1368,26 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content).toHaveLength(2)
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain(
+      expect(callResponse.content).toHaveLength(2)
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain(
         '"title":"Test Post for Finding (MCP Hook Override)"',
       )
     })
 
     it('should find site-settings global', async ({ mcp }) => {
       const apiKey = await getApiKey({ globalFind: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: { globalSlug: 'site-settings' },
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: { globalSlug: 'site-settings' },
         name: 'findGlobal',
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content).toBeDefined()
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain('Global "site-settings"')
-      expect(callResponse.result.content[0].text).toContain('```json')
+      expect(callResponse.content).toBeDefined()
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain('Global "site-settings"')
+      expect(callResponse.content[0].text).toContain('```json')
     })
 
     it('should find site-settings global with select', async ({ mcp }) => {
@@ -1441,9 +1402,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       const apiKey = await getApiKey({ globalFind: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           globalSlug: 'site-settings',
           collectionSlug: 'posts',
           select: '{"siteName": true}',
@@ -1452,10 +1413,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content).toBeDefined()
-      expect(callResponse.result.content[0].type).toBe('text')
-      const responseText: string = callResponse.result.content[0].text
+      expect(callResponse.content).toBeDefined()
+      expect(callResponse.content[0].type).toBe('text')
+      const responseText: string = callResponse.content[0].text
       expect(responseText).toContain('"siteName":"MCP Site"')
       expect(responseText).not.toContain('siteDescription')
       expect(responseText).not.toContain('contactEmail')
@@ -1464,9 +1424,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
     it('should update site-settings global', async ({ mcp }) => {
       const apiKey = await getApiKey({ globalFind: true, globalUpdate: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           globalSlug: 'site-settings',
           data: {
             maintenanceMode: false,
@@ -1478,19 +1438,16 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content).toBeDefined()
-      expect(callResponse.result.content[0].type).toBe('text')
-      expect(callResponse.result.content[0].text).toContain(
-        'Global "site-settings" updated successfully',
-      )
+      expect(callResponse.content).toBeDefined()
+      expect(callResponse.content[0].type).toBe('text')
+      expect(callResponse.content[0].text).toContain('Global "site-settings" updated successfully')
     })
 
     it('should update site-settings global with select', async ({ mcp }) => {
       const apiKey = await getApiKey({ globalFind: true, globalUpdate: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           globalSlug: 'site-settings',
           data: {
             maintenanceMode: false,
@@ -1503,10 +1460,9 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(callResponse).toBeDefined()
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content).toBeDefined()
-      expect(callResponse.result.content[0].type).toBe('text')
-      const responseText: string = callResponse.result.content[0].text
+      expect(callResponse.content).toBeDefined()
+      expect(callResponse.content[0].type).toBe('text')
+      const responseText: string = callResponse.content[0].text
       expect(responseText).toContain('"siteName":"MCP Test Site Select"')
       expect(responseText).not.toContain('siteDescription')
       expect(responseText).not.toContain('maintenanceMode')
@@ -1538,9 +1494,9 @@ describe('@payloadcms/plugin-mcp', () => {
       createdIDs.push(doc.id)
 
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           limit: 1,
           page: 1,
@@ -1549,7 +1505,7 @@ describe('@payloadcms/plugin-mcp', () => {
         name: 'findDocuments',
       })
 
-      const responseText: string = callResponse.result.content[0].text
+      const responseText: string = callResponse.content[0].text
       const jsonBlocks = responseText.match(/```json\n[\s\S]*?```/g)
 
       expect(jsonBlocks).toBeTruthy()
@@ -1564,13 +1520,13 @@ describe('@payloadcms/plugin-mcp', () => {
 
     it('should return minified JSON in global responses', async ({ mcp }) => {
       const apiKey = await getApiKey({ globalFind: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: { globalSlug: 'site-settings' },
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: { globalSlug: 'site-settings' },
         name: 'findGlobal',
       })
 
-      const responseText: string = callResponse.result.content[0].text
+      const responseText: string = callResponse.content[0].text
       const jsonBlocks = responseText.match(/```json\n[\s\S]*?```/g)
 
       expect(jsonBlocks).toBeTruthy()
@@ -1593,16 +1549,16 @@ describe('@payloadcms/plugin-mcp', () => {
       createdIDs.push(doc.id)
 
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           id: doc.id,
         },
         name: 'findDocuments',
       })
 
-      const responseText: string = callResponse.result.content[0].text
+      const responseText: string = callResponse.content[0].text
       // findByID response format: `Resource from collection "posts":\n${JSON.stringify(doc)}`
       // (no fenced code block — extract the JSON from the second line)
       const jsonPart = responseText.split('\n').slice(1).join('\n')
@@ -1617,12 +1573,13 @@ describe('@payloadcms/plugin-mcp', () => {
   describe('Localization', () => {
     it('should include locale parameters in tool schemas', async ({ mcp }) => {
       const apiKey = await getApiKey({ enableUpdate: true, enableDelete: true })
-      const toolsResponse = await mcp.listTools({ apiKey })
+      const client = await mcp.connect(apiKey)
+      const toolsResponse = await client.listTools()
 
-      expect(toolsResponse.result.tools).toBeDefined()
+      expect(toolsResponse.tools).toBeDefined()
 
       // Check createDocument has locale parameters
-      const createTool = toolsResponse.result.tools.find((t: any) => t.name === 'createDocument')
+      const createTool = toolsResponse.tools.find((t: any) => t.name === 'createDocument')
       expect(createTool).toBeDefined()
       expect(createTool.inputSchema.properties.locale).toBeDefined()
       expect(createTool.inputSchema.properties.locale.type).toBe('string')
@@ -1630,19 +1587,19 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(createTool.inputSchema.properties.fallbackLocale).toBeDefined()
 
       // Check updateDocument has locale parameters
-      const updateTool = toolsResponse.result.tools.find((t: any) => t.name === 'updateDocument')
+      const updateTool = toolsResponse.tools.find((t: any) => t.name === 'updateDocument')
       expect(updateTool).toBeDefined()
       expect(updateTool.inputSchema.properties.locale).toBeDefined()
       expect(updateTool.inputSchema.properties.fallbackLocale).toBeDefined()
 
       // Check findDocuments has locale parameters
-      const findTool = toolsResponse.result.tools.find((t: any) => t.name === 'findDocuments')
+      const findTool = toolsResponse.tools.find((t: any) => t.name === 'findDocuments')
       expect(findTool).toBeDefined()
       expect(findTool.inputSchema.properties.locale).toBeDefined()
       expect(findTool.inputSchema.properties.fallbackLocale).toBeDefined()
 
       // Check deleteDocuments has locale parameters
-      const deleteTool = toolsResponse.result.tools.find((t: any) => t.name === 'deleteDocuments')
+      const deleteTool = toolsResponse.tools.find((t: any) => t.name === 'deleteDocuments')
       expect(deleteTool).toBeDefined()
       expect(deleteTool.inputSchema.properties.locale).toBeDefined()
       expect(deleteTool.inputSchema.properties.fallbackLocale).toBeDefined()
@@ -1650,9 +1607,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
     it('should create post with specific locale', async ({ mcp }) => {
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           data: {
             content: 'This is my first post in English',
@@ -1663,12 +1620,10 @@ describe('@payloadcms/plugin-mcp', () => {
         name: 'createDocument',
       })
 
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content[0].text).toContain('Document created successfully')
-      expect(callResponse.result.content[0].text).toContain('"title":"Hello World"')
-      expect(callResponse.result.content[0].text).toContain(
-        '"content":"This is my first post in English"',
-      )
+      expect(callResponse).toBeDefined()
+      expect(callResponse.content[0].text).toContain('Document created successfully')
+      expect(callResponse.content[0].text).toContain('"title":"Hello World"')
+      expect(callResponse.content[0].text).toContain('"content":"This is my first post in English"')
     })
 
     it('should update post to add translation', async ({ mcp }) => {
@@ -1683,9 +1638,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
       // Update with Spanish translation via MCP
       const apiKey = await getApiKey({ enableUpdate: true })
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           id: englishPost.id,
           data: {
@@ -1697,10 +1652,10 @@ describe('@payloadcms/plugin-mcp', () => {
         name: 'updateDocument',
       })
 
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content[0].text).toContain('Document updated successfully')
-      expect(callResponse.result.content[0].text).toContain('"title":"Título Español"')
-      expect(callResponse.result.content[0].text).toContain('"content":"Contenido Español"')
+      expect(callResponse).toBeDefined()
+      expect(callResponse.content[0].text).toContain('Document updated successfully')
+      expect(callResponse.content[0].text).toContain('"title":"Título Español"')
+      expect(callResponse.content[0].text).toContain('"content":"Contenido Español"')
     })
 
     it('should find post in specific locale', async ({ mcp }) => {
@@ -1725,9 +1680,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
       // Find in Spanish via MCP
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           id: post.id,
           locale: 'es',
@@ -1735,11 +1690,11 @@ describe('@payloadcms/plugin-mcp', () => {
         name: 'findDocuments',
       })
 
-      expect(callResponse.result).toBeDefined()
-      expect(callResponse.result.content[0].text).toContain(
+      expect(callResponse).toBeDefined()
+      expect(callResponse.content[0].text).toContain(
         '"title":"Publicación Española (MCP Hook Override)"',
       )
-      expect(callResponse.result.content[0].text).toContain('"content":"Contenido Español"')
+      expect(callResponse.content[0].text).toContain('"content":"Contenido Español"')
     })
 
     it('should find post with locale "all"', async ({ mcp }) => {
@@ -1774,9 +1729,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
       // Find with locale: all via MCP
       const apiKey = await getApiKey()
-      const callResponse = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           id: post.id,
           locale: 'all',
@@ -1784,8 +1739,8 @@ describe('@payloadcms/plugin-mcp', () => {
         name: 'findDocuments',
       })
 
-      expect(callResponse.result).toBeDefined()
-      const responseText = callResponse.result.content[0].text
+      expect(callResponse).toBeDefined()
+      const responseText = callResponse.content[0].text
 
       // Should contain locale objects with all translations
       expect(responseText).toContain('"en":')
@@ -1808,9 +1763,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
       // Try to find in French (which doesn't exist)
       const apiKey = await getApiKey()
-      const json = await mcp.callTool({
-        apiKey,
-        args: {
+      const client = await mcp.connect(apiKey)
+      const json = await client.callTool({
+        arguments: {
           collectionSlug: 'posts',
           id: post.id,
           locale: 'fr',
@@ -1819,14 +1774,11 @@ describe('@payloadcms/plugin-mcp', () => {
       })
 
       expect(json).toBeDefined()
-      expect(json.result).toBeDefined()
-      expect(json.result.content).toBeDefined()
-      expect(json.result.content[0].type).toBe('text')
+      expect(json.content).toBeDefined()
+      expect(json.content[0].type).toBe('text')
       // Should fallback to English (with default value for content)
-      expect(json.result.content[0].text).toContain(
-        '"title":"English Only Title (MCP Hook Override)"',
-      )
-      expect(json.result.content[0].text).toContain('"content":"Hello World."')
+      expect(json.content[0].text).toContain('"title":"English Only Title (MCP Hook Override)"')
+      expect(json.content[0].text).toContain('"content":"Hello World."')
     })
   })
 
@@ -1852,14 +1804,14 @@ describe('@payloadcms/plugin-mcp', () => {
           user: userId,
         },
       })
-      return doc.apiKey as string
+      return doc.apiKey
     }
 
     describe('Schema validation', () => {
       const getFieldTypeInputProps = async (mcp: any, apiKey: string) => {
-        const schemaResponse = await mcp.callTool({
-          apiKey,
-          args: { collectionSlug: 'field-types' },
+        const client = await mcp.connect(apiKey)
+        const schemaResponse = await client.callTool({
+          arguments: { collectionSlug: 'field-types' },
           name: 'getCollectionSchema',
         })
 
@@ -1967,9 +1919,9 @@ describe('@payloadcms/plugin-mcp', () => {
         mcp,
       }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             data: {
               textField: 'Hello MCP',
@@ -1982,10 +1934,10 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'createDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
-        expect(callResponse.result.content[0].type).toBe('text')
-        expect(callResponse.result.content[0].text).toContain(
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
+        expect(callResponse.content[0].type).toBe('text')
+        expect(callResponse.content[0].text).toContain(
           'Document created successfully in collection "field-types"!',
         )
 
@@ -2004,9 +1956,9 @@ describe('@payloadcms/plugin-mcp', () => {
         mcp,
       }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             data: {
               numberField: 'not a number',
@@ -2015,20 +1967,18 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'createDocument',
         })
 
-        expect(callResponse.result.isError).toBe(true)
-        expect(callResponse.result.content[0].text).toContain('Use this schema for data')
-        expect(callResponse.result.content[0].text).toContain('"numberField"')
-        expect(
-          (callResponse.result as any).structuredContent.schema.properties.numberField,
-        ).toBeDefined()
+        expect(callResponse.isError).toBe(true)
+        expect(callResponse.content[0].text).toContain('Use this schema for data')
+        expect(callResponse.content[0].text).toContain('"numberField"')
+        expect((callResponse as any).structuredContent.schema.properties.numberField).toBeDefined()
       })
 
       it('should create document with date, code, and json fields', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
+        const client = await mcp.connect(apiKey)
         const testDate = '2024-01-15T10:30:00.000Z'
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             data: {
               textField: 'Date/Code/JSON test',
@@ -2040,8 +1990,8 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'createDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
 
         const doc = getToolDoc(callResponse)
 
@@ -2054,9 +2004,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
       it('should create document with select field', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             data: {
               textField: 'Select test',
@@ -2066,8 +2016,8 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'createDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
 
         const doc = getToolDoc(callResponse)
 
@@ -2078,9 +2028,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
       it('should create document with radio field', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             data: {
               textField: 'Radio test',
@@ -2090,8 +2040,8 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'createDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
 
         const doc = getToolDoc(callResponse)
 
@@ -2102,9 +2052,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
       it('should create document with group field (nested object)', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             data: {
               textField: 'Group test',
@@ -2117,8 +2067,8 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'createDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
 
         const doc = getToolDoc(callResponse)
 
@@ -2131,9 +2081,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
       it('should create document with collapsible children at top level', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             data: {
               textField: 'Collapsible test',
@@ -2143,8 +2093,8 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'createDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
 
         const doc = getToolDoc(callResponse)
 
@@ -2156,9 +2106,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
       it('should create document with row children at top level', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             data: {
               textField: 'Row test',
@@ -2168,8 +2118,8 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'createDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
 
         const doc = getToolDoc(callResponse)
 
@@ -2183,9 +2133,9 @@ describe('@payloadcms/plugin-mcp', () => {
         mcp,
       }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             data: {
               textField: 'Tabs test',
@@ -2198,8 +2148,8 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'createDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
 
         const doc = getToolDoc(callResponse)
 
@@ -2215,9 +2165,9 @@ describe('@payloadcms/plugin-mcp', () => {
 
       it('should create document with array field', async ({ mcp }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             data: {
               textField: 'Array test',
@@ -2230,8 +2180,8 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'createDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
 
         const doc = getToolDoc(callResponse)
 
@@ -2252,20 +2202,20 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(created.id)
 
         const apiKey = await getFieldTypesApiKey()
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             where: { textField: { equals: 'Findable doc' } },
           },
           name: 'findDocuments',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
-        expect(callResponse.result.content[0].text).toContain('Collection: "field-types"')
-        expect(callResponse.result.content[0].text).toContain('"textField":"Findable doc"')
-        expect(callResponse.result.content[0].text).toContain('"numberField":7')
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
+        expect(callResponse.content[0].text).toContain('Collection: "field-types"')
+        expect(callResponse.content[0].text).toContain('"textField":"Findable doc"')
+        expect(callResponse.content[0].text).toContain('"numberField":7')
       })
     })
 
@@ -2281,9 +2231,9 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(created.id)
 
         const apiKey = await getFieldTypesApiKey(true, false)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             id: created.id,
             data: {
@@ -2296,9 +2246,9 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'updateDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
-        expect(callResponse.result.content[0].text).toContain(
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
+        expect(callResponse.content[0].text).toContain(
           'Document updated successfully in collection "field-types"!',
         )
 
@@ -2321,9 +2271,9 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(created.id)
 
         const apiKey = await getFieldTypesApiKey(true, false)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             id: created.id,
             data: {
@@ -2333,12 +2283,10 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'updateDocument',
         })
 
-        expect(callResponse.result.isError).toBe(true)
-        expect(callResponse.result.content[0].text).toContain('Use this schema for data')
-        expect(callResponse.result.content[0].text).toContain('"numberField"')
-        expect(
-          (callResponse.result as any).structuredContent.schema.properties.numberField,
-        ).toBeDefined()
+        expect(callResponse.isError).toBe(true)
+        expect(callResponse.content[0].text).toContain('Use this schema for data')
+        expect(callResponse.content[0].text).toContain('"numberField"')
+        expect((callResponse as any).structuredContent.schema.properties.numberField).toBeDefined()
       })
 
       it('should update document with collapsible field (children at top level)', async ({
@@ -2354,9 +2302,9 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(created.id)
 
         const apiKey = await getFieldTypesApiKey(true, false)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             id: created.id,
             data: {
@@ -2366,8 +2314,8 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'updateDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
 
         const doc = getToolDoc(callResponse)
 
@@ -2385,9 +2333,9 @@ describe('@payloadcms/plugin-mcp', () => {
         createdFieldTypeIds.push(created.id)
 
         const apiKey = await getFieldTypesApiKey(true, false)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             id: created.id,
             data: {
@@ -2401,8 +2349,8 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'updateDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
 
         const doc = getToolDoc(callResponse)
 
@@ -2417,11 +2365,11 @@ describe('@payloadcms/plugin-mcp', () => {
         mcp,
       }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
+        const client = await mcp.connect(apiKey)
 
         // Create a doc without passing any `uiField` value (it has no stored data)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             data: {
               textField: 'UI field safety test',
@@ -2430,9 +2378,9 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'createDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
-        expect(callResponse.result.content[0].text).toContain('Document created successfully')
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
+        expect(callResponse.content[0].text).toContain('Document created successfully')
 
         const doc = getToolDoc(callResponse)
 
@@ -2446,9 +2394,9 @@ describe('@payloadcms/plugin-mcp', () => {
         mcp,
       }) => {
         const apiKey = await getFieldTypesApiKey(false, true)
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'field-types',
             data: {
               textField: 'All layout fields test',
@@ -2462,8 +2410,8 @@ describe('@payloadcms/plugin-mcp', () => {
           name: 'createDocument',
         })
 
-        expect(callResponse.result).toBeDefined()
-        expect(callResponse.result.isError).toBeFalsy()
+        expect(callResponse).toBeDefined()
+        expect(callResponse.isError).toBeFalsy()
 
         const doc = getToolDoc(callResponse)
 

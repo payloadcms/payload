@@ -24,5 +24,9 @@
     /* Popup menus */
     --popup-radius: var(--radius-large);
     --popup-item-radius: var(--button-radius);
+
+    /* Stroke widths */
+    --stroke-width-small: 1px;
+    --stroke-width-medium: 2px;
   }
 }

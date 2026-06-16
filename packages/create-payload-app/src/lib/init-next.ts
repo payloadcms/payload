@@ -14,7 +14,10 @@ import type { CliArgs, DbType, NextAppDetails, NextConfigType, PackageManager } 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
 import { debug as origDebug, warning } from '../utils/log.js'
 import { moveMessage } from '../utils/messages.js'
-import { resolvePackageVersion } from '../utils/resolvePackageVersion.js'
+import {
+  DEFAULT_PAYLOAD_VERSION_TAG,
+  resolvePackageVersion,
+} from '../utils/resolvePackageVersion.js'
 import { installPackages } from './install-packages.js'
 import { wrapNextConfig } from './wrap-next-config.js'
 
@@ -30,7 +33,7 @@ type InitNextArgs = {
   packageManager: PackageManager
   projectDir: string
   useDistFiles?: boolean
-} & Pick<CliArgs, '--debug' | '--version'>
+} & Pick<CliArgs, '--debug' | '--payload-version'>
 
 type InitNextResult =
   | { isSrcDir: boolean; nextAppDir?: string; reason: string; success: false }
@@ -94,7 +97,7 @@ export async function initNext(args: InitNextArgs): Promise<InitNextResult> {
     dbType,
     packageManager,
     projectDir,
-    versionOrTag: args['--version'],
+    versionOrTag: args['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG,
   })
   if (!installSuccess) {
     installSpinner.stop('Failed to install dependencies', 1)
