@@ -1,6 +1,6 @@
 @layer payload-default {
   .query-preset-heading {
-    margin: 0 0 var(--spacer-2-5);
+    margin: var(--spacer-4) 0 var(--spacer-2-5);
     color: var(--color-text);
     font-family: var(--text-heading-medium-font-family);
     font-size: var(--text-heading-medium-font-size);
@@ -8,8 +8,10 @@
     line-height: var(--text-heading-medium-line-height);
   }
 
-  /* Heading and the Group by / Columns buttons on one row, buttons pushed right. */
   .field-type.row.query-preset-controls-row {
+    /* Match the standalone headings' top spacing so sections stay aligned. */
+    margin-top: var(--spacer-4);
+
     .row__fields {
       align-items: center;
 
@@ -20,7 +22,7 @@
     }
 
     .query-preset-heading {
-      /* Keep the row's compensating inline-start margin so the heading stays aligned. */
+      /* The row owns the top spacing, so collapse the heading's own margins. */
       margin-block: 0;
       margin-inline-end: auto;
     }
@@ -29,9 +31,5 @@
   /* The Access heading provides the separation, so hide the group's top border. */
   .query-preset-access-group.group-field--top-level::before {
     display: none;
-  }
-
-  .render-fields > .field-type.query-preset-title {
-    margin-bottom: var(--spacer-5);
   }
 }
