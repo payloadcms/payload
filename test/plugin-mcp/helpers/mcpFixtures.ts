@@ -88,6 +88,8 @@ export const it = base.extend<ScopedFixtures>({
   ],
   // eslint-disable-next-line no-empty-pattern
   mcp: async ({}, use) => {
-    await use(createMcpClient(restClient))
+    const client = createMcpClient(restClient)
+    await use(client)
+    await client.close()
   },
 })
