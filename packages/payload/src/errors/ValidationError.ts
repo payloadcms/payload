@@ -16,13 +16,6 @@ export type ValidationFieldError = {
   // The error message to display for this field
   message: string
   path: string
-  /**
-   * For database-level unique-constraint errors raised on an array/block sub-table,
-   * the name of the failing sub-table (e.g. `posts_my_array`). The dotted field path
-   * cannot be resolved safely at insert time, so this is exposed so that `afterError`
-   * hooks can map the failure back to a collection field/block and build a clearer
-   * message for the editor.
-   */
   tableName?: string
 }
 
