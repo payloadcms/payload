@@ -818,7 +818,6 @@ export function DefaultEditView({
                       <Upload
                         collectionSlug={collectionConfig.slug}
                         initialState={initialState}
-                        sidePanel
                         uploadConfig={upload}
                         UploadControls={UploadControls}
                         UploadFilePreview={UploadFilePreview}

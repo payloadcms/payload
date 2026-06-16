@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 
 import { FieldError } from '../../fields/FieldError/index.js'
 import { fieldBaseClass } from '../../fields/shared/index.js'
+import { TextInput } from '../../fields/Text/Input.js'
 import { useForm, useFormProcessing } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -88,7 +89,7 @@ export const UploadActions = ({
           )}
           {enableAdjustments && (
             <Button
-              buttonStyle="pill"
+              buttonStyle="secondary"
               className={`${baseClass}__edit`}
               margin={false}
               onClick={() => {
@@ -456,19 +457,18 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
           .join(' ')}
       >
         <FieldError message={errorMessage} showError={showError} />
+
         {data?.filename && !removedFile && (
           <UploadToolbar
-            canRemove={!uploadConfig.hideRemoveFile && canRemoveUpload}
-            filename={selectedSize ?? (data.filename as string)}
+            filename={data.filename as string}
             fileSrc={sidePanelFileSrc}
             isAdjustable={fileTypeIsAdjustable}
             onEditImage={() => openModal(editDrawerSlug)}
-            onRemove={handleFileRemoval}
             onRenameConfirm={handleRename}
             onReplace={handleFileRemoval}
           />
         )}
-        <div className={`${baseClass}__side-panel`}>
+        <div className={`${baseClass}__side-panel__content`}>
           {data?.filename && !removedFile ? (
             <React.Fragment>
               {hasImageSizes && (
@@ -481,17 +481,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 />
               )}
               <div className={`${baseClass}__side-panel__preview`}>
-                <div className={`${baseClass}__side-panel__info`}>
-                  <span className={`${baseClass}__side-panel__info-label`}>
-                    {selectedSize ?? t('general:original')}
-                  </span>
-                  <span className={`${baseClass}__side-panel__info-meta`}>
-                    {formatFilesize(
-                      (selectedSizeData?.filesize ?? (data?.filesize as number)) || 0,
-                    )}
-                    {data.mimeType ? ` – ${data.mimeType as string}` : null}
-                  </span>
-                </div>
                 <div className={`${baseClass}__side-panel__image-wrap`}>
                   {UploadFilePreview ?? (
                     <Thumbnail
@@ -505,15 +494,30 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                     />
                   )}
                 </div>
-                {(() => {
-                  const w = (selectedSizeData?.width ?? data?.width) as number | undefined
-                  const h = (selectedSizeData?.height ?? data?.height) as number | undefined
-                  return typeof w === 'number' && typeof h === 'number' ? (
-                    <span className={`${baseClass}__side-panel__dimensions`}>
-                      {w} × {h}
-                    </span>
-                  ) : null
-                })()}
+                <div className={`${baseClass}__side-panel__info`}>
+                  <span className={`${baseClass}__side-panel__info-label`}>
+                    {selectedSize ?? t('general:original')}
+                  </span>
+                  <span className={`${baseClass}__side-panel__info-meta`}>
+                    {(() => {
+                      const w = (selectedSizeData?.width ?? data?.width) as number | undefined
+                      const h = (selectedSizeData?.height ?? data?.height) as number | undefined
+                      const parts: string[] = []
+                      if (typeof w === 'number' && typeof h === 'number') {
+                        parts.push(`${w} × ${h}`)
+                      }
+                      parts.push(
+                        formatFilesize(
+                          (selectedSizeData?.filesize ?? (data?.filesize as number)) || 0,
+                        ),
+                      )
+                      if (data.mimeType) {
+                        parts.push(data.mimeType as string)
+                      }
+                      return parts.join(' – ')
+                    })()}
+                  </span>
+                </div>
               </div>
             </React.Fragment>
           ) : (
@@ -573,6 +577,14 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
               )}
               {value && fileSrc && (
                 <React.Fragment>
+                  <Button
+                    buttonStyle="ghost"
+                    className={`${baseClass}__remove`}
+                    icon="x"
+                    onClick={handleFileRemoval}
+                    round
+                    tooltip={t('general:cancel')}
+                  />
                   <div className={`${baseClass}__thumbnail-wrap`}>
                     <Thumbnail
                       collectionSlug={collectionSlug}
@@ -580,12 +592,10 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                     />
                   </div>
                   <div className={`${baseClass}__file-adjustments`}>
-                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                    <input
-                      className={`${baseClass}__filename`}
+                    <TextInput
+                      label={t('upload:fileName')}
                       onChange={handleFileNameChange}
-                      title={filename || value.name}
-                      type="text"
+                      path="filename"
                       value={filename || value.name}
                     />
                     <UploadActions
@@ -595,19 +605,12 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                       mimeType={value.type}
                     />
                   </div>
-                  <Button
-                    buttonStyle="ghost"
-                    className={`${baseClass}__remove`}
-                    icon="x"
-                    onClick={handleFileRemoval}
-                    round
-                    tooltip={t('general:cancel')}
-                  />
                 </React.Fragment>
               )}
             </div>
           )}
         </div>
+
         {drawers}
       </div>
     )
@@ -687,6 +690,14 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
           )}
           {value && fileSrc && (
             <React.Fragment>
+              <Button
+                buttonStyle="ghost"
+                className={`${baseClass}__remove`}
+                icon="x"
+                onClick={handleFileRemoval}
+                round
+                tooltip={t('general:cancel')}
+              />
               <div className={`${baseClass}__thumbnail-wrap`}>
                 <Thumbnail
                   collectionSlug={collectionSlug}
@@ -694,12 +705,10 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                 />
               </div>
               <div className={`${baseClass}__file-adjustments`}>
-                {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                <input
-                  className={`${baseClass}__filename`}
+                <TextInput
+                  label={t('upload:fileName')}
                   onChange={handleFileNameChange}
-                  title={filename || value.name}
-                  type="text"
+                  path="filename"
                   value={filename || value.name}
                 />
                 <UploadActions
@@ -709,14 +718,6 @@ export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
                   mimeType={value.type}
                 />
               </div>
-              <Button
-                buttonStyle="ghost"
-                className={`${baseClass}__remove`}
-                icon="x"
-                onClick={handleFileRemoval}
-                round
-                tooltip={t('general:cancel')}
-              />
             </React.Fragment>
           )}
         </div>

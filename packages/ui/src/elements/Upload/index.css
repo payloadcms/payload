@@ -8,6 +8,7 @@
 
   .file-field__upload {
     display: flex;
+    position: relative;
   }
 
   .file-field .tooltip.error-message {
@@ -33,8 +34,11 @@
   }
 
   .file-field__remove {
-    margin: var(--spacer-4) var(--spacer-3) var(--spacer-3) 0;
-    place-self: flex-start;
+    position: absolute;
+    top: var(--spacer-2);
+    right: var(--spacer-2);
+    margin: 0;
+    z-index: 1;
   }
 
   .file-field__file-adjustments {
@@ -43,39 +47,6 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacer-2);
-  }
-
-  .file-field__filename {
-    font-family: var(--font-body);
-    width: 100%;
-    border: var(--stroke-width-small) solid var(--color-border);
-    border-radius: var(--radius-small);
-    background: var(--color-bg-primary);
-    color: var(--color-text);
-    font-size: 1rem;
-    height: var(--spacer-6);
-    line-height: var(--spacer-3);
-    padding: var(--spacer-1) var(--spacer-2-5);
-    -webkit-appearance: none;
-
-    &[data-rtl='true'] {
-      direction: rtl;
-    }
-
-    &::-webkit-input-placeholder {
-      color: var(--color-text-tertiary);
-      font-weight: normal;
-      font-size: 1rem;
-    }
-
-    &:hover {
-      border-color: var(--color-border-hover);
-    }
-
-    &:focus {
-      border-color: var(--color-border-selected);
-      outline: none;
-    }
   }
 
   .file-field__upload-actions {
@@ -108,7 +79,7 @@
     flex-direction: column;
     flex-wrap: wrap;
     align-items: center;
-    gap: var(--spacer-1);
+    gap: var(--spacer-2);
     justify-content: center;
     width: 100%;
   }
@@ -142,18 +113,11 @@
     background: var(--color-bg-secondary);
   }
 
-  .file-field__side-panel {
-    position: sticky;
-    top: var(--doc-controls-height);
-    height: max(
-      500px,
-      calc(
-        100dvh - max(0px, calc(var(--app-header-height) - var(--scroll-y))) -
-          var(--doc-controls-height)
-      )
-    );
+  .file-field__side-panel__content {
     display: flex;
     flex-direction: row;
+    flex: 1 1 0;
+    min-height: 0;
     overflow: hidden;
   }
 
@@ -163,20 +127,28 @@
     flex: 1 0 0;
     min-width: 0;
     background: var(--color-bg-secondary);
-    padding: var(--spacer-3);
-    gap: var(--spacer-2);
+    padding: var(--spacer-3) var(--spacer-4);
+    gap: var(--spacer-3);
     overflow: hidden;
   }
 
   .file-field__side-panel__info {
     display: flex;
-    align-items: baseline;
+    align-items: center;
+    align-self: center;
     gap: var(--spacer-2);
     flex-shrink: 0;
     min-width: 0;
   }
 
+  /* Badge-style label matching Figma "Original" / size-name chip */
   .file-field__side-panel__info-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--spacer-2);
+    height: 16px;
+    border-radius: var(--radius-small);
+    background: var(--color-bg-secondary-hover);
     font-family: var(--text-body-medium-strong-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-strong-font-weight);
@@ -194,14 +166,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     min-width: 0;
-  }
-
-  .file-field__side-panel__dimensions {
-    font-size: var(--text-body-medium-font-size);
-    line-height: var(--text-body-medium-line-height);
-    color: var(--color-text-secondary);
-    text-align: center;
-    flex-shrink: 0;
   }
 
   .file-field__side-panel__image-wrap {
@@ -249,6 +213,10 @@
       position: static;
       height: auto;
       min-height: 400px;
+    }
+
+    .file-field__side-panel__content {
+      flex-direction: column;
     }
 
     .file-field__side-panel__preview {

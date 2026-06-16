@@ -1,9 +1,9 @@
 @layer payload-default {
   .upload-toolbar {
-    display: grid;
-    grid-template-columns: 1fr fit-content(100%) 1fr;
+    display: flex;
     align-items: center;
-    padding: var(--spacer-2) var(--spacer-2-5) var(--spacer-2) var(--spacer-2);
+    justify-content: space-between;
+    padding: var(--spacer-2) var(--spacer-4) var(--spacer-2) var(--spacer-2);
     border-bottom: 1px solid var(--color-border);
     background: var(--color-bg);
     flex-shrink: 0;
@@ -12,19 +12,15 @@
   .upload-toolbar__left {
     display: flex;
     align-items: flex-start;
-  }
-
-  .upload-toolbar__center {
-    display: flex;
-    gap: var(--spacer-1);
-    align-items: center;
+    min-width: 0;
+    flex: 1;
   }
 
   .upload-toolbar__right {
     display: flex;
     gap: var(--spacer-1);
     align-items: center;
-    justify-content: flex-end;
+    flex-shrink: 0;
   }
 
   .upload-toolbar__filename-btn {
