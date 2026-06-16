@@ -189,7 +189,13 @@ export const renderListView = async (
   if (queryPreset?.where && !query.where) {
     query.where = queryPreset.where
   }
-  query.groupBy = query.groupBy ?? queryPreset?.groupBy ?? collectionPreferences?.groupBy
+  // Prefer an explicit user preference (incl. an empty string, which means the
+  // user cleared grouping on a modified preset) over the preset's saved groupBy.
+  // Otherwise clearing groupBy while a preset is active reverts: the cleared URL
+  // re-syncs to `groupBy` absent and `?? queryPreset.groupBy` re-applies the
+  // preset's value. `??` keeps an empty-string preference and only falls through
+  // to the preset when the preference is truly unset.
+  query.groupBy = query.groupBy ?? collectionPreferences?.groupBy ?? queryPreset?.groupBy
 
   const columnPreference = query.columns
     ? transformColumnsToPreferences(query.columns)
