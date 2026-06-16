@@ -1,0 +1,93 @@
+import type { CodegenEvalCase } from '../../types.js'
+
+export const richtextCodegenDataset: CodegenEvalCase[] = [
+  // ──────────────────────────────────────────────────────────
+  // Positive cases — valid config modifications
+  // ──────────────────────────────────────────────────────────
+  {
+    category: 'richtext',
+    expected:
+      'editor property added to buildConfig set to lexicalEditor({}) (or lexicalEditor with features), imported from @payloadcms/richtext-lexical',
+    fixturePath: 'richtext/codegen/switch-root-editor-to-lexical',
+    input:
+      'Configure lexicalEditor as the root-level editor in the Payload config so all richText fields use Lexical by default.',
+    // configOption verifies the root editor property exists in buildConfig
+    assertions: [{ kind: 'configOption', path: 'editor' }],
+  },
+  {
+    category: 'richtext',
+    expected:
+      'FixedToolbarFeature() added to the features array of the lexicalEditor on the body field; imported from @payloadcms/richtext-lexical',
+    fixturePath: 'richtext/codegen/add-fixed-toolbar',
+    input: 'Add a fixed toolbar to the body richText field on the posts collection.',
+    // FixedToolbarFeature is an element in the features array — no AST kind for array element contents
+    assertions: [],
+  },
+  {
+    category: 'richtext',
+    expected:
+      'EXPERIMENTAL_TableFeature() added to the features array of the lexicalEditor on the content field; imported from @payloadcms/richtext-lexical',
+    fixturePath: 'richtext/codegen/add-tables-feature',
+    input:
+      'Add table support to the content richText field on the posts collection using the experimental table feature.',
+    // No AST assertion kind covers lexicalEditor features[] array contents — scorer carries the load.
+    assertions: [],
+  },
+  {
+    category: 'richtext',
+    expected:
+      'BlocksFeature with a callout block added to the features array of the lexicalEditor on the body field; callout block has a style select field and a content textarea field',
+    fixturePath: 'richtext/codegen/add-blocks-feature-with-blocks',
+    input:
+      'Add a BlocksFeature with a callout block to the body richText field on the posts collection. The callout block should have a style field (select: info, warning, error) and a content field (textarea).',
+    // No AST assertion kind covers lexicalEditor features[] array contents — scorer carries the load.
+    assertions: [],
+  },
+  {
+    category: 'richtext',
+    expected:
+      'lexicalEditor on the body field configured with features: [BoldFeature(), ItalicFeature()] — no ...defaultFeatures spread — removing all other features',
+    fixturePath: 'richtext/codegen/disable-default-features',
+    input:
+      'Configure the body richText field on the posts collection to only enable Bold and Italic features, removing all other default features.',
+    // No AST assertion kind covers lexicalEditor features[] array contents — scorer carries the load.
+    assertions: [],
+  },
+  {
+    category: 'richtext',
+    expected:
+      'HeadingFeature({ enabledHeadingSizes: ["h2", "h3"] }) used in the features array of the lexicalEditor on the body field',
+    fixturePath: 'richtext/codegen/add-headingfeature-h2-h3',
+    input: 'Limit headings to h2 and h3 only on the body richText field of the posts collection.',
+    // No AST assertion kind covers lexicalEditor features[] array contents — scorer carries the load.
+    assertions: [],
+  },
+  {
+    category: 'richtext',
+    expected:
+      'A content field of type richText added to the posts collection, with editor: lexicalEditor() (or using the root-level editor)',
+    fixturePath: 'richtext/codegen/fix-missing-richtext-field',
+    input:
+      'The posts collection is missing its content richText field. Add it so editors can write rich text content using the Lexical editor.',
+    // fieldExists checks the field was added; fieldOption checks it uses the richText type
+    assertions: [
+      { slug: 'posts', field: 'content', kind: 'fieldExists' },
+      { slug: 'posts', field: 'content', kind: 'fieldOption', option: 'type', value: 'richText' },
+    ],
+  },
+  // ──────────────────────────────────────────────────────────
+  // Correction case — broken fixture that the LLM must fix
+  // ──────────────────────────────────────────────────────────
+  {
+    assertions: [
+      { slug: 'posts', field: 'content', kind: 'fieldOption', option: 'type', value: 'richText' },
+      { slug: 'posts', field: 'content', kind: 'fieldOption', option: 'editor' },
+    ],
+    category: 'richtext',
+    expected:
+      'content field on posts changed from type: "text" to type: "richText" with an editor: lexicalEditor() property added',
+    fixturePath: 'richtext/codegen/fix-wrong-field-type',
+    input:
+      'This config has a content field on the posts collection that uses type: "text" but it should use the Lexical rich text editor. Fix it so the field is a richText field using lexicalEditor().',
+  },
+]

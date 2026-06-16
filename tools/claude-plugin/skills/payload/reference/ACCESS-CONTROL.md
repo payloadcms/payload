@@ -71,11 +71,11 @@ export const Posts: CollectionConfig = {
 
     // Async: Check related data
     delete: async ({ req, id }) => {
-      const hasComments = await req.payload.count({
+      const commentCount = await req.payload.count({
         collection: 'comments',
         where: { post: { equals: id } },
       })
-      return hasComments === 0
+      return commentCount.totalDocs === 0
     },
 
     // Admin panel visibility
@@ -280,8 +280,12 @@ Field access does NOT support query constraints - only boolean returns.
 ```ts
 import type { NumberField, FieldAccess } from 'payload'
 
+// Assumes the salary field lives on the Users collection — doc.id is the
+// user's own ID, so comparing user?.id === doc?.id correctly identifies
+// the record owner. On any other collection, use a `user` relationship
+// field and compare `doc.user === user?.id` instead.
 const salaryReadAccess: FieldAccess = ({ req: { user }, doc }) => {
-  // Self can read own salary
+  // Self can read own salary (Users collection only — doc.id is the user's ID)
   if (user?.id === doc?.id) return true
   // Admin can read all salaries
   return user?.roles?.includes('admin')
@@ -534,121 +538,180 @@ export const Users: CollectionConfig = {
 ```ts
 import type { Access } from 'payload'
 
-// Check if user is a project member before allowing access
+// Ownership check — query another collection to verify membership
 export const projectMemberAccess: Access = async ({ req, id }) => {
   const { user, payload } = req
-
   if (!user) return false
   if (user.roles?.includes('admin')) return true
-
-  // Check if document exists and user is member
-  const project = await payload.findByID({
-    collection: 'projects',
-    id: id as string,
-    depth: 0,
-  })
-
-  return project.members?.includes(user.id)
+  if (!id) return false // Access Operation guard
+  const project = await payload.findByID({ collection: 'projects', id: id as string, depth: 0 })
+  return Boolean(project.members?.includes(user.id))
 }
 
-// Prevent deletion if document has dependencies
+// Dependency guard — block delete when related documents exist
 export const preventDeleteWithDependencies: Access = async ({ req, id }) => {
-  const { payload } = req
-
-  const dependencyCount = await payload.count({
+  if (!id) return true // Access Operation guard
+  const { totalDocs } = await req.payload.count({
     collection: 'related-items',
-    where: {
-      parent: { equals: id },
-    },
+    where: { parent: { equals: id } },
   })
-
-  return dependencyCount === 0
+  return totalDocs === 0
 }
 ```
 
 ## Access Control Function Arguments
 
-### Collection Create
+Quick signature reference:
+
+| Operation         | Signature                                          |
+| ----------------- | -------------------------------------------------- |
+| Collection create | `({ req, data }) => boolean \| Where`              |
+| Collection read   | `({ req, id }) => boolean \| Where`                |
+| Collection update | `({ req, id, data }) => boolean \| Where`          |
+| Collection delete | `({ req, id }) => boolean \| Where`                |
+| Field create      | `({ req, data, siblingData }) => boolean`          |
+| Field read        | `({ req, id, doc, siblingData }) => boolean`       |
+| Field update      | `({ req, id, data, doc, siblingData }) => boolean` |
+
+### Argument reference
+
+- `req: PayloadRequest`
+  - `req.user`: authenticated user (or `null` for public requests)
+  - `req.payload`: Payload instance for queries inside the access fn
+  - `req.headers`: request headers
+  - `req.locale`: current locale string
+- `id: string | number | undefined`: document ID being read/updated/deleted. **`undefined` during Access Operation** (login check) — guard before using.
+- `data`: incoming write payload on create/update; `undefined` during Access Operation.
+- `doc`: full existing document on field-level read/update; `undefined` during Access Operation and on collection create.
+- `siblingData`: adjacent field values at the same level (field access only).
+- `blockData`: containing block's data (inside `blocks` field access only); `undefined` outside a block.
+
+Access fns may return `boolean` or a `Where` query for row-level filtering — field-level fns return `boolean` only.
+
+## Access Operation Context
+
+On login, Payload executes all access functions without a document reference — this is the **Access Operation**. During it, `id`, `data`, `siblingData`, `blockData`, and `doc` are all `undefined`. `Where` queries are also **not evaluated** (treated as denial). Guard before using any of these:
 
 ```ts
-create: ({ req, data }) => boolean | Where
+import type { Access } from 'payload'
 
-// req: PayloadRequest
-//   - req.user: Authenticated user (if any)
-//   - req.payload: Payload instance for queries
-//   - req.headers: Request headers
-//   - req.locale: Current locale
-// data: The data being created
+// ❌ crashes during Access Operation (id is undefined)
+export const byOwner: Access = ({ req: { user }, id }) => user?.id === id
+
+// ✅ guard first
+export const byOwner: Access = ({ req: { user }, id }) => {
+  if (!id) return Boolean(user) // Access Operation: allow if authenticated
+  return user?.id === id
+}
 ```
 
-### Collection Read
+## Default Access Behavior
+
+When no access function is specified, Payload uses:
 
 ```ts
-read: ({ req, id }) => boolean | Where
-
-// req: PayloadRequest
-// id: Document ID being read
-//   - undefined during Access Operation (login check)
-//   - string when reading specific document
+const defaultPayloadAccess = ({ req: { user } }) => Boolean(user)
 ```
 
-### Collection Update
+`Boolean(undefined) === false`, `Boolean({...}) === true` — authenticated = allowed, unauthenticated = denied. This is also the canonical pattern for "must be logged in" checks.
+
+## `unlock` Access
+
+Auth-enabled collections only. Controls who can unlock accounts locked after too many failed login attempts:
 
 ```ts
-update: ({ req, id, data }) => boolean | Where
-
-// req: PayloadRequest
-// id: Document ID being updated
-// data: New values being applied
+export const Users: CollectionConfig = {
+  slug: 'users',
+  auth: true,
+  access: {
+    unlock: ({ req: { user } }) => user?.roles?.includes('admin'),
+  },
+  fields: [
+    { name: 'name', type: 'text' },
+    { name: 'roles', type: 'select', hasMany: true, options: ['admin', 'user'], saveToJWT: true },
+  ],
+}
 ```
 
-### Collection Delete
+## `readVersions` Access
+
+Version-enabled collections/globals only. Controls who can browse version history:
 
 ```ts
-delete: ({ req, id }) => boolean | Where
+const adminOnly = ({ req: { user } }) => user?.roles?.includes('admin')
 
-// req: PayloadRequest
-// id: Document ID being deleted
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  versions: { drafts: true },
+  access: {
+    read: () => true, // public reads current version
+    readVersions: adminOnly, // only admins see version history
+  },
+  fields: [{ name: 'title', type: 'text' }],
+}
 ```
 
-### Field Create
+> **Note:** A `Where` query from `readVersions` applies to the internal versions collection (`_posts_v`), not the originals.
+
+## Drafts Update Access — Controlling Who Can Publish
+
+Inspect `data._status` to restrict who can publish drafts:
 
 ```ts
-access: {
-  create: ({ req, data, siblingData }) => boolean
+export const updatePostAccess: Access = ({ req: { user }, data }) => {
+  if (!user) return false
+  // data may be undefined during Access Operation — always use ?.
+  if (data?._status === 'published' && !user.roles?.includes('admin')) return false
+  return true
 }
 
-// req: PayloadRequest
-// data: Full document data
-// siblingData: Adjacent field values at same level
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  versions: { drafts: true },
+  access: { update: updatePostAccess },
+  fields: [{ name: 'title', type: 'text' }],
+}
 ```
 
-### Field Read
+## Trash Discrimination — Soft Delete vs Permanent Delete
+
+For Trash-enabled collections, `delete` access receives a `data` argument. Check `data.deletedAt` to tell trash from permanent deletion:
 
 ```ts
-access: {
-  read: ({ req, id, doc, siblingData }) => boolean
+// Anyone can trash (soft-delete); only admins can permanently delete
+export const deletePostAccess: Access = ({ req: { user }, data }) => {
+  if (!user) return false
+  // data?.deletedAt is set when trashing; absent/null for permanent delete
+  if (data?.deletedAt) return true // soft delete — allow
+  return user.roles?.includes('admin') ?? false // permanent — admin only
 }
-
-// req: PayloadRequest
-// id: Document ID
-// doc: Full document
-// siblingData: Adjacent field values
 ```
 
-### Field Update
+> **Note:** `data` is `undefined` during the Access Operation — use `data?.deletedAt`.
+
+## Field Access Side Effects
+
+- **`read: false`** — the property is **completely omitted** from API responses (not `null`, not present at all).
+- **`update: false`** — submitted values are **silently discarded**; no error thrown, stored value unchanged.
 
 ```ts
-access: {
-  update: ({ req, id, data, doc, siblingData }) => boolean
+export const Customers: CollectionConfig = {
+  slug: 'customers',
+  fields: [
+    { name: 'name', type: 'text' },
+    {
+      name: 'ssn',
+      type: 'text',
+      access: {
+        read: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
+        update: ({ req: { user } }) => user?.roles?.includes('admin') ?? false,
+      },
+    },
+  ],
 }
-
-// req: PayloadRequest
-// id: Document ID
-// data: New values
-// doc: Current document
-// siblingData: Adjacent field values
 ```
+
+> **Tip:** `read: false` omits the key entirely — use `doc?.ssn` in client code, never assume the key exists.
 
 ## Important Notes
 

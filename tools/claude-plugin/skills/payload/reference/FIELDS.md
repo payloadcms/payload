@@ -585,6 +585,24 @@ const groupField: GroupField = {
 }
 ```
 
+## Custom Validation
+
+Every field supports a `validate` function. Return `true` to pass, a string error message to fail.
+
+```ts
+{
+  name: 'slug',
+  type: 'text',
+  validate: (value, { data }) => {
+    if (!value) return 'Slug is required'
+    if (!/^[a-z0-9-]+$/.test(value)) return 'Slug must be lowercase letters, numbers, and hyphens'
+    return true
+  },
+}
+```
+
+Async validation (database lookups, external API checks) is supported — return a `Promise<true | string>`.
+
 ## Reusable Field Factories
 
 Create composable field patterns that can be customized with overrides.

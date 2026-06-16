@@ -8,19 +8,38 @@
  * as "minor" (e.g. collection-level vs. field-level hooks).
  */
 
+/** String-literal union of recognized Payload db adapter discriminators. Catches typos like `adapter: 'mongo'` at compile time. */
+export type AdapterName = 'd1-sqlite' | 'mongoose' | 'postgres' | 'sqlite' | 'vercel-postgres'
+
 export type CollectionHookName =
   | 'afterChange'
   | 'afterDelete'
+  | 'afterError'
+  | 'afterForgotPassword' // auth-enabled collections
+  | 'afterLogin' // auth-enabled collections
+  | 'afterLogout' // auth-enabled collections
+  | 'afterMe' // auth-enabled collections
+  | 'afterOperation'
   | 'afterRead'
+  | 'afterRefresh' // auth-enabled collections
   | 'beforeChange'
   | 'beforeDelete'
+  | 'beforeLogin' // auth-enabled collections
   | 'beforeOperation'
   | 'beforeRead'
   | 'beforeValidate'
+  | 'me' // auth-enabled collections
+  | 'refresh' // auth-enabled collections
 
 export type FieldHookName = 'afterChange' | 'afterRead' | 'beforeChange' | 'beforeValidate'
 
-export type AccessOperation = 'create' | 'delete' | 'read' | 'update'
+export type AccessOperation =
+  | 'create'
+  | 'delete'
+  | 'read'
+  | 'readVersions' // version-enabled collections
+  | 'unlock' // auth-enabled collections
+  | 'update'
 
 export type Assertion =
   | {
@@ -35,6 +54,36 @@ export type Assertion =
       /** Asserts a collection with the given slug exists in the parsed config. */
       kind: 'collectionExists'
       /** Slug to find in `collections[]`. */
+      slug: string
+    }
+  | {
+      /** Asserts a property on a collection beyond `fields[]`/`hooks`/`access` — versions, auth, admin, timestamps, upload, etc. */
+      kind: 'collectionOption'
+      /** Dotted path on the collection, e.g. 'versions.drafts', 'auth.loginWithUsername', 'admin.useAsTitle'. */
+      path: string
+      /** Slug of the collection. */
+      slug: string
+      /** Optional expected literal value. Omit to check existence only. */
+      value?: boolean | number | string
+    }
+  | {
+      /** Asserts a property on the top-level `buildConfig({ ... })` object, addressed by a dotted path. Used for root-level options that don't fit collections.fields/hooks/access (csrf, cookiePrefix, serverURL, routes, admin.importMap.baseDir, admin.components.*, jobs.autoRun, etc.). When the value at a path is not an object literal (e.g. `db` is a call to `postgresAdapter(...)`), descent stops there — use `dbAdapterOption` for adapter args. */
+      kind: 'configOption'
+      /** Dotted path under buildConfig, e.g. 'csrf', 'admin.importMap.baseDir', 'jobs.autoRun'. */
+      path: string
+      /** Optional expected literal value (boolean/number/string). Omit to check existence only. */
+      value?: boolean | number | string
+    }
+  | {
+      /** Asserts a task with the given slug exists in `buildConfig.jobs.tasks[]`. */
+      kind: 'jobsTask'
+      /** Slug of the task. */
+      slug: string
+    }
+  | {
+      /** Asserts a workflow with the given slug exists in `buildConfig.jobs.workflows[]`. */
+      kind: 'jobsWorkflow'
+      /** Slug of the workflow. */
       slug: string
     }
   | {
@@ -81,6 +130,16 @@ export type Assertion =
       /** Slug of the collection containing the field. */
       slug: string
       /** Optional expected literal value. When omitted, only existence of the option is checked. */
+      value?: boolean | number | string
+    }
+  | {
+      /** Optional adapter discriminator. Omit to accept any adapter. */
+      adapter?: AdapterName
+      /** Asserts a property passed to the db adapter call (mongooseAdapter, postgresAdapter, sqliteAdapter, vercelPostgresAdapter, d1SqliteAdapter). */
+      kind: 'dbAdapterOption'
+      /** Dotted path on the adapter args, e.g. 'migrationDir', 'prodMigrations', 'transactionOptions'. */
+      path: string
+      /** Optional expected literal value. */
       value?: boolean | number | string
     }
   | {
