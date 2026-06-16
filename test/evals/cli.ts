@@ -248,8 +248,13 @@ async function main(): Promise<void> {
       try {
         mkdirSync(evalResultsDir, { recursive: true })
         appendFileSync(path.join(evalResultsDir, '.completed-runs'), `${runId}\n`)
-      } catch {
-        // best-effort; an untagged run just won't show in the dashboard
+      } catch (err) {
+        // A finished run that isn't tagged gets hidden by the dashboard, so make
+        // the failure loud instead of silently losing the run.
+        process.stderr.write(
+          `Warning: could not tag run ${runId} as finished — it will be hidden in the dashboard. ` +
+            `${err instanceof Error ? err.message : String(err)}\n`,
+        )
       }
     }
     process.exit(code ?? 1)
