@@ -18,6 +18,12 @@ import './index.css'
 export type GroupByControlProps = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly fields: ClientField[]
+  /**
+   * When set, the control is driven by the form (value + onChange) instead of
+   * list query state. Used by the Query Presets drawer.
+   */
+  readonly onChange?: (groupBy: string) => void
+  readonly value?: string
 }
 
 const baseClass = 'group-by-control'
@@ -38,13 +44,19 @@ const supportedFieldTypes: Field['type'][] = [
   'upload',
 ]
 
-export const GroupByControl: React.FC<GroupByControlProps> = ({ collectionSlug, fields }) => {
+export const GroupByControl: React.FC<GroupByControlProps> = ({
+  collectionSlug,
+  fields,
+  onChange,
+  value: valueProp,
+}) => {
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
   const listQuery = useListQuery()
   const closeRef = useRef<(() => void) | null>(null)
 
-  const groupByRaw = listQuery.query?.groupBy
+  const isFormMode = typeof onChange === 'function'
+  const groupByRaw = isFormMode ? valueProp : listQuery.query?.groupBy
   const groupByFieldName = groupByRaw?.replace(/^-/, '')
 
   const fieldPermissions = permissions?.collections?.[collectionSlug]?.fields
@@ -75,6 +87,10 @@ export const GroupByControl: React.FC<GroupByControlProps> = ({ collectionSlug, 
 
   const handleFieldSelect = useCallback(
     (value: string) => {
+      if (isFormMode) {
+        onChange(groupByRaw?.startsWith('-') ? `-${value}` : value)
+        return
+      }
       void (async () => {
         if (typeof listQuery.refineListData !== 'function') {
           return
@@ -85,22 +101,34 @@ export const GroupByControl: React.FC<GroupByControlProps> = ({ collectionSlug, 
         })
       })()
     },
-    [listQuery],
+    [isFormMode, onChange, groupByRaw, listQuery],
   )
 
   const handleClear = useCallback(() => {
+    if (isFormMode) {
+      onChange('')
+      closeRef.current?.()
+      return
+    }
     void (async () => {
       if (typeof listQuery.refineListData === 'function') {
         await listQuery.refineListData({ groupBy: '' })
       }
       closeRef.current?.()
     })()
-  }, [listQuery])
+  }, [isFormMode, onChange, listQuery])
 
   const handleDirectionSelect = useCallback(
     (value: 'asc' | 'desc') => {
+      if (!groupByFieldName) {
+        return
+      }
+      if (isFormMode) {
+        onChange(value === 'asc' ? groupByFieldName : `-${groupByFieldName}`)
+        return
+      }
       void (async () => {
-        if (!groupByFieldName || typeof listQuery.refineListData !== 'function') {
+        if (typeof listQuery.refineListData !== 'function') {
           return
         }
         await listQuery.refineListData({
@@ -109,7 +137,7 @@ export const GroupByControl: React.FC<GroupByControlProps> = ({ collectionSlug, 
         })
       })()
     },
-    [groupByFieldName, listQuery],
+    [groupByFieldName, isFormMode, onChange, listQuery],
   )
 
   if (filteredFields.length === 0) {

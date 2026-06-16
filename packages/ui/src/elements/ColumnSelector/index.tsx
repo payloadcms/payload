@@ -1,6 +1,6 @@
 'use client'
 
-import type { SanitizedCollectionConfig, StaticLabel } from 'payload'
+import type { Column, SanitizedCollectionConfig, StaticLabel } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import { fieldIsHiddenOrDisabled, fieldIsID, isFieldDisabled } from 'payload/shared'
@@ -64,6 +64,12 @@ const NestedLabel: React.FC<NestedLabelProps> = ({ label }) => {
 
 export type Props = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
+  /**
+   * When set, the selector is driven by the form (columns + onChange) instead of
+   * the table columns context. Used by the Query Presets drawer.
+   */
+  readonly columns?: Column[]
+  readonly onChange?: (columns: Column[]) => void
   readonly onClose?: () => void
 }
 
@@ -115,9 +121,46 @@ const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle
   )
 }
 
-export const ColumnSelector: React.FC<Props> = ({ collectionSlug, onClose }) => {
-  const { columns, moveColumn, toggleColumn } = useTableColumns()
+export const ColumnSelector: React.FC<Props> = ({
+  collectionSlug,
+  columns: columnsProp,
+  onChange,
+  onClose,
+}) => {
+  const tableColumns = useTableColumns()
   const { i18n, t } = useTranslation()
+
+  const isFormMode = typeof onChange === 'function'
+  const columns = isFormMode ? columnsProp : tableColumns.columns
+
+  const toggleColumn = useCallback(
+    async (column: string) => {
+      if (isFormMode) {
+        onChange(
+          (columnsProp || []).map((col) =>
+            col.accessor === column ? { ...col, active: !col.active } : col,
+          ),
+        )
+        return
+      }
+      await tableColumns.toggleColumn(column)
+    },
+    [isFormMode, onChange, columnsProp, tableColumns],
+  )
+
+  const moveColumn = useCallback(
+    async ({ fromIndex, toIndex }: { fromIndex: number; toIndex: number }) => {
+      if (isFormMode) {
+        const next = [...(columnsProp || [])]
+        const [moved] = next.splice(fromIndex, 1)
+        next.splice(toIndex, 0, moved)
+        onChange(next)
+        return
+      }
+      await tableColumns.moveColumn({ fromIndex, toIndex })
+    },
+    [isFormMode, onChange, columnsProp, tableColumns],
+  )
 
   const uuid = useId()
   const editDepth = useEditDepth()

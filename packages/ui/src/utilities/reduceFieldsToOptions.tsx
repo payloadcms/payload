@@ -45,7 +45,7 @@ export const reduceFieldsToOptions = ({
     }
 
     // IMPORTANT: We DON'T mutate field.name here because the field object is shared across
-    // multiple components (WhereBuilder, GroupByBuilder, etc.). Mutating it would break
+    // multiple components (WhereBuilder, GroupByControl, etc.). Mutating it would break
     // permission checks and cause issues in other components that need the field name.
     // Instead, we use a flag to determine whether to include the field name in the path.
     let shouldIgnoreFieldName = false

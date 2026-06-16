@@ -1,7 +1,7 @@
 'use client'
-import type { ColumnPreference, JSONFieldClientComponent } from 'payload'
+import type { ClientField, Column, ColumnPreference, JSONFieldClientComponent } from 'payload'
 
-import React, { useId, useMemo } from 'react'
+import React, { useMemo } from 'react'
 
 import { FieldLabel } from '../../../../fields/FieldLabel/index.js'
 import { useField } from '../../../../forms/useField/index.js'
@@ -10,8 +10,8 @@ import { useConfig } from '../../../../providers/Config/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { getColumns } from '../../../../utilities/getColumns.js'
 import { reduceFieldsToOptions } from '../../../../utilities/reduceFieldsToOptions.js'
-import { PillSelector, type SelectablePill } from '../../../PillSelector/index.js'
-import './index.scss'
+import { ColumnsButton } from '../../../ColumnsButton/index.js'
+import './index.css'
 
 export const QueryPresetsColumnField: JSONFieldClientComponent = ({
   field: { label, required },
@@ -22,14 +22,13 @@ export const QueryPresetsColumnField: JSONFieldClientComponent = ({
   const { config, getEntityConfig } = useConfig()
   const { i18n } = useTranslation()
   const { permissions } = useAuth()
-  const uuid = useId()
 
   const collectionConfig = useMemo(
     () => (relatedCollection ? getEntityConfig({ collectionSlug: relatedCollection }) : null),
     [relatedCollection, getEntityConfig],
   )
 
-  const columns = useMemo(() => {
+  const columnPreferences = useMemo(() => {
     if (!relatedCollection || !collectionConfig) {
       return []
     }
@@ -43,49 +42,49 @@ export const QueryPresetsColumnField: JSONFieldClientComponent = ({
     })
   }, [config, collectionConfig, relatedCollection, value, i18n, permissions])
 
-  const reducedFields = useMemo(() => {
+  const fieldByPath = useMemo(() => {
     if (!collectionConfig?.fields) {
-      return []
+      return new Map<string, ClientField>()
     }
-    return reduceFieldsToOptions({
+    const reducedFields = reduceFieldsToOptions({
       fieldPermissions: permissions?.collections?.[relatedCollection]?.fields ?? true,
       fields: collectionConfig.fields,
       i18n,
     })
+    return new Map(reducedFields.map((f) => [String(f.fieldPath), f.field]))
   }, [collectionConfig, i18n, permissions, relatedCollection])
 
-  const accessorToLabel = useMemo(() => {
-    const map: Record<string, React.ReactNode> = {}
-    for (const f of reducedFields) {
-      map[String(f.fieldPath)] = f.label
-    }
-    return map
-  }, [reducedFields])
-
-  const pills: SelectablePill[] = useMemo(
+  // Build minimal `Column`s from preferences; no cells rendered here.
+  const columns: Column[] = useMemo(
     () =>
-      columns.map((col, i) => ({
-        name: col.accessor,
-        key: `${relatedCollection}-${col.accessor}-${i}-${uuid}`,
-        Label: accessorToLabel[col.accessor] ?? col.accessor,
-        selected: col.active,
-      })),
-    [accessorToLabel, columns, relatedCollection, uuid],
+      columnPreferences.reduce<Column[]>((acc, col) => {
+        const field = fieldByPath.get(col.accessor)
+        if (field) {
+          acc.push({
+            accessor: col.accessor,
+            active: col.active,
+            field,
+            Heading: null,
+            renderedCells: [],
+          })
+        }
+        return acc
+      }, []),
+    [columnPreferences, fieldByPath],
   )
 
-  const currentColumns = value ?? columns
-
-  const handleClick = React.useCallback(
-    ({ pill }: { pill: SelectablePill }) => {
-      const newColumns = currentColumns.map((col) =>
-        col.accessor === pill.name ? { ...col, active: !col.active } : col,
-      )
-      setValue(newColumns.length ? newColumns : undefined)
+  const handleChange = React.useCallback(
+    (newColumns: Column[]) => {
+      const preferences: ColumnPreference[] = newColumns.map((col) => ({
+        accessor: col.accessor,
+        active: col.active,
+      }))
+      setValue(preferences.length ? preferences : undefined)
     },
-    [currentColumns, setValue],
+    [setValue],
   )
 
-  if (!relatedCollection) {
+  if (!relatedCollection || !collectionConfig) {
     return (
       <div className="field-type query-preset-columns-field">
         <FieldLabel as="h3" label={label} path={path} required={required} />
@@ -98,14 +97,7 @@ export const QueryPresetsColumnField: JSONFieldClientComponent = ({
 
   return (
     <div className="field-type query-preset-columns-field">
-      <FieldLabel as="h3" label={label} path={path} required={required} />
-      {pills.length > 0 ? (
-        <PillSelector onClick={handleClick} pills={pills} />
-      ) : (
-        <p className="query-preset-columns-field__hint">
-          No columns available for this collection.
-        </p>
-      )}
+      <ColumnsButton collectionSlug={relatedCollection} columns={columns} onChange={handleChange} />
     </div>
   )
 }

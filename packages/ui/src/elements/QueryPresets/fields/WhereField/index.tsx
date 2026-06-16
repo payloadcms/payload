@@ -6,7 +6,7 @@ import React from 'react'
 import { FieldLabel } from '../../../../fields/FieldLabel/index.js'
 import { useField } from '../../../../forms/useField/index.js'
 import { WhereBuilder } from '../../../WhereBuilder/index.js'
-import './index.scss'
+import './index.css'
 
 export const QueryPresetsWhereField: JSONFieldClientComponent = ({
   field: { label, required },
@@ -28,7 +28,6 @@ export const QueryPresetsWhereField: JSONFieldClientComponent = ({
 
   return (
     <div className="field-type query-preset-where-field">
-      <FieldLabel as="h3" label={label} path={path} required={required} />
       <WhereBuilder
         collectionSlug={relatedCollection}
         onChange={(where) => setValue(where)}

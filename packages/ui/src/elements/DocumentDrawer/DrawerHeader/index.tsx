@@ -133,6 +133,9 @@ export const DocumentDrawerHeader: React.FC<{
 
   const showLockedMetaIcon = user && readOnlyForIncomingUser
 
+  const showBeforeMeta = Boolean(showLockedMetaIcon || BeforeDocumentMeta)
+  const showMeta = showBeforeMeta || showStatus || showUpdatedAt || showAutosave
+
   return (
     <div className={`${documentDrawerBaseClass}__header`}>
       <div className={`${documentDrawerBaseClass}__header-bar`}>
@@ -157,39 +160,41 @@ export const DocumentDrawerHeader: React.FC<{
           element="h2"
           renderAsLink={renderTitleAsLink}
         />
-        <div className={`${documentDrawerBaseClass}__meta`}>
-          {Boolean(showLockedMetaIcon || BeforeDocumentMeta) && (
-            <div className={`${documentDrawerBaseClass}__before-meta`}>
-              {showLockedMetaIcon && (
-                <Locked className={`${documentDrawerBaseClass}__locked-controls`} user={user} />
-              )}
-              {BeforeDocumentMeta}
-            </div>
-          )}
-          {showStatus ? (
-            <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
-          ) : null}
-          {showUpdatedAt ? (
-            <span
-              className={`${documentDrawerBaseClass}__updated-at`}
-              title={formattedUpdatedAt || formattedCreatedAt || undefined}
-            >
-              {relativeTime
-                ? t(isTrashed ? 'general:deletedAgo' : 'general:updatedAgo', {
-                    distance: relativeTime,
-                  })
-                : `${t('general:loading')}...`}
-            </span>
-          ) : null}
-          {showAutosave ? (
-            <Autosave
-              collection={collectionConfig}
-              global={globalConfig}
-              id={id}
-              publishedDocUpdatedAt={data?.createdAt}
-            />
-          ) : null}
-        </div>
+        {showMeta ? (
+          <div className={`${documentDrawerBaseClass}__meta`}>
+            {showBeforeMeta && (
+              <div className={`${documentDrawerBaseClass}__before-meta`}>
+                {showLockedMetaIcon && (
+                  <Locked className={`${documentDrawerBaseClass}__locked-controls`} user={user} />
+                )}
+                {BeforeDocumentMeta}
+              </div>
+            )}
+            {showStatus ? (
+              <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
+            ) : null}
+            {showUpdatedAt ? (
+              <span
+                className={`${documentDrawerBaseClass}__updated-at`}
+                title={formattedUpdatedAt || formattedCreatedAt || undefined}
+              >
+                {relativeTime
+                  ? t(isTrashed ? 'general:deletedAgo' : 'general:updatedAgo', {
+                      distance: relativeTime,
+                    })
+                  : `${t('general:loading')}...`}
+              </span>
+            ) : null}
+            {showAutosave ? (
+              <Autosave
+                collection={collectionConfig}
+                global={globalConfig}
+                id={id}
+                publishedDocUpdatedAt={data?.createdAt}
+              />
+            ) : null}
+          </div>
+        ) : null}
         {AfterHeader ? (
           <div className={`${documentDrawerBaseClass}__after-header`}>{AfterHeader}</div>
         ) : null}

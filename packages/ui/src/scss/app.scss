@@ -96,6 +96,12 @@
     overflow-x: hidden;
   }
 
+  // Lock background scroll while a drawer is open. Backs up faceless-ui's JS
+  // body-scroll-lock, which a sibling modal can clear prematurely.
+  body:has(.drawer--is-open) {
+    overflow: hidden;
+  }
+
   img {
     max-width: 100%;
     height: auto;

@@ -1,0 +1,37 @@
+@layer payload-default {
+  .query-preset-heading {
+    margin: 0 0 var(--spacer-2-5);
+    color: var(--color-text);
+    font-family: var(--text-heading-medium-font-family);
+    font-size: var(--text-heading-medium-font-size);
+    font-weight: var(--text-heading-medium-font-weight);
+    line-height: var(--text-heading-medium-line-height);
+  }
+
+  /* Heading and the Group by / Columns buttons on one row, buttons pushed right. */
+  .field-type.row.query-preset-controls-row {
+    .row__fields {
+      align-items: center;
+
+      /* Size each item to its content instead of equal columns. */
+      &:has(> *:nth-child(2)) > * {
+        flex: 0 0 auto;
+      }
+    }
+
+    .query-preset-heading {
+      /* Keep the row's compensating inline-start margin so the heading stays aligned. */
+      margin-block: 0;
+      margin-inline-end: auto;
+    }
+  }
+
+  /* The Access heading provides the separation, so hide the group's top border. */
+  .query-preset-access-group.group-field--top-level::before {
+    display: none;
+  }
+
+  .render-fields > .field-type.query-preset-title {
+    margin-bottom: var(--spacer-5);
+  }
+}

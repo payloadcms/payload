@@ -236,27 +236,40 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   )
 
   const addFirstFilter = React.useCallback(async () => {
-    if (firstField) {
-      await addCondition({
-        andIndex: 0,
-        field: firstField,
-        orIndex: conditions.length,
-        relation: 'or',
-      })
+    if (!firstField) {
+      return
     }
-  }, [addCondition, conditions.length, firstField])
 
-  // When conditions is empty in list mode, show a virtual first row immediately
-  // (derived from the first available field) so the panel never opens blank.
+    // With no committed conditions, only the virtual placeholder row is shown. Commit it
+    // and append a new row so a second row appears on the first click.
+    if (conditions.length === 0) {
+      const defaultOperator = firstField.operators[0].value
+      const makeRow = () => ({
+        and: [{ [String(firstField.fieldPath)]: { [defaultOperator]: undefined } }],
+      })
+
+      await handleWhereChange({ or: [makeRow(), makeRow()] })
+      return
+    }
+
+    await addCondition({
+      andIndex: 0,
+      field: firstField,
+      orIndex: conditions.length,
+      relation: 'or',
+    })
+  }, [addCondition, conditions.length, firstField, handleWhereChange])
+
+  // When conditions is empty, show a virtual first row so the panel never opens blank.
   const displayConditions =
-    !isFormMode && conditions.length === 0 && firstField
+    conditions.length === 0 && firstField
       ? ([
           { and: [{ [firstField.fieldPath]: { [firstField.operators[0].value]: undefined } }] },
         ] as typeof conditions)
       : conditions
 
   return (
-    <div className={baseClass}>
+    <div className={[baseClass, isFormMode && `${baseClass}--form-mode`].filter(Boolean).join(' ')}>
       <div className={`${baseClass}__or-filters`}>
         {displayConditions.map((or, orIndex) => {
           const compoundOrKey = `${orIndex}_${Array.isArray(or?.and) ? or.and.length : ''}`
