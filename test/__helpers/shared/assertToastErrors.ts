@@ -2,6 +2,8 @@ import type { Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 
+import { closeAllToasts } from '../e2e/helpers.js'
+
 export async function assertToastErrors({
   page,
   errors,
@@ -29,4 +31,6 @@ export async function assertToastErrors({
       await expect(errorItems.nth(i)).toHaveText(errors[i]!)
     }
   }
+
+  await closeAllToasts(page)
 }

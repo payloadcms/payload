@@ -15,13 +15,13 @@
 
     .payload-toast-item {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       gap: var(--spacer-2);
       min-height: var(--spacer-6);
       inset-inline: 0;
       width: fit-content;
       margin-inline: auto;
-      padding-inline: var(--spacer-2);
+      padding: var(--spacer-2);
       color: var(--color-text-oninverse);
       font-style: normal;
       font-weight: var(--font-weight-strong);
@@ -30,9 +30,13 @@
       box-shadow: var(--elevation-100-canvas);
 
       .toast-content {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: var(--spacer-1);
         width: 100%;
         transition: opacity 100ms cubic-bezier(0.55, 0.055, 0.675, 0.19);
-        padding-block: var(--spacer-2);
+        padding-block: var(--spacer-1);
       }
 
       &[data-front='false'] {
@@ -76,9 +80,66 @@
   }
 }
 
-/* Sonner injects [data-title] styles outside any @layer, which beats layered rules regardless of
-   specificity. This unlayered block wins over Sonner's :where() (0,0,0) via class specificity. */
+/* Sonner injects unlayered `:where()` (0,0,0) styles that beat our layered rules. These overrides
+   are unlayered too, winning on class specificity. */
+
 .payload-toast-container .toast-title {
   font-weight: var(--text-body-medium-strong-font-weight);
   line-height: var(--text-body-medium-strong-line-height);
+}
+
+/* Sonner forces [data-icon] to 16px; use a --spacer-4 (24px) box so our icons fit. */
+.payload-toast-container .payload-toast-item .toast-icon {
+  position: relative;
+  width: var(--spacer-4);
+  height: var(--spacer-4);
+  margin: 0;
+  justify-content: center;
+}
+
+.payload-toast-container .payload-toast-item .toast-icon svg {
+  margin: 0;
+}
+
+/* Spinner wrapper is `absolute; inset: 0`; restore flex flow so the box centers it. */
+.payload-toast-container .payload-toast-item .toast-icon .sonner-loading-wrapper {
+  position: static;
+}
+
+/* Sonner positions [data-close-button] absolutely; place it inline as a --spacer-4 (24px) IconButton. */
+.payload-toast-container .payload-toast-item .payload-toast-close-button {
+  position: relative;
+  inset: auto;
+  order: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: var(--spacer-4);
+  min-height: var(--spacer-4);
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding-inline: var(--spacer-1);
+  border: 0;
+  border-radius: var(--radius-medium);
+  background: transparent;
+  color: var(--color-icon-oninverse);
+  transform: none;
+  cursor: pointer;
+  transition: none;
+}
+
+.payload-toast-container .payload-toast-item .payload-toast-close-button:hover,
+.payload-toast-container .payload-toast-item .payload-toast-close-button:focus-visible {
+  background: var(--color-bg-inverse-hover);
+}
+
+.payload-toast-container .toast-error .payload-toast-close-button {
+  color: var(--color-text-ondanger);
+}
+
+.payload-toast-container .toast-error .payload-toast-close-button:hover,
+.payload-toast-container .toast-error .payload-toast-close-button:focus-visible {
+  background: var(--color-bg-danger-hover);
 }
