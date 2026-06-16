@@ -146,4 +146,21 @@ export const optimizeDepsIncludeDefaults: string[] = [
   '@payloadcms/ui > @dnd-kit/modifiers',
   '@payloadcms/ui > dequal/lite',
   'payload > ajv',
+  // The storage client-upload suites (esp. vercel-blob) crawl part of the
+  // `payload` server runtime into the client bundle and discover these late,
+  // triggering several "optimized dependencies changed. reloading" waves that
+  // reload the page mid-test (the bulk-upload drawer's Create New button /
+  // dropzone vanish and the direct-to-bucket PUT never fires). Pre-bundle the
+  // whole observed set so the first pass is complete.
+  'payload > undici',
+  'payload > jose',
+  'payload > dataloader',
+  'payload > path-to-regexp',
+  'payload > console-table-printer',
+  'payload > ci-info',
+  'payload > image-size',
+  'payload > image-size/fromFile',
+  'payload > ipaddr.js',
+  'payload > range-parser',
+  'payload > sanitize-filename',
 ]
