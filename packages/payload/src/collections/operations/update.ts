@@ -32,6 +32,7 @@ import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQu
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { deleteReusedRowIDs } from './utilities/deleteReusedRowIDs.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
 
@@ -255,7 +256,12 @@ export const updateOperation = async <
           autosave,
           collectionConfig,
           config,
-          data: deepCopyObjectSimple(data),
+          data: deleteReusedRowIDs({
+            config,
+            data: deepCopyObjectSimple(data),
+            existingDoc: docWithLocales,
+            fields: collectionConfig.fields,
+          }),
           depth: depth!,
           docWithLocales,
           draftArg,
