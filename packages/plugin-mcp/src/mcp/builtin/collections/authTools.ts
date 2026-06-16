@@ -35,10 +35,8 @@ export const authCollectionTool = defineCollectionTool({
   description: 'Checks authentication status for the current user.',
   input: z.object({
     headers: z
-      .string()
-      .describe(
-        'Optional JSON string containing custom headers to send with the authentication request',
-      )
+      .record(z.string(), z.string())
+      .describe('Optional custom headers to send with the authentication request')
       .optional(),
   }),
 }).handler(async ({ collectionSlug, input, req }) => {
@@ -46,11 +44,7 @@ export const authCollectionTool = defineCollectionTool({
   try {
     let authHeaders = new Headers()
     if (input.headers) {
-      try {
-        authHeaders = new Headers(JSON.parse(input.headers) as Record<string, string>)
-      } catch {
-        logger.warn(`Invalid headers JSON for auth: ${input.headers}, using empty headers`)
-      }
+      authHeaders = new Headers(input.headers)
     }
     const result = await req.payload.auth({ headers: authHeaders })
     return {

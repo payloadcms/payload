@@ -231,8 +231,21 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(findDocuments.inputSchema.properties.page.type).toBe('integer')
       expect(findDocuments.inputSchema.properties.page.minimum).toBe(1)
       expect(findDocuments.inputSchema.properties.page.default).toBe(1)
+      expect(findDocuments.inputSchema.properties.pagination).toBeDefined()
+      expect(findDocuments.inputSchema.properties.pagination.type).toBe('boolean')
+      expect(findDocuments.inputSchema.properties.populate).toBeDefined()
+      expect(findDocuments.inputSchema.properties.populate.type).toBe('object')
+      expect(findDocuments.inputSchema.properties.populate.description).toContain(
+        'control which fields to include from populated relationship or upload documents',
+      )
+      expect(findDocuments.inputSchema.properties.joins).toBeDefined()
+      expect(findDocuments.inputSchema.properties.joins.description).toContain(
+        'configure join field queries',
+      )
       expect(findDocuments.inputSchema.properties.sort).toBeDefined()
       expect(findDocuments.inputSchema.properties.sort.type).toBe('string')
+      expect(findDocuments.inputSchema.properties.trash).toBeDefined()
+      expect(findDocuments.inputSchema.properties.trash.type).toBe('boolean')
       expect(findDocuments.inputSchema.properties.where).toBeDefined()
       // Where clause is a $ref to a shared recursive schema: and/or groups plus field operators
       const whereRef: string = findDocuments.inputSchema.properties.where.$ref
@@ -259,6 +272,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(createDocument.inputSchema.properties.fallbackLocale).toBeDefined()
       expect(createDocument.inputSchema.properties.locale).toBeDefined()
       expect(createDocument.inputSchema.properties.select).toBeDefined()
+      expect(createDocument.inputSchema.properties.select.type).toBe('object')
 
       // Find tool: no `data` wrapper, just metadata fields
       expect(findDocuments.inputSchema).toBeDefined()
@@ -268,6 +282,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(findDocuments.inputSchema.properties.limit).toBeDefined()
       expect(findDocuments.inputSchema.properties.page).toBeDefined()
       expect(findDocuments.inputSchema.properties.select).toBeDefined()
+      expect(findDocuments.inputSchema.properties.select.type).toBe('object')
       expect(findDocuments.inputSchema.properties.where).toBeDefined()
 
       // Custom top-level tool schema
@@ -421,9 +436,14 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(findGlobalTool.inputSchema.properties.globalSlug.enum).toBeUndefined()
       expect(findGlobalTool.inputSchema.properties.globalSlug.description).toBe('The global slug')
       expect(findGlobalTool.inputSchema.properties.select).toBeDefined()
-      expect(findGlobalTool.inputSchema.properties.select.type).toBe('string')
+      expect(findGlobalTool.inputSchema.properties.select.type).toBe('object')
       expect(findGlobalTool.inputSchema.properties.select.description).toContain(
-        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        "Optional: define exactly which fields you'd like to return in the response",
+      )
+      expect(findGlobalTool.inputSchema.properties.populate).toBeDefined()
+      expect(findGlobalTool.inputSchema.properties.populate.type).toBe('object')
+      expect(findGlobalTool.inputSchema.properties.populate.description).toContain(
+        'control which fields to include from populated relationship or upload documents',
       )
 
       const updateGlobalTool = toolsResponse.result.tools.find(
@@ -435,9 +455,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(updateGlobalTool.inputSchema.properties.globalSlug.enum).toBeUndefined()
       expect(updateGlobalTool.inputSchema.properties.globalSlug.description).toBe('The global slug')
       expect(updateGlobalTool.inputSchema.properties.select).toBeDefined()
-      expect(updateGlobalTool.inputSchema.properties.select.type).toBe('string')
+      expect(updateGlobalTool.inputSchema.properties.select.type).toBe('object')
       expect(updateGlobalTool.inputSchema.properties.select.description).toContain(
-        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"siteName\": true}'",
+        "Optional: define exactly which fields you'd like to return in the response",
       )
     })
 
@@ -452,9 +472,9 @@ describe('@payloadcms/plugin-mcp', () => {
       )
       expect(updateToolSchema).toBeDefined()
       expect(updateToolSchema.inputSchema.properties.select).toBeDefined()
-      expect(updateToolSchema.inputSchema.properties.select.type).toBe('string')
+      expect(updateToolSchema.inputSchema.properties.select.type).toBe('object')
       expect(updateToolSchema.inputSchema.properties.select.description).toContain(
-        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        "Optional: define exactly which fields you'd like to return in the response",
       )
     })
   })
@@ -669,7 +689,7 @@ describe('@payloadcms/plugin-mcp', () => {
             content: 'Content should be omitted',
             title: 'Select Create Post',
           },
-          select: '{"title": true}',
+          select: { title: true },
         },
         name: 'createDocument',
       })
@@ -808,7 +828,7 @@ describe('@payloadcms/plugin-mcp', () => {
           collectionSlug: 'posts',
           limit: 1,
           page: 1,
-          select: '{"title": true}',
+          select: { title: true },
           where: { title: { contains: 'Select Test Post' } },
         },
         name: 'findDocuments',
@@ -821,6 +841,95 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(responseText).toContain('Collection: "posts"')
       expect(responseText).toContain('"title":"Select Test Post (MCP Hook Override)"')
       expect(responseText).not.toContain('"content": "Content that should be omitted"')
+    })
+
+    it('should pass populate, joins, trash, and pagination to findDocuments list queries', async ({
+      mcp,
+    }) => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          author: userId,
+          content: 'Find options pass-through content',
+          title: 'Find Options Pass Through',
+        },
+      })
+      const apiKey = await getApiKey()
+      const findSpy = vi.spyOn(payload, 'find')
+
+      try {
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            collectionSlug: 'posts',
+            joins: false,
+            limit: 1,
+            page: 1,
+            pagination: false,
+            populate: { users: { email: true } },
+            trash: true,
+            where: { title: { equals: 'Find Options Pass Through' } },
+          },
+          name: 'findDocuments',
+        })
+
+        expect(callResponse).toBeDefined()
+        expect(callResponse.result).toBeDefined()
+        expect(findSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            collection: 'posts',
+            joins: false,
+            pagination: false,
+            populate: { users: { email: true } },
+            trash: true,
+          }),
+        )
+      } finally {
+        findSpy.mockRestore()
+        await payload.delete({ id: post.id, collection: 'posts' })
+      }
+    })
+
+    it('should pass populate, joins, and trash to findDocuments ID queries', async ({ mcp }) => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          author: userId,
+          content: 'Find by ID options pass-through content',
+          title: 'Find By ID Options Pass Through',
+        },
+      })
+      const apiKey = await getApiKey()
+      const findByIDSpy = vi.spyOn(payload, 'findByID')
+
+      try {
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            collectionSlug: 'posts',
+            id: post.id,
+            joins: false,
+            populate: { users: { email: true } },
+            trash: true,
+          },
+          name: 'findDocuments',
+        })
+
+        expect(callResponse).toBeDefined()
+        expect(callResponse.result).toBeDefined()
+        expect(findByIDSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            collection: 'posts',
+            id: post.id,
+            joins: false,
+            populate: { users: { email: true } },
+            trash: true,
+          }),
+        )
+      } finally {
+        findByIDSpy.mockRestore()
+        await payload.delete({ id: post.id, collection: 'posts' })
+      }
     })
 
     it('should call updateDocument', async ({ mcp }) => {
@@ -945,7 +1054,7 @@ describe('@payloadcms/plugin-mcp', () => {
             content: 'Updated but should be omitted',
             title: 'Select Update Post Edited',
           },
-          select: '{"title": true}',
+          select: { title: true },
         },
         name: 'updateDocument',
       })
@@ -1446,7 +1555,7 @@ describe('@payloadcms/plugin-mcp', () => {
         args: {
           globalSlug: 'site-settings',
           collectionSlug: 'posts',
-          select: '{"siteName": true}',
+          select: { siteName: true },
         },
         name: 'findGlobal',
       })
@@ -1460,6 +1569,33 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(responseText).not.toContain('siteDescription')
       expect(responseText).not.toContain('contactEmail')
       expect(responseText).not.toContain('maintenanceMode')
+    })
+
+    it('should pass populate to findGlobal', async ({ mcp }) => {
+      const apiKey = await getApiKey({ globalFind: true })
+      const findGlobalSpy = vi.spyOn(payload, 'findGlobal')
+
+      try {
+        const callResponse = await mcp.callTool({
+          apiKey,
+          args: {
+            globalSlug: 'site-settings',
+            populate: { users: { email: true } },
+          },
+          name: 'findGlobal',
+        })
+
+        expect(callResponse).toBeDefined()
+        expect(callResponse.result).toBeDefined()
+        expect(findGlobalSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            populate: { users: { email: true } },
+            slug: 'site-settings',
+          }),
+        )
+      } finally {
+        findGlobalSpy.mockRestore()
+      }
     })
 
     it('should update site-settings global', async ({ mcp }) => {
@@ -1497,7 +1633,7 @@ describe('@payloadcms/plugin-mcp', () => {
             siteDescription: 'Should not appear',
             siteName: 'MCP Test Site Select',
           },
-          select: '{"siteName": true}',
+          select: { siteName: true },
         },
         name: 'updateGlobal',
       })
