@@ -19,8 +19,8 @@ export const ToastContainer: React.FC<{
       className="payload-toast-container"
       // @ts-expect-error
       dir="undefined"
-      duration={duration ?? Infinity ?? 4000}
-      expand={expand ?? true}
+      duration={duration ?? 4000}
+      expand={expand ?? false}
       gap={8}
       icons={{
         error: <WarningIcon />,
