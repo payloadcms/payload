@@ -1,6 +1,6 @@
 @layer payload-default {
   .tenant-selector {
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
     width: calc(100% + var(--nav-padding-block-start) * 2);
     margin-inline-start: calc(-1 * var(--nav-padding-inline-start));
     margin-block-end: var(--spacer-4);
