@@ -1,6 +1,6 @@
 export const getCaptureMenuScroll = ({
   captureMenuScroll,
-  menuPortalTarget,
+  menuPortalTarget: _menuPortalTarget,
 }: {
   captureMenuScroll?: boolean
   menuPortalTarget?: HTMLElement | null
@@ -9,5 +9,5 @@ export const getCaptureMenuScroll = ({
     return captureMenuScroll
   }
 
-  return !menuPortalTarget
+  return true
 }
