@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { arraySlug } from './shared.js'
+import { arraySlug, complexSlug } from './shared.js'
 
 let payload: Payload
 
@@ -188,5 +188,49 @@ describe('array-update', () => {
 
     expect(updatedOther.arrayOfFields?.[0].id).not.toBe(existingRowID)
     expect(updatedOther.arrayOfFields?.[0].required).toBe('updated existing row')
+  })
+
+  it('should assign fresh row IDs for localized arrays, groups and blocks on bulk update', async () => {
+    const docA = await payload.create({ collection: complexSlug, data: {} })
+    const docB = await payload.create({ collection: complexSlug, data: {} })
+
+    const { docs, errors } = await payload.update({
+      collection: complexSlug,
+      data: {
+        blocks: [
+          {
+            id: '6116a7f0f0f0f0f0f0f0f0f2',
+            blockType: 'content',
+            innerArray: [{ id: '6116a7f0f0f0f0f0f0f0f0f3', text: 'inner block' }],
+            text: 'block value',
+          },
+        ],
+        group: {
+          groupArray: [{ id: '6116a7f0f0f0f0f0f0f0f0f4', text: 'group value' }],
+        },
+        localizedArray: [{ id: '6116a7f0f0f0f0f0f0f0f0f5', text: 'localized value' }],
+      },
+      where: { id: { in: [docA.id, docB.id] } },
+    })
+
+    expect(errors).toHaveLength(0)
+    expect(docs).toHaveLength(2)
+
+    const updatedA = await payload.findByID({ id: docA.id, collection: complexSlug })
+    const updatedB = await payload.findByID({ id: docB.id, collection: complexSlug })
+
+    expect(updatedA.localizedArray?.[0].text).toBe('localized value')
+    expect(updatedB.localizedArray?.[0].text).toBe('localized value')
+    expect(updatedA.group?.groupArray?.[0].text).toBe('group value')
+    expect(updatedB.group?.groupArray?.[0].text).toBe('group value')
+    expect(updatedA.blocks?.[0].text).toBe('block value')
+    expect(updatedB.blocks?.[0].text).toBe('block value')
+
+    expect(updatedA.localizedArray?.[0].id).not.toBe(updatedB.localizedArray?.[0].id)
+    expect(updatedA.group?.groupArray?.[0].id).not.toBe(updatedB.group?.groupArray?.[0].id)
+    expect(updatedA.blocks?.[0].id).not.toBe(updatedB.blocks?.[0].id)
+    expect(updatedA.blocks?.[0].innerArray?.[0].id).not.toBe(
+      updatedB.blocks?.[0].innerArray?.[0].id,
+    )
   })
 })
