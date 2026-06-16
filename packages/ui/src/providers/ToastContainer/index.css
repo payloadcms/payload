@@ -20,7 +20,7 @@
       min-height: var(--spacer-6);
       inset-inline: 0;
       width: fit-content;
-      margin-inline: auto;
+      margin-inline-start: auto;
       padding: var(--spacer-2);
       color: var(--color-text-oninverse);
       font-style: normal;
