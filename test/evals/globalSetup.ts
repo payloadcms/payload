@@ -17,7 +17,11 @@ export async function setup() {
   // the same id (see cache.getRunId) and the dashboard groups results by it.
   const resultsDir = path.resolve(__dirname, 'eval-results')
   mkdirSync(resultsDir, { recursive: true })
-  writeFileSync(path.join(resultsDir, '.run-id'), new Date().toISOString(), 'utf-8')
+  writeFileSync(
+    path.join(resultsDir, '.run-id'),
+    process.env.EVAL_RUN_ID ?? new Date().toISOString(),
+    'utf-8',
+  )
 
   // Check agent auth once, before any test, so a missing login aborts the run
   // up front (with the exact login command) instead of failing every case.

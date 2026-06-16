@@ -14,6 +14,11 @@
 
 import * as p from '@clack/prompts'
 import { spawn } from 'node:child_process'
+import { appendFileSync, mkdirSync } from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const evalResultsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'eval-results')
 
 type Suite = { label: string; spec?: string; value: string }
 
@@ -204,8 +209,13 @@ async function main(): Promise<void> {
     vitestArgs.push('-t', args.testPattern)
   }
 
+  // One id for this run; the dashboard groups results by it. We tag it "finished"
+  // only on a clean exit below, so cancelled runs (Ctrl+C) stay hidden.
+  const runId = new Date().toISOString()
+
   const env: NodeJS.ProcessEnv = {
     ...process.env,
+    EVAL_RUN_ID: runId,
     EVAL_RUNNER: runner,
     EVAL_SKILL: skill,
     NODE_NO_WARNINGS: '1',
@@ -231,7 +241,19 @@ async function main(): Promise<void> {
     process.stderr.write(`Failed to launch vitest: ${err.message}\n`)
     process.exit(1)
   })
-  child.on('exit', (code) => process.exit(code ?? 0))
+  child.on('exit', (code) => {
+    // Numeric code (even 1 for test failures) = the run finished. A signal kill
+    // (Ctrl+C) has code === null, so we don't tag it — the dashboard hides it.
+    if (code !== null) {
+      try {
+        mkdirSync(evalResultsDir, { recursive: true })
+        appendFileSync(path.join(evalResultsDir, '.completed-runs'), `${runId}\n`)
+      } catch {
+        // best-effort; an untagged run just won't show in the dashboard
+      }
+    }
+    process.exit(code ?? 1)
+  })
 }
 
 main().catch((err: unknown) => {

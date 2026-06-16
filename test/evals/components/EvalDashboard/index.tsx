@@ -63,6 +63,21 @@ const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const cacheDir = path.resolve(__dirname, '../../eval-results/cache')
 const fixturesDir = path.resolve(__dirname, '../../fixtures')
+const completedRunsFile = path.resolve(__dirname, '../../eval-results/.completed-runs')
+
+/** Run ids that finished (written by the launcher on a clean exit). Cancelled runs aren't listed. */
+function readCompletedRunIds(): Set<string> {
+  try {
+    return new Set(
+      readFileSync(completedRunsFile, 'utf-8')
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean),
+    )
+  } catch {
+    return new Set()
+  }
+}
 
 type CacheEntry = {
   createdAt: string
@@ -88,6 +103,7 @@ function readCacheEntries(): EvalEntry[] {
     return []
   }
 
+  const completed = readCompletedRunIds()
   const entries: EvalEntry[] = []
   for (const file of files) {
     try {
@@ -97,6 +113,11 @@ function readCacheEntries(): EvalEntry[] {
         continue
       }
       const { result } = entry
+      // Hide runs that never finished (e.g. Ctrl+C'd). Pre-run-tracking entries
+      // have no runId and are always kept.
+      if (result.runId && !completed.has(result.runId)) {
+        continue
+      }
       entries.push({
         type: 'codegen',
         audience: getAudience(result.category),
