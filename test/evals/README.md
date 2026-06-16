@@ -19,7 +19,19 @@ Three orthogonal knobs select what runs (defaults: direct LLM, skill on):
 
 The skill is delivered per harness: system-prompt injection for `llm`, embedded in the workdir's `.claude/skills/` for `claude-code`.
 
-The `claude-code` runner requires the `claude` CLI on `PATH` and an authenticated session (`claude login` or `ANTHROPIC_API_KEY`). It sandboxes `claude` via a fresh `CLAUDE_CONFIG_DIR`, so your user-level `CLAUDE.md`, skills, and settings are never visible to the agent.
+The `claude-code` runner requires the `claude` CLI on `PATH` and sandboxes it via a fresh `CLAUDE_CONFIG_DIR` so your user-level `CLAUDE.md`, skills, and settings are never visible to the agent. It authenticates in two steps, automatically:
+
+1. **API key (default):** uses `ANTHROPIC_API_KEY` (or a copied `~/.claude/.credentials.json`) in a per-run temp sandbox — the original path, unchanged.
+2. **OAuth fallback:** if step 1 is rejected — e.g. a managed-settings org pin that requires first-party login and refuses API keys — it falls back to a **persistent, isolated** config dir in your user config (`~/.config/payload-evals/claude-code`, outside the repo) whose OAuth session you seed **once** (the API key is stripped from the subprocess in this mode):
+
+   ```bash
+   CLAUDE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/payload-evals/claude-code" claude auth login --console
+   # (use --sso or --claudeai instead, to match how your org logs in)
+   ```
+
+   The runner prints this exact command (with the resolved path) when the fallback is needed.
+
+If neither works, the runner fails with the exact fix (set `ANTHROPIC_API_KEY` or run the login above).
 
 ## Running
 
@@ -45,7 +57,7 @@ setting `EVAL_RUNNER` / `EVAL_SKILL` / `EVAL_MODEL` directly works too.
 ## Required env vars
 
 - `OPENAI_API_KEY` **or** `ANTHROPIC_API_KEY` — at least one is required for **all** runs. Both the runner and the LLM scorer default to OpenAI models when `OPENAI_API_KEY` is set, and otherwise fall back to Anthropic (`claude-sonnet-4-6` runner, `claude-haiku-4-5` scorer).
-- `ANTHROPIC_API_KEY` — additionally required for the `claude-code` runner (`EVAL_RUNNER=claude-code`), unless you've run `claude login` (the runner falls back to copying your `~/.claude/.credentials.json` into the sandbox).
+- The `claude-code` runner uses `ANTHROPIC_API_KEY` by default; if that's rejected (e.g. an org OAuth pin), it automatically falls back to a one-time login into an isolated sandbox config dir (see Variants above).
 
 ## Optional env knobs
 

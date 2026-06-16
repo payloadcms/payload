@@ -5,7 +5,7 @@ import { loadEnv } from 'payload/node'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
-export function setup() {
+export async function setup() {
   loadEnv()
 
   if (!process.env.OPENAI_API_KEY && !process.env.ANTHROPIC_API_KEY) {
@@ -18,4 +18,11 @@ export function setup() {
   const resultsDir = path.resolve(__dirname, 'eval-results')
   mkdirSync(resultsDir, { recursive: true })
   writeFileSync(path.join(resultsDir, '.run-id'), new Date().toISOString(), 'utf-8')
+
+  // Check agent auth once, before any test, so a missing login aborts the run
+  // up front (with the exact login command) instead of failing every case.
+  if (process.env.EVAL_RUNNER === 'claude-code') {
+    const { preflightAgentAuth } = await import('./runner/claudeCode.js')
+    await preflightAgentAuth()
+  }
 }
