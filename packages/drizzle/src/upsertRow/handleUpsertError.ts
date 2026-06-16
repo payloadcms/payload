@@ -81,6 +81,10 @@ export const handleUpsertError = ({
           {
             message: req?.t ? req.t('error:valueMustBeUnique') : 'Value must be unique',
             path: fieldName,
+            // Preserve the failing sub-table so `afterError` hooks can resolve the
+            // affected array/block field. Doing this here is safe because it does not
+            // touch how rows are inserted (the cause of the data loss in PR #15754).
+            tableName,
           },
         ],
         global: globalSlug,
