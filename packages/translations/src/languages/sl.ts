@@ -409,6 +409,7 @@ export const slTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Odpri v novem oknu',
     or: 'Ali',
     order: 'Vrstni red',
+    other: 'Drugo',
     overwriteExistingData: 'Prepišite obstoječe podatke polja',
     pageNotFound: 'Stran ni najdena',
     password: 'Geslo',

@@ -410,6 +410,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Otvori u novom prozoru',
     or: 'Ili',
     order: 'Redosled',
+    other: 'Ostalo',
     overwriteExistingData: 'Prepiši postojeće podatke iz polja',
     pageNotFound: 'Stranica nije pronađena',
     password: 'Lozinka',

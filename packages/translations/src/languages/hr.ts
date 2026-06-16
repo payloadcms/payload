@@ -409,6 +409,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Otvori u novom prozoru',
     or: 'ili',
     order: 'Poredak',
+    other: 'Ostalo',
     overwriteExistingData: 'Prepišite postojeće podatke u polju',
     pageNotFound: 'Stranica nije pronađena',
     password: 'Lozinka',

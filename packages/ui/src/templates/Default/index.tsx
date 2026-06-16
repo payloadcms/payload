@@ -3,9 +3,12 @@ import type {
   DocumentSubViewTypes,
   PayloadRequest,
   ServerProps,
+  UserMenuSettingsItem,
   ViewTypes,
   VisibleEntities,
 } from 'payload'
+
+import { getTranslation } from '@payloadcms/translations'
 
 import './index.css'
 
@@ -21,10 +24,23 @@ import {
   DefaultTemplateWrapper as Wrapper,
 } from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
+import type { UserMenuSettingsGroup } from '../../elements/UserMenu/SettingsMenu/index.js'
+
 import { DefaultNav } from '../../elements/Nav/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
 const baseClass = 'template-default'
+
+const isUserMenuSettingsGroup = (
+  userMenuSettingsItem: UserMenuSettingsItem,
+): userMenuSettingsItem is Extract<
+  UserMenuSettingsItem,
+  { group?: unknown; items: CustomComponent[] }
+> =>
+  typeof userMenuSettingsItem === 'object' &&
+  userMenuSettingsItem !== null &&
+  'items' in userMenuSettingsItem &&
+  Array.isArray(userMenuSettingsItem.items)
 
 export type DefaultTemplateProps = {
   children?: React.ReactNode
@@ -109,18 +125,66 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     })
   }
 
-  const settingsItems: React.ReactNode[] =
-    components?.userMenuSettingsItems && Array.isArray(components.userMenuSettingsItems)
-      ? components.userMenuSettingsItems.map((item, index) =>
+  const settingsItemGroups: UserMenuSettingsGroup[] = []
+  if (components?.userMenuSettingsItems && Array.isArray(components.userMenuSettingsItems)) {
+    const localizedFallbackSettingsGroupLabel = i18n.t('general:other')
+    const groupedItemsByLabel = new Map<string, React.ReactNode[]>()
+    const groupLabels: string[] = []
+    const ungroupedItems: React.ReactNode[] = []
+
+    for (const [itemIndex, userMenuSettingsItem] of components.userMenuSettingsItems.entries()) {
+      if (isUserMenuSettingsGroup(userMenuSettingsItem)) {
+        const groupLabel = userMenuSettingsItem.group
+          ? getTranslation(userMenuSettingsItem.group, i18n)
+          : localizedFallbackSettingsGroupLabel
+
+        const existingItems = groupedItemsByLabel.get(groupLabel)
+        const renderedItems = userMenuSettingsItem.items.map((groupedItem, groupedItemIndex) =>
           RenderServerComponent({
             clientProps,
-            Component: item,
+            Component: groupedItem,
             importMap: payload.importMap,
-            key: `user-menu-settings-item-${index}`,
+            key: `user-menu-settings-group-${groupLabel}-${itemIndex}-${groupedItemIndex}`,
             serverProps,
           }),
         )
-      : []
+
+        if (existingItems) {
+          existingItems.push(...renderedItems)
+        } else if (renderedItems.length > 0) {
+          groupedItemsByLabel.set(groupLabel, renderedItems)
+          groupLabels.push(groupLabel)
+        }
+      } else {
+        ungroupedItems.push(
+          RenderServerComponent({
+            clientProps,
+            Component: userMenuSettingsItem,
+            importMap: payload.importMap,
+            key: `user-menu-settings-item-${itemIndex}`,
+            serverProps,
+          }),
+        )
+      }
+    }
+
+    for (const groupLabel of groupLabels) {
+      const items = groupedItemsByLabel.get(groupLabel)
+      if (items?.length) {
+        settingsItemGroups.push({
+          group: groupLabel,
+          items,
+        })
+      }
+    }
+
+    if (ungroupedItems.length > 0) {
+      settingsItemGroups.push({
+        group: localizedFallbackSettingsGroupLabel,
+        items: ungroupedItems,
+      })
+    }
+  }
 
   const NavComponent = RenderServerComponent({
     clientProps,
@@ -155,7 +219,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                         })
                       : undefined
                   }
-                  settingsItems={settingsItems}
+                  settingsItemGroups={settingsItemGroups}
                 />
                 {children}
               </div>

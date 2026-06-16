@@ -410,6 +410,7 @@ export const plTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Otwórz w nowym oknie',
     or: 'lub',
     order: 'Kolejność',
+    other: 'Inne',
     overwriteExistingData: 'Nadpisz istniejące dane pola',
     pageNotFound: 'Strona nie znaleziona',
     password: 'Hasło',

@@ -418,6 +418,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Openen in nieuw venster',
     or: 'Of',
     order: 'Volgorde',
+    other: 'Overige',
     overwriteExistingData: 'Overschrijf bestaande veldgegevens',
     pageNotFound: 'Pagina niet gevonden',
     password: 'Wachtwoord',

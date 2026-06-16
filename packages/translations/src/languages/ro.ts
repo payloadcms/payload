@@ -416,6 +416,7 @@ export const roTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Deschide într-o fereastră nouă',
     or: 'Sau',
     order: 'ORdine',
+    other: 'Altele',
     overwriteExistingData: 'Suprascrieți datele existente din câmp',
     pageNotFound: 'Pagina nu a fost găsită',
     password: 'Parola',

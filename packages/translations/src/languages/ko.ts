@@ -407,6 +407,7 @@ export const koTranslations: DefaultTranslationsObject = {
     openInNewWindow: '새 창에서 열기',
     or: '또는',
     order: '순서',
+    other: '기타',
     overwriteExistingData: '기존 필드 데이터 덮어쓰기',
     pageNotFound: '페이지를 찾을 수 없음',
     password: '비밀번호',

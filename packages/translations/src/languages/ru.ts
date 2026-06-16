@@ -413,6 +413,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Открыть в новом окне',
     or: 'Или же',
     order: 'Порядок',
+    other: 'Другое',
     overwriteExistingData: 'Перезаписать существующие данные поля',
     pageNotFound: 'Страница не найдена',
     password: 'Пароль',

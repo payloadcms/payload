@@ -535,6 +535,13 @@ type SanitizedTimezoneConfig = {
 export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
   PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
 
+export type UserMenuSettingsGroup = {
+  group?: LabelFunction | StaticLabel
+  items: CustomComponent[]
+}
+
+export type UserMenuSettingsItem = CustomComponent | UserMenuSettingsGroup
+
 export type Locale = {
   /**
    * value of supported locale
@@ -1021,7 +1028,7 @@ export type Config = {
        * These components will be rendered in the Settings sub-popup of the user menu.
        * When empty or absent, the Settings sub-trigger is not shown.
        */
-      userMenuSettingsItems?: CustomComponent[]
+      userMenuSettingsItems?: UserMenuSettingsItem[]
       /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`

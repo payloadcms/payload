@@ -412,6 +412,7 @@ export const caTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Obre en una finestra nova',
     or: 'O',
     order: 'Ordre',
+    other: 'Altres',
     overwriteExistingData: 'Sobreescriu les dades existents',
     pageNotFound: 'Pàgina no trobada',
     password: 'Contrasenya',

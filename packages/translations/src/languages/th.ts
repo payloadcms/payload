@@ -402,6 +402,7 @@ export const thTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'เปิดในหน้าต่างใหม่',
     or: 'หรือ',
     order: 'เรียงตาม',
+    other: 'อื่น ๆ',
     overwriteExistingData: 'เขียนทับข้อมูลในฟิลด์ที่มีอยู่แล้ว',
     pageNotFound: 'ไม่พบหน้าที่ต้องการ',
     password: 'รหัสผ่าน',

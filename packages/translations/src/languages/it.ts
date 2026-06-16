@@ -413,6 +413,7 @@ export const itTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Apri in una nuova finestra',
     or: 'Oppure',
     order: 'Ordine',
+    other: 'Altro',
     overwriteExistingData: 'Sovrascrivi i dati del campo esistente',
     pageNotFound: 'Pagina non trovata',
     password: 'Password',

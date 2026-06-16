@@ -414,6 +414,7 @@ export const trTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Yeni pencerede aç',
     or: 'Or',
     order: 'Order',
+    other: 'Diğer',
     overwriteExistingData: 'Mevcut alan verilerinin üzerine yazın',
     pageNotFound: 'Sayfa bulunamadı',
     password: 'Parola',

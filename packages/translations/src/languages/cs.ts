@@ -408,6 +408,7 @@ export const csTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Otevřít v novém okně',
     or: 'Nebo',
     order: 'Pořadí',
+    other: 'Jiné',
     overwriteExistingData: 'Přepsat existující data pole',
     pageNotFound: 'Stránka nenalezena',
     password: 'Heslo',

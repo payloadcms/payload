@@ -415,6 +415,7 @@ export const esTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Abrir en nueva ventana',
     or: 'O',
     order: 'Orden',
+    other: 'Otro',
     overwriteExistingData: 'Sobrescribir los datos existentes del campo',
     pageNotFound: 'Página no encontrada',
     password: 'Contraseña',

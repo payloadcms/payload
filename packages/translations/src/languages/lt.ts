@@ -412,6 +412,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Atidaryti naujame lange',
     or: 'Arba',
     order: 'Užsakyti',
+    other: 'Kita',
     overwriteExistingData: 'Perrašyti esamus lauko duomenis',
     pageNotFound: 'Puslapis nerastas',
     password: 'Slaptažodis',

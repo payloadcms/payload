@@ -1,9 +1,17 @@
-import type { SanitizedConfig } from '../../config/types.js'
+import type { SanitizedConfig, UserMenuSettingsItem } from '../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
 import { iterateCollections } from './iterateCollections.js'
 import { genImportMapIterateFields } from './iterateFields.js'
 import { iterateGlobals } from './iterateGlobals.js'
+
+const isUserMenuSettingsGroup = (
+  userMenuSettingsItem: UserMenuSettingsItem,
+): userMenuSettingsItem is Extract<UserMenuSettingsItem, { items: unknown }> =>
+  typeof userMenuSettingsItem === 'object' &&
+  userMenuSettingsItem !== null &&
+  'items' in userMenuSettingsItem &&
+  Array.isArray(userMenuSettingsItem.items)
 
 export function iterateConfig({
   addToImportMap,
@@ -58,7 +66,17 @@ export function iterateConfig({
   addToImportMap(config.admin?.components?.header)
   addToImportMap(config.admin?.components?.logout?.Button)
   addToImportMap(config.admin?.components?.settingsMenu)
-  addToImportMap(config.admin?.components?.userMenuSettingsItems)
+  if (config.admin?.components?.userMenuSettingsItems?.length) {
+    for (const userMenuSettingsItem of config.admin.components.userMenuSettingsItems) {
+      if (isUserMenuSettingsGroup(userMenuSettingsItem)) {
+        for (const groupedItem of userMenuSettingsItem.items) {
+          addToImportMap(groupedItem)
+        }
+      } else {
+        addToImportMap(userMenuSettingsItem)
+      }
+    }
+  }
   addToImportMap(config.admin?.components?.graphics?.Icon)
   addToImportMap(config.admin?.components?.graphics?.Logo)
 

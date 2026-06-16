@@ -409,6 +409,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Отвори в нов прозорец',
     or: 'Или',
     order: 'Ред',
+    other: 'Друго',
     overwriteExistingData: 'Презапишете съществуващите данни в полето',
     pageNotFound: 'Страницата не беше открита',
     password: 'Парола',

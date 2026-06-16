@@ -411,6 +411,7 @@ export const svTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Öppna i nytt fönster',
     or: 'Eller',
     order: 'Ordning',
+    other: 'Annat',
     overwriteExistingData: 'Skriv över befintlig fältdata',
     pageNotFound: 'Sidan hittas inte',
     password: 'Lösenord',

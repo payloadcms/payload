@@ -409,6 +409,7 @@ export const skTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Otvoriť v novom okne',
     or: 'Alebo',
     order: 'Poradie',
+    other: 'Iné',
     overwriteExistingData: 'Prepísať existujúce pole dát',
     pageNotFound: 'Stránka nenájdená',
     password: 'Heslo',

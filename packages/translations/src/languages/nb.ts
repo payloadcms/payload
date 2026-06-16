@@ -411,6 +411,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Åpne i nytt vindu',
     or: 'Eller',
     order: 'Rekkefølge',
+    other: 'Annet',
     overwriteExistingData: 'Overskriv eksisterende feltdata',
     pageNotFound: 'Siden ble ikke funnet',
     password: 'Passord',

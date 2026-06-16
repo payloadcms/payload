@@ -396,6 +396,7 @@ export const heTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'פתח בחלון חדש',
     or: 'או',
     order: 'סדר',
+    other: 'אחר',
     overwriteExistingData: 'דרוס את נתוני השדה הקיימים',
     pageNotFound: 'הדף לא נמצא',
     password: 'סיסמה',

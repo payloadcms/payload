@@ -410,6 +410,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Բացել նոր պատուհանում',
     or: 'Կամ',
     order: 'Հերթականություն',
+    other: 'Այլ',
     overwriteExistingData: 'Վերագրել գոյություն ունեցող դաշտի տվյալները',
     pageNotFound: 'Էջը չի գտնվել',
     password: 'Գաղտնաբառ',

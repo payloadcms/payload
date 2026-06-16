@@ -411,6 +411,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Abrir em nova janela',
     or: 'Ou',
     order: 'Ordem',
+    other: 'Outro',
     overwriteExistingData: 'Sobrescrever dados de campo existentes',
     pageNotFound: 'Página não encontrada',
     password: 'Senha',
