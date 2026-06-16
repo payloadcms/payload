@@ -88,10 +88,13 @@ describe('Collapsibles', () => {
   test('should render CollapsibleLabel using a component', async () => {
     const label = 'custom row label as component'
     await page.goto(url.create)
-    await page.locator('#field-arrayWithCollapsibles').scrollIntoViewIfNeeded()
 
     const arrayWithCollapsibles = page.locator('#field-arrayWithCollapsibles')
+    // Wait for the field to be attached/visible (retries through the post-hydration
+    // re-render of the async RSC view) before the one-shot `scrollIntoViewIfNeeded`,
+    // which otherwise throws "Element is not attached to the DOM" if it lands mid-churn.
     await expect(arrayWithCollapsibles).toBeVisible()
+    await arrayWithCollapsibles.scrollIntoViewIfNeeded()
 
     await addArrayRow(page, { fieldName: 'arrayWithCollapsibles' })
 
