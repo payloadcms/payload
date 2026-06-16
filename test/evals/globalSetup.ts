@@ -6,9 +6,9 @@ import { loadEnv } from 'payload/node'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 import type { RunnerKind, SkillInstallMode } from './runner/types.js'
-import type { Variant } from './variant.js'
 
-import { getVariant } from './variant.js'
+import { getVariant, variantLane } from './variant.js'
+import { resolveVariant } from './variantOptions.js'
 
 type CacheEntry = {
   result: {
@@ -35,13 +35,6 @@ type SnapshotResult = {
   type: 'codegen'
 }
 
-const ENV_VARIANT_TO_INTERNAL: Record<string, Variant> = {
-  'agent-claude-code': 'agent-skill',
-  'agent-claude-code-baseline': 'agent-baseline',
-  baseline: 'baseline',
-  skill: 'skill',
-}
-
 export function setup() {
   loadEnv()
 
@@ -51,11 +44,11 @@ export function setup() {
 }
 
 export function teardown() {
-  const envVariant = process.env.EVAL_VARIANT ?? 'skill'
-  const variant = ENV_VARIANT_TO_INTERNAL[envVariant] ?? 'skill'
+  const { runner, skillOn } = resolveVariant()
+  const variant = variantLane(runner, skillOn)
 
   const cacheDir = path.resolve(__dirname, 'eval-results/cache')
-  const runsDir = path.resolve(__dirname, 'eval-results/runs', envVariant)
+  const runsDir = path.resolve(__dirname, 'eval-results/runs', variant)
 
   let cacheFiles: string[]
   try {

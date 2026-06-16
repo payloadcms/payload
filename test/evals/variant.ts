@@ -2,6 +2,14 @@ import type { RunnerKind, SkillInstallMode } from './runner/types.js'
 
 export type Variant = 'agent-baseline' | 'agent-skill' | 'baseline' | 'skill'
 
+/** The reporting lane for a (runner, skill) combination — the inverse of how getVariant reads it back off a result. */
+export function variantLane(runner: RunnerKind, skillOn: boolean): Variant {
+  if (runner === 'claude-code') {
+    return skillOn ? 'agent-skill' : 'agent-baseline'
+  }
+  return skillOn ? 'skill' : 'baseline'
+}
+
 type VariantInput = {
   modelId?: string
   runnerKind?: RunnerKind
