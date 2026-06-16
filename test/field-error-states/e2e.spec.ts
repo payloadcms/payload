@@ -227,7 +227,7 @@ describe('Field Error States', () => {
       await prefillHomeAndHeroTabs(page)
 
       // fill out new tabs with required arrays
-      const tabWithRequiredArrayButton = page.getByRole('button', {
+      const tabWithRequiredArrayButton = page.getByRole('tab', {
         name: 'Tab with Required Array',
         exact: true,
       })
@@ -235,7 +235,7 @@ describe('Field Error States', () => {
       await addArrayRow(page, { fieldName: 'tabWithRequiredArray__requiredArray' })
       await page.locator('#field-tabWithRequiredArray__requiredArray__0__arrayText').fill('Test')
 
-      const unnamedTabButton = page.getByRole('button', {
+      const unnamedTabButton = page.getByRole('tab', {
         name: 'Unnamed Tab with Required Array',
         exact: true,
       })
@@ -270,7 +270,7 @@ describe('Field Error States', () => {
       await waitForFormReady(page)
       await prefillHomeAndHeroTabs(page)
 
-      const tabWithRequiredArrayButton = page.getByRole('button', {
+      const tabWithRequiredArrayButton = page.getByRole('tab', {
         name: 'Tab with Required Array',
         exact: true,
       })

@@ -1,4 +1,10 @@
 /**
+ * Default npm dist-tag used by the create-payload-app CLI when no
+ * `--payload-version` is provided. The CLI scaffolds against canary by default.
+ */
+export const DEFAULT_PAYLOAD_VERSION_TAG = 'canary'
+
+/**
  * Resolves a package version from either an npm dist-tag (e.g. `canary`) or an
  * explicit version number (e.g. `3.40.0`).
  *

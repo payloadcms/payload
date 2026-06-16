@@ -50,7 +50,6 @@ export async function getApiKey({
           : {}),
       },
       apiKey: randomUUID(),
-      enableAPIKey: true,
       label: 'Test API Key',
       user: userId,
     },
@@ -89,6 +88,8 @@ export const it = base.extend<ScopedFixtures>({
   ],
   // eslint-disable-next-line no-empty-pattern
   mcp: async ({}, use) => {
-    await use(createMcpClient(restClient))
+    const client = createMcpClient(restClient)
+    await use(client)
+    await client.close()
   },
 })

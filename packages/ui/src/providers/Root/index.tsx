@@ -18,6 +18,7 @@ import React from 'react'
 import type { Theme } from '../Theme/index.js'
 
 import { CloseModalOnRouteChange } from '../../elements/CloseModalOnRouteChange/index.js'
+import { DrawerStackProvider } from '../../elements/Drawer/index.js'
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
 import { StayLoggedInModal } from '../../elements/StayLoggedIn/index.js'
@@ -103,36 +104,38 @@ export const RootProvider: React.FC<Props> = ({
                     >
                       <ScrollInfoProvider>
                         <ModalProvider classPrefix="payload" transTime={0} zIndex="var(--z-modal)">
-                          <CloseModalOnRouteChange />
-                          <AuthProvider permissions={permissions} user={user}>
-                            <PreferencesProvider>
-                              <HierarchyProvider>
-                                <ThemeProvider highContrastMode={highContrastMode} theme={theme}>
-                                  <LocaleProvider locale={locale}>
-                                    <StepNavProvider>
-                                      <LoadingOverlayProvider>
-                                        <DocumentEventsProvider>
-                                          <NavProvider initialIsOpen={isNavOpen}>
-                                            <UploadHandlersProvider>
-                                              <DndContext
-                                                collisionDetection={pointerWithin}
-                                                // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
-                                                id={dndContextID}
-                                              >
-                                                {children}
-                                              </DndContext>
-                                            </UploadHandlersProvider>
-                                          </NavProvider>
-                                        </DocumentEventsProvider>
-                                      </LoadingOverlayProvider>
-                                    </StepNavProvider>
-                                  </LocaleProvider>
-                                </ThemeProvider>
-                              </HierarchyProvider>
-                            </PreferencesProvider>
-                            <ModalContainer />
-                            <StayLoggedInModal />
-                          </AuthProvider>
+                          <DrawerStackProvider>
+                            <CloseModalOnRouteChange />
+                            <AuthProvider permissions={permissions} user={user}>
+                              <PreferencesProvider>
+                                <HierarchyProvider>
+                                  <ThemeProvider highContrastMode={highContrastMode} theme={theme}>
+                                    <LocaleProvider locale={locale}>
+                                      <StepNavProvider>
+                                        <LoadingOverlayProvider>
+                                          <DocumentEventsProvider>
+                                            <NavProvider initialIsOpen={isNavOpen}>
+                                              <UploadHandlersProvider>
+                                                <DndContext
+                                                  collisionDetection={pointerWithin}
+                                                  // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
+                                                  id={dndContextID}
+                                                >
+                                                  {children}
+                                                </DndContext>
+                                              </UploadHandlersProvider>
+                                            </NavProvider>
+                                          </DocumentEventsProvider>
+                                        </LoadingOverlayProvider>
+                                      </StepNavProvider>
+                                    </LocaleProvider>
+                                  </ThemeProvider>
+                                </HierarchyProvider>
+                              </PreferencesProvider>
+                              <ModalContainer />
+                              <StayLoggedInModal />
+                            </AuthProvider>
+                          </DrawerStackProvider>
                         </ModalProvider>
                       </ScrollInfoProvider>
                     </WindowInfoProvider>

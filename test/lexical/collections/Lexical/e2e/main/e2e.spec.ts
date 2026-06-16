@@ -1769,7 +1769,7 @@ describe('lexicalMain', () => {
     await textNodeInNestedEditor.click()
     await expect(decoratorLocator).toBeHidden()
 
-    await page.getByRole('button', { name: 'Tab2' }).click()
+    await page.getByRole('tab', { name: 'Tab2' }).click()
     await expect(decoratorLocator).toBeHidden()
 
     const labelInsideCollapsableBody2 = page.getByText('Text2')
