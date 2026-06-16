@@ -22,6 +22,8 @@ export const deTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'E-Mail oder Benutzername',
     emailSent: 'E-Mail versendet',
     emailVerified: 'E-Mail erfolgreich verifiziert.',
+    emailVerifiedRedirecting:
+      'E-Mail erfolgreich verifiziert. Sie werden zum Login weitergeleitet...',
     enableAPIKey: 'API-Schlüssel aktivieren',
     failedToUnlock: 'Entsperrung fehlgeschlagen',
     forceUnlock: 'Entsperrung erzwingen',
@@ -57,6 +59,7 @@ export const deTranslations: DefaultTranslationsObject = {
       'Ein neues Konto wurde auf <a href="{{serverURL}}">{{serverURL}}</a> für dich erstellt. Bitte klicke auf den folgenden Link oder kopiere die URL in deinen Browser, um deine E-Mail-Adresse zu verifizieren: <a href="{{verificationURL}}">{{verificationURL}}</a><br> Nachdem du deine E-Mail-Adresse verifiziert hast, kannst du dich anmelden.',
     newAPIKeyGenerated: 'Neuer API-Schlüssel wurde generiert',
     newPassword: 'Neues Passwort',
+    notRedirected: 'Nicht weitergeleitet? <0>Hier anmelden</0>',
     passed: 'Authentifizierung erfolgreich',
     passwordResetSuccessfully: 'Passwort erfolgreich zurückgesetzt.',
     resetPassword: 'Passwort zurücksetzen',
@@ -70,6 +73,8 @@ export const deTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Konnte nicht verifiziert werden',
     username: 'Benutzername',
     usernameNotValid: 'Der angegebene Benutzername ist nicht gültig.',
+    verificationFailedRequestNew:
+      'Wir konnten Ihr Konto nicht verifizieren. Fordern Sie eine neue Bestätigungs-E-Mail an und versuchen Sie es erneut.',
     verified: 'Verifiziert',
     verifiedSuccessfully: 'Erfolgreich verifiziert',
     verify: 'Verifizieren',
@@ -257,6 +262,7 @@ export const deTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Ein anderer Benutzer hat die Bearbeitung dieses Dokuments übernommen.',
     applyChanges: 'Änderungen anwenden',
     ascending: 'Aufsteigend',
+    auto: 'Automatisch',
     automatic: 'Automatisch',
     backToDashboard: 'Zurück zur Übersicht',
     by: 'Von',
@@ -452,6 +458,7 @@ export const deTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} ausgewählt',
     selectLabel: '{{label}} auswählen',
     selectValue: 'Wert auswählen',
+    settings: 'Einstellungen',
     showAllLabel: 'Alle {{label}} anzeigen',
     shownInTable: 'In Tabelle angezeigt',
     showSidebar: 'Seitenleiste anzeigen',
@@ -469,6 +476,7 @@ export const deTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       '{{count}} von insgesamt {{total}} Dokumenten aus {{collections}} wurden erfolgreich neu indexiert, {{skips}} Entwürfe wurden übersprungen.',
     takeOver: 'Übernehmen',
+    theme: 'Thema',
     thisLanguage: 'Deutsch',
     time: 'Zeit',
     timezone: 'Zeitzone',
@@ -504,6 +512,7 @@ export const deTranslations: DefaultTranslationsObject = {
     viewing: 'Ansehen',
     viewReadOnly: 'Nur-Lese-Ansicht',
     welcome: 'Willkommen',
+    where: 'Wo',
     yes: 'Ja',
   },
   hierarchy: {

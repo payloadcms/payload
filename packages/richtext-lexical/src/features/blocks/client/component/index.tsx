@@ -39,7 +39,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { ViewMapBlockComponentProps } from '../../../../types/index.js'
-import type { BlockFields } from '../../server/nodes/BlocksNode.js'
+import type { BlockFields } from '../../server/schema.js'
 
 import './index.css'
 import '../../../../utilities/fieldsDrawer/index.css'
@@ -339,11 +339,9 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     componentMapRenderedBlockPath
   ]?.[0] as BlocksFieldClient
 
-  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
-    ? typeof blocksField?.blockReferences?.[0] === 'string'
-      ? config.blocksMap[blocksField?.blockReferences?.[0]]
-      : blocksField?.blockReferences?.[0]
-    : blocksField?.blocks?.[0]
+  const blockOrSlug = blocksField?.blocks?.[0]
+  const clientBlock: ClientBlock | undefined =
+    typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
 
   const { i18n, t } = useTranslation<object, string>()
 

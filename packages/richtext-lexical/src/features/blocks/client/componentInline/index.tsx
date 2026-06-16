@@ -31,7 +31,7 @@ import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'r
 import { v4 as uuid } from 'uuid'
 
 import type { ViewMapInlineBlockComponentProps } from '../../../../types/index.js'
-import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
+import type { InlineBlockFields } from '../../server/schema.js'
 import type { BlockComponentProps } from '../component/index.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
@@ -199,11 +199,9 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     componentMapRenderedBlockPath
   ]?.[0] as BlocksFieldClient
 
-  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
-    ? typeof blocksField?.blockReferences?.[0] === 'string'
-      ? config.blocksMap[blocksField?.blockReferences?.[0]]
-      : blocksField?.blockReferences?.[0]
-    : blocksField?.blocks?.[0]
+  const blockOrSlug = blocksField?.blocks?.[0]
+  const clientBlock: ClientBlock | undefined =
+    typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
 
   const clientBlockFields = clientBlock?.fields ?? []
 

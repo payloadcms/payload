@@ -60,6 +60,54 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_7DB35FFD".
+ */
+export type LexicalNodes_7DB35FFD =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_7DB35FFD>
+  | SerializedRelationshipNode<
+      | 'posts'
+      | 'users'
+      | 'hidden-collection'
+      | 'not-in-view-collection'
+      | 'collection-no-api-view'
+      | 'custom-document-controls'
+      | 'custom-views-one'
+      | 'custom-views-two'
+      | 'custom-collection-view'
+      | 'reorder-tabs'
+      | 'custom-fields'
+      | 'group-one-collection-ones'
+      | 'group-one-collection-twos'
+      | 'group-two-collection-ones'
+      | 'group-two-collection-twos'
+      | 'geo'
+      | 'array'
+      | 'disable-duplicate'
+      | 'disable-copy-to-locale'
+      | 'edit-menu-items'
+      | 'format-doc-url'
+      | 'base-list-filters'
+      | 'with300documents'
+      | 'with-list-drawer'
+      | 'placeholder'
+      | 'use-as-title-group-field'
+      | 'disable-bulk-edit'
+      | 'custom-list-drawer'
+      | 'list-view-select-api'
+      | 'virtuals'
+      | 'no-timestamps'
+      | 'localized'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
 
 export interface Config {
   auth: {
@@ -101,6 +149,7 @@ export interface Config {
     virtuals: Virtual;
     'no-timestamps': NoTimestamp;
     localized: Localized;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -142,6 +191,7 @@ export interface Config {
     virtuals: VirtualsSelect<false> | VirtualsSelect<true>;
     'no-timestamps': NoTimestampsSelect<false> | NoTimestampsSelect<true>;
     localized: LocalizedSelect<false> | LocalizedSelect<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -262,21 +312,7 @@ export interface Post {
   title?: string | null;
   description?: string | null;
   number?: number | null;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_7DB35FFD> | null;
   someTextField?: string | null;
   namedGroup?: {
     someTextField?: string | null;
@@ -444,14 +480,7 @@ export interface CustomField {
         id?: string | null;
       }[]
     | null;
-  blocksFieldWithBeforeAfterInputs?:
-    | {
-        textField?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'blockFields';
-      }[]
-    | null;
+  blocksFieldWithBeforeAfterInputs?: BlockFields[] | null;
   text?: string | null;
   groupFieldWithBeforeAfterInputs?: {
     textOne?: string | null;
@@ -460,6 +489,16 @@ export interface CustomField {
   radioFieldWithBeforeAfterInputs?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockFields".
+ */
+export interface BlockFields {
+  textField?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'blockFields';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -695,6 +734,31 @@ export interface Localized {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string | User;
+  overrideAccess?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -852,6 +916,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'localized';
         value: string | Localized;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1344,6 +1412,22 @@ export interface LocalizedSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  apiKey?: T;
+  apiKeyIndex?: T;
+  access?: T;
+  label?: T;
+  description?: T;
+  lastUsed?: T;
+  user?: T;
+  overrideAccess?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1602,6 +1686,76 @@ export interface CollectionsWidget {
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 

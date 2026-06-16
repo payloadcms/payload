@@ -33,6 +33,7 @@ export default buildConfigWithDefaults({
           relationTo: 'users',
         },
       ],
+      versions: false,
     },
     {
       slug: 'relation-a',
@@ -52,6 +53,7 @@ export default buildConfigWithDefaults({
         plural: 'Relation As',
         singular: 'Relation A',
       },
+      versions: false,
     },
     {
       slug: 'relation-b',
@@ -71,6 +73,7 @@ export default buildConfigWithDefaults({
         plural: 'Relation Bs',
         singular: 'Relation B',
       },
+      versions: false,
     },
     {
       slug: 'shops',
@@ -87,6 +90,7 @@ export default buildConfigWithDefaults({
           relationTo: 'items',
         },
       ],
+      versions: false,
     },
     {
       slug: 'items',
@@ -103,6 +107,7 @@ export default buildConfigWithDefaults({
           relationTo: 'itemTags',
         },
       ],
+      versions: false,
     },
     {
       slug: 'itemTags',
@@ -113,6 +118,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
   ],
   onInit: async (payload) => {

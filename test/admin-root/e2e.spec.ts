@@ -56,14 +56,6 @@ test.describe('Admin Panel (Root)', () => {
     })
   })
 
-  // test.beforeEach(async () => {
-  //   await throttleTest({
-  //     page,
-  //     context,
-  //     delay: 'Fast 4G',
-  //   })
-  // })
-
   test('should redirect `${adminRoute}/collections` to `${adminRoute}', async () => {
     const collectionsURL = `${url.admin}/collections`
     await page.goto(collectionsURL)
@@ -150,7 +142,10 @@ test.describe('Admin Panel (Root)', () => {
     await page.goto(url.create)
     const textField = page.locator('#field-text')
     await textField.fill('updated')
-    await page.click('a[aria-label="Account"]')
+    await page.click('button[aria-label="Account"]')
+    const profileLink = page.locator('a.user-menu__profile')
+    await expect(profileLink).toBeVisible()
+    await profileLink.click()
     const modal = page.locator('div.payload__modal-container')
     await expect(modal).toBeVisible()
 

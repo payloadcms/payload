@@ -33,15 +33,23 @@ export async function getApiKey({
     data: {
       access: {
         collections: {
-          posts: { create: true, delete: enableDelete, find: true, update: enableUpdate },
+          posts: {
+            create: true,
+            delete: enableDelete,
+            find: true,
+            update: enableUpdate,
+          },
           products: { find: true },
         },
         ...(globalFind || globalUpdate
-          ? { globals: { 'site-settings': { find: globalFind, update: globalUpdate } } }
+          ? {
+              globals: {
+                'site-settings': { find: globalFind, update: globalUpdate },
+              },
+            }
           : {}),
       },
       apiKey: randomUUID(),
-      enableAPIKey: true,
       label: 'Test API Key',
       user: userId,
     },
@@ -80,6 +88,8 @@ export const it = base.extend<ScopedFixtures>({
   ],
   // eslint-disable-next-line no-empty-pattern
   mcp: async ({}, use) => {
-    await use(createMcpClient(restClient))
+    const client = createMcpClient(restClient)
+    await use(client)
+    await client.close()
   },
 })

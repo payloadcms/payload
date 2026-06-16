@@ -34,6 +34,7 @@
   // Essentially disables bun test buttons
   "bun.test.filePattern": "bun.test.ts",
   "playwright.env": {
+    "PATH": "${env:HOME}/.local/share/mise/shims:${env:PATH}",
     "NODE_OPTIONS": "--no-deprecation --no-experimental-strip-types"
   },
   "vitest.nodeEnv": {

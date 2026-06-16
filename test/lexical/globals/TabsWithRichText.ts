@@ -48,6 +48,7 @@ const TabsWithRichText: GlobalConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default TabsWithRichText

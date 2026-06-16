@@ -22,6 +22,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'Электронная почта или Имя пользователя',
     emailSent: 'Email отправлен',
     emailVerified: 'Электронная почта успешно подтверждена.',
+    emailVerifiedRedirecting:
+      'Электронная почта успешно подтверждена. Перенаправление на страницу входа...',
     enableAPIKey: 'Активировать API ключ',
     failedToUnlock: 'Не удалось разблокировать',
     forceUnlock: 'Принудительная разблокировка',
@@ -56,6 +58,7 @@ export const ruTranslations: DefaultTranslationsObject = {
       'Новый аккаунт был создан для доступа к <a href="{{serverURL}}">{{serverURL}}</a> Пожалуйста, кликните по следующей ссылке или вставьте в адресную строку браузера чтобы подтвердить email: <a href="{{verificationURL}}">{{verificationURL}}</a><br> После подтверждения вашего email, вы сможете успешно войти в систему.',
     newAPIKeyGenerated: 'Новый API ключ сгенерирован.',
     newPassword: 'Новый пароль',
+    notRedirected: 'Не перенаправлены? <0>Войдите здесь</0>',
     passed: 'Аутентификация пройдена',
     passwordResetSuccessfully: 'Сброс пароля успешно выполнен.',
     resetPassword: 'Сброс пароля',
@@ -69,6 +72,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     unableToVerify: 'Невозможно подтвердить',
     username: 'Имя пользователя',
     usernameNotValid: 'Предоставленное имя пользователя недействительно.',
+    verificationFailedRequestNew:
+      'Не удалось подтвердить вашу учетную запись. Запросите новое письмо для подтверждения и попробуйте снова.',
     verified: 'Подтверждено',
     verifiedSuccessfully: 'Успешно подтверждено',
     verify: 'Подтвердить',
@@ -251,6 +256,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Другой пользователь взял на себя редактирование этого документа.',
     applyChanges: 'Применить изменения',
     ascending: 'Восходящий',
+    auto: 'Автоматически',
     automatic: 'Автоматически',
     backToDashboard: 'Назад к Панели',
     by: 'По',
@@ -446,6 +452,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} выбрано',
     selectLabel: 'Выберите {{label}}',
     selectValue: 'Выбрать значение',
+    settings: 'Настройки',
     showAllLabel: 'Показать все {{label}}',
     shownInTable: 'Показано в таблице',
     showSidebar: 'Показать боковую панель',
@@ -462,6 +469,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Успешно переиндексировано {{count}} из {{total}} документов из {{collections}}, пропущено {{skips}} черновиков.',
     takeOver: 'Взять на себя',
+    theme: 'Тема',
     thisLanguage: 'Русский',
     time: 'Время',
     timezone: 'Часовой пояс',
@@ -497,6 +505,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     viewing: 'Просмотр',
     viewReadOnly: 'Просмотр только для чтения',
     welcome: 'Добро пожаловать',
+    where: 'Где',
     yes: 'Да',
   },
   hierarchy: {

@@ -5,6 +5,7 @@ import React from 'react'
 import type { LoadingOverlayTypes } from '../../elements/LoadingOverlay/types.js'
 
 import { useLoadingOverlay } from '../../elements/LoadingOverlay/index.js'
+import { Spinner } from '../../elements/Spinner/index.js'
 import { useFormProcessing } from '../../forms/Form/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'
@@ -20,12 +21,9 @@ type LoadingOverlayProps = {
 
 export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
   animationDuration,
-  loadingText,
   overlayType,
   show = true,
 }) => {
-  const { t } = useTranslation()
-
   return (
     <div
       className={[
@@ -39,15 +37,7 @@ export const LoadingOverlay: React.FC<LoadingOverlayProps> = ({
         animationDuration: animationDuration || '500ms',
       }}
     >
-      <div className={`${baseClass}__bars`}>
-        <div className={`${baseClass}__bar`} />
-        <div className={`${baseClass}__bar`} />
-        <div className={`${baseClass}__bar`} />
-        <div className={`${baseClass}__bar`} />
-        <div className={`${baseClass}__bar`} />
-      </div>
-
-      <span className={`${baseClass}__text`}>{loadingText || t('general:loading')}</span>
+      <Spinner size="lg" />
     </div>
   )
 }

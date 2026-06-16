@@ -4,7 +4,7 @@ import type { EditorProps } from '@monaco-editor/react'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
 import type React from 'react'
-import type { DeepUndefinable, MarkRequired } from 'ts-essentials'
+import type { DeepUndefinable, MarkOptional, MarkRequired } from 'ts-essentials'
 
 import type {
   JoinFieldClientProps,
@@ -1371,8 +1371,8 @@ export type RadioFieldClient = {
 
 type BlockFields = {
   [key: string]: any
-  blockName?: string
-  blockType?: string
+  blockName?: null | string
+  blockType: string
 }
 
 export type BlockJSX = {
@@ -1430,7 +1430,7 @@ export type BlockJSX = {
     markdownToLexical: (props: { markdown: string }) => Record<string, any>
     openMatch?: RegExpMatchArray
     props: Record<string, any>
-  }) => BlockFields | false
+  }) => false | MarkOptional<BlockFields, 'blockType'>
 }
 
 export type Block = {
@@ -1543,12 +1543,9 @@ export type BlocksField = {
     isSortable?: boolean
   } & FieldAdmin
   /**
-   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
-   *
-   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   * Blocks to use in this field. Inline block configs and string slugs of blocks defined in `config.blocks` are both supported.
    */
-  blockReferences?: (Block | BlockSlug)[]
-  blocks: Block[]
+  blocks: (Block | BlockSlug)[]
   defaultValue?: DefaultValue
   /**
    * Blocks can be conditionally enabled using the `filterOptions` property on the blocks field.
@@ -1590,13 +1587,7 @@ export type BlocksField = {
 export type BlocksFieldClient = {
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
-  /**
-   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
-   *
-   * @todo `blockReferences` will be merged with `blocks` in 4.0
-   */
-  blockReferences?: (ClientBlock | string)[]
-  blocks: ClientBlock[]
+  blocks: (ClientBlock | string)[]
   labels?: LabelsClient
 } & FieldBaseClient &
   Pick<BlocksField, 'maxRows' | 'minRows' | 'type'>
@@ -1717,14 +1708,8 @@ export type FlattenedBlock = {
 } & Block
 
 export type FlattenedBlocksField = {
-  /**
-   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
-   *
-   * @todo `blockReferences` will be merged with `blocks` in 4.0
-   */
-  blockReferences?: (FlattenedBlock | string)[]
-  blocks: FlattenedBlock[]
-} & Omit<BlocksField, 'blockReferences' | 'blocks'>
+  blocks: (FlattenedBlock | string)[]
+} & Omit<BlocksField, 'blocks'>
 
 export type FlattenedGroupField = {
   flattenedFields: FlattenedField[]

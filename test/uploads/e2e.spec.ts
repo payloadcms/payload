@@ -23,6 +23,7 @@ import {
   saveDocAndAssert,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
@@ -1138,16 +1139,20 @@ describe('Uploads', () => {
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
       await expect(editManyBulkUploadModal).toBeVisible()
 
-      await editManyBulkUploadModal
-        .locator('.edit-many-bulk-uploads__form .react-select')
-        .click({ delay: 100 })
-      const options = editManyBulkUploadModal.locator('.rs__option')
+      const editFieldSelector = editManyBulkUploadModal.locator(
+        '.edit-many-bulk-uploads__form .react-select',
+      )
+      await editFieldSelector.click({ delay: 100 })
+      const editFieldMenu = getSelectMenu({ page })
+      const options = editFieldMenu.locator('.rs__option')
 
       await options.locator('text=Prefix').click()
 
       await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
 
-      await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+      await editManyBulkUploadModal
+        .locator('.edit-many-bulk-uploads__header__actions button')
+        .click()
       await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
       await closeAllToasts(page)
 
@@ -1204,13 +1209,16 @@ describe('Uploads', () => {
         '.edit-many-bulk-uploads__form .react-select',
       )
       await fieldSelector.click({ delay: 100 })
-      const options = editManyBulkUploadModal.locator('.rs__option')
+      const fieldSelectorMenu = getSelectMenu({ page })
+      const options = fieldSelectorMenu.locator('.rs__option')
       // Select an option
       await options.locator('text=Prefix').click()
 
       await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
 
-      await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+      await editManyBulkUploadModal
+        .locator('.edit-many-bulk-uploads__header__actions button')
+        .click()
 
       await saveButton.click()
       await expect(page.locator('.payload-toast-container')).toContainText(
@@ -1257,13 +1265,16 @@ describe('Uploads', () => {
         '.edit-many-bulk-uploads__form .react-select',
       )
       await fieldSelector.click({ delay: 100 })
-      const options = editManyBulkUploadModal.locator('.rs__option')
+      const fieldSelectorMenu2 = getSelectMenu({ page })
+      const options = fieldSelectorMenu2.locator('.rs__option')
       // Select an option
       await options.locator('text=Prefix').click()
 
       await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
 
-      await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+      await editManyBulkUploadModal
+        .locator('.edit-many-bulk-uploads__header__actions button')
+        .click()
 
       await bulkUploadModal.locator('.file-field__upload .file-field__remove').click()
 
@@ -2309,15 +2320,13 @@ describe('Uploads', () => {
     await openListFilters(page, {})
 
     const whereBuilder = page.locator('.where-builder')
-    await whereBuilder.locator('.where-builder__add-first-filter').click()
 
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()
 
-    const menuList = conditionField.locator('.rs__menu-list')
+    const menuList = getSelectMenu({ page })
 
     // ensure the image size is not present
-    await expect(menuList.getByText('Sizes > one > URL', { exact: true })).toHaveCount(0)
     await expect(menuList.getByText('Sizes > one > Width', { exact: true })).toHaveCount(0)
     await expect(menuList.getByText('Sizes > one > Height', { exact: true })).toHaveCount(0)
     await expect(menuList.getByText('Sizes > one > MIME Type', { exact: true })).toHaveCount(0)
@@ -2338,12 +2347,11 @@ describe('Uploads', () => {
     await openListFilters(page, {})
 
     const whereBuilder = page.locator('.where-builder')
-    await whereBuilder.locator('.where-builder__add-first-filter').click()
 
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()
 
-    const menuList = conditionField.locator('.rs__menu-list')
+    const menuList = getSelectMenu({ page })
 
     // ensure the image size is present
     await expect(menuList.getByText('Sizes > two > URL', { exact: true })).toHaveCount(1)

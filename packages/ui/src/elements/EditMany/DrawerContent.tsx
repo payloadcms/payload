@@ -22,7 +22,7 @@ import { useForm } from '../../forms/Form/context.js'
 import { Form } from '../../forms/Form/index.js'
 import { RenderField } from '../../forms/RenderFields/RenderField.js'
 import { FormSubmit } from '../../forms/Submit/index.js'
-import { XIcon } from '../../icons/X/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentInfoProvider } from '../../providers/DocumentInfo/index.js'
@@ -33,9 +33,10 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
+import { Button } from '../Button/index.js'
 import { FieldSelect } from '../FieldSelect/index.js'
 import { baseClass } from './index.js'
-import './index.scss'
+import './index.css'
 import '../../forms/RenderFields/index.css'
 
 const Submit: React.FC<{
@@ -54,7 +55,7 @@ const Submit: React.FC<{
   }, [action, submit])
 
   return (
-    <FormSubmit className={`${baseClass}__save`} disabled={disabled} onClick={save}>
+    <FormSubmit className={`${baseClass}__save`} disabled={disabled} onClick={save} size="medium">
       {t('general:save')}
     </FormSubmit>
   )
@@ -79,7 +80,12 @@ const PublishButton: React.FC<{
   }, [action, submit])
 
   return (
-    <FormSubmit className={`${baseClass}__publish`} disabled={disabled} onClick={save}>
+    <FormSubmit
+      className={`${baseClass}__publish`}
+      disabled={disabled}
+      onClick={save}
+      size="medium"
+    >
       {t('version:publishChanges')}
     </FormSubmit>
   )
@@ -109,6 +115,7 @@ const SaveDraftButton: React.FC<{
       className={`${baseClass}__draft`}
       disabled={disabled}
       onClick={save}
+      size="medium"
     >
       {t('version:saveDraft')}
     </FormSubmit>
@@ -317,6 +324,11 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
     [getFormState, collection.slug, collectionPermissions, setSelectedFields],
   )
 
+  const title = t('general:editingLabel', {
+    count,
+    label: getTranslation(count > 1 ? plural : singular, i18n),
+  })
+
   return (
     <DocumentInfoProvider
       collectionSlug={collection.slug}
@@ -331,92 +343,85 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
       versionCount={0}
     >
       <OperationContext value="update">
-        <div className={`${baseClass}__main`}>
+        <Form
+          className={`${baseClass}__form`}
+          isInitializing={isInitializing}
+          onChange={[onChange]}
+          onSuccess={onSuccess}
+        >
           <div className={`${baseClass}__header`}>
-            <h2 className={`${baseClass}__header__title`}>
-              {t('general:editingLabel', {
-                count,
-                label: getTranslation(count > 1 ? plural : singular, i18n),
-              })}
-            </h2>
-            <button
+            <Button
               aria-label={t('general:close')}
+              buttonStyle="ghost"
               className={`${baseClass}__header__close`}
-              id={`close-drawer__${drawerSlug}`}
+              icon={<ChevronIcon direction="left" size={24} />}
               onClick={() => closeModal(drawerSlug)}
-              type="button"
-            >
-              <XIcon />
-            </button>
-          </div>
-          <Form
-            className={`${baseClass}__form`}
-            isInitializing={isInitializing}
-            onChange={[onChange]}
-            onSuccess={onSuccess}
-          >
-            <FieldSelect
-              fields={fields}
-              onChange={onFieldSelect}
-              permissions={collectionPermissions.fields}
             />
+            <h2 className={`${baseClass}__header__title`} title={title}>
+              {title}
+            </h2>
+            <div className={`${baseClass}__header__actions`}>
+              {collection?.versions?.drafts ? (
+                <React.Fragment>
+                  <SaveDraftButton
+                    action={formatAdminURL({
+                      apiRoute,
+                      path: `/${collection.slug}${queryString}&draft=true`,
+                    })}
+                    disabled={selectedFields.length === 0}
+                  />
+                  <PublishButton
+                    action={formatAdminURL({
+                      apiRoute,
+                      path: `/${collection.slug}${queryString}&draft=true`,
+                    })}
+                    disabled={selectedFields.length === 0}
+                  />
+                </React.Fragment>
+              ) : (
+                <Submit
+                  action={formatAdminURL({
+                    apiRoute,
+                    path: `/${collection.slug}${queryString}`,
+                  })}
+                  disabled={selectedFields.length === 0}
+                />
+              )}
+            </div>
+          </div>
+          <div className={`${baseClass}__body`}>
+            <div className={`${baseClass}__select-fields`}>
+              <FieldSelect
+                fields={fields}
+                onChange={onFieldSelect}
+                permissions={collectionPermissions.fields}
+              />
+            </div>
             {selectedFields.length === 0 ? null : (
-              <div className="render-fields">
-                {selectedFields.map((option, i) => {
-                  const {
-                    value: { field, fieldPermissions, path },
-                  } = option
+              <div className={`${baseClass}__edit`}>
+                <div className="render-fields">
+                  {selectedFields.map((option, i) => {
+                    const {
+                      value: { field, fieldPermissions, path },
+                    } = option
 
-                  return (
-                    <RenderField
-                      clientFieldConfig={field}
-                      indexPath=""
-                      key={`${path}-${i}`}
-                      parentPath=""
-                      parentSchemaPath=""
-                      path={path}
-                      permissions={fieldPermissions}
-                    />
-                  )
-                })}
-              </div>
-            )}
-            <div className={`${baseClass}__sidebar-wrap`}>
-              <div className={`${baseClass}__sidebar`}>
-                <div className={`${baseClass}__sidebar-sticky-wrap`}>
-                  <div className={`${baseClass}__document-actions`}>
-                    {collection?.versions?.drafts ? (
-                      <React.Fragment>
-                        <SaveDraftButton
-                          action={formatAdminURL({
-                            apiRoute,
-                            path: `/${collection.slug}${queryString}&draft=true`,
-                          })}
-                          disabled={selectedFields.length === 0}
-                        />
-                        <PublishButton
-                          action={formatAdminURL({
-                            apiRoute,
-                            path: `/${collection.slug}${queryString}&draft=true`,
-                          })}
-                          disabled={selectedFields.length === 0}
-                        />
-                      </React.Fragment>
-                    ) : (
-                      <Submit
-                        action={formatAdminURL({
-                          apiRoute,
-                          path: `/${collection.slug}${queryString}`,
-                        })}
-                        disabled={selectedFields.length === 0}
+                    return (
+                      <RenderField
+                        clientFieldConfig={field}
+                        indexPath=""
+                        key={`${path}-${i}`}
+                        parentPath=""
+                        parentSchemaPath=""
+                        path={path}
+                        permissions={fieldPermissions}
                       />
-                    )}
-                  </div>
+                    )
+                  })}
                 </div>
               </div>
-            </div>
-          </Form>
-        </div>
+            )}
+          </div>
+        </Form>
       </OperationContext>
     </DocumentInfoProvider>
   )

@@ -50,6 +50,7 @@ import {
 import { navigateToDiffVersionView as _navigateToDiffVersionView } from '../__helpers/e2e/navigateToDiffVersionView.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -692,7 +693,7 @@ describe('Versions', () => {
 
       // revert to last published version
       await page.locator('#action-revert-to-published').click()
-      await saveDocAndAssert(page, '[id^=confirm-revert-] #confirm-action')
+      await saveDocAndAssert(page, '[id^=confirm-revert-] [data-dialog-action="confirm"]')
 
       // verify that spanish content is reverted correctly
       await expect(page.locator('#field-title')).toHaveValue(spanishTitle)
@@ -807,7 +808,7 @@ describe('Versions', () => {
       await page.goto(errorOnUnpublishURL.edit(String(publishedDoc.id)))
       await openDocControls(page)
       await page.locator('#action-unpublish').click()
-      await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
+      await page.locator('[id^="confirm-un-publish-"] [data-dialog-action="confirm"]').click()
       await expect(
         page.locator('.payload-toast-item:has-text("Custom error on unpublish")'),
       ).toBeVisible()
@@ -872,7 +873,7 @@ describe('Versions', () => {
 
       await openDocControls(page)
       await page.locator('#action-unpublish').click()
-      await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
+      await page.locator('[id^="confirm-un-publish-"] [data-dialog-action="confirm"]').click()
       await expect(page.locator('.payload-toast-item')).toBeVisible()
 
       await expect.poll(() => page.locator(versionsCountSelector).textContent()).toBe(countBefore)
@@ -1224,7 +1225,9 @@ describe('Versions', () => {
       await openDocControls(page)
       await page.locator('#action-duplicate').click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain(publishedDoc.id)
+      await expect
+        .poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT })
+        .not.toContain(publishedDoc.id)
 
       await expect(page.locator('.doc-controls__status .status__value')).toContainText('Draft')
       await waitForFormReady(page)
@@ -1412,7 +1415,7 @@ describe('Versions', () => {
 
       await openDocControls(page)
       await page.locator('#action-unpublish').click()
-      await page.locator('[id^="confirm-un-publish-"] #confirm-action').click()
+      await page.locator('[id^="confirm-un-publish-"] [data-dialog-action="confirm"]').click()
       await expect(page.locator('.payload-toast-item')).toBeVisible()
 
       await expect.poll(() => versionsCountPill.textContent()).toBe(countBefore)
@@ -1468,7 +1471,8 @@ describe('Versions', () => {
       await expect(fromSelect).toBeVisible()
       await fromSelect.click()
 
-      const moreVersions = compareFromContainer.locator('.rs__option:has-text("More versions...")')
+      const versionSelectMenu = getSelectMenu({ page })
+      const moreVersions = versionSelectMenu.locator('.rs__option:has-text("More versions...")')
       await expect(moreVersions).toBeVisible()
       await moreVersions.click()
 
@@ -1597,11 +1601,8 @@ describe('Versions', () => {
 
       const drawerContent = localPage.locator('.schedule-publish__scheduler')
       const dropdownControlSelector = drawerContent.locator(`.timezone-picker .rs__control`)
-      const timezoneOptionSelector = drawerContent.locator(
-        `.timezone-picker .rs__menu .rs__option:has-text("Paris")`,
-      )
       await dropdownControlSelector.click()
-      await timezoneOptionSelector.click()
+      await getSelectMenu({ page: localPage }).locator('.rs__option', { hasText: 'Paris' }).click()
 
       const dateInput = drawerContent.locator('.date-time-picker__input-wrapper input')
       // Create a date for 2049-01-01 18:00:00 UTC, so it is timezone-invariant across CI environments
@@ -1657,9 +1658,9 @@ describe('Versions', () => {
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('.popup__content')
+      const publishLocaleContent = page.locator('.popup__content')
 
-      await expect(publishSpecificLocale).toContainText('English')
+      await expect(publishLocaleContent).toContainText('English')
     })
 
     test('should publish specific locale', async () => {
@@ -1682,9 +1683,9 @@ describe('Versions', () => {
       const publishOptions = page.locator('#action-save-popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('#publish-locale')
-      await expect(publishSpecificLocale).toContainText('English')
-      await publishSpecificLocale.click()
+      const publishLocaleButton = page.locator('#publish-locale')
+      await expect(publishLocaleButton).toContainText('English')
+      await publishLocaleButton.click()
 
       await wait(500)
 
@@ -1718,7 +1719,7 @@ describe('Versions', () => {
       // This reproduces the bug where:
       // 1. A doc is saved without blocks (autosave fires before blocks are added)
       // 2. Blocks are added
-      // 3. Publishing with publishSpecificLocale drops blockType/id
+      // 3. Publishing a specific locale drops blockType/id
       await page.goto(url.create)
       const textField = page.locator('#field-text')
 
@@ -1760,7 +1761,6 @@ describe('Versions', () => {
         },
         draft: false,
         locale: 'en',
-        publishSpecificLocale: 'en',
       })
 
       // Step 4: Verify blocks survived with metadata intact
@@ -2176,9 +2176,9 @@ describe('Versions', () => {
       const publishOptions = page.locator('.doc-controls__controls .popup')
       await publishOptions.click()
 
-      const publishSpecificLocale = page.locator('.popup__content')
+      const publishLocaleContent = page.locator('.popup__content')
 
-      await expect(publishSpecificLocale).toContainText('English')
+      await expect(publishLocaleContent).toContainText('English')
     })
   })
 

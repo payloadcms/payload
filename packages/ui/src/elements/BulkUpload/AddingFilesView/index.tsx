@@ -15,7 +15,7 @@ import { EditForm } from '../EditForm/index.js'
 import { FileSidebar } from '../FileSidebar/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { DrawerHeader } from '../Header/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'bulk-upload--file-manager'
 

@@ -1,16 +1,21 @@
 'use client'
 import type { ClientCollectionConfig, ViewTypes, Where } from 'payload'
 
+import * as qs from 'qs-esm'
 import React, { Fragment, useCallback } from 'react'
 
 import { DeleteMany } from '../../../elements/DeleteMany/index.js'
-import { EditMany_v4 } from '../../../elements/EditMany/index.js'
+import { EditMany } from '../../../elements/EditMany/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
 import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
 import { RestoreMany } from '../../../elements/RestoreMany/index.js'
 import { UnpublishMany_v4 } from '../../../elements/UnpublishMany/index.js'
+import { useAuth } from '../../../providers/Auth/index.js'
+import { useRouteCache } from '../../../providers/RouteCache/index.js'
+import { useRouter, useSearchParams } from '../../../providers/RouterAdapter/index.js'
 import { SelectAllStatus, useSelection } from '../../../providers/Selection/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { parseSearchParams } from '../../../utilities/parseSearchParams.js'
 
 export type ListSelectionProps = {
   collectionConfig?: ClientCollectionConfig
@@ -29,8 +34,8 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   collectionConfig,
   disableBulkDelete,
   disableBulkEdit,
-  hasDeletePermission,
-  hasTrashPermission,
+  hasDeletePermission: hasDeletePermissionFromProps,
+  hasTrashPermission: hasTrashPermissionFromProps,
   label,
   modalPrefix,
   showSelectAllAcrossPages = true,
@@ -39,6 +44,10 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
 }) => {
   const { count, selectAll, selectedIDs, toggleAll, totalDocs } = useSelection()
   const { t } = useTranslation()
+  const { permissions } = useAuth()
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const { clearRouteCache } = useRouteCache()
 
   const onActionSuccess = useCallback(() => toggleAll(), [toggleAll])
 
@@ -47,6 +56,29 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
   }
 
   const isTrashView = collectionConfig?.trash && viewType === 'trash'
+
+  const collectionPermissions = permissions?.collections?.[collectionConfig?.slug]
+  const hasDeletePermission =
+    hasDeletePermissionFromProps !== undefined
+      ? hasDeletePermissionFromProps
+      : Boolean(collectionPermissions?.delete)
+  const hasTrashPermission =
+    hasTrashPermissionFromProps !== undefined ? hasTrashPermissionFromProps : hasDeletePermission
+  const canShowDeleteButton =
+    viewType === 'trash' ? hasDeletePermission : hasDeletePermission || hasTrashPermission
+
+  const selectingAll = selectAll === SelectAllStatus.AllAvailable
+  const deleteIDs = selectingAll ? [] : selectedIDs
+  const baseWhere = parseSearchParams(searchParams)?.where as Where
+  const deleteWhere =
+    viewType === 'trash'
+      ? {
+          and: [
+            ...(Array.isArray(baseWhere?.and) ? baseWhere.and : baseWhere ? [baseWhere] : []),
+            { deletedAt: { exists: true } },
+          ],
+        }
+      : baseWhere
 
   return (
     <ListSelection_v4
@@ -68,7 +100,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
       SelectionActions={[
         !disableBulkEdit && !isTrashView && (
           <Fragment key="bulk-actions">
-            <EditMany_v4
+            <EditMany
               collection={collectionConfig}
               count={count}
               ids={selectedIDs}
@@ -100,14 +132,38 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
         isTrashView && (
           <RestoreMany collection={collectionConfig} key="bulk-restore" viewType={viewType} />
         ),
-        !disableBulkDelete && (
+        !disableBulkDelete && canShowDeleteButton && collectionConfig && (
           <DeleteMany
-            collection={collectionConfig}
+            afterDelete={() => {
+              toggleAll()
+
+              router.replace(
+                qs.stringify(
+                  {
+                    ...parseSearchParams(searchParams),
+                    page: selectAll ? '1' : undefined,
+                  },
+                  { addQueryPrefix: true },
+                ),
+              )
+
+              clearRouteCache()
+            }}
             hasDeletePermission={hasDeletePermission}
             hasTrashPermission={hasTrashPermission}
             key="bulk-delete"
             modalPrefix={modalPrefix}
+            search={parseSearchParams(searchParams)?.search as string}
+            selections={{
+              [collectionConfig.slug]: {
+                all: selectingAll,
+                ids: deleteIDs,
+                totalCount: selectingAll ? count : deleteIDs.length,
+              },
+            }}
+            trash={collectionConfig?.trash}
             viewType={viewType}
+            where={deleteWhere}
           />
         ),
       ].filter(Boolean)}

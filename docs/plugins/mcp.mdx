@@ -25,7 +25,7 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
 - Two transports out of the box:
   - **HTTP** at `/api/mcp` - for remote clients, protected by per-user API keys
   - **stdio** via the `payload-mcp` bin - for local AI clients spawning a child process
-- Every collection and global automatically gets `find`, `create`, `update`, `delete` (and `find` / `update` for globals) tools - opt out per tool with `tools: { delete: false }`
+- Stable discovery and CRUD tools for all collections and globals (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `getGlobalSchema`, `findGlobal`, `updateGlobal`) - opt out per operation with simple keys like `tools: { delete: false }`
 - Auth-enabled collections expose opt-in `login`, `auth`, `forgotPassword`, `resetPassword`, `unlock`, `verify` tools
 - Define your own `tools`, `prompts`, and `resources` with full TypeScript inference via `defineTool` / `defineCollectionTool` / `defineGlobalTool` / `definePrompt`
 - Per-API-key access control through an admin-UI managed collection - toggle any tool, prompt, or resource on/off per key in real time
@@ -64,8 +64,7 @@ export default buildConfig({
 }
 ```
 
-That's it - every collection and global is now available as MCP tools (`findPosts`,
-`createPosts`, `updatePosts`, …).
+That's it - every collection and global is now available through the generic MCP tools. For example, call `getConfigInfo` to see available slugs, inspect a collection with `getCollectionSchema`, then create a document with `createDocument`.
 
 The `payload-mcp` bin finds your `payload.config.ts` automatically, since it's installed
 inside your project. If your project has an unusual layout (e.g. a monorepo), see
@@ -88,12 +87,12 @@ mcpPlugin({
   collections: {
     posts: {
       description:
-        'Published blog articles. Use `find` to list or fetch one by ID.',
+        'Published blog articles. Use `findDocuments` to list or fetch one by ID.',
       tools: {
         // Built-in opt-out: keep find/create/update, block delete
         delete: false,
 
-        // Built-in override: keep find enabled, just refine its description
+        // Built-in override: keep findDocuments enabled, just refine its description
         find: {
           description:
             'Find blog posts. Pass an `id` to fetch one; omit it to list with pagination.',
@@ -101,7 +100,7 @@ mcpPlugin({
       },
     },
     media: {
-      // Read-only: only `find` and `update` remain
+      // Read-only: only `findDocuments` and `updateDocument` remain
       tools: {
         create: false,
         delete: false,
@@ -157,18 +156,20 @@ mcpPlugin({
 
 | Option             | Type       | Description                                                                                                                                                             |
 | ------------------ | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `description`      | `string`   | Description shown to MCP clients for every tool on this collection (unless a specific tool overrides it).                                                               |
+| `description`      | `string`   | Description shown for this collection in discovery responses.                                                                                                           |
 | `tools`            | `object`   | Map of tool name → configuration. See [Configuring tools](#configuring-per-collection-tools) and [Defining custom tools](#defining-custom-tools-prompts-and-resources). |
 | `overrideResponse` | `function` | Intercept the response of any built-in tool for this collection (`(response, doc, req) => response`). See [Modifying responses](#modifying-responses).                  |
 
 The `tools` map keys can be:
 
-- A built-in name (`find`, `create`, `update`, `delete`, plus auth tool names on auth collections): set to `false` to disable, or to an override object `{ description?, overrideResponse? }`. Auth tools also accept `true` to enable with no overrides.
+- A built-in key (`getCollectionSchema`, `find`, `create`, `update`, `delete`, plus auth tool names on auth collections): set to `false` to disable, or to an override object `{ description?, overrideResponse? }`. Auth tools also accept `true` to enable with no overrides.
 - A custom name: a value produced by `defineCollectionTool(...)`.
+
+`getConfigInfo` is always registered as a top-level tool. It returns the collection and global slugs visible to the current MCP client. API keys can disable it like any other top-level tool.
 
 ### Per-global options
 
-`globals[slug]` accepts the same shape, but the built-in keys are limited to `find` and `update` (globals are singletons; create / delete don't apply).
+`globals[slug]` accepts the same shape, but the built-in keys are limited to `getGlobalSchema`, `find`, and `update` (globals are singletons; create / delete don't apply).
 
 ## Transports
 
@@ -334,12 +335,12 @@ The HTTP endpoint requires a Bearer API key on every request. API keys live in t
 ### Creating an API key
 
 1. Start your Payload server and open the admin panel
-2. Go to **MCP → API Keys**
-3. Click **Create New**
+2. Open the user menu (avatar in the header), then **Settings → Manage API keys**
+3. Click **Create New**, then click **Generate new key**
 4. Pick the user the key represents (its Payload access control rules become the key's ceiling)
-5. In the **Access** field, leave items checked to allow them, uncheck them to deny - every collection tool, global tool, prompt, resource, and top-level tool is listed
+5. Under **Permissions**, leave items checked to allow them, uncheck them to deny - the Collections, Globals, and Server tabs list every collection tool, global tool, prompt, resource, and top-level tool
 6. Optionally check **Override access control** to make local-API calls performed by this key run with `overrideAccess: true` (use sparingly; this bypasses Payload access rules)
-7. Save and copy the generated key
+7. Save and copy the key
 
 ### Dev-mode session fallback
 
@@ -447,7 +448,7 @@ mcpPlugin({
 
 ### Collection-scoped tools
 
-A collection tool's wire name is `<key><PascalSlug>` (e.g. `publishPosts`). The handler additionally receives `collectionSlug`.
+A collection tool's wire name is exactly its key. Payload adds a `collectionSlug` string to the MCP input schema automatically; the handler receives the resolved `collectionSlug`. The field is intentionally not enum-restricted so newly-added collections can be used after HMR even if the MCP client cached the previous tool schema.
 
 ```ts
 import { defineCollectionTool, mcpPlugin } from '@payloadcms/plugin-mcp'
@@ -460,7 +461,9 @@ mcpPlugin({
       tools: {
         publish: defineCollectionTool({
           description: 'Publish a draft post by ID.',
-          input: z.object({ id: z.string() }),
+          input: z.object({
+            id: z.string(),
+          }),
         }).handler(async ({ collectionSlug, input, authorizedMCP, req }) => {
           const result = await req.payload.update({
             id: input.id,
@@ -484,30 +487,41 @@ mcpPlugin({
 })
 ```
 
-#### Function-form `input` (access to the collection schema)
-
-If you need to derive a Zod / JSON Schema from the collection itself, `input` can be a function that receives the JSON Schema for the collection - useful for "passthrough" tools that accept a partial document of any shape:
-
-```ts
-defineCollectionTool({
-  description: 'Bulk-import posts from a JSON payload.',
-  input: ({ collectionSchema }) => ({
-    type: 'object',
-    properties: {
-      docs: { type: 'array', items: collectionSchema },
-    },
-    required: ['docs'],
-  }),
-}).handler(async ({ collectionSlug, input, authorizedMCP, req }) => {
-  // ...
-})
-```
-
-Virtual fields are stripped from `collectionSchema` automatically.
-
 ### Global-scoped tools
 
-`defineGlobalTool` mirrors `defineCollectionTool`, with the handler receiving `globalSlug` instead of `collectionSlug`.
+`defineGlobalTool` mirrors `defineCollectionTool`. Payload adds a `globalSlug` string to the MCP input schema automatically; the handler receives the resolved `globalSlug`. The field is intentionally not enum-restricted so newly-added globals can be used after HMR even if the MCP client cached the previous tool schema.
+
+```ts
+import { defineGlobalTool, mcpPlugin } from '@payloadcms/plugin-mcp'
+import { localAPIDefaults } from '@payloadcms/plugin-mcp'
+import * as z from 'zod'
+
+mcpPlugin({
+  globals: {
+    'site-settings': {
+      tools: {
+        setMaintenanceMode: defineGlobalTool({
+          description: 'Enable or disable maintenance mode.',
+          input: z.object({
+            enabled: z.boolean(),
+          }),
+        }).handler(async ({ globalSlug, input, authorizedMCP, req }) => {
+          const result = await req.payload.updateGlobal({
+            slug: globalSlug,
+            data: { maintenanceMode: input.enabled },
+            req,
+            ...localAPIDefaults(authorizedMCP),
+          })
+
+          return {
+            content: [{ type: 'text', text: JSON.stringify(result) }],
+          }
+        }),
+      },
+    },
+  },
+})
+```
 
 ### Prompts
 
@@ -614,7 +628,7 @@ Built-in CRUD tools already use this pattern, so they automatically respect the 
 
 ## Reducing token usage with `select`
 
-The built-in `find` tool for both collections and globals accepts an optional `select` parameter. It limits which fields come back, which significantly reduces token usage on large documents.
+The built-in `findDocuments`, `findGlobal`, `createDocument`, `updateDocument`, and `updateGlobal` tools accept an optional `select` parameter. It limits which fields come back, which significantly reduces token usage on large documents.
 
 `select` is a JSON string following [Payload's Select API](https://payloadcms.com/docs/queries/select) syntax - set a field to `true` to include it:
 
@@ -629,8 +643,9 @@ curl -i 'http://localhost:3000/api/mcp' \
     "id": "1",
     "method": "tools/call",
     "params": {
-      "name": "findPosts",
+      "name": "findDocuments",
       "arguments": {
+        "collectionSlug": "posts",
         "select": "{\"title\": true, \"slug\": true}"
       }
     }
@@ -731,8 +746,9 @@ curl -i 'http://localhost:3000/api/mcp' \
     "id": "1",
     "method": "tools/call",
     "params": {
-      "name": "findPosts",
+      "name": "findDocuments",
       "arguments": {
+        "collectionSlug": "posts",
         "locale": "es",
         "fallbackLocale": "en"
       }
@@ -742,9 +758,7 @@ curl -i 'http://localhost:3000/api/mcp' \
 
 ## Virtual fields
 
-Virtual fields (computed, read-only fields) are automatically excluded from the `create` and `update` tool schemas. They cannot be set by a model, so including them in the schema would be misleading and add noise. They are still present in `find` responses.
-
-The same stripping applies to the `collectionSchema` / `globalSchema` argument passed to function-form `input` in custom tools.
+Virtual fields (computed, read-only fields) are automatically excluded from `getCollectionSchema` and `getGlobalSchema`. They cannot be set by a model, so including them in the schema would be misleading and add noise. They are still present in find responses.
 
 ## Performance
 
@@ -752,7 +766,7 @@ There are several levers for reducing the number of tokens consumed per MCP requ
 
 ### Write strong descriptions
 
-The description you provide for a collection or global is the primary signal a model uses to decide which tool to call. A vague description leads to missed or incorrect tool calls; a precise description gets the right tool called on the first try.
+The description you provide for a collection or global helps the model choose the right `collectionSlug` / `globalSlug` after inspecting the available schemas. A vague description leads to missed or incorrect tool calls; a precise description gets the right document target on the first try.
 
 ```ts
 // Weak - the model has no idea what kind of posts these are
@@ -783,7 +797,7 @@ If a collection has fields that are irrelevant or sensitive for the model's task
 
 ### Only enable the operations you need
 
-If a model only needs to read data, disable `create`, `update`, and `delete`. Every additional tool adds more entries to `tools/list`, which costs tokens and increases the chance of an unintended action.
+If a model only needs to read data, disable `create`, `update`, and `delete`.
 
 ```ts
 mcpPlugin({

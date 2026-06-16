@@ -22,6 +22,8 @@ export const arTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'البريد الإلكتروني أو اسم المستخدم',
     emailSent: 'تمّ ارسال البريد الإلكتروني',
     emailVerified: 'تم التحقق من البريد الإلكتروني بنجاح.',
+    emailVerifiedRedirecting:
+      'تم التحقق من البريد الإلكتروني بنجاح. سيتم تحويلك إلى صفحة تسجيل الدخول...',
     enableAPIKey: 'تفعيل مفتاح API',
     failedToUnlock: 'فشل فتح القفل',
     forceUnlock: 'إجبار فتح القفل',
@@ -55,6 +57,7 @@ export const arTranslations: DefaultTranslationsObject = {
       'تمّ إنشاء حساب جديد لتتمكّن من الوصول إلى <a href="{{serverURL}}"> {{serverURL}} </a> الرّجاء النّقر فوق الرّابط التّالي أو لصق عنوان URL أدناه في متصفّحّك لتأكيد بريدك الإلكتروني : <a href="{{verificationURL}}"> {{verificationURL}} </a> <br> بعد التّحقّق من بريدك الإلكتروني ، ستتمكّن من تسجيل الدّخول بنجاح.',
     newAPIKeyGenerated: 'تمّ توليد مفتاح API جديد.',
     newPassword: 'كلمة مرور جديدة',
+    notRedirected: 'لم يتم إعادة التوجيه؟ <0>تسجيل الدخول من هنا</0>',
     passed: 'تمت المصادقة',
     passwordResetSuccessfully: 'تمت إعادة تعيين كلمة المرور بنجاح.',
     resetPassword: 'إعادة تعيين كلمة المرور',
@@ -68,6 +71,8 @@ export const arTranslations: DefaultTranslationsObject = {
     unableToVerify: 'غير قادر على التحقق من',
     username: 'اسم المستخدم',
     usernameNotValid: 'اسم المستخدم المقدم غير صالح',
+    verificationFailedRequestNew:
+      'تعذر علينا التحقق من حسابك. يرجى طلب رسالة تحقق جديدة والمحاولة مرة أخرى.',
     verified: 'تمّ التحقّق',
     verifiedSuccessfully: 'تمّ التحقّق بنجاح',
     verify: 'قم بالتّحقّق',
@@ -243,6 +248,7 @@ export const arTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'قام مستخدم آخر بالاستيلاء على تحرير هذا المستند.',
     applyChanges: 'طبق التغييرات',
     ascending: 'تصاعدي',
+    auto: 'تلقائي',
     automatic: 'تلقائي',
     backToDashboard: 'العودة للوحة التّحكّم',
     by: 'بواسطة',
@@ -435,6 +441,7 @@ export const arTranslations: DefaultTranslationsObject = {
     selectedCount: 'تم تحديد {{count}} {{label}}',
     selectLabel: 'حدد {{label}}',
     selectValue: 'اختيار قيمة',
+    settings: 'الإعدادات',
     showAllLabel: 'عرض كل {{label}}',
     shownInTable: 'معروض في جدول',
     showSidebar: 'إظهار الشريط الجانبي',
@@ -451,6 +458,7 @@ export const arTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'تمت إعادة فهرسة {{count}} من أصل {{total}} مستند من {{collections}} وتخطي {{skips}} مسودة.',
     takeOver: 'تولي',
+    theme: 'سمة',
     thisLanguage: 'العربية',
     time: 'الوقت',
     timezone: 'المنطقة الزمنية',
@@ -484,6 +492,7 @@ export const arTranslations: DefaultTranslationsObject = {
     viewing: 'عرض',
     viewReadOnly: 'عرض للقراءة فقط',
     welcome: 'مرحبًا',
+    where: 'أين',
     yes: 'نعم',
   },
   hierarchy: {

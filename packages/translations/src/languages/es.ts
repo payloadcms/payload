@@ -22,6 +22,8 @@ export const esTranslations: DefaultTranslationsObject = {
     emailOrUsername: 'Correo electrónico o nombre de usuario',
     emailSent: 'Correo Enviado',
     emailVerified: 'Correo electrónico verificado con éxito.',
+    emailVerifiedRedirecting:
+      'Correo electrónico verificado correctamente. Redirigiéndolo para iniciar sesión...',
     enableAPIKey: 'Habilitar Clave API',
     failedToUnlock: 'Desbloqueo Fallido',
     forceUnlock: 'Forzar Desbloqueo',
@@ -55,6 +57,7 @@ export const esTranslations: DefaultTranslationsObject = {
       'Se ha creado una nueva cuenta para que puedas acceder a <a href="{{serverURL}}">{{serverURL}}</a>. Por favor, haz click o copia el siguiente enlace a tu navegador para verificar tu correo: <a href="{{verificationURL}}">{{verificationURL}}</a>.<br> Una vez hayas verificado tu correo, podrás iniciar sesión.',
     newAPIKeyGenerated: 'Nueva Clave de API Generada.',
     newPassword: 'Nueva Contraseña',
+    notRedirected: '¿No fue redirigido? <0>Inicie sesión aquí</0>',
     passed: 'Autenticación Exitosa',
     passwordResetSuccessfully: 'Contraseña restablecida con éxito.',
     resetPassword: 'Restablecer Contraseña',
@@ -68,6 +71,8 @@ export const esTranslations: DefaultTranslationsObject = {
     unableToVerify: 'No se pudo Verificar',
     username: 'Nombre de usuario',
     usernameNotValid: 'El nombre de usuario proporcionado no es válido.',
+    verificationFailedRequestNew:
+      'No pudimos verificar su cuenta. Solicite un nuevo correo electrónico de verificación e inténtelo nuevamente.',
     verified: 'Verificado',
     verifiedSuccessfully: 'Verificado Correctamente',
     verify: 'Verificar',
@@ -254,6 +259,7 @@ export const esTranslations: DefaultTranslationsObject = {
     anotherUserTakenOver: 'Otro usuario ha tomado el control de la edición de este documento.',
     applyChanges: 'Aplicar Cambios',
     ascending: 'Ascendente',
+    auto: 'Automático',
     automatic: 'Automático',
     backToDashboard: 'Volver al Panel de Control',
     by: 'Por',
@@ -450,6 +456,7 @@ export const esTranslations: DefaultTranslationsObject = {
     selectedCount: '{{count}} {{label}} seleccionados',
     selectLabel: 'Seleccionar {{label}}',
     selectValue: 'Seleccionar un valor',
+    settings: 'Configuraciones',
     showAllLabel: 'Mostrar todos los elementos de {{label}}',
     shownInTable: 'Mostrado en tabla',
     showSidebar: 'Mostrar barra lateral',
@@ -466,6 +473,7 @@ export const esTranslations: DefaultTranslationsObject = {
     successfullyReindexed:
       'Se reindexaron correctamente {{count}} de {{total}} documentos de {{collections}} y se omitieron {{skips}} borradores.',
     takeOver: 'Tomar el control',
+    theme: 'Tema',
     thisLanguage: 'Español',
     time: 'Hora',
     timezone: 'Zona horaria',
@@ -499,6 +507,7 @@ export const esTranslations: DefaultTranslationsObject = {
     viewing: 'Visualización',
     viewReadOnly: 'Ver solo lectura',
     welcome: 'Te damos la bienvenida',
+    where: 'Dónde',
     yes: 'Sí',
   },
   hierarchy: {

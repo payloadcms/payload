@@ -1,6 +1,6 @@
 import type { PopulationPromise } from '../../typesServer.js'
 import type { RelationshipFeatureProps } from './index.js'
-import type { SerializedRelationshipNode } from './nodes/RelationshipNode.js'
+import type { SerializedRelationshipNode } from './schema.js'
 
 import { populate } from '../../../populateGraphQL/populate.js'
 

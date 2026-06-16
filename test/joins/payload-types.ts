@@ -93,6 +93,7 @@ export interface Config {
     'example-posts': ExamplePost;
     folderPoly1: FolderPoly1;
     folderPoly2: FolderPoly2;
+    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -184,6 +185,7 @@ export interface Config {
     'example-posts': ExamplePostsSelect<false> | ExamplePostsSelect<true>;
     folderPoly1: FolderPoly1Select<false> | FolderPoly1Select<true>;
     folderPoly2: FolderPoly2Select<false> | FolderPoly2Select<true>;
+    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -335,14 +337,7 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        category?: (string | null) | Category;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  blocks?: Block[] | null;
   first?: {
     tabText?: string | null;
   };
@@ -569,6 +564,16 @@ export interface Singular {
   category?: (string | null) | Category;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block".
+ */
+export interface Block {
+  category?: (string | null) | Category;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -839,6 +844,31 @@ export interface FolderPoly2 {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys".
+ */
+export interface PayloadMcpApiKey {
+  id: string;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string | User;
+  overrideAccess?: boolean | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -964,6 +994,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'folderPoly2';
         value: string | FolderPoly2;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1377,6 +1411,22 @@ export interface FolderPoly1Select<T extends boolean = true> {
 export interface FolderPoly2Select<T extends boolean = true> {
   folderPoly2Title?: T;
   _h_folders?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_select".
+ */
+export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
+  apiKey?: T;
+  apiKeyIndex?: T;
+  access?: T;
+  label?: T;
+  description?: T;
+  lastUsed?: T;
+  user?: T;
+  overrideAccess?: T;
   updatedAt?: T;
   createdAt?: T;
 }

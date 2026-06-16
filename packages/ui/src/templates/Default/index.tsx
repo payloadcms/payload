@@ -109,6 +109,19 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     })
   }
 
+  const settingsItems: React.ReactNode[] =
+    components?.userMenuSettingsItems && Array.isArray(components.userMenuSettingsItems)
+      ? components.userMenuSettingsItems.map((item, index) =>
+          RenderServerComponent({
+            clientProps,
+            Component: item,
+            importMap: payload.importMap,
+            key: `user-menu-settings-item-${index}`,
+            serverProps,
+          }),
+        )
+      : []
+
   const NavComponent = RenderServerComponent({
     clientProps,
     Component: CustomNav,
@@ -142,6 +155,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                         })
                       : undefined
                   }
+                  settingsItems={settingsItems}
                 />
                 {children}
               </div>

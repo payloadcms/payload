@@ -276,6 +276,7 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
       ],
     },
     lockDocuments: false,
+    versions: false,
   }
 
   if (jobsConfig.stats) {
