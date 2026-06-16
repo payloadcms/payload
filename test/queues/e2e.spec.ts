@@ -31,7 +31,11 @@ describe('Queues', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    // This suite logs in explicitly (no auto-login), so `/admin` redirects to
+    // `/admin/login`. Pass `noAutoLogin` so the compilation poll waits for the
+    // login URL instead of the dashboard URL that never loads — otherwise it
+    // loops until the beforeAll times out on TanStack (server-side 307 redirect).
+    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
 
     await login({ page, serverURL })
 
