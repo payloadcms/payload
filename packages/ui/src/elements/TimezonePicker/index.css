@@ -196,20 +196,5 @@
     max-height: calc(var(--spacer-6) * 5);
     padding-inline: var(--spacer-2);
     padding-bottom: var(--spacer-2);
-    scrollbar-width: thin;
-    scrollbar-color: color-mix(in srgb, var(--color-text) 40%, transparent) transparent;
-
-    &::-webkit-scrollbar {
-      width: 4px;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      background: color-mix(in srgb, var(--color-text) 40%, transparent);
-      border-radius: 2px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
-    }
   }
 }

@@ -250,6 +250,7 @@
     ],
     "overrides": {
       "@vercel/blob>undici": "6.24.1",
+      "amazon-cognito-identity-js>js-cookie": "^3.0.7",
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
       "dotenv": "$dotenv",

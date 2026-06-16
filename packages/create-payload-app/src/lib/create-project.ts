@@ -16,7 +16,10 @@ import type {
 
 import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, info, warning } from '../utils/log.js'
-import { resolvePackageVersion } from '../utils/resolvePackageVersion.js'
+import {
+  DEFAULT_PAYLOAD_VERSION_TAG,
+  resolvePackageVersion,
+} from '../utils/resolvePackageVersion.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
 import { configurePluginProject } from './configure-plugin-project.js'
 import { downloadExample } from './download-example.js'
@@ -131,14 +134,14 @@ export async function createProject(
     })
   }
 
-  const versionOrTag = cliArgs['--version'] ?? 'latest'
+  const versionOrTag = cliArgs['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG
 
   const spinner = p.spinner()
   spinner.start(`Resolving Payload version (${versionOrTag})...`)
 
   const payloadVersion = await resolvePackageVersion({
     packageName: 'payload',
-    versionOrTag: cliArgs['--version'],
+    versionOrTag,
   })
 
   spinner.stop(`Using Payload version ${payloadVersion}`)
