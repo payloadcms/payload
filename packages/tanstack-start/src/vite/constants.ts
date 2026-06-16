@@ -135,4 +135,15 @@ export const optimizeDepsIncludeDefaults: string[] = [
   '@payloadcms/ui > react-select > @floating-ui/dom > @floating-ui/core',
   '@payloadcms/ui > react-select > prop-types > react-is',
   '@payloadcms/ui > date-fns/locale/en-US',
+  // Further late discoveries observed re-optimizing mid-run in CI cold starts
+  // (see CI logs: "✨ new dependencies optimized: @dnd-kit/modifiers / ajv /
+  // dequal/lite"). The modular dashboard pulls in `@dnd-kit/modifiers` on first
+  // render; form-state diffing reaches `dequal/lite` (a distinct entry point
+  // from the already-listed `dequal`); client-side field validation reaches
+  // `ajv` *through `payload`* — it is `ssrExternal` server-side but still
+  // bundled into the client, and must be pathed via `payload` so the optimizer
+  // pre-bundles the exact copy the runtime loads.
+  '@payloadcms/ui > @dnd-kit/modifiers',
+  '@payloadcms/ui > dequal/lite',
+  'payload > ajv',
 ]
