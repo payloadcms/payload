@@ -751,8 +751,17 @@ test.describe('Import Export Plugin', () => {
 
       await page.goto(importsURL.create)
 
-      await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-list-test.csv')
+      // `setInputFiles` fires a one-shot native change event; if it lands before
+      // the upload field's React onChange is hydrated (the admin view is an async
+      // RSC/Flight payload that hydrates after the shell), the selection is
+      // dropped and the filename never appears. Unlike click/fill, setInputFiles
+      // does not auto-retry, so retry the selection until it registers.
+      await expect(async () => {
+        await page.setInputFiles('input[type="file"]', csvPath)
+        await expect(page.locator('.file-field__filename')).toHaveValue('e2e-list-test.csv', {
+          timeout: 2000,
+        })
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -808,8 +817,15 @@ test.describe('Import Export Plugin', () => {
 
       await page.goto(importsURL.create)
 
-      await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-field__filename')).toHaveValue('e2e-update-test.csv')
+      // See note above: retry the file selection until the upload field's React
+      // onChange is hydrated (async RSC/Flight view), since setInputFiles is a
+      // one-shot native event with no auto-retry.
+      await expect(async () => {
+        await page.setInputFiles('input[type="file"]', csvPath)
+        await expect(page.locator('.file-field__filename')).toHaveValue('e2e-update-test.csv', {
+          timeout: 2000,
+        })
+      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
