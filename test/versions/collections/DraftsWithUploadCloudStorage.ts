@@ -8,18 +8,8 @@ import { draftWithUploadCloudStorageCollectionSlug } from '../slugs.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-/**
- * Filenames passed to the mock adapter's handleDelete. Tests assert that the
- * published file is not deleted when saving a draft over a published document.
- */
 export const cloudStorageDeletedFilenames: string[] = []
 
-/**
- * Mock cloud-storage adapter that mirrors the real S3 adapter: its handleUpload
- * returns the full `data` object (see packages/storage-s3/src/adapter.ts). This is
- * what triggers the cloud-storage afterChange hook to persist the doc back to the
- * database, which previously unpublished the main document on a draft save.
- */
 export const mockCloudStorageAdapter = () => ({
   name: 'mock-cloud-storage-adapter',
   handleDelete: ({ filename }: { filename: string }) => {

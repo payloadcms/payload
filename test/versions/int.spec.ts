@@ -2268,7 +2268,6 @@ describe('Versions', () => {
       expect(draftDoc.alt).toBe('Updated in draft')
       expect(draftDoc.filename).not.toBe(publishedDoc.filename)
 
-      // The published file must remain in storage.
       expect(cloudStorageDeletedFilenames).not.toContain(publishedDoc.filename)
     })
 
