@@ -1,17 +1,10 @@
-import type { SanitizedConfig, UserMenuSettingsItem } from '../../config/types.js'
+import type { SanitizedConfig } from '../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
+import { isUserMenuSettingsGroup } from '../../config/types.js'
 import { iterateCollections } from './iterateCollections.js'
 import { genImportMapIterateFields } from './iterateFields.js'
 import { iterateGlobals } from './iterateGlobals.js'
-
-const isUserMenuSettingsGroup = (
-  userMenuSettingsItem: UserMenuSettingsItem,
-): userMenuSettingsItem is Extract<UserMenuSettingsItem, { items: unknown }> =>
-  typeof userMenuSettingsItem === 'object' &&
-  userMenuSettingsItem !== null &&
-  'items' in userMenuSettingsItem &&
-  Array.isArray(userMenuSettingsItem.items)
 
 export function iterateConfig({
   addToImportMap,

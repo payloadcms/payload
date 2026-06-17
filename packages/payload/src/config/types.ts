@@ -542,6 +542,14 @@ export type UserMenuSettingsGroup = {
 
 export type UserMenuSettingsItem = CustomComponent | UserMenuSettingsGroup
 
+export const isUserMenuSettingsGroup = (
+  userMenuSettingsItem: UserMenuSettingsItem,
+): userMenuSettingsItem is UserMenuSettingsGroup =>
+  typeof userMenuSettingsItem === 'object' &&
+  userMenuSettingsItem !== null &&
+  'items' in userMenuSettingsItem &&
+  Array.isArray(userMenuSettingsItem.items)
+
 export type Locale = {
   /**
    * value of supported locale

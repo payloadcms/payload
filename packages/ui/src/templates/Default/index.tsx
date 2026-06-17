@@ -3,12 +3,12 @@ import type {
   DocumentSubViewTypes,
   PayloadRequest,
   ServerProps,
-  UserMenuSettingsItem,
   ViewTypes,
   VisibleEntities,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { isUserMenuSettingsGroup } from 'payload/shared'
 
 import './index.css'
 
@@ -30,17 +30,6 @@ import { DefaultNav } from '../../elements/Nav/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
 const baseClass = 'template-default'
-
-const isUserMenuSettingsGroup = (
-  userMenuSettingsItem: UserMenuSettingsItem,
-): userMenuSettingsItem is Extract<
-  UserMenuSettingsItem,
-  { group?: unknown; items: CustomComponent[] }
-> =>
-  typeof userMenuSettingsItem === 'object' &&
-  userMenuSettingsItem !== null &&
-  'items' in userMenuSettingsItem &&
-  Array.isArray(userMenuSettingsItem.items)
 
 export type DefaultTemplateProps = {
   children?: React.ReactNode
