@@ -2,23 +2,27 @@ import type { PluginLanguage } from '../types.js'
 
 export const hrTranslations = {
   'plugin-mcp': {
-    apiKeyDescription: 'API ključevi određuju kojim kolekcijama, resursima, alatima i promptovima MCP klijenti mogu pristupiti.',
+    apiKeyDescription:
+      'API ključevi određuju kojim kolekcijama, resursima, alatima i promptovima MCP klijenti mogu pristupiti.',
     apiKeys: 'API ključevi',
     authentication: 'Autentikacija',
     description: 'Opis',
     descriptionDescription: 'Opišite svrhu API ključa.',
     dismiss: 'Zatvori',
     keepKeyPrivate: 'Čuvajte svoj ključ privatnim.',
-    keyPrivateDescription: 'Ovaj ključ daje MCP-u pristup vašem sadržaju. Nemojte ga dijeliti s drugima!',
+    keyPrivateDescription:
+      'Ovaj ključ daje MCP-u pristup vašem sadržaju. Nemojte ga dijeliti s drugima!',
     lastUsed: 'Zadnje korišteno',
     manageAPIKeys: 'Upravljanje API ključevima',
     mcp: 'MCP',
     noAPIKeys: 'Nema API ključeva',
     operations: 'Operacije',
     overrideAccess: 'Zaobiđi kontrolu pristupa',
-    overrideAccessDescription: 'Kada je označeno, ovaj ključ zaobilazi Payload kontrolu pristupa pri svakoj operaciji. Ostavite neoznačeno osim ako imate konkretan razlog.',
+    overrideAccessDescription:
+      'Kada je označeno, ovaj ključ zaobilazi Payload kontrolu pristupa pri svakoj operaciji. Ostavite neoznačeno osim ako imate konkretan razlog.',
     permissions: 'Dozvole',
-    permissionsDescription: 'Dopustite MCP klijentima pristup sljedećim kolekcijama, alatima, resursima i promptovima.',
+    permissionsDescription:
+      'Dopustite MCP klijentima pristup sljedećim kolekcijama, alatima, resursima i promptovima.',
     prompts: 'Promptovi',
     resources: 'Resursi',
     server: 'Poslužitelj',

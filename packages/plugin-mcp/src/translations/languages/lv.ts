@@ -2,7 +2,8 @@ import type { PluginLanguage } from '../types.js'
 
 export const lvTranslations = {
   'plugin-mcp': {
-    apiKeyDescription: 'API atslēgas nosaka, kurām kolekcijām, resursiem, rīkiem un promptiem MCP klienti var piekļūt.',
+    apiKeyDescription:
+      'API atslēgas nosaka, kurām kolekcijām, resursiem, rīkiem un promptiem MCP klienti var piekļūt.',
     apiKeys: 'API atslēgas',
     authentication: 'Autentifikācija',
     description: 'Apraksts',
@@ -16,9 +17,11 @@ export const lvTranslations = {
     noAPIKeys: 'Nav API atslēgu',
     operations: 'Darbības',
     overrideAccess: 'Apiet piekļuves kontroli',
-    overrideAccessDescription: 'Ja atzīmēts, šī atslēga apiet Payload piekļuves kontroli katrā darbībā. Atstājiet neatzīmētu, ja nav konkrēta iemesla.',
+    overrideAccessDescription:
+      'Ja atzīmēts, šī atslēga apiet Payload piekļuves kontroli katrā darbībā. Atstājiet neatzīmētu, ja nav konkrēta iemesla.',
     permissions: 'Atļaujas',
-    permissionsDescription: 'Atļaujiet MCP klientiem piekļūt šādām kolekcijām, rīkiem, resursiem un promptiem.',
+    permissionsDescription:
+      'Atļaujiet MCP klientiem piekļūt šādām kolekcijām, rīkiem, resursiem un promptiem.',
     prompts: 'Prompti',
     resources: 'Resursi',
     server: 'Serveris',

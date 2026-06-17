@@ -9,6 +9,13 @@ const DEFAULT_DESCRIPTION =
   'Delete documents in any collection by passing the collection slug and ID or where clause.'
 
 export const deleteDocumentsTool = defineCollectionTool({
+  annotations: {
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'Delete Documents',
+  },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     id: z

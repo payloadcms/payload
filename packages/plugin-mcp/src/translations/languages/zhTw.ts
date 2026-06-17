@@ -16,7 +16,8 @@ export const zhTwTranslations = {
     noAPIKeys: '沒有 API 金鑰',
     operations: '操作',
     overrideAccess: '覆寫存取控制',
-    overrideAccessDescription: '啟用後，此金鑰執行的每個操作都會略過 Payload 存取控制。除非有明確原因，否則請保持關閉。',
+    overrideAccessDescription:
+      '啟用後，此金鑰執行的每個操作都會略過 Payload 存取控制。除非有明確原因，否則請保持關閉。',
     permissions: '權限',
     permissionsDescription: '允許 MCP 用戶端存取以下集合、工具、資源和提示詞。',
     prompts: '提示詞',

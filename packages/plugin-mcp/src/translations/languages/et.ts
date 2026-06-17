@@ -2,7 +2,8 @@ import type { PluginLanguage } from '../types.js'
 
 export const etTranslations = {
   'plugin-mcp': {
-    apiKeyDescription: 'API võtmed määravad, millistele kogudele, ressurssidele, tööriistadele ja promptidele MCP kliendid ligi pääsevad.',
+    apiKeyDescription:
+      'API võtmed määravad, millistele kogudele, ressurssidele, tööriistadele ja promptidele MCP kliendid ligi pääsevad.',
     apiKeys: 'API võtmed',
     authentication: 'Autentimine',
     description: 'Kirjeldus',
@@ -16,9 +17,11 @@ export const etTranslations = {
     noAPIKeys: 'API võtmeid pole',
     operations: 'Toimingud',
     overrideAccess: 'Tühista juurdepääsukontroll',
-    overrideAccessDescription: 'Kui see on märgitud, möödub võti igas toimingus Payloadi juurdepääsureeglitest. Jäta märkimata, kui sul pole konkreetset põhjust.',
+    overrideAccessDescription:
+      'Kui see on märgitud, möödub võti igas toimingus Payloadi juurdepääsureeglitest. Jäta märkimata, kui sul pole konkreetset põhjust.',
     permissions: 'Õigused',
-    permissionsDescription: 'Luba MCP klientidel pääseda ligi järgmistele kogudele, tööriistadele, ressurssidele ja promptidele.',
+    permissionsDescription:
+      'Luba MCP klientidel pääseda ligi järgmistele kogudele, tööriistadele, ressurssidele ja promptidele.',
     prompts: 'Promptid',
     resources: 'Ressursid',
     server: 'Server',

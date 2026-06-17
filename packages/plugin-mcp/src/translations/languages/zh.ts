@@ -16,7 +16,8 @@ export const zhTranslations = {
     noAPIKeys: '没有 API 密钥',
     operations: '操作',
     overrideAccess: '覆盖访问控制',
-    overrideAccessDescription: '启用后，此密钥执行的每个操作都会绕过 Payload 访问控制。除非有明确原因，否则请保持关闭。',
+    overrideAccessDescription:
+      '启用后，此密钥执行的每个操作都会绕过 Payload 访问控制。除非有明确原因，否则请保持关闭。',
     permissions: '权限',
     permissionsDescription: '允许 MCP 客户端访问以下集合、工具、资源和提示词。',
     prompts: '提示词',

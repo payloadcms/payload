@@ -11,6 +11,13 @@ const DEFAULT_DESCRIPTION =
   'Find documents in any collection by passing the collection slug and optional ID or where clause.'
 
 export const findDocumentsTool = defineCollectionTool({
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+    readOnlyHint: true,
+    title: 'Find Documents',
+  },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     id: z
@@ -39,9 +46,7 @@ export const findDocumentsTool = defineCollectionTool({
       .optional(),
     joins: z
       .union([z.record(z.string(), z.unknown()), z.literal(false)])
-      .describe(
-        'Optional: configure join field queries, or pass false to disable all join fields.',
-      )
+      .describe('Optional: configure join field queries, or pass false to disable all join fields.')
       .optional(),
     limit: z
       .number()
@@ -77,7 +82,7 @@ export const findDocumentsTool = defineCollectionTool({
     select: z
       .record(z.string(), z.unknown())
       .describe(
-        "Optional: define exactly which fields you'd like to return in the response, e.g., {\"title\": true}",
+        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"title": true}',
       )
       .optional(),
     sort: z

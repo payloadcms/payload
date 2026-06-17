@@ -2,7 +2,8 @@ import type { PluginLanguage } from '../types.js'
 
 export const slTranslations = {
   'plugin-mcp': {
-    apiKeyDescription: 'API ključi nadzorujejo, do katerih zbirk, virov, orodij in promptov lahko dostopajo odjemalci MCP.',
+    apiKeyDescription:
+      'API ključi nadzorujejo, do katerih zbirk, virov, orodij in promptov lahko dostopajo odjemalci MCP.',
     apiKeys: 'API ključi',
     authentication: 'Preverjanje pristnosti',
     description: 'Opis',
@@ -16,9 +17,11 @@ export const slTranslations = {
     noAPIKeys: 'Ni API ključev',
     operations: 'Operacije',
     overrideAccess: 'Prepiši nadzor dostopa',
-    overrideAccessDescription: 'Ko je označeno, ta ključ obide Payloadov nadzor dostopa pri vsaki operaciji. Pustite neoznačeno, razen če imate poseben razlog.',
+    overrideAccessDescription:
+      'Ko je označeno, ta ključ obide Payloadov nadzor dostopa pri vsaki operaciji. Pustite neoznačeno, razen če imate poseben razlog.',
     permissions: 'Dovoljenja',
-    permissionsDescription: 'Dovolite odjemalcem MCP dostop do naslednjih zbirk, orodij, virov in promptov.',
+    permissionsDescription:
+      'Dovolite odjemalcem MCP dostop do naslednjih zbirk, orodij, virov in promptov.',
     prompts: 'Prompti',
     resources: 'Viri',
     server: 'Strežnik',

@@ -9,6 +9,13 @@ import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 const DEFAULT_DESCRIPTION = 'Find any Payload global by passing the global slug.'
 
 export const findGlobalTool = defineGlobalTool({
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+    readOnlyHint: true,
+    title: 'Find Global',
+  },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     depth: z
@@ -38,7 +45,7 @@ export const findGlobalTool = defineGlobalTool({
     select: z
       .record(z.string(), z.unknown())
       .describe(
-        "Optional: define exactly which fields you'd like to return in the response, e.g., {\"title\": true}",
+        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"title": true}',
       )
       .optional(),
   }),

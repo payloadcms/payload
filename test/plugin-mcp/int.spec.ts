@@ -175,18 +175,55 @@ describe('@payloadcms/plugin-mcp', () => {
       const toolsByName: Record<string, any> = Object.fromEntries(
         toolsResponse.tools.map((t: { name: string }) => [t.name, t]),
       )
+      const plugin = payload.config.plugins.find(
+        (plugin) => plugin.slug === '@payloadcms/plugin-mcp',
+      ) as any
+      const pluginItems = plugin.sanitizedOptions.items
 
       const getConfigInfo = toolsByName['getConfigInfo']
       expect(getConfigInfo).toBeDefined()
       expect(getConfigInfo.description).toContain('List the Payload collection and global slugs')
+      expect(getConfigInfo.annotations).toMatchObject({
+        title: 'Config Info',
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+        readOnlyHint: true,
+      })
+      expect(
+        pluginItems.find((item: any) => item.type === 'tool' && item.configKey === 'getConfigInfo')
+          ?.label,
+      ).toBe('Config Info')
 
       const createDocument = toolsByName['createDocument']
       expect(createDocument).toBeDefined()
       expect(createDocument.description).toContain('Create a document in any collection')
+      expect(createDocument.annotations).toMatchObject({
+        title: 'Create Document',
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+        readOnlyHint: false,
+      })
 
       const findDocuments = toolsByName['findDocuments']
       expect(findDocuments).toBeDefined()
       expect(findDocuments.description).toContain('Find documents in any collection')
+      expect(findDocuments.annotations).toMatchObject({
+        title: 'Find Documents',
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+        readOnlyHint: true,
+      })
+      expect(
+        pluginItems.find(
+          (item: any) =>
+            item.type === 'collectionTool' &&
+            item.collectionSlug === 'posts' &&
+            item.configKey === 'find',
+        )?.label,
+      ).toBe('Find Posts')
 
       // diceRoll: custom top-level tool
       const diceRoll = toolsByName['diceRoll']
@@ -194,6 +231,45 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(diceRoll.description).toContain(
         'Rolls a virtual dice with a specified number of sides',
       )
+      expect(diceRoll.annotations).toMatchObject({
+        title: 'Dice Roll',
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+        readOnlyHint: false,
+      })
+      expect(
+        pluginItems.find((item: any) => item.type === 'tool' && item.configKey === 'diceRoll')
+          ?.label,
+      ).toBe('Dice Roll')
+
+      const publish = toolsByName['publish']
+      expect(publish).toBeDefined()
+      expect(publish.annotations).toMatchObject({
+        title: 'Publish Post',
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: false,
+        readOnlyHint: false,
+      })
+      expect(
+        pluginItems.find(
+          (item: any) =>
+            item.type === 'collectionTool' &&
+            item.collectionSlug === 'posts' &&
+            item.configKey === 'publish',
+        )?.label,
+      ).toBe('Publish Post')
+
+      const auth = toolsByName['auth']
+      expect(auth).toBeDefined()
+      expect(auth.annotations).toMatchObject({
+        title: 'Check Auth Status',
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+        readOnlyHint: true,
+      })
 
       const createDocumentTools = toolsResponse.tools.filter(
         (tool: { name: string }) => tool.name === 'createDocument',
@@ -432,6 +508,13 @@ describe('@payloadcms/plugin-mcp', () => {
       const findGlobalTool = toolsResponse.tools.find((t: any) => t.name === 'findGlobal')
       expect(findGlobalTool).toBeDefined()
       expect(findGlobalTool.description).toContain('Find any Payload global')
+      expect(findGlobalTool.annotations).toMatchObject({
+        title: 'Find Site Settings',
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: false,
+        readOnlyHint: true,
+      })
       expect(findGlobalTool.inputSchema.properties.globalSlug.type).toBe('string')
       expect(findGlobalTool.inputSchema.properties.globalSlug.enum).toBeUndefined()
       expect(findGlobalTool.inputSchema.properties.globalSlug.description).toBe('The global slug')
@@ -449,6 +532,13 @@ describe('@payloadcms/plugin-mcp', () => {
       const updateGlobalTool = toolsResponse.tools.find((t: any) => t.name === 'updateGlobal')
       expect(updateGlobalTool).toBeDefined()
       expect(updateGlobalTool.description).toContain('Update any Payload global')
+      expect(updateGlobalTool.annotations).toMatchObject({
+        title: 'Update Global',
+        destructiveHint: true,
+        idempotentHint: false,
+        openWorldHint: false,
+        readOnlyHint: false,
+      })
       expect(updateGlobalTool.inputSchema.properties.globalSlug.type).toBe('string')
       expect(updateGlobalTool.inputSchema.properties.globalSlug.enum).toBeUndefined()
       expect(updateGlobalTool.inputSchema.properties.globalSlug.description).toBe('The global slug')
