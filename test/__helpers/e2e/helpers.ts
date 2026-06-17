@@ -206,8 +206,7 @@ export async function saveDocHotkeyAndAssert(page: Page): Promise<void> {
   } else {
     await page.keyboard.up('Control')
   }
-  // Check front toast only to prevent interference from past toasts
-  await expect(page.locator(`.payload-toast-item[data-front='true']`)).toContainText('successfully')
+  await expect(page.locator('.payload-toast-container')).toContainText('successfully')
   await closeAllToasts(page)
 }
 
@@ -235,14 +234,11 @@ export async function saveDocAndAssert(
   }
   await page.click(selector, { delay: 100 })
 
-  // Check front toast only to prevent interference from past toasts
-  const frontToast = page.locator(`.payload-toast-item[data-front='true']`)
-
   if (expectation === 'success') {
-    await expect(frontToast).toContainText('successfully')
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
   } else {
-    await expect(frontToast).toHaveClass(/toast-error/)
+    await expect(page.locator('.payload-toast-container .toast-error')).toBeVisible()
   }
 
   // Close all toasts to prevent them from interfering with subsequent tests. E.g. the following could happen
@@ -260,11 +256,7 @@ export async function closeAllToasts(page: Locator | Page): Promise<void> {
   let count = await page.locator(toastCloseSelector).count()
 
   while (count > 0) {
-    // Always close the front-most toast — with the collapsed stack layout, background
-    // toasts are obscured by the front toast and cannot be clicked directly.
-    await page
-      .locator(`.payload-toast-item[data-front='true'] button.payload-toast-close-button`)
-      .click()
+    await page.locator(toastCloseSelector).first().click()
     await expect(page.locator(toastCloseSelector)).toHaveCount(count - 1)
     count--
   }

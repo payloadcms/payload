@@ -16,6 +16,7 @@ import {
 } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import {
+  closeAllToasts,
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
@@ -589,6 +590,8 @@ describe('Uploads', () => {
         'successfully',
       )
 
+      await closeAllToasts(page)
+
       // save the document and expect an error
       await page.locator('button#action-save').click()
       await assertToastErrors({
@@ -650,6 +653,7 @@ describe('Uploads', () => {
 
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
 
     await wait(1000)
 
@@ -671,6 +675,7 @@ describe('Uploads', () => {
     await loadFromUrlButton.click()
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
 
     await wait(1000)
 
@@ -928,6 +933,7 @@ describe('Uploads', () => {
     await page.locator('[id^="doc-drawer_admin-thumbnail-size"] #action-save').click()
 
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
 
     const href = await page.locator('#field-singleThumbnailUpload a').getAttribute('href')
 
@@ -959,6 +965,7 @@ describe('Uploads', () => {
       '.bulk-upload--actions-bar__saveButtons button',
     )
     await saveButton.click()
+    await closeAllToasts(page)
 
     await expect(
       page.locator('#field-hasManyThumbnailUpload .upload--has-many__dragItem'),
@@ -991,6 +998,7 @@ describe('Uploads', () => {
     await page.waitForSelector('button#action-save')
     await page.locator('button#action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
 
     await wait(1000) // Wait for the save
 
@@ -1041,6 +1049,7 @@ describe('Uploads', () => {
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
       await expect(items).toHaveCount(2)
@@ -1082,6 +1091,7 @@ describe('Uploads', () => {
         .fill('prefix-one')
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
       await expect(items).toHaveCount(1)
@@ -1144,6 +1154,7 @@ describe('Uploads', () => {
         .locator('.edit-many-bulk-uploads__header__actions button')
         .click()
       await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
+      await closeAllToasts(page)
 
       const items = page.locator('#field-hasManyUpload .upload--has-many__dragItem')
       await expect(items).toHaveCount(2)
@@ -1185,6 +1196,7 @@ describe('Uploads', () => {
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
       await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 2 files')
+      await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('2')
@@ -1212,6 +1224,7 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container')).toContainText(
         'Successfully saved 2 files',
       )
+      await closeAllToasts(page)
 
       await saveDocAndAssert(page)
     })
@@ -1279,6 +1292,7 @@ describe('Uploads', () => {
 
       const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
       await saveButton.click()
+      await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
@@ -1442,6 +1456,7 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container')).toContainText(
         'Successfully saved 1 files',
       )
+      await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
       await expect(errorCount).toHaveText('1')
@@ -1465,6 +1480,7 @@ describe('Uploads', () => {
       await expect(page.locator('.payload-toast-container')).toContainText(
         'Successfully saved 1 files',
       )
+      await closeAllToasts(page)
 
       await expect(bulkUploadModal).toBeHidden()
 
@@ -1507,6 +1523,7 @@ describe('Uploads', () => {
 
       // Should show error message for all failed files
       await expect(page.locator('.payload-toast-container')).toContainText('Failed to save 3 files')
+      await closeAllToasts(page)
 
       // Check that each file has exactly 1 error (the missing required field)
       const errorCounts = await bulkUploadModal
@@ -1569,6 +1586,7 @@ describe('Uploads', () => {
       await expect(
         page.locator('.payload-toast-container .toast-error:has-text("Failed to save 2 files")'),
       ).toBeVisible()
+      await closeAllToasts(page)
       // After submission, the successful form (form 3) is removed from sidebar
       // Only the 2 failed forms remain in the sidebar
       const fileSelections = bulkUploadModal.locator('.file-selections__filesContainer')
@@ -1657,6 +1675,7 @@ describe('Uploads', () => {
       await expect(
         page.locator('.payload-toast-container .toast-error:has-text("File size limit")'),
       ).toBeVisible()
+      await closeAllToasts(page)
       // The file that exceeded the size limit should have exactly 1 error.
       // After the 2 successful files are saved and removed, only the failed file (2mb.jpg) remains.
       // It should already be active (no need to navigate).

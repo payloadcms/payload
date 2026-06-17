@@ -14,8 +14,8 @@ import {
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
-import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { indexedFieldsSlug } from '../../slugs.js'
@@ -115,6 +115,10 @@ describe('Radio', () => {
 
     // nested in a group error
     await page.locator('#field-group__unique').fill(uniqueText)
+
+    // TODO: used because otherwise the toast locator resolves to 2 items
+    // at the same time. Instead we should uniquely identify each toast.
+    await wait(2000)
 
     // attempt to save
     await page.locator('#action-save').click()

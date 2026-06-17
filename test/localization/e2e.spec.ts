@@ -897,6 +897,7 @@ describe('Localization', () => {
       await expect(page.locator('.payload-toast-container')).toContainText(
         'successfully duplicated',
       )
+      // Close all toasts to prevent them from interfering with subsequent tests. E.g. the following could happen
       await closeAllToasts(page)
 
       await page.waitForURL((url) => !url.toString().includes(id))
@@ -1040,14 +1041,14 @@ describe('Localization', () => {
       // Switch back to SEO tab so the field error tooltip is visible after save
       await page.locator('button.tabs-field__tab-button', { hasText: 'SEO' }).click()
 
-      await saveDocAndAssert(page, '#action-save', 'error', {
-        disableDismissAllToasts: true,
-      })
+      await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
 
       // 1. Toast error message should reference 'seoTitle', not 'seoTitle.en'
       const errorToast = page.locator('.payload-toast-container .toast-error')
       await expect(errorToast).toBeVisible()
       await expect(errorToast.locator('[data-testid="field-error"]')).toHaveText('seoTitle')
+
+      await closeAllToasts(page)
 
       // 2. SEO tab button should be highlighted with an error pill
       const seoTabButton = page.locator('button.tabs-field__tab-button', { hasText: 'SEO' })
@@ -1056,8 +1057,6 @@ describe('Localization', () => {
 
       // 3. The seoTitle field itself should be in error state
       await expect(page.locator('.field-type.text:has(#field-seoTitle)')).toHaveClass(/\berror\b/)
-
-      await closeAllToasts(page)
     })
   })
 

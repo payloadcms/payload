@@ -15,6 +15,7 @@ import type { PayloadTestSDK } from '../../../../../__helpers/shared/sdk/index.j
 import type { Config, LexicalField } from '../../../../payload-types.js'
 
 import {
+  closeAllToasts,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
@@ -570,6 +571,7 @@ describe('lexicalMain', () => {
     await wait(500)
     await createUploadDrawer.getByText('Save').first().click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
 
     await expect(createUploadDrawer).toBeHidden()
     await expect(uploadListDrawer).toBeHidden()
@@ -921,6 +923,7 @@ describe('lexicalMain', () => {
     // Save drawer
     await docDrawer.locator('button').getByText('Save').first().click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+    await closeAllToasts(page)
     await expect(docDrawer).toBeHidden()
     await wait(1500) // Ensure doc is saved in the database
 

@@ -3,6 +3,8 @@ import type { Page } from '@playwright/test'
 import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 
+import { closeAllToasts } from './helpers.js'
+
 export async function copyPasteField({
   fieldName,
   rowIndex,
@@ -38,9 +40,8 @@ export async function copyPasteField({
   await actionBtn.click()
 
   if (isCopy) {
-    const copySuccessToast = page
-      .locator('.payload-toast-item.toast-success')
-      .filter({ hasText: 'Copied' })
+    const copySuccessToast = page.locator('.payload-toast-item.toast-success')
     await expect(copySuccessToast).toBeVisible()
+    await closeAllToasts(page)
   }
 }
