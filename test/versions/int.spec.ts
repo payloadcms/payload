@@ -2218,7 +2218,7 @@ describe('Versions', () => {
       cloudStorageDeletedFilenames.length = 0
     })
 
-    it('should not unpublish the main document or delete its file when saving a draft with a new file', async () => {
+    it('should not unpublish the main document when saving a draft with a new file', async () => {
       const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
 
       imageFile.name = 'cloud-original-published.jpg'
@@ -2267,6 +2267,36 @@ describe('Versions', () => {
       expect(draftDoc._status).toBe('draft')
       expect(draftDoc.alt).toBe('Updated in draft')
       expect(draftDoc.filename).not.toBe(publishedDoc.filename)
+    })
+
+    it('should not delete the published file when saving a draft with a new file', async () => {
+      const imageFile = await getFileByPath(path.resolve(dirname, './image.jpg'))
+
+      imageFile.name = 'cloud-delete-published.jpg'
+
+      const publishedDoc = await payload.create({
+        collection: draftWithUploadCloudStorageCollectionSlug,
+        data: {
+          _status: 'published',
+          alt: 'Original image',
+        },
+        file: imageFile,
+      })
+
+      const draftImageFile = await getFileByPath(path.resolve(dirname, './image.png'))
+
+      draftImageFile.name = 'cloud-delete-draft.png'
+
+      await payload.update({
+        id: publishedDoc.id,
+        collection: draftWithUploadCloudStorageCollectionSlug,
+        data: {
+          _status: 'draft',
+          alt: 'Updated in draft',
+        },
+        draft: true,
+        file: draftImageFile,
+      })
 
       expect(cloudStorageDeletedFilenames).not.toContain(publishedDoc.filename)
     })
