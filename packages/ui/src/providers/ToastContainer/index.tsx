@@ -4,8 +4,8 @@ import type { ClientConfig } from 'payload'
 import React from 'react'
 import { Toaster } from 'sonner'
 
+import { CheckIcon } from '../../icons/Check/index.js'
 import { InfoIcon } from '../../icons/Info/index.js'
-import { SuccessIcon } from '../../icons/Success/index.js'
 import { WarningIcon } from '../../icons/Warning/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import './index.css'
@@ -25,14 +25,20 @@ export const ToastContainer: React.FC<{
       expand={expand ?? false}
       gap={8}
       icons={{
-        close: <XIcon size={16} />,
+        close: <XIcon size={24} />,
         error: <WarningIcon />,
         info: <InfoIcon />,
-        success: <SuccessIcon />,
+        success: <CheckIcon size={24} />,
         warning: <WarningIcon />,
       }}
-      offset="calc(var(--gutter-h) / 2)"
+      offset={{
+        bottom: 'var(--spacer-6)',
+        right: 'var(--spacer-6)',
+      }}
       position={position ?? 'bottom-right'}
+      style={{
+        width: '280px',
+      }}
       toastOptions={{
         classNames: {
           closeButton: 'payload-toast-close-button',

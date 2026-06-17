@@ -18,9 +18,9 @@
       align-items: flex-start;
       gap: var(--spacer-2);
       min-height: var(--spacer-6);
-      inset-inline: 0;
-      width: fit-content;
-      margin-inline-start: auto;
+      /* set width to match FPL */
+      inline-size: 280px;
+      margin: 0;
       padding: var(--spacer-2);
       color: var(--color-text-oninverse);
       font-style: normal;
@@ -66,6 +66,11 @@
       &.toast-error {
         color: var(--color-text-ondanger);
         background: var(--color-bg-danger);
+
+        .toast-title {
+          color: var(--color-text-ondanger);
+        }
+
         .icon--warning {
           color: var(--color-text-ondanger);
         }
@@ -106,6 +111,13 @@
   position: static;
 }
 
+.payload-toast-container
+  .payload-toast-item
+  .toast-icon
+  .sonner-loading-wrapper[data-visible='false'] {
+  display: none;
+}
+
 /* Sonner positions [data-close-button] absolutely; place it inline as a --spacer-4 (24px) IconButton. */
 .payload-toast-container .payload-toast-item .payload-toast-close-button {
   position: relative;
@@ -120,7 +132,7 @@
   width: auto;
   height: auto;
   margin: 0;
-  padding-inline: var(--spacer-1);
+  padding: 0;
   border: 0;
   border-radius: var(--radius-medium);
   background: transparent;
@@ -142,4 +154,17 @@
 .payload-toast-container .toast-error .payload-toast-close-button:hover,
 .payload-toast-container .toast-error .payload-toast-close-button:focus-visible {
   background: var(--color-bg-danger-hover);
+}
+
+[data-sonner-toaster].payload-toast-container[data-lifted='true'] {
+  transform: none;
+}
+
+[data-sonner-toaster].payload-toast-container[data-x-position='right'] {
+  left: auto;
+  right: var(--spacer-6);
+}
+
+[data-sonner-toaster].payload-toast-container[data-y-position='bottom'] {
+  bottom: var(--spacer-6);
 }
