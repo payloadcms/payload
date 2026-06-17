@@ -19,6 +19,18 @@
       &:has(> *:nth-child(2)) > * {
         flex: 0 0 auto;
       }
+
+      /* Keep the heading inline with the buttons on mobile, where rows
+         otherwise stack into a column. `max-width` clamps the width without
+         fighting the row's mobile `width: 100% !important`. */
+      @media (max-width: 1024px) {
+        flex-direction: row;
+        flex-wrap: nowrap;
+
+        > * {
+          max-width: fit-content;
+        }
+      }
     }
 
     .query-preset-heading {
