@@ -32,10 +32,11 @@
   .file-manager__panel {
     position: sticky;
     top: var(--doc-controls-height);
-    height: max(
-      500px,
-      calc(100dvh - var(--app-header-height) - var(--doc-controls-height) - var(--doc-header-height))
-    );
+    /* Fill from the stuck position (below the sticky doc controls) to the viewport bottom.
+       The app header and doc header scroll away, so only the doc controls remain above the
+       stuck panel — subtracting more would leave a gap at the bottom while scrolling.
+       Capped at 100% (the box height) so short, non-scrollable documents don't gain a scrollbar. */
+    height: min(100%, max(500px, calc(100dvh - var(--doc-controls-height))));
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -58,6 +59,16 @@
     background: var(--color-bg-secondary);
     padding: var(--spacer-4);
     position: relative;
+  }
+
+  /* Fill the whole upload area so a file can be dropped onto any part of the file manager,
+     not just the band occupied by the dropzone's buttons. */
+  .file-manager__upload .dropzone {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .file-manager__remove {
@@ -111,7 +122,7 @@
     color: var(--color-text-tertiary);
   }
 
-  @media (max-width: 1024px) {
+  @container edit-main (max-width: 1024px) {
     .file-manager {
       min-height: 400px;
       border-bottom: 1px solid var(--color-border);

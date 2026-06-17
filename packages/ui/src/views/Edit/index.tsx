@@ -3,7 +3,7 @@
 import type { ClientUser, DocumentViewClientProps } from 'payload'
 
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
-import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import type { FormProps } from '../../forms/Form/index.js'
@@ -20,7 +20,6 @@ import { DocumentTakeOver } from '../../elements/DocumentTakeOver/index.js'
 import { FileManager } from '../../elements/FileManager/index.js'
 import { LeaveWithoutSaving } from '../../elements/LeaveWithoutSaving/index.js'
 import { LivePreviewWindow } from '../../elements/LivePreview/Window/index.js'
-import { Upload } from '../../elements/Upload/index.js'
 import { Form } from '../../forms/Form/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -783,7 +782,7 @@ export function DefaultEditView({
                 .filter(Boolean)
                 .join(' ')}
             >
-              {upload && !BeforeFields && !isInDrawer ? (
+              {upload && !BeforeFields ? (
                 <UploadControlsProvider>
                   <div className={`${baseClass}__upload-layout`}>
                     {CustomUpload || (
@@ -830,42 +829,24 @@ export function DefaultEditView({
                 <DocumentFields
                   AfterFields={AfterFields}
                   BeforeFields={
-                    BeforeFields || (
-                      <Fragment>
-                        {auth && (
-                          <Auth
-                            className={`${baseClass}__auth`}
-                            collectionSlug={collectionConfig.slug}
-                            disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
-                            email={data?.email}
-                            loginWithUsername={auth?.loginWithUsername}
-                            operation={operation}
-                            readOnly={!hasSavePermission}
-                            requirePassword={!id}
-                            setValidateBeforeSubmit={setValidateBeforeSubmit}
-                            // eslint-disable-next-line react-compiler/react-compiler
-                            useAPIKey={auth.useAPIKey}
-                            username={data?.username}
-                            verify={auth.verify}
-                          />
-                        )}
-                        {upload && (
-                          <React.Fragment>
-                            <UploadControlsProvider>
-                              {CustomUpload || (
-                                <Upload
-                                  collectionSlug={collectionConfig.slug}
-                                  initialState={initialState}
-                                  uploadConfig={upload}
-                                  UploadControls={UploadControls}
-                                  UploadFilePreview={UploadFilePreview}
-                                />
-                              )}
-                            </UploadControlsProvider>
-                          </React.Fragment>
-                        )}
-                      </Fragment>
-                    )
+                    BeforeFields ||
+                    (auth ? (
+                      <Auth
+                        className={`${baseClass}__auth`}
+                        collectionSlug={collectionConfig.slug}
+                        disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
+                        email={data?.email}
+                        loginWithUsername={auth?.loginWithUsername}
+                        operation={operation}
+                        readOnly={!hasSavePermission}
+                        requirePassword={!id}
+                        setValidateBeforeSubmit={setValidateBeforeSubmit}
+                        // eslint-disable-next-line react-compiler/react-compiler
+                        useAPIKey={auth.useAPIKey}
+                        username={data?.username}
+                        verify={auth.verify}
+                      />
+                    ) : undefined)
                   }
                   Description={Description}
                   docPermissions={docPermissions}

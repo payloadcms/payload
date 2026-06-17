@@ -71,7 +71,7 @@
     min-width: 0;
   }
 
-  @media (max-width: 768px) {
+  @container edit-main (max-width: 768px) {
     .file-preview {
       flex-direction: column-reverse;
     }

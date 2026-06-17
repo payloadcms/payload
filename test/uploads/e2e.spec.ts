@@ -38,7 +38,6 @@ import {
   adminUploadControlSlug,
   adminUploadFilePreviewMapSlug,
   adminUploadFilePreviewSingleSlug,
-  filePreviewSlug,
   animatedTypeMedia,
   audioSlug,
   bulkUploadsHookErrorSlug,
@@ -47,6 +46,7 @@ import {
   customFileNameMediaSlug,
   customUploadFieldSlug,
   fileMimeTypeSlug,
+  filePreviewSlug,
   focalOnlySlug,
   hideFileInputOnCreateSlug,
   imageSizesOnlySlug,
@@ -2627,6 +2627,75 @@ describe('Uploads', () => {
 
       await expect(page.locator('#file-preview[data-mime-category="audio"]')).toBeVisible()
       await expect(page.locator('#file-preview audio')).toBeVisible()
+    })
+  })
+
+  describe('built-in file previews', () => {
+    test('should render the native audio player for audio uploads', async () => {
+      const audioDoc = (
+        await payload.find({
+          collection: mediaSlug,
+          depth: 0,
+          limit: 1,
+          where: { mimeType: { equals: 'audio/mpeg' } },
+        })
+      ).docs[0]
+
+      await page.goto(mediaURL.edit(audioDoc!.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('audio.audio-preview')).toBeVisible()
+      await expect(page.locator('.file-preview__thumbnail')).toBeHidden()
+    })
+
+    test('should render a browser iframe for PDF uploads', async () => {
+      const pdfDoc = (
+        await payload.find({
+          collection: mediaSlug,
+          depth: 0,
+          limit: 1,
+          where: { mimeType: { equals: 'application/pdf' } },
+        })
+      ).docs[0]
+
+      await page.goto(mediaURL.edit(pdfDoc!.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('iframe.pdf-preview')).toBeVisible()
+    })
+
+    test('should fall back to the thumbnail for image uploads', async () => {
+      const imageDoc = (
+        await payload.find({
+          collection: mediaSlug,
+          depth: 0,
+          limit: 1,
+          where: { mimeType: { equals: 'image/png' } },
+        })
+      ).docs[0]
+
+      await page.goto(mediaURL.edit(imageDoc!.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('.file-preview__thumbnail')).toBeVisible()
+      await expect(page.locator('.audio-preview')).toBeHidden()
+      await expect(page.locator('.pdf-preview')).toBeHidden()
+    })
+
+    test('should render the native video player for video uploads', async () => {
+      const videoDoc = (
+        await payload.find({
+          collection: mediaSlug,
+          depth: 0,
+          limit: 1,
+          where: { mimeType: { equals: 'video/mp4' } },
+        })
+      ).docs[0]
+
+      await page.goto(mediaURL.edit(videoDoc!.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('video.video-preview')).toBeVisible()
     })
   })
 })

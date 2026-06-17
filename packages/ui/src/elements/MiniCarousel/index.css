@@ -56,7 +56,7 @@
     flex-shrink: 0;
   }
 
-  @media (max-width: 768px) {
+  @container edit-main (max-width: 768px) {
     .mini-carousel {
       flex-direction: row;
       align-items: center;

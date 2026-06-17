@@ -7,6 +7,7 @@
   .collection-edit__main {
     width: 100%;
     container-type: inline-size;
+    container-name: edit-main;
   }
 
   .collection-edit__main--popup-open {
@@ -35,7 +36,9 @@
     }
   }
 
-  @media (max-width: 1024px) {
+  /* Container query (not viewport) so the layout stacks based on the space actually available
+     to the edit view — e.g. inside a narrow document drawer it uses the stacked mobile layout. */
+  @container edit-main (max-width: 1024px) {
     .collection-edit__upload-layout {
       flex-direction: column;
       gap: var(--spacer-5);
