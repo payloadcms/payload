@@ -8,7 +8,6 @@ import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { TrashIcon } from '../../icons/Trash/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { reduceFieldsToOptions } from '../../utilities/reduceFieldsToOptions.js'
 import { Button } from '../Button/index.js'
@@ -18,12 +17,10 @@ import './index.css'
 export type GroupByControlProps = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly fields: ClientField[]
-  /**
-   * When set, the control is driven by the form (value + onChange) instead of
-   * list query state. Used by the Query Presets drawer.
-   */
-  readonly onChange?: (groupBy: string) => void
-  readonly value?: string
+  /** Called with the next `groupBy` value (prefixed with `-` for descending). */
+  readonly onChange: (groupBy: string) => void
+  /** The current `groupBy` value (prefixed with `-` for descending). */
+  readonly value: string
 }
 
 const baseClass = 'group-by-control'
@@ -48,16 +45,13 @@ export const GroupByControl: React.FC<GroupByControlProps> = ({
   collectionSlug,
   fields,
   onChange,
-  value: valueProp,
+  value,
 }) => {
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
-  const listQuery = useListQuery()
   const closeRef = useRef<(() => void) | null>(null)
 
-  const isFormMode = typeof onChange === 'function'
-  const groupByRaw = isFormMode ? valueProp : listQuery.query?.groupBy
-  const groupByFieldName = groupByRaw?.replace(/^-/, '')
+  const groupByFieldName = value?.replace(/^-/, '')
 
   const fieldPermissions = permissions?.collections?.[collectionSlug]?.fields
 
@@ -86,58 +80,25 @@ export const GroupByControl: React.FC<GroupByControlProps> = ({
   const isActive = Boolean(groupByFieldName && groupByField)
 
   const handleFieldSelect = useCallback(
-    (value: string) => {
-      if (isFormMode) {
-        onChange(groupByRaw?.startsWith('-') ? `-${value}` : value)
-        return
-      }
-      void (async () => {
-        if (typeof listQuery.refineListData !== 'function') {
-          return
-        }
-        await listQuery.refineListData({
-          groupBy: listQuery.query?.groupBy?.startsWith('-') ? `-${value}` : value,
-          page: 1,
-        })
-      })()
+    (fieldPath: string) => {
+      onChange(value?.startsWith('-') ? `-${fieldPath}` : fieldPath)
     },
-    [isFormMode, onChange, groupByRaw, listQuery],
+    [onChange, value],
   )
 
   const handleClear = useCallback(() => {
-    if (isFormMode) {
-      onChange('')
-      closeRef.current?.()
-      return
-    }
-    void (async () => {
-      if (typeof listQuery.refineListData === 'function') {
-        await listQuery.refineListData({ groupBy: '' })
-      }
-      closeRef.current?.()
-    })()
-  }, [isFormMode, onChange, listQuery])
+    onChange('')
+    closeRef.current?.()
+  }, [onChange])
 
   const handleDirectionSelect = useCallback(
-    (value: 'asc' | 'desc') => {
+    (direction: 'asc' | 'desc') => {
       if (!groupByFieldName) {
         return
       }
-      if (isFormMode) {
-        onChange(value === 'asc' ? groupByFieldName : `-${groupByFieldName}`)
-        return
-      }
-      void (async () => {
-        if (typeof listQuery.refineListData !== 'function') {
-          return
-        }
-        await listQuery.refineListData({
-          groupBy: value === 'asc' ? groupByFieldName : `-${groupByFieldName}`,
-          page: 1,
-        })
-      })()
+      onChange(direction === 'asc' ? groupByFieldName : `-${groupByFieldName}`)
     },
-    [groupByFieldName, isFormMode, onChange, listQuery],
+    [groupByFieldName, onChange],
   )
 
   if (filteredFields.length === 0) {
@@ -145,11 +106,7 @@ export const GroupByControl: React.FC<GroupByControlProps> = ({
   }
 
   const directionValue =
-    !groupByRaw || typeof groupByRaw !== 'string'
-      ? 'asc'
-      : groupByRaw.startsWith('-')
-        ? 'desc'
-        : 'asc'
+    !value || typeof value !== 'string' ? 'asc' : value.startsWith('-') ? 'desc' : 'asc'
 
   // Build the trigger button label
   const triggerLabel = isActive

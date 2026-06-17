@@ -12,12 +12,9 @@ import { Popup } from '../Popup/index.js'
 
 export type ColumnsButtonProps = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
-  /**
-   * When set, the underlying ColumnSelector is driven by the form (columns +
-   * onChange) instead of the table columns context. Used by the Query Presets drawer.
-   */
-  readonly columns?: Column[]
-  readonly onChange?: (columns: Column[]) => void
+  readonly columns: Column[]
+  /** Called with the next column state whenever a column is toggled or reordered. */
+  readonly onChange: (columns: Column[]) => void
 }
 
 const baseClass = 'columns-button'

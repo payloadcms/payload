@@ -9,13 +9,14 @@ import type {
 export type WhereBuilderProps = {
   readonly collectionPluralLabel?: SanitizedCollectionConfig['labels']['plural']
   readonly collectionSlug: SanitizedCollectionConfig['slug']
-  readonly fields?: ClientField[]
-  /** When set, WhereBuilder is controlled by the form (value + onChange) instead of list query. */
-  readonly onChange?: (where: Where) => void
+  readonly fields: ClientField[]
+  /** Called with the next `where` value whenever a condition is added, edited, or removed. */
+  readonly onChange: (where: Where) => Promise<void> | void
   /** Called when the last condition is removed, so the parent can close the filters panel. */
   readonly onClose?: () => void
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
+  /** The current `where` value to render conditions from. */
   readonly value?: Where
 }
 

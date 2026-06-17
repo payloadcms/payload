@@ -39,7 +39,7 @@ export const QueryPresetsGroupByField: TextFieldClientComponent = ({
         collectionSlug={relatedCollection}
         fields={collectionConfig.fields}
         onChange={(groupBy) => setValue(groupBy || null)}
-        value={value ?? undefined}
+        value={value ?? ''}
       />
     </div>
   )

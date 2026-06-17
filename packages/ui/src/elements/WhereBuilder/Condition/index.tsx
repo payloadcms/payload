@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 
 import type {
   AddCondition,
@@ -22,6 +22,7 @@ export type Props = {
   readonly reducedFields: ReducedField[]
   readonly removeCondition: RemoveCondition
   readonly RenderedFilter?: React.ReactNode
+  readonly showRemoveButton: boolean
   readonly updateCondition: UpdateCondition
   readonly updateJoin: UpdateJoin
   readonly value: Value
@@ -57,6 +58,7 @@ export const Condition: React.FC<Props> = (props) => {
     reducedFields,
     removeCondition,
     RenderedFilter,
+    showRemoveButton,
     updateCondition,
     updateJoin,
     value,
@@ -69,6 +71,10 @@ export const Condition: React.FC<Props> = (props) => {
   const [internalValue, setInternalValue] = useState<Value>(value)
 
   const debouncedValue = useDebounce(internalValue, 300)
+
+  // Tracks the last value this row reported upward, so the downward sync below can tell our own
+  // committed echo apart from a genuine external change (e.g. the row being cleared/reset).
+  const lastReportedValue = useRef<Value>(value)
 
   const booleanSelect = ['exists'].includes(operator) || reducedField?.field?.type === 'checkbox'
 
@@ -85,13 +91,16 @@ export const Condition: React.FC<Props> = (props) => {
 
   const updateValue = useEffectEvent(async (debouncedValue: Value) => {
     if (operator) {
+      const normalizedValue =
+        debouncedValue === null || debouncedValue === '' ? undefined : debouncedValue
+      lastReportedValue.current = normalizedValue
       await updateCondition({
         type: 'value',
         andIndex,
         field: reducedField,
         operator,
         orIndex,
-        value: debouncedValue === null || debouncedValue === '' ? undefined : debouncedValue,
+        value: normalizedValue,
       })
     }
   })
@@ -99,6 +108,15 @@ export const Condition: React.FC<Props> = (props) => {
   useEffect(() => {
     void updateValue(debouncedValue)
   }, [debouncedValue])
+
+  // Sync external value changes (e.g. the row being cleared or reset to a placeholder) down into
+  // local state, but skip our own committed echo so this never clobbers in-progress typing.
+  useEffect(() => {
+    if (value !== lastReportedValue.current) {
+      lastReportedValue.current = value
+      setInternalValue(value)
+    }
+  }, [value])
 
   const disabled = !reducedField?.fieldPath || isFieldDisabled(reducedField?.field, 'filter')
 
@@ -211,17 +229,19 @@ export const Condition: React.FC<Props> = (props) => {
           </div>
         </div>
         <div className={`${baseClass}__actions`}>
-          <Button
-            buttonStyle="ghost"
-            className={`${baseClass}__actions-remove`}
-            icon={<LineIcon size={24} />}
-            onClick={() =>
-              removeCondition({
-                andIndex,
-                orIndex,
-              })
-            }
-          />
+          {showRemoveButton && (
+            <Button
+              buttonStyle="ghost"
+              className={`${baseClass}__actions-remove`}
+              icon={<LineIcon size={24} />}
+              onClick={() =>
+                removeCondition({
+                  andIndex,
+                  orIndex,
+                })
+              }
+            />
+          )}
         </div>
       </div>
     </div>
