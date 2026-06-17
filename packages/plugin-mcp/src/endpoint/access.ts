@@ -1,144 +1,194 @@
-import type { DefaultDocumentIDType, PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, SanitizedPermissions, TypedUser } from 'payload'
 
-import crypto from 'crypto'
-import { UnauthorizedError } from 'payload'
+import { getAccessResults, UnauthorizedError } from 'payload'
 
-import type { AuthorizedMCP, MCPAPIKeysDoc } from '../types.js'
+import type { AuthorizedMCP } from '../types.js'
+import {
+  COLLECTION_BUILTINS,
+  GLOBAL_BUILTINS,
+  type MCPCollectionBuiltinName,
+  type MCPGlobalBuiltinName,
+} from '../mcp/builtinTools.js'
 
 import { getLogger } from '../utils/getLogger.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 
 /**
- * Resolves the API key (or dev-mode session) and returns the items the caller
- * may use. Denied items are dropped from the array.
+ * Resolves the MCP caller and returns the MCP surface authorized for that request.
+ *
+ * Authorization has two layers:
+ * 1. Payload collection/global permissions determine whether built-in operation tools are shown.
+ * 2. MCP `access` callbacks can further hide any configured tool, prompt, or resource.
  */
-export const getAuthorizedMCP: (args: { req: PayloadRequest }) => Promise<AuthorizedMCP> = async ({
-  req,
-}) => {
+export const getAuthorizedMCP: (args: {
+  req: PayloadRequest
+  skipAuth?: boolean
+}) => Promise<AuthorizedMCP> = async ({ req, skipAuth = false }) => {
   const logger = getLogger({ payload: req.payload })
   const pluginConfig = getPluginConfig({ config: req.payload.config })
 
-  const authHeader = req.headers.get('Authorization')
-  const hasBearerToken = authHeader?.startsWith('Bearer ')
-
-  const buildAuthorized = (apiKeyDoc: MCPAPIKeysDoc): AuthorizedMCP => ({
-    items: pluginConfig.items.filter((item) => {
-      switch (item.type) {
-        case 'collectionTool':
-          return apiKeyDoc.access.collections?.[item.collectionSlug]?.[item.configKey] !== false
-        case 'globalTool':
-          return apiKeyDoc.access.globals?.[item.globalSlug]?.[item.configKey] !== false
-        case 'prompt':
-          return apiKeyDoc.access.prompts?.[item.configKey] !== false
-        case 'resource':
-          return apiKeyDoc.access.resources?.[item.configKey] !== false
-        case 'tool':
-          return apiKeyDoc.access.tools?.[item.configKey] !== false
-      }
-    }),
-    overrideAccess:
-      typeof apiKeyDoc.overrideAccess === 'boolean' ? apiKeyDoc.overrideAccess : false,
-    user: apiKeyDoc.user,
+  const getAuthorizedMCPForUser = ({
+    overrideAccess = false,
+    user,
+  }: {
+    overrideAccess?: boolean
+    user: null | TypedUser
+  }): AuthorizedMCP => ({
+    items: pluginConfig.items,
+    overrideAccess,
+    user,
   })
 
-  if (pluginConfig.overrideAuth) {
-    return await pluginConfig.overrideAuth({
-      getAPIKeyDoc: (overrideApiKey) => getAPIKeyDoc({ logger, overrideApiKey, pluginConfig, req }),
-      getAuthorizedMCP: ({ apiKeyDoc }) => buildAuthorized(apiKeyDoc),
-      pluginConfig,
+  if (skipAuth) {
+    return await filterAuthorizedMCPItems({
+      authorizedMCP: getAuthorizedMCPForUser({
+        overrideAccess: true,
+        user: req.user ?? null,
+      }),
       req,
     })
   }
 
-  if (process.env.NODE_ENV === 'development' && !hasBearerToken) {
-    logger.info('Dev mode: skipping API key check, using session user')
-    return buildAuthorized({
-      id: -1,
-      access: {},
-      overrideAccess: true,
-      user: req.user ?? null,
+  if (pluginConfig.overrideAuth) {
+    return await filterAuthorizedMCPItems({
+      authorizedMCP: await pluginConfig.overrideAuth({
+        getAPIKeyUser: (overrideApiKey) =>
+          getAPIKeyUser({ overrideApiKey, pluginConfig, req }),
+        getAuthorizedMCP: getAuthorizedMCPForUser,
+        pluginConfig,
+        req,
+      }),
+      req,
     })
   }
 
-  return buildAuthorized(await getAPIKeyDoc({ logger, pluginConfig, req }))
+  if (process.env.NODE_ENV === 'development' && !req.headers.get('Authorization')) {
+    logger.info('Dev mode: skipping API key check, using session user')
+    return await filterAuthorizedMCPItems({
+      authorizedMCP: getAuthorizedMCPForUser({
+        overrideAccess: true,
+        user: req.user ?? null,
+      }),
+      req,
+    })
+  }
+
+  return await filterAuthorizedMCPItems({
+    authorizedMCP: getAuthorizedMCPForUser({ user: await getAPIKeyUser({ pluginConfig, req }) }),
+    req,
+  })
 }
 
-const getAPIKeyDoc = async ({
-  logger,
+const getAPIKeyUser = async ({
   overrideApiKey,
   pluginConfig,
   req,
 }: {
-  logger: ReturnType<typeof getLogger>
   overrideApiKey?: string
   pluginConfig: ReturnType<typeof getPluginConfig>
   req: PayloadRequest
-}): Promise<MCPAPIKeysDoc> => {
-  const authHeader = req.headers.get('Authorization')
-  const hasBearerToken = authHeader?.startsWith('Bearer ')
+}): Promise<TypedUser> => {
+  const headers = new Headers(req.headers)
+  if (overrideApiKey) {
+    headers.set('Authorization', `${pluginConfig.userCollection} API-Key ${overrideApiKey}`)
+  }
 
-  const apiKey =
-    overrideApiKey ?? (hasBearerToken ? authHeader?.replace('Bearer ', '').trim() || null : null)
+  const user = overrideApiKey
+    ? (await req.payload.auth({ headers })).user
+    : req.user
 
-  if (!apiKey) {
+  if (user?._strategy !== 'api-key' || user.collection !== pluginConfig.userCollection) {
     throw new UnauthorizedError()
   }
 
-  const sha256APIKeyIndex = crypto
-    .createHmac('sha256', req.payload.secret)
-    .update(apiKey)
-    .digest('hex')
+  return user
+}
 
-  const doc = await req.payload.db.findOne<MCPAPIKeysDoc>({
-    collection: 'payload-mcp-api-keys',
-    req,
-    where: {
-      apiKeyIndex: { equals: sha256APIKeyIndex },
-    },
-  })
+const filterAuthorizedMCPItems = async ({
+  authorizedMCP,
+  req,
+}: {
+  authorizedMCP: AuthorizedMCP
+  req: PayloadRequest
+}): Promise<AuthorizedMCP> => {
+  const items: AuthorizedMCP['items'] = []
+  // Layer 1: use Payload access results to hide built-in collection/global
+  // operation tools the caller cannot run. `overrideAccess` skips this layer.
+  const permissions = authorizedMCP.overrideAccess
+    ? null
+    : await getAccessResults({ req: { ...req, user: authorizedMCP.user } })
 
-  if (!doc || !doc.user) {
-    throw new UnauthorizedError()
-  }
+  for (const item of authorizedMCP.items) {
+    if (item.type === 'collectionTool') {
+      // Built-in collection tools map to Payload collection operations.
+      // Custom collection tools have no operation gate here.
+      const operation =
+        COLLECTION_BUILTINS[item.configKey as MCPCollectionBuiltinName]?.accessOperation
 
-  logger.info('API Key is valid')
+      if (
+        operation &&
+        permissions &&
+        !permissions.collections?.[item.collectionSlug]?.[operation]
+      ) {
+        continue
+      }
 
-  const userRef = doc.user
-  const userID =
-    typeof userRef === 'object' && userRef !== null && 'id' in userRef
-      ? userRef.id
-      : (userRef as unknown as DefaultDocumentIDType)
+      // Layer 2: per-tool access callbacks can further hide the item.
+      if (
+        item.tool.access &&
+        !(await item.tool.access({
+          authorizedMCP,
+          collectionSlug: item.collectionSlug,
+          req,
+        }))
+      ) {
+        continue
+      }
+      items.push(item)
+      continue
+    }
 
-  const user = (await req.payload.findByID({
-    id: userID,
-    collection: pluginConfig.userCollection,
-    depth: 0,
-    disableErrors: true,
-    req,
-  })) as null | TypedUser
+    if (item.type === 'globalTool') {
+      // Built-in global tools map to Payload global operations.
+      // Custom global tools have no operation gate here.
+      const operation = GLOBAL_BUILTINS[item.configKey as MCPGlobalBuiltinName]?.accessOperation
 
-  if (!user) {
-    throw new UnauthorizedError()
-  }
+      if (operation && permissions && !permissions.globals?.[item.globalSlug]?.[operation]) {
+        continue
+      }
 
-  try {
-    await req.payload.db.updateOne({
-      id: doc.id,
-      collection: 'payload-mcp-api-keys',
-      data: { lastUsed: new Date().toISOString() },
-      req,
-      returning: false,
-    })
-  } catch (err) {
-    logger.warn({ err, msg: 'Failed to update MCP API key last-used timestamp' })
+      // Layer 2: per-tool access callbacks can further hide the item.
+      if (
+        item.tool.access &&
+        !(await item.tool.access({
+          authorizedMCP,
+          globalSlug: item.globalSlug,
+          req,
+        }))
+      ) {
+        continue
+      }
+      items.push(item)
+      continue
+    }
+
+    const access =
+      item.type === 'prompt'
+        ? item.prompt.access
+        : item.type === 'resource'
+          ? item.resource.access
+          : item.tool.access
+
+    // Prompts, resources, and top-level tools only have the MCP access-callback layer.
+    if (access && !(await access({ authorizedMCP, req }))) {
+      continue
+    }
+
+    items.push(item)
   }
 
   return {
-    ...doc,
-    user: {
-      ...user,
-      _strategy: 'mcp-api-key' as const,
-      collection: pluginConfig.userCollection,
-    },
+    ...authorizedMCP,
+    items,
   }
 }

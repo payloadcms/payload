@@ -887,9 +887,9 @@ createAPIKeyFields({
 })
 ```
 
-### `@payloadcms/plugin-mcp` refactored: config API, built-in tool inputs, and API keys
+### `@payloadcms/plugin-mcp` refactored: config API, built-in tool inputs, and user API keys
 
-The MCP plugin was refactored. The public config API, the built-in tool inputs, and the API key collection schema all changed. Update your plugin config and delete + recreate any existing API keys.
+The MCP plugin was refactored. The public config API, the built-in tool inputs, and API-key authentication changed. Update your plugin config and recreate MCP credentials as user API keys.
 
 **Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default through the generic built-in tools (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, plus `getGlobalSchema`, `findGlobal`, and `updateGlobal` for globals). Turn individual operations off via simple config keys like `tools: { create: false }`.
 
@@ -963,17 +963,19 @@ defineCollectionTool({
 + mcpPlugin({ collections: { users: { tools: { login: true } } } })
 ```
 
-**`mcp.handlerOptions` is gone.** `verboseLogs` moved to `mcp.verboseLogs`. `onEvent`, `maxDuration`, `disableSse`, `redisUrl` and `basePath` were removed. The `experimental.tools` block (auth, plus the collection / job / config codegen tools) was removed entirely. The unused `GET /api/mcp` route was dropped; only `POST` remains.
+**`mcp.handlerOptions` is gone.** `verboseLogs` moved to `mcp.verboseLogs`. `onEvent`, `maxDuration`, `disableSse`, `redisUrl` and `basePath` were removed. The `experimental.tools` block (auth, plus the collection / job / config codegen tools) was removed entirely. The server-push `GET /api/mcp` stream is no longer supported; MCP requests use `POST /api/mcp`.
 
 **`overrideAuth` signature changed.** It now receives one argument object and returns an `AuthorizedMCP` instead of the old `MCPAccessSettings` (the type was removed).
 
 ```diff
 mcpPlugin({
 - overrideAuth: (req, getDefaultMcpAccessSettings) => { ... },
-+ overrideAuth: ({ req, pluginConfig, getAPIKeyDoc, getAuthorizedMCP }) => { ... },
++ overrideAuth: ({ req, pluginConfig, getAPIKeyUser, getAuthorizedMCP }) => { ... },
 })
 ```
 
-**API keys must be recreated and are managed from a new admin flow.** The `payload-mcp-api-keys` collection keeps its slug, but it is no longer auth-enabled, is hidden from the main nav, and is linked from the user menu under **Settings → Manage API keys**. Its admin shape changed: the API key value is handled by explicit encrypted `apiKey` and hashed `apiKeyIndex` fields behind a custom generate/copy UI, permissions are stored in one `access` JSON field, `label`, `description`, a required `user`, and `overrideAccess` render in the sidebar, and a `lastUsed` field was added for existing keys. Keys still run as their user when `overrideAccess` is enabled; that setting only bypasses Payload access rules for the key's operations. The list view now defaults to title, last used, and user columns, and renders a custom empty state when no API keys exist. Existing keys keep authenticating but lose their permissions (an empty `access` is treated as "allow everything"), so an un-migrated key silently gets full access. Delete your existing MCP API keys after upgrading and create fresh ones.
+**MCP now uses user API keys.** The `payload-mcp-api-keys` collection was removed. API keys sent to `/api/mcp` now use Payload's normal `Authorization: <userCollection> API-Key <key>` header and are looked up against the configured `userCollection` using Payload's normal `auth.useAPIKey` fields. Enable `auth.useAPIKey` on that collection and create API keys on the users that should call MCP. Existing `payload-mcp-api-keys` documents no longer authenticate, and `overrideApiKeyCollection` was removed.
 
-**Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`, and moved to `zod` v4. If your custom tools import `zod` directly, make sure it resolves to v4. `@payloadcms/ui` and `react` 19 are now peer dependencies; any Payload 4 project already provides both.
+**MCP tool access is configured in code.** The old per-key permissions UI was removed with the MCP API-key collection. Tools, prompts, and resources can now define an `access` callback; built-in collection/global tools accept `access` in their override object.
+
+**Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`, and moved to `zod` v4. If your custom tools import `zod` directly, make sure it resolves to v4.

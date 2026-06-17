@@ -6,8 +6,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createLocalReq, getPayload } from 'payload'
 import { findConfig } from 'payload/node'
 
-import type { AuthorizedMCP, SanitizedMCPPluginConfig } from './types.js'
+import type { SanitizedMCPPluginConfig } from './types.js'
 
+import { getAuthorizedMCP } from './endpoint/access.js'
 import { buildMcpServer } from './mcp/buildMcpServer.js'
 import { sanitizeMCPConfig } from './mcp/sanitizeMCPConfig.js'
 import { getPluginConfig } from './utils/getPluginConfig.js'
@@ -62,14 +63,9 @@ export const runMcpStdio = async (): Promise<void> => {
     ;(payload.config.plugins ??= []).push(fakePluginFn)
   }
 
-  const authorizedMCP: AuthorizedMCP = {
-    items: pluginConfig.items,
-    overrideAccess: true,
-    user: null,
-  }
-
   const req = await createLocalReq({}, payload)
   req.payloadAPI = 'MCP' as const
+  const authorizedMCP = await getAuthorizedMCP({ req, skipAuth: true })
 
   const server = buildMcpServer({ authorizedMCP, pluginConfig, req })
 
