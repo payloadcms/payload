@@ -135,7 +135,7 @@ describe('@payloadcms/plugin-mcp', () => {
       const updateOneSpy = vi.spyOn(payload.db, 'updateOne')
 
       try {
-        const client = await mcp.connect(doc.apiKey as string)
+        const client = await mcp.connect(doc.apiKey)
         await client.ping()
 
         expect(updateOneSpy).toHaveBeenCalledWith(
@@ -329,7 +329,7 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const client = await mcp.connect(doc.apiKey as string)
+      const client = await mcp.connect(doc.apiKey)
       const response = await client.callTool({ arguments: {}, name: 'getConfigInfo' })
       const text = getToolText(response)
 
@@ -351,7 +351,7 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const client = await mcp.connect(doc.apiKey as string)
+      const client = await mcp.connect(doc.apiKey)
       const toolsResponse = await client.listTools()
       const toolNames = toolsResponse.tools.map((tool: { name: string }) => tool.name)
 
@@ -490,7 +490,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(promptResponse).toBeDefined()
       expect(promptResponse.messages).toHaveLength(2)
       expect(promptResponse.messages[0].content.type).toBe('text')
-      expect(promptResponse.messages[0].content.text).toContain('This prompt was sent: Hello, world!')
+      expect(promptResponse.messages[0].content.text).toContain(
+        'This prompt was sent: Hello, world!',
+      )
       expect(promptResponse.messages[1].content.type).toBe('text')
       expect(promptResponse.messages[1].content.text).toContain(
         `This prompt was sent by userId: ${userId}`,
@@ -727,7 +729,7 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
 
-      const client = await mcp.connect(doc.apiKey as string)
+      const client = await mcp.connect(doc.apiKey)
       const toolsResponse = await client.listTools()
       const createDocument = toolsResponse.tools.find((tool) => tool.name === 'createDocument')
       expect(createDocument.inputSchema.properties.collectionSlug.type).toBe('string')
@@ -827,12 +829,13 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
       const apiKey = await getApiKey()
+      const client = await mcp.connect(apiKey)
+
       const findSpy = vi.spyOn(payload, 'find')
 
       try {
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'posts',
             joins: false,
             limit: 1,
@@ -846,7 +849,6 @@ describe('@payloadcms/plugin-mcp', () => {
         })
 
         expect(callResponse).toBeDefined()
-        expect(callResponse.result).toBeDefined()
         expect(findSpy).toHaveBeenCalledWith(
           expect.objectContaining({
             collection: 'posts',
@@ -872,12 +874,13 @@ describe('@payloadcms/plugin-mcp', () => {
         },
       })
       const apiKey = await getApiKey()
+      const client = await mcp.connect(apiKey)
+
       const findByIDSpy = vi.spyOn(payload, 'findByID')
 
       try {
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const callResponse = await client.callTool({
+          arguments: {
             collectionSlug: 'posts',
             id: post.id,
             joins: false,
@@ -888,7 +891,6 @@ describe('@payloadcms/plugin-mcp', () => {
         })
 
         expect(callResponse).toBeDefined()
-        expect(callResponse.result).toBeDefined()
         expect(findByIDSpy).toHaveBeenCalledWith(
           expect.objectContaining({
             collection: 'posts',
@@ -1265,7 +1267,7 @@ describe('@payloadcms/plugin-mcp', () => {
           user: userId,
         },
       })
-      return doc.apiKey as string
+      return doc.apiKey
     }
 
     it('should create a page with a block', async ({ mcp }) => {
@@ -1531,12 +1533,12 @@ describe('@payloadcms/plugin-mcp', () => {
 
     it('should pass populate to findGlobal', async ({ mcp }) => {
       const apiKey = await getApiKey({ globalFind: true })
+      const client = await mcp.connect(apiKey)
       const findGlobalSpy = vi.spyOn(payload, 'findGlobal')
 
       try {
-        const callResponse = await mcp.callTool({
-          apiKey,
-          args: {
+        const callResponse = await client.callTool({
+          arguments: {
             globalSlug: 'site-settings',
             populate: { users: { email: true } },
           },
@@ -1544,7 +1546,6 @@ describe('@payloadcms/plugin-mcp', () => {
         })
 
         expect(callResponse).toBeDefined()
-        expect(callResponse.result).toBeDefined()
         expect(findGlobalSpy).toHaveBeenCalledWith(
           expect.objectContaining({
             populate: { users: { email: true } },
@@ -1938,7 +1939,7 @@ describe('@payloadcms/plugin-mcp', () => {
           user: userId,
         },
       })
-      return doc.apiKey as string
+      return doc.apiKey
     }
 
     describe('Schema validation', () => {
@@ -2104,9 +2105,7 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(callResponse.isError).toBe(true)
         expect(callResponse.content[0].text).toContain('Use this schema for data')
         expect(callResponse.content[0].text).toContain('"numberField"')
-        expect(
-          (callResponse as any).structuredContent.schema.properties.numberField,
-        ).toBeDefined()
+        expect((callResponse as any).structuredContent.schema.properties.numberField).toBeDefined()
       })
 
       it('should create document with date, code, and json fields', async ({ mcp }) => {
@@ -2422,9 +2421,7 @@ describe('@payloadcms/plugin-mcp', () => {
         expect(callResponse.isError).toBe(true)
         expect(callResponse.content[0].text).toContain('Use this schema for data')
         expect(callResponse.content[0].text).toContain('"numberField"')
-        expect(
-          (callResponse as any).structuredContent.schema.properties.numberField,
-        ).toBeDefined()
+        expect((callResponse as any).structuredContent.schema.properties.numberField).toBeDefined()
       })
 
       it('should update document with collapsible field (children at top level)', async ({
