@@ -18,12 +18,13 @@ import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 
 type UnpublishManyDrawerContentProps = {
+  collection: UnpublishManyProps['collection']
   drawerSlug: string
   ids: (number | string)[]
   onSuccess?: () => void
   selectAll: boolean
   where?: Where
-} & UnpublishManyProps
+}
 
 export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProps) {
   const {
