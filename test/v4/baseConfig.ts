@@ -155,17 +155,19 @@ export const baseConfig: Partial<Config> = {
       password: devUser.password,
       prefillOnly: true,
     },
-    livePreview: {
-      collections: [docControlsSlug],
-      url: 'http://localhost:3000',
-    },
     components: {
       actions: [
         './components/HeaderAction.tsx#HeaderAction',
         './components/HeaderAction.tsx#HeaderAction2',
       ],
       beforeNavLinks: ['./views/Components/NavLink.js#ComponentsNavLink'],
-      userMenuSettingsItems: ['./components/UserMenuSettingsItem.tsx#UserMenuSettingsItem'],
+      userMenuSettingsItems: [
+        {
+          group: 'Developer Tools',
+          items: ['./components/UserMenuSettingsItem.tsx#UserMenuSettingsItem'],
+        },
+        './components/UserMenuSettingsItemLegacy.tsx#UserMenuSettingsItemLegacy',
+      ],
       views: {
         components: {
           Component: './views/Components/index.js#ComponentsView',
@@ -175,6 +177,10 @@ export const baseConfig: Partial<Config> = {
     },
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    livePreview: {
+      collections: [docControlsSlug],
+      url: 'http://localhost:3000',
     },
   },
   collections,
@@ -405,8 +411,8 @@ export const baseConfig: Partial<Config> = {
       await payload.create({
         collection: tagItemsSlug,
         data: {
-          title: `Tag Item ${i}`,
           description: `Description for tag item ${i}`,
+          title: `Tag Item ${i}`,
         },
       })
     }
@@ -753,8 +759,8 @@ export const baseConfig: Partial<Config> = {
     // Seed drawers collection: a couple of docs linked via the
     // self-referencing `child` field so drawers can be drilled into.
     const drawerSeeds = [
-      { title: 'Landing Page', status: 'published' as const },
-      { title: 'About Page', status: 'draft' as const },
+      { status: 'published' as const, title: 'Landing Page' },
+      { status: 'draft' as const, title: 'About Page' },
     ]
 
     let previousNestedChild: number | string | undefined
@@ -763,7 +769,6 @@ export const baseConfig: Partial<Config> = {
       const created = await payload.create({
         collection: drawersSlug,
         data: {
-          title: seed.title,
           blocks: [
             { blockType: 'hero-block', heading: `${seed.title} Hero` },
             {
@@ -852,6 +857,7 @@ export const baseConfig: Partial<Config> = {
           relatedRelationship: createdRelationship.id,
           relatedText: createdPosts[i]?.id as string,
           status: seed.status,
+          title: seed.title,
         },
       })
       previousNestedChild = created.id

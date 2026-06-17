@@ -88,7 +88,10 @@ export const mcpPlugin = definePlugin<MCPPluginConfig>({
           ...config.admin?.components,
           userMenuSettingsItems: [
             ...(config.admin?.components?.userMenuSettingsItems ?? []),
-            '@payloadcms/plugin-mcp/client#MCPSettingsMenu',
+            {
+              group: 'MCP',
+              items: ['@payloadcms/plugin-mcp/client#MCPSettingsMenu'],
+            },
           ],
         },
       },
