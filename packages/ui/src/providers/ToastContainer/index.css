@@ -5,7 +5,7 @@
 
     .toast-title {
       padding-inline: var(--spacer-1);
-      color: var(--color-text-oninverse);
+      color: var(--color-text);
       font-family: var(--text-body-medium-strong-font-family);
       font-size: var(--text-body-medium-strong-font-size);
       font-weight: var(--text-body-medium-strong-font-weight);
@@ -22,10 +22,10 @@
       inline-size: 280px;
       margin: 0;
       padding: var(--spacer-2);
-      color: var(--color-text-oninverse);
+      color: var(--color-text);
       font-style: normal;
       font-weight: var(--font-weight-strong);
-      background: var(--color-bg-inverse);
+      background: var(--color-bg-elevated);
       border-radius: var(--radius-large);
       box-shadow: var(--elevation-100-canvas);
 
@@ -78,7 +78,7 @@
 
       &.toast-warning {
         .icon--warning {
-          color: var(--color-text-oninverse);
+          color: var(--color-icon-warning);
         }
       }
     }
@@ -136,15 +136,38 @@
   border: 0;
   border-radius: var(--radius-medium);
   background: transparent;
-  color: var(--color-icon-oninverse);
+  color: var(--color-icon);
   transform: none;
   cursor: pointer;
   transition: none;
 }
 
+/* Sonner sets a dark-theme base background on [data-close-button]. Override with higher specificity. */
+[data-sonner-toaster][data-theme='dark'].payload-toast-container
+  [data-sonner-toast].payload-toast-item
+  [data-close-button].payload-toast-close-button {
+  background: transparent;
+  border-color: transparent;
+}
+
 .payload-toast-container .payload-toast-item .payload-toast-close-button:hover,
 .payload-toast-container .payload-toast-item .payload-toast-close-button:focus-visible {
-  background: var(--color-bg-inverse-hover);
+  background: var(--color-bg-hover);
+}
+
+[data-sonner-toaster][data-theme='dark'].payload-toast-container
+  [data-sonner-toast].payload-toast-item
+  [data-close-button].payload-toast-close-button:hover,
+[data-sonner-toaster][data-theme='dark'].payload-toast-container
+  [data-sonner-toast].payload-toast-item
+  [data-close-button].payload-toast-close-button:focus-visible {
+  background: var(--color-bg-hover);
+}
+
+[data-sonner-toaster][data-theme='dark'].payload-toast-container
+  [data-sonner-toast].payload-toast-item
+  [data-close-button].payload-toast-close-button:active {
+  background: var(--color-bg-pressed);
 }
 
 .payload-toast-container .toast-error .payload-toast-close-button {
@@ -154,6 +177,21 @@
 .payload-toast-container .toast-error .payload-toast-close-button:hover,
 .payload-toast-container .toast-error .payload-toast-close-button:focus-visible {
   background: var(--color-bg-danger-hover);
+}
+
+[data-sonner-toaster][data-theme='dark'].payload-toast-container
+  [data-sonner-toast].payload-toast-item.toast-error
+  [data-close-button].payload-toast-close-button:hover,
+[data-sonner-toaster][data-theme='dark'].payload-toast-container
+  [data-sonner-toast].payload-toast-item.toast-error
+  [data-close-button].payload-toast-close-button:focus-visible {
+  background: var(--color-bg-danger-hover);
+}
+
+[data-sonner-toaster][data-theme='dark'].payload-toast-container
+  [data-sonner-toast].payload-toast-item.toast-error
+  [data-close-button].payload-toast-close-button:active {
+  background: var(--color-bg-danger-pressed);
 }
 
 [data-sonner-toaster].payload-toast-container[data-lifted='true'] {

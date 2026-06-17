@@ -39,6 +39,7 @@ export const ToastContainer: React.FC<{
       style={{
         width: '280px',
       }}
+      theme="dark"
       toastOptions={{
         classNames: {
           closeButton: 'payload-toast-close-button',
