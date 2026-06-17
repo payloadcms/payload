@@ -17,6 +17,13 @@ export const getAfterChangeHook =
       return doc
     }
 
+    // Whether the originating operation saved a draft. When true, persisting upload
+    // metadata and deleting previous files must respect the draft, otherwise the
+    // published main document gets unpublished and its file removed.
+    const isDraftSave = (doc as { _status?: string })._status === 'draft'
+    const isDraftOverPublished =
+      isDraftSave && (previousDoc as { _status?: string } | undefined)?._status === 'published'
+
     try {
       const files = getIncomingFiles({ data: doc, req })
 
@@ -63,6 +70,10 @@ export const getAfterChangeHook =
               collection: collection.slug,
               data: uploadMetadata,
               depth: 0,
+              // Preserve the draft state of the originating operation. Without this, the
+              // metadata is written to the published main document, flipping its _status
+              // to draft (effectively unpublishing it) when saving a draft with a new file.
+              draft: isDraftSave,
               req,
             })
           } finally {
@@ -76,7 +87,12 @@ export const getAfterChangeHook =
         // persistence have succeeded. Deleting earlier would orphan the
         // record if a later step throws (e.g. a user-defined afterChange
         // hook on the same collection).
-        if (previousDoc && operation === 'update') {
+        //
+        // Skip deletion when saving a draft over a published document: the previous
+        // (published) file is still referenced by the published main document, so
+        // removing it would break the published document even though only a draft
+        // was saved.
+        if (previousDoc && operation === 'update' && !isDraftOverPublished) {
           let filesToDelete: string[] = []
 
           if (typeof previousDoc?.filename === 'string') {

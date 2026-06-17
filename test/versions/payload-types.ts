@@ -62,23 +62,24 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_3937C7CB".
+ * via the `definition` "LexicalNodes_F50D3E7C".
  */
-export type LexicalNodes_3937C7CB =
+export type LexicalNodes_F50D3E7C =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_3937C7CB>
+  | SerializedParagraphNode<LexicalNodes_F50D3E7C>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_3937C7CB>
+  | SerializedHeadingNode<LexicalNodes_F50D3E7C>
   | SerializedUploadNode<'draft-with-upload'>
+  | SerializedUploadNode<'draft-with-upload-cloud-storage'>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
   | SerializedUploadNode<'media2'>
-  | SerializedQuoteNode<LexicalNodes_3937C7CB>
-  | SerializedListNode<LexicalNodes_3937C7CB>
-  | SerializedListItemNode<LexicalNodes_3937C7CB>
-  | SerializedAutoLinkNode<LexicalNodes_3937C7CB, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_3937C7CB, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_F50D3E7C>
+  | SerializedListNode<LexicalNodes_F50D3E7C>
+  | SerializedListItemNode<LexicalNodes_F50D3E7C>
+  | SerializedAutoLinkNode<LexicalNodes_F50D3E7C, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_F50D3E7C, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'disable-publish'
       | 'posts'
@@ -132,6 +133,7 @@ export interface Config {
     diff: Diff;
     text: Text;
     'draft-with-upload': DraftWithUpload;
+    'draft-with-upload-cloud-storage': DraftWithUploadCloudStorage;
     media: Media;
     media2: Media2;
     users: User;
@@ -163,6 +165,7 @@ export interface Config {
     diff: DiffSelect<false> | DiffSelect<true>;
     text: TextSelect<false> | TextSelect<true>;
     'draft-with-upload': DraftWithUploadSelect<false> | DraftWithUploadSelect<true>;
+    'draft-with-upload-cloud-storage': DraftWithUploadCloudStorageSelect<false> | DraftWithUploadCloudStorageSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     media2: Media2Select<false> | Media2Select<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -265,7 +268,7 @@ export interface AutosavePost {
   title: string;
   relationship?: (string | null) | Post;
   computedTitle?: string | null;
-  richText?: LexicalRichText<LexicalNodes_3937C7CB> | null;
+  richText?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
   json?:
     | {
         [k: string]: unknown;
@@ -563,8 +566,8 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
-  richtext?: LexicalRichText<LexicalNodes_3937C7CB> | null;
-  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_3937C7CB> | null;
+  richtext?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
+  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
@@ -708,6 +711,26 @@ export interface Media {
  * via the `definition` "draft-with-upload".
  */
 export interface DraftWithUpload {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-upload-cloud-storage".
+ */
+export interface DraftWithUploadCloudStorage {
   id: string;
   alt?: string | null;
   updatedAt: string;
@@ -957,6 +980,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'draft-with-upload';
         value: string | DraftWithUpload;
+      } | null)
+    | ({
+        relationTo: 'draft-with-upload-cloud-storage';
+        value: string | DraftWithUploadCloudStorage;
       } | null)
     | ({
         relationTo: 'media';
@@ -1373,6 +1400,25 @@ export interface TextSelect<T extends boolean = true> {
  * via the `definition` "draft-with-upload_select".
  */
 export interface DraftWithUploadSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-upload-cloud-storage_select".
+ */
+export interface DraftWithUploadCloudStorageSelect<T extends boolean = true> {
   alt?: T;
   updatedAt?: T;
   createdAt?: T;
