@@ -1,4 +1,4 @@
-import type { SelectType } from 'payload'
+import type { JoinQuery, PopulateType, SelectType } from 'payload'
 
 import { z } from 'zod'
 
@@ -37,6 +37,12 @@ export const findDocumentsTool = defineCollectionTool({
       .string()
       .describe('Optional: fallback locale code to use when requested locale is not available')
       .optional(),
+    joins: z
+      .union([z.record(z.string(), z.unknown()), z.literal(false)])
+      .describe(
+        'Optional: configure join field queries, or pass false to disable all join fields.',
+      )
+      .optional(),
     limit: z
       .number()
       .int()
@@ -58,15 +64,29 @@ export const findDocumentsTool = defineCollectionTool({
       .describe('Page number for pagination (default: 1)')
       .optional()
       .default(1),
-    select: z
-      .string()
+    pagination: z
+      .boolean()
+      .describe('Optional: set to false to skip the count query overhead')
+      .optional(),
+    populate: z
+      .record(z.string(), z.unknown())
       .describe(
-        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        'Optional: control which fields to include from populated relationship or upload documents.',
+      )
+      .optional(),
+    select: z
+      .record(z.string(), z.unknown())
+      .describe(
+        "Optional: define exactly which fields you'd like to return in the response, e.g., {\"title\": true}",
       )
       .optional(),
     sort: z
       .string()
       .describe('Field to sort by (e.g., "createdAt", "-updatedAt" for descending)')
+      .optional(),
+    trash: z
+      .boolean()
+      .describe('Optional: include soft-deleted documents when trash is enabled on the collection')
       .optional(),
     where: whereSchema
       .describe(
@@ -78,23 +98,28 @@ export const findDocumentsTool = defineCollectionTool({
   const payload = req.payload
   const logger = getLogger({ payload })
 
-  const { id, depth, draft, fallbackLocale, limit, locale, page, select, sort, where } = input
+  const {
+    id,
+    depth,
+    draft,
+    fallbackLocale,
+    joins,
+    limit,
+    locale,
+    page,
+    pagination,
+    populate,
+    select,
+    sort,
+    trash,
+    where,
+  } = input
 
   logger.info(
     `Reading document from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ''}, limit: ${limit}, page: ${page}${locale ? `, locale: ${locale}` : ''}`,
   )
 
   try {
-    let selectClause: SelectType | undefined
-    if (select) {
-      try {
-        selectClause = JSON.parse(select) as SelectType
-      } catch {
-        logger.warn(`Invalid select clause JSON: ${select}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
-      }
-    }
-
     if (id) {
       try {
         const doc = await payload.findByID({
@@ -103,10 +128,13 @@ export const findDocumentsTool = defineCollectionTool({
           depth,
           req,
           ...localAPIDefaults(authorizedMCP),
-          ...(selectClause && { select: selectClause }),
+          ...(select && { select: select as SelectType }),
+          ...(populate && { populate: populate as PopulateType }),
+          ...(joins !== undefined && { joins: joins as JoinQuery }),
           ...(locale && { locale }),
           ...(fallbackLocale && { fallbackLocale }),
           ...(draft !== undefined && { draft }),
+          ...(trash !== undefined && { trash }),
         })
 
         return {
@@ -138,10 +166,14 @@ export const findDocumentsTool = defineCollectionTool({
       page,
       req,
       ...localAPIDefaults(authorizedMCP),
-      ...(selectClause && { select: selectClause }),
+      ...(select && { select: select as SelectType }),
+      ...(populate && { populate: populate as PopulateType }),
+      ...(joins !== undefined && { joins: joins as JoinQuery }),
       ...(locale && { locale }),
       ...(fallbackLocale && { fallbackLocale }),
       ...(draft !== undefined && { draft }),
+      ...(pagination !== undefined && { pagination }),
+      ...(trash !== undefined && { trash }),
     }
 
     if (sort) {
