@@ -150,10 +150,16 @@
     }
 
     .doc-controls {
-      padding: var(--spacer-2) var(--spacer-3);
+      padding: var(--spacer-2-5);
       padding-right: var(--spacer-2-5);
       gap: var(--spacer-2);
       flex-wrap: wrap;
+    }
+
+    .doc-controls--drawerHeaderActions {
+      padding: 0;
+      gap: 0;
+      flex-wrap: nowrap;
     }
 
     .doc-controls__content {
