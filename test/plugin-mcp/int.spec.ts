@@ -630,7 +630,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(schema.properties.badProperty).toBeUndefined()
     })
 
-    it('should call createDocument', async ({ mcp }) => {
+    it('should call createDocument with generic payload', async ({ mcp }) => {
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
       const callResponse = await client.callTool({
