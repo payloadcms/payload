@@ -5,42 +5,34 @@ import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
-import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
 import { UnpublishManyDrawerContent } from './DrawerContent.js'
 
 export type UnpublishManyProps = {
   collection: ClientCollectionConfig
-  count?: number
-  ids?: (number | string)[]
+  count: number
+  ids: (number | string)[]
   /**
    * When multiple UnpublishMany components are rendered on the page, this will differentiate them.
    */
   modalPrefix?: string
   onSuccess?: () => void
-  selectAll?: boolean
+  selectAll: boolean
   where?: Where
 }
 
 export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
-  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
-
   const {
     collection,
     collection: { slug, versions } = {},
-    count: countFromProps,
-    ids: idsFromProps,
+    count,
+    ids,
     modalPrefix,
     onSuccess,
-    selectAll: selectAllFromProps,
+    selectAll,
     where,
   } = props
-
-  const resolvedCount = countFromProps ?? count
-  const resolvedIDs = idsFromProps ?? selectedIDs
-  const resolvedOnSuccess = onSuccess ?? (() => toggleAll())
-  const resolvedSelectAll = selectAllFromProps ?? selectAll === SelectAllStatus.AllAvailable
 
   const { t } = useTranslation()
   const { permissions } = useAuth()
@@ -51,7 +43,7 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
 
   const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}unpublish-${slug}`
 
-  if (!versions?.drafts || resolvedCount === 0 || !hasPermission) {
+  if (!versions?.drafts || count === 0 || !hasPermission) {
     return null
   }
 
@@ -68,9 +60,9 @@ export const UnpublishMany: React.FC<UnpublishManyProps> = (props) => {
       <UnpublishManyDrawerContent
         collection={collection}
         drawerSlug={drawerSlug}
-        ids={resolvedIDs}
-        onSuccess={resolvedOnSuccess}
-        selectAll={resolvedSelectAll}
+        ids={ids}
+        onSuccess={onSuccess}
+        selectAll={selectAll}
         where={where}
       />
     </React.Fragment>
