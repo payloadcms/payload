@@ -13,6 +13,7 @@ import { addArrayRow } from '../__helpers/e2e/fields/array/index.js'
 import { addBlock } from '../__helpers/e2e/fields/blocks/addBlock.js'
 import {
   changeLocale,
+  closeAllToasts,
   closeLocaleSelector,
   ensureCompilationIsDone,
   findTableRow,
@@ -896,6 +897,7 @@ describe('Localization', () => {
       await expect(page.locator('.payload-toast-container')).toContainText(
         'successfully duplicated',
       )
+      await closeAllToasts(page)
 
       await page.waitForURL((url) => !url.toString().includes(id))
 
@@ -1038,7 +1040,9 @@ describe('Localization', () => {
       // Switch back to SEO tab so the field error tooltip is visible after save
       await page.locator('button.tabs-field__tab-button', { hasText: 'SEO' }).click()
 
-      await saveDocAndAssert(page, '#action-save', 'error')
+      await saveDocAndAssert(page, '#action-save', 'error', {
+        disableDismissAllToasts: true,
+      })
 
       // 1. Toast error message should reference 'seoTitle', not 'seoTitle.en'
       const errorToast = page.locator('.payload-toast-container .toast-error')
@@ -1052,6 +1056,8 @@ describe('Localization', () => {
 
       // 3. The seoTitle field itself should be in error state
       await expect(page.locator('.field-type.text:has(#field-seoTitle)')).toHaveClass(/\berror\b/)
+
+      await closeAllToasts(page)
     })
   })
 
