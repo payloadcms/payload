@@ -12,45 +12,35 @@ import { PublishManyDrawerContent } from './DrawerContent.js'
 
 export type PublishManyProps = {
   collection: ClientCollectionConfig
-}
-
-export const PublishMany: React.FC<PublishManyProps> = (props) => {
-  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
-
-  return (
-    <PublishMany_v4
-      {...props}
-      count={count}
-      ids={selectedIDs}
-      onSuccess={() => toggleAll()}
-      selectAll={selectAll === SelectAllStatus.AllAvailable}
-    />
-  )
-}
-
-type PublishMany_v4Props = {
-  count: number
-  ids: (number | string)[]
+  count?: number
+  ids?: (number | string)[]
   /**
    * When multiple PublishMany components are rendered on the page, this will differentiate them.
    */
   modalPrefix?: string
   onSuccess?: () => void
-  selectAll: boolean
+  selectAll?: boolean
   where?: Where
-} & PublishManyProps
+}
 
-export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
+export const PublishMany: React.FC<PublishManyProps> = (props) => {
+  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
+
   const {
     collection,
     collection: { slug, versions } = {},
-    count,
-    ids,
+    count: countFromProps,
+    ids: idsFromProps,
     modalPrefix,
     onSuccess,
-    selectAll,
+    selectAll: selectAllFromProps,
     where,
   } = props
+
+  const resolvedCount = countFromProps ?? count
+  const resolvedIDs = idsFromProps ?? selectedIDs
+  const resolvedOnSuccess = onSuccess ?? (() => toggleAll())
+  const resolvedSelectAll = selectAllFromProps ?? selectAll === SelectAllStatus.AllAvailable
 
   const { permissions } = useAuth()
   const { t } = useTranslation()
@@ -62,7 +52,7 @@ export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
 
   const drawerSlug = `${modalPrefix ? `${modalPrefix}-` : ''}publish-${slug}`
 
-  if (!versions?.drafts || count === 0 || !hasPermission) {
+  if (!versions?.drafts || resolvedCount === 0 || !hasPermission) {
     return null
   }
 
@@ -79,9 +69,9 @@ export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
       <PublishManyDrawerContent
         collection={collection}
         drawerSlug={drawerSlug}
-        ids={ids}
-        onSuccess={onSuccess}
-        selectAll={selectAll}
+        ids={resolvedIDs}
+        onSuccess={resolvedOnSuccess}
+        selectAll={resolvedSelectAll}
         where={where}
       />
     </React.Fragment>
