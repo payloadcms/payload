@@ -140,7 +140,7 @@ function SingleFormSection({ form, serverURL }: { form: Form; serverURL: string 
                   [field.name]: e.target.value,
                 }))
               }}
-              path={`${String(form.id)}.${field.name}`}
+              path={field.name}
               required={Boolean(field.required)}
               value={textValues[field.name] ?? ''}
             />
