@@ -2,6 +2,8 @@
   :root {
     /* Light mode elevations */
 
+    --elevation-100-canvas: 0 0 0.5px 0 rgba(0, 0, 0, 0.3);
+
     --elevation-300-tooltip:
       0 0 0.5px 0 rgba(0, 0, 0, 0.15), 0 5px 12px 0 rgba(0, 0, 0, 0.13),
       0 1px 3px 0 rgba(0, 0, 0, 0.1);
@@ -17,6 +19,8 @@
 
   [data-theme='dark'] {
     /* Dark mode elevations */
+
+    --elevation-100-canvas: 0 0 0.5px 0 rgba(0, 0, 0, 0.5);
 
     --elevation-300-tooltip:
       0 0.5px 0 0 rgba(255, 255, 255, 0.08) inset, 0 5px 12px 0 rgba(0, 0, 0, 0.35),
