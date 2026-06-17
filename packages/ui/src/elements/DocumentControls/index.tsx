@@ -425,7 +425,7 @@ export const DocumentControls: React.FC<{
                   )}
                 </React.Fragment>
               )}
-              {hasDeletePermission && (
+              {hasDeletePermission && id && (
                 <DeleteDocument
                   buttonId="action-delete"
                   collectionSlug={collectionConfig?.slug}
