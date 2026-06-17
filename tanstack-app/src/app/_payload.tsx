@@ -6,6 +6,7 @@ import '@payloadcms/ui/scss/app.scss'
 // `(payload)/custom.scss` so the shared "custom CSS" e2e passes on both adapters.
 import './custom.scss'
 
+import { HydrationMarker } from '../components/HydrationMarker/index.js'
 import { getLayoutDataFn } from '../functions/layout.functions'
 import { serverFunctionHandler } from '../functions/serverFunction.functions'
 import { switchLanguageFn } from '../functions/switchLanguage.functions'
@@ -44,6 +45,7 @@ function PayloadLayout() {
             no custom providers are configured. */}
         {(data as any).providers ?? <Outlet />}
       </RootProvider>
+      <HydrationMarker />
       <div id="portal" />
     </>
   )
