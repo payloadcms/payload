@@ -1039,6 +1039,7 @@ export interface CollapsibleField {
         id?: string | null;
       }[]
     | null;
+  noPersistText?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2946,6 +2947,7 @@ export interface CollapsibleFieldsSelect<T extends boolean = true> {
         innerCollapsible?: T;
         id?: T;
       };
+  noPersistText?: T;
   updatedAt?: T;
   createdAt?: T;
 }
