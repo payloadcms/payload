@@ -217,10 +217,10 @@ export async function buildSearchParam({
               }
             } else {
               const stringID = doc._id.toString()
-              $in.push(stringID)
-
               if (Types.ObjectId.isValid(stringID)) {
                 $in.push(doc._id)
+              } else {
+                $in.push(stringID)
               }
             }
           })
