@@ -14,7 +14,7 @@ import { sortFieldMap } from '../../../../providers/TableColumns/buildColumnStat
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { getColumns } from '../../../../utilities/getColumns.js'
 import { ColumnsButton } from '../../../ColumnsButton/index.js'
-import './index.css'
+import '../fields.css'
 
 export const QueryPresetsColumnField: JSONFieldClientComponent = ({
   field: { label, required },

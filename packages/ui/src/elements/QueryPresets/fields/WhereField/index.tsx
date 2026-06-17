@@ -6,7 +6,7 @@ import React from 'react'
 import { FieldLabel } from '../../../../fields/FieldLabel/index.js'
 import { useField } from '../../../../forms/useField/index.js'
 import { WhereBuilder } from '../../../WhereBuilder/index.js'
-import './index.css'
+import '../fields.css'
 
 export const QueryPresetsWhereField: JSONFieldClientComponent = ({
   field: { label, required },

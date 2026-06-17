@@ -7,7 +7,7 @@ import { FieldLabel } from '../../../../fields/FieldLabel/index.js'
 import { useField } from '../../../../forms/useField/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
 import { GroupByControl } from '../../../GroupByControl/index.js'
-import './index.css'
+import '../fields.css'
 
 export const QueryPresetsGroupByField: TextFieldClientComponent = ({
   field: { label, required },

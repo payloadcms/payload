@@ -1,0 +1,16 @@
+@layer payload-default {
+  .query-preset-columns-field,
+  .query-preset-group-by-field,
+  .query-preset-where-field {
+    .field-label {
+      margin-bottom: var(--spacer-2);
+    }
+  }
+
+  .query-preset-columns-field__hint,
+  .query-preset-group-by-field__hint,
+  .query-preset-where-field__hint {
+    margin: 0;
+    color: var(--color-text-secondary);
+  }
+}
