@@ -2,7 +2,8 @@ import type { PluginLanguage } from '../types.js'
 
 export const azTranslations = {
   'plugin-mcp': {
-    apiKeyDescription: 'API açarları MCP müştərilərinin hansı kolleksiyalara, resurslara, alətlərə və promptlara daxil ola biləcəyini idarə edir.',
+    apiKeyDescription:
+      'API açarları MCP müştərilərinin hansı kolleksiyalara, resurslara, alətlərə və promptlara daxil ola biləcəyini idarə edir.',
     apiKeys: 'API açarları',
     authentication: 'Autentifikasiya',
     description: 'Təsvir',
@@ -16,9 +17,11 @@ export const azTranslations = {
     noAPIKeys: 'API açarı yoxdur',
     operations: 'Əməliyyatlar',
     overrideAccess: 'Giriş nəzarətini keç',
-    overrideAccessDescription: 'İşarələndikdə bu açar icra etdiyi hər əməliyyatda Payload giriş qaydalarını keçir. Xüsusi səbəbiniz yoxdursa işarələməyin.',
+    overrideAccessDescription:
+      'İşarələndikdə bu açar icra etdiyi hər əməliyyatda Payload giriş qaydalarını keçir. Xüsusi səbəbiniz yoxdursa işarələməyin.',
     permissions: 'İcazələr',
-    permissionsDescription: 'MCP müştərilərinə aşağıdakı kolleksiyalara, alətlərə, resurslara və promptlara giriş icazəsi verin.',
+    permissionsDescription:
+      'MCP müştərilərinə aşağıdakı kolleksiyalara, alətlərə, resurslara və promptlara giriş icazəsi verin.',
     prompts: 'Promptlar',
     resources: 'Resurslar',
     server: 'Server',

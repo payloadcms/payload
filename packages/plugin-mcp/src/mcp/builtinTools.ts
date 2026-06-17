@@ -19,8 +19,8 @@ import { getGlobalSchemaTool } from './builtin/globals/getGlobalSchemaTool.js'
 import { updateGlobalTool } from './builtin/globals/updateTool.js'
 
 export const TOOL_BUILTINS = {
-  getConfigInfo: { label: 'Config Info', mcpName: 'getConfigInfo', tool: getConfigInfoTool },
-} satisfies Record<string, { label: string; mcpName: string; tool: Tool }>
+  getConfigInfo: { mcpName: 'getConfigInfo', tool: getConfigInfoTool },
+} satisfies Record<string, { mcpName: string; tool: Tool }>
 
 /**
  * The static built-in collection CRUD tools. Keys here are the source of truth
@@ -36,26 +36,23 @@ export const COLLECTION_BUILTINS = {
 } satisfies Record<string, { mcpName: string; tool: CollectionTool }>
 
 /**
- * The static auth tools surfaced under auth-enabled collections. Each entry
- * carries the admin-UI label alongside the tool. Keys are the source of truth
- * for `MCPCollectionAuthToolName`.
+ * The static auth tools surfaced under auth-enabled collections. Keys are the
+ * source of truth for `MCPCollectionAuthToolName`.
  */
 export const COLLECTION_AUTH_BUILTINS = {
-  auth: { label: 'Check Auth Status', mcpName: 'auth', tool: authCollectionTool },
+  auth: { mcpName: 'auth', tool: authCollectionTool },
   forgotPassword: {
-    label: 'Forgot Password',
     mcpName: 'forgotPassword',
     tool: forgotPasswordCollectionTool,
   },
-  login: { label: 'User Login', mcpName: 'login', tool: loginCollectionTool },
+  login: { mcpName: 'login', tool: loginCollectionTool },
   resetPassword: {
-    label: 'Reset Password',
     mcpName: 'resetPassword',
     tool: resetPasswordCollectionTool,
   },
-  unlock: { label: 'Unlock Account', mcpName: 'unlock', tool: unlockCollectionTool },
-  verify: { label: 'Email Verification', mcpName: 'verify', tool: verifyCollectionTool },
-} satisfies Record<string, { label: string; mcpName: string; tool: CollectionTool }>
+  unlock: { mcpName: 'unlock', tool: unlockCollectionTool },
+  verify: { mcpName: 'verify', tool: verifyCollectionTool },
+} satisfies Record<string, { mcpName: string; tool: CollectionTool }>
 
 /**
  * The static built-in global tools. Keys are the source of truth for

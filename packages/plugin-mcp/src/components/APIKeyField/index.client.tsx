@@ -3,10 +3,7 @@
 import { APIKeyInput, Button, useField, useTranslation, WarningTriangleIcon } from '@payloadcms/ui'
 import React, { useState } from 'react'
 
-import type {
-  PluginMCPTranslationKeys,
-  PluginMCPTranslations,
-} from '../../translations/index.js'
+import type { PluginMCPTranslationKeys, PluginMCPTranslations } from '../../translations/index.js'
 
 import './index.css'
 
@@ -29,9 +26,7 @@ export const APIKeyField: React.FC = () => {
 
   return (
     <div className={baseClass}>
-      <p className={`${baseClass}__description`}>
-        {t('plugin-mcp:apiKeyDescription')}
-      </p>
+      <p className={`${baseClass}__description`}>{t('plugin-mcp:apiKeyDescription')}</p>
       <div className={`${baseClass}__panel`}>
         <div className={`${baseClass}__header`}>
           <span className={`${baseClass}__title`}>{t('authentication:apiKey')}</span>

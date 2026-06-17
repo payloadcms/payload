@@ -4,10 +4,7 @@ import { PopupList, useConfig, useTranslation } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import type {
-  PluginMCPTranslationKeys,
-  PluginMCPTranslations,
-} from '../../translations/index.js'
+import type { PluginMCPTranslationKeys, PluginMCPTranslations } from '../../translations/index.js'
 
 /**
  * Entry in the user menu's Settings sub-popup linking to the API keys

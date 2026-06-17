@@ -2,7 +2,8 @@ import type { PluginLanguage } from '../types.js'
 
 export const rsLatinTranslations = {
   'plugin-mcp': {
-    apiKeyDescription: 'API ključevi kontrolišu kojim kolekcijama, resursima, alatima i promptovima MCP klijenti mogu da pristupe.',
+    apiKeyDescription:
+      'API ključevi kontrolišu kojim kolekcijama, resursima, alatima i promptovima MCP klijenti mogu da pristupe.',
     apiKeys: 'API ključevi',
     authentication: 'Autentifikacija',
     description: 'Opis',
@@ -16,9 +17,11 @@ export const rsLatinTranslations = {
     noAPIKeys: 'Nema API ključeva',
     operations: 'Operacije',
     overrideAccess: 'Zaobiđi kontrolu pristupa',
-    overrideAccessDescription: 'Kada je označeno, ovaj ključ zaobilazi Payload kontrolu pristupa pri svakoj operaciji. Ostavite neoznačeno osim ako imate konkretan razlog.',
+    overrideAccessDescription:
+      'Kada je označeno, ovaj ključ zaobilazi Payload kontrolu pristupa pri svakoj operaciji. Ostavite neoznačeno osim ako imate konkretan razlog.',
     permissions: 'Dozvole',
-    permissionsDescription: 'Dozvolite MCP klijentima pristup sledećim kolekcijama, alatima, resursima i promptovima.',
+    permissionsDescription:
+      'Dozvolite MCP klijentima pristup sledećim kolekcijama, alatima, resursima i promptovima.',
     prompts: 'Promptovi',
     resources: 'Resursi',
     server: 'Server',

@@ -2,7 +2,8 @@ import type { PluginLanguage } from '../types.js'
 
 export const daTranslations = {
   'plugin-mcp': {
-    apiKeyDescription: 'API-nøgler styrer, hvilke samlinger, ressourcer, værktøjer og prompts MCP-klienter kan få adgang til.',
+    apiKeyDescription:
+      'API-nøgler styrer, hvilke samlinger, ressourcer, værktøjer og prompts MCP-klienter kan få adgang til.',
     apiKeys: 'API-nøgler',
     authentication: 'Godkendelse',
     description: 'Beskrivelse',
@@ -16,9 +17,11 @@ export const daTranslations = {
     noAPIKeys: 'Ingen API-nøgler',
     operations: 'Handlinger',
     overrideAccess: 'Tilsidesæt adgangskontrol',
-    overrideAccessDescription: 'Når dette er markeret, omgår nøglen Payloads adgangskontrol for hver handling. Lad det være umarkeret, medmindre du har en specifik grund.',
+    overrideAccessDescription:
+      'Når dette er markeret, omgår nøglen Payloads adgangskontrol for hver handling. Lad det være umarkeret, medmindre du har en specifik grund.',
     permissions: 'Tilladelser',
-    permissionsDescription: 'Tillad MCP-klienter adgang til følgende samlinger, værktøjer, ressourcer og prompts.',
+    permissionsDescription:
+      'Tillad MCP-klienter adgang til følgende samlinger, værktøjer, ressourcer og prompts.',
     prompts: 'Prompts',
     resources: 'Ressourcer',
     server: 'Server',

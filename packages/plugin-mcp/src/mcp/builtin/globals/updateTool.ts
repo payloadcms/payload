@@ -15,6 +15,13 @@ import { validateGlobalData } from '../validateEntityData.js'
 const DEFAULT_DESCRIPTION = 'Update any Payload global by passing the global slug and data.'
 
 export const updateGlobalTool = defineGlobalTool({
+  annotations: {
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'Update Global',
+  },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     data: z.record(z.string(), z.unknown()).describe('The global fields to update'),
@@ -41,7 +48,7 @@ export const updateGlobalTool = defineGlobalTool({
     select: z
       .record(z.string(), z.unknown())
       .describe(
-        "Optional: define exactly which fields you'd like to return in the response, e.g., {\"siteName\": true}",
+        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"siteName": true}',
       )
       .optional(),
   }),

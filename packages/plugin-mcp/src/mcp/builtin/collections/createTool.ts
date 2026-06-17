@@ -17,6 +17,13 @@ const DEFAULT_DESCRIPTION =
   'Create a document in any collection by passing the collection slug and data.'
 
 export const createDocumentTool = defineCollectionTool({
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'Create Document',
+  },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     data: z.record(z.string(), z.unknown()).describe('The document fields to create'),
@@ -46,7 +53,7 @@ export const createDocumentTool = defineCollectionTool({
     select: z
       .record(z.string(), z.unknown())
       .describe(
-        "Optional: define exactly which fields you'd like to return, e.g., {\"title\": true}",
+        'Optional: define exactly which fields you\'d like to return, e.g., {"title": true}',
       )
       .optional(),
   }),
