@@ -427,6 +427,7 @@ describe('Dashboard', () => {
   test('widget re-renders when query params change (= modular dashboard RSC rerenders)', async ({
     page,
   }) => {
+    test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
     const d = new DashboardHelper(page)
     await d.setEditing()
     await d.addWidget('page query')

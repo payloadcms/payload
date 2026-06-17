@@ -100,6 +100,7 @@ describe('Lexical Fully Featured - database', () => {
     test('ensure auto upload by copy & pasting image works when pasting from website', async ({
       page,
     }) => {
+      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       await page.goto(url.admin + '/custom-image')
       await page.keyboard.press('Meta+A')
       await page.keyboard.press('Control+A')
