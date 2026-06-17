@@ -32,11 +32,11 @@
   .file-manager__panel {
     position: sticky;
     top: var(--doc-controls-height);
-    /* Fill from the stuck position (below the sticky doc controls) to the viewport bottom.
-       The app header and doc header scroll away, so only the doc controls remain above the
-       stuck panel — subtracting more would leave a gap at the bottom while scrolling.
-       Capped at 100% (the box height) so short, non-scrollable documents don't gain a scrollbar. */
-    height: min(100%, max(500px, calc(100dvh - var(--doc-controls-height))));
+    /* Fill the viewport below the app header, doc controls and doc header. */
+    height: max(
+      500px,
+      calc(100dvh - var(--app-header-height) - var(--doc-controls-height) - var(--doc-header-height))
+    );
     display: flex;
     flex-direction: column;
     overflow: hidden;
