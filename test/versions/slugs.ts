@@ -22,6 +22,7 @@ export const diffCollectionSlug = 'diff'
 export const mediaCollectionSlug = 'media'
 export const media2CollectionSlug = 'media2'
 export const draftWithUploadCollectionSlug = 'draft-with-upload'
+export const draftWithUploadCloudStorageCollectionSlug = 'draft-with-upload-cloud-storage'
 
 export const versionCollectionSlug = 'version-posts'
 
