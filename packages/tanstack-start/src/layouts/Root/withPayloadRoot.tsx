@@ -96,7 +96,10 @@ export function withPayloadRoot(
 
   return function PayloadRootShell({ children }: { children: React.ReactNode }) {
     const isAdminRoute = useRouterState({
-      select: (s) => s.location.pathname.startsWith(adminRoute),
+      select: (s) => {
+        const { pathname } = s.location
+        return pathname === adminRoute || pathname.startsWith(`${adminRoute}/`)
+      },
     })
 
     if (isAdminRoute) {
