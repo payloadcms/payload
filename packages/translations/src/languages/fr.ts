@@ -420,7 +420,6 @@ export const frTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Ouvrir dans une nouvelle fenêtre',
     or: 'ou',
     order: 'Ordre',
-    other: 'Autre',
     overwriteExistingData: 'Écraser les données existantes du champ',
     pageNotFound: 'Page non trouvée',
     password: 'Mot de passe',

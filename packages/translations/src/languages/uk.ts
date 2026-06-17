@@ -408,7 +408,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Відкрити в новому вікні',
     or: 'або',
     order: 'Порядок',
-    other: 'Інше',
     overwriteExistingData: 'Перезаписати існуючі дані поля',
     pageNotFound: 'Сторінка не знайдена',
     password: 'Пароль',

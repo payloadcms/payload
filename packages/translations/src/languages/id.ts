@@ -412,7 +412,6 @@ export const idTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Buka di jendela baru',
     or: 'Atau',
     order: 'Urutan',
-    other: 'Lainnya',
     overwriteExistingData: 'Timpa data isian yang ada',
     pageNotFound: 'Halaman tidak ditemukan',
     password: 'Kata Sandi',

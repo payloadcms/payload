@@ -414,7 +414,6 @@ export const myTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'ဝင်းဒိုးအသစ်တွင် ဖွင့်ပါ',
     or: 'သို့မဟုတ်',
     order: 'အစဉ်လိုက်',
-    other: 'အခြား',
     overwriteExistingData: 'Menulis semula data bidang yang sedia ada',
     pageNotFound: 'ရောက်ရှိနေသော စာမျက်နှာသည် မရှိပါ။',
     password: 'စကားဝှက်',

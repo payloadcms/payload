@@ -409,7 +409,6 @@ export const taTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'புதிய சாளரத்தில் திற',
     or: 'அல்லது',
     order: 'வரிசை',
-    other: 'மற்றவை',
     overwriteExistingData: 'ஏற்கனவே உள்ள புலத் தரவை மேலெழுது',
     pageNotFound: 'பக்கம் கிடைக்கவில்லை',
     password: 'கடவுச்சொல்',

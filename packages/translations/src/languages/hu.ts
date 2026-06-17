@@ -414,7 +414,6 @@ export const huTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Megnyitás új ablakban',
     or: 'Vagy',
     order: 'Sorrend',
-    other: 'Egyéb',
     overwriteExistingData: 'Írja felül a meglévő mezőadatokat',
     pageNotFound: 'Az oldal nem található',
     password: 'Jelszó',

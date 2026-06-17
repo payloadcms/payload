@@ -411,7 +411,6 @@ export const lvTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Atvērt jaunā logā',
     or: 'Vai',
     order: 'Kārtība',
-    other: 'Cits',
     overwriteExistingData: 'Pārrakstīt esošos datus',
     pageNotFound: 'Lapa nav atrasta',
     password: 'Parole',

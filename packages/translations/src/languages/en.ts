@@ -410,7 +410,6 @@ export const enTranslations = {
     openInNewWindow: 'Open in new window',
     or: 'Or',
     order: 'Order',
-    other: 'Other',
     overwriteExistingData: 'Overwrite existing field data',
     pageNotFound: 'Page not found',
     password: 'Password',

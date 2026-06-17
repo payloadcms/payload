@@ -8,7 +8,7 @@ import { MenuSeparator } from '../../MenuSeparator/index.js'
 import { Popup, PopupList } from '../../Popup/index.js'
 
 export type UserMenuSettingsGroup = {
-  group: string
+  group?: string
   items: React.ReactNode[]
 }
 
@@ -22,7 +22,7 @@ export const SettingsMenuContent: React.FC<{ groups: UserMenuSettingsGroup[] }> 
     {groups.map((group, groupIndex) => (
       <Fragment key={`settings-group-${group.group}-${groupIndex}`}>
         {groupIndex > 0 && <MenuSeparator />}
-        <PopupList.GroupLabel label={group.group} />
+        {group.group && <PopupList.GroupLabel label={group.group} />}
         {group.items.map((item, itemIndex) => (
           <Fragment key={`settings-item-${groupIndex}-${itemIndex}`}>{item}</Fragment>
         ))}

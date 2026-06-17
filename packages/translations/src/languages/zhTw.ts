@@ -388,7 +388,6 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     openInNewWindow: '在新視窗中開啟',
     or: '或',
     order: '順序',
-    other: '其他',
     overwriteExistingData: '覆寫現有欄位資料',
     pageNotFound: '找不到此頁面',
     password: '密碼',

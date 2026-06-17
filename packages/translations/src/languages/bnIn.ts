@@ -414,7 +414,6 @@ export const bnInTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'নতুন উইন্ডোতে খুলুন',
     or: 'বা',
     order: 'অর্ডার',
-    other: 'অন্যান্য',
     overwriteExistingData: 'বিদ্যমান ফিল্ড ডেটা ওভাররাইট করুন',
     pageNotFound: 'পৃষ্ঠা পাওয়া যায়নি',
     password: 'পাসওয়ার্ড',

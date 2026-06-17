@@ -333,7 +333,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:of',
   'general:open',
   'general:openInNewWindow',
-  'general:other',
   'general:only',
   'general:or',
   'general:order',

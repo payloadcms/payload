@@ -390,7 +390,6 @@ export const zhTranslations: DefaultTranslationsObject = {
     openInNewWindow: '在新窗口中打开',
     or: '或',
     order: '排序',
-    other: '其他',
     overwriteExistingData: '覆盖现有字段数据',
     pageNotFound: '未找到页面',
     password: '密码',

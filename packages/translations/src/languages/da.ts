@@ -409,7 +409,6 @@ export const daTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Åbn i nyt vindue',
     or: 'Eller',
     order: 'Rækkefølge',
-    other: 'Andet',
     overwriteExistingData: 'Overskriv eksisterende feltdata',
     pageNotFound: 'Siden blev ikke fundet',
     password: 'Adgangskode',

@@ -407,7 +407,6 @@ export const etTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Ava uues aknas',
     or: 'Või',
     order: 'Järjestus',
-    other: 'Muu',
     overwriteExistingData: 'Kirjuta olemasolevad välja andmed üle',
     pageNotFound: 'Lehte ei leitud',
     password: 'Parool',

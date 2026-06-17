@@ -400,7 +400,6 @@ export const arTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'فتح في نافذة جديدة',
     or: 'أو',
     order: 'التّرتيب',
-    other: 'أخرى',
     overwriteExistingData: 'استبدل بيانات الحقل الموجودة',
     pageNotFound: 'الصّفحة غير موجودة',
     password: 'كلمة المرور',

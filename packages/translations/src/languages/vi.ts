@@ -411,7 +411,6 @@ export const viTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Mở trong cửa sổ mới',
     or: 'hoặc',
     order: 'Thứ tự',
-    other: 'Khác',
     overwriteExistingData: 'Ghi đè dữ liệu trường hiện tại',
     pageNotFound: 'Không tìm thấy trang',
     password: 'Mật khẩu',

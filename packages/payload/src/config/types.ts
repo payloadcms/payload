@@ -536,7 +536,7 @@ export type CustomComponent<TAdditionalProps extends object = Record<string, any
   PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
 
 export type UserMenuSettingsGroup = {
-  group?: LabelFunction | StaticLabel
+  group: LabelFunction | StaticLabel
   items: CustomComponent[]
 }
 

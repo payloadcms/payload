@@ -116,44 +116,43 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 
   const settingsItemGroups: UserMenuSettingsGroup[] = []
   if (components?.userMenuSettingsItems && Array.isArray(components.userMenuSettingsItems)) {
-    const localizedFallbackSettingsGroupLabel = i18n.t('general:other')
     const groupedItemsByLabel = new Map<string, React.ReactNode[]>()
     const groupLabels: string[] = []
     const ungroupedItems: React.ReactNode[] = []
 
     for (const [itemIndex, userMenuSettingsItem] of components.userMenuSettingsItems.entries()) {
-      if (isUserMenuSettingsGroup(userMenuSettingsItem)) {
-        const groupLabel = userMenuSettingsItem.group
-          ? getTranslation(userMenuSettingsItem.group, i18n)
-          : localizedFallbackSettingsGroupLabel
-
-        const existingItems = groupedItemsByLabel.get(groupLabel)
-        const renderedItems = userMenuSettingsItem.items.map((groupedItem, groupedItemIndex) =>
-          RenderServerComponent({
-            clientProps,
-            Component: groupedItem,
-            importMap: payload.importMap,
-            key: `user-menu-settings-group-${groupLabel}-${itemIndex}-${groupedItemIndex}`,
-            serverProps,
-          }),
-        )
-
-        if (existingItems) {
-          existingItems.push(...renderedItems)
-        } else if (renderedItems.length > 0) {
-          groupedItemsByLabel.set(groupLabel, renderedItems)
-          groupLabels.push(groupLabel)
-        }
-      } else {
+      // Ungrouped items are collected as orphans rendered at the bottom
+      if (!isUserMenuSettingsGroup(userMenuSettingsItem)) {
         ungroupedItems.push(
           RenderServerComponent({
             clientProps,
             Component: userMenuSettingsItem,
             importMap: payload.importMap,
-            key: `user-menu-settings-item-${itemIndex}`,
+            key: `user-menu-settings-ungrouped-${itemIndex}`,
             serverProps,
           }),
         )
+
+        continue
+      }
+
+      const groupLabel = getTranslation(userMenuSettingsItem.group, i18n)
+      const existingItems = groupedItemsByLabel.get(groupLabel)
+      const renderedItems = userMenuSettingsItem.items.map((groupedItem, groupedItemIndex) =>
+        RenderServerComponent({
+          clientProps,
+          Component: groupedItem,
+          importMap: payload.importMap,
+          key: `user-menu-settings-group-${groupLabel}-${itemIndex}-${groupedItemIndex}`,
+          serverProps,
+        }),
+      )
+
+      if (existingItems) {
+        existingItems.push(...renderedItems)
+      } else if (renderedItems.length > 0) {
+        groupedItemsByLabel.set(groupLabel, renderedItems)
+        groupLabels.push(groupLabel)
       }
     }
 
@@ -169,7 +168,6 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
 
     if (ungroupedItems.length > 0) {
       settingsItemGroups.push({
-        group: localizedFallbackSettingsGroupLabel,
         items: ungroupedItems,
       })
     }

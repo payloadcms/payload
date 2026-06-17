@@ -419,7 +419,6 @@ export const deTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'In neuem Fenster öffnen',
     or: 'oder',
     order: 'Reihenfolge',
-    other: 'Sonstige',
     overwriteExistingData: 'Vorhandene Eingaben überschreiben',
     pageNotFound: 'Seite nicht gefunden',
     password: 'Passwort',

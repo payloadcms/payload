@@ -403,7 +403,6 @@ export const faTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'باز کردن در پنجره جدید',
     or: 'یا',
     order: 'ترتیب',
-    other: 'سایر',
     overwriteExistingData: 'بازنویسی اطلاعات موجود در فیلدها',
     pageNotFound: 'صفحه پیدا نشد',
     password: 'رمز عبور',

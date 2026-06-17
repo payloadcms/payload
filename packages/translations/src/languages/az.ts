@@ -413,7 +413,6 @@ export const azTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Yeni pəncərədə aç',
     or: 'Və ya',
     order: 'Sıra',
-    other: 'Digər',
     overwriteExistingData: 'Mövcud sahə məlumatlarını yenidən yazın',
     pageNotFound: 'Səhifə tapılmadı',
     password: 'Şifrə',

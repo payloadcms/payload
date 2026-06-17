@@ -408,7 +408,6 @@ export const isTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Opna í nýjum glugga',
     or: 'Eða',
     order: 'Röð',
-    other: 'Annað',
     overwriteExistingData: 'Yfirskrifa skráð gögn í reit',
     pageNotFound: 'Síða fannst ekki',
     password: 'Lykilorð',

@@ -410,7 +410,6 @@ export const rsTranslations: DefaultTranslationsObject = {
     openInNewWindow: 'Отвори у новом прозору',
     or: 'Или',
     order: 'Редослед',
-    other: 'Ostalo',
     overwriteExistingData: 'Prepišite postojeće podatke u polju',
     pageNotFound: 'Страница није пронађена',
     password: 'Лозинка',
