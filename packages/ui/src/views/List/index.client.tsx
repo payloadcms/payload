@@ -256,7 +256,7 @@ export function DefaultListView(props: ListViewClientProps) {
                 collectionPluralLabel={collectionConfig?.labels?.plural}
                 collectionSlug={collectionSlug}
                 fields={collectionConfig?.fields}
-                onEmpty={() => setIsWhereOpen(false)}
+                onEmptyRemove={() => setIsWhereOpen(false)}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
               />

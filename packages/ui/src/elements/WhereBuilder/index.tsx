@@ -36,8 +36,8 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const {
     collectionSlug,
     fields,
-    onChange,
-    onEmpty,
+    onChange: handleWhereChange,
+    onEmptyRemove,
     renderedFilters = undefined,
     resolvedFilterOptions = undefined,
     value,
@@ -76,9 +76,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
     return []
   }, [value])
-
-  // Reports edits to the parent. Aliased so the callbacks below read clearly.
-  const handleWhereChange = onChange
 
   const addCondition: AddCondition = React.useCallback(
     ({ andIndex, field, orIndex, relation }) => {
@@ -164,7 +161,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     ({ andIndex, orIndex }) => {
       // Virtual first row: removing it just closes the panel
       if (conditions.length === 0) {
-        onEmpty?.()
+        onEmptyRemove?.()
         return
       }
 
@@ -179,10 +176,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
       // Removing the last remaining condition closes the filters panel.
       if (newConditions.length === 0) {
-        onEmpty?.()
+        onEmptyRemove?.()
       }
     },
-    [conditions, handleWhereChange, onEmpty],
+    [conditions, handleWhereChange, onEmptyRemove],
   )
 
   const updateJoin: UpdateJoin = React.useCallback(
@@ -250,9 +247,9 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         ] as typeof conditions)
       : conditions
 
-  // Disable the remove button only on the drawer's uncommitted placeholder row, where there's
-  // nothing to remove. A committed condition or a closable panel (list view) keeps it enabled.
-  const disableRemoveButton = conditions.length === 0 && !onEmpty
+  // Disable the remove button only when there are no committed conditions and this host
+  // doesn't provide an empty-state removal handler.
+  const disableRemoveButton = conditions.length === 0 && !onEmptyRemove
 
   return (
     <div className={baseClass}>

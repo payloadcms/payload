@@ -12,8 +12,8 @@ export type WhereBuilderProps = {
   readonly fields: ClientField[]
   /** Called with the next `where` value whenever a condition is added, edited, or removed. */
   readonly onChange: (where: Where) => Promise<void> | void
-  /** Called when the last condition is removed, so the parent can close the filters panel. */
-  readonly onEmpty?: () => void
+  /** Called when the last condition is removed, so the parent has empty state control. */
+  readonly onEmptyRemove?: () => void
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
   /** The current `where` value to render conditions from. */
