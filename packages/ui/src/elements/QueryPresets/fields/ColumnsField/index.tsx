@@ -13,7 +13,7 @@ import { isColumnActive } from '../../../../providers/TableColumns/buildColumnSt
 import { sortFieldMap } from '../../../../providers/TableColumns/buildColumnState/sortFieldMap.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { getColumns } from '../../../../utilities/getColumns.js'
-import { ColumnsButton } from '../../../ColumnsButton/index.js'
+import { ColumnSelectionButton } from '../../../ColumnSelection/index.js'
 import '../fields.css'
 
 export const QueryPresetsColumnField: JSONFieldClientComponent = ({
@@ -151,7 +151,11 @@ export const QueryPresetsColumnField: JSONFieldClientComponent = ({
 
   return (
     <div className="field-type query-preset-columns-field">
-      <ColumnsButton collectionSlug={relatedCollection} columns={columns} onChange={handleChange} />
+      <ColumnSelectionButton
+        collectionSlug={relatedCollection}
+        columns={columns}
+        onChange={handleChange}
+      />
     </div>
   )
 }

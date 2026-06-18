@@ -11,8 +11,8 @@ import { Dots } from '../../icons/Dots/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import { ListColumnsButton } from '../ListColumnsButton/index.js'
-import { ListGroupByControl } from '../ListGroupByControl/index.js'
+import { ListColumnSelectionButton } from '../ListColumnSelectionButton/index.js'
+import { ListGroupByButton } from '../ListGroupByButton/index.js'
 import { ListWhereBuilder } from '../ListWhereBuilder/index.js'
 import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
 import { ListSearchFilter } from '../Search/ListSearchFilter/index.js'
@@ -115,11 +115,11 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               {t('general:filters')}
             </Button>
           )}
-          <ListGroupByControl
+          <ListGroupByButton
             collectionSlug={collectionConfig.slug}
             fields={collectionConfig.fields}
           />
-          {enableColumns && <ListColumnsButton collectionSlug={collectionConfig.slug} />}
+          {enableColumns && <ListColumnSelectionButton collectionSlug={collectionConfig.slug} />}
           {enableSort && (
             <Button
               buttonStyle="secondary"

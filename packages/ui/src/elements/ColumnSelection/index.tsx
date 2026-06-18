@@ -7,10 +7,10 @@ import React from 'react'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import { ColumnSelector } from '../ColumnSelector/index.js'
 import { Popup } from '../Popup/index.js'
+import { ColumnSelectionPopup } from './Popup.js'
 
-export type ColumnsButtonProps = {
+export type ColumnSelectionButtonProps = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly columns: Column[]
   /** Called with the next column state whenever a column is toggled or reordered. */
@@ -19,7 +19,7 @@ export type ColumnsButtonProps = {
 
 const baseClass = 'columns-button'
 
-export const ColumnsButton: React.FC<ColumnsButtonProps> = ({
+export const ColumnSelectionButton: React.FC<ColumnSelectionButtonProps> = ({
   collectionSlug,
   columns,
   onChange,
@@ -31,7 +31,7 @@ export const ColumnsButton: React.FC<ColumnsButtonProps> = ({
       className={baseClass}
       horizontalAlign="right"
       render={({ close }) => (
-        <ColumnSelector
+        <ColumnSelectionPopup
           collectionSlug={collectionSlug}
           columns={columns}
           onChange={onChange}

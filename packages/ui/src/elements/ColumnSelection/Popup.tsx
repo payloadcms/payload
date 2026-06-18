@@ -15,7 +15,7 @@ import { Button } from '../Button/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable/index.js'
 import { Switch } from '../Switch/index.js'
-import './index.css'
+import './Popup.css'
 
 const baseClass = 'column-selector'
 
@@ -61,7 +61,7 @@ const NestedLabel: React.FC<NestedLabelProps> = ({ label }) => {
   )
 }
 
-export type Props = {
+export type ColumnSelectionPopupProps = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly columns: Column[]
   /** Called with the next column state whenever a column is toggled or reordered. */
@@ -117,7 +117,12 @@ const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle
   )
 }
 
-export const ColumnSelector: React.FC<Props> = ({ collectionSlug, columns, onChange, onClose }) => {
+export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
+  collectionSlug,
+  columns,
+  onChange,
+  onClose,
+}) => {
   const { i18n, t } = useTranslation()
 
   const toggleColumn = useCallback(

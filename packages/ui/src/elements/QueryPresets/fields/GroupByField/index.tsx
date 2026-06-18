@@ -6,7 +6,7 @@ import React, { useMemo } from 'react'
 import { FieldLabel } from '../../../../fields/FieldLabel/index.js'
 import { useField } from '../../../../forms/useField/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
-import { GroupByControl } from '../../../GroupByControl/index.js'
+import { GroupByButton } from '../../../GroupBy/index.js'
 import '../fields.css'
 
 export const QueryPresetsGroupByField: TextFieldClientComponent = ({
@@ -35,7 +35,7 @@ export const QueryPresetsGroupByField: TextFieldClientComponent = ({
 
   return (
     <div className="field-type query-preset-group-by-field">
-      <GroupByControl
+      <GroupByButton
         collectionSlug={relatedCollection}
         fields={collectionConfig.fields}
         onChange={(groupBy) => setValue(groupBy || null)}

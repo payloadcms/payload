@@ -21,7 +21,7 @@ import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
-import { ListColumnsButton } from '../ListColumnsButton/index.js'
+import { ListColumnSelectionButton } from '../ListColumnSelectionButton/index.js'
 import { NoListResults } from '../NoListResults/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { AddNewButton } from './AddNewButton.js'
@@ -305,7 +305,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     />
   )
 
-  const columnsButton = <ListColumnsButton collectionSlug={collectionConfig?.slug} />
+  const columnsButton = <ListColumnSelectionButton collectionSlug={collectionConfig?.slug} />
 
   return (
     <div className={baseClass}>
