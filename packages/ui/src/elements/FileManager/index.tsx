@@ -26,7 +26,10 @@ import { Thumbnail } from '../Thumbnail/index.js'
 import { editDrawerSlug, sizePreviewSlug } from '../Upload/index.js'
 import { pasteURLDrawerSlug, UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
 import './index.css'
+import { AudioPreview } from './FilePreview/AudioPreview/index.js'
 import { FilePreview } from './FilePreview/index.js'
+import { PdfPreview } from './FilePreview/PdfPreview/index.js'
+import { VideoPreview } from './FilePreview/VideoPreview/index.js'
 import { FileToolbar } from './FileToolbar/index.js'
 
 const baseClass = 'file-manager'
@@ -260,6 +263,46 @@ export const FileManager: React.FC<FileManagerProps> = ({
     }
   }, [uploadControlFile, handleFileChange])
 
+  // Preview a freshly-selected (not-yet-saved) file from its local object URL, so video/audio/PDF
+  // are playable/viewable just like images. Sizing is capped in CSS so large files stay contained.
+  const renderSelectedFilePreview = (src: string) => {
+    const fileType = value?.type ?? ''
+
+    if (fileType.startsWith('video/')) {
+      return (
+        <div className={`${baseClass}__selected-preview`}>
+          <VideoPreview fileSrc={src} />
+        </div>
+      )
+    }
+
+    if (fileType.startsWith('audio/')) {
+      return (
+        <div className={`${baseClass}__selected-preview ${baseClass}__selected-preview--audio`}>
+          <AudioPreview fileSrc={src} />
+        </div>
+      )
+    }
+
+    if (fileType === 'application/pdf') {
+      return (
+        <div className={`${baseClass}__selected-preview`}>
+          <PdfPreview fileSrc={src} title={value?.name} />
+        </div>
+      )
+    }
+
+    return (
+      <div className={`${baseClass}__selected-preview`}>
+        <Thumbnail
+          collectionSlug={collectionSlug}
+          fileSrc={isImage(fileType) ? src : null}
+          size="expand"
+        />
+      </div>
+    )
+  }
+
   const drawers = (
     <Fragment>
       {(value || data?.filename) && (
@@ -394,12 +437,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
                     round
                     tooltip={t('general:cancel')}
                   />
-                  <div className={`${baseClass}__thumbnail-wrap`}>
-                    <Thumbnail
-                      collectionSlug={collectionSlug}
-                      fileSrc={isImage(value.type) ? fileSrc : null}
-                    />
-                  </div>
+                  {renderSelectedFilePreview(fileSrc)}
                   <div className={`${baseClass}__file-adjustments`}>
                     <TextInput
                       label={t('upload:fileName')}

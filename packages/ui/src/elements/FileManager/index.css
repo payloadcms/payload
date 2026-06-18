@@ -81,9 +81,28 @@
     z-index: 1;
   }
 
-  .file-manager__thumbnail-wrap {
+  /* Preview of a freshly-selected (not-yet-saved) file. Capped so large media stays contained;
+     the definite height lets the PDF iframe / video / image fill it. */
+  .file-manager__selected-preview {
     position: relative;
-    width: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 420px;
+    height: min(50dvh, 320px);
+    overflow: hidden;
+    border-radius: var(--radius-small);
+  }
+
+  /* Audio is just a player bar — no tall box needed. */
+  .file-manager__selected-preview--audio {
+    height: auto;
+  }
+
+  .file-manager__selected-preview .thumbnail img,
+  .file-manager__selected-preview .thumbnail svg {
+    object-fit: contain;
   }
 
   .file-manager__file-adjustments {
