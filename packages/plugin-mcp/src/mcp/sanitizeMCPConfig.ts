@@ -126,7 +126,16 @@ const sanitizeCollectionConfig = ({
   const collectionPluginConfig = pluginConfig.collections?.[slug]
   const items: CollectionMCPItem[] = []
 
-  for (const [toolKey, { mcpName, tool }] of COLLECTION_BUILTIN_ENTRIES) {
+  for (const [
+    toolKey,
+    { mcpName, requiresDuplicateEnabled, requiresVersions, tool },
+  ] of COLLECTION_BUILTIN_ENTRIES) {
+    if (requiresVersions && !collection.versions) {
+      continue
+    }
+    if (requiresDuplicateEnabled && collection.disableDuplicate) {
+      continue
+    }
     const matchedConfigEntry = collectionPluginConfig?.tools?.[toolKey]
     if (matchedConfigEntry === false) {
       continue
@@ -215,7 +224,10 @@ const sanitizeGlobalConfig = ({
   const globalPluginConfig = pluginConfig.globals?.[slug]
   const items: GlobalMCPItem[] = []
 
-  for (const [toolKey, { mcpName, tool }] of GLOBAL_BUILTIN_ENTRIES) {
+  for (const [toolKey, { mcpName, requiresVersions, tool }] of GLOBAL_BUILTIN_ENTRIES) {
+    if (requiresVersions && !global.versions) {
+      continue
+    }
     const matchedConfigEntry = globalPluginConfig?.tools?.[toolKey]
     if (matchedConfigEntry === false) {
       continue
