@@ -15,8 +15,6 @@ import type {
 
 import { CirclePlusIcon } from '../../icons/CirclePlus/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
-import { useConfig } from '../../providers/Config/index.js'
-import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { reduceFieldsToOptions } from '../../utilities/reduceFieldsToOptions.js'
 import { Button } from '../Button/index.js'
@@ -29,32 +27,23 @@ const baseClass = 'where-builder'
 export { WhereBuilderProps }
 
 /**
- * The WhereBuilder component is used to render the filter controls for a collection's list view
- * or in a form (e.g. Query Presets). When `value` and `onChange` are provided, it is controlled
- * by the form; otherwise it uses list query state from {@link useListQuery}.
+ * Presentational filter builder. It renders the conditions described by `value` and
+ * reports edits through `onChange`. It is unaware of where its value is stored — the
+ * list view wires it to list query state via {@link ListWhereBuilder}, and the Query
+ * Presets drawer wires it to form state.
  */
 export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   const {
     collectionSlug,
-    fields: fieldsProp,
-    onChange,
-    onClose,
+    fields,
+    onChange: handleWhereChange,
+    onEmptyRemove,
     renderedFilters = undefined,
     resolvedFilterOptions = undefined,
-    value: valueProp,
+    value,
   } = props
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
-  const { getEntityConfig } = useConfig()
-  const listQuery = useListQuery()
-
-  const isFormMode = typeof onChange === 'function'
-
-  const collectionConfig = useMemo(
-    () => (isFormMode ? getEntityConfig({ collectionSlug }) : null),
-    [isFormMode, collectionSlug, getEntityConfig],
-  )
-  const fields = isFormMode ? collectionConfig?.fields : fieldsProp
 
   const fieldPermissions = permissions?.collections?.[collectionSlug]?.fields
 
@@ -74,39 +63,23 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   )
 
   const conditions = useMemo(() => {
-    const whereFromSearch = isFormMode ? valueProp : listQuery.query?.where
-
-    if (whereFromSearch) {
-      if (validateWhereQuery(whereFromSearch)) {
-        return whereFromSearch.or ?? []
+    if (value) {
+      if (validateWhereQuery(value)) {
+        return value.or ?? []
       }
 
-      const transformedWhere = transformWhereQuery(whereFromSearch)
+      const transformedWhere = transformWhereQuery(value)
       if (validateWhereQuery(transformedWhere)) {
         return transformedWhere.or ?? []
-      }
-
-      if (!isFormMode) {
-        console.warn(`Invalid where query in URL: ${JSON.stringify(whereFromSearch)}`) // eslint-disable-line no-console
       }
     }
 
     return []
-  }, [isFormMode, valueProp, listQuery.query?.where])
-
-  const handleWhereChange = useMemo(
-    () =>
-      isFormMode
-        ? (where: { or: typeof conditions }) => {
-            onChange?.(where)
-          }
-        : listQuery.handleWhereChange,
-    [isFormMode, onChange, listQuery.handleWhereChange],
-  )
+  }, [value])
 
   const addCondition: AddCondition = React.useCallback(
-    async ({ andIndex, field, orIndex, relation }) => {
-      const newConditions = [...conditions]
+    ({ andIndex, field, orIndex, relation }) => {
+      const newConditions = structuredClone(conditions)
 
       const defaultOperator = fieldTypeConditions[field.field.type].operators[0].value
 
@@ -128,20 +101,26 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         })
       }
 
-      await handleWhereChange({ or: newConditions })
+      void handleWhereChange({ or: newConditions })
     },
     [conditions, handleWhereChange],
   )
 
   const updateCondition: UpdateCondition = React.useCallback(
-    async ({ andIndex, field, operator: incomingOperator, orIndex, value }) => {
+    ({ type, andIndex, field, operator: incomingOperator, orIndex, value }) => {
       // Virtual first row: conditions not yet committed, build from scratch
       if (conditions.length === 0) {
+        // Ignore empty value edits so a cleared row doesn't re-commit itself. Field and
+        // operator picks carry empty values too, but must fall through to build the row.
+        if (type === 'value' && (value === undefined || value === null || value === '')) {
+          return
+        }
+
         const { validOperator } = getValidFieldOperators({
           field: field.field,
           operator: incomingOperator,
         })
-        await handleWhereChange({
+        void handleWhereChange({
           or: [{ and: [{ [String(field.fieldPath)]: { [validOperator]: value } }] }],
         })
         return
@@ -169,42 +148,42 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
           return
         }
 
-        const newConditions = [...conditions]
+        const newConditions = structuredClone(conditions)
         newConditions[orIndex].and[andIndex] = newRowCondition
 
-        await handleWhereChange({ or: newConditions })
+        void handleWhereChange({ or: newConditions })
       }
     },
     [conditions, handleWhereChange],
   )
 
   const removeCondition: RemoveCondition = React.useCallback(
-    async ({ andIndex, orIndex }) => {
+    ({ andIndex, orIndex }) => {
       // Virtual first row: removing it just closes the panel
       if (conditions.length === 0) {
-        onClose?.()
+        onEmptyRemove?.()
         return
       }
 
-      const newConditions = [...conditions]
+      const newConditions = structuredClone(conditions)
       newConditions[orIndex].and.splice(andIndex, 1)
 
       if (newConditions[orIndex].and.length === 0) {
         newConditions.splice(orIndex, 1)
       }
 
-      await handleWhereChange({ or: newConditions })
+      void handleWhereChange({ or: newConditions })
 
       // Removing the last remaining condition closes the filters panel.
       if (newConditions.length === 0) {
-        onClose?.()
+        onEmptyRemove?.()
       }
     },
-    [conditions, handleWhereChange, onClose],
+    [conditions, handleWhereChange, onEmptyRemove],
   )
 
   const updateJoin: UpdateJoin = React.useCallback(
-    async ({ andIndex, join, orIndex }) => {
+    ({ andIndex, join, orIndex }) => {
       // Flatten the nested or/and structure into a single ordered list, tracking
       // the join relation that connects each condition to the previous one.
       const flattened: { cond: (typeof conditions)[number]['and'][number]; join: 'and' | 'or' }[] =
@@ -230,12 +209,12 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         }
       })
 
-      await handleWhereChange({ or: newConditions })
+      void handleWhereChange({ or: newConditions })
     },
     [conditions, handleWhereChange],
   )
 
-  const addFirstFilter = React.useCallback(async () => {
+  const addFirstFilter = React.useCallback(() => {
     if (!firstField) {
       return
     }
@@ -248,11 +227,11 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         and: [{ [String(firstField.fieldPath)]: { [defaultOperator]: undefined } }],
       })
 
-      await handleWhereChange({ or: [makeRow(), makeRow()] })
+      void handleWhereChange({ or: [makeRow(), makeRow()] })
       return
     }
 
-    await addCondition({
+    void addCondition({
       andIndex: 0,
       field: firstField,
       orIndex: conditions.length,
@@ -268,8 +247,12 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         ] as typeof conditions)
       : conditions
 
+  // Disable the remove button only when there are no committed conditions and this host
+  // doesn't provide an empty-state removal handler.
+  const disableRemoveButton = conditions.length === 0 && !onEmptyRemove
+
   return (
-    <div className={[baseClass, isFormMode && `${baseClass}--form-mode`].filter(Boolean).join(' ')}>
+    <div className={baseClass}>
       <div className={`${baseClass}__or-filters`}>
         {displayConditions.map((or, orIndex) => {
           const compoundOrKey = `${orIndex}_${Array.isArray(or?.and) ? or.and.length : ''}`
@@ -293,6 +276,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                     <Condition
                       addCondition={addCondition}
                       andIndex={andIndex}
+                      disableRemoveButton={disableRemoveButton}
                       fieldPath={fieldPath}
                       filterOptions={resolvedFilterOptions?.get(fieldPath)}
                       isFirstCondition={isFirstCondition}

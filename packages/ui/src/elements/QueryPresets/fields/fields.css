@@ -13,4 +13,11 @@
     margin: 0;
     color: var(--color-text-secondary);
   }
+
+  /* The builder sits inline within the form here, so drop the list-panel chrome
+     (border + gutter padding) it carries in the list view. */
+  .query-preset-where-field .where-builder {
+    padding: 0;
+    border-bottom: none;
+  }
 }

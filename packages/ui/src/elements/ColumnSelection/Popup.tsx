@@ -10,13 +10,12 @@ import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
 import { SearchIcon } from '../../icons/Search/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
-import { useTableColumns } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { useDraggableSortable } from '../DraggableSortable/useDraggableSortable/index.js'
 import { Switch } from '../Switch/index.js'
-import './index.css'
+import './Popup.css'
 
 const baseClass = 'column-selector'
 
@@ -62,14 +61,11 @@ const NestedLabel: React.FC<NestedLabelProps> = ({ label }) => {
   )
 }
 
-export type Props = {
+export type ColumnSelectionPopupProps = {
   readonly collectionSlug: SanitizedCollectionConfig['slug']
-  /**
-   * When set, the selector is driven by the form (columns + onChange) instead of
-   * the table columns context. Used by the Query Presets drawer.
-   */
-  readonly columns?: Column[]
-  readonly onChange?: (columns: Column[]) => void
+  readonly columns: Column[]
+  /** Called with the next column state whenever a column is toggled or reordered. */
+  readonly onChange: (columns: Column[]) => void
   readonly onClose?: () => void
 }
 
@@ -121,45 +117,31 @@ const ColumnItem: React.FC<ColumnItemProps> = ({ id, active, labelText, onToggle
   )
 }
 
-export const ColumnSelector: React.FC<Props> = ({
+export const ColumnSelectionPopup: React.FC<ColumnSelectionPopupProps> = ({
   collectionSlug,
-  columns: columnsProp,
+  columns,
   onChange,
   onClose,
 }) => {
-  const tableColumns = useTableColumns()
   const { i18n, t } = useTranslation()
 
-  const isFormMode = typeof onChange === 'function'
-  const columns = isFormMode ? columnsProp : tableColumns.columns
-
   const toggleColumn = useCallback(
-    async (column: string) => {
-      if (isFormMode) {
-        onChange(
-          (columnsProp || []).map((col) =>
-            col.accessor === column ? { ...col, active: !col.active } : col,
-          ),
-        )
-        return
-      }
-      await tableColumns.toggleColumn(column)
+    (column: string) => {
+      onChange(
+        columns.map((col) => (col.accessor === column ? { ...col, active: !col.active } : col)),
+      )
     },
-    [isFormMode, onChange, columnsProp, tableColumns],
+    [columns, onChange],
   )
 
   const moveColumn = useCallback(
-    async ({ fromIndex, toIndex }: { fromIndex: number; toIndex: number }) => {
-      if (isFormMode) {
-        const next = [...(columnsProp || [])]
-        const [moved] = next.splice(fromIndex, 1)
-        next.splice(toIndex, 0, moved)
-        onChange(next)
-        return
-      }
-      await tableColumns.moveColumn({ fromIndex, toIndex })
+    ({ fromIndex, toIndex }: { fromIndex: number; toIndex: number }) => {
+      const next = [...columns]
+      const [moved] = next.splice(fromIndex, 1)
+      next.splice(toIndex, 0, moved)
+      onChange(next)
     },
-    [isFormMode, onChange, columnsProp, tableColumns],
+    [columns, onChange],
   )
 
   const uuid = useId()

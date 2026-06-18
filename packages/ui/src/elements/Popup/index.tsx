@@ -502,7 +502,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     // after the browser has finished laying out the newly-visible popup
     // content. The rAF call is the authoritative one — it catches cases
     // where the popup height wasn't stable yet during the first call
-    // (e.g. ColumnSelector content rendering after hidden → visible
+    // (e.g. ColumnSelection popup content rendering after hidden → visible
     // class switch), which was causing incorrect flip-to-top decisions.
     // /////////////////////////////////////
 

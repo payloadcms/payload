@@ -13,13 +13,6 @@
     }
   }
 
-  /* In form mode (e.g. the Query Presets drawer) the builder sits inline within a
-     form, so drop the list-panel chrome (border + gutter padding). */
-  .where-builder--form-mode {
-    padding: 0;
-    border-bottom: none;
-  }
-
   .where-builder__label {
     margin: 0;
     color: var(--color-text);
