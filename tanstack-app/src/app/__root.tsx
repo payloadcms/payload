@@ -1,10 +1,9 @@
-import { createRootRoute, HeadContent, Outlet, Scripts } from '@tanstack/react-router'
-import { useEffect } from 'react'
+import { withPayloadRoot } from '@payloadcms/tanstack-start/client'
+import { createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
 
-import { getInitialHtmlAttrsFn } from '../functions/theme.functions'
+import { HydrationMarker } from '../components/HydrationMarker/index.js'
 
 export const Route = createRootRoute({
-  loader: () => getInitialHtmlAttrsFn(),
   head: () => ({
     links: [
       {
@@ -22,39 +21,20 @@ export const Route = createRootRoute({
       },
     ],
   }),
-  component: RootComponent,
+  // Single Payload integration touch point: `withPayloadRoot` renders the
+  // Payload admin document shell on `/admin` routes and our own shell
+  // everywhere else. No root loader, no manual theme/html threading.
+  shellComponent: withPayloadRoot(MarketingHtml),
 })
 
-/**
- * Sets `window.__TANSTACK_HYDRATED__ = true` after the first effect runs,
- * which is the earliest point at which React's event handlers are guaranteed
- * to be attached. The Playwright `goto` wrapper in `initPageConsoleErrorCatch`
- * waits for this flag before returning, which prevents the very common race
- * where a Playwright click lands on the SSR'd DOM before React finishes
- * hydrating (the click focuses the button but the React `onClick` handler
- * never fires).
- *
- * Production users do not see this marker because the bundle hash differs;
- * tests opt-in via the Playwright wrapper and consult the global directly.
- */
-function HydrationMarker() {
-  useEffect(() => {
-    ;(window as unknown as { __TANSTACK_HYDRATED__?: boolean }).__TANSTACK_HYDRATED__ = true
-  }, [])
-  return null
-}
-
-function RootComponent() {
-  const { dir, languageCode, theme } = Route.useLoaderData()
-
+function MarketingHtml({ children }: { children: React.ReactNode }) {
   return (
-    <html data-theme={theme} dir={dir} lang={languageCode} suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
-        <style>{`@layer payload-default, payload;`}</style>
         <HeadContent />
       </head>
       <body>
-        <Outlet />
+        {children}
         <HydrationMarker />
         <Scripts />
       </body>
