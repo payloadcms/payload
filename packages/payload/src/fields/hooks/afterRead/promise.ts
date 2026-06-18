@@ -377,6 +377,7 @@ export const promise = async ({
         : await field.access.read({
             id: doc.id as number | string,
             blockData,
+            collectionSlug: collection?.slug,
             data: doc,
             doc,
             req,
