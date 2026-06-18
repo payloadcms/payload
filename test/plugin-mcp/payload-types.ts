@@ -64,7 +64,6 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -114,31 +113,13 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User | PayloadMcpApiKey;
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
 export interface UserAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
-  };
-}
-export interface PayloadMcpApiKeyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -318,17 +299,7 @@ export interface ReturnedResource {
 export interface Page {
   id: string;
   title: string;
-  layout?:
-    | (
-        | HeroBlock
-        | {
-            body?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textContent';
-          }
-      )[]
-    | null;
+  layout?: (HeroBlock | TextContent)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -342,6 +313,16 @@ export interface HeroBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'hero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextContent".
+ */
+export interface TextContent {
+  body?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textContent';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -440,149 +421,33 @@ export interface FieldType {
   createdAt: string;
 }
 /**
- * API keys control which collections, resources, tools, and prompts MCP clients can access
- *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys".
  */
 export interface PayloadMcpApiKey {
   id: string;
-  /**
-   * The user that the API key is associated with.
-   */
-  user: string | User;
-  /**
-   * A useful label for the API key.
-   */
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   label?: string | null;
-  /**
-   * The purpose of the API key.
-   */
   description?: string | null;
-  products?: {
-    /**
-     * Allow clients to find products.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create products.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update products.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete products.
-     */
-    delete?: boolean | null;
-  };
-  fieldTypes?: {
-    /**
-     * Allow clients to find field-types.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create field-types.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update field-types.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete field-types.
-     */
-    delete?: boolean | null;
-  };
-  pages?: {
-    /**
-     * Allow clients to find pages.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create pages.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update pages.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete pages.
-     */
-    delete?: boolean | null;
-  };
-  posts?: {
-    /**
-     * Allow clients to find posts.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create posts.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update posts.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete posts.
-     */
-    delete?: boolean | null;
-  };
-  media?: {
-    /**
-     * Allow clients to find media.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to update media.
-     */
-    update?: boolean | null;
-  };
-  siteSettings?: {
-    /**
-     * Allow clients to find site-settings global.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to update site-settings global.
-     */
-    update?: boolean | null;
-  };
-  'payload-mcp-tool'?: {
-    /**
-     * Rolls a virtual dice with a specified number of sides
-     */
-    diceRoll?: boolean | null;
-  };
-  'payload-mcp-resource'?: {
-    /**
-     * Data is a resource that contains special data.
-     */
-    data?: boolean | null;
-    /**
-     * Data is a resource that contains special data.
-     */
-    dataByID?: boolean | null;
-  };
-  'payload-mcp-prompt'?: {
-    /**
-     * Creates a prompt to process a message
-     */
-    echo?: boolean | null;
-  };
+  lastUsed?: string | null;
+  user: string | User;
+  overrideAccess?: boolean | null;
   /**
    * This field added by overrideApiKeyCollection
    */
   override?: string | null;
   updatedAt: string;
   createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -649,15 +514,10 @@ export interface PayloadLockedDocument {
         value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -667,15 +527,10 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   key?: string | null;
   value?:
     | {
@@ -877,75 +732,17 @@ export interface FieldTypesSelect<T extends boolean = true> {
  * via the `definition` "payload-mcp-api-keys_select".
  */
 export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  user?: T;
+  apiKey?: T;
+  apiKeyIndex?: T;
+  access?: T;
   label?: T;
   description?: T;
-  products?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  fieldTypes?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  pages?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  posts?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  media?:
-    | T
-    | {
-        find?: T;
-        update?: T;
-      };
-  siteSettings?:
-    | T
-    | {
-        find?: T;
-        update?: T;
-      };
-  'payload-mcp-tool'?:
-    | T
-    | {
-        diceRoll?: T;
-      };
-  'payload-mcp-resource'?:
-    | T
-    | {
-        data?: T;
-        dataByID?: T;
-      };
-  'payload-mcp-prompt'?:
-    | T
-    | {
-        echo?: T;
-      };
+  lastUsed?: T;
+  user?: T;
+  overrideAccess?: T;
   override?: T;
   updatedAt?: T;
   createdAt?: T;
-  enableAPIKey?: T;
-  apiKey?: T;
-  apiKeyIndex?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

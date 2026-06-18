@@ -7,7 +7,6 @@ const DraftVersions: CollectionConfig = {
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'status', 'createdAt'],
-    group: 'Versions',
   },
   versions: {
     drafts: true,

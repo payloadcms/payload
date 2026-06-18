@@ -2,7 +2,7 @@
   "name": "payload-3-custom-server",
   "type": "module",
   "scripts": {
-    "build": "next build && tsc --project tsconfig.server.json",
+    "build": "payload build && tsc --project tsconfig.server.json",
     "dev": "nodemon",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",

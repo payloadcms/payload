@@ -49,6 +49,7 @@ export const baseConfig: Partial<Config> = {
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: foldersSlug,
@@ -65,6 +66,7 @@ export const baseConfig: Partial<Config> = {
           required: true,
         },
       ],
+      versions: false,
     },
   ],
   admin: {
@@ -76,7 +78,6 @@ export const baseConfig: Partial<Config> = {
       beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
       graphics: {
         Logo: '/components/Logo/index.js#Logo',
-        Icon: '/components/Icon/index.js#Icon',
       },
     },
   },
@@ -88,7 +89,6 @@ export const baseConfig: Partial<Config> = {
   },
   plugins: [
     multiTenantPlugin<ConfigType>({
-      // debug: true,
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
       useTenantsCollectionAccess: false,
       tenantField: {

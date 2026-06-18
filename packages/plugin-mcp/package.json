@@ -21,20 +21,36 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
+  "sideEffects": [
+    "*.css"
+  ],
   "type": "module",
   "exports": {
     ".": {
       "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
+    },
+    "./stdio": {
+      "import": "./src/stdio.ts",
+      "types": "./src/stdio.ts",
+      "default": "./src/stdio.ts"
     }
   },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "bin": {
+    "payload-mcp": "./bin.js"
+  },
   "files": [
     "src",
-    "dist"
+    "dist",
+    "bin.js"
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
@@ -48,18 +64,23 @@
     "pack:plugin": "pnpm build && pnpm pack"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.27.1",
-    "@types/json-schema": "7.0.15",
-    "json-schema-to-zod": "2.6.1",
-    "mcp-handler": "^1.0.7",
-    "zod": "^3.25.50"
+    "@cfworker/json-schema": "^4.1.1",
+    "@modelcontextprotocol/server": "2.0.0-alpha.2",
+    "@payloadcms/translations": "workspace:*",
+    "tsx": "4.22.4",
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "payload": "workspace:*"
+    "@payloadcms/ui": "workspace:*",
+    "@types/react": "19.2.14",
+    "payload": "workspace:*",
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "peerDependencies": {
-    "payload": "workspace:*"
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*",
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "publishConfig": {
     "exports": {
@@ -67,10 +88,25 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
+      },
+      "./stdio": {
+        "import": "./dist/stdio.js",
+        "types": "./dist/stdio.d.ts",
+        "default": "./dist/stdio.js"
       }
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
+  },
+  "//deps_notes": {
+    "zod": "zod is a hard dependency of @modelcontextprotocol/server, thus we can safely use it without it impacting bundle size. Make extra sure the zod version here matches exactly what's defined in the dependencies of @modelcontextprotocol/server to avoid duplicate versions being installed.",
+    "@cfworker/json-schema": "Should be able to remove in next @modelcontextprotocol/server alpha release. Marked as an optional peer of @modelcontextprotocol/server, but its bundle does an eager top-level `import { Validator } from '@cfworker/json-schema'`, so it must be installed even when only zod-registered tools are used. Drop once upstream lazy-loads the validator. See: https://github.com/modelcontextprotocol/typescript-sdk",
+    "tsx": "Required by the `bin.js` stdio mcp. Keep the version pinned to whatever `payload` ships to avoid duplicate installs."
   },
   "homepage:": "https://payloadcms.com"
 }

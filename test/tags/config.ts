@@ -46,6 +46,7 @@ export const Tags: CollectionConfig = {
       type: 'textarea',
     },
   ],
+  versions: false,
 }
 
 // Categories hierarchy collection (single-select)
@@ -72,6 +73,7 @@ export const Categories: CollectionConfig = {
       required: true,
     },
   ],
+  versions: false,
 }
 
 // Posts collection that references both tags (multi) and categories (single)
@@ -95,6 +97,7 @@ export const Posts: CollectionConfig = {
     // Multi-select tags (hasMany: true, the default)
     createTagField({ hasMany: true, label: 'Tags', relationTo: tagsSlug }),
   ],
+  versions: false,
 }
 
 // Pages collection that references tags
@@ -115,6 +118,7 @@ export const Pages: CollectionConfig = {
     },
     createTagField({ hasMany: true, relationTo: tagsSlug }),
   ],
+  versions: false,
 }
 
 // Media collection that references tags
@@ -132,6 +136,7 @@ export const Media: CollectionConfig = {
     createTagField({ hasMany: true, relationTo: tagsSlug }),
   ],
   upload: true,
+  versions: false,
 }
 
 export default buildConfigWithDefaults({

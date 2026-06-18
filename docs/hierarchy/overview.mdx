@@ -846,11 +846,11 @@ Unlike stored paths, computed paths don't require updating draft versions when a
 
 Updates with `locale: 'all'` will skip hierarchy processing. **Workaround:** Update each locale individually.
 
-### Parent Changes with `publishSpecificLocale`
+### Parent Changes When Publishing a Single Locale
 
-**Use with caution:** When using `publishSpecificLocale`, be aware that the `parent` field is **not localized**—tree structure must be consistent across locales.
+**Use with caution:** When publishing a single locale (`locale: '<code>'` with `_status: 'published'`), be aware that the `parent` field is **not localized**—tree structure must be consistent across locales.
 
-When you publish a draft with a changed parent using `publishSpecificLocale`:
+When you publish a draft with a changed parent for one locale:
 
 - The parent change applies to **all locales** (parent field is not localized)
 - Paths are computed per locale on next read
@@ -868,7 +868,7 @@ When you publish a draft with a changed parent using `publishSpecificLocale`:
 
 // Draft changes parent
 await payload.update({
-  collection: 'pages',∫
+  collection: 'pages',
   id: 'doc-id',
   data: { parent: 'parent-2' },
   draft: true,
@@ -878,7 +878,9 @@ await payload.update({
 await payload.update({
   collection: 'pages',
   id: 'doc-id',
-  publishSpecificLocale: 'fr',
+  locale: 'fr',
+  data: { _status: 'published' },
+  draft: false,
 })
 // Result: parent changed to 'parent-2' for ALL locales
 // Paths computed on next read will reflect new parent for all locales
@@ -896,7 +898,7 @@ await payload.update({
 })
 ```
 
-**Note:** Title changes work as expected with `publishSpecificLocale` since paths are computed per locale.
+**Note:** Title changes work as expected when publishing a single locale, since paths are computed per locale.
 
 ## Best Practices
 

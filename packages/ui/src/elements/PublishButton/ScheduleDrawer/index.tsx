@@ -33,11 +33,13 @@ import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { Table } from '../../Table/index.js'
 import { TimezonePicker } from '../../TimezonePicker/index.js'
 import { buildUpcomingColumns } from './buildUpcomingColumns.js'
+import { buildUpcomingScheduleWhere } from './buildUpcomingScheduleWhere.js'
 
 const baseClass = 'schedule-publish'
 
 type Props = {
   defaultType?: PublishType
+  onUpcomingChange?: (hasUpcoming: boolean) => void
   schedulePublishConfig?: SchedulePublish
   slug: string
 }
@@ -47,7 +49,12 @@ const defaultLocaleOption = {
   value: 'all',
 }
 
-export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePublishConfig }) => {
+export const ScheduleDrawer: React.FC<Props> = ({
+  slug,
+  defaultType,
+  onUpcomingChange,
+  schedulePublishConfig,
+}) => {
   const {
     config: {
       admin: {
@@ -93,41 +100,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
   const fetchUpcoming = React.useCallback(async () => {
     const query: { sort: string; where: Where } = {
       sort: 'waitUntil',
-      where: {
-        and: [
-          {
-            taskSlug: {
-              equals: 'schedulePublish',
-            },
-          },
-          {
-            waitUntil: {
-              greater_than: new Date(),
-            },
-          },
-        ],
-      },
-    }
-
-    if (collectionSlug) {
-      query.where.and.push({
-        'input.doc.value': {
-          equals: String(id),
-        },
-      })
-      query.where.and.push({
-        'input.doc.relationTo': {
-          equals: collectionSlug,
-        },
-      })
-    }
-
-    if (globalSlug) {
-      query.where.and.push({
-        'input.global': {
-          equals: globalSlug,
-        },
-      })
+      where: buildUpcomingScheduleWhere({ id, collectionSlug, globalSlug }),
     }
 
     const { docs } = await requests
@@ -154,7 +127,19 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
       }),
     )
     setUpcoming(docs)
-  }, [collectionSlug, globalSlug, api, i18n, dateFormat, localization, supportedTimezones, t, id])
+    onUpcomingChange?.(docs.length > 0)
+  }, [
+    collectionSlug,
+    globalSlug,
+    api,
+    i18n,
+    dateFormat,
+    localization,
+    supportedTimezones,
+    t,
+    id,
+    onUpcomingChange,
+  ])
 
   const deleteHandler = React.useCallback(
     async (id: number | string) => {

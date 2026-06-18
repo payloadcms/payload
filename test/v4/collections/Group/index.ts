@@ -76,6 +76,7 @@ const GroupFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default GroupFields

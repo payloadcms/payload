@@ -3,8 +3,8 @@
     &.rs__multi-value {
       display: flex;
       padding: 0;
-      border: 1px solid var(--color-border);
-      border-radius: 0.1875rem;
+      border: var(--stroke-width-small) solid var(--color-border);
+      border-radius: var(--radius-chip);
       background: var(--color-bg);
       height: 1.25rem;
       margin: 0;

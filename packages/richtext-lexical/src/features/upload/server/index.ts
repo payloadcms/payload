@@ -11,7 +11,15 @@ import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
 import { UploadMarkdownTransformer } from './markdownTransformer.js'
 import { UploadServerNode } from './nodes/UploadNode.js'
+import { createUploadNodeJSONSchema } from './schema.js'
 import { uploadValidation } from './validate.js'
+
+export type {
+  Internal_UploadData,
+  SerializedUploadNode,
+  UploadData,
+  UploadDataImproved,
+} from './schema.js'
 
 export type ExclusiveUploadFeatureProps =
   | {
@@ -166,8 +174,10 @@ export const UploadFeature = createServerFeature<
                 if (!collection) {
                   return node
                 }
-                // @ts-expect-error - Fix in Payload v4
-                const id = node?.value?.id || node?.value // for backwards-compatibility
+                const id =
+                  typeof node?.value === 'object' && node.value !== null && 'id' in node.value
+                    ? node.value.id
+                    : node?.value // for backwards-compatibility
 
                 const populateDepth =
                   props?.maxDepth !== undefined && props?.maxDepth < depth ? props?.maxDepth : depth
@@ -193,6 +203,7 @@ export const UploadFeature = createServerFeature<
               },
             ],
           },
+          jsonSchema: createUploadNodeJSONSchema(props),
           node: UploadServerNode,
           validations: [uploadValidation(props)],
         }),

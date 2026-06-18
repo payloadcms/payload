@@ -16,6 +16,7 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { ServerAdapter } from '../admin/adapters/server.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
   CustomStatus,
@@ -484,6 +485,12 @@ export type ServerProps = {
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
   readonly searchParams?: Params
+  /**
+   * Framework-agnostic methods for server-side navigation, headers, cookies, and other server-only APIs.
+   * Plugins should call these methods instead of importing directly from `next/navigation`, `next/headers`, etc.
+   * These methods are populated by the given framework adapter, e.g. `@payloadcms/next`.
+   */
+  readonly server: ServerAdapter
   readonly user?: TypedUser
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
@@ -527,6 +534,21 @@ type SanitizedTimezoneConfig = {
 
 export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
   PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
+
+export type UserMenuSettingsGroup = {
+  group: LabelFunction | StaticLabel
+  items: CustomComponent[]
+}
+
+export type UserMenuSettingsItem = CustomComponent | UserMenuSettingsGroup
+
+export const isUserMenuSettingsGroup = (
+  userMenuSettingsItem: UserMenuSettingsItem,
+): userMenuSettingsItem is UserMenuSettingsGroup =>
+  typeof userMenuSettingsItem === 'object' &&
+  userMenuSettingsItem !== null &&
+  'items' in userMenuSettingsItem &&
+  Array.isArray(userMenuSettingsItem.items)
 
 export type Locale = {
   /**
@@ -1010,6 +1032,12 @@ export type Config = {
         tabs?: SidebarTab[]
       }
       /**
+       * Add custom items to the user menu popup in the admin panel header.
+       * These components will be rendered in the Settings sub-popup of the user menu.
+       * When empty or absent, the Settings sub-trigger is not shown.
+       */
+      userMenuSettingsItems?: UserMenuSettingsItem[]
+      /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
        * + `Dashboard` - `/admin`
@@ -1242,22 +1270,6 @@ export type Config = {
   email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
-  /**
-   * Experimental features may be unstable or change in future versions.
-   */
-  experimental?: {
-    /**
-     * Enable per-locale status for documents.
-     *
-     * Requires:
-     * - `localization` enabled
-     * - `versions.drafts` enabled
-     * - `versions.drafts.localizeStatus` set at collection or global level
-     *
-     * @experimental
-     */
-    localizeStatus?: boolean
-  }
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
@@ -1616,8 +1628,16 @@ export type Config = {
  */
 export type SanitizedConfig = {
   admin: {
+    /**
+     * `Required` (shallow) marks the top-level dashboard props as required, mainly `defaultLayout`,
+     * which sanitizing always fills in. Do not switch this to the `DeepRequired` used below: it
+     * recurses into the widgets and re-expands the whole `Field` type (a large self-referencing
+     * union), which is very expensive to check. Never run a `Field`-bearing type through
+     * `DeepRequired`.
+     */
+    dashboard: Required<NonNullable<NonNullable<Config['admin']>['dashboard']>>
     timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Config['admin']>
+  } & DeepRequired<Omit<NonNullable<Config['admin']>, 'dashboard'>>
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
@@ -1772,7 +1792,7 @@ export type SharedEntityViews = {
    * ```
    */
   [key: string]:
-    | { actions?: CustomComponent[]; Component?: PayloadComponent }
+    | { actions?: CustomComponent[]; Component?: PayloadComponent; NoResults?: CustomComponent }
     | AdminViewConfig
     | EditConfig
     | undefined
@@ -1800,7 +1820,7 @@ export type SharedAdminComponents = {
   views?: SharedEntityViews
 }
 
-export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
+export type EntityDescriptionFunction = ({ t }: { t: TFunction<ClientTranslationKeys> }) => string
 
 export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 

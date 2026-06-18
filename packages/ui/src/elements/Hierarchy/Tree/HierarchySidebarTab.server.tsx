@@ -44,15 +44,16 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
       ? collectionConfig.hierarchy
       : undefined
 
-  const IconComponent = hierarchyConfig?.admin?.components?.Icon
+  const IconComponent = hierarchyConfig?.admin?.components?.SmallIcon
   const icon = IconComponent ? (
     RenderServerComponent({
+      clientProps: { size: 16 },
       Component: IconComponent,
       importMap: payload.importMap,
       key: `hierarchy-sidebar-icon-${hierarchyCollectionSlug}`,
     })
   ) : (
-    <TagIcon />
+    <TagIcon size={16} />
   )
 
   try {

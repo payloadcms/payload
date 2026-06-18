@@ -286,8 +286,8 @@
   .LexicalEditorTheme__listItemChecked,
   .LexicalEditorTheme__listItemUnchecked {
     position: relative;
-    padding-right: var(--spacer-4);
-    margin-right: var(--spacer-3);
+    padding-left: var(--spacer-4);
+    margin-left: var(--spacer-3);
     list-style-type: none;
     outline: none;
   }
@@ -331,7 +331,7 @@
   }
 
   .LexicalEditorTheme__listItemUnchecked:before {
-    border: 1px solid var(--color-text);
+    border: var(--stroke-width-small) solid var(--color-text);
     background-color: var(--color-bg);
   }
 

@@ -2,7 +2,6 @@
 
 import type { ClientUser, DocumentViewClientProps } from 'payload'
 
-import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
@@ -30,6 +29,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext, usePreviewURL } from '../../providers/LivePreview/context.js'
 import { OperationProvider } from '../../providers/Operation/index.js'
 import { useRouteCache } from '../../providers/RouteCache/index.js'
+import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { UploadControlsProvider } from '../../providers/UploadControls/index.js'
@@ -41,7 +41,7 @@ import { handleTakeOver } from '../../utilities/handleTakeOver.js'
 import { Auth } from './Auth/index.js'
 import { SetDocumentStepNav } from './SetDocumentStepNav/index.js'
 import { SetDocumentTitle } from './SetDocumentTitle/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'collection-edit'
 const PENDING_SUCCESS_TOAST_KEY = 'payload-pending-success-toast'
@@ -612,6 +612,57 @@ export function DefaultEditView({
       collectionConfig.hierarchy.allowHasMany === false,
   )
 
+  const documentControlsProps: Omit<React.ComponentProps<typeof DocumentControls>, 'variant'> = {
+    id,
+    slug: collectionConfig?.slug || globalConfig?.slug,
+    apiURL,
+    BeforeDocumentControls,
+    BeforeDocumentMeta,
+    customComponents: {
+      PreviewButton,
+      PublishButton,
+      SaveButton,
+      SaveDraftButton,
+      Status,
+      UnpublishButton,
+    },
+    data,
+    disableActions: disableActions || isTrashed,
+    disableCreate,
+    EditMenuItems,
+    hasPublishPermission,
+    hasSavePermission,
+    isEditing,
+    isInDrawer,
+    isTrashed,
+    onDelete,
+    onDrawerCreateNew: clearDoc,
+    onDuplicate,
+    onRestore,
+    onSave,
+    onTakeOver: () => {
+      void handleTakeOver({
+        id,
+        clearRouteCache,
+        collectionSlug,
+        documentLockStateRef: documentLockState,
+        globalSlug,
+        isLockingEnabled,
+        isWithinDoc: true,
+        setCurrentEditor,
+        setIsReadOnlyForIncomingUser,
+        updateDocumentEditor,
+        user,
+      })
+    },
+    permissions: docPermissions,
+    readOnlyForIncomingUser: isReadOnlyForIncomingUser,
+    redirectAfterDelete,
+    redirectAfterDuplicate,
+    redirectAfterRestore,
+    user: currentEditor,
+  }
+
   return (
     <main
       className={[
@@ -645,9 +696,16 @@ export function DefaultEditView({
         >
           {isInDrawer && (
             <DocumentDrawerHeader
+              actions={
+                <DocumentControls {...documentControlsProps} variant="drawerHeaderActions" />
+              }
               AfterHeader={Description}
+              BeforeDocumentMeta={BeforeDocumentMeta}
               drawerSlug={drawerSlug}
-              showDocumentID={!isFolderCollection}
+              readOnlyForIncomingUser={isReadOnlyForIncomingUser}
+              renderTitleAsLink={!isFolderCollection}
+              Status={Status}
+              user={currentEditor}
             />
           )}
           {isLockingEnabled && shouldShowDocumentLockedModal && (
@@ -690,7 +748,11 @@ export function DefaultEditView({
             <DocumentStaleData isActive={showStaleDataModal} onReload={handleStaleDataReload} />
           )}
           {preventLeaveWithoutSaving && (
-            <LeaveWithoutSaving onConfirm={handleLeaveConfirm} onPrevent={handlePrevent} />
+            <LeaveWithoutSaving
+              modalSlug={drawerSlug ? `leave-without-saving-${drawerSlug}` : undefined}
+              onConfirm={handleLeaveConfirm}
+              onPrevent={handlePrevent}
+            />
           )}
           {!isInDrawer && (
             <SetDocumentStepNav
@@ -708,56 +770,7 @@ export function DefaultEditView({
             fallback={depth <= 1 ? id?.toString() : undefined}
             globalConfig={globalConfig}
           />
-          <DocumentControls
-            apiURL={apiURL}
-            BeforeDocumentControls={BeforeDocumentControls}
-            BeforeDocumentMeta={BeforeDocumentMeta}
-            customComponents={{
-              PreviewButton,
-              PublishButton,
-              SaveButton,
-              SaveDraftButton,
-              Status,
-              UnpublishButton,
-            }}
-            data={data}
-            disableActions={disableActions || isTrashed}
-            disableCreate={disableCreate}
-            EditMenuItems={EditMenuItems}
-            hasPublishPermission={hasPublishPermission}
-            hasSavePermission={hasSavePermission}
-            id={id}
-            isEditing={isEditing}
-            isInDrawer={isInDrawer}
-            isTrashed={isTrashed}
-            onDelete={onDelete}
-            onDrawerCreateNew={clearDoc}
-            onDuplicate={onDuplicate}
-            onRestore={onRestore}
-            onSave={onSave}
-            onTakeOver={() =>
-              handleTakeOver({
-                id,
-                clearRouteCache,
-                collectionSlug,
-                documentLockStateRef: documentLockState,
-                globalSlug,
-                isLockingEnabled,
-                isWithinDoc: true,
-                setCurrentEditor,
-                setIsReadOnlyForIncomingUser,
-                updateDocumentEditor,
-                user,
-              })
-            }
-            permissions={docPermissions}
-            readOnlyForIncomingUser={isReadOnlyForIncomingUser}
-            redirectAfterDelete={redirectAfterDelete}
-            redirectAfterDuplicate={redirectAfterDuplicate}
-            redirectAfterRestore={redirectAfterRestore}
-            slug={collectionConfig?.slug || globalConfig?.slug}
-            user={currentEditor}
-          />
+          {!isInDrawer && <DocumentControls {...documentControlsProps} variant="default" />}
           <div
             className={[`${baseClass}__main-wrapper`, isPopupOpen && `${baseClass}--detached`]
               .filter(Boolean)

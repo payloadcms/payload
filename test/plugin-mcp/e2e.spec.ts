@@ -42,12 +42,20 @@ test.describe('MCP Plugin', () => {
     // Create an API key with permissions to call tools/list
     const createKeyRes = await request.post(`${serverURL}/api/payload-mcp-api-keys`, {
       data: {
-        enableAPIKey: true,
-        label: 'E2E Test Key',
+        access: {
+          collections: {
+            posts: {
+              create: true,
+              delete: true,
+              find: true,
+              update: true,
+            },
+            products: { find: true },
+          },
+        },
         apiKey: randomUUID(),
+        label: 'E2E Test Key',
         user: userId,
-        posts: { create: true, find: true, update: true, delete: true },
-        products: { find: true },
       },
       headers: {
         Authorization: `JWT ${token}`,

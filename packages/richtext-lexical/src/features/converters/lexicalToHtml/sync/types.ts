@@ -4,7 +4,7 @@ import type {
   DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
-} from '../../../../nodeTypes.js'
+} from '../../../../types/nodeTypes.js'
 import type { SerializedLexicalNodeWithParent } from '../shared/types.js'
 
 export type HTMLConverter<T extends { [key: string]: any; type?: string } = SerializedLexicalNode> =
@@ -44,31 +44,13 @@ export type HTMLConverters<
   >
 } & {
   blocks?: {
-    [K in Extract<
-      Extract<T, { type: 'block' }> extends SerializedBlockNode<infer B>
-        ? B extends { blockType: string }
-          ? B['blockType']
-          : never
-        : never,
-      string
-    >]?: HTMLConverter<
-      Extract<T, { type: 'block' }> extends SerializedBlockNode<infer B>
-        ? SerializedBlockNode<Extract<B, { blockType: K }>>
-        : SerializedBlockNode
+    [K in Extract<T, { type: 'block' }>['fields']['blockType']]?: HTMLConverter<
+      Extract<T, { fields: { blockType: K }; type: 'block' }>
     >
   }
   inlineBlocks?: {
-    [K in Extract<
-      Extract<T, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
-        ? B extends { blockType: string }
-          ? B['blockType']
-          : never
-        : never,
-      string
-    >]?: HTMLConverter<
-      Extract<T, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
-        ? SerializedInlineBlockNode<Extract<B, { blockType: K }>>
-        : SerializedInlineBlockNode
+    [K in Extract<T, { type: 'inlineBlock' }>['fields']['blockType']]?: HTMLConverter<
+      Extract<T, { fields: { blockType: K }; type: 'inlineBlock' }>
     >
   }
   unknown?: HTMLConverter<SerializedLexicalNode>
@@ -77,6 +59,6 @@ export type HTMLConverters<
 export type HTMLConvertersFunction<
   T extends { [key: string]: any; type?: string } =
     | DefaultNodeTypes
-    | SerializedBlockNode<{ blockName?: null | string }>
+    | SerializedBlockNode<{ blockName?: null | string; blockType: string }>
     | SerializedInlineBlockNode<{ blockName?: null | string; blockType: string }>,
-> = (args: { defaultConverters: HTMLConverters<DefaultNodeTypes> }) => HTMLConverters<T>
+> = (args: { defaultConverters: HTMLConverters<T> }) => HTMLConverters<T>

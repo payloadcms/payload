@@ -86,6 +86,15 @@ export const getWorkspace = async () => {
         })
         .join('\n') + '\n',
     )
+
+    const failed = results.filter((result) => !result.success)
+    if (failed.length > 0) {
+      throw new Error(
+        `${failed.length} of ${results.length} package(s) failed to publish: ${failed
+          .map((result) => result.name)
+          .join(', ')}`,
+      )
+    }
   }
 
   const publish = async () => {
