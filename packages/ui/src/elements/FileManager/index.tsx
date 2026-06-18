@@ -115,14 +115,6 @@ export const FileManager: React.FC<FileManagerProps> = ({
     sidePanelMimeType !== 'image/svg+xml' &&
     sidePanelMimeType !== 'image/jxl'
 
-  const showSidePanelCarousel = Boolean(
-    data?.filename &&
-      !removedFile &&
-      hasImageSizes &&
-      sidePanelMimeType &&
-      isImage(sidePanelMimeType),
-  )
-
   const renameFile = (fileToChange: File, newName: string): File =>
     new File([fileToChange], newName, {
       type: fileToChange.type,
@@ -344,15 +336,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
   )
 
   return (
-    <div
-      className={[
-        fieldBaseClass,
-        baseClass,
-        showSidePanelCarousel && `${baseClass}--has-side-carousel`,
-      ]
-        .filter(Boolean)
-        .join(' ')}
-    >
+    <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <FieldError message={errorMessage} showError={showError} />
       <div className={`${baseClass}__panel`}>
         {data?.filename && !removedFile && (

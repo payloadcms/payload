@@ -14,21 +14,6 @@
     background: var(--color-bg-secondary);
   }
 
-  /*
-   * The carousel lives inside the sticky panel, so its border-right only spans the
-   * viewport-height panel. This draws the same divider down the full height of the
-   * (potentially taller) box so it reaches the bottom even below the sticky panel.
-   */
-  .file-manager--has-side-carousel::before {
-    content: '';
-    position: absolute;
-    inset-block: 0;
-    inset-inline-start: 0;
-    width: var(--mini-carousel-width);
-    border-inline-end: 1px solid var(--color-border);
-    pointer-events: none;
-  }
-
   .file-manager__panel {
     position: sticky;
     top: var(--doc-controls-height);
@@ -157,12 +142,6 @@
 
     .file-manager__content {
       flex-direction: column;
-    }
-
-    /* The panel is static here (no stacking context), so the absolutely-positioned divider
-       would paint over the toolbar — and there is no sticky gap left to fill anyway. */
-    .file-manager--has-side-carousel::before {
-      display: none;
     }
   }
 }

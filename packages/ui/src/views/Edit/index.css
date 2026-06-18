@@ -20,15 +20,16 @@
     align-items: flex-start;
 
     /* The file manager renders before the fields in the DOM (so it stacks on top at mobile),
-       but on desktop it should sit after them in the row at 2fr. */
+       but on desktop it should sit after them in the row at 2fr. The divider lives on the file
+       manager (not the fields) because it always stretches full height — the fields may be short. */
     .file-manager {
       order: 2;
       flex: 2;
+      border-inline-start: 1px solid var(--color-border);
     }
 
     .document-fields {
       flex: 1;
-      border-inline-end: 1px solid var(--color-border);
     }
 
     .document-fields:not(:has(.document-fields__sidebar-wrap)):not(:has(.document-fields__edit > :not(.document-fields__fields))):not(:has(.document-fields__fields > :not(input[type="hidden"]))) {
@@ -46,6 +47,8 @@
       .file-manager {
         order: 0;
         flex: 1 0 0;
+        /* Stacked — no vertical divider; the file manager's own bottom border separates it. */
+        border-inline-start: 0;
       }
 
       .document-fields {
