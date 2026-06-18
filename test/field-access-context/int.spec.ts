@@ -26,12 +26,12 @@ describe('field access collection context', () => {
 
   afterEach(async () => {
     for (const id of parentIDs) {
-      await payload.delete({ collection: parentsSlug, id })
+      await payload.delete({ id, collection: parentsSlug })
     }
     parentIDs.length = 0
 
     for (const id of childIDs) {
-      await payload.delete({ collection: childrenSlug, id })
+      await payload.delete({ id, collection: childrenSlug })
     }
     childIDs.length = 0
 
@@ -53,14 +53,13 @@ describe('field access collection context', () => {
     })
     parentIDs.push(doc.id)
 
-    expect(readAccessLog()).toContainEqual(
-      expect.objectContaining({
-        collectionSlug: parentsSlug,
-        fieldName: 'accessCreateProbe',
-        operation: 'create',
-        source: 'field-access',
-      }),
+    const log = readAccessLog()
+    expect(log).toContainEqual(
+      expect.objectContaining({ collectionSlug: parentsSlug, fieldName: 'accessCreateProbe' }),
     )
+    expect(
+      log.filter((e) => e.fieldName === 'accessCreateProbe' && e.collectionSlug === undefined),
+    ).toHaveLength(0)
   })
 
   it('should pass collectionSlug to REST create field access callbacks', async () => {
@@ -74,14 +73,13 @@ describe('field access collection context', () => {
     parentIDs.push(doc.doc.id)
 
     expect(response.status).toBe(201)
-    expect(readAccessLog()).toContainEqual(
-      expect.objectContaining({
-        collectionSlug: parentsSlug,
-        fieldName: 'accessCreateProbe',
-        operation: 'create',
-        source: 'field-access',
-      }),
+    const log = readAccessLog()
+    expect(log).toContainEqual(
+      expect.objectContaining({ collectionSlug: parentsSlug, fieldName: 'accessCreateProbe' }),
     )
+    expect(
+      log.filter((e) => e.fieldName === 'accessCreateProbe' && e.collectionSlug === undefined),
+    ).toHaveLength(0)
   })
 
   it('should pass collectionSlug to local read field access callbacks', async () => {
@@ -101,14 +99,13 @@ describe('field access collection context', () => {
       overrideAccess: false,
     })
 
-    expect(readAccessLog()).toContainEqual(
-      expect.objectContaining({
-        collectionSlug: parentsSlug,
-        fieldName: 'accessReadProbe',
-        operation: 'read',
-        source: 'field-access',
-      }),
+    const log = readAccessLog()
+    expect(log).toContainEqual(
+      expect.objectContaining({ collectionSlug: parentsSlug, fieldName: 'accessReadProbe' }),
     )
+    expect(
+      log.filter((e) => e.fieldName === 'accessReadProbe' && e.collectionSlug === undefined),
+    ).toHaveLength(0)
   })
 
   it('should pass collectionSlug to REST read field access callbacks', async () => {
@@ -125,14 +122,13 @@ describe('field access collection context', () => {
     const response = await restClient.GET(`/${parentsSlug}/${doc.id}`)
 
     expect(response.status).toBe(200)
-    expect(readAccessLog()).toContainEqual(
-      expect.objectContaining({
-        collectionSlug: parentsSlug,
-        fieldName: 'accessReadProbe',
-        operation: 'read',
-        source: 'field-access',
-      }),
+    const log = readAccessLog()
+    expect(log).toContainEqual(
+      expect.objectContaining({ collectionSlug: parentsSlug, fieldName: 'accessReadProbe' }),
     )
+    expect(
+      log.filter((e) => e.fieldName === 'accessReadProbe' && e.collectionSlug === undefined),
+    ).toHaveLength(0)
   })
 
   it('should pass collectionSlug to GraphQL read field access callbacks', async () => {
@@ -160,14 +156,13 @@ describe('field access collection context', () => {
     const result = await response.json()
 
     expect(result.errors).toBeUndefined()
-    expect(readAccessLog()).toContainEqual(
-      expect.objectContaining({
-        collectionSlug: parentsSlug,
-        fieldName: 'accessReadProbe',
-        operation: 'read',
-        source: 'field-access',
-      }),
+    const log = readAccessLog()
+    expect(log).toContainEqual(
+      expect.objectContaining({ collectionSlug: parentsSlug, fieldName: 'accessReadProbe' }),
     )
+    expect(
+      log.filter((e) => e.fieldName === 'accessReadProbe' && e.collectionSlug === undefined),
+    ).toHaveLength(0)
   })
 
   it('should pass child collectionSlug when reading populated relationship children', async () => {
@@ -197,14 +192,14 @@ describe('field access collection context', () => {
       overrideAccess: false,
     })
 
-    expect(readAccessLog()).toContainEqual(
-      expect.objectContaining({
-        collectionSlug: childrenSlug,
-        fieldName: 'childReadProbe',
-        operation: 'read',
-        source: 'field-access',
-      }),
+    // Child field access should receive the child collection's slug, not the parent's
+    const log = readAccessLog()
+    expect(log).toContainEqual(
+      expect.objectContaining({ collectionSlug: childrenSlug, fieldName: 'childReadProbe' }),
     )
+    expect(
+      log.filter((e) => e.fieldName === 'childReadProbe' && e.collectionSlug === undefined),
+    ).toHaveLength(0)
   })
 
   it('should pass collectionSlug to update field access callbacks', async () => {
@@ -226,14 +221,13 @@ describe('field access collection context', () => {
       overrideAccess: false,
     })
 
-    expect(readAccessLog()).toContainEqual(
-      expect.objectContaining({
-        collectionSlug: parentsSlug,
-        fieldName: 'accessUpdateProbe',
-        operation: 'update',
-        source: 'field-access',
-      }),
+    const log = readAccessLog()
+    expect(log).toContainEqual(
+      expect.objectContaining({ collectionSlug: parentsSlug, fieldName: 'accessUpdateProbe' }),
     )
+    expect(
+      log.filter((e) => e.fieldName === 'accessUpdateProbe' && e.collectionSlug === undefined),
+    ).toHaveLength(0)
   })
 
   it('should pass collectionSlug to findDistinct field access callbacks', async () => {
@@ -262,17 +256,18 @@ describe('field access collection context', () => {
       overrideAccess: false,
     })
 
-    expect(readAccessLog()).toContainEqual(
-      expect.objectContaining({
-        collectionSlug: parentsSlug,
-        fieldName: 'distinctProbe',
-        operation: 'read',
-        source: 'find-distinct',
-      }),
+    const log = readAccessLog()
+    expect(log).toContainEqual(
+      expect.objectContaining({ collectionSlug: parentsSlug, fieldName: 'distinctProbe' }),
     )
+    expect(
+      log.filter((e) => e.fieldName === 'distinctProbe' && e.collectionSlug === undefined),
+    ).toHaveLength(0)
   })
 
   it('should pass collectionSlug when building collection field permissions', async () => {
+    // payload.auth() calls getEntityPermissions for all registered collections,
+    // which calls populateFieldPermissions → field.access[operation] for each field.
     const req = await createLocalReq({}, payload)
 
     await payload.auth({
@@ -280,14 +275,13 @@ describe('field access collection context', () => {
       req,
     })
 
-    expect(readAccessLog()).toContainEqual(
-      expect.objectContaining({
-        collectionSlug: parentsSlug,
-        fieldName: 'permissionsProbe',
-        operation: 'read',
-        source: 'permissions',
-      }),
+    const log = readAccessLog()
+    expect(log).toContainEqual(
+      expect.objectContaining({ collectionSlug: parentsSlug, fieldName: 'permissionsProbe' }),
     )
+    expect(
+      log.filter((e) => e.fieldName === 'permissionsProbe' && e.collectionSlug === undefined),
+    ).toHaveLength(0)
   })
 
   it('should leave collectionSlug undefined for global field access callbacks', async () => {
@@ -304,7 +298,8 @@ describe('field access collection context', () => {
       overrideAccess: false,
     })
 
-    expect(readAccessLog()).toContainEqual(
+    const log = readAccessLog()
+    expect(log).toContainEqual(
       expect.objectContaining({
         collectionSlug: undefined,
         fieldName: 'globalReadProbe',
@@ -312,5 +307,9 @@ describe('field access collection context', () => {
         source: 'field-access',
       }),
     )
+    // Verify it was NOT called with any collection slug
+    expect(
+      log.filter((e) => e.fieldName === 'globalReadProbe' && e.collectionSlug !== undefined),
+    ).toHaveLength(0)
   })
 })

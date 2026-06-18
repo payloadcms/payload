@@ -28,9 +28,7 @@ export const recordAccess = ({
   operation,
   source,
 }: Pick<AccessLogEntry, 'fieldName' | 'operation' | 'source'>): FieldAccess => {
-  return (args) => {
-    const { collectionSlug } = args as { collectionSlug?: string } & typeof args
-
+  return ({ collectionSlug }) => {
     pushAccessLog({ collectionSlug, fieldName, operation, source })
 
     return true
