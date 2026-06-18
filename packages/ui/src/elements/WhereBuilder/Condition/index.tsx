@@ -13,6 +13,7 @@ import type {
 export type Props = {
   readonly addCondition: AddCondition
   readonly andIndex: number
+  readonly disableRemoveButton: boolean
   readonly fieldPath: string
   readonly filterOptions?: ResolvedFilterOptions
   readonly isFirstCondition: boolean
@@ -22,7 +23,6 @@ export type Props = {
   readonly reducedFields: ReducedField[]
   readonly removeCondition: RemoveCondition
   readonly RenderedFilter?: React.ReactNode
-  readonly showRemoveButton: boolean
   readonly updateCondition: UpdateCondition
   readonly updateJoin: UpdateJoin
   readonly value: Value
@@ -49,6 +49,7 @@ const baseClass = 'condition'
 export const Condition: React.FC<Props> = (props) => {
   const {
     andIndex,
+    disableRemoveButton,
     fieldPath,
     filterOptions,
     isFirstCondition,
@@ -58,7 +59,6 @@ export const Condition: React.FC<Props> = (props) => {
     reducedFields,
     removeCondition,
     RenderedFilter,
-    showRemoveButton,
     updateCondition,
     updateJoin,
     value,
@@ -229,19 +229,18 @@ export const Condition: React.FC<Props> = (props) => {
           </div>
         </div>
         <div className={`${baseClass}__actions`}>
-          {showRemoveButton && (
-            <Button
-              buttonStyle="ghost"
-              className={`${baseClass}__actions-remove`}
-              icon={<LineIcon size={24} />}
-              onClick={() =>
-                removeCondition({
-                  andIndex,
-                  orIndex,
-                })
-              }
-            />
-          )}
+          <Button
+            buttonStyle="ghost"
+            className={`${baseClass}__actions-remove`}
+            disabled={disableRemoveButton}
+            icon={<LineIcon size={24} />}
+            onClick={() =>
+              removeCondition({
+                andIndex,
+                orIndex,
+              })
+            }
+          />
         </div>
       </div>
     </div>

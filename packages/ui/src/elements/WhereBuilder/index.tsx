@@ -250,22 +250,13 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
         ] as typeof conditions)
       : conditions
 
-  // Show the per-row remove button only when removing does something meaningful: when there is
-  // a committed condition to remove, or when the builder lives in a closable panel (the list
-  // view), where removing the last row closes it. The uncommitted virtual placeholder row in
-  // the always-open form (drawer) has nothing to remove, so it gets no button.
-  const showRemoveButton = conditions.length > 0 || Boolean(onClose)
+  // Disable the remove button only on the drawer's uncommitted placeholder row, where there's
+  // nothing to remove. A committed condition or a closable panel (list view) keeps it enabled.
+  const disableRemoveButton = conditions.length === 0 && !onClose
 
   return (
     <div className={baseClass}>
-      <div
-        className={[
-          `${baseClass}__or-filters`,
-          !showRemoveButton && `${baseClass}__or-filters--no-actions`,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
+      <div className={`${baseClass}__or-filters`}>
         {displayConditions.map((or, orIndex) => {
           const compoundOrKey = `${orIndex}_${Array.isArray(or?.and) ? or.and.length : ''}`
 
@@ -288,6 +279,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                     <Condition
                       addCondition={addCondition}
                       andIndex={andIndex}
+                      disableRemoveButton={disableRemoveButton}
                       fieldPath={fieldPath}
                       filterOptions={resolvedFilterOptions?.get(fieldPath)}
                       isFirstCondition={isFirstCondition}
@@ -298,7 +290,6 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                       reducedFields={reducedFields}
                       removeCondition={removeCondition}
                       RenderedFilter={renderedFilters?.get(fieldPath)}
-                      showRemoveButton={showRemoveButton}
                       updateCondition={updateCondition}
                       updateJoin={updateJoin}
                       value={value}

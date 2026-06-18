@@ -38,17 +38,6 @@
     align-items: center;
   }
 
-  /* Without the per-row remove button, drop the trailing actions track so the last input stays
-     flush with the edge instead of leaving a gap where the button would be. */
-  .where-builder__or-filters--no-actions {
-    grid-template-columns: minmax(calc(var(--spacer-4) * 2), max-content) 1fr 1fr 1fr;
-  }
-
-  /* The actions cell still renders empty; remove it from the grid so it doesn't wrap to a new row. */
-  .where-builder__or-filters--no-actions .condition__actions {
-    display: none;
-  }
-
   /* Flatten the condition wrappers so each cell is a direct grid item. */
   .where-builder__and-filters {
     display: contents;
