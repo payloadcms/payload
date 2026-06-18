@@ -978,6 +978,8 @@ mcpPlugin({
 
 The `userCollection` option was also removed. MCP now accepts any Payload user authenticated through API-key auth, using the collection slug from the `Authorization` header.
 
+Because the `payload-mcp-api-keys` collection config was removed, run your normal database migration workflow after upgrading so the old collection/table is removed where your database adapter requires schema migrations. Back up any existing MCP API key documents first if you need to reference them while recreating credentials as user API keys. You can build your own RBAC system, managable in the admin UI, using the new access functions added to mcp items, if needed. Otherwise, just manage tool access in code.
+
 **MCP tool access is configured in code.** The old per-key permissions UI was removed with the MCP API-key collection. Tools, prompts, and resources can now define an `access` callback; built-in collection/global tools accept `access` in their override object.
 
 **Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`, and moved to `zod` v4. If your custom tools import `zod` directly, make sure it resolves to v4.
