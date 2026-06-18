@@ -52,8 +52,7 @@ export const getAuthorizedMCP: (args: {
   if (pluginConfig.overrideAuth) {
     return await filterAuthorizedMCPItems({
       authorizedMCP: await pluginConfig.overrideAuth({
-        getAPIKeyUser: (overrideApiKey) =>
-          getAPIKeyUser({ overrideApiKey, pluginConfig, req }),
+        getAPIKeyUser: (headers) => getAPIKeyUser({ headers, req }),
         getAuthorizedMCP: getAuthorizedMCPForUser,
         pluginConfig,
         req,
@@ -74,30 +73,21 @@ export const getAuthorizedMCP: (args: {
   }
 
   return await filterAuthorizedMCPItems({
-    authorizedMCP: getAuthorizedMCPForUser({ user: await getAPIKeyUser({ pluginConfig, req }) }),
+    authorizedMCP: getAuthorizedMCPForUser({ user: await getAPIKeyUser({ req }) }),
     req,
   })
 }
 
 const getAPIKeyUser = async ({
-  overrideApiKey,
-  pluginConfig,
+  headers,
   req,
 }: {
-  overrideApiKey?: string
-  pluginConfig: ReturnType<typeof getPluginConfig>
+  headers?: Headers
   req: PayloadRequest
 }): Promise<TypedUser> => {
-  const headers = new Headers(req.headers)
-  if (overrideApiKey) {
-    headers.set('Authorization', `${pluginConfig.userCollection} API-Key ${overrideApiKey}`)
-  }
+  const user = headers ? (await req.payload.auth({ headers: new Headers(headers) })).user : req.user
 
-  const user = overrideApiKey
-    ? (await req.payload.auth({ headers })).user
-    : req.user
-
-  if (user?._strategy !== 'api-key' || user.collection !== pluginConfig.userCollection) {
+  if (user?._strategy !== 'api-key') {
     throw new UnauthorizedError()
   }
 

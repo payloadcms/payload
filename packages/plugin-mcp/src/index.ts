@@ -1,4 +1,4 @@
-import { defaultUserCollection, definePlugin } from 'payload'
+import { definePlugin } from 'payload'
 
 import type { AuthorizedMCP, MCPPluginConfig, SanitizedMCPPluginConfig } from './types.js'
 
@@ -23,15 +23,6 @@ export const mcpPlugin = definePlugin<MCPPluginConfig>({
   slug: '@payloadcms/plugin-mcp',
   order: 10,
   plugin: ({ config, plugins, ...rawConfig }) => {
-    // If a project has no auth collection yet, add the default users collection
-    // so the default `userCollection` exists for API-key authentication.
-    if (!rawConfig.disabled && !config.admin?.user) {
-      const firstCollectionWithAuth = (config.collections ?? []).find(({ auth }) => Boolean(auth))
-      if (!firstCollectionWithAuth) {
-        ;(config.collections ??= []).push(defaultUserCollection)
-      }
-    }
-
     const pluginConfig = sanitizeMCPConfig({ config, pluginConfig: rawConfig })
 
     // Stash the sanitized config on plugin options so `getPluginConfig()` reads it.

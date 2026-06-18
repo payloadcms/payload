@@ -33,7 +33,6 @@ import {
  *  - Flattens `tools` / `prompts` / `resources` / per-collection / per-global
  *    tool maps into a single `items` array.
  *  - Applies built-in tools for collections and globals, respecting opt-out user overrides.
- *  - Applies the `userCollection` default
  *
  * Called once during plugin init. After that, `plugins['@payloadcms/plugin-mcp']
  * ?.options` holds the sanitized result
@@ -98,16 +97,11 @@ export const sanitizeMCPConfig = ({
     })
   }
 
-  // Mirror Payload's own admin.user detection (sanitize.ts) since plugins run first.
-  const firstCollectionWithAuth = config.collections?.find(({ auth }) => Boolean(auth))
-
   return {
     disabled: pluginConfig.disabled,
     items,
     mcp: pluginConfig.mcp,
     overrideAuth: pluginConfig.overrideAuth,
-    userCollection:
-      pluginConfig.userCollection ?? config.admin?.user ?? firstCollectionWithAuth?.slug ?? 'users',
   }
 }
 

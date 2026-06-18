@@ -974,7 +974,9 @@ mcpPlugin({
 })
 ```
 
-**MCP now uses user API keys.** The `payload-mcp-api-keys` collection was removed. API keys sent to `/api/mcp` now use Payload's normal `Authorization: <userCollection> API-Key <key>` header and are looked up against the configured `userCollection` using Payload's normal `auth.useAPIKey` fields. Enable `auth.useAPIKey` on that collection and create API keys on the users that should call MCP. Existing `payload-mcp-api-keys` documents no longer authenticate, and `overrideApiKeyCollection` was removed.
+**MCP now uses user API keys.** The `payload-mcp-api-keys` collection was removed. API keys sent to `/api/mcp` now use Payload's normal `Authorization: <authCollectionSlug> API-Key <key>` header and Payload's normal `auth.useAPIKey` fields. Enable `auth.useAPIKey` on the auth collection whose users should call MCP. Existing `payload-mcp-api-keys` documents no longer authenticate, and `overrideApiKeyCollection` was removed.
+
+The `userCollection` option was also removed. MCP now accepts any Payload user authenticated through API-key auth, using the collection slug from the `Authorization` header.
 
 **MCP tool access is configured in code.** The old per-key permissions UI was removed with the MCP API-key collection. Tools, prompts, and resources can now define an `access` callback; built-in collection/global tools accept `access` in their override object.
 

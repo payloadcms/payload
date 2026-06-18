@@ -12,17 +12,32 @@ export const getConfigInfoTool = defineTool({
   },
   description: 'List the Payload collection and global slugs visible to this MCP client.',
 }).handler(async ({ authorizedMCP, req }) => {
-  const user = authorizedMCP.user ?? req.user ?? null
-  const permissions = user ? await getAccessResults({ req: { ...req, user } }) : null
+  const user = authorizedMCP.user
+  const permissions = authorizedMCP.overrideAccess
+    ? null
+    : await getAccessResults({ req: { ...req, user } })
+  const authorizedCollectionSlugs = new Set<string>()
+  const authorizedGlobalSlugs = new Set<string>()
+
+  for (const item of authorizedMCP.items) {
+    if (item.type === 'collectionTool') {
+      authorizedCollectionSlugs.add(item.collectionSlug)
+    } else if (item.type === 'globalTool') {
+      authorizedGlobalSlugs.add(item.globalSlug)
+    }
+  }
 
   const collections: string[] = []
   const globals: string[] = []
 
   for (const collection of req.payload.config.collections) {
+    if (!authorizedCollectionSlugs.has(collection.slug)) {
+      continue
+    }
     if (user && isEntityHidden({ hidden: collection.admin.hidden, user })) {
       continue
     }
-    if (user && !permissions?.collections?.[collection.slug]?.read) {
+    if (!authorizedMCP.overrideAccess && !permissions?.collections?.[collection.slug]?.read) {
       continue
     }
 
@@ -30,10 +45,13 @@ export const getConfigInfoTool = defineTool({
   }
 
   for (const global of req.payload.config.globals) {
+    if (!authorizedGlobalSlugs.has(global.slug)) {
+      continue
+    }
     if (user && isEntityHidden({ hidden: global.admin.hidden, user })) {
       continue
     }
-    if (user && !permissions?.globals?.[global.slug]?.read) {
+    if (!authorizedMCP.overrideAccess && !permissions?.globals?.[global.slug]?.read) {
       continue
     }
 

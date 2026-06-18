@@ -142,7 +142,6 @@ mcpPlugin({
 | `prompts`                              | `object`         | Custom prompts, keyed by name. Values are `Prompt` objects (use [`definePrompt`](#prompts)).                                                  |
 | `resources`                            | `object`         | Custom resources, keyed by name. Values are `Resource` objects.                                                                               |
 | `disabled`                             | `boolean`        | Skip MCP endpoint registration.                                                                                                              |
-| `userCollection`                       | `CollectionSlug` | Auth collection used for default API-key lookup. Defaults to `config.admin.user` (typically `users`).                                        |
 | `overrideAuth`                         | `function`       | Replace the default API-key auth with a fully custom access strategy. See [Custom auth](#custom-auth).                                       |
 | `mcp.serverOptions.serverInfo.name`    | `string`         | The MCP server name advertised to clients. Default `'Payload MCP Server'`.                                                                    |
 | `mcp.serverOptions.serverInfo.version` | `string`         | The MCP server version. Default `'1.0.0'`.                                                                                                    |
@@ -332,19 +331,19 @@ npx @modelcontextprotocol/inspector
 The HTTP endpoint requires Payload's normal API-key header on every request:
 
 ```txt
-Authorization: <userCollection> API-Key <key>
+Authorization: <authCollectionSlug> API-Key <key>
 ```
 
-MCP authenticates those keys against the configured `userCollection` using Payload's normal auth API-key fields.
+MCP authenticates those keys with Payload's normal API-key auth strategy.
 
 ### Creating an API key
 
 1. Start your Payload server and open the admin panel
-2. Open a user document in the collection configured as `userCollection`
+2. Open a user document in an auth-enabled collection with `auth.useAPIKey`
 3. Enable API key auth for that user, generate a key, then save and copy it
-4. Use that key as `Authorization: users API-Key <key>` when calling `/api/mcp` (replace `users` with your configured `userCollection`)
+4. Use that key as `Authorization: users API-Key <key>` when calling `/api/mcp` (replace `users` with that auth collection's slug)
 
-The user attached to the API key is used for Payload access control. Enable `auth.useAPIKey` on your configured user collection if it is not already enabled.
+The user attached to the API key is used for Payload access control.
 
 ### Dev-mode session fallback
 
@@ -390,7 +389,7 @@ The handler receives:
 
 - `req` - the incoming `PayloadRequest`
 - `pluginConfig` - the fully sanitized plugin config, including the registered `items`
-- `getAPIKeyUser(overrideKey?)` - runs the default API-key lookup against the configured user collection (optionally with a key you provide)
+- `getAPIKeyUser(headers?)` - returns the current API-key-authenticated user, or runs Payload API-key auth against full headers you provide
 - `getAuthorizedMCP({ user, overrideAccess? })` - builds an `AuthorizedMCP` with all configured items for the given user
 
 ## Defining custom tools, prompts, and resources
