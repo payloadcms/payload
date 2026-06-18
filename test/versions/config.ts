@@ -28,6 +28,7 @@ import { Media } from './collections/Media.js'
 import { Media2 } from './collections/Media2.js'
 import Posts from './collections/Posts.js'
 import { TextCollection } from './collections/Text.js'
+import UnpublishHookFormReset from './collections/UnpublishHookFormReset.js'
 import VersionPosts from './collections/Versions.js'
 import AutosaveGlobal from './globals/Autosave.js'
 import AutosaveWithDraftButtonGlobal from './globals/AutosaveWithDraftButton.js'
@@ -64,6 +65,7 @@ export default buildConfigWithDefaults({
     DraftsWithCustomUnpublish,
     DraftsWithValidate,
     ErrorOnUnpublish,
+    UnpublishHookFormReset,
     LocalizedPosts,
     VersionPosts,
     CustomIDs,

@@ -23,7 +23,6 @@ export function UnpublishButton({
   const {
     id,
     collectionSlug,
-    data: dataFromProps,
     globalSlug,
     hasPublishedDoc,
     hasPublishPermission,
@@ -102,10 +101,18 @@ export function UnpublishButton({
           })
 
           if (res.status === 200) {
-            void resetForm({
-              ...(dataFromProps || {}),
-              _status: 'draft',
-            })
+            const json = await res.json()
+            let data
+
+            if (globalSlug) {
+              data = json.result
+            } else if (collectionSlug) {
+              data = json.doc
+            }
+
+            if (data) {
+              void resetForm(data)
+            }
 
             toast.success(t('version:unpublishedSuccessfully'))
             if (!unpublishAll) {
@@ -136,7 +143,6 @@ export function UnpublishButton({
       })
     },
     [
-      dataFromProps,
       resetForm,
       collectionSlug,
       globalSlug,

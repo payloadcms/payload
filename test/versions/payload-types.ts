@@ -62,24 +62,24 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_F50D3E7C".
+ * via the `definition` "LexicalNodes_A64963B0".
  */
-export type LexicalNodes_F50D3E7C =
+export type LexicalNodes_A64963B0 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_F50D3E7C>
+  | SerializedParagraphNode<LexicalNodes_A64963B0>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_F50D3E7C>
+  | SerializedHeadingNode<LexicalNodes_A64963B0>
   | SerializedUploadNode<'draft-with-upload'>
   | SerializedUploadNode<'draft-with-upload-cloud-storage'>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
   | SerializedUploadNode<'media2'>
-  | SerializedQuoteNode<LexicalNodes_F50D3E7C>
-  | SerializedListNode<LexicalNodes_F50D3E7C>
-  | SerializedListItemNode<LexicalNodes_F50D3E7C>
-  | SerializedAutoLinkNode<LexicalNodes_F50D3E7C, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_F50D3E7C, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_A64963B0>
+  | SerializedListNode<LexicalNodes_A64963B0>
+  | SerializedListItemNode<LexicalNodes_A64963B0>
+  | SerializedAutoLinkNode<LexicalNodes_A64963B0, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_A64963B0, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'disable-publish'
       | 'posts'
@@ -94,6 +94,7 @@ export type LexicalNodes_F50D3E7C =
       | 'drafts-with-custom-unpublish'
       | 'draft-with-validate-posts'
       | 'error-on-unpublish'
+      | 'unpublish-hook-form-reset'
       | 'localized-posts'
       | 'version-posts'
       | 'custom-ids'
@@ -127,6 +128,7 @@ export interface Config {
     'drafts-with-custom-unpublish': DraftsWithCustomUnpublish;
     'draft-with-validate-posts': DraftWithValidatePost;
     'error-on-unpublish': ErrorOnUnpublish;
+    'unpublish-hook-form-reset': UnpublishHookFormReset;
     'localized-posts': LocalizedPost;
     'version-posts': VersionPost;
     'custom-ids': CustomId;
@@ -159,6 +161,7 @@ export interface Config {
     'drafts-with-custom-unpublish': DraftsWithCustomUnpublishSelect<false> | DraftsWithCustomUnpublishSelect<true>;
     'draft-with-validate-posts': DraftWithValidatePostsSelect<false> | DraftWithValidatePostsSelect<true>;
     'error-on-unpublish': ErrorOnUnpublishSelect<false> | ErrorOnUnpublishSelect<true>;
+    'unpublish-hook-form-reset': UnpublishHookFormResetSelect<false> | UnpublishHookFormResetSelect<true>;
     'localized-posts': LocalizedPostsSelect<false> | LocalizedPostsSelect<true>;
     'version-posts': VersionPostsSelect<false> | VersionPostsSelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
@@ -268,7 +271,7 @@ export interface AutosavePost {
   title: string;
   relationship?: (string | null) | Post;
   computedTitle?: string | null;
-  richText?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
+  richText?: LexicalRichText<LexicalNodes_A64963B0> | null;
   json?:
     | {
         [k: string]: unknown;
@@ -437,6 +440,18 @@ export interface ErrorOnUnpublish {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unpublish-hook-form-reset".
+ */
+export interface UnpublishHookFormReset {
+  id: string;
+  title: string;
+  note?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "localized-posts".
  */
 export interface LocalizedPost {
@@ -566,8 +581,8 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
-  richtext?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
-  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
+  richtext?: LexicalRichText<LexicalNodes_A64963B0> | null;
+  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_A64963B0> | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
@@ -958,6 +973,10 @@ export interface PayloadLockedDocument {
         value: string | ErrorOnUnpublish;
       } | null)
     | ({
+        relationTo: 'unpublish-hook-form-reset';
+        value: string | UnpublishHookFormReset;
+      } | null)
+    | ({
         relationTo: 'localized-posts';
         value: string | LocalizedPost;
       } | null)
@@ -1217,6 +1236,17 @@ export interface DraftWithValidatePostsSelect<T extends boolean = true> {
  */
 export interface ErrorOnUnpublishSelect<T extends boolean = true> {
   title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unpublish-hook-form-reset_select".
+ */
+export interface UnpublishHookFormResetSelect<T extends boolean = true> {
+  title?: T;
+  note?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
