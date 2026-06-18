@@ -64,18 +64,26 @@
     flex-shrink: 0;
   }
 
+  /* Once the layout stacks (the panel is static, not sticky) there's no gap to fill, so disable
+     the scroll-driven growth and just fill the panel via stretch — otherwise the growing carousel
+     would overflow into the content below. */
+  @container edit-main (max-width: 1024px) {
+    .mini-carousel {
+      align-self: stretch;
+      height: auto;
+      animation: none;
+    }
+  }
+
   @container edit-main (max-width: 768px) {
     .mini-carousel {
       flex-direction: row;
       align-items: center;
       width: 100%;
-      height: auto;
       overflow-x: auto;
       overflow-y: hidden;
       border-right: 0;
       border-top: 1px solid var(--color-border);
-      /* Horizontal filmstrip below the image — no scroll-driven height growth here. */
-      animation: none;
     }
 
     .mini-carousel__item {
