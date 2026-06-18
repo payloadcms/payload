@@ -172,7 +172,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
             collectionPluralLabel={collectionConfig?.labels?.plural}
             collectionSlug={collectionConfig.slug}
             fields={collectionConfig?.fields}
-            onClose={() => setVisibleDrawer(undefined)}
+            onEmpty={() => setVisibleDrawer(undefined)}
             renderedFilters={renderedFilters}
             resolvedFilterOptions={resolvedFilterOptions}
           />

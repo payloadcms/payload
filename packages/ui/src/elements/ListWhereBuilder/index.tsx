@@ -10,7 +10,7 @@ export type ListWhereBuilderProps = {
   readonly collectionPluralLabel?: SanitizedCollectionConfig['labels']['plural']
   readonly collectionSlug: SanitizedCollectionConfig['slug']
   readonly fields: ClientField[]
-  readonly onClose?: () => void
+  readonly onEmpty?: () => void
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
 }
@@ -23,7 +23,7 @@ export const ListWhereBuilder: React.FC<ListWhereBuilderProps> = ({
   collectionPluralLabel,
   collectionSlug,
   fields,
-  onClose,
+  onEmpty,
   renderedFilters,
   resolvedFilterOptions,
 }) => {
@@ -40,7 +40,7 @@ export const ListWhereBuilder: React.FC<ListWhereBuilderProps> = ({
       collectionSlug={collectionSlug}
       fields={fields}
       onChange={handleChange}
-      onClose={onClose}
+      onEmpty={onEmpty}
       renderedFilters={renderedFilters}
       resolvedFilterOptions={resolvedFilterOptions}
       value={query?.where}

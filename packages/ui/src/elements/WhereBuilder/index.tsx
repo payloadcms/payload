@@ -37,7 +37,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     collectionSlug,
     fields,
     onChange,
-    onClose,
+    onEmpty,
     renderedFilters = undefined,
     resolvedFilterOptions = undefined,
     value,
@@ -164,7 +164,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
     ({ andIndex, orIndex }) => {
       // Virtual first row: removing it just closes the panel
       if (conditions.length === 0) {
-        onClose?.()
+        onEmpty?.()
         return
       }
 
@@ -179,10 +179,10 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
       // Removing the last remaining condition closes the filters panel.
       if (newConditions.length === 0) {
-        onClose?.()
+        onEmpty?.()
       }
     },
-    [conditions, handleWhereChange, onClose],
+    [conditions, handleWhereChange, onEmpty],
   )
 
   const updateJoin: UpdateJoin = React.useCallback(
@@ -252,7 +252,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
 
   // Disable the remove button only on the drawer's uncommitted placeholder row, where there's
   // nothing to remove. A committed condition or a closable panel (list view) keeps it enabled.
-  const disableRemoveButton = conditions.length === 0 && !onClose
+  const disableRemoveButton = conditions.length === 0 && !onEmpty
 
   return (
     <div className={baseClass}>
