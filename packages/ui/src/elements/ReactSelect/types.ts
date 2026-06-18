@@ -70,6 +70,7 @@ export type OptionGroup = {
 export type ReactSelectAdapterProps = {
   backspaceRemovesValue?: boolean
   blurInputOnSelect?: boolean
+  captureMenuScroll?: boolean
   className?: string
   classNames?: ClassNamesConfig<Option, boolean, GroupBase<Option>>
   components?: {

@@ -11,6 +11,23 @@ import { getSkillTreeHash } from './runner/workdir.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const cacheDir = path.join(__dirname, 'eval-results', 'cache')
+const runIdFile = path.join(__dirname, 'eval-results', '.run-id')
+
+let runIdLoaded = false
+let runIdValue: string | undefined
+
+/** The current invocation's run id, written by globalSetup. Read once per worker. */
+function getRunId(): string | undefined {
+  if (!runIdLoaded) {
+    runIdLoaded = true
+    try {
+      runIdValue = readFileSync(runIdFile, 'utf-8').trim() || undefined
+    } catch {
+      runIdValue = undefined
+    }
+  }
+  return runIdValue
+}
 
 type CacheEntry = {
   createdAt: string
@@ -58,7 +75,7 @@ export function setCachedResult(key: string, result: EvalResult): void {
   const entry: CacheEntry = {
     version: 1,
     createdAt: new Date().toISOString(),
-    result,
+    result: { ...result, runId: result.runId ?? getRunId() },
   }
   writeFileSync(cacheFilePath(key), JSON.stringify(entry, null, 2), 'utf-8')
 }

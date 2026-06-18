@@ -54,7 +54,7 @@ export async function getApiKey({
       user: userId,
     },
   })
-  return doc.apiKey as string
+  return doc.apiKey
 }
 
 const fixtureDir = path.dirname(fileURLToPath(import.meta.url))

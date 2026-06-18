@@ -7,9 +7,9 @@ import React, { Fragment, useCallback } from 'react'
 import { DeleteMany } from '../../../elements/DeleteMany/index.js'
 import { EditMany } from '../../../elements/EditMany/index.js'
 import { ListSelection_v4, ListSelectionButton } from '../../../elements/ListSelection/index.js'
-import { PublishMany_v4 } from '../../../elements/PublishMany/index.js'
+import { PublishMany } from '../../../elements/PublishMany/index.js'
 import { RestoreMany } from '../../../elements/RestoreMany/index.js'
-import { UnpublishMany_v4 } from '../../../elements/UnpublishMany/index.js'
+import { UnpublishMany } from '../../../elements/UnpublishMany/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { useRouter, useSearchParams } from '../../../providers/RouterAdapter/index.js'
@@ -109,7 +109,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               selectAll={selectAll === SelectAllStatus.AllAvailable}
               where={where}
             />
-            <PublishMany_v4
+            <PublishMany
               collection={collectionConfig}
               count={count}
               ids={selectedIDs}
@@ -118,7 +118,7 @@ export const ListSelection: React.FC<ListSelectionProps> = ({
               selectAll={selectAll === SelectAllStatus.AllAvailable}
               where={where}
             />
-            <UnpublishMany_v4
+            <UnpublishMany
               collection={collectionConfig}
               count={count}
               ids={selectedIDs}

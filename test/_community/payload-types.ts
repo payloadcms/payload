@@ -62,16 +62,16 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_00871687".
+ * via the `definition` "LexicalNodes_342F8217".
  */
-export type LexicalNodes_00871687 =
+export type LexicalNodes_342F8217 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_00871687>
+  | SerializedParagraphNode<LexicalNodes_342F8217>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_00871687>
+  | SerializedQuoteNode<LexicalNodes_342F8217>
   | SerializedRelationshipNode<
       | 'posts'
       | 'users'
@@ -80,11 +80,11 @@ export type LexicalNodes_00871687 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_00871687, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_00871687, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_00871687>
-  | SerializedListItemNode<LexicalNodes_00871687>
-  | SerializedHeadingNode<LexicalNodes_00871687>;
+  | SerializedAutoLinkNode<LexicalNodes_342F8217, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_342F8217, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_342F8217>
+  | SerializedListItemNode<LexicalNodes_342F8217>
+  | SerializedHeadingNode<LexicalNodes_342F8217>;
 
 export interface Config {
   auth: {
@@ -111,7 +111,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
   globals: {
@@ -153,9 +153,9 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title?: string | null;
-  content?: LexicalRichText<LexicalNodes_00871687> | null;
+  content?: LexicalRichText<LexicalNodes_342F8217> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -164,7 +164,7 @@ export interface Post {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -208,7 +208,7 @@ export interface Media {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -233,7 +233,7 @@ export interface User {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -250,15 +250,15 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'users';
@@ -267,7 +267,7 @@ export interface PayloadLockedDocument {
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -277,10 +277,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -300,7 +300,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -434,7 +434,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "menu".
  */
 export interface Menu {
-  id: string;
+  id: number;
   globalText?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
@@ -603,6 +603,6 @@ export interface LexicalRichText<TNode> {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

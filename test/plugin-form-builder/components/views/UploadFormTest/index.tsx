@@ -1,9 +1,12 @@
 import type { AdminViewServerProps } from 'payload'
 
+import { ArrowIcon, Button } from '@payloadcms/ui'
 import { MinimalTemplate } from '@payloadcms/ui/rsc'
+import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
 import { UploadFormTestClient } from './index.client.js'
+import './index.css'
 
 export function UploadFormTestView({ initPageResult }: AdminViewServerProps) {
   const { req } = initPageResult
@@ -25,6 +28,11 @@ async function UploadFormTestViewAsync({
   payload: AdminViewServerProps['initPageResult']['req']['payload']
   serverURL: string
 }) {
+  const dashboardURL = formatAdminURL({
+    adminRoute: payload.config.routes.admin,
+    path: '/',
+  })
+
   const { docs } = await payload.find({
     collection: 'forms',
     depth: 0,
@@ -37,15 +45,22 @@ async function UploadFormTestViewAsync({
   )
 
   return (
-    <div
-      style={{
-        marginTop: 'calc(var(--base) * 2)',
-        paddingLeft: 'var(--gutter-h)',
-        paddingRight: 'var(--gutter-h)',
-      }}
-    >
-      <h1>Upload Form Test</h1>
-      <p>Use the forms below to test file uploads via the Payload REST API.</p>
+    <div className="upload-form-test__view">
+      <Button
+        buttonStyle="secondary"
+        className="upload-form-test__back-button"
+        el="link"
+        icon={<ArrowIcon className="upload-form-test__back-icon" size={16} />}
+        iconPosition="left"
+        margin={false}
+        to={dashboardURL}
+      >
+        Back to Dashboard
+      </Button>
+      <h1 className="upload-form-test__title">Upload Form Test</h1>
+      <p className="upload-form-test__description">
+        Use the forms below to test file uploads via the Payload REST API.
+      </p>
       <UploadFormTestClient forms={uploadForms} serverURL={serverURL} />
     </div>
   )

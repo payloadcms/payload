@@ -20,6 +20,7 @@ import { pluginsCodegenDataset } from '../../datasets/plugins/codegen.js'
 import { pluginsOfficialCodegenDataset } from '../../datasets/plugins/official/codegen.js'
 import { getAudience } from './audience.js'
 import { renderCodegenDiff, renderCodegenFile } from './codeDiff.js'
+import { runKeyOf } from './configuration.js'
 import { ResultsTable } from './ResultsTable.js'
 
 const codegenFixtureByQuestion: Record<string, string> = (() => {
@@ -62,6 +63,21 @@ const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const cacheDir = path.resolve(__dirname, '../../eval-results/cache')
 const fixturesDir = path.resolve(__dirname, '../../fixtures')
+const completedRunsFile = path.resolve(__dirname, '../../eval-results/.completed-runs')
+
+/** Run ids that finished (written by the launcher on a clean exit). Cancelled runs aren't listed. */
+function readCompletedRunIds(): Set<string> {
+  try {
+    return new Set(
+      readFileSync(completedRunsFile, 'utf-8')
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean),
+    )
+  } catch {
+    return new Set()
+  }
+}
 
 type CacheEntry = {
   createdAt: string
@@ -87,6 +103,7 @@ function readCacheEntries(): EvalEntry[] {
     return []
   }
 
+  const completed = readCompletedRunIds()
   const entries: EvalEntry[] = []
   for (const file of files) {
     try {
@@ -96,6 +113,11 @@ function readCacheEntries(): EvalEntry[] {
         continue
       }
       const { result } = entry
+      // Hide runs that never finished (e.g. Ctrl+C'd). Pre-run-tracking entries
+      // have no runId and are always kept.
+      if (result.runId && !completed.has(result.runId)) {
+        continue
+      }
       entries.push({
         type: 'codegen',
         audience: getAudience(result.category),
@@ -111,38 +133,6 @@ function readCacheEntries(): EvalEntry[] {
   }
 
   return entries.sort((a, b) => a.category.localeCompare(b.category))
-}
-
-const runsBaseDir = path.resolve(__dirname, '../../eval-results/runs')
-
-function readRunSnapshots(): RunSnapshot[] {
-  const snapshots: RunSnapshot[] = []
-  let variants: string[]
-  try {
-    variants = readdirSync(runsBaseDir)
-  } catch {
-    return []
-  }
-  for (const variant of variants) {
-    const variantDir = path.join(runsBaseDir, variant)
-    let files: string[]
-    try {
-      files = readdirSync(variantDir)
-        .filter((f) => f.endsWith('.json'))
-        .sort()
-    } catch {
-      continue
-    }
-    for (const file of files) {
-      try {
-        const raw = JSON.parse(readFileSync(path.join(variantDir, file), 'utf-8'))
-        snapshots.push({ ...raw, filename: `${variant}/${file}` })
-      } catch {
-        // skip corrupt snapshot files
-      }
-    }
-  }
-  return snapshots
 }
 
 async function buildCodegenHtml(entries: EvalEntry[]): Promise<Record<string, RenderedCode>> {
@@ -178,7 +168,7 @@ async function buildCodegenHtml(entries: EvalEntry[]): Promise<Record<string, Re
 
 export async function EvalDashboardView({ initPageResult }: AdminViewServerProps) {
   const entries = readCacheEntries()
-  const runs = readRunSnapshots()
+  const runCount = new Set(entries.map((e) => runKeyOf(e.result))).size
   const codegenHtml = await buildCodegenHtml(entries)
   const adminRoute = initPageResult.req.payload.config.routes.admin
 
@@ -216,7 +206,8 @@ export async function EvalDashboardView({ initPageResult }: AdminViewServerProps
       >
         <h1 style={{ margin: 0 }}>Eval Results</h1>
         <span style={{ color: 'var(--theme-elevation-400)', fontSize: '0.875rem' }}>
-          {entries.length} cached result{entries.length !== 1 ? 's' : ''}
+          {entries.length} result{entries.length !== 1 ? 's' : ''} · {runCount} run
+          {runCount !== 1 ? 's' : ''}
         </span>
       </div>
 
@@ -232,16 +223,11 @@ export async function EvalDashboardView({ initPageResult }: AdminViewServerProps
           }}
         >
           <p style={{ margin: 0 }}>
-            No cached results found. Run the eval suite first: <code>pnpm run test:eval</code>
+            No results yet. Run the eval suite first: <code>pnpm test:eval</code>
           </p>
         </div>
       ) : (
-        <ResultsTable
-          adminRoute={adminRoute}
-          codegenHtml={codegenHtml}
-          entries={entries}
-          runs={runs}
-        />
+        <ResultsTable adminRoute={adminRoute} codegenHtml={codegenHtml} entries={entries} />
       )}
     </div>
   )

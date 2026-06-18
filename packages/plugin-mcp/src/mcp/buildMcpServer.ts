@@ -142,6 +142,7 @@ export const buildMcpServer = ({
           server.registerTool(
             item.mcpName,
             {
+              annotations: item.tool.annotations,
               description: item.tool.description,
               inputSchema: toStandardSchema(inputSchema),
             },
@@ -198,6 +199,7 @@ export const buildMcpServer = ({
           server.registerTool(
             item.mcpName,
             {
+              annotations: tool.annotations,
               description: tool.description,
               inputSchema: tool.input ? toStandardSchema(tool.input) : undefined,
             },
