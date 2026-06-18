@@ -213,6 +213,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       hasPermission = await field.access.read({
         id,
         blockData,
+        collectionSlug,
         data: fullData,
         req,
         siblingData: data,
