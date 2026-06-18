@@ -209,10 +209,10 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
 
   populateFieldPermissions({
     blockReferencesPermissions,
-    collectionSlug: entityType === 'collection' ? entity.slug : undefined,
+    collection: entityType === 'collection' ? (entity as SanitizedCollectionConfig) : null,
     data,
     fields: entity.fields,
-    globalSlug: entityType === 'global' ? entity.slug : undefined,
+    global: entityType === 'global' ? (entity as SanitizedGlobalConfig) : null,
     operations,
     parentPermissionsObject: entityPermissions,
     permissionsObject: fieldsPermissions,

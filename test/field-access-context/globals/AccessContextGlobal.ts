@@ -1,6 +1,6 @@
 import type { GlobalConfig } from 'payload'
 
-import { globalSlug, recordAccess } from '../shared.js'
+import { childrenSlug, globalSlug, recordAccess } from '../shared.js'
 
 export const AccessContextGlobal: GlobalConfig = {
   slug: globalSlug,
@@ -19,6 +19,11 @@ export const AccessContextGlobal: GlobalConfig = {
           source: 'field-access',
         }),
       },
+    },
+    {
+      name: 'globalChild',
+      type: 'relationship',
+      relationTo: childrenSlug,
     },
   ],
 }

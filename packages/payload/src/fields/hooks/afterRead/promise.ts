@@ -377,10 +377,10 @@ export const promise = async ({
         : await field.access.read({
             id: doc.id as number | string,
             blockData,
-            collectionSlug: collection?.slug,
+            collection,
             data: doc,
             doc,
-            globalSlug: global?.slug,
+            global,
             req,
             siblingData: siblingDoc,
           })

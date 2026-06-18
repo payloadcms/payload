@@ -215,9 +215,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       hasPermission = await field.access.read({
         id,
         blockData,
-        collectionSlug,
+        collection: collectionSlug
+          ? (req.payload.collections[collectionSlug]?.config ?? null)
+          : null,
         data: fullData,
-        globalSlug,
+        global: globalSlug
+          ? (req.payload.globals.config.find((g) => g.slug === globalSlug) ?? null)
+          : null,
         req,
         siblingData: data,
       })

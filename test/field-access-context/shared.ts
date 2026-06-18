@@ -29,8 +29,14 @@ export const recordAccess = ({
   operation,
   source,
 }: Pick<AccessLogEntry, 'fieldName' | 'operation' | 'source'>): FieldAccess => {
-  return ({ collectionSlug, globalSlug: gs }) => {
-    pushAccessLog({ collectionSlug, fieldName, globalSlug: gs, operation, source })
+  return ({ collection, global: g }) => {
+    pushAccessLog({
+      collectionSlug: collection?.slug,
+      fieldName,
+      globalSlug: g?.slug,
+      operation,
+      source,
+    })
 
     return true
   }

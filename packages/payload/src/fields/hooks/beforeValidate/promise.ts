@@ -323,10 +323,10 @@ export const promise = async <T>({
         : await field.access[operation]({
             id,
             blockData,
-            collectionSlug: collection?.slug,
+            collection,
             data: data as Partial<T>,
             doc,
-            globalSlug: global?.slug,
+            global,
             req,
             siblingData,
           })

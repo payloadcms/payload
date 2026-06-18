@@ -132,7 +132,8 @@ export const findDistinctOperation = async (
 
     if (fieldResult.field.access?.read) {
       const hasAccess = await fieldResult.field.access.read({
-        collectionSlug: collectionConfig.slug,
+        collection: collectionConfig,
+        global: null,
         req,
       })
       if (!hasAccess) {

@@ -315,4 +315,45 @@ describe('field access collection context', () => {
       log.filter((e) => e.fieldName === 'globalReadProbe' && e.globalSlug === undefined),
     ).toHaveLength(0)
   })
+
+  it('should pass child collectionSlug when reading a populated relationship child from a global', async () => {
+    const child = await payload.create({
+      collection: childrenSlug,
+      data: {
+        childReadProbe: 'global relationship child',
+        title: 'global relationship child',
+      },
+    })
+    childIDs.push(child.id)
+
+    await payload.updateGlobal({
+      slug: globalSlug,
+      data: {
+        globalChild: child.id,
+      },
+    })
+    resetAccessLog()
+
+    await payload.findGlobal({
+      slug: globalSlug,
+      depth: 1,
+      overrideAccess: false,
+    })
+
+    // The child's field access should receive the child collection context, not the global context
+    const log = readAccessLog()
+    expect(log).toContainEqual(
+      expect.objectContaining({
+        collectionSlug: childrenSlug,
+        fieldName: 'childReadProbe',
+        globalSlug: undefined,
+      }),
+    )
+    expect(
+      log.filter((e) => e.fieldName === 'childReadProbe' && e.collectionSlug === undefined),
+    ).toHaveLength(0)
+    expect(
+      log.filter((e) => e.fieldName === 'childReadProbe' && e.globalSlug !== undefined),
+    ).toHaveLength(0)
+  })
 })
