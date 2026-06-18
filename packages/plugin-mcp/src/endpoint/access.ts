@@ -3,13 +3,13 @@ import type { PayloadRequest, SanitizedPermissions, TypedUser } from 'payload'
 import { getAccessResults, UnauthorizedError } from 'payload'
 
 import type { AuthorizedMCP } from '../types.js'
+
 import {
   COLLECTION_BUILTINS,
   GLOBAL_BUILTINS,
   type MCPCollectionBuiltinName,
   type MCPGlobalBuiltinName,
 } from '../mcp/builtinTools.js'
-
 import { getLogger } from '../utils/getLogger.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 

@@ -144,11 +144,7 @@ export type MCPBuiltInGlobalToolOverride = {
 export type MCPTopLevelToolEntry = Tool
 
 export type MCPCollectionToolsMap = {
-  [customToolName: string]:
-    | boolean
-    | CollectionTool
-    | MCPBuiltInCollectionToolOverride
-    | undefined
+  [customToolName: string]: boolean | CollectionTool | MCPBuiltInCollectionToolOverride | undefined
 } & {
   [K in MCPCollectionBuiltinName]?: false | MCPBuiltInCollectionToolOverride
 }
@@ -163,11 +159,7 @@ export type MCPToolsMapForCollection<Slug extends CollectionSlug> = Slug extends
   : MCPCollectionToolsMap
 
 export type MCPGlobalToolsMap = {
-  [customToolName: string]:
-    | boolean
-    | GlobalTool
-    | MCPBuiltInGlobalToolOverride
-    | undefined
+  [customToolName: string]: boolean | GlobalTool | MCPBuiltInGlobalToolOverride | undefined
 } & {
   [K in MCPGlobalBuiltinName]?: false | MCPBuiltInGlobalToolOverride
 }
