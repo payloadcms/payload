@@ -58,7 +58,7 @@ export function iterateCollections({
         typeof filePreview === 'string' ||
         (typeof filePreview === 'object' && 'path' in filePreview)
       ) {
-        addToImportMap(filePreview)
+        addToImportMap(filePreview as PayloadComponent)
       } else {
         for (const component of Object.values(filePreview as Record<string, PayloadComponent>)) {
           addToImportMap(component)
