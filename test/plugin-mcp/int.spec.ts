@@ -1,4 +1,4 @@
-import { afterEach, describe, expect } from 'vitest'
+import { afterEach, describe, expect, vi } from 'vitest'
 
 import { getToolDoc, getToolText } from './helpers/mcpClient.js'
 import {
@@ -1465,7 +1465,7 @@ describe('@payloadcms/plugin-mcp', () => {
     })
 
     it('should pass populate to findGlobal', async ({ mcp }) => {
-      const apiKey = await getApiKey({ globalFind: true })
+      const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
       const findGlobalSpy = vi.spyOn(payload, 'findGlobal')
 
