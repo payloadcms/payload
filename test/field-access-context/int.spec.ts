@@ -284,7 +284,7 @@ describe('field access collection context', () => {
     ).toHaveLength(0)
   })
 
-  it('should leave collectionSlug undefined for global field access callbacks', async () => {
+  it('should leave collectionSlug undefined and set globalSlug for global field access callbacks', async () => {
     await payload.updateGlobal({
       slug: globalSlug,
       data: {
@@ -303,13 +303,16 @@ describe('field access collection context', () => {
       expect.objectContaining({
         collectionSlug: undefined,
         fieldName: 'globalReadProbe',
+        globalSlug,
         operation: 'read',
         source: 'field-access',
       }),
     )
-    // Verify it was NOT called with any collection slug
     expect(
       log.filter((e) => e.fieldName === 'globalReadProbe' && e.collectionSlug !== undefined),
+    ).toHaveLength(0)
+    expect(
+      log.filter((e) => e.fieldName === 'globalReadProbe' && e.globalSlug === undefined),
     ).toHaveLength(0)
   })
 })

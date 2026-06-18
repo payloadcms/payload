@@ -254,6 +254,11 @@ export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> 
    */
   doc?: TData
   /**
+   * Slug of the global that owns the field being evaluated.
+   * Undefined when the field belongs to a collection.
+   */
+  globalSlug?: string
+  /**
    * The `id` of the current document being read or updated. `id` is undefined during the `create` operation.
    */
   id?: number | string

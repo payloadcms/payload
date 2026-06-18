@@ -7,6 +7,7 @@ export const globalSlug = 'field-access-context-global'
 export type AccessLogEntry = {
   collectionSlug: string | undefined
   fieldName: string
+  globalSlug: string | undefined
   operation: 'create' | 'read' | 'update'
   source: 'field-access' | 'find-distinct' | 'permissions'
 }
@@ -28,8 +29,8 @@ export const recordAccess = ({
   operation,
   source,
 }: Pick<AccessLogEntry, 'fieldName' | 'operation' | 'source'>): FieldAccess => {
-  return ({ collectionSlug }) => {
-    pushAccessLog({ collectionSlug, fieldName, operation, source })
+  return ({ collectionSlug, globalSlug: gs }) => {
+    pushAccessLog({ collectionSlug, fieldName, globalSlug: gs, operation, source })
 
     return true
   }

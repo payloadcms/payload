@@ -212,6 +212,7 @@ export async function getEntityPermissions<TEntityType extends 'collection' | 'g
     collectionSlug: entityType === 'collection' ? entity.slug : undefined,
     data,
     fields: entity.fields,
+    globalSlug: entityType === 'global' ? entity.slug : undefined,
     operations,
     parentPermissionsObject: entityPermissions,
     permissionsObject: fieldsPermissions,

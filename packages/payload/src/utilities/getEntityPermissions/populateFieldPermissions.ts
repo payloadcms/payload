@@ -55,6 +55,7 @@ export const populateFieldPermissions = ({
   collectionSlug,
   data,
   fields,
+  globalSlug,
   operations,
   parentPermissionsObject,
   permissionsObject,
@@ -69,6 +70,11 @@ export const populateFieldPermissions = ({
   collectionSlug?: string
   data: JsonObject | undefined
   fields: Field[]
+  /**
+   * Slug of the global that owns the fields being evaluated.
+   * Undefined when the fields belong to a collection.
+   */
+  globalSlug?: string
   id?: DefaultDocumentIDType
   /**
    * Operations to check access for
@@ -103,6 +109,7 @@ export const populateFieldPermissions = ({
             collectionSlug,
             data,
             doc: data,
+            globalSlug,
             req,
             // We cannot include siblingData or blockData here, as we do not have siblingData/blockData available once we reach block or array
             // rows, as we're calculating schema permissions, which do not include individual rows.
@@ -138,6 +145,7 @@ export const populateFieldPermissions = ({
           collectionSlug,
           data,
           fields: field.fields,
+          globalSlug,
           operations,
           parentPermissionsObject: fieldPermissions,
           permissionsObject: fieldPermissions.fields,
@@ -232,6 +240,7 @@ export const populateFieldPermissions = ({
             collectionSlug,
             data,
             fields: block.fields,
+            globalSlug,
             operations,
             parentPermissionsObject: blockPermission,
             permissionsObject: blockPermission.fields,
@@ -250,6 +259,7 @@ export const populateFieldPermissions = ({
         collectionSlug,
         data,
         fields: field.fields,
+        globalSlug,
         operations,
         // Field does not have a name here => use parent permissions object
         blockReferencesPermissions,
@@ -302,6 +312,7 @@ export const populateFieldPermissions = ({
             collectionSlug,
             data,
             fields: tab.fields,
+            globalSlug,
             operations,
             parentPermissionsObject: tabPermissions,
             permissionsObject: tabPermissions.fields,
@@ -315,6 +326,7 @@ export const populateFieldPermissions = ({
             collectionSlug,
             data,
             fields: tab.fields,
+            globalSlug,
             operations,
             // Tab does not have a name here => use parent permissions object
             blockReferencesPermissions,

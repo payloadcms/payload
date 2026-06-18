@@ -64,6 +64,7 @@ export type AddFieldStatePromiseArgs = {
    */
   forceFullValue?: boolean
   fullData: Data
+  globalSlug?: string
   id: number | string
   /**
    * Whether the field schema should be included in the state
@@ -124,6 +125,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     filter,
     forceFullValue = false,
     fullData,
+    globalSlug,
     includeSchema = false,
     indexPath,
     mockRSCs,
@@ -215,6 +217,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
         blockData,
         collectionSlug,
         data: fullData,
+        globalSlug,
         req,
         siblingData: data,
       })

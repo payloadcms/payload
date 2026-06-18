@@ -326,6 +326,7 @@ export const promise = async <T>({
             collectionSlug: collection?.slug,
             data: data as Partial<T>,
             doc,
+            globalSlug: global?.slug,
             req,
             siblingData,
           })

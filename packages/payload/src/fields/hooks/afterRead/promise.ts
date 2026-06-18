@@ -380,6 +380,7 @@ export const promise = async ({
             collectionSlug: collection?.slug,
             data: doc,
             doc,
+            globalSlug: global?.slug,
             req,
             siblingData: siblingDoc,
           })
