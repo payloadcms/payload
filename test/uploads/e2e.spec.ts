@@ -325,6 +325,32 @@ describe('Uploads', () => {
     await expect(page.locator('.mini-carousel')).toBeVisible()
   })
 
+  test('should open the current asset in a new tab from the upload toolbar', async () => {
+    const mediaDoc = (
+      await payload.find({
+        collection: mediaSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
+
+    await page.goto(mediaURL.edit(mediaDoc!.id))
+    await waitForFormReady(page)
+
+    const previewLink = page.locator('.file-toolbar__right a[target="_blank"]')
+    const downloadLink = page.locator('.file-toolbar__right a[download]')
+
+    await expect(previewLink).toBeVisible()
+    await expect(previewLink).toHaveAttribute('rel', 'noopener noreferrer')
+
+    // Preview opens the same currently-shown asset that the download action targets
+    const previewHref = previewLink
+    const downloadHref = await downloadLink.getAttribute('href')
+    await expect(previewHref).toHaveAttribute('href')
+    expect(previewHref).toBe(downloadHref)
+  })
+
   test('should show upload dropzone in right panel for new upload collection document', async () => {
     await page.goto(mediaURL.create)
     await waitForFormReady(page)

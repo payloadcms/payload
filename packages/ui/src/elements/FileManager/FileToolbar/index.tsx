@@ -4,6 +4,7 @@ import React from 'react'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { CropIcon } from '../../../icons/Crop/index.js'
 import { DownloadIcon } from '../../../icons/Download/index.js'
+import { ExternalLinkIcon } from '../../../icons/ExternalLink/index.js'
 import { RefreshIcon } from '../../../icons/Refresh/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
@@ -64,6 +65,18 @@ export const FileToolbar: React.FC<Props> = ({
             round={false}
             tooltip={t('upload:editImage')}
           />
+        )}
+        {fileSrc && (
+          <a
+            aria-label={t('fields:openInNewTab')}
+            className={`${baseClass}__icon-link`}
+            href={fileSrc}
+            rel="noopener noreferrer"
+            target="_blank"
+            title={t('fields:openInNewTab')}
+          >
+            <ExternalLinkIcon size={24} />
+          </a>
         )}
         {fileSrc && (
           <a
