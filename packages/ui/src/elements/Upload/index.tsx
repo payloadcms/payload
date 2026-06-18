@@ -122,7 +122,7 @@ export const Upload: React.FC<UploadProps> = (props) => {
   const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
   return (
     <UploadControlsProvider>
-      <Upload_v4
+      <UploadComponent
         {...props}
         resetUploadEdits={resetUploadEdits}
         updateUploadEdits={updateUploadEdits}
@@ -132,13 +132,13 @@ export const Upload: React.FC<UploadProps> = (props) => {
   )
 }
 
-export type UploadProps_v4 = {
+type UploadComponentProps = {
   readonly resetUploadEdits?: () => void
   readonly updateUploadEdits?: (args: UploadEdits) => void
   readonly uploadEdits?: UploadEdits
 } & UploadProps
 
-export const Upload_v4: React.FC<UploadProps_v4> = (props) => {
+const UploadComponent: React.FC<UploadComponentProps> = (props) => {
   const {
     collectionSlug,
     customActions,

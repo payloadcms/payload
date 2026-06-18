@@ -15,7 +15,7 @@ import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
-import { Upload_v4 } from '../../Upload/index.js'
+import { FileManager } from '../../FileManager/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import './index.css'
 
@@ -26,7 +26,6 @@ const baseClass = 'collection-edit'
 // This is solely to support custom edit views which get server-rendered
 
 export function EditForm({
-  BeforeDocumentMeta,
   resetUploadEdits,
   submitted,
   updateUploadEdits,
@@ -128,9 +127,8 @@ export function EditForm({
           BeforeFields={
             <React.Fragment>
               {CustomUpload || (
-                <Upload_v4
+                <FileManager
                   collectionSlug={collectionConfig.slug}
-                  customActions={[BeforeDocumentMeta].filter(Boolean)}
                   initialState={initialState}
                   resetUploadEdits={resetUploadEdits}
                   updateUploadEdits={updateUploadEdits}

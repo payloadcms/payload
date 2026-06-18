@@ -15,5 +15,11 @@
       margin: 0;
       flex: 1;
     }
+
+    &__meta {
+      display: flex;
+      align-items: center;
+      gap: var(--spacer-2);
+    }
   }
 }

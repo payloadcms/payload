@@ -10,10 +10,11 @@ import './index.css'
 const baseClass = 'bulk-upload--drawer-header'
 
 type Props = {
+  readonly BeforeDocumentMeta?: React.ReactNode
   readonly onClose: () => void
   readonly title: string
 }
-export function DrawerHeader({ onClose, title }: Props) {
+export function DrawerHeader({ BeforeDocumentMeta, onClose, title }: Props) {
   const { t } = useTranslation()
 
   return (
@@ -25,6 +26,7 @@ export function DrawerHeader({ onClose, title }: Props) {
         onClick={onClose}
       />
       <h2 title={title}>{title}</h2>
+      {BeforeDocumentMeta ? <div className={`${baseClass}__meta`}>{BeforeDocumentMeta}</div> : null}
     </div>
   )
 }

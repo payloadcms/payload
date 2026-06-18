@@ -16,6 +16,7 @@ import { Drawer, useDrawerDepth } from '../Drawer/index.js'
 import { AddFilesView } from './AddFilesView/index.js'
 import { AddingFilesView } from './AddingFilesView/index.js'
 import { FormsManagerProvider, type InitialForms, useFormsManager } from './FormsManager/index.js'
+import './index.css'
 
 const drawerSlug = 'bulk-upload-drawer-slug'
 
@@ -127,7 +128,7 @@ export function BulkUploadDrawer() {
   }, [modalState])
 
   return (
-    <Drawer Header={null} slug={drawerSlug}>
+    <Drawer className="bulk-upload-modal" Header={null} slug={drawerSlug}>
       <FormsManagerProvider>
         <UploadControlsProvider>
           <EditDepthProvider>

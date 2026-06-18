@@ -17,7 +17,6 @@ import { ErrorPill } from '../../ErrorPill/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
-import { Actions } from '../ActionsBar/index.js'
 import { AddFilesView } from '../AddFilesView/index.js'
 import './index.css'
 import { useFormsManager } from '../FormsManager/index.js'
@@ -163,10 +162,6 @@ export function FileSidebar() {
               />
             </Drawer>
           </div>
-        </div>
-
-        <div className={`${baseClass}__header__mobileDocActions`}>
-          <Actions />
         </div>
       </div>
 

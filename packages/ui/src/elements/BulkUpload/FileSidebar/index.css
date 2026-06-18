@@ -207,10 +207,6 @@
     padding-block: 0;
   }
 
-  .file-selections__header__mobileDocActions {
-    display: none;
-  }
-
   .file-selections__animateWrapper {
     overflow: auto;
   }
@@ -310,23 +306,6 @@
       display: flex;
       justify-content: flex-end;
       padding-block: 0;
-    }
-
-    .file-selections__header__mobileDocActions {
-      position: relative;
-      display: flex;
-      justify-content: flex-end;
-      margin-inline-start: auto;
-      padding-block: 0;
-
-      > div {
-        display: flex;
-        justify-content: flex-end;
-
-        button {
-          flex: 0 0 auto;
-        }
-      }
     }
 
     .file-selections__toggler {

@@ -41,44 +41,47 @@ export function AddingFilesView() {
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   return (
-    <div className={baseClass}>
-      <FileSidebar />
+    <div className={`${baseClass}__wrapper`}>
+      <div className={baseClass}>
+        <FileSidebar />
 
-      <div className={`${baseClass}__editView`}>
-        <DrawerHeader
-          onClose={() => openModal(discardBulkUploadModalSlug)}
-          title={getTranslation(collectionConfig.labels.singular, i18n)}
-        />
-        {activeForm ? (
-          <DocumentInfoProvider
-            collectionSlug={collectionSlug}
-            currentEditor={user}
-            docPermissions={docPermissions}
-            hasPublishedDoc={false}
-            hasPublishPermission={hasPublishPermission}
-            hasSavePermission={hasSavePermission}
-            id={null}
-            initialData={reduceFieldsToValues(activeForm.formState, true)}
-            initialState={activeForm.formState}
-            isLocked={false}
-            key={`${activeIndex}-${forms.length}`}
-            lastUpdateTime={0}
-            mostRecentVersionIsAutosaved={false}
-            unpublishedVersionCount={0}
-            Upload={documentSlots.Upload}
-            versionCount={0}
-          >
-            <ActionsBar collectionConfig={collectionConfig} />
-            <EditForm
-              BeforeDocumentMeta={documentSlots.BeforeDocumentMeta}
-              resetUploadEdits={resetUploadEdits}
-              submitted={hasSubmitted}
-              updateUploadEdits={updateUploadEdits}
-              uploadEdits={activeForm?.uploadEdits}
-            />
-          </DocumentInfoProvider>
-        ) : null}
+        <div className={`${baseClass}__editView`}>
+          <DrawerHeader
+            BeforeDocumentMeta={documentSlots.BeforeDocumentMeta}
+            onClose={() => openModal(discardBulkUploadModalSlug)}
+            title={getTranslation(collectionConfig.labels.singular, i18n)}
+          />
+          {activeForm ? (
+            <DocumentInfoProvider
+              collectionSlug={collectionSlug}
+              currentEditor={user}
+              docPermissions={docPermissions}
+              hasPublishedDoc={false}
+              hasPublishPermission={hasPublishPermission}
+              hasSavePermission={hasSavePermission}
+              id={null}
+              initialData={reduceFieldsToValues(activeForm.formState, true)}
+              initialState={activeForm.formState}
+              isLocked={false}
+              key={`${activeIndex}-${forms.length}`}
+              lastUpdateTime={0}
+              mostRecentVersionIsAutosaved={false}
+              unpublishedVersionCount={0}
+              Upload={documentSlots.Upload}
+              versionCount={0}
+            >
+              <EditForm
+                resetUploadEdits={resetUploadEdits}
+                submitted={hasSubmitted}
+                updateUploadEdits={updateUploadEdits}
+                uploadEdits={activeForm?.uploadEdits}
+              />
+            </DocumentInfoProvider>
+          ) : null}
+        </div>
       </div>
+
+      <ActionsBar collectionConfig={collectionConfig} />
 
       <DiscardWithoutSaving />
     </div>

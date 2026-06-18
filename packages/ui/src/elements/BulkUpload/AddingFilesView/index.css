@@ -1,7 +1,16 @@
 @layer payload-default {
+  .bulk-upload--file-manager__wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+  }
+
   .bulk-upload--file-manager {
     display: flex;
-    height: 100%;
+    flex: 1;
+    min-height: 0;
     width: 100%;
     overflow: hidden;
   }
@@ -11,6 +20,40 @@
     height: 100%;
     max-height: 100%;
     overflow: auto;
+  }
+
+  /* In the drawer the file manager is contained (not the full-viewport sticky panel used on the
+     document edit page); the preview sits at a fixed height like editing an upload in a drawer. */
+  .bulk-upload--file-manager .file-manager {
+    min-height: 400px;
+  }
+
+  .bulk-upload--file-manager .file-manager__panel {
+    position: static;
+    height: auto;
+    min-height: 400px;
+  }
+
+  /* The preview bleeds to the edges of the drawer; the fields below keep the gutter padding
+     (the document fields wrapper applies a horizontal gutter that we cancel out here). */
+  .bulk-upload--file-manager .file-manager {
+    width: auto;
+    margin-top: calc(-1 * var(--gutter-v));
+    margin-inline: calc(-1 * var(--gutter-h));
+  }
+
+  .bulk-upload--file-manager .file-manager__upload {
+    padding: 0;
+    justify-content: flex-start;
+  }
+
+  .bulk-upload--file-manager .file-manager__selected-preview {
+    max-width: none;
+    width: 100%;
+    flex: 1;
+    height: auto;
+    min-height: 0;
+    border-radius: 0;
   }
 
   @media (max-width: 1024px) {

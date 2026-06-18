@@ -1,0 +1,42 @@
+@layer payload-default {
+  /*
+   * The bulk upload reuses the Drawer machinery (slug, depth, backdrop, nested-drawer stacking)
+   * but is presented as a centered modal rather than a right-anchored drawer.
+   */
+  .bulk-upload-modal.drawer {
+    justify-content: center;
+    align-items: center;
+    padding: var(--spacer-4);
+  }
+
+  /* Backdrop fills the whole viewport so clicking outside the modal closes it. */
+  .bulk-upload-modal .drawer__close {
+    position: absolute;
+    inset: 0;
+    flex-grow: 0;
+  }
+
+  .bulk-upload-modal .drawer__content {
+    /* Neutralize the drawer's leftward stacking shift so the modal stays centered. */
+    --drawer-layer-offset: 0px;
+    width: clamp(900px, 84vw, 1040px);
+    height: min(86vh, 720px);
+    max-width: 100%;
+    max-height: 100%;
+    border-radius: var(--radius-large);
+    overflow: hidden;
+  }
+
+  @media (max-width: 1024px) {
+    .bulk-upload-modal.drawer {
+      padding: 0;
+    }
+
+    .bulk-upload-modal .drawer__content {
+      width: 100%;
+      height: 100dvh;
+      max-height: 100dvh;
+      border-radius: 0;
+    }
+  }
+}

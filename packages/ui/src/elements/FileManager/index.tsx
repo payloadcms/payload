@@ -47,16 +47,26 @@ const validate = (value) => {
 export type FileManagerProps = {
   readonly collectionSlug: string
   readonly initialState?: import('payload').FormState
+  /**
+   * When provided, upload edits are sourced from these props instead of the `useUploadEdits`
+   * context. The bulk upload drawer uses this to drive per-file edits from its FormsManager.
+   */
+  readonly resetUploadEdits?: () => void
+  readonly updateUploadEdits?: (args: UploadEdits) => void
   readonly uploadConfig: SanitizedCollectionConfig['upload']
   readonly UploadControls?: React.ReactNode
+  readonly uploadEdits?: UploadEdits
   readonly UploadFilePreview?: React.ReactNode
 }
 
 export const FileManager: React.FC<FileManagerProps> = ({
   collectionSlug,
   initialState,
+  resetUploadEdits: resetUploadEditsFromProps,
+  updateUploadEdits: updateUploadEditsFromProps,
   uploadConfig,
   UploadControls,
+  uploadEdits: uploadEditsFromProps,
   UploadFilePreview,
 }) => {
   const { closeModal, openModal } = useModal()
@@ -80,7 +90,10 @@ export const FileManager: React.FC<FileManagerProps> = ({
     uploadControlFileName,
     uploadControlFileUrl,
   } = useUploadControls()
-  const { resetUploadEdits, updateUploadEdits, uploadEdits } = useUploadEdits()
+  const uploadEditsContext = useUploadEdits()
+  const resetUploadEdits = resetUploadEditsFromProps ?? uploadEditsContext.resetUploadEdits
+  const updateUploadEdits = updateUploadEditsFromProps ?? uploadEditsContext.updateUploadEdits
+  const uploadEdits = uploadEditsFromProps ?? uploadEditsContext.uploadEdits
 
   const [fileSrc, setFileSrc] = useState<null | string>(null)
   const [removedFile, setRemovedFile] = useState(false)

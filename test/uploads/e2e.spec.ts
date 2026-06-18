@@ -1147,6 +1147,53 @@ describe('Uploads', () => {
       await saveDocAndAssert(page)
     })
 
+    test('should render the file manager preview for files in the bulk upload drawer', async () => {
+      await page.goto(uploadsTwo.list)
+
+      // Wait for page header to be visible (indicates page is loaded and hydrated)
+      await expect(page.locator('.list-header__title')).toBeVisible()
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await expect(bulkUploadButton).toBeEnabled()
+
+      // Click and retry until dropzone appears (handles hydration timing issues)
+      const dropzoneInput = page.locator('.dropzone input[type="file"]')
+      await expect(async () => {
+        await bulkUploadButton.click()
+        await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
+      }).toPass({ timeout: 5000, intervals: [500] })
+
+      await page
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles([
+          path.resolve(dirname, './image.png'),
+          path.resolve(dirname, './test-pdf.pdf'),
+        ])
+
+      const bulkUploadForm = page.locator('.bulk-upload--file-manager')
+
+      // The drawer reuses the FileManager preview rather than the legacy file-field upload
+      await expect(bulkUploadForm.locator('.file-manager')).toBeVisible()
+      await expect(bulkUploadForm.locator('.file-field')).toHaveCount(0)
+
+      // The active (image) file renders the rich image preview
+      await expect(
+        bulkUploadForm.locator('.file-manager__selected-preview .thumbnail img'),
+      ).toBeVisible()
+
+      // Switching to the PDF renders the built-in PDF preview
+      await bulkUploadForm
+        .locator('.file-selections__fileRowContainer', { hasText: 'test-pdf.pdf' })
+        .locator('button.file-selections__fileRow')
+        .click()
+
+      await expect(
+        bulkUploadForm.locator('.file-manager__selected-preview .pdf-preview'),
+      ).toBeVisible()
+    })
+
     test('should bulk upload non-image files without page errors', async () => {
       // Enable collection ONLY for this test
       collectErrorsFromPage()
