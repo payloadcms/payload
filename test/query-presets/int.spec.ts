@@ -572,7 +572,7 @@ describe('Query Presets', () => {
         expect(presetForAdminsCreatedByEditor).toBeFalsy()
       } catch (error: unknown) {
         expect((error as Error).message).toBe(
-          'The following fields are invalid: Sharing settings > Read > Specify who can read this Preset, Sharing settings > Update > Specify who can update this Preset',
+          'The following fields are invalid: Read > Specify who can read this Preset, Update > Specify who can update this Preset',
         )
       }
 
