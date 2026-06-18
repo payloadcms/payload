@@ -4,7 +4,8 @@
     flex-direction: row;
     flex: 1 1 0;
     min-height: 0;
-    overflow: hidden;
+    /* Visible so the mini carousel can grow past the panel as the headers scroll away. */
+    overflow: visible;
   }
 
   .file-preview__main {

@@ -6,18 +6,34 @@
     gap: var(--spacer-3);
     padding: var(--spacer-2-5);
     width: var(--mini-carousel-width, 72px);
+    height: 100%;
     flex-shrink: 0;
     overflow-y: auto;
     /* Hide the native scrollbar so it doesn't consume layout width — otherwise a classic
        (non-overlay) scrollbar shrinks the stretched thumbnails below their intended size. */
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    /* scrollbar-width: none; */
+    /* -ms-overflow-style: none; */
     background: var(--color-bg-secondary);
     border-right: 1px solid var(--color-border);
-    align-self: stretch;
+    /* Opt out of the flex line's stretch so the explicit (scroll-driven) height below is honored
+       and the carousel can grow past the panel instead of being clamped to the line height. */
+    align-self: flex-start;
+    /* The sticky panel fills the viewport below all the chrome. When the app header and doc
+       header scroll away, only the carousel grows to keep its bottom on the viewport edge —
+       the preview content stays put. Pure CSS via a scroll-driven timeline; where it isn't
+       supported the carousel just keeps its static height (the prior behavior). */
+    animation: mini-carousel-fill-scrolled-chrome linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 calc(var(--app-header-height) + var(--doc-header-height));
 
-    &::-webkit-scrollbar {
+    /* &::-webkit-scrollbar {
       display: none;
+    } */
+  }
+
+  @keyframes mini-carousel-fill-scrolled-chrome {
+    to {
+      height: calc(100% + var(--app-header-height) + var(--doc-header-height));
     }
   }
 
@@ -61,10 +77,13 @@
       flex-direction: row;
       align-items: center;
       width: 100%;
+      height: auto;
       overflow-x: auto;
       overflow-y: hidden;
       border-right: 0;
       border-top: 1px solid var(--color-border);
+      /* Horizontal filmstrip below the image — no scroll-driven height growth here. */
+      animation: none;
     }
 
     .mini-carousel__item {
