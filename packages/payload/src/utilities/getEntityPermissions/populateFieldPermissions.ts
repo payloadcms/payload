@@ -52,6 +52,7 @@ const setPermission = (
 export const populateFieldPermissions = ({
   id,
   blockReferencesPermissions,
+  collectionSlug,
   data,
   fields,
   operations,
@@ -61,6 +62,11 @@ export const populateFieldPermissions = ({
   req,
 }: {
   blockReferencesPermissions: BlockReferencesPermissions
+  /**
+   * Slug of the collection that owns the fields being evaluated.
+   * Undefined when the fields belong to a global.
+   */
+  collectionSlug?: string
   data: JsonObject | undefined
   fields: Field[]
   id?: DefaultDocumentIDType
@@ -94,6 +100,7 @@ export const populateFieldPermissions = ({
         if ('access' in field && field.access && typeof field.access[operation] === 'function') {
           const accessResult = field.access[operation]({
             id,
+            collectionSlug,
             data,
             doc: data,
             req,
@@ -128,6 +135,7 @@ export const populateFieldPermissions = ({
         populateFieldPermissions({
           id,
           blockReferencesPermissions,
+          collectionSlug,
           data,
           fields: field.fields,
           operations,
@@ -221,6 +229,7 @@ export const populateFieldPermissions = ({
           populateFieldPermissions({
             id,
             blockReferencesPermissions,
+            collectionSlug,
             data,
             fields: block.fields,
             operations,
@@ -238,6 +247,7 @@ export const populateFieldPermissions = ({
       // Field does not have a name => same parentPermissionsObject
       populateFieldPermissions({
         id,
+        collectionSlug,
         data,
         fields: field.fields,
         operations,
@@ -289,6 +299,7 @@ export const populateFieldPermissions = ({
           populateFieldPermissions({
             id,
             blockReferencesPermissions,
+            collectionSlug,
             data,
             fields: tab.fields,
             operations,
@@ -301,6 +312,7 @@ export const populateFieldPermissions = ({
           // Tab does not have a name => same parentPermissionsObject
           populateFieldPermissions({
             id,
+            collectionSlug,
             data,
             fields: tab.fields,
             operations,
