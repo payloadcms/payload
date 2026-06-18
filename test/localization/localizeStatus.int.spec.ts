@@ -8,7 +8,7 @@ import { sql as drizzleSql } from 'drizzle-orm'
 import { Types } from 'mongoose'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
@@ -26,6 +26,43 @@ describe('localizeStatus migration', () => {
     if (payload?.db && typeof payload.db.destroy === 'function') {
       await payload.db.destroy()
     }
+  })
+
+  describe('querying a joined localized draft collection', () => {
+    const createdOrgIDs: Array<number | string> = []
+
+    afterEach(async () => {
+      for (const id of createdOrgIDs) {
+        await payload.delete({ id, collection: 'joinOrgs' })
+      }
+      createdOrgIDs.length = 0
+    })
+
+    // Used to throw `invalid reference to FROM-clause entry for table "_r_v"` on Postgres
+    // because the join subquery's ORDER BY referenced the un-aliased version table.
+    it('should not throw when the joined collection sorts by a localized field', async () => {
+      const org = await payload.create({
+        collection: 'joinOrgs',
+        data: { title: 'Acme' },
+        locale: 'en',
+      })
+      createdOrgIDs.push(org.id)
+
+      await payload.create({
+        collection: 'joinRepos',
+        data: { org: org.id, title: 'repo-a' },
+        locale: 'en',
+      })
+
+      const result = await payload.find({
+        collection: 'joinOrgs',
+        draft: true,
+        locale: 'en',
+      })
+
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0]?.repos?.docs).toHaveLength(1)
+    })
   })
 
   describe.skipIf(process.env.PAYLOAD_DATABASE !== 'postgres')('PostgreSQL', () => {
