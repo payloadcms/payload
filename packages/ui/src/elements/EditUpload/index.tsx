@@ -127,7 +127,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
     setFocalPosition({ x: 50, y: 50 })
   }
 
-  const fileSrcToUse = fileSrc ? appendCacheTag(fileSrc, imageCacheTag) : fileSrc
+  const fileSrcToUse = fileSrc ? appendCacheTag(fileSrc, imageCacheTag) : undefined
 
   const cropWidthPx = ((crop.width / 100) * uncroppedPixelWidth).toFixed(0)
   const cropHeightPx = ((crop.height / 100) * uncroppedPixelHeight).toFixed(0)
