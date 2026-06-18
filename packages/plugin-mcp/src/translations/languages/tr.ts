@@ -2,7 +2,8 @@ import type { PluginLanguage } from '../types.js'
 
 export const trTranslations = {
   'plugin-mcp': {
-    apiKeyDescription: 'API anahtarları, MCP istemcilerinin hangi koleksiyonlara, kaynaklara, araçlara ve promptlara erişebileceğini kontrol eder.',
+    apiKeyDescription:
+      'API anahtarları, MCP istemcilerinin hangi koleksiyonlara, kaynaklara, araçlara ve promptlara erişebileceğini kontrol eder.',
     apiKeys: 'API anahtarları',
     authentication: 'Kimlik doğrulama',
     description: 'Açıklama',
@@ -16,9 +17,11 @@ export const trTranslations = {
     noAPIKeys: 'API anahtarı yok',
     operations: 'İşlemler',
     overrideAccess: 'Erişim kontrolünü geçersiz kıl',
-    overrideAccessDescription: 'İşaretlendiğinde bu anahtar, gerçekleştirdiği her işlemde Payload erişim kontrolünü atlar. Belirli bir nedeniniz yoksa işaretlemeyin.',
+    overrideAccessDescription:
+      'İşaretlendiğinde bu anahtar, gerçekleştirdiği her işlemde Payload erişim kontrolünü atlar. Belirli bir nedeniniz yoksa işaretlemeyin.',
     permissions: 'İzinler',
-    permissionsDescription: 'MCP istemcilerinin aşağıdaki koleksiyonlara, araçlara, kaynaklara ve promptlara erişmesine izin verin.',
+    permissionsDescription:
+      'MCP istemcilerinin aşağıdaki koleksiyonlara, araçlara, kaynaklara ve promptlara erişmesine izin verin.',
     prompts: 'Promptlar',
     resources: 'Kaynaklar',
     server: 'Sunucu',

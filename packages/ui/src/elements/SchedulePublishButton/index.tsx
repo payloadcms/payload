@@ -14,8 +14,15 @@ import { ScheduleDrawer } from '../PublishButton/ScheduleDrawer/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 
 export const SchedulePublishButton: React.FC<{ disabled?: boolean }> = ({ disabled }) => {
-  const { id, collectionSlug, globalSlug, hasPublishPermission, unpublishedVersionCount } =
-    useDocumentInfo()
+  const {
+    id,
+    collectionSlug,
+    globalSlug,
+    hasPublishPermission,
+    hasScheduledPublish,
+    setHasScheduledPublish,
+    unpublishedVersionCount,
+  } = useDocumentInfo()
 
   const { getEntityConfig } = useConfig()
   const { isModalOpen, toggleModal } = useModal()
@@ -61,7 +68,7 @@ export const SchedulePublishButton: React.FC<{ disabled?: boolean }> = ({ disabl
         <Button
           buttonStyle="ghost"
           disabled={disabled}
-          icon={<ScheduleIcon />}
+          icon={<ScheduleIcon active={hasScheduledPublish} />}
           id="schedule-publish-button"
           onClick={() => toggleModal(drawerSlug)}
         />
@@ -72,6 +79,7 @@ export const SchedulePublishButton: React.FC<{ disabled?: boolean }> = ({ disabl
       {isModalOpen(drawerSlug) && (
         <ScheduleDrawer
           defaultType={!hasNewerVersions ? 'unpublish' : 'publish'}
+          onUpcomingChange={setHasScheduledPublish}
           schedulePublishConfig={
             scheduledPublishEnabled &&
             typeof entityConfig.versions.drafts.schedulePublish === 'object'

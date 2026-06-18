@@ -1,7 +1,4 @@
-import type {
-  NestedKeysStripped,
-  SupportedLanguages,
-} from '@payloadcms/translations'
+import type { NestedKeysStripped, SupportedLanguages } from '@payloadcms/translations'
 
 import type { PluginDefaultTranslationsObject } from './types.js'
 

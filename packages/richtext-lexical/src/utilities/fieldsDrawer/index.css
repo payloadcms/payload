@@ -9,8 +9,4 @@
       padding: var(--spacer-3);
     }
   }
-
-  .fields-drawer .radio-group .field-description {
-    margin-top: var(--spacer-2);
-  }
 }

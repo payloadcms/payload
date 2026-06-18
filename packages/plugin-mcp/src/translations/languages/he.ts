@@ -2,7 +2,8 @@ import type { PluginLanguage } from '../types.js'
 
 export const heTranslations = {
   'plugin-mcp': {
-    apiKeyDescription: 'מפתחות API קובעים לאילו אוספים, משאבים, כלים והנחיות לקוחות MCP יכולים לגשת.',
+    apiKeyDescription:
+      'מפתחות API קובעים לאילו אוספים, משאבים, כלים והנחיות לקוחות MCP יכולים לגשת.',
     apiKeys: 'מפתחות API',
     authentication: 'אימות',
     description: 'תיאור',
@@ -16,7 +17,8 @@ export const heTranslations = {
     noAPIKeys: 'אין מפתחות API',
     operations: 'פעולות',
     overrideAccess: 'עקוף בקרת גישה',
-    overrideAccessDescription: 'כאשר מסומן, מפתח זה עוקף את בקרת הגישה של Payload בכל פעולה שהוא מבצע. השאר לא מסומן אלא אם יש סיבה ספציפית.',
+    overrideAccessDescription:
+      'כאשר מסומן, מפתח זה עוקף את בקרת הגישה של Payload בכל פעולה שהוא מבצע. השאר לא מסומן אלא אם יש סיבה ספציפית.',
     permissions: 'הרשאות',
     permissionsDescription: 'אפשר ללקוחות MCP לגשת לאוספים, לכלים, למשאבים ולהנחיות הבאים.',
     prompts: 'הנחיות',

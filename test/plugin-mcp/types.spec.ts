@@ -14,6 +14,7 @@ type IdSchemaInput = { id: string }
 describe('defineTool input inference', () => {
   test('static schema', () => {
     defineTool({
+      annotations: { readOnlyHint: true },
       description: 'x',
       input: z.object({ id: z.string() }),
     }).handler(({ input }) => {
@@ -35,6 +36,7 @@ describe('defineTool input inference', () => {
 describe('defineCollectionTool input inference', () => {
   test('static schema', () => {
     defineCollectionTool({
+      annotations: { destructiveHint: false },
       description: 'x',
       input: z.object({ id: z.string() }),
     }).handler(({ input, collectionSlug }) => {
@@ -57,6 +59,7 @@ describe('defineCollectionTool input inference', () => {
 describe('defineGlobalTool input inference', () => {
   test('static schema', () => {
     defineGlobalTool({
+      annotations: { idempotentHint: true },
       description: 'x',
       input: z.object({ id: z.string() }),
     }).handler(({ input, globalSlug }) => {
@@ -65,7 +68,6 @@ describe('defineGlobalTool input inference', () => {
       return { content: [] }
     })
   })
-
 })
 
 describe('definePrompt input inference', () => {

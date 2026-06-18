@@ -152,6 +152,63 @@ test.describe('Hierarchy Sidebar', () => {
       // Child should be hidden
       await expect(tree.getByText('Engineering Division')).toBeHidden()
     })
+
+    test('should navigate tree via keyboard and load more with Enter without navigation', async () => {
+      const prefs = await payload.find({
+        collection: 'payload-preferences',
+        where: { key: { equals: 'hierarchy-tree-divisions' } },
+      })
+      for (const pref of prefs.docs) {
+        await payload.delete({ collection: 'payload-preferences', id: pref.id })
+      }
+
+      await page.goto(`${serverURL}/admin`)
+      await openNav(page)
+      await page.getByRole('tab', { name: 'Divisions' }).click()
+
+      const tree = page.getByRole('tree')
+      await expect(tree).toBeVisible()
+
+      const getActiveText = async () =>
+        page.evaluate(() => (document.activeElement?.textContent || '').trim())
+
+      const getActiveClass = async () =>
+        page.evaluate(() => (document.activeElement?.className || '').toString())
+
+      // Focus the first tree node, then close/open with arrows for deterministic keyboard flow
+      const alphaNode = tree.locator('.tree-node').first()
+      await expect(alphaNode).toBeVisible()
+      await alphaNode.focus()
+      await expect.poll(getActiveText).toContain('Alpha Division')
+      await page.keyboard.press('ArrowLeft')
+      await expect(alphaNode).toHaveAttribute('aria-expanded', 'false')
+
+      // Open Alpha Division with ArrowRight, then navigate vertically through its children
+      await page.keyboard.press('ArrowRight')
+      await expect(alphaNode).toHaveAttribute('aria-expanded', 'true')
+      await expect(tree.getByText('Alpha Child 1')).toBeVisible()
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Alpha Child 1')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Alpha Child 2')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Alpha Child 3')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveClass).toContain('tree__load-more-button')
+
+      // Enter should load more children, not navigate
+      const urlBefore = page.url()
+      await page.keyboard.press('Enter')
+      await expect(page).toHaveURL(urlBefore)
+      await expect(tree.getByText('Alpha Child 4')).toBeVisible()
+      await expect
+        .poll(() => page.evaluate(() => document.activeElement?.getAttribute('aria-level')))
+        .toBe('2')
+
+      // Continue vertical navigation to the next root sibling after the newly loaded child
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Beta Division')
+    })
   })
 
   test.describe('Sidebar Tab Visibility', () => {

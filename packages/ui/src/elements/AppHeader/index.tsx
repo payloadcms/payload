@@ -1,6 +1,8 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
 
+import type { UserMenuSettingsGroup } from '../UserMenu/SettingsMenu/index.js'
+
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { LanguageIcon } from '../../icons/Language/index.js'
 import { SidebarIcon } from '../../icons/Sidebar/index.js'
@@ -20,9 +22,9 @@ const baseClass = 'app-header'
 
 type Props = {
   CustomAvatar?: React.ReactNode
-  settingsItems?: React.ReactNode[]
+  settingsItemGroups?: UserMenuSettingsGroup[]
 }
-export function AppHeader({ CustomAvatar, settingsItems }: Props) {
+export function AppHeader({ CustomAvatar, settingsItemGroups }: Props) {
   const { t } = useTranslation()
   const locale = useLocale()
 
@@ -130,7 +132,7 @@ export function AppHeader({ CustomAvatar, settingsItems }: Props) {
                 )}
               />
             )}
-            <UserMenu CustomAvatar={CustomAvatar} settingsItems={settingsItems} />
+            <UserMenu CustomAvatar={CustomAvatar} settingsItemGroups={settingsItemGroups} />
           </div>
         </div>
       </div>

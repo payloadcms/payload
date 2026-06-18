@@ -28,6 +28,7 @@ import { buildFormState } from '../../utilities/buildFormState.js'
 import { getDocPreferences } from '../../utilities/getDocPreferences.js'
 import { getDocumentData } from '../../utilities/getDocumentData.js'
 import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.js'
+import { getHasScheduledPublish } from '../../utilities/getHasScheduledPublish.js'
 import { getIsLocked } from '../../utilities/getIsLocked.js'
 import { getVersions } from '../../utilities/getVersions.js'
 import { handleLivePreview } from '../../utilities/handleLivePreview.js'
@@ -213,6 +214,7 @@ export const renderDocument = async ({
   const [
     { hasPublishedDoc, mostRecentVersionIsAutosaved, unpublishedVersionCount, versionCount },
     { state: formState },
+    hasScheduledPublish,
   ] = await Promise.all([
     getVersions({
       id: idFromArgs,
@@ -239,6 +241,14 @@ export const renderDocument = async ({
       req,
       schemaPath: collectionSlug || globalSlug,
       skipValidation: true,
+    }),
+    getHasScheduledPublish({
+      id: idFromArgs,
+      collectionConfig,
+      globalConfig,
+      hasPublishPermission,
+      payload,
+      user,
     }),
   ])
 
@@ -415,6 +425,7 @@ export const renderDocument = async ({
         hasPublishedDoc={hasPublishedDoc}
         hasPublishPermission={hasPublishPermission}
         hasSavePermission={hasSavePermission}
+        hasScheduledPublish={hasScheduledPublish}
         hasTrashPermission={hasTrashPermission}
         id={id}
         initialData={doc}

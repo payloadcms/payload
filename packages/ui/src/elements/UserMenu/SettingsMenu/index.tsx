@@ -4,22 +4,34 @@ import React, { Fragment } from 'react'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { GearIcon } from '../../../icons/Gear/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { Popup } from '../../Popup/index.js'
+import { MenuSeparator } from '../../MenuSeparator/index.js'
+import { Popup, PopupList } from '../../Popup/index.js'
+
+export type UserMenuSettingsGroup = {
+  group?: string
+  items: React.ReactNode[]
+}
 
 type SettingsMenuProps = {
-  items: React.ReactNode[]
+  groups: UserMenuSettingsGroup[]
   onMobileOpen?: () => void
 }
 
-export const SettingsMenuContent: React.FC<{ items: React.ReactNode[] }> = ({ items }) => (
+export const SettingsMenuContent: React.FC<{ groups: UserMenuSettingsGroup[] }> = ({ groups }) => (
   <>
-    {items.map((item, i) => (
-      <Fragment key={`settings-item-${i}`}>{item}</Fragment>
+    {groups.map((group, groupIndex) => (
+      <Fragment key={`settings-group-${group.group}-${groupIndex}`}>
+        {groupIndex > 0 && <MenuSeparator />}
+        {group.group && <PopupList.GroupLabel label={group.group} />}
+        {group.items.map((item, itemIndex) => (
+          <Fragment key={`settings-item-${groupIndex}-${itemIndex}`}>{item}</Fragment>
+        ))}
+      </Fragment>
     ))}
   </>
 )
 
-export const SettingsMenu: React.FC<SettingsMenuProps> = ({ items, onMobileOpen }) => {
+export const SettingsMenu: React.FC<SettingsMenuProps> = ({ groups, onMobileOpen }) => {
   const { t } = useTranslation()
 
   if (onMobileOpen) {
@@ -62,7 +74,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ items, onMobileOpen 
           </span>
           <span className="popup-button-list__label">{t('general:settings')}</span>
           <span className="popup-button-list__chevron">
-            <ChevronIcon direction="right" size={24} />
+            <ChevronIcon direction="right" size={16} />
           </span>
         </button>
       )}
@@ -70,7 +82,7 @@ export const SettingsMenu: React.FC<SettingsMenuProps> = ({ items, onMobileOpen 
       size="large"
       theme="dark"
     >
-      <SettingsMenuContent items={items} />
+      <SettingsMenuContent groups={groups} />
     </Popup>
   )
 }

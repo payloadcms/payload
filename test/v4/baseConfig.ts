@@ -155,17 +155,19 @@ export const baseConfig: Partial<Config> = {
       password: devUser.password,
       prefillOnly: true,
     },
-    livePreview: {
-      collections: [docControlsSlug],
-      url: 'http://localhost:3000',
-    },
     components: {
       actions: [
         './components/HeaderAction.tsx#HeaderAction',
         './components/HeaderAction.tsx#HeaderAction2',
       ],
       beforeNavLinks: ['./views/Components/NavLink.js#ComponentsNavLink'],
-      userMenuSettingsItems: ['./components/UserMenuSettingsItem.tsx#UserMenuSettingsItem'],
+      userMenuSettingsItems: [
+        {
+          group: 'Developer Tools',
+          items: ['./components/UserMenuSettingsItem.tsx#UserMenuSettingsItem'],
+        },
+        './components/UserMenuSettingsItemLegacy.tsx#UserMenuSettingsItemLegacy',
+      ],
       views: {
         components: {
           Component: './views/Components/index.js#ComponentsView',
@@ -175,6 +177,10 @@ export const baseConfig: Partial<Config> = {
     },
     importMap: {
       baseDir: path.resolve(dirname),
+    },
+    livePreview: {
+      collections: [docControlsSlug],
+      url: 'http://localhost:3000',
     },
   },
   collections,
@@ -405,8 +411,8 @@ export const baseConfig: Partial<Config> = {
       await payload.create({
         collection: tagItemsSlug,
         data: {
-          title: `Tag Item ${i}`,
           description: `Description for tag item ${i}`,
+          title: `Tag Item ${i}`,
         },
       })
     }
@@ -426,6 +432,32 @@ export const baseConfig: Partial<Config> = {
       collection: foldersSlug,
       data: { name: 'Subfolder B', parent: rootFolder.id },
     })
+
+    // Seed nested child folders under a single parent to test nested LoadMoreRow pagination
+    const nestedParentFolder = await payload.create({
+      collection: foldersSlug,
+      data: { name: 'Nested Parent Folder', parent: rootFolder.id },
+    })
+
+    for (let i = 1; i <= 10; i++) {
+      await payload.create({
+        collection: foldersSlug,
+        data: { name: `Nested Child ${i}`, parent: nestedParentFolder.id },
+      })
+    }
+
+    // Seed a third level: Nested Parent Folder > Branch Folder > Leaf Child N
+    const branchFolder = await payload.create({
+      collection: foldersSlug,
+      data: { name: 'Branch Folder', parent: nestedParentFolder.id },
+    })
+
+    for (let i = 1; i <= 10; i++) {
+      await payload.create({
+        collection: foldersSlug,
+        data: { name: `Leaf Child ${i}`, parent: branchFolder.id },
+      })
+    }
 
     // Seed folder-items collection with 30 items (no folder assigned) for hierarchy pagination testing
     for (let i = 1; i <= 30; i++) {
@@ -727,8 +759,8 @@ export const baseConfig: Partial<Config> = {
     // Seed drawers collection: a couple of docs linked via the
     // self-referencing `child` field so drawers can be drilled into.
     const drawerSeeds = [
-      { title: 'Landing Page', status: 'published' as const },
-      { title: 'About Page', status: 'draft' as const },
+      { status: 'published' as const, title: 'Landing Page' },
+      { status: 'draft' as const, title: 'About Page' },
     ]
 
     let previousNestedChild: number | string | undefined
@@ -737,7 +769,6 @@ export const baseConfig: Partial<Config> = {
       const created = await payload.create({
         collection: drawersSlug,
         data: {
-          title: seed.title,
           blocks: [
             { blockType: 'hero-block', heading: `${seed.title} Hero` },
             {
@@ -826,6 +857,7 @@ export const baseConfig: Partial<Config> = {
           relatedRelationship: createdRelationship.id,
           relatedText: createdPosts[i]?.id as string,
           status: seed.status,
+          title: seed.title,
         },
       })
       previousNestedChild = created.id

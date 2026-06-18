@@ -18,10 +18,16 @@ export const AfterNavLinks: PayloadClientReactComponent<
   } = useConfig()
 
   return (
-    <div style={{ marginTop: 'var(--base)', padding: '0 var(--base)', width: '100%' }}>
+    <div
+      style={{
+        marginTop: 'var(--spacer-4)',
+        padding: '0 var(--spacer-4)',
+        width: '100%',
+      }}
+    >
       <Link
         href={`${adminRoute}/upload-form-test`}
-        style={{ color: 'var(--theme-text)', textDecoration: 'none' }}
+        style={{ color: 'var(--color-text)', textDecoration: 'none' }}
       >
         Upload Form Test
       </Link>

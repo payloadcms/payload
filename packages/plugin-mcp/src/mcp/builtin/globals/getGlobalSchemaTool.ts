@@ -2,6 +2,13 @@ import { defineGlobalTool } from '../../../defineTool.js'
 import { getGlobalInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 
 export const getGlobalSchemaTool = defineGlobalTool({
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+    readOnlyHint: true,
+    title: 'Get Global Schema',
+  },
   description: 'Get the input schema for updating a global.',
 }).handler(({ globalSlug, req }) => {
   const inputSchema = getGlobalInputSchema({ globalSlug, req })

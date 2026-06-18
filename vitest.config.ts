@@ -97,6 +97,8 @@ export default defineConfig({
           environment: 'node',
           fileParallelism: false,
           globalSetup: ['test/evals/globalSetup.ts'],
+          // Loads .env
+          setupFiles: ['./test/evals/vitest.setup.ts'],
           // 10 minutes per test: LLM call (~60-120s) + tsc wait + scorer + buffer.
           testTimeout: 600000,
         },

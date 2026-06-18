@@ -211,7 +211,8 @@ export const DocumentControls: React.FC<{
 
   const showDotMenu = Boolean(
     !disableActions &&
-      ((collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
+      (EditMenuItems ||
+        (collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
         (globalConfig && (globalHasDraftsEnabled || localization))),
   )
   const collectionAutosaveEnabled = hasAutosaveEnabled(collectionConfig)
@@ -438,7 +439,7 @@ export const DocumentControls: React.FC<{
                   )}
                 </React.Fragment>
               )}
-              {hasDeletePermission && (
+              {hasDeletePermission && id && (
                 <DeleteDocument
                   buttonId="action-delete"
                   collectionSlug={collectionConfig?.slug}

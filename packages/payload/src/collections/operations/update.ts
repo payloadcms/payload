@@ -17,7 +17,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
-import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
+import { type CollectionSlug, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
@@ -33,6 +33,7 @@ import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQu
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { copyDataWithFreshRowIDs } from './utilities/copyDataWithFreshRowIDs.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
 
@@ -258,7 +259,12 @@ export const updateOperation = async <
           autosave,
           collectionConfig,
           config,
-          data: deepCopyObjectSimple(data),
+          data: copyDataWithFreshRowIDs({
+            config,
+            data,
+            existingDoc: docWithLocales,
+            fields: collectionConfig.fields,
+          }),
           depth: depth!,
           docWithLocales,
           draftArg,

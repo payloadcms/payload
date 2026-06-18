@@ -5,10 +5,7 @@ import type { NoResultsClientProps } from 'payload'
 import { Button, NoListResults, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
-import type {
-  PluginMCPTranslationKeys,
-  PluginMCPTranslations,
-} from '../../translations/index.js'
+import type { PluginMCPTranslationKeys, PluginMCPTranslations } from '../../translations/index.js'
 
 export const APIKeysEmptyState: React.FC<NoResultsClientProps> = ({
   hasCreatePermission,

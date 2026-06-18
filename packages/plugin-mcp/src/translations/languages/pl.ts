@@ -2,7 +2,8 @@ import type { PluginLanguage } from '../types.js'
 
 export const plTranslations = {
   'plugin-mcp': {
-    apiKeyDescription: 'Klucze API kontrolują, do których kolekcji, zasobów, narzędzi i promptów klienci MCP mają dostęp.',
+    apiKeyDescription:
+      'Klucze API kontrolują, do których kolekcji, zasobów, narzędzi i promptów klienci MCP mają dostęp.',
     apiKeys: 'Klucze API',
     authentication: 'Uwierzytelnianie',
     description: 'Opis',
@@ -16,9 +17,11 @@ export const plTranslations = {
     noAPIKeys: 'Brak kluczy API',
     operations: 'Operacje',
     overrideAccess: 'Pomiń kontrolę dostępu',
-    overrideAccessDescription: 'Po zaznaczeniu ten klucz omija kontrolę dostępu Payload przy każdej operacji. Pozostaw niezaznaczone, chyba że masz konkretny powód.',
+    overrideAccessDescription:
+      'Po zaznaczeniu ten klucz omija kontrolę dostępu Payload przy każdej operacji. Pozostaw niezaznaczone, chyba że masz konkretny powód.',
     permissions: 'Uprawnienia',
-    permissionsDescription: 'Zezwól klientom MCP na dostęp do następujących kolekcji, narzędzi, zasobów i promptów.',
+    permissionsDescription:
+      'Zezwól klientom MCP na dostęp do następujących kolekcji, narzędzi, zasobów i promptów.',
     prompts: 'Prompty',
     resources: 'Zasoby',
     server: 'Serwer',
