@@ -9,10 +9,6 @@
     height: 100%;
     flex-shrink: 0;
     overflow-y: auto;
-    /* Hide the native scrollbar so it doesn't consume layout width — otherwise a classic
-       (non-overlay) scrollbar shrinks the stretched thumbnails below their intended size. */
-    /* scrollbar-width: none; */
-    /* -ms-overflow-style: none; */
     background: var(--color-bg-secondary);
     border-right: 1px solid var(--color-border);
     /* Opt out of the flex line's stretch so the explicit (scroll-driven) height below is honored
@@ -25,10 +21,6 @@
     animation: mini-carousel-fill-scrolled-chrome linear both;
     animation-timeline: scroll(root block);
     animation-range: 0 calc(var(--app-header-height) + var(--doc-header-height));
-
-    /* &::-webkit-scrollbar {
-      display: none;
-    } */
   }
 
   @keyframes mini-carousel-fill-scrolled-chrome {
