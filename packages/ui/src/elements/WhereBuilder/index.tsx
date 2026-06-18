@@ -110,12 +110,12 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
   )
 
   const updateCondition: UpdateCondition = React.useCallback(
-    ({ andIndex, field, operator: incomingOperator, orIndex, value }) => {
+    ({ type, andIndex, field, operator: incomingOperator, orIndex, value }) => {
       // Virtual first row: conditions not yet committed, build from scratch
       if (conditions.length === 0) {
-        // Nothing to commit until the placeholder row has an actual value. This also prevents a
-        // cleared row from immediately re-committing itself as an empty condition.
-        if (value === undefined || value === null || value === '') {
+        // Ignore empty value edits so a cleared row doesn't re-commit itself. Field and
+        // operator picks carry empty values too, but must fall through to build the row.
+        if (type === 'value' && (value === undefined || value === null || value === '')) {
           return
         }
 
