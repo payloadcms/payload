@@ -241,6 +241,11 @@ export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> 
    */
   blockData?: JsonObject | undefined
   /**
+   * Slug of the collection that owns the field being evaluated.
+   * Undefined when the field belongs to a global.
+   */
+  collectionSlug?: string
+  /**
    * The incoming, top-level document data used to `create` or `update` the document with.
    */
   data?: Partial<TData>
