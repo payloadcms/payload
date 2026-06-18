@@ -339,16 +339,11 @@ describe('Uploads', () => {
     await waitForFormReady(page)
 
     const previewLink = page.locator('.file-toolbar__right a[target="_blank"]')
-    const downloadLink = page.locator('.file-toolbar__right a[download]')
 
     await expect(previewLink).toBeVisible()
     await expect(previewLink).toHaveAttribute('rel', 'noopener noreferrer')
-
-    // Preview opens the same currently-shown asset that the download action targets
-    const previewHref = previewLink
-    const downloadHref = await downloadLink.getAttribute('href')
-    await expect(previewHref).toHaveAttribute('href')
-    expect(previewHref).toBe(downloadHref)
+    // Opens the current asset (the served media file) in a new tab
+    await expect(previewLink).toHaveAttribute('href', /\/api\/media\/file\//)
   })
 
   test('should show upload dropzone in right panel for new upload collection document', async () => {

@@ -123,25 +123,23 @@ export function EditForm({
         onSuccess={onSave}
         submitted={submitted}
       >
-        <DocumentFields
-          BeforeFields={
-            <React.Fragment>
-              {CustomUpload || (
-                <FileManager
-                  collectionSlug={collectionConfig.slug}
-                  initialState={initialState}
-                  resetUploadEdits={resetUploadEdits}
-                  updateUploadEdits={updateUploadEdits}
-                  uploadConfig={collectionConfig.upload}
-                  uploadEdits={uploadEdits}
-                />
-              )}
-            </React.Fragment>
-          }
-          docPermissions={docPermissions}
-          fields={collectionConfig.fields}
-          schemaPathSegments={[collectionConfig.slug]}
-        />
+        <div className={`${baseClass}__upload-layout`}>
+          {CustomUpload || (
+            <FileManager
+              collectionSlug={collectionConfig.slug}
+              initialState={initialState}
+              resetUploadEdits={resetUploadEdits}
+              updateUploadEdits={updateUploadEdits}
+              uploadConfig={collectionConfig.upload}
+              uploadEdits={uploadEdits}
+            />
+          )}
+          <DocumentFields
+            docPermissions={docPermissions}
+            fields={collectionConfig.fields}
+            schemaPathSegments={[collectionConfig.slug]}
+          />
+        </div>
         <ReportAllErrors />
         <GetFieldProxy />
       </Form>

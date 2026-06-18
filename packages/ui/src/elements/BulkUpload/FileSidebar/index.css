@@ -6,6 +6,9 @@
     display: flex;
     flex-direction: column;
     width: 250px;
+    /* Lock the width so the file list does not reflow (and re-truncate filenames) while the edit
+       view remounts during file-to-file navigation. */
+    flex-shrink: 0;
     overflow: visible;
     max-height: 100dvh;
   }

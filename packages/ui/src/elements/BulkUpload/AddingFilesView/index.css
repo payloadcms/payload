@@ -16,30 +16,47 @@
   }
 
   .bulk-upload--file-manager__editView {
+    display: flex;
+    flex-direction: column;
     flex-grow: 1;
+    min-width: 0;
     height: 100%;
     max-height: 100%;
-    overflow: auto;
+    /* Never scroll horizontally (the columns are flex-sized); scroll vertically only if needed. */
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
-  /* In the drawer the file manager is contained (not the full-viewport sticky panel used on the
-     document edit page); the preview sits at a fixed height like editing an upload in a drawer. */
+  /* The form fills the edit view so the preview column can stretch to full height. */
+  .bulk-upload--file-manager .collection-edit__form {
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Desktop: fields and preview sit side by side (the shared upload-layout class supplies the
+     row + ordering + flex ratios). A gap separates the two columns. The shared layout's responsive
+     behaviour is keyed to an `edit-main` container query, which the bulk modal does not establish,
+     so the stacking is handled by the viewport media query below instead. */
+  .bulk-upload--file-manager .collection-edit__upload-layout {
+    height: 100%;
+    align-items: stretch;
+    gap: var(--gutter-h);
+  }
+
+  .bulk-upload--file-manager .collection-edit__upload-layout .file-manager {
+    border-inline-start: 0;
+  }
+
+  /* Contained file manager (not the full-viewport sticky panel used on the document edit page);
+     the preview fills its column and bleeds to the edges. */
   .bulk-upload--file-manager .file-manager {
-    min-height: 400px;
+    min-height: 0;
   }
 
   .bulk-upload--file-manager .file-manager__panel {
     position: static;
-    height: auto;
-    min-height: 400px;
-  }
-
-  /* The preview bleeds to the edges of the drawer; the fields below keep the gutter padding
-     (the document fields wrapper applies a horizontal gutter that we cancel out here). */
-  .bulk-upload--file-manager .file-manager {
-    width: auto;
-    margin-top: calc(-1 * var(--gutter-v));
-    margin-inline: calc(-1 * var(--gutter-h));
+    height: 100%;
+    min-height: 0;
   }
 
   .bulk-upload--file-manager .file-manager__upload {
@@ -47,22 +64,36 @@
     justify-content: flex-start;
   }
 
+  /* The preview panel bleeds to the edges, but the media itself is inset so it has breathing room. */
   .bulk-upload--file-manager .file-manager__selected-preview {
     max-width: none;
     width: 100%;
     flex: 1;
     height: auto;
     min-height: 0;
+    padding: var(--gutter-h);
     border-radius: 0;
   }
 
+  /* Align the file name input with the document fields (same horizontal gutter), so they line up
+     when stacked. */
+  .bulk-upload--file-manager .file-manager__file-adjustments {
+    padding-inline: var(--gutter-h);
+  }
+
+  /* Stack on mobile — the modal is full-screen and there is no room for two columns. */
   @media (max-width: 1024px) {
     .bulk-upload--file-manager {
       flex-direction: column-reverse;
     }
 
-    .bulk-upload--file-manager__editView {
-      flex-grow: 1;
+    .bulk-upload--file-manager .collection-edit__upload-layout {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .bulk-upload--file-manager .collection-edit__upload-layout .file-manager {
+      order: 0;
     }
   }
 }
