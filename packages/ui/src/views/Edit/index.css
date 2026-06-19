@@ -19,13 +19,12 @@
     flex-direction: row;
     align-items: flex-start;
 
-    /* The file manager renders before the fields in the DOM (so it stacks on top at mobile),
-       but on desktop it should sit after them in the row at 2fr. The divider lives on the file
-       manager (not the fields) because it always stretches full height — the fields may be short. */
+    /* File manager renders first in the DOM (stacks on top at mobile) but is ordered after the
+       fields on desktop. The divider lives on it since it always stretches full height. */
     .file-manager {
       order: 2;
       flex: 2;
-      border-inline-start: 1px solid var(--color-border);
+      border-inline-start: var(--stroke-width-small) solid var(--color-border);
     }
 
     .document-fields {

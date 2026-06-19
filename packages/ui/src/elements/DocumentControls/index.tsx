@@ -160,7 +160,12 @@ export const DocumentControls: React.FC<{
   const rootRef = useRef<HTMLDivElement>(null)
   const i18nRef = useRef(i18n)
 
+  // Only the page-level controls bar feeds the sticky layout offsets. Drawer instances
+  // (variant="drawerHeaderActions") must not publish the shared var or they'd clobber it.
   useEffect(() => {
+    if (variant !== 'default') {
+      return
+    }
     const el = rootRef.current
     if (!el) {
       return
@@ -169,8 +174,11 @@ export const DocumentControls: React.FC<{
       document.documentElement.style.setProperty('--doc-controls-height', `${el.offsetHeight}px`)
     })
     observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
+    return () => {
+      observer.disconnect()
+      document.documentElement.style.removeProperty('--doc-controls-height')
+    }
+  }, [variant])
   i18nRef.current = i18n
 
   const updateRelativeTime = useCallback(() => {

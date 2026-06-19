@@ -3,6 +3,7 @@ import type { Data, FileSizes, SanitizedCollectionConfig } from 'payload'
 
 import React from 'react'
 
+import { useTranslation } from '../../providers/Translation/index.js'
 import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import './index.css'
 
@@ -28,7 +29,7 @@ const MiniCarouselItem: React.FC<MiniCarouselItemProps> = ({
   return (
     <button
       aria-label={label}
-      aria-pressed={active}
+      aria-pressed={active ? 'true' : 'false'}
       className={[`${baseClass}__item`, active && `${baseClass}__item--active`]
         .filter(Boolean)
         .join(' ')}
@@ -58,6 +59,7 @@ export const MiniCarousel: React.FC<MiniCarouselProps> = ({
   selectedSize,
   uploadConfig,
 }) => {
+  const { t } = useTranslation()
   const { imageSizes } = uploadConfig
   const { sizes, url: originalUrl } = doc
 
@@ -77,7 +79,7 @@ export const MiniCarousel: React.FC<MiniCarouselProps> = ({
       <MiniCarouselItem
         active={selectedSize === null}
         imageCacheTag={imageCacheTag}
-        label="Original"
+        label={t('general:original')}
         onClick={() => onSelect(null)}
         url={originalUrl}
       />

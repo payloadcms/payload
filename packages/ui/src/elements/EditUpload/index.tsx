@@ -14,7 +14,7 @@ import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { Button } from '../Button/index.js'
 import { DialogBody, DialogFooter, DialogHeader, DialogModal } from '../Dialog/index.js'
 import './index.css'
-import './library.scss'
+import './library.css'
 
 const baseClass = 'edit-upload'
 

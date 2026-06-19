@@ -49,7 +49,10 @@ export function AppHeader({ CustomAvatar, settingsItemGroups }: Props) {
       document.documentElement.style.setProperty('--app-header-height', `${el.offsetHeight}px`)
     })
     observer.observe(el)
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      document.documentElement.style.removeProperty('--app-header-height')
+    }
   }, [])
 
   useEffect(() => {

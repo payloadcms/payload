@@ -348,6 +348,10 @@ export const FileManager: React.FC<FileManagerProps> = ({
     </Fragment>
   )
 
+  // Hide the create file input when the collection opts out of it (unless the user has explicitly
+  // removed an existing file or already selected a new one).
+  const showUploadInput = Boolean(value) || removedFile || !uploadConfig?.hideFileInputOnCreate
+
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <FieldError message={errorMessage} showError={showError} />
@@ -356,6 +360,8 @@ export const FileManager: React.FC<FileManagerProps> = ({
           <FileToolbar
             filename={data.filename as string}
             fileSrc={sidePanelFileSrc}
+            fileUrl={data?.url as string}
+            hideRemoveFile={uploadConfig?.hideRemoveFile}
             isAdjustable={fileTypeIsAdjustable}
             onEditImage={() => openModal(editDrawerSlug)}
             onReplace={handleFileRemoval}
@@ -373,7 +379,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
               uploadConfig={uploadConfig}
               UploadFilePreview={UploadFilePreview}
             />
-          ) : (
+          ) : showUploadInput ? (
             <div className={`${baseClass}__upload`}>
               {!value && (
                 <Dropzone onChange={handleFileSelection}>
@@ -453,7 +459,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
                 </Fragment>
               )}
             </div>
-          )}
+          ) : null}
         </div>
       </div>
       {drawers}

@@ -22,7 +22,10 @@ export const DocumentHeaderRoot: React.FC<{ children: React.ReactNode }> = ({ ch
       document.documentElement.style.setProperty('--doc-header-height', `${el.offsetHeight}px`)
     })
     observer.observe(el)
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      document.documentElement.style.removeProperty('--doc-header-height')
+    }
   }, [])
 
   return (

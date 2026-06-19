@@ -1,6 +1,8 @@
 @layer payload-default {
   .audio-preview {
+    --audio-preview-max-width: 480px;
+
     width: 100%;
-    max-width: 480px;
+    max-width: var(--audio-preview-max-width);
   }
 }

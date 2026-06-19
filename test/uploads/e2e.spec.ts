@@ -181,7 +181,7 @@ describe('Uploads', () => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     page = await context.newPage()
 
-    const { consoleErrors, collectErrors, stopCollectingErrors } = initPageConsoleErrorCatch(page, {
+    const { collectErrors, consoleErrors, stopCollectingErrors } = initPageConsoleErrorCatch(page, {
       ignoreCORS: true,
     })
 
@@ -243,11 +243,11 @@ describe('Uploads', () => {
 
   test('should show upload filename in upload collection list', async () => {
     await page.goto(mediaURL.list)
-    const audioUpload = page.locator('tr.row-1 .cell-filename')
-    await expect(audioUpload).toHaveText('audio.mp3')
+    const audioUpload = page.locator('tbody .cell-filename', { hasText: exactText('audio.mp3') })
+    await expect(audioUpload).toBeVisible()
 
-    const imageUpload = page.locator('tr.row-2 .cell-filename')
-    await expect(imageUpload).toHaveText('image.png')
+    const imageUpload = page.locator('tbody .cell-filename', { hasText: exactText('image.png') })
+    await expect(imageUpload).toBeVisible()
   })
 
   test('should see upload filename in relation list', async () => {
@@ -280,9 +280,15 @@ describe('Uploads', () => {
     await expect(filename).toContainText('image.png')
 
     await page.locator('.field-type.upload').nth(0).getByRole('button', { name: 'Edit' }).click()
-    await page.locator('.file-details__remove').click()
 
-    await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+    // Replace the file from within the document drawer's file manager
+    await page.locator('.doc-drawer .file-toolbar__filename-btn').click()
+    await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
+
+    await page.setInputFiles(
+      '.doc-drawer .file-manager input[type="file"]',
+      path.join(dirname, 'test-image.jpg'),
+    )
     await saveDocAndAssert(page, '.doc-drawer button#action-save')
 
     await page.locator('.doc-drawer__header-close').click()
@@ -311,8 +317,12 @@ describe('Uploads', () => {
       await payload.find({
         collection: mediaSlug,
         depth: 0,
-        limit: 1,
         pagination: false,
+        where: {
+          mimeType: {
+            equals: 'image/png',
+          },
+        },
       })
     ).docs[0]
 
@@ -320,8 +330,8 @@ describe('Uploads', () => {
     await waitForFormReady(page)
 
     await expect(page.locator('.collection-edit__upload-layout')).toBeVisible()
-    await expect(page.locator('.file-field__side-panel')).toBeVisible()
-    await expect(page.locator('.file-field__side-panel__preview')).toBeVisible()
+    await expect(page.locator('.file-manager')).toBeVisible()
+    await expect(page.locator('.file-preview')).toBeVisible()
     await expect(page.locator('.mini-carousel')).toBeVisible()
   })
 
@@ -351,7 +361,7 @@ describe('Uploads', () => {
     await waitForFormReady(page)
 
     await expect(page.locator('.collection-edit__upload-layout')).toBeVisible()
-    await expect(page.locator('.file-field__side-panel .dropzone')).toBeVisible()
+    await expect(page.locator('.file-manager .dropzone')).toBeVisible()
   })
 
   test('should switch active thumbnail when clicking mini carousel item', async () => {
@@ -384,7 +394,7 @@ describe('Uploads', () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
 
-    const filename = page.locator('.file-field__filename')
+    const filename = page.locator('.file-manager #field-filename')
 
     await expect(filename).toHaveValue('image.png')
 
@@ -406,7 +416,7 @@ describe('Uploads', () => {
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './ios-image.jpeg'))
 
-    const filename = page.locator('.file-field__filename')
+    const filename = page.locator('.file-manager #field-filename')
 
     await expect(filename).toHaveValue('ios-image.jpeg')
 
@@ -417,12 +427,12 @@ describe('Uploads', () => {
     await page.goto(mediaURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image-avif.avif'))
-    const filename = page.locator('.file-field__filename')
+    const filename = page.locator('.file-manager #field-filename')
     await expect(filename).toHaveValue('test-image-avif.avif')
 
     await saveDocAndAssert(page)
 
-    const fileMetaSizeType = page.locator('.file-meta__size-type')
+    const fileMetaSizeType = page.locator('.file-preview__info-meta')
     await expect(fileMetaSizeType).toHaveText(/image\/png/)
   })
 
@@ -430,12 +440,12 @@ describe('Uploads', () => {
     await page.goto(threeDimensionalURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './duck.glb'))
-    const filename = page.locator('.file-field__filename')
+    const filename = page.locator('.file-manager #field-filename')
     await expect(filename).toHaveValue('duck.glb')
 
     await saveDocAndAssert(page)
 
-    const fileMetaSizeType = page.locator('.file-meta__size-type')
+    const fileMetaSizeType = page.locator('.file-preview__info-meta')
     await expect(fileMetaSizeType).toHaveText(/model\/gltf-binary/)
   })
 
@@ -443,16 +453,16 @@ describe('Uploads', () => {
     await page.goto(svgOnlyURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './svgWithXml.svg'))
-    const filename = page.locator('.file-field__filename')
+    const filename = page.locator('.file-manager #field-filename')
     await expect(filename).toHaveValue('svgWithXml.svg')
 
     await saveDocAndAssert(page)
 
-    const fileMetaSizeType = page.locator('.file-meta__size-type')
+    const fileMetaSizeType = page.locator('.file-preview__info-meta')
     await expect(fileMetaSizeType).toHaveText(/image\/svg\+xml/)
 
     // ensure the svg loads
-    const svgImage = page.locator('img[src*="svgWithXml"]')
+    const svgImage = page.locator('.file-preview__thumbnail img[src*="svgWithXml"]')
     await expect(svgImage).toBeVisible()
   })
 
@@ -460,7 +470,7 @@ describe('Uploads', () => {
     await page.goto(animatedTypeMediaURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
-    const animatedFilename = page.locator('.file-field__filename')
+    const animatedFilename = page.locator('.file-manager #field-filename')
 
     await expect(animatedFilename).toHaveValue('animated.webp')
 
@@ -469,7 +479,7 @@ describe('Uploads', () => {
     await page.goto(animatedTypeMediaURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './non-animated.webp'))
-    const nonAnimatedFileName = page.locator('.file-field__filename')
+    const nonAnimatedFileName = page.locator('.file-manager #field-filename')
 
     await expect(nonAnimatedFileName).toHaveValue('non-animated.webp')
 
@@ -480,19 +490,21 @@ describe('Uploads', () => {
     await page.goto(animatedTypeMediaURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
-    const animatedFilename = page.locator('.file-field__filename')
+    const animatedFilename = page.locator('.file-manager #field-filename')
 
     await expect(animatedFilename).toHaveValue('animated.webp')
 
     await saveDocAndAssert(page)
 
-    await page.locator('.file-field__previewSizes').click()
-
-    const smallSquareFilename = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(1)
-      .locator('.file-meta__url a')
-    await expect(smallSquareFilename).toContainText(/480x480\.webp$/)
+    // The per-size detail is no longer surfaced in the doc edit UI; verify the generated size
+    // filename via the API instead.
+    const mediaID = page.url().split('/').pop()
+    const { doc } = await client.findByID({
+      id: mediaID as number | string,
+      slug: animatedTypeMedia,
+      auth: true,
+    })
+    expect(doc.sizes.squareSmall.filename).toMatch(/480x480\.webp$/)
   })
 
   test('should show resized images', async () => {
@@ -509,88 +521,54 @@ describe('Uploads', () => {
       })
     ).docs[0]
 
-    await page.goto(mediaURL.edit(pngDoc!.id))
+    // The per-size detail drawer was replaced by the inline carousel, which no longer surfaces
+    // per-size dimensions/formats; verify the generated sizes via the API instead.
+    const { sizes } = pngDoc!
 
-    await page.locator('.file-field__previewSizes').click()
-
-    const maintainedAspectRatioItem = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(1)
-      .locator('.file-meta__size-type')
-    await expect(maintainedAspectRatioItem).toContainText('1024x1024')
-
-    const differentFormatFromMainImageMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(2)
-      .locator('.file-meta__size-type')
-    await expect(differentFormatFromMainImageMeta).toContainText('image/jpeg')
-
-    const maintainedImageSizeMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(3)
-      .locator('.file-meta__size-type')
-    await expect(maintainedImageSizeMeta).toContainText('1600x1600')
-
-    const maintainedImageSizeWithNewFormatMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(4)
-      .locator('.file-meta__size-type')
-    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('1600x1600')
-    await expect(maintainedImageSizeWithNewFormatMeta).toContainText('image/jpeg')
-
-    const sameSizeMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(5)
-      .locator('.file-meta__size-type')
-    await expect(sameSizeMeta).toContainText('320x80')
-
-    const tabletMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(6)
-      .locator('.file-meta__size-type')
-    await expect(tabletMeta).toContainText('640x480')
-
-    const mobileMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(7)
-      .locator('.file-meta__size-type')
-    await expect(mobileMeta).toContainText('320x240')
-
-    const iconMeta = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(8)
-      .locator('.file-meta__size-type')
-    await expect(iconMeta).toContainText('16x16')
+    expect(sizes!.maintainedAspectRatio).toMatchObject({ height: 1024, width: 1024 })
+    expect(sizes!.differentFormatFromMainImage!.mimeType).toBe('image/jpeg')
+    expect(sizes!.maintainedImageSize).toMatchObject({ height: 1600, width: 1600 })
+    expect(sizes!.maintainedImageSizeWithNewFormat).toMatchObject({
+      height: 1600,
+      mimeType: 'image/jpeg',
+      width: 1600,
+    })
+    expect(sizes!.accidentalSameSize).toMatchObject({ height: 80, width: 320 })
+    expect(sizes!.tablet).toMatchObject({ height: 480, width: 640 })
+    expect(sizes!.mobile).toMatchObject({ height: 240, width: 320 })
+    expect(sizes!.icon).toMatchObject({ height: 16, width: 16 })
   })
 
   test('should resize and show tiff images', async () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.tiff'))
 
-    await expect(page.locator('.file-field__upload .thumbnail svg')).toBeVisible()
+    await expect(page.locator('.file-manager__selected-preview .thumbnail svg')).toBeVisible()
 
     await saveDocAndAssert(page)
 
-    await expect(page.locator('.file-details img')).toBeVisible()
+    await expect(page.locator('.file-preview__thumbnail img')).toBeVisible()
   })
 
   test('should have custom file name for image size', async () => {
     await page.goto(customFileNameURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
 
-    await expect(page.locator('.file-field__upload .thumbnail img')).toBeVisible()
+    await expect(page.locator('.file-manager__selected-preview .thumbnail img')).toBeVisible()
 
     await saveDocAndAssert(page)
 
-    await expect(page.locator('.file-details img')).toBeVisible()
+    await expect(page.locator('.file-preview__thumbnail img')).toBeVisible()
 
-    await page.locator('.file-field__previewSizes').click()
-
-    const renamedImageSizeFile = page
-      .locator('.preview-sizes__list .preview-sizes__sizeOption')
-      .nth(1)
-
-    await expect(renamedImageSizeFile).toContainText('custom-500x500.png')
+    // The per-size detail is no longer surfaced in the doc edit UI; verify the custom generated
+    // size filename via the API instead.
+    const mediaID = page.url().split('/').pop()
+    const { doc } = await client.findByID({
+      id: mediaID as number | string,
+      slug: customFileNameMediaSlug,
+      auth: true,
+    })
+    expect(doc.sizes.custom.filename).toBe('custom-500x500.png')
   })
 
   test('should show draft uploads in the relation list', async () => {
@@ -630,7 +608,7 @@ describe('Uploads', () => {
       path.resolve(dirname, './test-image-1500x735.jpeg'),
     )
 
-    const filename = page.locator('.file-field__filename')
+    const filename = page.locator('.file-manager #field-filename')
 
     await expect(filename).toHaveValue('test-image-1500x735.jpeg')
 
@@ -666,7 +644,7 @@ describe('Uploads', () => {
 
       // upload an image and try to select it
       await page
-        .locator('[id^=doc-drawer_media_1_] .file-field__upload input[type="file"]')
+        .locator('[id^=doc-drawer_media_1_] .file-manager input[type="file"]')
         .setInputFiles(path.resolve(dirname, './image.png'))
       await page.locator('[id^=doc-drawer_media_1_] button#action-save').click()
       await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
@@ -678,8 +656,8 @@ describe('Uploads', () => {
       // save the document and expect an error
       await page.locator('button#action-save').click()
       await assertToastErrors({
-        page,
         errors: ['Audio'],
+        page,
       })
     })
 
@@ -710,7 +688,7 @@ describe('Uploads', () => {
   test('should throw error when file is larger than the limit and abortOnLimit is true', async () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './2mb.jpg'))
-    await expect(page.locator('.file-field__filename')).toHaveValue('2mb.jpg')
+    await expect(page.locator('.file-manager #field-filename')).toHaveValue('2mb.jpg')
 
     await page.click('#action-save', { delay: 100 })
     await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
@@ -809,7 +787,7 @@ describe('Uploads', () => {
 
     await page.goto(mediaWithoutCacheTagsSlugURL.edit(imageDoc!.id))
 
-    const genericUploadImage = page.locator('.file-details .thumbnail img')
+    const genericUploadImage = page.locator('.file-preview__thumbnail img')
     await expect(genericUploadImage).not.toHaveAttribute('src', cacheTagPattern)
   })
 
@@ -836,7 +814,7 @@ describe('Uploads', () => {
 
     await page.goto(adminThumbnailFunctionURL.edit(imageDoc!.id))
 
-    const genericUploadImage = page.locator('.file-details .thumbnail img')
+    const genericUploadImage = page.locator('.file-preview__thumbnail img')
     await expect(genericUploadImage).toHaveAttribute('src', cacheTagPattern)
   })
 
@@ -990,6 +968,12 @@ describe('Uploads', () => {
       '.collection-edit--custom-upload-field .document-fields__edit h3',
     )
     await expect(clientText).toHaveText('This text was rendered on the client')
+
+    // Custom Upload components render in the legacy single-column path, not the
+    // side-by-side file manager layout.
+    await expect(
+      page.locator('.collection-edit--custom-upload-field .collection-edit__upload-layout'),
+    ).toHaveCount(0)
   })
 
   test('should show original image url on a single upload card for an upload with adminThumbnail defined', async () => {
@@ -1008,7 +992,9 @@ describe('Uploads', () => {
       '[id^="doc-drawer_admin-thumbnail-size"] input[type="file"]',
       path.resolve(dirname, './test-image.png'),
     )
-    const filename = page.locator('[id^="doc-drawer_admin-thumbnail-size"] .file-field__filename')
+    const filename = page.locator(
+      '[id^="doc-drawer_admin-thumbnail-size"] .file-manager #field-filename',
+    )
     await expect(filename).toHaveValue('test-image.png')
 
     await expect(page.locator('[id^="doc-drawer_admin-thumbnail-size"] #action-save')).toBeVisible()
@@ -1085,7 +1071,8 @@ describe('Uploads', () => {
 
     await wait(1000) // Wait for the save
 
-    await expect(page.locator('.file-field__previewSizes')).toBeVisible()
+    // Image sizes are now surfaced inline via the mini carousel rather than a preview-sizes button.
+    await expect(page.locator('.mini-carousel')).toBeVisible()
   })
 
   describe('bulk uploads', () => {
@@ -1095,10 +1082,10 @@ describe('Uploads', () => {
 
       // Upload single file
       await page.setInputFiles(
-        '.file-field input[type="file"]',
+        '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-field__filename')
+      const filename = page.locator('.file-manager #field-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1158,7 +1145,7 @@ describe('Uploads', () => {
       await expect(async () => {
         await bulkUploadButton.click()
         await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
-      }).toPass({ timeout: 5000, intervals: [500] })
+      }).toPass({ intervals: [500], timeout: 5000 })
 
       await page
         .locator('.dropzone input[type="file"]')
@@ -1198,10 +1185,10 @@ describe('Uploads', () => {
 
       // Upload single file
       await page.setInputFiles(
-        '.file-field input[type="file"]',
+        '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-field__filename')
+      const filename = page.locator('.file-manager #field-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1241,11 +1228,11 @@ describe('Uploads', () => {
 
       // Upload single file
       await page.setInputFiles(
-        '.file-field input[type="file"]',
+        '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
 
-      const filename = page.locator('.file-field__filename')
+      const filename = page.locator('.file-manager #field-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1301,10 +1288,10 @@ describe('Uploads', () => {
 
       // Upload single file
       await page.setInputFiles(
-        '.file-field input[type="file"]',
+        '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-field__filename')
+      const filename = page.locator('.file-manager #field-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1365,10 +1352,10 @@ describe('Uploads', () => {
 
       // Upload single file
       await page.setInputFiles(
-        '.file-field input[type="file"]',
+        '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-field__filename')
+      const filename = page.locator('.file-manager #field-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1406,7 +1393,7 @@ describe('Uploads', () => {
         .locator('.edit-many-bulk-uploads__header__actions button')
         .click()
 
-      await bulkUploadModal.locator('.file-field__upload .file-field__remove').click()
+      await bulkUploadModal.locator('.file-manager__remove').click()
 
       const chevronRight = bulkUploadModal.locator(
         '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
@@ -1444,7 +1431,7 @@ describe('Uploads', () => {
       await expect(async () => {
         await bulkUploadButton.click()
         await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
-      }).toPass({ timeout: 5000, intervals: [500] })
+      }).toPass({ intervals: [500], timeout: 5000 })
 
       await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './image.png'))
 
@@ -1492,7 +1479,7 @@ describe('Uploads', () => {
       await expect(async () => {
         await bulkUploadButton.click()
         await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
-      }).toPass({ timeout: 5000, intervals: [500] })
+      }).toPass({ intervals: [500], timeout: 5000 })
 
       await page.setInputFiles('.dropzone input[type="file"]', path.resolve(dirname, './image.png'))
 
@@ -1541,10 +1528,10 @@ describe('Uploads', () => {
       await page.goto(uploadsOne.create)
 
       await page.setInputFiles(
-        '.file-field input[type="file"]',
+        '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-field__filename')
+      const filename = page.locator('.file-manager #field-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1567,7 +1554,7 @@ describe('Uploads', () => {
         .fill('prefix-one')
 
       // Clear the filename from the first file
-      await bulkUploadModal.locator('.file-field__filename').clear()
+      await bulkUploadModal.locator('.file-manager #field-filename').clear()
 
       const nextImageChevronButton = bulkUploadModal.locator(
         '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
@@ -1600,10 +1587,10 @@ describe('Uploads', () => {
       await expect(bulkUploadModal.locator('.field-error')).toContainText('A file name is required')
 
       // Filename field should be empty (as we cleared it)
-      await expect(bulkUploadModal.locator('.file-field__filename')).toHaveValue('')
+      await expect(bulkUploadModal.locator('.file-manager #field-filename')).toHaveValue('')
 
       // Add the filename back
-      await bulkUploadModal.locator('.file-field__filename').fill('fixed-filename.png')
+      await bulkUploadModal.locator('.file-manager #field-filename').fill('fixed-filename.png')
 
       await saveButton.click()
 
@@ -1624,10 +1611,10 @@ describe('Uploads', () => {
       await page.goto(uploadsOne.create)
 
       await page.setInputFiles(
-        '.file-field input[type="file"]',
+        '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-field__filename')
+      const filename = page.locator('.file-manager #field-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1668,10 +1655,10 @@ describe('Uploads', () => {
       await page.goto(uploadsOne.create)
 
       await page.setInputFiles(
-        '.file-field input[type="file"]',
+        '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-field__filename')
+      const filename = page.locator('.file-manager #field-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1693,14 +1680,14 @@ describe('Uploads', () => {
 
       // Form 1: Fill prefix but remove file (should have 1 error: missing file)
       await bulkUploadModal.locator('#field-prefix').fill('prefix-one')
-      await bulkUploadModal.locator('.file-field__upload .file-field__remove').click()
+      await bulkUploadModal.locator('.file-manager__remove').click()
 
       // Form 2: Omit prefix and remove file (should have 2 errors: missing file + missing prefix)
       const nextButton = bulkUploadModal.locator(
         '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
       )
       await nextButton.click()
-      await bulkUploadModal.locator('.file-field__upload .file-field__remove').click()
+      await bulkUploadModal.locator('.file-manager__remove').click()
 
       // Form 3: Fill prefix and keep file (should have 0 errors - will succeed)
       await nextButton.click()
@@ -1756,10 +1743,10 @@ describe('Uploads', () => {
       await page.goto(uploadsOne.create)
 
       await page.setInputFiles(
-        '.file-field input[type="file"]',
+        '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-field__filename')
+      const filename = page.locator('.file-manager #field-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1828,7 +1815,7 @@ describe('Uploads', () => {
       await expect(async () => {
         await bulkUploadButton.click()
         await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
-      }).toPass({ timeout: 5000, intervals: [500] })
+      }).toPass({ intervals: [500], timeout: 5000 })
 
       await page
         .locator('.dropzone input[type="file"]')
@@ -1875,13 +1862,13 @@ describe('Uploads', () => {
       // Navigate to the upload creation page
       await page.goto(uploadsOne.create)
 
-      // Click the "Paste URL" button
-      const pasteURLButton = page.locator('.file-field__upload button', { hasText: 'Paste URL' })
+      // Open the paste-from-URL modal
+      const pasteURLButton = page.locator('.file-manager__upload button', { hasText: 'Paste URL' })
       await pasteURLButton.click()
 
       // Input the remote URL
       const remoteImage = 'http://localhost:4000/mock-cors-image'
-      const inputField = page.locator('.file-field__upload .file-field__remote-file')
+      const inputField = page.locator('#upload-paste-url #field-url')
       await inputField.fill(remoteImage)
 
       // Intercept the server-side fetch to the paste-url endpoint
@@ -1892,8 +1879,8 @@ describe('Uploads', () => {
         { timeout: POLL_TOPASS_TIMEOUT },
       )
 
-      // Click the "Add File" button
-      const addFileButton = page.locator('.file-field__add-file')
+      // Click the "Add file" button
+      const addFileButton = page.locator('#upload-paste-url button', { hasText: 'Add file' })
       await addFileButton.click()
 
       // Wait for the server-side fetch to complete
@@ -1902,14 +1889,14 @@ describe('Uploads', () => {
       await serverSideFetch.text()
 
       // Wait for the filename field to be updated
-      const filenameInput = page.locator('.file-field .file-field__filename')
+      const filenameInput = page.locator('.file-manager #field-filename')
       await expect(filenameInput).toHaveValue('mock-cors-image', { timeout: 500 })
 
       // Save and assert the document
       await saveDocAndAssert(page)
 
       // Validate the uploaded image
-      const imageDetails = page.locator('.file-field .file-details img')
+      const imageDetails = page.locator('.file-preview__thumbnail img')
       await expect(imageDetails).toHaveAttribute('src', /mock-cors-image/, { timeout: 500 })
     })
 
@@ -1917,17 +1904,17 @@ describe('Uploads', () => {
       // Navigate to the upload creation page
       await page.goto(uploadsTwo.create)
 
-      // Click the "Paste URL" button
-      const pasteURLButton = page.locator('.file-field__upload button', { hasText: 'Paste URL' })
+      // Open the paste-from-URL modal
+      const pasteURLButton = page.locator('.file-manager__upload button', { hasText: 'Paste URL' })
       await pasteURLButton.click()
 
       // Input the remote URL
       const remoteImage = 'http://localhost:4000/mock-cors-image'
-      const inputField = page.locator('.file-field__upload .file-field__remote-file')
+      const inputField = page.locator('#upload-paste-url #field-url')
       await inputField.fill(remoteImage)
 
-      // Click the "Add File" button
-      const addFileButton = page.locator('.file-field__add-file')
+      // Click the "Add file" button
+      const addFileButton = page.locator('#upload-paste-url button', { hasText: 'Add file' })
       await addFileButton.click()
 
       // Verify the toast error appears with the correct message
@@ -2010,12 +1997,14 @@ describe('Uploads', () => {
       const updateFocalPosition = async (page: Page) => {
         await page.goto(focalOnlyURL.create)
         await page.setInputFiles('input[type="file"]', path.join(dirname, 'horizontal-squares.jpg'))
+        // The crop/focal editor opens from the file toolbar, which appears once the file is saved
+        await saveDocAndAssert(page)
 
-        await page.locator('.file-field__edit').click()
+        await page.locator('button[aria-label="Edit Image"]').click()
 
         // set focal point
-        await page.locator('.edit-upload__input input[name="X %"]').fill('12') // left focal point
-        await page.locator('.edit-upload__input input[name="Y %"]').fill('50') // top focal point
+        await page.locator('.edit-upload__dialog #field-focalX').fill('12') // left focal point
+        await page.locator('.edit-upload__dialog #field-focalY').fill('50') // top focal point
 
         // apply focal point
         await page.locator('button:has-text("Apply Changes")').click()
@@ -2039,32 +2028,36 @@ describe('Uploads', () => {
       await page.goto(animatedTypeMediaURL.create)
 
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+      // The crop editor opens from the file toolbar, which appears once the file is saved
+      await saveDocAndAssert(page)
 
-      await page.locator('.file-field__edit').click()
+      await page.locator('button[aria-label="Edit Image"]').click()
 
       // set crop
-      await page.locator('.edit-upload__input input[name="Width (px)"]').fill('400')
-      await page.locator('.edit-upload__input input[name="Height (px)"]').fill('800')
+      await page.locator('#field-cropWidth').fill('400')
+      await page.locator('#field-cropHeight').fill('800')
       // set focal point
-      await page.locator('.edit-upload__input input[name="X %"]').fill('75') // init left focal point
-      await page.locator('.edit-upload__input input[name="Y %"]').fill('50') // init top focal point
+      await page.locator('.edit-upload__dialog #field-focalX').fill('75') // init left focal point
+      await page.locator('.edit-upload__dialog #field-focalY').fill('50') // init top focal point
 
       await page.locator('button:has-text("Apply Changes")').click()
       await saveDocAndAssert(page)
 
-      const resizeOptionMedia = page.locator('.file-meta .file-meta__size-type')
-      await expect(resizeOptionMedia).toContainText('200x200')
+      const resizeOptionMedia = page.locator('.file-preview__info-meta')
+      await expect(resizeOptionMedia).toContainText('200 × 200')
     })
 
     test('should allow incrementing crop dimensions back to original maximum size', async () => {
       await page.goto(mediaURL.create)
 
       await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
+      // The crop editor opens from the file toolbar, which appears once the file is saved
+      await saveDocAndAssert(page)
 
-      await page.locator('.file-field__edit').click()
+      await page.locator('button[aria-label="Edit Image"]').click()
 
-      const widthInput = page.locator('.edit-upload__input input[name="Width (px)"]')
-      const heightInput = page.locator('.edit-upload__input input[name="Height (px)"]')
+      const widthInput = page.locator('#field-cropWidth')
+      const heightInput = page.locator('#field-cropHeight')
 
       await expect(widthInput).toHaveValue('800')
       await expect(heightInput).toHaveValue('800')
@@ -2118,7 +2111,7 @@ describe('Uploads', () => {
 
   test('should hide file input when disableCreateFileInput is true on collection create', async () => {
     await page.goto(hideFileInputOnCreateURL.create)
-    await expect(page.locator('.file-field__upload')).toBeHidden()
+    await expect(page.locator('.file-manager__upload')).toBeHidden()
   })
 
   test('should hide bulk upload from list view when disableCreateFileInput is true', async () => {
@@ -2144,16 +2137,16 @@ describe('Uploads', () => {
     await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
     await saveDocAndAssert(page)
 
-    await page.locator('.file-field__edit').click()
+    await page.locator('button[aria-label="Edit Image"]').click()
 
     // no need to make any changes to the image if resizeOptions.withoutEnlargement is actually being respected now
     await page.locator('button:has-text("Apply Changes")').click()
     await saveDocAndAssert(page)
 
-    const resizeOptionMedia = page.locator('.file-meta .file-meta__size-type')
+    const resizeOptionMedia = page.locator('.file-preview__info-meta')
 
     // expect the image to be the original size since the original image is smaller than the dimensions defined in resizeOptions
-    await expect(resizeOptionMedia).toContainText('800x800')
+    await expect(resizeOptionMedia).toContainText('800 × 800')
   })
 
   describe('imageSizes best fit', () => {
@@ -2232,7 +2225,7 @@ describe('Uploads', () => {
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
 
-    const filename = page.locator('.file-field__filename')
+    const filename = page.locator('.file-manager #field-filename')
 
     await expect(filename).toHaveValue('animated.webp')
     await saveDocAndAssert(page, '#action-save', 'error')
@@ -2242,7 +2235,7 @@ describe('Uploads', () => {
     await page.goto(fileMimeTypeURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image-as-pdf.pdf'))
 
-    const filename = page.locator('.file-field__filename')
+    const filename = page.locator('.file-manager #field-filename')
     await expect(filename).toHaveValue('image-as-pdf.pdf')
 
     await saveDocAndAssert(page, '#action-save', 'error')
@@ -2253,7 +2246,7 @@ describe('Uploads', () => {
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.png'))
     await saveDocAndAssert(page)
     const imageID = page.url().split('/').pop()!
-    const { doc } = await client.findByID({ slug: mediaSlug, id: imageID, auth: true })
+    const { doc } = await client.findByID({ id: imageID, slug: mediaSlug, auth: true })
     const filename = doc.filename as string
     const filePath = path.resolve(dirname, 'media', filename)
     const before = statSync(filePath)
@@ -2270,12 +2263,17 @@ describe('Uploads', () => {
     const docID = (await payload.find({ collection: mediaWithoutDeleteAccessSlug, limit: 1 }))
       .docs[0]?.id as string
     await page.goto(mediaWithoutDeleteAccessURL.edit(docID))
-    const removeButton = page.locator('.file-details__remove')
-    await expect(removeButton).toBeVisible()
-    await removeButton.click()
-    await expect(page.locator('input[type="file"]')).toBeAttached()
-    await page.setInputFiles('input[type="file"]', path.join(dirname, 'test-image.jpg'))
-    const filename = page.locator('.file-field__filename')
+    // Replacing the file is available even without delete access
+    await page.locator('.file-toolbar__filename-btn').click()
+    const replaceButton = page.locator('.popup-button-list__button', { hasText: 'Replace file' })
+    await expect(replaceButton).toBeVisible()
+    await replaceButton.click()
+    await expect(page.locator('.file-manager input[type="file"]')).toBeAttached()
+    await page.setInputFiles(
+      '.file-manager input[type="file"]',
+      path.join(dirname, 'test-image.jpg'),
+    )
+    const filename = page.locator('.file-manager #field-filename')
     await expect(filename).toHaveValue('test-image.jpg')
     await saveDocAndAssert(page)
     const filenameFromAPI = (
@@ -2507,9 +2505,13 @@ describe('Uploads', () => {
     await page.locator('#field-prefix').fill('initial')
     await saveDocAndAssert(page)
 
-    // Change the file
-    await page.locator('.file-details__remove').click()
-    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image.jpg'))
+    // Change the file via the toolbar replace action
+    await page.locator('.file-toolbar__filename-btn').click()
+    await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
+    await page.setInputFiles(
+      '.file-manager input[type="file"]',
+      path.resolve(dirname, './test-image.jpg'),
+    )
     await saveDocAndAssert(page)
 
     // Modify another field and save - this should work without errors
@@ -2556,18 +2558,18 @@ describe('Uploads', () => {
     const imageBuffer = readFileSync(path.resolve(dirname, './image.png'))
 
     await page.setInputFiles('input[type="file"]', {
+      name: 'file%20#hash.png',
       buffer: imageBuffer,
       mimeType: 'image/png',
-      name: 'file%20#hash.png',
     })
 
-    const filenameField = page.locator('.file-field__filename')
+    const filenameField = page.locator('.file-manager #field-filename')
     await expect(filenameField).toHaveValue('file%20#hash.png')
 
     await saveDocAndAssert(page)
 
-    // After saving, the URL shown in the admin panel must have # and % encoded
-    const fileUrlLink = page.locator('.file-meta__url a')
+    // After saving, the file URL (the toolbar "open in new tab" link) must have # and % encoded
+    const fileUrlLink = page.locator('.file-toolbar__right a[target="_blank"]')
     await expect(fileUrlLink).toHaveAttribute('href')
 
     const href = await fileUrlLink.getAttribute('href')
@@ -2595,7 +2597,7 @@ describe('Uploads', () => {
       await waitForFormReady(page)
 
       await expect(page.locator('#custom-file-preview-single')).toBeVisible()
-      await expect(page.locator('.file-field__side-panel__image-wrap .thumbnail')).toBeHidden()
+      await expect(page.locator('.file-preview__image-wrap .thumbnail')).toBeHidden()
     })
 
     test('should pass mimeType as clientProp to filePreview component', async () => {
@@ -2662,7 +2664,7 @@ describe('Uploads', () => {
       await page.goto(adminUploadFilePreviewMapURL.edit(imageDoc!.id))
       await waitForFormReady(page)
 
-      await expect(page.locator('.file-field__side-panel__image-wrap .thumbnail')).toBeVisible()
+      await expect(page.locator('.file-preview__image-wrap .thumbnail')).toBeVisible()
       await expect(page.locator('#custom-file-preview-pdf')).toBeHidden()
       await expect(page.locator('#custom-file-preview-audio')).toBeHidden()
     })

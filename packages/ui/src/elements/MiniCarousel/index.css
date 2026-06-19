@@ -10,14 +10,10 @@
     flex-shrink: 0;
     overflow-y: auto;
     background: var(--color-bg-secondary);
-    border-right: 1px solid var(--color-border);
-    /* Opt out of the flex line's stretch so the explicit (scroll-driven) height below is honored
-       and the carousel can grow past the panel instead of being clamped to the line height. */
+    border-right: var(--stroke-width-small) solid var(--color-border);
+    /* Honor the scroll-driven height below instead of stretching to the flex line. */
     align-self: flex-start;
-    /* The sticky panel fills the viewport below all the chrome. When the app header and doc
-       header scroll away, only the carousel grows to keep its bottom on the viewport edge —
-       the preview content stays put. Pure CSS via a scroll-driven timeline; where it isn't
-       supported the carousel just keeps its static height (the prior behavior). */
+    /* Scroll-driven: grow to fill the gap as the header scrolls away. Falls back to static height. */
     animation: mini-carousel-fill-scrolled-chrome linear both;
     animation-timeline: scroll(root block);
     animation-range: 0 calc(var(--app-header-height) + var(--doc-header-height));
@@ -37,7 +33,7 @@
     flex-shrink: 0;
     padding: var(--spacer-1);
     border-radius: var(--radius-medium);
-    border: 1px solid var(--color-border);
+    border: var(--stroke-width-small) solid var(--color-border);
     background: var(--color-bg-secondary);
     cursor: pointer;
     overflow: hidden;
@@ -59,14 +55,12 @@
 
   .mini-carousel__divider {
     width: 100%;
-    height: 1px;
+    height: var(--stroke-width-small);
     background: var(--color-border);
     flex-shrink: 0;
   }
 
-  /* Once the layout stacks (the panel is static, not sticky) there's no gap to fill, so disable
-     the scroll-driven growth and just fill the panel via stretch — otherwise the growing carousel
-     would overflow into the content below. */
+  /* Stacked layout: disable scroll-driven growth and fill via stretch. */
   @container edit-main (max-width: 1024px) {
     .mini-carousel {
       align-self: stretch;
@@ -83,7 +77,7 @@
       overflow-x: auto;
       overflow-y: hidden;
       border-right: 0;
-      border-top: 1px solid var(--color-border);
+      border-top: var(--stroke-width-small) solid var(--color-border);
     }
 
     .mini-carousel__item {
@@ -91,7 +85,7 @@
     }
 
     .mini-carousel__divider {
-      width: 1px;
+      width: var(--stroke-width-small);
       height: 48px;
       margin: 0 var(--spacer-2);
     }

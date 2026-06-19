@@ -1183,9 +1183,6 @@ export default buildConfigWithDefaults({
         {
           name: 'photographer',
           type: 'text',
-          admin: {
-            // position: 'sidebar',
-          },
         },
         {
           name: 'priority',

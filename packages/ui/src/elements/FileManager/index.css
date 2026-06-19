@@ -138,7 +138,7 @@
   @container edit-main (max-width: 1024px) {
     .file-manager {
       min-height: 400px;
-      border-bottom: 1px solid var(--color-border);
+      border-bottom: var(--stroke-width-small) solid var(--color-border);
     }
 
     .file-manager__panel {

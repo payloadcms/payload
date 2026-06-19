@@ -664,6 +664,24 @@ export function DefaultEditView({
     user: currentEditor,
   }
 
+  const authComponent = auth ? (
+    <Auth
+      className={`${baseClass}__auth`}
+      collectionSlug={collectionConfig.slug}
+      disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
+      email={data?.email}
+      loginWithUsername={auth?.loginWithUsername}
+      operation={operation}
+      readOnly={!hasSavePermission}
+      requirePassword={!id}
+      setValidateBeforeSubmit={setValidateBeforeSubmit}
+      // eslint-disable-next-line react-compiler/react-compiler
+      useAPIKey={auth.useAPIKey}
+      username={data?.username}
+      verify={auth.verify}
+    />
+  ) : undefined
+
   return (
     <main
       className={[
@@ -782,39 +800,19 @@ export function DefaultEditView({
                 .filter(Boolean)
                 .join(' ')}
             >
-              {upload && !BeforeFields ? (
+              {upload && !BeforeFields && !CustomUpload ? (
                 <UploadControlsProvider>
                   <div className={`${baseClass}__upload-layout`}>
-                    {CustomUpload || (
-                      <FileManager
-                        collectionSlug={collectionConfig.slug}
-                        initialState={initialState}
-                        uploadConfig={upload}
-                        UploadControls={UploadControls}
-                        UploadFilePreview={UploadFilePreview}
-                      />
-                    )}
+                    <FileManager
+                      collectionSlug={collectionConfig.slug}
+                      initialState={initialState}
+                      uploadConfig={upload}
+                      UploadControls={UploadControls}
+                      UploadFilePreview={UploadFilePreview}
+                    />
                     <DocumentFields
                       AfterFields={AfterFields}
-                      BeforeFields={
-                        auth ? (
-                          <Auth
-                            className={`${baseClass}__auth`}
-                            collectionSlug={collectionConfig.slug}
-                            disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
-                            email={data?.email}
-                            loginWithUsername={auth?.loginWithUsername}
-                            operation={operation}
-                            readOnly={!hasSavePermission}
-                            requirePassword={!id}
-                            setValidateBeforeSubmit={setValidateBeforeSubmit}
-                            // eslint-disable-next-line react-compiler/react-compiler
-                            useAPIKey={auth.useAPIKey}
-                            username={data?.username}
-                            verify={auth.verify}
-                          />
-                        ) : undefined
-                      }
+                      BeforeFields={authComponent}
                       Description={Description}
                       docPermissions={docPermissions}
                       fields={docConfig.fields}
@@ -829,24 +827,14 @@ export function DefaultEditView({
                 <DocumentFields
                   AfterFields={AfterFields}
                   BeforeFields={
-                    BeforeFields ||
-                    (auth ? (
-                      <Auth
-                        className={`${baseClass}__auth`}
-                        collectionSlug={collectionConfig.slug}
-                        disableLocalStrategy={collectionConfig.auth?.disableLocalStrategy}
-                        email={data?.email}
-                        loginWithUsername={auth?.loginWithUsername}
-                        operation={operation}
-                        readOnly={!hasSavePermission}
-                        requirePassword={!id}
-                        setValidateBeforeSubmit={setValidateBeforeSubmit}
-                        // eslint-disable-next-line react-compiler/react-compiler
-                        useAPIKey={auth.useAPIKey}
-                        username={data?.username}
-                        verify={auth.verify}
-                      />
-                    ) : undefined)
+                    BeforeFields || (
+                      <React.Fragment>
+                        {authComponent}
+                        {upload && CustomUpload ? (
+                          <UploadControlsProvider>{CustomUpload}</UploadControlsProvider>
+                        ) : null}
+                      </React.Fragment>
+                    )
                   }
                   Description={Description}
                   docPermissions={docPermissions}

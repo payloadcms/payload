@@ -1,5 +1,5 @@
-// CSS manually copied into the payload-default layer from the react-image-crop library
-// see: /node_modules/react-image-crop/dist/ReactCrop.css
+/* CSS manually copied into the payload-default layer from the react-image-crop library */
+/* see: /node_modules/react-image-crop/dist/ReactCrop.css */
 
 @layer payload-default {
   .ReactCrop {
