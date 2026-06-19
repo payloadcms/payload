@@ -3,8 +3,11 @@ import { defaultAccess } from '../../../defaultAccess.js'
 import { getGlobalInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 
 export const getGlobalSchemaTool = defineGlobalTool({
-  access: (args) =>
-    defaultAccess(args) && Boolean(args.permissions?.globals?.[args.globalSlug]?.read),
+  access: (args) => {
+    const permissions = args.permissions?.globals?.[args.globalSlug]
+
+    return defaultAccess(args) && Boolean(permissions?.read || permissions?.update)
+  },
   annotations: {
     destructiveHint: false,
     idempotentHint: true,

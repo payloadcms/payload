@@ -1,6 +1,6 @@
 import type { PayloadRequest, SanitizedPermissions } from 'payload'
 
-import { getAccessResults } from 'payload'
+import { getAccessResults, UnauthorizedError } from 'payload'
 
 import type { AuthorizedMCP, MCPItem } from '../types.js'
 
@@ -34,9 +34,17 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
     })
   }
 
-  req.user = req.headers
-    ? (await req.payload.auth({ headers: new Headers(req.headers), req })).user
-    : req.user
+  if (req.headers) {
+    const headers = new Headers(req.headers)
+    const hasAuthorization = headers.has('Authorization')
+
+    headers.set('DisableAutologin', 'true')
+    req.user = (await req.payload.auth({ headers, req })).user
+
+    if (hasAuthorization && !req.user) {
+      throw new UnauthorizedError(req.t)
+    }
+  }
 
   return {
     items: await filterMCPItems({

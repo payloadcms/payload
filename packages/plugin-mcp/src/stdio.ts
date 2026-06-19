@@ -17,8 +17,9 @@ import { resolveProjectRoot } from './utils/resolveProjectRoot.js'
 /**
  * Stdio adapter for the Payload MCP server.
  *
- * In production, pass PAYLOAD_MCP_AUTHORIZATION so stdio can authenticate with
- * the same Payload auth header as HTTP.
+ * Pass PAYLOAD_MCP_AUTHORIZATION when stdio should authenticate with the same
+ * Payload auth header as HTTP. In development, PAYLOAD_MCP_OVERRIDE_ACCESS=true
+ * skips access control for local setup.
  */
 export const runMcpStdio = async (): Promise<void> => {
   /**

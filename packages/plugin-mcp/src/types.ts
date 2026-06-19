@@ -302,8 +302,8 @@ export type MCPItem =
 /**
  * The caller's identity + the MCP items authorized for this request. Disabled
  * items and items blocked by access callbacks or Payload operation access are
- * absent from `items`. Handlers receive this via `args.authorizedMCP` so they
- * can spread `localAPIDefaults(authorizedMCP)` into every local API call.
+ * absent from `items`. Tool handlers receive this via `args.authorizedMCP` so
+ * they can spread `localAPIDefaults(authorizedMCP)` into every local API call.
  */
 export type AuthorizedMCP = {
   items: MCPItem[]
