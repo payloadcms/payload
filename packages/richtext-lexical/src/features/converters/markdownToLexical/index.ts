@@ -6,7 +6,7 @@ import type { SanitizedServerEditorConfig } from '../../../lexical/config/types.
 import type { DefaultNodeTypes, TypedEditorState } from '../../../types/nodeTypes.js'
 
 import { getEnabledNodes } from '../../../lexical/nodes/index.js'
-import { $convertFromMarkdownString } from '../../../packages/@lexical/markdown/index.js'
+import { $convertFromMarkdownString } from '../../../lexical-proxy/@lexical-markdown.js'
 
 export const convertMarkdownToLexical = <
   TNodeTypes extends SerializedLexicalNode = DefaultNodeTypes,

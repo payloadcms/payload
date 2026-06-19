@@ -1,4 +1,4 @@
-import type { TextFormatTransformer } from '../../../packages/@lexical/markdown/MarkdownTransformers.js'
+import type { TextFormatTransformer } from '@lexical/markdown'
 
 export const INLINE_CODE: TextFormatTransformer = {
   type: 'text-format',

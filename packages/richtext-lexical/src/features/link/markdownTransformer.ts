@@ -6,9 +6,10 @@
 //
 // - code should go first as it prevents any transformations inside
 
+import type { TextMatchTransformer } from '@lexical/markdown'
+
 import { $createTextNode, $isTextNode } from 'lexical'
 
-import type { TextMatchTransformer } from '../../packages/@lexical/markdown/MarkdownTransformers.js'
 import type { SerializedLinkNode } from './server/schema.js'
 
 import { sanitizeUrl } from '../../lexical/utils/url.js'

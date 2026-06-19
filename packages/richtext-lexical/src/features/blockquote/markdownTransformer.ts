@@ -1,6 +1,6 @@
-import { $createQuoteNode, $isQuoteNode, QuoteNode } from '@lexical/rich-text'
+import type { ElementTransformer } from '@lexical/markdown'
 
-import type { ElementTransformer } from '../../packages/@lexical/markdown/index.js'
+import { $createQuoteNode, $isQuoteNode, QuoteNode } from '@lexical/rich-text'
 
 export const MarkdownTransformer: ElementTransformer = {
   type: 'element',

@@ -1,6 +1,6 @@
-import { $isListNode, ListItemNode, ListNode } from '@lexical/list'
+import type { ElementTransformer } from '@lexical/markdown'
 
-import type { ElementTransformer } from '../../../packages/@lexical/markdown/MarkdownTransformers.js'
+import { $isListNode, ListItemNode, ListNode } from '@lexical/list'
 
 import { listExport, listReplace } from '../shared/markdown.js'
 

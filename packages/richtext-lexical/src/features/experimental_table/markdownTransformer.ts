@@ -19,7 +19,7 @@ import {
   $convertToMarkdownString,
   type ElementTransformer,
   type Transformer,
-} from '../../packages/@lexical/markdown/index.js'
+} from '../../lexical-proxy/@lexical-markdown.js'
 
 // Very primitive table setup
 const TABLE_ROW_REG_EXP = /^\|(.+)\|\s?$/

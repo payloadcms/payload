@@ -5,7 +5,7 @@ import { createHeadlessEditor } from '@lexical/headless'
 import {
   $convertFromMarkdownString,
   type Transformer,
-} from '../../../../packages/@lexical/markdown/index.js'
+} from '../../../../lexical-proxy/@lexical-markdown.js'
 
 export function getMarkdownToLexical(
   allNodes: Array<Klass<LexicalNode> | LexicalNodeReplacement>,

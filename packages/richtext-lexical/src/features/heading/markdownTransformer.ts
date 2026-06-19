@@ -1,8 +1,7 @@
+import type { ElementTransformer } from '@lexical/markdown'
 import type { HeadingTagType } from '@lexical/rich-text'
 
 import { $createHeadingNode, $isHeadingNode, HeadingNode } from '@lexical/rich-text'
-
-import type { ElementTransformer } from '../../packages/@lexical/markdown/MarkdownTransformers.js'
 
 import { createBlockNode } from '../../lexical/utils/markdown/createBlockNode.js'
 

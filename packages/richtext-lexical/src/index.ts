@@ -23,7 +23,7 @@ import { richTextValidateHOC } from './validate/index.js'
 
 let checkedDependencies = false
 
-export const lexicalTargetVersion = '0.41.0'
+export const lexicalTargetVersion = '0.45.0'
 
 export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   if (
@@ -341,7 +341,7 @@ export {
 
 export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
 
-export { $convertFromMarkdownString } from './packages/@lexical/markdown/index.js'
+export { $convertFromMarkdownString } from './lexical-proxy/@lexical-markdown.js'
 
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'
