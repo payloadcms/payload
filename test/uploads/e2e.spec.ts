@@ -615,6 +615,25 @@ describe('Uploads', () => {
     await expect(page.locator('.file-preview__thumbnail img')).toBeVisible()
   })
 
+  test('should show the native video player when selecting a video to upload', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles(
+      'input[type="file"]',
+      path.resolve(dirname, './christmas-mariachi-in-guadalajara.mp4'),
+    )
+
+    await expect(page.locator('.file-manager__selected-preview video.video-preview')).toBeVisible()
+  })
+
+  test('should show the native audio player when selecting an audio file to upload', async () => {
+    await page.goto(mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './audio.mp3'))
+
+    await expect(
+      page.locator('.file-manager__selected-preview--audio audio.audio-preview'),
+    ).toBeVisible()
+  })
+
   test('should have custom file name for image size', async () => {
     await page.goto(customFileNameURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
