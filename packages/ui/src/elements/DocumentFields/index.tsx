@@ -15,6 +15,11 @@ type Args = {
   readonly AfterFields?: React.ReactNode
   readonly BeforeFields?: React.ReactNode
   readonly Description?: React.ReactNode
+  /**
+   * When true, fields with `admin.position: 'sidebar'` render inline in the main column and no
+   * sidebar is rendered. Used by upload collections, whose layout has no room for a field sidebar.
+   */
+  readonly disableSidebar?: boolean
   readonly docPermissions: SanitizedDocumentPermissions
   readonly fields: ClientField[]
   readonly forceSidebarWrap?: boolean
@@ -26,6 +31,7 @@ type Args = {
 export const DocumentFields: React.FC<Args> = ({
   AfterFields,
   BeforeFields,
+  disableSidebar = false,
   docPermissions,
   fields,
   forceSidebarWrap,
@@ -34,6 +40,14 @@ export const DocumentFields: React.FC<Args> = ({
   schemaPathSegments,
 }) => {
   const { hasSidebarFields, mainFields, sidebarFields } = useMemo(() => {
+    if (disableSidebar) {
+      return {
+        hasSidebarFields: false,
+        mainFields: fields,
+        sidebarFields: [] as ClientField[],
+      }
+    }
+
     return fields.reduce(
       (acc, field) => {
         if (fieldIsSidebar(field)) {
@@ -52,7 +66,7 @@ export const DocumentFields: React.FC<Args> = ({
         sidebarFields: [] as ClientField[],
       },
     )
-  }, [fields])
+  }, [disableSidebar, fields])
 
   return (
     <div

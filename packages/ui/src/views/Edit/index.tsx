@@ -814,6 +814,7 @@ export function DefaultEditView({
                       AfterFields={AfterFields}
                       BeforeFields={authComponent}
                       Description={Description}
+                      disableSidebar={Boolean(upload)}
                       docPermissions={docPermissions}
                       fields={docConfig.fields}
                       forceSidebarWrap={isLivePreviewing}
@@ -837,6 +838,7 @@ export function DefaultEditView({
                     )
                   }
                   Description={Description}
+                  disableSidebar={Boolean(upload)}
                   docPermissions={docPermissions}
                   fields={docConfig.fields}
                   forceSidebarWrap={isLivePreviewing}

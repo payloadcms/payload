@@ -430,6 +430,31 @@ describe('Uploads', () => {
     await expect(page.locator('#field-category')).toBeVisible()
   })
 
+  test('should render sidebar-positioned fields inline for upload collections', async () => {
+    const mediaWithFieldsDoc = (
+      await payload.find({
+        collection: mediaWithFieldsSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+        sort: 'createdAt',
+        where: {
+          mimeType: { contains: 'image/' },
+        },
+      })
+    ).docs[0]
+
+    await page.goto(mediaWithFieldsURL.edit(mediaWithFieldsDoc!.id))
+    await waitForFormReady(page)
+
+    // Upload collections never show the field sidebar.
+    await expect(page.locator('.document-fields__sidebar-wrap')).toHaveCount(0)
+    await expect(page.locator('.document-fields--no-sidebar')).toBeVisible()
+
+    // The photographer field uses admin.position: 'sidebar' but must render inline in the main column.
+    await expect(page.locator('.document-fields__main #field-photographer')).toBeVisible()
+  })
+
   test('should create file upload', async () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
