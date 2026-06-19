@@ -183,6 +183,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     addRelationship: 'Pievienot saistību',
     addUpload: 'Pievienot augšupielādi',
     block: 'Bloks',
+    blockName: 'Bloka nosaukums',
     blocks: 'bloki',
     blockType: 'Bloka tips',
     chooseBetweenCustomTextOrDocument:

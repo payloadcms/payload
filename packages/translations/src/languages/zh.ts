@@ -174,6 +174,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     addRelationship: '添加关系',
     addUpload: '添加上传',
     block: '区块',
+    blockName: '区块名称',
     blocks: '区块',
     blockType: '区块类型',
     chooseBetweenCustomTextOrDocument: '选择输入一个自定义的文本 URL 或链接到另一个文档。',

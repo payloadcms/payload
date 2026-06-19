@@ -181,6 +181,7 @@ export const arTranslations: DefaultTranslationsObject = {
     addRelationship: 'أضف علاقة',
     addUpload: 'أضف تحميل',
     block: 'وحدة محتوى',
+    blockName: 'اسم الكتلة',
     blocks: 'وحدات المحتوى',
     blockType: 'نوع وحدة المحتوى',
     chooseBetweenCustomTextOrDocument: 'اختر بين إدخال عنوان URL نصّي مخصّص أو الرّبط بمستند آخر.',

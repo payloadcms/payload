@@ -184,6 +184,7 @@ export const isTranslations: DefaultTranslationsObject = {
     addRelationship: 'Bæta við tengingu',
     addUpload: 'Bæta við skrá',
     block: 'blokk',
+    blockName: 'Heiti bloks',
     blocks: 'blokkir',
     blockType: 'Blokkartegund',
     chooseBetweenCustomTextOrDocument:

@@ -186,6 +186,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     addRelationship: 'Nieuwe Relatie',
     addUpload: 'Upload Toevoegen',
     block: 'Blok',
+    blockName: 'Bloknaam',
     blocks: 'blokken',
     blockType: 'Bloktype',
     chooseBetweenCustomTextOrDocument:

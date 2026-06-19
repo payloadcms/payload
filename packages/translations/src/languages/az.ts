@@ -183,6 +183,7 @@ export const azTranslations: DefaultTranslationsObject = {
     addRelationship: 'Relationship əlavə et',
     addUpload: 'Yükləmə əlavə et',
     block: 'Blok',
+    blockName: 'Blok adı',
     blocks: 'bloklar',
     blockType: 'Blok Növü',
     chooseBetweenCustomTextOrDocument:

@@ -182,6 +182,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     addRelationship: 'Ավելացնել հարաբերություն',
     addUpload: 'Վերբեռնել',
     block: 'բլոկ',
+    blockName: 'Բլոկի անուն',
     blocks: 'բլոկներ',
     blockType: 'Բլոկի տեսակ',
     chooseBetweenCustomTextOrDocument:

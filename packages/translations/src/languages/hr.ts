@@ -184,6 +184,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     addRelationship: 'Dodaj odnos',
     addUpload: 'Dodaj učitavanje',
     block: 'Blokiranje',
+    blockName: 'Naziv bloka',
     blocks: 'blokiranja',
     blockType: 'Vrsta blokiranja',
     chooseBetweenCustomTextOrDocument:

@@ -183,6 +183,7 @@ export const csTranslations: DefaultTranslationsObject = {
     addRelationship: 'Přidat vztah',
     addUpload: 'Přidat nahrávání',
     block: 'Blok',
+    blockName: 'Název bloku',
     blocks: 'bloky',
     blockType: 'Typ bloku',
     chooseBetweenCustomTextOrDocument:

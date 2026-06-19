@@ -185,6 +185,7 @@ export const myTranslations: DefaultTranslationsObject = {
     addRelationship: 'Relationship အသစ်ထည့်သွင်းမည်။',
     addUpload: 'Upload ထည့်ပါ။',
     block: 'ဘလောက်',
+    blockName: 'ဘလော့ခ်အမည်',
     blocks: 'ဘလောက်များ',
     blockType: 'ဘလောက် အမျိုးအစား',
     chooseBetweenCustomTextOrDocument:
@@ -673,8 +674,7 @@ export const myTranslations: DefaultTranslationsObject = {
     restoring: 'ပြန်ယူနေဆဲ...',
     reverting: 'ပြန်ပြောင်းနေဆဲ...',
     revertToPublished: 'အများဆိုင်သို့ ပြန်ပြောင်းပါ။',
-    revertUnsuccessful:
-      'ပြန်လည်ပြောင်းခြင်း မအောင်မြင်ပါ။ ယခင်က ထုတ်ဝေထားသော ဗားရှင်း မတွေ့ပါ။',
+    revertUnsuccessful: 'ပြန်လည်ပြောင်းခြင်း မအောင်မြင်ပါ။ ယခင်က ထုတ်ဝေထားသော ဗားရှင်း မတွေ့ပါ။',
     saveDraft: 'မှုကြမ်းကို သိမ်းဆည်းမည်။',
     scheduledSuccessfully: 'အောင်မြင်စွာ နေ့စွဲထားသည်။',
     schedulePublish: 'ပြဌာန်းထုတ်ဝေချိန်း',

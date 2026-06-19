@@ -44,6 +44,7 @@ export const ArrayAction: React.FC<Props> = ({
   return (
     <Popup
       button={<MoreIcon />}
+      buttonAriaLabel={t('general:moreOptions')}
       buttonClassName={`${baseClass}__button`}
       caret={false}
       className={baseClass}

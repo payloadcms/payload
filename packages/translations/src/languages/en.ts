@@ -183,6 +183,7 @@ export const enTranslations = {
     addRelationship: 'Add Relationship',
     addUpload: 'Add Upload',
     block: 'Block',
+    blockName: 'Block name',
     blocks: 'blocks',
     blockType: 'Block Type',
     chooseBetweenCustomTextOrDocument:

@@ -128,6 +128,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'fields:addRelationship',
   'fields:addUpload',
   'fields:block',
+  'fields:blockName',
   'fields:blocks',
   'fields:blockType',
   'fields:chooseBetweenCustomTextOrDocument',

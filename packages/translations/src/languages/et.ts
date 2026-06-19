@@ -182,6 +182,7 @@ export const etTranslations: DefaultTranslationsObject = {
     addRelationship: 'Lisa seos',
     addUpload: 'Lisa üleslaadimine',
     block: 'Plokk',
+    blockName: 'Ploki nimi',
     blocks: 'plokid',
     blockType: 'Ploki tüüp',
     chooseBetweenCustomTextOrDocument:

@@ -57,6 +57,12 @@ export type PopupProps = {
   boundingRef?: React.RefObject<HTMLElement>
   button?: React.ReactNode
   /**
+   * Accessible label for the trigger button.
+   * Necessary when the button has an icon-only content,
+   * so the button has an accessible name for screen readers.
+   */
+  buttonAriaLabel?: string
+  /**
    * The class name to apply to the button that triggers the popup.
    */
   buttonClassName?: string
@@ -146,6 +152,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
   const {
     id,
     button,
+    buttonAriaLabel,
     buttonClassName,
     buttonSize,
     buttonType = 'default',
@@ -561,6 +568,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     <PopupTrigger
       active={active}
       button={button}
+      buttonAriaLabel={buttonAriaLabel}
       buttonType={buttonType}
       className={buttonClassName}
       disabled={disabled}

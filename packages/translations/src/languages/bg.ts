@@ -183,6 +183,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     addRelationship: 'Добави отношение',
     addUpload: 'Качи',
     block: 'Блок',
+    blockName: 'Име на блок',
     blocks: 'блокове',
     blockType: 'Тип блок',
     chooseBetweenCustomTextOrDocument:

@@ -185,6 +185,7 @@ export const caTranslations: DefaultTranslationsObject = {
     addRelationship: 'Afegeix relació',
     addUpload: 'Afegeix pujada',
     block: 'Bloc',
+    blockName: 'Nom del bloc',
     blocks: 'blocs',
     blockType: 'Tipus de bloc',
     chooseBetweenCustomTextOrDocument:

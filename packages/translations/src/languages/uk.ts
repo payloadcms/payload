@@ -184,6 +184,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     addRelationship: "Додати взаємозв'язок",
     addUpload: 'Додати завантаження',
     block: 'Блок',
+    blockName: 'Назва блоку',
     blocks: 'блоки',
     blockType: 'Тип блока',
     chooseBetweenCustomTextOrDocument:

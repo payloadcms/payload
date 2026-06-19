@@ -184,6 +184,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     addRelationship: 'リレーションシップを追加',
     addUpload: 'アップロードを追加',
     block: 'ブロック',
+    blockName: 'ブロック名',
     blocks: 'ブロック',
     blockType: 'ブロックタイプ',
     chooseBetweenCustomTextOrDocument:

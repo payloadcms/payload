@@ -37,6 +37,7 @@ export const SectionTitle: React.FC<Props> = (props) => {
   return (
     <div className={classes} data-value={customValue || value || t('general:untitled')}>
       <input
+        aria-label={t('fields:blockName')}
         className={`${baseClass}__input`}
         id={path}
         name={path}

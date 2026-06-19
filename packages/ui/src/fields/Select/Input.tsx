@@ -11,7 +11,10 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
+import { useForm } from '../../forms/Form/context.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { fieldBaseClass } from '../shared/index.js'
 import './index.css'
 
@@ -72,6 +75,9 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
   } = props
 
   const { i18n } = useTranslation()
+  const editDepth = useEditDepth()
+  const { uuid } = useForm()
+  const inputId = generateFieldID(path, editDepth, uuid)
 
   let valueToRender
 
@@ -124,6 +130,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
           disabled={readOnly}
           filterOption={filterOption}
           id={id}
+          inputId={inputId}
           isClearable={isClearable}
           isMulti={hasMany}
           isSortable={isSortable}

@@ -183,6 +183,7 @@ export const taTranslations: DefaultTranslationsObject = {
     addRelationship: 'உறவைக் (Relationship) சேர்க்கவும்',
     addUpload: 'பதிவேற்றத்தைச் சேர்க்கவும்',
     block: 'தொகுதி',
+    blockName: 'பிளாக் பெயர்',
     blocks: 'தொகுதிகள்',
     blockType: 'தொகுதி வகை',
     chooseBetweenCustomTextOrDocument:
