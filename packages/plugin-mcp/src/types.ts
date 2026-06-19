@@ -236,7 +236,7 @@ export type MCPPluginConfig = {
     serverOptions?: MCPServerOptions
     verboseLogs?: boolean
   }
-  /** Replace the default API-key auth with a custom resolver. */
+  /** Replace the default MCP authorization resolver. */
   overrideGetAuthorizedMCP?: (
     args: {
       pluginConfig: SanitizedMCPPluginConfig

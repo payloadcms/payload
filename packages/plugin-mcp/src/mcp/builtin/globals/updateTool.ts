@@ -3,6 +3,7 @@ import type { SelectType } from 'payload'
 import { z } from 'zod'
 
 import { defineGlobalTool } from '../../../defineTool.js'
+import { defaultAccess } from '../../../defaultAccess.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import {
   getGlobalVirtualFieldNames,
@@ -15,8 +16,8 @@ import { validateGlobalData } from '../validateEntityData.js'
 const DEFAULT_DESCRIPTION = 'Update any Payload global by passing the global slug and data.'
 
 export const updateGlobalTool = defineGlobalTool({
-  access: ({ globalSlug, permissions }) =>
-    !permissions || Boolean(permissions.globals?.[globalSlug]?.update),
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.globals?.[args.globalSlug]?.update),
   annotations: {
     destructiveHint: true,
     idempotentHint: false,

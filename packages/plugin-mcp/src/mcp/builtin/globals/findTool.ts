@@ -3,14 +3,15 @@ import type { PopulateType, SelectType } from 'payload'
 import { z } from 'zod'
 
 import { defineGlobalTool } from '../../../defineTool.js'
+import { defaultAccess } from '../../../defaultAccess.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
 const DEFAULT_DESCRIPTION = 'Find any Payload global by passing the global slug.'
 
 export const findGlobalTool = defineGlobalTool({
-  access: ({ globalSlug, permissions }) =>
-    !permissions || Boolean(permissions.globals?.[globalSlug]?.read),
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.globals?.[args.globalSlug]?.read),
   annotations: {
     destructiveHint: false,
     idempotentHint: true,

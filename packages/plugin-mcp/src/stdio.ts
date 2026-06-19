@@ -63,19 +63,27 @@ export const runMcpStdio = async (): Promise<void> => {
     ;(payload.config.plugins ??= []).push(fakePluginFn)
   }
 
-  const headers = new Headers()
-  const authorization = process.env.PAYLOAD_MCP_AUTHORIZATION
-  if (!authorization && process.env.NODE_ENV === 'production') {
-    throw new Error('Payload MCP stdio requires PAYLOAD_MCP_AUTHORIZATION in production.')
+  const overrideAccessEnv = process.env.PAYLOAD_MCP_OVERRIDE_ACCESS
+  let overrideAccess = false
+
+  if (overrideAccessEnv === 'true') {
+    overrideAccess = true
+  } else if (overrideAccessEnv && overrideAccessEnv !== 'false') {
+    throw new Error('PAYLOAD_MCP_OVERRIDE_ACCESS must be "true" or "false".')
   }
 
-  if (authorization) {
-    headers.set('Authorization', authorization)
+  if (overrideAccess && process.env.NODE_ENV !== 'development') {
+    throw new Error('PAYLOAD_MCP_OVERRIDE_ACCESS is only available in development.')
+  }
+
+  const headers = new Headers()
+  if (process.env.PAYLOAD_MCP_AUTHORIZATION) {
+    headers.set('Authorization', process.env.PAYLOAD_MCP_AUTHORIZATION)
   }
 
   const req = await createLocalReq({ req: { headers } }, payload)
   req.payloadAPI = 'MCP' as const
-  const authorizedMCP = await getAuthorizedMCP({ req, skipAuth: !authorization })
+  const authorizedMCP = await getAuthorizedMCP({ overrideAccess, req })
 
   const server = buildMcpServer({ authorizedMCP, pluginConfig, req })
 

@@ -2,6 +2,7 @@ import type { JoinQuery, PopulateType, SelectType } from 'payload'
 
 import { z } from 'zod'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
@@ -11,8 +12,8 @@ const DEFAULT_DESCRIPTION =
   'Find documents in any collection by passing the collection slug and optional ID or where clause.'
 
 export const findDocumentsTool = defineCollectionTool({
-  access: ({ collectionSlug, permissions }) =>
-    !permissions || Boolean(permissions.collections?.[collectionSlug]?.read),
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.collectionSlug]?.read),
   annotations: {
     destructiveHint: false,
     idempotentHint: true,

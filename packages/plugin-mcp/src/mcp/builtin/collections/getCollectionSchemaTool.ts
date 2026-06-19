@@ -1,9 +1,10 @@
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 
 export const getCollectionSchemaTool = defineCollectionTool({
-  access: ({ collectionSlug, permissions }) =>
-    !permissions || Boolean(permissions.collections?.[collectionSlug]?.read),
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.collectionSlug]?.read),
   annotations: {
     destructiveHint: false,
     idempotentHint: true,

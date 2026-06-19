@@ -17,6 +17,7 @@ import type {
   SanitizedMCPPluginConfig,
 } from '../types.js'
 
+import { defaultAccess } from '../defaultAccess.js'
 import {
   COLLECTION_AUTH_BUILTIN_ENTRIES,
   COLLECTION_AUTH_BUILTINS,
@@ -60,7 +61,7 @@ export const sanitizeMCPConfig = ({
       configKey,
       label: tool.annotations?.title ?? configKey,
       mcpName,
-      tool,
+      tool: { ...tool, access: tool.access ?? defaultAccess },
     })
   }
 
@@ -73,7 +74,7 @@ export const sanitizeMCPConfig = ({
       configKey,
       label: tool.annotations?.title ?? configKey,
       mcpName: configKey,
-      tool,
+      tool: { ...tool, access: tool.access ?? defaultAccess },
     })
   }
 
@@ -83,7 +84,7 @@ export const sanitizeMCPConfig = ({
       configKey,
       label: prompt.title ?? configKey,
       mcpName: configKey,
-      prompt,
+      prompt: { ...prompt, access: prompt.access ?? defaultAccess },
     })
   }
 
@@ -93,7 +94,7 @@ export const sanitizeMCPConfig = ({
       configKey,
       label: resource.title ?? configKey,
       mcpName: configKey,
-      resource,
+      resource: { ...resource, access: resource.access ?? defaultAccess },
     })
   }
 
@@ -131,7 +132,7 @@ const sanitizeCollectionConfig = ({
       mcpName,
       tool: {
         ...tool,
-        access: override?.access ?? tool.access,
+        access: override?.access ?? tool.access ?? defaultAccess,
         annotations,
         description: override?.description ?? tool.description,
         overrideResponse:
@@ -159,7 +160,7 @@ const sanitizeCollectionConfig = ({
         mcpName,
         tool: {
           ...tool,
-          access: override?.access,
+          access: override?.access ?? tool.access ?? defaultAccess,
           annotations,
           description: override?.description ?? tool.description,
           overrideResponse:
@@ -189,7 +190,7 @@ const sanitizeCollectionConfig = ({
       configKey,
       label: customTool.annotations?.title ?? configKey,
       mcpName: configKey,
-      tool: customTool,
+      tool: { ...customTool, access: customTool.access ?? defaultAccess },
     })
   }
 
@@ -222,7 +223,7 @@ const sanitizeGlobalConfig = ({
       mcpName,
       tool: {
         ...tool,
-        access: override?.access ?? tool.access,
+        access: override?.access ?? tool.access ?? defaultAccess,
         annotations,
         description: override?.description ?? tool.description,
         overrideResponse:
@@ -249,7 +250,7 @@ const sanitizeGlobalConfig = ({
       globalSlug: slug,
       label: customTool.annotations?.title ?? configKey,
       mcpName: configKey,
-      tool: customTool,
+      tool: { ...customTool, access: customTool.access ?? defaultAccess },
     })
   }
 

@@ -1,15 +1,14 @@
 import type { PayloadRequest, SanitizedPermissions } from 'payload'
 
-import { getAccessResults, UnauthorizedError } from 'payload'
+import { getAccessResults } from 'payload'
 
 import type { AuthorizedMCP, MCPItem } from '../types.js'
 
-import { getLogger } from '../utils/getLogger.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 
 export type GetAuthorizedMCPArgs = {
+  overrideAccess: boolean
   req: PayloadRequest
-  skipAuth?: boolean
 }
 
 /**
@@ -18,19 +17,20 @@ export type GetAuthorizedMCPArgs = {
  * Authorization has two layers:
  * 1. Payload collection/global permissions determine whether built-in operation tools are shown.
  * 2. MCP `access` callbacks can further hide any configured tool, prompt, or resource.
+ *
+ * Like Payload core operations, `overrideAccess` skips both layers.
  */
 export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<AuthorizedMCP> = async ({
+  overrideAccess,
   req,
-  skipAuth = false,
 }) => {
-  const logger = getLogger({ payload: req.payload })
   const pluginConfig = getPluginConfig({ config: req.payload.config })
 
   if (pluginConfig.overrideGetAuthorizedMCP) {
     return await pluginConfig.overrideGetAuthorizedMCP({
+      overrideAccess,
       pluginConfig,
       req,
-      skipAuth,
     })
   }
 
@@ -38,49 +38,35 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
     ? (await req.payload.auth({ headers: new Headers(req.headers), req })).user
     : req.user
 
-  if (process.env.NODE_ENV === 'development' && !req.user) {
-    logger.info('Dev mode: skipping API key check, using session user')
-    return {
-      items: await filterMCPItems({
-        checkPermissions: false,
-        items: pluginConfig.items,
-        req,
-      }),
-      overrideAccess: true,
-      user: req.user,
-    }
-  }
-
-  if (!skipAuth && req.user?._strategy !== 'api-key') {
-    throw new UnauthorizedError()
-  }
-
   return {
     items: await filterMCPItems({
-      checkPermissions: !skipAuth,
       items: pluginConfig.items,
+      overrideAccess,
       req,
     }),
-    overrideAccess: skipAuth,
+    overrideAccess,
     user: req.user,
   }
 }
 
 export const filterMCPItems = async ({
-  checkPermissions,
   items,
+  overrideAccess,
   req,
 }: {
-  /**
-   * Whether to pass Payload permissions into item access callbacks.
-   */
-  checkPermissions: boolean
   items: MCPItem[]
+  overrideAccess: boolean
   req: PayloadRequest
 }): Promise<MCPItem[]> => {
+  // Match Payload core: overrideAccess bypasses access evaluation instead of
+  // forcing each access function to return true.
+  if (overrideAccess) {
+    return items
+  }
+
   const authorizedItems: MCPItem[] = []
 
-  const permissions = checkPermissions ? await getAccessResults({ req }) : undefined
+  const permissions = await getAccessResults({ req })
 
   for (const item of items) {
     if (!(await checkItemAccess({ item, permissions, req }))) {
