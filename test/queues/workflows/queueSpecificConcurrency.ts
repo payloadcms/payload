@@ -21,7 +21,7 @@ export const queueSpecificConcurrencyWorkflow: WorkflowConfig<'queueSpecificConc
     },
   ],
   // Include queue name in the key for queue-specific concurrency
-  concurrency: ({ input, queue }) => `${queue}:exclusive:${input.resourceId}`,
+  concurrency: () => 'exclusive',
   handler: async ({ inlineTask, job }) => {
     const delayMs = job.input.delayMs ?? 100
 
