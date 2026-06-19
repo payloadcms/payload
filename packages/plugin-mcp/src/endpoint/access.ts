@@ -85,7 +85,9 @@ const getAPIKeyUser = async ({
   headers?: Headers
   req: PayloadRequest
 }): Promise<TypedUser> => {
-  const user = headers ? (await req.payload.auth({ headers: new Headers(headers) })).user : req.user
+  const user = headers
+    ? (await req.payload.auth({ headers: new Headers(headers), req })).user
+    : req.user
 
   if (user?._strategy !== 'api-key') {
     throw new UnauthorizedError()
