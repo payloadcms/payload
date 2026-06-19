@@ -695,8 +695,11 @@ export const Form: React.FC<FormProps> = (props) => {
       })
 
       setModified(true)
+      // Adding a new row means the user hasn't submitted this state yet — clear the
+      // submitted flag so new required fields don't immediately show validation errors.
+      setSubmitted(false)
     },
-    [dispatchFields, getDataByPath, setModified],
+    [dispatchFields, getDataByPath, setModified, setSubmitted],
   )
 
   const moveFieldRow: FormContextType['moveFieldRow'] = useCallback(
