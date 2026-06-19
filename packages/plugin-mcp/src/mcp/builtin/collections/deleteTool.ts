@@ -9,6 +9,8 @@ const DEFAULT_DESCRIPTION =
   'Delete documents in any collection by passing the collection slug and ID or where clause.'
 
 export const deleteDocumentsTool = defineCollectionTool({
+  access: ({ collectionSlug, permissions }) =>
+    !permissions || Boolean(permissions.collections?.[collectionSlug]?.delete),
   annotations: {
     destructiveHint: true,
     idempotentHint: false,

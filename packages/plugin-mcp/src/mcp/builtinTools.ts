@@ -28,29 +28,15 @@ export const TOOL_BUILTINS = {
  * automatically.
  */
 export const COLLECTION_BUILTINS = {
-  create: { accessOperation: 'create', mcpName: 'createDocument', tool: createDocumentTool },
-  delete: { accessOperation: 'delete', mcpName: 'deleteDocuments', tool: deleteDocumentsTool },
-  find: { accessOperation: 'read', mcpName: 'findDocuments', tool: findDocumentsTool },
+  create: { mcpName: 'createDocument', tool: createDocumentTool },
+  delete: { mcpName: 'deleteDocuments', tool: deleteDocumentsTool },
+  find: { mcpName: 'findDocuments', tool: findDocumentsTool },
   getCollectionSchema: {
-    accessOperation: 'read',
     mcpName: 'getCollectionSchema',
     tool: getCollectionSchemaTool,
   },
-  update: { accessOperation: 'update', mcpName: 'updateDocument', tool: updateDocumentTool },
-} satisfies Record<
-  string,
-  {
-    /**
-     * What payload access operation this maps to. Used for determining
-     * whether to show this tool or not based on payload access results,
-     * smilar to how the UI determines whether to show a collection
-     * in the sidebar
-     */
-    accessOperation: 'create' | 'delete' | 'read' | 'update'
-    mcpName: string
-    tool: CollectionTool
-  }
->
+  update: { mcpName: 'updateDocument', tool: updateDocumentTool },
+} satisfies Record<string, { mcpName: string; tool: CollectionTool }>
 
 /**
  * The static auth tools surfaced under auth-enabled collections. Keys are the
@@ -76,17 +62,13 @@ export const COLLECTION_AUTH_BUILTINS = {
  * `MCPGlobalBuiltinName`.
  */
 export const GLOBAL_BUILTINS = {
-  find: { accessOperation: 'read', mcpName: 'findGlobal', tool: findGlobalTool },
+  find: { mcpName: 'findGlobal', tool: findGlobalTool },
   getGlobalSchema: {
-    accessOperation: 'read',
     mcpName: 'getGlobalSchema',
     tool: getGlobalSchemaTool,
   },
-  update: { accessOperation: 'update', mcpName: 'updateGlobal', tool: updateGlobalTool },
-} satisfies Record<
-  string,
-  { accessOperation: 'read' | 'update'; mcpName: string; tool: GlobalTool }
->
+  update: { mcpName: 'updateGlobal', tool: updateGlobalTool },
+} satisfies Record<string, { mcpName: string; tool: GlobalTool }>
 
 export type MCPCollectionBuiltinName = keyof typeof COLLECTION_BUILTINS
 

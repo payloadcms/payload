@@ -19,6 +19,8 @@ const DEFAULT_DESCRIPTION =
   'Update documents in any collection by passing the collection slug and data.'
 
 export const updateDocumentTool = defineCollectionTool({
+  access: ({ collectionSlug, permissions }) =>
+    !permissions || Boolean(permissions.collections?.[collectionSlug]?.update),
   annotations: {
     destructiveHint: true,
     idempotentHint: false,

@@ -15,6 +15,8 @@ import { validateGlobalData } from '../validateEntityData.js'
 const DEFAULT_DESCRIPTION = 'Update any Payload global by passing the global slug and data.'
 
 export const updateGlobalTool = defineGlobalTool({
+  access: ({ globalSlug, permissions }) =>
+    !permissions || Boolean(permissions.globals?.[globalSlug]?.update),
   annotations: {
     destructiveHint: true,
     idempotentHint: false,

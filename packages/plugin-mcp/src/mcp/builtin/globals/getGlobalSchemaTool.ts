@@ -2,6 +2,8 @@ import { defineGlobalTool } from '../../../defineTool.js'
 import { getGlobalInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 
 export const getGlobalSchemaTool = defineGlobalTool({
+  access: ({ globalSlug, permissions }) =>
+    !permissions || Boolean(permissions.globals?.[globalSlug]?.read),
   annotations: {
     destructiveHint: false,
     idempotentHint: true,

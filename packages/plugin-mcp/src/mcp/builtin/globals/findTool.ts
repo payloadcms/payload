@@ -9,6 +9,8 @@ import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 const DEFAULT_DESCRIPTION = 'Find any Payload global by passing the global slug.'
 
 export const findGlobalTool = defineGlobalTool({
+  access: ({ globalSlug, permissions }) =>
+    !permissions || Boolean(permissions.globals?.[globalSlug]?.read),
   annotations: {
     destructiveHint: false,
     idempotentHint: true,

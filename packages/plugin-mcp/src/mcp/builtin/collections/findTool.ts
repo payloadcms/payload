@@ -11,6 +11,8 @@ const DEFAULT_DESCRIPTION =
   'Find documents in any collection by passing the collection slug and optional ID or where clause.'
 
 export const findDocumentsTool = defineCollectionTool({
+  access: ({ collectionSlug, permissions }) =>
+    !permissions || Boolean(permissions.collections?.[collectionSlug]?.read),
   annotations: {
     destructiveHint: false,
     idempotentHint: true,

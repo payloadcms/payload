@@ -17,6 +17,8 @@ const DEFAULT_DESCRIPTION =
   'Create a document in any collection by passing the collection slug and data.'
 
 export const createDocumentTool = defineCollectionTool({
+  access: ({ collectionSlug, permissions }) =>
+    !permissions || Boolean(permissions.collections?.[collectionSlug]?.create),
   annotations: {
     destructiveHint: false,
     idempotentHint: false,

@@ -14,6 +14,7 @@ import type {
   GlobalSlug,
   MaybePromise,
   PayloadRequest,
+  SanitizedPermissions,
   TypedUser,
 } from 'payload'
 
@@ -62,6 +63,7 @@ export type TypedInput<TSchema> = TSchema extends StandardSchemaWithJSON
   : Record<string, unknown>
 
 export type MCPAccessArgs = {
+  permissions?: SanitizedPermissions
   req: PayloadRequest
 }
 

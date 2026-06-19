@@ -4,12 +4,6 @@ import { getAccessResults, UnauthorizedError } from 'payload'
 
 import type { AuthorizedMCP, MCPItem } from '../types.js'
 
-import {
-  COLLECTION_BUILTINS,
-  GLOBAL_BUILTINS,
-  type MCPCollectionBuiltinName,
-  type MCPGlobalBuiltinName,
-} from '../mcp/builtinTools.js'
 import { getLogger } from '../utils/getLogger.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 
@@ -47,7 +41,11 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
   if (process.env.NODE_ENV === 'development' && !req.user) {
     logger.info('Dev mode: skipping API key check, using session user')
     return {
-      items: pluginConfig.items,
+      items: await filterMCPItems({
+        checkPermissions: false,
+        items: pluginConfig.items,
+        req,
+      }),
       overrideAccess: true,
       user: req.user,
     }
@@ -59,7 +57,6 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
 
   return {
     items: await filterMCPItems({
-      checkItemAccessFns: true,
       checkPermissions: !skipAuth,
       items: pluginConfig.items,
       req,
@@ -70,14 +67,12 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
 }
 
 export const filterMCPItems = async ({
-  checkItemAccessFns,
   checkPermissions,
   items,
   req,
 }: {
-  checkItemAccessFns: boolean
   /**
-   * Whether to check if the user has access to the underlying collection/global for built-in tools.
+   * Whether to pass Payload permissions into item access callbacks.
    */
   checkPermissions: boolean
   items: MCPItem[]
@@ -88,10 +83,7 @@ export const filterMCPItems = async ({
   const permissions = checkPermissions ? await getAccessResults({ req }) : undefined
 
   for (const item of items) {
-    if (checkItemAccessFns && !(await checkItemAccess({ item, req }))) {
-      continue
-    }
-    if (permissions && !checkItemPermissions({ item, permissions })) {
+    if (!(await checkItemAccess({ item, permissions, req }))) {
       continue
     }
     authorizedItems.push(item)
@@ -105,9 +97,11 @@ export const filterMCPItems = async ({
  */
 const checkItemAccess = async ({
   item,
+  permissions,
   req,
 }: {
   item: MCPItem
+  permissions?: SanitizedPermissions
   req: PayloadRequest
 }): Promise<boolean> => {
   if (item.type === 'collectionTool') {
@@ -115,6 +109,7 @@ const checkItemAccess = async ({
       item.tool.access &&
       !(await item.tool.access({
         collectionSlug: item.collectionSlug,
+        permissions,
         req,
       }))
     ) {
@@ -125,6 +120,7 @@ const checkItemAccess = async ({
       item.tool.access &&
       !(await item.tool.access({
         globalSlug: item.globalSlug,
+        permissions,
         req,
       }))
     ) {
@@ -138,40 +134,7 @@ const checkItemAccess = async ({
           ? item.resource.access
           : item.tool.access
 
-    // Prompts, resources, and top-level tools only have the MCP access-callback layer.
-    if (access && !(await access({ req }))) {
-      return false
-    }
-  }
-
-  return true
-}
-
-/**
- * Checks if built-in items have permissions for the current user
- */
-const checkItemPermissions = ({
-  item,
-  permissions,
-}: {
-  item: MCPItem
-  permissions: SanitizedPermissions
-}): boolean => {
-  if (item.type === 'collectionTool') {
-    // Built-in collection tools map to Payload collection operations.
-    // Custom collection tools have no operation gate here.
-    const operation =
-      COLLECTION_BUILTINS[item.configKey as MCPCollectionBuiltinName]?.accessOperation
-
-    if (operation && !permissions.collections?.[item.collectionSlug]?.[operation]) {
-      return false
-    }
-  } else if (item.type === 'globalTool') {
-    // Built-in global tools map to Payload global operations.
-    // Custom global tools have no operation gate here.
-    const operation = GLOBAL_BUILTINS[item.configKey as MCPGlobalBuiltinName]?.accessOperation
-
-    if (operation && !permissions.globals?.[item.globalSlug]?.[operation]) {
+    if (access && !(await access({ permissions, req }))) {
       return false
     }
   }

@@ -131,7 +131,7 @@ const sanitizeCollectionConfig = ({
       mcpName,
       tool: {
         ...tool,
-        access: override?.access,
+        access: override?.access ?? tool.access,
         annotations,
         description: override?.description ?? tool.description,
         overrideResponse:
@@ -222,7 +222,7 @@ const sanitizeGlobalConfig = ({
       mcpName,
       tool: {
         ...tool,
-        access: override?.access,
+        access: override?.access ?? tool.access,
         annotations,
         description: override?.description ?? tool.description,
         overrideResponse:
