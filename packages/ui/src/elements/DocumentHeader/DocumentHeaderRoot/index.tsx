@@ -1,5 +1,7 @@
 'use client'
-import React, { useEffect, useRef } from 'react'
+import React, { useRef } from 'react'
+
+import { useElementHeightVariable } from '../../../hooks/useElementHeightVariable.js'
 
 const baseClass = 'doc-header'
 
@@ -13,20 +15,7 @@ const baseClass = 'doc-header'
 export const DocumentHeaderRoot: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const ref = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    const el = ref.current
-    if (!el) {
-      return
-    }
-    const observer = new ResizeObserver(() => {
-      document.documentElement.style.setProperty('--doc-header-height', `${el.offsetHeight}px`)
-    })
-    observer.observe(el)
-    return () => {
-      observer.disconnect()
-      document.documentElement.style.removeProperty('--doc-header-height')
-    }
-  }, [])
+  useElementHeightVariable({ cssVar: '--doc-header-height', ref })
 
   return (
     <div className={baseClass} ref={ref}>

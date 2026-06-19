@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import type { UserMenuSettingsGroup } from '../UserMenu/SettingsMenu/index.js'
 
+import { useElementHeightVariable } from '../../hooks/useElementHeightVariable.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { LanguageIcon } from '../../icons/Language/index.js'
 import { SidebarIcon } from '../../icons/Sidebar/index.js'
@@ -40,20 +41,7 @@ export function AppHeader({ CustomAvatar, settingsItemGroups }: Props) {
   const customControlsRef = useRef<HTMLDivElement>(null)
   const [isScrollable, setIsScrollable] = useState(false)
 
-  useEffect(() => {
-    const el = headerRef.current
-    if (!el) {
-      return
-    }
-    const observer = new ResizeObserver(() => {
-      document.documentElement.style.setProperty('--app-header-height', `${el.offsetHeight}px`)
-    })
-    observer.observe(el)
-    return () => {
-      observer.disconnect()
-      document.documentElement.style.removeProperty('--app-header-height')
-    }
-  }, [])
+  useElementHeightVariable({ cssVar: '--app-header-height', ref: headerRef })
 
   useEffect(() => {
     const checkIsScrollable = () => {

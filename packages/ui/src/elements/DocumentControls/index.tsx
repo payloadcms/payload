@@ -19,6 +19,7 @@ import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
+import { useElementHeightVariable } from '../../hooks/useElementHeightVariable.js'
 import { MoreIcon } from '../../icons/More/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -162,23 +163,11 @@ export const DocumentControls: React.FC<{
 
   // Only the page-level controls bar feeds the sticky layout offsets. Drawer instances
   // (variant="drawerHeaderActions") must not publish the shared var or they'd clobber it.
-  useEffect(() => {
-    if (variant !== 'default') {
-      return
-    }
-    const el = rootRef.current
-    if (!el) {
-      return
-    }
-    const observer = new ResizeObserver(() => {
-      document.documentElement.style.setProperty('--doc-controls-height', `${el.offsetHeight}px`)
-    })
-    observer.observe(el)
-    return () => {
-      observer.disconnect()
-      document.documentElement.style.removeProperty('--doc-controls-height')
-    }
-  }, [variant])
+  useElementHeightVariable({
+    cssVar: '--doc-controls-height',
+    isEnabled: variant === 'default',
+    ref: rootRef,
+  })
   i18nRef.current = i18n
 
   const updateRelativeTime = useCallback(() => {
