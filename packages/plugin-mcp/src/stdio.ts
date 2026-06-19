@@ -65,6 +65,10 @@ export const runMcpStdio = async (): Promise<void> => {
 
   const headers = new Headers()
   const authorization = process.env.PAYLOAD_MCP_AUTHORIZATION
+  if (!authorization && process.env.NODE_ENV === 'production') {
+    throw new Error('Payload MCP stdio requires PAYLOAD_MCP_AUTHORIZATION in production.')
+  }
+
   if (authorization) {
     headers.set('Authorization', authorization)
   }
