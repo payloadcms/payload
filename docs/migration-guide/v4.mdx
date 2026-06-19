@@ -435,6 +435,13 @@ If you are still using Slate, **do not upgrade to 4.0 yet.** Stay on the latest 
 
 `@payloadcms/richtext-lexical` now depends on `lexical` 0.45.0 (previously 0.41.0). Lexical shipped several breaking changes across these minor bumps. The majority of users are not affected, but if you maintain custom Lexical nodes, features, or directly import from `lexical` / `@lexical/*` packages, consult the [Lexical changelog](https://github.com/facebook/lexical/blob/main/CHANGELOG.md) for the 0.42.0, 0.43.0, 0.44.0, and 0.45.0 releases and update your code accordingly.
 
+Because Payload re-exports Lexical's APIs, one re-export subpath changed: Lexical removed `@lexical/react/LexicalContextMenuPlugin`, so `@payloadcms/richtext-lexical/lexical/react/LexicalContextMenuPlugin` no longer exists. The closest replacement is the node-focused `LexicalNodeContextMenuPlugin` (which exports `NodeContextMenuPlugin`). This is not a drop-in rename — `NodeContextMenuPlugin` has a different API than the old `LexicalContextMenuPlugin`, so review its props against the Lexical changelog when migrating:
+
+```diff
+- import { LexicalContextMenuPlugin } from '@payloadcms/richtext-lexical/lexical/react/LexicalContextMenuPlugin'
++ import { NodeContextMenuPlugin } from '@payloadcms/richtext-lexical/lexical/react/LexicalNodeContextMenuPlugin'
+```
+
 ### `HTMLConverterFeature` and `lexicalHTML` have been removed ([#16548](https://github.com/payloadcms/payload/pull/16548))
 
 The deprecated `HTMLConverterFeature`, `lexicalHTML`, and the per-node `converters.html` API have been removed from `@payloadcms/richtext-lexical`. Use `convertLexicalToHTML` and `lexicalHTMLField` from the non-deprecated converter instead.
