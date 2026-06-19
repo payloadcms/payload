@@ -1,5 +1,5 @@
-import { defineGlobalTool } from '../../../defineTool.js'
 import { defaultAccess } from '../../../defaultAccess.js'
+import { defineGlobalTool } from '../../../defineTool.js'
 import { getGlobalInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 
 export const getGlobalSchemaTool = defineGlobalTool({

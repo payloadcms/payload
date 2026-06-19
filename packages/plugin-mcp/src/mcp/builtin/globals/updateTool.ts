@@ -2,8 +2,8 @@ import type { SelectType } from 'payload'
 
 import { z } from 'zod'
 
-import { defineGlobalTool } from '../../../defineTool.js'
 import { defaultAccess } from '../../../defaultAccess.js'
+import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import {
   getGlobalVirtualFieldNames,

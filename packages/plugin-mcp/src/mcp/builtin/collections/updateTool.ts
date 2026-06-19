@@ -2,8 +2,8 @@ import type { SelectType, Where } from 'payload'
 
 import { z } from 'zod'
 
-import { defineCollectionTool } from '../../../defineTool.js'
 import { defaultAccess } from '../../../defaultAccess.js'
+import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import {
   getCollectionVirtualFieldNames,

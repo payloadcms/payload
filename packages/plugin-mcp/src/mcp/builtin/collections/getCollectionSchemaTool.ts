@@ -8,7 +8,9 @@ export const getCollectionSchemaTool = defineCollectionTool({
 
     return (
       defaultAccess(args) &&
-      Boolean(permissions?.create || permissions?.delete || permissions?.read || permissions?.update)
+      Boolean(
+        permissions?.create || permissions?.delete || permissions?.read || permissions?.update,
+      )
     )
   },
   annotations: {
