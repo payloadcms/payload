@@ -9,7 +9,7 @@
        wrap the actions below the dropdown instead of letting them overlap. */
     flex-wrap: wrap;
     row-gap: var(--spacer-2);
-    padding: var(--spacer-2) var(--spacer-4) var(--spacer-2) var(--spacer-2);
+    padding: var(--spacer-2) var(--gutter-h);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
     background: var(--color-bg);
     flex-shrink: 0;

@@ -14,7 +14,7 @@
     flex: 1 0 0;
     min-width: 0;
     background: var(--color-bg-secondary);
-    padding: var(--spacer-3) var(--spacer-4);
+    padding: var(--spacer-3) var(--gutter-h);
     gap: var(--spacer-3);
     overflow: hidden;
   }
