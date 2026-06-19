@@ -125,6 +125,13 @@ const sanitizeCollectionConfig = ({
   const slug = collection.slug
   const collectionPluginConfig = pluginConfig.collections?.[slug]
   const items: CollectionMCPItem[] = []
+  /**
+   * Payload disables duplicate for auth collections by default unless the
+   * collection explicitly opts back in with `disableDuplicate: false`.
+   */
+  const isDuplicateDisabled =
+    collection.disableDuplicate === true ||
+    (Boolean(collection.auth) && collection.disableDuplicate !== false)
 
   for (const [
     toolKey,
@@ -133,7 +140,7 @@ const sanitizeCollectionConfig = ({
     if (requiresVersions && !collection.versions) {
       continue
     }
-    if (requiresDuplicateEnabled && collection.disableDuplicate) {
+    if (requiresDuplicateEnabled && isDuplicateDisabled) {
       continue
     }
     const matchedConfigEntry = collectionPluginConfig?.tools?.[toolKey]

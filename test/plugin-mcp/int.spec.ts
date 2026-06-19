@@ -420,6 +420,8 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(findDocuments.inputSchema.properties.where).toBeDefined()
 
       expect(countDocuments.inputSchema.properties.collectionSlug).toBeDefined()
+      expect(countDocuments.inputSchema.properties.locale).toBeDefined()
+      expect(countDocuments.inputSchema.properties.locale.type).toBe('string')
       expect(countDocuments.inputSchema.properties.where).toBeDefined()
       expect(duplicateDocument.inputSchema.properties.id).toBeDefined()
       expect(duplicateDocument.inputSchema.properties.data).toBeDefined()
@@ -1011,6 +1013,7 @@ describe('@payloadcms/plugin-mcp', () => {
       const callResponse = await client.callTool({
         arguments: {
           collectionSlug: 'products',
+          locale: 'en',
           where: {
             title: {
               equals: 'Countable Product',
@@ -1055,6 +1058,38 @@ describe('@payloadcms/plugin-mcp', () => {
 
       await payload.delete({ id: duplicated.id, collection: 'products' })
       await payload.delete({ id: product.id, collection: 'products' })
+    })
+
+    it('should not enable duplicateDocument for auth collections by default', async ({ mcp }) => {
+      const plugin = payload.config.plugins.find(
+        (plugin) => plugin.slug === '@payloadcms/plugin-mcp',
+      ) as any
+      const userDuplicateItem = plugin.sanitizedOptions.items.find(
+        (item: any) =>
+          item.type === 'collectionTool' &&
+          item.collectionSlug === 'users' &&
+          item.configKey === 'duplicate',
+      )
+
+      expect(userDuplicateItem).toBeUndefined()
+
+      const apiKey = await getApiKey()
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
+          collectionSlug: 'users',
+          data: {
+            email: 'duplicated-user@example.com',
+          },
+          id: userId,
+        },
+        name: 'duplicateDocument',
+      })
+
+      expect(callResponse.isError).toBe(true)
+      expect(getToolText(callResponse)).toContain(
+        'MCP access to "duplicateDocument" is not enabled for collection "users"',
+      )
     })
 
     it('should call findDistinct', async ({ mcp }) => {

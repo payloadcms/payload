@@ -891,7 +891,7 @@ createAPIKeyFields({
 
 The MCP plugin was refactored. The public config API, the built-in tool inputs, and the API key collection schema all changed. Update your plugin config and delete + recreate any existing API keys.
 
-**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default through the generic built-in tools (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, plus `getGlobalSchema`, `findGlobal`, and `updateGlobal` for globals). Turn individual operations off via simple config keys like `tools: { create: false }`.
+**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default through the generic built-in tools. For collections, this includes tools like `getCollectionSchema`, `findDocuments`, `countDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `duplicateDocument`, and `findDistinct`, plus version tools when versions are enabled. For globals, this includes `getGlobalSchema`, `findGlobal`, and `updateGlobal`, plus version tools when versions are enabled. Turn individual operations off via simple config keys like `tools: { create: false }`.
 
 ```diff
 mcpPlugin({

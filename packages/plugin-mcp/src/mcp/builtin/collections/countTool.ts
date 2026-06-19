@@ -18,6 +18,7 @@ export const countDocumentsTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
+    locale: z.string().describe('Optional: locale code to count documents in').optional(),
     trash: z
       .boolean()
       .describe('Optional: include soft-deleted documents when trash is enabled on the collection')
@@ -31,7 +32,7 @@ export const countDocumentsTool = defineCollectionTool({
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
-  const { trash, where } = input
+  const { locale, trash, where } = input
 
   logger.info(`Counting documents in collection: ${collectionSlug}`)
 
@@ -40,6 +41,7 @@ export const countDocumentsTool = defineCollectionTool({
       collection: collectionSlug,
       req,
       ...localAPIDefaults(authorizedMCP),
+      ...(locale ? { locale } : {}),
       ...(trash !== undefined ? { trash } : {}),
       ...(where ? { where } : {}),
     })
