@@ -4,8 +4,8 @@ import React from 'react'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { CropIcon } from '../../../icons/Crop/index.js'
 import { DownloadIcon } from '../../../icons/Download/index.js'
-import { ExternalLinkIcon } from '../../../icons/ExternalLink/index.js'
-import { ReplaceIcon } from '../../../icons/Replace/index.js'
+import { NewTabIcon } from '../../../icons/NewTab/index.js'
+import { SwapIcon } from '../../../icons/Swap/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { CopyToClipboard } from '../../CopyToClipboard/index.js'
@@ -58,7 +58,7 @@ export const FileToolbar: React.FC<Props> = ({
             verticalAlign="bottom"
           >
             <PopupList.MenuItem>
-              <PopupList.Button icon={<ReplaceIcon />} onClick={onReplace}>
+              <PopupList.Button icon={<SwapIcon />} onClick={onReplace}>
                 {t('upload:replaceFile')}
               </PopupList.Button>
             </PopupList.MenuItem>
@@ -88,7 +88,7 @@ export const FileToolbar: React.FC<Props> = ({
             target="_blank"
             title={t('fields:openInNewTab')}
           >
-            <ExternalLinkIcon size={24} />
+            <NewTabIcon size={24} />
           </a>
         )}
         {fileSrc && (

@@ -365,12 +365,12 @@ export {
   AlignJustifiedIcon as DragHandleIcon,
 } from '../../icons/AlignJustified/index.js'
 export { EditIcon } from '../../icons/Edit/index.js'
-export { ExternalLinkIcon } from '../../icons/ExternalLink/index.js'
 export { LineIcon } from '../../icons/Line/index.js'
 export { LinkIcon } from '../../icons/Link/index.js'
 export { LogOutIcon } from '../../icons/LogOut/index.js'
 export { MinimizeMaximizeIcon } from '../../icons/MinimizeMaximize/index.js'
 export { MoreIcon } from '../../icons/More/index.js'
+export { NewTabIcon } from '../../icons/NewTab/index.js'
 export { PlusIcon } from '../../icons/Plus/index.js'
 export { SearchIcon } from '../../icons/Search/index.js'
 export { SwapIcon } from '../../icons/Swap/index.js'
