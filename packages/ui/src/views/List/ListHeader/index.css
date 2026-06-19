@@ -1,24 +1,28 @@
 @layer payload-default {
   .list-drawer__header {
-    margin-top: var(--spacer-6);
+    margin-top: var(--spacer-5);
     width: 100%;
   }
 
   .list-drawer__select-collection-wrap {
-    margin-top: var(--spacer-3);
+    margin-top: var(--spacer-2);
   }
 
-  @media (max-width: 768px) {
+  .list-drawer .collection-list__header {
+    margin-bottom: var(--spacer-2);
+  }
+
+  @media (min-width: 768px) {
     .list-drawer__header {
-      margin-top: var(--spacer-5);
+      margin-top: var(--spacer-6);
     }
 
     .list-drawer .collection-list__header {
-      margin-bottom: var(--spacer-2);
+      margin-bottom: unset;
     }
 
     .list-drawer__select-collection-wrap {
-      margin-top: var(--spacer-2);
+      margin-top: var(--spacer-3);
     }
   }
 

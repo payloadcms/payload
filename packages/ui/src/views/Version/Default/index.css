@@ -2,6 +2,8 @@
   .view-version {
     width: 100%;
     padding-bottom: var(--spacing-view-bottom);
+    display: flex;
+    flex-direction: column;
   }
 
   .view-version__toggle-locales-label {
@@ -11,6 +13,7 @@
   .view-version-controls-top {
     border-bottom: var(--stroke-width-small) solid var(--color-border);
     padding: var(--spacer-2) var(--gutter-h);
+    order: 2;
   }
 
   .view-version-controls-top__wrapper {
@@ -25,6 +28,8 @@
     flex-direction: row;
     align-items: center;
     gap: var(--spacer-4);
+    width: 100%;
+    justify-content: space-between;
   }
 
   .view-version-controls-top h2 {
@@ -35,12 +40,14 @@
     font-weight: var(--text-body-large-strong-font-weight);
     line-height: var(--text-body-large-strong-line-height);
     letter-spacing: var(--text-body-large-strong-letter-spacing);
+    display: none;
   }
 
   .view-version-controls-bottom {
     border-bottom: var(--stroke-width-small) solid var(--color-border);
-    padding: var(--spacer-2-5) var(--gutter-h);
+    padding: var(--spacer-2-5) var(--spacer-3);
     position: relative;
+    order: 1;
 
     /* Vertical separator line */
     &::after {
@@ -52,13 +59,14 @@
       width: var(--stroke-width-small);
       background-color: var(--color-border);
       transform: translateX(-50%);
+      display: none;
     }
   }
 
   .view-version-controls-bottom__wrapper {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacer-4);
+    grid-template-columns: 1fr;
+    gap: var(--spacer-3);
   }
 
   .view-version__time-elapsed {
@@ -129,6 +137,10 @@
     letter-spacing: var(--text-body-medium-letter-spacing);
   }
 
+  .view-version-controls-top__wrapper .view-version__modifiedCheckBox {
+    margin-left: 0;
+  }
+
   .view-version__modifiedCheckBox label.field-label {
     font-weight: var(--text-body-medium-font-weight);
   }
@@ -144,6 +156,7 @@
     gap: var(--spacer-3);
     position: relative;
     border-bottom: var(--stroke-width-small) solid var(--color-border);
+    order: 3;
 
     /* Vertical separator line */
     &::after {
@@ -156,70 +169,70 @@
       background-color: var(--color-border);
       transform: translateX(-50%);
       z-index: 2;
+      display: none;
     }
   }
 
-  @media (max-width: 1024px) {
+  @media (min-width: 768px) {
+    .view-version {
+      display: block;
+    }
+
+    .view-version-controls-top {
+      order: 0;
+    }
+
+    .view-version-controls-top__wrapper-actions {
+      width: auto;
+      justify-content: normal;
+    }
+
+    /* Reorder: controls-bottom first, controls-top (checkbox) second, diff last */
+    .view-version-controls-bottom {
+      order: 0;
+      padding: var(--spacer-2-5) var(--gutter-h);
+
+      /* Show vertical separator on desktop */
+      &::after {
+        display: block;
+      }
+    }
+
+    .view-version__diff-wrap {
+      order: 0;
+
+      /* Show vertical separator on desktop */
+      &::after {
+        display: block;
+      }
+    }
+
+    /* Show title on desktop */
+    .view-version-controls-top h2 {
+      display: block;
+    }
+
+    /* Checkbox: restore left margin */
+    .view-version-controls-top__wrapper .view-version__modifiedCheckBox {
+      margin-left: var(--spacer-4);
+    }
+
+    /* Two column for version selectors */
+    .view-version-controls-bottom__wrapper {
+      grid-template-columns: 1fr 1fr;
+      gap: var(--spacer-4);
+    }
+
     .view-version__version-to-version {
       flex-direction: column;
       align-items: flex-start;
     }
   }
 
-  @media (max-width: 768px) {
-    .view-version {
-      display: flex;
-      flex-direction: column;
-    }
-
+  @media (min-width: 1024px) {
     .view-version__version-to-version {
       flex-direction: row;
       align-items: center;
-    }
-
-    /* Reorder: controls-bottom first, controls-top (checkbox) second, diff last */
-    .view-version-controls-bottom {
-      order: 1;
-      padding-inline: var(--spacer-3);
-
-      /* Hide vertical separator on mobile */
-      &::after {
-        display: none;
-      }
-    }
-
-    .view-version-controls-top {
-      order: 2;
-    }
-
-    .view-version__diff-wrap {
-      order: 3;
-
-      /* Hide vertical separator on mobile */
-      &::after {
-        display: none;
-      }
-    }
-
-    /* Hide title on mobile */
-    .view-version-controls-top h2 {
-      display: none;
-    }
-
-    /* Checkbox: remove left margin */
-    .view-version-controls-top__wrapper .view-version__modifiedCheckBox {
-      margin-left: 0;
-    }
-
-    .view-version-controls-top__wrapper-actions {
-      width: 100%;
-      justify-content: space-between;
-    }
-
-    /* Single column for version selectors */
-    .view-version-controls-bottom__wrapper {
-      grid-template-columns: 1fr;
-      gap: var(--spacer-3);
     }
   }
 }

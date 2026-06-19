@@ -22,6 +22,7 @@
     gap: var(--spacer-2);
     align-items: center;
     width: 100%;
+    justify-content: space-between;
   }
 
   .bulk-upload--actions-bar__locationText {
@@ -45,13 +46,17 @@
     white-space: nowrap;
   }
 
-  @media (max-width: 1024px) {
+  .bulk-upload--actions-bar__saveButtons {
+    display: none;
+  }
+
+  @media (min-width: 1024px) {
     .bulk-upload--actions-bar__navigation {
-      justify-content: space-between;
+      justify-content: unset;
     }
 
     .bulk-upload--actions-bar__saveButtons {
-      display: none;
+      display: unset;
     }
   }
 }

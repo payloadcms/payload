@@ -1,6 +1,49 @@
 @layer payload-default {
   .doc-tabs {
-    display: flex;
+    width: 100%;
+    overflow: auto;
+  }
+
+  /* this container has a gradient overlay as visual indication of `overflow: scroll` */
+  .doc-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .doc-tabs::after {
+    content: '';
+    display: block;
+    position: sticky;
+    right: 0;
+    width: var(--spacer-5);
+    height: var(--spacer-5);
+    background: linear-gradient(to right, transparent, var(--color-bg));
+    flex-shrink: 0;
+    z-index: 1111;
+    pointer-events: none;
+  }
+
+  .doc-tabs__tabs-container {
+    margin-right: auto;
+  }
+
+  @media (min-width: 768px) {
+    .doc-tabs {
+      display: flex;
+      width: unset;
+      overflow: unset;
+    }
+
+    .doc-tabs::-webkit-scrollbar {
+      display: unset;
+    }
+
+    .doc-tabs::after {
+      display: none;
+    }
+
+    .doc-tabs__tabs-container {
+      margin-right: unset;
+    }
   }
 
   .doc-tabs__tabs {
@@ -10,34 +53,5 @@
     align-items: center;
     margin: 0;
     padding: var(--spacer-1) 0;
-  }
-
-  @media (max-width: 768px) {
-    .doc-tabs {
-      width: 100%;
-      overflow: auto;
-    }
-
-    /* this container has a gradient overlay as visual indication of `overflow: scroll` */
-    .doc-tabs::-webkit-scrollbar {
-      display: none;
-    }
-
-    .doc-tabs::after {
-      content: '';
-      display: block;
-      position: sticky;
-      right: 0;
-      width: var(--spacer-5);
-      height: var(--spacer-5);
-      background: linear-gradient(to right, transparent, var(--color-bg));
-      flex-shrink: 0;
-      z-index: 1111;
-      pointer-events: none;
-    }
-
-    .doc-tabs__tabs-container {
-      margin-right: auto;
-    }
   }
 }

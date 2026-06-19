@@ -15,6 +15,7 @@
     .row__fields {
       align-items: center;
       column-gap: var(--spacer-2);
+      flex-direction: row;
       flex-wrap: nowrap;
 
       /* Size controls to their content and drop Row's inline margins so the last
@@ -32,7 +33,7 @@
       }
 
       /* Stay in a row on mobile, where Row otherwise stacks into a column. */
-      @media (max-width: 1024px) {
+      @media (min-width: 1024px) {
         flex-direction: row;
       }
     }

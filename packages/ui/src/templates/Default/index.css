@@ -5,7 +5,7 @@
   }
 
   .template-default__wrap {
-    min-width: 0;
+    min-width: 100%;
     width: 100%;
     flex-grow: 1;
     position: relative;
@@ -15,9 +15,9 @@
 
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     .template-default__wrap {
-      min-width: 100%;
+      min-width: 0;
     }
   }
 }

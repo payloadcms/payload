@@ -3,6 +3,7 @@
     display: flex;
     align-items: center;
     gap: var(--spacer-2);
+    flex-direction: row;
   }
 
   .version-pill-label-text {
@@ -19,13 +20,5 @@
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
-  }
-
-  @media (max-width: 768px) {
-    .version-pill-label {
-      flex-direction: row;
-      align-items: center;
-      gap: var(--spacer-2);
-    }
   }
 }

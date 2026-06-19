@@ -1,19 +1,19 @@
 @layer payload-default {
   .publish-button__label--full {
-    display: inline;
-  }
-
-  .publish-button__label--short {
     display: none;
   }
 
-  @media (max-width: 1024px) {
+  .publish-button__label--short {
+    display: inline;
+  }
+
+  @media (min-width: 1024px) {
     .publish-button__label--full {
-      display: none;
+      display: inline;
     }
 
     .publish-button__label--short {
-      display: inline;
+      display: none;
     }
   }
 }

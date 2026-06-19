@@ -8,14 +8,14 @@
     letter-spacing: var(--text-body-medium-strong-letter-spacing);
     display: flex;
     flex-direction: row;
-    height: 100%;
+    height: min-content;
     align-items: center;
     color: var(--color-text);
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     .field-diff-label {
-      height: min-content;
+      height: 100%;
     }
   }
 }

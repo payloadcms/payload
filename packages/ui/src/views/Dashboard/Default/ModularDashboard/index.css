@@ -24,13 +24,21 @@
     }
   }
 
-  @media (max-width: 768px) {
+  .modular-dashboard .widget {
+    width: 100% !important;
+  }
+
+  .modular-dashboard .widget-wrapper__size-btn {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
     .modular-dashboard .widget {
-      width: 100% !important;
+      width: revert !important;
     }
 
     .modular-dashboard .widget-wrapper__size-btn {
-      display: none;
+      display: flex;
     }
   }
 
@@ -173,7 +181,6 @@
   }
 
   .widget-wrapper__size-btn {
-    display: flex;
     align-items: center;
     gap: var(--spacer-1);
     padding: var(--spacer-1) var(--spacer-2);

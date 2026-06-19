@@ -1,6 +1,7 @@
 @layer payload-default {
   .bulk-upload--file-manager {
     display: flex;
+    flex-direction: column-reverse;
     height: 100%;
     width: 100%;
     overflow: hidden;
@@ -13,13 +14,9 @@
     overflow: auto;
   }
 
-  @media (max-width: 1024px) {
+  @media (min-width: 1024px) {
     .bulk-upload--file-manager {
-      flex-direction: column-reverse;
-    }
-
-    .bulk-upload--file-manager__editView {
-      flex-grow: 1;
+      flex-direction: row;
     }
   }
 }

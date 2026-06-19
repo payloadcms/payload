@@ -1,6 +1,6 @@
 @layer payload-default {
   .condition {
-    display: contents;
+    display: block;
 
     .btn {
       vertical-align: middle;
@@ -10,7 +10,19 @@
 
   /* Flatten wrap and inputs — all 5 cells (__join, __field, __operator, __value, __actions)
      become direct items of the parent or-filters grid, no subgrid needed. */
-  .condition__wrap,
+  .condition__wrap {
+    margin-top: var(--spacer-3);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      'join actions'
+      'field field'
+      'operator operator'
+      'value value';
+    gap: var(--spacer-2);
+    align-items: start;
+  }
+
   .condition__inputs {
     display: contents;
   }
@@ -21,8 +33,13 @@
   }
 
   /* The and/or join dropdown is compact (24px tall) per the design. */
+  .condition__join {
+    grid-area: join;
+  }
+
   .condition__join .rs__control {
     min-height: var(--spacer-4);
+    min-width: calc(var(--spacer-4) * 3);
     padding-block: 0;
     padding-inline: calc(var(--spacer-1) * 1.5) var(--spacer-4);
     text-transform: lowercase;
@@ -44,68 +61,72 @@
   /* display:contents makes the three input divs participate directly in the parent grid */
   .condition__inputs > div {
     min-width: 0;
+    flex-basis: auto;
+    width: 100%;
+  }
+
+  .condition__field {
+    grid-area: field;
   }
 
   .condition__field .field-label {
     padding-bottom: 0;
   }
 
+  .condition__operator {
+    grid-area: operator;
+  }
+
+  .condition__value {
+    grid-area: value;
+  }
+
   .condition__actions {
     display: flex;
     gap: var(--spacer-2);
+    grid-area: actions;
+    align-self: center;
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     .condition {
-      display: block;
+      display: contents;
     }
 
-    .condition__wrap {
-      margin-top: var(--spacer-3);
-      display: grid;
-      grid-template-columns: 1fr auto;
-      grid-template-areas:
-        'join actions'
-        'field field'
-        'operator operator'
-        'value value';
-      gap: var(--spacer-2);
-      align-items: start;
-    }
-
+    .condition__wrap,
     .condition__inputs {
       display: contents;
     }
 
     .condition__join {
-      grid-area: join;
+      grid-area: unset;
     }
 
     .condition__join .rs__control {
-      min-width: calc(var(--spacer-4) * 3);
+      min-width: unset;
       /* width: fit-content; */
     }
 
     .condition__field {
-      grid-area: field;
+      grid-area: unset;
     }
 
     .condition__operator {
-      grid-area: operator;
+      grid-area: unset;
     }
 
     .condition__value {
-      grid-area: value;
+      grid-area: unset;
     }
 
     .condition__inputs > div {
-      flex-basis: auto;
-      width: 100%;
+      flex-basis: unset;
+      width: unset;
     }
 
     .condition__actions {
-      grid-area: actions;
-      align-self: center;
+      grid-area: unset;
+      align-self: unset;
     }
   }
 }

@@ -3,7 +3,7 @@
     display: flex;
     width: 100%;
     --gap: var(--spacer-3);
-    --cols: 5;
+    --cols: 1;
   }
 
   .collections__wrap {
@@ -49,36 +49,33 @@
     justify-content: unset;
   }
 
-  @media (max-width: 1440px) {
+  @media (min-width: 400px) {
     .collections {
-      --cols: 4;
+      --cols: 2;
     }
   }
 
-  @media (max-width: 1024px) {
+  @media (min-width: 768px) {
     .collections {
       --gap: var(--spacer-3);
       --cols: 2;
     }
-  }
-
-  @media (max-width: 768px) {
-    .collections {
-      --cols: 2;
-    }
-
-    .collections__wrap {
-      gap: var(--spacer-3);
-    }
 
     .collections__card-list {
-      gap: var(--spacer-2);
+      gap: var(--spacer-3);
     }
   }
 
-  @media (max-width: 400px) {
+  @media (min-width: 1024px) {
     .collections {
-      --cols: 1;
+      --gap: var(--spacer-3);
+      --cols: 4;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .collections {
+      --cols: 5;
     }
   }
 }

@@ -122,6 +122,18 @@
       outline-offset: var(--accessibility-outline-offset);
       border-radius: var(--radius-small);
     }
+
+    th,
+    td {
+      max-width: 70vw;
+    }
+
+    @media (min-width: 1024px) {
+      th,
+      td {
+        max-width: none;
+      }
+    }
   }
 
   [dir='rtl'] .table thead th {
@@ -227,14 +239,5 @@
   .table--drag-preview {
     cursor: grabbing;
     z-index: var(--z-popup);
-  }
-
-  @media (max-width: 1024px) {
-    .table {
-      th,
-      td {
-        max-width: 70vw;
-      }
-    }
   }
 }
