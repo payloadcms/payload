@@ -17,8 +17,8 @@ import { resolveProjectRoot } from './utils/resolveProjectRoot.js'
 /**
  * Stdio adapter for the Payload MCP server.
  *
- * Do not use in production. There's no auth; whoever can spawn the process gets
- * full access to your local data.
+ * In production, pass PAYLOAD_MCP_AUTHORIZATION so stdio can authenticate with
+ * the same Payload auth header as HTTP.
  */
 export const runMcpStdio = async (): Promise<void> => {
   /**
@@ -63,9 +63,15 @@ export const runMcpStdio = async (): Promise<void> => {
     ;(payload.config.plugins ??= []).push(fakePluginFn)
   }
 
-  const req = await createLocalReq({}, payload)
+  const headers = new Headers()
+  const authorization = process.env.PAYLOAD_MCP_AUTHORIZATION
+  if (authorization) {
+    headers.set('Authorization', authorization)
+  }
+
+  const req = await createLocalReq({ req: { headers } }, payload)
   req.payloadAPI = 'MCP' as const
-  const authorizedMCP = await getAuthorizedMCP({ req, skipAuth: true })
+  const authorizedMCP = await getAuthorizedMCP({ req, skipAuth: !authorization })
 
   const server = buildMcpServer({ authorizedMCP, pluginConfig, req })
 
