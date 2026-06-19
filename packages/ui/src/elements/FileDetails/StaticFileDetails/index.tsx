@@ -5,7 +5,7 @@ import { Button } from '../../Button/index.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
 import { UploadActions } from '../../Upload/index.js'
 import { FileMeta } from '../FileMeta/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'file-details'
 

@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useState } from 'react'
 
 import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { FileMeta } from '../FileDetails/FileMeta/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'preview-sizes'
 

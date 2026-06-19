@@ -141,7 +141,6 @@
     min-width: 0;
   }
 
-  /* Badge-style label matching Figma "Original" / size-name chip */
   .file-field__side-panel__info-label {
     display: inline-flex;
     align-items: center;

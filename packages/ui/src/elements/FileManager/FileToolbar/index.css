@@ -74,6 +74,10 @@
     text-overflow: ellipsis;
   }
 
+  .file-toolbar__filename-popup.popup__content {
+    min-width: 118px;
+  }
+
   .file-toolbar__icon-link {
     display: flex;
     align-items: center;

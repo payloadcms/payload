@@ -51,7 +51,7 @@
     display: inline-flex;
     align-items: center;
     padding: 0 var(--spacer-2);
-    border-radius: var(--radius-small);
+    border-radius: var(--radius-medium);
     background: var(--color-bg-secondary-hover);
     font-family: var(--text-body-medium-strong-font-family);
     font-size: var(--text-body-medium-font-size);
