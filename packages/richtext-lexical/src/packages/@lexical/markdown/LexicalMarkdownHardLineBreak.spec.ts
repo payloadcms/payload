@@ -1,14 +1,17 @@
 import { createHeadlessEditor } from '@lexical/headless'
+import { LinkNode } from '@lexical/link'
 import { ListItemNode, ListNode } from '@lexical/list'
 import { HeadingNode, QuoteNode } from '@lexical/rich-text'
-import { $getRoot, $isElementNode, $isLineBreakNode } from 'lexical'
+import { $getRoot, $getState, $isElementNode, $isLineBreakNode, $isTextNode } from 'lexical'
 import { describe, expect, it } from 'vitest'
 
 import { $convertFromMarkdownString, $convertToMarkdownString } from './index.js'
-import { normalizeMarkdown } from './MarkdownTransformers.js'
+import { hardLineBreakState, normalizeMarkdown } from './MarkdownTransformers.js'
 
 function createEditor() {
-  return createHeadlessEditor({ nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode] })
+  return createHeadlessEditor({
+    nodes: [HeadingNode, QuoteNode, ListNode, ListItemNode, LinkNode],
+  })
 }
 
 function importMarkdown(markdown: string): { hasLineBreak: boolean; textContent: string } {
@@ -23,6 +26,38 @@ function importMarkdown(markdown: string): { hasLineBreak: boolean; textContent:
     result = {
       hasLineBreak: firstChild.getChildren().some((child) => $isLineBreakNode(child)),
       textContent: firstChild.getTextContent(),
+    }
+  })
+  return result
+}
+
+// Returns the hard line break marker stored on the first LineBreakNode of the
+// first block, plus the text content of every text node in that block. Used to
+// assert the marker was moved off the text and onto the line break node, even
+// when the trailing whitespace was split into its own text node by an inline
+// transformer (e.g. after bold or a link).
+function getStoredHardLineBreak(markdown: string): {
+  marker: string
+  textNodeTexts: string[]
+} {
+  const editor = createEditor()
+  editor.update(() => $convertFromMarkdownString(markdown), { discrete: true })
+  let result = { marker: '', textNodeTexts: [] as string[] }
+  editor.getEditorState().read(() => {
+    const block = $getRoot().getFirstChild()
+    if (!$isElementNode(block)) {
+      throw new Error('Expected an element block')
+    }
+    const lineBreakNode = block.getChildren().find((child) => $isLineBreakNode(child))
+    if (lineBreakNode === undefined) {
+      throw new Error('Expected a line break node')
+    }
+    result = {
+      marker: $getState(lineBreakNode, hardLineBreakState),
+      textNodeTexts: block
+        .getChildren()
+        .filter($isTextNode)
+        .map((child) => child.getTextContent()),
     }
   })
   return result
@@ -80,6 +115,27 @@ describe('markdown hard line break import', () => {
     expect(hasLineBreak).toBe(true)
     expect(textContent).toBe('foo\nbar')
   })
+
+  it('should store the marker on the line break when the hard break follows formatted text', () => {
+    const { marker, textNodeTexts } = getStoredHardLineBreak('**foo**  \nbar')
+
+    expect(marker).toBe('  ')
+    // The trailing-space marker is split into its own text node by the bold
+    // transformer; it must be moved onto the line break node, not left as text.
+    expect(textNodeTexts).not.toContain('  ')
+  })
+
+  it('should store the exact number of trailing spaces when the hard break follows formatted text', () => {
+    const { marker } = getStoredHardLineBreak('**foo**   \nbar')
+
+    expect(marker).toBe('   ')
+  })
+
+  it('should store the marker on the line break when the hard break follows a link', () => {
+    const { marker } = getStoredHardLineBreak('[foo](https://payloadcms.com)  \nbar')
+
+    expect(marker).toBe('  ')
+  })
 })
 
 describe('markdown hard line break round trip', () => {
@@ -95,5 +151,15 @@ describe('markdown hard line break round trip', () => {
 
   it('should not introduce a hard break for a soft wrap', () => {
     expect(roundTrip(['foo', 'bar'].join('\n'))).toBe('foo bar')
+  })
+
+  it('should round trip a hard break after formatted text', () => {
+    const md = '**foo**  \nbar'
+    expect(roundTrip(md)).toBe(md)
+  })
+
+  it('should round trip a hard break after a link', () => {
+    const md = '[foo](https://payloadcms.com)  \nbar'
+    expect(roundTrip(md)).toBe(md)
   })
 })
