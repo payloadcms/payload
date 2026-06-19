@@ -250,6 +250,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     aboutToTrashCount:
       'U staat op het punt om {{count}} {{label}} naar de prullenbak te verplaatsen',
     accepts: 'Accepteert',
+    access: 'Toegang',
     addBelow: 'Onderaan toevoegen',
     addFilter: 'Filter toevoegen',
     adminTheme: 'Adminthema',
@@ -429,6 +430,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     permanentlyDeletedCountSuccessfully: 'Permanent {{count}} {{label}} succesvol verwijderd.',
     perPage: 'Per pagina: {{limit}}',
     perPageLabel: 'Per pagina:',
+    presets: 'Voorinstellingen',
     previous: 'Vorige',
     reindex: 'Herindexeren',
     reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',

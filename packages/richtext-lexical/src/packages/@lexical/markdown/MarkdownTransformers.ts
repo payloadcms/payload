@@ -9,7 +9,14 @@
 
 import type { ListType } from '@lexical/list'
 import type { HeadingTagType } from '@lexical/rich-text'
-import type { ElementNode, Klass, LexicalNode, TextFormatType, TextNode } from 'lexical'
+import type {
+  ElementNode,
+  Klass,
+  LexicalNode,
+  LineBreakNode,
+  TextFormatType,
+  TextNode,
+} from 'lexical'
 
 import {
   $createListItemNode,
@@ -27,7 +34,13 @@ import {
   HeadingNode,
   QuoteNode,
 } from '@lexical/rich-text'
-import { $createLineBreakNode } from 'lexical'
+import {
+  $createLineBreakNode,
+  $isLineBreakNode,
+  $isTextNode,
+  $setState,
+  createState,
+} from 'lexical'
 
 export type Transformer =
   | ElementTransformer
@@ -199,6 +212,106 @@ const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/
 const TAG_START_REGEX = /^[ \t]*<[a-z_][\w-]*(?:\s[^<>]*)?\/?>/i
 const TAG_END_REGEX = /^[ \t]*<\/[a-z_][\w-]*\s*>/i
 
+/**
+ * A CommonMark hard line break marker: either a single backslash (`\`) or two or
+ * more trailing spaces, both placed at the end of a line before the newline.
+ * See https://spec.commonmark.org/0.31.2/#hard-line-breaks
+ */
+export type MarkdownHardLineBreak = string
+
+/**
+ * Stores the original hard line break marker on a `LineBreakNode` so it can be
+ * preserved across a markdown import/export round trip instead of being
+ * collapsed into a soft line break.
+ *
+ * Note: unlike upstream Lexical (which sets `resetOnCopyNode: true`), that option
+ * does not exist in the `lexical` version pinned here (0.41.0), so it is omitted.
+ */
+export const hardLineBreakState = createState('mdHardLineBreak', {
+  parse: (val): MarkdownHardLineBreak => {
+    if (typeof val === 'string' && /^(\\| {2,})$/.test(val)) {
+      return val
+    }
+    return ''
+  },
+})
+
+/**
+ * Detects a CommonMark hard line break marker at the end of a raw line.
+ *
+ * @returns a tuple of `[textWithoutMarker, marker]` when a marker is found, otherwise null.
+ */
+export function parseMarkdownHardLineBreak(line: string): [string, MarkdownHardLineBreak] | null {
+  if (line.endsWith('\\')) {
+    return [line.slice(0, -1), '\\']
+  }
+
+  const spaces = line.match(/^(.*?\S)( {2,})$/)
+  return spaces ? [spaces[1]!, spaces[2]!] : null
+}
+
+function hasNonWhitespaceContentOnLine(children: Array<LexicalNode>, endIndex: number): boolean {
+  for (let i = endIndex - 1; i >= 0; i--) {
+    if ($isLineBreakNode(children[i])) {
+      return false
+    }
+    if (/\S/.test(children[i]!.getTextContent())) {
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * Removes a trailing hard line break marker from the last text node of `previousNode`
+ * (if present) and returns the marker, so it can be carried onto a `LineBreakNode`.
+ */
+function $extractMarkdownHardLineBreakMarker(
+  previousNode: ElementNode,
+): MarkdownHardLineBreak | null {
+  const children = previousNode.getChildren()
+  const lastChildIndex = children.length - 1
+  const lastChild = children[lastChildIndex]
+
+  if (!$isTextNode(lastChild)) {
+    return null
+  }
+
+  const lastText = lastChild.getTextContent()
+  const hardLineBreak = parseMarkdownHardLineBreak(lastText)
+
+  if (hardLineBreak !== null) {
+    const [text, marker] = hardLineBreak
+    lastChild.setTextContent(text)
+    return marker
+  }
+
+  // Trailing whitespace may have been split into its own text node by inline
+  // transformers (e.g. after formatted or linked content). Only treat it as a
+  // hard break when there is preceding non-whitespace content on the same line.
+  if (/^ {2,}$/.test(lastText) && hasNonWhitespaceContentOnLine(children, lastChildIndex)) {
+    lastChild.setTextContent('')
+    return lastText
+  }
+
+  return null
+}
+
+/**
+ * Creates a `LineBreakNode` for a markdown line join, preserving any CommonMark
+ * hard line break marker found at the end of `previousNode` via node state.
+ */
+export function $createMarkdownLineBreakNode(previousNode: ElementNode): LineBreakNode {
+  const lineBreakNode = $createLineBreakNode()
+  const hardLineBreak = $extractMarkdownHardLineBreakMarker(previousNode)
+
+  if (hardLineBreak !== null) {
+    $setState(lineBreakNode, hardLineBreakState, hardLineBreak)
+  }
+
+  return lineBreakNode
+}
+
 const createBlockNode = (
   createNode: (match: Array<string>) => ElementNode,
 ): ElementTransformer['replace'] => {
@@ -333,7 +446,7 @@ export const QUOTE: ElementTransformer = {
       const previousNode = parentNode.getPreviousSibling()
       if ($isQuoteNode(previousNode)) {
         previousNode.splice(previousNode.getChildrenSize(), 0, [
-          $createLineBreakNode(),
+          $createMarkdownLineBreakNode(previousNode),
           ...children,
         ])
         previousNode.select(0, 0)
@@ -445,6 +558,10 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines: boole
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i]!
     const lastLine = sanitizedLines[sanitizedLines.length - 1]
+    // A hard line break marker on the current line only matters if another line follows it.
+    const hardLineBreak = i < lines.length - 1 ? parseMarkdownHardLineBreak(line) : null
+    const lastLineHasHardLineBreak =
+      lastLine !== undefined && parseMarkdownHardLineBreak(lastLine) !== null
 
     // Code blocks of ```single line``` don't toggle the inCodeBlock flag
     if (CODE_SINGLE_LINE_REGEX.test(line)) {
@@ -494,6 +611,8 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines: boole
       CHECK_LIST_REGEX.test(line) ||
       TABLE_ROW_REG_EXP.test(line) ||
       TABLE_ROW_DIVIDER_REG_EXP.test(line) ||
+      // Don't merge the next line into a line that ends with a hard line break marker.
+      lastLineHasHardLineBreak ||
       !shouldMergeAdjacentLines ||
       TAG_START_REGEX.test(line) ||
       TAG_END_REGEX.test(line) ||
@@ -503,7 +622,9 @@ export function normalizeMarkdown(input: string, shouldMergeAdjacentLines: boole
     ) {
       sanitizedLines.push(line)
     } else {
-      sanitizedLines[sanitizedLines.length - 1] = lastLine + ' ' + line.trim()
+      // Preserve a trailing hard line break marker on the merged line so it survives import.
+      sanitizedLines[sanitizedLines.length - 1] =
+        lastLine + ' ' + (hardLineBreak === null ? line.trim() : line.trimStart())
     }
   }
 

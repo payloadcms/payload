@@ -37,10 +37,6 @@
     overflow: auto;
   }
 
-  .versions .table th:first-child {
-    padding-inline-start: var(--gutter-h);
-  }
-
   .versions .table td:first-child:not(.cell--linked) {
     padding-inline-start: var(--gutter-h);
   }

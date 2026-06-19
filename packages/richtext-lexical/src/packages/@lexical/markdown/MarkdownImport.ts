@@ -13,7 +13,6 @@ import { $isListItemNode, $isListNode } from '@lexical/list'
 import { $isQuoteNode } from '@lexical/rich-text'
 import { $findMatchingParent } from '@lexical/utils'
 import {
-  $createLineBreakNode,
   $createParagraphNode,
   $createTextNode,
   $getRoot,
@@ -30,6 +29,7 @@ import type {
 } from './MarkdownTransformers.js'
 
 import { importTextTransformers } from './importTextTransformers.js'
+import { $createMarkdownLineBreakNode } from './MarkdownTransformers.js'
 import { isEmptyParagraph, transformersByType } from './utils.js'
 
 export type TextFormatTransformersIndex = Readonly<{
@@ -231,7 +231,7 @@ function $importBlocks(
 
       if (targetNode != null && targetNode.getTextContentSize() > 0) {
         targetNode.splice(targetNode.getChildrenSize(), 0, [
-          $createLineBreakNode(),
+          $createMarkdownLineBreakNode(targetNode),
           ...elementNode.getChildren(),
         ])
         elementNode.remove()
