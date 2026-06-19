@@ -2722,6 +2722,25 @@ describe('Uploads', () => {
       await expect(page.locator('#custom-file-preview-audio audio')).toBeAttached()
     })
 
+    test('should render filePreview matched by video category wildcard', async () => {
+      const videoDoc = (
+        await payload.find({
+          collection: adminUploadFilePreviewMapSlug,
+          depth: 0,
+          limit: 1,
+          where: { mimeType: { equals: 'video/mp4' } },
+        })
+      ).docs[0]
+
+      await page.goto(adminUploadFilePreviewMapURL.edit(videoDoc!.id))
+      await waitForFormReady(page)
+
+      await expect(page.locator('#file-preview[data-mime-category="video"]')).toBeVisible()
+      // Assert the inner media element renders so the test fails if `fileSrc` stops being passed
+      // through to the matched component.
+      await expect(page.locator('#file-preview video')).toBeAttached()
+    })
+
     test('should fall back to default Thumbnail when no filePreview matches', async () => {
       const imageDoc = (
         await payload.find({

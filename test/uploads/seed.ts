@@ -177,12 +177,12 @@ export const seed = async (payload: Payload) => {
   await payload.create({
     collection: relationPreviewSlug,
     data: {
-      imageWithPreview1: uploadedImageWithPreview,
-      imageWithPreview2: uploadedImageWithPreview,
       imageWithoutPreview1: uploadedImageWithPreview,
       imageWithoutPreview2: uploadedImageWithoutPreview,
-      imageWithPreview3: uploadedImageWithoutPreview,
       imageWithoutPreview3: uploadedImageWithoutPreview,
+      imageWithPreview1: uploadedImageWithPreview,
+      imageWithPreview2: uploadedImageWithPreview,
+      imageWithPreview3: uploadedImageWithoutPreview,
     },
   })
 
@@ -196,9 +196,9 @@ export const seed = async (payload: Payload) => {
 
   for (let i = 0; i < 20; i++) {
     const data = {
-      title: `List View Preview ${i + 1}`,
-      imageUpload: uploadedImageWithPreview,
       imageRelationship: uploadedImageWithPreview,
+      imageUpload: uploadedImageWithPreview,
+      title: `List View Preview ${i + 1}`,
     }
     if (i > 15) {
       data.imageUpload = ''
@@ -244,9 +244,7 @@ export const seed = async (payload: Payload) => {
     file: Awaited<ReturnType<typeof getFileByPath>>
   }> = [
     {
-      file: videoFile,
       data: {
-        title: 'Christmas Mariachi in Guadalajara',
         altText: 'Mariachi band performing on a festive stage in Guadalajara',
         caption: 'Christmas mariachi playing in the streets of Guadalajara',
         category: 'People',
@@ -275,12 +273,12 @@ export const seed = async (payload: Payload) => {
         shootDate: '2024-12-24T20:00:00.000Z',
         source: 'https://example.com/christmas-mariachi-in-guadalajara',
         tags: ['christmas', 'mariachi', 'guadalajara', 'music', 'video'],
+        title: 'Christmas Mariachi in Guadalajara',
       },
+      file: videoFile,
     },
     {
-      file: pdfFile,
       data: {
-        title: 'Test PDF',
         altText: 'Test PDF document cover page',
         caption: 'Test PDF document',
         category: 'Technology',
@@ -302,12 +300,12 @@ export const seed = async (payload: Payload) => {
         shootDate: '2024-01-15T09:00:00.000Z',
         source: 'https://example.com/test-pdf',
         tags: ['pdf', 'document', 'test'],
+        title: 'Test PDF',
       },
+      file: pdfFile,
     },
     {
-      file: audioFile,
       data: {
-        title: 'Audio',
         altText: 'Audio waveform',
         caption: 'Audio clip',
         category: 'Abstract',
@@ -329,12 +327,12 @@ export const seed = async (payload: Payload) => {
         shootDate: '2023-06-01T12:00:00.000Z',
         source: 'https://example.com/audio',
         tags: ['audio', 'sound', 'mp3'],
+        title: 'Audio',
       },
+      file: audioFile,
     },
     {
-      file: horizontalSquaresFile,
       data: {
-        title: 'Horizontal Squares',
         altText: 'Rows of horizontal squares forming an abstract pattern',
         caption: 'Horizontal squares pattern',
         category: 'Abstract',
@@ -361,12 +359,12 @@ export const seed = async (payload: Payload) => {
         shootDate: '2024-03-10T14:30:00.000Z',
         source: 'https://example.com/horizontal-squares',
         tags: ['abstract', 'squares', 'pattern', 'geometric'],
+        title: 'Horizontal Squares',
       },
+      file: horizontalSquaresFile,
     },
     {
-      file: imageFile,
       data: {
-        title: 'Image',
         altText: 'Sample PNG image',
         caption: 'Sample image',
         category: 'Technology',
@@ -387,7 +385,9 @@ export const seed = async (payload: Payload) => {
         shootDate: '2024-02-20T10:00:00.000Z',
         source: 'https://example.com/image',
         tags: ['image', 'png', 'sample'],
+        title: 'Image',
       },
+      file: imageFile,
     },
   ]
 
@@ -417,7 +417,8 @@ export const seed = async (payload: Payload) => {
     } as File,
   })
 
-  // Seed filePreview map collection — one image (no match), one PDF (exact), one audio (wildcard)
+  // Seed filePreview map collection — one image (no match), one PDF (exact), one audio (category
+  // wildcard) and one video (category wildcard)
   await payload.create({
     collection: adminUploadFilePreviewMapSlug,
     data: {},
@@ -442,6 +443,15 @@ export const seed = async (payload: Payload) => {
     file: {
       ...audioFile,
       name: `map-preview-audio-${audioFile?.name}`,
+    } as File,
+  })
+
+  await payload.create({
+    collection: adminUploadFilePreviewMapSlug,
+    data: {},
+    file: {
+      ...videoFile,
+      name: `map-preview-video-${videoFile?.name}`,
     } as File,
   })
 
