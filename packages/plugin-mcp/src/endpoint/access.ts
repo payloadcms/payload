@@ -59,6 +59,7 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
 
   return {
     items: await filterMCPItems({
+      checkItemAccessFns: true,
       checkPermissions: !skipAuth,
       items: pluginConfig.items,
       req,
@@ -69,10 +70,12 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
 }
 
 export const filterMCPItems = async ({
+  checkItemAccessFns,
   checkPermissions,
   items,
   req,
 }: {
+  checkItemAccessFns: boolean
   /**
    * Whether to check if the user has access to the underlying collection/global for built-in tools.
    */
@@ -85,7 +88,7 @@ export const filterMCPItems = async ({
   const permissions = checkPermissions ? await getAccessResults({ req }) : undefined
 
   for (const item of items) {
-    if (!(await checkItemAccess({ item, req }))) {
+    if (checkItemAccessFns && !(await checkItemAccess({ item, req }))) {
       continue
     }
     if (permissions && !checkItemPermissions({ item, permissions })) {
