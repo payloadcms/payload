@@ -52,6 +52,7 @@ import {
   imageSizesOnlySlug,
   listViewPreviewSlug,
   mediaSlug,
+  mediaWithFieldsSlug,
   mediaWithImageSizeAdminPropsSlug,
   mediaWithoutCacheTagsSlug,
   mediaWithoutDeleteAccessSlug,
@@ -128,6 +129,7 @@ let relationToNoFilesRequiredURL: AdminUrlUtil
 let adminUploadFilePreviewSingleURL: AdminUrlUtil
 let adminUploadFilePreviewMapURL: AdminUrlUtil
 let filePreviewURL: AdminUrlUtil
+let mediaWithFieldsURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
@@ -176,6 +178,7 @@ describe('Uploads', () => {
     adminUploadFilePreviewSingleURL = new AdminUrlUtil(serverURL, adminUploadFilePreviewSingleSlug)
     adminUploadFilePreviewMapURL = new AdminUrlUtil(serverURL, adminUploadFilePreviewMapSlug)
     filePreviewURL = new AdminUrlUtil(serverURL, filePreviewSlug)
+    mediaWithFieldsURL = new AdminUrlUtil(serverURL, mediaWithFieldsSlug)
 
     const context = await browser.newContext()
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
@@ -371,6 +374,7 @@ describe('Uploads', () => {
         depth: 0,
         limit: 1,
         pagination: false,
+        sort: 'createdAt',
         where: {
           mimeType: { contains: 'image/' },
         },
@@ -384,10 +388,46 @@ describe('Uploads', () => {
 
     await expect(carouselItems.first()).toHaveClass(/mini-carousel__item--active/)
 
+    // Fail loudly if a future imageSizes change leaves fewer than two carousel items, rather than
+    // throwing an opaque "element not found" on the nth(1) click below.
+    expect(await carouselItems.count()).toBeGreaterThanOrEqual(2)
+
     await carouselItems.nth(1).click()
 
     await expect(carouselItems.nth(1)).toHaveClass(/mini-carousel__item--active/)
     await expect(carouselItems.first()).not.toHaveClass(/mini-carousel__item--active/)
+  })
+
+  test('should render the many-fields side panel alongside the upload preview for media-with-fields', async () => {
+    const mediaWithFieldsDoc = (
+      await payload.find({
+        collection: mediaWithFieldsSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+        sort: 'createdAt',
+        where: {
+          mimeType: { contains: 'image/' },
+        },
+      })
+    ).docs[0]
+
+    await page.goto(mediaWithFieldsURL.edit(mediaWithFieldsDoc!.id))
+    await waitForFormReady(page)
+
+    await expect(page.locator('.collection-edit__upload-layout')).toBeVisible()
+    await expect(page.locator('.file-manager')).toBeVisible()
+    await expect(page.locator('.file-preview')).toBeVisible()
+
+    // The many configured imageSizes should surface as carousel items alongside the preview.
+    const carouselItems = page.locator('.mini-carousel__item')
+    await expect(carouselItems.first()).toBeVisible()
+    expect(await carouselItems.count()).toBeGreaterThanOrEqual(2)
+
+    // The collection's many fields should render in the side panel alongside the upload preview.
+    await expect(page.locator('#field-title')).toBeVisible()
+    await expect(page.locator('#field-description')).toBeVisible()
+    await expect(page.locator('#field-category')).toBeVisible()
   })
 
   test('should create file upload', async () => {
@@ -2633,6 +2673,9 @@ describe('Uploads', () => {
       await waitForFormReady(page)
 
       await expect(page.locator('#custom-file-preview-pdf')).toBeVisible()
+      // Assert the inner element rendered from `fileSrc` is present so the test fails if `fileSrc`
+      // stops being passed through to the matched component.
+      await expect(page.locator('#custom-file-preview-pdf span')).toBeVisible()
     })
 
     test('should render filePreview matched by category wildcard', async () => {
@@ -2649,6 +2692,9 @@ describe('Uploads', () => {
       await waitForFormReady(page)
 
       await expect(page.locator('#custom-file-preview-audio')).toBeVisible()
+      // Assert the inner media element renders so the test fails if `fileSrc` stops being passed
+      // through to the matched component.
+      await expect(page.locator('#custom-file-preview-audio audio')).toBeAttached()
     })
 
     test('should fall back to default Thumbnail when no filePreview matches', async () => {

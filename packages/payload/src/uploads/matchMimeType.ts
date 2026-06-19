@@ -9,12 +9,15 @@ export function matchMimeType(
   map: Record<string, PayloadComponent>,
   mimeType: string,
 ): PayloadComponent | undefined {
-  if (map[mimeType]) {
+  if (mimeType in map) {
     return map[mimeType]
   }
   const category = mimeType.split('/')[0]
-  if (map[`${category}/*`]) {
+  if (`${category}/*` in map) {
     return map[`${category}/*`]
   }
-  return map['*']
+  if ('*' in map) {
+    return map['*']
+  }
+  return undefined
 }

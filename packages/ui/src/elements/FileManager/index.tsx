@@ -163,6 +163,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
     handleFileChange({ file: null })
     setFileSrc('')
     setFileUrl('')
+    setSelectedSize(null)
     resetUploadEdits()
     setUploadControlFileUrl('')
     setUploadControlFileName(null)
@@ -251,6 +252,18 @@ export const FileManager: React.FC<FileManagerProps> = ({
       setRemovedFile(false)
     }
   }, [initialState])
+
+  useEffect(() => {
+    return () => {
+      if (fileSrc?.startsWith('blob:')) {
+        URL.revokeObjectURL(fileSrc)
+      }
+    }
+  }, [fileSrc])
+
+  useEffect(() => {
+    setSelectedSize(null)
+  }, [data?.url, data?.filename])
 
   useEffect(() => {
     const handleControlFileUrl = async () => {

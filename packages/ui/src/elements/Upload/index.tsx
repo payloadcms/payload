@@ -341,6 +341,14 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
   }, [initialState])
 
   useEffect(() => {
+    return () => {
+      if (fileSrc?.startsWith('blob:')) {
+        URL.revokeObjectURL(fileSrc)
+      }
+    }
+  }, [fileSrc])
+
+  useEffect(() => {
     if (isFormSubmitting) {
       setRemovedFile(false)
     }
