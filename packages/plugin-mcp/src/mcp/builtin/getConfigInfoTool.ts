@@ -3,6 +3,13 @@ import { getAccessResults, isEntityHidden } from 'payload'
 import { defineTool } from '../../defineTool.js'
 
 export const getConfigInfoTool = defineTool({
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+    readOnlyHint: true,
+    title: 'Config Info',
+  },
   description: 'List the Payload collection and global slugs visible to this MCP client.',
 }).handler(async ({ authorizedMCP, req }) => {
   const user = authorizedMCP.user ?? req.user ?? null

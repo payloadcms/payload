@@ -75,7 +75,7 @@ export const LanguageMenu: React.FC<{
           </span>
           <span className="popup-button-list__label">{t('general:language')}</span>
           <span className="popup-button-list__chevron">
-            <ChevronIcon direction="right" size={24} />
+            <ChevronIcon direction="right" size={16} />
           </span>
         </button>
       )}

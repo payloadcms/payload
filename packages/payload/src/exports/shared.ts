@@ -39,7 +39,7 @@ export {
   generateKeyBetween,
   generateNKeysBetween,
 } from '../config/orderable/fractional-indexing.js'
-export { serverProps } from '../config/types.js'
+export { isUserMenuSettingsGroup, serverProps } from '../config/types.js'
 export { combineQueries } from '../database/combineQueries.js'
 
 export { APIError, APIErrorName } from '../errors/APIError.js'

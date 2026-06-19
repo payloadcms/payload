@@ -103,7 +103,6 @@
   }
 
   .rs__menu-list {
-    max-height: calc(var(--spacer-6) * 5);
     overflow-y: auto;
   }
 

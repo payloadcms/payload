@@ -1014,11 +1014,22 @@ test.describe('Group By', () => {
       const presetTitle = 'Virtual Field Preset'
       await modal.locator('input[name="title"]').fill(presetTitle)
 
-      // Check that the groupBy field shows the proper label (not "page.title")
-      const groupByField = modal.locator('.query-preset-group-by-field .group-by-builder')
+      // The collapsed control shows the resolved virtual field label (not "page.title")
+      const groupByField = modal.locator('.query-preset-group-by-field')
       await expect(groupByField).toBeVisible()
-      await expect(groupByField).toContainText('Virtual Title From Page')
-      await expect(groupByField).toContainText('Ascending')
+      const groupByTrigger = groupByField.locator('#toggle-group-by')
+      await expect(groupByTrigger).toContainText('Virtual Title From Page')
+
+      // Open the control to verify the saved field label and sort direction
+      await groupByTrigger.click()
+      const groupByPopup = page.locator('.group-by-control__popup')
+      await expect(groupByPopup).toBeVisible()
+      await expect(groupByPopup).toContainText('Virtual Title From Page')
+      await expect(groupByPopup).toContainText('Ascending')
+
+      // Close the control before saving
+      await groupByTrigger.click()
+      await expect(groupByPopup).toBeHidden()
 
       await saveDocAndAssert(page)
       await expect(modal).toBeHidden()
@@ -1094,11 +1105,18 @@ test.describe('Group By', () => {
       const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
       await expect(editModal).toBeVisible()
 
-      // Check that the groupBy field shows the proper label with descending direction
-      const groupByField = editModal.locator('.query-preset-group-by-field .group-by-builder')
+      // The collapsed control shows the resolved virtual field label (not "page.title")
+      const groupByField = editModal.locator('.query-preset-group-by-field')
       await expect(groupByField).toBeVisible()
-      await expect(groupByField).toContainText('Virtual Title From Page')
-      await expect(groupByField).toContainText('Descending')
+      const groupByTrigger = groupByField.locator('#toggle-group-by')
+      await expect(groupByTrigger).toContainText('Virtual Title From Page')
+
+      // Open the control to verify the saved field label and descending sort direction
+      await groupByTrigger.click()
+      const groupByPopup = page.locator('.group-by-control__popup')
+      await expect(groupByPopup).toBeVisible()
+      await expect(groupByPopup).toContainText('Virtual Title From Page')
+      await expect(groupByPopup).toContainText('Descending')
     })
   })
 })

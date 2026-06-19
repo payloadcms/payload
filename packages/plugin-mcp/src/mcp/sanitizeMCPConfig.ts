@@ -55,11 +55,11 @@ export const sanitizeMCPConfig = ({
     items.push(...sanitizeGlobalConfig({ global, pluginConfig }))
   }
 
-  for (const [configKey, { label, mcpName, tool }] of TOOL_BUILTIN_ENTRIES) {
+  for (const [configKey, { mcpName, tool }] of TOOL_BUILTIN_ENTRIES) {
     items.push({
       type: 'tool',
       configKey,
-      label,
+      label: tool.annotations?.title ?? configKey,
       mcpName,
       tool,
     })
@@ -72,7 +72,7 @@ export const sanitizeMCPConfig = ({
     items.push({
       type: 'tool',
       configKey,
-      label: configKey,
+      label: tool.annotations?.title ?? configKey,
       mcpName: configKey,
       tool,
     })
@@ -132,14 +132,16 @@ const sanitizeCollectionConfig = ({
       continue
     }
     const override = typeof matchedConfigEntry === 'object' ? matchedConfigEntry : undefined
+    const annotations = { ...tool.annotations, ...override?.annotations }
     items.push({
       type: 'collectionTool',
       collectionSlug: slug,
       configKey: toolKey,
-      label: capitalize(toolKey),
+      label: annotations.title ?? toolKey,
       mcpName,
       tool: {
         ...tool,
+        annotations,
         description: override?.description ?? tool.description,
         overrideResponse:
           override?.overrideResponse ??
@@ -150,21 +152,23 @@ const sanitizeCollectionConfig = ({
   }
 
   if (collection.auth) {
-    for (const [authToolKey, { label, mcpName, tool }] of COLLECTION_AUTH_BUILTIN_ENTRIES) {
+    for (const [authToolKey, { mcpName, tool }] of COLLECTION_AUTH_BUILTIN_ENTRIES) {
       const matchedConfigEntry = collectionPluginConfig?.tools?.[authToolKey]
       if (!matchedConfigEntry) {
         continue
       }
       // `true` means "enable, no override"; only the object form carries fields.
       const override = typeof matchedConfigEntry === 'object' ? matchedConfigEntry : undefined
+      const annotations = { ...tool.annotations, ...override?.annotations }
       items.push({
         type: 'collectionTool',
         collectionSlug: slug,
         configKey: authToolKey,
-        label,
+        label: annotations.title ?? authToolKey,
         mcpName,
         tool: {
           ...tool,
+          annotations,
           description: override?.description ?? tool.description,
           overrideResponse:
             override?.overrideResponse ??
@@ -191,7 +195,7 @@ const sanitizeCollectionConfig = ({
       type: 'collectionTool',
       collectionSlug: slug,
       configKey,
-      label: configKey,
+      label: customTool.annotations?.title ?? configKey,
       mcpName: configKey,
       tool: customTool,
     })
@@ -217,14 +221,16 @@ const sanitizeGlobalConfig = ({
       continue
     }
     const override = typeof matchedConfigEntry === 'object' ? matchedConfigEntry : undefined
+    const annotations = { ...tool.annotations, ...override?.annotations }
     items.push({
       type: 'globalTool',
       configKey: toolKey,
       globalSlug: slug,
-      label: capitalize(toolKey),
+      label: annotations.title ?? toolKey,
       mcpName,
       tool: {
         ...tool,
+        annotations,
         description: override?.description ?? tool.description,
         overrideResponse:
           override?.overrideResponse ??
@@ -248,7 +254,7 @@ const sanitizeGlobalConfig = ({
       type: 'globalTool',
       configKey,
       globalSlug: slug,
-      label: configKey,
+      label: customTool.annotations?.title ?? configKey,
       mcpName: configKey,
       tool: customTool,
     })
@@ -256,5 +262,3 @@ const sanitizeGlobalConfig = ({
 
   return items
 }
-
-const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1)

@@ -37,6 +37,21 @@ const TABBABLE_SELECTOR = [
   .map((s) => `${s}:not([tabindex="-1"])`)
   .join(', ')
 
+/**
+ * Returns whether the element has a `position: fixed` ancestor (e.g. an open Drawer).
+ * Such popups must be positioned with `fixed` so they don't drift when the background scrolls.
+ */
+const hasFixedAncestor = (element: HTMLElement | null): boolean => {
+  let node = element?.parentElement
+  while (node && node !== document.body) {
+    if (window.getComputedStyle(node).position === 'fixed') {
+      return true
+    }
+    node = node.parentElement
+  }
+  return false
+}
+
 export type PopupProps = {
   backgroundColor?: CSSProperties['backgroundColor']
   boundingRef?: React.RefObject<HTMLElement>
@@ -159,6 +174,12 @@ export const Popup: React.FC<PopupProps> = (props) => {
   const triggerRef = useRef<HTMLDivElement>(null)
 
   /**
+   * Whether the trigger is inside a `position: fixed` ancestor (e.g. a Drawer),
+   * in which case the popup is positioned with `fixed` instead of `absolute`.
+   */
+  const isFixedRef = useRef(false)
+
+  /**
    * Keeps track of whether the popup was opened via keyboard.
    * This is used to determine whether to autofocus the first element in the popup.
    * If the popup was opened via mouse, we do not want to autofocus the first element.
@@ -207,6 +228,12 @@ export const Popup: React.FC<PopupProps> = (props) => {
     const triggerRect = trigger.getBoundingClientRect()
     const popupRect = popup.getBoundingClientRect()
 
+    // Inside a fixed ancestor, use `fixed` (no scroll offset) so background scrolling
+    // doesn't shift the popup. Otherwise use page coordinates (absolute).
+    const useFixed = isFixedRef.current
+    const scrollY = useFixed ? 0 : window.scrollY
+    const scrollX = useFixed ? 0 : window.scrollX
+
     // Gap between the popup and the trigger/viewport edges (in pixels)
     const offset = 10
     // Additional gap used in side mode so the child popup has breathing room from its parent
@@ -225,9 +252,9 @@ export const Popup: React.FC<PopupProps> = (props) => {
       // /////////////////////////////////////
 
       // Top: align with trigger top, clamped to viewport
-      top = triggerRect.top + window.scrollY
-      const maxTop = window.scrollY + window.innerHeight - popupRect.height - offset
-      top = Math.max(window.scrollY + offset, Math.min(top, maxTop))
+      top = triggerRect.top + scrollY
+      const maxTop = scrollY + window.innerHeight - popupRect.height - offset
+      top = Math.max(scrollY + offset, Math.min(top, maxTop))
 
       // Use the parent popup's bounding rect as the reference for left/right positioning
       // so the child appears 4px from the parent popup edge, not just the trigger button.
@@ -249,7 +276,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
         }
       }
 
-      left = left + window.scrollX
+      left = left + scrollX
       // Caret not used in side mode; set a neutral value
       caretLeft = popupRect.width / 2
 
@@ -265,22 +292,22 @@ export const Popup: React.FC<PopupProps> = (props) => {
       let onTop = verticalAlign === 'top'
 
       if (verticalAlign === 'bottom') {
-        top = triggerRect.bottom + window.scrollY + offset
+        top = triggerRect.bottom + scrollY + offset
 
         if (triggerRect.bottom + popupRect.height + offset > window.innerHeight) {
           // Try to flip above — only do so if there's actually enough room
-          const topIfAbove = triggerRect.top + window.scrollY - popupRect.height - offset
-          if (topIfAbove >= window.scrollY) {
+          const topIfAbove = triggerRect.top + scrollY - popupRect.height - offset
+          if (topIfAbove >= scrollY) {
             top = topIfAbove
             onTop = true
           }
           // else: not enough room above either — keep below and let it overflow rather than going off-screen
         }
       } else {
-        top = triggerRect.top + window.scrollY - popupRect.height - offset
+        top = triggerRect.top + scrollY - popupRect.height - offset
 
         if (triggerRect.top - popupRect.height - offset < 0) {
-          top = triggerRect.bottom + window.scrollY + offset
+          top = triggerRect.bottom + scrollY + offset
           onTop = false
         }
       }
@@ -325,9 +352,13 @@ export const Popup: React.FC<PopupProps> = (props) => {
     // /////////////////////////////////////
 
     const newTop = `${Math.round(top)}px`
-    const newLeft = `${Math.round(left + window.scrollX)}px`
+    const newLeft = `${Math.round(left + scrollX)}px`
     const newCaretLeft = `${Math.round(caretLeft)}px`
+    const newPosition = useFixed ? 'fixed' : ''
 
+    if (popup.style.position !== newPosition) {
+      popup.style.position = newPosition
+    }
     if (popup.style.top !== newTop) {
       popup.style.top = newTop
     }
@@ -448,6 +479,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
         // `.popup__hidden-content` takes effect. Without this, the inline
         // styles set during positioning would win over the CSS rule, keeping
         // portaled children (e.g. a ReactSelect menu) visually on-screen.
+        popup.style.position = ''
         popup.style.top = ''
         popup.style.left = ''
       }
@@ -470,9 +502,12 @@ export const Popup: React.FC<PopupProps> = (props) => {
     // after the browser has finished laying out the newly-visible popup
     // content. The rAF call is the authoritative one — it catches cases
     // where the popup height wasn't stable yet during the first call
-    // (e.g. ColumnSelector content rendering after hidden → visible
+    // (e.g. ColumnSelection popup content rendering after hidden → visible
     // class switch), which was causing incorrect flip-to-top decisions.
     // /////////////////////////////////////
+
+    // Decide the positioning strategy once per open.
+    isFixedRef.current = hasFixedAncestor(triggerRef.current)
 
     updatePosition()
     const rafId = requestAnimationFrame(() => {

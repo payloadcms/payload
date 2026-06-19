@@ -2,7 +2,8 @@ import type { PluginLanguage } from '../types.js'
 
 export const thTranslations = {
   'plugin-mcp': {
-    apiKeyDescription: 'คีย์ API ควบคุมว่าลูกค้า MCP สามารถเข้าถึงคอลเลกชัน ทรัพยากร เครื่องมือ และพรอมป์ใดได้บ้าง',
+    apiKeyDescription:
+      'คีย์ API ควบคุมว่าลูกค้า MCP สามารถเข้าถึงคอลเลกชัน ทรัพยากร เครื่องมือ และพรอมป์ใดได้บ้าง',
     apiKeys: 'คีย์ API',
     authentication: 'การยืนยันตัวตน',
     description: 'คำอธิบาย',
@@ -16,9 +17,11 @@ export const thTranslations = {
     noAPIKeys: 'ไม่มีคีย์ API',
     operations: 'การดำเนินการ',
     overrideAccess: 'ข้ามการควบคุมการเข้าถึง',
-    overrideAccessDescription: 'เมื่อเลือก คีย์นี้จะข้ามการควบคุมการเข้าถึงของ Payload ในทุกการดำเนินการ เว้นไว้หากไม่มีเหตุผลเฉพาะ',
+    overrideAccessDescription:
+      'เมื่อเลือก คีย์นี้จะข้ามการควบคุมการเข้าถึงของ Payload ในทุกการดำเนินการ เว้นไว้หากไม่มีเหตุผลเฉพาะ',
     permissions: 'สิทธิ์',
-    permissionsDescription: 'อนุญาตให้ลูกค้า MCP เข้าถึงคอลเลกชัน เครื่องมือ ทรัพยากร และพรอมป์ต่อไปนี้',
+    permissionsDescription:
+      'อนุญาตให้ลูกค้า MCP เข้าถึงคอลเลกชัน เครื่องมือ ทรัพยากร และพรอมป์ต่อไปนี้',
     prompts: 'พรอมป์',
     resources: 'ทรัพยากร',
     server: 'เซิร์ฟเวอร์',

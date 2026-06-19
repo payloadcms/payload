@@ -35,10 +35,9 @@
   .rich-text-lexical__wrap {
     width: 100%;
     position: relative;
-
-    > .field-description {
-      margin-top: var(--spacer-2);
-    }
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
   }
 
   @keyframes fadeInBackground {

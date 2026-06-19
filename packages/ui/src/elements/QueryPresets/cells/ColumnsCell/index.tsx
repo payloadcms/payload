@@ -4,7 +4,7 @@ import { toWords, transformColumnsToSearchParams } from 'payload/shared'
 import React from 'react'
 
 import { Pill } from '../../../Pill/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'query-preset-columns-cell'
 

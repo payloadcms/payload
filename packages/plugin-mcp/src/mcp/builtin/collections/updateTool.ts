@@ -19,6 +19,13 @@ const DEFAULT_DESCRIPTION =
   'Update documents in any collection by passing the collection slug and data.'
 
 export const updateDocumentTool = defineCollectionTool({
+  annotations: {
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'Update Document',
+  },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     id: z.union([z.string(), z.number()]).describe('The ID of the document to update').optional(),
@@ -55,9 +62,9 @@ export const updateDocumentTool = defineCollectionTool({
       .optional()
       .default(false),
     select: z
-      .string()
+      .record(z.string(), z.unknown())
       .describe(
-        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"title": true}',
       )
       .optional(),
     where: whereSchema
@@ -112,16 +119,6 @@ export const updateDocumentTool = defineCollectionTool({
 
     const whereClause: Where = where ?? {}
 
-    let selectClause: SelectType | undefined
-    if (select) {
-      try {
-        selectClause = JSON.parse(select) as SelectType
-      } catch {
-        logger.warn(`Invalid select clause JSON: ${select}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
-      }
-    }
-
     if (id) {
       const result = await payload.update({
         id,
@@ -136,7 +133,7 @@ export const updateDocumentTool = defineCollectionTool({
         ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
         ...(locale ? { locale } : {}),
         ...(fallbackLocale ? { fallbackLocale } : {}),
-        ...(selectClause ? { select: selectClause } : {}),
+        ...(select ? { select: select as SelectType } : {}),
       })
 
       return {
@@ -163,7 +160,7 @@ export const updateDocumentTool = defineCollectionTool({
       ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
       ...(locale ? { locale } : {}),
       ...(fallbackLocale ? { fallbackLocale } : {}),
-      ...(selectClause ? { select: selectClause } : {}),
+      ...(select ? { select: select as SelectType } : {}),
     })
 
     const docs = result.docs || []
