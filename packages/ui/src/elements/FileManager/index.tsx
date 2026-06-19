@@ -2,7 +2,7 @@
 import type { SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL, isImage } from 'payload/shared'
+import { formatAdminURL, formatFilesize, isImage } from 'payload/shared'
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
@@ -442,6 +442,13 @@ export const FileManager: React.FC<FileManagerProps> = ({
                       path="filename"
                       value={filename || value.name}
                     />
+                    {(value.size || value.type) && (
+                      <span className={`${baseClass}__selected-meta`}>
+                        {[value.size ? formatFilesize(value.size) : null, value.type]
+                          .filter(Boolean)
+                          .join(' – ')}
+                      </span>
+                    )}
                   </div>
                 </Fragment>
               )}

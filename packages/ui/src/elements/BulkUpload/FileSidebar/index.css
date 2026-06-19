@@ -181,11 +181,14 @@
 
   .file-selections__remove--overlay {
     position: absolute;
-    transform: translateY(-50%);
     top: 50%;
-    bottom: 50%;
     right: var(--rowPadding);
-    height: 20px;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
     border-radius: var(--radius-medium);
     cursor: pointer;
 

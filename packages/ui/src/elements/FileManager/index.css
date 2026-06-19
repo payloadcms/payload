@@ -98,6 +98,13 @@
     gap: var(--spacer-2);
   }
 
+  .file-manager__selected-meta {
+    color: var(--color-text-tertiary);
+    font-family: var(--text-body-small-font-family);
+    font-size: var(--text-body-small-font-size);
+    line-height: var(--text-body-small-line-height);
+  }
+
   .file-manager__hidden-input {
     display: none;
   }
