@@ -17,6 +17,7 @@ import type {
   TypedUser,
 } from 'payload'
 
+import type { GetAuthorizedMCPArgs } from './endpoint/access.js'
 import type {
   MCPCollectionAuthToolName,
   MCPCollectionBuiltinName,
@@ -61,7 +62,6 @@ export type TypedInput<TSchema> = TSchema extends StandardSchemaWithJSON
   : Record<string, unknown>
 
 export type MCPAccessArgs = {
-  authorizedMCP: AuthorizedMCP
   req: PayloadRequest
 }
 
@@ -235,12 +235,11 @@ export type MCPPluginConfig = {
     verboseLogs?: boolean
   }
   /** Replace the default API-key auth with a custom resolver. */
-  overrideAuth?: (args: {
-    getAPIKeyUser: (headers?: Headers) => Promise<TypedUser>
-    getAuthorizedMCP: (args: { overrideAccess?: boolean; user: null | TypedUser }) => AuthorizedMCP
-    pluginConfig: SanitizedMCPPluginConfig
-    req: PayloadRequest
-  }) => MaybePromise<AuthorizedMCP>
+  overrideGetAuthorizedMCP?: (
+    args: {
+      pluginConfig: SanitizedMCPPluginConfig
+    } & GetAuthorizedMCPArgs,
+  ) => MaybePromise<AuthorizedMCP>
   prompts?: Record<string, Prompt>
   resources?: Record<string, Resource>
   /** Cross-cutting tools (not scoped to any collection or global). */
@@ -249,7 +248,7 @@ export type MCPPluginConfig = {
 
 export type SanitizedMCPPluginConfig = {
   items: MCPItem[]
-} & Pick<MCPPluginConfig, 'disabled' | 'mcp' | 'overrideAuth'>
+} & Pick<MCPPluginConfig, 'disabled' | 'mcp' | 'overrideGetAuthorizedMCP'>
 
 export type MCPServerOptions = {
   options?: ConstructorParameters<typeof McpServer>[1]

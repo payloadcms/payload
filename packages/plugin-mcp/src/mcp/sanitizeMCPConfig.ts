@@ -101,7 +101,7 @@ export const sanitizeMCPConfig = ({
     disabled: pluginConfig.disabled,
     items,
     mcp: pluginConfig.mcp,
-    overrideAuth: pluginConfig.overrideAuth,
+    overrideGetAuthorizedMCP: pluginConfig.overrideGetAuthorizedMCP,
   }
 }
 

@@ -1,8 +1,8 @@
-import type { PayloadRequest, SanitizedPermissions, TypedUser } from 'payload'
+import type { PayloadRequest, SanitizedPermissions } from 'payload'
 
 import { getAccessResults, UnauthorizedError } from 'payload'
 
-import type { AuthorizedMCP } from '../types.js'
+import type { AuthorizedMCP, MCPItem } from '../types.js'
 
 import {
   COLLECTION_BUILTINS,
@@ -13,6 +13,11 @@ import {
 import { getLogger } from '../utils/getLogger.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 
+export type GetAuthorizedMCPArgs = {
+  req: PayloadRequest
+  skipAuth?: boolean
+}
+
 /**
  * Resolves the MCP caller and returns the MCP surface authorized for that request.
  *
@@ -20,150 +25,109 @@ import { getPluginConfig } from '../utils/getPluginConfig.js'
  * 1. Payload collection/global permissions determine whether built-in operation tools are shown.
  * 2. MCP `access` callbacks can further hide any configured tool, prompt, or resource.
  */
-export const getAuthorizedMCP: (args: {
-  req: PayloadRequest
-  skipAuth?: boolean
-}) => Promise<AuthorizedMCP> = async ({ req, skipAuth = false }) => {
+export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<AuthorizedMCP> = async ({
+  req,
+  skipAuth = false,
+}) => {
   const logger = getLogger({ payload: req.payload })
   const pluginConfig = getPluginConfig({ config: req.payload.config })
 
-  const getAuthorizedMCPForUser = ({
-    overrideAccess = false,
-    user,
-  }: {
-    overrideAccess?: boolean
-    user: null | TypedUser
-  }): AuthorizedMCP => ({
-    items: pluginConfig.items,
-    overrideAccess,
-    user,
-  })
-
-  if (skipAuth) {
-    return await filterAuthorizedMCPItems({
-      authorizedMCP: getAuthorizedMCPForUser({
-        overrideAccess: true,
-        user: req.user ?? null,
-      }),
+  if (pluginConfig.overrideGetAuthorizedMCP) {
+    return await pluginConfig.overrideGetAuthorizedMCP({
+      pluginConfig,
       req,
+      skipAuth,
     })
   }
 
-  if (pluginConfig.overrideAuth) {
-    return await filterAuthorizedMCPItems({
-      authorizedMCP: await pluginConfig.overrideAuth({
-        getAPIKeyUser: (headers) => getAPIKeyUser({ headers, req }),
-        getAuthorizedMCP: getAuthorizedMCPForUser,
-        pluginConfig,
-        req,
-      }),
-      req,
-    })
-  }
-
-  if (process.env.NODE_ENV === 'development' && !req.headers.get('Authorization')) {
-    logger.info('Dev mode: skipping API key check, using session user')
-    return await filterAuthorizedMCPItems({
-      authorizedMCP: getAuthorizedMCPForUser({
-        overrideAccess: true,
-        user: req.user ?? null,
-      }),
-      req,
-    })
-  }
-
-  return await filterAuthorizedMCPItems({
-    authorizedMCP: getAuthorizedMCPForUser({ user: await getAPIKeyUser({ req }) }),
-    req,
-  })
-}
-
-const getAPIKeyUser = async ({
-  headers,
-  req,
-}: {
-  headers?: Headers
-  req: PayloadRequest
-}): Promise<TypedUser> => {
-  const user = headers
-    ? (await req.payload.auth({ headers: new Headers(headers), req })).user
+  req.user = req.headers
+    ? (await req.payload.auth({ headers: new Headers(req.headers), req })).user
     : req.user
 
-  if (user?._strategy !== 'api-key') {
+  if (process.env.NODE_ENV === 'development' && !req.user) {
+    logger.info('Dev mode: skipping API key check, using session user')
+    return {
+      items: pluginConfig.items,
+      overrideAccess: true,
+      user: req.user,
+    }
+  }
+
+  if (!skipAuth && req.user?._strategy !== 'api-key') {
     throw new UnauthorizedError()
   }
 
-  return user
+  return {
+    items: await filterMCPItems({
+      checkPermissions: !skipAuth,
+      items: pluginConfig.items,
+      req,
+    }),
+    overrideAccess: skipAuth,
+    user: req.user,
+  }
 }
 
-const filterAuthorizedMCPItems = async ({
-  authorizedMCP,
+export const filterMCPItems = async ({
+  checkPermissions,
+  items,
   req,
 }: {
-  authorizedMCP: AuthorizedMCP
+  /**
+   * Whether to check if the user has access to the underlying collection/global for built-in tools.
+   */
+  checkPermissions: boolean
+  items: MCPItem[]
   req: PayloadRequest
-}): Promise<AuthorizedMCP> => {
-  const items: AuthorizedMCP['items'] = []
-  // Layer 1: use Payload access results to hide built-in collection/global
-  // operation tools the caller cannot run. `overrideAccess` skips this layer.
-  const permissions = authorizedMCP.overrideAccess
-    ? null
-    : await getAccessResults({ req: { ...req, user: authorizedMCP.user } })
+}): Promise<MCPItem[]> => {
+  const authorizedItems: MCPItem[] = []
 
-  for (const item of authorizedMCP.items) {
-    if (item.type === 'collectionTool') {
-      // Built-in collection tools map to Payload collection operations.
-      // Custom collection tools have no operation gate here.
-      const operation =
-        COLLECTION_BUILTINS[item.configKey as MCPCollectionBuiltinName]?.accessOperation
+  const permissions = checkPermissions ? await getAccessResults({ req }) : undefined
 
-      if (
-        operation &&
-        permissions &&
-        !permissions.collections?.[item.collectionSlug]?.[operation]
-      ) {
-        continue
-      }
-
-      // Layer 2: per-tool access callbacks can further hide the item.
-      if (
-        item.tool.access &&
-        !(await item.tool.access({
-          authorizedMCP,
-          collectionSlug: item.collectionSlug,
-          req,
-        }))
-      ) {
-        continue
-      }
-      items.push(item)
+  for (const item of items) {
+    if (!(await checkItemAccess({ item, req }))) {
       continue
     }
-
-    if (item.type === 'globalTool') {
-      // Built-in global tools map to Payload global operations.
-      // Custom global tools have no operation gate here.
-      const operation = GLOBAL_BUILTINS[item.configKey as MCPGlobalBuiltinName]?.accessOperation
-
-      if (operation && permissions && !permissions.globals?.[item.globalSlug]?.[operation]) {
-        continue
-      }
-
-      // Layer 2: per-tool access callbacks can further hide the item.
-      if (
-        item.tool.access &&
-        !(await item.tool.access({
-          authorizedMCP,
-          globalSlug: item.globalSlug,
-          req,
-        }))
-      ) {
-        continue
-      }
-      items.push(item)
+    if (permissions && !checkItemPermissions({ item, permissions })) {
       continue
     }
+    authorizedItems.push(item)
+  }
 
+  return authorizedItems
+}
+
+/**
+ * Runs MCP item access callbacks
+ */
+const checkItemAccess = async ({
+  item,
+  req,
+}: {
+  item: MCPItem
+  req: PayloadRequest
+}): Promise<boolean> => {
+  if (item.type === 'collectionTool') {
+    if (
+      item.tool.access &&
+      !(await item.tool.access({
+        collectionSlug: item.collectionSlug,
+        req,
+      }))
+    ) {
+      return false
+    }
+  } else if (item.type === 'globalTool') {
+    if (
+      item.tool.access &&
+      !(await item.tool.access({
+        globalSlug: item.globalSlug,
+        req,
+      }))
+    ) {
+      return false
+    }
+  } else {
     const access =
       item.type === 'prompt'
         ? item.prompt.access
@@ -172,15 +136,42 @@ const filterAuthorizedMCPItems = async ({
           : item.tool.access
 
     // Prompts, resources, and top-level tools only have the MCP access-callback layer.
-    if (access && !(await access({ authorizedMCP, req }))) {
-      continue
+    if (access && !(await access({ req }))) {
+      return false
     }
-
-    items.push(item)
   }
 
-  return {
-    ...authorizedMCP,
-    items,
+  return true
+}
+
+/**
+ * Checks if built-in items have permissions for the current user
+ */
+const checkItemPermissions = ({
+  item,
+  permissions,
+}: {
+  item: MCPItem
+  permissions: SanitizedPermissions
+}): boolean => {
+  if (item.type === 'collectionTool') {
+    // Built-in collection tools map to Payload collection operations.
+    // Custom collection tools have no operation gate here.
+    const operation =
+      COLLECTION_BUILTINS[item.configKey as MCPCollectionBuiltinName]?.accessOperation
+
+    if (operation && !permissions.collections?.[item.collectionSlug]?.[operation]) {
+      return false
+    }
+  } else if (item.type === 'globalTool') {
+    // Built-in global tools map to Payload global operations.
+    // Custom global tools have no operation gate here.
+    const operation = GLOBAL_BUILTINS[item.configKey as MCPGlobalBuiltinName]?.accessOperation
+
+    if (operation && !permissions.globals?.[item.globalSlug]?.[operation]) {
+      return false
+    }
   }
+
+  return true
 }

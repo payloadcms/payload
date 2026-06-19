@@ -37,6 +37,11 @@
       "import": "./src/stdio.ts",
       "types": "./src/stdio.ts",
       "default": "./src/stdio.ts"
+    },
+    "./internal": {
+      "import": "./src/internal.ts",
+      "types": "./src/internal.ts",
+      "default": "./src/internal.ts"
     }
   },
   "main": "./src/index.ts",
@@ -89,6 +94,11 @@
         "import": "./dist/stdio.js",
         "types": "./dist/stdio.d.ts",
         "default": "./dist/stdio.js"
+      },
+      "./internal": {
+        "import": "./dist/internal.js",
+        "types": "./dist/internal.d.ts",
+        "default": "./dist/internal.js"
       }
     },
     "main": "./dist/index.js",
