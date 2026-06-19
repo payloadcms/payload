@@ -23,7 +23,7 @@
       color: var(--color-text-secondary);
 
       tr {
-        border-top: 1px solid var(--color-border);
+        border-top: var(--stroke-width-small) solid var(--color-border);
 
         &:hover {
           background: var(--color-bg-secondary);
@@ -85,10 +85,7 @@
   .slot-table__tr {
     position: relative;
     line-height: 1;
-    border-top: 1px solid var(--color-border);
-  }
-
-  .slot-table__tr--clickable {
+    border-top: var(--stroke-width-small) solid var(--color-border);
     cursor: pointer;
 
     &:hover {
