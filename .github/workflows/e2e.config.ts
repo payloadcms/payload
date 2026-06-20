@@ -69,6 +69,7 @@ export default createE2EConfig([
   // TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
   // it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
   { file: 'lexical__collections__LexicalListsFeature', shards: 1, parallel: false },
+  { file: 'lexical__collections__LexicalLinkAutosave', shards: 1, parallel: false },
   { file: 'lexical__collections__LexicalViewsFrontend', shards: 1, parallel: false },
   { file: 'lexical__collections__LexicalViewsProvider', shards: 1, parallel: false },
   { file: 'lexical__collections__LexicalViewsProviderDefault', shards: 1, parallel: false },
