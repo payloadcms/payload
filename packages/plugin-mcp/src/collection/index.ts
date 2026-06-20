@@ -5,6 +5,7 @@ import { createAPIKeyFields } from 'payload'
 import type { SanitizedMCPPluginConfig } from '../types.js'
 
 import { getAccessField } from './getAccessField.js'
+import { rotateMcpApiKeyHandler } from './rotateEndpoint.js'
 
 const apiKeyStorageFields = createAPIKeyFields({
   apiKeyField: {
@@ -40,6 +41,13 @@ export const getAPIKeysCollection = ({
       group: false,
       useAsTitle: 'label',
     },
+    endpoints: [
+      {
+        handler: rotateMcpApiKeyHandler,
+        method: 'post',
+        path: '/:id/rotate',
+      },
+    ],
     fields: [
       ...apiKeyStorageFields,
       getAccessField({ pluginConfig }),
