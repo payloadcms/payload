@@ -7,9 +7,11 @@ export type PluginLanguage = Language<{
     apiKeyDescription: string
     apiKeys: string
     authentication: string
+    confirmRotation: string
     description: string
     descriptionDescription: string
     dismiss: string
+    errorRotatingAPIKey: string
     keepKeyPrivate: string
     keyPrivateDescription: string
     lastUsed: string
@@ -23,6 +25,8 @@ export type PluginLanguage = Language<{
     permissionsDescription: string
     prompts: string
     resources: string
+    rotate: string
+    rotateAPIKey: string
     server: string
     title: string
     titleDescription: string
