@@ -102,4 +102,15 @@
     line-height: 1;
     padding: 0;
   }
+
+  .mcp-api-key-field__actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--spacer-2) var(--spacer-3) var(--spacer-3);
+    border-block-start: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .mcp-api-key-field__rotate {
+    margin: 0;
+  }
 }
