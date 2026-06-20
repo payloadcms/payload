@@ -98,6 +98,17 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
+  collectionsInput: {
+    users: UserInput;
+    products: ProductInput;
+    customers: CustomerInput;
+    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
+    'payload-kv': PayloadKvInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+  };
+  globalsInput: {};
   user: User | Customer;
   jobs: {
     tasks: unknown;
@@ -489,6 +500,197 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string | null;
+  name?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_input".
+ */
+export interface ProductInput {
+  id?: string | null;
+  name?: string | null;
+  /**
+   * All pricing information is managed in Stripe and will be reflected here.
+   */
+  price?: {
+    stripePriceID?: string | null;
+    stripeJSON?: string | null;
+  };
+  stripeID?: string | null;
+  skipSync?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "customers_input".
+ */
+export interface CustomerInput {
+  id?: string | null;
+  name?: string | null;
+  /**
+   * All subscriptions are managed in Stripe and will be reflected here. Use the link in the sidebar to go directly to this customer in Stripe to begin managing their subscriptions.
+   */
+  subscriptions?:
+    | {
+        stripeSubscriptionID?: string | null;
+        stripeProductID?: string | null;
+        product?: string | null;
+        status?:
+          | ('active' | 'canceled' | 'incomplete' | 'incomplete_expired' | 'past_due' | 'trialing' | 'unpaid')
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  stripeID?: string | null;
+  skipSync?: boolean | null;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_input".
+ */
+export interface PayloadMcpApiKeyInput {
+  id?: string | null;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string;
+  overrideAccess?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string | null;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string | null;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'products';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'customers';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user:
+    | {
+        relationTo: 'users';
+        value: string;
+      }
+    | {
+        relationTo: 'customers';
+        value: string;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string | null;
+  user:
+    | {
+        relationTo: 'users';
+        value: string;
+      }
+    | {
+        relationTo: 'customers';
+        value: string;
+      };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string | null;
+  name?: string | null;
+  batch?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

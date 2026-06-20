@@ -93,17 +93,23 @@ export const getFieldToJSONSchema: (args: {
       : nodeUnionJson
 
     const hash = createHash('sha256').update(hashInput).digest('hex').slice(0, 8).toUpperCase()
-    const nodeUnionName = `LexicalNodes_${hash}`
+
+    // Distinguish an input node union from an output one with an `_Input` suffix - unless an
+    // identical output union already exists (a relationship-free editor whose input == output), in
+    // which case share it. The content hash means differing unions split and identical ones merge.
+    const sharesOutputUnion = variant === 'input' && interfaceNameDefinitions.has(`LexicalNodes_${hash}`)
+    const resolvedHash = variant === 'input' && !sharesOutputUnion ? `${hash}_Input` : hash
+    const nodeUnionName = `LexicalNodes_${resolvedHash}`
 
     // Replacing the hash resolves the union name and any feature-derived
     // sibling names in one pass.
     const replacePlaceholder = (schemaString: string) =>
-      JSON.parse(schemaString.replaceAll(NODE_UNION_HASH_PLACEHOLDER, hash)) as JSONSchema4
+      JSON.parse(schemaString.replaceAll(NODE_UNION_HASH_PLACEHOLDER, resolvedHash)) as JSONSchema4
 
     // Resolve placeholders left in feature-registered definitions so Map keys
     // and `$ref` targets line up.
     for (const [oldKey, schema] of [...interfaceNameDefinitions.entries()]) {
-      const newKey = oldKey.replaceAll(NODE_UNION_HASH_PLACEHOLDER, hash)
+      const newKey = oldKey.replaceAll(NODE_UNION_HASH_PLACEHOLDER, resolvedHash)
       const resolvedSchema = replacePlaceholder(JSON.stringify(schema))
       if (newKey !== oldKey) {
         interfaceNameDefinitions.delete(oldKey)

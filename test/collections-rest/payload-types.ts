@@ -115,6 +115,26 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
+  collectionsInput: {
+    posts: PostInput;
+    point: PointInput;
+    relation: RelationInput;
+    dummy: DummyInput;
+    'custom-id': CustomIdInput;
+    'custom-id-number': CustomIdNumberInput;
+    'error-on-hooks': ErrorOnHookInput;
+    endpoints: EndpointInput;
+    'disabled-bulk-edit-docs': DisabledBulkEditDocInput;
+    'disabled-bulk-delete-docs': DisabledBulkDeleteDocInput;
+    'large-documents': LargeDocumentInput;
+    users: UserInput;
+    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
+    'payload-kv': PayloadKvInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+  };
+  globalsInput: {};
   user: User;
   jobs: {
     tasks: unknown;
@@ -678,6 +698,296 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_input".
+ */
+export interface PostInput {
+  id?: string | null;
+  title?: string | null;
+  description?: string | null;
+  number?: number | null;
+  fakeLocalization?: string | null;
+  relationField?: string | null;
+  relationHasManyField?: string[] | null;
+  relationMultiRelationTo?:
+    | ({
+        relationTo: 'relation';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'dummy';
+        value: string;
+      } | null);
+  relationMultiRelationToHasMany?:
+    | (
+        | {
+            relationTo: 'relation';
+            value: string;
+          }
+        | {
+            relationTo: 'dummy';
+            value: string;
+          }
+      )[]
+    | null;
+  restrictedField?: string | null;
+  D1?: {
+    D2?: {
+      D3?: {
+        D4?: string | null;
+      };
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "point_input".
+ */
+export interface PointInput {
+  id?: string | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation_input".
+ */
+export interface RelationInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "dummy_input".
+ */
+export interface DummyInput {
+  id?: string | null;
+  title?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id_input".
+ */
+export interface CustomIdInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-number_input".
+ */
+export interface CustomIdNumberInput {
+  id?: number | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "error-on-hooks_input".
+ */
+export interface ErrorOnHookInput {
+  id?: string | null;
+  text?: string | null;
+  errorBeforeChange?: boolean | null;
+  errorAfterDelete?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "endpoints_input".
+ */
+export interface EndpointInput {
+  id?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disabled-bulk-edit-docs_input".
+ */
+export interface DisabledBulkEditDocInput {
+  id?: string | null;
+  text?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disabled-bulk-delete-docs_input".
+ */
+export interface DisabledBulkDeleteDocInput {
+  id?: string | null;
+  text?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "large-documents_input".
+ */
+export interface LargeDocumentInput {
+  id?: string | null;
+  array?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_input".
+ */
+export interface PayloadMcpApiKeyInput {
+  id?: string | null;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string;
+  overrideAccess?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string | null;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string | null;
+  document?:
+    | ({
+        relationTo: 'posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'point';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relation';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'dummy';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'custom-id';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'custom-id-number';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'error-on-hooks';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'endpoints';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'disabled-bulk-edit-docs';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'disabled-bulk-delete-docs';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'large-documents';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string | null;
+  name?: string | null;
+  batch?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -121,6 +121,29 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
+  collectionsInput: {
+    'fields-relationship': FieldsRelationshipInput;
+    'relation-filter-false': RelationFilterFalseInput;
+    'relation-filter-true': RelationFilterTrueInput;
+    'relation-one': RelationOneInput;
+    'relation-two': RelationTwoInput;
+    'relation-restricted': RelationRestrictedInput;
+    'relation-with-title': RelationWithTitleInput;
+    'relation-updated-externally': RelationUpdatedExternallyInput;
+    'collection-1': Collection1Input;
+    'collection-2': Collection2Input;
+    videos: VideoInput;
+    podcasts: PodcastInput;
+    'mixed-media': MixedMediaInput;
+    'versioned-relationship-field': VersionedRelationshipFieldInput;
+    users: UserInput;
+    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
+    'payload-kv': PayloadKvInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+  };
+  globalsInput: {};
   user: User;
   jobs: {
     tasks: unknown;
@@ -813,6 +836,390 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-relationship_input".
+ */
+export interface FieldsRelationshipInput {
+  id?: string | null;
+  relationToSelf?: string | null;
+  relationship?: string | null;
+  relationshipHasMany?: string[] | null;
+  relationshipMultiple?:
+    | ({
+        relationTo: 'relation-one';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relation-two';
+        value: string;
+      } | null);
+  relationshipHasManyMultiple?:
+    | (
+        | {
+            relationTo: 'relation-one';
+            value: string;
+          }
+        | {
+            relationTo: 'relation-two';
+            value: string;
+          }
+      )[]
+    | null;
+  relationshipRestricted?: string | null;
+  relationshipWithTitle?: string | null;
+  /**
+   * This will filter the relationship options based on id, which is the same as the relationship field in this document
+   */
+  relationshipFilteredByID?: string | null;
+  /**
+   * This will filter the relationship options if the filter field in this document is set to "Include me"
+   */
+  relationshipFilteredByField?: string | null;
+  /**
+   * This will filter the relationship options if the filter field in this document is set to "Include me"
+   */
+  filteredByFieldInCollapsible?: string | null;
+  array?:
+    | {
+        /**
+         * This will filter the relationship options if the filter field in this document is set to "Include me"
+         */
+        filteredByFieldInArray?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  relationshipFilteredAsync?: string | null;
+  relationshipManyFiltered?:
+    | (
+        | {
+            relationTo: 'relation-with-title';
+            value: string;
+          }
+        | {
+            relationTo: 'relation-filter-false';
+            value: string;
+          }
+        | {
+            relationTo: 'relation-filter-true';
+            value: string;
+          }
+        | {
+            relationTo: 'relation-one';
+            value: string;
+          }
+      )[]
+    | null;
+  filter?: string | null;
+  relationshipReadOnly?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-filter-false_input".
+ */
+export interface RelationFilterFalseInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-filter-true_input".
+ */
+export interface RelationFilterTrueInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-one_input".
+ */
+export interface RelationOneInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-two_input".
+ */
+export interface RelationTwoInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-restricted_input".
+ */
+export interface RelationRestrictedInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-with-title_input".
+ */
+export interface RelationWithTitleInput {
+  id?: string | null;
+  name?: string | null;
+  meta?: {
+    title?: string | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-updated-externally_input".
+ */
+export interface RelationUpdatedExternallyInput {
+  id?: string | null;
+  relationPrePopulate?: string | null;
+  relationHasMany?: string[] | null;
+  relationToManyHasMany?:
+    | (
+        | {
+            relationTo: 'collection-1';
+            value: string;
+          }
+        | {
+            relationTo: 'collection-2';
+            value: string;
+          }
+      )[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-1_input".
+ */
+export interface Collection1Input {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-2_input".
+ */
+export interface Collection2Input {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "videos_input".
+ */
+export interface VideoInput {
+  id: number;
+  title?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "podcasts_input".
+ */
+export interface PodcastInput {
+  id: number;
+  title?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "mixed-media_input".
+ */
+export interface MixedMediaInput {
+  id?: string | null;
+  relatedMedia?:
+    | (
+        | {
+            relationTo: 'videos';
+            value: number;
+          }
+        | {
+            relationTo: 'podcasts';
+            value: number;
+          }
+      )[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versioned-relationship-field_input".
+ */
+export interface VersionedRelationshipFieldInput {
+  id?: string | null;
+  title: string;
+  relationshipField?:
+    | {
+        relationTo: 'collection-1';
+        value: string;
+      }[]
+    | null;
+  relatedVersionedDoc?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_input".
+ */
+export interface PayloadMcpApiKeyInput {
+  id?: string | null;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string;
+  overrideAccess?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string | null;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string | null;
+  document?:
+    | ({
+        relationTo: 'fields-relationship';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relation-filter-false';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relation-filter-true';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relation-one';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relation-two';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relation-restricted';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relation-with-title';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relation-updated-externally';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'collection-1';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'collection-2';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'videos';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'podcasts';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'mixed-media';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'versioned-relationship-field';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string | null;
+  name?: string | null;
+  batch?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

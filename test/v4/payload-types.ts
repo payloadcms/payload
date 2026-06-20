@@ -60,6 +60,948 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_3647D6E1".
+ */
+export type LexicalNodes_3647D6E1 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_3647D6E1>
+  | SerializedInlineBlockNode<InlineCta>
+  | SerializedAutoLinkNode<LexicalNodes_3647D6E1, LexicalLinkFields_B540ABDC>
+  | SerializedLinkNode<LexicalNodes_3647D6E1, LexicalLinkFields_B540ABDC>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_3647D6E1>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedListNode<LexicalNodes_3647D6E1>
+  | SerializedListItemNode<LexicalNodes_3647D6E1>
+  | SerializedHeadingNode<LexicalNodes_3647D6E1>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_523AE04C_Input".
+ */
+export type LexicalNodes_523AE04C_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_523AE04C_Input>
+  | SerializedInlineBlockNode<InlineCta>
+  | SerializedAutoLinkNode<LexicalNodes_523AE04C_Input, LexicalLinkFields_B540ABDC>
+  | SerializedLinkNode<LexicalNodes_523AE04C_Input, LexicalLinkFields_B540ABDC>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNodeInput<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_523AE04C_Input>
+  | SerializedRelationshipNodeInput<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedListNode<LexicalNodes_523AE04C_Input>
+  | SerializedListItemNode<LexicalNodes_523AE04C_Input>
+  | SerializedHeadingNode<LexicalNodes_523AE04C_Input>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_67B489CE".
+ */
+export type LexicalNodes_67B489CE =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_67B489CE>
+  | SerializedBlockNode<Callout>
+  | SerializedInlineBlockNode<Kbd>
+  | SerializedUploadNode<'uploads', LexicalUploadFields_7C90EEAC>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_67B489CE>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_67B489CE, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_67B489CE, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_67B489CE>
+  | SerializedListItemNode<LexicalNodes_67B489CE>
+  | SerializedHeadingNode<LexicalNodes_67B489CE>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_355C7AF5_Input".
+ */
+export type LexicalNodes_355C7AF5_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_355C7AF5_Input>
+  | SerializedBlockNode<Callout>
+  | SerializedInlineBlockNode<Kbd>
+  | SerializedUploadNodeInput<'uploads', LexicalUploadFields_7C90EEAC>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_355C7AF5_Input>
+  | SerializedRelationshipNodeInput<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_355C7AF5_Input, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_355C7AF5_Input, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_355C7AF5_Input>
+  | SerializedListItemNode<LexicalNodes_355C7AF5_Input>
+  | SerializedHeadingNode<LexicalNodes_355C7AF5_Input>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_5DEE47AF".
+ */
+export type LexicalNodes_5DEE47AF =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_5DEE47AF>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_5DEE47AF>
+  | SerializedUploadNode<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_5DEE47AF>
+  | SerializedListNode<LexicalNodes_5DEE47AF>
+  | SerializedListItemNode<LexicalNodes_5DEE47AF>
+  | SerializedAutoLinkNode<LexicalNodes_5DEE47AF, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_5DEE47AF, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_FE3427D9".
+ */
+export type LexicalNodes_FE3427D9 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_FE3427D9>
+  | SerializedBlockNode<Banner>
+  | SerializedInlineBlockNode<Highlight>
+  | SerializedUploadNode<'uploads', LexicalUploadFields_309347F3>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_FE3427D9>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_FE3427D9, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_FE3427D9, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_FE3427D9>
+  | SerializedListItemNode<LexicalNodes_FE3427D9>
+  | SerializedHeadingNode<LexicalNodes_FE3427D9>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_831A4A70".
+ */
+export type LexicalNodes_831A4A70 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_831A4A70>
+  | SerializedTableNode<LexicalNodes_831A4A70>
+  | SerializedTableCellNode<LexicalNodes_831A4A70>
+  | SerializedTableRowNode<LexicalNodes_831A4A70>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_831A4A70>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_831A4A70, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_831A4A70, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_831A4A70>
+  | SerializedListItemNode<LexicalNodes_831A4A70>
+  | SerializedHeadingNode<LexicalNodes_831A4A70>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_56B26BA1".
+ */
+export type LexicalNodes_56B26BA1 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_56B26BA1>
+  | SerializedBlockNode<Code>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_56B26BA1>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_56B26BA1, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_56B26BA1, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_56B26BA1>
+  | SerializedListItemNode<LexicalNodes_56B26BA1>
+  | SerializedHeadingNode<LexicalNodes_56B26BA1>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_1329E8DC".
+ */
+export type LexicalNodes_1329E8DC =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_1329E8DC>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_1329E8DC>
+  | SerializedRelationshipNode<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_1329E8DC, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_1329E8DC, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_1329E8DC>
+  | SerializedListItemNode<LexicalNodes_1329E8DC>
+  | SerializedHeadingNode<LexicalNodes_1329E8DC>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_C3EC708E_Input".
+ */
+export type LexicalNodes_C3EC708E_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_C3EC708E_Input>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_C3EC708E_Input>
+  | SerializedUploadNodeInput<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_C3EC708E_Input>
+  | SerializedListNode<LexicalNodes_C3EC708E_Input>
+  | SerializedListItemNode<LexicalNodes_C3EC708E_Input>
+  | SerializedAutoLinkNode<LexicalNodes_C3EC708E_Input, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_C3EC708E_Input, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNodeInput<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_503034A3_Input".
+ */
+export type LexicalNodes_503034A3_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_503034A3_Input>
+  | SerializedBlockNode<BannerInput>
+  | SerializedInlineBlockNode<Highlight>
+  | SerializedUploadNodeInput<'uploads', LexicalUploadFields_33EB4B4A>
+  | SerializedHorizontalRuleNode
+  | SerializedQuoteNode<LexicalNodes_503034A3_Input>
+  | SerializedRelationshipNodeInput<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_503034A3_Input, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_503034A3_Input, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_503034A3_Input>
+  | SerializedListItemNode<LexicalNodes_503034A3_Input>
+  | SerializedHeadingNode<LexicalNodes_503034A3_Input>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_6E50E220_Input".
+ */
+export type LexicalNodes_6E50E220_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_6E50E220_Input>
+  | SerializedTableNode<LexicalNodes_6E50E220_Input>
+  | SerializedTableCellNode<LexicalNodes_6E50E220_Input>
+  | SerializedTableRowNode<LexicalNodes_6E50E220_Input>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNodeInput<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_6E50E220_Input>
+  | SerializedRelationshipNodeInput<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_6E50E220_Input, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_6E50E220_Input, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_6E50E220_Input>
+  | SerializedListItemNode<LexicalNodes_6E50E220_Input>
+  | SerializedHeadingNode<LexicalNodes_6E50E220_Input>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_E5067678_Input".
+ */
+export type LexicalNodes_E5067678_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_E5067678_Input>
+  | SerializedBlockNode<Code>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNodeInput<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_E5067678_Input>
+  | SerializedRelationshipNodeInput<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_E5067678_Input, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_E5067678_Input, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_E5067678_Input>
+  | SerializedListItemNode<LexicalNodes_E5067678_Input>
+  | SerializedHeadingNode<LexicalNodes_E5067678_Input>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_4DA1FDD1_Input".
+ */
+export type LexicalNodes_4DA1FDD1_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_4DA1FDD1_Input>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNodeInput<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_4DA1FDD1_Input>
+  | SerializedRelationshipNodeInput<
+      | 'users'
+      | 'doc-controls'
+      | 'drawers'
+      | 'orderable'
+      | 'search-bar-test'
+      | 'talks'
+      | 'unauthorized-test'
+      | 'array-fields'
+      | 'blocks-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'date-fields'
+      | 'email-fields'
+      | 'group-fields'
+      | 'join-fields'
+      | 'join-posts'
+      | 'json-fields'
+      | 'number-fields'
+      | 'password-fields'
+      | 'point-fields'
+      | 'radio-fields'
+      | 'relationship-fields'
+      | 'rich-text-fields'
+      | 'row-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'folders'
+      | 'folder-items'
+      | 'tags'
+      | 'tag-items'
+      | 'rubbish'
+      | 'rubbish-with-drafts'
+      | 'upload-fields'
+      | 'autosave'
+      | 'versions-diff'
+      | 'draft-versions'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+      | 'payload-query-presets'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_4DA1FDD1_Input, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_4DA1FDD1_Input, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_4DA1FDD1_Input>
+  | SerializedListItemNode<LexicalNodes_4DA1FDD1_Input>
+  | SerializedHeadingNode<LexicalNodes_4DA1FDD1_Input>;
 
 export interface Config {
   auth: {
@@ -192,6 +1134,57 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
+  collectionsInput: {
+    users: UserInput;
+    'doc-controls': DocControlInput;
+    drawers: DrawerInput;
+    orderable: OrderableInput;
+    'search-bar-test': SearchBarTestInput;
+    talks: TalkInput;
+    'unauthorized-test': UnauthorizedTestInput;
+    'array-fields': ArrayFieldInput;
+    'blocks-fields': BlocksFieldInput;
+    'checkbox-fields': CheckboxFieldInput;
+    'code-fields': CodeFieldInput;
+    'collapsible-fields': CollapsibleFieldInput;
+    'date-fields': DateFieldInput;
+    'email-fields': EmailFieldInput;
+    'group-fields': GroupFieldInput;
+    'join-fields': JoinFieldInput;
+    'join-posts': JoinPostInput;
+    'json-fields': JsonFieldInput;
+    'number-fields': NumberFieldInput;
+    'password-fields': PasswordFieldInput;
+    'point-fields': PointFieldInput;
+    'radio-fields': RadioFieldInput;
+    'relationship-fields': RelationshipFieldInput;
+    'rich-text-fields': RichTextFieldInput;
+    'row-fields': RowFieldInput;
+    'select-fields': SelectFieldInput;
+    'slug-fields': SlugFieldInput;
+    'tabs-fields': TabsFieldInput;
+    'text-fields': TextFieldInput;
+    'textarea-fields': TextareaFieldInput;
+    folders: FolderInput;
+    'folder-items': FolderItemInput;
+    tags: TagInput;
+    'tag-items': TagItemInput;
+    rubbish: RubbishInput;
+    'rubbish-with-drafts': RubbishWithDraftInput;
+    uploads: UploadInput;
+    'upload-fields': UploadFieldInput;
+    autosave: AutosaveInput;
+    'versions-diff': VersionsDiffInput;
+    'draft-versions': DraftVersionInput;
+    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
+    'payload-kv': PayloadKvInput;
+    'payload-jobs': PayloadJobInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+    'payload-query-presets': PayloadQueryPresetInput;
+  };
+  globalsInput: {};
   user: User;
   jobs: {
     tasks: {
@@ -300,82 +1293,22 @@ export interface Drawer {
    */
   blocks?:
     | (
-        | {
-            label: string;
-            url?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'cta-block';
-          }
-        | {
-            heading: string;
-            subheading?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'hero-block';
-          }
-        | {
-            caption?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'media-block';
-          }
-        | {
-            quote: string;
-            author?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'quote-block';
-          }
-        | {
-            heading?: string | null;
-            body?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content-block';
-          }
-        | {
-            title?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'gallery-block';
-          }
-        | {
-            heading: string;
-            content?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'accordion-block';
-          }
-        | {
-            url: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'video-block';
-          }
-        | {
-            language?: string | null;
-            code?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'code-block';
-          }
-        | {
-            caption?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'table-block';
-          }
+        | CtaBlock
+        | HeroBlock
+        | MediaBlock
+        | QuoteBlock
+        | ContentBlock
+        | GalleryBlock
+        | AccordionBlock
+        | VideoBlock
+        | CodeBlock
+        | TableBlock
       )[]
     | null;
   /**
    * Use the link and inline block toolbar items to open their drawers.
    */
-  content?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
+  content?: LexicalRichText<LexicalNodes_3647D6E1> | null;
   status?: ('draft' | 'published') | null;
   publishedAt?: string | null;
   updatedAt: string;
@@ -480,6 +1413,112 @@ export interface RelationshipField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CtaBlock".
+ */
+export interface CtaBlock {
+  label: string;
+  url?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'cta-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBlock".
+ */
+export interface HeroBlock {
+  heading: string;
+  subheading?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'hero-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaBlock".
+ */
+export interface MediaBlock {
+  caption?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'media-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "QuoteBlock".
+ */
+export interface QuoteBlock {
+  quote: string;
+  author?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'quote-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock".
+ */
+export interface ContentBlock {
+  heading?: string | null;
+  body?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "GalleryBlock".
+ */
+export interface GalleryBlock {
+  title?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'gallery-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "AccordionBlock".
+ */
+export interface AccordionBlock {
+  heading: string;
+  content?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'accordion-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "VideoBlock".
+ */
+export interface VideoBlock {
+  url: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'video-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CodeBlock".
+ */
+export interface CodeBlock {
+  language?: string | null;
+  code?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'code-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TableBlock".
+ */
+export interface TableBlock {
+  caption?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'table-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "orderable".
  */
 export interface Orderable {
@@ -522,11 +1561,7 @@ export interface Talk {
    * One-paragraph teaser shown in listings.
    */
   shortDescription?: string | null;
-  abstract?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
+  abstract?: LexicalRichText<LexicalNodes_67B489CE> | null;
   track?: ('frontend' | 'backend' | 'devops' | 'design' | 'ai-ml' | 'workshop') | null;
   /**
    * Total runtime in minutes.
@@ -574,55 +1609,7 @@ export interface Talk {
         id?: string | null;
       }[]
     | null;
-  sections?:
-    | (
-        | {
-            eyebrow?: string | null;
-            heading: string;
-            subheading?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'talk-hero';
-          }
-        | {
-            quote: string;
-            attribution?: string | null;
-            role?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'talk-quote';
-          }
-        | {
-            label: string;
-            url: string;
-            style?: ('primary' | 'secondary' | 'ghost') | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'talk-cta';
-          }
-        | {
-            image: string | Upload;
-            caption?: string | null;
-            align?: ('left' | 'center' | 'right') | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'talk-image';
-          }
-        | {
-            heading?: string | null;
-            items?:
-              | {
-                  question: string;
-                  answer: string;
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'talk-qa';
-          }
-      )[]
-    | null;
+  sections?: (TalkHero | TalkQuote | TalkCta | TalkImage | TalkQa)[] | null;
   /**
    * Links to slides, recording, docs, code.
    */
@@ -717,6 +1704,71 @@ export interface Upload {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TalkHero".
+ */
+export interface TalkHero {
+  eyebrow?: string | null;
+  heading: string;
+  subheading?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'talk-hero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TalkQuote".
+ */
+export interface TalkQuote {
+  quote: string;
+  attribution?: string | null;
+  role?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'talk-quote';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TalkCta".
+ */
+export interface TalkCta {
+  label: string;
+  url: string;
+  style?: ('primary' | 'secondary' | 'ghost') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'talk-cta';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TalkImage".
+ */
+export interface TalkImage {
+  image: string | Upload;
+  caption?: string | null;
+  align?: ('left' | 'center' | 'right') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'talk-image';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TalkQa".
+ */
+export interface TalkQa {
+  heading?: string | null;
+  items?:
+    | {
+        question: string;
+        answer: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'talk-qa';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "unauthorized-test".
  */
 export interface UnauthorizedTest {
@@ -795,112 +1847,106 @@ export interface BlocksField {
    * A block field with multiple block types.
    */
   multipleBlockTypes?:
-    | (
-        | {
-            text: string;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'test-block';
-          }
-        | {
-            heading: string;
-            subheading?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'hero-block';
-          }
-        | {
-            label: string;
-            url?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'call-to-action-block';
-          }
-        | {
-            caption?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'image-block';
-          }
-        | {
-            quote: string;
-            author?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'quote-block';
-          }
-        | {
-            heading?: string | null;
-            body?: string | null;
-            link?: string | null;
-            footnote?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'content-block';
-          }
-        | {
-            title?: string | null;
-            firstName?: string | null;
-            lastName?: string | null;
-            email?: string | null;
-            message?: string | null;
-            terms?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'form-block';
-          }
-      )[]
+    | (TestBlock | HeroBlock | CallToActionBlock | ImageBlock | QuoteBlock | ContentBlock_EE3D21DD | FormBlock)[]
     | null;
-  blocksWithRequiredField?:
-    | {
-        text: string;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'test-block-required';
-      }[]
-    | null;
-  blocksWithMinRows?:
-    | {
-        text: string;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'test-block';
-      }[]
-    | null;
-  readOnlyBlocks?:
-    | {
-        text: string;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'test-block';
-      }[]
-    | null;
-  nestedBlocksField?:
-    | {
-        outerText?: string | null;
-        nestedBlocks?:
-          | (
-              | {
-                  innerText?: string | null;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'inner-block';
-                }
-              | {
-                  text: string;
-                  id?: string | null;
-                  blockName?: string | null;
-                  blockType: 'test-block';
-                }
-            )[]
-          | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'outer-block';
-      }[]
-    | null;
+  blocksWithRequiredField?: TestBlockRequired[] | null;
+  blocksWithMinRows?: TestBlock[] | null;
+  readOnlyBlocks?: TestBlock[] | null;
+  nestedBlocksField?: OuterBlock[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestBlock".
+ */
+export interface TestBlock {
+  text: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'test-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CallToActionBlock".
+ */
+export interface CallToActionBlock {
+  label: string;
+  url?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'call-to-action-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ImageBlock".
+ */
+export interface ImageBlock {
+  caption?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'image-block';
+}
+/**
+ * Multiple blocks resolve to the `ContentBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlock_EE3D21DD".
+ */
+export interface ContentBlock_EE3D21DD {
+  heading?: string | null;
+  body?: string | null;
+  link?: string | null;
+  footnote?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "FormBlock".
+ */
+export interface FormBlock {
+  title?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  email?: string | null;
+  message?: string | null;
+  terms?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'form-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestBlockRequired".
+ */
+export interface TestBlockRequired {
+  text: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'test-block-required';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "OuterBlock".
+ */
+export interface OuterBlock {
+  outerText?: string | null;
+  nestedBlocks?: (InnerBlock | TestBlock)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'outer-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InnerBlock".
+ */
+export interface InnerBlock {
+  innerText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'inner-block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1269,13 +2315,37 @@ export interface PointField {
  */
 export interface RadioField {
   id: string;
+  /**
+   * Choose the type of content this entry represents.
+   */
   contentType?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * Choose the type of content this required field represents.
+   */
   contentTypeRequired: 'article' | 'video' | 'podcast';
+  /**
+   * This disabled radio field still renders its description text.
+   */
   contentTypeDisabled?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * This read-only radio field should keep consistent description spacing.
+   */
   contentTypeReadOnly?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * Vertical radio options should match field description spacing.
+   */
   contentTypeVertical?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * Required vertical radio field with description text.
+   */
   contentTypeVerticalRequired: 'article' | 'video' | 'podcast';
+  /**
+   * Disabled vertical radio field with description text.
+   */
   contentTypeVerticalDisabled?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * Read-only vertical radio field with description text.
+   */
   contentTypeVerticalReadOnly?: ('article' | 'video' | 'podcast') | null;
   updatedAt: string;
   createdAt: string;
@@ -1289,31 +2359,23 @@ export interface RichTextField {
   /**
    * The main content of the document.
    */
-  content?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
-  table?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
-  code?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
-  typography?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
-  lists?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
+  content?: LexicalRichText<LexicalNodes_FE3427D9> | null;
+  /**
+   * Rich text table field used to validate description spacing.
+   */
+  table?: LexicalRichText<LexicalNodes_831A4A70> | null;
+  /**
+   * Rich text code block field used to validate description spacing.
+   */
+  code?: LexicalRichText<LexicalNodes_56B26BA1> | null;
+  /**
+   * Rich text typography field used to validate description spacing.
+   */
+  typography?: LexicalRichText<LexicalNodes_1329E8DC> | null;
+  /**
+   * Rich text list field used to validate description spacing.
+   */
+  lists?: LexicalRichText<LexicalNodes_1329E8DC> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1451,11 +2513,7 @@ export interface SlugField {
 export interface TabsField {
   id: string;
   title?: string | null;
-  postContent?:
-    | {
-        [k: string]: unknown;
-      }[]
-    | null;
+  postContent?: LexicalRichText<LexicalNodes_1329E8DC> | null;
   featuredImage: string;
   metaTitle?: string | null;
   metaDescription?: string | null;
@@ -1598,22 +2656,7 @@ export interface VersionsDiff {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | (
-        | {
-            blockText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textBlock';
-          }
-        | {
-            blockNumber?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'numberBlock';
-          }
-      )[]
-    | null;
+  blocks?: (TextBlock | NumberBlock)[] | null;
   checkbox?: boolean | null;
   code?: string | null;
   date?: string | null;
@@ -1651,6 +2694,26 @@ export interface VersionsDiff {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlock".
+ */
+export interface TextBlock {
+  blockText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "NumberBlock".
+ */
+export interface NumberBlock {
+  blockNumber?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'numberBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2023,6 +3086,25 @@ export interface PayloadMigration {
 export interface PayloadQueryPreset {
   id: string;
   title: string;
+  groupBy?: string | null;
+  columns?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   isShared?: boolean | null;
   access?: {
     read?: {
@@ -2038,25 +3120,6 @@ export interface PayloadQueryPreset {
       users?: (string | User)[] | null;
     };
   };
-  where?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  columns?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  groupBy?: string | null;
   relatedCollection: 'search-bar-test' | 'select-fields';
   /**
    * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
@@ -3184,6 +4247,9 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface PayloadQueryPresetsSelect<T extends boolean = true> {
   title?: T;
+  groupBy?: T;
+  columns?: T;
+  where?: T;
   isShared?: T;
   access?:
     | T
@@ -3207,9 +4273,6 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
               users?: T;
             };
       };
-  where?: T;
-  columns?: T;
-  groupBy?: T;
   relatedCollection?: T;
   isTemp?: T;
   updatedAt?: T;
@@ -3224,6 +4287,1480 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string | null;
+  name?: string | null;
+  roles?: ('admin' | 'user')[] | null;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "doc-controls_input".
+ */
+export interface DocControlInput {
+  id?: string | null;
+  title: string;
+  content?: string | null;
+  parent?: string | null;
+  deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "drawers_input".
+ */
+export interface DrawerInput {
+  id?: string | null;
+  title: string;
+  /**
+   * Open or create a related doc to nest another drawer.
+   */
+  child?: string | null;
+  /**
+   * Opens a text-fields doc — different content in the drawer.
+   */
+  relatedText?: string | null;
+  relatedRelationship?: string | null;
+  /**
+   * Add a block to open the blocks drawer.
+   */
+  blocks?:
+    | (
+        | CtaBlock
+        | HeroBlock
+        | MediaBlock
+        | QuoteBlock
+        | ContentBlock
+        | GalleryBlock
+        | AccordionBlock
+        | VideoBlock
+        | CodeBlock
+        | TableBlock
+      )[]
+    | null;
+  /**
+   * Use the link and inline block toolbar items to open their drawers.
+   */
+  content?: LexicalRichText<LexicalNodes_523AE04C_Input> | null;
+  status?: ('draft' | 'published') | null;
+  publishedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orderable_input".
+ */
+export interface OrderableInput {
+  id?: string | null;
+  _order?: string | null;
+  title: string;
+  priority?: ('high' | 'medium' | 'low') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "search-bar-test_input".
+ */
+export interface SearchBarTestInput {
+  id?: string | null;
+  title: string;
+  description?: string | null;
+  category?: ('news' | 'blog' | 'tutorial' | 'docs') | null;
+  status?: ('draft' | 'published' | 'archived') | null;
+  priority?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "talks_input".
+ */
+export interface TalkInput {
+  id?: string | null;
+  /**
+   * Public-facing title of the talk.
+   */
+  title: string;
+  /**
+   * URL slug — leave blank to auto-generate.
+   */
+  slug?: string | null;
+  /**
+   * One-paragraph teaser shown in listings.
+   */
+  shortDescription?: string | null;
+  abstract?: LexicalRichText<LexicalNodes_355C7AF5_Input> | null;
+  track?: ('frontend' | 'backend' | 'devops' | 'design' | 'ai-ml' | 'workshop') | null;
+  /**
+   * Total runtime in minutes.
+   */
+  durationMinutes?: number | null;
+  difficultyLevel?: ('beginner' | 'intermediate' | 'advanced') | null;
+  languages?: ('en' | 'es' | 'de' | 'fr' | 'ja' | 'pt')[] | null;
+  /**
+   * Keywords for search and discoverability.
+   */
+  keywords?: string[] | null;
+  startTime?: string | null;
+  endTime?: string | null;
+  /**
+   * Room or stage name.
+   */
+  room?: string | null;
+  /**
+   * Maximum seats.
+   */
+  capacity?: number | null;
+  /**
+   * Geographic coordinates of the venue.
+   *
+   * @minItems 2
+   * @maxItems 2
+   */
+  venueLocation?: [number, number] | null;
+  registrationDeadline?: string | null;
+  registrationUrl?: string | null;
+  contactEmail?: string | null;
+  /**
+   * Wide image used on the talk landing page.
+   */
+  heroImage?: string | null;
+  slidesUrl?: string | null;
+  recordingUrl?: string | null;
+  /**
+   * Photos and graphics for the talk.
+   */
+  gallery?:
+    | {
+        image: string;
+        caption?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  sections?: (TalkHero | TalkQuote | TalkCta | TalkImageInput | TalkQa)[] | null;
+  /**
+   * Links to slides, recording, docs, code.
+   */
+  resources?:
+    | {
+        label: string;
+        url: string;
+        type?: ('slides' | 'recording' | 'docs' | 'code' | 'other') | null;
+        id?: string | null;
+      }[]
+    | null;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  ogImage?: string | null;
+  customCss?: string | null;
+  /**
+   * JSON-LD schema injected into the page head.
+   */
+  customSchema?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Notes visible only to organizers.
+   */
+  internalNotes?: {
+    reviewerNotes?: string | null;
+    flagged?: boolean | null;
+  };
+  /**
+   * Other talks attendees might enjoy.
+   */
+  relatedTalks?: string[] | null;
+  /**
+   * Workflow status (separate from publish state).
+   */
+  status?: ('proposed' | 'accepted' | 'confirmed' | 'cancelled') | null;
+  /**
+   * Primary owner of this talk.
+   */
+  organizer?: string | null;
+  coOrganizers?: string[] | null;
+  /**
+   * Hierarchical tags.
+   */
+  _h_tags?: string[] | null;
+  isFeatured?: boolean | null;
+  isVirtual?: boolean | null;
+  /**
+   * Current registered attendees.
+   */
+  attendeeCount?: number | null;
+  /**
+   * Sort priority (1–10).
+   */
+  priority?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TalkImageInput".
+ */
+export interface TalkImageInput {
+  image: string;
+  caption?: string | null;
+  align?: ('left' | 'center' | 'right') | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'talk-image';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unauthorized-test_input".
+ */
+export interface UnauthorizedTestInput {
+  id?: string | null;
+  title?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-fields_input".
+ */
+export interface ArrayFieldInput {
+  id?: string | null;
+  arrayField?:
+    | {
+        name?: string | null;
+        anotherNestedTextField?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithRequiredField?:
+    | {
+        name: string;
+        id?: string | null;
+      }[]
+    | null;
+  minRows?:
+    | {
+        name?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  nestedArray?:
+    | {
+        nestedArrayField?:
+          | {
+              name: string;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithMaxRows?:
+    | {
+        name?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Add items to this array field.
+   */
+  arrayWithDescription?:
+    | {
+        name?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  localizedArray?:
+    | {
+        name?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-fields_input".
+ */
+export interface BlocksFieldInput {
+  id?: string | null;
+  /**
+   * A block field with multiple block types.
+   */
+  multipleBlockTypes?:
+    | (TestBlock | HeroBlock | CallToActionBlock | ImageBlock | QuoteBlock | ContentBlockInput | FormBlock)[]
+    | null;
+  blocksWithRequiredField?: TestBlockRequired[] | null;
+  blocksWithMinRows?: TestBlock[] | null;
+  readOnlyBlocks?: TestBlock[] | null;
+  nestedBlocksField?: OuterBlock[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlockInput".
+ */
+export interface ContentBlockInput {
+  heading?: string | null;
+  body?: string | null;
+  link?: string | null;
+  footnote?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content-block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checkbox-fields_input".
+ */
+export interface CheckboxFieldInput {
+  id?: string | null;
+  enableFeature?: boolean | null;
+  enableFeatureRequired?: boolean | null;
+  enableFeatureDisabled?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "code-fields_input".
+ */
+export interface CodeFieldInput {
+  id?: string | null;
+  /**
+   * Write JavaScript code
+   */
+  javascript: string;
+  /**
+   * Write HTML markup
+   */
+  html?: string | null;
+  /**
+   * Write CSS styles
+   */
+  css?: string | null;
+  /**
+   * Write TypeScript code
+   */
+  typescript?: string | null;
+  /**
+   * This field is read only
+   */
+  readOnly?: string | null;
+  /**
+   * This field is disabled
+   */
+  disabled?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collapsible-fields_input".
+ */
+export interface CollapsibleFieldInput {
+  id?: string | null;
+  nestedField?: string | null;
+  nestedFieldRequired: string;
+  outerText?: string | null;
+  innerText?: string | null;
+  collapsedField?: string | null;
+  describedField?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "date-fields_input".
+ */
+export interface DateFieldInput {
+  id?: string | null;
+  default?: string | null;
+  /**
+   * Select a date from the calendar
+   */
+  required: string;
+  disabled?: string | null;
+  readOnly?: string | null;
+  dayOnly?: string | null;
+  timeOnly?: string | null;
+  dayAndTime?: string | null;
+  monthOnly?: string | null;
+  withTimezone?: string | null;
+  withTimezone_tz?: SupportedTimezones;
+  withTimezoneRequired: string;
+  withTimezoneRequired_tz: SupportedTimezones;
+  withTimezoneDisabled?: string | null;
+  withTimezoneDisabled_tz?: SupportedTimezones;
+  withTimezoneReadOnly?: string | null;
+  withTimezoneReadOnly_tz?: SupportedTimezones;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-fields_input".
+ */
+export interface EmailFieldInput {
+  id?: string | null;
+  /**
+   * The primary contact email for this account
+   */
+  emailAddress?: string | null;
+  /**
+   * The primary contact email for this account
+   */
+  emailAddressRequired: string;
+  /**
+   * The primary contact email for this account
+   */
+  emailAddressDisabled?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-fields_input".
+ */
+export interface GroupFieldInput {
+  id?: string | null;
+  /**
+   * Enter the shipping address details
+   */
+  shippingInfo?: {
+    name?: string | null;
+    address?: string | null;
+  };
+  contactInfo?: {
+    /**
+     * The primary contact email for this account
+     */
+    emailAddress?: string | null;
+  };
+  /**
+   * This group has required fields to test error state
+   */
+  requiredInfo: {
+    requiredField: string;
+    anotherRequired: string;
+  };
+  unnamedGroup: {
+    unnamedGroupField: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "join-fields_input".
+ */
+export interface JoinFieldInput {
+  id?: string | null;
+  name: string;
+  group?: {};
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "join-posts_input".
+ */
+export interface JoinPostInput {
+  id?: string | null;
+  title: string;
+  /**
+   * The parent category (used by join fields)
+   */
+  category?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "json-fields_input".
+ */
+export interface JsonFieldInput {
+  id?: string | null;
+  /**
+   * Enter valid JSON data
+   */
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * This field is required
+   */
+  jsonRequired:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * This field is read only
+   */
+  jsonReadOnly?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * This field is disabled
+   */
+  jsonDisabled?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "number-fields_input".
+ */
+export interface NumberFieldInput {
+  id?: string | null;
+  /**
+   * Listed price in USD, excluding tax
+   */
+  price?: number | null;
+  /**
+   * Listed price in USD, excluding tax
+   */
+  priceRequired: number;
+  /**
+   * Listed price in USD, excluding tax
+   */
+  priceDisabled?: number | null;
+  /**
+   * Listed price in USD, excluding tax
+   */
+  priceReadOnly?: number | null;
+  /**
+   * Listed prices in USD, excluding tax
+   */
+  prices?: number[] | null;
+  /**
+   * Listed prices in USD, excluding tax
+   */
+  pricesReadOnly?: number[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "password-fields_input".
+ */
+export interface PasswordFieldInput {
+  id?: string | null;
+  /**
+   * Must be at least 8 characters
+   */
+  password?: string | null;
+  /**
+   * Must be at least 8 characters
+   */
+  passwordRequired: string;
+  /**
+   * Must be at least 8 characters
+   */
+  passwordDisabled?: string | null;
+  /**
+   * Has a default value
+   */
+  passwordWithDefault?: string | null;
+  confirmPassword?: string | null;
+  confirmPasswordDisabled?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "point-fields_input".
+ */
+export interface PointFieldInput {
+  id?: string | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  location?: [number, number] | null;
+  /**
+   * This is an example of a required point field. Try to submit the form without filling out this field to see the validation error.
+   *
+   * @minItems 2
+   * @maxItems 2
+   */
+  locationRequired: [number, number];
+  /**
+   * This field is disabled because it is readOnly in the admin config.
+   *
+   * @minItems 2
+   * @maxItems 2
+   */
+  locationDisabled?: [number, number] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "radio-fields_input".
+ */
+export interface RadioFieldInput {
+  id?: string | null;
+  /**
+   * Choose the type of content this entry represents.
+   */
+  contentType?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * Choose the type of content this required field represents.
+   */
+  contentTypeRequired: 'article' | 'video' | 'podcast';
+  /**
+   * This disabled radio field still renders its description text.
+   */
+  contentTypeDisabled?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * This read-only radio field should keep consistent description spacing.
+   */
+  contentTypeReadOnly?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * Vertical radio options should match field description spacing.
+   */
+  contentTypeVertical?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * Required vertical radio field with description text.
+   */
+  contentTypeVerticalRequired: 'article' | 'video' | 'podcast';
+  /**
+   * Disabled vertical radio field with description text.
+   */
+  contentTypeVerticalDisabled?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * Read-only vertical radio field with description text.
+   */
+  contentTypeVerticalReadOnly?: ('article' | 'video' | 'podcast') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationship-fields_input".
+ */
+export interface RelationshipFieldInput {
+  id?: string | null;
+  /**
+   * The author of this post
+   */
+  author?: string | null;
+  /**
+   * Relationship with drawer appearance
+   */
+  authorWithDrawer?: string | null;
+  /**
+   * The author of this post
+   */
+  authorRequired: string;
+  /**
+   * Select related posts
+   */
+  relatedPosts?: string[] | null;
+  /**
+   * This field is disabled
+   */
+  authorDisabled?: string | null;
+  /**
+   * This field is read-only
+   */
+  authorReadOnly?: string | null;
+  /**
+   * Can relate to users or text fields
+   */
+  polymorphic?:
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'text-fields';
+        value: string;
+      } | null);
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rich-text-fields_input".
+ */
+export interface RichTextFieldInput {
+  id?: string | null;
+  /**
+   * The main content of the document.
+   */
+  content?: LexicalRichText<LexicalNodes_503034A3_Input> | null;
+  /**
+   * Rich text table field used to validate description spacing.
+   */
+  table?: LexicalRichText<LexicalNodes_6E50E220_Input> | null;
+  /**
+   * Rich text code block field used to validate description spacing.
+   */
+  code?: LexicalRichText<LexicalNodes_E5067678_Input> | null;
+  /**
+   * Rich text typography field used to validate description spacing.
+   */
+  typography?: LexicalRichText<LexicalNodes_4DA1FDD1_Input> | null;
+  /**
+   * Rich text list field used to validate description spacing.
+   */
+  lists?: LexicalRichText<LexicalNodes_4DA1FDD1_Input> | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "row-fields_input".
+ */
+export interface RowFieldInput {
+  id?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  city?: string | null;
+  state?: string | null;
+  zip?: string | null;
+  email?: string | null;
+  phone?: string | null;
+  newsletter?: boolean | null;
+  category?: ('a' | 'b' | 'c') | null;
+  quantity?: number | null;
+  autoWidthA?: string | null;
+  autoWidthB?: string | null;
+  explicit30?: string | null;
+  autoFill?: string | null;
+  q1?: string | null;
+  q2?: string | null;
+  q3?: string | null;
+  q4?: string | null;
+  billingStreet?: string | null;
+  billingCity?: string | null;
+  shippingStreet?: string | null;
+  shippingCity?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-fields_input".
+ */
+export interface SelectFieldInput {
+  id?: string | null;
+  /**
+   * The current publication status of this post
+   */
+  status?: ('draft' | 'published' | 'archived') | null;
+  /**
+   * The current publication status of this post
+   */
+  statusRequired: 'draft' | 'published' | 'archived';
+  /**
+   * This field is disabled
+   */
+  statusDisabled?: ('draft' | 'published' | 'archived') | null;
+  /**
+   * This field is read-only
+   */
+  statusReadOnly?: ('draft' | 'published' | 'archived') | null;
+  /**
+   * Select multiple tags
+   */
+  tags?: ('technology' | 'design' | 'marketing' | 'engineering' | 'product')[] | null;
+  /**
+   * At least one tag is required
+   */
+  tagsRequired: ('technology' | 'design' | 'marketing' | 'engineering' | 'product')[];
+  /**
+   * These tags cannot be changed
+   */
+  tagsReadOnly?: ('technology' | 'design' | 'marketing' | 'engineering' | 'product')[] | null;
+  /**
+   * Has many values to test wrapping
+   */
+  tagsWithManyValues?: ('technology' | 'design' | 'marketing' | 'engineering' | 'product')[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-fields_input".
+ */
+export interface SlugFieldInput {
+  id?: string | null;
+  title?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  /**
+   * This is the default slug field
+   */
+  slug: string;
+  requiredTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateRequiredSlug?: boolean | null;
+  requiredSlug: string;
+  readOnlyTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateReadOnlySlug?: boolean | null;
+  readOnlySlug?: string | null;
+  longTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateLongSlug?: boolean | null;
+  /**
+   * This slug has a long value to test text-overflow behavior
+   */
+  longSlug: string;
+  placeholderTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generatePlaceholderSlug?: boolean | null;
+  placeholderSlug: string;
+  lockedTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateLockedSlug?: boolean | null;
+  /**
+   * This slug starts with a value to show the locked state
+   */
+  lockedSlug?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabs-fields_input".
+ */
+export interface TabsFieldInput {
+  id?: string | null;
+  title?: string | null;
+  postContent?: LexicalRichText<LexicalNodes_4DA1FDD1_Input> | null;
+  featuredImage: string;
+  metaTitle?: string | null;
+  metaDescription?: string | null;
+  publishedAt?: string | null;
+  viewCount?: number | null;
+  category?: string | null;
+  authorName?: string | null;
+  relatedPosts?: string | null;
+  commentsEnabled?: boolean | null;
+  socialImage?: string | null;
+  customCSS?: string | null;
+  visibility?: ('public' | 'private' | 'draft') | null;
+  sidebarGroup?: {
+    showRecentPosts?: boolean | null;
+    showCategories?: boolean | null;
+    adCode?: string | null;
+    customHTML?: string | null;
+  };
+  apiKey?: string | null;
+  webhookUrl?: string | null;
+  emailNotifications?: boolean | null;
+  pushNotifications?: boolean | null;
+  autoBackup?: boolean | null;
+  backupFrequency?: ('daily' | 'weekly' | 'monthly') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "text-fields_input".
+ */
+export interface TextFieldInput {
+  id?: string | null;
+  /**
+   * The public-facing title of this post
+   */
+  title?: string | null;
+  /**
+   * List your favorite fruits
+   */
+  favoriteFruit?: string[] | null;
+  /**
+   * This field is disabled
+   */
+  textDisabled?: string | null;
+  /**
+   * This field is read-only
+   */
+  textReadOnly?: string | null;
+  /**
+   * Tags for this post (hierarchy field)
+   */
+  _h_tags?: string[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "textarea-fields_input".
+ */
+export interface TextareaFieldInput {
+  id?: string | null;
+  /**
+   * The main body content for this entry
+   */
+  content?: string | null;
+  /**
+   * This field is required
+   */
+  contentRequired: string;
+  /**
+   * This field is read-only
+   */
+  contentReadOnly?: string | null;
+  /**
+   * This field is disabled
+   */
+  contentDisabled?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders_input".
+ */
+export interface FolderInput {
+  id?: string | null;
+  parent?: string | null;
+  name: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folder-items_input".
+ */
+export interface FolderItemInput {
+  id?: string | null;
+  title: string;
+  parent?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tags_input".
+ */
+export interface TagInput {
+  id?: string | null;
+  _h_tags?: string | null;
+  name: string;
+  description?: string | null;
+  allowedCollections?: ('talks' | 'text-fields' | 'tag-items')[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tag-items_input".
+ */
+export interface TagItemInput {
+  id?: string | null;
+  title: string;
+  description?: string | null;
+  _h_tags?: string[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rubbish_input".
+ */
+export interface RubbishInput {
+  id?: string | null;
+  title: string;
+  deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rubbish-with-drafts_input".
+ */
+export interface RubbishWithDraftInput {
+  id?: string | null;
+  title: string;
+  deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads_input".
+ */
+export interface UploadInput {
+  id?: string | null;
+  alt?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "upload-fields_input".
+ */
+export interface UploadFieldInput {
+  id?: string | null;
+  heroImage?: string | null;
+  heroImageRequired: string;
+  heroImageReadOnly?: string | null;
+  heroImageHasMany?: string[] | null;
+  heroImageHasManyReadOnly?: string[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave_input".
+ */
+export interface AutosaveInput {
+  id?: string | null;
+  title: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions-diff_input".
+ */
+export interface VersionsDiffInput {
+  id?: string | null;
+  title: string;
+  array?:
+    | {
+        arrayText?: string | null;
+        nestedArray?:
+          | {
+              nestedText?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?: (TextBlock | NumberBlock)[] | null;
+  checkbox?: boolean | null;
+  code?: string | null;
+  date?: string | null;
+  description?: string | null;
+  email?: string | null;
+  group?: {
+    nestedText?: string | null;
+    nestedNumber?: number | null;
+  };
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  number?: number | null;
+  numberMany?: number[] | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+  radio?: ('small' | 'medium' | 'large') | null;
+  relationship?: string | null;
+  relationshipMany?: string[] | null;
+  select?: ('option-1' | 'option-2' | 'option-3') | null;
+  selectMany?: ('option-1' | 'option-2' | 'option-3')[] | null;
+  tabText?: string | null;
+  tabNumber?: number | null;
+  upload?: string | null;
+  uploadMany?: string[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-versions_input".
+ */
+export interface DraftVersionInput {
+  id?: string | null;
+  title: string;
+  content?: string | null;
+  author?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_input".
+ */
+export interface PayloadMcpApiKeyInput {
+  id?: string | null;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string;
+  overrideAccess?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string | null;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_input".
+ */
+export interface PayloadJobInput {
+  id?: string | null;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug: 'inline' | 'schedulePublish';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  taskSlug?: ('inline' | 'schedulePublish') | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string | null;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'doc-controls';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'drawers';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'orderable';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'search-bar-test';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'talks';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'unauthorized-test';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'array-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'blocks-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'checkbox-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'code-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'collapsible-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'date-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'email-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'group-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'join-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'join-posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'json-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'number-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'password-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'point-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'radio-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relationship-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'rich-text-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'row-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'select-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'slug-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'tabs-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'text-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'textarea-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'folders';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'folder-items';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'tags';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'tag-items';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'rubbish';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'rubbish-with-drafts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'uploads';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'upload-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'autosave';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'versions-diff';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'draft-versions';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string | null;
+  name?: string | null;
+  batch?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-query-presets_input".
+ */
+export interface PayloadQueryPresetInput {
+  id?: string | null;
+  title: string;
+  groupBy?: string | null;
+  columns?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  isShared?: boolean | null;
+  access?: {
+    read?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: string[] | null;
+    };
+    update?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: string[] | null;
+    };
+    delete?: {
+      constraint?: ('everyone' | 'onlyMe' | 'specificUsers') | null;
+      users?: string[] | null;
+    };
+  };
+  relatedCollection: 'search-bar-test' | 'select-fields';
+  /**
+   * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
+   */
+  isTemp?: boolean | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3244,10 +5781,434 @@ export interface TaskSchedulePublish {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "InlineCta".
+ */
+export interface InlineCta {
+  id: string;
+  blockType: 'inline-cta';
+  label: string;
+  url?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_B540ABDC".
+ */
+export interface LexicalLinkFields_B540ABDC {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  rel?: ('noopener' | 'noreferrer' | 'nofollow')[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Callout".
+ */
+export interface Callout {
+  id: string;
+  blockType: 'callout';
+  style?: ('info' | 'warning' | 'success' | 'error') | null;
+  body: string;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Kbd".
+ */
+export interface Kbd {
+  id: string;
+  blockType: 'kbd';
+  keys: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_7C90EEAC".
+ */
+export interface LexicalUploadFields_7C90EEAC {
+  caption?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock".
+ */
+export interface MyBlock {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  someTextRequired: string;
+  radios?: ('option1' | 'option2' | 'option3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
+ */
+export interface LexicalLinkFields_0A7E9EC0 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Banner".
+ */
+export interface Banner {
+  id: string;
+  blockType: 'banner';
+  style?: ('info' | 'warning' | 'error' | 'success') | null;
+  content?: LexicalRichText<LexicalNodes_5DEE47AF> | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Highlight".
+ */
+export interface Highlight {
+  id: string;
+  blockType: 'highlight';
+  text?: string | null;
+  color?: ('yellow' | 'green' | 'blue' | 'pink') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_309347F3".
+ */
+export interface LexicalUploadFields_309347F3 {
+  caption?: LexicalRichText<LexicalNodes_5DEE47AF> | null;
+  altText?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Code".
+ */
+export interface Code {
+  id: string;
+  blockType: 'Code';
+  language?:
+    | (
+        | 'abap'
+        | 'apex'
+        | 'azcli'
+        | 'bat'
+        | 'bicep'
+        | 'cameligo'
+        | 'clojure'
+        | 'coffee'
+        | 'cpp'
+        | 'csharp'
+        | 'csp'
+        | 'css'
+        | 'cypher'
+        | 'dart'
+        | 'dockerfile'
+        | 'ecl'
+        | 'elixir'
+        | 'flow9'
+        | 'freemarker2'
+        | 'fsharp'
+        | 'go'
+        | 'graphql'
+        | 'handlebars'
+        | 'hcl'
+        | 'html'
+        | 'ini'
+        | 'java'
+        | 'javascript'
+        | 'julia'
+        | 'kotlin'
+        | 'less'
+        | 'lexon'
+        | 'liquid'
+        | 'lua'
+        | 'm3'
+        | 'markdown'
+        | 'mdx'
+        | 'mips'
+        | 'msdax'
+        | 'mysql'
+        | 'objective-c'
+        | 'pascal'
+        | 'pascaligo'
+        | 'perl'
+        | 'pgsql'
+        | 'php'
+        | 'pla'
+        | 'plaintext'
+        | 'postiats'
+        | 'powerquery'
+        | 'powershell'
+        | 'protobuf'
+        | 'pug'
+        | 'python'
+        | 'qsharp'
+        | 'r'
+        | 'razor'
+        | 'redis'
+        | 'redshift'
+        | 'restructuredtext'
+        | 'ruby'
+        | 'rust'
+        | 'sb'
+        | 'scala'
+        | 'scheme'
+        | 'scss'
+        | 'shell'
+        | 'solidity'
+        | 'sophia'
+        | 'sparql'
+        | 'sql'
+        | 'st'
+        | 'swift'
+        | 'systemverilog'
+        | 'tcl'
+        | 'twig'
+        | 'typescript'
+        | 'typespec'
+        | 'vb'
+        | 'wgsl'
+        | 'xml'
+        | 'yaml'
+      )
+    | null;
+  code?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BannerInput".
+ */
+export interface BannerInput {
+  id: string;
+  blockType: 'banner';
+  style?: ('info' | 'warning' | 'error' | 'success') | null;
+  content?: LexicalRichText<LexicalNodes_C3EC708E_Input> | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_33EB4B4A".
+ */
+export interface LexicalUploadFields_33EB4B4A {
+  caption?: LexicalRichText<LexicalNodes_C3EC708E_Input> | null;
+  altText?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
+}
+
+export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string;
+  };
+}[TSlugs];
+
+export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string;
+  };
+}[TSlugs];
+
+export interface SerializedTableNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'table';
+  colWidths?: number[];
+  frozenColumnCount?: number;
+  frozenRowCount?: number;
+  rowStriping?: boolean;
+}
+export interface SerializedTableRowNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablerow';
+  height?: number;
+}
+export interface SerializedTableCellNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'tablecell';
+  backgroundColor?: string | null;
+  colSpan?: number;
+  headerState: number;
+  rowSpan?: number;
+  verticalAlign?: string;
+  width?: number;
 }
 
 

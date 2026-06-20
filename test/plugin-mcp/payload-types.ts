@@ -113,6 +113,25 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
+  collectionsInput: {
+    users: UserInput;
+    media: MediaInput;
+    posts: PostInput;
+    products: ProductInput;
+    rolls: RollInput;
+    'modified-prompts': ModifiedPromptInput;
+    'returned-resources': ReturnedResourceInput;
+    pages: PageInput;
+    'field-types': FieldTypeInput;
+    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
+    'payload-kv': PayloadKvInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+  };
+  globalsInput: {
+    'site-settings': SiteSettingInput;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -831,6 +850,394 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string | null;
+  enableAPIKey?: boolean | null;
+  apiKey?: string | null;
+  apiKeyIndex?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_input".
+ */
+export interface MediaInput {
+  id?: string | null;
+  alt?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_input".
+ */
+export interface PostInput {
+  id?: string | null;
+  /**
+   * The title of the post
+   */
+  title: string;
+  /**
+   * The content of the post
+   */
+  content?: string | null;
+  /**
+   * The author of the post
+   */
+  author?: string | null;
+  /**
+   * Geographic location coordinates
+   *
+   * @minItems 2
+   * @maxItems 2
+   */
+  location?: [number, number] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "products_input".
+ */
+export interface ProductInput {
+  id?: string | null;
+  title?: string | null;
+  description?: string | null;
+  price?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rolls_input".
+ */
+export interface RollInput {
+  id?: string | null;
+  /**
+   * The number of sides on the die that was rolled
+   */
+  sides: number;
+  /**
+   * The result of the die roll
+   */
+  result: number;
+  /**
+   * The user who rolled the die
+   */
+  user: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "modified-prompts_input".
+ */
+export interface ModifiedPromptInput {
+  id?: string | null;
+  /**
+   * The original prompt
+   */
+  original: string;
+  /**
+   * The modified prompt
+   */
+  modified: string;
+  /**
+   * The user sent the prompt to modify
+   */
+  user: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "returned-resources_input".
+ */
+export interface ReturnedResourceInput {
+  id?: string | null;
+  /**
+   * The URI of the resource
+   */
+  uri: string;
+  /**
+   * The content of the resource
+   */
+  content: string;
+  /**
+   * The user sent the prompt to modify
+   */
+  user: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_input".
+ */
+export interface PageInput {
+  id?: string | null;
+  title: string;
+  layout?: (HeroBlock | TextContent)[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-types_input".
+ */
+export interface FieldTypeInput {
+  id?: string | null;
+  /**
+   * A simple text field
+   */
+  textField?: string | null;
+  /**
+   * A textarea field
+   */
+  textareaField?: string | null;
+  /**
+   * A number field
+   */
+  numberField?: number | null;
+  /**
+   * An email field
+   */
+  emailField?: string | null;
+  /**
+   * A checkbox field
+   */
+  checkboxField?: boolean | null;
+  /**
+   * A date field
+   */
+  dateField?: string | null;
+  /**
+   * A code field
+   */
+  codeField?: string | null;
+  /**
+   * A JSON field
+   */
+  jsonField?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * A select field
+   */
+  selectField?: ('option1' | 'option2' | 'option3') | null;
+  /**
+   * A radio field
+   */
+  radioField?: ('radio1' | 'radio2' | 'radio3') | null;
+  /**
+   * An array field with nested items
+   */
+  arrayField?:
+    | {
+        item?: string | null;
+        itemNumber?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * A group field with nested properties
+   */
+  groupField?: {
+    groupText?: string | null;
+    groupNumber?: number | null;
+  };
+  /**
+   * An upload field
+   */
+  uploadField?: string | null;
+  /**
+   * Text field inside a collapsible container
+   */
+  collapsibleText?: string | null;
+  /**
+   * Text field inside a row container
+   */
+  rowText?: string | null;
+  namedTab?: {
+    /**
+     * Text field inside a named tab
+     */
+    namedTabText?: string | null;
+  };
+  /**
+   * Text field inside an unnamed tab
+   */
+  unnamedTabText?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_input".
+ */
+export interface PayloadMcpApiKeyInput {
+  id?: string | null;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string;
+  overrideAccess?: boolean | null;
+  /**
+   * This field added by overrideApiKeyCollection
+   */
+  override?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string | null;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string | null;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'products';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'rolls';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'modified-prompts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'returned-resources';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'field-types';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string | null;
+  name?: string | null;
+  batch?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site-settings_input".
+ */
+export interface SiteSettingInput {
+  id?: string | null;
+  /**
+   * The name of the site
+   */
+  siteName: string;
+  /**
+   * A brief description of the site
+   */
+  siteDescription?: string | null;
+  /**
+   * Enable or disable maintenance mode
+   */
+  maintenanceMode?: boolean | null;
+  /**
+   * Contact email address for the site
+   */
+  contactEmail?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

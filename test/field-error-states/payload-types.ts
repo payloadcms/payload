@@ -91,6 +91,37 @@ export type LexicalNodes_9326F794 =
       | 'payload-preferences'
       | 'payload-migrations'
     >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_2C696D1B_Input".
+ */
+export type LexicalNodes_2C696D1B_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_2C696D1B_Input>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_2C696D1B_Input>
+  | SerializedUploadNodeInput<'uploads'>
+  | SerializedQuoteNode<LexicalNodes_2C696D1B_Input>
+  | SerializedListNode<LexicalNodes_2C696D1B_Input>
+  | SerializedListItemNode<LexicalNodes_2C696D1B_Input>
+  | SerializedAutoLinkNode<LexicalNodes_2C696D1B_Input, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_2C696D1B_Input, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNodeInput<
+      | 'error-fields'
+      | 'validate-drafts-on'
+      | 'validate-drafts-off'
+      | 'validate-drafts-on-autosave'
+      | 'prev-value'
+      | 'prev-value-relation'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
 
 export interface Config {
   auth: {
@@ -141,6 +172,24 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+  };
+  collectionsInput: {
+    'error-fields': ErrorFieldInput;
+    uploads: UploadInput;
+    'validate-drafts-on': ValidateDraftsOnInput;
+    'validate-drafts-off': ValidateDraftsOffInput;
+    'validate-drafts-on-autosave': ValidateDraftsOnAutosaveInput;
+    'prev-value': PrevValueInput;
+    'prev-value-relation': PrevValueRelationInput;
+    users: UserInput;
+    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
+    'payload-kv': PayloadKvInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+  };
+  globalsInput: {
+    'global-validate-drafts-on': GlobalValidateDraftsOnInput;
   };
   user: User;
   jobs: {
@@ -905,6 +954,396 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "error-fields_input".
+ */
+export interface ErrorFieldInput {
+  id?: string | null;
+  parentArray?:
+    | {
+        childArray: {
+          childArrayText: string;
+          id?: string | null;
+        }[];
+        id?: string | null;
+      }[]
+    | null;
+  home: {
+    tabText: string;
+    text: string;
+    array?:
+      | {
+          requiredArrayText: string;
+          arrayText?: string | null;
+          group: {
+            text: string;
+            number: number;
+            date: string;
+            checkbox?: boolean | null;
+          };
+          code: string;
+          json:
+            | {
+                [k: string]: unknown;
+              }
+            | unknown[]
+            | string
+            | number
+            | boolean
+            | null;
+          email: string;
+          /**
+           * @minItems 2
+           * @maxItems 2
+           */
+          point: [number, number];
+          radio: 'mint' | 'dark_gray';
+          relationship: string;
+          richtext: LexicalRichText<LexicalNodes_2C696D1B_Input>;
+          select: 'mint' | 'dark_gray';
+          upload: string;
+          text: string;
+          textarea: string;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  tabText: string;
+  text: string;
+  array?:
+    | {
+        requiredArrayText: string;
+        arrayText?: string | null;
+        group: {
+          text: string;
+          number: number;
+          date: string;
+          checkbox?: boolean | null;
+        };
+        code: string;
+        json:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        email: string;
+        /**
+         * @minItems 2
+         * @maxItems 2
+         */
+        point: [number, number];
+        radio: 'mint' | 'dark_gray';
+        relationship: string;
+        richtext: LexicalRichText<LexicalNodes_2C696D1B_Input>;
+        select: 'mint' | 'dark_gray';
+        upload: string;
+        text: string;
+        textarea: string;
+        id?: string | null;
+      }[]
+    | null;
+  tabWithRequiredArray: {
+    requiredArray: {
+      arrayText: string;
+      id?: string | null;
+    }[];
+  };
+  unnamedRequiredArray: {
+    arrayText: string;
+    id?: string | null;
+  }[];
+  layout?: Block1Input[] | null;
+  group: {
+    text: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block1Input".
+ */
+export interface Block1Input {
+  tabText: string;
+  text: string;
+  array?:
+    | {
+        requiredArrayText: string;
+        arrayText?: string | null;
+        group: {
+          text: string;
+          number: number;
+          date: string;
+          checkbox?: boolean | null;
+        };
+        code: string;
+        json:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        email: string;
+        /**
+         * @minItems 2
+         * @maxItems 2
+         */
+        point: [number, number];
+        radio: 'mint' | 'dark_gray';
+        relationship: string;
+        richtext: LexicalRichText<LexicalNodes_2C696D1B_Input>;
+        select: 'mint' | 'dark_gray';
+        upload: string;
+        text: string;
+        textarea: string;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block1';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads_input".
+ */
+export interface UploadInput {
+  id?: string | null;
+  text?: string | null;
+  media?: string | null;
+  richText?: LexicalRichText<LexicalNodes_2C696D1B_Input> | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "validate-drafts-on_input".
+ */
+export interface ValidateDraftsOnInput {
+  id?: string | null;
+  title: string;
+  /**
+   * Check this box to simulate a validation failure. The save button should remain enabled after the failure.
+   */
+  failValidation?: boolean | null;
+  /**
+   * This field will fail validation if "Fail Validation" checkbox is checked. This simulates validation failures from business logic, network errors, or third-party validation.
+   */
+  validatedField?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "validate-drafts-off_input".
+ */
+export interface ValidateDraftsOffInput {
+  id?: string | null;
+  title: string;
+  /**
+   * Check this box to simulate a validation failure. The save button should remain enabled after the failure.
+   */
+  failValidation?: boolean | null;
+  /**
+   * This field will fail validation if "Fail Validation" checkbox is checked. This simulates validation failures from business logic, network errors, or third-party validation.
+   */
+  validatedField?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "validate-drafts-on-autosave_input".
+ */
+export interface ValidateDraftsOnAutosaveInput {
+  id?: string | null;
+  title: string;
+  /**
+   * Check this box to simulate a validation failure. The save button should remain enabled after the failure.
+   */
+  failValidation?: boolean | null;
+  /**
+   * This field will fail validation if "Fail Validation" checkbox is checked. This simulates validation failures from business logic, network errors, or third-party validation.
+   */
+  validatedField?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prev-value_input".
+ */
+export interface PrevValueInput {
+  id?: string | null;
+  title: string;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prev-value-relation_input".
+ */
+export interface PrevValueRelationInput {
+  id?: string | null;
+  previousValueRelation?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_input".
+ */
+export interface PayloadMcpApiKeyInput {
+  id?: string | null;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string;
+  overrideAccess?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string | null;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string | null;
+  document?:
+    | ({
+        relationTo: 'error-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'uploads';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'validate-drafts-on';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'validate-drafts-off';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'validate-drafts-on-autosave';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'prev-value';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'prev-value-relation';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string | null;
+  name?: string | null;
+  batch?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-validate-drafts-on_input".
+ */
+export interface GlobalValidateDraftsOnInput {
+  id?: string | null;
+  group: {
+    title: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MyBlock".
  */
 export interface MyBlock {
@@ -1083,6 +1522,30 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
+
+export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string;
+  };
+}[TSlugs];
+
+export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string;
+  };
+}[TSlugs];
 
 
 declare module 'payload' {

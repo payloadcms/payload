@@ -428,9 +428,22 @@ export function fieldsToJSONSchema({
 } {
   const requiredFieldNames = new Set<string>()
 
-  // `Input` suffix keeps a named interface's write-shaped def from colliding with its `output` one.
-  const interfaceDefName = (name: string): string =>
-    variant === 'input' ? `${name}Input` : name
+  // Registers a named-interface (group/tab/array/select) def and returns its `$ref` name. For input,
+  // shares the read-shaped def when byte-identical; otherwise registers an `Input`-suffixed twin so
+  // the write shape doesn't collide with the read one.
+  const registerNamedInterface = (name: string, schema: JSONSchema4): string => {
+    if (variant === 'input') {
+      const outputDef = interfaceNameDefinitions.get(name)
+      if (outputDef && JSON.stringify(outputDef) === JSON.stringify(schema)) {
+        return name
+      }
+      const inputName = `${name}Input`
+      interfaceNameDefinitions.set(inputName, schema)
+      return inputName
+    }
+    interfaceNameDefinitions.set(name, schema)
+    return name
+  }
 
   return {
     properties: Object.fromEntries(
@@ -476,11 +489,8 @@ export function fieldsToJSONSchema({
             }
 
             if (field.interfaceName) {
-              const definition = interfaceDefName(field.interfaceName)
-              interfaceNameDefinitions.set(definition, fieldSchema)
-
               fieldSchema = {
-                $ref: `#/$defs/${definition}`,
+                $ref: `#/$defs/${registerNamedInterface(field.interfaceName, fieldSchema)}`,
               }
             }
             break
@@ -577,10 +587,7 @@ export function fieldsToJSONSchema({
               }
 
               if (field.interfaceName) {
-                const definition = interfaceDefName(field.interfaceName)
-                interfaceNameDefinitions.set(definition, fieldSchema)
-
-                fieldSchema = { $ref: `#/$defs/${definition}` }
+                fieldSchema = { $ref: `#/$defs/${registerNamedInterface(field.interfaceName, fieldSchema)}` }
               }
             }
             break
@@ -691,11 +698,8 @@ export function fieldsToJSONSchema({
             }
 
             if (field.interfaceName) {
-              const definition = interfaceDefName(field.interfaceName)
-              interfaceNameDefinitions.set(definition, fieldSchema)
-
               fieldSchema = {
-                $ref: `#/$defs/${definition}`,
+                $ref: `#/$defs/${registerNamedInterface(field.interfaceName, fieldSchema)}`,
               }
             }
 
@@ -874,11 +878,8 @@ export function fieldsToJSONSchema({
               }
 
               if (field.interfaceName) {
-                const definition = interfaceDefName(field.interfaceName)
-                interfaceNameDefinitions.set(definition, fieldSchema)
-
                 fieldSchema = {
-                  $ref: `#/$defs/${definition}`,
+                  $ref: `#/$defs/${registerNamedInterface(field.interfaceName, fieldSchema)}`,
                 }
               }
               break
@@ -904,10 +905,7 @@ export function fieldsToJSONSchema({
             }
 
             if (field.interfaceName) {
-              const definition = interfaceDefName(field.interfaceName)
-              interfaceNameDefinitions.set(definition, fieldSchema)
-
-              fieldSchema = { $ref: `#/$defs/${definition}` }
+              fieldSchema = { $ref: `#/$defs/${registerNamedInterface(field.interfaceName, fieldSchema)}` }
             }
             break
           }
@@ -1423,7 +1421,11 @@ const hashBlockSchema = (schema: JSONSchema4): string =>
  * The name is the block's `interfaceName`, or a PascalCase form of its slug. If a different block
  * already uses that name - whether it was auto-generated or an explicit `interfaceName` - this one
  * gets a content-hash suffix (`Hero_3F2A1B0C`) so the two don't overwrite each other. Registering
- * the same block shape again reuses its name. The `input` variant adds an `Input` suffix (`HeroInput`).
+ * the same block shape again reuses its name.
+ *
+ * The `input` variant adds an `Input` suffix (`HeroInput`) - unless the read-shaped def is already
+ * registered with byte-identical content (a block with nothing that differs between input and
+ * output), in which case it's shared as-is rather than emitting a redundant twin.
  */
 export function registerBlockInterface(
   block: { interfaceName?: string; slug: string },
@@ -1431,8 +1433,16 @@ export function registerBlockInterface(
   interfaceNameDefinitions: Map<string, JSONSchema4>,
   variant: SchemaVariant = 'output',
 ): string {
-  const inputSuffix = variant === 'input' ? 'Input' : ''
-  const baseName = `${block.interfaceName ?? toWords(block.slug, true)}${inputSuffix}`
+  const rawName = block.interfaceName ?? toWords(block.slug, true)
+
+  if (variant === 'input') {
+    const outputDef = interfaceNameDefinitions.get(rawName)
+    if (outputDef && hashBlockSchema(outputDef) === hashBlockSchema(blockSchema)) {
+      return rawName
+    }
+  }
+
+  const baseName = variant === 'input' ? `${rawName}Input` : rawName
   const existing = interfaceNameDefinitions.get(baseName)
 
   // The name is free - claim it.

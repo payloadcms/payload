@@ -201,6 +201,40 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
+  collectionsInput: {
+    users: UserInput;
+    posts: PostInput;
+    categories: CategoryInput;
+    'hidden-posts': HiddenPostInput;
+    uploads: UploadInput;
+    versions: VersionInput;
+    'categories-versions': CategoriesVersionInput;
+    singular: SingularInput;
+    'self-joins': SelfJoinInput;
+    'localized-posts': LocalizedPostInput;
+    'localized-categories': LocalizedCategoryInput;
+    'restricted-categories': RestrictedCategoryInput;
+    'categories-join-restricted': CategoriesJoinRestrictedInput;
+    'restricted-posts': RestrictedPostInput;
+    'collection-restricted': CollectionRestrictedInput;
+    'depth-joins-1': DepthJoins1Input;
+    'depth-joins-2': DepthJoins2Input;
+    'depth-joins-3': DepthJoins3Input;
+    'multiple-collections-parents': MultipleCollectionsParentInput;
+    'multiple-collections-1': MultipleCollections1Input;
+    'multiple-collections-2': MultipleCollections2Input;
+    folders: FolderInput;
+    'example-pages': ExamplePageInput;
+    'example-posts': ExamplePostInput;
+    folderPoly1: FolderPoly1Input;
+    folderPoly2: FolderPoly2Input;
+    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
+    'payload-kv': PayloadKvInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+  };
+  globalsInput: {};
   user: User;
   jobs: {
     tasks: unknown;
@@ -1479,6 +1513,540 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_input".
+ */
+export interface PostInput {
+  id?: string | null;
+  title?: string | null;
+  localizedText?: string | null;
+  author?: string | null;
+  /**
+   * Hides posts for the `filtered` join field in categories
+   */
+  isFiltered?: boolean | null;
+  restrictedField?: string | null;
+  upload?: string | null;
+  category?: string | null;
+  categories?: string[] | null;
+  categoriesLocalized?: string[] | null;
+  polymorphic?:
+    | ({
+        relationTo: 'categories';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  polymorphics?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string;
+          }
+        | {
+            relationTo: 'users';
+            value: string;
+          }
+      )[]
+    | null;
+  localizedPolymorphic?:
+    | ({
+        relationTo: 'categories';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null);
+  localizedPolymorphics?:
+    | (
+        | {
+            relationTo: 'categories';
+            value: string;
+          }
+        | {
+            relationTo: 'users';
+            value: string;
+          }
+      )[]
+    | null;
+  group?: {
+    category?: string | null;
+    camelCaseCategory?: string | null;
+  };
+  array?:
+    | {
+        category?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayHasMany?:
+    | {
+        category?: string[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  localizedArray?:
+    | {
+        category?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?: BlockInput[] | null;
+  first?: {
+    tabText?: string | null;
+  };
+  tab?: {
+    category?: string | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockInput".
+ */
+export interface BlockInput {
+  category?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories_input".
+ */
+export interface CategoryInput {
+  id?: string | null;
+  name?: string | null;
+  group?: {};
+  enableErrorOnJoin?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-posts_input".
+ */
+export interface HiddenPostInput {
+  id?: string | null;
+  title?: string | null;
+  category?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads_input".
+ */
+export interface UploadInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions_input".
+ */
+export interface VersionInput {
+  id?: string | null;
+  title: string;
+  category?: string | null;
+  categoryVersion?: string | null;
+  categoryVersions?: string[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-versions_input".
+ */
+export interface CategoriesVersionInput {
+  id?: string | null;
+  title?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "singular_input".
+ */
+export interface SingularInput {
+  id?: string | null;
+  category?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "self-joins_input".
+ */
+export interface SelfJoinInput {
+  id?: string | null;
+  rel?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-posts_input".
+ */
+export interface LocalizedPostInput {
+  id?: string | null;
+  title?: string | null;
+  category?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-categories_input".
+ */
+export interface LocalizedCategoryInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-categories_input".
+ */
+export interface RestrictedCategoryInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "categories-join-restricted_input".
+ */
+export interface CategoriesJoinRestrictedInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-posts_input".
+ */
+export interface RestrictedPostInput {
+  id?: string | null;
+  title?: string | null;
+  restrictedField?: string | null;
+  category?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-restricted_input".
+ */
+export interface CollectionRestrictedInput {
+  id?: string | null;
+  title?: string | null;
+  canRead?: boolean | null;
+  category?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-1_input".
+ */
+export interface DepthJoins1Input {
+  id?: string | null;
+  rel?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-2_input".
+ */
+export interface DepthJoins2Input {
+  id?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "depth-joins-3_input".
+ */
+export interface DepthJoins3Input {
+  id?: string | null;
+  rel?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "multiple-collections-parents_input".
+ */
+export interface MultipleCollectionsParentInput {
+  id?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "multiple-collections-1_input".
+ */
+export interface MultipleCollections1Input {
+  id?: string | null;
+  parent?: string | null;
+  title?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "multiple-collections-2_input".
+ */
+export interface MultipleCollections2Input {
+  id?: string | null;
+  parent?: string | null;
+  title?: string | null;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders_input".
+ */
+export interface FolderInput {
+  id?: string | null;
+  _h_folders?: string | null;
+  name?: string | null;
+  folderType?: ('example-pages' | 'example-posts' | 'folderPoly1' | 'folderPoly2')[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "example-pages_input".
+ */
+export interface ExamplePageInput {
+  id?: string | null;
+  _h_folders?: string | null;
+  title?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "example-posts_input".
+ */
+export interface ExamplePostInput {
+  id?: string | null;
+  _h_folders?: string | null;
+  title?: string | null;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly1_input".
+ */
+export interface FolderPoly1Input {
+  id?: string | null;
+  folderPoly1Title?: string | null;
+  _h_folders?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folderPoly2_input".
+ */
+export interface FolderPoly2Input {
+  id?: string | null;
+  folderPoly2Title?: string | null;
+  _h_folders?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_input".
+ */
+export interface PayloadMcpApiKeyInput {
+  id?: string | null;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string;
+  overrideAccess?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string | null;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string | null;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'categories';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'hidden-posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'uploads';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'versions';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'categories-versions';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'singular';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'self-joins';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'localized-posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'localized-categories';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'restricted-categories';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'categories-join-restricted';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'restricted-posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'collection-restricted';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'depth-joins-1';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'depth-joins-2';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'depth-joins-3';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'multiple-collections-parents';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'multiple-collections-1';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'multiple-collections-2';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'folders';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'example-pages';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'example-posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'folderPoly1';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'folderPoly2';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string | null;
+  name?: string | null;
+  batch?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

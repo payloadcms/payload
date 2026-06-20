@@ -95,6 +95,41 @@ export type LexicalNodes_0E9BF36D =
   | SerializedListNode<LexicalNodes_0E9BF36D>
   | SerializedListItemNode<LexicalNodes_0E9BF36D>
   | SerializedHeadingNode<LexicalNodes_0E9BF36D>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_937C88BE_Input".
+ */
+export type LexicalNodes_937C88BE_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_937C88BE_Input>
+  | SerializedHorizontalRuleNode
+  | {
+      type: 'upload';
+      /**
+       * Lexical's internal serialization version for this node type.
+       */
+      version: number;
+      [k: string]: unknown;
+    }
+  | SerializedQuoteNode<LexicalNodes_937C88BE_Input>
+  | SerializedRelationshipNodeInput<
+      | 'posts'
+      | 'simple'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_937C88BE_Input, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_937C88BE_Input, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_937C88BE_Input>
+  | SerializedListItemNode<LexicalNodes_937C88BE_Input>
+  | SerializedHeadingNode<LexicalNodes_937C88BE_Input>;
 
 export interface Config {
   auth: {
@@ -134,6 +169,18 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
+  collectionsInput: {
+    posts: PostInput;
+    simple: SimpleInput;
+    users: UserInput;
+    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
+    'payload-kv': PayloadKvInput;
+    'payload-jobs': PayloadJobInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+  };
+  globalsInput: {};
   user: User;
   jobs: {
     tasks: {
@@ -652,6 +699,287 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_input".
+ */
+export interface PostInput {
+  id?: string | null;
+  title: string;
+  content?: LexicalRichText<LexicalNodes_937C88BE_Input> | null;
+  jobStep1Ran?: string | null;
+  jobStep2Ran?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple_input".
+ */
+export interface SimpleInput {
+  id?: string | null;
+  title: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_input".
+ */
+export interface PayloadMcpApiKeyInput {
+  id?: string | null;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string;
+  overrideAccess?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string | null;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-jobs_input".
+ */
+export interface PayloadJobInput {
+  id?: string | null;
+  /**
+   * Input data provided to the job
+   */
+  input?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  completedAt?: string | null;
+  totalTried?: number | null;
+  /**
+   * If hasError is true this job will not be retried
+   */
+  hasError?: boolean | null;
+  /**
+   * If hasError is true, this is the error that caused it
+   */
+  error?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * Task execution log
+   */
+  log?:
+    | {
+        executedAt: string;
+        completedAt: string;
+        taskSlug:
+          | 'inline'
+          | 'UpdatePost'
+          | 'UpdatePostStep2'
+          | 'CreateSimple'
+          | 'CreateSimpleRetriesUndefined'
+          | 'CreateSimpleRetries0'
+          | 'CreateSimpleWithDuplicateMessage'
+          | 'ExternalTask'
+          | 'ThrowError'
+          | 'DoNothingTask'
+          | 'SelfCancel';
+        taskID: string;
+        input?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        output?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        state: 'failed' | 'succeeded';
+        error?:
+          | {
+              [k: string]: unknown;
+            }
+          | unknown[]
+          | string
+          | number
+          | boolean
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  workflowSlug?:
+    | (
+        | 'selfCancel'
+        | 'updatePost'
+        | 'updatePostJSONWorkflow'
+        | 'retriesTest'
+        | 'retriesRollbackTest'
+        | 'retriesWorkflowLevelTest'
+        | 'workflowNoRetriesSet'
+        | 'workflowRetries0'
+        | 'workflowAndTasksRetriesUndefined'
+        | 'workflowRetries2TasksRetriesUndefined'
+        | 'workflowRetries2TasksRetries0'
+        | 'inlineTaskTest'
+        | 'failsImmediately'
+        | 'fastParallelTask'
+        | 'inlineTaskTestDelayed'
+        | 'externalWorkflow'
+        | 'retriesBackoffTest'
+        | 'subTask'
+        | 'subTaskFails'
+        | 'longRunning'
+        | 'parallelTask'
+        | 'exclusiveConcurrency'
+        | 'noConcurrency'
+        | 'queueSpecificConcurrency'
+        | 'supersedesConcurrency'
+        | 'throwsInHandlerNoRetries'
+        | 'throwsInHandlerRetries1'
+      )
+    | null;
+  taskSlug?:
+    | (
+        | 'inline'
+        | 'UpdatePost'
+        | 'UpdatePostStep2'
+        | 'CreateSimple'
+        | 'CreateSimpleRetriesUndefined'
+        | 'CreateSimpleRetries0'
+        | 'CreateSimpleWithDuplicateMessage'
+        | 'ExternalTask'
+        | 'ThrowError'
+        | 'DoNothingTask'
+        | 'SelfCancel'
+      )
+    | null;
+  queue?: string | null;
+  waitUntil?: string | null;
+  processing?: boolean | null;
+  /**
+   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+   */
+  concurrencyKey?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string | null;
+  document?:
+    | ({
+        relationTo: 'posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'simple';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string | null;
+  name?: string | null;
+  batch?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MyUpdatePostType".
  */
 export interface MyUpdatePostType {
@@ -1148,6 +1476,30 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
+
+export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string;
+  };
+}[TSlugs];
+
+export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string;
+  };
+}[TSlugs];
 
 
 declare module 'payload' {

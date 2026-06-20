@@ -125,6 +125,69 @@ export type LexicalNodes_74BE97BC =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_EA008DE0_Input".
+ */
+export type LexicalNodes_EA008DE0_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_EA008DE0_Input>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_EA008DE0_Input>
+  | {
+      type: 'upload';
+      /**
+       * Lexical's internal serialization version for this node type.
+       */
+      version: number;
+      [k: string]: unknown;
+    }
+  | SerializedQuoteNode<LexicalNodes_EA008DE0_Input>
+  | SerializedListNode<LexicalNodes_EA008DE0_Input>
+  | SerializedListItemNode<LexicalNodes_EA008DE0_Input>
+  | SerializedAutoLinkNode<LexicalNodes_EA008DE0_Input, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_EA008DE0_Input, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNodeInput<
+      | 'users'
+      | 'public-users'
+      | 'posts'
+      | 'unrestricted'
+      | 'relation-restricted'
+      | 'fully-restricted'
+      | 'read-only-collection'
+      | 'user-restricted-collection'
+      | 'can-create-not-update-collection'
+      | 'restricted-versions'
+      | 'restricted-versions-admin-panel'
+      | 'sibling-data'
+      | 'rely-on-request-headers'
+      | 'doc-level-access'
+      | 'hidden-fields'
+      | 'hidden-access'
+      | 'hidden-access-count'
+      | 'fields-and-top-access'
+      | 'blocks-field-access'
+      | 'disabled'
+      | 'rich-text'
+      | 'regression1'
+      | 'regression2'
+      | 'hooks'
+      | 'auth-collection'
+      | 'read-restricted'
+      | 'differentiated-trash'
+      | 'restricted-trash'
+      | 'field-restricted-update-based-on-data'
+      | 'where-cache-same'
+      | 'where-cache-unique'
+      | 'async-parent'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_3CC4B7D0".
  */
 export type LexicalNodes_3CC4B7D0 =
@@ -186,6 +249,69 @@ export type LexicalNodes_3CC4B7D0 =
   | SerializedListNode<LexicalNodes_3CC4B7D0>
   | SerializedListItemNode<LexicalNodes_3CC4B7D0>
   | SerializedHeadingNode<LexicalNodes_3CC4B7D0>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_AD02C9BE_Input".
+ */
+export type LexicalNodes_AD02C9BE_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_AD02C9BE_Input>
+  | SerializedHorizontalRuleNode
+  | {
+      type: 'upload';
+      /**
+       * Lexical's internal serialization version for this node type.
+       */
+      version: number;
+      [k: string]: unknown;
+    }
+  | SerializedQuoteNode<LexicalNodes_AD02C9BE_Input>
+  | SerializedRelationshipNodeInput<
+      | 'users'
+      | 'public-users'
+      | 'posts'
+      | 'unrestricted'
+      | 'relation-restricted'
+      | 'fully-restricted'
+      | 'read-only-collection'
+      | 'user-restricted-collection'
+      | 'can-create-not-update-collection'
+      | 'restricted-versions'
+      | 'restricted-versions-admin-panel'
+      | 'sibling-data'
+      | 'rely-on-request-headers'
+      | 'doc-level-access'
+      | 'hidden-fields'
+      | 'hidden-access'
+      | 'hidden-access-count'
+      | 'fields-and-top-access'
+      | 'blocks-field-access'
+      | 'disabled'
+      | 'rich-text'
+      | 'regression1'
+      | 'regression2'
+      | 'hooks'
+      | 'auth-collection'
+      | 'read-restricted'
+      | 'differentiated-trash'
+      | 'restricted-trash'
+      | 'field-restricted-update-based-on-data'
+      | 'where-cache-same'
+      | 'where-cache-unique'
+      | 'async-parent'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_AD02C9BE_Input, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_AD02C9BE_Input, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_AD02C9BE_Input>
+  | SerializedListItemNode<LexicalNodes_AD02C9BE_Input>
+  | SerializedHeadingNode<LexicalNodes_AD02C9BE_Input>;
 
 export interface Config {
   auth: {
@@ -296,6 +422,52 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
+  };
+  collectionsInput: {
+    users: UserInput;
+    'public-users': PublicUserInput;
+    posts: PostInput;
+    unrestricted: UnrestrictedInput;
+    'relation-restricted': RelationRestrictedInput;
+    'fully-restricted': FullyRestrictedInput;
+    'read-only-collection': ReadOnlyCollectionInput;
+    'user-restricted-collection': UserRestrictedCollectionInput;
+    'can-create-not-update-collection': CanCreateNotUpdateCollectionInput;
+    'restricted-versions': RestrictedVersionInput;
+    'restricted-versions-admin-panel': RestrictedVersionsAdminPanelInput;
+    'sibling-data': SiblingDatumInput;
+    'rely-on-request-headers': RelyOnRequestHeaderInput;
+    'doc-level-access': DocLevelAccessInput;
+    'hidden-fields': HiddenFieldInput;
+    'hidden-access': HiddenAccessInput;
+    'hidden-access-count': HiddenAccessCountInput;
+    'fields-and-top-access': FieldsAndTopAccessInput;
+    'blocks-field-access': BlocksFieldAccessInput;
+    disabled: DisabledInput;
+    'rich-text': RichTextInput;
+    regression1: Regression1Input;
+    regression2: Regression2Input;
+    hooks: HookInput;
+    'auth-collection': AuthCollectionInput;
+    'read-restricted': ReadRestrictedInput;
+    'differentiated-trash': DifferentiatedTrashInput;
+    'restricted-trash': RestrictedTrashInput;
+    'field-restricted-update-based-on-data': FieldRestrictedUpdateBasedOnDatumInput;
+    'where-cache-same': WhereCacheSameInput;
+    'where-cache-unique': WhereCacheUniqueInput;
+    'async-parent': AsyncParentInput;
+    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
+    'payload-kv': PayloadKvInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+  };
+  globalsInput: {
+    settings: SettingInput;
+    test: TestInput;
+    'read-only-global': ReadOnlyGlobalInput;
+    'user-restricted-global': UserRestrictedGlobalInput;
+    'read-not-update-global': ReadNotUpdateGlobalInput;
   };
   user: User | PublicUser | AuthCollection;
   jobs: {
@@ -1973,6 +2145,766 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string | null;
+  roles?: ('admin' | 'user')[] | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "public-users_input".
+ */
+export interface PublicUserInput {
+  id?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_input".
+ */
+export interface PostInput {
+  id?: string | null;
+  restrictedField?: string | null;
+  group?: {
+    restrictedGroupText?: string | null;
+  };
+  restrictedRowText?: string | null;
+  restrictedCollapsibleText?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unrestricted_input".
+ */
+export interface UnrestrictedInput {
+  id?: string | null;
+  name?: string | null;
+  info?: {
+    title?: string | null;
+    description?: string | null;
+  };
+  userRestrictedDocs?: string[] | null;
+  createNotUpdateDocs?: string[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-restricted_input".
+ */
+export interface RelationRestrictedInput {
+  id?: string | null;
+  name?: string | null;
+  post?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fully-restricted_input".
+ */
+export interface FullyRestrictedInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "read-only-collection_input".
+ */
+export interface ReadOnlyCollectionInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "user-restricted-collection_input".
+ */
+export interface UserRestrictedCollectionInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "can-create-not-update-collection_input".
+ */
+export interface CanCreateNotUpdateCollectionInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-versions_input".
+ */
+export interface RestrictedVersionInput {
+  id?: string | null;
+  name?: string | null;
+  hidden?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-versions-admin-panel_input".
+ */
+export interface RestrictedVersionsAdminPanelInput {
+  id?: string | null;
+  name?: string | null;
+  hidden?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "sibling-data_input".
+ */
+export interface SiblingDatumInput {
+  id?: string | null;
+  array?:
+    | {
+        allowPublicReadability?: boolean | null;
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rely-on-request-headers_input".
+ */
+export interface RelyOnRequestHeaderInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "doc-level-access_input".
+ */
+export interface DocLevelAccessInput {
+  id?: string | null;
+  approvedForRemoval?: boolean | null;
+  approvedTitle?: string | null;
+  lockTitle?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-fields_input".
+ */
+export interface HiddenFieldInput {
+  id?: string | null;
+  title?: string | null;
+  partiallyHiddenGroup?: {
+    name?: string | null;
+    value?: string | null;
+  };
+  partiallyHiddenArray?:
+    | {
+        name?: string | null;
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  hidden?: boolean | null;
+  hiddenWithDefault?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-access_input".
+ */
+export interface HiddenAccessInput {
+  id?: string | null;
+  title: string;
+  hidden?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hidden-access-count_input".
+ */
+export interface HiddenAccessCountInput {
+  id?: string | null;
+  title: string;
+  hidden?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "fields-and-top-access_input".
+ */
+export interface FieldsAndTopAccessInput {
+  id?: string | null;
+  secret?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks-field-access_input".
+ */
+export interface BlocksFieldAccessInput {
+  id?: string | null;
+  title: string;
+  editableBlocks?: TestBlock[] | null;
+  readOnlyBlocks?: TestBlock2[] | null;
+  editableBlockRefs?: Titleblock[] | null;
+  readOnlyBlockRefs?: Titleblock[] | null;
+  tabReadOnlyTest?: {
+    tabReadOnlyBlocks?: TestBlock3[] | null;
+    tabReadOnlyBlockRefs?: Titleblock[] | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disabled_input".
+ */
+export interface DisabledInput {
+  id?: string | null;
+  group?: {
+    text?: string | null;
+  };
+  namedTab?: {
+    text?: string | null;
+  };
+  unnamedTab?: string | null;
+  array?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rich-text_input".
+ */
+export interface RichTextInput {
+  id?: string | null;
+  blocks?: RichTextInput1[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RichTextInput".
+ */
+export interface RichTextInput1 {
+  richText?: LexicalRichText<LexicalNodes_EA008DE0_Input> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'richText';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regression1_input".
+ */
+export interface Regression1Input {
+  id?: string | null;
+  group1?: {
+    richText1?: LexicalRichText<LexicalNodes_AD02C9BE_Input> | null;
+    text?: string | null;
+  };
+  tab1?: {
+    richText2?: LexicalRichText<LexicalNodes_AD02C9BE_Input> | null;
+    blocks2?: MyBlockInput[] | null;
+  };
+  richText4?: LexicalRichText<LexicalNodes_AD02C9BE_Input> | null;
+  blocks3?: MyBlock2Input[] | null;
+  array?:
+    | {
+        art?: LexicalRichText<LexicalNodes_AD02C9BE_Input> | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithAccessFalse?:
+    | {
+        richText6?: LexicalRichText<LexicalNodes_AD02C9BE_Input> | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?: MyBlock3Input[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlockInput".
+ */
+export interface MyBlockInput {
+  richText3?: LexicalRichText<LexicalNodes_AD02C9BE_Input> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'myBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock2Input".
+ */
+export interface MyBlock2Input {
+  richText5?: LexicalRichText<LexicalNodes_AD02C9BE_Input> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'myBlock2';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock3Input".
+ */
+export interface MyBlock3Input {
+  richText7?: LexicalRichText<LexicalNodes_AD02C9BE_Input> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'myBlock3';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "regression2_input".
+ */
+export interface Regression2Input {
+  id?: string | null;
+  group?: {
+    richText1?: LexicalRichText<LexicalNodes_AD02C9BE_Input> | null;
+    text?: string | null;
+  };
+  array?:
+    | {
+        richText2?: LexicalRichText<LexicalNodes_AD02C9BE_Input> | null;
+        id?: string | null;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hooks_input".
+ */
+export interface HookInput {
+  id?: string | null;
+  cannotMutateRequired: string;
+  cannotMutateNotRequired?: string | null;
+  canMutate?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "auth-collection_input".
+ */
+export interface AuthCollectionInput {
+  id?: string | null;
+  password?: string | null;
+  roles?: ('admin' | 'user')[] | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  _verified?: boolean | null;
+  _verificationToken?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "read-restricted_input".
+ */
+export interface ReadRestrictedInput {
+  id?: string | null;
+  restrictedTopLevel?: string | null;
+  visibleTopLevel?: string | null;
+  contactInfo?: {
+    email?: string | null;
+    secretPhone?: string | null;
+    publicPhone?: string | null;
+  };
+  visibleInRow?: string | null;
+  restrictedInRow?: string | null;
+  visibleInCollapsible?: string | null;
+  restrictedInCollapsible?: string | null;
+  items?:
+    | {
+        title?: string | null;
+        secretDescription?: string | null;
+        publicDescription?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  publicData?: string | null;
+  secretInPublicTab?: string | null;
+  settings?: {
+    visibleSetting?: boolean | null;
+    restrictedSetting?: boolean | null;
+  };
+  metadata?: {
+    analytics?: {
+      visibleMetric?: number | null;
+      restrictedMetric?: number | null;
+    };
+  };
+  address?: {
+    street?: string | null;
+    city?: string | null;
+    secretPostalCode?: string | null;
+  };
+  advanced?: {
+    visibleAdvanced?: string | null;
+    restrictedAdvanced?: string | null;
+  };
+  unrestricted?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "differentiated-trash_input".
+ */
+export interface DifferentiatedTrashInput {
+  id?: string | null;
+  title?: string | null;
+  deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-trash_input".
+ */
+export interface RestrictedTrashInput {
+  id?: string | null;
+  title?: string | null;
+  deletedAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-restricted-update-based-on-data_input".
+ */
+export interface FieldRestrictedUpdateBasedOnDatumInput {
+  id?: string | null;
+  restricted?: string | null;
+  doesNothing?: boolean | null;
+  isRestricted?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "where-cache-same_input".
+ */
+export interface WhereCacheSameInput {
+  id?: string | null;
+  title: string;
+  userRole: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "where-cache-unique_input".
+ */
+export interface WhereCacheUniqueInput {
+  id?: string | null;
+  title: string;
+  readRole: string;
+  updateRole: string;
+  deleteRole: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "async-parent_input".
+ */
+export interface AsyncParentInput {
+  id?: string | null;
+  title: string;
+  parentField?: {
+    childField1?: string | null;
+    childField2?: string | null;
+    nestedGroup?: {
+      deepChild1?: string | null;
+      deepChild2?: number | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_input".
+ */
+export interface PayloadMcpApiKeyInput {
+  id?: string | null;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string;
+  overrideAccess?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string | null;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string | null;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'public-users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'unrestricted';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relation-restricted';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'fully-restricted';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'read-only-collection';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'user-restricted-collection';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'can-create-not-update-collection';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'restricted-versions';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'restricted-versions-admin-panel';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'sibling-data';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'rely-on-request-headers';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'doc-level-access';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'hidden-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'hidden-access';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'hidden-access-count';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'fields-and-top-access';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'blocks-field-access';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'disabled';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'rich-text';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'regression1';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'regression2';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'hooks';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'auth-collection';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'read-restricted';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'differentiated-trash';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'restricted-trash';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'field-restricted-update-based-on-data';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'where-cache-same';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'where-cache-unique';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'async-parent';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user:
+    | {
+        relationTo: 'users';
+        value: string;
+      }
+    | {
+        relationTo: 'public-users';
+        value: string;
+      }
+    | {
+        relationTo: 'auth-collection';
+        value: string;
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string | null;
+  user:
+    | {
+        relationTo: 'users';
+        value: string;
+      }
+    | {
+        relationTo: 'public-users';
+        value: string;
+      }
+    | {
+        relationTo: 'auth-collection';
+        value: string;
+      };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string | null;
+  name?: string | null;
+  batch?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "settings_input".
+ */
+export interface SettingInput {
+  id?: string | null;
+  test?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "test_input".
+ */
+export interface TestInput {
+  id?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "read-only-global_input".
+ */
+export interface ReadOnlyGlobalInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "user-restricted-global_input".
+ */
+export interface UserRestrictedGlobalInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "read-not-update-global_input".
+ */
+export interface ReadNotUpdateGlobalInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MyBlock".
  */
 export interface MyBlock {
@@ -2151,6 +3083,30 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
+
+export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string;
+  };
+}[TSlugs];
+
+export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string;
+  };
+}[TSlugs];
 
 export interface SerializedHorizontalRuleNode {
   type: 'horizontalrule';
