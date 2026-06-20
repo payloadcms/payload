@@ -35,6 +35,7 @@ export const getFieldToJSONSchema: (args: {
     i18n,
     interfaceNameDefinitions,
     typeStringDefinitions,
+    variant = 'output',
   }) => {
     // Step 1: build the schema for every node type allowed in this field.
 
@@ -56,6 +57,7 @@ export const getFieldToJSONSchema: (args: {
       interfaceNameDefinitions,
       nodeUnionName: NODE_UNION_NAME_PLACEHOLDER,
       typeStringDefinitions,
+      variant,
     }
 
     const nodeSchemas: JSONSchema4[] = [

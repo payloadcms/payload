@@ -231,6 +231,7 @@ export type JSONSchemaArgs = {
   | 'i18n'
   | 'interfaceNameDefinitions'
   | 'typeStringDefinitions'
+  | 'variant'
 >
 
 export type JSONSchemaFn = (args: JSONSchemaArgs) => JSONSchema4

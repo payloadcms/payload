@@ -8,23 +8,24 @@ import type { JSONSchemaArgs, JSONSchemaFn } from '../../typesServer.js'
 
 import { formatSchema } from '../../../types/jsonSchemaHelpers.js'
 
-type BaseBlockFields<TFields extends JsonObject = JsonObject> = {
+type BaseBlockFields<TFields extends JsonObject = JsonObject> = TFields & {
   blockName?: null | string
   blockType: string
-} & TFields
+}
 
-export type BlockFields<TFields extends JsonObject = JsonObject> = {
+export type BlockFields<TFields extends JsonObject = JsonObject> = BaseBlockFields<TFields> & {
   id: string
-} & BaseBlockFields<TFields>
+}
 
-export type BlockFieldsOptionalID<TFields extends JsonObject = JsonObject> = {
-  id?: string
-} & BaseBlockFields<TFields>
+export type BlockFieldsOptionalID<TFields extends JsonObject = JsonObject> =
+  BaseBlockFields<TFields> & {
+    id?: string
+  }
 
-export type InlineBlockFields<TFields extends JsonObject = JsonObject> = {
+export type InlineBlockFields<TFields extends JsonObject = JsonObject> = TFields & {
   blockType: string
   id: string
-} & TFields
+}
 
 // Distributive (`TFields extends unknown ?`) so `SerializedBlockNode<A | B>` expands to
 // `SerializedBlockNode<A> | SerializedBlockNode<B>` - i.e. a discriminated union where each block
@@ -33,7 +34,7 @@ export type InlineBlockFields<TFields extends JsonObject = JsonObject> = {
 export type SerializedBlockNode<TFields extends { blockType: string } = { blockType: string }> =
   TFields extends unknown
     ? {
-        fields: { blockName?: null | string; id: string } & Omit<TFields, 'blockName' | 'id'>
+        fields: Omit<TFields, 'blockName' | 'id'> & { blockName?: null | string; id: string }
         format: LexicalElementFormat
         type: 'block'
         version: number
@@ -44,7 +45,7 @@ export type SerializedInlineBlockNode<
   TFields extends { blockType: string } = { blockType: string },
 > = TFields extends unknown
   ? {
-      fields: { id: string } & Omit<TFields, 'id'>
+      fields: Omit<TFields, 'id'> & { id: string }
       type: 'inlineBlock'
       version: number
     }
@@ -87,6 +88,7 @@ const buildBlockFieldsSchema = (
         i18n: args.i18n,
         interfaceNameDefinitions: args.interfaceNameDefinitions,
         typeStringDefinitions: args.typeStringDefinitions,
+        variant: args.variant,
       })
     : { properties: {}, required: [] }
 
@@ -94,7 +96,7 @@ const buildBlockFieldsSchema = (
     id: _stripId,
     blockName: _stripBlockName,
     ...userOnlyProperties
-  } = (userFieldsSchema.properties ?? {}) as { [k: string]: JSONSchema4 }
+  } = userFieldsSchema.properties ?? {}
   const userOnlyRequired = (userFieldsSchema.required ?? []).filter(
     (r) => r !== 'id' && r !== 'blockName',
   )
@@ -117,7 +119,7 @@ const buildBlockFieldsSchema = (
     required,
   }
 
-  return registerBlockInterface(block, fieldsSchema, args.interfaceNameDefinitions)
+  return registerBlockInterface(block, fieldsSchema, args.interfaceNameDefinitions, args.variant)
 }
 
 export const createBlockNodeJSONSchema =

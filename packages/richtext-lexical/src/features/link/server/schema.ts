@@ -11,11 +11,11 @@ import type { JSONSchemaArgs, JSONSchemaFn } from '../../typesServer.js'
 export type LinkFields = {
   /** Custom fields added via `LinkFeature`'s `fields` prop. */
   [k: string]: unknown
-  doc?: {
+  doc?: null | {
     relationTo: string
     /** Document ID, or the full doc when populated by the afterRead hook. */
-    value: { [k: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
-  } | null
+    value: DefaultDocumentIDType | { [k: string]: unknown; id: DefaultDocumentIDType }
+  }
   linkType: 'custom' | 'internal'
   newTab: boolean
   url?: string
@@ -71,6 +71,7 @@ const buildLinkFieldsJSONSchema = (
     i18n,
     interfaceNameDefinitions,
     typeStringDefinitions,
+    variant,
   }: JSONSchemaArgs,
 ): JSONSchema4 => {
   const flattenedExtraFields = flattenAllFields({ fields: sanitizedFieldsWithoutText })
@@ -83,6 +84,7 @@ const buildLinkFieldsJSONSchema = (
           i18n,
           interfaceNameDefinitions,
           typeStringDefinitions,
+          variant,
         })
       : { properties: {}, required: [] }
 

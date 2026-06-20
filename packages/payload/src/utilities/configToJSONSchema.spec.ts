@@ -204,6 +204,31 @@ describe('configToJSONSchema', () => {
     })
   })
 
+  it('passes the variant to field-level jsonSchema transforms', async () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [
+        {
+          slug: 'posts',
+          fields: [
+            {
+              name: 'custom',
+              type: 'text',
+              jsonSchema: [({ jsonSchema, variant }) => ({ ...jsonSchema, description: variant })],
+            },
+          ],
+        },
+      ],
+      typescript: { generateInputTypes: true },
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
+
+    expect((schema?.$defs?.posts as JSONSchema4).properties!.custom.description).toBe('output')
+    expect((schema?.$defs?.posts_input as JSONSchema4).properties!.custom.description).toBe('input')
+  })
+
   it('should handle block fields with no blocks', async () => {
     // @ts-expect-error
     const config: Config = {

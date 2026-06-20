@@ -814,6 +814,7 @@ export function fieldsToJSONSchema({
                   interfaceNameDefinitions,
                   isRequired,
                   typeStringDefinitions,
+                  variant,
                 }),
               }
             } else {
@@ -933,7 +934,7 @@ export function fieldsToJSONSchema({
 
         if ('jsonSchema' in field && field?.jsonSchema?.length) {
           for (const schema of field.jsonSchema) {
-            fieldSchema = schema({ jsonSchema: fieldSchema! })
+            fieldSchema = schema({ jsonSchema: fieldSchema!, variant })
           }
         }
 
