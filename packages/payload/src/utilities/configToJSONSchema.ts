@@ -10,12 +10,19 @@ import type { FieldAffectingData, FlattenedField, Option } from '../fields/confi
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 
 import { MissingEditorProp } from '../errors/MissingEditorProp.js'
-import { fieldAffectsData } from '../fields/config/types.js'
+import { fieldAffectsData, fieldIsVirtual } from '../fields/config/types.js'
 import { generateJobsJSONSchemas } from '../queues/config/generateJobsJSONSchemas.js'
 import { flattenAllFields } from './flattenAllFields.js'
 import { formatNames, toWords } from './formatLabels.js'
 import { getCollectionIDFieldTypes } from './getCollectionIDFieldTypes.js'
 import { optionsAreEqual } from './optionsAreEqual.js'
+
+/** Read (`output`) vs write (`input`) shape: `input` is what `create`/`update` accept. */
+export type SchemaVariant = 'input' | 'output'
+
+// Virtual fields (computed) and join fields (derived from the inverse relationship) are read-only.
+const fieldIsInputExcluded = (field: FlattenedField): boolean =>
+  field.type === 'join' || fieldIsVirtual(field)
 
 const fieldIsRequired = (field: FlattenedField): boolean => {
   const isConditional = Boolean(field?.admin && field?.admin?.condition)
@@ -75,6 +82,28 @@ function generateEntitySelectSchemas(
     (acc, { slug }) => {
       acc[slug] = {
         $ref: `#/$defs/${slug}_select`,
+      }
+
+      return acc
+    },
+    {} as Record<string, JSONSchema4>,
+  )
+
+  return {
+    type: 'object',
+    additionalProperties: false,
+    properties,
+    required: Object.keys(properties),
+  }
+}
+
+function generateEntityInputSchemas(
+  entities: (SanitizedCollectionConfig | SanitizedGlobalConfig)[],
+): JSONSchema4 {
+  const properties = [...entities].reduce(
+    (acc, { slug }) => {
+      acc[slug] = {
+        $ref: `#/$defs/${slug}_input`,
       }
 
       return acc
@@ -379,6 +408,7 @@ export type FieldsToJSONSchemaArgs = {
    * ends up emitted once.
    */
   typeStringDefinitions: Set<string>
+  variant?: SchemaVariant
 }
 
 export function fieldsToJSONSchema({
@@ -389,6 +419,7 @@ export function fieldsToJSONSchema({
   i18n,
   interfaceNameDefinitions,
   typeStringDefinitions,
+  variant = 'output',
 }: FieldsToJSONSchemaArgs): {
   properties: {
     [k: string]: JSONSchema4
@@ -397,10 +428,23 @@ export function fieldsToJSONSchema({
 } {
   const requiredFieldNames = new Set<string>()
 
+  // `Input` suffix keeps a named interface's write-shaped def from colliding with its `output` one.
+  const interfaceDefName = (name: string): string =>
+    variant === 'input' ? `${name}Input` : name
+
   return {
     properties: Object.fromEntries(
       fields.reduce((fieldSchemas, field, index) => {
-        const isRequired = fieldAffectsData(field) && fieldIsRequired(field)
+        if (variant === 'input' && fieldIsInputExcluded(field)) {
+          return fieldSchemas
+        }
+
+        // A field with a `defaultValue` is filled in when omitted, so it's optional on input.
+        const hasDefaultValue = 'defaultValue' in field && field.defaultValue !== undefined
+        const isRequired =
+          fieldAffectsData(field) &&
+          fieldIsRequired(field) &&
+          !(variant === 'input' && hasDefaultValue)
 
         const fieldDescription = entityOrFieldToJsDocs({ entity: field, i18n })
         const baseFieldSchema: JSONSchema4 = {}
@@ -426,15 +470,17 @@ export function fieldsToJSONSchema({
                   i18n,
                   interfaceNameDefinitions,
                   typeStringDefinitions,
+                  variant,
                 }),
               },
             }
 
             if (field.interfaceName) {
-              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+              const definition = interfaceDefName(field.interfaceName)
+              interfaceNameDefinitions.set(definition, fieldSchema)
 
               fieldSchema = {
-                $ref: `#/$defs/${field.interfaceName}`,
+                $ref: `#/$defs/${definition}`,
               }
             }
             break
@@ -468,6 +514,7 @@ export function fieldsToJSONSchema({
                         i18n,
                         interfaceNameDefinitions,
                         typeStringDefinitions,
+                        variant,
                       })
 
                       const blockSchema: JSONSchema4 = {
@@ -485,7 +532,7 @@ export function fieldsToJSONSchema({
                       return forceInlineBlocks
                         ? blockSchema
                         : {
-                            $ref: `#/$defs/${registerBlockInterface(block, blockSchema, interfaceNameDefinitions)}`,
+                            $ref: `#/$defs/${registerBlockInterface(block, blockSchema, interfaceNameDefinitions, variant)}`,
                           }
                     }),
                   }
@@ -525,13 +572,15 @@ export function fieldsToJSONSchema({
                   i18n,
                   interfaceNameDefinitions,
                   typeStringDefinitions,
+                  variant,
                 }),
               }
 
               if (field.interfaceName) {
-                interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+                const definition = interfaceDefName(field.interfaceName)
+                interfaceNameDefinitions.set(definition, fieldSchema)
 
-                fieldSchema = { $ref: `#/$defs/${field.interfaceName}` }
+                fieldSchema = { $ref: `#/$defs/${definition}` }
               }
             }
             break
@@ -642,10 +691,11 @@ export function fieldsToJSONSchema({
             }
 
             if (field.interfaceName) {
-              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+              const definition = interfaceDefName(field.interfaceName)
+              interfaceNameDefinitions.set(definition, fieldSchema)
 
               fieldSchema = {
-                $ref: `#/$defs/${field.interfaceName}`,
+                $ref: `#/$defs/${definition}`,
               }
             }
 
@@ -653,6 +703,17 @@ export function fieldsToJSONSchema({
           }
           case 'relationship':
           case 'upload': {
+            // Read: an ID or the populated doc. Input: only the ID, so drop the `$ref`.
+            const relationValueSchema = (relation: string): JSONSchema4 =>
+              variant === 'input'
+                ? { type: collectionIDFieldTypes[relation] }
+                : {
+                    oneOf: [
+                      { type: collectionIDFieldTypes[relation] },
+                      { $ref: `#/$defs/${relation}` },
+                    ],
+                  }
+
             if (Array.isArray(field.relationTo)) {
               if (field.hasMany) {
                 fieldSchema = {
@@ -667,16 +728,7 @@ export function fieldsToJSONSchema({
                           relationTo: {
                             const: relation,
                           },
-                          value: {
-                            oneOf: [
-                              {
-                                type: collectionIDFieldTypes[relation],
-                              },
-                              {
-                                $ref: `#/$defs/${relation}`,
-                              },
-                            ],
-                          },
+                          value: relationValueSchema(relation),
                         },
                         required: ['value', 'relationTo'],
                       }
@@ -694,16 +746,7 @@ export function fieldsToJSONSchema({
                         relationTo: {
                           const: relation,
                         },
-                        value: {
-                          oneOf: [
-                            {
-                              type: collectionIDFieldTypes[relation],
-                            },
-                            {
-                              $ref: `#/$defs/${relation}`,
-                            },
-                          ],
-                        },
+                        value: relationValueSchema(relation),
                       },
                       required: ['value', 'relationTo'],
                     }
@@ -714,16 +757,27 @@ export function fieldsToJSONSchema({
               fieldSchema = {
                 ...baseFieldSchema,
                 type: withNullableJSONSchemaType('array', isRequired),
-                items: {
-                  oneOf: [
-                    {
-                      type: collectionIDFieldTypes[field.relationTo],
-                    },
-                    {
-                      $ref: `#/$defs/${field.relationTo}`,
-                    },
-                  ],
-                },
+                items:
+                  variant === 'input'
+                    ? { type: collectionIDFieldTypes[field.relationTo] }
+                    : {
+                        oneOf: [
+                          {
+                            type: collectionIDFieldTypes[field.relationTo],
+                          },
+                          {
+                            $ref: `#/$defs/${field.relationTo}`,
+                          },
+                        ],
+                      },
+              }
+            } else if (variant === 'input') {
+              fieldSchema = {
+                ...baseFieldSchema,
+                type: withNullableJSONSchemaType(
+                  collectionIDFieldTypes[field.relationTo]!,
+                  isRequired,
+                ),
               }
             } else {
               fieldSchema = {
@@ -819,10 +873,11 @@ export function fieldsToJSONSchema({
               }
 
               if (field.interfaceName) {
-                interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+                const definition = interfaceDefName(field.interfaceName)
+                interfaceNameDefinitions.set(definition, fieldSchema)
 
                 fieldSchema = {
-                  $ref: `#/$defs/${field.interfaceName}`,
+                  $ref: `#/$defs/${definition}`,
                 }
               }
               break
@@ -843,13 +898,15 @@ export function fieldsToJSONSchema({
                 i18n,
                 interfaceNameDefinitions,
                 typeStringDefinitions,
+                variant,
               }),
             }
 
             if (field.interfaceName) {
-              interfaceNameDefinitions.set(field.interfaceName, fieldSchema)
+              const definition = interfaceDefName(field.interfaceName)
+              interfaceNameDefinitions.set(definition, fieldSchema)
 
-              fieldSchema = { $ref: `#/$defs/${field.interfaceName}` }
+              fieldSchema = { $ref: `#/$defs/${definition}` }
             }
             break
           }
@@ -904,34 +961,47 @@ export function entityToJSONSchema(
   collectionIDFieldTypes?: { [key: string]: 'number' | 'string' },
   i18n?: I18n,
   forceInlineBlocks?: boolean,
+  variant: SchemaVariant = 'output',
 ): JSONSchema4 {
   if (!collectionIDFieldTypes) {
     collectionIDFieldTypes = getCollectionIDFieldTypes({ config, defaultIDType })
   }
 
-  const title = entity.typescript?.interface
+  const isInput = variant === 'input'
+
+  const baseTitle = entity.typescript?.interface
     ? entity.typescript.interface
     : formatNames(entity.slug).singular
+  const title = isInput ? `${baseTitle}Input` : baseTitle
 
   let mutableFields = [...entity.flattenedFields]
 
-  const idField: FieldAffectingData = { name: 'id', type: defaultIDType as 'text', required: true }
+  // `id` is always present on read; on input it's optional (omit it, or pass a custom ID).
+  const idField: FieldAffectingData = {
+    name: 'id',
+    type: defaultIDType as 'text',
+    required: !isInput,
+  }
   const customIdField = mutableFields.find((field) => field.name === 'id') as FieldAffectingData
 
   if (customIdField && customIdField.type !== 'group' && customIdField.type !== 'tab') {
-    mutableFields = mutableFields.map((field) => {
-      if (field === customIdField) {
-        return { ...field, required: true }
-      }
-
-      return field
-    })
+    if (!isInput) {
+      mutableFields = mutableFields.map((field) =>
+        field === customIdField ? { ...field, required: true } : field,
+      )
+    }
   } else {
     mutableFields.unshift(idField)
   }
 
-  // mark timestamp fields required
-  if ('timestamps' in entity && entity.timestamps !== false) {
+  if (isInput) {
+    // Managed by Payload, not set by a client.
+    mutableFields = mutableFields.filter(
+      (field) =>
+        field.name !== 'createdAt' && field.name !== 'updatedAt' && field.name !== '_status',
+    )
+  } else if ('timestamps' in entity && entity.timestamps !== false) {
+    // mark timestamp fields required
     mutableFields = mutableFields.map((field) => {
       if (field.name === 'createdAt' || field.name === 'updatedAt') {
         return {
@@ -966,10 +1036,11 @@ export function entityToJSONSchema(
     i18n,
     interfaceNameDefinitions,
     typeStringDefinitions,
+    variant,
   })
 
-  // Add collection property to auth collections
-  if (isAuthCollection) {
+  // The `User`-union discriminator (read-side, e.g. `req.user`); not part of create/update data.
+  if (isAuthCollection && !isInput) {
     fieldsSchema.properties = {
       ...fieldsSchema.properties,
       collection: { type: 'string', enum: [entity.slug] },
@@ -999,17 +1070,20 @@ export function entityToJSONSchema(
  * as part of the whole config schema.
  *
  * Relationship/upload `$ref`s to other collections are left in place - the caller handles those.
+ * (The `input` variant reduces relationships to IDs, so only rich-text node `$defs` still ref them.)
  */
 export function entityToStandaloneJSONSchema({
   config,
   defaultIDType,
   entity,
   i18n,
+  variant = 'output',
 }: {
   config: SanitizedConfig
   defaultIDType: 'number' | 'text'
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   i18n?: I18n
+  variant?: SchemaVariant
 }): JSONSchema4 {
   const definitions = new Map<string, JSONSchema4>()
 
@@ -1023,6 +1097,7 @@ export function entityToStandaloneJSONSchema({
     undefined,
     i18n,
     true, // forceInlineBlocks
+    variant,
   )
 
   // Timezone fields `$ref` supportedTimezones, which lives on the root config schema, so add it here.
@@ -1347,14 +1422,16 @@ const hashBlockSchema = (schema: JSONSchema4): string =>
  * The name is the block's `interfaceName`, or a PascalCase form of its slug. If a different block
  * already uses that name - whether it was auto-generated or an explicit `interfaceName` - this one
  * gets a content-hash suffix (`Hero_3F2A1B0C`) so the two don't overwrite each other. Registering
- * the same block shape again reuses its name.
+ * the same block shape again reuses its name. The `input` variant adds an `Input` suffix (`HeroInput`).
  */
 export function registerBlockInterface(
   block: { interfaceName?: string; slug: string },
   blockSchema: JSONSchema4,
   interfaceNameDefinitions: Map<string, JSONSchema4>,
+  variant: SchemaVariant = 'output',
 ): string {
-  const baseName = block.interfaceName ?? toWords(block.slug, true)
+  const inputSuffix = variant === 'input' ? 'Input' : ''
+  const baseName = `${block.interfaceName ?? toWords(block.slug, true)}${inputSuffix}`
   const existing = interfaceNameDefinitions.get(baseName)
 
   // The name is free - claim it.
@@ -1417,6 +1494,8 @@ export function configToJSONSchema(
     })),
   ]
 
+  const generateInputTypes = config.typescript?.generateInputTypes !== false
+
   const entityDefinitions: { [k: string]: JSONSchema4 } = entities.reduce(
     (acc, { type, entity }) => {
       acc[entity.slug] = entityToJSONSchema(
@@ -1429,6 +1508,21 @@ export function configToJSONSchema(
         i18n,
         forceInlineBlocks,
       )
+
+      if (generateInputTypes) {
+        acc[`${entity.slug}_input`] = entityToJSONSchema(
+          config,
+          entity,
+          interfaceNameDefinitions,
+          defaultIDType!,
+          typeStringDefinitions,
+          collectionIDFieldTypes,
+          i18n,
+          forceInlineBlocks,
+          'input',
+        )
+      }
+
       const select = fieldsToSelectJSONSchema({
         config,
         fields: entity.flattenedFields,
@@ -1544,6 +1638,12 @@ export function configToJSONSchema(
       globalsSelect: generateEntitySelectSchemas(config.globals || []),
       locale: generateLocaleEntitySchemas(config.localization),
       widgets: widgetSchemas.schema,
+      ...(generateInputTypes
+        ? {
+            collectionsInput: generateEntityInputSchemas(config.collections || []),
+            globalsInput: generateEntityInputSchemas(config.globals || []),
+          }
+        : {}),
       ...(config.typescript?.strictDraftTypes
         ? {
             strictDraftTypes: {
@@ -1562,6 +1662,7 @@ export function configToJSONSchema(
       'collectionsSelect',
       'collectionsJoins',
       'globalsSelect',
+      ...(generateInputTypes ? ['collectionsInput', 'globalsInput'] : []),
       ...(config.typescript?.strictDraftTypes ? ['strictDraftTypes'] : []),
       'globals',
       'auth',

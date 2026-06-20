@@ -1570,6 +1570,15 @@ export type Config = {
         }
       | false
 
+    /**
+     * Also generate write-shaped input types (e.g. `PostInput`) reflecting what `create`/`update`
+     * accept, exposed on `Config['collectionsInput']` and `Config['globalsInput']`. Set `false` to
+     * skip them.
+     *
+     * @default true
+     */
+    generateInputTypes?: boolean
+
     /** Filename to write the generated types to */
     outputFile?: string
 

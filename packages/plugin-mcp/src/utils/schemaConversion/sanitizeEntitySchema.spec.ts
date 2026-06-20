@@ -6,9 +6,11 @@ import { sanitizeEntitySchema } from './sanitizeEntitySchema.js'
 
 describe('sanitizeEntitySchema', () => {
   it('keeps a Lexical node union strict (oneOf) while simplifying relationship values to IDs', () => {
-    // Shaped like the schema the MCP server prepares for a collection with a Lexical richText field:
-    // a `$defs` node union (a `oneOf` of node shapes) where a relationship node's `value` is either
-    // an ID or a `$ref` to the populated related collection.
+    // Shaped like the schema the MCP server prepares for a collection with a Lexical richText field
+    // (Payload's `input` variant): a `$defs` node union (a `oneOf` of node shapes) where a
+    // relationship node's `value` is either an ID or a `$ref` to the populated related collection.
+    // The editor generates these node `$defs` unaware of the input variant, so they still carry the
+    // populated-doc `$ref` that sanitize reduces to an ID.
     const standalone: JsonSchemaType = {
       type: 'object',
       $defs: {
@@ -85,7 +87,9 @@ describe('sanitizeEntitySchema', () => {
         },
       },
       properties: {
-        // `id` is dropped - it's a Payload-managed field MCP clients never set.
+        // Managed fields (createdAt/updatedAt/_status) are excluded upstream by the `input` variant;
+        // `id` stays because it's a valid optional input (a client may supply a custom ID).
+        id: { type: 'string' },
         content: {
           type: 'object',
           properties: {
