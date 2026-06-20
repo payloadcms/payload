@@ -3,17 +3,20 @@
 import {
   APIKeyInput,
   Button,
-  GenerateConfirmation,
   toast,
+  useConfig,
   useDocumentInfo,
   useField,
+  useForm,
   useTranslation,
   WarningTriangleIcon,
 } from '@payloadcms/ui'
-import React, { useState } from 'react'
+import { formatAdminURL } from 'payload/shared'
+import React, { useCallback, useEffect, useState } from 'react'
 
 import type { PluginMCPTranslationKeys, PluginMCPTranslations } from '../../translations/index.js'
 
+import { RotateConfirmation } from '../RotateConfirmation/index.client.js'
 import './index.css'
 
 const baseClass = 'mcp-api-key-field'
@@ -21,28 +24,56 @@ const baseClass = 'mcp-api-key-field'
 /**
  * Custom component for the MCP API-keys collection's `apiKey` field:
  * - no key yet: a "Generate new key" button
- * - key set: a dismissible privacy warning + the shared masked-key input
+ * - key set: a dismissible privacy warning + the shared masked-key input + rotate
  */
 export const APIKeyField: React.FC = () => {
   const { setValue: setApiKey, value: apiKey } = useField<string>({ path: 'apiKey' })
   const { t } = useTranslation<PluginMCPTranslations, PluginMCPTranslationKeys>()
   const [isWarningDismissed, setIsWarningDismissed] = useState(false)
-  const { id } = useDocumentInfo()
-  const [isRotating, setIsRotating] = useState(false)
+  const [highlighted, setHighlighted] = useState(false)
+  const { config } = useConfig()
+  const { id, isEditing } = useDocumentInfo()
+  const { setModified } = useForm()
 
-  const handleRotate = async () => {
-    try {
-      setIsRotating(true)
-      const res = await fetch(`/api/payload-mcp-api-keys/${id}/rotate`, { method: 'POST' })
-      const { apiKey: newKey } = await res.json()
-      setApiKey(newKey)
-      toast.success(t('authentication:newAPIKeyGenerated'))
-      setIsRotating(false)
-    } catch (error) {
-      toast.error(t('authentication:errorRotatingAPIKey'))
-      setIsRotating(false)
+  const handleRotate = useCallback(async () => {
+    if (!id) {
+      return
     }
-  }
+
+    const url = formatAdminURL({
+      apiRoute: config.routes.api,
+      path: `/payload-mcp-api-keys/${id}/rotate`,
+    })
+
+    const res = await fetch(url, { credentials: 'include', method: 'POST' })
+
+    if (!res.ok) {
+      toast.error(t('plugin-mcp:errorRotatingAPIKey'))
+      throw new Error('Rotate failed')
+    }
+
+    const { apiKey: newKey } = (await res.json()) as { apiKey: string }
+
+    setApiKey(newKey)
+    setModified(false)
+    setIsWarningDismissed(false)
+    setHighlighted(true)
+    toast.success(t('authentication:newAPIKeyGenerated'))
+  }, [config.routes.api, id, setApiKey, setModified, t])
+
+  useEffect(() => {
+    if (!highlighted) {
+      return undefined
+    }
+
+    const timeout = window.setTimeout(() => {
+      setHighlighted(false)
+    }, 10000)
+
+    return () => {
+      window.clearTimeout(timeout)
+    }
+  }, [highlighted])
 
   const generateKey = () => {
     setApiKey(crypto.randomUUID())
@@ -85,12 +116,17 @@ export const APIKeyField: React.FC = () => {
                   </button>
                 </div>
               )}
-              <APIKeyInput aria-label={t('authentication:apiKey')} value={apiKey} />
+              <APIKeyInput
+                aria-label={t('authentication:apiKey')}
+                highlighted={highlighted}
+                value={apiKey}
+              />
             </div>
-            <GenerateConfirmation
-              highlightField={() => setIsRotating(true)}
-              setKey={handleRotate}
-            />
+            {isEditing && (
+              <div className={`${baseClass}__actions`}>
+                <RotateConfirmation className={`${baseClass}__rotate`} onRotate={handleRotate} />
+              </div>
+            )}
           </>
         )}
       </div>
