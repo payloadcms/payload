@@ -64,9 +64,6 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  experimental: {
-    localizeStatus: true,
-  },
   collections: [
     RichTextCollection,
     BlocksCollection,
@@ -480,9 +477,7 @@ export default buildConfigWithDefaults({
       ],
       slug: globalWithDraftsSlug,
       versions: {
-        drafts: {
-          localizeStatus: true,
-        },
+        drafts: {},
       },
     },
   ],
@@ -545,6 +540,20 @@ export default buildConfigWithDefaults({
     ],
   },
   onInit: async (payload) => {
+    // On a fresh database with autoIndex enabled, the first write to a collection (or its
+    // versions collection) kicks off async index builds. A subsequent seeding write can then
+    // race that catalog change and fail with a transient MongoDB "catalog changes" error.
+    // Awaiting Model.init() lets collection and index creation settle before the writes below.
+    // This is a no-op for non-Mongoose adapters, where these models are undefined.
+    const db = payload.db as any
+    if (db?.collections || db?.versions) {
+      await Promise.all([
+        ...payload.config.collections.map((coll) => db.collections?.[coll.slug]?.init?.()),
+        ...payload.config.collections.map((coll) => db.versions?.[coll.slug]?.init?.()),
+        db.globals?.init?.(),
+      ])
+    }
+
     const collection = localizedPostsSlug
 
     await payload.create({

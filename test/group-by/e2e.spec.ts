@@ -25,6 +25,7 @@ import {
 } from '../__helpers/e2e/helpers.js'
 import { navigateToListView } from '../__helpers/e2e/navigateToListView.js'
 import { deletePreferences } from '../__helpers/e2e/preferences.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -37,6 +38,7 @@ import {
   openManagePresets,
   selectPreset,
 } from '../query-presets/helpers/togglePreset.js'
+import { noGroupableSlug } from './collections/NoGroupable/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 const { beforeEach } = test
@@ -47,6 +49,7 @@ const dirname = path.dirname(filename)
 test.describe('Group By', () => {
   let page: Page
   let url: AdminUrlUtil
+  let noGroupableUrl: AdminUrlUtil
   let serverURL: string
   let payload: PayloadTestSDK<Config>
   let user: any
@@ -55,6 +58,7 @@ test.describe('Group By', () => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     url = new AdminUrlUtil(serverURL, 'posts')
+    noGroupableUrl = new AdminUrlUtil(serverURL, noGroupableSlug)
 
     const context = await browser.newContext()
     page = await context.newPage()
@@ -85,11 +89,13 @@ test.describe('Group By', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('should display group-by button only when `admin.groupBy` is enabled', async () => {
+  test('should show the group by control for collections with groupable fields', async () => {
     await page.goto(url.list)
     await expect(page.locator('#toggle-group-by')).toBeVisible()
+  })
 
-    await page.goto(new AdminUrlUtil(serverURL, 'users').list)
+  test('should hide the group by control for collections with no groupable fields', async () => {
+    await page.goto(noGroupableUrl.list)
     await expect(page.locator('#toggle-group-by')).toBeHidden()
   })
 
@@ -668,7 +674,9 @@ test.describe('Group By', () => {
     await expect(modal).toBeVisible()
 
     await modal.locator('.field-select .rs__control').click()
-    await modal.locator('.field-select .rs__option', { hasText: exactText('Title') }).click()
+    await getSelectMenu({ page })
+      .locator('.rs__option', { hasText: exactText('Title') })
+      .click()
 
     const field = modal.locator(`#field-title`)
     await expect(field).toBeVisible()
@@ -756,7 +764,9 @@ test.describe('Group By', () => {
     await modal.locator('.field-select .rs__control').click()
     await wait(500)
 
-    await modal.locator('.field-select .rs__option', { hasText: exactText('Title') }).click()
+    await getSelectMenu({ page })
+      .locator('.rs__option', { hasText: exactText('Title') })
+      .click()
     await wait(500)
 
     const field = modal.locator(`#field-title`)
@@ -1004,11 +1014,22 @@ test.describe('Group By', () => {
       const presetTitle = 'Virtual Field Preset'
       await modal.locator('input[name="title"]').fill(presetTitle)
 
-      // Check that the groupBy field shows the proper label (not "page.title")
-      const groupByField = modal.locator('.query-preset-group-by-field .group-by-builder')
+      // The collapsed control shows the resolved virtual field label (not "page.title")
+      const groupByField = modal.locator('.query-preset-group-by-field')
       await expect(groupByField).toBeVisible()
-      await expect(groupByField).toContainText('Virtual Title From Page')
-      await expect(groupByField).toContainText('Ascending')
+      const groupByTrigger = groupByField.locator('#toggle-group-by')
+      await expect(groupByTrigger).toContainText('Virtual Title From Page')
+
+      // Open the control to verify the saved field label and sort direction
+      await groupByTrigger.click()
+      const groupByPopup = page.locator('.group-by-control__popup')
+      await expect(groupByPopup).toBeVisible()
+      await expect(groupByPopup).toContainText('Virtual Title From Page')
+      await expect(groupByPopup).toContainText('Ascending')
+
+      // Close the control before saving
+      await groupByTrigger.click()
+      await expect(groupByPopup).toBeHidden()
 
       await saveDocAndAssert(page)
       await expect(modal).toBeHidden()
@@ -1084,11 +1105,18 @@ test.describe('Group By', () => {
       const editModal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
       await expect(editModal).toBeVisible()
 
-      // Check that the groupBy field shows the proper label with descending direction
-      const groupByField = editModal.locator('.query-preset-group-by-field .group-by-builder')
+      // The collapsed control shows the resolved virtual field label (not "page.title")
+      const groupByField = editModal.locator('.query-preset-group-by-field')
       await expect(groupByField).toBeVisible()
-      await expect(groupByField).toContainText('Virtual Title From Page')
-      await expect(groupByField).toContainText('Descending')
+      const groupByTrigger = groupByField.locator('#toggle-group-by')
+      await expect(groupByTrigger).toContainText('Virtual Title From Page')
+
+      // Open the control to verify the saved field label and descending sort direction
+      await groupByTrigger.click()
+      const groupByPopup = page.locator('.group-by-control__popup')
+      await expect(groupByPopup).toBeVisible()
+      await expect(groupByPopup).toContainText('Virtual Title From Page')
+      await expect(groupByPopup).toContainText('Descending')
     })
   })
 })

@@ -85,6 +85,12 @@ export const DocumentControls: React.FC<{
   readonly redirectAfterRestore?: boolean
   readonly slug: SanitizedCollectionConfig['slug']
   readonly user?: ClientUser
+  /**
+   * Controls how the document controls render.
+   * - `default`: full controls bar (meta + actions), used on the edit page.
+   * - `drawerHeaderActions`: only the action buttons, rendered in the document drawer header.
+   */
+  readonly variant?: 'default' | 'drawerHeaderActions'
 }> = (props) => {
   const {
     id,
@@ -119,6 +125,7 @@ export const DocumentControls: React.FC<{
     redirectAfterDuplicate,
     redirectAfterRestore,
     user,
+    variant = 'default',
   } = props
 
   const { i18n, t } = useTranslation()
@@ -191,7 +198,8 @@ export const DocumentControls: React.FC<{
 
   const showDotMenu = Boolean(
     !disableActions &&
-      ((collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
+      (EditMenuItems ||
+        (collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
         (globalConfig && (globalHasDraftsEnabled || localization))),
   )
   const collectionAutosaveEnabled = hasAutosaveEnabled(collectionConfig)
@@ -210,65 +218,75 @@ export const DocumentControls: React.FC<{
   const showLockedMetaIcon = user && readOnlyForIncomingUser
 
   return (
-    <div className={baseClass}>
-      <div className={`${baseClass}__content`}>
-        {Boolean(showLockedMetaIcon || BeforeDocumentMeta) && (
-          <div className={`${baseClass}__before-meta`}>
-            {showLockedMetaIcon && (
-              <Locked className={`${baseClass}__locked-controls`} user={user} />
-            )}
-            {BeforeDocumentMeta}
-          </div>
-        )}
-        <ul className={`${baseClass}__meta`}>
-          {collectionConfig && !isEditing && !isAccountView && (
-            <li className={`${baseClass}__list-item`}>
-              <p className={`${baseClass}__creating-new`}>
-                {i18n.t('general:creatingNewLabel', {
-                  label: getTranslation(
-                    collectionConfig?.labels?.singular ?? i18n.t('general:document'),
-                    i18n,
-                  ),
-                })}
-              </p>
-            </li>
-          )}
-          {(collectionHasDraftsEnabled || globalHasDraftsEnabled) && (
-            <Fragment>
-              {(globalConfig || (collectionConfig && isEditing)) && (
-                <li className={`${baseClass}__status ${baseClass}__list-item`}>
-                  <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
-                </li>
+    <div
+      className={[baseClass, variant !== 'default' && `${baseClass}--${variant}`]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      {variant === 'default' && (
+        <div className={`${baseClass}__content`}>
+          {Boolean(showLockedMetaIcon || BeforeDocumentMeta) && (
+            <div className={`${baseClass}__before-meta`}>
+              {showLockedMetaIcon && (
+                <Locked className={`${baseClass}__locked-controls`} user={user} />
               )}
-              {hasSavePermission &&
-                autosaveEnabled &&
-                !unsavedDraftWithValidations &&
-                !isTrashed && (
-                  <li className={`${baseClass}__list-item`}>
-                    <Autosave
-                      collection={collectionConfig}
-                      global={globalConfig}
-                      id={id}
-                      publishedDocUpdatedAt={data?.createdAt}
-                    />
+              {BeforeDocumentMeta}
+            </div>
+          )}
+          <ul className={`${baseClass}__meta`}>
+            {collectionConfig && !isEditing && !isAccountView && (
+              <li className={`${baseClass}__list-item`}>
+                <p className={`${baseClass}__creating-new`}>
+                  {i18n.t('general:creatingNewLabel', {
+                    label: getTranslation(
+                      collectionConfig?.labels?.singular ?? i18n.t('general:document'),
+                      i18n,
+                    ),
+                  })}
+                </p>
+              </li>
+            )}
+            {(collectionHasDraftsEnabled || globalHasDraftsEnabled) && (
+              <Fragment>
+                {(globalConfig || (collectionConfig && isEditing)) && (
+                  <li className={`${baseClass}__status ${baseClass}__list-item`}>
+                    <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
                   </li>
                 )}
-            </Fragment>
-          )}
-          {collectionConfig?.timestamps && (isEditing || isAccountView) && relativeTime && (
-            <li
-              className={`${baseClass}__list-item ${baseClass}__value-wrap`}
-              title={updatedAt || createdAt || undefined}
-            >
-              <p className={`${baseClass}__value`}>
-                {t(isTrashed ? 'general:deletedAgo' : 'general:updatedAgo', {
-                  distance: relativeTime,
-                })}
-              </p>
-            </li>
-          )}
-        </ul>
-      </div>
+                {hasSavePermission &&
+                  autosaveEnabled &&
+                  !unsavedDraftWithValidations &&
+                  !isTrashed && (
+                    <li className={`${baseClass}__list-item`}>
+                      <Autosave
+                        collection={collectionConfig}
+                        global={globalConfig}
+                        id={id}
+                        publishedDocUpdatedAt={data?.createdAt}
+                      />
+                    </li>
+                  )}
+              </Fragment>
+            )}
+            {collectionConfig?.timestamps &&
+              (isEditing || isAccountView) &&
+              (data?.updatedAt || data?.createdAt) && (
+                <li
+                  className={`${baseClass}__list-item ${baseClass}__value-wrap`}
+                  title={updatedAt || createdAt || undefined}
+                >
+                  <p className={`${baseClass}__value`}>
+                    {relativeTime
+                      ? t(isTrashed ? 'general:deletedAgo' : 'general:updatedAgo', {
+                          distance: relativeTime,
+                        })
+                      : `${t('general:loading')}...`}
+                  </p>
+                </li>
+              )}
+          </ul>
+        </div>
+      )}
       <div className={`${baseClass}__controls-wrapper`}>
         <div className={`${baseClass}__controls`}>
           {BeforeDocumentControls}
@@ -407,7 +425,7 @@ export const DocumentControls: React.FC<{
                   )}
                 </React.Fragment>
               )}
-              {hasDeletePermission && (
+              {hasDeletePermission && id && (
                 <DeleteDocument
                   buttonId="action-delete"
                   collectionSlug={collectionConfig?.slug}

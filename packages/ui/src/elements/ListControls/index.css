@@ -12,6 +12,11 @@
     }
   }
 
+  .drawer .list-controls {
+    padding-left: var(--spacer-3);
+    padding-right: var(--spacer-3);
+  }
+
   .list-controls__search-row {
     display: flex;
     gap: var(--spacer-2);

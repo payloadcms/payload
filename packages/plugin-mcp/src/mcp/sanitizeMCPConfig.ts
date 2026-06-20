@@ -8,13 +8,12 @@ import type {
 } from 'payload'
 
 import type {
+  CollectionMCPItem,
   CollectionTool,
+  GlobalMCPItem,
   GlobalTool,
-  MCPBuiltInToolOverride,
   MCPItem,
-  MCPPluginCollectionConfig,
   MCPPluginConfig,
-  MCPPluginGlobalConfig,
   SanitizedMCPPluginConfig,
 } from '../types.js'
 
@@ -25,6 +24,8 @@ import {
   COLLECTION_BUILTINS,
   GLOBAL_BUILTIN_ENTRIES,
   GLOBAL_BUILTINS,
+  TOOL_BUILTIN_ENTRIES,
+  TOOL_BUILTINS,
 } from './builtinTools.js'
 
 /**
@@ -54,29 +55,45 @@ export const sanitizeMCPConfig = ({
     items.push(...sanitizeGlobalConfig({ global, pluginConfig }))
   }
 
-  for (const [key, tool] of Object.entries(pluginConfig.tools ?? {})) {
+  for (const [configKey, { mcpName, tool }] of TOOL_BUILTIN_ENTRIES) {
     items.push({
       type: 'tool',
-      key,
-      label: key,
+      configKey,
+      label: tool.annotations?.title ?? configKey,
+      mcpName,
       tool,
     })
   }
 
-  for (const [key, prompt] of Object.entries(pluginConfig.prompts ?? {})) {
+  for (const [configKey, tool] of Object.entries(pluginConfig.tools ?? {})) {
+    if (configKey in TOOL_BUILTINS) {
+      continue
+    }
+    items.push({
+      type: 'tool',
+      configKey,
+      label: tool.annotations?.title ?? configKey,
+      mcpName: configKey,
+      tool,
+    })
+  }
+
+  for (const [configKey, prompt] of Object.entries(pluginConfig.prompts ?? {})) {
     items.push({
       type: 'prompt',
-      key,
-      label: prompt.title ?? key,
+      configKey,
+      label: prompt.title ?? configKey,
+      mcpName: configKey,
       prompt,
     })
   }
 
-  for (const [key, resource] of Object.entries(pluginConfig.resources ?? {})) {
+  for (const [configKey, resource] of Object.entries(pluginConfig.resources ?? {})) {
     items.push({
       type: 'resource',
-      key,
-      label: resource.title ?? key,
+      configKey,
+      label: resource.title ?? configKey,
+      mcpName: configKey,
       resource,
     })
   }
@@ -101,42 +118,63 @@ const sanitizeCollectionConfig = ({
 }: {
   collection: CollectionConfig | SanitizedCollectionConfig
   pluginConfig: MCPPluginConfig
-}): MCPItem[] => {
+}): CollectionMCPItem[] => {
   if (collection.slug === 'payload-mcp-api-keys') {
     return []
   }
   const slug = collection.slug
   const collectionPluginConfig = pluginConfig.collections?.[slug]
-  const items: MCPItem[] = []
+  const items: CollectionMCPItem[] = []
 
-  for (const [toolKey, tool] of COLLECTION_BUILTIN_ENTRIES) {
+  for (const [toolKey, { mcpName, tool }] of COLLECTION_BUILTIN_ENTRIES) {
     const matchedConfigEntry = collectionPluginConfig?.tools?.[toolKey]
     if (matchedConfigEntry === false) {
       continue
     }
+    const override = typeof matchedConfigEntry === 'object' ? matchedConfigEntry : undefined
+    const annotations = { ...tool.annotations, ...override?.annotations }
     items.push({
       type: 'collectionTool',
       collectionSlug: slug,
-      key: toolKey,
-      label: capitalize(toolKey),
-      tool: overrideBuiltinTool(tool, matchedConfigEntry, collectionPluginConfig),
+      configKey: toolKey,
+      label: annotations.title ?? toolKey,
+      mcpName,
+      tool: {
+        ...tool,
+        annotations,
+        description: override?.description ?? tool.description,
+        overrideResponse:
+          override?.overrideResponse ??
+          collectionPluginConfig?.overrideResponse ??
+          tool.overrideResponse,
+      },
     })
   }
 
   if (collection.auth) {
-    for (const [authToolKey, { label, tool }] of COLLECTION_AUTH_BUILTIN_ENTRIES) {
+    for (const [authToolKey, { mcpName, tool }] of COLLECTION_AUTH_BUILTIN_ENTRIES) {
       const matchedConfigEntry = collectionPluginConfig?.tools?.[authToolKey]
       if (!matchedConfigEntry) {
         continue
       }
       // `true` means "enable, no override"; only the object form carries fields.
       const override = typeof matchedConfigEntry === 'object' ? matchedConfigEntry : undefined
+      const annotations = { ...tool.annotations, ...override?.annotations }
       items.push({
         type: 'collectionTool',
         collectionSlug: slug,
-        key: authToolKey,
-        label,
-        tool: overrideBuiltinTool(tool, override, collectionPluginConfig),
+        configKey: authToolKey,
+        label: annotations.title ?? authToolKey,
+        mcpName,
+        tool: {
+          ...tool,
+          annotations,
+          description: override?.description ?? tool.description,
+          overrideResponse:
+            override?.overrideResponse ??
+            collectionPluginConfig?.overrideResponse ??
+            tool.overrideResponse,
+        },
       })
     }
   }
@@ -146,8 +184,8 @@ const sanitizeCollectionConfig = ({
   const customEntries = Object.entries(collectionPluginConfig?.tools ?? {}) as Array<
     [string, CollectionTool | undefined]
   >
-  for (const [key, customTool] of customEntries) {
-    if (key in COLLECTION_BUILTINS || key in COLLECTION_AUTH_BUILTINS) {
+  for (const [configKey, customTool] of customEntries) {
+    if (configKey in COLLECTION_BUILTINS || configKey in COLLECTION_AUTH_BUILTINS) {
       continue
     }
     if (!customTool) {
@@ -156,8 +194,9 @@ const sanitizeCollectionConfig = ({
     items.push({
       type: 'collectionTool',
       collectionSlug: slug,
-      key,
-      label: key,
+      configKey,
+      label: customTool.annotations?.title ?? configKey,
+      mcpName: configKey,
       tool: customTool,
     })
   }
@@ -171,30 +210,41 @@ const sanitizeGlobalConfig = ({
 }: {
   global: GlobalConfig | SanitizedGlobalConfig
   pluginConfig: MCPPluginConfig
-}): MCPItem[] => {
+}): GlobalMCPItem[] => {
   const slug = global.slug
   const globalPluginConfig = pluginConfig.globals?.[slug]
-  const items: MCPItem[] = []
+  const items: GlobalMCPItem[] = []
 
-  for (const [toolKey, baseTool] of GLOBAL_BUILTIN_ENTRIES) {
+  for (const [toolKey, { mcpName, tool }] of GLOBAL_BUILTIN_ENTRIES) {
     const matchedConfigEntry = globalPluginConfig?.tools?.[toolKey]
     if (matchedConfigEntry === false) {
       continue
     }
+    const override = typeof matchedConfigEntry === 'object' ? matchedConfigEntry : undefined
+    const annotations = { ...tool.annotations, ...override?.annotations }
     items.push({
       type: 'globalTool',
+      configKey: toolKey,
       globalSlug: slug,
-      key: toolKey,
-      label: capitalize(toolKey),
-      tool: overrideBuiltinTool(baseTool, matchedConfigEntry, globalPluginConfig),
+      label: annotations.title ?? toolKey,
+      mcpName,
+      tool: {
+        ...tool,
+        annotations,
+        description: override?.description ?? tool.description,
+        overrideResponse:
+          override?.overrideResponse ??
+          globalPluginConfig?.overrideResponse ??
+          tool.overrideResponse,
+      },
     })
   }
 
   const customEntries = Object.entries(globalPluginConfig?.tools ?? {}) as Array<
     [string, GlobalTool | undefined]
   >
-  for (const [key, customTool] of customEntries) {
-    if (key in GLOBAL_BUILTINS) {
+  for (const [configKey, customTool] of customEntries) {
+    if (configKey in GLOBAL_BUILTINS) {
       continue
     }
     if (!customTool) {
@@ -202,38 +252,13 @@ const sanitizeGlobalConfig = ({
     }
     items.push({
       type: 'globalTool',
+      configKey,
       globalSlug: slug,
-      key,
-      label: key,
+      label: customTool.annotations?.title ?? configKey,
+      mcpName: configKey,
       tool: customTool,
     })
   }
 
   return items
-}
-
-const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1)
-
-/**
- * Spread the static built-in tool and apply consumer-side overrides.
- * Precedence: per-tool override > scope-level (collection/global) override >
- * the static tool's defaults. `toolEntry` is whatever the user put under
- * `tools: { find: ... }` — could be `true`, `false`, or an override object —
- * so it's narrowed internally.
- */
-const overrideBuiltinTool = <TTool extends CollectionTool | GlobalTool>(
-  tool: TTool,
-  toolOverride?: MCPBuiltInToolOverride,
-  entityPluginConfig?: TTool extends CollectionTool
-    ? MCPPluginCollectionConfig<any>
-    : MCPPluginGlobalConfig,
-): TTool => {
-  return {
-    ...tool,
-    description: toolOverride?.description ?? entityPluginConfig?.description ?? tool.description,
-    overrideResponse:
-      toolOverride?.overrideResponse ??
-      entityPluginConfig?.overrideResponse ??
-      tool.overrideResponse,
-  }
 }

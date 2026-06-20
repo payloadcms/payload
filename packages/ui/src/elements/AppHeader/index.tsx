@@ -1,8 +1,8 @@
 'use client'
-import { formatAdminURL } from 'payload/shared'
 import React, { useEffect, useRef, useState } from 'react'
 
-import { Account } from '../../graphics/Account/index.js'
+import type { UserMenuSettingsGroup } from '../UserMenu/SettingsMenu/index.js'
+
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { LanguageIcon } from '../../icons/Language/index.js'
 import { SidebarIcon } from '../../icons/Sidebar/index.js'
@@ -11,20 +11,20 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import { Link } from '../Link/index.js'
 import { Localizer } from '../Localizer/index.js'
 import { useNav } from '../Nav/context.js'
 import { NavToggler } from '../Nav/NavToggler/index.js'
-import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { StepNav } from '../StepNav/index.js'
+import { UserMenu } from '../UserMenu/index.js'
 import './index.css'
 
 const baseClass = 'app-header'
 
 type Props = {
   CustomAvatar?: React.ReactNode
+  settingsItemGroups?: UserMenuSettingsGroup[]
 }
-export function AppHeader({ CustomAvatar }: Props) {
+export function AppHeader({ CustomAvatar, settingsItemGroups }: Props) {
   const { t } = useTranslation()
   const locale = useLocale()
 
@@ -33,13 +33,7 @@ export function AppHeader({ CustomAvatar }: Props) {
   const { navOpen, setNavOpen } = useNav()
 
   const {
-    config: {
-      admin: {
-        routes: { account: accountRoute },
-      },
-      localization,
-      routes: { admin: adminRoute },
-    },
+    config: { localization },
   } = useConfig()
 
   const customControlsRef = useRef<HTMLDivElement>(null)
@@ -122,15 +116,7 @@ export function AppHeader({ CustomAvatar }: Props) {
                 )}
               />
             )}
-            <Link
-              aria-label={t('authentication:account')}
-              className={`${baseClass}__account`}
-              href={formatAdminURL({ adminRoute, path: accountRoute })}
-              prefetch={false}
-              tabIndex={0}
-            >
-              <RenderCustomComponent CustomComponent={CustomAvatar} Fallback={<Account />} />
-            </Link>
+            <UserMenu CustomAvatar={CustomAvatar} settingsItemGroups={settingsItemGroups} />
           </div>
         </div>
       </div>

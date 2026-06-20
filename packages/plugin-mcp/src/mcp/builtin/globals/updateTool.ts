@@ -9,54 +9,49 @@ import {
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
-import { buildToolInput } from '../../../utils/schemaConversion/buildToolInput.js'
-import { sanitizeEntitySchema } from '../../../utils/schemaConversion/sanitizeEntitySchema.js'
+import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
+import { validateGlobalData } from '../validateEntityData.js'
 
-const DEFAULT_DESCRIPTION = 'Update a Payload global singleton configuration.'
+const DEFAULT_DESCRIPTION = 'Update any Payload global by passing the global slug and data.'
 
 export const updateGlobalTool = defineGlobalTool({
-  description: DEFAULT_DESCRIPTION,
-  input: ({ globalSchema }) => {
-    const partialSchema = sanitizeEntitySchema(globalSchema)
-    // Global updates do not require all required fields to be passed => delete .required.
-    //
-    // Local API equivalent: packages/payload/src/global/operations/local/update.ts#BaseOptions#data:
-    // data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
-    delete partialSchema.required
-
-    return buildToolInput({
-      controls: {
-        depth: z
-          .number()
-          .describe('Optional: Depth of relationships to populate')
-          .optional()
-          .default(0),
-        draft: z
-          .boolean()
-          .describe('Optional: Whether to save as draft (default: false)')
-          .optional()
-          .default(false),
-        fallbackLocale: z
-          .string()
-          .describe('Optional: fallback locale code to use when requested locale is not available')
-          .optional(),
-        locale: z
-          .string()
-          .describe(
-            'Optional: locale code to update data in (e.g., "en", "es"). Use "all" to update all locales for localized fields',
-          )
-          .optional(),
-        select: z
-          .string()
-          .describe(
-            'Optional: define exactly which fields you\'d like to return in the response (JSON), e.g., \'{"siteName": "My Site"}\'',
-          )
-          .optional(),
-      },
-      dataDescription: 'The fields to update',
-      dataSchema: partialSchema,
-    })
+  annotations: {
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'Update Global',
   },
+  description: DEFAULT_DESCRIPTION,
+  input: z.object({
+    data: z.record(z.string(), z.unknown()).describe('The global fields to update'),
+    depth: z
+      .number()
+      .describe('Optional: Depth of relationships to populate')
+      .optional()
+      .default(0),
+    draft: z
+      .boolean()
+      .describe('Optional: Whether to save as draft (default: false)')
+      .optional()
+      .default(false),
+    fallbackLocale: z
+      .string()
+      .describe('Optional: fallback locale code to use when requested locale is not available')
+      .optional(),
+    locale: z
+      .string()
+      .describe(
+        'Optional: locale code to update data in (e.g., "en", "es"). Use "all" to update all locales for localized fields',
+      )
+      .optional(),
+    select: z
+      .record(z.string(), z.unknown())
+      .describe(
+        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"siteName": true}',
+      )
+      .optional(),
+  }),
 }).handler(async ({ authorizedMCP, globalSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
@@ -69,17 +64,14 @@ export const updateGlobalTool = defineGlobalTool({
 
   try {
     const virtualFieldNames = getGlobalVirtualFieldNames(payload.config, globalSlug)
-    const parsedData = stripVirtualFields(data, virtualFieldNames)
+    const inputData = stripVirtualFields(data, virtualFieldNames)
+    const validationError = validateGlobalData({ data: inputData, globalSlug, req })
 
-    let selectClause: SelectType | undefined
-    if (select) {
-      try {
-        selectClause = JSON.parse(select) as SelectType
-      } catch {
-        logger.warn(`Invalid select clause JSON for global: ${select}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
-      }
+    if (validationError) {
+      return validationError
     }
+
+    const parsedData = transformPointDataToPayload(inputData)
 
     const updateOptions: Parameters<typeof payload.updateGlobal>[0] = {
       slug: globalSlug,
@@ -95,8 +87,8 @@ export const updateGlobalTool = defineGlobalTool({
     if (fallbackLocale) {
       updateOptions.fallbackLocale = fallbackLocale
     }
-    if (selectClause) {
-      updateOptions.select = selectClause
+    if (select) {
+      updateOptions.select = select as SelectType
     }
 
     const result = await payload.updateGlobal(updateOptions)

@@ -23,6 +23,9 @@ const Tags: CollectionConfig = {
     },
   ],
   tags: {
+    admin: {
+      treeLimit: 4,
+    },
     collectionSpecific: { fieldName: 'allowedCollections' },
   },
   versions: false,

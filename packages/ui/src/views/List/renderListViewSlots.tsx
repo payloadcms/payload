@@ -9,6 +9,8 @@ import type {
   ListViewServerPropsOnly,
   ListViewSlots,
   ListViewSlotSharedClientProps,
+  NoResultsClientProps,
+  NoResultsServerPropsOnly,
   Payload,
   SanitizedCollectionConfig,
   StaticDescription,
@@ -117,6 +119,20 @@ export const renderListViewSlots = ({
       importMap: payload.importMap,
       serverProps: serverProps satisfies ViewDescriptionServerPropsOnly,
     })
+  }
+
+  if (collectionConfig.admin.components?.views?.list?.NoResults) {
+    result.NoResults = (
+      <React.Fragment key="list-view-no-results">
+        {RenderServerComponent({
+          clientProps: clientProps satisfies NoResultsClientProps,
+          Component: collectionConfig.admin.components.views.list.NoResults,
+          importMap: payload.importMap,
+          key: 'list-view-no-results',
+          serverProps: serverProps satisfies NoResultsServerPropsOnly,
+        })}
+      </React.Fragment>
+    )
   }
 
   return result

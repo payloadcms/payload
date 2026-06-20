@@ -1,15 +1,23 @@
-import type { SelectType } from 'payload'
+import type { JoinQuery, PopulateType, SelectType } from 'payload'
 
 import { z } from 'zod'
 
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
+import { whereSchema } from '../../../utils/whereSchema.js'
 
 const DEFAULT_DESCRIPTION =
-  'Find documents in a collection by ID or where clause using Find or FindByID.'
+  'Find documents in any collection by passing the collection slug and optional ID or where clause.'
 
-export const findCollectionTool = defineCollectionTool({
+export const findDocumentsTool = defineCollectionTool({
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+    readOnlyHint: true,
+    title: 'Find Documents',
+  },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     id: z
@@ -36,6 +44,10 @@ export const findCollectionTool = defineCollectionTool({
       .string()
       .describe('Optional: fallback locale code to use when requested locale is not available')
       .optional(),
+    joins: z
+      .union([z.record(z.string(), z.unknown()), z.literal(false)])
+      .describe('Optional: configure join field queries, or pass false to disable all join fields.')
+      .optional(),
     limit: z
       .number()
       .int()
@@ -57,20 +69,33 @@ export const findCollectionTool = defineCollectionTool({
       .describe('Page number for pagination (default: 1)')
       .optional()
       .default(1),
-    select: z
-      .string()
+    pagination: z
+      .boolean()
+      .describe('Optional: set to false to skip the count query overhead')
+      .optional(),
+    populate: z
+      .record(z.string(), z.unknown())
       .describe(
-        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        'Optional: control which fields to include from populated relationship or upload documents.',
+      )
+      .optional(),
+    select: z
+      .record(z.string(), z.unknown())
+      .describe(
+        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"title": true}',
       )
       .optional(),
     sort: z
       .string()
       .describe('Field to sort by (e.g., "createdAt", "-updatedAt" for descending)')
       .optional(),
-    where: z
-      .string()
+    trash: z
+      .boolean()
+      .describe('Optional: include soft-deleted documents when trash is enabled on the collection')
+      .optional(),
+    where: whereSchema
       .describe(
-        'Optional JSON string for where clause filtering (e.g., \'{"title": {"contains": "test"}}\')',
+        'Optional: where clause for filtering. Use field names with Payload operators, and/or arrays for grouping. Example: {"title":{"contains":"test"}}',
       )
       .optional(),
   }),
@@ -78,33 +103,28 @@ export const findCollectionTool = defineCollectionTool({
   const payload = req.payload
   const logger = getLogger({ payload })
 
-  const { id, depth, draft, fallbackLocale, limit, locale, page, select, sort, where } = input
+  const {
+    id,
+    depth,
+    draft,
+    fallbackLocale,
+    joins,
+    limit,
+    locale,
+    page,
+    pagination,
+    populate,
+    select,
+    sort,
+    trash,
+    where,
+  } = input
 
   logger.info(
     `Reading document from collection: ${collectionSlug}${id ? ` with ID: ${id}` : ''}, limit: ${limit}, page: ${page}${locale ? `, locale: ${locale}` : ''}`,
   )
 
   try {
-    let whereClause: Record<string, unknown> = {}
-    if (where) {
-      try {
-        whereClause = JSON.parse(where) as Record<string, unknown>
-      } catch {
-        logger.warn(`Invalid where clause JSON: ${where}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in where clause' }] }
-      }
-    }
-
-    let selectClause: SelectType | undefined
-    if (select) {
-      try {
-        selectClause = JSON.parse(select) as SelectType
-      } catch {
-        logger.warn(`Invalid select clause JSON: ${select}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
-      }
-    }
-
     if (id) {
       try {
         const doc = await payload.findByID({
@@ -113,10 +133,13 @@ export const findCollectionTool = defineCollectionTool({
           depth,
           req,
           ...localAPIDefaults(authorizedMCP),
-          ...(selectClause && { select: selectClause }),
+          ...(select && { select: select as SelectType }),
+          ...(populate && { populate: populate as PopulateType }),
+          ...(joins !== undefined && { joins: joins as JoinQuery }),
           ...(locale && { locale }),
           ...(fallbackLocale && { fallbackLocale }),
           ...(draft !== undefined && { draft }),
+          ...(trash !== undefined && { trash }),
         })
 
         return {
@@ -148,17 +171,21 @@ export const findCollectionTool = defineCollectionTool({
       page,
       req,
       ...localAPIDefaults(authorizedMCP),
-      ...(selectClause && { select: selectClause }),
+      ...(select && { select: select as SelectType }),
+      ...(populate && { populate: populate as PopulateType }),
+      ...(joins !== undefined && { joins: joins as JoinQuery }),
       ...(locale && { locale }),
       ...(fallbackLocale && { fallbackLocale }),
       ...(draft !== undefined && { draft }),
+      ...(pagination !== undefined && { pagination }),
+      ...(trash !== undefined && { trash }),
     }
 
     if (sort) {
       findOptions.sort = sort
     }
-    if (Object.keys(whereClause).length > 0) {
-      findOptions.where = whereClause as Parameters<typeof payload.find>[0]['where']
+    if (where) {
+      findOptions.where = where
     }
 
     const result = await payload.find(findOptions)

@@ -592,6 +592,37 @@ The same rule applies to lexical block nodes — they now emit as `SerializedBlo
 
 When two **different** blocks resolve to the same auto-derived name (same slug, different fields — e.g. a shared block overridden in one collection), the first keeps the clean name and any later block with a different shape gets a stable content-hash suffix (`Hero_3F2A1B0C`), so neither is silently mistyped. To choose the name yourself — or to resolve a collision with another type in your generated file (a collection, an array's `interfaceName`, etc.) — set an explicit `interfaceName` on the block. See [Block interface name collisions](/docs/typescript/generating-types#block-interface-name-collisions).
 
+### Blocks field `blockReferences` moved into `blocks`
+
+The `blockReferences` property on blocks fields has been removed. The `blocks` property now accepts both inline block configs and string slugs for blocks defined in the top-level Payload Config `blocks` array.
+
+Run `npx @payloadcms/codemod --transform migrate-block-references-to-blocks` to migrate automatically.
+
+```diff
+export const Pages: CollectionConfig = {
+  slug: 'pages',
+  fields: [
+    {
+      name: 'layout',
+      type: 'blocks',
+-     blockReferences: ['hero', 'content'],
+-     blocks: [],
++     blocks: ['hero', 'content'],
+    },
+  ],
+}
+```
+
+Inline blocks continue to work as before:
+
+```ts
+{
+  name: 'layout',
+  type: 'blocks',
+  blocks: [HeroBlock, ContentBlock],
+}
+```
+
 ### Lexical: generated `payload-types.ts` shape changed
 
 `richText` fields backed by `lexicalEditor` used to emit a permissive `{ [k: string]: unknown }` per field. They now emit a discriminated union of strict per-node interfaces (`SerializedTextNode`, `SerializedParagraphNode`, `SerializedHeadingNode`, `SerializedBlockNode`, etc.) under a hash-named alias like `LexicalNodes_AB12CD34`.
@@ -827,11 +858,40 @@ The sha1 HMAC fallback for API key authentication has been removed. API keys are
 
 **How to migrate:** Open the user document for each affected API key holder and save it — this regenerates the key under sha256. Alternatively, generate a new API key from the admin panel.
 
+### `baseAPIKeyFields` was replaced by `createAPIKeyFields`
+
+The `baseAPIKeyFields` export from `payload` has been removed. Use `createAPIKeyFields()` instead. It returns the same default auth API key storage fields, and also accepts overrides for projects or plugins that need to customize the generated field configs.
+
+```diff
+- import { baseAPIKeyFields } from 'payload'
++ import { createAPIKeyFields } from 'payload'
+
+  export const MyCollection = {
+    fields: [
+-     ...baseAPIKeyFields,
++     ...createAPIKeyFields(),
+    ],
+  }
+```
+
+If you previously cloned or modified `baseAPIKeyFields`, pass field overrides to `createAPIKeyFields()` instead:
+
+```ts
+createAPIKeyFields({
+  apiKeyField: {
+    admin: {
+      components: { Field: './APIKeyField#APIKeyField' },
+    },
+  },
+  includeEnableAPIKey: false,
+})
+```
+
 ### `@payloadcms/plugin-mcp` refactored: config API, built-in tool inputs, and API keys
 
 The MCP plugin was refactored. The public config API, the built-in tool inputs, and the API key collection schema all changed. Update your plugin config and delete + recreate any existing API keys.
 
-**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default with the standard CRUD tools (find, create, update, delete); turn individual ones off via `tools: { <op>: false }`.
+**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default through the generic built-in tools (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, plus `getGlobalSchema`, `findGlobal`, and `updateGlobal` for globals). Turn individual operations off via simple config keys like `tools: { create: false }`.
 
 ```diff
 mcpPlugin({
@@ -871,19 +931,32 @@ mcpPlugin({
 
 Prompts and resources move the same way, into top-level `prompts` and `resources` records.
 
-**Built-in `create` / `update` tool inputs now take a `data` object.** Document fields used to sit at the top level alongside options like `depth`, `draft` and `locale`. They are now nested under `data`. `_status`, `id`, `createdAt` and `updatedAt` are also no longer accepted there; set publish state with a custom tool if you need to.
+For custom collection and global tools, do not add `collectionSlug` / `globalSlug` yourself. Payload adds the slug input to the MCP schema automatically, and the handler receives the resolved slug as a top-level argument.
 
 ```ts
-// arguments to a `createPosts` tool call
+defineCollectionTool({
+  description: 'Publish a draft post by ID.',
+  input: z.object({
+    id: z.string(),
+  }),
+}).handler(async ({ collectionSlug, input, req }) => {
+  // collectionSlug is resolved from the tool call
+})
+```
+
+**Built-in collection tools are now generic.** Per-collection names like `createPosts` / `updatePosts` were replaced by `createDocument` / `updateDocument`. Pass the target collection as `collectionSlug`; document fields live under `data` alongside options like `depth`, `draft` and `locale`. `_status`, `id`, `createdAt` and `updatedAt` are no longer accepted inside `data`; set publish state with a custom tool if you need to.
+
+```ts
+// arguments to a `createDocument` tool call
 
 // before
 { title: 'Hello', _status: 'draft', draft: true, depth: 2 }
 
 // after
-{ data: { title: 'Hello' }, draft: true, depth: 2 }
+{ collectionSlug: 'posts', data: { title: 'Hello' }, draft: true, depth: 2 }
 ```
 
-**Auth tools are per-collection and opt-in.** The old `experimental.tools.auth` block is gone. Opt in per collection via `tools: { login: true }`, and the wire name becomes `login<Collection>` (e.g. `loginUsers`).
+**Auth tools are per-collection and opt-in.** The old `experimental.tools.auth` block is gone. Opt in per collection via `tools: { login: true }`. Auth tool names are generic (`login`, `auth`, etc.); pass the target auth collection as `collectionSlug`.
 
 ```diff
 - mcpPlugin({ experimental: { tools: { auth: { enabled: true } } } })
@@ -901,6 +974,6 @@ mcpPlugin({
 })
 ```
 
-**API keys must be recreated.** The `payload-mcp-api-keys` collection keeps its slug, but its fields changed completely. The old per-collection / per-global / per-tool checkbox fields are now a single `access` JSON field, plus an `overrideAccess` option. Existing keys keep authenticating but lose their permissions (an empty `access` is treated as "allow everything"), so an un-migrated key silently gets full access. Delete your existing API keys after upgrading and create fresh ones.
+**API keys must be recreated and are managed from a new admin flow.** The `payload-mcp-api-keys` collection keeps its slug, but it is no longer auth-enabled, is hidden from the main nav, and is linked from the user menu under **Settings → Manage API keys**. Its admin shape changed: the API key value is handled by explicit encrypted `apiKey` and hashed `apiKeyIndex` fields behind a custom generate/copy UI, permissions are stored in one `access` JSON field, `label`, `description`, a required `user`, and `overrideAccess` render in the sidebar, and a `lastUsed` field was added for existing keys. Keys still run as their user when `overrideAccess` is enabled; that setting only bypasses Payload access rules for the key's operations. The list view now defaults to title, last used, and user columns, and renders a custom empty state when no API keys exist. Existing keys keep authenticating but lose their permissions (an empty `access` is treated as "allow everything"), so an un-migrated key silently gets full access. Delete your existing MCP API keys after upgrading and create fresh ones.
 
 **Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`, and moved to `zod` v4. If your custom tools import `zod` directly, make sure it resolves to v4. `@payloadcms/ui` and `react` 19 are now peer dependencies; any Payload 4 project already provides both.

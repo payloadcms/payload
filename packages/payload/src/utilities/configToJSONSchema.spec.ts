@@ -649,7 +649,7 @@ describe('configToJSONSchema', () => {
         {
           slug: 'with-refs',
           fields: [
-            { name: 'layout', type: 'blocks', blockReferences: ['sharedBlock'], blocks: [] },
+            { name: 'layout', type: 'blocks', blocks: ['sharedBlock'] },
             { name: 'when', type: 'date', timezone: true },
           ],
           timestamps: false,

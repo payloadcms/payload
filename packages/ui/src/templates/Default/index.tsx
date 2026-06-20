@@ -7,6 +7,9 @@ import type {
   VisibleEntities,
 } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
+import { isUserMenuSettingsGroup } from 'payload/shared'
+
 import './index.css'
 
 import React from 'react'
@@ -21,6 +24,8 @@ import {
   DefaultTemplateWrapper as Wrapper,
 } from '../../exports/client/index.js'
 /* eslint-enable payload/no-imports-from-exports-dir */
+import type { UserMenuSettingsGroup } from '../../elements/UserMenu/SettingsMenu/index.js'
+
 import { DefaultNav } from '../../elements/Nav/index.js'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 
@@ -109,6 +114,65 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
     })
   }
 
+  const settingsItemGroups: UserMenuSettingsGroup[] = []
+  if (components?.userMenuSettingsItems && Array.isArray(components.userMenuSettingsItems)) {
+    const groupedItemsByLabel = new Map<string, React.ReactNode[]>()
+    const groupLabels: string[] = []
+    const ungroupedItems: React.ReactNode[] = []
+
+    for (const [itemIndex, userMenuSettingsItem] of components.userMenuSettingsItems.entries()) {
+      // Ungrouped items are collected as orphans rendered at the bottom
+      if (!isUserMenuSettingsGroup(userMenuSettingsItem)) {
+        ungroupedItems.push(
+          RenderServerComponent({
+            clientProps,
+            Component: userMenuSettingsItem,
+            importMap: payload.importMap,
+            key: `user-menu-settings-ungrouped-${itemIndex}`,
+            serverProps,
+          }),
+        )
+
+        continue
+      }
+
+      const groupLabel = getTranslation(userMenuSettingsItem.group, i18n)
+      const existingItems = groupedItemsByLabel.get(groupLabel)
+      const renderedItems = userMenuSettingsItem.items.map((groupedItem, groupedItemIndex) =>
+        RenderServerComponent({
+          clientProps,
+          Component: groupedItem,
+          importMap: payload.importMap,
+          key: `user-menu-settings-group-${groupLabel}-${itemIndex}-${groupedItemIndex}`,
+          serverProps,
+        }),
+      )
+
+      if (existingItems) {
+        existingItems.push(...renderedItems)
+      } else if (renderedItems.length > 0) {
+        groupedItemsByLabel.set(groupLabel, renderedItems)
+        groupLabels.push(groupLabel)
+      }
+    }
+
+    for (const groupLabel of groupLabels) {
+      const items = groupedItemsByLabel.get(groupLabel)
+      if (items?.length) {
+        settingsItemGroups.push({
+          group: groupLabel,
+          items,
+        })
+      }
+    }
+
+    if (ungroupedItems.length > 0) {
+      settingsItemGroups.push({
+        items: ungroupedItems,
+      })
+    }
+  }
+
   const NavComponent = RenderServerComponent({
     clientProps,
     Component: CustomNav,
@@ -142,6 +206,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                         })
                       : undefined
                   }
+                  settingsItemGroups={settingsItemGroups}
                 />
                 {children}
               </div>

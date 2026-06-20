@@ -10,7 +10,7 @@
 
   .view-version-controls-top {
     border-bottom: var(--stroke-width-small) solid var(--color-border);
-    padding: var(--spacer-2) var(--spacer-4);
+    padding: var(--spacer-2) var(--gutter-h);
   }
 
   .view-version-controls-top__wrapper {
@@ -39,7 +39,7 @@
 
   .view-version-controls-bottom {
     border-bottom: var(--stroke-width-small) solid var(--color-border);
-    padding: var(--spacer-2-5) var(--spacer-4);
+    padding: var(--spacer-2-5) var(--gutter-h);
     position: relative;
 
     /* Vertical separator line */
@@ -138,7 +138,7 @@
   }
 
   .view-version__diff-wrap {
-    padding: var(--spacer-3) var(--spacer-4);
+    padding: var(--spacer-3) var(--gutter-h);
     display: flex;
     flex-direction: column;
     gap: var(--spacer-3);
@@ -190,12 +190,10 @@
 
     .view-version-controls-top {
       order: 2;
-      padding-inline: var(--spacer-3);
     }
 
     .view-version__diff-wrap {
       order: 3;
-      padding: var(--spacer-3);
 
       /* Hide vertical separator on mobile */
       &::after {

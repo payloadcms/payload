@@ -6,6 +6,7 @@ import type {
   ResourceTemplate,
   ServerContext,
   StandardSchemaWithJSON,
+  ToolAnnotations,
 } from '@modelcontextprotocol/server'
 import type {
   AuthCollectionSlug,
@@ -26,8 +27,8 @@ import type {
 
 export type { MCPCollectionAuthToolName, MCPCollectionBuiltinName, MCPGlobalBuiltinName }
 
-/** Re-exported from `@modelcontextprotocol/server` — the JSON Schema shape the MCP runtime validates against. */
-export type { JsonSchemaType, StandardSchemaWithJSON }
+/** Re-exported from `@modelcontextprotocol/server` — common MCP types used in plugin config. */
+export type { JsonSchemaType, StandardSchemaWithJSON, ToolAnnotations }
 
 /**
  * What a tool's `input` (or a prompt's `argsSchema`) can be — either a raw
@@ -46,9 +47,11 @@ export type ToolInputSchema = JsonSchemaType | StandardSchemaWithJSON
 export type ClientMCPPluginConfig = {
   items: Array<{
     collectionSlug?: string
-    description: string
+    configKey: string
+    description?: string
     globalSlug?: string
-    key: string
+    /** Admin-UI bucket for collection/global tools: built-in CRUD, auth, or custom. */
+    group?: 'auth' | 'custom' | 'operations'
     label: string
     type: 'collectionTool' | 'globalTool' | 'prompt' | 'resource' | 'tool'
   }>
@@ -96,6 +99,7 @@ export type GlobalToolHandlerArgs<TSchema = undefined> = {
 } & ToolHandlerArgs<TSchema>
 
 export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> = {
+  annotations?: ToolAnnotations
   description: string
   handler: (args: ToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
   input?: TSchema
@@ -105,23 +109,18 @@ export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema |
   overrideResponse?: MCPResponseOverride
 }
 
-/**
- * `TSchema` is the schema itself (Standard Schema, raw JSON Schema, or undefined).
- * The function-form variant of `input` carries a concrete `{ collectionSchema: JsonSchemaType }`
- * parameter type so callers can write `({ collectionSchema }) => …` without annotating it.
- */
 export type CollectionTool<
   TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
 > = {
   handler: (args: CollectionToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
-  input?: ((args: { collectionSchema: JsonSchemaType }) => TSchema) | TSchema
-} & Pick<Tool, 'description' | 'overrideResponse'>
+  input?: TSchema
+} & Pick<Tool, 'annotations' | 'description' | 'overrideResponse'>
 
 export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> =
   {
     handler: (args: GlobalToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
-    input?: ((args: { globalSchema: JsonSchemaType }) => TSchema) | TSchema
-  } & Pick<Tool, 'description' | 'overrideResponse'>
+    input?: TSchema
+  } & Pick<Tool, 'annotations' | 'description' | 'overrideResponse'>
 
 /**
  * Configures (or disables) a built-in tool without replacing it.
@@ -129,6 +128,7 @@ export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSc
  * required handler) from being silently accepted at a built-in key slot.
  */
 export type MCPBuiltInToolOverride = {
+  annotations?: ToolAnnotations
   description?: string
   handler?: never
   overrideResponse?: MCPResponseOverride
@@ -287,40 +287,41 @@ export type MCPAPIKeysDocAccessTree = {
  */
 export type MCPAPIKeysDoc = {
   access: MCPAPIKeysDocAccessTree
+  apiKey?: string
+  apiKeyIndex?: string
   id: DefaultDocumentIDType
+  lastUsed?: string
   overrideAccess?: boolean
   user: null | TypedUser
 }
 
 /**
- * One MCP primitive — tool, prompt, or resource — paired with the metadata both
- * the endpoint and the API key collection need. Built by `sanitizeMCPConfig`,
- * filtered by `getAuthorizedMCP`, registered by the MCP endpoint.
+ * One MCP primitive plus the metadata needed for access checks, admin UI, and
+ * registration.
  *
- *  - `key`: the config identifier (`find`, `echo`). Used for the API-key deny
- *    lookup and as the admin checkbox field name. For collection/global tools,
- *    the MCP wire name (`findPosts`) is derived from `key + slug` at
- *    registration time.
- *  - `label`: human-readable admin-UI display text for the checkbox.
- *  - `tool` / `prompt` / `resource`: the live primitive (its own
- *    `description` is what both MCP clients and the admin UI surface).
+ * - `configKey`: the config/API-key identifier, e.g. `find` or `echo`.
+ * - `mcpName`: the MCP wire name, e.g. `findDocuments` or `echo`.
+ * - `label`: human-readable admin checkbox text.
  */
 export type MCPItemBase = {
-  key: string
+  configKey: string
   label: string
+  mcpName: string
 }
 
+export type CollectionMCPItem = {
+  collectionSlug: CollectionSlug
+  tool: CollectionTool
+  type: 'collectionTool'
+} & MCPItemBase
+
+export type GlobalMCPItem = {
+  globalSlug: GlobalSlug
+  tool: GlobalTool
+  type: 'globalTool'
+} & MCPItemBase
+
 export type MCPItem =
-  | ({
-      collectionSlug: CollectionSlug
-      tool: CollectionTool
-      type: 'collectionTool'
-    } & MCPItemBase)
-  | ({
-      globalSlug: GlobalSlug
-      tool: GlobalTool
-      type: 'globalTool'
-    } & MCPItemBase)
   | ({
       prompt: Prompt
       type: 'prompt'
@@ -333,6 +334,8 @@ export type MCPItem =
       tool: Tool
       type: 'tool'
     } & MCPItemBase)
+  | CollectionMCPItem
+  | GlobalMCPItem
 
 /**
  * The caller's identity + the MCP items they can use for this request. Returned

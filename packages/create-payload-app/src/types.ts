@@ -21,13 +21,13 @@ export interface Args extends arg.Spec {
   '--no-agent': BooleanConstructor
   '--no-deps': BooleanConstructor
   '--no-git': BooleanConstructor
+  '--payload-version': StringConstructor
   '--secret': StringConstructor
   '--template': StringConstructor
   '--use-bun': BooleanConstructor
   '--use-npm': BooleanConstructor
   '--use-pnpm': BooleanConstructor
   '--use-yarn': BooleanConstructor
-  '--version': StringConstructor
 
   // Aliases
 

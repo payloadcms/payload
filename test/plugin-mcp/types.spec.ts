@@ -14,6 +14,7 @@ type IdSchemaInput = { id: string }
 describe('defineTool input inference', () => {
   test('static schema', () => {
     defineTool({
+      annotations: { readOnlyHint: true },
       description: 'x',
       input: z.object({ id: z.string() }),
     }).handler(({ input }) => {
@@ -35,35 +36,12 @@ describe('defineTool input inference', () => {
 describe('defineCollectionTool input inference', () => {
   test('static schema', () => {
     defineCollectionTool({
+      annotations: { destructiveHint: false },
       description: 'x',
       input: z.object({ id: z.string() }),
     }).handler(({ input, collectionSlug }) => {
       expect(input).type.toBe<IdSchemaInput>()
       expect(collectionSlug).type.toBe<CollectionSlug>()
-      return { content: [] }
-    })
-  })
-
-  test('function-form (no param)', () => {
-    defineCollectionTool({
-      description: 'x',
-      input: () => z.object({ id: z.string() }),
-    }).handler(({ input }) => {
-      expect(input).type.toBe<IdSchemaInput>()
-      return { content: [] }
-    })
-  })
-
-  test('function-form reading collectionSchema', () => {
-    defineCollectionTool({
-      description: 'x',
-      input: ({ collectionSchema }) => {
-        // collectionSchema is the per-collection JSON Schema, typed (not implicit any)
-        expect(collectionSchema).type.toBeAssignableTo<object>()
-        return z.object({ id: z.string() })
-      },
-    }).handler(({ input }) => {
-      expect(input).type.toBe<IdSchemaInput>()
       return { content: [] }
     })
   })
@@ -81,6 +59,7 @@ describe('defineCollectionTool input inference', () => {
 describe('defineGlobalTool input inference', () => {
   test('static schema', () => {
     defineGlobalTool({
+      annotations: { idempotentHint: true },
       description: 'x',
       input: z.object({ id: z.string() }),
     }).handler(({ input, globalSlug }) => {
@@ -90,18 +69,6 @@ describe('defineGlobalTool input inference', () => {
     })
   })
 
-  test('function-form reading globalSchema', () => {
-    defineGlobalTool({
-      description: 'x',
-      input: ({ globalSchema }) => {
-        expect(globalSchema).type.toBeAssignableTo<object>()
-        return z.object({ id: z.string() })
-      },
-    }).handler(({ input }) => {
-      expect(input).type.toBe<IdSchemaInput>()
-      return { content: [] }
-    })
-  })
 })
 
 describe('definePrompt input inference', () => {

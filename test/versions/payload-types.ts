@@ -62,23 +62,24 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_3937C7CB".
+ * via the `definition` "LexicalNodes_F50D3E7C".
  */
-export type LexicalNodes_3937C7CB =
+export type LexicalNodes_F50D3E7C =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_3937C7CB>
+  | SerializedParagraphNode<LexicalNodes_F50D3E7C>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_3937C7CB>
+  | SerializedHeadingNode<LexicalNodes_F50D3E7C>
   | SerializedUploadNode<'draft-with-upload'>
+  | SerializedUploadNode<'draft-with-upload-cloud-storage'>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
   | SerializedUploadNode<'media2'>
-  | SerializedQuoteNode<LexicalNodes_3937C7CB>
-  | SerializedListNode<LexicalNodes_3937C7CB>
-  | SerializedListItemNode<LexicalNodes_3937C7CB>
-  | SerializedAutoLinkNode<LexicalNodes_3937C7CB, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_3937C7CB, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_F50D3E7C>
+  | SerializedListNode<LexicalNodes_F50D3E7C>
+  | SerializedListItemNode<LexicalNodes_F50D3E7C>
+  | SerializedAutoLinkNode<LexicalNodes_F50D3E7C, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_F50D3E7C, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'disable-publish'
       | 'posts'
@@ -110,7 +111,6 @@ export type LexicalNodes_3937C7CB =
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -133,6 +133,7 @@ export interface Config {
     diff: Diff;
     text: Text;
     'draft-with-upload': DraftWithUpload;
+    'draft-with-upload-cloud-storage': DraftWithUploadCloudStorage;
     media: Media;
     media2: Media2;
     users: User;
@@ -164,6 +165,7 @@ export interface Config {
     diff: DiffSelect<false> | DiffSelect<true>;
     text: TextSelect<false> | TextSelect<true>;
     'draft-with-upload': DraftWithUploadSelect<false> | DraftWithUploadSelect<true>;
+    'draft-with-upload-cloud-storage': DraftWithUploadCloudStorageSelect<false> | DraftWithUploadCloudStorageSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     media2: Media2Select<false> | Media2Select<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -204,7 +206,7 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User | PayloadMcpApiKey;
+  user: User;
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -217,24 +219,6 @@ export interface Config {
   };
 }
 export interface UserAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
-  };
-}
-export interface PayloadMcpApiKeyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -284,7 +268,7 @@ export interface AutosavePost {
   title: string;
   relationship?: (string | null) | Post;
   computedTitle?: string | null;
-  richText?: LexicalRichText<LexicalNodes_3937C7CB> | null;
+  richText?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
   json?:
     | {
         [k: string]: unknown;
@@ -582,8 +566,8 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
-  richtext?: LexicalRichText<LexicalNodes_3937C7CB> | null;
-  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_3937C7CB> | null;
+  richtext?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
+  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
@@ -744,6 +728,26 @@ export interface DraftWithUpload {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-upload-cloud-storage".
+ */
+export interface DraftWithUploadCloudStorage {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media2".
  */
 export interface Media2 {
@@ -761,32 +765,13 @@ export interface Media2 {
   focalY?: number | null;
 }
 /**
- * API keys control which collections, resources, tools, and prompts MCP clients can access
- *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys".
  */
 export interface PayloadMcpApiKey {
   id: string;
-  /**
-   * The user that the API key is associated with.
-   */
-  user: string | User;
-  /**
-   * A useful label for the API key.
-   */
-  label?: string | null;
-  /**
-   * The purpose of the API key.
-   */
-  description?: string | null;
-  /**
-   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
-   */
-  overrideAccess?: boolean | null;
-  /**
-   * Access for this API key — uncheck to revoke individual tools.
-   */
+  apiKey: string;
+  apiKeyIndex: string;
   access?:
     | {
         [k: string]: unknown;
@@ -796,12 +781,13 @@ export interface PayloadMcpApiKey {
     | number
     | boolean
     | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string | User;
+  overrideAccess?: boolean | null;
   updatedAt: string;
   createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -996,6 +982,10 @@ export interface PayloadLockedDocument {
         value: string | DraftWithUpload;
       } | null)
     | ({
+        relationTo: 'draft-with-upload-cloud-storage';
+        value: string | DraftWithUploadCloudStorage;
+      } | null)
+    | ({
         relationTo: 'media';
         value: string | Media;
       } | null)
@@ -1012,15 +1002,10 @@ export interface PayloadLockedDocument {
         value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1030,15 +1015,10 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   key?: string | null;
   value?:
     | {
@@ -1436,6 +1416,25 @@ export interface DraftWithUploadSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-upload-cloud-storage_select".
+ */
+export interface DraftWithUploadCloudStorageSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -1495,16 +1494,16 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "payload-mcp-api-keys_select".
  */
 export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  user?: T;
-  label?: T;
-  description?: T;
-  overrideAccess?: T;
-  access?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+  access?: T;
+  label?: T;
+  description?: T;
+  lastUsed?: T;
+  user?: T;
+  overrideAccess?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

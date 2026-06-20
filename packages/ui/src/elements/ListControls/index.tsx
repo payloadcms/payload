@@ -11,11 +11,11 @@ import { Dots } from '../../icons/Dots/index.js'
 import { useListQuery } from '../../providers/ListQuery/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
-import { ColumnsButton } from '../ColumnsButton/index.js'
-import { GroupByControl } from '../GroupByControl/index.js'
+import { ListColumnSelectionButton } from '../ListColumnSelectionButton/index.js'
+import { ListGroupByButton } from '../ListGroupByButton/index.js'
+import { ListWhereBuilder } from '../ListWhereBuilder/index.js'
 import { QueryPresetBar } from '../QueryPresets/QueryPresetBar/index.js'
 import { ListSearchFilter } from '../Search/ListSearchFilter/index.js'
-import { WhereBuilder } from '../WhereBuilder/index.js'
 import './index.css'
 
 const baseClass = 'list-controls'
@@ -115,13 +115,11 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               {t('general:filters')}
             </Button>
           )}
-          {collectionConfig.admin.groupBy && (
-            <GroupByControl
-              collectionSlug={collectionConfig.slug}
-              fields={collectionConfig.fields}
-            />
-          )}
-          {enableColumns && <ColumnsButton collectionSlug={collectionConfig.slug} />}
+          <ListGroupByButton
+            collectionSlug={collectionConfig.slug}
+            fields={collectionConfig.fields}
+          />
+          {enableColumns && <ListColumnSelectionButton collectionSlug={collectionConfig.slug} />}
           {enableSort && (
             <Button
               buttonStyle="secondary"
@@ -170,11 +168,11 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
       </div>
       {!isControlled && isWhereOpen && (
         <div className={`${baseClass}__where`} id={`${baseClass}-where`}>
-          <WhereBuilder
+          <ListWhereBuilder
             collectionPluralLabel={collectionConfig?.labels?.plural}
             collectionSlug={collectionConfig.slug}
             fields={collectionConfig?.fields}
-            onClose={() => setVisibleDrawer(undefined)}
+            onEmptyRemove={() => setVisibleDrawer(undefined)}
             renderedFilters={renderedFilters}
             resolvedFilterOptions={resolvedFilterOptions}
           />

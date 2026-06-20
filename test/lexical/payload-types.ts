@@ -204,22 +204,22 @@ export type LexicalNodes_95508CB0 =
   | SerializedHeadingNode<LexicalNodes_95508CB0>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D3ACC5D1".
+ * via the `definition` "LexicalNodes_291F748A".
  */
-export type LexicalNodes_D3ACC5D1 =
+export type LexicalNodes_291F748A =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D3ACC5D1>
-  | SerializedBlockNode<Code | PayloadCode | MyBlock>
+  | SerializedParagraphNode<LexicalNodes_291F748A>
+  | SerializedBlockNode<Code | PayloadCode | MyBlock | JsonBlock>
   | SerializedInlineBlockNode<MyInlineBlock | InlineBlockWithSelect | InlineBlockWithRelationship>
-  | SerializedTableNode<LexicalNodes_D3ACC5D1>
-  | SerializedTableCellNode<LexicalNodes_D3ACC5D1>
-  | SerializedTableRowNode<LexicalNodes_D3ACC5D1>
+  | SerializedTableNode<LexicalNodes_291F748A>
+  | SerializedTableCellNode<LexicalNodes_291F748A>
+  | SerializedTableRowNode<LexicalNodes_291F748A>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_D3ACC5D1>
+  | SerializedQuoteNode<LexicalNodes_291F748A>
   | SerializedRelationshipNode<
       | 'lexical-benchmark'
       | 'lexical-fully-featured'
@@ -257,11 +257,11 @@ export type LexicalNodes_D3ACC5D1 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_D3ACC5D1, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_D3ACC5D1, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_D3ACC5D1>
-  | SerializedListItemNode<LexicalNodes_D3ACC5D1>
-  | SerializedHeadingNode<LexicalNodes_D3ACC5D1>;
+  | SerializedAutoLinkNode<LexicalNodes_291F748A, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_291F748A, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_291F748A>
+  | SerializedListItemNode<LexicalNodes_291F748A>
+  | SerializedHeadingNode<LexicalNodes_291F748A>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_80B5B21B".
@@ -1407,7 +1407,6 @@ export type LexicalNodes_D77F50C2 =
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {
     nestedBlock: NestedBlock;
@@ -1506,31 +1505,13 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User | PayloadMcpApiKey;
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
 export interface UserAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
-  };
-}
-export interface PayloadMcpApiKeyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -1586,7 +1567,7 @@ export interface LexicalBenchmark {
  */
 export interface LexicalFullyFeatured {
   id: number;
-  richText?: LexicalRichText<LexicalNodes_D3ACC5D1> | null;
+  richText?: LexicalRichText<LexicalNodes_291F748A> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2153,32 +2134,13 @@ export interface User {
   collection: 'users';
 }
 /**
- * API keys control which collections, resources, tools, and prompts MCP clients can access
- *
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-mcp-api-keys".
  */
 export interface PayloadMcpApiKey {
   id: number;
-  /**
-   * The user that the API key is associated with.
-   */
-  user: number | User;
-  /**
-   * A useful label for the API key.
-   */
-  label?: string | null;
-  /**
-   * The purpose of the API key.
-   */
-  description?: string | null;
-  /**
-   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
-   */
-  overrideAccess?: boolean | null;
-  /**
-   * Access for this API key — uncheck to revoke individual tools.
-   */
+  apiKey: string;
+  apiKeyIndex: string;
   access?:
     | {
         [k: string]: unknown;
@@ -2188,12 +2150,13 @@ export interface PayloadMcpApiKey {
     | number
     | boolean
     | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: number | User;
+  overrideAccess?: boolean | null;
   updatedAt: string;
   createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'payload-mcp-api-keys';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2352,15 +2315,10 @@ export interface PayloadLockedDocument {
         value: number | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user:
-    | {
-        relationTo: 'users';
-        value: number | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: number | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: number | User;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -2370,15 +2328,10 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: number;
-  user:
-    | {
-        relationTo: 'users';
-        value: number | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: number | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: number | User;
+  };
   key?: string | null;
   value?:
     | {
@@ -2920,16 +2873,16 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "payload-mcp-api-keys_select".
  */
 export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  user?: T;
-  label?: T;
-  description?: T;
-  overrideAccess?: T;
-  access?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  enableAPIKey?: T;
   apiKey?: T;
   apiKeyIndex?: T;
+  access?: T;
+  label?: T;
+  description?: T;
+  lastUsed?: T;
+  user?: T;
+  overrideAccess?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3460,6 +3413,24 @@ export interface MyBlock {
   id: string;
   blockType: 'myBlock';
   someText?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "JsonBlock".
+ */
+export interface JsonBlock {
+  id: string;
+  blockType: 'jsonBlock';
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   blockName?: string | null;
 }
 /**
@@ -4273,6 +4244,6 @@ export interface SerializedTableCellNode<TChildren> extends SerializedLexicalEle
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
