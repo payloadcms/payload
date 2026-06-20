@@ -88,7 +88,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     depth: editDepth,
   })
 
-  const { toggleDrawer } = useLexicalDrawer(drawerSlug)
+  const { isOpen: isDrawerOpen, toggleDrawer } = useLexicalDrawer(drawerSlug)
 
   const setNotLink = useCallback(() => {
     setIsLink(false)
@@ -214,7 +214,12 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       }
     }
 
-    setStateData(data)
+    // Don't overwrite the drawer's form state while it's open — doing so
+    // resets any in-progress edits (e.g. switching link type) because
+    // DrawerContent re-fetches initialState whenever the `data` prop changes.
+    if (!isDrawerOpen) {
+      setStateData(data)
+    }
     setIsLink(true)
     setSelectedNodes(selection ? selection?.getNodes() : [])
 
@@ -270,6 +275,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     i18n,
     locale?.code,
     anchorElem,
+    isDrawerOpen,
   ])
 
   useEffect(() => {

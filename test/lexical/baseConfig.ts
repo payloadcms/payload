@@ -20,6 +20,7 @@ import { LexicalCustomCell } from './collections/LexicalCustomCell/index.js'
 import { LexicalHeadingFeature } from './collections/LexicalHeadingFeature/index.js'
 import { LexicalInBlock } from './collections/LexicalInBlock/index.js'
 import { LexicalJSXConverter } from './collections/LexicalJSXConverter/index.js'
+import { LexicalLinkAutosave } from './collections/LexicalLinkAutosave/index.js'
 import { LexicalLinkFeature } from './collections/LexicalLinkFeature/index.js'
 import { LexicalListsFeature } from './collections/LexicalListsFeature/index.js'
 import { LexicalLocalizedFields } from './collections/LexicalLocalized/index.js'
@@ -55,6 +56,7 @@ export const baseConfig: Partial<Config> = {
     LexicalBenchmark,
     LexicalFullyFeatured,
     LexicalAutosave,
+    LexicalLinkAutosave,
     LexicalLinkFeature,
     LexicalListsFeature,
     LexicalHeadingFeature,
