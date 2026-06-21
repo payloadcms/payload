@@ -157,9 +157,9 @@ describe('Upload', () => {
       .locator('[id^=doc-drawer_uploads_1_] input[type="file"]')
       .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
 
-    await expect(page.locator('[id^=doc-drawer_uploads_1_] #field-filename')).toHaveValue(
-      'payload.png',
-    )
+    await expect(
+      page.locator('[id^=doc-drawer_uploads_1_] .file-manager #field-filename'),
+    ).toHaveValue('payload.png')
 
     await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
@@ -233,9 +233,9 @@ describe('Upload', () => {
     await page
       .locator('[id^=doc-drawer_uploads_1_] input[type="file"]')
       .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
-    await expect(page.locator('[id^=doc-drawer_uploads_1_] #field-filename')).toHaveValue(
-      'payload.png',
-    )
+    await expect(
+      page.locator('[id^=doc-drawer_uploads_1_] .file-manager #field-filename'),
+    ).toHaveValue('payload.png')
     await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
     await page.locator('.field-type.upload').getByRole('button', { name: 'Remove' }).click()

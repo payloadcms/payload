@@ -71,7 +71,7 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
   test('should complete a single client upload via the admin UI', async () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, '../../uploads/image.png'))
-    await expect(page.locator('.file-field__filename')).toHaveValue('image.png')
+    await expect(page.locator('.file-manager #field-filename')).toHaveValue('image.png')
     await saveDocAndAssert(page)
   })
 
@@ -211,7 +211,7 @@ test.describe('storage-vercel-blob client uploads E2E', () => {
     await expect(async () => {
       await bulkUploadButton.click()
       await expect(dropzoneInput).toBeAttached({ timeout: 1500 })
-    }).toPass({ timeout: 5000, intervals: [500] })
+    }).toPass({ intervals: [500], timeout: 5000 })
 
     await testPage.setInputFiles('.dropzone input[type="file"]', [
       path.resolve(dirname, '../../uploads/image.png'),

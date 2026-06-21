@@ -470,7 +470,7 @@ describe('Uploads', () => {
     // pasteURL option is set to false in the media collection
     await page.goto(mediaURL.create)
 
-    const pasteURLButton = page.locator('.file-field__upload button', {
+    const pasteURLButton = page.locator('.file-manager__upload button', {
       hasText: 'Paste URL',
     })
     await expect(pasteURLButton).toBeHidden()

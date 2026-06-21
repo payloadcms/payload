@@ -145,7 +145,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('body')).not.toContainText('Loading...')
 
       // Change per-page to 25
-      await setPerPageLimit({ page, limit: 25 })
+      await setPerPageLimit({ limit: 25, page })
 
       // Open export from list menu
       const listMenuButton = page.locator('#list-menu')
@@ -502,8 +502,8 @@ test.describe('Import Export Plugin', () => {
         // Cleanup
         for (const id of createdPages) {
           await payload.delete({
-            collection: 'custom-id-pages' as any,
             id,
+            collection: 'custom-id-pages' as any,
           })
         }
       })
@@ -648,8 +648,8 @@ test.describe('Import Export Plugin', () => {
 
       for (const id of createdPageIDs) {
         await payload.delete({
-          collection: 'pages',
           id,
+          collection: 'pages',
         })
       }
       createdPageIDs.length = 0
@@ -678,7 +678,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('#field-filename')).toHaveValue('e2e-test-import.csv')
+      await expect(page.locator('.file-manager #field-filename')).toHaveValue('e2e-test-import.csv')
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -717,7 +717,9 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', jsonPath)
-      await expect(page.locator('#field-filename')).toHaveValue('e2e-test-import.json')
+      await expect(page.locator('.file-manager #field-filename')).toHaveValue(
+        'e2e-test-import.json',
+      )
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -752,7 +754,7 @@ test.describe('Import Export Plugin', () => {
       await page.goto(importsURL.create)
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('#field-filename')).toHaveValue('e2e-list-test.csv')
+      await expect(page.locator('.file-manager #field-filename')).toHaveValue('e2e-list-test.csv')
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -809,7 +811,7 @@ test.describe('Import Export Plugin', () => {
       await page.goto(importsURL.create)
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('#field-filename')).toHaveValue('e2e-update-test.csv')
+      await expect(page.locator('.file-manager #field-filename')).toHaveValue('e2e-update-test.csv')
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -852,7 +854,9 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('#field-filename')).toHaveValue('e2e-published-status-test.csv')
+      await expect(page.locator('.file-manager #field-filename')).toHaveValue(
+        'e2e-published-status-test.csv',
+      )
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -868,10 +872,10 @@ test.describe('Import Export Plugin', () => {
 
       const importedDocs = await payload.find({
         collection: 'pages',
+        draft: false,
         where: {
           title: { contains: 'E2E Published Status Test' },
         },
-        draft: false,
       })
 
       expect(importedDocs.docs.length).toBe(2)
@@ -894,7 +898,9 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('#field-filename')).toHaveValue('e2e-explicit-status-test.csv')
+      await expect(page.locator('.file-manager #field-filename')).toHaveValue(
+        'e2e-explicit-status-test.csv',
+      )
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -910,10 +916,10 @@ test.describe('Import Export Plugin', () => {
 
       const draftDocs = await payload.find({
         collection: 'pages',
+        draft: true,
         where: {
           title: { equals: 'E2E Explicit Draft Test' },
         },
-        draft: true,
       })
 
       expect(draftDocs.docs.length).toBe(1)
@@ -921,10 +927,10 @@ test.describe('Import Export Plugin', () => {
 
       const publishedDocs = await payload.find({
         collection: 'pages',
+        draft: false,
         where: {
           title: { equals: 'E2E Explicit Published Test' },
         },
-        draft: false,
       })
 
       expect(publishedDocs.docs.length).toBe(1)
@@ -1065,7 +1071,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('#field-filename')).toHaveValue(csvFilename)
+      await expect(page.locator('.file-manager #field-filename')).toHaveValue(csvFilename)
 
       // Collection field is disabled since this custom import only targets one collection
       const collectionField = page.locator('#field-collectionSlug')
@@ -1078,9 +1084,9 @@ test.describe('Import Export Plugin', () => {
         await runJobsQueue({ serverURL })
         const { docs } = await payload.find({
           collection: postsWithS3ImportSlug as any,
-          where: {},
-          sort: '-createdAt',
           limit: 1,
+          sort: '-createdAt',
+          where: {},
         })
         expect(docs[0]?.status).toBe('completed')
       }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
@@ -1223,11 +1229,11 @@ test.describe('Import Export Plugin', () => {
       await payload.create({
         collection: 'pages',
         data: {
-          title: 'E2E beforeExport Preview Test',
-          customRelationship: userId,
-          customRelNameEmail: userId,
-          customRelIdName: userId,
           _status: 'published',
+          customRelationship: userId,
+          customRelIdName: userId,
+          customRelNameEmail: userId,
+          title: 'E2E beforeExport Preview Test',
         },
       })
     })
@@ -1661,7 +1667,9 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('#field-filename')).toHaveValue('e2e-column-map-import.csv')
+      await expect(page.locator('.file-manager #field-filename')).toHaveValue(
+        'e2e-column-map-import.csv',
+      )
 
       const importModeField = page.locator('#field-importMode')
       await importModeField.click()
@@ -1693,7 +1701,7 @@ test.describe('Import Export Plugin', () => {
     test('should export CSV with renamed column headers via admin save', async () => {
       await payload.create({
         collection: postsWithColumnMapSlug,
-        data: { title: 'E2E Export Rename', excerpt: 'exported summary', count: 99 },
+        data: { count: 99, excerpt: 'exported summary', title: 'E2E Export Rename' },
       })
       createdTitles.push('E2E Export Rename')
 
@@ -1712,8 +1720,8 @@ test.describe('Import Export Plugin', () => {
 
       const exports = await payload.find({
         collection: 'posts-with-column-map-export',
-        sort: '-createdAt',
         limit: 1,
+        sort: '-createdAt',
       })
 
       expect(exports.docs).toHaveLength(1)
@@ -1728,8 +1736,8 @@ test.describe('Import Export Plugin', () => {
       expect(matching!.title).toBeUndefined()
 
       await payload.delete({
-        collection: 'posts-with-column-map-export',
         id: exportDoc.id,
+        collection: 'posts-with-column-map-export',
       })
     })
   })
@@ -1742,7 +1750,7 @@ test.describe('Import Export Plugin', () => {
       for (let i = 1; i <= 2; i++) {
         const doc = await payload.create({
           collection: postsWithHooksSlug,
-          data: { title: `Hook Preview Post ${i}`, secret: `secret-${i}`, count: i },
+          data: { count: i, secret: `secret-${i}`, title: `Hook Preview Post ${i}` },
         })
         createdPostIds.push(doc.id)
       }
@@ -1750,7 +1758,7 @@ test.describe('Import Export Plugin', () => {
 
     test.afterAll(async () => {
       for (const id of createdPostIds) {
-        await payload.delete({ collection: postsWithHooksSlug, id }).catch(() => null)
+        await payload.delete({ id, collection: postsWithHooksSlug }).catch(() => null)
       }
     })
 
@@ -1821,8 +1829,8 @@ test.describe('Import Export Plugin', () => {
         {
           data: {
             collectionSlug: postsWithHooksSlug,
-            format: 'csv',
             fileData,
+            format: 'csv',
           },
         },
       )
@@ -1838,7 +1846,7 @@ test.describe('Import Export Plugin', () => {
     })
 
     test('should apply import.hooks.before in JSON import preview (title gets _imported suffix)', async () => {
-      const jsonContent = JSON.stringify([{ title: 'Hook Preview Import JSON', count: 2 }])
+      const jsonContent = JSON.stringify([{ count: 2, title: 'Hook Preview Import JSON' }])
       const fileData = Buffer.from(jsonContent).toString('base64')
 
       const response = await page.request.post(
@@ -1846,8 +1854,8 @@ test.describe('Import Export Plugin', () => {
         {
           data: {
             collectionSlug: postsWithHooksSlug,
-            format: 'json',
             fileData,
+            format: 'json',
           },
         },
       )

@@ -561,11 +561,11 @@ describe('lexicalMain', () => {
     await expect(createUploadDrawer).toBeVisible()
     await wait(500)
 
-    const input = createUploadDrawer.locator('.file-field__upload input[type="file"]').first()
+    const input = createUploadDrawer.locator('.file-manager input[type="file"]').first()
     await expect(input).toBeAttached()
 
     await input.setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
-    await expect(createUploadDrawer.locator('.file-field .file-field__filename')).toHaveValue(
+    await expect(createUploadDrawer.locator('.file-manager #field-filename')).toHaveValue(
       'payload.jpg',
     )
     await wait(500)
@@ -1301,9 +1301,8 @@ describe('lexicalMain', () => {
     await link.scrollIntoViewIfNeeded()
     await expect(link).toBeVisible()
     await link.click({
-      // eslint-disable-next-line playwright/no-force-option
-      force: true,
       button: 'left',
+      force: true,
     })
 
     await expect(page.locator('.link-edit')).toBeVisible()
@@ -1876,26 +1875,26 @@ describe('lexicalMain', () => {
     const doc = await payload.create({
       collection: lexicalCustomCellSlug,
       data: {
-        title: 'Test Custom Cell',
         richTextField: {
           root: {
+            type: 'root',
             children: [
               {
-                children: [{ text: 'Hello', type: 'text', version: 1 }],
+                type: 'paragraph',
+                children: [{ type: 'text', text: 'Hello', version: 1 }],
                 direction: null,
                 format: '',
                 indent: 0,
-                type: 'paragraph',
                 version: 1,
               },
             ],
             direction: null,
             format: '',
             indent: 0,
-            type: 'root',
             version: 1,
           },
         },
+        title: 'Test Custom Cell',
       },
     })
 
