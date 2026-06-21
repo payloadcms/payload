@@ -145,7 +145,7 @@ export const findByIDOperation = async <
       req,
     })
 
-    // execute only if there's a custom ID and potentially overwriten access on id
+    // execute only if there's a custom ID and potentially overwritten access on id
     if (req.payload.collections[collectionConfig.slug]!.customIDType) {
       await validateQueryPaths({
         collectionConfig,

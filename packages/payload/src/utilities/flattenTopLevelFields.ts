@@ -122,7 +122,7 @@ export function flattenTopLevelFields<TField extends ClientField | Field>(
         )
       } else {
         if (fieldAffectsData(field)) {
-          // Hoisting diabled - keep as top level field
+          // Hoisting disabled - keep as top level field
           acc.push(field as FlattenedField<TField>)
         } else {
           acc.push(...flattenTopLevelFields(field.fields as TField[], options))

@@ -572,7 +572,7 @@ describe('flattenFields', () => {
       },
     ]
 
-    it('should hoist named group fields inside unamed tabs when moveSubFieldsToTop is true', () => {
+    it('should hoist named group fields inside unnamed tabs when moveSubFieldsToTop is true', () => {
       const unnamedTabWithNamedGroup: ClientField[] = [
         {
           type: 'tabs',
