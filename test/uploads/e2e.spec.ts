@@ -459,7 +459,7 @@ describe('Uploads', () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
 
-    const filename = page.locator('.file-manager #field-filename')
+    const filename = page.locator('#field-filemanager-filename')
 
     await expect(filename).toHaveValue('image.png')
 
@@ -481,7 +481,7 @@ describe('Uploads', () => {
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './ios-image.jpeg'))
 
-    const filename = page.locator('.file-manager #field-filename')
+    const filename = page.locator('#field-filemanager-filename')
 
     await expect(filename).toHaveValue('ios-image.jpeg')
 
@@ -492,7 +492,7 @@ describe('Uploads', () => {
     await page.goto(mediaURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './test-image-avif.avif'))
-    const filename = page.locator('.file-manager #field-filename')
+    const filename = page.locator('#field-filemanager-filename')
     await expect(filename).toHaveValue('test-image-avif.avif')
 
     await saveDocAndAssert(page)
@@ -505,7 +505,7 @@ describe('Uploads', () => {
     await page.goto(threeDimensionalURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './duck.glb'))
-    const filename = page.locator('.file-manager #field-filename')
+    const filename = page.locator('#field-filemanager-filename')
     await expect(filename).toHaveValue('duck.glb')
 
     await saveDocAndAssert(page)
@@ -518,7 +518,7 @@ describe('Uploads', () => {
     await page.goto(svgOnlyURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './svgWithXml.svg'))
-    const filename = page.locator('.file-manager #field-filename')
+    const filename = page.locator('#field-filemanager-filename')
     await expect(filename).toHaveValue('svgWithXml.svg')
 
     await saveDocAndAssert(page)
@@ -535,7 +535,7 @@ describe('Uploads', () => {
     await page.goto(animatedTypeMediaURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
-    const animatedFilename = page.locator('.file-manager #field-filename')
+    const animatedFilename = page.locator('#field-filemanager-filename')
 
     await expect(animatedFilename).toHaveValue('animated.webp')
 
@@ -544,7 +544,7 @@ describe('Uploads', () => {
     await page.goto(animatedTypeMediaURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './non-animated.webp'))
-    const nonAnimatedFileName = page.locator('.file-manager #field-filename')
+    const nonAnimatedFileName = page.locator('#field-filemanager-filename')
 
     await expect(nonAnimatedFileName).toHaveValue('non-animated.webp')
 
@@ -555,7 +555,7 @@ describe('Uploads', () => {
     await page.goto(animatedTypeMediaURL.create)
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
-    const animatedFilename = page.locator('.file-manager #field-filename')
+    const animatedFilename = page.locator('#field-filemanager-filename')
 
     await expect(animatedFilename).toHaveValue('animated.webp')
 
@@ -692,7 +692,7 @@ describe('Uploads', () => {
       path.resolve(dirname, './test-image-1500x735.jpeg'),
     )
 
-    const filename = page.locator('.file-manager #field-filename')
+    const filename = page.locator('#field-filemanager-filename')
 
     await expect(filename).toHaveValue('test-image-1500x735.jpeg')
 
@@ -772,7 +772,7 @@ describe('Uploads', () => {
   test('should throw error when file is larger than the limit and abortOnLimit is true', async () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './2mb.jpg'))
-    await expect(page.locator('.file-manager #field-filename')).toHaveValue('2mb.jpg')
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('2mb.jpg')
 
     await page.click('#action-save', { delay: 100 })
     await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
@@ -1077,7 +1077,7 @@ describe('Uploads', () => {
       path.resolve(dirname, './test-image.png'),
     )
     const filename = page.locator(
-      '[id^="doc-drawer_admin-thumbnail-size"] .file-manager #field-filename',
+      '[id^="doc-drawer_admin-thumbnail-size"] #field-filemanager-filename',
     )
     await expect(filename).toHaveValue('test-image.png')
 
@@ -1169,7 +1169,7 @@ describe('Uploads', () => {
         '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-manager #field-filename')
+      const filename = page.locator('#field-filemanager-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1272,7 +1272,7 @@ describe('Uploads', () => {
         '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-manager #field-filename')
+      const filename = page.locator('#field-filemanager-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1316,7 +1316,7 @@ describe('Uploads', () => {
         path.resolve(dirname, './image.png'),
       )
 
-      const filename = page.locator('.file-manager #field-filename')
+      const filename = page.locator('#field-filemanager-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1375,7 +1375,7 @@ describe('Uploads', () => {
         '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-manager #field-filename')
+      const filename = page.locator('#field-filemanager-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1439,7 +1439,7 @@ describe('Uploads', () => {
         '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-manager #field-filename')
+      const filename = page.locator('#field-filemanager-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1615,7 +1615,7 @@ describe('Uploads', () => {
         '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-manager #field-filename')
+      const filename = page.locator('#field-filemanager-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1638,7 +1638,7 @@ describe('Uploads', () => {
         .fill('prefix-one')
 
       // Clear the filename from the first file
-      await bulkUploadModal.locator('.file-manager #field-filename').clear()
+      await bulkUploadModal.locator('#field-filemanager-filename').clear()
 
       const nextImageChevronButton = bulkUploadModal.locator(
         '.bulk-upload--actions-bar__controls button:nth-of-type(2)',
@@ -1671,10 +1671,10 @@ describe('Uploads', () => {
       await expect(bulkUploadModal.locator('.field-error')).toContainText('A file name is required')
 
       // Filename field should be empty (as we cleared it)
-      await expect(bulkUploadModal.locator('.file-manager #field-filename')).toHaveValue('')
+      await expect(bulkUploadModal.locator('#field-filemanager-filename')).toHaveValue('')
 
       // Add the filename back
-      await bulkUploadModal.locator('.file-manager #field-filename').fill('fixed-filename.png')
+      await bulkUploadModal.locator('#field-filemanager-filename').fill('fixed-filename.png')
 
       await saveButton.click()
 
@@ -1698,7 +1698,7 @@ describe('Uploads', () => {
         '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-manager #field-filename')
+      const filename = page.locator('#field-filemanager-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1742,7 +1742,7 @@ describe('Uploads', () => {
         '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-manager #field-filename')
+      const filename = page.locator('#field-filemanager-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1830,7 +1830,7 @@ describe('Uploads', () => {
         '.file-manager input[type="file"]',
         path.resolve(dirname, './image.png'),
       )
-      const filename = page.locator('.file-manager #field-filename')
+      const filename = page.locator('#field-filemanager-filename')
       await expect(filename).toHaveValue('image.png')
 
       const bulkUploadButton = page.locator('#field-hasManyUpload button', {
@@ -1973,7 +1973,7 @@ describe('Uploads', () => {
       await serverSideFetch.text()
 
       // Wait for the filename field to be updated
-      const filenameInput = page.locator('.file-manager #field-filename')
+      const filenameInput = page.locator('#field-filemanager-filename')
       await expect(filenameInput).toHaveValue('mock-cors-image', { timeout: 500 })
 
       // Save and assert the document
@@ -2309,7 +2309,7 @@ describe('Uploads', () => {
 
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './animated.webp'))
 
-    const filename = page.locator('.file-manager #field-filename')
+    const filename = page.locator('#field-filemanager-filename')
 
     await expect(filename).toHaveValue('animated.webp')
     await saveDocAndAssert(page, '#action-save', 'error')
@@ -2319,7 +2319,7 @@ describe('Uploads', () => {
     await page.goto(fileMimeTypeURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image-as-pdf.pdf'))
 
-    const filename = page.locator('.file-manager #field-filename')
+    const filename = page.locator('#field-filemanager-filename')
     await expect(filename).toHaveValue('image-as-pdf.pdf')
 
     await saveDocAndAssert(page, '#action-save', 'error')
@@ -2357,7 +2357,7 @@ describe('Uploads', () => {
       '.file-manager input[type="file"]',
       path.join(dirname, 'test-image.jpg'),
     )
-    const filename = page.locator('.file-manager #field-filename')
+    const filename = page.locator('#field-filemanager-filename')
     await expect(filename).toHaveValue('test-image.jpg')
     await saveDocAndAssert(page)
     const filenameFromAPI = (
@@ -2647,7 +2647,7 @@ describe('Uploads', () => {
       mimeType: 'image/png',
     })
 
-    const filenameField = page.locator('.file-manager #field-filename')
+    const filenameField = page.locator('#field-filemanager-filename')
     await expect(filenameField).toHaveValue('file%20#hash.png')
 
     await saveDocAndAssert(page)

@@ -565,7 +565,7 @@ describe('lexicalMain', () => {
     await expect(input).toBeAttached()
 
     await input.setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
-    await expect(createUploadDrawer.locator('.file-manager #field-filename')).toHaveValue(
+    await expect(createUploadDrawer.locator('#field-filemanager-filename')).toHaveValue(
       'payload.jpg',
     )
     await wait(500)

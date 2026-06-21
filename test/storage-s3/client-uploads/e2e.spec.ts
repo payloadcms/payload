@@ -56,7 +56,7 @@ test.describe('storage-s3 client uploads E2E', () => {
   test('should complete a single client upload via the admin UI', async () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, '../../uploads/image.png'))
-    await expect(page.locator('.file-manager #field-filename')).toHaveValue('image.png')
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('image.png')
     await saveDocAndAssert(page)
   })
 

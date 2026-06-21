@@ -67,7 +67,7 @@ describe('Upload', () => {
     await page
       .locator('.file-manager input[type="file"]')
       .setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
-    await expect(page.locator('.file-manager #field-filename')).toHaveValue('payload.jpg')
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('payload.jpg')
     await saveDocAndAssert(page)
   }
 
@@ -92,7 +92,7 @@ describe('Upload', () => {
     const addFileButton = page.locator('#upload-paste-url button', { hasText: 'Add file' })
     await addFileButton.click()
 
-    await expect(page.locator('.file-manager #field-filename')).toHaveValue('og-image.jpg')
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('og-image.jpg')
 
     await saveDocAndAssert(page)
 
@@ -158,7 +158,7 @@ describe('Upload', () => {
       .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
 
     await expect(
-      page.locator('[id^=doc-drawer_uploads_1_] .file-manager #field-filename'),
+      page.locator('[id^=doc-drawer_uploads_1_] #field-filemanager-filename'),
     ).toHaveValue('payload.png')
 
     await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
@@ -234,7 +234,7 @@ describe('Upload', () => {
       .locator('[id^=doc-drawer_uploads_1_] input[type="file"]')
       .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
     await expect(
-      page.locator('[id^=doc-drawer_uploads_1_] .file-manager #field-filename'),
+      page.locator('[id^=doc-drawer_uploads_1_] #field-filemanager-filename'),
     ).toHaveValue('payload.png')
     await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')

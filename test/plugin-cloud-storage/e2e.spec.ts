@@ -31,7 +31,7 @@ test.describe('Cloud Storage Plugin', () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
 
-    const filename = page.locator('.file-manager #field-filename')
+    const filename = page.locator('#field-filemanager-filename')
 
     await expect(filename).toHaveValue('image.png')
 
@@ -42,7 +42,7 @@ test.describe('Cloud Storage Plugin', () => {
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
 
-    const filename = page.locator('.file-manager #field-filename')
+    const filename = page.locator('#field-filemanager-filename')
 
     await expect(filename).toHaveValue('image.png')
 
@@ -65,7 +65,7 @@ test.describe('Cloud Storage Plugin', () => {
 
     await page.goto(mediaURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
-    await expect(page.locator('.file-manager #field-filename')).toHaveValue('image.png')
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('image.png')
     await saveDocAndAssert(page)
 
     await page.locator('button[aria-label="Edit Image"]').click()

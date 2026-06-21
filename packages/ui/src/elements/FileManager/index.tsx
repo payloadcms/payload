@@ -455,7 +455,9 @@ export const FileManager: React.FC<FileManagerProps> = ({
                   />
                   {renderSelectedFilePreview(fileSrc)}
                   <div className={`${baseClass}__file-adjustments`}>
+                    {/* Custom id so this editor doesn't collide with the hidden auto `filename` field. */}
                     <TextInput
+                      id="field-filemanager-filename"
                       label={t('upload:fileName')}
                       onChange={handleFileNameChange}
                       path="filename"

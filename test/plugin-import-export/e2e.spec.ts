@@ -678,7 +678,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-manager #field-filename')).toHaveValue('e2e-test-import.csv')
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue('e2e-test-import.csv')
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -717,9 +717,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', jsonPath)
-      await expect(page.locator('.file-manager #field-filename')).toHaveValue(
-        'e2e-test-import.json',
-      )
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue('e2e-test-import.json')
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -754,7 +752,7 @@ test.describe('Import Export Plugin', () => {
       await page.goto(importsURL.create)
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-manager #field-filename')).toHaveValue('e2e-list-test.csv')
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue('e2e-list-test.csv')
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -811,7 +809,7 @@ test.describe('Import Export Plugin', () => {
       await page.goto(importsURL.create)
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-manager #field-filename')).toHaveValue('e2e-update-test.csv')
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue('e2e-update-test.csv')
 
       const collectionField = page.locator('#field-collectionSlug')
       await collectionField.click()
@@ -854,7 +852,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-manager #field-filename')).toHaveValue(
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue(
         'e2e-published-status-test.csv',
       )
 
@@ -898,7 +896,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-manager #field-filename')).toHaveValue(
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue(
         'e2e-explicit-status-test.csv',
       )
 
@@ -1071,7 +1069,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-manager #field-filename')).toHaveValue(csvFilename)
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue(csvFilename)
 
       // Collection field is disabled since this custom import only targets one collection
       const collectionField = page.locator('#field-collectionSlug')
@@ -1667,7 +1665,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('.collection-edit')).toBeVisible()
 
       await page.setInputFiles('input[type="file"]', csvPath)
-      await expect(page.locator('.file-manager #field-filename')).toHaveValue(
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue(
         'e2e-column-map-import.csv',
       )
 
