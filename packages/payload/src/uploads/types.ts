@@ -145,7 +145,7 @@ export type UploadConfig = {
    * Allow restricted file types known to be problematic.
    * - If set to `true`, it will allow all file types.
    * - If set to `false`, it will not allow file types and extensions known to be problematic.
-   * - This setting is overriden by the `mimeTypes` option.
+   * - This setting is overridden by the `mimeTypes` option.
    * @default false
    */
   allowRestrictedFileTypes?: boolean

@@ -1275,7 +1275,7 @@ describe('Localization', () => {
           // eslint-disable-next-line vitest/no-conditional-expect
           expect(docWithoutFallback.items).toStrictEqual(null)
         } else {
-          // TODO: build out compatability with SQL databases
+          // TODO: build out compatibility with SQL databases
           // Currently SQL databases always fallback since the localized values are joined in.
           // The join only has 2 states, undefined or the localized value of the requested locale.
           // If the localized value is not in the DB, there is no way to know if the value should fallback or not so we fallback if fallbackLocale is truthy.
