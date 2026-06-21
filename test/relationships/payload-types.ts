@@ -139,6 +139,36 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
+  collectionsInput: {
+    posts: PostInput;
+    postsLocalized: PostsLocalizedInput;
+    relation: RelationInput;
+    'strict-access': StrictAccessInput;
+    chained: ChainedInput;
+    'custom-id': CustomIdInput;
+    'custom-id-number': CustomIdNumberInput;
+    screenings: ScreeningInput;
+    movies: MovieInput;
+    directors: DirectorInput;
+    movieReviews: MovieReviewInput;
+    'polymorphic-relationships': PolymorphicRelationshipInput;
+    tree: TreeInput;
+    pages: PageInput;
+    'rels-to-pages': RelsToPageInput;
+    'rels-to-pages-and-custom-text-ids': RelsToPagesAndCustomTextIdInput;
+    'object-writes': ObjectWriteInput;
+    'deep-nested': DeepNestedInput;
+    relations: RelationInput1;
+    items: ItemInput;
+    blocks: BlockInput1;
+    users: UserInput;
+    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
+    'payload-kv': PayloadKvInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+  };
+  globalsInput: {};
   user: User;
   jobs: {
     tasks: unknown;
@@ -1067,6 +1097,490 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_input".
+ */
+export interface PostInput {
+  id?: string | null;
+  title?: string | null;
+  description?: string | null;
+  number?: number | null;
+  relationField?: string | null;
+  blocks?: BlockInput[] | null;
+  defaultAccessRelation?: string | null;
+  chainedRelation?: string | null;
+  maxDepthRelation?: string | null;
+  customIdRelation?: string | null;
+  customIdNumberRelation?: number | null;
+  filteredRelation?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "BlockInput".
+ */
+export interface BlockInput {
+  relationField?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "postsLocalized_input".
+ */
+export interface PostsLocalizedInput {
+  id?: string | null;
+  title?: string | null;
+  relationField?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation_input".
+ */
+export interface RelationInput {
+  id?: string | null;
+  name?: string | null;
+  disableRelation?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "strict-access_input".
+ */
+export interface StrictAccessInput {
+  id?: string | null;
+  name?: string | null;
+  disableRelation?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "chained_input".
+ */
+export interface ChainedInput {
+  id?: string | null;
+  name?: string | null;
+  relation?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id_input".
+ */
+export interface CustomIdInput {
+  id?: string | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-number_input".
+ */
+export interface CustomIdNumberInput {
+  id?: number | null;
+  name?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "screenings_input".
+ */
+export interface ScreeningInput {
+  id?: string | null;
+  name?: string | null;
+  movie?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "movies_input".
+ */
+export interface MovieInput {
+  id?: string | null;
+  name?: string | null;
+  select?: ('a' | 'b' | 'c')[] | null;
+  director?: string | null;
+  array?:
+    | {
+        director?: string[] | null;
+        polymorphic?: {
+          relationTo: 'directors';
+          value: string;
+        } | null;
+        id?: string | null;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "directors_input".
+ */
+export interface DirectorInput {
+  id?: string | null;
+  name?: string | null;
+  localized?: string | null;
+  movies?: string[] | null;
+  movie?: string | null;
+  directors?: string[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "movieReviews_input".
+ */
+export interface MovieReviewInput {
+  id?: string | null;
+  movieReviewer: string;
+  likes?: string[] | null;
+  visibility: 'followers' | 'public';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "polymorphic-relationships_input".
+ */
+export interface PolymorphicRelationshipInput {
+  id?: string | null;
+  polymorphic?: {
+    relationTo: 'movies';
+    value: string;
+  } | null;
+  polymorphicLocalized?: {
+    relationTo: 'movies';
+    value: string;
+  } | null;
+  polymorphicMany?:
+    | {
+        relationTo: 'movies';
+        value: string;
+      }[]
+    | null;
+  polymorphicManyLocalized?:
+    | {
+        relationTo: 'movies';
+        value: string;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tree_input".
+ */
+export interface TreeInput {
+  id?: string | null;
+  text?: string | null;
+  parent?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pages_input".
+ */
+export interface PageInput {
+  id?: string | null;
+  menu?:
+    | {
+        label?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rels-to-pages_input".
+ */
+export interface RelsToPageInput {
+  id?: string | null;
+  page?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "rels-to-pages-and-custom-text-ids_input".
+ */
+export interface RelsToPagesAndCustomTextIdInput {
+  id?: string | null;
+  rel?:
+    | ({
+        relationTo: 'pages';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'custom-id';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'custom-id-number';
+        value: number;
+      } | null);
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "object-writes_input".
+ */
+export interface ObjectWriteInput {
+  id?: string | null;
+  one?: string | null;
+  many?: string[] | null;
+  onePoly?: {
+    relationTo: 'movies';
+    value: string;
+  } | null;
+  manyPoly?:
+    | {
+        relationTo: 'movies';
+        value: string;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "deep-nested_input".
+ */
+export interface DeepNestedInput {
+  id?: string | null;
+  content?: {
+    blocks?: TestBlockInput[] | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestBlockInput".
+ */
+export interface TestBlockInput {
+  meta?: {
+    movie?: string | null;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relations_input".
+ */
+export interface RelationInput1 {
+  id?: string | null;
+  item?: {
+    relationTo: 'items';
+    value: string;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "items_input".
+ */
+export interface ItemInput {
+  id?: string | null;
+  status?: ('completed' | 'failed' | 'pending') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "blocks_input".
+ */
+export interface BlockInput1 {
+  id?: string | null;
+  blocks?: SomeInput[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SomeInput".
+ */
+export interface SomeInput {
+  director?: string | null;
+  directors?: string[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'some';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_input".
+ */
+export interface PayloadMcpApiKeyInput {
+  id?: string | null;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string;
+  overrideAccess?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string | null;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string | null;
+  document?:
+    | ({
+        relationTo: 'posts';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'postsLocalized';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relation';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'strict-access';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'chained';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'custom-id';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'custom-id-number';
+        value: number;
+      } | null)
+    | ({
+        relationTo: 'screenings';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'movies';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'directors';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'movieReviews';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'polymorphic-relationships';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'tree';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'pages';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'rels-to-pages';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'rels-to-pages-and-custom-text-ids';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'object-writes';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'deep-nested';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relations';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'items';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'blocks';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string | null;
+  name?: string | null;
+  batch?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

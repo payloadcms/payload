@@ -122,6 +122,64 @@ export type LexicalNodes_937A3078 =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_520531E7_Input".
+ */
+export type LexicalNodes_520531E7_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_520531E7_Input>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_520531E7_Input>
+  | SerializedUploadNodeInput<'uploads'>
+  | SerializedUploadNodeInput<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_520531E7_Input>
+  | SerializedListNode<LexicalNodes_520531E7_Input>
+  | SerializedListItemNode<LexicalNodes_520531E7_Input>
+  | SerializedAutoLinkNode<LexicalNodes_520531E7_Input, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_520531E7_Input, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNodeInput<
+      | 'users'
+      | 'select-versions-fields'
+      | 'array-fields'
+      | 'block-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'conditional-logic'
+      | 'custom-id'
+      | 'custom-id-nested'
+      | 'custom-tab-id'
+      | 'custom-row-id'
+      | 'date-fields'
+      | 'email-fields'
+      | 'radio-fields'
+      | 'group-fields'
+      | 'row-fields'
+      | 'indexed-fields'
+      | 'json-fields'
+      | 'number-fields'
+      | 'point-fields'
+      | 'relationship-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields-2'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'uploads-multi'
+      | 'uploads-poly'
+      | 'uploads-multi-poly'
+      | 'uploads-restricted'
+      | 'ui-fields'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_313DC238".
  */
 export type LexicalNodes_313DC238 =
@@ -178,6 +236,64 @@ export type LexicalNodes_313DC238 =
   | SerializedListNode<LexicalNodes_313DC238>
   | SerializedListItemNode<LexicalNodes_313DC238>
   | SerializedHeadingNode<LexicalNodes_313DC238>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_58E0ECD8_Input".
+ */
+export type LexicalNodes_58E0ECD8_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_58E0ECD8_Input>
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNodeInput<'uploads'>
+  | SerializedUploadNodeInput<'uploads2'>
+  | SerializedQuoteNode<LexicalNodes_58E0ECD8_Input>
+  | SerializedRelationshipNodeInput<
+      | 'users'
+      | 'select-versions-fields'
+      | 'array-fields'
+      | 'block-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'conditional-logic'
+      | 'custom-id'
+      | 'custom-id-nested'
+      | 'custom-tab-id'
+      | 'custom-row-id'
+      | 'date-fields'
+      | 'email-fields'
+      | 'radio-fields'
+      | 'group-fields'
+      | 'row-fields'
+      | 'indexed-fields'
+      | 'json-fields'
+      | 'number-fields'
+      | 'point-fields'
+      | 'relationship-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'tabs-fields-2'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'uploads-multi'
+      | 'uploads-poly'
+      | 'uploads-multi-poly'
+      | 'uploads-restricted'
+      | 'ui-fields'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedAutoLinkNode<LexicalNodes_58E0ECD8_Input, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_58E0ECD8_Input, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_58E0ECD8_Input>
+  | SerializedListItemNode<LexicalNodes_58E0ECD8_Input>
+  | SerializedHeadingNode<LexicalNodes_58E0ECD8_Input>;
 
 export interface Config {
   auth: {
@@ -285,6 +401,50 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
+  collectionsInput: {
+    users: UserInput;
+    'select-versions-fields': SelectVersionsFieldInput;
+    'array-fields': ArrayFieldInput;
+    'block-fields': BlockFieldInput;
+    'checkbox-fields': CheckboxFieldInput;
+    'code-fields': CodeFieldInput;
+    'collapsible-fields': CollapsibleFieldInput;
+    'conditional-logic': ConditionalLogicInput;
+    'custom-id': CustomIdInput;
+    'custom-id-nested': CustomIdNestedInput;
+    'custom-tab-id': CustomTabIdInput;
+    'custom-row-id': CustomRowIdInput;
+    'date-fields': DateFieldInput;
+    'email-fields': EmailFieldInput;
+    'radio-fields': RadioFieldInput;
+    'group-fields': GroupFieldInput;
+    'row-fields': RowFieldInput;
+    'indexed-fields': IndexedFieldInput;
+    'json-fields': JsonFieldInput;
+    'number-fields': NumberFieldInput;
+    'point-fields': PointFieldInput;
+    'relationship-fields': RelationshipFieldInput;
+    'select-fields': SelectFieldInput;
+    'slug-fields': SlugFieldInput;
+    'tabs-fields-2': TabsFields2Input;
+    'tabs-fields': TabsFieldInput;
+    'text-fields': TextFieldInput;
+    'textarea-fields': TextareaFieldInput;
+    uploads: UploadInput;
+    uploads2: Uploads2Input;
+    uploads3: Uploads3Input;
+    'uploads-multi': UploadsMultiInput;
+    'uploads-poly': UploadsPolyInput;
+    'uploads-multi-poly': UploadsMultiPolyInput;
+    'uploads-restricted': UploadsRestrictedInput;
+    'ui-fields': UiFieldInput;
+    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
+    'payload-kv': PayloadKvInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+  };
+  globalsInput: {};
   user: User;
   jobs: {
     tasks: unknown;
@@ -3940,6 +4100,1453 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string | null;
+  canViewConditionalField?: boolean | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-versions-fields_input".
+ */
+export interface SelectVersionsFieldInput {
+  id?: string | null;
+  hasMany?: ('a' | 'b' | 'c' | 'd')[] | null;
+  array?:
+    | {
+        hasManyArr?: ('a' | 'b' | 'c')[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?: Block[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "array-fields_input".
+ */
+export interface ArrayFieldInput {
+  id?: string | null;
+  title?: string | null;
+  items?:
+    | {
+        text: string;
+        anotherText?: string | null;
+        localizedText?: string | null;
+        richTextField?: LexicalRichText<LexicalNodes_520531E7_Input> | null;
+        subArray?:
+          | {
+              text?: string | null;
+              textTwo?: string | null;
+              textInRow?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  collapsedArray?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  localized?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  readOnly?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  potentiallyEmptyArray?:
+    | {
+        text?: string | null;
+        group?: {
+          text?: string | null;
+        };
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * Row labels rendered as react components.
+   */
+  rowLabelAsComponent?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithMinRows?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  disableSort?:
+    | {
+        text: string;
+        id?: string | null;
+      }[]
+    | null;
+  nestedArrayLocalized?:
+    | {
+        array?:
+          | {
+              text?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  externallyUpdatedArray?:
+    | {
+        id?: string | null;
+      }[]
+    | null;
+  customArrayField?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithLabels?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayWithCustomID?:
+    | {
+        id?: string | null;
+        text?: string | null;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "block-fields_input".
+ */
+export interface BlockFieldInput {
+  id?: string | null;
+  blocks?: (ContentBlockInput | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[] | null;
+  duplicate?: (ContentBlockInput | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[] | null;
+  collapsedByDefaultBlocks?:
+    | (
+        | LocalizedContentBlockInput
+        | LocalizedWithIconBlock
+        | LocalizedNoBlockname
+        | LocalizedNumberBlock
+        | LocalizedSubBlocksBlock
+        | LocalizedTabsBlock
+      )[]
+    | null;
+  disableSort?:
+    | (
+        | LocalizedContentBlockInput
+        | LocalizedWithIconBlock
+        | LocalizedNoBlockname
+        | LocalizedNumberBlock
+        | LocalizedSubBlocksBlock
+        | LocalizedTabsBlock
+      )[]
+    | null;
+  localizedBlocks?:
+    | (
+        | LocalizedContentBlockInput
+        | LocalizedWithIconBlock
+        | LocalizedNoBlockname
+        | LocalizedNumberBlock
+        | LocalizedSubBlocksBlock
+        | LocalizedTabsBlock
+      )[]
+    | null;
+  i18nBlocks?: TextInI18NBlock[] | null;
+  blocksWithLocalizedArray?: LocalizedArray[] | null;
+  blocksWithSimilarConfigs?: (BlockA | BlockB | GroupBlock)[] | null;
+  /**
+   * The purpose of this field is to test validateExistingBlockIsIdentical works with similar blocks with group fields
+   */
+  blocksWithSimilarGroup?: (GroupBlock | BlockB)[] | null;
+  blocksWithMinRows?: BlockWithMinRows[] | null;
+  customBlocks?: (Block1 | Block2)[] | null;
+  relationshipBlocks?: RelationshipsInput[] | null;
+  blockWithLabels?: Text[] | null;
+  deduplicatedBlocks?: ConfigBlockTest[] | null;
+  deduplicatedBlocks2?: ConfigBlockTest[] | null;
+  localizedReferencesLocalizedBlock?: LocalizedTextReference[] | null;
+  localizedReferences?: LocalizedTextReference2[] | null;
+  /**
+   * The purpose of this field is to test Block groups.
+   */
+  groupedBlocks?: (BlockWithGroupOne | BlockWithGroupTwo | BlockWithLocalizedGroup | BlockWithoutGroup)[] | null;
+  readOnly?: ReadOnlyBlock[] | null;
+  /**
+   * Change the value of this field to change the enabled blocks of the blocksWithDynamicFilterOptions field. If it's empty, all blocks are enabled.
+   */
+  enabledBlocks?: string | null;
+  blocksWithDynamicFilterOptions?: (BlockOne | BlockTwo | BlockThree)[] | null;
+  blocksWithFilterOptions?: (BlockFour | BlockFive | BlockSix)[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ContentBlockInput".
+ */
+export interface ContentBlockInput {
+  text: string;
+  richText?: LexicalRichText<LexicalNodes_58E0ECD8_Input> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localizedContentBlockInput".
+ */
+export interface LocalizedContentBlockInput {
+  text: string;
+  richText?: LexicalRichText<LexicalNodes_58E0ECD8_Input> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedContent';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "RelationshipsInput".
+ */
+export interface RelationshipsInput {
+  relationship?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'relationships';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "checkbox-fields_input".
+ */
+export interface CheckboxFieldInput {
+  id?: string | null;
+  checkbox?: boolean | null;
+  checkboxNotRequired?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "code-fields_input".
+ */
+export interface CodeFieldInput {
+  id?: string | null;
+  javascript?: string | null;
+  typescript?: string | null;
+  json?: string | null;
+  html?: string | null;
+  css?: string | null;
+  codeWithPadding?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collapsible-fields_input".
+ */
+export interface CollapsibleFieldInput {
+  id?: string | null;
+  text: string;
+  group: {
+    textWithinGroup?: string | null;
+    subGroup: {
+      textWithinSubGroup?: string | null;
+      requiredTextWithinSubGroup?: string | null;
+    };
+  };
+  someText?: string | null;
+  group2?: {
+    textWithinGroup?: string | null;
+    subGroup?: {
+      textWithinSubGroup?: string | null;
+    };
+  };
+  functionTitleField?: string | null;
+  componentTitleField?: string | null;
+  nestedTitle?: string | null;
+  arrayWithCollapsibles?:
+    | {
+        innerCollapsible?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditional-logic_input".
+ */
+export interface ConditionalLogicInput {
+  id?: string | null;
+  text: string;
+  toggleField?: boolean | null;
+  fieldWithDocIDCondition?: string | null;
+  fieldWithCondition?: string | null;
+  rowFieldWithCondition?: string | null;
+  fieldWithOperationCondition?: string | null;
+  customFieldWithField?: string | null;
+  customFieldWithHOC?: string | null;
+  customClientFieldWithCondition?: string | null;
+  customServerFieldWithCondition?: string | null;
+  conditionalRichText?: LexicalRichText<LexicalNodes_520531E7_Input> | null;
+  userConditional?: string | null;
+  parentGroup?: {
+    enableParentGroupFields?: boolean | null;
+    /**
+     * Ensures we can rely on nested fields within `data`.
+     */
+    siblingField?: string | null;
+  };
+  /**
+   * Ensures we can rely on nested fields within `siblingsData`.
+   */
+  reliesOnParentGroup?: string | null;
+  groupSelection?: ('group1' | 'group2') | null;
+  group1?: {
+    group1Field?: string | null;
+  };
+  group2?: {
+    group2Field?: string | null;
+  };
+  enableConditionalFields?: boolean | null;
+  arrayWithConditionalField?:
+    | {
+        text?: string | null;
+        textWithCondition?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocksWithConditionalField?: BlockWithConditionalField[] | null;
+  blocksWithRadioCondition?: BlockWithRadioCondition[] | null;
+  enableTabs?: boolean | null;
+  conditionalTabsField1?: string | null;
+  conditionalTabsField2?: string | null;
+  arrayOne?:
+    | {
+        title?: string | null;
+        arrayTwo?:
+          | {
+              selectOptions?: ('optionOne' | 'optionTwo') | null;
+              arrayThree?:
+                | {
+                    numberField?: number | null;
+                    id?: string | null;
+                  }[]
+                | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id_input".
+ */
+export interface CustomIdInput {
+  id?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-id-nested_input".
+ */
+export interface CustomIdNestedInput {
+  /**
+   * Custom numeric ID nested in an unnamed tab
+   */
+  id?: number | null;
+  title: string;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-tab-id_input".
+ */
+export interface CustomTabIdInput {
+  id?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-row-id_input".
+ */
+export interface CustomRowIdInput {
+  id?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "date-fields_input".
+ */
+export interface DateFieldInput {
+  id?: string | null;
+  default: string;
+  timeOnly?: string | null;
+  timeOnlyWithMiliseconds?: string | null;
+  timeOnlyWithCustomFormat?: string | null;
+  dayOnly?: string | null;
+  dayAndTime?: string | null;
+  monthOnly?: string | null;
+  defaultWithTimezone?: string | null;
+  defaultWithTimezone_tz?: SupportedTimezones;
+  /**
+   * This date here should be required.
+   */
+  dayAndTimeWithTimezone: string;
+  dayAndTimeWithTimezone_tz?: SupportedTimezones;
+  dayAndTimeWithTimezoneFixed?: string | null;
+  dayAndTimeWithTimezoneFixed_tz?: 'Europe/London' | null;
+  dayAndTimeWithTimezoneRequired?: string | null;
+  dayAndTimeWithTimezoneRequired_tz?: SupportedTimezones;
+  dayAndTimeWithTimezoneReadOnly?: string | null;
+  dayAndTimeWithTimezoneReadOnly_tz?: SupportedTimezones;
+  timezoneBlocks?: DateBlock[] | null;
+  timezoneArray?:
+    | {
+        dayAndTime?: string | null;
+        dayAndTime_tz?: SupportedTimezones;
+        id?: string | null;
+      }[]
+    | null;
+  timezoneGroup?: {
+    dayAndTime?: string | null;
+    dayAndTime_tz?: SupportedTimezones;
+  };
+  array?:
+    | {
+        date?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  dateWithOffsetTimezone?: string | null;
+  dateWithOffsetTimezone_tz?: ('+05:30' | '-08:00' | '+00:00') | null;
+  dateWithMixedTimezones?: string | null;
+  dateWithMixedTimezones_tz?: ('America/New_York' | '+05:30' | 'UTC') | null;
+  dateWithTimezoneNoDefault?: string | null;
+  dateWithTimezoneNoDefault_tz?: ('America/New_York' | 'Europe/London' | 'UTC') | null;
+  dateWithTimezoneWithDisabledColumns?: string | null;
+  dateWithTimezoneWithDisabledColumns_tz?: SupportedTimezones;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "email-fields_input".
+ */
+export interface EmailFieldInput {
+  id?: string | null;
+  email: string;
+  localizedEmail?: string | null;
+  emailWithAutocomplete?: string | null;
+  /**
+   * en description
+   */
+  i18nEmail?: string | null;
+  defaultEmail?: string | null;
+  defaultEmptyString?: string | null;
+  defaultFunction?: string | null;
+  defaultAsync?: string | null;
+  customLabel?: string | null;
+  customError?: string | null;
+  beforeAndAfterInput?: string | null;
+  disableListColumnText?: string | null;
+  disableListFilterText?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "radio-fields_input".
+ */
+export interface RadioFieldInput {
+  id?: string | null;
+  radio?: ('one' | 'two' | 'three') | null;
+  radioWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "group-fields_input".
+ */
+export interface GroupFieldInput {
+  id?: string | null;
+  /**
+   * This is a group.
+   */
+  group?: {
+    text?: string | null;
+    defaultParent?: string | null;
+    defaultChild?: string | null;
+    subGroup?: {
+      textWithinGroup?: string | null;
+      arrayWithinGroup?:
+        | {
+            textWithinArray?: string | null;
+            id?: string | null;
+          }[]
+        | null;
+    };
+  };
+  arrayOfGroups?:
+    | {
+        groupItem?: {
+          text?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  localizedGroup?: {
+    text?: string | null;
+  };
+  potentiallyEmptyGroup?: {
+    text?: string | null;
+  };
+  groupInRow?: {
+    field?: string | null;
+    secondField?: string | null;
+    thirdField?: string | null;
+  };
+  secondGroupInRow?: {
+    field?: string | null;
+    nestedGroup?: {
+      nestedField?: string | null;
+    };
+  };
+  groups?: {
+    groupInRow?: {
+      field?: string | null;
+      secondField?: string | null;
+      thirdField?: string | null;
+    };
+    secondGroupInRow?: {
+      field?: string | null;
+      nestedGroup?: {
+        nestedField?: string | null;
+      };
+    };
+  };
+  camelCaseGroup?: {
+    array?:
+      | {
+          text?: string | null;
+          array?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  localizedGroupArr?: {
+    array?:
+      | {
+          text?: string | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  localizedGroupSelect?: {
+    select?: ('one' | 'two')[] | null;
+  };
+  localizedGroupRel?: {
+    email?: string | null;
+  };
+  localizedGroupManyRel?: {
+    email?: string[] | null;
+  };
+  localizedGroupPolyRel?: {
+    email?: {
+      relationTo: 'email-fields';
+      value: string;
+    } | null;
+  };
+  localizedGroupPolyHasManyRel?: {
+    email?:
+      | {
+          relationTo: 'email-fields';
+          value: string;
+        }[]
+      | null;
+  };
+  insideUnnamedGroup?: string | null;
+  insideGroupWithNoLabel?: string | null;
+  deeplyNestedGroup?: {
+    insideNestedUnnamedGroup?: string | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "row-fields_input".
+ */
+export interface RowFieldInput {
+  id: string;
+  title: string;
+  field_with_width_a?: string | null;
+  field_with_width_b?: string | null;
+  field_with_width_30_percent?: string | null;
+  field_with_width_60_percent?: string | null;
+  field_with_width_20_percent?: string | null;
+  field_within_collapsible_a?: string | null;
+  field_within_collapsible_b?: string | null;
+  field_20_percent_width_within_row_a?: string | null;
+  no_set_width_within_row_b?: string | null;
+  no_set_width_within_row_c?: string | null;
+  field_20_percent_width_within_row_d?: string | null;
+  leftColumn?: LeftTextBlock[] | null;
+  rightColumn?: RightTextBlock[] | null;
+  arrayLeftColumn?:
+    | {
+        leftArrayChild?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  arrayRightColumn?:
+    | {
+        rightArrayChild?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "indexed-fields_input".
+ */
+export interface IndexedFieldInput {
+  id?: string | null;
+  text: string;
+  uniqueText?: string | null;
+  uniqueRelationship?: string | null;
+  uniqueHasManyRelationship?: string[] | null;
+  uniqueHasManyRelationship_2?: string[] | null;
+  uniquePolymorphicRelationship?: {
+    relationTo: 'text-fields';
+    value: string;
+  } | null;
+  uniquePolymorphicRelationship_2?: {
+    relationTo: 'text-fields';
+    value: string;
+  } | null;
+  uniqueHasManyPolymorphicRelationship?:
+    | {
+        relationTo: 'text-fields';
+        value: string;
+      }[]
+    | null;
+  uniqueHasManyPolymorphicRelationship_2?:
+    | {
+        relationTo: 'text-fields';
+        value: string;
+      }[]
+    | null;
+  uniqueRequiredText?: string | null;
+  localizedUniqueRequiredText?: string | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point?: [number, number] | null;
+  group?: {
+    localizedUnique?: string | null;
+    unique?: string | null;
+    /**
+     * @minItems 2
+     * @maxItems 2
+     */
+    point?: [number, number] | null;
+  };
+  collapsibleLocalizedUnique?: string | null;
+  collapsibleTextUnique?: string | null;
+  someText?: string | null;
+  some?:
+    | {
+        text?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "json-fields_input".
+ */
+export interface JsonFieldInput {
+  id?: string | null;
+  json?: {
+    array?: {
+      object?: {
+        array?: number[];
+        text?: string;
+      };
+      text?: string;
+    }[];
+    foo?: 'bar' | 'foobar';
+    number?: 10 | 5;
+    [k: string]: unknown;
+  };
+  group?: {
+    jsonWithinGroup?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+  };
+  customJSON?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "number-fields_input".
+ */
+export interface NumberFieldInput {
+  id?: string | null;
+  number?: number | null;
+  min?: number | null;
+  max?: number | null;
+  positiveNumber?: number | null;
+  negativeNumber?: number | null;
+  decimalMin?: number | null;
+  decimalMax?: number | null;
+  defaultNumber?: number | null;
+  hasMany?: number[] | null;
+  validatesHasMany?: number[] | null;
+  localizedHasMany?: number[] | null;
+  withMinRows?: number[] | null;
+  array?:
+    | {
+        numbers?: number[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?: BlockWithNumber[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "point-fields_input".
+ */
+export interface PointFieldInput {
+  id?: string | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  point: [number, number];
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  camelCasePoint?: [number, number] | null;
+  /**
+   * @minItems 2
+   * @maxItems 2
+   */
+  localized?: [number, number] | null;
+  group?: {
+    /**
+     * @minItems 2
+     * @maxItems 2
+     */
+    point?: [number, number] | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationship-fields_input".
+ */
+export interface RelationshipFieldInput {
+  id?: string | null;
+  text?: string | null;
+  relationship:
+    | {
+        relationTo: 'text-fields';
+        value: string;
+      }
+    | {
+        relationTo: 'array-fields';
+        value: string;
+      };
+  relationHasManyPolymorphic?:
+    | (
+        | {
+            relationTo: 'text-fields';
+            value: string;
+          }
+        | {
+            relationTo: 'array-fields';
+            value: string;
+          }
+      )[]
+    | null;
+  relationToSelf?: string | null;
+  relationToSelfSelectOnly?: string | null;
+  relationWithAllowCreateToFalse?: string | null;
+  relationWithAllowEditToFalse?: string | null;
+  relationWithDynamicDefault?: string | null;
+  relationHasManyWithDynamicDefault?: {
+    relationTo: 'users';
+    value: string;
+  } | null;
+  relationshipWithMin?: string[] | null;
+  relationshipWithMax?: string[] | null;
+  relationshipHasMany?: string[] | null;
+  array?:
+    | {
+        relationship?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  relationshipWithMinRows?:
+    | {
+        relationTo: 'text-fields';
+        value: string;
+      }[]
+    | null;
+  relationToRow?: string | null;
+  relationToRowMany?: string[] | null;
+  relationshipDrawer?: string | null;
+  relationshipDrawerReadOnly?: string | null;
+  polymorphicRelationshipDrawer?:
+    | ({
+        relationTo: 'text-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'array-fields';
+        value: string;
+      } | null);
+  relationshipDrawerHasMany?: string[] | null;
+  relationshipDrawerHasManyPolymorphic?:
+    | (
+        | {
+            relationTo: 'text-fields';
+            value: string;
+          }
+        | {
+            relationTo: 'array-fields';
+            value: string;
+          }
+      )[]
+    | null;
+  relationshipDrawerWithAllowCreateFalse?: string | null;
+  relationshipDrawerWithFilterOptions?: {
+    relationTo: 'text-fields';
+    value: string;
+  } | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "select-fields_input".
+ */
+export interface SelectFieldInput {
+  id?: string | null;
+  select?: ('one' | 'two' | 'three') | null;
+  selectReadOnly?: ('one' | 'two' | 'three') | null;
+  selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+  array?:
+    | {
+        selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+        group?: {
+          selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+  selectHasManyLocalized?: ('one' | 'two')[] | null;
+  selectI18n?: ('one' | 'two' | 'three') | null;
+  simple?: ('One' | 'Two' | 'Three') | null;
+  settings?: {
+    category?: ('a' | 'b')[] | null;
+  };
+  selectWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
+  disallowOption1?: boolean | null;
+  selectWithFilteredOptions?: ('one' | 'two' | 'three') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-fields_input".
+ */
+export interface SlugFieldInput {
+  id?: string | null;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  localizedTitle?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateCustomSlug?: boolean | null;
+  customSlugify: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateLocalizedSlug?: boolean | null;
+  localizedSlug?: string | null;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateReadOnlySlug?: boolean | null;
+  readOnlySlug?: string | null;
+  test?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabs-fields-2_input".
+ */
+export interface TabsFields2Input {
+  id?: string | null;
+  arrayWithTabs?:
+    | {
+        text?: string | null;
+        tab2?: {
+          text2?: string | null;
+        };
+        id?: string | null;
+      }[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "tabs-fields_input".
+ */
+export interface TabsFieldInput {
+  id?: string | null;
+  /**
+   * This should not collapse despite there being many tabs pushing the main fields open.
+   */
+  sidebarField?: string | null;
+  /**
+   * When active, the conditional tab should be visible. When inactive, it should be hidden.
+   */
+  conditionalTabVisible?: boolean | null;
+  conditionalTab?: {
+    conditionalTabField?: string | null;
+    /**
+     * When active, the nested conditional tab should be visible. When inactive, it should be hidden.
+     */
+    nestedConditionalTabVisible?: boolean | null;
+    conditionalTabGroup?: {
+      conditionalTabGroupTitle?: string | null;
+      conditionalTab?: {};
+    };
+    nestedUnconditionalTabInput?: string | null;
+    nestedConditionalTabInput?: string | null;
+  };
+  array: {
+    text: string;
+    id?: string | null;
+  }[];
+  blocks?: (ContentBlockInput | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[] | null;
+  group: {
+    number: number;
+  };
+  textInRow: string;
+  numberInRow: number;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  tab: TabWithName;
+  namedTabWithDefaultValue?: {
+    defaultValue?: string | null;
+  };
+  localizedTab?: {
+    text?: string | null;
+  };
+  accessControlTab?: {
+    text?: string | null;
+  };
+  hooksTab?: {
+    beforeValidate?: boolean | null;
+    beforeChange?: boolean | null;
+    afterChange?: boolean | null;
+    afterRead?: boolean | null;
+  };
+  camelCaseTab?: {
+    array?:
+      | {
+          text?: string | null;
+          array?:
+            | {
+                text?: string | null;
+                id?: string | null;
+              }[]
+            | null;
+          id?: string | null;
+        }[]
+      | null;
+  };
+  textarea?: string | null;
+  anotherText: string;
+  nestedTab?: {
+    text?: string | null;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "text-fields_input".
+ */
+export interface TextFieldInput {
+  id?: string | null;
+  text: string;
+  hiddenTextField?: string | null;
+  /**
+   * This field should be hidden
+   */
+  adminHiddenTextField?: string | null;
+  /**
+   * This field should be disabled
+   */
+  disabledTextField?: string | null;
+  localizedText?: string | null;
+  localizedRequiredText?: string | null;
+  /**
+   * en description
+   */
+  i18nText?: string | null;
+  defaultString?: string | null;
+  defaultEmptyString?: string | null;
+  defaultFunction?: string | null;
+  defaultAsync?: string | null;
+  overrideLength?: string | null;
+  fieldWithDefaultValue?: string | null;
+  dependentOnFieldWithDefaultValue?: string | null;
+  hasMany?: string[] | null;
+  hasManySecond?: string[] | null;
+  readOnlyHasMany?: string[] | null;
+  validatesHasMany?: string[] | null;
+  localizedHasMany?: string[] | null;
+  withMinRows?: string[] | null;
+  withMaxRows?: string[] | null;
+  defaultValueFromReq?: string | null;
+  array?:
+    | {
+        texts?: string[] | null;
+        id?: string | null;
+      }[]
+    | null;
+  blocks?: BlockWithText[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "textarea-fields_input".
+ */
+export interface TextareaFieldInput {
+  id?: string | null;
+  text: string;
+  hiddenTextField?: string | null;
+  /**
+   * This field should be hidden
+   */
+  adminHiddenTextField?: string | null;
+  /**
+   * This field should be disabled
+   */
+  disabledTextField?: string | null;
+  localizedText?: string | null;
+  /**
+   * en description
+   */
+  i18nText?: string | null;
+  defaultString?: string | null;
+  defaultEmptyString?: string | null;
+  defaultFunction?: string | null;
+  defaultAsync?: string | null;
+  overrideLength?: string | null;
+  fieldWithDefaultValue?: string | null;
+  dependentOnFieldWithDefaultValue?: string | null;
+  defaultValueFromReq?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads_input".
+ */
+export interface UploadInput {
+  id?: string | null;
+  text?: string | null;
+  media?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads2_input".
+ */
+export interface Uploads2Input {
+  id?: string | null;
+  text?: string | null;
+  media?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads3_input".
+ */
+export interface Uploads3Input {
+  id?: string | null;
+  media?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-multi_input".
+ */
+export interface UploadsMultiInput {
+  id?: string | null;
+  text?: string | null;
+  media?: string[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-poly_input".
+ */
+export interface UploadsPolyInput {
+  id?: string | null;
+  text?: string | null;
+  media?:
+    | ({
+        relationTo: 'uploads';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'uploads2';
+        value: string;
+      } | null);
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-multi-poly_input".
+ */
+export interface UploadsMultiPolyInput {
+  id?: string | null;
+  text?: string | null;
+  media?:
+    | (
+        | {
+            relationTo: 'uploads';
+            value: string;
+          }
+        | {
+            relationTo: 'uploads2';
+            value: string;
+          }
+      )[]
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-restricted_input".
+ */
+export interface UploadsRestrictedInput {
+  id?: string | null;
+  text?: string | null;
+  uploadWithoutRestriction?: string | null;
+  uploadWithAllowCreateFalse?: string | null;
+  uploadMultipleWithAllowCreateFalse?: string[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ui-fields_input".
+ */
+export interface UiFieldInput {
+  id?: string | null;
+  text: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_input".
+ */
+export interface PayloadMcpApiKeyInput {
+  id?: string | null;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string;
+  overrideAccess?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string | null;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string | null;
+  document?:
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'select-versions-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'array-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'block-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'checkbox-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'code-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'collapsible-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'conditional-logic';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'custom-id';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'custom-id-nested';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'custom-tab-id';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'custom-row-id';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'date-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'email-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'radio-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'group-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'row-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'indexed-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'json-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'number-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'point-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relationship-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'select-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'slug-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'tabs-fields-2';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'tabs-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'text-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'textarea-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'uploads';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'uploads2';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'uploads3';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'uploads-multi';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'uploads-poly';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'uploads-multi-poly';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'uploads-restricted';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'ui-fields';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string | null;
+  name?: string | null;
+  batch?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MyBlock".
  */
 export interface MyBlock {
@@ -4118,6 +5725,30 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
+
+export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string;
+  };
+}[TSlugs];
+
+export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string;
+  };
+}[TSlugs];
 
 export interface SerializedHorizontalRuleNode {
   type: 'horizontalrule';

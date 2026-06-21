@@ -159,6 +159,29 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      // Exercises every input-vs-output divergence for the type tests in types.spec.ts.
+      slug: 'input-types',
+      fields: [
+        { name: 'title', type: 'text', required: true },
+        {
+          name: 'status',
+          type: 'select',
+          defaultValue: 'draft',
+          options: [
+            { label: 'Draft', value: 'draft' },
+            { label: 'Published', value: 'published' },
+          ],
+          required: true,
+        },
+        { name: 'category', type: 'relationship', relationTo: 'pages-categories' },
+        { name: 'categories', type: 'relationship', hasMany: true, relationTo: 'pages-categories' },
+        { name: 'related', type: 'relationship', relationTo: ['pages', 'pages-categories'] },
+        { name: 'image', type: 'upload', relationTo: 'media' },
+        { name: 'computedTitle', type: 'text', virtual: true },
+      ],
+      versions: false,
+    },
   ],
   admin: {
     importMap: {

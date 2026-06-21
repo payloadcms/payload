@@ -143,6 +143,89 @@ export type LexicalNodes_7A11A510 =
       | 'payload-preferences'
       | 'payload-migrations'
     >;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_8FC2ECC4_Input".
+ */
+export type LexicalNodes_8FC2ECC4_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_8FC2ECC4_Input>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_8FC2ECC4_Input>
+  | SerializedUploadNodeInput<'gif-resize'>
+  | SerializedUploadNodeInput<'filename-compound-index'>
+  | SerializedUploadNodeInput<'no-image-sizes'>
+  | SerializedUploadNodeInput<'object-fit'>
+  | SerializedUploadNodeInput<'with-meta-data'>
+  | SerializedUploadNodeInput<'without-meta-data'>
+  | SerializedUploadNodeInput<'with-only-jpeg-meta-data'>
+  | SerializedUploadNodeInput<'crop-only'>
+  | SerializedUploadNodeInput<'focal-only'>
+  | SerializedUploadNodeInput<'image-sizes-only'>
+  | SerializedUploadNodeInput<'focal-no-sizes'>
+  | SerializedUploadNodeInput<'media', LexicalUploadFields_1AB4670B>
+  | SerializedUploadNodeInput<'allow-list-media'>
+  | SerializedUploadNodeInput<'skip-safe-fetch-media'>
+  | SerializedUploadNodeInput<'skip-safe-fetch-header-filter'>
+  | SerializedUploadNodeInput<'skip-allow-list-safe-fetch-media'>
+  | SerializedUploadNodeInput<'restrict-file-types'>
+  | SerializedUploadNodeInput<'no-restrict-file-types'>
+  | SerializedUploadNodeInput<'no-restrict-file-mime-types'>
+  | SerializedUploadNodeInput<'pdf-only'>
+  | SerializedUploadNodeInput<'restricted-mime-types'>
+  | SerializedUploadNodeInput<'animated-type-media'>
+  | SerializedUploadNodeInput<'enlarge'>
+  | SerializedUploadNodeInput<'without-enlarge'>
+  | SerializedUploadNodeInput<'reduce'>
+  | SerializedUploadNodeInput<'media-trim'>
+  | SerializedUploadNodeInput<'custom-file-name-media'>
+  | SerializedUploadNodeInput<'unstored-media'>
+  | SerializedUploadNodeInput<'externally-served-media'>
+  | SerializedUploadNodeInput<'uploads-1'>
+  | SerializedUploadNodeInput<'admin-thumbnail-function'>
+  | SerializedUploadNodeInput<'admin-thumbnail-with-search-queries'>
+  | SerializedUploadNodeInput<'admin-thumbnail-size'>
+  | SerializedUploadNodeInput<'admin-upload-control'>
+  | SerializedUploadNodeInput<'no-files-required'>
+  | SerializedUploadNodeInput<'optional-file'>
+  | SerializedUploadNodeInput<'required-file'>
+  | SerializedUploadNodeInput<'versions'>
+  | SerializedUploadNodeInput<'custom-upload-field'>
+  | SerializedUploadNodeInput<'media-with-relation-preview'>
+  | SerializedUploadNodeInput<'media-without-cache-tags'>
+  | SerializedUploadNodeInput<'media-without-relation-preview'>
+  | SerializedUploadNodeInput<'hide-file-input-on-create'>
+  | SerializedUploadNodeInput<'three-dimensional'>
+  | SerializedUploadNodeInput<'constructor-options'>
+  | SerializedUploadNodeInput<'bulk-uploads'>
+  | SerializedUploadNodeInput<'bulk-uploads-hook-error'>
+  | SerializedUploadNodeInput<'file-mime-type'>
+  | SerializedUploadNodeInput<'svg-only'>
+  | SerializedUploadNodeInput<'media-without-delete-access'>
+  | SerializedUploadNodeInput<'media-with-image-size-admin-props'>
+  | SerializedUploadNodeInput<'prefix-media'>
+  | SerializedQuoteNode<LexicalNodes_8FC2ECC4_Input>
+  | SerializedListNode<LexicalNodes_8FC2ECC4_Input>
+  | SerializedListItemNode<LexicalNodes_8FC2ECC4_Input>
+  | SerializedAutoLinkNode<LexicalNodes_8FC2ECC4_Input, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_8FC2ECC4_Input, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNodeInput<
+      | 'relation'
+      | 'audio'
+      | 'relation-to-no-files-required'
+      | 'relation-preview'
+      | 'best-fit'
+      | 'list-view-preview'
+      | 'simple-relationship'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
 
 export interface Config {
   auth: {
@@ -298,6 +381,76 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
+  collectionsInput: {
+    relation: RelationInput;
+    audio: AudioInput;
+    'gif-resize': GifResizeInput;
+    'filename-compound-index': FilenameCompoundIndexInput;
+    'no-image-sizes': NoImageSizeInput;
+    'object-fit': ObjectFitInput;
+    'with-meta-data': WithMetaDatumInput;
+    'without-meta-data': WithoutMetaDatumInput;
+    'with-only-jpeg-meta-data': WithOnlyJpegMetaDatumInput;
+    'crop-only': CropOnlyInput;
+    'focal-only': FocalOnlyInput;
+    'image-sizes-only': ImageSizesOnlyInput;
+    'focal-no-sizes': FocalNoSizeInput;
+    media: MediaInput;
+    'allow-list-media': AllowListMediaInput;
+    'skip-safe-fetch-media': SkipSafeFetchMediaInput;
+    'skip-safe-fetch-header-filter': SkipSafeFetchHeaderFilterInput;
+    'skip-allow-list-safe-fetch-media': SkipAllowListSafeFetchMediaInput;
+    'restrict-file-types': RestrictFileTypeInput;
+    'no-restrict-file-types': NoRestrictFileTypeInput;
+    'no-restrict-file-mime-types': NoRestrictFileMimeTypeInput;
+    'pdf-only': PdfOnlyInput;
+    'restricted-mime-types': RestrictedMimeTypeInput;
+    'animated-type-media': AnimatedTypeMediaInput;
+    enlarge: EnlargeInput;
+    'without-enlarge': WithoutEnlargeInput;
+    reduce: ReduceInput;
+    'media-trim': MediaTrimInput;
+    'custom-file-name-media': CustomFileNameMediaInput;
+    'unstored-media': UnstoredMediaInput;
+    'externally-served-media': ExternallyServedMediaInput;
+    'uploads-1': Uploads1Input;
+    'uploads-2': Uploads2Input;
+    'any-images': AnyImageInput;
+    'admin-thumbnail-function': AdminThumbnailFunctionInput;
+    'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQueryInput;
+    'admin-thumbnail-size': AdminThumbnailSizeInput;
+    'admin-upload-control': AdminUploadControlInput;
+    'no-files-required': NoFilesRequiredInput;
+    'relation-to-no-files-required': RelationToNoFilesRequiredInput;
+    'optional-file': OptionalFileInput;
+    'required-file': RequiredFileInput;
+    versions: VersionInput;
+    'custom-upload-field': CustomUploadFieldInput;
+    'media-with-relation-preview': MediaWithRelationPreviewInput;
+    'media-without-cache-tags': MediaWithoutCacheTagInput;
+    'media-without-relation-preview': MediaWithoutRelationPreviewInput;
+    'relation-preview': RelationPreviewInput;
+    'hide-file-input-on-create': HideFileInputOnCreateInput;
+    'best-fit': BestFitInput;
+    'list-view-preview': ListViewPreviewInput;
+    'three-dimensional': ThreeDimensionalInput;
+    'constructor-options': ConstructorOptionInput;
+    'bulk-uploads': BulkUploadInput;
+    'bulk-uploads-hook-error': BulkUploadsHookErrorInput;
+    'simple-relationship': SimpleRelationshipInput;
+    'file-mime-type': FileMimeTypeInput;
+    'svg-only': SvgOnlyInput;
+    'media-without-delete-access': MediaWithoutDeleteAccessInput;
+    'media-with-image-size-admin-props': MediaWithImageSizeAdminPropInput;
+    'prefix-media': PrefixMediaInput;
+    users: UserInput;
+    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
+    'payload-kv': PayloadKvInput;
+    'payload-locked-documents': PayloadLockedDocumentInput;
+    'payload-preferences': PayloadPreferenceInput;
+    'payload-migrations': PayloadMigrationInput;
+  };
+  globalsInput: {};
   user: User;
   jobs: {
     tasks: unknown;
@@ -4071,6 +4224,1842 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation_input".
+ */
+export interface RelationInput {
+  id?: string | null;
+  image?: string | null;
+  versionedImage?: string | null;
+  hideFileInputOnCreate?: string | null;
+  hasManyImage?: string[] | null;
+  blocks?: LocalizedMediaBlockInput[] | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LocalizedMediaBlockInput".
+ */
+export interface LocalizedMediaBlockInput {
+  media: string;
+  relatedMedia?: string[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedMediaBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audio_input".
+ */
+export interface AudioInput {
+  id?: string | null;
+  audio?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "gif-resize_input".
+ */
+export interface GifResizeInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "filename-compound-index_input".
+ */
+export interface FilenameCompoundIndexInput {
+  id?: string | null;
+  /**
+   * Alt text to be used for compound index
+   */
+  alt?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-image-sizes_input".
+ */
+export interface NoImageSizeInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "object-fit_input".
+ */
+export interface ObjectFitInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    fitContain?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    fitInside?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    fitCover?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    fitOutside?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "with-meta-data_input".
+ */
+export interface WithMetaDatumInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    sizeOne?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "without-meta-data_input".
+ */
+export interface WithoutMetaDatumInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    sizeTwo?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "with-only-jpeg-meta-data_input".
+ */
+export interface WithOnlyJpegMetaDatumInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    sizeThree?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "crop-only_input".
+ */
+export interface CropOnlyInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    focalTest?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest2?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest3?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "focal-only_input".
+ */
+export interface FocalOnlyInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    focalTest?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest2?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest3?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "image-sizes-only_input".
+ */
+export interface ImageSizesOnlyInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    sizeOne?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    sizeTwo?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "focal-no-sizes_input".
+ */
+export interface FocalNoSizeInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media_input".
+ */
+export interface MediaInput {
+  id?: string | null;
+  alt?: string | null;
+  localized?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    maintainedAspectRatio?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    differentFormatFromMainImage?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    maintainedImageSize?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    maintainedImageSizeWithNewFormat?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    accidentalSameSize?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    tablet?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    mobile?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    icon?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest2?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest3?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest4?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest5?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest6?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    focalTest7?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    undefinedHeight?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "allow-list-media_input".
+ */
+export interface AllowListMediaInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-safe-fetch-media_input".
+ */
+export interface SkipSafeFetchMediaInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-safe-fetch-header-filter_input".
+ */
+export interface SkipSafeFetchHeaderFilterInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "skip-allow-list-safe-fetch-media_input".
+ */
+export interface SkipAllowListSafeFetchMediaInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restrict-file-types_input".
+ */
+export interface RestrictFileTypeInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-restrict-file-types_input".
+ */
+export interface NoRestrictFileTypeInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-restrict-file-mime-types_input".
+ */
+export interface NoRestrictFileMimeTypeInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "pdf-only_input".
+ */
+export interface PdfOnlyInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-mime-types_input".
+ */
+export interface RestrictedMimeTypeInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "animated-type-media_input".
+ */
+export interface AnimatedTypeMediaInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    squareSmall?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    undefinedHeight?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    undefinedWidth?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    undefinedAll?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "enlarge_input".
+ */
+export interface EnlargeInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    accidentalSameSize?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    sameSizeWithNewFormat?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    resizedLarger?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    resizedSmaller?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    widthLowerHeightLarger?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    undefinedHeightWithoutEnlargement?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "without-enlarge_input".
+ */
+export interface WithoutEnlargeInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reduce_input".
+ */
+export interface ReduceInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    accidentalSameSize?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    sameSizeWithNewFormat?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    resizedLarger?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    resizedSmaller?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-trim_input".
+ */
+export interface MediaTrimInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    trimNumber?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    trimString?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    trimOptions?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-file-name-media_input".
+ */
+export interface CustomFileNameMediaInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    custom?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "unstored-media_input".
+ */
+export interface UnstoredMediaInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "externally-served-media_input".
+ */
+export interface ExternallyServedMediaInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-1_input".
+ */
+export interface Uploads1Input {
+  id?: string | null;
+  hasManyUpload?: string[] | null;
+  singleUpload?: string | null;
+  hasManyThumbnailUpload?: string[] | null;
+  singleThumbnailUpload?: string | null;
+  richText?: LexicalRichText<LexicalNodes_8FC2ECC4_Input> | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "uploads-2_input".
+ */
+export interface Uploads2Input {
+  id?: string | null;
+  prefix: string;
+  title?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "any-images_input".
+ */
+export interface AnyImageInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-thumbnail-function_input".
+ */
+export interface AdminThumbnailFunctionInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-thumbnail-with-search-queries_input".
+ */
+export interface AdminThumbnailWithSearchQueryInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-thumbnail-size_input".
+ */
+export interface AdminThumbnailSizeInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    small?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    medium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-upload-control_input".
+ */
+export interface AdminUploadControlInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-files-required_input".
+ */
+export interface NoFilesRequiredInput {
+  id?: string | null;
+  title?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-to-no-files-required_input".
+ */
+export interface RelationToNoFilesRequiredInput {
+  id?: string | null;
+  title?: string | null;
+  uploadField?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "optional-file_input".
+ */
+export interface OptionalFileInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "required-file_input".
+ */
+export interface RequiredFileInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "versions_input".
+ */
+export interface VersionInput {
+  id?: string | null;
+  title?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "custom-upload-field_input".
+ */
+export interface CustomUploadFieldInput {
+  id?: string | null;
+  alt?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-relation-preview_input".
+ */
+export interface MediaWithRelationPreviewInput {
+  id?: string | null;
+  title?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-cache-tags_input".
+ */
+export interface MediaWithoutCacheTagInput {
+  id?: string | null;
+  title?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-relation-preview_input".
+ */
+export interface MediaWithoutRelationPreviewInput {
+  id?: string | null;
+  title?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relation-preview_input".
+ */
+export interface RelationPreviewInput {
+  id?: string | null;
+  imageWithPreview1?: string | null;
+  imageWithPreview2?: string | null;
+  imageWithoutPreview1?: string | null;
+  imageWithoutPreview2?: string | null;
+  imageWithPreview3?: string | null;
+  imageWithoutPreview3?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "hide-file-input-on-create_input".
+ */
+export interface HideFileInputOnCreateInput {
+  id?: string | null;
+  title?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "best-fit_input".
+ */
+export interface BestFitInput {
+  id?: string | null;
+  withAdminThumbnail?: string | null;
+  withinRange?: string | null;
+  nextSmallestOutOfRange?: string | null;
+  original?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "list-view-preview_input".
+ */
+export interface ListViewPreviewInput {
+  id?: string | null;
+  title?: string | null;
+  imageUpload?: string | null;
+  imageRelationship?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "three-dimensional_input".
+ */
+export interface ThreeDimensionalInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "constructor-options_input".
+ */
+export interface ConstructorOptionInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-uploads_input".
+ */
+export interface BulkUploadInput {
+  id?: string | null;
+  title: string;
+  relationship?: {
+    relationTo: 'simple-relationship';
+    value: string;
+  } | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulk-uploads-hook-error_input".
+ */
+export interface BulkUploadsHookErrorInput {
+  id?: string | null;
+  title?: string | null;
+  shouldFail?: boolean | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-relationship_input".
+ */
+export interface SimpleRelationshipInput {
+  id?: string | null;
+  title?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-mime-type_input".
+ */
+export interface FileMimeTypeInput {
+  id?: string | null;
+  title?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "svg-only_input".
+ */
+export interface SvgOnlyInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-without-delete-access_input".
+ */
+export interface MediaWithoutDeleteAccessInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-image-size-admin-props_input".
+ */
+export interface MediaWithImageSizeAdminPropInput {
+  id?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    one?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    two?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    three?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    four?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "prefix-media_input".
+ */
+export interface PrefixMediaInput {
+  id?: string | null;
+  prefix?: string | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "users_input".
+ */
+export interface UserInput {
+  id?: string | null;
+  email: string;
+  resetPasswordToken?: string | null;
+  resetPasswordExpiration?: string | null;
+  salt?: string | null;
+  hash?: string | null;
+  loginAttempts?: number | null;
+  lockUntil?: string | null;
+  sessions?:
+    | {
+        id: string;
+        createdAt?: string | null;
+        expiresAt: string;
+      }[]
+    | null;
+  password?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-mcp-api-keys_input".
+ */
+export interface PayloadMcpApiKeyInput {
+  id?: string | null;
+  apiKey: string;
+  apiKeyIndex: string;
+  access?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  label?: string | null;
+  description?: string | null;
+  lastUsed?: string | null;
+  user: string;
+  overrideAccess?: boolean | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_input".
+ */
+export interface PayloadKvInput {
+  id?: string | null;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-locked-documents_input".
+ */
+export interface PayloadLockedDocumentInput {
+  id?: string | null;
+  document?:
+    | ({
+        relationTo: 'relation';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'audio';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'gif-resize';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'filename-compound-index';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'no-image-sizes';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'object-fit';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'with-meta-data';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'without-meta-data';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'with-only-jpeg-meta-data';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'crop-only';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'focal-only';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'image-sizes-only';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'focal-no-sizes';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'media';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'allow-list-media';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'skip-safe-fetch-media';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'skip-safe-fetch-header-filter';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'skip-allow-list-safe-fetch-media';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'restrict-file-types';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'no-restrict-file-types';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'no-restrict-file-mime-types';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'pdf-only';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'restricted-mime-types';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'animated-type-media';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'enlarge';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'without-enlarge';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'reduce';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'media-trim';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'custom-file-name-media';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'unstored-media';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'externally-served-media';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'uploads-1';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'uploads-2';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'any-images';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'admin-thumbnail-function';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'admin-thumbnail-with-search-queries';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'admin-thumbnail-size';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'admin-upload-control';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'no-files-required';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relation-to-no-files-required';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'optional-file';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'required-file';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'versions';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'custom-upload-field';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'media-with-relation-preview';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'media-without-cache-tags';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'media-without-relation-preview';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'relation-preview';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'hide-file-input-on-create';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'best-fit';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'list-view-preview';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'three-dimensional';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'constructor-options';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'bulk-uploads';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'bulk-uploads-hook-error';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'simple-relationship';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'file-mime-type';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'svg-only';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'media-without-delete-access';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'media-with-image-size-admin-props';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'prefix-media';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'users';
+        value: string;
+      } | null)
+    | ({
+        relationTo: 'payload-mcp-api-keys';
+        value: string;
+      } | null);
+  globalSlug?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-preferences_input".
+ */
+export interface PayloadPreferenceInput {
+  id?: string | null;
+  user: {
+    relationTo: 'users';
+    value: string;
+  };
+  key?: string | null;
+  value?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-migrations_input".
+ */
+export interface PayloadMigrationInput {
+  id?: string | null;
+  name?: string | null;
+  batch?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MyBlock".
  */
 export interface MyBlock {
@@ -4256,6 +6245,30 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
+
+export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string;
+  };
+}[TSlugs];
+
+export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: number | string;
+  };
+}[TSlugs];
 
 
 declare module 'payload' {
