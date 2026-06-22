@@ -44,7 +44,7 @@ export function createMcpClient(restClient: NextRESTClient): McpClient {
         body: JSON.stringify(body),
         headers: {
           Accept: 'application/json, text/event-stream',
-          ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+          ...(apiKey ? { Authorization: `users API-Key ${apiKey}` } : {}),
           'Content-Type': 'application/json',
         },
       }),

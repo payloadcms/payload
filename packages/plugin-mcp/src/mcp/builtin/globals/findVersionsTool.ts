@@ -2,6 +2,7 @@ import type { PopulateType, SelectType } from 'payload'
 
 import { z } from 'zod'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
@@ -11,6 +12,8 @@ const DEFAULT_DESCRIPTION =
   'Find global versions in any version-enabled global by passing the global slug and optional where clause.'
 
 export const findGlobalVersionsTool = defineGlobalTool({
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.globals?.[args.globalSlug]?.readVersions),
   annotations: {
     destructiveHint: false,
     idempotentHint: true,

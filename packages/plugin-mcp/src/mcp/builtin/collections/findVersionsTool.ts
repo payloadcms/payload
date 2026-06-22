@@ -2,6 +2,7 @@ import type { PopulateType, SelectType } from 'payload'
 
 import { z } from 'zod'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
@@ -11,6 +12,9 @@ const DEFAULT_DESCRIPTION =
   'Find document versions in any version-enabled collection by passing the collection slug and optional where clause.'
 
 export const findVersionsTool = defineCollectionTool({
+  access: (args) =>
+    defaultAccess(args) &&
+    Boolean(args.permissions?.collections?.[args.collectionSlug]?.readVersions),
   annotations: {
     destructiveHint: false,
     idempotentHint: true,

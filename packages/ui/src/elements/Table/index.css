@@ -49,16 +49,30 @@
     }
 
     /* Linked cells: move padding to the anchor/button for full-cell clickability */
-    .cell--linked {
+    td.cell--linked {
       padding: 0;
+
+      &:first-child,
+      &:last-child {
+        padding: 0;
+      }
 
       > :is(a, button) {
         display: flex;
         align-items: center;
+        width: 100%;
         padding: var(--spacer-2) var(--spacer-2-5);
         min-height: calc(var(--spacer-4) * 2);
         cursor: pointer;
       }
+
+      &:first-child > :is(a, button) {
+        padding-inline-start: var(--gutter-h);
+      }
+    }
+
+    .drawer & td.cell--linked:first-child > :is(a, button) {
+      padding-inline-start: var(--spacer-3);
     }
 
     #heading-_select,
@@ -178,10 +192,18 @@
     }
 
     /* Linked cells: move padding to the anchor/button for full-cell clickability */
-    .cell--linked {
+    td.cell--linked {
       padding: 0;
 
+      &:first-child,
+      &:last-child {
+        padding: 0;
+      }
+
       > :is(a, button) {
+        display: flex;
+        align-items: center;
+        width: 100%;
         padding: 0 var(--spacer-2-5);
         min-height: var(--spacer-5);
         cursor: pointer;

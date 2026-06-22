@@ -79,15 +79,6 @@ export default buildConfigWithDefaults({
     })(),
 
     mcpPlugin({
-      overrideApiKeyCollection: (collection) => {
-        collection.fields.push({
-          name: 'override',
-          type: 'text',
-          admin: { description: 'This field added by overrideApiKeyCollection' },
-          defaultValue: 'This field added by overrideApiKeyCollection',
-        })
-        return collection
-      },
       collections: {
         users: {
           description: 'User accounts.',
@@ -189,6 +180,12 @@ export default buildConfigWithDefaults({
         verboseLogs: true,
       },
       tools: {
+        hiddenTool: defineTool({
+          access: () => false,
+          description: 'This tool should be hidden by its access callback',
+        }).handler(() => ({
+          content: [{ type: 'text' as const, text: 'hidden' }],
+        })),
         diceRoll: defineTool({
           annotations: {
             title: 'Dice Roll',

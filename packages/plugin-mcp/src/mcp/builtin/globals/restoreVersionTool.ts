@@ -2,6 +2,7 @@ import type { PopulateType } from 'payload'
 
 import { z } from 'zod'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
@@ -9,6 +10,8 @@ import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 const DEFAULT_DESCRIPTION = 'Restore a global from a previous version in any version-enabled global.'
 
 export const restoreGlobalVersionTool = defineGlobalTool({
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.globals?.[args.globalSlug]?.update),
   annotations: {
     destructiveHint: true,
     idempotentHint: false,

@@ -2,6 +2,7 @@ import type { PopulateType, SelectType } from 'payload'
 
 import { z } from 'zod'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import {
@@ -16,6 +17,8 @@ const DEFAULT_DESCRIPTION =
   'Duplicate a document in any collection by passing the collection slug and source document ID.'
 
 export const duplicateDocumentTool = defineCollectionTool({
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.collectionSlug]?.create),
   annotations: {
     destructiveHint: false,
     idempotentHint: false,
