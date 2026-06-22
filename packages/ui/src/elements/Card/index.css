@@ -51,7 +51,6 @@
     margin: 0;
     height: auto;
     width: auto;
-    min-height: 0;
     border-radius: inherit;
 
     &:hover,
