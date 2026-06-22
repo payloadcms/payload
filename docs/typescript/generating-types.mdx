@@ -203,7 +203,7 @@ For the `posts` collection above, the input type narrows the relationship to an 
 
 ```ts
 export interface PostInput {
-  id?: string | null // optional - custom ID or Payload-generated
+  id?: string // optional — custom ID or Payload-generated
   title?: string | null
   author?: string | null // ID only, never the populated document
   // no createdAt / updatedAt
