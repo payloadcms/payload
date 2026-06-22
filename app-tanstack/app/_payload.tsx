@@ -7,8 +7,7 @@ import '@payloadcms/ui/scss/app.scss'
 import './custom.scss'
 
 import { HydrationMarker } from '../components/HydrationMarker/index.js'
-import { getLayoutDataFn } from './_payload/layout.functions.js'
-import { serverFunctionHandler } from './_payload/serverFunction.functions.js'
+import { getLayoutDataFn, serverFunctionHandler } from './_payload/server.functions.js'
 
 export const Route = createFileRoute('/_payload')({
   loader: () => getLayoutDataFn(),
