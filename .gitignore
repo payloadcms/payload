@@ -370,7 +370,7 @@ app-tanstack/routeTree.gen.ts
 test/*/app-tanstack/routeTree.gen.ts
 
 # Per-suite standalone TanStack apps generate their own importMap at test time
-test/*/app-tanstack/importMap.js
+test/*/app-tanstack/app/_payload/importMap.js
 
 # Screenshots created by Playwright MCP
 .playwright-mcp

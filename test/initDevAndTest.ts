@@ -31,7 +31,7 @@ export async function initDevAndTest(
 
   const importMapPath: string =
     framework === 'tanstack-start'
-      ? path.resolve(tanstackAppDir, 'importMap.js')
+      ? path.resolve(tanstackAppDir, 'app/_payload/importMap.js')
       : path.resolve(getNextRootDir(testSuiteArg).rootDir, './app/(payload)/admin/importMap.js')
 
   try {

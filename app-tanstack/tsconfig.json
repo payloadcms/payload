@@ -14,8 +14,6 @@
     "app/**/*",
     "components/**/*",
     "router.tsx",
-    "importMap.js",
-    "payload-types.ts",
     "../test/admin/config.ts"
   ]
 }
