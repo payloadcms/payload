@@ -37,7 +37,7 @@ all changes that you attempt to make within the migration, and the `down` should
 Here is an example migration file:
 
 ```ts
-import { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/your-db-adapter'
+import type { MigrateUpArgs, MigrateDownArgs } from '@payloadcms/your-db-adapter'
 
 export async function up({ payload, req }: MigrateUpArgs): Promise<void> {
   // Perform changes to your database here.
