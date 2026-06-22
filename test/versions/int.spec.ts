@@ -4002,6 +4002,80 @@ describe('Versions', () => {
           payload,
         })
       })
+
+      it('should enqueue scheduled-publish jobs on the configured queue when jobs.scheduledPublishQueue is set', async () => {
+        const currentDate = new Date()
+
+        const req = await createLocalReq({ user }, payload)
+
+        const originalQueue = req.payload.config.jobs?.scheduledPublishQueue
+        req.payload.config.jobs.scheduledPublishQueue = 'schedule-publish'
+
+        try {
+          await schedulePublishHandler({
+            type: 'publish',
+            date: new Date(currentDate.getTime() + 3000),
+            doc: {
+              relationTo: draftCollectionSlug,
+              value: draftDoc.id,
+            },
+            locale: 'all',
+            req,
+            user,
+          })
+
+          const { docs } = await payload.find({
+            collection: 'payload-jobs',
+            where: {
+              'input.doc.value': {
+                equals: draftDoc.id,
+              },
+            },
+          })
+
+          expect(docs[0]).toBeDefined()
+          expect(docs[0].queue).toBe('schedule-publish')
+        } finally {
+          req.payload.config.jobs.scheduledPublishQueue = originalQueue
+        }
+      })
+
+      it('should fall back to the default queue when jobs.scheduledPublishQueue is not set', async () => {
+        const currentDate = new Date()
+
+        const req = await createLocalReq({ user }, payload)
+
+        const originalQueue = req.payload.config.jobs?.scheduledPublishQueue
+        delete req.payload.config.jobs.scheduledPublishQueue
+
+        try {
+          await schedulePublishHandler({
+            type: 'publish',
+            date: new Date(currentDate.getTime() + 3000),
+            doc: {
+              relationTo: draftCollectionSlug,
+              value: draftDoc.id,
+            },
+            locale: 'all',
+            req,
+            user,
+          })
+
+          const { docs } = await payload.find({
+            collection: 'payload-jobs',
+            where: {
+              'input.doc.value': {
+                equals: draftDoc.id,
+              },
+            },
+          })
+
+          expect(docs[0]).toBeDefined()
+          expect(docs[0].queue).toBe('default')
+        } finally {
+          req.payload.config.jobs.scheduledPublishQueue = originalQueue
+        }
+      })
     })
   })
 
