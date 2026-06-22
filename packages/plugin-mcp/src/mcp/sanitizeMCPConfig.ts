@@ -116,8 +116,24 @@ const sanitizeCollectionConfig = ({
   const slug = collection.slug
   const collectionPluginConfig = pluginConfig.collections?.[slug]
   const items: CollectionMCPItem[] = []
+  /**
+   * Payload disables duplicate for auth collections by default unless the
+   * collection explicitly opts back in with `disableDuplicate: false`.
+   */
+  const isDuplicateDisabled =
+    collection.disableDuplicate === true ||
+    (Boolean(collection.auth) && collection.disableDuplicate !== false)
 
-  for (const [toolKey, { mcpName, tool }] of COLLECTION_BUILTIN_ENTRIES) {
+  for (const [
+    toolKey,
+    { mcpName, requiresDuplicateEnabled, requiresVersions, tool },
+  ] of COLLECTION_BUILTIN_ENTRIES) {
+    if (requiresVersions && !collection.versions) {
+      continue
+    }
+    if (requiresDuplicateEnabled && isDuplicateDisabled) {
+      continue
+    }
     const matchedConfigEntry = collectionPluginConfig?.tools?.[toolKey]
     if (matchedConfigEntry === false) {
       continue
@@ -208,7 +224,10 @@ const sanitizeGlobalConfig = ({
   const globalPluginConfig = pluginConfig.globals?.[slug]
   const items: GlobalMCPItem[] = []
 
-  for (const [toolKey, { mcpName, tool }] of GLOBAL_BUILTIN_ENTRIES) {
+  for (const [toolKey, { mcpName, requiresVersions, tool }] of GLOBAL_BUILTIN_ENTRIES) {
+    if (requiresVersions && !global.versions) {
+      continue
+    }
     const matchedConfigEntry = globalPluginConfig?.tools?.[toolKey]
     if (matchedConfigEntry === false) {
       continue
