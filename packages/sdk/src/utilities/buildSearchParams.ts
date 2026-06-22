@@ -75,7 +75,7 @@ export const buildSearchParams = (args: OperationArgs): string => {
   }
 
   if (Object.keys(search).length > 0) {
-    return stringify(search, { addQueryPrefix: true })
+    return stringify(search, { addQueryPrefix: true, allowEmptyArrays: true })
   }
 
   return ''
