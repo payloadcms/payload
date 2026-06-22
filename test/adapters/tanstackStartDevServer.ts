@@ -42,17 +42,17 @@ export async function startTanStackStartDevServer({
   port: number
   testSuiteArg: string
 }): Promise<DevServerResult> {
-  const rootDir = path.resolve(__dirname, '../../app-tanstack')
   const adminRoute = '/admin'
 
-  // `app-tanstack` is no longer a workspace package, so the vite binary, its
-  // deps, and the config all live at the monorepo root. We still run vite with
-  // `cwd: app-tanstack` so Vite's root resolves to the app.
-  const repoRoot = path.resolve(rootDir, '..')
-  const viteBin = path.resolve(repoRoot, 'node_modules/.bin/vite')
-  const configPath = path.resolve(repoRoot, 'vite.tanstack.config.ts')
+  // The TanStack app is driven from the `test` package (like the Next test
+  // apps): its vite binary, deps, and config all live under `test/`, and Vite
+  // runs with `cwd: test/` so it resolves them from `test/node_modules`. The app
+  // itself is located via `srcDirectory` in the config.
+  const testDir = path.resolve(__dirname, '..')
+  const viteBin = path.resolve(testDir, 'node_modules/.bin/vite')
+  const configPath = path.resolve(testDir, 'vite.tanstack.config.ts')
 
-  const cssLoaderUrl = resolveCssLoaderUrl(rootDir)
+  const cssLoaderUrl = resolveCssLoaderUrl(testDir)
   const previousNodeOptions = process.env.NODE_OPTIONS ?? ''
   const nodeOptions = cssLoaderUrl
     ? `${previousNodeOptions} --import ${cssLoaderUrl}`.trim()
@@ -72,9 +72,10 @@ export async function startTanStackStartDevServer({
         configPath,
       ],
       {
-        // Vite's root is the repo root (keeps generated junk out of
-        // `app-tanstack`); the config locates the app via `srcDirectory`.
-        cwd: repoRoot,
+        // Vite's root is `test/` (keeps generated junk out of the app dirs and
+        // resolves deps from `test/node_modules`); the config locates the app
+        // via `srcDirectory`.
+        cwd: testDir,
         env: {
           ...process.env,
           NODE_OPTIONS: nodeOptions,
@@ -83,7 +84,7 @@ export async function startTanStackStartDevServer({
           PAYLOAD_CORE_DEV: 'true',
           PAYLOAD_DROP_DATABASE: process.env.PAYLOAD_DROP_DATABASE ?? 'true',
           PAYLOAD_TEST_SUITE: testSuiteArg,
-          ROOT_DIR: repoRoot,
+          ROOT_DIR: testDir,
         },
         stdio: ['pipe', 'pipe', 'pipe'],
       },
@@ -97,7 +98,7 @@ export async function startTanStackStartDevServer({
 
       if (!resolved && output.includes('Local:')) {
         resolved = true
-        resolve({ adminRoute, port, rootDir })
+        resolve({ adminRoute, port, rootDir: testDir })
       }
     })
 
@@ -123,7 +124,7 @@ export async function startTanStackStartDevServer({
     setTimeout(() => {
       if (!resolved) {
         resolved = true
-        resolve({ adminRoute, port, rootDir })
+        resolve({ adminRoute, port, rootDir: testDir })
       }
     }, 30000)
   })

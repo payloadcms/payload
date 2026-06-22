@@ -366,12 +366,10 @@ payload.db
 test/payload.db
 
 # TanStack Router auto-generated route tree
-app-tanstack/routeTree.gen.ts
-test/*/app-tanstack/routeTree.gen.ts
+**/app-tanstack/routeTree.gen.ts
 
 # Generated TanStack admin importMap (shippable app + per-suite standalone apps)
-app-tanstack/app/_payload/importMap.js
-test/*/app-tanstack/app/_payload/importMap.js
+**/app-tanstack/app/_payload/importMap.js
 
 # Screenshots created by Playwright MCP
 .playwright-mcp
