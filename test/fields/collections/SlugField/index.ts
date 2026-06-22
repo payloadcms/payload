@@ -1,6 +1,4 @@
-import type { CollectionConfig, TextField } from 'payload'
-
-import { slugField } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 import { slugFieldSlug } from './shared.js'
 
@@ -21,29 +19,28 @@ const SlugField: CollectionConfig = {
       type: 'text',
       localized: true,
     },
-    slugField({
-      slugify: ({ valueToSlugify }) => valueToSlugify?.toUpperCase(),
+    {
       name: 'customSlugify',
-      checkboxName: 'generateCustomSlug',
-      required: false,
-    }),
-    slugField({
-      useAsSlug: 'localizedTitle',
+      type: 'slug',
+      slugify: ({ valueToSlugify }) => valueToSlugify?.toUpperCase(),
+      useAsSlug: 'title',
+      required: true,
+    },
+    {
       name: 'localizedSlug',
+      type: 'slug',
+      useAsSlug: 'localizedTitle',
       localized: true,
       required: false,
-      checkboxName: 'generateLocalizedSlug',
-    }),
-    slugField({
+    },
+    {
       name: 'readOnlySlug',
-      checkboxName: 'generateReadOnlySlug',
+      type: 'slug',
       required: false,
-      overrides: (defaultField) => {
-        ;(defaultField.fields[1] as TextField).admin!.readOnly = true
-
-        return defaultField
+      admin: {
+        readOnly: true,
       },
-    }),
+    },
     {
       type: 'text',
       name: 'test',
