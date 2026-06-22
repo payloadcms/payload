@@ -17,6 +17,7 @@ import type {
   SanitizedMCPPluginConfig,
 } from '../types.js'
 
+import { defaultAccess } from '../defaultAccess.js'
 import {
   COLLECTION_AUTH_BUILTIN_ENTRIES,
   COLLECTION_AUTH_BUILTINS,
@@ -33,7 +34,6 @@ import {
  *  - Flattens `tools` / `prompts` / `resources` / per-collection / per-global
  *    tool maps into a single `items` array.
  *  - Applies built-in tools for collections and globals, respecting opt-out user overrides.
- *  - Applies the `userCollection` default
  *
  * Called once during plugin init. After that, `plugins['@payloadcms/plugin-mcp']
  * ?.options` holds the sanitized result
@@ -61,7 +61,7 @@ export const sanitizeMCPConfig = ({
       configKey,
       label: tool.annotations?.title ?? configKey,
       mcpName,
-      tool,
+      tool: { ...tool, access: tool.access ?? defaultAccess },
     })
   }
 
@@ -74,7 +74,7 @@ export const sanitizeMCPConfig = ({
       configKey,
       label: tool.annotations?.title ?? configKey,
       mcpName: configKey,
-      tool,
+      tool: { ...tool, access: tool.access ?? defaultAccess },
     })
   }
 
@@ -84,7 +84,7 @@ export const sanitizeMCPConfig = ({
       configKey,
       label: prompt.title ?? configKey,
       mcpName: configKey,
-      prompt,
+      prompt: { ...prompt, access: prompt.access ?? defaultAccess },
     })
   }
 
@@ -94,21 +94,15 @@ export const sanitizeMCPConfig = ({
       configKey,
       label: resource.title ?? configKey,
       mcpName: configKey,
-      resource,
+      resource: { ...resource, access: resource.access ?? defaultAccess },
     })
   }
-
-  // Mirror Payload's own admin.user detection (sanitize.ts) since plugins run first.
-  const firstCollectionWithAuth = config.collections!.find(({ auth }) => Boolean(auth))
 
   return {
     disabled: pluginConfig.disabled,
     items,
     mcp: pluginConfig.mcp,
-    overrideApiKeyCollection: pluginConfig.overrideApiKeyCollection,
-    overrideAuth: pluginConfig.overrideAuth,
-    userCollection:
-      pluginConfig.userCollection ?? config.admin?.user ?? firstCollectionWithAuth?.slug ?? 'users',
+    overrideGetAuthorizedMCP: pluginConfig.overrideGetAuthorizedMCP,
   }
 }
 
@@ -119,9 +113,6 @@ const sanitizeCollectionConfig = ({
   collection: CollectionConfig | SanitizedCollectionConfig
   pluginConfig: MCPPluginConfig
 }): CollectionMCPItem[] => {
-  if (collection.slug === 'payload-mcp-api-keys') {
-    return []
-  }
   const slug = collection.slug
   const collectionPluginConfig = pluginConfig.collections?.[slug]
   const items: CollectionMCPItem[] = []
@@ -141,6 +132,7 @@ const sanitizeCollectionConfig = ({
       mcpName,
       tool: {
         ...tool,
+        access: override?.access ?? tool.access ?? defaultAccess,
         annotations,
         description: override?.description ?? tool.description,
         overrideResponse:
@@ -168,6 +160,7 @@ const sanitizeCollectionConfig = ({
         mcpName,
         tool: {
           ...tool,
+          access: override?.access ?? tool.access ?? defaultAccess,
           annotations,
           description: override?.description ?? tool.description,
           overrideResponse:
@@ -197,7 +190,7 @@ const sanitizeCollectionConfig = ({
       configKey,
       label: customTool.annotations?.title ?? configKey,
       mcpName: configKey,
-      tool: customTool,
+      tool: { ...customTool, access: customTool.access ?? defaultAccess },
     })
   }
 
@@ -230,6 +223,7 @@ const sanitizeGlobalConfig = ({
       mcpName,
       tool: {
         ...tool,
+        access: override?.access ?? tool.access ?? defaultAccess,
         annotations,
         description: override?.description ?? tool.description,
         overrideResponse:
@@ -256,7 +250,7 @@ const sanitizeGlobalConfig = ({
       globalSlug: slug,
       label: customTool.annotations?.title ?? configKey,
       mcpName: configKey,
-      tool: customTool,
+      tool: { ...customTool, access: customTool.access ?? defaultAccess },
     })
   }
 

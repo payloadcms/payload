@@ -31,7 +31,10 @@ export const COLLECTION_BUILTINS = {
   create: { mcpName: 'createDocument', tool: createDocumentTool },
   delete: { mcpName: 'deleteDocuments', tool: deleteDocumentsTool },
   find: { mcpName: 'findDocuments', tool: findDocumentsTool },
-  getCollectionSchema: { mcpName: 'getCollectionSchema', tool: getCollectionSchemaTool },
+  getCollectionSchema: {
+    mcpName: 'getCollectionSchema',
+    tool: getCollectionSchemaTool,
+  },
   update: { mcpName: 'updateDocument', tool: updateDocumentTool },
 } satisfies Record<string, { mcpName: string; tool: CollectionTool }>
 
@@ -60,7 +63,10 @@ export const COLLECTION_AUTH_BUILTINS = {
  */
 export const GLOBAL_BUILTINS = {
   find: { mcpName: 'findGlobal', tool: findGlobalTool },
-  getGlobalSchema: { mcpName: 'getGlobalSchema', tool: getGlobalSchemaTool },
+  getGlobalSchema: {
+    mcpName: 'getGlobalSchema',
+    tool: getGlobalSchemaTool,
+  },
   update: { mcpName: 'updateGlobal', tool: updateGlobalTool },
 } satisfies Record<string, { mcpName: string; tool: GlobalTool }>
 

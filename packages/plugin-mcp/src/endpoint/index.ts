@@ -13,7 +13,20 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
   req.payloadAPI = 'MCP' as const
 
   const pluginConfig = getPluginConfig({ config: req.payload.config })
-  const authorizedMCP = await getAuthorizedMCP({ req })
+  const overrideAccessParam = new URL(req.url).searchParams.get('overrideAccess')
+
+  if (overrideAccessParam !== null && process.env.NODE_ENV !== 'development') {
+    throw new APIError('MCP overrideAccess is only available in development.', 400)
+  }
+
+  let overrideAccess = false
+  if (overrideAccessParam === 'true') {
+    overrideAccess = true
+  } else if (overrideAccessParam !== null && overrideAccessParam !== 'false') {
+    throw new APIError('MCP overrideAccess must be "true" or "false".', 400)
+  }
+
+  const authorizedMCP = await getAuthorizedMCP({ overrideAccess, req })
 
   const server = buildMcpServer({ authorizedMCP, pluginConfig, req })
 
