@@ -1,0 +1,6 @@
+# Local AI Agent files - DO NOT COMMIT
+AGENTS.local.md
+CLAUDE.local.md
+QWEN.md
+.claude/settings.local.json
+.claude/worktrees/
