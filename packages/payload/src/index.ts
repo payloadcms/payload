@@ -1538,7 +1538,6 @@ export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 export { slugField, type SlugFieldClientProps } from './fields/baseFields/slug/index.js'
 
-export { type SlugField } from './fields/baseFields/slug/index.js'
 export {
   createClientBlocks,
   createClientField,
@@ -1649,6 +1648,7 @@ export type {
   SelectFieldClient,
   SingleRelationshipField,
   SingleRelationshipFieldClient,
+  SlugField,
   Tab,
   TabAsField,
   TabAsFieldClient,

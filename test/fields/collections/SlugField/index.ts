@@ -15,7 +15,7 @@ const SlugField: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    slugField(),
+    { name: 'slug', type: 'slug' },
     {
       name: 'localizedTitle',
       type: 'text',
@@ -25,6 +25,7 @@ const SlugField: CollectionConfig = {
       slugify: ({ valueToSlugify }) => valueToSlugify?.toUpperCase(),
       name: 'customSlugify',
       checkboxName: 'generateCustomSlug',
+      required: false,
     }),
     slugField({
       useAsSlug: 'localizedTitle',

@@ -75,6 +75,57 @@ describe('Fields', () => {
     await payload.destroy()
   })
 
+  describe('slug field', () => {
+    const created: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of created) {
+        await payload.delete({ collection: 'slug-fields', id })
+      }
+      created.length = 0
+    })
+
+    it('should generate a slug from the source field on create', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'My First Post' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('my-first-post')
+    })
+
+    it('should keep a user-provided slug on create', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'My First Post', slug: 'custom-slug' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('custom-slug')
+    })
+
+    it('should freeze a diverged slug on update', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Original Title' },
+      })
+      created.push(doc.id)
+
+      const updated = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { title: 'Changed Title', slug: 'manual-value' },
+      })
+      expect(updated.slug).toBe('manual-value')
+
+      const again = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { title: 'Changed Title Again' },
+      })
+      expect(again.slug).toBe('manual-value')
+    })
+  })
+
   describe('text', () => {
     let doc
     const text = 'text field'
