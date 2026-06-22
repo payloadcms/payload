@@ -99,7 +99,7 @@ export const FileToolbar: React.FC<Props> = ({
             href={fileSrc}
             title={t('upload:download')}
           >
-            <DownloadIcon size="24Large" />
+            <DownloadIcon size={24} />
           </a>
         )}
       </div>
