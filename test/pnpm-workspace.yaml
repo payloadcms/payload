@@ -1,0 +1,5 @@
+# Used by the standalone prod-test flow (`cd test && pnpm i --ignore-workspace`),
+# where pnpm treats this dir as its own root. v11 ignores `package.json#pnpm`,
+# so the graphql override lives here.
+overrides:
+  graphql: '16.8.1'
