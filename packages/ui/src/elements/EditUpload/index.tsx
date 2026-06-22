@@ -7,12 +7,13 @@ import React, { useRef, useState } from 'react'
 import ReactCrop from 'react-image-crop'
 
 import { editDrawerSlug } from '../../elements/Upload/index.js'
-import { NumberInput } from '../../fields/Number/Input.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
+import { ResetIcon } from '../../icons/Reset/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { Button } from '../Button/index.js'
-import { DialogBody, DialogFooter, DialogHeader, DialogModal } from '../Dialog/index.js'
+import { DialogFooter, DialogHeader, DialogModal } from '../Dialog/index.js'
+import { UnitInput } from '../UnitInput/index.js'
 import './index.css'
 import './library.css'
 
@@ -85,6 +86,9 @@ export const EditUpload: React.FC<EditUploadProps> = ({
 
   const fineTuneCrop = ({ dimension, value }: { dimension: 'height' | 'width'; value: string }) => {
     const intValue = parseInt(value)
+    if (Number.isNaN(intValue)) {
+      return null
+    }
     const percentage =
       100 * (intValue / (dimension === 'width' ? uncroppedPixelWidth : uncroppedPixelHeight))
     if (percentage <= 0 || percentage > 100) {
@@ -140,7 +144,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
       slug={editDrawerSlug}
     >
       <DialogHeader showClose title={`${t('general:editing')} ${fileName}`} />
-      <DialogBody>
+      <div className={`${baseClass}__body`}>
         <div className={`${baseClass}__content`}>
           {/* Canvas area */}
           <div className={`${baseClass}__crop`}>
@@ -197,38 +201,29 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                 <div className={`${baseClass}__section`}>
                   <div className={`${baseClass}__section-header`}>
                     <span className={`${baseClass}__section-title`}>{t('upload:crop')}</span>
-                    <Button
-                      buttonStyle="ghost"
+                    <button
+                      aria-label={t('general:reset')}
                       className={`${baseClass}__reset`}
                       onClick={() => setCrop({ height: 100, unit: '%', width: 100, x: 0, y: 0 })}
+                      type="button"
                     >
-                      {t('general:reset')}
-                    </Button>
+                      <ResetIcon />
+                    </button>
                   </div>
                   <div className={`${baseClass}__fieldset`}>
-                    <NumberInput
-                      className={`${baseClass}__field`}
-                      label="W"
-                      onChange={(e) =>
-                        fineTuneCrop({
-                          dimension: 'width',
-                          value: (e as React.ChangeEvent<HTMLInputElement>).target.value,
-                        })
-                      }
-                      path="cropWidth"
+                    <UnitInput
+                      ariaLabel={t('upload:width')}
+                      name="cropWidth"
+                      onChange={(value) => fineTuneCrop({ dimension: 'width', value })}
+                      prefix="W"
                       readOnly={!imageLoaded}
                       value={Number(cropWidthPx)}
                     />
-                    <NumberInput
-                      className={`${baseClass}__field`}
-                      label="H"
-                      onChange={(e) =>
-                        fineTuneCrop({
-                          dimension: 'height',
-                          value: (e as React.ChangeEvent<HTMLInputElement>).target.value,
-                        })
-                      }
-                      path="cropHeight"
+                    <UnitInput
+                      ariaLabel={t('upload:height')}
+                      name="cropHeight"
+                      onChange={(value) => fineTuneCrop({ dimension: 'height', value })}
+                      prefix="H"
                       readOnly={!imageLoaded}
                       value={Number(cropHeightPx)}
                     />
@@ -240,43 +235,34 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                 <div className={`${baseClass}__section`}>
                   <div className={`${baseClass}__section-header`}>
                     <span className={`${baseClass}__section-title`}>{t('upload:focalPoint')}</span>
-                    <Button
-                      buttonStyle="ghost"
+                    <button
+                      aria-label={t('general:reset')}
                       className={`${baseClass}__reset`}
                       onClick={centerFocalPoint}
+                      type="button"
                     >
-                      {t('general:reset')}
-                    </Button>
+                      <ResetIcon />
+                    </button>
                   </div>
                   <div className={`${baseClass}__fieldset`}>
-                    <NumberInput
-                      AfterInput={<span className={`${baseClass}__suffix`}>%</span>}
-                      className={`${baseClass}__field`}
-                      label="X"
+                    <UnitInput
+                      ariaLabel={`${t('upload:focalPoint')} X`}
                       max={100}
                       min={0}
-                      onChange={(e) =>
-                        fineTuneFocalPosition({
-                          coordinate: 'x',
-                          value: (e as React.ChangeEvent<HTMLInputElement>).target.value,
-                        })
-                      }
-                      path="focalX"
+                      name="focalX"
+                      onChange={(value) => fineTuneFocalPosition({ coordinate: 'x', value })}
+                      prefix="X"
+                      suffix="%"
                       value={Math.round(focalPosition.x)}
                     />
-                    <NumberInput
-                      AfterInput={<span className={`${baseClass}__suffix`}>%</span>}
-                      className={`${baseClass}__field`}
-                      label="Y"
+                    <UnitInput
+                      ariaLabel={`${t('upload:focalPoint')} Y`}
                       max={100}
                       min={0}
-                      onChange={(e) =>
-                        fineTuneFocalPosition({
-                          coordinate: 'y',
-                          value: (e as React.ChangeEvent<HTMLInputElement>).target.value,
-                        })
-                      }
-                      path="focalY"
+                      name="focalY"
+                      onChange={(value) => fineTuneFocalPosition({ coordinate: 'y', value })}
+                      prefix="Y"
+                      suffix="%"
                       value={Math.round(focalPosition.y)}
                     />
                   </div>
@@ -285,7 +271,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
             </div>
           )}
         </div>
-      </DialogBody>
+      </div>
       <DialogFooter>
         <Button
           aria-label={t('general:cancel')}

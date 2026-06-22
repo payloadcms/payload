@@ -1,50 +1,11 @@
 @layer payload-default {
-  .toolbar-input__group {
-    display: flex;
-    align-items: stretch;
-    height: var(--spacer-4);
-    border: var(--stroke-width-small) solid transparent;
-    border-radius: var(--field-border-radius);
-    background: var(--color-bg-secondary);
-    overflow: hidden;
-
-    &:hover:not(:focus-within) {
-      border-color: var(--color-border);
-    }
-
-    &:focus-within {
-      border-color: var(--color-border-selected);
-    }
-  }
-
-  .toolbar-input__prefix {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--spacer-4);
-    font-size: var(--text-body-medium-font-size, 0.6875rem);
-    color: var(--color-text-secondary);
-    user-select: none;
-  }
-
+  /* Keep the toolbar size input compact rather than filling available space */
   .toolbar-input {
+    width: max-content;
+  }
+
+  .toolbar-input .unit-input__field {
+    flex: 0 0 auto;
     width: calc(var(--spacer-4) * 2);
-    display: flex;
-    align-items: center;
-    border: none;
-    background: transparent;
-    font-size: var(--text-body-medium-font-size, 0.6875rem);
-    color: var(--color-text);
-    appearance: textfield;
-
-    &::-webkit-outer-spin-button,
-    &::-webkit-inner-spin-button {
-      appearance: none;
-      margin: 0;
-    }
-
-    &:focus {
-      outline: none;
-    }
   }
 }
