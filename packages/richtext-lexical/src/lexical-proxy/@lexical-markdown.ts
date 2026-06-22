@@ -1,23 +1,3 @@
-/**
- * Payload's markdown entrypoint.
- *
- * Previously Payload vendored a full copy of `@lexical/markdown` (it could not
- * depend on the published package because, prior to lexical 0.42, importing it
- * transitively pulled in `@lexical/code` and its `prismjs` dependency, which
- * broke type generation). Since lexical 0.42 the markdown package depends on
- * `@lexical/code-core` (no prism), so the vendored copy is no longer needed.
- *
- * This module re-exports the upstream package and only keeps the Payload
- * specific behaviors that the fork added on top of it:
- * - `$convertFromMarkdownString` merges adjacent lines by default
- *   (`shouldMergeAdjacentLines = true`), whereas upstream defaults to `false`.
- * - The default transformer set excludes the upstream `CODE` and `LINK`
- *   transformers, since Payload provides those as features with its own node
- *   types.
- * - Markdown is normalized with Payload's own `normalizeMarkdown` (handles
- *   nested code fences and preserves table-row whitespace) instead of the
- *   upstream normalizer, which is not exported and lacks those behaviors.
- */
 import type { ElementNode } from 'lexical'
 
 import {
@@ -96,11 +76,8 @@ function $convertFromMarkdownString(
     return $convertFromMarkdownStringUpstream(markdown, transformers, node, true)
   }
 
-  // Normalize with Payload's normalizer, then let upstream import the result.
-  // Passing shouldMergeAdjacentLines = false stops upstream's internal
-  // normalizer from re-merging the already normalized markdown; for non empty
-  // lines it preserves trailing whitespace and hard line breaks, so the only
-  // observable difference is that whitespace-only lines collapse to empty.
+  // shouldMergeAdjacentLines = false stops upstream from re-normalizing the
+  // already normalized markdown.
   const sanitizedMarkdown = normalizeMarkdown(markdown, shouldMergeAdjacentLines)
   return $convertFromMarkdownStringUpstream(sanitizedMarkdown, transformers, node, false, false)
 }

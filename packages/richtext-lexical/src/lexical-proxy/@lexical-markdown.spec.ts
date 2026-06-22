@@ -40,11 +40,8 @@ function roundTrip(markdown: string): string {
   return output
 }
 
-// These tests guard the behavior that originally motivated dropping Payload's
-// vendored @lexical/markdown fork: hard line breaks must survive markdown
-// import (and round trip) even when adjacent lines are merged by default. The
-// fix now lives in the upstream package (lexical 0.45, facebook/lexical#8402);
-// these assert it still holds through Payload's wrapper.
+// Hard line breaks must survive markdown import and round trip even when
+// adjacent lines are merged by default.
 describe('markdown hard line break import', () => {
   it('should import a trailing-space hard break as a line break node with the marker stripped', () => {
     const { hasLineBreak, textContent } = importMarkdown(['foo  ', 'bar'].join('\n'))

@@ -162,10 +162,6 @@ export const tableJson = {
           rowSpan: 1,
         },
         {
-          // A table cell that contains only whitespace imports as an empty
-          // paragraph. The upstream @lexical/markdown normalizer (used since the
-          // vendored fork was removed) collapses whitespace-only lines, so the
-          // padding spaces no longer survive as a text node.
           children: [
             {
               children: [],

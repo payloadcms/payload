@@ -1,20 +1,11 @@
 /**
- * Payload-specific markdown normalization.
- *
- * This is the one piece of Payload's former `@lexical/markdown` fork that could
- * not be replaced by the upstream package: upstream's `normalizeMarkdown` (not
- * publicly exported) does not handle nested code fences and trims trailing
- * whitespace from table rows, both of which Payload relies on for round
- * tripping MDX documents. The rest of the markdown machinery (import, export,
- * shortcuts and transformers) now comes from `@lexical/markdown` directly.
- *
- * `$convertFromMarkdownString` runs this before delegating the actual import to
- * the upstream package.
+ * Payload-specific markdown normalization, run by `$convertFromMarkdownString`
+ * before delegating the import to `@lexical/markdown`. Handles nested code
+ * fences and preserves table-row whitespace.
  */
 
-// These regexes are copied verbatim from `@lexical/markdown` so their matching
-// semantics stay identical. They are only used with `.test()` here, so their
-// capturing groups are unused in this module.
+// These regexes are only used with `.test()` here, so their capturing groups
+// are unused in this module.
 /* eslint-disable regexp/no-unused-capturing-group */
 
 const EMPTY_OR_WHITESPACE_ONLY = /^[\t ]*$/
