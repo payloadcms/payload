@@ -5,7 +5,6 @@
     align-items: stretch;
     gap: var(--spacer-3);
     padding: var(--spacer-2-5);
-    width: var(--mini-carousel-width, 72px);
     height: 100%;
     flex-shrink: 0;
     overflow-y: auto;
@@ -37,6 +36,8 @@
     background: var(--color-bg-secondary);
     cursor: pointer;
     overflow: hidden;
+    width: 48px;
+    height: 48px;
   }
 
   .mini-carousel__item img {

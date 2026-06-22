@@ -517,6 +517,11 @@ export type CollectionAdminOptions = {
    */
   preview?: GeneratePreviewURL
   /**
+   * Opt-in to an edit layout where only the fields column scrolls on desktop,
+   * instead of the whole page.
+   */
+  scrollFieldsOnly?: boolean
+  /**
    * Field to use as title in Edit View and first column in List view
    */
   useAsTitle?: string

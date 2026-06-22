@@ -60,93 +60,6 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_60C9F82D".
- */
-export type LexicalNodes_60C9F82D =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_60C9F82D>
-  | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_60C9F82D>
-  | SerializedUploadNode<'gif-resize'>
-  | SerializedUploadNode<'filename-compound-index'>
-  | SerializedUploadNode<'no-image-sizes'>
-  | SerializedUploadNode<'object-fit'>
-  | SerializedUploadNode<'with-meta-data'>
-  | SerializedUploadNode<'without-meta-data'>
-  | SerializedUploadNode<'with-only-jpeg-meta-data'>
-  | SerializedUploadNode<'crop-only'>
-  | SerializedUploadNode<'focal-only'>
-  | SerializedUploadNode<'image-sizes-only'>
-  | SerializedUploadNode<'focal-no-sizes'>
-  | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
-  | SerializedUploadNode<'allow-list-media'>
-  | SerializedUploadNode<'skip-safe-fetch-media'>
-  | SerializedUploadNode<'skip-safe-fetch-header-filter'>
-  | SerializedUploadNode<'skip-allow-list-safe-fetch-media'>
-  | SerializedUploadNode<'restrict-file-types'>
-  | SerializedUploadNode<'no-restrict-file-types'>
-  | SerializedUploadNode<'no-restrict-file-mime-types'>
-  | SerializedUploadNode<'pdf-only'>
-  | SerializedUploadNode<'restricted-mime-types'>
-  | SerializedUploadNode<'animated-type-media'>
-  | SerializedUploadNode<'enlarge'>
-  | SerializedUploadNode<'without-enlarge'>
-  | SerializedUploadNode<'reduce'>
-  | SerializedUploadNode<'media-trim'>
-  | SerializedUploadNode<'custom-file-name-media'>
-  | SerializedUploadNode<'unstored-media'>
-  | SerializedUploadNode<'externally-served-media'>
-  | SerializedUploadNode<'uploads-1'>
-  | SerializedUploadNode<'admin-thumbnail-function'>
-  | SerializedUploadNode<'admin-thumbnail-with-search-queries'>
-  | SerializedUploadNode<'admin-thumbnail-size'>
-  | SerializedUploadNode<'admin-upload-control'>
-  | SerializedUploadNode<'admin-upload-file-preview-single'>
-  | SerializedUploadNode<'admin-upload-file-preview-map'>
-  | SerializedUploadNode<'file-preview'>
-  | SerializedUploadNode<'no-files-required'>
-  | SerializedUploadNode<'optional-file'>
-  | SerializedUploadNode<'required-file'>
-  | SerializedUploadNode<'versions'>
-  | SerializedUploadNode<'custom-upload-field'>
-  | SerializedUploadNode<'media-with-relation-preview'>
-  | SerializedUploadNode<'media-without-cache-tags'>
-  | SerializedUploadNode<'media-without-relation-preview'>
-  | SerializedUploadNode<'hide-file-input-on-create'>
-  | SerializedUploadNode<'three-dimensional'>
-  | SerializedUploadNode<'constructor-options'>
-  | SerializedUploadNode<'bulk-uploads'>
-  | SerializedUploadNode<'bulk-uploads-hook-error'>
-  | SerializedUploadNode<'file-mime-type'>
-  | SerializedUploadNode<'svg-only'>
-  | SerializedUploadNode<'media-without-delete-access'>
-  | SerializedUploadNode<'media-with-image-size-admin-props'>
-  | SerializedUploadNode<'prefix-media'>
-  | SerializedUploadNode<'media-with-fields'>
-  | SerializedQuoteNode<LexicalNodes_60C9F82D>
-  | SerializedListNode<LexicalNodes_60C9F82D>
-  | SerializedListItemNode<LexicalNodes_60C9F82D>
-  | SerializedAutoLinkNode<LexicalNodes_60C9F82D, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_60C9F82D, LexicalLinkFields_0A7E9EC0>
-  | SerializedRelationshipNode<
-      | 'relation'
-      | 'audio'
-      | 'relation-to-no-files-required'
-      | 'relation-preview'
-      | 'best-fit'
-      | 'list-view-preview'
-      | 'simple-relationship'
-      | 'users'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >;
 
 export interface Config {
   auth: {
@@ -344,7 +257,15 @@ export interface Relation {
   versionedImage?: (string | null) | Version;
   hideFileInputOnCreate?: (string | null) | HideFileInputOnCreate;
   hasManyImage?: (string | Media)[] | null;
-  blocks?: LocalizedMediaBlock[] | null;
+  blocks?:
+    | {
+        media: string | Media;
+        relatedMedia?: (string | Media)[] | null;
+        id?: string | null;
+        blockName?: string | null;
+        blockType: 'localizedMediaBlock';
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -537,17 +458,6 @@ export interface HideFileInputOnCreate {
   height?: number | null;
   focalX?: number | null;
   focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LocalizedMediaBlock".
- */
-export interface LocalizedMediaBlock {
-  media: string | Media;
-  relatedMedia?: (string | Media)[] | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'localizedMediaBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1401,7 +1311,11 @@ export interface Uploads1 {
   singleUpload?: (string | null) | Uploads2;
   hasManyThumbnailUpload?: (string | AdminThumbnailSize)[] | null;
   singleThumbnailUpload?: (string | null) | AdminThumbnailSize;
-  richText?: LexicalRichText<LexicalNodes_60C9F82D> | null;
+  richText?:
+    | {
+        [k: string]: unknown;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -4731,190 +4645,10 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MyBlock".
- */
-export interface MyBlock {
-  id: string;
-  blockType: 'myBlock';
-  someText?: string | null;
-  someTextRequired: string;
-  radios?: ('option1' | 'option2' | 'option3') | null;
-  blockName?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalUploadFields_1AB4670B".
- */
-export interface LexicalUploadFields_1AB4670B {
-  alt?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_0A7E9EC0".
- */
-export interface LexicalLinkFields_0A7E9EC0 {
-  linkType: 'custom' | 'internal';
-  url?: string;
-  doc?: {
-    relationTo: string;
-    value:
-      | string
-      | number
-      | {
-          id: string | number;
-          [k: string]: unknown;
-        };
-  } | null;
-  newTab: boolean;
-  description?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
-}
-
-/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
-export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-export type LexicalElementDirection = ('ltr' | 'rtl') | null;
-
-export interface SerializedLexicalElementBase<TChildren> {
-  children: TChildren[];
-  direction: LexicalElementDirection;
-  format: LexicalElementFormat;
-  indent: number;
-  textFormat?: number;
-  textStyle?: string;
-  version: number;
-}
-
-export type LexicalTextMode = 'normal' | 'token' | 'segmented';
-
-export interface SerializedTextNode {
-  type: 'text';
-  detail: number;
-  format: number;
-  mode: LexicalTextMode;
-  style: string;
-  text: string;
-  version: number;
-}
-
-export interface SerializedTabNode {
-  type: 'tab';
-  detail: number;
-  format: number;
-  mode: LexicalTextMode;
-  style: string;
-  text: string;
-  version: number;
-}
-
-export interface SerializedLineBreakNode {
-  type: 'linebreak';
-  version: number;
-}
-
-export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
-  type: 'paragraph';
-  textFormat: number;
-  textStyle: string;
-}
-
-export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
-  type: 'block';
-  format: LexicalElementFormat;
-  version: number;
-  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
-} : never;
-export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
-  type: 'inlineBlock';
-  version: number;
-  fields: { id: string } & Omit<TFields, 'id'>;
-} : never;
-
-export interface SerializedHeadingNode<
-  TChildren,
-  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
-> extends SerializedLexicalElementBase<TChildren> {
-  type: 'heading';
-  tag: TTag;
-}
-
-export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
-  type: 'upload';
-  format: LexicalElementFormat;
-  id: string;
-  version: number;
-  fields: TFields;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
-  };
-}[TSlugs];
-
-export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
-  type: 'quote';
-}
-
-export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
-  type: 'list';
-  checked?: boolean;
-  listType: 'number' | 'bullet' | 'check';
-  start: number;
-  tag: 'ul' | 'ol';
-}
-
-export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
-  type: 'listitem';
-  checked?: boolean;
-  value: number;
-}
-
-export interface LexicalLinkFields {
-  [k: string]: unknown;
-  doc?: {
-    relationTo: string;
-    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
-  } | null;
-  linkType: 'custom' | 'internal';
-  newTab: boolean;
-  url?: string;
-}
-export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
-  type: 'link';
-  fields: TFields;
-  id?: string;
-}
-export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
-  type: 'autolink';
-  fields: TFields;
-}
-
-export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
-  };
-}[TSlugs];
-
-/** Shape of a Lexical `richText` field. */
-export interface LexicalRichText<TNode> {
-  root: {
-    children: TNode[];
-    direction: LexicalElementDirection;
-    format: LexicalElementFormat;
-    indent: number;
-    type: 'root';
-    version: number;
-  };
 }
 
 

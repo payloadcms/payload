@@ -67,7 +67,7 @@
     position: var(--sidebar-wrap-position, sticky);
     top: var(--sidebar-wrap-top, var(--doc-controls-height));
     width: var(--sidebar-wrap-width, 33.33%);
-    height: var(--sidebar-wrap-height, calc(100vh - var(--doc-controls-height)));
+    height: var(--sidebar-wrap-height, calc(100dvh - var(--doc-controls-height)));
     min-width: var(--sidebar-wrap-min-width, var(--doc-sidebar-width));
     flex-shrink: var(--sidebar-wrap-flex-shrink, 0);
   }

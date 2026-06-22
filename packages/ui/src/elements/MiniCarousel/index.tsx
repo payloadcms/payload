@@ -75,7 +75,7 @@ export const MiniCarousel: React.FC<MiniCarouselProps> = ({
   }
 
   return (
-    <div className={baseClass}>
+    <div className={[baseClass, 'scrollbar-thin'].join(' ')}>
       <MiniCarouselItem
         active={selectedSize === null}
         imageCacheTag={imageCacheTag}

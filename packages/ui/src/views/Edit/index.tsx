@@ -664,7 +664,7 @@ export function DefaultEditView({
     user: currentEditor,
   }
 
-  const authComponent = auth ? (
+  const renderAuth = auth ? (
     <Auth
       className={`${baseClass}__auth`}
       collectionSlug={collectionConfig.slug}
@@ -681,6 +681,12 @@ export function DefaultEditView({
       verify={auth.verify}
     />
   ) : undefined
+
+  const shouldRenderUploadPanel = Boolean(upload)
+  const shouldScrollFieldsOnly =
+    collectionConfig?.admin?.scrollFieldsOnly ??
+    globalConfig?.admin?.scrollFieldsOnly ??
+    shouldRenderUploadPanel
 
   return (
     <main
@@ -791,7 +797,12 @@ export function DefaultEditView({
           />
           {!isInDrawer && <DocumentControls {...documentControlsProps} variant="default" />}
           <div
-            className={[`${baseClass}__main-wrapper`, isPopupOpen && `${baseClass}--detached`]
+            className={[
+              `${baseClass}__main-wrapper`,
+              shouldRenderUploadPanel && `${baseClass}__main-wrapper--has-upload-panel`,
+              shouldScrollFieldsOnly && `${baseClass}__main-wrapper--scroll-fields-only`,
+              isPopupOpen && `${baseClass}--detached`,
+            ]
               .filter(Boolean)
               .join(' ')}
           >
@@ -800,55 +811,33 @@ export function DefaultEditView({
                 .filter(Boolean)
                 .join(' ')}
             >
-              {upload && !BeforeFields && !CustomUpload ? (
-                <UploadControlsProvider>
-                  <div className={`${baseClass}__upload-layout`}>
-                    <FileManager
-                      collectionSlug={collectionConfig.slug}
-                      initialState={initialState}
-                      uploadConfig={upload}
-                      UploadControls={UploadControls}
-                      UploadFilePreview={UploadFilePreview}
-                    />
-                    <DocumentFields
-                      AfterFields={AfterFields}
-                      BeforeFields={authComponent}
-                      Description={Description}
-                      disableSidebar={Boolean(upload)}
-                      docPermissions={docPermissions}
-                      fields={docConfig.fields}
-                      forceSidebarWrap={isLivePreviewing}
-                      isTrashed={isTrashed}
-                      readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
-                      schemaPathSegments={schemaPathSegments}
-                    />
-                  </div>
-                </UploadControlsProvider>
-              ) : (
-                <DocumentFields
-                  AfterFields={AfterFields}
-                  BeforeFields={
-                    BeforeFields || (
-                      <React.Fragment>
-                        {authComponent}
-                        {upload && CustomUpload ? (
-                          <UploadControlsProvider>{CustomUpload}</UploadControlsProvider>
-                        ) : null}
-                      </React.Fragment>
-                    )
-                  }
-                  Description={Description}
-                  disableSidebar={Boolean(upload)}
-                  docPermissions={docPermissions}
-                  fields={docConfig.fields}
-                  forceSidebarWrap={isLivePreviewing}
-                  isTrashed={isTrashed}
-                  readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
-                  schemaPathSegments={schemaPathSegments}
-                />
-              )}
+              <DocumentFields
+                AfterFields={AfterFields}
+                // code smell to render before fields and not auth?
+                BeforeFields={shouldRenderUploadPanel ? renderAuth : BeforeFields || renderAuth}
+                Description={Description}
+                docPermissions={docPermissions}
+                fields={docConfig.fields}
+                forceSidebarWrap={shouldRenderUploadPanel || isLivePreviewing}
+                isTrashed={isTrashed}
+                readOnly={isReadOnlyForIncomingUser || !hasSavePermission || isTrashed}
+                schemaPathSegments={schemaPathSegments}
+              />
               {AfterDocument}
             </div>
+            {shouldRenderUploadPanel && (
+              <UploadControlsProvider>
+                {CustomUpload || (
+                  <FileManager
+                    collectionSlug={collectionConfig.slug}
+                    initialState={initialState}
+                    uploadConfig={upload}
+                    UploadControls={UploadControls}
+                    UploadFilePreview={UploadFilePreview}
+                  />
+                )}
+              </UploadControlsProvider>
+            )}
             {isLivePreviewEnabled && !isInDrawer && livePreviewURL && (
               <>
                 {CustomLivePreview || (

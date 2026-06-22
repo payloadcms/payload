@@ -260,6 +260,7 @@ export interface DocControl {
   id: string;
   title: string;
   content?: string | null;
+  test?: string | null;
   parent?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
@@ -1269,13 +1270,37 @@ export interface PointField {
  */
 export interface RadioField {
   id: string;
+  /**
+   * Choose the type of content this entry represents.
+   */
   contentType?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * Choose the type of content this required field represents.
+   */
   contentTypeRequired: 'article' | 'video' | 'podcast';
+  /**
+   * This disabled radio field still renders its description text.
+   */
   contentTypeDisabled?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * This read-only radio field should keep consistent description spacing.
+   */
   contentTypeReadOnly?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * Vertical radio options should match field description spacing.
+   */
   contentTypeVertical?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * Required vertical radio field with description text.
+   */
   contentTypeVerticalRequired: 'article' | 'video' | 'podcast';
+  /**
+   * Disabled vertical radio field with description text.
+   */
   contentTypeVerticalDisabled?: ('article' | 'video' | 'podcast') | null;
+  /**
+   * Read-only vertical radio field with description text.
+   */
   contentTypeVerticalReadOnly?: ('article' | 'video' | 'podcast') | null;
   updatedAt: string;
   createdAt: string;
@@ -1294,21 +1319,33 @@ export interface RichTextField {
         [k: string]: unknown;
       }[]
     | null;
+  /**
+   * Rich text table field used to validate description spacing.
+   */
   table?:
     | {
         [k: string]: unknown;
       }[]
     | null;
+  /**
+   * Rich text code block field used to validate description spacing.
+   */
   code?:
     | {
         [k: string]: unknown;
       }[]
     | null;
+  /**
+   * Rich text typography field used to validate description spacing.
+   */
   typography?:
     | {
         [k: string]: unknown;
       }[]
     | null;
+  /**
+   * Rich text list field used to validate description spacing.
+   */
   lists?:
     | {
         [k: string]: unknown;
@@ -2023,6 +2060,25 @@ export interface PayloadMigration {
 export interface PayloadQueryPreset {
   id: string;
   title: string;
+  groupBy?: string | null;
+  columns?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   isShared?: boolean | null;
   access?: {
     read?: {
@@ -2038,25 +2094,6 @@ export interface PayloadQueryPreset {
       users?: (string | User)[] | null;
     };
   };
-  where?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  columns?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  groupBy?: string | null;
   relatedCollection: 'search-bar-test' | 'select-fields';
   /**
    * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
@@ -2099,6 +2136,7 @@ export interface UsersSelect<T extends boolean = true> {
 export interface DocControlsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  test?: T;
   parent?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -3184,6 +3222,9 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface PayloadQueryPresetsSelect<T extends boolean = true> {
   title?: T;
+  groupBy?: T;
+  columns?: T;
+  where?: T;
   isShared?: T;
   access?:
     | T
@@ -3207,9 +3248,6 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
               users?: T;
             };
       };
-  where?: T;
-  columns?: T;
-  groupBy?: T;
   relatedCollection?: T;
   isTemp?: T;
   updatedAt?: T;

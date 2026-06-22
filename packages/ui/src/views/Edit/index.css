@@ -1,46 +1,115 @@
 @layer payload-default {
+  .collection-edit__form {
+    height: 100%;
+    width: 100%;
+    container-type: inline-size;
+    container-name: edit-main;
+  }
+
   .collection-edit__main-wrapper {
     width: 100%;
     display: flex;
   }
 
+  .collection-edit__main-wrapper--scroll-fields-only {
+    height: calc(
+      100dvh - var(--app-header-height, 0px) - var(--doc-controls-height, 0px) -
+        var(--doc-header-height, 0px)
+    );
+    overflow: hidden;
+
+    .collection-edit__main {
+      min-height: 0;
+        overflow: hidden;
+    }
+
+    .document-fields {
+        height: 100%;
+        min-height: 0;
+      }
+
+      .document-fields__main {
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+        scrollbar-color: var(--scrollbar-color) transparent;
+      }
+
+      .document-fields__sidebar {
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+        scrollbar-color: var(--scrollbar-color) transparent;
+    }
+
+    .document-fields__sidebar-wrap {
+      --sidebar-wrap-top: 0px;
+      --sidebar-wrap-height: 100%;
+    }
+  }
+
+  .template-default__wrap:has(.collection-edit__main-wrapper--scroll-fields-only) {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
   .collection-edit__main {
     width: 100%;
-    container-type: inline-size;
-    container-name: edit-main;
   }
 
   .collection-edit__main--popup-open {
     width: 100%;
   }
 
-  .collection-edit__upload-layout {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-
-    /* File manager renders first in the DOM (stacks on top at mobile) but is ordered after the
-       fields on desktop. The divider lives on it since it always stretches full height. */
-    .file-manager {
-      order: 2;
-      flex: 2;
-      border-inline-start: var(--stroke-width-small) solid var(--color-border);
-    }
-
-    .document-fields {
+  .collection-edit__main-wrapper--has-upload-panel {
+    .collection-edit__main {
       flex: 1;
     }
-
-    .document-fields:not(:has(.document-fields__sidebar-wrap)):not(:has(.document-fields__edit > :not(.document-fields__fields))):not(:has(.document-fields__fields > :not(input[type="hidden"]))) {
-      display: none;
+    .file-manager {
+      flex: 2;
+      border-inline-start: var(--stroke-width-small) solid var(--color-border);
     }
   }
 
   /* Container query (not viewport) so the layout stacks based on the space actually available
      to the edit view — e.g. inside a narrow document drawer it uses the stacked mobile layout. */
   @container edit-main (max-width: 1024px) {
-    .collection-edit__upload-layout {
-      flex-direction: column;
+    .collection-edit__main-wrapper--scroll-fields-only {
+      height: auto;
+      overflow: visible;
+
+      .collection-edit__main {
+        min-height: initial;
+        overflow: visible;
+      }
+
+      .document-fields {
+        height: auto;
+        min-height: initial;
+      }
+
+      .document-fields__main {
+        min-height: initial;
+        overflow-y: visible;
+        overscroll-behavior: auto;
+        scrollbar-width: auto;
+        scrollbar-color: auto;
+      }
+
+      .document-fields__sidebar {
+        overscroll-behavior: auto;
+        scrollbar-width: auto;
+        scrollbar-color: auto;
+      }
+    }
+
+    .template-default__wrap:has(.collection-edit__main-wrapper--scroll-fields-only) {
+      height: auto;
+      overflow: visible;
+    }
+
+    .collection-edit__main-wrapper--has-upload-panel {
+      flex-direction: column-reverse;
       gap: var(--spacer-5);
 
       .file-manager {
@@ -71,11 +140,6 @@
       pointer-events: none;
       z-index: -1;
     }
-  }
-
-  .collection-edit__form {
-    height: 100%;
-    width: 100%;
   }
 
   .collection-edit__auth {

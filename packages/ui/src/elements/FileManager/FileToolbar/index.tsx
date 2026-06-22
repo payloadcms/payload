@@ -1,6 +1,7 @@
 'use client'
-import React from 'react'
+import React, { useRef } from 'react'
 
+import { useElementHeightVariable } from '../../../hooks/useElementHeightVariable.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { CropIcon } from '../../../icons/Crop/index.js'
 import { DownloadIcon } from '../../../icons/Download/index.js'
@@ -35,9 +36,11 @@ export const FileToolbar: React.FC<Props> = ({
   onReplace,
 }) => {
   const { t } = useTranslation()
+  const ref = useRef<HTMLDivElement>(null)
+  useElementHeightVariable({ cssVar: '--file-toolbar-height', ref })
 
   return (
-    <div className={baseClass}>
+    <div className={baseClass} ref={ref}>
       <div className={`${baseClass}__left`}>
         {hideRemoveFile ? (
           <span className={`${baseClass}__filename-btn ${baseClass}__filename-btn--static`}>
