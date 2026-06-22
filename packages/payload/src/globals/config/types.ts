@@ -183,11 +183,6 @@ export type GlobalAdminOptions = {
    * Function to generate custom preview URL
    */
   preview?: GeneratePreviewURL
-  /**
-   * Opt-in to an edit layout where only the fields column scrolls on desktop,
-   * instead of the whole page.
-   */
-  scrollFieldsOnly?: boolean
 }
 
 export type GlobalConfig<TSlug extends GlobalSlug = any> = {
