@@ -369,7 +369,8 @@ test/payload.db
 app-tanstack/routeTree.gen.ts
 test/*/app-tanstack/routeTree.gen.ts
 
-# Per-suite standalone TanStack apps generate their own importMap at test time
+# Generated TanStack admin importMap (shippable app + per-suite standalone apps)
+app-tanstack/app/_payload/importMap.js
 test/*/app-tanstack/app/_payload/importMap.js
 
 # Screenshots created by Playwright MCP

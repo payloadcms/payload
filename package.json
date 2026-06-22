@@ -14,7 +14,7 @@
     "build:all": "turbo build --filter \"!blank\" --filter \"!website\" --filter \"!ecommerce\"",
     "build:all:force": "pnpm clean && pnpm build:all",
     "build:app": "next build",
-    "build:app-tanstack": "vite build app-tanstack --config vite.tanstack.config.ts --configLoader runner",
+    "build:app-tanstack": "vite build --config vite.tanstack.config.ts --configLoader runner",
     "build:app:analyze": "cross-env ANALYZE=true next build",
     "build:bundle-for-analysis": "turbo run build:bundle-for-analysis",
     "build:clean": "pnpm clean:build",

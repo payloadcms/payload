@@ -72,7 +72,9 @@ export async function startTanStackStartDevServer({
         configPath,
       ],
       {
-        cwd: rootDir,
+        // Vite's root is the repo root (keeps generated junk out of
+        // `app-tanstack`); the config locates the app via `srcDirectory`.
+        cwd: repoRoot,
         env: {
           ...process.env,
           NODE_OPTIONS: nodeOptions,
@@ -81,7 +83,7 @@ export async function startTanStackStartDevServer({
           PAYLOAD_CORE_DEV: 'true',
           PAYLOAD_DROP_DATABASE: process.env.PAYLOAD_DROP_DATABASE ?? 'true',
           PAYLOAD_TEST_SUITE: testSuiteArg,
-          ROOT_DIR: rootDir,
+          ROOT_DIR: repoRoot,
         },
         stdio: ['pipe', 'pipe', 'pipe'],
       },

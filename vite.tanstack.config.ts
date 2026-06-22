@@ -10,13 +10,16 @@ import { createLogger, defineConfig, mergeConfig } from 'vite'
 // This config lives at the monorepo root (not inside `app-tanstack`) so the
 // TanStack app can ship as plain source — no `package.json`, no `node_modules`.
 // Its dependencies are declared by the root `package.json` and resolve from the
-// root `node_modules`. Run it with Vite's root set to `app-tanstack` (the dev
-// server spawns vite with `cwd: app-tanstack`; the `build:app-tanstack` script
-// passes `--root app-tanstack`), so `srcDirectory`/`outDir`/warmup stay
-// app-relative even though the config file sits up here.
+// root `node_modules`.
+//
+// Vite's root is the monorepo root (it runs with `cwd` at the repo root), NOT
+// `app-tanstack`. That keeps `app-tanstack` pristine: `@vitejs/plugin-rsc`
+// hardcodes its temp dir to `<root>/node_modules/.vite-rsc-temp`, so a root of
+// `app-tanstack` would litter it with `node_modules`. With the repo root as the
+// Vite root, generated junk (rsc temp, dep cache) lands in the already-ignored
+// root `node_modules`, and the build output is redirected to `dist/app-tanstack`.
+// The app is located via `srcDirectory` instead.
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-
-const appRoot = path.resolve(__dirname, 'app-tanstack')
 
 // Third-party deps (react-datepicker, @faceless-ui/*) ship sourcemaps whose
 // original source files aren't published, so Vite warns on every one. Silence
@@ -64,11 +67,12 @@ const testSuite = process.env.PAYLOAD_TEST_SUITE || '_community'
 // rest fall back to the shippable app at `app-tanstack`. Mirrors how each Next
 // test suite owns its own `rootDir`/`app` dir.
 //
-// `srcDirectory` is relative to the Vite root (`app-tanstack`): TanStack's
-// entry planner joins it onto the root (`path.join`), so an absolute path would
-// be concatenated rather than replace it.
+// `srcDirectory` is relative to the Vite root (the repo root): TanStack's entry
+// planner joins it onto the root (`path.join`), so an absolute path would be
+// concatenated rather than replace it. The shippable app lives at
+// `app-tanstack`; a suite with its own app overrides it.
 const suiteDir = path.resolve(__dirname, 'test', testSuite, 'app-tanstack')
-const srcDirectory = fs.existsSync(suiteDir) ? path.relative(appRoot, suiteDir) : '.'
+const srcDirectory = fs.existsSync(suiteDir) ? path.relative(__dirname, suiteDir) : 'app-tanstack'
 
 export default defineConfig((env) =>
   mergeConfig(
@@ -105,20 +109,21 @@ export default defineConfig((env) =>
           },
         },
       },
+      // Keep build output out of `app-tanstack` (which ships as pure source);
+      // the repo root already ignores `dist`.
+      build: { outDir: path.resolve(__dirname, 'dist/app-tanstack') },
       customLogger: logger,
       envDir: __dirname,
       server: {
-        // Suite route dirs live under `test/<suite>/app-tanstack`, outside the
-        // Vite root, so allow Vite to serve from the monorepo root.
         fs: { allow: [__dirname] },
         port,
         strictPort: true,
         warmup: {
           clientFiles: [
-            './app/__root.tsx',
-            './app/_payload.tsx',
-            './app/_payload/admin.index.tsx',
-            './app/_payload/admin.$.tsx',
+            './app-tanstack/app/__root.tsx',
+            './app-tanstack/app/_payload.tsx',
+            './app-tanstack/app/_payload/admin.index.tsx',
+            './app-tanstack/app/_payload/admin.$.tsx',
           ],
         },
       },
