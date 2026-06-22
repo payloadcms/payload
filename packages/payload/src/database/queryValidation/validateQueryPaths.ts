@@ -49,8 +49,9 @@ export async function validateQueryPaths({
     const promises: Promise<void>[] = []
     for (const path in where) {
       const constraint = where[path]
+      const lowercasePath = path.toLowerCase()
 
-      if ((path === 'and' || path === 'or') && Array.isArray(constraint)) {
+      if ((lowercasePath === 'and' || lowercasePath === 'or') && Array.isArray(constraint)) {
         for (const item of constraint) {
           if (collectionConfig) {
             promises.push(
@@ -79,6 +80,38 @@ export async function validateQueryPaths({
               }),
             )
           }
+        }
+      } else if (
+        lowercasePath === 'not' &&
+        typeof constraint === 'object' &&
+        !Array.isArray(constraint)
+      ) {
+        if (collectionConfig) {
+          promises.push(
+            validateQueryPaths({
+              collectionConfig,
+              errors,
+              overrideAccess,
+              policies,
+              polymorphicJoin,
+              req,
+              versionFields,
+              where: constraint as Where,
+            }),
+          )
+        } else {
+          promises.push(
+            validateQueryPaths({
+              errors,
+              globalConfig,
+              overrideAccess,
+              policies,
+              polymorphicJoin,
+              req,
+              versionFields,
+              where: constraint as Where,
+            }),
+          )
         }
       } else if (!Array.isArray(constraint)) {
         for (const operator in constraint) {
