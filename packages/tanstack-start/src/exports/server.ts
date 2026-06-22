@@ -1,7 +1,6 @@
 export { login } from '../auth/login.js'
 export { logout } from '../auth/logout.js'
 export { refresh } from '../auth/refresh.js'
-export { switchLanguage } from '../auth/switchLanguage.js'
 export { getRequestI18n } from '../utilities/getRequestI18n.server.js'
 export { getRequestLocale } from '../utilities/getRequestLocale.js'
 export { getRequestTheme } from '../utilities/getRequestTheme.js'

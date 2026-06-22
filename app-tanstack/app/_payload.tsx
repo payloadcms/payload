@@ -9,7 +9,6 @@ import './custom.scss'
 import { HydrationMarker } from '../components/HydrationMarker/index.js'
 import { getLayoutDataFn } from './_payload/layout.functions.js'
 import { serverFunctionHandler } from './_payload/serverFunction.functions.js'
-import { switchLanguageFn } from './_payload/switchLanguage.functions.js'
 
 export const Route = createFileRoute('/_payload')({
   loader: () => getLayoutDataFn(),
@@ -32,9 +31,6 @@ function PayloadLayout() {
         permissions={data.user ? data.permissions : null}
         RouterAdapter={TanStackRouterAdapter}
         serverFunction={serverFunctionHandler}
-        switchLanguageServerAction={async (lang: string) => {
-          await switchLanguageFn({ data: lang })
-        }}
         theme={data.theme}
         translations={data.translations}
         user={data.user}
