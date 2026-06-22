@@ -107,14 +107,15 @@ describe('configToJSONSchema', () => {
     expect(postsOutput.required).toStrictEqual(['id', 'title', 'status', 'updatedAt', 'createdAt'])
 
     // Input (write) shape: relationships are ID-only, the defaultValue field is optional, `id` is
-    // optional, and createdAt/updatedAt are dropped.
+    // optional, and createdAt/updatedAt are dropped. `id` and the defaulted `status` are optional
+    // but NOT nullable - nullability follows the read shape, where they're non-null.
     expect(schema?.$defs?.posts_input).toStrictEqual({
       type: 'object',
       additionalProperties: false,
       properties: {
-        id: { type: ['string', 'null'] },
+        id: { type: 'string' },
         title: { type: 'string' },
-        status: { type: ['string', 'null'], enum: ['draft', 'published'] },
+        status: { type: 'string', enum: ['draft', 'published'] },
         author: { type: ['string', 'null'] },
         categories: { type: ['array', 'null'], items: { type: 'string' } },
       },
