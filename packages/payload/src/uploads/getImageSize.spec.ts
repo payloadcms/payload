@@ -13,7 +13,14 @@ const fixturesDir = path.resolve(dirname, '../../../../test/uploads')
 
 const fileFor = (name: string): PayloadRequest['file'] => {
   const data = readFileSync(path.join(fixturesDir, name))
-  return { data, mimetype: 'image/test', name, size: data.length } as PayloadRequest['file']
+  // In-memory uploads carry an empty `tempFilePath`, which must fall back to `data`
+  return {
+    data,
+    mimetype: 'image/test',
+    name,
+    size: data.length,
+    tempFilePath: '',
+  } as PayloadRequest['file']
 }
 
 describe('getImageSize', () => {
