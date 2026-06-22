@@ -35,8 +35,8 @@ export const codeConverter: BlockJSX = {
 
     if (isSingleLineAndComplete) {
       return {
-        code: language + (children?.length ? children : ''), // No need to add space to children as they are not trimmed
-        language: '',
+        code: (language || '') + (children?.length ? children : ''), // No need to add space to children as they are not trimmed
+        language,
       }
     }
 
