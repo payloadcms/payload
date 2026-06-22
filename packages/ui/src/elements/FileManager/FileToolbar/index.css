@@ -10,6 +10,7 @@
     flex-wrap: wrap;
     row-gap: var(--spacer-2);
     padding: var(--spacer-2) var(--gutter-h);
+    padding-inline-start: var(--spacer-2-5);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
     background: var(--color-bg);
     flex-shrink: 0;

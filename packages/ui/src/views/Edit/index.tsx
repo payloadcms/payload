@@ -683,10 +683,7 @@ export function DefaultEditView({
   ) : undefined
 
   const shouldRenderUploadPanel = Boolean(upload)
-  const shouldScrollFieldsOnly =
-    collectionConfig?.admin?.scrollFieldsOnly ??
-    globalConfig?.admin?.scrollFieldsOnly ??
-    shouldRenderUploadPanel
+  const shouldScrollFieldsOnly = shouldRenderUploadPanel
 
   return (
     <main

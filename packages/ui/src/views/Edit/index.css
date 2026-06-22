@@ -20,26 +20,40 @@
 
     .collection-edit__main {
       min-height: 0;
-        overflow: hidden;
+      overflow: hidden;
     }
 
     .document-fields {
-        height: 100%;
-        min-height: 0;
-      }
+      height: 100%;
+      min-height: 0;
+    }
 
-      .document-fields__main {
-        min-height: 0;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-        scrollbar-width: thin;
-        scrollbar-color: var(--scrollbar-color) transparent;
-      }
+    .document-fields--force-sidebar-wrap {
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-color) transparent;
+    }
 
-      .document-fields__sidebar {
-        overscroll-behavior: contain;
-        scrollbar-width: thin;
-        scrollbar-color: var(--scrollbar-color) transparent;
+    .document-fields:not(.document-fields--force-sidebar-wrap) .document-fields__main {
+      min-height: 0;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-color) transparent;
+    }
+
+    .document-fields--force-sidebar-wrap .document-fields__main {
+      overflow-y: visible;
+      overscroll-behavior: auto;
+      scrollbar-width: auto;
+      scrollbar-color: auto;
+    }
+
+    .document-fields__sidebar {
+      overscroll-behavior: contain;
+      scrollbar-width: thin;
+      scrollbar-color: var(--scrollbar-color) transparent;
     }
 
     .document-fields__sidebar-wrap {
@@ -88,7 +102,14 @@
         min-height: initial;
       }
 
-      .document-fields__main {
+      .document-fields--force-sidebar-wrap {
+        overflow-y: visible;
+        overscroll-behavior: auto;
+        scrollbar-width: auto;
+        scrollbar-color: auto;
+      }
+
+      .document-fields:not(.document-fields--force-sidebar-wrap) .document-fields__main {
         min-height: initial;
         overflow-y: visible;
         overscroll-behavior: auto;
