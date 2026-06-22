@@ -12,7 +12,6 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { AnimateHeight } from '../../AnimateHeight/index.js'
 import { Button } from '../../Button/index.js'
-import { Drawer } from '../../Drawer/index.js'
 import { ErrorPill } from '../../ErrorPill/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
@@ -155,12 +154,7 @@ export function FileSidebar() {
               </strong>
             </Button>
 
-            <Drawer Header={null} slug={addMoreFilesDrawerSlug}>
-              <AddFilesView
-                onCancel={() => closeModal(addMoreFilesDrawerSlug)}
-                onDrop={handleAddFiles}
-              />
-            </Drawer>
+            <AddFilesView drawerSlug={addMoreFilesDrawerSlug} onDrop={handleAddFiles} />
           </div>
         </div>
       </div>

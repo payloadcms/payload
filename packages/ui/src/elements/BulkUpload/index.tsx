@@ -22,7 +22,6 @@ const drawerSlug = 'bulk-upload-drawer-slug'
 
 function DrawerContent() {
   const { addFiles, forms, isInitializing } = useFormsManager()
-  const { closeModal } = useModal()
   const { collectionSlug, drawerSlug } = useBulkUpload()
   const { getEntityConfig } = useConfig()
   const { t } = useTranslation()
@@ -60,13 +59,17 @@ function DrawerContent() {
     return (
       <AddFilesView
         acceptMimeTypes={uploadMimeTypes?.join(', ')}
-        onCancel={() => closeModal(drawerSlug)}
+        drawerSlug={drawerSlug}
         onDrop={onDrop}
       />
     )
-  } else {
-    return <AddingFilesView />
   }
+
+  return (
+    <Drawer className="bulk-upload-modal" Header={null} slug={drawerSlug}>
+      <AddingFilesView />
+    </Drawer>
+  )
 }
 
 export type BulkUploadProps = {
@@ -127,16 +130,20 @@ export function BulkUploadDrawer() {
     onModalStateChanged(modalState)
   }, [modalState])
 
+  // Only mount the providers (and reset forms on unmount) while the drawer is open,
+  // matching the previous behavior where the Drawer lazily rendered its children.
+  if (!modalState[drawerSlug]?.isOpen) {
+    return null
+  }
+
   return (
-    <Drawer className="bulk-upload-modal" Header={null} slug={drawerSlug}>
-      <FormsManagerProvider>
-        <UploadControlsProvider>
-          <EditDepthProvider>
-            <DrawerContent />
-          </EditDepthProvider>
-        </UploadControlsProvider>
-      </FormsManagerProvider>
-    </Drawer>
+    <FormsManagerProvider>
+      <UploadControlsProvider>
+        <EditDepthProvider>
+          <DrawerContent />
+        </EditDepthProvider>
+      </UploadControlsProvider>
+    </FormsManagerProvider>
   )
 }
 
