@@ -138,7 +138,7 @@ const toAdminPageMetadata = (meta: MetaConfig): AdminPageMetadata => {
  *   so it's read from the `nav` holder after `renderServerComponent` resolves.
  */
 export const loadAdminPageRSC = createServerFn({ method: 'GET' })
-  .inputValidator((data: LoadInput): LoadInput => data ?? {})
+  .validator((data: LoadInput): LoadInput => data ?? {})
   .handler(async ({ data }) => {
     const { renderRoot } = await import('@payloadcms/ui/views/Root')
     const { defaultAdminViews } = await import('@payloadcms/ui/views/Root/adminViews')

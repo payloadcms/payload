@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 
 export const getLivePreviewDoc = createServerFn({ method: 'GET' })
-  .inputValidator((data: { collection: string; slug: string }) => data)
+  .validator((data: { collection: string; slug: string }) => data)
   .handler(async ({ data: { slug, collection } }) => {
     const config = (await import('@payload-config')).default
     const { getPayload } = await import('payload')

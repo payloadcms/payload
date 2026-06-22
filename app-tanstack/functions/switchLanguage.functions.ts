@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 
 export const switchLanguageFn = createServerFn({ method: 'POST' })
-  .inputValidator((data: string) => data)
+  .validator((data: string) => data)
   .handler(async ({ data: language }) => {
     const { switchLanguage } = await import('@payloadcms/tanstack-start/server')
     const config = (await import('@payload-config')).default

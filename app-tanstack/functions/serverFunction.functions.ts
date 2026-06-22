@@ -17,7 +17,7 @@ import { createServerFn } from '@tanstack/react-start'
  * React elements into those handles before they cross the wire.
  */
 export const runPayloadServerFn = createServerFn({ method: 'POST' })
-  .inputValidator((args: ServerFunctionClientArgs): ServerFunctionClientArgs => args)
+  .validator((args: ServerFunctionClientArgs): ServerFunctionClientArgs => args)
   .handler(async ({ data }) => {
     const { handleServerFunctions } = await import('@payloadcms/tanstack-start/server')
     const config = (await import('@payload-config')).default
