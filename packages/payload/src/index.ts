@@ -1536,7 +1536,7 @@ export type { ValidationFieldError } from './errors/index.js'
 
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
-export { slugField, type SlugFieldClientProps } from './fields/baseFields/slug/index.js'
+export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 
 export {
   createClientBlocks,

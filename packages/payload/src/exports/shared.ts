@@ -21,7 +21,7 @@ export {
 
 export { isUserMenuSettingsGroup, serverProps } from '../config/types.js'
 
-export { type Slugify } from '../fields/baseFields/slug/index.js'
+export { type Slugify } from '../fields/baseFields/slug/types.js'
 
 export { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
 
