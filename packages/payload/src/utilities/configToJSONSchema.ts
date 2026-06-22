@@ -503,6 +503,7 @@ export function fieldsToJSONSchema({
           case 'code':
           case 'date':
           case 'email':
+          case 'slug':
           case 'textarea': {
             fieldSchema = {
               ...baseFieldSchema,
