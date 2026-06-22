@@ -2,7 +2,7 @@ packages:
   - 'packages/*'
   - 'tools/*'
   - 'test'
-  - 'tanstack-app'
+  - 'app-tanstack'
   - 'templates/blank'
   - 'templates/website'
   - 'templates/ecommerce'

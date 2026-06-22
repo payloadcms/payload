@@ -1,7 +1,7 @@
 import { withPayloadRoot } from '@payloadcms/tanstack-start/client'
 import { createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
 
-import { HydrationMarker } from '../components/HydrationMarker/index.js'
+import { HydrationMarker } from '~/components/HydrationMarker/index.js'
 
 export const Route = createRootRoute({
   head: () => ({

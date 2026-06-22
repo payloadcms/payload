@@ -42,7 +42,7 @@ export async function startTanStackStartDevServer({
   port: number
   testSuiteArg: string
 }): Promise<DevServerResult> {
-  const rootDir = path.resolve(__dirname, '../../tanstack-app')
+  const rootDir = path.resolve(__dirname, '../../app-tanstack')
   const adminRoute = '/admin'
 
   const viteBin = path.resolve(rootDir, 'node_modules/.bin/vite')

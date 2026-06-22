@@ -23,7 +23,7 @@ export async function initDevAndTest(
 
   const importMapPath: string =
     framework === 'tanstack-start'
-      ? path.resolve(dirname, '../tanstack-app/src/importMap.js')
+      ? path.resolve(dirname, '../app-tanstack/importMap.js')
       : path.resolve(getNextRootDir(testSuiteArg).rootDir, './app/(payload)/admin/importMap.js')
 
   try {
@@ -55,7 +55,7 @@ export async function initDevAndTest(
   const config: SanitizedConfig = await (await import(configUrl)).default
 
   if (framework === 'tanstack-start') {
-    process.env.ROOT_DIR = path.resolve(dirname, '../tanstack-app')
+    process.env.ROOT_DIR = path.resolve(dirname, '../app-tanstack')
     config.admin.importMap.importMapFile = importMapPath
   } else {
     process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir

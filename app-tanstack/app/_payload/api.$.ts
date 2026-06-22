@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
 
 const handler = async ({ request }: { request: Request }) => {
-  const { handleAPIRoute } = await import('../../functions/handleAPIRoute.js')
+  const { handleAPIRoute } = await import('~/functions/handleAPIRoute.js')
   return handleAPIRoute(request)
 }
 

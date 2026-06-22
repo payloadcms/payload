@@ -6,10 +6,10 @@ import '@payloadcms/ui/scss/app.scss'
 // `(payload)/custom.scss` so the shared "custom CSS" e2e passes on both adapters.
 import './custom.scss'
 
-import { HydrationMarker } from '../components/HydrationMarker/index.js'
-import { getLayoutDataFn } from '../functions/layout.functions'
-import { serverFunctionHandler } from '../functions/serverFunction.functions'
-import { switchLanguageFn } from '../functions/switchLanguage.functions'
+import { HydrationMarker } from '~/components/HydrationMarker/index.js'
+import { getLayoutDataFn } from '~/functions/layout.functions.js'
+import { serverFunctionHandler } from '~/functions/serverFunction.functions.js'
+import { switchLanguageFn } from '~/functions/switchLanguage.functions.js'
 
 export const Route = createFileRoute('/_payload')({
   loader: () => getLayoutDataFn(),

@@ -451,7 +451,7 @@ export const openColumnControls = async (page: Page) => {
  * so the underlying state never updates and any follow-up `toBeVisible`
  * assertion times out. We patch `goto` here to wait for the hydration
  * marker that the TanStack root component installs (see
- * `tanstack-app/src/app/__root.tsx`). The patch is a no-op for the Next.js
+ * `app-tanstack/app/__root.tsx`). The patch is a no-op for the Next.js
  * adapter, where the marker is never set, so individual tests don't need to
  * branch on the framework.
  *

@@ -46,24 +46,43 @@ export const databaseAdapter = mongooseAdapter({
 
 const port = Number(process.env.PORT) || 3000
 
+const testSuite = process.env.PAYLOAD_TEST_SUITE || '_community'
+
+// Most test suites only exercise the shared admin shell, so they fall back to
+// the shippable routes in `app`. A suite that needs extra front-end routes
+// (e.g. `live-preview`, `admin-bar`) ships its own complete routes directory
+// under `test/<suite>/app-tanstack/app`, keeping that test-only routing out of
+// the shippable root. Mirrors how each Next test suite owns its own `app` dir.
+// An absolute `routesDirectory` overrides the default resolution; this app sets
+// `srcDirectory: '.'` so routes/entries/`routeTree.gen.ts` live at the app root
+// (no `src` wrapper), matching the Next `app` dir layout.
+const suiteRoutesDir = path.resolve(__dirname, '..', 'test', testSuite, 'app-tanstack', 'app')
+const routesDirectory = fs.existsSync(suiteRoutesDir) ? suiteRoutesDir : 'app'
+
 export default defineConfig((env) =>
   mergeConfig(
     payloadPlugin({
+      // Resolve the `~` → app-root alias as an explicit Vite alias rather than
+      // relying on `resolve.tsconfigPaths`. Per-suite route dirs (e.g.
+      // `test/<suite>/app-tanstack/app`) live outside this project, so their
+      // nearest tsconfig is not `app-tanstack/tsconfig.json` and tsconfck would never
+      // apply the `~/*` mapping to them. A Vite alias applies globally, so the
+      // duplicated shell route files resolve shared modules the same wherever
+      // they live.
+      additionalAliases: [{ find: '~', replacement: path.resolve(__dirname) }],
       additionalIgnoreImporters: [
         /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
       ],
-      payloadConfigPath: path.resolve(
-        __dirname,
-        '..',
-        'test',
-        process.env.PAYLOAD_TEST_SUITE || '_community',
-        'config.ts',
-      ),
+      payloadConfigPath: path.resolve(__dirname, '..', 'test', testSuite, 'config.ts'),
       reactPlugin: viteReact({
         exclude: [],
         include: /\.[jt]sx?$/,
       }),
+      routesDirectory,
+      // No `src` wrapper — routes, `router.tsx`, and `importMap.js` sit at the
+      // app root, so the TanStack source dir is the project root itself.
       rscPlugin: rsc({ serverHandler: false }),
+      srcDirectory: '.',
       tanstackStart,
     })(env),
     {
@@ -88,14 +107,17 @@ export default defineConfig((env) =>
       customLogger: logger,
       envDir: path.resolve(__dirname, '..'),
       server: {
+        // Per-suite route dirs live under `test/<suite>/app-tanstack`, outside
+        // this app root, so allow Vite to serve from the monorepo root.
+        fs: { allow: [path.resolve(__dirname, '..')] },
         port,
         strictPort: true,
         warmup: {
           clientFiles: [
-            './src/app/__root.tsx',
-            './src/app/_payload.tsx',
-            './src/app/_payload/admin.index.tsx',
-            './src/app/_payload/admin.$.tsx',
+            './app/__root.tsx',
+            './app/_payload.tsx',
+            './app/_payload/admin.index.tsx',
+            './app/_payload/admin.$.tsx',
           ],
         },
       },
