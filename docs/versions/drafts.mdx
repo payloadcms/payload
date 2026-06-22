@@ -31,6 +31,10 @@ Collections and Globals both support the same options for configuring drafts. Yo
 
 By enabling drafts on a collection or a global, Payload will **automatically inject a new field into your schema** called `_status`. The `_status` field is used internally by Payload to store if a document is set to `draft` or `published`.
 
+<Banner type="warning">
+  **`unique` fields and Drafts:** Using `unique: true` on fields in collections with drafts enabled can cause silent failures. When a document is created, Payload writes to both the main collection table and the versions table (`_collectionSlug_v`). Because the initial draft is created with empty or default values before the user fills in the form, a database-level unique constraint will fail on the second document creation — since the first empty-value draft already exists. The Admin UI may redirect to a `?notFound=` URL without showing an error. To work around this, replace `unique: true` with `index: true` and enforce uniqueness at the application level using a custom `validate` function. See [Unique Fields with Drafts](#unique-fields-with-drafts) below.
+</Banner>
+
 **Admin UI status indication**
 
 Within the Admin UI, if drafts are enabled, a document can be shown with one of three "statuses":
@@ -314,3 +318,57 @@ If a document is published, the Payload Admin UI will be updated to show an "unp
 ## Reverting to published
 
 If a document is published, and you have made further changes which are saved as a draft, Payload will show a "revert to published" button at the top of the sidebar which will allow you to reject your draft changes and "revert" back to the published state of the document. Your drafts will still be saved, but a new version will be created that will reflect the last published state of the document.
+
+## Unique fields with Drafts
+
+When using `unique: true` on fields in a collection that has `versions.drafts` enabled, you may encounter silent document creation failures. This is a known limitation ([#953](https://github.com/payloadcms/payload/issues/953), [#12628](https://github.com/payloadcms/payload/issues/12628)).
+
+### The problem
+
+When Payload creates a new document in a drafts-enabled collection, it writes to both the main collection table and the versions table. The database-level `UNIQUE` constraint on the main table can conflict with the draft creation process — particularly when:
+
+- Multiple documents are created before unique field values are filled in (autosave creates rows with empty values)
+- The versions system attempts to write to both tables within the same operation
+
+The result is a silent failure where the Admin UI redirects to `?notFound=<id>` instead of showing the newly created document, with no visible error message.
+
+### Workaround
+
+Replace `unique: true` with `index: true` and enforce uniqueness at the application level using a custom `validate` function:
+
+```ts
+const MyCollection: CollectionConfig = {
+  slug: 'my-collection',
+  versions: {
+    drafts: true,
+  },
+  fields: [
+    {
+      name: 'slug',
+      type: 'text',
+      required: true,
+      // Use index instead of unique to avoid DB-level constraint conflicts with drafts
+      index: true,
+      validate: async (value, { req, id }) => {
+        if (!value) return true
+        const existing = await req.payload.count({
+          collection: 'my-collection',
+          where: {
+            slug: { equals: value },
+            id: { not_equals: id || 0 },
+          },
+        })
+        if (existing.totalDocs > 0) {
+          return 'This value is already in use'
+        }
+        return true
+      },
+    },
+  ],
+}
+```
+
+This approach:
+- Preserves the index for query performance
+- Validates uniqueness before save, providing a clear error message in the Admin UI
+- Avoids the database-level constraint that conflicts with the drafts version system
