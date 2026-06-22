@@ -87,7 +87,7 @@ export const filterMCPItems = async ({
 }
 
 /**
- * Runs MCP item access callbacks
+ * Runs MCP item access callbacks.
  */
 const checkItemAccess = async ({
   item,
