@@ -51,12 +51,12 @@ const testSuite = process.env.PAYLOAD_TEST_SUITE || '_community'
 // Most test suites only exercise the shared admin shell, so they fall back to
 // the shippable routes in `src/app`. A suite that needs extra front-end routes
 // (e.g. `live-preview`, `admin-bar`) ships its own complete routes directory
-// under `test/<suite>/tanstack/app`, keeping that test-only routing out of the
-// shippable root. Mirrors how each Next test suite owns its own `app` dir.
+// under `test/<suite>/app-tanstack/app`, keeping that test-only routing out of
+// the shippable root. Mirrors how each Next test suite owns its own `app` dir.
 // An absolute `routesDirectory` overrides the default `src/<dir>` resolution;
 // `routeTree.gen.ts` is always emitted to `src/` regardless, so `router.tsx`
 // stays shared.
-const suiteRoutesDir = path.resolve(__dirname, '..', 'test', testSuite, 'tanstack', 'app')
+const suiteRoutesDir = path.resolve(__dirname, '..', 'test', testSuite, 'app-tanstack', 'app')
 const routesDirectory = fs.existsSync(suiteRoutesDir) ? suiteRoutesDir : 'app'
 
 export default defineConfig((env) =>
@@ -64,8 +64,8 @@ export default defineConfig((env) =>
     payloadPlugin({
       // Resolve the `~` → `src` alias as an explicit Vite alias rather than
       // relying on `resolve.tsconfigPaths`. Per-suite route dirs (e.g.
-      // `test/<suite>/tanstack/app`) live outside this project, so their nearest
-      // tsconfig is not `tanstack-app/tsconfig.json` and tsconfck would never
+      // `test/<suite>/app-tanstack/app`) live outside this project, so their
+      // nearest tsconfig is not `app-tanstack/tsconfig.json` and tsconfck would never
       // apply the `~/*` mapping to them. A Vite alias applies globally, so the
       // duplicated shell route files resolve shared modules the same wherever
       // they live.
@@ -104,8 +104,8 @@ export default defineConfig((env) =>
       customLogger: logger,
       envDir: path.resolve(__dirname, '..'),
       server: {
-        // Per-suite route dirs live under `test/<suite>/tanstack`, outside this
-        // app root, so allow Vite to serve from the monorepo root.
+        // Per-suite route dirs live under `test/<suite>/app-tanstack`, outside
+        // this app root, so allow Vite to serve from the monorepo root.
         fs: { allow: [path.resolve(__dirname, '..')] },
         port,
         strictPort: true,

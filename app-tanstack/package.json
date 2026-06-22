@@ -1,5 +1,5 @@
 {
-  "name": "@payloadcms/tanstack-app",
+  "name": "@payloadcms/app-tanstack",
   "version": "0.0.0",
   "private": true,
   "type": "module",

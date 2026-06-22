@@ -36,7 +36,7 @@ export const createTestHooks = (testSuiteName = '_community', testSuiteConfig = 
      */
     beforeTest: async () => {
       if (framework === 'tanstack-start') {
-        const tanstackRootDir = path.resolve(dirname, '..', 'tanstack-app')
+        const tanstackRootDir = path.resolve(dirname, '..', 'app-tanstack')
         const tanstackConfigPath = `../test/${testSuiteName}/${testSuiteConfig}`
         await replacePayloadConfigPath(tanstackRootDir, tanstackConfigPath)
       } else {

@@ -283,7 +283,7 @@ Shared entry points in `@payloadcms/ui`:
 - `views/<View>/<View>ViewRSC.tsx` — per-view server components (`ListViewRSC`, `DocumentViewRSC`, `DashboardViewRSC`, …).
 - `utilities/sharedHandlers/` + `utilities/serverFunctionRegistry.ts` — shared `render-list` / `render-document` / `form-state` / `table-state` server-function handlers, registered through `sharedServerFunctions` and merged into each adapter's `handleServerFunctions`.
 
-Each adapter is a ~50–80 line wrapper that calls `initReq`, hands the result to `renderAdminPage`, and ships the resulting React tree to the client (Next does it natively; TanStack pipes through `renderServerComponent` to produce an RSC Flight payload). See `packages/next/src/admin/RootPage.tsx` and `tanstack-app/src/functions/adminPageRSC.functions.tsx` for the canonical examples.
+Each adapter is a ~50–80 line wrapper that calls `initReq`, hands the result to `renderAdminPage`, and ships the resulting React tree to the client (Next does it natively; TanStack pipes through `renderServerComponent` to produce an RSC Flight payload). See `packages/next/src/admin/RootPage.tsx` and `app-tanstack/src/functions/adminPageRSC.functions.tsx` for the canonical examples.
 
 When adding a new adapter:
 
