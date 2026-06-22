@@ -7,7 +7,16 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createLogger, defineConfig, mergeConfig } from 'vite'
 
+// This config lives at the monorepo root (not inside `app-tanstack`) so the
+// TanStack app can ship as plain source — no `package.json`, no `node_modules`.
+// Its dependencies are declared by the root `package.json` and resolve from the
+// root `node_modules`. Run it with Vite's root set to `app-tanstack` (the dev
+// server spawns vite with `cwd: app-tanstack`; the `build:app-tanstack` script
+// passes `--root app-tanstack`), so `srcDirectory`/`outDir`/warmup stay
+// app-relative even though the config file sits up here.
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const appRoot = path.resolve(__dirname, 'app-tanstack')
 
 // Third-party deps (react-datepicker, @faceless-ui/*) ship sourcemaps whose
 // original source files aren't published, so Vite warns on every one. Silence
@@ -29,7 +38,7 @@ logger.warnOnce = (msg, options) => {
   baseWarnOnce(msg, options)
 }
 
-const databaseAdapterPath = path.resolve(__dirname, '..', 'test', 'databaseAdapter.js')
+const databaseAdapterPath = path.resolve(__dirname, 'test', 'databaseAdapter.js')
 if (!fs.existsSync(databaseAdapterPath)) {
   fs.writeFileSync(
     databaseAdapterPath,
@@ -52,14 +61,14 @@ const testSuite = process.env.PAYLOAD_TEST_SUITE || '_community'
 // (`test/<suite>/app-tanstack`) is a completely standalone app — its own
 // `router.tsx`, routes, `importMap.js`, components and `routeTree.gen.ts`. We
 // point `srcDirectory` at that suite dir so everything resolves within it; the
-// rest fall back to the shippable root app. Mirrors how each Next test suite
-// owns its own `rootDir`/`app` dir. There is no `src` wrapper, so the source
-// dir is the app root itself (`.` for the shippable app).
-// `srcDirectory` must be relative to this app root: TanStack's entry planner
-// joins it onto the root (`path.join`), so an absolute path would be
-// concatenated rather than replace it.
-const suiteDir = path.resolve(__dirname, '..', 'test', testSuite, 'app-tanstack')
-const srcDirectory = fs.existsSync(suiteDir) ? path.relative(__dirname, suiteDir) : '.'
+// rest fall back to the shippable app at `app-tanstack`. Mirrors how each Next
+// test suite owns its own `rootDir`/`app` dir.
+//
+// `srcDirectory` is relative to the Vite root (`app-tanstack`): TanStack's
+// entry planner joins it onto the root (`path.join`), so an absolute path would
+// be concatenated rather than replace it.
+const suiteDir = path.resolve(__dirname, 'test', testSuite, 'app-tanstack')
+const srcDirectory = fs.existsSync(suiteDir) ? path.relative(appRoot, suiteDir) : '.'
 
 export default defineConfig((env) =>
   mergeConfig(
@@ -67,7 +76,7 @@ export default defineConfig((env) =>
       additionalIgnoreImporters: [
         /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
       ],
-      payloadConfigPath: path.resolve(__dirname, '..', 'test', testSuite, 'config.ts'),
+      payloadConfigPath: path.resolve(__dirname, 'test', testSuite, 'config.ts'),
       reactPlugin: viteReact({
         exclude: [],
         include: /\.[jt]sx?$/,
@@ -86,7 +95,7 @@ export default defineConfig((env) =>
                 findFileUrl(url: string) {
                   if (url.startsWith('~@payloadcms/ui/scss')) {
                     return new URL(
-                      'file://' + path.resolve(__dirname, '../packages/ui/src/scss/styles.scss'),
+                      'file://' + path.resolve(__dirname, 'packages/ui/src/scss/styles.scss'),
                     )
                   }
                   return null
@@ -97,11 +106,11 @@ export default defineConfig((env) =>
         },
       },
       customLogger: logger,
-      envDir: path.resolve(__dirname, '..'),
+      envDir: __dirname,
       server: {
-        // Per-suite route dirs live under `test/<suite>/app-tanstack`, outside
-        // this app root, so allow Vite to serve from the monorepo root.
-        fs: { allow: [path.resolve(__dirname, '..')] },
+        // Suite route dirs live under `test/<suite>/app-tanstack`, outside the
+        // Vite root, so allow Vite to serve from the monorepo root.
+        fs: { allow: [__dirname] },
         port,
         strictPort: true,
         warmup: {

@@ -45,7 +45,12 @@ export async function startTanStackStartDevServer({
   const rootDir = path.resolve(__dirname, '../../app-tanstack')
   const adminRoute = '/admin'
 
-  const viteBin = path.resolve(rootDir, 'node_modules/.bin/vite')
+  // `app-tanstack` is no longer a workspace package, so the vite binary, its
+  // deps, and the config all live at the monorepo root. We still run vite with
+  // `cwd: app-tanstack` so Vite's root resolves to the app.
+  const repoRoot = path.resolve(rootDir, '..')
+  const viteBin = path.resolve(repoRoot, 'node_modules/.bin/vite')
+  const configPath = path.resolve(repoRoot, 'vite.tanstack.config.ts')
 
   const cssLoaderUrl = resolveCssLoaderUrl(rootDir)
   const previousNodeOptions = process.env.NODE_OPTIONS ?? ''
@@ -56,7 +61,16 @@ export async function startTanStackStartDevServer({
   return new Promise<DevServerResult>((resolve, reject) => {
     const child = spawn(
       viteBin,
-      ['dev', '--port', String(port), '--strictPort', '--configLoader', 'runner'],
+      [
+        'dev',
+        '--port',
+        String(port),
+        '--strictPort',
+        '--configLoader',
+        'runner',
+        '--config',
+        configPath,
+      ],
       {
         cwd: rootDir,
         env: {
