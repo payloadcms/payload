@@ -31,12 +31,18 @@ export const generateSlug =
         ? customSlugify({ data: (data ?? {}) as TypeWithID, req, valueToSlugify })
         : defaultSlugify(valueToSlugify as string)
 
+    const entity = collection || global!
+
     if (operation === 'create') {
+      // Autosave drafts: do not auto-generate on the initial draft — the user is still
+      // entering content. Keep an explicitly provided slug; generation begins on a later autosave.
+      if (hasAutosaveEnabled(entity) && data?._status === 'draft') {
+        return value || null
+      }
       // Keep an explicitly provided slug; otherwise generate from the source.
       return await run(value || source)
     }
 
-    const entity = collection || global!
     const originalSlug = originalDoc?.[name]
     const originalSource = originalDoc?.[useAsSlug]
 

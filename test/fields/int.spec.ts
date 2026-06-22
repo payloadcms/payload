@@ -124,6 +124,116 @@ describe('Fields', () => {
       })
       expect(again.slug).toBe('manual-value')
     })
+
+    describe('autosave drafts', () => {
+      const created: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of created) {
+          await payload.delete({ collection: 'slug-autosave', id })
+        }
+        created.length = 0
+      })
+
+      it('should NOT generate a slug on the initial draft (req 1)', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+        created.push(draft.id)
+        expect(draft.slug == null || draft.slug === '').toBe(true)
+      })
+
+      it('should keep an explicit slug the user typed on the initial draft', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One', slug: 'user-typed' },
+        })
+        created.push(draft.id)
+        expect(draft.slug).toBe('user-typed')
+      })
+
+      it('should generate once content exists on a subsequent autosave', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+        created.push(draft.id)
+
+        const updated = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Draft One Updated' },
+        })
+        expect(updated.slug).toBe('draft-one-updated')
+      })
+
+      it('should keep an admin overwrite across subsequent autosaves (req 2)', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+        created.push(draft.id)
+
+        await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Draft Two' },
+        })
+
+        const overwritten = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { slug: 'human-chosen-slug' },
+        })
+        expect(overwritten.slug).toBe('human-chosen-slug')
+
+        const afterMoreEdits = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Draft Three' },
+        })
+        expect(afterMoreEdits.slug).toBe('human-chosen-slug')
+      })
+
+      it('should stabilize the slug after publish', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+        created.push(draft.id)
+
+        await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Publishable Title' },
+        })
+
+        const published = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          data: { _status: 'published', title: 'Publishable Title' },
+        })
+        expect(published.slug).toBe('publishable-title')
+
+        const afterPublish = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          data: { _status: 'published', title: 'Title Changed After Publish' },
+        })
+        expect(afterPublish.slug).toBe('publishable-title')
+      })
+    })
   })
 
   describe('text', () => {
