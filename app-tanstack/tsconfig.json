@@ -8,8 +8,17 @@
     "baseUrl": ".",
     "paths": {
       "@payload-config": ["../test/_community/config.ts"],
-      "~/*": ["./src/*"]
+      "~/*": ["./*"]
     }
   },
-  "include": ["src/**/*", "vite.config.ts", "../test/admin/config.ts"]
+  "include": [
+    "app/**/*",
+    "components/**/*",
+    "functions/**/*",
+    "router.tsx",
+    "importMap.js",
+    "payload-types.ts",
+    "vite.config.ts",
+    "../test/admin/config.ts"
+  ]
 }

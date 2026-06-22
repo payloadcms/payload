@@ -366,7 +366,7 @@ payload.db
 test/payload.db
 
 # TanStack Router auto-generated route tree
-app-tanstack/src/routeTree.gen.ts
+app-tanstack/routeTree.gen.ts
 
 # Screenshots created by Playwright MCP
 .playwright-mcp
