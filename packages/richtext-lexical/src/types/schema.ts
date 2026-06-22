@@ -97,7 +97,8 @@ export const getFieldToJSONSchema: (args: {
     // Distinguish an input node union from an output one with an `_Input` suffix - unless an
     // identical output union already exists (a relationship-free editor whose input == output), in
     // which case share it. The content hash means differing unions split and identical ones merge.
-    const sharesOutputUnion = variant === 'input' && interfaceNameDefinitions.has(`LexicalNodes_${hash}`)
+    const sharesOutputUnion =
+      variant === 'input' && interfaceNameDefinitions.has(`LexicalNodes_${hash}`)
     const resolvedHash = variant === 'input' && !sharesOutputUnion ? `${hash}_Input` : hash
     const nodeUnionName = `LexicalNodes_${resolvedHash}`
 

@@ -11,11 +11,11 @@ import type { JSONSchemaArgs, JSONSchemaFn } from '../../typesServer.js'
 export type LinkFields = {
   /** Custom fields added via `LinkFeature`'s `fields` prop. */
   [k: string]: unknown
-  doc?: null | {
+  doc?: {
     relationTo: string
     /** Document ID, or the full doc when populated by the afterRead hook. */
-    value: DefaultDocumentIDType | { [k: string]: unknown; id: DefaultDocumentIDType }
-  }
+    value: { [k: string]: unknown; id: DefaultDocumentIDType } | DefaultDocumentIDType
+  } | null
   linkType: 'custom' | 'internal'
   newTab: boolean
   url?: string

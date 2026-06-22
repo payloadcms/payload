@@ -8,24 +8,23 @@ import type { JSONSchemaArgs, JSONSchemaFn } from '../../typesServer.js'
 
 import { formatSchema } from '../../../types/jsonSchemaHelpers.js'
 
-type BaseBlockFields<TFields extends JsonObject = JsonObject> = TFields & {
+type BaseBlockFields<TFields extends JsonObject = JsonObject> = {
   blockName?: null | string
   blockType: string
-}
+} & TFields
 
-export type BlockFields<TFields extends JsonObject = JsonObject> = BaseBlockFields<TFields> & {
+export type BlockFields<TFields extends JsonObject = JsonObject> = {
   id: string
-}
+} & BaseBlockFields<TFields>
 
-export type BlockFieldsOptionalID<TFields extends JsonObject = JsonObject> =
-  BaseBlockFields<TFields> & {
-    id?: string
-  }
+export type BlockFieldsOptionalID<TFields extends JsonObject = JsonObject> = {
+  id?: string
+} & BaseBlockFields<TFields>
 
-export type InlineBlockFields<TFields extends JsonObject = JsonObject> = TFields & {
+export type InlineBlockFields<TFields extends JsonObject = JsonObject> = {
   blockType: string
   id: string
-}
+} & TFields
 
 // Distributive (`TFields extends unknown ?`) so `SerializedBlockNode<A | B>` expands to
 // `SerializedBlockNode<A> | SerializedBlockNode<B>` - i.e. a discriminated union where each block
@@ -34,7 +33,7 @@ export type InlineBlockFields<TFields extends JsonObject = JsonObject> = TFields
 export type SerializedBlockNode<TFields extends { blockType: string } = { blockType: string }> =
   TFields extends unknown
     ? {
-        fields: Omit<TFields, 'blockName' | 'id'> & { blockName?: null | string; id: string }
+        fields: { blockName?: null | string; id: string } & Omit<TFields, 'blockName' | 'id'>
         format: LexicalElementFormat
         type: 'block'
         version: number
@@ -45,7 +44,7 @@ export type SerializedInlineBlockNode<
   TFields extends { blockType: string } = { blockType: string },
 > = TFields extends unknown
   ? {
-      fields: Omit<TFields, 'id'> & { id: string }
+      fields: { id: string } & Omit<TFields, 'id'>
       type: 'inlineBlock'
       version: number
     }
