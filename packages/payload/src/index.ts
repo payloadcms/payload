@@ -1649,6 +1649,7 @@ export type {
   SingleRelationshipField,
   SingleRelationshipFieldClient,
   SlugField,
+  SlugFieldClient,
   Tab,
   TabAsField,
   TabAsFieldClient,
