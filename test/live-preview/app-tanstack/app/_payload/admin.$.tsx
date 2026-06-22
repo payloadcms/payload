@@ -2,7 +2,7 @@ import { NotFoundClient } from '@payloadcms/ui'
 import { createFileRoute, notFound, redirect } from '@tanstack/react-router'
 import { Fragment, type ReactNode } from 'react'
 
-import { loadAdminPageRSC } from '~/functions/adminPageRSC.functions.js'
+import { loadAdminPageRSC } from './adminPageRSC.functions.js'
 import { getAdminMeta } from '@payloadcms/tanstack-start'
 
 export const Route = createFileRoute('/_payload/admin/$')({
