@@ -10,4 +10,9 @@ export {
   withPayloadRoot,
   type WithPayloadRootOptions,
 } from '../layouts/Root/withPayloadRoot.js'
+export {
+  type AdminLoad,
+  payloadAdminIndexRoute,
+  payloadAdminSplatRoute,
+} from '../routes/adminRoutes.js'
 export { viteDevReloadStrategy } from '../utilities/devReloadStrategy.js'
