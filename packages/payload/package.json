@@ -127,7 +127,7 @@
     "sanitize-filename": "1.6.3",
     "ts-essentials": "10.0.3",
     "tsx": "4.22.4",
-    "undici": "7.24.4",
+    "undici": "7.28.0",
     "uuid": "13.0.2",
     "ws": "^8.16.0"
   },

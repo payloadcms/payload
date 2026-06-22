@@ -42,7 +42,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "nodemailer": "^8.0.5"
+    "nodemailer": "^9.0.1"
   },
   "devDependencies": {
     "@types/nodemailer": "^8.0.0",
