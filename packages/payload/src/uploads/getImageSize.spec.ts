@@ -43,6 +43,25 @@ describe('getImageSize', () => {
     },
   )
 
+  it('should fall back to the probe when sharp cannot decode a header-only image', async () => {
+    // A 1x1 PNG truncated after IHDR: the header is readable but there is no
+    // pixel data, so sharp throws while the probe still measures it.
+    const data = Buffer.from(
+      '89504e470d0a1a0a0000000d49484452000000010000000108060000001f15c489',
+      'hex',
+    )
+    const file = {
+      data,
+      mimetype: 'image/png',
+      name: 'truncated.png',
+      size: data.length,
+      tempFilePath: '',
+    } as PayloadRequest['file']
+
+    expect(await getImageSize({ file, sharp })).toEqual({ height: 1, width: 1 })
+    expect(await getImageSize({ file })).toEqual({ height: 1, width: 1 })
+  })
+
   it('should read TIFF dimensions from a tempFilePath without a temp-file workaround', async () => {
     const tempFilePath = path.join(fixturesDir, 'test-image.tiff')
     const file = {

@@ -21,9 +21,14 @@ export async function getImageSize({ file, sharp }: Args): Promise<ProbedImageSi
   const tempFilePath = file?.tempFilePath || undefined
 
   if (sharp) {
-    const { height, width } = await sharp(tempFilePath ?? file!.data).metadata()
-    if (width && height) {
-      return { height, width }
+    try {
+      const { height, width } = await sharp(tempFilePath ?? file!.data).metadata()
+      if (width && height) {
+        return { height, width }
+      }
+    } catch {
+      // sharp decodes the full image and rejects truncated/header-only files
+      // that the byte-level probe can still measure, so fall through to it
     }
   }
 
