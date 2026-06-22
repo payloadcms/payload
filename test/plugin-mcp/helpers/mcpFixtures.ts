@@ -9,52 +9,44 @@ import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../../credentials.js'
+import { limitedMCPUserEmail } from '../limitedAccess.js'
 import { createMcpClient, type McpClient } from './mcpClient.js'
 
 export let payload: Payload
 export let restClient: NextRESTClient
+export let limitedUserId: number | string
 export let userId: string
 
-export type GetApiKeyOptions = {
-  enableDelete?: boolean
-  enableUpdate?: boolean
-  globalFind?: boolean
-  globalUpdate?: boolean
+export async function getApiKey(): Promise<string> {
+  const apiKey = randomUUID()
+
+  await payload.update({
+    id: userId,
+    collection: 'users',
+    data: {
+      apiKey,
+      enableAPIKey: true,
+    },
+    overrideAccess: true,
+  })
+
+  return apiKey
 }
 
-export async function getApiKey({
-  enableDelete = false,
-  enableUpdate = false,
-  globalFind = false,
-  globalUpdate = false,
-}: GetApiKeyOptions = {}): Promise<string> {
-  const doc = await payload.create({
-    collection: 'payload-mcp-api-keys',
+export async function getLimitedApiKey(): Promise<string> {
+  const apiKey = randomUUID()
+
+  await payload.update({
+    id: limitedUserId,
+    collection: 'users',
     data: {
-      access: {
-        collections: {
-          posts: {
-            create: true,
-            delete: enableDelete,
-            find: true,
-            update: enableUpdate,
-          },
-          products: { find: true },
-        },
-        ...(globalFind || globalUpdate
-          ? {
-              globals: {
-                'site-settings': { find: globalFind, update: globalUpdate },
-              },
-            }
-          : {}),
-      },
-      apiKey: randomUUID(),
-      label: 'Test API Key',
-      user: userId,
+      apiKey,
+      enableAPIKey: true,
     },
+    overrideAccess: true,
   })
-  return doc.apiKey
+
+  return apiKey
 }
 
 const fixtureDir = path.dirname(fileURLToPath(import.meta.url))
@@ -79,6 +71,16 @@ export const it = base.extend<ScopedFixtures>({
         })
         .then((res) => res.json())
       userId = loginResponse.user.id
+
+      const limitedUser = await payload.create({
+        collection: 'users',
+        data: {
+          email: limitedMCPUserEmail,
+          password: randomUUID(),
+        },
+        overrideAccess: true,
+      })
+      limitedUserId = limitedUser.id
 
       await use()
 
