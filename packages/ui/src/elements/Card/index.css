@@ -44,13 +44,14 @@
     }
   }
 
-  .card__click {
+  .card .card__click {
     z-index: 1;
     inset: 0;
     position: absolute;
     margin: 0;
     height: auto;
     width: auto;
+    min-height: 0;
     border-radius: inherit;
 
     &:hover,
