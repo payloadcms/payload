@@ -8,6 +8,7 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { removeExpiredSessions, revokeSession } from '../sessions.js'
 
 export type Arguments = {
   allSessions?: boolean
@@ -45,50 +46,52 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
       }
     }
 
-    if (collectionConfig.auth.disableLocalStrategy !== true && collectionConfig.auth.useSessions) {
-      const where = appendNonTrashedFilter({
-        enableTrash: Boolean(collectionConfig.trash),
-        trash: false,
-        where: {
-          id: {
-            equals: user.id,
-          },
-        },
-      })
-
-      const userWithSessions = await req.payload.db.findOne<{
-        id: number | string
-        sessions: { id: string }[]
-      }>({
-        collection: collectionConfig.slug,
-        req,
-        where,
-      })
-
-      if (!userWithSessions) {
-        throw new APIError('No User', httpStatus.BAD_REQUEST)
-      }
-
+    if (collectionConfig.auth.useSessions) {
       if (allSessions) {
+        const where = appendNonTrashedFilter({
+          enableTrash: Boolean(collectionConfig.trash),
+          trash: false,
+          where: {
+            id: {
+              equals: user.id,
+            },
+          },
+        })
+
+        const userWithSessions = await req.payload.db.findOne<{
+          id: number | string
+          sessions: { id: string }[]
+        }>({
+          collection: collectionConfig.slug,
+          req,
+          where,
+        })
+
+        if (!userWithSessions) {
+          throw new APIError('No User', httpStatus.BAD_REQUEST)
+        }
+
         userWithSessions.sessions = []
-      } else {
-        const sessionsAfterLogout = (userWithSessions?.sessions || []).filter(
-          (s) => s.id !== req?.user?._sid,
-        )
 
-        userWithSessions.sessions = sessionsAfterLogout
+        // Prevent updatedAt from being updated when only removing sessions
+        ;(userWithSessions as any).updatedAt = null
+
+        await req.payload.db.updateOne({
+          id: user.id,
+          collection: collectionConfig.slug,
+          data: userWithSessions,
+          req,
+          returning: false,
+        })
+      } else if (user._sid) {
+        await revokeSession({
+          collectionConfig,
+          payload: req.payload,
+          req,
+          sid: user._sid,
+          user,
+        })
       }
-
-      // Prevent updatedAt from being updated when only removing a session
-      ;(userWithSessions as any).updatedAt = null
-
-      await req.payload.db.updateOne({
-        id: user.id,
-        collection: collectionConfig.slug,
-        data: userWithSessions,
-        req,
-        returning: false,
-      })
     }
 
     if (shouldCommit) {
