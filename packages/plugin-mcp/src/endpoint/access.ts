@@ -98,40 +98,22 @@ const checkItemAccess = async ({
   permissions?: SanitizedPermissions
   req: PayloadRequest
 }): Promise<boolean> => {
-  if (item.type === 'collectionTool') {
-    if (
-      item.tool.access &&
-      !(await item.tool.access({
-        collectionSlug: item.collectionSlug,
-        permissions,
-        req,
-      }))
-    ) {
-      return false
-    }
-  } else if (item.type === 'globalTool') {
-    if (
-      item.tool.access &&
-      !(await item.tool.access({
-        globalSlug: item.globalSlug,
-        permissions,
-        req,
-      }))
-    ) {
-      return false
-    }
-  } else {
-    const access =
-      item.type === 'prompt'
-        ? item.prompt.access
-        : item.type === 'resource'
-          ? item.resource.access
-          : item.tool.access
-
-    if (access && !(await access({ permissions, req }))) {
-      return false
-    }
+  switch (item.type) {
+    case 'collectionTool':
+      return (
+        !item.tool.access ||
+        (await item.tool.access({ collectionSlug: item.collectionSlug, permissions, req }))
+      )
+    case 'globalTool':
+      return (
+        !item.tool.access ||
+        (await item.tool.access({ globalSlug: item.globalSlug, permissions, req }))
+      )
+    case 'prompt':
+      return !item.prompt.access || (await item.prompt.access({ permissions, req }))
+    case 'resource':
+      return !item.resource.access || (await item.resource.access({ permissions, req }))
+    case 'tool':
+      return !item.tool.access || (await item.tool.access({ permissions, req }))
   }
-
-  return true
 }
