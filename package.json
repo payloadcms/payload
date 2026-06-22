@@ -225,7 +225,6 @@
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",
       "dotenv": "$dotenv",
-      "effect": "^3.20.0",
       "graphql": "16.8.1",
       "mcp-handler>@modelcontextprotocol/sdk": "1.27.1",
       "react": "$react",
