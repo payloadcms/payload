@@ -23,6 +23,17 @@ if (disableTranspile) {
 
   if (!useSwc) {
     const start = async () => {
+      // tsx 4.22.4 uses Node's synchronous `module.registerHooks` API when it is available
+      // (Node v23.5+). On those versions that code path leaks tsx's internal `?namespace=...`
+      // query string onto resolved specifiers — including Node built-ins like `node:crypto` —
+      // which Node then tries to open as a file, failing with ENOENT. Removing `registerHooks`
+      // forces tsx to fall back to its older async `module.register()` worker path, which does
+      // not have this bug. See https://github.com/payloadcms/payload/issues/16949
+      const nodeModule = await import('node:module')
+      if (typeof nodeModule.default.registerHooks === 'function') {
+        nodeModule.default.registerHooks = undefined
+      }
+
       // Use tsx
       let tsImport = (await import('tsx/esm/api')).tsImport
 
