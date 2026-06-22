@@ -153,11 +153,14 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
         router: {
           autoCodeSplitting: false,
           codeSplittingOptions: { defaultBehavior: [] },
-          // Exclude only generated importMap files. Admin form saves are
-          // dispatched via `runPayloadServerFn` (a TanStack Start
-          // `createServerFn`) rather than a hand-rolled route, so there is
-          // no longer an `api.server-function.ts` to special-case here.
-          routeFileIgnorePattern: 'importMap\\.(?:js|server\\.ts)$',
+          // Exclude generated importMap files and colocated server-function
+          // modules (`*.functions.ts`). Admin form saves are dispatched via
+          // `runPayloadServerFn` (a TanStack Start `createServerFn`) rather than
+          // a hand-rolled route, so there is no longer an `api.server-function.ts`
+          // to special-case here. The `*.functions.ts` shims live next to the
+          // routes that use them (e.g. `app/_payload/*.functions.ts`); they
+          // define `createServerFn`s, not routes, so they must not be scanned.
+          routeFileIgnorePattern: 'importMap\\.(?:js|server\\.ts)$|\\.functions\\.',
           routesDirectory,
         } as any,
         rsc: { enabled: true },

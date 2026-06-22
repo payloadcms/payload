@@ -84,7 +84,7 @@ export type WithPayloadRootOptions = {
  *
  * ```tsx
  * export const Route = createRootRoute({
- *   shellComponent: withPayloadRoot(MarketingHtml),
+ *   shellComponent: withPayloadRoot(MarketingRoot),
  * })
  * ```
  */

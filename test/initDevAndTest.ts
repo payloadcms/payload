@@ -21,9 +21,17 @@ export async function initDevAndTest(
 ): Promise<void> {
   const framework = process.env.PAYLOAD_FRAMEWORK || 'next'
 
+  // A test suite that ships its own standalone TanStack app
+  // (`test/<suite>/app-tanstack`) generates its importMap there; everyone else
+  // falls back to the shippable root app. Mirrors the per-suite app dir model.
+  const tanstackSuiteAppDir = path.resolve(dirname, testSuiteArg, 'app-tanstack')
+  const tanstackAppDir = fs.existsSync(tanstackSuiteAppDir)
+    ? tanstackSuiteAppDir
+    : path.resolve(dirname, '../app-tanstack')
+
   const importMapPath: string =
     framework === 'tanstack-start'
-      ? path.resolve(dirname, '../app-tanstack/importMap.js')
+      ? path.resolve(tanstackAppDir, 'importMap.js')
       : path.resolve(getNextRootDir(testSuiteArg).rootDir, './app/(payload)/admin/importMap.js')
 
   try {
