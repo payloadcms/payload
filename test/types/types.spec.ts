@@ -1413,6 +1413,41 @@ describe('Types testing', () => {
     })
   })
 
+  // The Local API's `create`/`update` type `data` against the read shape, not the input shape.
+  // The input types are a valid subset, so a value typed as `*Input` is always accepted there.
+  describe('input types are assignable to create / update data (which expect the read shape)', () => {
+    test('a full PostInput is valid payload.create and payload.update data', () => {
+      const data = {} as PostInput
+      expect(payload.create).type.toBeCallableWith({ collection: 'posts', data })
+      expect(payload.update).type.toBeCallableWith({ collection: 'posts', data, id: 1 })
+    })
+
+    test('a full InputTypeInput is valid payload.update data', () => {
+      const data = {} as InputTypeInput
+      expect(payload.update).type.toBeCallableWith({ collection: 'input-types', data, id: 1 })
+    })
+
+    test('input field values (relationship, hasMany, polymorphic, upload, defaulted) are valid update data', () => {
+      const input = {} as InputTypeInput
+      expect(payload.update).type.toBeCallableWith({
+        collection: 'input-types',
+        data: {
+          categories: input.categories,
+          category: input.category,
+          image: input.image,
+          related: input.related,
+          status: input.status,
+        },
+        id: 1,
+      })
+    })
+
+    test('input rich text (ID-only relationship + block nodes) is valid update data', () => {
+      const richText = {} as InputTypeInput['richText']
+      expect(payload.update).type.toBeCallableWith({ collection: 'input-types', data: { richText }, id: 1 })
+    })
+  })
+
   describe('strictDraftTypes flag', () => {
     describe('query operations', () => {
       test('draft find query returns optional required fields when flag is enabled', async () => {

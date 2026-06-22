@@ -1,4 +1,9 @@
-import { lexicalEditor, UploadFeature } from '@payloadcms/richtext-lexical'
+import {
+  BlocksFeature,
+  lexicalEditor,
+  RelationshipFeature,
+  UploadFeature,
+} from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -178,6 +183,21 @@ export default buildConfigWithDefaults({
         { name: 'categories', type: 'relationship', hasMany: true, relationTo: 'pages-categories' },
         { name: 'related', type: 'relationship', relationTo: ['pages', 'pages-categories'] },
         { name: 'image', type: 'upload', relationTo: 'media' },
+        {
+          name: 'richText',
+          type: 'richText',
+          editor: lexicalEditor({
+            features: ({ defaultFeatures }) => [
+              ...defaultFeatures,
+              RelationshipFeature(),
+              BlocksFeature({
+                blocks: [
+                  { slug: 'cta', fields: [{ name: 'link', type: 'relationship', relationTo: 'pages' }] },
+                ],
+              }),
+            ],
+          }),
+        },
         { name: 'computedTitle', type: 'text', virtual: true },
       ],
       versions: false,

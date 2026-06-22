@@ -135,6 +135,70 @@ export type LexicalNodes_D164F3F6_Input =
   | SerializedListNode<LexicalNodes_D164F3F6_Input>
   | SerializedListItemNode<LexicalNodes_D164F3F6_Input>
   | SerializedHeadingNode<LexicalNodes_D164F3F6_Input>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_8AA0D32D".
+ */
+export type LexicalNodes_8AA0D32D =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_8AA0D32D>
+  | SerializedBlockNode<Cta>
+  | SerializedRelationshipNode<
+      | 'posts'
+      | 'pages'
+      | 'pages-categories'
+      | 'draft-posts'
+      | 'input-types'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNode<'media'>
+  | SerializedUploadNode<'gallery'>
+  | SerializedQuoteNode<LexicalNodes_8AA0D32D>
+  | SerializedAutoLinkNode<LexicalNodes_8AA0D32D, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_8AA0D32D, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_8AA0D32D>
+  | SerializedListItemNode<LexicalNodes_8AA0D32D>
+  | SerializedHeadingNode<LexicalNodes_8AA0D32D>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_8D60E965_Input".
+ */
+export type LexicalNodes_8D60E965_Input =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_8D60E965_Input>
+  | SerializedBlockNode<CtaInput>
+  | SerializedRelationshipNodeInput<
+      | 'posts'
+      | 'pages'
+      | 'pages-categories'
+      | 'draft-posts'
+      | 'input-types'
+      | 'users'
+      | 'payload-mcp-api-keys'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >
+  | SerializedHorizontalRuleNode
+  | SerializedUploadNodeInput<'media'>
+  | SerializedUploadNodeInput<'gallery'>
+  | SerializedQuoteNode<LexicalNodes_8D60E965_Input>
+  | SerializedAutoLinkNode<LexicalNodes_8D60E965_Input, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_8D60E965_Input, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_8D60E965_Input>
+  | SerializedListItemNode<LexicalNodes_8D60E965_Input>
+  | SerializedHeadingNode<LexicalNodes_8D60E965_Input>;
 
 export interface Config {
   auth: {
@@ -355,6 +419,7 @@ export interface InputType {
         value: string | PagesCategory;
       } | null);
   image?: (string | null) | Media;
+  richText?: LexicalRichText<LexicalNodes_8AA0D32D> | null;
   computedTitle?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -609,6 +674,7 @@ export interface InputTypesSelect<T extends boolean = true> {
   categories?: T;
   related?: T;
   image?: T;
+  richText?: T;
   computedTitle?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -842,6 +908,7 @@ export interface InputTypeInput {
         value: string;
       } | null);
   image?: string | null;
+  richText?: LexicalRichText<LexicalNodes_8D60E965_Input> | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1017,6 +1084,26 @@ export interface LexicalUploadFields_9521FA4A {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Cta".
+ */
+export interface Cta {
+  id: string;
+  blockType: 'cta';
+  link?: (string | null) | Page;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CtaInput".
+ */
+export interface CtaInput {
+  id: string;
+  blockType: 'cta';
+  link?: string | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -1180,6 +1267,18 @@ export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collect
     value: number | string;
   };
 }[TSlugs];
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
 
 
 declare module 'payload' {
