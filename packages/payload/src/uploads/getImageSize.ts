@@ -17,15 +17,17 @@ type Args = {
 }
 
 export async function getImageSize({ file, sharp }: Args): Promise<ProbedImageSize> {
+  // `tempFilePath` may be an empty string when the file is held in memory
+  const tempFilePath = file?.tempFilePath || undefined
+
   if (sharp) {
-    const input = file?.tempFilePath ?? file!.data
-    const { height, width } = await sharp(input).metadata()
+    const { height, width } = await sharp(tempFilePath ?? file!.data).metadata()
     if (width && height) {
       return { height, width }
     }
   }
 
-  const data = file?.tempFilePath ? await fs.readFile(file.tempFilePath) : file!.data
+  const data = tempFilePath ? await fs.readFile(tempFilePath) : file!.data
 
   return probeImageSize(data)
 }
