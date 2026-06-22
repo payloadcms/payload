@@ -1,6 +1,7 @@
 import type { JSONSchema4 } from 'json-schema'
 import type {
   DataFromCollectionSlug,
+  IDTypeForCollectionSlug,
   JsonObject,
   TypedUploadCollection,
   UploadCollectionSlug,
@@ -23,7 +24,7 @@ export type UploadData<TFields extends JsonObject = JsonObject> = {
     id: string
     relationTo: TCollectionSlug
     /** Either the document ID or the full populated document. */
-    value: DataFromCollectionSlug<TCollectionSlug> | number | string
+    value: DataFromCollectionSlug<TCollectionSlug> | IDTypeForCollectionSlug<TCollectionSlug>
   }
 }[UploadCollectionSlug]
 
@@ -47,7 +48,7 @@ export type UploadDataImproved<TFields extends JsonObject = JsonObject> = {
     fields: TFields
     id: string
     relationTo: TCollectionSlug
-    value: number | string | TypedUploadCollection[TCollectionSlug]
+    value: IDTypeForCollectionSlug<TCollectionSlug> | TypedUploadCollection[TCollectionSlug]
   }
 }[UploadCollectionSlug]
 
@@ -57,7 +58,7 @@ export type SerializedUploadNode<
 > = {
   [TSlug in TSlugs]: {
     relationTo: TSlug
-    value: DataFromCollectionSlug<TSlug> | number | string
+    value: DataFromCollectionSlug<TSlug> | IDTypeForCollectionSlug<TSlug>
   }
 }[TSlugs] & {
   fields: TFields
@@ -77,7 +78,7 @@ const SERIALIZED_UPLOAD_NODE_TS = `export type SerializedUploadNode<TSlugs exten
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];`
 
@@ -91,7 +92,7 @@ const SERIALIZED_UPLOAD_NODE_INPUT_TS = `export type SerializedUploadNodeInput<T
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string;
+    value: Config['collections'][TSlug]['id'];
   };
 }[TSlugs];`
 

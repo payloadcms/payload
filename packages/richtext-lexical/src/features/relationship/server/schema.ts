@@ -1,5 +1,10 @@
 import type { JSONSchema4 } from 'json-schema'
-import type { CollectionSlug, DataFromCollectionSlug, UploadCollectionSlug } from 'payload'
+import type {
+  CollectionSlug,
+  DataFromCollectionSlug,
+  IDTypeForCollectionSlug,
+  UploadCollectionSlug,
+} from 'payload'
 
 import type { LexicalElementFormat } from '../../../types/nodeTypes.js'
 import type { JSONSchemaFn } from '../../typesServer.js'
@@ -11,7 +16,7 @@ import { filterEnabledRelationshipCollections } from '../shared/filterEnabledRel
 export type RelationshipData = {
   [TCollectionSlug in CollectionSlug]: {
     relationTo: TCollectionSlug
-    value: DataFromCollectionSlug<TCollectionSlug> | number | string
+    value: DataFromCollectionSlug<TCollectionSlug> | IDTypeForCollectionSlug<TCollectionSlug>
   }
 }[CollectionSlug]
 
@@ -27,7 +32,7 @@ export type NonUploadCollectionSlug = [Exclude<CollectionSlug, UploadCollectionS
 export type SerializedRelationshipNode<TSlugs extends CollectionSlug = NonUploadCollectionSlug> = {
   [TSlug in TSlugs]: {
     relationTo: TSlug
-    value: DataFromCollectionSlug<TSlug> | number | string
+    value: DataFromCollectionSlug<TSlug> | IDTypeForCollectionSlug<TSlug>
   }
 }[TSlugs] & {
   format: LexicalElementFormat
@@ -43,7 +48,7 @@ const SERIALIZED_RELATIONSHIP_NODE_TS = `export type SerializedRelationshipNode<
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];`
 
@@ -55,7 +60,7 @@ const SERIALIZED_RELATIONSHIP_NODE_INPUT_TS = `export type SerializedRelationshi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string;
+    value: Config['collections'][TSlug]['id'];
   };
 }[TSlugs];`
 

@@ -1369,6 +1369,7 @@ export type {
   CollectionConfig,
   DataFromCollectionSlug,
   HookOperationType,
+  IDTypeForCollectionSlug,
   MeHook as CollectionMeHook,
   RefreshHook as CollectionRefreshHook,
   RequiredDataFromCollection,

@@ -6181,7 +6181,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -6230,7 +6230,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -6255,7 +6255,7 @@ export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections']
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string;
+    value: Config['collections'][TSlug]['id'];
   };
 }[TSlugs];
 
@@ -6266,7 +6266,7 @@ export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collect
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string;
+    value: Config['collections'][TSlug]['id'];
   };
 }[TSlugs];
 
