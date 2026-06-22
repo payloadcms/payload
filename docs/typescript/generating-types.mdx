@@ -186,7 +186,19 @@ export interface Post {
 
 ## Input and output types
 
-By default, Payload generates **two** interfaces for each collection and global: an **output** (read) type and an **input** (write) type.
+Payload can optionally generate a second, write-shaped **input** type alongside the **output** (read) type for each collection and global. It's **opt-in** — enable it with `typescript.generateInputTypes: true`:
+
+```ts
+// payload.config.ts
+{
+  // ...
+  typescript: {
+    generateInputTypes: true, // defaults to false
+  },
+}
+```
+
+When enabled, you get two interfaces per entity:
 
 - `Post` — the **output** shape, returned by `find`, `findByID`, and similar read operations.
 - `PostInput` — the **input** shape, describing the `data` you write in `create` and `update`.
@@ -221,18 +233,7 @@ type PostInput = Config['collectionsInput']['posts']
 type MenuInput = Config['globalsInput']['menu']
 ```
 
-### Disabling input types
-
-Set `typescript.generateInputTypes` to `false` to skip them — only the output types are generated. Output types are byte-for-byte identical whether or not input types are enabled.
-
-```ts
-{
-  // ...
-  typescript: {
-    generateInputTypes: false, // defaults to true
-  },
-}
-```
+Enabling input types is purely additive — the **output** types are byte-for-byte identical whether or not it's on, so turning it on only adds the new `*Input` defs and `collectionsInput` / `globalsInput` maps.
 
 ### Using input types with the Local API
 

@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_3CBD56AD".
+ * via the `definition` "LexicalNodes_464B7BF4".
  */
-export type LexicalNodes_3CBD56AD =
+export type LexicalNodes_464B7BF4 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_3CBD56AD>
-  | SerializedAutoLinkNode<LexicalNodes_3CBD56AD, LexicalLinkFields_11D2ED94>
-  | SerializedLinkNode<LexicalNodes_3CBD56AD, LexicalLinkFields_11D2ED94>
+  | SerializedParagraphNode<LexicalNodes_464B7BF4>
+  | SerializedAutoLinkNode<LexicalNodes_464B7BF4, LexicalLinkFields_11D2ED94>
+  | SerializedLinkNode<LexicalNodes_464B7BF4, LexicalLinkFields_11D2ED94>
   | SerializedBlockNode<NestedBlock>
   | SerializedHorizontalRuleNode
   | {
@@ -81,7 +81,7 @@ export type LexicalNodes_3CBD56AD =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_3CBD56AD>
+  | SerializedQuoteNode<LexicalNodes_464B7BF4>
   | SerializedRelationshipNode<
       | 'beforeOperation'
       | 'before-change-hooks'
@@ -106,59 +106,9 @@ export type LexicalNodes_3CBD56AD =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedListNode<LexicalNodes_3CBD56AD>
-  | SerializedListItemNode<LexicalNodes_3CBD56AD>
-  | SerializedHeadingNode<LexicalNodes_3CBD56AD>;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_0D32AE1F_Input".
- */
-export type LexicalNodes_0D32AE1F_Input =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_0D32AE1F_Input>
-  | SerializedAutoLinkNode<LexicalNodes_0D32AE1F_Input, LexicalLinkFields_9E3E471D>
-  | SerializedLinkNode<LexicalNodes_0D32AE1F_Input, LexicalLinkFields_9E3E471D>
-  | SerializedBlockNode<NestedBlock>
-  | SerializedHorizontalRuleNode
-  | {
-      type: 'upload';
-      /**
-       * Lexical's internal serialization version for this node type.
-       */
-      version: number;
-      [k: string]: unknown;
-    }
-  | SerializedQuoteNode<LexicalNodes_0D32AE1F_Input>
-  | SerializedRelationshipNodeInput<
-      | 'beforeOperation'
-      | 'before-change-hooks'
-      | 'before-validate'
-      | 'afterOperation'
-      | 'context-hooks'
-      | 'transforms'
-      | 'hooks'
-      | 'nested-after-read-hooks'
-      | 'nested-after-change-hooks'
-      | 'chaining-hooks'
-      | 'relations'
-      | 'hooks-users'
-      | 'data-hooks'
-      | 'before-delete-hooks'
-      | 'before-delete-2-hooks'
-      | 'value-hooks'
-      | 'after-read'
-      | 'override-access-hooks'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >
-  | SerializedListNode<LexicalNodes_0D32AE1F_Input>
-  | SerializedListItemNode<LexicalNodes_0D32AE1F_Input>
-  | SerializedHeadingNode<LexicalNodes_0D32AE1F_Input>;
+  | SerializedListNode<LexicalNodes_464B7BF4>
+  | SerializedListItemNode<LexicalNodes_464B7BF4>
+  | SerializedHeadingNode<LexicalNodes_464B7BF4>;
 
 export interface Config {
   auth: {
@@ -227,34 +177,6 @@ export interface Config {
   locale: null;
   widgets: {
     collections: CollectionsWidget;
-  };
-  collectionsInput: {
-    beforeOperation: BeforeOperationInput;
-    'before-change-hooks': BeforeChangeHookInput;
-    'before-validate': BeforeValidateInput;
-    afterOperation: AfterOperationInput;
-    'context-hooks': ContextHookInput;
-    transforms: TransformInput;
-    hooks: HookInput;
-    'nested-after-read-hooks': NestedAfterReadHookInput;
-    'nested-after-change-hooks': NestedAfterChangeHookInput;
-    'chaining-hooks': ChainingHookInput;
-    relations: RelationInput;
-    'hooks-users': HooksUserInput;
-    'data-hooks': DataHookInput;
-    'before-delete-hooks': BeforeDeleteHookInput;
-    'before-delete-2-hooks': BeforeDelete2HookInput;
-    'value-hooks': ValueHookInput;
-    'after-read': AfterReadInput;
-    'override-access-hooks': OverrideAccessHookInput;
-    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
-    'payload-kv': PayloadKvInput;
-    'payload-locked-documents': PayloadLockedDocumentInput;
-    'payload-preferences': PayloadPreferenceInput;
-    'payload-migrations': PayloadMigrationInput;
-  };
-  globalsInput: {
-    'data-hooks-global': DataHooksGlobalInput;
   };
   user: HooksUser;
   jobs: {
@@ -418,7 +340,7 @@ export interface NestedAfterChangeHook {
         }[]
       | null;
   };
-  lexical?: LexicalRichText<LexicalNodes_3CBD56AD> | null;
+  lexical?: LexicalRichText<LexicalNodes_464B7BF4> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -978,390 +900,6 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "beforeOperation_input".
- */
-export interface BeforeOperationInput {
-  id?: string;
-  category?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "before-change-hooks_input".
- */
-export interface BeforeChangeHookInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "before-validate_input".
- */
-export interface BeforeValidateInput {
-  id?: string;
-  title?: string | null;
-  selection?: ('a' | 'b') | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "afterOperation_input".
- */
-export interface AfterOperationInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "context-hooks_input".
- */
-export interface ContextHookInput {
-  id?: string;
-  value?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "transforms_input".
- */
-export interface TransformInput {
-  id?: string;
-  /**
-   * @minItems 2
-   * @maxItems 2
-   */
-  transform?: [number, number] | null;
-  /**
-   * @minItems 2
-   * @maxItems 2
-   */
-  localizedTransform?: [number, number] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hooks_input".
- */
-export interface HookInput {
-  id?: string;
-  fieldBeforeValidate?: boolean | null;
-  fieldBeforeChange?: boolean | null;
-  fieldAfterChange?: boolean | null;
-  fieldAfterRead?: boolean | null;
-  collectionBeforeValidate?: boolean | null;
-  collectionBeforeChange?: boolean | null;
-  collectionAfterChange?: boolean | null;
-  collectionBeforeRead?: boolean | null;
-  collectionAfterRead?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "nested-after-read-hooks_input".
- */
-export interface NestedAfterReadHookInput {
-  id?: string;
-  text?: string | null;
-  group?: {
-    array?:
-      | {
-          input?: string | null;
-          afterRead?: string | null;
-          shouldPopulate?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-    subGroup?: {
-      afterRead?: string | null;
-      shouldPopulate?: string | null;
-    };
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "nested-after-change-hooks_input".
- */
-export interface NestedAfterChangeHookInput {
-  id?: string;
-  text?: string | null;
-  group?: {
-    array?:
-      | {
-          nestedAfterChange?: string | null;
-          id?: string | null;
-        }[]
-      | null;
-  };
-  lexical?: LexicalRichText<LexicalNodes_0D32AE1F_Input> | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "chaining-hooks_input".
- */
-export interface ChainingHookInput {
-  id?: string;
-  text?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relations_input".
- */
-export interface RelationInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "hooks-users_input".
- */
-export interface HooksUserInput {
-  id?: string;
-  roles?: ('admin' | 'user')[];
-  afterLoginHook?: boolean | null;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "data-hooks_input".
- */
-export interface DataHookInput {
-  id?: string;
-  field_collectionAndField?: string | null;
-  collection_beforeOperation_collection?: string | null;
-  collection_beforeChange_collection?: string | null;
-  collection_afterChange_collection?: string | null;
-  collection_beforeRead_collection?: string | null;
-  collection_afterRead_collection?: string | null;
-  collection_afterOperation_collection?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "before-delete-hooks_input".
- */
-export interface BeforeDeleteHookInput {
-  id?: string;
-  title?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "before-delete-2-hooks_input".
- */
-export interface BeforeDelete2HookInput {
-  id?: string;
-  title?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "value-hooks_input".
- */
-export interface ValueHookInput {
-  id?: string;
-  slug?: string | null;
-  beforeValidate_value?: string | null;
-  beforeChange_value?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "after-read_input".
- */
-export interface AfterReadInput {
-  id?: string;
-  title?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "override-access-hooks_input".
- */
-export interface OverrideAccessHookInput {
-  id?: string;
-  title?: string | null;
-  beforeReadCalled?: boolean | null;
-  beforeReadOverrideAccess?: boolean | null;
-  afterReadCalled?: boolean | null;
-  afterReadOverrideAccess?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_input".
- */
-export interface PayloadMcpApiKeyInput {
-  id?: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string;
-  overrideAccess?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_input".
- */
-export interface PayloadKvInput {
-  id?: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_input".
- */
-export interface PayloadLockedDocumentInput {
-  id?: string;
-  document?:
-    | ({
-        relationTo: 'beforeOperation';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'before-change-hooks';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'before-validate';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'afterOperation';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'context-hooks';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'transforms';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'hooks';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'nested-after-read-hooks';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'nested-after-change-hooks';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'chaining-hooks';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'relations';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'hooks-users';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'data-hooks';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'before-delete-hooks';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'before-delete-2-hooks';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'value-hooks';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'after-read';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'override-access-hooks';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'hooks-users';
-    value: string;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-preferences_input".
- */
-export interface PayloadPreferenceInput {
-  id?: string;
-  user: {
-    relationTo: 'hooks-users';
-    value: string;
-  };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_input".
- */
-export interface PayloadMigrationInput {
-  id?: string;
-  name?: string | null;
-  batch?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "data-hooks-global_input".
- */
-export interface DataHooksGlobalInput {
-  id?: string;
-  field_globalAndField?: string | null;
-  global_beforeChange_global?: string | null;
-  global_afterChange_global?: string | null;
-  global_beforeRead_global?: string | null;
-  global_afterRead_global?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "NestedLinkBlock".
  */
 export interface NestedLinkBlock {
@@ -1399,36 +937,6 @@ export interface NestedBlock {
   blockType: 'nestedBlock';
   nestedAfterChange?: string | null;
   blockName?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "NestedLinkBlockInput".
- */
-export interface NestedLinkBlockInput {
-  nestedRelationship?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'nestedLinkBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalLinkFields_9E3E471D".
- */
-export interface LexicalLinkFields_9E3E471D {
-  linkBlocks?: NestedLinkBlockInput[] | null;
-  doc?: {
-    relationTo: string;
-    value:
-      | string
-      | number
-      | {
-          id: string | number;
-          [k: string]: unknown;
-        };
-  } | null;
-  linkType: 'custom' | 'internal';
-  newTab: boolean;
-  url?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1583,30 +1091,6 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
-
-export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
-  type: 'upload';
-  format: LexicalElementFormat;
-  id: string;
-  version: number;
-  fields: TFields;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
-
-export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
 
 
 declare module 'payload' {

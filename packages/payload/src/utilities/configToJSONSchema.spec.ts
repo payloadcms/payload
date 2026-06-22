@@ -129,29 +129,29 @@ describe('configToJSONSchema', () => {
     })
   })
 
-  it('should generate input types by default and skip them when disabled', async () => {
+  it('should skip input types by default and generate them when enabled', async () => {
     // @ts-expect-error partial config
-    const onByDefault: Config = {
+    const offByDefault: Config = {
       collections: [{ slug: 'posts', fields: [{ name: 'title', type: 'text' }] }],
     }
     const { jsonSchema: defaultSchema } = configToJSONSchema(
-      await sanitizeConfig(onByDefault),
+      await sanitizeConfig(offByDefault),
       'text',
     )
-    expect(defaultSchema?.$defs?.posts_input).toBeDefined()
-    expect(defaultSchema?.properties?.collectionsInput).toBeDefined()
+    expect(defaultSchema?.$defs?.posts_input).toBeUndefined()
+    expect(defaultSchema?.properties?.collectionsInput).toBeUndefined()
 
     // @ts-expect-error partial config
-    const disabled: Config = {
+    const enabled: Config = {
       collections: [{ slug: 'posts', fields: [{ name: 'title', type: 'text' }] }],
-      typescript: { generateInputTypes: false },
+      typescript: { generateInputTypes: true },
     }
-    const { jsonSchema: disabledSchema } = configToJSONSchema(
-      await sanitizeConfig(disabled),
+    const { jsonSchema: enabledSchema } = configToJSONSchema(
+      await sanitizeConfig(enabled),
       'text',
     )
-    expect(disabledSchema?.$defs?.posts_input).toBeUndefined()
-    expect(disabledSchema?.properties?.collectionsInput).toBeUndefined()
+    expect(enabledSchema?.$defs?.posts_input).toBeDefined()
+    expect(enabledSchema?.properties?.collectionsInput).toBeDefined()
   })
 
   it('should generate Input-suffixed definitions for named interfaces and blocks', async () => {

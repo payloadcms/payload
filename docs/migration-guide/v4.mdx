@@ -623,14 +623,6 @@ Inline blocks continue to work as before:
 }
 ```
 
-### Collections and globals now generate a separate input type
-
-Payload now generates a write-shaped **input** type for every collection and global, alongside the existing read type — `PostInput` next to `Post`, `MenuInput` next to `Menu` — and adds `collectionsInput` / `globalsInput` maps to the generated `Config` interface. This is on by default; the read types are byte-for-byte unchanged.
-
-The input type narrows the read type to what you actually write: relationship and upload fields (and rich-text relationship/upload nodes) become ID-only, `id` and `defaultValue` fields become optional, and `createdAt` / `updatedAt` / `_status` / virtual / join fields are dropped.
-
-This is **additive** — existing imports of `Post` / `collections[...]` are unaffected; the generated file just grows. The Local API's `create` / `update` still type `data` against the read shape, and a `PostInput` value stays assignable to them. Opt out with `typescript.generateInputTypes: false`. See [Input and output types](/docs/typescript/generating-types#input-and-output-types).
-
 ### Lexical: generated `payload-types.ts` shape changed
 
 `richText` fields backed by `lexicalEditor` used to emit a permissive `{ [k: string]: unknown }` per field. They now emit a discriminated union of strict per-node interfaces (`SerializedTextNode`, `SerializedParagraphNode`, `SerializedHeadingNode`, `SerializedBlockNode`, etc.) under a hash-named alias like `LexicalNodes_AB12CD34`.

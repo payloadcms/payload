@@ -70,8 +70,8 @@ export interface Config {
     tickets: Ticket;
     revenue: Revenue;
     events: Event;
-    users: User;
     'payload-kv': PayloadKv;
+    users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -81,8 +81,8 @@ export interface Config {
     tickets: TicketsSelect<false> | TicketsSelect<true>;
     revenue: RevenueSelect<false> | RevenueSelect<true>;
     events: EventsSelect<false> | EventsSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -102,18 +102,6 @@ export interface Config {
     configurable: ConfigurableWidget;
     collections: CollectionsWidget;
   };
-  collectionsInput: {
-    tickets: TicketInput;
-    revenue: RevenueInput;
-    events: EventInput;
-    users: UserInput;
-    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
-    'payload-kv': PayloadKvInput;
-    'payload-locked-documents': PayloadLockedDocumentInput;
-    'payload-preferences': PayloadPreferenceInput;
-    'payload-migrations': PayloadMigrationInput;
-  };
-  globalsInput: {};
   user: User;
   jobs: {
     tasks: unknown;
@@ -334,6 +322,14 @@ export interface EventsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -353,14 +349,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -459,170 +447,6 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tickets_input".
- */
-export interface TicketInput {
-  id?: string;
-  title: string;
-  description?: string | null;
-  status?: 'open' | 'in-progress' | 'closed';
-  priority?: 'low' | 'medium' | 'high' | 'critical';
-  assignee?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "revenue_input".
- */
-export interface RevenueInput {
-  id?: string;
-  amount: number;
-  description: string;
-  date?: string;
-  category?: 'sales' | 'subscriptions' | 'services' | 'other';
-  source?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "events_input".
- */
-export interface EventInput {
-  id?: string;
-  title: string;
-  description?: string | null;
-  startDate: string;
-  endDate?: string | null;
-  location?: string | null;
-  type?: 'meeting' | 'conference' | 'workshop' | 'webinar' | 'other';
-  organizer?: string | null;
-  status?: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_input".
- */
-export interface UserInput {
-  id?: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_input".
- */
-export interface PayloadMcpApiKeyInput {
-  id?: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string;
-  overrideAccess?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_input".
- */
-export interface PayloadKvInput {
-  id?: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_input".
- */
-export interface PayloadLockedDocumentInput {
-  id?: string;
-  document?:
-    | ({
-        relationTo: 'tickets';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'revenue';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'events';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-preferences_input".
- */
-export interface PayloadPreferenceInput {
-  id?: string;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_input".
- */
-export interface PayloadMigrationInput {
-  id?: string;
-  name?: string | null;
-  batch?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

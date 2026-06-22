@@ -62,18 +62,18 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_AE9E55AF".
+ * via the `definition` "LexicalNodes_E51C3FCC".
  */
-export type LexicalNodes_AE9E55AF =
+export type LexicalNodes_E51C3FCC =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_AE9E55AF>
-  | SerializedAutoLinkNode<LexicalNodes_AE9E55AF, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_AE9E55AF, LexicalLinkFields>
+  | SerializedParagraphNode<LexicalNodes_E51C3FCC>
+  | SerializedAutoLinkNode<LexicalNodes_E51C3FCC, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_E51C3FCC, LexicalLinkFields>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'upload'>
-  | SerializedQuoteNode<LexicalNodes_AE9E55AF>
+  | SerializedQuoteNode<LexicalNodes_E51C3FCC>
   | SerializedRelationshipNode<
       | 'posts'
       | 'localized-posts'
@@ -91,44 +91,9 @@ export type LexicalNodes_AE9E55AF =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedListNode<LexicalNodes_AE9E55AF>
-  | SerializedListItemNode<LexicalNodes_AE9E55AF>
-  | SerializedHeadingNode<LexicalNodes_AE9E55AF>;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_A2D7B181_Input".
- */
-export type LexicalNodes_A2D7B181_Input =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_A2D7B181_Input>
-  | SerializedAutoLinkNode<LexicalNodes_A2D7B181_Input, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_A2D7B181_Input, LexicalLinkFields>
-  | SerializedHorizontalRuleNode
-  | SerializedUploadNodeInput<'upload'>
-  | SerializedQuoteNode<LexicalNodes_A2D7B181_Input>
-  | SerializedRelationshipNodeInput<
-      | 'posts'
-      | 'localized-posts'
-      | 'versioned-posts'
-      | 'deep-posts'
-      | 'pages'
-      | 'points'
-      | 'force-select'
-      | 'rels'
-      | 'relationships-blocks'
-      | 'custom-ids'
-      | 'users'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >
-  | SerializedListNode<LexicalNodes_A2D7B181_Input>
-  | SerializedListItemNode<LexicalNodes_A2D7B181_Input>
-  | SerializedHeadingNode<LexicalNodes_A2D7B181_Input>;
+  | SerializedListNode<LexicalNodes_E51C3FCC>
+  | SerializedListItemNode<LexicalNodes_E51C3FCC>
+  | SerializedHeadingNode<LexicalNodes_E51C3FCC>;
 
 export interface Config {
   auth: {
@@ -187,29 +152,6 @@ export interface Config {
   locale: 'en' | 'de';
   widgets: {
     collections: CollectionsWidget;
-  };
-  collectionsInput: {
-    posts: PostInput;
-    'localized-posts': LocalizedPostInput;
-    'versioned-posts': VersionedPostInput;
-    'deep-posts': DeepPostInput;
-    pages: PageInput;
-    points: PointInput;
-    'force-select': ForceSelectInput;
-    upload: UploadInput;
-    rels: RelInput;
-    'relationships-blocks': RelationshipsBlockInput;
-    'custom-ids': CustomIdInput;
-    users: UserInput;
-    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
-    'payload-kv': PayloadKvInput;
-    'payload-locked-documents': PayloadLockedDocumentInput;
-    'payload-preferences': PayloadPreferenceInput;
-    'payload-migrations': PayloadMigrationInput;
-  };
-  globalsInput: {
-    'global-post': GlobalPostInput;
-    'force-select-global': ForceSelectGlobalInput;
   };
   user: User;
   jobs: {
@@ -504,7 +446,7 @@ export interface Introduction {
       | null;
     label: string;
   };
-  richTextLexical?: LexicalRichText<LexicalNodes_AE9E55AF> | null;
+  richTextLexical?: LexicalRichText<LexicalNodes_E51C3FCC> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'introduction';
@@ -1183,428 +1125,6 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_input".
- */
-export interface PostInput {
-  id?: string;
-  text?: string | null;
-  number?: number | null;
-  select?: ('a' | 'b') | null;
-  selectMany?: ('a' | 'b')[] | null;
-  group?: {
-    text?: string | null;
-    number?: number | null;
-  };
-  array?:
-    | {
-        text?: string | null;
-        number?: number | null;
-        id?: string | null;
-      }[]
-    | null;
-  blocks?: (Intro | Cta)[] | null;
-  tab?: {
-    text?: string | null;
-    number?: number | null;
-  };
-  unnamedTabText?: string | null;
-  unnamedTabNumber?: number | null;
-  hasOne?: string | null;
-  hasMany?: string[] | null;
-  hasManyUpload?: string[] | null;
-  hasOnePoly?: {
-    relationTo: 'rels';
-    value: string;
-  } | null;
-  hasManyPoly?:
-    | {
-        relationTo: 'rels';
-        value: string;
-      }[]
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized-posts_input".
- */
-export interface LocalizedPostInput {
-  id?: string;
-  text?: string | null;
-  number?: number | null;
-  select?: ('a' | 'b') | null;
-  selectMany?: ('a' | 'b')[] | null;
-  group?: {
-    text?: string | null;
-    number?: number | null;
-  };
-  groupSecond?: {
-    text?: string | null;
-    number?: number | null;
-  };
-  array?:
-    | {
-        text?: string | null;
-        number?: number | null;
-        id?: string | null;
-      }[]
-    | null;
-  arraySecond?:
-    | {
-        text?: string | null;
-        number?: number | null;
-        id?: string | null;
-      }[]
-    | null;
-  blocks?: (Intro | Cta)[] | null;
-  blocksSecond?: (First | Second)[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "versioned-posts_input".
- */
-export interface VersionedPostInput {
-  id?: string;
-  text?: string | null;
-  number?: number | null;
-  array?:
-    | {
-        text?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  blocks?: Test[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "deep-posts_input".
- */
-export interface DeepPostInput {
-  id?: string;
-  group?: {
-    array?:
-      | {
-          group?: {
-            text?: string | null;
-            number?: number | null;
-          };
-          id?: string | null;
-        }[]
-      | null;
-    blocks?: Block[] | null;
-  };
-  arrayTop?:
-    | {
-        text?: string | null;
-        arrayNested?:
-          | {
-              text?: string | null;
-              number?: number | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_input".
- */
-export interface PageInput {
-  id?: string;
-  relatedPage?: string | null;
-  content?: IntroductionInput[] | null;
-  slug: string;
-  additional?: string | null;
-  array?:
-    | {
-        title?: string | null;
-        other?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  blocks?: Some[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "IntroductionInput".
- */
-export interface IntroductionInput {
-  title: string;
-  link: {
-    docPoly?: {
-      relationTo: 'pages';
-      value: string;
-    } | null;
-    doc?: string | null;
-    docMany?: string[] | null;
-    docHasManyPoly?:
-      | {
-          relationTo: 'pages';
-          value: string;
-        }[]
-      | null;
-    label: string;
-  };
-  richTextLexical?: LexicalRichText<LexicalNodes_A2D7B181_Input> | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'introduction';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "points_input".
- */
-export interface PointInput {
-  id?: string;
-  text?: string | null;
-  /**
-   * @minItems 2
-   * @maxItems 2
-   */
-  point?: [number, number] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "force-select_input".
- */
-export interface ForceSelectInput {
-  id?: string;
-  text?: string | null;
-  field1?: string | null;
-  field2?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "upload_input".
- */
-export interface UploadInput {
-  id?: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "rels_input".
- */
-export interface RelInput {
-  id?: string;
-  text?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationships-blocks_input".
- */
-export interface RelationshipsBlockInput {
-  id?: string;
-  blocks?: BlockInput[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BlockInput".
- */
-export interface BlockInput {
-  hasMany?: string[] | null;
-  hasOne?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'block';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-ids_input".
- */
-export interface CustomIdInput {
-  id?: number;
-  text?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_input".
- */
-export interface UserInput {
-  id?: string;
-  name?: string | null;
-  number?: number | null;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_input".
- */
-export interface PayloadMcpApiKeyInput {
-  id?: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string;
-  overrideAccess?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_input".
- */
-export interface PayloadKvInput {
-  id?: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_input".
- */
-export interface PayloadLockedDocumentInput {
-  id?: string;
-  document?:
-    | ({
-        relationTo: 'posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'localized-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'versioned-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'deep-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'pages';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'points';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'force-select';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'upload';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'rels';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'relationships-blocks';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'custom-ids';
-        value: number;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-preferences_input".
- */
-export interface PayloadPreferenceInput {
-  id?: string;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_input".
- */
-export interface PayloadMigrationInput {
-  id?: string;
-  name?: string | null;
-  batch?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global-post_input".
- */
-export interface GlobalPostInput {
-  id?: string;
-  text?: string | null;
-  number?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "force-select-global_input".
- */
-export interface ForceSelectGlobalInput {
-  id?: string;
-  text?: string | null;
-  field1?: string | null;
-  field2?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -1744,30 +1264,6 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
-
-export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
-  type: 'upload';
-  format: LexicalElementFormat;
-  id: string;
-  version: number;
-  fields: TFields;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
-
-export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
 
 
 declare module 'payload' {

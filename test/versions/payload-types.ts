@@ -62,24 +62,24 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_F50D3E7C".
+ * via the `definition` "LexicalNodes_E98BC274".
  */
-export type LexicalNodes_F50D3E7C =
+export type LexicalNodes_E98BC274 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_F50D3E7C>
+  | SerializedParagraphNode<LexicalNodes_E98BC274>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_F50D3E7C>
+  | SerializedHeadingNode<LexicalNodes_E98BC274>
   | SerializedUploadNode<'draft-with-upload'>
   | SerializedUploadNode<'draft-with-upload-cloud-storage'>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
   | SerializedUploadNode<'media2'>
-  | SerializedQuoteNode<LexicalNodes_F50D3E7C>
-  | SerializedListNode<LexicalNodes_F50D3E7C>
-  | SerializedListItemNode<LexicalNodes_F50D3E7C>
-  | SerializedAutoLinkNode<LexicalNodes_F50D3E7C, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_F50D3E7C, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_E98BC274>
+  | SerializedListNode<LexicalNodes_E98BC274>
+  | SerializedListItemNode<LexicalNodes_E98BC274>
+  | SerializedAutoLinkNode<LexicalNodes_E98BC274, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_E98BC274, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'disable-publish'
       | 'posts'
@@ -99,55 +99,8 @@ export type LexicalNodes_F50D3E7C =
       | 'custom-ids'
       | 'diff'
       | 'text'
-      | 'users'
       | 'payload-kv'
-      | 'payload-jobs'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_0016D51A_Input".
- */
-export type LexicalNodes_0016D51A_Input =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_0016D51A_Input>
-  | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_0016D51A_Input>
-  | SerializedUploadNodeInput<'draft-with-upload'>
-  | SerializedUploadNodeInput<'draft-with-upload-cloud-storage'>
-  | SerializedUploadNodeInput<'media', LexicalUploadFields_1AB4670B>
-  | SerializedUploadNodeInput<'media2'>
-  | SerializedQuoteNode<LexicalNodes_0016D51A_Input>
-  | SerializedListNode<LexicalNodes_0016D51A_Input>
-  | SerializedListItemNode<LexicalNodes_0016D51A_Input>
-  | SerializedAutoLinkNode<LexicalNodes_0016D51A_Input, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_0016D51A_Input, LexicalLinkFields_0A7E9EC0>
-  | SerializedRelationshipNodeInput<
-      | 'disable-publish'
-      | 'posts'
-      | 'autosave-posts'
-      | 'autosave-with-draft-button-posts'
-      | 'autosave-multi-select-posts'
-      | 'autosave-with-validate-posts'
-      | 'draft-posts'
-      | 'drafts-no-read-versions'
-      | 'draft-with-max-posts'
-      | 'draft-posts-with-change-hook'
-      | 'drafts-with-custom-unpublish'
-      | 'draft-with-validate-posts'
-      | 'error-on-unpublish'
-      | 'localized-posts'
-      | 'version-posts'
-      | 'custom-ids'
-      | 'diff'
-      | 'text'
       | 'users'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
       | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -182,8 +135,8 @@ export interface Config {
     'draft-with-upload-cloud-storage': DraftWithUploadCloudStorage;
     media: Media;
     media2: Media2;
-    users: User;
     'payload-kv': PayloadKv;
+    users: User;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -213,8 +166,8 @@ export interface Config {
     'draft-with-upload-cloud-storage': DraftWithUploadCloudStorageSelect<false> | DraftWithUploadCloudStorageSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     media2: Media2Select<false> | Media2Select<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -249,48 +202,6 @@ export interface Config {
   locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
-  };
-  collectionsInput: {
-    'disable-publish': DisablePublishInput;
-    posts: PostInput;
-    'autosave-posts': AutosavePostInput;
-    'autosave-with-draft-button-posts': AutosaveWithDraftButtonPostInput;
-    'autosave-multi-select-posts': AutosaveMultiSelectPostInput;
-    'autosave-with-validate-posts': AutosaveWithValidatePostInput;
-    'draft-posts': DraftPostInput;
-    'drafts-no-read-versions': DraftsNoReadVersionInput;
-    'draft-with-max-posts': DraftWithMaxPostInput;
-    'draft-posts-with-change-hook': DraftPostsWithChangeHookInput;
-    'drafts-with-custom-unpublish': DraftsWithCustomUnpublishInput;
-    'draft-with-validate-posts': DraftWithValidatePostInput;
-    'error-on-unpublish': ErrorOnUnpublishInput;
-    'localized-posts': LocalizedPostInput;
-    'version-posts': VersionPostInput;
-    'custom-ids': CustomIdInput;
-    diff: DiffInput;
-    text: TextInput;
-    'draft-with-upload': DraftWithUploadInput;
-    'draft-with-upload-cloud-storage': DraftWithUploadCloudStorageInput;
-    media: MediaInput;
-    media2: Media2Input;
-    users: UserInput;
-    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
-    'payload-kv': PayloadKvInput;
-    'payload-jobs': PayloadJobInput;
-    'payload-locked-documents': PayloadLockedDocumentInput;
-    'payload-preferences': PayloadPreferenceInput;
-    'payload-migrations': PayloadMigrationInput;
-  };
-  globalsInput: {
-    'autosave-global': AutosaveGlobalInput;
-    'autosave-with-draft-button-global': AutosaveWithDraftButtonGlobalInput;
-    'draft-global': DraftGlobalInput;
-    'draft-with-max-global': DraftWithMaxGlobalInput;
-    'disable-publish-global': DisablePublishGlobalInput;
-    'localized-global': LocalizedGlobalInput;
-    'max-versions': MaxVersionInput;
-    'draft-unlimited-global': DraftUnlimitedGlobalInput;
-    'simple-draft-global': SimpleDraftGlobalInput;
   };
   user: User;
   jobs: {
@@ -354,7 +265,7 @@ export interface AutosavePost {
   title: string;
   relationship?: (string | null) | Post;
   computedTitle?: string | null;
-  richText?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
+  richText?: LexicalRichText<LexicalNodes_E98BC274> | null;
   json?:
     | {
         [k: string]: unknown;
@@ -652,8 +563,8 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
-  richtext?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
-  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
+  richtext?: LexicalRichText<LexicalNodes_E98BC274> | null;
+  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_E98BC274> | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
@@ -1526,6 +1437,14 @@ export interface Media2Select<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1545,14 +1464,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1829,747 +1740,6 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "disable-publish_input".
- */
-export interface DisablePublishInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_input".
- */
-export interface PostInput {
-  id?: string;
-  relationToAutosaves?: string | null;
-  relationToVersions?: string | null;
-  relationToDrafts?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-posts_input".
- */
-export interface AutosavePostInput {
-  id?: string;
-  title: string;
-  relationship?: string | null;
-  computedTitle?: string | null;
-  richText?: LexicalRichText<LexicalNodes_0016D51A_Input> | null;
-  json?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  description: string;
-  array?:
-    | {
-        text?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-with-draft-button-posts_input".
- */
-export interface AutosaveWithDraftButtonPostInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-multi-select-posts_input".
- */
-export interface AutosaveMultiSelectPostInput {
-  id?: string;
-  title: string;
-  tag?: ('blog' | 'essay' | 'portfolio')[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-with-validate-posts_input".
- */
-export interface AutosaveWithValidatePostInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-posts_input".
- */
-export interface DraftPostInput {
-  id?: string;
-  title: string;
-  description: string;
-  radio?: 'test' | null;
-  select?: ('test1' | 'test2')[] | null;
-  blocksField?: Block[] | null;
-  relation?: string | null;
-  restrictedToUpdate?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "drafts-no-read-versions_input".
- */
-export interface DraftsNoReadVersionInput {
-  id?: string;
-  title: string;
-  description?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-with-max-posts_input".
- */
-export interface DraftWithMaxPostInput {
-  id?: string;
-  title: string;
-  description: string;
-  radio?: 'test' | null;
-  select?: ('test1' | 'test2')[] | null;
-  blocksField?: Block[] | null;
-  relation?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-posts-with-change-hook_input".
- */
-export interface DraftPostsWithChangeHookInput {
-  id?: string;
-  title: string;
-  description: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "drafts-with-custom-unpublish_input".
- */
-export interface DraftsWithCustomUnpublishInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-with-validate-posts_input".
- */
-export interface DraftWithValidatePostInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "error-on-unpublish_input".
- */
-export interface ErrorOnUnpublishInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized-posts_input".
- */
-export interface LocalizedPostInput {
-  id?: string;
-  text?: string | null;
-  description?: string | null;
-  blocks?: (BlockInput | LocalizedTextBlock)[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BlockInput".
- */
-export interface BlockInput {
-  array?:
-    | {
-        relationship?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'block';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "version-posts_input".
- */
-export interface VersionPostInput {
-  id?: string;
-  title: string;
-  description: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-ids_input".
- */
-export interface CustomIdInput {
-  id?: string;
-  title?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "diff_input".
- */
-export interface DiffInput {
-  id?: string;
-  array?:
-    | {
-        textInArray?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  arrayLocalized?:
-    | {
-        textInArrayLocalized?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  blocks?:
-    | (SingleRelationshipBlockInput | ManyRelationshipBlockInput | TextBlock | CollapsibleBlock | TabsBlock)[]
-    | null;
-  checkbox?: boolean | null;
-  code?: string | null;
-  textInCollapsible?: string | null;
-  date?: string | null;
-  email?: string | null;
-  group?: {
-    textInGroup?: string | null;
-  };
-  textInUnnamedGroup?: string | null;
-  textInUnnamedLabeledGroup?: string | null;
-  number?: number | null;
-  /**
-   * @minItems 2
-   * @maxItems 2
-   */
-  point?: [number, number] | null;
-  json?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  radio?: ('option1' | 'option2') | null;
-  relationship?: string | null;
-  relationshipHasMany?: string[] | null;
-  relationshipPolymorphic?:
-    | ({
-        relationTo: 'draft-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'text';
-        value: string;
-      } | null);
-  relationshipHasManyPolymorphic?:
-    | (
-        | {
-            relationTo: 'draft-posts';
-            value: string;
-          }
-        | {
-            relationTo: 'text';
-            value: string;
-          }
-      )[]
-    | null;
-  relationshipHasManyPolymorphic2?:
-    | (
-        | {
-            relationTo: 'draft-posts';
-            value: string;
-          }
-        | {
-            relationTo: 'text';
-            value: string;
-          }
-      )[]
-    | null;
-  zeroDepthRelationship?: string | null;
-  richtext?: LexicalRichText<LexicalNodes_0016D51A_Input> | null;
-  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_0016D51A_Input> | null;
-  textInRow?: string | null;
-  textCannotRead?: string | null;
-  select?: ('option1' | 'option2') | null;
-  namedTab1?: {
-    textInNamedTab1?: string | null;
-    textInNamedTab1ReadFalse?: string | null;
-    textInNamedTab1UpdateFalse?: string | null;
-  };
-  textInUnnamedTab2?: string | null;
-  textInRowInUnnamedTab?: string | null;
-  textInRowInUnnamedTabUpdateFalse?: string | null;
-  text?: string | null;
-  textArea?: string | null;
-  upload?: string | null;
-  uploadHasMany?: string[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "SingleRelationshipBlockInput".
- */
-export interface SingleRelationshipBlockInput {
-  title?: string | null;
-  relatedItem?: {
-    relationTo: 'text';
-    value: string;
-  } | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'SingleRelationshipBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ManyRelationshipBlockInput".
- */
-export interface ManyRelationshipBlockInput {
-  title?: string | null;
-  relatedItem?:
-    | {
-        relationTo: 'text';
-        value: string;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'ManyRelationshipBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "text_input".
- */
-export interface TextInput {
-  id?: string;
-  text: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-with-upload_input".
- */
-export interface DraftWithUploadInput {
-  id?: string;
-  alt?: string | null;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-with-upload-cloud-storage_input".
- */
-export interface DraftWithUploadCloudStorageInput {
-  id?: string;
-  alt?: string | null;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_input".
- */
-export interface MediaInput {
-  id?: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media2_input".
- */
-export interface Media2Input {
-  id?: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_input".
- */
-export interface UserInput {
-  id?: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_input".
- */
-export interface PayloadMcpApiKeyInput {
-  id?: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string;
-  overrideAccess?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_input".
- */
-export interface PayloadKvInput {
-  id?: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-jobs_input".
- */
-export interface PayloadJobInput {
-  id?: string;
-  /**
-   * Input data provided to the job
-   */
-  input?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  completedAt?: string | null;
-  totalTried?: number | null;
-  /**
-   * If hasError is true this job will not be retried
-   */
-  hasError?: boolean | null;
-  /**
-   * If hasError is true, this is the error that caused it
-   */
-  error?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * Task execution log
-   */
-  log?:
-    | {
-        executedAt: string;
-        completedAt: string;
-        taskSlug: 'inline' | 'schedulePublish';
-        taskID: string;
-        input?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        output?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        state: 'failed' | 'succeeded';
-        error?:
-          | {
-              [k: string]: unknown;
-            }
-          | unknown[]
-          | string
-          | number
-          | boolean
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  taskSlug?: ('inline' | 'schedulePublish') | null;
-  queue?: string | null;
-  waitUntil?: string | null;
-  processing?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_input".
- */
-export interface PayloadLockedDocumentInput {
-  id?: string;
-  document?:
-    | ({
-        relationTo: 'disable-publish';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'autosave-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'autosave-with-draft-button-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'autosave-multi-select-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'autosave-with-validate-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'draft-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'drafts-no-read-versions';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'draft-with-max-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'draft-posts-with-change-hook';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'drafts-with-custom-unpublish';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'draft-with-validate-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'error-on-unpublish';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'localized-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'version-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'custom-ids';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'diff';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'text';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'draft-with-upload';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'draft-with-upload-cloud-storage';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'media2';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-preferences_input".
- */
-export interface PayloadPreferenceInput {
-  id?: string;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_input".
- */
-export interface PayloadMigrationInput {
-  id?: string;
-  name?: string | null;
-  batch?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-global_input".
- */
-export interface AutosaveGlobalInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-with-draft-button-global_input".
- */
-export interface AutosaveWithDraftButtonGlobalInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-global_input".
- */
-export interface DraftGlobalInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-with-max-global_input".
- */
-export interface DraftWithMaxGlobalInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "disable-publish-global_input".
- */
-export interface DisablePublishGlobalInput {
-  id?: string;
-  title?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "localized-global_input".
- */
-export interface LocalizedGlobalInput {
-  id?: string;
-  title?: string | null;
-  content?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "max-versions_input".
- */
-export interface MaxVersionInput {
-  id?: string;
-  title?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "draft-unlimited-global_input".
- */
-export interface DraftUnlimitedGlobalInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "simple-draft-global_input".
- */
-export interface SimpleDraftGlobalInput {
-  id?: string;
-  title: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskSchedulePublish".
  */
 export interface TaskSchedulePublish {
@@ -2781,30 +1951,6 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
-
-export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
-  type: 'upload';
-  format: LexicalElementFormat;
-  id: string;
-  version: number;
-  fields: TFields;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
-
-export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
 
 
 declare module 'payload' {

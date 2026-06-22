@@ -62,124 +62,62 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_AE29B1B0".
+ * via the `definition` "LexicalNodes_A70CA761".
  */
-export type LexicalNodes_AE29B1B0 =
+export type LexicalNodes_A70CA761 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_AE29B1B0>
+  | SerializedParagraphNode<LexicalNodes_A70CA761>
   | SerializedInlineBlockNode<InlineCode>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_AE29B1B0>
+  | SerializedQuoteNode<LexicalNodes_A70CA761>
   | SerializedRelationshipNode<
       | 'posts'
       | 'simple'
-      | 'users'
       | 'payload-kv'
+      | 'users'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_AE29B1B0, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_AE29B1B0, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_AE29B1B0>
-  | SerializedListItemNode<LexicalNodes_AE29B1B0>
-  | SerializedHeadingNode<LexicalNodes_AE29B1B0>;
+  | SerializedAutoLinkNode<LexicalNodes_A70CA761, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_A70CA761, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_A70CA761>
+  | SerializedListItemNode<LexicalNodes_A70CA761>
+  | SerializedHeadingNode<LexicalNodes_A70CA761>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_E1F445FF".
+ * via the `definition` "LexicalNodes_3BEE52D3".
  */
-export type LexicalNodes_E1F445FF =
+export type LexicalNodes_3BEE52D3 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_E1F445FF>
+  | SerializedParagraphNode<LexicalNodes_3BEE52D3>
   | SerializedBlockNode<Banner | Code | PackageInstallOptions | TextContainerNoTrim | TextContainer | RestExamplesBlock>
   | SerializedInlineBlockNode<InlineCode>
-  | SerializedTableNode<LexicalNodes_E1F445FF>
-  | SerializedTableCellNode<LexicalNodes_E1F445FF>
-  | SerializedTableRowNode<LexicalNodes_E1F445FF>
+  | SerializedTableNode<LexicalNodes_3BEE52D3>
+  | SerializedTableCellNode<LexicalNodes_3BEE52D3>
+  | SerializedTableRowNode<LexicalNodes_3BEE52D3>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_E1F445FF>
+  | SerializedQuoteNode<LexicalNodes_3BEE52D3>
   | SerializedRelationshipNode<
       | 'posts'
       | 'simple'
-      | 'users'
       | 'payload-kv'
+      | 'users'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_E1F445FF, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_E1F445FF, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_E1F445FF>
-  | SerializedListItemNode<LexicalNodes_E1F445FF>
-  | SerializedHeadingNode<LexicalNodes_E1F445FF>;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_2E5517A3_Input".
- */
-export type LexicalNodes_2E5517A3_Input =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_2E5517A3_Input>
-  | SerializedInlineBlockNode<InlineCode>
-  | SerializedHorizontalRuleNode
-  | SerializedUploadNodeInput<'media'>
-  | SerializedQuoteNode<LexicalNodes_2E5517A3_Input>
-  | SerializedRelationshipNodeInput<
-      | 'posts'
-      | 'simple'
-      | 'users'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >
-  | SerializedAutoLinkNode<LexicalNodes_2E5517A3_Input, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_2E5517A3_Input, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_2E5517A3_Input>
-  | SerializedListItemNode<LexicalNodes_2E5517A3_Input>
-  | SerializedHeadingNode<LexicalNodes_2E5517A3_Input>;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_76CFB9F0_Input".
- */
-export type LexicalNodes_76CFB9F0_Input =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_76CFB9F0_Input>
-  | SerializedBlockNode<
-      BannerInput | Code | PackageInstallOptions | TextContainerNoTrim | TextContainer | RestExamplesBlock
-    >
-  | SerializedInlineBlockNode<InlineCode>
-  | SerializedTableNode<LexicalNodes_76CFB9F0_Input>
-  | SerializedTableCellNode<LexicalNodes_76CFB9F0_Input>
-  | SerializedTableRowNode<LexicalNodes_76CFB9F0_Input>
-  | SerializedHorizontalRuleNode
-  | SerializedUploadNodeInput<'media'>
-  | SerializedQuoteNode<LexicalNodes_76CFB9F0_Input>
-  | SerializedRelationshipNodeInput<
-      | 'posts'
-      | 'simple'
-      | 'users'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >
-  | SerializedAutoLinkNode<LexicalNodes_76CFB9F0_Input, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_76CFB9F0_Input, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_76CFB9F0_Input>
-  | SerializedListItemNode<LexicalNodes_76CFB9F0_Input>
-  | SerializedHeadingNode<LexicalNodes_76CFB9F0_Input>;
+  | SerializedAutoLinkNode<LexicalNodes_3BEE52D3, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_3BEE52D3, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_3BEE52D3>
+  | SerializedListItemNode<LexicalNodes_3BEE52D3>
+  | SerializedHeadingNode<LexicalNodes_3BEE52D3>;
 
 export interface Config {
   auth: {
@@ -190,8 +128,8 @@ export interface Config {
     posts: Post;
     simple: Simple;
     media: Media;
-    users: User;
     'payload-kv': PayloadKv;
+    users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -201,8 +139,8 @@ export interface Config {
     posts: PostsSelect<false> | PostsSelect<true>;
     simple: SimpleSelect<false> | SimpleSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -217,18 +155,6 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  collectionsInput: {
-    posts: PostInput;
-    simple: SimpleInput;
-    media: MediaInput;
-    users: UserInput;
-    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
-    'payload-kv': PayloadKvInput;
-    'payload-locked-documents': PayloadLockedDocumentInput;
-    'payload-preferences': PayloadPreferenceInput;
-    'payload-migrations': PayloadMigrationInput;
-  };
-  globalsInput: {};
   user: User;
   jobs: {
     tasks: unknown;
@@ -267,8 +193,8 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
-  richText?: LexicalRichText<LexicalNodes_E1F445FF> | null;
-  richTextUnconverted?: LexicalRichText<LexicalNodes_E1F445FF> | null;
+  richText?: LexicalRichText<LexicalNodes_3BEE52D3> | null;
+  richTextUnconverted?: LexicalRichText<LexicalNodes_3BEE52D3> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -329,6 +255,23 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -351,23 +294,6 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -515,6 +441,14 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -534,14 +468,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -587,198 +513,6 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_input".
- */
-export interface PostInput {
-  id?: string;
-  docPath: string;
-  frontMatter?:
-    | {
-        key?: string | null;
-        value?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  richText?: LexicalRichText<LexicalNodes_76CFB9F0_Input> | null;
-  richTextUnconverted?: LexicalRichText<LexicalNodes_76CFB9F0_Input> | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "simple_input".
- */
-export interface SimpleInput {
-  id?: string;
-  text?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_input".
- */
-export interface MediaInput {
-  id?: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-  sizes?: {
-    thumbnail?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    medium?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-    large?: {
-      url?: string | null;
-      width?: number | null;
-      height?: number | null;
-      mimeType?: string | null;
-      filesize?: number | null;
-      filename?: string | null;
-    };
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_input".
- */
-export interface UserInput {
-  id?: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_input".
- */
-export interface PayloadMcpApiKeyInput {
-  id?: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string;
-  overrideAccess?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_input".
- */
-export interface PayloadKvInput {
-  id?: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_input".
- */
-export interface PayloadLockedDocumentInput {
-  id?: string;
-  document?:
-    | ({
-        relationTo: 'posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'simple';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-preferences_input".
- */
-export interface PayloadPreferenceInput {
-  id?: string;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_input".
- */
-export interface PayloadMigrationInput {
-  id?: string;
-  name?: string | null;
-  batch?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "InlineCode".
  */
 export interface InlineCode {
@@ -794,7 +528,7 @@ export interface Banner {
   id: string;
   blockType: 'Banner';
   type?: ('success' | 'info' | 'warning') | null;
-  content?: LexicalRichText<LexicalNodes_AE29B1B0> | null;
+  content?: LexicalRichText<LexicalNodes_A70CA761> | null;
   blockName?: string | null;
 }
 /**
@@ -889,17 +623,6 @@ export interface RestExamplesBlock {
         id?: string | null;
       }[]
     | null;
-  blockName?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BannerInput".
- */
-export interface BannerInput {
-  id: string;
-  blockType: 'Banner';
-  type?: ('success' | 'info' | 'warning') | null;
-  content?: LexicalRichText<LexicalNodes_2E5517A3_Input> | null;
   blockName?: string | null;
 }
 /**
@@ -1076,30 +799,6 @@ export interface SerializedTableCellNode<TChildren> extends SerializedLexicalEle
   verticalAlign?: string;
   width?: number;
 }
-
-export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
-  type: 'upload';
-  format: LexicalElementFormat;
-  id: string;
-  version: number;
-  fields: TFields;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
-
-export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
 
 
 declare module 'payload' {

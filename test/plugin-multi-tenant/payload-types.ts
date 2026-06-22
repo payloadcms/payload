@@ -62,17 +62,17 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_68925DC9".
+ * via the `definition` "LexicalNodes_FABA6FC2".
  */
-export type LexicalNodes_68925DC9 =
+export type LexicalNodes_FABA6FC2 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_68925DC9>
+  | SerializedParagraphNode<LexicalNodes_FABA6FC2>
   | SerializedBlockNode<BlockWithRelationship>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_68925DC9>
+  | SerializedQuoteNode<LexicalNodes_FABA6FC2>
   | SerializedRelationshipNode<
       | 'tenants'
       | 'users'
@@ -88,45 +88,11 @@ export type LexicalNodes_68925DC9 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_68925DC9, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_68925DC9, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_68925DC9>
-  | SerializedListItemNode<LexicalNodes_68925DC9>
-  | SerializedHeadingNode<LexicalNodes_68925DC9>;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_0B6BE060_Input".
- */
-export type LexicalNodes_0B6BE060_Input =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_0B6BE060_Input>
-  | SerializedBlockNode<BlockWithRelationshipInput>
-  | SerializedHorizontalRuleNode
-  | SerializedUploadNodeInput<'media'>
-  | SerializedQuoteNode<LexicalNodes_0B6BE060_Input>
-  | SerializedRelationshipNodeInput<
-      | 'tenants'
-      | 'users'
-      | 'food-items'
-      | 'food-menu'
-      | 'autosave-global'
-      | 'relationships'
-      | 'multi-tenant-posts'
-      | 'notTenanted'
-      | 'folders'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >
-  | SerializedAutoLinkNode<LexicalNodes_0B6BE060_Input, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_0B6BE060_Input, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_0B6BE060_Input>
-  | SerializedListItemNode<LexicalNodes_0B6BE060_Input>
-  | SerializedHeadingNode<LexicalNodes_0B6BE060_Input>;
+  | SerializedAutoLinkNode<LexicalNodes_FABA6FC2, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_FABA6FC2, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_FABA6FC2>
+  | SerializedListItemNode<LexicalNodes_FABA6FC2>
+  | SerializedHeadingNode<LexicalNodes_FABA6FC2>;
 
 export interface Config {
   auth: {
@@ -180,24 +146,6 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  collectionsInput: {
-    tenants: TenantInput;
-    users: UserInput;
-    'food-items': FoodItemInput;
-    'food-menu': FoodMenuInput;
-    'autosave-global': AutosaveGlobalInput;
-    relationships: RelationshipInput;
-    'multi-tenant-posts': MultiTenantPostInput;
-    media: MediaInput;
-    notTenanted: NotTenantedInput;
-    folders: FolderInput;
-    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
-    'payload-kv': PayloadKvInput;
-    'payload-locked-documents': PayloadLockedDocumentInput;
-    'payload-preferences': PayloadPreferenceInput;
-    'payload-migrations': PayloadMigrationInput;
-  };
-  globalsInput: {};
   user: User;
   jobs: {
     tasks: unknown;
@@ -282,7 +230,7 @@ export interface FoodItem {
   tenant?: (string | null) | Tenant;
   name: string;
   localizedName?: string | null;
-  content?: LexicalRichText<LexicalNodes_68925DC9> | null;
+  content?: LexicalRichText<LexicalNodes_FABA6FC2> | null;
   polymorphicRelationship?:
     | ({
         relationTo: 'relationships';
@@ -711,301 +659,12 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants_input".
- */
-export interface TenantInput {
-  id?: string;
-  name: string;
-  domain: string;
-  isPublic?: boolean | null;
-  selectedLocales?: ('allLocales' | 'en' | 'es' | 'fr')[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_input".
- */
-export interface UserInput {
-  id?: string;
-  roles?: ('admin' | 'user')[] | null;
-  tenants?:
-    | {
-        tenant: string;
-        tenantRole?: ('admin' | 'member') | null;
-        id?: string | null;
-      }[]
-    | null;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "food-items_input".
- */
-export interface FoodItemInput {
-  id?: string;
-  tenant?: string | null;
-  name: string;
-  localizedName?: string | null;
-  content?: LexicalRichText<LexicalNodes_0B6BE060_Input> | null;
-  polymorphicRelationship?:
-    | ({
-        relationTo: 'relationships';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'food-items';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'notTenanted';
-        value: string;
-      } | null);
-  folder?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "food-menu_input".
- */
-export interface FoodMenuInput {
-  id?: string;
-  tenant?: string | null;
-  title: string;
-  description?: string | null;
-  menuItems?:
-    | {
-        /**
-         * Automatically filtered by selected tenant
-         */
-        menuItem: string;
-        active?: boolean | null;
-        id?: string | null;
-      }[]
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "autosave-global_input".
- */
-export interface AutosaveGlobalInput {
-  id?: string;
-  tenant?: string | null;
-  title: string;
-  description?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationships_input".
- */
-export interface RelationshipInput {
-  id?: string;
-  tenant?: string | null;
-  title: string;
-  relationship?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "multi-tenant-posts_input".
- */
-export interface MultiTenantPostInput {
-  id?: string;
-  tenant?: string[] | null;
-  title: string;
-  parent?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_input".
- */
-export interface MediaInput {
-  id?: string;
-  tenant?: string | null;
-  alt?: string | null;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "notTenanted_input".
- */
-export interface NotTenantedInput {
-  id?: string;
-  name?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "folders_input".
- */
-export interface FolderInput {
-  id?: string;
-  folder?: string | null;
-  tenant?: string | null;
-  name: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_input".
- */
-export interface PayloadMcpApiKeyInput {
-  id?: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string;
-  overrideAccess?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_input".
- */
-export interface PayloadKvInput {
-  id?: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_input".
- */
-export interface PayloadLockedDocumentInput {
-  id?: string;
-  document?:
-    | ({
-        relationTo: 'tenants';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'food-items';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'food-menu';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'autosave-global';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'relationships';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'multi-tenant-posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'notTenanted';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'folders';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-preferences_input".
- */
-export interface PayloadPreferenceInput {
-  id?: string;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_input".
- */
-export interface PayloadMigrationInput {
-  id?: string;
-  name?: string | null;
-  batch?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "BlockWithRelationship".
  */
 export interface BlockWithRelationship {
   id: string;
   blockType: 'block-with-relationship';
   relationship?: (string | null) | FoodMenu;
-  blockName?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BlockWithRelationshipInput".
- */
-export interface BlockWithRelationshipInput {
-  id: string;
-  blockType: 'block-with-relationship';
-  relationship?: string | null;
   blockName?: string | null;
 }
 /**
@@ -1161,30 +820,6 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
-
-export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
-  type: 'upload';
-  format: LexicalElementFormat;
-  id: string;
-  version: number;
-  fields: TFields;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
-
-export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
 
 
 declare module 'payload' {

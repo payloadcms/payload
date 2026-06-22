@@ -62,16 +62,16 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_A6D73F5A".
+ * via the `definition` "LexicalNodes_D543C5B5".
  */
-export type LexicalNodes_A6D73F5A =
+export type LexicalNodes_D543C5B5 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_A6D73F5A>
+  | SerializedParagraphNode<LexicalNodes_D543C5B5>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_A6D73F5A>
+  | SerializedQuoteNode<LexicalNodes_D543C5B5>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -89,24 +89,24 @@ export type LexicalNodes_A6D73F5A =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_A6D73F5A, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_A6D73F5A, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_A6D73F5A>
-  | SerializedListItemNode<LexicalNodes_A6D73F5A>
-  | SerializedHeadingNode<LexicalNodes_A6D73F5A>;
+  | SerializedAutoLinkNode<LexicalNodes_D543C5B5, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_D543C5B5, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_D543C5B5>
+  | SerializedListItemNode<LexicalNodes_D543C5B5>
+  | SerializedHeadingNode<LexicalNodes_D543C5B5>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_850D1707".
+ * via the `definition` "LexicalNodes_EBA54163".
  */
-export type LexicalNodes_850D1707 =
+export type LexicalNodes_EBA54163 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_850D1707>
+  | SerializedParagraphNode<LexicalNodes_EBA54163>
   | SerializedBlockNode<MediaBlock_1EDC4A89>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_850D1707>
+  | SerializedQuoteNode<LexicalNodes_EBA54163>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -124,28 +124,28 @@ export type LexicalNodes_850D1707 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_850D1707, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_850D1707, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_850D1707>
-  | SerializedListItemNode<LexicalNodes_850D1707>
-  | SerializedHeadingNode<LexicalNodes_850D1707>;
+  | SerializedAutoLinkNode<LexicalNodes_EBA54163, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_EBA54163, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_EBA54163>
+  | SerializedListItemNode<LexicalNodes_EBA54163>
+  | SerializedHeadingNode<LexicalNodes_EBA54163>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_1A3BAFDD".
+ * via the `definition` "LexicalNodes_660DF7D8".
  */
-export type LexicalNodes_1A3BAFDD =
+export type LexicalNodes_660DF7D8 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_1A3BAFDD>
+  | SerializedParagraphNode<LexicalNodes_660DF7D8>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_1A3BAFDD>
+  | SerializedHeadingNode<LexicalNodes_660DF7D8>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
-  | SerializedQuoteNode<LexicalNodes_1A3BAFDD>
-  | SerializedListNode<LexicalNodes_1A3BAFDD>
-  | SerializedListItemNode<LexicalNodes_1A3BAFDD>
-  | SerializedAutoLinkNode<LexicalNodes_1A3BAFDD, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_1A3BAFDD, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_660DF7D8>
+  | SerializedListNode<LexicalNodes_660DF7D8>
+  | SerializedListItemNode<LexicalNodes_660DF7D8>
+  | SerializedAutoLinkNode<LexicalNodes_660DF7D8, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_660DF7D8, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -158,112 +158,6 @@ export type LexicalNodes_1A3BAFDD =
       | 'static-url'
       | 'custom-live-preview'
       | 'conditional-url'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_E88DE8E5_Input".
- */
-export type LexicalNodes_E88DE8E5_Input =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_E88DE8E5_Input>
-  | SerializedHorizontalRuleNode
-  | SerializedUploadNodeInput<'media'>
-  | SerializedQuoteNode<LexicalNodes_E88DE8E5_Input>
-  | SerializedRelationshipNodeInput<
-      | 'users'
-      | 'pages'
-      | 'posts'
-      | 'ssr'
-      | 'ssr-autosave'
-      | 'tenants'
-      | 'categories'
-      | 'collection-level-config'
-      | 'static-url'
-      | 'custom-live-preview'
-      | 'conditional-url'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >
-  | SerializedAutoLinkNode<LexicalNodes_E88DE8E5_Input, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_E88DE8E5_Input, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_E88DE8E5_Input>
-  | SerializedListItemNode<LexicalNodes_E88DE8E5_Input>
-  | SerializedHeadingNode<LexicalNodes_E88DE8E5_Input>;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_D2C8076D_Input".
- */
-export type LexicalNodes_D2C8076D_Input =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_D2C8076D_Input>
-  | SerializedBlockNode<MediaBlockInput_9DA88ECF>
-  | SerializedHorizontalRuleNode
-  | SerializedUploadNodeInput<'media'>
-  | SerializedQuoteNode<LexicalNodes_D2C8076D_Input>
-  | SerializedRelationshipNodeInput<
-      | 'users'
-      | 'pages'
-      | 'posts'
-      | 'ssr'
-      | 'ssr-autosave'
-      | 'tenants'
-      | 'categories'
-      | 'collection-level-config'
-      | 'static-url'
-      | 'custom-live-preview'
-      | 'conditional-url'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >
-  | SerializedAutoLinkNode<LexicalNodes_D2C8076D_Input, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_D2C8076D_Input, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_D2C8076D_Input>
-  | SerializedListItemNode<LexicalNodes_D2C8076D_Input>
-  | SerializedHeadingNode<LexicalNodes_D2C8076D_Input>;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_753943B3_Input".
- */
-export type LexicalNodes_753943B3_Input =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_753943B3_Input>
-  | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_753943B3_Input>
-  | SerializedUploadNodeInput<'media', LexicalUploadFields_1AB4670B>
-  | SerializedQuoteNode<LexicalNodes_753943B3_Input>
-  | SerializedListNode<LexicalNodes_753943B3_Input>
-  | SerializedListItemNode<LexicalNodes_753943B3_Input>
-  | SerializedAutoLinkNode<LexicalNodes_753943B3_Input, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_753943B3_Input, LexicalLinkFields_0A7E9EC0>
-  | SerializedRelationshipNodeInput<
-      | 'users'
-      | 'pages'
-      | 'posts'
-      | 'ssr'
-      | 'ssr-autosave'
-      | 'tenants'
-      | 'categories'
-      | 'collection-level-config'
-      | 'static-url'
-      | 'custom-live-preview'
-      | 'conditional-url'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -329,29 +223,6 @@ export interface Config {
   locale: 'en' | 'es';
   widgets: {
     collections: CollectionsWidget;
-  };
-  collectionsInput: {
-    users: UserInput;
-    pages: PageInput;
-    posts: PostInput;
-    ssr: SsrInput;
-    'ssr-autosave': SsrAutosaveInput;
-    tenants: TenantInput;
-    categories: CategoryInput;
-    media: MediaInput;
-    'collection-level-config': CollectionLevelConfigInput;
-    'static-url': StaticUrlInput;
-    'custom-live-preview': CustomLivePreviewInput;
-    'conditional-url': ConditionalUrlInput;
-    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
-    'payload-kv': PayloadKvInput;
-    'payload-locked-documents': PayloadLockedDocumentInput;
-    'payload-preferences': PayloadPreferenceInput;
-    'payload-migrations': PayloadMigrationInput;
-  };
-  globalsInput: {
-    header: HeaderInput;
-    footer: FooterInput;
   };
   user: User;
   jobs: {
@@ -446,7 +317,7 @@ export interface Page {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -456,8 +327,8 @@ export interface Page {
   testNumber?: number | null;
   localizedTitle?: string | null;
   relationToLocalized?: (string | null) | Post;
-  richTextLexical?: LexicalRichText<LexicalNodes_850D1707> | null;
-  richTextLexicalLocalized?: LexicalRichText<LexicalNodes_850D1707> | null;
+  richTextLexical?: LexicalRichText<LexicalNodes_EBA54163> | null;
+  richTextLexicalLocalized?: LexicalRichText<LexicalNodes_EBA54163> | null;
   relationshipAsUpload?: (string | null) | Media;
   relationshipMonoHasOne?: (string | null) | Post;
   relationshipMonoHasMany?: (string | Post)[] | null;
@@ -474,7 +345,7 @@ export interface Page {
   arrayOfRelationships?:
     | {
         uploadInArray?: (string | null) | Media;
-        richTextInArray?: LexicalRichText<LexicalNodes_1A3BAFDD> | null;
+        richTextInArray?: LexicalRichText<LexicalNodes_660DF7D8> | null;
         relationshipInArrayMonoHasOne?: (string | null) | Post;
         relationshipInArrayMonoHasMany?: (string | Post)[] | null;
         relationshipInArrayPolyHasOne?: {
@@ -518,7 +389,7 @@ export interface Tenant {
  */
 export interface Cta {
   invertBackground?: boolean | null;
-  richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+  richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
   links?:
     | {
         link: {
@@ -558,7 +429,7 @@ export interface Post {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -582,7 +453,7 @@ export interface Content {
   columns?:
     | {
         size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-        richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+        richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
         enableLink?: boolean | null;
         link?: {
           type?: ('reference' | 'custom') | null;
@@ -615,7 +486,7 @@ export interface Content {
  * via the `definition` "Archive".
  */
 export interface Archive {
-  introContent?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+  introContent?: LexicalRichText<LexicalNodes_D543C5B5> | null;
   populateBy?: ('collection' | 'selection') | null;
   relationTo?: 'posts' | null;
   categories?: (string | Category)[] | null;
@@ -666,7 +537,7 @@ export interface Ssr {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -691,7 +562,7 @@ export interface SsrAutosave {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -737,7 +608,7 @@ export interface CustomLivePreview {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -1656,560 +1527,6 @@ export interface CollectionsWidget {
   width: 'full';
 }
 /**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_input".
- */
-export interface UserInput {
-  id?: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This collections does not use drafts or autosave. Changes are sent to the iframe window in real-time to use for fully client-side rendering.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pages_input".
- */
-export interface PageInput {
-  id?: string;
-  slug: string;
-  tenant?: string | null;
-  title: string;
-  hero: {
-    type?: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_E88DE8E5_Input> | null;
-    media?: string | null;
-  };
-  layout?: (CtaInput | ContentInput | MediaBlockInput | ArchiveInput)[] | null;
-  /**
-   * A number field for visual comparison with toolbar size inputs
-   */
-  testNumber?: number | null;
-  localizedTitle?: string | null;
-  relationToLocalized?: string | null;
-  richTextLexical?: LexicalRichText<LexicalNodes_D2C8076D_Input> | null;
-  richTextLexicalLocalized?: LexicalRichText<LexicalNodes_D2C8076D_Input> | null;
-  relationshipAsUpload?: string | null;
-  relationshipMonoHasOne?: string | null;
-  relationshipMonoHasMany?: string[] | null;
-  relationshipPolyHasOne?: {
-    relationTo: 'posts';
-    value: string;
-  } | null;
-  relationshipPolyHasMany?:
-    | {
-        relationTo: 'posts';
-        value: string;
-      }[]
-    | null;
-  arrayOfRelationships?:
-    | {
-        uploadInArray?: string | null;
-        richTextInArray?: LexicalRichText<LexicalNodes_753943B3_Input> | null;
-        relationshipInArrayMonoHasOne?: string | null;
-        relationshipInArrayMonoHasMany?: string[] | null;
-        relationshipInArrayPolyHasOne?: {
-          relationTo: 'posts';
-          value: string;
-        } | null;
-        relationshipInArrayPolyHasMany?:
-          | {
-              relationTo: 'posts';
-              value: string;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  tab?: {
-    relationshipInTab?: string | null;
-  };
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    image?: string | null;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "CtaInput".
- */
-export interface CtaInput {
-  invertBackground?: boolean | null;
-  richText?: LexicalRichText<LexicalNodes_E88DE8E5_Input> | null;
-  links?:
-    | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'posts';
-                value: string;
-              } | null)
-            | ({
-                relationTo: 'pages';
-                value: string;
-              } | null);
-          url?: string | null;
-          label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
-          appearance?: ('primary' | 'secondary') | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'cta';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ContentInput".
- */
-export interface ContentInput {
-  invertBackground?: boolean | null;
-  columns?:
-    | {
-        size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-        richText?: LexicalRichText<LexicalNodes_E88DE8E5_Input> | null;
-        enableLink?: boolean | null;
-        link?: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'posts';
-                value: string;
-              } | null)
-            | ({
-                relationTo: 'pages';
-                value: string;
-              } | null);
-          url?: string | null;
-          label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
-          appearance?: ('default' | 'primary' | 'secondary') | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'content';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MediaBlockInput".
- */
-export interface MediaBlockInput {
-  invertBackground?: boolean | null;
-  position?: ('default' | 'fullscreen') | null;
-  media: string;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'mediaBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ArchiveInput".
- */
-export interface ArchiveInput {
-  introContent?: LexicalRichText<LexicalNodes_E88DE8E5_Input> | null;
-  populateBy?: ('collection' | 'selection') | null;
-  relationTo?: 'posts' | null;
-  categories?: string[] | null;
-  limit?: number | null;
-  selectedDocs?:
-    | {
-        relationTo: 'posts';
-        value: string;
-      }[]
-    | null;
-  /**
-   * This field is auto-populated after-read
-   */
-  populatedDocs?:
-    | {
-        relationTo: 'posts';
-        value: string;
-      }[]
-    | null;
-  /**
-   * This field is auto-populated after-read
-   */
-  populatedDocsTotal?: number | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'archive';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_input".
- */
-export interface PostInput {
-  id?: string;
-  slug: string;
-  tenant?: string | null;
-  title: string;
-  hero: {
-    type?: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_E88DE8E5_Input> | null;
-    media?: string | null;
-  };
-  layout?: (CtaInput | ContentInput | MediaBlockInput | ArchiveInput)[] | null;
-  relatedPosts?: string[] | null;
-  localizedTitle?: string | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    image?: string | null;
-  };
-  deletedAt?: string | null;
-}
-/**
- * This collections has drafts enabled, but not autosave. Changes need to be saved to trigger a full router refresh, which fetches draft content on the server.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ssr_input".
- */
-export interface SsrInput {
-  id?: string;
-  slug: string;
-  tenant?: string | null;
-  title: string;
-  hero: {
-    type?: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_E88DE8E5_Input> | null;
-    media?: string | null;
-  };
-  layout?: (CtaInput | ContentInput | MediaBlockInput | ArchiveInput)[] | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    image?: string | null;
-  };
-}
-/**
- * This collections has drafts and autosave enabled. Changes will automatically trigger a full router refresh, which fetches draft content on the server.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ssr-autosave_input".
- */
-export interface SsrAutosaveInput {
-  id?: string;
-  slug: string;
-  tenant?: string | null;
-  title: string;
-  hero: {
-    type?: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_E88DE8E5_Input> | null;
-    media?: string | null;
-  };
-  layout?: (CtaInput | ContentInput | MediaBlockInput | ArchiveInput)[] | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    image?: string | null;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "tenants_input".
- */
-export interface TenantInput {
-  id?: string;
-  title: string;
-  clientURL: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_input".
- */
-export interface CategoryInput {
-  id?: string;
-  title?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "media_input".
- */
-export interface MediaInput {
-  id?: string;
-  alt: string;
-  url?: string | null;
-  thumbnailURL?: string | null;
-  filename?: string | null;
-  mimeType?: string | null;
-  filesize?: number | null;
-  width?: number | null;
-  height?: number | null;
-  focalX?: number | null;
-  focalY?: number | null;
-}
-/**
- * Live Preview is enabled on this collection's own config, not the root config.
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collection-level-config_input".
- */
-export interface CollectionLevelConfigInput {
-  id?: string;
-  title?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "static-url_input".
- */
-export interface StaticUrlInput {
-  id?: string;
-  title?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-live-preview_input".
- */
-export interface CustomLivePreviewInput {
-  id?: string;
-  slug: string;
-  tenant?: string | null;
-  title: string;
-  hero: {
-    type?: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_E88DE8E5_Input> | null;
-    media?: string | null;
-  };
-  layout?: (CtaInput | ContentInput | MediaBlockInput | ArchiveInput)[] | null;
-  meta?: {
-    title?: string | null;
-    description?: string | null;
-    image?: string | null;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "conditional-url_input".
- */
-export interface ConditionalUrlInput {
-  id?: string;
-  title?: string | null;
-  enabled?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_input".
- */
-export interface PayloadMcpApiKeyInput {
-  id?: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string;
-  overrideAccess?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_input".
- */
-export interface PayloadKvInput {
-  id?: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_input".
- */
-export interface PayloadLockedDocumentInput {
-  id?: string;
-  document?:
-    | ({
-        relationTo: 'users';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'pages';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'ssr';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'ssr-autosave';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'tenants';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'categories';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'media';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'collection-level-config';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'static-url';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'custom-live-preview';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'conditional-url';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-preferences_input".
- */
-export interface PayloadPreferenceInput {
-  id?: string;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_input".
- */
-export interface PayloadMigrationInput {
-  id?: string;
-  name?: string | null;
-  batch?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header_input".
- */
-export interface HeaderInput {
-  id?: string;
-  navItems?:
-    | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'posts';
-                value: string;
-              } | null)
-            | ({
-                relationTo: 'pages';
-                value: string;
-              } | null);
-          url?: string | null;
-          label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
-          appearance?: ('default' | 'primary' | 'secondary') | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "footer_input".
- */
-export interface FooterInput {
-  id?: string;
-  navItems?:
-    | {
-        link: {
-          type?: ('reference' | 'custom') | null;
-          newTab?: boolean | null;
-          reference?:
-            | ({
-                relationTo: 'posts';
-                value: string;
-              } | null)
-            | ({
-                relationTo: 'pages';
-                value: string;
-              } | null);
-          url?: string | null;
-          label: string;
-          /**
-           * Choose how the link should be rendered.
-           */
-          appearance?: ('default' | 'primary' | 'secondary') | null;
-        };
-        id?: string | null;
-      }[]
-    | null;
-}
-/**
  * Multiple blocks resolve to the `MediaBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
  *
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2261,20 +1578,6 @@ export interface LexicalLinkFields_0A7E9EC0 {
   } | null;
   newTab: boolean;
   description?: string | null;
-}
-/**
- * Multiple blocks resolve to the `MediaBlockInput` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MediaBlockInput_9DA88ECF".
- */
-export interface MediaBlockInput_9DA88ECF {
-  id: string;
-  blockType: 'mediaBlock';
-  invertBackground?: boolean | null;
-  position?: ('default' | 'fullscreen') | null;
-  media: string;
-  blockName?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2429,30 +1732,6 @@ export type SerializedInlineBlockNode<TFields extends { blockType: string }> = T
   version: number;
   fields: { id: string } & Omit<TFields, 'id'>;
 } : never;
-
-export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
-  type: 'upload';
-  format: LexicalElementFormat;
-  id: string;
-  version: number;
-  fields: TFields;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
-
-export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
 
 
 declare module 'payload' {

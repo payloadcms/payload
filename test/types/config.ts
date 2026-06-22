@@ -252,6 +252,7 @@ export default buildConfigWithDefaults({
     },
   ],
   typescript: {
+    generateInputTypes: true,
     outputFile: path.resolve(dirname, 'payload-types.ts'),
     strictDraftTypes: true,
     postProcess: [

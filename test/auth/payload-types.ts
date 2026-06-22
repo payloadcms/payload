@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_AAE6FCC0".
+ * via the `definition` "LexicalNodes_BCC912DC".
  */
-export type LexicalNodes_AAE6FCC0 =
+export type LexicalNodes_BCC912DC =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_AAE6FCC0>
+  | SerializedParagraphNode<LexicalNodes_BCC912DC>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_AAE6FCC0>
+  | SerializedHeadingNode<LexicalNodes_BCC912DC>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_AAE6FCC0 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_AAE6FCC0>
-  | SerializedListNode<LexicalNodes_AAE6FCC0>
-  | SerializedListItemNode<LexicalNodes_AAE6FCC0>
-  | SerializedAutoLinkNode<LexicalNodes_AAE6FCC0, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_AAE6FCC0, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_BCC912DC>
+  | SerializedListNode<LexicalNodes_BCC912DC>
+  | SerializedListItemNode<LexicalNodes_BCC912DC>
+  | SerializedAutoLinkNode<LexicalNodes_BCC912DC, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_BCC912DC, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'partial-disable-local-strategies'
@@ -92,44 +92,6 @@ export type LexicalNodes_AAE6FCC0 =
       | 'public-users'
       | 'relationsCollection'
       | 'api-keys-with-field-read-access'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_2B6FD0B4_Input".
- */
-export type LexicalNodes_2B6FD0B4_Input =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_2B6FD0B4_Input>
-  | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_2B6FD0B4_Input>
-  | {
-      type: 'upload';
-      /**
-       * Lexical's internal serialization version for this node type.
-       */
-      version: number;
-      [k: string]: unknown;
-    }
-  | SerializedQuoteNode<LexicalNodes_2B6FD0B4_Input>
-  | SerializedListNode<LexicalNodes_2B6FD0B4_Input>
-  | SerializedListItemNode<LexicalNodes_2B6FD0B4_Input>
-  | SerializedAutoLinkNode<LexicalNodes_2B6FD0B4_Input, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_2B6FD0B4_Input, LexicalLinkFields_0A7E9EC0>
-  | SerializedRelationshipNodeInput<
-      | 'users'
-      | 'partial-disable-local-strategies'
-      | 'disable-local-strategy-password'
-      | 'api-keys'
-      | 'public-users'
-      | 'relationsCollection'
-      | 'api-keys-with-field-read-access'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -183,21 +145,6 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  collectionsInput: {
-    users: UserInput;
-    'partial-disable-local-strategies': PartialDisableLocalStrategyInput;
-    'disable-local-strategy-password': DisableLocalStrategyPasswordInput;
-    'api-keys': ApiKeyInput;
-    'public-users': PublicUserInput;
-    relationsCollection: RelationsCollectionInput;
-    'api-keys-with-field-read-access': ApiKeysWithFieldReadAccessInput;
-    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
-    'payload-kv': PayloadKvInput;
-    'payload-locked-documents': PayloadLockedDocumentInput;
-    'payload-preferences': PayloadPreferenceInput;
-    'payload-migrations': PayloadMigrationInput;
-  };
-  globalsInput: {};
   user:
     | User
     | PartialDisableLocalStrategy
@@ -333,7 +280,7 @@ export interface User {
       }[]
     | null;
   namedSaveToJWT?: string | null;
-  richText?: LexicalRichText<LexicalNodes_AAE6FCC0> | null;
+  richText?: LexicalRichText<LexicalNodes_BCC912DC> | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -810,299 +757,6 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_input".
- */
-export interface UserInput {
-  id?: string;
-  adminOnlyField?: string | null;
-  roles?: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
-  loginMetadata?:
-    | {
-        info?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  namedSaveToJWT?: string | null;
-  richText?: LexicalRichText<LexicalNodes_2B6FD0B4_Input> | null;
-  group?: {
-    liftedSaveToJWT?: string | null;
-  };
-  groupSaveToJWT?: {
-    saveToJWTString?: string | null;
-    saveToJWTFalse?: string | null;
-  };
-  saveToJWTTab?: {
-    test?: string | null;
-  };
-  tabSaveToJWTString?: {
-    includedByDefault?: string | null;
-  };
-  tabLiftedSaveToJWT?: string | null;
-  unnamedTabSaveToJWTString?: string | null;
-  unnamedTabSaveToJWTFalse?: string | null;
-  custom?: string | null;
-  shouldNotShowInClientConfigUnlessAuthenticated?: string | null;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "partial-disable-local-strategies_input".
- */
-export interface PartialDisableLocalStrategyInput {
-  id?: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "disable-local-strategy-password_input".
- */
-export interface DisableLocalStrategyPasswordInput {
-  id?: string;
-  password: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "api-keys_input".
- */
-export interface ApiKeyInput {
-  id?: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "public-users_input".
- */
-export interface PublicUserInput {
-  id?: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  _verified?: boolean | null;
-  _verificationToken?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationsCollection_input".
- */
-export interface RelationsCollectionInput {
-  id?: string;
-  rel?: string | null;
-  text?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "api-keys-with-field-read-access_input".
- */
-export interface ApiKeysWithFieldReadAccessInput {
-  id?: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_input".
- */
-export interface PayloadMcpApiKeyInput {
-  id?: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string;
-  overrideAccess?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_input".
- */
-export interface PayloadKvInput {
-  id?: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_input".
- */
-export interface PayloadLockedDocumentInput {
-  id?: string;
-  document?:
-    | ({
-        relationTo: 'users';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'partial-disable-local-strategies';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'disable-local-strategy-password';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'api-keys';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'public-users';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'relationsCollection';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'api-keys-with-field-read-access';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string;
-      } | null);
-  globalSlug?: string | null;
-  user:
-    | {
-        relationTo: 'users';
-        value: string;
-      }
-    | {
-        relationTo: 'partial-disable-local-strategies';
-        value: string;
-      }
-    | {
-        relationTo: 'disable-local-strategy-password';
-        value: string;
-      }
-    | {
-        relationTo: 'api-keys';
-        value: string;
-      }
-    | {
-        relationTo: 'public-users';
-        value: string;
-      }
-    | {
-        relationTo: 'api-keys-with-field-read-access';
-        value: string;
-      };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-preferences_input".
- */
-export interface PayloadPreferenceInput {
-  id?: string;
-  user:
-    | {
-        relationTo: 'users';
-        value: string;
-      }
-    | {
-        relationTo: 'partial-disable-local-strategies';
-        value: string;
-      }
-    | {
-        relationTo: 'disable-local-strategy-password';
-        value: string;
-      }
-    | {
-        relationTo: 'api-keys';
-        value: string;
-      }
-    | {
-        relationTo: 'public-users';
-        value: string;
-      }
-    | {
-        relationTo: 'api-keys-with-field-read-access';
-        value: string;
-      };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_input".
- */
-export interface PayloadMigrationInput {
-  id?: string;
-  name?: string | null;
-  batch?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MyBlock".
  */
 export interface MyBlock {
@@ -1281,30 +935,6 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
-
-export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
-  type: 'upload';
-  format: LexicalElementFormat;
-  id: string;
-  version: number;
-  fields: TFields;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
-
-export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
 
 
 declare module 'payload' {

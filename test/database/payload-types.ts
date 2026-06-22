@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_680F881F".
+ * via the `definition` "LexicalNodes_56C44267".
  */
-export type LexicalNodes_680F881F =
+export type LexicalNodes_56C44267 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_680F881F>
+  | SerializedParagraphNode<LexicalNodes_56C44267>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_680F881F>
+  | SerializedHeadingNode<LexicalNodes_56C44267>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_680F881F =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_680F881F>
-  | SerializedListNode<LexicalNodes_680F881F>
-  | SerializedListItemNode<LexicalNodes_680F881F>
-  | SerializedAutoLinkNode<LexicalNodes_680F881F, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_680F881F, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_56C44267>
+  | SerializedListNode<LexicalNodes_56C44267>
+  | SerializedListItemNode<LexicalNodes_56C44267>
+  | SerializedAutoLinkNode<LexicalNodes_56C44267, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_56C44267, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'noTimeStamps'
       | 'categories'
@@ -111,66 +111,8 @@ export type LexicalNodes_680F881F =
       | 'virtual-linked-tenants'
       | 'virtual-linked-roles'
       | 'virtual-linked-projects'
-      | 'users'
       | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_35AF72AA_Input".
- */
-export type LexicalNodes_35AF72AA_Input =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_35AF72AA_Input>
-  | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_35AF72AA_Input>
-  | {
-      type: 'upload';
-      /**
-       * Lexical's internal serialization version for this node type.
-       */
-      version: number;
-      [k: string]: unknown;
-    }
-  | SerializedQuoteNode<LexicalNodes_35AF72AA_Input>
-  | SerializedListNode<LexicalNodes_35AF72AA_Input>
-  | SerializedListItemNode<LexicalNodes_35AF72AA_Input>
-  | SerializedAutoLinkNode<LexicalNodes_35AF72AA_Input, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_35AF72AA_Input, LexicalLinkFields_0A7E9EC0>
-  | SerializedRelationshipNodeInput<
-      | 'noTimeStamps'
-      | 'categories'
-      | 'simple'
-      | 'simple-localized'
-      | 'categories-custom-id'
-      | 'posts'
-      | 'error-on-unnamed-fields'
-      | 'default-values'
-      | 'relation-a'
-      | 'relation-b'
-      | 'pg-migrations'
-      | 'custom-schema'
-      | 'places'
-      | 'virtual-relations'
-      | 'fields-persistance'
-      | 'custom-ids'
-      | 'fake-custom-ids'
-      | 'relationships-migration'
-      | 'compound-indexes'
-      | 'aliases'
-      | 'blocks-docs'
-      | 'unique-fields'
-      | 'select-has-many'
-      | 'virtual-linked-tenants'
-      | 'virtual-linked-roles'
-      | 'virtual-linked-projects'
       | 'users'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
@@ -208,8 +150,8 @@ export interface Config {
     'virtual-linked-tenants': VirtualLinkedTenant;
     'virtual-linked-roles': VirtualLinkedRole;
     'virtual-linked-projects': VirtualLinkedProject;
-    users: User;
     'payload-kv': PayloadKv;
+    users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -246,8 +188,8 @@ export interface Config {
     'virtual-linked-tenants': VirtualLinkedTenantsSelect<false> | VirtualLinkedTenantsSelect<true>;
     'virtual-linked-roles': VirtualLinkedRolesSelect<false> | VirtualLinkedRolesSelect<true>;
     'virtual-linked-projects': VirtualLinkedProjectsSelect<false> | VirtualLinkedProjectsSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -273,47 +215,6 @@ export interface Config {
   locale: 'en' | 'es' | 'uk';
   widgets: {
     collections: CollectionsWidget;
-  };
-  collectionsInput: {
-    noTimeStamps: NoTimeStampInput;
-    categories: CategoryInput;
-    simple: SimpleInput;
-    'simple-localized': SimpleLocalizedInput;
-    'categories-custom-id': CategoriesCustomIdInput;
-    posts: PostInput;
-    'error-on-unnamed-fields': ErrorOnUnnamedFieldInput;
-    'default-values': DefaultValueInput;
-    'relation-a': RelationAInput;
-    'relation-b': RelationBInput;
-    'pg-migrations': PgMigrationInput;
-    'custom-schema': CustomSchemaInput;
-    places: PlaceInput;
-    'virtual-relations': VirtualRelationInput;
-    'fields-persistance': FieldsPersistanceInput;
-    'custom-ids': CustomIdInput;
-    'fake-custom-ids': FakeCustomIdInput;
-    'relationships-migration': RelationshipsMigrationInput;
-    'compound-indexes': CompoundIndexInput;
-    aliases: AliasInput;
-    'blocks-docs': BlocksDocInput;
-    'unique-fields': UniqueFieldInput;
-    'select-has-many': SelectHasManyInput;
-    'virtual-linked-tenants': VirtualLinkedTenantInput;
-    'virtual-linked-roles': VirtualLinkedRoleInput;
-    'virtual-linked-projects': VirtualLinkedProjectInput;
-    users: UserInput;
-    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
-    'payload-kv': PayloadKvInput;
-    'payload-locked-documents': PayloadLockedDocumentInput;
-    'payload-preferences': PayloadPreferenceInput;
-    'payload-migrations': PayloadMigrationInput;
-  };
-  globalsInput: {
-    header: HeaderInput;
-    global: GlobalInput;
-    'global-2': Global2Input;
-    'global-3': Global3Input;
-    'virtual-relation-global': VirtualRelationGlobalInput;
   };
   user: User;
   jobs: {
@@ -584,7 +485,7 @@ export interface DefaultValue {
 export interface RelationA {
   id: string;
   title?: string | null;
-  richText?: LexicalRichText<LexicalNodes_680F881F> | null;
+  richText?: LexicalRichText<LexicalNodes_56C44267> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -596,7 +497,7 @@ export interface RelationB {
   id: string;
   title?: string | null;
   relationship?: (string | null) | RelationA;
-  richText?: LexicalRichText<LexicalNodes_680F881F> | null;
+  richText?: LexicalRichText<LexicalNodes_56C44267> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -910,6 +811,23 @@ export interface VirtualLinkedProject {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -932,23 +850,6 @@ export interface User {
     | null;
   password?: string | null;
   collection: 'users';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1614,6 +1515,14 @@ export interface VirtualLinkedProjectsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1633,14 +1542,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1834,693 +1735,6 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "noTimeStamps_input".
- */
-export interface NoTimeStampInput {
-  id?: string;
-  title?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories_input".
- */
-export interface CategoryInput {
-  id?: string;
-  title?: string | null;
-  simple?: string | null;
-  hideout?: {
-    camera1?: {
-      time1Image?: string | null;
-    };
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "simple_input".
- */
-export interface SimpleInput {
-  id?: string;
-  text?: string | null;
-  number?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "simple-localized_input".
- */
-export interface SimpleLocalizedInput {
-  id?: string;
-  text?: string | null;
-  number?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "categories-custom-id_input".
- */
-export interface CategoriesCustomIdInput {
-  id?: number;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_input".
- */
-export interface PostInput {
-  id?: string;
-  title: string;
-  category?: string | null;
-  categories?: string[] | null;
-  categoriesCustomID?: number[] | null;
-  categoryPoly?: {
-    relationTo: 'categories';
-    value: string;
-  } | null;
-  categoryPolyMany?:
-    | {
-        relationTo: 'categories';
-        value: string;
-      }[]
-    | null;
-  categoryCustomID?: number | null;
-  polymorphicRelations?:
-    | (
-        | {
-            relationTo: 'categories';
-            value: string;
-          }
-        | {
-            relationTo: 'simple';
-            value: string;
-          }
-      )[]
-    | null;
-  localizedPolymorphicRelations?:
-    | (
-        | {
-            relationTo: 'categories';
-            value: string;
-          }
-        | {
-            relationTo: 'simple';
-            value: string;
-          }
-      )[]
-    | null;
-  localized?: string | null;
-  text?: string | null;
-  number?: number | null;
-  numberDefault?: number | null;
-  numbersHasMany?: number[] | null;
-  publishDate?: string | null;
-  blocks?: BlockThird[] | null;
-  testNestedGroup?: {
-    nestedLocalizedPolymorphicRelation?:
-      | (
-          | {
-              relationTo: 'categories';
-              value: string;
-            }
-          | {
-              relationTo: 'simple';
-              value: string;
-            }
-        )[]
-      | null;
-    nestedLocalizedText?: string | null;
-    nestedText1?: string | null;
-    nestedText2?: string | null;
-  };
-  D1?: {
-    D2?: {
-      D3?: {
-        D4?: string | null;
-      };
-    };
-  };
-  hasTransaction?: boolean | null;
-  throwAfterChange?: boolean | null;
-  arrayWithIDs?:
-    | {
-        text?: string | null;
-        textLocalized?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  arrayWithIDsLocalized?:
-    | {
-        text?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  blocksWithIDs?: BlockFirst[] | null;
-  group?: {
-    text?: string | null;
-  };
-  tab?: {
-    text?: string | null;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "error-on-unnamed-fields_input".
- */
-export interface ErrorOnUnnamedFieldInput {
-  id?: string;
-  groupWithinUnnamedTab: {
-    text: string;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "default-values_input".
- */
-export interface DefaultValueInput {
-  id?: string;
-  title?: string | null;
-  defaultValue?: string | null;
-  array?:
-    | {
-        defaultValue?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  group?: {
-    defaultValue?: string | null;
-  };
-  select?: ('option0' | 'option1' | 'default') | null;
-  /**
-   * @minItems 2
-   * @maxItems 2
-   */
-  point?: [number, number] | null;
-  escape?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation-a_input".
- */
-export interface RelationAInput {
-  id?: string;
-  title?: string | null;
-  richText?: LexicalRichText<LexicalNodes_35AF72AA_Input> | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation-b_input".
- */
-export interface RelationBInput {
-  id?: string;
-  title?: string | null;
-  relationship?: string | null;
-  richText?: LexicalRichText<LexicalNodes_35AF72AA_Input> | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "pg-migrations_input".
- */
-export interface PgMigrationInput {
-  id?: string;
-  relation1?: string | null;
-  myArray?:
-    | {
-        relation2?: string | null;
-        mySubArray?:
-          | {
-              relation3?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-  myGroup?: {
-    relation4?: string | null;
-  };
-  myBlocks?: MyBlockInput[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MyBlockInput".
- */
-export interface MyBlockInput {
-  relation5?: string | null;
-  relation6?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'myBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-schema_input".
- */
-export interface CustomSchemaInput {
-  id?: string;
-  text?: string | null;
-  localizedText?: string | null;
-  relationship?: string[] | null;
-  select?: ('a' | 'b' | 'c')[] | null;
-  radio?: ('a' | 'b' | 'c') | null;
-  array?:
-    | {
-        text?: string | null;
-        localizedText?: string | null;
-        id?: string | null;
-      }[]
-    | null;
-  blocks?: BlockSecond[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "places_input".
- */
-export interface PlaceInput {
-  id?: string;
-  country?: string | null;
-  city?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "virtual-relations_input".
- */
-export interface VirtualRelationInput {
-  id?: string;
-  post?: string | null;
-  posts?: string[] | null;
-  customID?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "fields-persistance_input".
- */
-export interface FieldsPersistanceInput {
-  id?: string;
-  blockWithVirtual?: BlockWithVirtualInput[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "BlockWithVirtualInput".
- */
-export interface BlockWithVirtualInput {
-  text?: string | null;
-  id?: string | null;
-  blockName?: string | null;
-  blockType: 'blockWithVirtual';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "custom-ids_input".
- */
-export interface CustomIdInput {
-  id?: string;
-  title?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "fake-custom-ids_input".
- */
-export interface FakeCustomIdInput {
-  id?: string;
-  title?: string | null;
-  group?: {
-    id?: string | null;
-  };
-  myTab?: {
-    id?: string | null;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relationships-migration_input".
- */
-export interface RelationshipsMigrationInput {
-  id?: string;
-  relationship?: string | null;
-  relationship_2?: {
-    relationTo: 'default-values';
-    value: string;
-  } | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "compound-indexes_input".
- */
-export interface CompoundIndexInput {
-  id?: string;
-  one?: string | null;
-  two?: string | null;
-  three?: string | null;
-  group?: {
-    four?: string | null;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "aliases_input".
- */
-export interface AliasInput {
-  id?: string;
-  thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName?:
-    | {
-        nestedArray?:
-          | {
-              text?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "blocks-docs_input".
- */
-export interface BlocksDocInput {
-  id?: string;
-  testBlocksLocalized?: Cta[] | null;
-  testBlocks?: Cta[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "unique-fields_input".
- */
-export interface UniqueFieldInput {
-  id?: string;
-  slugField?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "select-has-many_input".
- */
-export interface SelectHasManyInput {
-  id?: string;
-  roles?: ('user' | 'admin' | 'editor')[] | null;
-  food?: ('apple' | 'bananabread' | 'banana')[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "virtual-linked-tenants_input".
- */
-export interface VirtualLinkedTenantInput {
-  id?: string;
-  slug: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "virtual-linked-roles_input".
- */
-export interface VirtualLinkedRoleInput {
-  id?: string;
-  project: string;
-  tenant: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "virtual-linked-projects_input".
- */
-export interface VirtualLinkedProjectInput {
-  id?: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_input".
- */
-export interface UserInput {
-  id?: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_input".
- */
-export interface PayloadMcpApiKeyInput {
-  id?: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string;
-  overrideAccess?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_input".
- */
-export interface PayloadKvInput {
-  id?: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_input".
- */
-export interface PayloadLockedDocumentInput {
-  id?: string;
-  document?:
-    | ({
-        relationTo: 'noTimeStamps';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'categories';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'simple';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'simple-localized';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'categories-custom-id';
-        value: number;
-      } | null)
-    | ({
-        relationTo: 'posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'error-on-unnamed-fields';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'default-values';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'relation-a';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'relation-b';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'pg-migrations';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'custom-schema';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'places';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'virtual-relations';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'fields-persistance';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'custom-ids';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'fake-custom-ids';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'relationships-migration';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'compound-indexes';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'aliases';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'blocks-docs';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'unique-fields';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'select-has-many';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'virtual-linked-tenants';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'virtual-linked-roles';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'virtual-linked-projects';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-preferences_input".
- */
-export interface PayloadPreferenceInput {
-  id?: string;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_input".
- */
-export interface PayloadMigrationInput {
-  id?: string;
-  name?: string | null;
-  batch?: number | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "header_input".
- */
-export interface HeaderInput {
-  id?: string;
-  itemsLvl1?:
-    | {
-        label?: string | null;
-        itemsLvl2?:
-          | {
-              label?: string | null;
-              itemsLvl3?:
-                | {
-                    label?: string | null;
-                    itemsLvl4?:
-                      | {
-                          label?: string | null;
-                          id?: string | null;
-                        }[]
-                      | null;
-                    id?: string | null;
-                  }[]
-                | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global_input".
- */
-export interface GlobalInput {
-  id?: string;
-  text?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global-2_input".
- */
-export interface Global2Input {
-  id?: string;
-  text?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "global-3_input".
- */
-export interface Global3Input {
-  id?: string;
-  text?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "virtual-relation-global_input".
- */
-export interface VirtualRelationGlobalInput {
-  id?: string;
-  post?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "MyBlock".
  */
 export interface MyBlock {
@@ -2699,30 +1913,6 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
-
-export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
-  type: 'upload';
-  format: LexicalElementFormat;
-  id: string;
-  version: number;
-  fields: TFields;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
-
-export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
 
 
 declare module 'payload' {

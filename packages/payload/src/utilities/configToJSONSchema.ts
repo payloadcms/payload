@@ -1514,7 +1514,7 @@ export function configToJSONSchema(
     })),
   ]
 
-  const generateInputTypes = config.typescript?.generateInputTypes !== false
+  const generateInputTypes = config.typescript?.generateInputTypes === true
 
   const entityDefinitions: { [k: string]: JSONSchema4 } = entities.reduce(
     (acc, { type, entity }) => {

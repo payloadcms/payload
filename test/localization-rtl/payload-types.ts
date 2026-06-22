@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_4AD70FC8".
+ * via the `definition` "LexicalNodes_4C38692C".
  */
-export type LexicalNodes_4AD70FC8 =
+export type LexicalNodes_4C38692C =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_4AD70FC8>
+  | SerializedParagraphNode<LexicalNodes_4C38692C>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_4AD70FC8>
+  | SerializedHeadingNode<LexicalNodes_4C38692C>
   | {
       type: 'upload';
       /**
@@ -79,51 +79,13 @@ export type LexicalNodes_4AD70FC8 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_4AD70FC8>
-  | SerializedListNode<LexicalNodes_4AD70FC8>
-  | SerializedListItemNode<LexicalNodes_4AD70FC8>
-  | SerializedAutoLinkNode<LexicalNodes_4AD70FC8, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_4AD70FC8, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_4C38692C>
+  | SerializedListNode<LexicalNodes_4C38692C>
+  | SerializedListItemNode<LexicalNodes_4C38692C>
+  | SerializedAutoLinkNode<LexicalNodes_4C38692C, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_4C38692C, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
-      | 'users'
-      | 'posts'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_31FB38D1_Input".
- */
-export type LexicalNodes_31FB38D1_Input =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_31FB38D1_Input>
-  | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_31FB38D1_Input>
-  | {
-      type: 'upload';
-      /**
-       * Lexical's internal serialization version for this node type.
-       */
-      version: number;
-      [k: string]: unknown;
-    }
-  | SerializedQuoteNode<LexicalNodes_31FB38D1_Input>
-  | SerializedListNode<LexicalNodes_31FB38D1_Input>
-  | SerializedListItemNode<LexicalNodes_31FB38D1_Input>
-  | SerializedAutoLinkNode<LexicalNodes_31FB38D1_Input, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_31FB38D1_Input, LexicalLinkFields_0A7E9EC0>
-  | SerializedRelationshipNodeInput<
-      | 'users'
-      | 'posts'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
+      'users' | 'posts' | 'payload-kv' | 'payload-locked-documents' | 'payload-preferences' | 'payload-migrations'
     >;
 
 export interface Config {
@@ -158,16 +120,6 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  collectionsInput: {
-    users: UserInput;
-    posts: PostInput;
-    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
-    'payload-kv': PayloadKvInput;
-    'payload-locked-documents': PayloadLockedDocumentInput;
-    'payload-preferences': PayloadPreferenceInput;
-    'payload-migrations': PayloadMigrationInput;
-  };
-  globalsInput: {};
   user: User;
   jobs: {
     tasks: unknown;
@@ -227,7 +179,7 @@ export interface Post {
   id: string;
   title?: string | null;
   description?: string | null;
-  content?: LexicalRichText<LexicalNodes_4AD70FC8> | null;
+  content?: LexicalRichText<LexicalNodes_4C38692C> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -387,135 +339,6 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_input".
- */
-export interface UserInput {
-  id?: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * Description
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_input".
- */
-export interface PostInput {
-  id?: string;
-  title?: string | null;
-  description?: string | null;
-  content?: LexicalRichText<LexicalNodes_31FB38D1_Input> | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_input".
- */
-export interface PayloadMcpApiKeyInput {
-  id?: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string;
-  overrideAccess?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_input".
- */
-export interface PayloadKvInput {
-  id?: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_input".
- */
-export interface PayloadLockedDocumentInput {
-  id?: string;
-  document?:
-    | ({
-        relationTo: 'users';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-preferences_input".
- */
-export interface PayloadPreferenceInput {
-  id?: string;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_input".
- */
-export interface PayloadMigrationInput {
-  id?: string;
-  name?: string | null;
-  batch?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -697,30 +520,6 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
-
-export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
-  type: 'upload';
-  format: LexicalElementFormat;
-  id: string;
-  version: number;
-  fields: TFields;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
-
-export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
 
 
 declare module 'payload' {

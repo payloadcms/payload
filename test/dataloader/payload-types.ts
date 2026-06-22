@@ -62,13 +62,13 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_5AC9F469".
+ * via the `definition` "LexicalNodes_2AD6024E".
  */
-export type LexicalNodes_5AC9F469 =
+export type LexicalNodes_2AD6024E =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_5AC9F469>
+  | SerializedParagraphNode<LexicalNodes_2AD6024E>
   | SerializedHorizontalRuleNode
   | {
       type: 'upload';
@@ -78,7 +78,7 @@ export type LexicalNodes_5AC9F469 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_5AC9F469>
+  | SerializedQuoteNode<LexicalNodes_2AD6024E>
   | SerializedRelationshipNode<
       | 'posts'
       | 'relation-a'
@@ -86,55 +86,17 @@ export type LexicalNodes_5AC9F469 =
       | 'shops'
       | 'items'
       | 'itemTags'
-      | 'users'
       | 'payload-kv'
+      | 'users'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_5AC9F469, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_5AC9F469, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_5AC9F469>
-  | SerializedListItemNode<LexicalNodes_5AC9F469>
-  | SerializedHeadingNode<LexicalNodes_5AC9F469>;
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_58F239BE_Input".
- */
-export type LexicalNodes_58F239BE_Input =
-  | SerializedTextNode
-  | SerializedTabNode
-  | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_58F239BE_Input>
-  | SerializedHorizontalRuleNode
-  | {
-      type: 'upload';
-      /**
-       * Lexical's internal serialization version for this node type.
-       */
-      version: number;
-      [k: string]: unknown;
-    }
-  | SerializedQuoteNode<LexicalNodes_58F239BE_Input>
-  | SerializedRelationshipNodeInput<
-      | 'posts'
-      | 'relation-a'
-      | 'relation-b'
-      | 'shops'
-      | 'items'
-      | 'itemTags'
-      | 'users'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
-    >
-  | SerializedAutoLinkNode<LexicalNodes_58F239BE_Input, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_58F239BE_Input, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_58F239BE_Input>
-  | SerializedListItemNode<LexicalNodes_58F239BE_Input>
-  | SerializedHeadingNode<LexicalNodes_58F239BE_Input>;
+  | SerializedAutoLinkNode<LexicalNodes_2AD6024E, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_2AD6024E, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_2AD6024E>
+  | SerializedListItemNode<LexicalNodes_2AD6024E>
+  | SerializedHeadingNode<LexicalNodes_2AD6024E>;
 
 export interface Config {
   auth: {
@@ -148,8 +110,8 @@ export interface Config {
     shops: Shop;
     items: Item;
     itemTags: ItemTag;
-    users: User;
     'payload-kv': PayloadKv;
+    users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -162,8 +124,8 @@ export interface Config {
     shops: ShopsSelect<false> | ShopsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
     itemTags: ItemTagsSelect<false> | ItemTagsSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -178,21 +140,6 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  collectionsInput: {
-    posts: PostInput;
-    'relation-a': RelationAInput;
-    'relation-b': RelationBInput;
-    shops: ShopInput;
-    items: ItemInput;
-    itemTags: ItemTagInput;
-    users: UserInput;
-    'payload-mcp-api-keys': PayloadMcpApiKeyInput;
-    'payload-kv': PayloadKvInput;
-    'payload-locked-documents': PayloadLockedDocumentInput;
-    'payload-preferences': PayloadPreferenceInput;
-    'payload-migrations': PayloadMigrationInput;
-  };
-  globalsInput: {};
   user: User;
   jobs: {
     tasks: unknown;
@@ -260,7 +207,7 @@ export interface User {
 export interface RelationA {
   id: string;
   relationship?: (string | null) | RelationB;
-  richText?: LexicalRichText<LexicalNodes_5AC9F469> | null;
+  richText?: LexicalRichText<LexicalNodes_2AD6024E> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -271,7 +218,7 @@ export interface RelationA {
 export interface RelationB {
   id: string;
   relationship?: (string | null) | RelationA;
-  richText?: LexicalRichText<LexicalNodes_5AC9F469> | null;
+  richText?: LexicalRichText<LexicalNodes_2AD6024E> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -462,6 +409,14 @@ export interface ItemTagsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -481,14 +436,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -531,196 +478,6 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "posts_input".
- */
-export interface PostInput {
-  id?: string;
-  title: string;
-  owner?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation-a_input".
- */
-export interface RelationAInput {
-  id?: string;
-  relationship?: string | null;
-  richText?: LexicalRichText<LexicalNodes_58F239BE_Input> | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "relation-b_input".
- */
-export interface RelationBInput {
-  id?: string;
-  relationship?: string | null;
-  richText?: LexicalRichText<LexicalNodes_58F239BE_Input> | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "shops_input".
- */
-export interface ShopInput {
-  id?: string;
-  name?: string | null;
-  items?: string[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "items_input".
- */
-export interface ItemInput {
-  id?: string;
-  name?: string | null;
-  itemTags?: string[] | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "itemTags_input".
- */
-export interface ItemTagInput {
-  id?: string;
-  name?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "users_input".
- */
-export interface UserInput {
-  id?: string;
-  email: string;
-  resetPasswordToken?: string | null;
-  resetPasswordExpiration?: string | null;
-  salt?: string | null;
-  hash?: string | null;
-  loginAttempts?: number | null;
-  lockUntil?: string | null;
-  sessions?:
-    | {
-        id: string;
-        createdAt?: string | null;
-        expiresAt: string;
-      }[]
-    | null;
-  password?: string | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_input".
- */
-export interface PayloadMcpApiKeyInput {
-  id?: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string;
-  overrideAccess?: boolean | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_input".
- */
-export interface PayloadKvInput {
-  id?: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-locked-documents_input".
- */
-export interface PayloadLockedDocumentInput {
-  id?: string;
-  document?:
-    | ({
-        relationTo: 'posts';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'relation-a';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'relation-b';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'shops';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'items';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'itemTags';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'users';
-        value: string;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string;
-      } | null);
-  globalSlug?: string | null;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-preferences_input".
- */
-export interface PayloadPreferenceInput {
-  id?: string;
-  user: {
-    relationTo: 'users';
-    value: string;
-  };
-  key?: string | null;
-  value?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-migrations_input".
- */
-export interface PayloadMigrationInput {
-  id?: string;
-  name?: string | null;
-  batch?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -863,30 +620,6 @@ export interface LexicalRichText<TNode> {
     version: number;
   };
 }
-
-export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
-  type: 'upload';
-  format: LexicalElementFormat;
-  id: string;
-  version: number;
-  fields: TFields;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
-
-export type SerializedRelationshipNodeInput<TSlugs extends keyof Config['collections']> = {
-  type: 'relationship';
-  format: LexicalElementFormat;
-  version: number;
-} & {
-  [TSlug in TSlugs]: {
-    relationTo: TSlug;
-    value: Config['collections'][TSlug]['id'];
-  };
-}[TSlugs];
 
 
 declare module 'payload' {
