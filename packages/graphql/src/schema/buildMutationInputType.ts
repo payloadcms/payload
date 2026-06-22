@@ -20,6 +20,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SelectField,
+  SlugField,
   TabsField,
   TextareaField,
   TextField,
@@ -89,6 +90,12 @@ export function buildMutationInputType({
   parentName,
 }: BuildMutationInputTypeArgs): GraphQLInputObjectType | null {
   const fieldToSchemaMap = {
+    slug: (inputObjectTypeConfig: InputObjectTypeConfig, field: SlugField) => ({
+      ...inputObjectTypeConfig,
+      [formatName(field.name)]: {
+        type: withNullableType({ type: GraphQLString, field, forceNullable, parentIsLocalized }),
+      },
+    }),
     array: (inputObjectTypeConfig: InputObjectTypeConfig, field: ArrayField) => {
       const fullName = combineParentName(parentName, toWords(field.name, true))
       let type: GraphQLList<GraphQLType> | GraphQLType = buildMutationInputType({
