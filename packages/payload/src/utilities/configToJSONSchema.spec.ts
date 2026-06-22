@@ -145,7 +145,10 @@ describe('configToJSONSchema', () => {
       collections: [{ slug: 'posts', fields: [{ name: 'title', type: 'text' }] }],
       typescript: { generateInputTypes: false },
     }
-    const { jsonSchema: disabledSchema } = configToJSONSchema(await sanitizeConfig(disabled), 'text')
+    const { jsonSchema: disabledSchema } = configToJSONSchema(
+      await sanitizeConfig(disabled),
+      'text',
+    )
     expect(disabledSchema?.$defs?.posts_input).toBeUndefined()
     expect(disabledSchema?.properties?.collectionsInput).toBeUndefined()
   })

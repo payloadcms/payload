@@ -513,9 +513,7 @@ export interface FieldBase {
    * `variant` is `'input'` when generating the write shape (`create`/`update`) and `'output'` when
    * generating the read shape, so a transform can differ between the two.
    */
-  jsonSchema?: Array<
-    (args: { jsonSchema: JSONSchema4; variant: SchemaVariant }) => JSONSchema4
-  >
+  jsonSchema?: Array<(args: { jsonSchema: JSONSchema4; variant: SchemaVariant }) => JSONSchema4>
   label?: false | LabelFunction | StaticLabel
   localized?: boolean
   /**
