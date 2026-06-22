@@ -203,33 +203,5 @@
     "wrangler": "~4.61.1",
     "zod": "4.3.6"
   },
-  "packageManager": "pnpm@10.27.0",
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@parcel/watcher",
-      "@sentry/cli",
-      "@swc/core",
-      "@vercel/git-hooks",
-      "better-sqlite3",
-      "bufferutil",
-      "esbuild",
-      "mongodb-memory-server",
-      "sharp",
-      "unrs-resolver",
-      "utf-8-validate",
-      "workerd"
-    ],
-    "overrides": {
-      "@types/request>form-data": "^2.5.6",
-      "amazon-cognito-identity-js>js-cookie": "^3.0.7",
-      "copyfiles": "$copyfiles",
-      "cross-env": "$cross-env",
-      "dotenv": "$dotenv",
-      "graphql": "16.8.1",
-      "mcp-handler>@modelcontextprotocol/sdk": "1.27.1",
-      "react": "$react",
-      "react-dom": "$react-dom",
-      "typescript": "$typescript"
-    }
-  }
+  "packageManager": "pnpm@11.7.0"
 }
