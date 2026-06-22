@@ -26,6 +26,7 @@ import type {
   RelationshipValueSingle,
   RichTextField,
   SelectField,
+  SlugField,
   TextareaField,
   TextField,
   UploadField,
@@ -97,6 +98,20 @@ export const text: TextFieldValidation = (
     if (!value || ((typeof value === 'string' || Array.isArray(value)) && value.length === 0)) {
       return t('validation:required')
     }
+  }
+
+  return true
+}
+
+export type SlugFieldValidation = Validate<string, unknown, unknown, SlugField>
+
+export const slug: SlugFieldValidation = (value, { req: { t }, required }) => {
+  if (!required && (value === undefined || value === null)) {
+    return true
+  }
+
+  if (required && !value) {
+    return t('validation:required')
   }
 
   return true
@@ -1108,6 +1123,7 @@ export const validations = {
   relationship,
   richText,
   select,
+  slug,
   text,
   textarea,
   upload,
