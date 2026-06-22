@@ -73,6 +73,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: '링크',
     loadingWithEllipsis: '로딩 중...',
   },
+  ms: {
+    label: 'Pautan',
+    loadingWithEllipsis: 'Memuatkan...',
+  },
   my: {
     label: 'လင့်',
     loadingWithEllipsis: 'ဖွင့်နေသည်...',

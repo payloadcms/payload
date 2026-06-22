@@ -55,6 +55,9 @@ export const i18n: Partial<GenericLanguages> = {
   ko: {
     label: '업로드',
   },
+  ms: {
+    label: 'Muat naik',
+  },
   my: {
     label: 'တင်ပြီး',
   },

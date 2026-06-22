@@ -55,6 +55,9 @@ export const i18n: Partial<GenericLanguages> = {
   ko: {
     label: '수평 규칙',
   },
+  ms: {
+    label: 'Garis mendatar',
+  },
   my: {
     label: 'Peraturan Mendatar',
   },

@@ -55,6 +55,9 @@ export const i18n: Partial<GenericLanguages> = {
   ko: {
     label: '관계',
   },
+  ms: {
+    label: 'Hubungan',
+  },
   my: {
     label: 'Hubungan',
   },
