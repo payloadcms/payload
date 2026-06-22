@@ -1,29 +1,31 @@
 import fs from 'fs/promises'
-import { imageSize } from 'image-size'
-import { imageSizeFromFile } from 'image-size/fromFile'
 
+import type { SharpDependency } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { ProbedImageSize } from './types.js'
 
-import { temporaryFileTask } from './tempFile.js'
+import { probeImageSize } from './probeImageSize.js'
 
-export async function getImageSize(file: PayloadRequest['file']): Promise<ProbedImageSize> {
-  if (file?.tempFilePath) {
-    return imageSizeFromFile(file.tempFilePath)
+type Args = {
+  file: PayloadRequest['file']
+  /**
+   * The configured `sharp` instance, when available. Preferred for reading
+   * dimensions because it covers every format sharp can process. Falls back to
+   * the dependency-free probe when sharp is not configured.
+   */
+  sharp?: SharpDependency
+}
+
+export async function getImageSize({ file, sharp }: Args): Promise<ProbedImageSize> {
+  if (sharp) {
+    const input = file?.tempFilePath ?? file!.data
+    const { height, width } = await sharp(input).metadata()
+    if (width && height) {
+      return { height, width }
+    }
   }
 
-  // Tiff file do not support buffers or streams, so we must write to file first
-  // then retrieve dimensions. https://github.com/image-size/image-size/issues/103
-  if (file?.mimetype === 'image/tiff') {
-    const dimensions = await temporaryFileTask(
-      async (filepath: string) => {
-        await fs.writeFile(filepath, file.data)
-        return imageSizeFromFile(filepath)
-      },
-      { extension: 'tiff' },
-    )
-    return dimensions
-  }
+  const data = file?.tempFilePath ? await fs.readFile(file.tempFilePath) : file!.data
 
-  return imageSize(file!.data)
+  return probeImageSize(data)
 }
