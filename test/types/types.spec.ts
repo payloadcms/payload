@@ -1262,8 +1262,6 @@ describe('Types testing', () => {
 
   describe('richText enforcement in local API and SDK', () => {
     test('payload.create accepts buildEditorState output as richText', () => {
-      // The Local API types `data` against the read shape, so read-typed editor state is accepted
-      // (read-modify-write works). See the PR's "create/update keep the read shape" section.
       expect(payload.create).type.toBeCallableWith({
         collection: 'posts',
         data: {
@@ -1444,7 +1442,11 @@ describe('Types testing', () => {
 
     test('input rich text (ID-only relationship + block nodes) is valid update data', () => {
       const richText = {} as InputTypeInput['richText']
-      expect(payload.update).type.toBeCallableWith({ id: 1, collection: 'input-types', data: { richText } })
+      expect(payload.update).type.toBeCallableWith({
+        id: 1,
+        collection: 'input-types',
+        data: { richText },
+      })
     })
   })
 
