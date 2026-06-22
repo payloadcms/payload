@@ -4103,7 +4103,7 @@ export interface CollectionsWidget {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   canViewConditionalField?: boolean | null;
   email: string;
   resetPasswordToken?: string | null;
@@ -4126,7 +4126,7 @@ export interface UserInput {
  * via the `definition` "select-versions-fields_input".
  */
 export interface SelectVersionsFieldInput {
-  id?: string | null;
+  id?: string;
   hasMany?: ('a' | 'b' | 'c' | 'd')[] | null;
   array?:
     | {
@@ -4141,37 +4141,33 @@ export interface SelectVersionsFieldInput {
  * via the `definition` "array-fields_input".
  */
 export interface ArrayFieldInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
-  items?:
-    | {
-        text: string;
-        anotherText?: string | null;
-        localizedText?: string | null;
-        richTextField?: LexicalRichText<LexicalNodes_520531E7_Input> | null;
-        subArray?:
-          | {
-              text?: string | null;
-              textTwo?: string | null;
-              textInRow?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
+  items?: {
+    text: string;
+    anotherText?: string | null;
+    localizedText?: string | null;
+    richTextField?: LexicalRichText<LexicalNodes_520531E7_Input> | null;
+    subArray?:
+      | {
+          text?: string | null;
+          textTwo?: string;
+          textInRow?: string;
+          id?: string | null;
+        }[]
+      | null;
+    id?: string | null;
+  }[];
   collapsedArray?:
     | {
         text: string;
         id?: string | null;
       }[]
     | null;
-  localized?:
-    | {
-        text: string;
-        id?: string | null;
-      }[]
-    | null;
+  localized?: {
+    text: string;
+    id?: string | null;
+  }[];
   readOnly?:
     | {
         text?: string | null;
@@ -4254,39 +4250,33 @@ export interface ArrayFieldInput {
  * via the `definition` "block-fields_input".
  */
 export interface BlockFieldInput {
-  id?: string | null;
-  blocks?: (ContentBlockInput | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[] | null;
-  duplicate?: (ContentBlockInput | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[] | null;
-  collapsedByDefaultBlocks?:
-    | (
-        | LocalizedContentBlockInput
-        | LocalizedWithIconBlock
-        | LocalizedNoBlockname
-        | LocalizedNumberBlock
-        | LocalizedSubBlocksBlock
-        | LocalizedTabsBlock
-      )[]
-    | null;
-  disableSort?:
-    | (
-        | LocalizedContentBlockInput
-        | LocalizedWithIconBlock
-        | LocalizedNoBlockname
-        | LocalizedNumberBlock
-        | LocalizedSubBlocksBlock
-        | LocalizedTabsBlock
-      )[]
-    | null;
-  localizedBlocks?:
-    | (
-        | LocalizedContentBlockInput
-        | LocalizedWithIconBlock
-        | LocalizedNoBlockname
-        | LocalizedNumberBlock
-        | LocalizedSubBlocksBlock
-        | LocalizedTabsBlock
-      )[]
-    | null;
+  id?: string;
+  blocks?: (ContentBlockInput | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  duplicate?: (ContentBlockInput | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
+  collapsedByDefaultBlocks?: (
+    | LocalizedContentBlockInput
+    | LocalizedWithIconBlock
+    | LocalizedNoBlockname
+    | LocalizedNumberBlock
+    | LocalizedSubBlocksBlock
+    | LocalizedTabsBlock
+  )[];
+  disableSort?: (
+    | LocalizedContentBlockInput
+    | LocalizedWithIconBlock
+    | LocalizedNoBlockname
+    | LocalizedNumberBlock
+    | LocalizedSubBlocksBlock
+    | LocalizedTabsBlock
+  )[];
+  localizedBlocks?: (
+    | LocalizedContentBlockInput
+    | LocalizedWithIconBlock
+    | LocalizedNoBlockname
+    | LocalizedNumberBlock
+    | LocalizedSubBlocksBlock
+    | LocalizedTabsBlock
+  )[];
   i18nBlocks?: TextInI18NBlock[] | null;
   blocksWithLocalizedArray?: LocalizedArray[] | null;
   blocksWithSimilarConfigs?: (BlockA | BlockB | GroupBlock)[] | null;
@@ -4351,8 +4341,8 @@ export interface RelationshipsInput {
  * via the `definition` "checkbox-fields_input".
  */
 export interface CheckboxFieldInput {
-  id?: string | null;
-  checkbox?: boolean | null;
+  id?: string;
+  checkbox?: boolean;
   checkboxNotRequired?: boolean | null;
 }
 /**
@@ -4360,7 +4350,7 @@ export interface CheckboxFieldInput {
  * via the `definition` "code-fields_input".
  */
 export interface CodeFieldInput {
-  id?: string | null;
+  id?: string;
   javascript?: string | null;
   typescript?: string | null;
   json?: string | null;
@@ -4373,13 +4363,13 @@ export interface CodeFieldInput {
  * via the `definition` "collapsible-fields_input".
  */
 export interface CollapsibleFieldInput {
-  id?: string | null;
+  id?: string;
   text: string;
   group: {
     textWithinGroup?: string | null;
     subGroup: {
       textWithinSubGroup?: string | null;
-      requiredTextWithinSubGroup?: string | null;
+      requiredTextWithinSubGroup?: string;
     };
   };
   someText?: string | null;
@@ -4404,7 +4394,7 @@ export interface CollapsibleFieldInput {
  * via the `definition` "conditional-logic_input".
  */
 export interface ConditionalLogicInput {
-  id?: string | null;
+  id?: string;
   text: string;
   toggleField?: boolean | null;
   fieldWithDocIDCondition?: string | null;
@@ -4472,7 +4462,7 @@ export interface ConditionalLogicInput {
  * via the `definition` "custom-id_input".
  */
 export interface CustomIdInput {
-  id?: string | null;
+  id?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4482,7 +4472,7 @@ export interface CustomIdNestedInput {
   /**
    * Custom numeric ID nested in an unnamed tab
    */
-  id?: number | null;
+  id?: number;
   title: string;
   description?: string | null;
 }
@@ -4491,21 +4481,21 @@ export interface CustomIdNestedInput {
  * via the `definition` "custom-tab-id_input".
  */
 export interface CustomTabIdInput {
-  id?: string | null;
+  id?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-row-id_input".
  */
 export interface CustomRowIdInput {
-  id?: string | null;
+  id?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "date-fields_input".
  */
 export interface DateFieldInput {
-  id?: string | null;
+  id?: string;
   default: string;
   timeOnly?: string | null;
   timeOnlyWithMiliseconds?: string | null;
@@ -4558,7 +4548,7 @@ export interface DateFieldInput {
  * via the `definition` "email-fields_input".
  */
 export interface EmailFieldInput {
-  id?: string | null;
+  id?: string;
   email: string;
   localizedEmail?: string | null;
   emailWithAutocomplete?: string | null;
@@ -4581,7 +4571,7 @@ export interface EmailFieldInput {
  * via the `definition` "radio-fields_input".
  */
 export interface RadioFieldInput {
-  id?: string | null;
+  id?: string;
   radio?: ('one' | 'two' | 'three') | null;
   radioWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
 }
@@ -4590,12 +4580,12 @@ export interface RadioFieldInput {
  * via the `definition` "group-fields_input".
  */
 export interface GroupFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * This is a group.
    */
   group?: {
-    text?: string | null;
+    text?: string;
     defaultParent?: string | null;
     defaultChild?: string | null;
     subGroup?: {
@@ -4702,7 +4692,7 @@ export interface GroupFieldInput {
  * via the `definition` "row-fields_input".
  */
 export interface RowFieldInput {
-  id: string;
+  id?: string;
   title: string;
   field_with_width_a?: string | null;
   field_with_width_b?: string | null;
@@ -4735,7 +4725,7 @@ export interface RowFieldInput {
  * via the `definition` "indexed-fields_input".
  */
 export interface IndexedFieldInput {
-  id?: string | null;
+  id?: string;
   text: string;
   uniqueText?: string | null;
   uniqueRelationship?: string | null;
@@ -4761,8 +4751,8 @@ export interface IndexedFieldInput {
         value: string;
       }[]
     | null;
-  uniqueRequiredText?: string | null;
-  localizedUniqueRequiredText?: string | null;
+  uniqueRequiredText?: string;
+  localizedUniqueRequiredText?: string;
   /**
    * @minItems 2
    * @maxItems 2
@@ -4792,7 +4782,7 @@ export interface IndexedFieldInput {
  * via the `definition` "json-fields_input".
  */
 export interface JsonFieldInput {
-  id?: string | null;
+  id?: string;
   json?: {
     array?: {
       object?: {
@@ -4831,7 +4821,7 @@ export interface JsonFieldInput {
  * via the `definition` "number-fields_input".
  */
 export interface NumberFieldInput {
-  id?: string | null;
+  id?: string;
   number?: number | null;
   min?: number | null;
   max?: number | null;
@@ -4857,7 +4847,7 @@ export interface NumberFieldInput {
  * via the `definition` "point-fields_input".
  */
 export interface PointFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * @minItems 2
    * @maxItems 2
@@ -4886,7 +4876,7 @@ export interface PointFieldInput {
  * via the `definition` "relationship-fields_input".
  */
 export interface RelationshipFieldInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   relationship:
     | {
@@ -4970,7 +4960,7 @@ export interface RelationshipFieldInput {
  * via the `definition` "select-fields_input".
  */
 export interface SelectFieldInput {
-  id?: string | null;
+  id?: string;
   select?: ('one' | 'two' | 'three') | null;
   selectReadOnly?: ('one' | 'two' | 'three') | null;
   selectHasMany?: ('one' | 'two' | 'three' | 'four' | 'five' | 'six')[] | null;
@@ -4998,7 +4988,7 @@ export interface SelectFieldInput {
  * via the `definition` "slug-fields_input".
  */
 export interface SlugFieldInput {
-  id?: string | null;
+  id?: string;
   title: string;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
@@ -5028,7 +5018,7 @@ export interface SlugFieldInput {
  * via the `definition` "tabs-fields-2_input".
  */
 export interface TabsFields2Input {
-  id?: string | null;
+  id?: string;
   arrayWithTabs?:
     | {
         text?: string | null;
@@ -5044,7 +5034,7 @@ export interface TabsFields2Input {
  * via the `definition` "tabs-fields_input".
  */
 export interface TabsFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * This should not collapse despite there being many tabs pushing the main fields open.
    */
@@ -5070,7 +5060,7 @@ export interface TabsFieldInput {
     text: string;
     id?: string | null;
   }[];
-  blocks?: (ContentBlockInput | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[] | null;
+  blocks?: (ContentBlockInput | WithIconBlock | NoBlockname | NumberBlock | SubBlocksBlock | TabsBlock)[];
   group: {
     number: number;
   };
@@ -5126,7 +5116,7 @@ export interface TabsFieldInput {
  * via the `definition` "text-fields_input".
  */
 export interface TextFieldInput {
-  id?: string | null;
+  id?: string;
   text: string;
   hiddenTextField?: string | null;
   /**
@@ -5138,7 +5128,7 @@ export interface TextFieldInput {
    */
   disabledTextField?: string | null;
   localizedText?: string | null;
-  localizedRequiredText?: string | null;
+  localizedRequiredText?: string;
   /**
    * en description
    */
@@ -5171,7 +5161,7 @@ export interface TextFieldInput {
  * via the `definition` "textarea-fields_input".
  */
 export interface TextareaFieldInput {
-  id?: string | null;
+  id?: string;
   text: string;
   hiddenTextField?: string | null;
   /**
@@ -5201,7 +5191,7 @@ export interface TextareaFieldInput {
  * via the `definition` "uploads_input".
  */
 export interface UploadInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   media?: string | null;
   url?: string | null;
@@ -5219,7 +5209,7 @@ export interface UploadInput {
  * via the `definition` "uploads2_input".
  */
 export interface Uploads2Input {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   media?: string | null;
   url?: string | null;
@@ -5237,7 +5227,7 @@ export interface Uploads2Input {
  * via the `definition` "uploads3_input".
  */
 export interface Uploads3Input {
-  id?: string | null;
+  id?: string;
   media?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -5254,7 +5244,7 @@ export interface Uploads3Input {
  * via the `definition` "uploads-multi_input".
  */
 export interface UploadsMultiInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   media?: string[] | null;
 }
@@ -5263,7 +5253,7 @@ export interface UploadsMultiInput {
  * via the `definition` "uploads-poly_input".
  */
 export interface UploadsPolyInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   media?:
     | ({
@@ -5280,7 +5270,7 @@ export interface UploadsPolyInput {
  * via the `definition` "uploads-multi-poly_input".
  */
 export interface UploadsMultiPolyInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   media?:
     | (
@@ -5300,7 +5290,7 @@ export interface UploadsMultiPolyInput {
  * via the `definition` "uploads-restricted_input".
  */
 export interface UploadsRestrictedInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   uploadWithoutRestriction?: string | null;
   uploadWithAllowCreateFalse?: string | null;
@@ -5311,7 +5301,7 @@ export interface UploadsRestrictedInput {
  * via the `definition` "ui-fields_input".
  */
 export interface UiFieldInput {
-  id?: string | null;
+  id?: string;
   text: string;
 }
 /**
@@ -5319,7 +5309,7 @@ export interface UiFieldInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -5342,7 +5332,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -5359,7 +5349,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'users';
@@ -5520,7 +5510,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -5541,7 +5531,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

@@ -615,7 +615,7 @@ export interface CollectionsWidget {
  * via the `definition` "categories_input".
  */
 export interface CategoryInput {
-  id?: string | null;
+  id?: string;
   parent?: string | null;
   name: string;
 }
@@ -624,7 +624,7 @@ export interface CategoryInput {
  * via the `definition` "departments_input".
  */
 export interface DepartmentInput {
-  id?: string | null;
+  id?: string;
   parentDept?: string | null;
   deptName: string;
 }
@@ -633,7 +633,7 @@ export interface DepartmentInput {
  * via the `definition` "divisions_input".
  */
 export interface DivisionInput {
-  id?: string | null;
+  id?: string;
   parent?: string | null;
   title: string;
 }
@@ -642,7 +642,7 @@ export interface DivisionInput {
  * via the `definition` "folders_input".
  */
 export interface FolderInput {
-  id?: string | null;
+  id?: string;
   parentFolder?: string | null;
   name: string;
   allowedTypes?: ('organizations' | 'products')[] | null;
@@ -652,7 +652,7 @@ export interface FolderInput {
  * via the `definition` "organizations_input".
  */
 export interface OrganizationInput {
-  id?: string | null;
+  id?: string;
   parent?: string | null;
   title: string;
   content?: string | null;
@@ -663,7 +663,7 @@ export interface OrganizationInput {
  * via the `definition` "pages_input".
  */
 export interface PageInput {
-  id?: string | null;
+  id?: string;
   parent?: string | null;
   title: string;
   slug?: string | null;
@@ -673,7 +673,7 @@ export interface PageInput {
  * via the `definition` "products_input".
  */
 export interface ProductInput {
-  id?: string | null;
+  id?: string;
   parent?: string | null;
   name: string;
   description?: string | null;
@@ -684,7 +684,7 @@ export interface ProductInput {
  * via the `definition` "regions_input".
  */
 export interface RegionInput {
-  id?: string | null;
+  id?: string;
   parent?: string | null;
   name: string;
 }
@@ -693,7 +693,7 @@ export interface RegionInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -715,7 +715,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -738,7 +738,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -755,7 +755,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'categories';
@@ -808,7 +808,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -829,7 +829,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

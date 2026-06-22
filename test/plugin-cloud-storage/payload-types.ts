@@ -855,7 +855,7 @@ export interface CollectionsWidget {
  * via the `definition` "media_input".
  */
 export interface MediaInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -890,7 +890,7 @@ export interface MediaInput {
  * via the `definition` "media-with-composite-prefixes_input".
  */
 export interface MediaWithCompositePrefixInput {
-  id?: string | null;
+  id?: string;
   prefix?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -907,7 +907,7 @@ export interface MediaWithCompositePrefixInput {
  * via the `definition` "media-with-custom-url_input".
  */
 export interface MediaWithCustomUrlInput {
-  id?: string | null;
+  id?: string;
   prefix?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -924,7 +924,7 @@ export interface MediaWithCustomUrlInput {
  * via the `definition` "media-with-generate-file-url_input".
  */
 export interface MediaWithGenerateFileUrlInput {
-  id?: string | null;
+  id?: string;
   prefix?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -941,7 +941,7 @@ export interface MediaWithGenerateFileUrlInput {
  * via the `definition` "media-with-overwrite_input".
  */
 export interface MediaWithOverwriteInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -976,7 +976,7 @@ export interface MediaWithOverwriteInput {
  * via the `definition` "media-with-prefix_input".
  */
 export interface MediaWithPrefixInput {
-  id?: string | null;
+  id?: string;
   prefix?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -993,7 +993,7 @@ export interface MediaWithPrefixInput {
  * via the `definition` "media-with-throwing-hook_input".
  */
 export interface MediaWithThrowingHookInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   /**
    * When enabled, the afterChange hook throws during the cloud-storage plugin internal update. Used to reproduce the swallowed-error bug in the admin panel and integration tests.
@@ -1014,7 +1014,7 @@ export interface MediaWithThrowingHookInput {
  * via the `definition` "restricted-media_input".
  */
 export interface RestrictedMediaInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -1031,7 +1031,7 @@ export interface RestrictedMediaInput {
  * via the `definition` "test-metadata_input".
  */
 export interface TestMetadatumInput {
-  id?: string | null;
+  id?: string;
   /**
    * Test note to identify this upload
    */
@@ -1061,7 +1061,7 @@ export interface TestMetadatumInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -1083,7 +1083,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -1106,7 +1106,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -1123,7 +1123,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'media';
@@ -1180,7 +1180,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -1201,7 +1201,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

@@ -957,7 +957,7 @@ export interface CollectionsWidget {
  * via the `definition` "error-fields_input".
  */
 export interface ErrorFieldInput {
-  id?: string | null;
+  id?: string;
   parentArray?:
     | {
         childArray: {
@@ -978,7 +978,7 @@ export interface ErrorFieldInput {
             text: string;
             number: number;
             date: string;
-            checkbox?: boolean | null;
+            checkbox?: boolean;
           };
           code: string;
           json:
@@ -1017,7 +1017,7 @@ export interface ErrorFieldInput {
           text: string;
           number: number;
           date: string;
-          checkbox?: boolean | null;
+          checkbox?: boolean;
         };
         code: string;
         json:
@@ -1075,7 +1075,7 @@ export interface Block1Input {
           text: string;
           number: number;
           date: string;
-          checkbox?: boolean | null;
+          checkbox?: boolean;
         };
         code: string;
         json:
@@ -1112,7 +1112,7 @@ export interface Block1Input {
  * via the `definition` "uploads_input".
  */
 export interface UploadInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   media?: string | null;
   richText?: LexicalRichText<LexicalNodes_2C696D1B_Input> | null;
@@ -1131,7 +1131,7 @@ export interface UploadInput {
  * via the `definition` "validate-drafts-on_input".
  */
 export interface ValidateDraftsOnInput {
-  id?: string | null;
+  id?: string;
   title: string;
   /**
    * Check this box to simulate a validation failure. The save button should remain enabled after the failure.
@@ -1147,7 +1147,7 @@ export interface ValidateDraftsOnInput {
  * via the `definition` "validate-drafts-off_input".
  */
 export interface ValidateDraftsOffInput {
-  id?: string | null;
+  id?: string;
   title: string;
   /**
    * Check this box to simulate a validation failure. The save button should remain enabled after the failure.
@@ -1163,7 +1163,7 @@ export interface ValidateDraftsOffInput {
  * via the `definition` "validate-drafts-on-autosave_input".
  */
 export interface ValidateDraftsOnAutosaveInput {
-  id?: string | null;
+  id?: string;
   title: string;
   /**
    * Check this box to simulate a validation failure. The save button should remain enabled after the failure.
@@ -1179,7 +1179,7 @@ export interface ValidateDraftsOnAutosaveInput {
  * via the `definition` "prev-value_input".
  */
 export interface PrevValueInput {
-  id?: string | null;
+  id?: string;
   title: string;
   description?: string | null;
 }
@@ -1188,7 +1188,7 @@ export interface PrevValueInput {
  * via the `definition` "prev-value-relation_input".
  */
 export interface PrevValueRelationInput {
-  id?: string | null;
+  id?: string;
   previousValueRelation?: string | null;
 }
 /**
@@ -1196,7 +1196,7 @@ export interface PrevValueRelationInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -1218,7 +1218,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -1241,7 +1241,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -1258,7 +1258,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'error-fields';
@@ -1307,7 +1307,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -1328,7 +1328,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -1337,7 +1337,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "global-validate-drafts-on_input".
  */
 export interface GlobalValidateDraftsOnInput {
-  id?: string | null;
+  id?: string;
   group: {
     title: string;
   };

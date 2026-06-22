@@ -1029,7 +1029,7 @@ export interface CollectionsWidget {
  * via the `definition` "beforeOperation_input".
  */
 export interface BeforeOperationInput {
-  id?: string | null;
+  id?: string;
   category?: string | null;
 }
 /**
@@ -1037,7 +1037,7 @@ export interface BeforeOperationInput {
  * via the `definition` "before-change-hooks_input".
  */
 export interface BeforeChangeHookInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -1045,7 +1045,7 @@ export interface BeforeChangeHookInput {
  * via the `definition` "before-validate_input".
  */
 export interface BeforeValidateInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   selection?: ('a' | 'b') | null;
 }
@@ -1054,7 +1054,7 @@ export interface BeforeValidateInput {
  * via the `definition` "afterOperation_input".
  */
 export interface AfterOperationInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -1062,7 +1062,7 @@ export interface AfterOperationInput {
  * via the `definition` "context-hooks_input".
  */
 export interface ContextHookInput {
-  id?: string | null;
+  id?: string;
   value?: string | null;
 }
 /**
@@ -1070,7 +1070,7 @@ export interface ContextHookInput {
  * via the `definition` "transforms_input".
  */
 export interface TransformInput {
-  id?: string | null;
+  id?: string;
   /**
    * @minItems 2
    * @maxItems 2
@@ -1087,7 +1087,7 @@ export interface TransformInput {
  * via the `definition` "hooks_input".
  */
 export interface HookInput {
-  id?: string | null;
+  id?: string;
   fieldBeforeValidate?: boolean | null;
   fieldBeforeChange?: boolean | null;
   fieldAfterChange?: boolean | null;
@@ -1103,7 +1103,7 @@ export interface HookInput {
  * via the `definition` "nested-after-read-hooks_input".
  */
 export interface NestedAfterReadHookInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   group?: {
     array?:
@@ -1125,7 +1125,7 @@ export interface NestedAfterReadHookInput {
  * via the `definition` "nested-after-change-hooks_input".
  */
 export interface NestedAfterChangeHookInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   group?: {
     array?:
@@ -1142,7 +1142,7 @@ export interface NestedAfterChangeHookInput {
  * via the `definition` "chaining-hooks_input".
  */
 export interface ChainingHookInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
 }
 /**
@@ -1150,7 +1150,7 @@ export interface ChainingHookInput {
  * via the `definition` "relations_input".
  */
 export interface RelationInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -1158,8 +1158,8 @@ export interface RelationInput {
  * via the `definition` "hooks-users_input".
  */
 export interface HooksUserInput {
-  id?: string | null;
-  roles?: ('admin' | 'user')[] | null;
+  id?: string;
+  roles?: ('admin' | 'user')[];
   afterLoginHook?: boolean | null;
   email: string;
   resetPasswordToken?: string | null;
@@ -1182,7 +1182,7 @@ export interface HooksUserInput {
  * via the `definition` "data-hooks_input".
  */
 export interface DataHookInput {
-  id?: string | null;
+  id?: string;
   field_collectionAndField?: string | null;
   collection_beforeOperation_collection?: string | null;
   collection_beforeChange_collection?: string | null;
@@ -1196,7 +1196,7 @@ export interface DataHookInput {
  * via the `definition` "before-delete-hooks_input".
  */
 export interface BeforeDeleteHookInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -1204,7 +1204,7 @@ export interface BeforeDeleteHookInput {
  * via the `definition` "before-delete-2-hooks_input".
  */
 export interface BeforeDelete2HookInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -1212,7 +1212,7 @@ export interface BeforeDelete2HookInput {
  * via the `definition` "value-hooks_input".
  */
 export interface ValueHookInput {
-  id?: string | null;
+  id?: string;
   slug?: string | null;
   beforeValidate_value?: string | null;
   beforeChange_value?: string | null;
@@ -1222,7 +1222,7 @@ export interface ValueHookInput {
  * via the `definition` "after-read_input".
  */
 export interface AfterReadInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -1230,7 +1230,7 @@ export interface AfterReadInput {
  * via the `definition` "override-access-hooks_input".
  */
 export interface OverrideAccessHookInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   beforeReadCalled?: boolean | null;
   beforeReadOverrideAccess?: boolean | null;
@@ -1242,7 +1242,7 @@ export interface OverrideAccessHookInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -1265,7 +1265,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -1282,7 +1282,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'beforeOperation';
@@ -1371,7 +1371,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'hooks-users';
     value: string;
@@ -1392,7 +1392,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -1401,7 +1401,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "data-hooks-global_input".
  */
 export interface DataHooksGlobalInput {
-  id?: string | null;
+  id?: string;
   field_globalAndField?: string | null;
   global_beforeChange_global?: string | null;
   global_afterChange_global?: string | null;

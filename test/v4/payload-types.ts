@@ -4293,7 +4293,7 @@ export interface CollectionsWidget {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   roles?: ('admin' | 'user')[] | null;
   enableAPIKey?: boolean | null;
@@ -4320,7 +4320,7 @@ export interface UserInput {
  * via the `definition` "doc-controls_input".
  */
 export interface DocControlInput {
-  id?: string | null;
+  id?: string;
   title: string;
   content?: string | null;
   parent?: string | null;
@@ -4331,7 +4331,7 @@ export interface DocControlInput {
  * via the `definition` "drawers_input".
  */
 export interface DrawerInput {
-  id?: string | null;
+  id?: string;
   title: string;
   /**
    * Open or create a related doc to nest another drawer.
@@ -4371,7 +4371,7 @@ export interface DrawerInput {
  * via the `definition` "orderable_input".
  */
 export interface OrderableInput {
-  id?: string | null;
+  id?: string;
   _order?: string | null;
   title: string;
   priority?: ('high' | 'medium' | 'low') | null;
@@ -4381,7 +4381,7 @@ export interface OrderableInput {
  * via the `definition` "search-bar-test_input".
  */
 export interface SearchBarTestInput {
-  id?: string | null;
+  id?: string;
   title: string;
   description?: string | null;
   category?: ('news' | 'blog' | 'tutorial' | 'docs') | null;
@@ -4393,7 +4393,7 @@ export interface SearchBarTestInput {
  * via the `definition` "talks_input".
  */
 export interface TalkInput {
-  id?: string | null;
+  id?: string;
   /**
    * Public-facing title of the talk.
    */
@@ -4534,7 +4534,7 @@ export interface TalkImageInput {
  * via the `definition` "unauthorized-test_input".
  */
 export interface UnauthorizedTestInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -4542,7 +4542,7 @@ export interface UnauthorizedTestInput {
  * via the `definition` "array-fields_input".
  */
 export interface ArrayFieldInput {
-  id?: string | null;
+  id?: string;
   arrayField?:
     | {
         name?: string | null;
@@ -4600,7 +4600,7 @@ export interface ArrayFieldInput {
  * via the `definition` "blocks-fields_input".
  */
 export interface BlocksFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * A block field with multiple block types.
    */
@@ -4630,9 +4630,9 @@ export interface ContentBlockInput {
  * via the `definition` "checkbox-fields_input".
  */
 export interface CheckboxFieldInput {
-  id?: string | null;
+  id?: string;
   enableFeature?: boolean | null;
-  enableFeatureRequired?: boolean | null;
+  enableFeatureRequired?: boolean;
   enableFeatureDisabled?: boolean | null;
 }
 /**
@@ -4640,7 +4640,7 @@ export interface CheckboxFieldInput {
  * via the `definition` "code-fields_input".
  */
 export interface CodeFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * Write JavaScript code
    */
@@ -4671,7 +4671,7 @@ export interface CodeFieldInput {
  * via the `definition` "collapsible-fields_input".
  */
 export interface CollapsibleFieldInput {
-  id?: string | null;
+  id?: string;
   nestedField?: string | null;
   nestedFieldRequired: string;
   outerText?: string | null;
@@ -4684,7 +4684,7 @@ export interface CollapsibleFieldInput {
  * via the `definition` "date-fields_input".
  */
 export interface DateFieldInput {
-  id?: string | null;
+  id?: string;
   default?: string | null;
   /**
    * Select a date from the calendar
@@ -4710,7 +4710,7 @@ export interface DateFieldInput {
  * via the `definition` "email-fields_input".
  */
 export interface EmailFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * The primary contact email for this account
    */
@@ -4729,7 +4729,7 @@ export interface EmailFieldInput {
  * via the `definition` "group-fields_input".
  */
 export interface GroupFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * Enter the shipping address details
    */
@@ -4759,7 +4759,7 @@ export interface GroupFieldInput {
  * via the `definition` "join-fields_input".
  */
 export interface JoinFieldInput {
-  id?: string | null;
+  id?: string;
   name: string;
   group?: {};
 }
@@ -4768,7 +4768,7 @@ export interface JoinFieldInput {
  * via the `definition` "join-posts_input".
  */
 export interface JoinPostInput {
-  id?: string | null;
+  id?: string;
   title: string;
   /**
    * The parent category (used by join fields)
@@ -4780,7 +4780,7 @@ export interface JoinPostInput {
  * via the `definition` "json-fields_input".
  */
 export interface JsonFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * Enter valid JSON data
    */
@@ -4835,7 +4835,7 @@ export interface JsonFieldInput {
  * via the `definition` "number-fields_input".
  */
 export interface NumberFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * Listed price in USD, excluding tax
    */
@@ -4866,7 +4866,7 @@ export interface NumberFieldInput {
  * via the `definition` "password-fields_input".
  */
 export interface PasswordFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * Must be at least 8 characters
    */
@@ -4891,7 +4891,7 @@ export interface PasswordFieldInput {
  * via the `definition` "point-fields_input".
  */
 export interface PointFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * @minItems 2
    * @maxItems 2
@@ -4917,7 +4917,7 @@ export interface PointFieldInput {
  * via the `definition` "radio-fields_input".
  */
 export interface RadioFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * Choose the type of content this entry represents.
    */
@@ -4956,7 +4956,7 @@ export interface RadioFieldInput {
  * via the `definition` "relationship-fields_input".
  */
 export interface RelationshipFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * The author of this post
    */
@@ -4999,7 +4999,7 @@ export interface RelationshipFieldInput {
  * via the `definition` "rich-text-fields_input".
  */
 export interface RichTextFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * The main content of the document.
    */
@@ -5026,7 +5026,7 @@ export interface RichTextFieldInput {
  * via the `definition` "row-fields_input".
  */
 export interface RowFieldInput {
-  id?: string | null;
+  id?: string;
   firstName?: string | null;
   lastName?: string | null;
   city?: string | null;
@@ -5055,7 +5055,7 @@ export interface RowFieldInput {
  * via the `definition` "select-fields_input".
  */
 export interface SelectFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * The current publication status of this post
    */
@@ -5094,7 +5094,7 @@ export interface SelectFieldInput {
  * via the `definition` "slug-fields_input".
  */
 export interface SlugFieldInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
@@ -5104,7 +5104,7 @@ export interface SlugFieldInput {
    * This is the default slug field
    */
   slug: string;
-  requiredTitle?: string | null;
+  requiredTitle?: string;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
@@ -5115,7 +5115,7 @@ export interface SlugFieldInput {
    * When enabled, the slug will auto-generate from the title field on save and autosave.
    */
   generateReadOnlySlug?: boolean | null;
-  readOnlySlug?: string | null;
+  readOnlySlug?: string;
   longTitle?: string | null;
   /**
    * When enabled, the slug will auto-generate from the title field on save and autosave.
@@ -5139,14 +5139,14 @@ export interface SlugFieldInput {
   /**
    * This slug starts with a value to show the locked state
    */
-  lockedSlug?: string | null;
+  lockedSlug?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tabs-fields_input".
  */
 export interface TabsFieldInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   postContent?: LexicalRichText<LexicalNodes_4DA1FDD1_Input> | null;
   featuredImage: string;
@@ -5179,11 +5179,11 @@ export interface TabsFieldInput {
  * via the `definition` "text-fields_input".
  */
 export interface TextFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * The public-facing title of this post
    */
-  title?: string | null;
+  title?: string;
   /**
    * List your favorite fruits
    */
@@ -5206,7 +5206,7 @@ export interface TextFieldInput {
  * via the `definition` "textarea-fields_input".
  */
 export interface TextareaFieldInput {
-  id?: string | null;
+  id?: string;
   /**
    * The main body content for this entry
    */
@@ -5229,7 +5229,7 @@ export interface TextareaFieldInput {
  * via the `definition` "folders_input".
  */
 export interface FolderInput {
-  id?: string | null;
+  id?: string;
   parent?: string | null;
   name: string;
 }
@@ -5238,7 +5238,7 @@ export interface FolderInput {
  * via the `definition` "folder-items_input".
  */
 export interface FolderItemInput {
-  id?: string | null;
+  id?: string;
   title: string;
   parent?: string | null;
 }
@@ -5247,7 +5247,7 @@ export interface FolderItemInput {
  * via the `definition` "tags_input".
  */
 export interface TagInput {
-  id?: string | null;
+  id?: string;
   _h_tags?: string | null;
   name: string;
   description?: string | null;
@@ -5258,7 +5258,7 @@ export interface TagInput {
  * via the `definition` "tag-items_input".
  */
 export interface TagItemInput {
-  id?: string | null;
+  id?: string;
   title: string;
   description?: string | null;
   _h_tags?: string[] | null;
@@ -5268,7 +5268,7 @@ export interface TagItemInput {
  * via the `definition` "rubbish_input".
  */
 export interface RubbishInput {
-  id?: string | null;
+  id?: string;
   title: string;
   deletedAt?: string | null;
 }
@@ -5277,7 +5277,7 @@ export interface RubbishInput {
  * via the `definition` "rubbish-with-drafts_input".
  */
 export interface RubbishWithDraftInput {
-  id?: string | null;
+  id?: string;
   title: string;
   deletedAt?: string | null;
 }
@@ -5286,7 +5286,7 @@ export interface RubbishWithDraftInput {
  * via the `definition` "uploads_input".
  */
 export interface UploadInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -5303,7 +5303,7 @@ export interface UploadInput {
  * via the `definition` "upload-fields_input".
  */
 export interface UploadFieldInput {
-  id?: string | null;
+  id?: string;
   heroImage?: string | null;
   heroImageRequired: string;
   heroImageReadOnly?: string | null;
@@ -5315,7 +5315,7 @@ export interface UploadFieldInput {
  * via the `definition` "autosave_input".
  */
 export interface AutosaveInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -5323,7 +5323,7 @@ export interface AutosaveInput {
  * via the `definition` "versions-diff_input".
  */
 export interface VersionsDiffInput {
-  id?: string | null;
+  id?: string;
   title: string;
   array?:
     | {
@@ -5378,7 +5378,7 @@ export interface VersionsDiffInput {
  * via the `definition` "draft-versions_input".
  */
 export interface DraftVersionInput {
-  id?: string | null;
+  id?: string;
   title: string;
   content?: string | null;
   author?: string | null;
@@ -5388,7 +5388,7 @@ export interface DraftVersionInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -5411,7 +5411,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -5428,7 +5428,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-jobs_input".
  */
 export interface PayloadJobInput {
-  id?: string | null;
+  id?: string;
   /**
    * Input data provided to the job
    */
@@ -5509,7 +5509,7 @@ export interface PayloadJobInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'users';
@@ -5690,7 +5690,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -5711,7 +5711,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -5720,7 +5720,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "payload-query-presets_input".
  */
 export interface PayloadQueryPresetInput {
-  id?: string | null;
+  id?: string;
   title: string;
   groupBy?: string | null;
   columns?:

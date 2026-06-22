@@ -452,12 +452,12 @@ export function fieldsToJSONSchema({
           return fieldSchemas
         }
 
-        // A field with a `defaultValue` is filled in when omitted, so it's optional on input.
         const hasDefaultValue = 'defaultValue' in field && field.defaultValue !== undefined
-        const isRequired =
-          fieldAffectsData(field) &&
-          fieldIsRequired(field) &&
-          !(variant === 'input' && hasDefaultValue)
+        // `isRequired` only controls nullability (a non-required field gets `| null`). It does not
+        // change between variants, so e.g. a defaulted field stays non-null on input.
+        const isRequired = fieldAffectsData(field) && fieldIsRequired(field)
+        // `isOptionalOnInput` controls the `?`: on input, defaulted fields can be omitted.
+        const isOptionalOnInput = variant === 'input' && hasDefaultValue
 
         const fieldDescription = entityOrFieldToJsDocs({ entity: field, i18n })
         const baseFieldSchema: JSONSchema4 = {}
@@ -587,7 +587,9 @@ export function fieldsToJSONSchema({
               }
 
               if (field.interfaceName) {
-                fieldSchema = { $ref: `#/$defs/${registerNamedInterface(field.interfaceName, fieldSchema)}` }
+                fieldSchema = {
+                  $ref: `#/$defs/${registerNamedInterface(field.interfaceName, fieldSchema)}`,
+                }
               }
             }
             break
@@ -905,7 +907,9 @@ export function fieldsToJSONSchema({
             }
 
             if (field.interfaceName) {
-              fieldSchema = { $ref: `#/$defs/${registerNamedInterface(field.interfaceName, fieldSchema)}` }
+              fieldSchema = {
+                $ref: `#/$defs/${registerNamedInterface(field.interfaceName, fieldSchema)}`,
+              }
             }
             break
           }
@@ -937,7 +941,7 @@ export function fieldsToJSONSchema({
         }
 
         if (fieldSchema! && fieldAffectsData(field)) {
-          if (isRequired && fieldSchema.required !== false) {
+          if (isRequired && !isOptionalOnInput && fieldSchema.required !== false) {
             requiredFieldNames.add(field.name)
           }
           fieldSchemas.set(field.name, fieldSchema)
@@ -975,20 +979,19 @@ export function entityToJSONSchema(
 
   let mutableFields = [...entity.flattenedFields]
 
-  // `id` is always present on read; on input it's optional (omit it, or pass a custom ID).
+  // `required: true` keeps `id` non-null. On input it's made optional further below (it's dropped
+  // from `required`) so you can omit it or pass a custom ID, but it's still never `null`.
   const idField: FieldAffectingData = {
     name: 'id',
     type: defaultIDType as 'text',
-    required: !isInput,
+    required: true,
   }
   const customIdField = mutableFields.find((field) => field.name === 'id') as FieldAffectingData
 
   if (customIdField && customIdField.type !== 'group' && customIdField.type !== 'tab') {
-    if (!isInput) {
-      mutableFields = mutableFields.map((field) =>
-        field === customIdField ? { ...field, required: true } : field,
-      )
-    }
+    mutableFields = mutableFields.map((field) =>
+      field === customIdField ? { ...field, required: true } : field,
+    )
   } else {
     mutableFields.unshift(idField)
   }
@@ -1037,6 +1040,12 @@ export function entityToJSONSchema(
     typeStringDefinitions,
     variant,
   })
+
+  // On input, `id` is optional (omit it, or pass a custom ID). Removing it from `required` makes
+  // it optional without making it nullable.
+  if (isInput && Array.isArray(fieldsSchema.required)) {
+    fieldsSchema.required = fieldsSchema.required.filter((name) => name !== 'id')
+  }
 
   // The `User`-union discriminator (read-side, e.g. `req.user`); not part of create/update data.
   if (isAuthCollection && !isInput) {

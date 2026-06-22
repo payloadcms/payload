@@ -1519,7 +1519,7 @@ export interface CollectionsWidget {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -1541,7 +1541,7 @@ export interface UserInput {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   localizedText?: string | null;
   author?: string | null;
@@ -1641,7 +1641,7 @@ export interface BlockInput {
  * via the `definition` "categories_input".
  */
 export interface CategoryInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   group?: {};
   enableErrorOnJoin?: boolean | null;
@@ -1651,7 +1651,7 @@ export interface CategoryInput {
  * via the `definition` "hidden-posts_input".
  */
 export interface HiddenPostInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   category?: string | null;
 }
@@ -1660,7 +1660,7 @@ export interface HiddenPostInput {
  * via the `definition` "uploads_input".
  */
 export interface UploadInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -1676,7 +1676,7 @@ export interface UploadInput {
  * via the `definition` "versions_input".
  */
 export interface VersionInput {
-  id?: string | null;
+  id?: string;
   title: string;
   category?: string | null;
   categoryVersion?: string | null;
@@ -1687,7 +1687,7 @@ export interface VersionInput {
  * via the `definition` "categories-versions_input".
  */
 export interface CategoriesVersionInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -1695,7 +1695,7 @@ export interface CategoriesVersionInput {
  * via the `definition` "singular_input".
  */
 export interface SingularInput {
-  id?: string | null;
+  id?: string;
   category?: string | null;
 }
 /**
@@ -1703,7 +1703,7 @@ export interface SingularInput {
  * via the `definition` "self-joins_input".
  */
 export interface SelfJoinInput {
-  id?: string | null;
+  id?: string;
   rel?: string | null;
 }
 /**
@@ -1711,7 +1711,7 @@ export interface SelfJoinInput {
  * via the `definition` "localized-posts_input".
  */
 export interface LocalizedPostInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   category?: string | null;
 }
@@ -1720,7 +1720,7 @@ export interface LocalizedPostInput {
  * via the `definition` "localized-categories_input".
  */
 export interface LocalizedCategoryInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -1728,7 +1728,7 @@ export interface LocalizedCategoryInput {
  * via the `definition` "restricted-categories_input".
  */
 export interface RestrictedCategoryInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -1736,7 +1736,7 @@ export interface RestrictedCategoryInput {
  * via the `definition` "categories-join-restricted_input".
  */
 export interface CategoriesJoinRestrictedInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -1744,7 +1744,7 @@ export interface CategoriesJoinRestrictedInput {
  * via the `definition` "restricted-posts_input".
  */
 export interface RestrictedPostInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   restrictedField?: string | null;
   category?: string | null;
@@ -1754,7 +1754,7 @@ export interface RestrictedPostInput {
  * via the `definition` "collection-restricted_input".
  */
 export interface CollectionRestrictedInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   canRead?: boolean | null;
   category?: string | null;
@@ -1764,7 +1764,7 @@ export interface CollectionRestrictedInput {
  * via the `definition` "depth-joins-1_input".
  */
 export interface DepthJoins1Input {
-  id?: string | null;
+  id?: string;
   rel?: string | null;
 }
 /**
@@ -1772,14 +1772,14 @@ export interface DepthJoins1Input {
  * via the `definition` "depth-joins-2_input".
  */
 export interface DepthJoins2Input {
-  id?: string | null;
+  id?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "depth-joins-3_input".
  */
 export interface DepthJoins3Input {
-  id?: string | null;
+  id?: string;
   rel?: string | null;
 }
 /**
@@ -1787,14 +1787,14 @@ export interface DepthJoins3Input {
  * via the `definition` "multiple-collections-parents_input".
  */
 export interface MultipleCollectionsParentInput {
-  id?: string | null;
+  id?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "multiple-collections-1_input".
  */
 export interface MultipleCollections1Input {
-  id?: string | null;
+  id?: string;
   parent?: string | null;
   title?: string | null;
   name?: string | null;
@@ -1804,7 +1804,7 @@ export interface MultipleCollections1Input {
  * via the `definition` "multiple-collections-2_input".
  */
 export interface MultipleCollections2Input {
-  id?: string | null;
+  id?: string;
   parent?: string | null;
   title?: string | null;
   description?: string | null;
@@ -1814,7 +1814,7 @@ export interface MultipleCollections2Input {
  * via the `definition` "folders_input".
  */
 export interface FolderInput {
-  id?: string | null;
+  id?: string;
   _h_folders?: string | null;
   name?: string | null;
   folderType?: ('example-pages' | 'example-posts' | 'folderPoly1' | 'folderPoly2')[] | null;
@@ -1824,7 +1824,7 @@ export interface FolderInput {
  * via the `definition` "example-pages_input".
  */
 export interface ExamplePageInput {
-  id?: string | null;
+  id?: string;
   _h_folders?: string | null;
   title?: string | null;
   name?: string | null;
@@ -1834,7 +1834,7 @@ export interface ExamplePageInput {
  * via the `definition` "example-posts_input".
  */
 export interface ExamplePostInput {
-  id?: string | null;
+  id?: string;
   _h_folders?: string | null;
   title?: string | null;
   description?: string | null;
@@ -1844,7 +1844,7 @@ export interface ExamplePostInput {
  * via the `definition` "folderPoly1_input".
  */
 export interface FolderPoly1Input {
-  id?: string | null;
+  id?: string;
   folderPoly1Title?: string | null;
   _h_folders?: string | null;
 }
@@ -1853,7 +1853,7 @@ export interface FolderPoly1Input {
  * via the `definition` "folderPoly2_input".
  */
 export interface FolderPoly2Input {
-  id?: string | null;
+  id?: string;
   folderPoly2Title?: string | null;
   _h_folders?: string | null;
 }
@@ -1862,7 +1862,7 @@ export interface FolderPoly2Input {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -1885,7 +1885,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -1902,7 +1902,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'users';
@@ -2023,7 +2023,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -2044,7 +2044,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

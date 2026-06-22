@@ -856,7 +856,7 @@ export interface CollectionsWidget {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
@@ -881,7 +881,7 @@ export interface UserInput {
  * via the `definition` "media_input".
  */
 export interface MediaInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -898,7 +898,7 @@ export interface MediaInput {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   /**
    * The title of the post
    */
@@ -924,7 +924,7 @@ export interface PostInput {
  * via the `definition` "products_input".
  */
 export interface ProductInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   description?: string | null;
   price?: number | null;
@@ -934,7 +934,7 @@ export interface ProductInput {
  * via the `definition` "rolls_input".
  */
 export interface RollInput {
-  id?: string | null;
+  id?: string;
   /**
    * The number of sides on the die that was rolled
    */
@@ -953,7 +953,7 @@ export interface RollInput {
  * via the `definition` "modified-prompts_input".
  */
 export interface ModifiedPromptInput {
-  id?: string | null;
+  id?: string;
   /**
    * The original prompt
    */
@@ -972,7 +972,7 @@ export interface ModifiedPromptInput {
  * via the `definition` "returned-resources_input".
  */
 export interface ReturnedResourceInput {
-  id?: string | null;
+  id?: string;
   /**
    * The URI of the resource
    */
@@ -991,7 +991,7 @@ export interface ReturnedResourceInput {
  * via the `definition` "pages_input".
  */
 export interface PageInput {
-  id?: string | null;
+  id?: string;
   title: string;
   layout?: (HeroBlock | TextContent)[] | null;
 }
@@ -1000,7 +1000,7 @@ export interface PageInput {
  * via the `definition` "field-types_input".
  */
 export interface FieldTypeInput {
-  id?: string | null;
+  id?: string;
   /**
    * A simple text field
    */
@@ -1094,7 +1094,7 @@ export interface FieldTypeInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -1121,7 +1121,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -1138,7 +1138,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'users';
@@ -1191,7 +1191,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -1212,7 +1212,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -1221,7 +1221,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "site-settings_input".
  */
 export interface SiteSettingInput {
-  id?: string | null;
+  id?: string;
   /**
    * The name of the site
    */

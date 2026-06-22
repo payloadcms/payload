@@ -1377,7 +1377,7 @@ describe('Types testing', () => {
 
     test('id is optional in write data', () => {
       expect<InputType['id']>().type.toBe<string>()
-      expect<InputTypeInput['id']>().type.toBe<null | string | undefined>()
+      expect<InputTypeInput['id']>().type.toBe<string | undefined>()
     })
 
     test('createdAt and updatedAt are not part of write data', () => {
@@ -1394,7 +1394,7 @@ describe('Types testing', () => {
 
     test('fields with a defaultValue are optional in write data', () => {
       expect<InputType['status']>().type.toBe<'draft' | 'published'>()
-      expect<InputTypeInput['status']>().type.toBe<'draft' | 'published' | null | undefined>()
+      expect<InputTypeInput['status']>().type.toBe<'draft' | 'published' | undefined>()
     })
 
     test('virtual fields are not part of write data', () => {
@@ -1419,17 +1419,18 @@ describe('Types testing', () => {
     test('a full PostInput is valid payload.create and payload.update data', () => {
       const data = {} as PostInput
       expect(payload.create).type.toBeCallableWith({ collection: 'posts', data })
-      expect(payload.update).type.toBeCallableWith({ collection: 'posts', data, id: 1 })
+      expect(payload.update).type.toBeCallableWith({ id: 1, collection: 'posts', data })
     })
 
     test('a full InputTypeInput is valid payload.update data', () => {
       const data = {} as InputTypeInput
-      expect(payload.update).type.toBeCallableWith({ collection: 'input-types', data, id: 1 })
+      expect(payload.update).type.toBeCallableWith({ id: 1, collection: 'input-types', data })
     })
 
     test('input field values (relationship, hasMany, polymorphic, upload, defaulted) are valid update data', () => {
       const input = {} as InputTypeInput
       expect(payload.update).type.toBeCallableWith({
+        id: 1,
         collection: 'input-types',
         data: {
           categories: input.categories,
@@ -1438,13 +1439,12 @@ describe('Types testing', () => {
           related: input.related,
           status: input.status,
         },
-        id: 1,
       })
     })
 
     test('input rich text (ID-only relationship + block nodes) is valid update data', () => {
       const richText = {} as InputTypeInput['richText']
-      expect(payload.update).type.toBeCallableWith({ collection: 'input-types', data: { richText }, id: 1 })
+      expect(payload.update).type.toBeCallableWith({ id: 1, collection: 'input-types', data: { richText } })
     })
   })
 

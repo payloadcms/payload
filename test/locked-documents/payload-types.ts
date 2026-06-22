@@ -724,7 +724,7 @@ export interface CollectionsWidget {
  * via the `definition` "autosave_input".
  */
 export interface AutosaveInput {
-  id?: string | null;
+  id?: string;
   fieldA?: string | null;
   fieldB?: string | null;
 }
@@ -733,7 +733,7 @@ export interface AutosaveInput {
  * via the `definition` "pages_input".
  */
 export interface PageInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
 }
 /**
@@ -741,7 +741,7 @@ export interface PageInput {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   richText?: LexicalRichText<LexicalNodes_F229A923_Input> | null;
   documentLoaded?: string | null;
@@ -751,7 +751,7 @@ export interface PostInput {
  * via the `definition` "server-components_input".
  */
 export interface ServerComponentInput {
-  id?: string | null;
+  id?: string;
   customTextServer?: string | null;
   richText?: LexicalRichText<LexicalNodes_F229A923_Input> | null;
 }
@@ -760,7 +760,7 @@ export interface ServerComponentInput {
  * via the `definition` "simple_input".
  */
 export interface SimpleInput {
-  id?: string | null;
+  id?: string;
   fieldA?: string | null;
   fieldB?: string | null;
 }
@@ -769,7 +769,7 @@ export interface SimpleInput {
  * via the `definition` "simple-with-versions_input".
  */
 export interface SimpleWithVersionInput {
-  id?: string | null;
+  id?: string;
   fieldA?: string | null;
   fieldB?: string | null;
 }
@@ -778,7 +778,7 @@ export interface SimpleWithVersionInput {
  * via the `definition` "tests_input".
  */
 export interface TestInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
 }
 /**
@@ -786,7 +786,7 @@ export interface TestInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   roles?: ('is_user' | 'is_admin')[] | null;
   email: string;
@@ -810,7 +810,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -833,7 +833,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -850,7 +850,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'autosave';
@@ -895,7 +895,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -916,7 +916,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -925,7 +925,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "admin_input".
  */
 export interface AdminInput {
-  id?: string | null;
+  id?: string;
   adminText?: string | null;
 }
 /**
@@ -933,7 +933,7 @@ export interface AdminInput {
  * via the `definition` "autosave-global_input".
  */
 export interface AutosaveGlobalInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
 }
 /**
@@ -941,7 +941,7 @@ export interface AutosaveGlobalInput {
  * via the `definition` "global-with-versions_input".
  */
 export interface GlobalWithVersionInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
 }
 /**
@@ -949,7 +949,7 @@ export interface GlobalWithVersionInput {
  * via the `definition` "menu_input".
  */
 export interface MenuInput {
-  id?: string | null;
+  id?: string;
   globalText?: string | null;
 }
 /**

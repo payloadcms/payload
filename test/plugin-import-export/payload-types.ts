@@ -2297,7 +2297,7 @@ export interface CollectionsWidget {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   limit?: number | null;
   email: string;
@@ -2321,7 +2321,7 @@ export interface UserInput {
  * via the `definition` "pages_input".
  */
 export interface PageInput {
-  id?: string | null;
+  id?: string;
   title: string;
   localized?: string | null;
   custom?: string | null;
@@ -2447,7 +2447,7 @@ export interface FaqSectionInput {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   title: string;
   content?: LexicalRichText<LexicalNodes_18141FD4_Input> | null;
 }
@@ -2456,7 +2456,7 @@ export interface PostInput {
  * via the `definition` "posts-exports-only_input".
  */
 export interface PostsExportsOnlyInput {
-  id?: string | null;
+  id?: string;
   title: string;
   content?: LexicalRichText<LexicalNodes_18141FD4_Input> | null;
 }
@@ -2465,7 +2465,7 @@ export interface PostsExportsOnlyInput {
  * via the `definition` "posts-imports-only_input".
  */
 export interface PostsImportsOnlyInput {
-  id?: string | null;
+  id?: string;
   title: string;
   content?: LexicalRichText<LexicalNodes_18141FD4_Input> | null;
 }
@@ -2474,7 +2474,7 @@ export interface PostsImportsOnlyInput {
  * via the `definition` "posts-no-jobs-queue_input".
  */
 export interface PostsNoJobsQueueInput {
-  id?: string | null;
+  id?: string;
   title: string;
   content?: LexicalRichText<LexicalNodes_18141FD4_Input> | null;
 }
@@ -2483,7 +2483,7 @@ export interface PostsNoJobsQueueInput {
  * via the `definition` "posts-with-limits_input".
  */
 export interface PostsWithLimitInput {
-  id?: string | null;
+  id?: string;
   title: string;
   content?: string | null;
 }
@@ -2492,7 +2492,7 @@ export interface PostsWithLimitInput {
  * via the `definition` "posts-with-s3_input".
  */
 export interface PostsWithS3Input {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -2500,7 +2500,7 @@ export interface PostsWithS3Input {
  * via the `definition` "posts-with-hooks_input".
  */
 export interface PostsWithHookInput {
-  id?: string | null;
+  id?: string;
   title: string;
   secret?: string | null;
   count?: number | null;
@@ -2511,7 +2511,7 @@ export interface PostsWithHookInput {
  * via the `definition` "posts-with-field-hooks_input".
  */
 export interface PostsWithFieldHookInput {
-  id?: string | null;
+  id?: string;
   title: string;
   secret?: string | null;
   count?: number | null;
@@ -2543,7 +2543,7 @@ export interface PostsWithFieldHookInput {
  * via the `definition` "posts-with-column-map_input".
  */
 export interface PostsWithColumnMapInput {
-  id?: string | null;
+  id?: string;
   title: string;
   excerpt?: string | null;
   count?: number | null;
@@ -2554,7 +2554,7 @@ export interface PostsWithColumnMapInput {
  * via the `definition` "media_input".
  */
 export interface MediaInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -2571,7 +2571,7 @@ export interface MediaInput {
  * via the `definition` "custom-id-pages_input".
  */
 export interface CustomIdPageInput {
-  id: string;
+  id?: string;
   title: string;
 }
 /**
@@ -2579,9 +2579,9 @@ export interface CustomIdPageInput {
  * via the `definition` "exports_input".
  */
 export interface ExportInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
-  format?: ('csv' | 'json') | null;
+  format?: 'csv' | 'json';
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
@@ -2589,7 +2589,7 @@ export interface ExportInput {
   locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   fields?: string[] | null;
-  collectionSlug?: string | null;
+  collectionSlug?: string;
   where?:
     | {
         [k: string]: unknown;
@@ -2614,9 +2614,9 @@ export interface ExportInput {
  * via the `definition` "posts-export_input".
  */
 export interface PostsExportInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
-  format?: ('csv' | 'json') | null;
+  format?: 'csv' | 'json';
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
@@ -2624,7 +2624,7 @@ export interface PostsExportInput {
   locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   fields?: string[] | null;
-  collectionSlug?: string | null;
+  collectionSlug?: string;
   where?:
     | {
         [k: string]: unknown;
@@ -2649,9 +2649,9 @@ export interface PostsExportInput {
  * via the `definition` "posts-no-jobs-queue-export_input".
  */
 export interface PostsNoJobsQueueExportInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
-  format?: ('csv' | 'json') | null;
+  format?: 'csv' | 'json';
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
@@ -2659,7 +2659,7 @@ export interface PostsNoJobsQueueExportInput {
   locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   fields?: string[] | null;
-  collectionSlug?: string | null;
+  collectionSlug?: string;
   where?:
     | {
         [k: string]: unknown;
@@ -2684,9 +2684,9 @@ export interface PostsNoJobsQueueExportInput {
  * via the `definition` "posts-with-s3-export_input".
  */
 export interface PostsWithS3ExportInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
-  format?: ('csv' | 'json') | null;
+  format?: 'csv' | 'json';
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
@@ -2694,7 +2694,7 @@ export interface PostsWithS3ExportInput {
   locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   fields?: string[] | null;
-  collectionSlug?: string | null;
+  collectionSlug?: string;
   where?:
     | {
         [k: string]: unknown;
@@ -2719,9 +2719,9 @@ export interface PostsWithS3ExportInput {
  * via the `definition` "posts-with-limits-export_input".
  */
 export interface PostsWithLimitsExportInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
-  format?: ('csv' | 'json') | null;
+  format?: 'csv' | 'json';
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
@@ -2729,7 +2729,7 @@ export interface PostsWithLimitsExportInput {
   locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   fields?: string[] | null;
-  collectionSlug?: string | null;
+  collectionSlug?: string;
   where?:
     | {
         [k: string]: unknown;
@@ -2754,9 +2754,9 @@ export interface PostsWithLimitsExportInput {
  * via the `definition` "posts-with-hooks-export_input".
  */
 export interface PostsWithHooksExportInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
-  format?: ('csv' | 'json') | null;
+  format?: 'csv' | 'json';
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
@@ -2764,7 +2764,7 @@ export interface PostsWithHooksExportInput {
   locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   fields?: string[] | null;
-  collectionSlug?: string | null;
+  collectionSlug?: string;
   where?:
     | {
         [k: string]: unknown;
@@ -2789,9 +2789,9 @@ export interface PostsWithHooksExportInput {
  * via the `definition` "posts-with-field-hooks-export_input".
  */
 export interface PostsWithFieldHooksExportInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
-  format?: ('csv' | 'json') | null;
+  format?: 'csv' | 'json';
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
@@ -2799,7 +2799,7 @@ export interface PostsWithFieldHooksExportInput {
   locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   fields?: string[] | null;
-  collectionSlug?: string | null;
+  collectionSlug?: string;
   where?:
     | {
         [k: string]: unknown;
@@ -2824,9 +2824,9 @@ export interface PostsWithFieldHooksExportInput {
  * via the `definition` "posts-with-column-map-export_input".
  */
 export interface PostsWithColumnMapExportInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
-  format?: ('csv' | 'json') | null;
+  format?: 'csv' | 'json';
   limit?: number | null;
   page?: number | null;
   sort?: string | null;
@@ -2834,7 +2834,7 @@ export interface PostsWithColumnMapExportInput {
   locale?: ('all' | 'en' | 'es' | 'de' | 'he') | null;
   drafts?: ('yes' | 'no') | null;
   fields?: string[] | null;
-  collectionSlug?: string | null;
+  collectionSlug?: string;
   where?:
     | {
         [k: string]: unknown;
@@ -2859,8 +2859,8 @@ export interface PostsWithColumnMapExportInput {
  * via the `definition` "imports_input".
  */
 export interface ImportInput {
-  id?: string | null;
-  collectionSlug?: string | null;
+  id?: string;
+  collectionSlug?: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -2894,8 +2894,8 @@ export interface ImportInput {
  * via the `definition` "posts-import_input".
  */
 export interface PostsImportInput {
-  id?: string | null;
-  collectionSlug?: string | null;
+  id?: string;
+  collectionSlug?: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -2929,8 +2929,8 @@ export interface PostsImportInput {
  * via the `definition` "posts-with-s3-import_input".
  */
 export interface PostsWithS3ImportInput {
-  id?: string | null;
-  collectionSlug?: string | null;
+  id?: string;
+  collectionSlug?: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -2964,8 +2964,8 @@ export interface PostsWithS3ImportInput {
  * via the `definition` "posts-with-limits-import_input".
  */
 export interface PostsWithLimitsImportInput {
-  id?: string | null;
-  collectionSlug?: string | null;
+  id?: string;
+  collectionSlug?: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -2999,8 +2999,8 @@ export interface PostsWithLimitsImportInput {
  * via the `definition` "posts-with-hooks-import_input".
  */
 export interface PostsWithHooksImportInput {
-  id?: string | null;
-  collectionSlug?: string | null;
+  id?: string;
+  collectionSlug?: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -3034,8 +3034,8 @@ export interface PostsWithHooksImportInput {
  * via the `definition` "posts-with-field-hooks-import_input".
  */
 export interface PostsWithFieldHooksImportInput {
-  id?: string | null;
-  collectionSlug?: string | null;
+  id?: string;
+  collectionSlug?: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -3069,8 +3069,8 @@ export interface PostsWithFieldHooksImportInput {
  * via the `definition` "posts-with-column-map-import_input".
  */
 export interface PostsWithColumnMapImportInput {
-  id?: string | null;
-  collectionSlug?: string | null;
+  id?: string;
+  collectionSlug?: string;
   importMode?: ('create' | 'update' | 'upsert') | null;
   matchField?: string | null;
   status?: ('pending' | 'completed' | 'partial' | 'failed') | null;
@@ -3104,7 +3104,7 @@ export interface PostsWithColumnMapImportInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -3127,7 +3127,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -3144,7 +3144,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-jobs_input".
  */
 export interface PayloadJobInput {
-  id?: string | null;
+  id?: string;
   /**
    * Input data provided to the job
    */
@@ -3225,7 +3225,7 @@ export interface PayloadJobInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'users';
@@ -3294,7 +3294,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -3315,7 +3315,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

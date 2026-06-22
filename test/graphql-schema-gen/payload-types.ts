@@ -524,7 +524,7 @@ export interface CollectionsWidget {
  * via the `definition` "collection1_input".
  */
 export interface Collection1Input {
-  id?: string | null;
+  id?: string;
   testing: string;
   title: string;
   meta?: SharedMetaArray;
@@ -535,7 +535,7 @@ export interface Collection1Input {
  * via the `definition` "collection2_input".
  */
 export interface Collection2Input {
-  id?: string | null;
+  id?: string;
   metaArray?: SharedMetaArray;
   metaGroup?: SharedMeta;
   nestedGroup?: {
@@ -549,7 +549,7 @@ export interface Collection2Input {
  * via the `definition` "no-graphql_input".
  */
 export interface NoGraphqlInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -557,7 +557,7 @@ export interface NoGraphqlInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -579,7 +579,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -602,7 +602,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -619,7 +619,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'collection1';
@@ -652,7 +652,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -673,7 +673,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

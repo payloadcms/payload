@@ -1880,7 +1880,7 @@ export interface CollectionsWidget {
  * via the `definition` "disable-publish_input".
  */
 export interface DisablePublishInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -1888,7 +1888,7 @@ export interface DisablePublishInput {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   relationToAutosaves?: string | null;
   relationToVersions?: string | null;
   relationToDrafts?: string | null;
@@ -1898,7 +1898,7 @@ export interface PostInput {
  * via the `definition` "autosave-posts_input".
  */
 export interface AutosavePostInput {
-  id?: string | null;
+  id?: string;
   title: string;
   relationship?: string | null;
   computedTitle?: string | null;
@@ -1925,7 +1925,7 @@ export interface AutosavePostInput {
  * via the `definition` "autosave-with-draft-button-posts_input".
  */
 export interface AutosaveWithDraftButtonPostInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -1933,7 +1933,7 @@ export interface AutosaveWithDraftButtonPostInput {
  * via the `definition` "autosave-multi-select-posts_input".
  */
 export interface AutosaveMultiSelectPostInput {
-  id?: string | null;
+  id?: string;
   title: string;
   tag?: ('blog' | 'essay' | 'portfolio')[] | null;
 }
@@ -1942,7 +1942,7 @@ export interface AutosaveMultiSelectPostInput {
  * via the `definition` "autosave-with-validate-posts_input".
  */
 export interface AutosaveWithValidatePostInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -1950,7 +1950,7 @@ export interface AutosaveWithValidatePostInput {
  * via the `definition` "draft-posts_input".
  */
 export interface DraftPostInput {
-  id?: string | null;
+  id?: string;
   title: string;
   description: string;
   radio?: 'test' | null;
@@ -1964,7 +1964,7 @@ export interface DraftPostInput {
  * via the `definition` "drafts-no-read-versions_input".
  */
 export interface DraftsNoReadVersionInput {
-  id?: string | null;
+  id?: string;
   title: string;
   description?: string | null;
 }
@@ -1973,7 +1973,7 @@ export interface DraftsNoReadVersionInput {
  * via the `definition` "draft-with-max-posts_input".
  */
 export interface DraftWithMaxPostInput {
-  id?: string | null;
+  id?: string;
   title: string;
   description: string;
   radio?: 'test' | null;
@@ -1986,7 +1986,7 @@ export interface DraftWithMaxPostInput {
  * via the `definition` "draft-posts-with-change-hook_input".
  */
 export interface DraftPostsWithChangeHookInput {
-  id?: string | null;
+  id?: string;
   title: string;
   description: string;
 }
@@ -1995,7 +1995,7 @@ export interface DraftPostsWithChangeHookInput {
  * via the `definition` "drafts-with-custom-unpublish_input".
  */
 export interface DraftsWithCustomUnpublishInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -2003,7 +2003,7 @@ export interface DraftsWithCustomUnpublishInput {
  * via the `definition` "draft-with-validate-posts_input".
  */
 export interface DraftWithValidatePostInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -2011,7 +2011,7 @@ export interface DraftWithValidatePostInput {
  * via the `definition` "error-on-unpublish_input".
  */
 export interface ErrorOnUnpublishInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -2019,7 +2019,7 @@ export interface ErrorOnUnpublishInput {
  * via the `definition` "localized-posts_input".
  */
 export interface LocalizedPostInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   description?: string | null;
   blocks?: (BlockInput | LocalizedTextBlock)[] | null;
@@ -2044,7 +2044,7 @@ export interface BlockInput {
  * via the `definition` "version-posts_input".
  */
 export interface VersionPostInput {
-  id?: string | null;
+  id?: string;
   title: string;
   description: string;
 }
@@ -2053,7 +2053,7 @@ export interface VersionPostInput {
  * via the `definition` "custom-ids_input".
  */
 export interface CustomIdInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2061,7 +2061,7 @@ export interface CustomIdInput {
  * via the `definition` "diff_input".
  */
 export interface DiffInput {
-  id?: string | null;
+  id?: string;
   array?:
     | {
         textInArray?: string | null;
@@ -2192,7 +2192,7 @@ export interface ManyRelationshipBlockInput {
  * via the `definition` "text_input".
  */
 export interface TextInput {
-  id?: string | null;
+  id?: string;
   text: string;
 }
 /**
@@ -2200,7 +2200,7 @@ export interface TextInput {
  * via the `definition` "draft-with-upload_input".
  */
 export interface DraftWithUploadInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -2217,7 +2217,7 @@ export interface DraftWithUploadInput {
  * via the `definition` "draft-with-upload-cloud-storage_input".
  */
 export interface DraftWithUploadCloudStorageInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -2234,7 +2234,7 @@ export interface DraftWithUploadCloudStorageInput {
  * via the `definition` "media_input".
  */
 export interface MediaInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -2250,7 +2250,7 @@ export interface MediaInput {
  * via the `definition` "media2_input".
  */
 export interface Media2Input {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -2266,7 +2266,7 @@ export interface Media2Input {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -2288,7 +2288,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -2311,7 +2311,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -2328,7 +2328,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-jobs_input".
  */
 export interface PayloadJobInput {
-  id?: string | null;
+  id?: string;
   /**
    * Input data provided to the job
    */
@@ -2409,7 +2409,7 @@ export interface PayloadJobInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'disable-publish';
@@ -2518,7 +2518,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -2539,7 +2539,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -2548,7 +2548,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "autosave-global_input".
  */
 export interface AutosaveGlobalInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -2556,7 +2556,7 @@ export interface AutosaveGlobalInput {
  * via the `definition` "autosave-with-draft-button-global_input".
  */
 export interface AutosaveWithDraftButtonGlobalInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -2564,7 +2564,7 @@ export interface AutosaveWithDraftButtonGlobalInput {
  * via the `definition` "draft-global_input".
  */
 export interface DraftGlobalInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -2572,7 +2572,7 @@ export interface DraftGlobalInput {
  * via the `definition` "draft-with-max-global_input".
  */
 export interface DraftWithMaxGlobalInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -2580,7 +2580,7 @@ export interface DraftWithMaxGlobalInput {
  * via the `definition` "disable-publish-global_input".
  */
 export interface DisablePublishGlobalInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2588,7 +2588,7 @@ export interface DisablePublishGlobalInput {
  * via the `definition` "localized-global_input".
  */
 export interface LocalizedGlobalInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   content?: string | null;
 }
@@ -2597,7 +2597,7 @@ export interface LocalizedGlobalInput {
  * via the `definition` "max-versions_input".
  */
 export interface MaxVersionInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2605,7 +2605,7 @@ export interface MaxVersionInput {
  * via the `definition` "draft-unlimited-global_input".
  */
 export interface DraftUnlimitedGlobalInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**
@@ -2613,7 +2613,7 @@ export interface DraftUnlimitedGlobalInput {
  * via the `definition` "simple-draft-global_input".
  */
 export interface SimpleDraftGlobalInput {
-  id?: string | null;
+  id?: string;
   title: string;
 }
 /**

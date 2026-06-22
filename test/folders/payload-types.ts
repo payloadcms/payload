@@ -538,7 +538,7 @@ export interface CollectionsWidget {
  * via the `definition` "payload-folders_input".
  */
 export interface PayloadFolderInput {
-  id?: string | null;
+  id?: string;
   folder?: string | null;
   name: string;
   folderSlug?: string | null;
@@ -549,7 +549,7 @@ export interface PayloadFolderInput {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   heroImage?: string | null;
   folder?: string | null;
@@ -560,7 +560,7 @@ export interface PostInput {
  * via the `definition` "media_input".
  */
 export interface MediaInput {
-  id?: string | null;
+  id?: string;
   testAdminThumbnail?: string | null;
   folder?: string | null;
   url?: string | null;
@@ -578,7 +578,7 @@ export interface MediaInput {
  * via the `definition` "translated-labels_input".
  */
 export interface TranslatedLabelInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   folder?: string | null;
 }
@@ -587,7 +587,7 @@ export interface TranslatedLabelInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -609,7 +609,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -632,7 +632,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -649,7 +649,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'payload-folders';
@@ -686,7 +686,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -707,7 +707,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -716,7 +716,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "global_input".
  */
 export interface GlobalInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**

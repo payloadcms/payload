@@ -612,7 +612,7 @@ export interface CollectionsWidget {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   number?: number | null;
   number2?: number | null;
@@ -626,7 +626,7 @@ export interface PostInput {
  * via the `definition` "drafts_input".
  */
 export interface DraftInput {
-  id?: string | null;
+  id?: string;
   _order?: string | null;
   text?: string | null;
   number?: number | null;
@@ -637,7 +637,7 @@ export interface DraftInput {
  * via the `definition` "default-sort_input".
  */
 export interface DefaultSortInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   number?: number | null;
 }
@@ -646,7 +646,7 @@ export interface DefaultSortInput {
  * via the `definition` "non-unique-sort_input".
  */
 export interface NonUniqueSortInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   order?: number | null;
 }
@@ -655,7 +655,7 @@ export interface NonUniqueSortInput {
  * via the `definition` "localized_input".
  */
 export interface LocalizedInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   number?: number | null;
   number2?: number | null;
@@ -669,7 +669,7 @@ export interface LocalizedInput {
  * via the `definition` "orderable_input".
  */
 export interface OrderableInput {
-  id?: string | null;
+  id?: string;
   _orderable_group_orderableJoinField_order?: string | null;
   _orderable_orderableJoinField2_order?: string | null;
   _orderable_orderableJoinField1_order?: string | null;
@@ -682,7 +682,7 @@ export interface OrderableInput {
  * via the `definition` "orderable-join_input".
  */
 export interface OrderableJoinInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   group?: {};
 }
@@ -691,7 +691,7 @@ export interface OrderableJoinInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -713,7 +713,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -736,7 +736,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -753,7 +753,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'posts';
@@ -802,7 +802,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -823,7 +823,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

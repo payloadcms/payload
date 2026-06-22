@@ -2148,7 +2148,7 @@ export interface CollectionsWidget {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   roles?: ('admin' | 'user')[] | null;
   email: string;
   resetPasswordToken?: string | null;
@@ -2171,7 +2171,7 @@ export interface UserInput {
  * via the `definition` "public-users_input".
  */
 export interface PublicUserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -2193,7 +2193,7 @@ export interface PublicUserInput {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   restrictedField?: string | null;
   group?: {
     restrictedGroupText?: string | null;
@@ -2206,7 +2206,7 @@ export interface PostInput {
  * via the `definition` "unrestricted_input".
  */
 export interface UnrestrictedInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   info?: {
     title?: string | null;
@@ -2220,7 +2220,7 @@ export interface UnrestrictedInput {
  * via the `definition` "relation-restricted_input".
  */
 export interface RelationRestrictedInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   post?: string | null;
 }
@@ -2229,7 +2229,7 @@ export interface RelationRestrictedInput {
  * via the `definition` "fully-restricted_input".
  */
 export interface FullyRestrictedInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -2237,7 +2237,7 @@ export interface FullyRestrictedInput {
  * via the `definition` "read-only-collection_input".
  */
 export interface ReadOnlyCollectionInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -2245,7 +2245,7 @@ export interface ReadOnlyCollectionInput {
  * via the `definition` "user-restricted-collection_input".
  */
 export interface UserRestrictedCollectionInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -2253,7 +2253,7 @@ export interface UserRestrictedCollectionInput {
  * via the `definition` "can-create-not-update-collection_input".
  */
 export interface CanCreateNotUpdateCollectionInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -2261,7 +2261,7 @@ export interface CanCreateNotUpdateCollectionInput {
  * via the `definition` "restricted-versions_input".
  */
 export interface RestrictedVersionInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   hidden?: boolean | null;
 }
@@ -2270,7 +2270,7 @@ export interface RestrictedVersionInput {
  * via the `definition` "restricted-versions-admin-panel_input".
  */
 export interface RestrictedVersionsAdminPanelInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   hidden?: boolean | null;
 }
@@ -2279,7 +2279,7 @@ export interface RestrictedVersionsAdminPanelInput {
  * via the `definition` "sibling-data_input".
  */
 export interface SiblingDatumInput {
-  id?: string | null;
+  id?: string;
   array?:
     | {
         allowPublicReadability?: boolean | null;
@@ -2293,7 +2293,7 @@ export interface SiblingDatumInput {
  * via the `definition` "rely-on-request-headers_input".
  */
 export interface RelyOnRequestHeaderInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -2301,7 +2301,7 @@ export interface RelyOnRequestHeaderInput {
  * via the `definition` "doc-level-access_input".
  */
 export interface DocLevelAccessInput {
-  id?: string | null;
+  id?: string;
   approvedForRemoval?: boolean | null;
   approvedTitle?: string | null;
   lockTitle?: boolean | null;
@@ -2311,7 +2311,7 @@ export interface DocLevelAccessInput {
  * via the `definition` "hidden-fields_input".
  */
 export interface HiddenFieldInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   partiallyHiddenGroup?: {
     name?: string | null;
@@ -2332,7 +2332,7 @@ export interface HiddenFieldInput {
  * via the `definition` "hidden-access_input".
  */
 export interface HiddenAccessInput {
-  id?: string | null;
+  id?: string;
   title: string;
   hidden?: boolean | null;
 }
@@ -2341,7 +2341,7 @@ export interface HiddenAccessInput {
  * via the `definition` "hidden-access-count_input".
  */
 export interface HiddenAccessCountInput {
-  id?: string | null;
+  id?: string;
   title: string;
   hidden?: boolean | null;
 }
@@ -2350,7 +2350,7 @@ export interface HiddenAccessCountInput {
  * via the `definition` "fields-and-top-access_input".
  */
 export interface FieldsAndTopAccessInput {
-  id?: string | null;
+  id?: string;
   secret?: string | null;
 }
 /**
@@ -2358,7 +2358,7 @@ export interface FieldsAndTopAccessInput {
  * via the `definition` "blocks-field-access_input".
  */
 export interface BlocksFieldAccessInput {
-  id?: string | null;
+  id?: string;
   title: string;
   editableBlocks?: TestBlock[] | null;
   readOnlyBlocks?: TestBlock2[] | null;
@@ -2374,7 +2374,7 @@ export interface BlocksFieldAccessInput {
  * via the `definition` "disabled_input".
  */
 export interface DisabledInput {
-  id?: string | null;
+  id?: string;
   group?: {
     text?: string | null;
   };
@@ -2394,7 +2394,7 @@ export interface DisabledInput {
  * via the `definition` "rich-text_input".
  */
 export interface RichTextInput {
-  id?: string | null;
+  id?: string;
   blocks?: RichTextInput1[] | null;
 }
 /**
@@ -2412,7 +2412,7 @@ export interface RichTextInput1 {
  * via the `definition` "regression1_input".
  */
 export interface Regression1Input {
-  id?: string | null;
+  id?: string;
   group1?: {
     richText1?: LexicalRichText<LexicalNodes_AD02C9BE_Input> | null;
     text?: string | null;
@@ -2472,7 +2472,7 @@ export interface MyBlock3Input {
  * via the `definition` "regression2_input".
  */
 export interface Regression2Input {
-  id?: string | null;
+  id?: string;
   group?: {
     richText1?: LexicalRichText<LexicalNodes_AD02C9BE_Input> | null;
     text?: string | null;
@@ -2489,7 +2489,7 @@ export interface Regression2Input {
  * via the `definition` "hooks_input".
  */
 export interface HookInput {
-  id?: string | null;
+  id?: string;
   cannotMutateRequired: string;
   cannotMutateNotRequired?: string | null;
   canMutate?: string | null;
@@ -2499,7 +2499,7 @@ export interface HookInput {
  * via the `definition` "auth-collection_input".
  */
 export interface AuthCollectionInput {
-  id?: string | null;
+  id?: string;
   password?: string | null;
   roles?: ('admin' | 'user')[] | null;
   email: string;
@@ -2524,7 +2524,7 @@ export interface AuthCollectionInput {
  * via the `definition` "read-restricted_input".
  */
 export interface ReadRestrictedInput {
-  id?: string | null;
+  id?: string;
   restrictedTopLevel?: string | null;
   visibleTopLevel?: string | null;
   contactInfo?: {
@@ -2572,7 +2572,7 @@ export interface ReadRestrictedInput {
  * via the `definition` "differentiated-trash_input".
  */
 export interface DifferentiatedTrashInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   deletedAt?: string | null;
 }
@@ -2581,7 +2581,7 @@ export interface DifferentiatedTrashInput {
  * via the `definition` "restricted-trash_input".
  */
 export interface RestrictedTrashInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   deletedAt?: string | null;
 }
@@ -2590,7 +2590,7 @@ export interface RestrictedTrashInput {
  * via the `definition` "field-restricted-update-based-on-data_input".
  */
 export interface FieldRestrictedUpdateBasedOnDatumInput {
-  id?: string | null;
+  id?: string;
   restricted?: string | null;
   doesNothing?: boolean | null;
   isRestricted?: boolean | null;
@@ -2600,7 +2600,7 @@ export interface FieldRestrictedUpdateBasedOnDatumInput {
  * via the `definition` "where-cache-same_input".
  */
 export interface WhereCacheSameInput {
-  id?: string | null;
+  id?: string;
   title: string;
   userRole: string;
 }
@@ -2609,7 +2609,7 @@ export interface WhereCacheSameInput {
  * via the `definition` "where-cache-unique_input".
  */
 export interface WhereCacheUniqueInput {
-  id?: string | null;
+  id?: string;
   title: string;
   readRole: string;
   updateRole: string;
@@ -2620,7 +2620,7 @@ export interface WhereCacheUniqueInput {
  * via the `definition` "async-parent_input".
  */
 export interface AsyncParentInput {
-  id?: string | null;
+  id?: string;
   title: string;
   parentField?: {
     childField1?: string | null;
@@ -2636,7 +2636,7 @@ export interface AsyncParentInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -2659,7 +2659,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -2676,7 +2676,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'users';
@@ -2830,7 +2830,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user:
     | {
         relationTo: 'users';
@@ -2860,7 +2860,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -2869,7 +2869,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "settings_input".
  */
 export interface SettingInput {
-  id?: string | null;
+  id?: string;
   test?: boolean | null;
 }
 /**
@@ -2877,14 +2877,14 @@ export interface SettingInput {
  * via the `definition` "test_input".
  */
 export interface TestInput {
-  id?: string | null;
+  id?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "read-only-global_input".
  */
 export interface ReadOnlyGlobalInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -2892,7 +2892,7 @@ export interface ReadOnlyGlobalInput {
  * via the `definition` "user-restricted-global_input".
  */
 export interface UserRestrictedGlobalInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -2900,7 +2900,7 @@ export interface UserRestrictedGlobalInput {
  * via the `definition` "read-not-update-global_input".
  */
 export interface ReadNotUpdateGlobalInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**

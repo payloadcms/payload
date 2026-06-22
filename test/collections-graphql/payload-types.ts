@@ -781,7 +781,7 @@ export interface CollectionsWidget {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -803,7 +803,7 @@ export interface UserInput {
  * via the `definition` "point_input".
  */
 export interface PointInput {
-  id?: string | null;
+  id?: string;
   /**
    * @minItems 2
    * @maxItems 2
@@ -815,7 +815,7 @@ export interface PointInput {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   description?: string | null;
   number?: number | null;
@@ -869,7 +869,7 @@ export interface PostInput {
  * via the `definition` "custom-ids_input".
  */
 export interface CustomIdInput {
-  id?: number | null;
+  id?: number;
   title?: string | null;
 }
 /**
@@ -877,7 +877,7 @@ export interface CustomIdInput {
  * via the `definition` "relation_input".
  */
 export interface RelationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -885,7 +885,7 @@ export interface RelationInput {
  * via the `definition` "dummy_input".
  */
 export interface DummyInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -893,7 +893,7 @@ export interface DummyInput {
  * via the `definition` "error-on-hooks_input".
  */
 export interface ErrorOnHookInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   errorBeforeChange?: boolean | null;
 }
@@ -902,7 +902,7 @@ export interface ErrorOnHookInput {
  * via the `definition` "payload-api-test-ones_input".
  */
 export interface PayloadApiTestOneInput {
-  id?: string | null;
+  id?: string;
   payloadAPI?: string | null;
 }
 /**
@@ -910,7 +910,7 @@ export interface PayloadApiTestOneInput {
  * via the `definition` "payload-api-test-twos_input".
  */
 export interface PayloadApiTestTwoInput {
-  id?: string | null;
+  id?: string;
   payloadAPI?: string | null;
   relation?: string | null;
 }
@@ -919,7 +919,7 @@ export interface PayloadApiTestTwoInput {
  * via the `definition` "content-type_input".
  */
 export interface ContentTypeInput {
-  id?: string | null;
+  id?: string;
   contentType?: string | null;
 }
 /**
@@ -927,7 +927,7 @@ export interface ContentTypeInput {
  * via the `definition` "cyclical-relationship_input".
  */
 export interface CyclicalRelationshipInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   relationToSelf?: string | null;
   media?: string | null;
@@ -937,7 +937,7 @@ export interface CyclicalRelationshipInput {
  * via the `definition` "media_input".
  */
 export interface MediaInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -954,7 +954,7 @@ export interface MediaInput {
  * via the `definition` "sort_input".
  */
 export interface SortInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   number?: number | null;
 }
@@ -963,7 +963,7 @@ export interface SortInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -986,7 +986,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -1003,7 +1003,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'users';
@@ -1072,7 +1072,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -1093,7 +1093,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

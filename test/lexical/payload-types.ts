@@ -1173,16 +1173,16 @@ export type LexicalNodes_26CA3A71_Input =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_540C058A_Input".
+ * via the `definition` "LexicalNodes_4AC240E9_Input".
  */
-export type LexicalNodes_540C058A_Input =
+export type LexicalNodes_4AC240E9_Input =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_540C058A_Input>
-  | SerializedTableNode<LexicalNodes_540C058A_Input>
-  | SerializedTableCellNode<LexicalNodes_540C058A_Input>
-  | SerializedTableRowNode<LexicalNodes_540C058A_Input>
+  | SerializedParagraphNode<LexicalNodes_4AC240E9_Input>
+  | SerializedTableNode<LexicalNodes_4AC240E9_Input>
+  | SerializedTableCellNode<LexicalNodes_4AC240E9_Input>
+  | SerializedTableRowNode<LexicalNodes_4AC240E9_Input>
   | SerializedBlockNode<
       | ValidationBlock
       | FilterOptionsBlockInput
@@ -1195,7 +1195,7 @@ export type LexicalNodes_540C058A_Input =
       | RelationshipHasManyBlockInput
       | SubBlockLexicalInput
       | LexicalBlocksRadioButtonsBlock
-      | ConditionalLayoutInput_DB165E12
+      | ConditionalLayoutInput_ADEA7D39
       | TabBlock
       | CodeInput
       | NoBlockName
@@ -1214,10 +1214,10 @@ export type LexicalNodes_540C058A_Input =
     >
   | SerializedUploadNodeInput<'uploads', LexicalUploadFields_8A05F5A6>
   | SerializedUploadNodeInput<'uploads2'>
-  | SerializedAutoLinkNode<LexicalNodes_540C058A_Input, LexicalLinkFields_652F3B98>
-  | SerializedLinkNode<LexicalNodes_540C058A_Input, LexicalLinkFields_652F3B98>
+  | SerializedAutoLinkNode<LexicalNodes_4AC240E9_Input, LexicalLinkFields_652F3B98>
+  | SerializedLinkNode<LexicalNodes_4AC240E9_Input, LexicalLinkFields_652F3B98>
   | SerializedHorizontalRuleNode
-  | SerializedQuoteNode<LexicalNodes_540C058A_Input>
+  | SerializedQuoteNode<LexicalNodes_4AC240E9_Input>
   | SerializedRelationshipNodeInput<
       | 'lexical-benchmark'
       | 'lexical-fully-featured'
@@ -1254,9 +1254,9 @@ export type LexicalNodes_540C058A_Input =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedListNode<LexicalNodes_540C058A_Input>
-  | SerializedListItemNode<LexicalNodes_540C058A_Input>
-  | SerializedHeadingNode<LexicalNodes_540C058A_Input>;
+  | SerializedListNode<LexicalNodes_4AC240E9_Input>
+  | SerializedListItemNode<LexicalNodes_4AC240E9_Input>
+  | SerializedHeadingNode<LexicalNodes_4AC240E9_Input>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "LexicalNodes_42C4EBEA".
@@ -4265,7 +4265,7 @@ export interface CollectionsWidget {
  * via the `definition` "lexical-benchmark_input".
  */
 export interface LexicalBenchmarkInput {
-  id?: string | null;
+  id?: string;
   richText?: LexicalRichText<LexicalNodes_A5C1A396_Input> | null;
 }
 /**
@@ -4273,7 +4273,7 @@ export interface LexicalBenchmarkInput {
  * via the `definition` "lexical-fully-featured_input".
  */
 export interface LexicalFullyFeaturedInput {
-  id?: string | null;
+  id?: string;
   richText?: LexicalRichText<LexicalNodes_9214E385_Input> | null;
 }
 /**
@@ -4281,7 +4281,7 @@ export interface LexicalFullyFeaturedInput {
  * via the `definition` "lexical-autosave_input".
  */
 export interface LexicalAutosaveInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   cta?:
     | {
@@ -4295,7 +4295,7 @@ export interface LexicalAutosaveInput {
  * via the `definition` "lexical-link-feature_input".
  */
 export interface LexicalLinkFeatureInput {
-  id?: string | null;
+  id?: string;
   richText?: LexicalRichText<LexicalNodes_770C4E94_Input> | null;
 }
 /**
@@ -4303,7 +4303,7 @@ export interface LexicalLinkFeatureInput {
  * via the `definition` "lexical-lists-features_input".
  */
 export interface LexicalListsFeatureInput {
-  id?: string | null;
+  id?: string;
   onlyOrderedList?: LexicalRichText<LexicalNodes_2C2D92D6> | null;
 }
 /**
@@ -4311,7 +4311,7 @@ export interface LexicalListsFeatureInput {
  * via the `definition` "lexical-heading-feature_input".
  */
 export interface LexicalHeadingFeatureInput {
-  id?: string | null;
+  id?: string;
   richText?: LexicalRichText<LexicalNodes_923DBFE3_Input> | null;
 }
 /**
@@ -4319,7 +4319,7 @@ export interface LexicalHeadingFeatureInput {
  * via the `definition` "lexical-jsx-converter_input".
  */
 export interface LexicalJsxConverterInput {
-  id?: string | null;
+  id?: string;
   richText?: LexicalRichText<LexicalNodes_64E81937_Input> | null;
 }
 /**
@@ -4327,7 +4327,7 @@ export interface LexicalJsxConverterInput {
  * via the `definition` "lexical-fields_input".
  */
 export interface LexicalFieldInput {
-  id?: string | null;
+  id?: string;
   title: string;
   lexicalRootEditor?: LexicalRichText<LexicalNodes_B4478FAA_Input> | null;
   /**
@@ -4337,7 +4337,7 @@ export interface LexicalFieldInput {
   /**
    * Should not be rendered
    */
-  lexicalWithBlocks: LexicalRichText<LexicalNodes_540C058A_Input>;
+  lexicalWithBlocks: LexicalRichText<LexicalNodes_4AC240E9_Input>;
   lexicalWithBlocks_markdown?: string | null;
 }
 /**
@@ -4345,7 +4345,7 @@ export interface LexicalFieldInput {
  * via the `definition` "lexical-views_input".
  */
 export interface LexicalViewInput {
-  id?: string | null;
+  id?: string;
   customDefaultView?: LexicalRichText<LexicalNodes_D5E564B7_Input> | null;
   vanillaView?: LexicalRichText<LexicalNodes_D5E564B7_Input> | null;
 }
@@ -4354,7 +4354,7 @@ export interface LexicalViewInput {
  * via the `definition` "lexical-views-frontend_input".
  */
 export interface LexicalViewsFrontendInput {
-  id?: string | null;
+  id?: string;
   customFrontendViews?: LexicalRichText<LexicalNodes_DE739342_Input> | null;
 }
 /**
@@ -4362,7 +4362,7 @@ export interface LexicalViewsFrontendInput {
  * via the `definition` "lexical-views-provider_input".
  */
 export interface LexicalViewsProviderInput {
-  id?: string | null;
+  id?: string;
   viewProviderWrapper?: {
     richTextField?: LexicalRichText<LexicalNodes_8C406F25_Input> | null;
   };
@@ -4372,7 +4372,7 @@ export interface LexicalViewsProviderInput {
  * via the `definition` "lexical-views-provider-default_input".
  */
 export interface LexicalViewsProviderDefaultInput {
-  id?: string | null;
+  id?: string;
   defaultViewWrapper?: {
     richTextField?: LexicalRichText<LexicalNodes_64E81937_Input> | null;
   };
@@ -4382,7 +4382,7 @@ export interface LexicalViewsProviderDefaultInput {
  * via the `definition` "lexical-views-provider-fallback_input".
  */
 export interface LexicalViewsProviderFallbackInput {
-  id?: string | null;
+  id?: string;
   fallbackViewWrapper?: {
     richTextField?: LexicalRichText<LexicalNodes_64E81937_Input> | null;
   };
@@ -4392,7 +4392,7 @@ export interface LexicalViewsProviderFallbackInput {
  * via the `definition` "lexical-views-nested_input".
  */
 export interface LexicalViewsNestedInput {
-  id?: string | null;
+  id?: string;
   parentRichText?: LexicalRichText<LexicalNodes_5F424694_Input> | null;
 }
 /**
@@ -4400,7 +4400,7 @@ export interface LexicalViewsNestedInput {
  * via the `definition` "lexical-localized-fields_input".
  */
 export interface LexicalLocalizedFieldInput {
-  id?: string | null;
+  id?: string;
   title: string;
   /**
    * Non-localized field with localized block subfields
@@ -4416,7 +4416,7 @@ export interface LexicalLocalizedFieldInput {
  * via the `definition` "lexicalObjectReferenceBug_input".
  */
 export interface LexicalObjectReferenceBugInput {
-  id?: string | null;
+  id?: string;
   lexicalDefault?: LexicalRichText<LexicalNodes_B4478FAA_Input> | null;
   lexicalEditor?: LexicalRichText<LexicalNodes_4207314C_Input> | null;
 }
@@ -4425,7 +4425,7 @@ export interface LexicalObjectReferenceBugInput {
  * via the `definition` "LexicalInBlock_input".
  */
 export interface LexicalInBlockInput {
-  id?: string | null;
+  id?: string;
   content?: LexicalRichText<LexicalNodes_7D10D03B_Input> | null;
   blocks?: LexicalInBlock2[] | null;
 }
@@ -4434,7 +4434,7 @@ export interface LexicalInBlockInput {
  * via the `definition` "lexical-autosave-block_input".
  */
 export interface LexicalAutosaveBlockInput {
-  id?: string | null;
+  id?: string;
   content?: LexicalRichText<LexicalNodes_00377727_Input> | null;
 }
 /**
@@ -4442,7 +4442,7 @@ export interface LexicalAutosaveBlockInput {
  * via the `definition` "lexical-access-control_input".
  */
 export interface LexicalAccessControlInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   richText?: LexicalRichText<LexicalNodes_2E9037B0_Input> | null;
 }
@@ -4451,7 +4451,7 @@ export interface LexicalAccessControlInput {
  * via the `definition` "lexical-relationship-fields_input".
  */
 export interface LexicalRelationshipFieldInput {
-  id?: string | null;
+  id?: string;
   richText?: LexicalRichText<LexicalNodes_567E475D_Input> | null;
   richText2?: LexicalRichText<LexicalNodes_AB9D088A_Input> | null;
   richText3?: LexicalRichText<LexicalNodes_797379BB_Input> | null;
@@ -4462,7 +4462,7 @@ export interface LexicalRelationshipFieldInput {
  * via the `definition` "collision_input".
  */
 export interface CollisionInput {
-  id?: string | null;
+  id?: string;
   collision?: LexicalRichText<LexicalNodes_64E81937_Input> | null;
 }
 /**
@@ -4470,7 +4470,7 @@ export interface CollisionInput {
  * via the `definition` "lexical-nested-blocks_input".
  */
 export interface LexicalNestedBlockInput {
-  id?: string | null;
+  id?: string;
   title: string;
   richText?: LexicalRichText<LexicalNodes_26874F8F_Input> | null;
 }
@@ -4479,7 +4479,7 @@ export interface LexicalNestedBlockInput {
  * via the `definition` "rich-text-fields_input".
  */
 export interface RichTextFieldInput {
-  id?: string | null;
+  id?: string;
   title: string;
   lexicalCustomFields: LexicalRichText<LexicalNodes_350FBEE4_Input>;
   lexicalCustomFields_html?: string | null;
@@ -4508,7 +4508,7 @@ export interface TextBlockInput {
  * via the `definition` "text-fields_input".
  */
 export interface TextFieldInput {
-  id?: string | null;
+  id?: string;
   text: string;
   hiddenTextField?: string | null;
   /**
@@ -4551,7 +4551,7 @@ export interface TextFieldInput {
  * via the `definition` "uploads_input".
  */
 export interface UploadInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   media?: string | null;
   url?: string | null;
@@ -4569,7 +4569,7 @@ export interface UploadInput {
  * via the `definition` "uploads2_input".
  */
 export interface Uploads2Input {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   media?: string | null;
   altText?: string | null;
@@ -4588,36 +4588,32 @@ export interface Uploads2Input {
  * via the `definition` "array-fields_input".
  */
 export interface ArrayFieldInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
-  items?:
-    | {
-        text: string;
-        anotherText?: string | null;
-        localizedText?: string | null;
-        subArray?:
-          | {
-              text?: string | null;
-              textTwo?: string | null;
-              textInRow?: string | null;
-              id?: string | null;
-            }[]
-          | null;
-        id?: string | null;
-      }[]
-    | null;
+  items?: {
+    text: string;
+    anotherText?: string | null;
+    localizedText?: string | null;
+    subArray?:
+      | {
+          text?: string | null;
+          textTwo?: string;
+          textInRow?: string;
+          id?: string | null;
+        }[]
+      | null;
+    id?: string | null;
+  }[];
   collapsedArray?:
     | {
         text: string;
         id?: string | null;
       }[]
     | null;
-  localized?:
-    | {
-        text: string;
-        id?: string | null;
-      }[]
-    | null;
+  localized?: {
+    text: string;
+    id?: string | null;
+  }[];
   readOnly?:
     | {
         text?: string | null;
@@ -4688,7 +4684,7 @@ export interface ArrayFieldInput {
  * via the `definition` "OnDemandForm_input".
  */
 export interface OnDemandFormInput {
-  id?: string | null;
+  id?: string;
   json?:
     | {
         [k: string]: unknown;
@@ -4704,7 +4700,7 @@ export interface OnDemandFormInput {
  * via the `definition` "OnDemandOutsideForm_input".
  */
 export interface OnDemandOutsideFormInput {
-  id?: string | null;
+  id?: string;
   json?:
     | {
         [k: string]: unknown;
@@ -4721,7 +4717,7 @@ export interface OnDemandOutsideFormInput {
  * via the `definition` "lexical-custom-cell_input".
  */
 export interface LexicalCustomCellInput {
-  id?: string | null;
+  id?: string;
   title: string;
   richTextField?: LexicalRichText<LexicalNodes_64E81937_Input> | null;
 }
@@ -4730,7 +4726,7 @@ export interface LexicalCustomCellInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -4752,7 +4748,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -4775,7 +4771,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -4792,7 +4788,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'lexical-benchmark';
@@ -4933,7 +4929,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -4954,7 +4950,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -4963,7 +4959,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "tabsWithRichText_input".
  */
 export interface TabsWithRichTextInput {
-  id?: string | null;
+  id?: string;
   tab1?: {
     rt1?: LexicalRichText<LexicalNodes_64E81937_Input> | null;
   };
@@ -6066,7 +6062,7 @@ export interface SubBlockLexicalInput {
 export interface ConditionalLayoutInput {
   id: string;
   blockType: 'conditionalLayout';
-  layout?: ('1' | '2' | '3') | null;
+  layout?: '1' | '2' | '3';
   columns?: BlockColumns;
   columns2?: BlockColumnsInput;
   columns3?: BlockColumnsInput;
@@ -6092,12 +6088,12 @@ export interface FilterOptionsBlockInput {
  * Multiple blocks resolve to the `ConditionalLayoutInput` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "ConditionalLayoutInput_DB165E12".
+ * via the `definition` "ConditionalLayoutInput_ADEA7D39".
  */
-export interface ConditionalLayoutInput_DB165E12 {
+export interface ConditionalLayoutInput_ADEA7D39 {
   id: string;
   blockType: 'conditionalLayout';
-  layout?: ('1' | '2' | '3') | null;
+  layout?: '1' | '2' | '3';
   columns?: BlockColumns;
   columns2?: BlockColumns;
   columns3?: BlockColumns;
@@ -6184,7 +6180,7 @@ export interface BannerBlock {
 export interface BannerBlockInput {
   id: string;
   blockType: 'banner';
-  type?: ('normal' | 'important') | null;
+  type?: 'normal' | 'important';
   title: string;
   content?: LexicalRichText<LexicalNodes_64E81937_Input> | null;
   blockName?: string | null;
@@ -6234,7 +6230,7 @@ export interface ContentBlockInput_49799CB4 {
 export interface ProviderBannerBlockInput {
   id: string;
   blockType: 'banner';
-  type?: ('normal' | 'important') | null;
+  type?: 'normal' | 'important';
   title: string;
   content?: LexicalRichText<LexicalNodes_64E81937_Input> | null;
   blockName?: string | null;

@@ -473,7 +473,7 @@ export interface CollectionsWidget {
  * via the `definition` "pages_input".
  */
 export interface PageInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   relatedPosts?: string[] | null;
   featuredPost?: string | null;
@@ -483,7 +483,7 @@ export interface PageInput {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   title: string;
   localizedField?: string | null;
   deletedAt?: string | null;
@@ -493,7 +493,7 @@ export interface PostInput {
  * via the `definition` "restricted-collection_input".
  */
 export interface RestrictedCollectionInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   deletedAt?: string | null;
 }
@@ -502,7 +502,7 @@ export interface RestrictedCollectionInput {
  * via the `definition` "differentiated-trash-collection_input".
  */
 export interface DifferentiatedTrashCollectionInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   deletedAt?: string | null;
 }
@@ -511,7 +511,7 @@ export interface DifferentiatedTrashCollectionInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   roles?: ('is_user' | 'is_admin')[] | null;
   deletedAt?: string | null;
@@ -536,7 +536,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -559,7 +559,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -576,7 +576,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'pages';
@@ -613,7 +613,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -634,7 +634,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

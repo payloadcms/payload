@@ -489,7 +489,7 @@ export interface CollectionsWidget {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -511,7 +511,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -534,7 +534,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -551,7 +551,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'users';
@@ -572,7 +572,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -593,7 +593,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -602,7 +602,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "global_input".
  */
 export interface GlobalInput {
-  id?: string | null;
+  id?: string;
   json?:
     | {
         [k: string]: unknown;
@@ -619,7 +619,7 @@ export interface GlobalInput {
  * via the `definition` "array_input".
  */
 export interface ArrayInput {
-  id?: string | null;
+  id?: string;
   array?:
     | {
         text?: string | null;
@@ -632,7 +632,7 @@ export interface ArrayInput {
  * via the `definition` "default-value_input".
  */
 export interface DefaultValueInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   group?: {
     text?: string | null;
@@ -643,7 +643,7 @@ export interface DefaultValueInput {
  * via the `definition` "access-control_input".
  */
 export interface AccessControlInput {
-  id?: string | null;
+  id?: string;
   title: string;
   enabled?: boolean | null;
 }
@@ -652,7 +652,7 @@ export interface AccessControlInput {
  * via the `definition` "without-graphql_input".
  */
 export interface WithoutGraphqlInput {
-  id?: string | null;
+  id?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

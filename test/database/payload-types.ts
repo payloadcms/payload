@@ -1885,7 +1885,7 @@ export interface CollectionsWidget {
  * via the `definition` "noTimeStamps_input".
  */
 export interface NoTimeStampInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -1893,7 +1893,7 @@ export interface NoTimeStampInput {
  * via the `definition` "categories_input".
  */
 export interface CategoryInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   simple?: string | null;
   hideout?: {
@@ -1907,7 +1907,7 @@ export interface CategoryInput {
  * via the `definition` "simple_input".
  */
 export interface SimpleInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   number?: number | null;
 }
@@ -1916,7 +1916,7 @@ export interface SimpleInput {
  * via the `definition` "simple-localized_input".
  */
 export interface SimpleLocalizedInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   number?: number | null;
 }
@@ -1925,14 +1925,14 @@ export interface SimpleLocalizedInput {
  * via the `definition` "categories-custom-id_input".
  */
 export interface CategoriesCustomIdInput {
-  id?: number | null;
+  id?: number;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   title: string;
   category?: string | null;
   categories?: string[] | null;
@@ -2031,7 +2031,7 @@ export interface PostInput {
  * via the `definition` "error-on-unnamed-fields_input".
  */
 export interface ErrorOnUnnamedFieldInput {
-  id?: string | null;
+  id?: string;
   groupWithinUnnamedTab: {
     text: string;
   };
@@ -2041,7 +2041,7 @@ export interface ErrorOnUnnamedFieldInput {
  * via the `definition` "default-values_input".
  */
 export interface DefaultValueInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   defaultValue?: string | null;
   array?:
@@ -2066,7 +2066,7 @@ export interface DefaultValueInput {
  * via the `definition` "relation-a_input".
  */
 export interface RelationAInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   richText?: LexicalRichText<LexicalNodes_35AF72AA_Input> | null;
 }
@@ -2075,7 +2075,7 @@ export interface RelationAInput {
  * via the `definition` "relation-b_input".
  */
 export interface RelationBInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   relationship?: string | null;
   richText?: LexicalRichText<LexicalNodes_35AF72AA_Input> | null;
@@ -2085,7 +2085,7 @@ export interface RelationBInput {
  * via the `definition` "pg-migrations_input".
  */
 export interface PgMigrationInput {
-  id?: string | null;
+  id?: string;
   relation1?: string | null;
   myArray?:
     | {
@@ -2120,7 +2120,7 @@ export interface MyBlockInput {
  * via the `definition` "custom-schema_input".
  */
 export interface CustomSchemaInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   localizedText?: string | null;
   relationship?: string[] | null;
@@ -2140,7 +2140,7 @@ export interface CustomSchemaInput {
  * via the `definition` "places_input".
  */
 export interface PlaceInput {
-  id?: string | null;
+  id?: string;
   country?: string | null;
   city?: string | null;
 }
@@ -2149,7 +2149,7 @@ export interface PlaceInput {
  * via the `definition` "virtual-relations_input".
  */
 export interface VirtualRelationInput {
-  id?: string | null;
+  id?: string;
   post?: string | null;
   posts?: string[] | null;
   customID?: string | null;
@@ -2159,7 +2159,7 @@ export interface VirtualRelationInput {
  * via the `definition` "fields-persistance_input".
  */
 export interface FieldsPersistanceInput {
-  id?: string | null;
+  id?: string;
   blockWithVirtual?: BlockWithVirtualInput[] | null;
 }
 /**
@@ -2177,7 +2177,7 @@ export interface BlockWithVirtualInput {
  * via the `definition` "custom-ids_input".
  */
 export interface CustomIdInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2185,7 +2185,7 @@ export interface CustomIdInput {
  * via the `definition` "fake-custom-ids_input".
  */
 export interface FakeCustomIdInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   group?: {
     id?: string | null;
@@ -2199,7 +2199,7 @@ export interface FakeCustomIdInput {
  * via the `definition` "relationships-migration_input".
  */
 export interface RelationshipsMigrationInput {
-  id?: string | null;
+  id?: string;
   relationship?: string | null;
   relationship_2?: {
     relationTo: 'default-values';
@@ -2211,7 +2211,7 @@ export interface RelationshipsMigrationInput {
  * via the `definition` "compound-indexes_input".
  */
 export interface CompoundIndexInput {
-  id?: string | null;
+  id?: string;
   one?: string | null;
   two?: string | null;
   three?: string | null;
@@ -2224,7 +2224,7 @@ export interface CompoundIndexInput {
  * via the `definition` "aliases_input".
  */
 export interface AliasInput {
-  id?: string | null;
+  id?: string;
   thisIsALongFieldNameThatCanCauseAPostgresErrorEvenThoughWeSetAShorterDBName?:
     | {
         nestedArray?:
@@ -2242,7 +2242,7 @@ export interface AliasInput {
  * via the `definition` "blocks-docs_input".
  */
 export interface BlocksDocInput {
-  id?: string | null;
+  id?: string;
   testBlocksLocalized?: Cta[] | null;
   testBlocks?: Cta[] | null;
 }
@@ -2251,7 +2251,7 @@ export interface BlocksDocInput {
  * via the `definition` "unique-fields_input".
  */
 export interface UniqueFieldInput {
-  id?: string | null;
+  id?: string;
   slugField?: string | null;
 }
 /**
@@ -2259,7 +2259,7 @@ export interface UniqueFieldInput {
  * via the `definition` "select-has-many_input".
  */
 export interface SelectHasManyInput {
-  id?: string | null;
+  id?: string;
   roles?: ('user' | 'admin' | 'editor')[] | null;
   food?: ('apple' | 'bananabread' | 'banana')[] | null;
 }
@@ -2268,7 +2268,7 @@ export interface SelectHasManyInput {
  * via the `definition` "virtual-linked-tenants_input".
  */
 export interface VirtualLinkedTenantInput {
-  id?: string | null;
+  id?: string;
   slug: string;
 }
 /**
@@ -2276,7 +2276,7 @@ export interface VirtualLinkedTenantInput {
  * via the `definition` "virtual-linked-roles_input".
  */
 export interface VirtualLinkedRoleInput {
-  id?: string | null;
+  id?: string;
   project: string;
   tenant: string;
 }
@@ -2285,14 +2285,14 @@ export interface VirtualLinkedRoleInput {
  * via the `definition` "virtual-linked-projects_input".
  */
 export interface VirtualLinkedProjectInput {
-  id?: string | null;
+  id?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -2314,7 +2314,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -2337,7 +2337,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -2354,7 +2354,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'noTimeStamps';
@@ -2479,7 +2479,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -2500,7 +2500,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -2509,7 +2509,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "header_input".
  */
 export interface HeaderInput {
-  id?: string | null;
+  id?: string;
   itemsLvl1?:
     | {
         label?: string | null;
@@ -2540,7 +2540,7 @@ export interface HeaderInput {
  * via the `definition` "global_input".
  */
 export interface GlobalInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
 }
 /**
@@ -2548,7 +2548,7 @@ export interface GlobalInput {
  * via the `definition` "global-2_input".
  */
 export interface Global2Input {
-  id?: string | null;
+  id?: string;
   text?: string | null;
 }
 /**
@@ -2556,7 +2556,7 @@ export interface Global2Input {
  * via the `definition` "global-3_input".
  */
 export interface Global3Input {
-  id?: string | null;
+  id?: string;
   text?: string | null;
 }
 /**
@@ -2564,7 +2564,7 @@ export interface Global3Input {
  * via the `definition` "virtual-relation-global_input".
  */
 export interface VirtualRelationGlobalInput {
-  id?: string | null;
+  id?: string;
   post?: string | null;
 }
 /**

@@ -762,7 +762,7 @@ export interface CollectionsWidget {
  * via the `definition` "tenants_input".
  */
 export interface TenantInput {
-  id?: string | null;
+  id?: string;
   name: string;
   domain: string;
   isPublic?: boolean | null;
@@ -773,7 +773,7 @@ export interface TenantInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   roles?: ('admin' | 'user')[] | null;
   tenants?:
     | {
@@ -803,7 +803,7 @@ export interface UserInput {
  * via the `definition` "food-items_input".
  */
 export interface FoodItemInput {
-  id?: string | null;
+  id?: string;
   tenant?: string | null;
   name: string;
   localizedName?: string | null;
@@ -828,7 +828,7 @@ export interface FoodItemInput {
  * via the `definition` "food-menu_input".
  */
 export interface FoodMenuInput {
-  id?: string | null;
+  id?: string;
   tenant?: string | null;
   title: string;
   description?: string | null;
@@ -848,7 +848,7 @@ export interface FoodMenuInput {
  * via the `definition` "autosave-global_input".
  */
 export interface AutosaveGlobalInput {
-  id?: string | null;
+  id?: string;
   tenant?: string | null;
   title: string;
   description?: string | null;
@@ -858,7 +858,7 @@ export interface AutosaveGlobalInput {
  * via the `definition` "relationships_input".
  */
 export interface RelationshipInput {
-  id?: string | null;
+  id?: string;
   tenant?: string | null;
   title: string;
   relationship?: string | null;
@@ -868,7 +868,7 @@ export interface RelationshipInput {
  * via the `definition` "multi-tenant-posts_input".
  */
 export interface MultiTenantPostInput {
-  id?: string | null;
+  id?: string;
   tenant?: string[] | null;
   title: string;
   parent?: string | null;
@@ -878,7 +878,7 @@ export interface MultiTenantPostInput {
  * via the `definition` "media_input".
  */
 export interface MediaInput {
-  id?: string | null;
+  id?: string;
   tenant?: string | null;
   alt?: string | null;
   url?: string | null;
@@ -896,7 +896,7 @@ export interface MediaInput {
  * via the `definition` "notTenanted_input".
  */
 export interface NotTenantedInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -904,7 +904,7 @@ export interface NotTenantedInput {
  * via the `definition` "folders_input".
  */
 export interface FolderInput {
-  id?: string | null;
+  id?: string;
   folder?: string | null;
   tenant?: string | null;
   name: string;
@@ -914,7 +914,7 @@ export interface FolderInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -937,7 +937,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -954,7 +954,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'tenants';
@@ -1011,7 +1011,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -1032,7 +1032,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

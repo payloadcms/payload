@@ -842,7 +842,7 @@ export interface CollectionsWidget {
  * via the `definition` "fields-relationship_input".
  */
 export interface FieldsRelationshipInput {
-  id?: string | null;
+  id?: string;
   relationToSelf?: string | null;
   relationship?: string | null;
   relationshipHasMany?: string[] | null;
@@ -919,7 +919,7 @@ export interface FieldsRelationshipInput {
  * via the `definition` "relation-filter-false_input".
  */
 export interface RelationFilterFalseInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -927,7 +927,7 @@ export interface RelationFilterFalseInput {
  * via the `definition` "relation-filter-true_input".
  */
 export interface RelationFilterTrueInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -935,7 +935,7 @@ export interface RelationFilterTrueInput {
  * via the `definition` "relation-one_input".
  */
 export interface RelationOneInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -943,7 +943,7 @@ export interface RelationOneInput {
  * via the `definition` "relation-two_input".
  */
 export interface RelationTwoInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -951,7 +951,7 @@ export interface RelationTwoInput {
  * via the `definition` "relation-restricted_input".
  */
 export interface RelationRestrictedInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -959,7 +959,7 @@ export interface RelationRestrictedInput {
  * via the `definition` "relation-with-title_input".
  */
 export interface RelationWithTitleInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   meta?: {
     title?: string | null;
@@ -970,7 +970,7 @@ export interface RelationWithTitleInput {
  * via the `definition` "relation-updated-externally_input".
  */
 export interface RelationUpdatedExternallyInput {
-  id?: string | null;
+  id?: string;
   relationPrePopulate?: string | null;
   relationHasMany?: string[] | null;
   relationToManyHasMany?:
@@ -991,7 +991,7 @@ export interface RelationUpdatedExternallyInput {
  * via the `definition` "collection-1_input".
  */
 export interface Collection1Input {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -999,7 +999,7 @@ export interface Collection1Input {
  * via the `definition` "collection-2_input".
  */
 export interface Collection2Input {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -1007,7 +1007,7 @@ export interface Collection2Input {
  * via the `definition` "videos_input".
  */
 export interface VideoInput {
-  id: number;
+  id?: number;
   title?: string | null;
 }
 /**
@@ -1015,7 +1015,7 @@ export interface VideoInput {
  * via the `definition` "podcasts_input".
  */
 export interface PodcastInput {
-  id: number;
+  id?: number;
   title?: string | null;
 }
 /**
@@ -1023,7 +1023,7 @@ export interface PodcastInput {
  * via the `definition` "mixed-media_input".
  */
 export interface MixedMediaInput {
-  id?: string | null;
+  id?: string;
   relatedMedia?:
     | (
         | {
@@ -1042,7 +1042,7 @@ export interface MixedMediaInput {
  * via the `definition` "versioned-relationship-field_input".
  */
 export interface VersionedRelationshipFieldInput {
-  id?: string | null;
+  id?: string;
   title: string;
   relationshipField?:
     | {
@@ -1057,7 +1057,7 @@ export interface VersionedRelationshipFieldInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -1079,7 +1079,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -1102,7 +1102,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -1119,7 +1119,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'fields-relationship';
@@ -1196,7 +1196,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -1217,7 +1217,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

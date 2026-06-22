@@ -506,7 +506,7 @@ export interface CollectionsWidget {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   email: string;
   resetPasswordToken?: string | null;
@@ -529,7 +529,7 @@ export interface UserInput {
  * via the `definition` "products_input".
  */
 export interface ProductInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   /**
    * All pricing information is managed in Stripe and will be reflected here.
@@ -546,7 +546,7 @@ export interface ProductInput {
  * via the `definition` "customers_input".
  */
 export interface CustomerInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   /**
    * All subscriptions are managed in Stripe and will be reflected here. Use the link in the sidebar to go directly to this customer in Stripe to begin managing their subscriptions.
@@ -588,7 +588,7 @@ export interface CustomerInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -611,7 +611,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -628,7 +628,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'users';
@@ -662,7 +662,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user:
     | {
         relationTo: 'users';
@@ -688,7 +688,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

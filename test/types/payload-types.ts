@@ -816,7 +816,7 @@ export interface CollectionsWidget {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   richText: LexicalRichText<LexicalNodes_D164F3F6_Input>;
   title?: string | null;
@@ -833,7 +833,7 @@ export interface PostInput {
  * via the `definition` "pages_input".
  */
 export interface PageInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   category?: string | null;
 }
@@ -842,7 +842,7 @@ export interface PageInput {
  * via the `definition` "pages-categories_input".
  */
 export interface PagesCategoryInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -850,7 +850,7 @@ export interface PagesCategoryInput {
  * via the `definition` "draft-posts_input".
  */
 export interface DraftPostInput {
-  id?: string | null;
+  id?: string;
   title: string;
   description: string;
 }
@@ -859,7 +859,7 @@ export interface DraftPostInput {
  * via the `definition` "media_input".
  */
 export interface MediaInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -876,7 +876,7 @@ export interface MediaInput {
  * via the `definition` "gallery_input".
  */
 export interface GalleryInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -893,9 +893,9 @@ export interface GalleryInput {
  * via the `definition` "input-types_input".
  */
 export interface InputTypeInput {
-  id?: string | null;
+  id?: string;
   title: string;
-  status?: ('draft' | 'published') | null;
+  status?: 'draft' | 'published';
   category?: string | null;
   categories?: string[] | null;
   related?:
@@ -915,7 +915,7 @@ export interface InputTypeInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -937,7 +937,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -960,7 +960,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -977,7 +977,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'posts';
@@ -1026,7 +1026,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -1047,7 +1047,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -1056,7 +1056,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "menu_input".
  */
 export interface MenuInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   richText?: LexicalRichText<LexicalNodes_D164F3F6_Input> | null;
 }
@@ -1065,7 +1065,7 @@ export interface MenuInput {
  * via the `definition` "settings_input".
  */
 export interface SettingInput {
-  id?: string | null;
+  id?: string;
   siteName?: string | null;
 }
 /**

@@ -2047,7 +2047,7 @@ export interface CollectionsWidget {
  * via the `definition` "richText_input".
  */
 export interface RichTextInput {
-  id?: string | null;
+  id?: string;
   lexical?: LexicalRichText<LexicalNodes_CAA3704A_Input> | null;
 }
 /**
@@ -2055,7 +2055,7 @@ export interface RichTextInput {
  * via the `definition` "blocks-fields_input".
  */
 export interface BlocksFieldInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   tabContent?: BlockInsideTab[] | null;
   content?: BlockInsideBlock[] | null;
@@ -2065,7 +2065,7 @@ export interface BlocksFieldInput {
  * via the `definition` "nested-arrays_input".
  */
 export interface NestedArrayInput {
-  id?: string | null;
+  id?: string;
   arrayWithBlocks?:
     | {
         blocksWithinArray?: SomeBlockInput[] | null;
@@ -2097,7 +2097,7 @@ export interface SomeBlockInput {
  * via the `definition` "nested-field-tables_input".
  */
 export interface NestedFieldTableInput {
-  id?: string | null;
+  id?: string;
   array?:
     | {
         relation?: {
@@ -2156,7 +2156,7 @@ export interface ContentInput {
  * via the `definition` "localized-drafts_input".
  */
 export interface LocalizedDraftInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2164,7 +2164,7 @@ export interface LocalizedDraftInput {
  * via the `definition` "localized-date-fields_input".
  */
 export interface LocalizedDateFieldInput {
-  id?: string | null;
+  id?: string;
   localizedDate?: string | null;
   date?: string | null;
 }
@@ -2173,7 +2173,7 @@ export interface LocalizedDateFieldInput {
  * via the `definition` "all-fields-localized_input".
  */
 export interface AllFieldsLocalizedInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   textarea?: string | null;
   number?: number | null;
@@ -2242,7 +2242,7 @@ export interface AllFieldsLocalizedInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   relation?: string | null;
   email: string;
@@ -2266,7 +2266,7 @@ export interface UserInput {
  * via the `definition` "localized-posts_input".
  */
 export interface LocalizedPostInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   description?: string | null;
   localizedDescription?: string | null;
@@ -2282,7 +2282,7 @@ export interface LocalizedPostInput {
  * via the `definition` "no-localized-fields_input".
  */
 export interface NoLocalizedFieldInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   group?: {
     en?: {
@@ -2295,7 +2295,7 @@ export interface NoLocalizedFieldInput {
  * via the `definition` "array-fields_input".
  */
 export interface ArrayFieldInput {
-  id?: string | null;
+  id?: string;
   items?:
     | {
         text?: string | null;
@@ -2308,7 +2308,7 @@ export interface ArrayFieldInput {
  * via the `definition` "localized-required_input".
  */
 export interface LocalizedRequiredInput {
-  id?: string | null;
+  id?: string;
   title: string;
   seoTitle?: string | null;
   nav: {
@@ -2332,7 +2332,7 @@ export interface LocalizedRequiredInput {
  * via the `definition` "with-localized-relationship_input".
  */
 export interface WithLocalizedRelationshipInput {
-  id?: string | null;
+  id?: string;
   localizedRelationship?: string | null;
   localizedRelationHasManyField?: string[] | null;
   localizedRelationMultiRelationTo?:
@@ -2362,7 +2362,7 @@ export interface WithLocalizedRelationshipInput {
  * via the `definition` "relationship-localized_input".
  */
 export interface RelationshipLocalizedInput {
-  id?: string | null;
+  id?: string;
   relationship?: string | null;
   relationshipHasMany?: string[] | null;
   relationMultiRelationTo?:
@@ -2398,7 +2398,7 @@ export interface RelationshipLocalizedInput {
  * via the `definition` "cannot-create-default-locale_input".
  */
 export interface CannotCreateDefaultLocaleInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -2406,7 +2406,7 @@ export interface CannotCreateDefaultLocaleInput {
  * via the `definition` "locale-restricted_input".
  */
 export interface LocaleRestrictedInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2414,7 +2414,7 @@ export interface LocaleRestrictedInput {
  * via the `definition` "nested_input".
  */
 export interface NestedInput {
-  id?: string | null;
+  id?: string;
   blocks?: BlockInput_8612C35D[] | null;
   topLevelArray?:
     | {
@@ -2454,7 +2454,7 @@ export interface BlockInput_8612C35D {
  * via the `definition` "groups_input".
  */
 export interface GroupInput {
-  id?: string | null;
+  id?: string;
   groupLocalizedRow?: {
     text?: string | null;
   };
@@ -2479,7 +2479,7 @@ export interface GroupInput {
  * via the `definition` "tabs_input".
  */
 export interface TabInput {
-  id?: string | null;
+  id?: string;
   tabLocalized?: {
     title?: string | null;
     array?:
@@ -2510,7 +2510,7 @@ export interface TabInput {
  * via the `definition` "localized-sort_input".
  */
 export interface LocalizedSortInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   date?: string | null;
 }
@@ -2519,7 +2519,7 @@ export interface LocalizedSortInput {
  * via the `definition` "blocks-same-name_input".
  */
 export interface BlocksSameNameInput {
-  id?: string | null;
+  id?: string;
   blocks?: (BlockFirst | BlockSecond)[] | null;
 }
 /**
@@ -2527,7 +2527,7 @@ export interface BlocksSameNameInput {
  * via the `definition` "localized-within-localized_input".
  */
 export interface LocalizedWithinLocalizedInput {
-  id?: string | null;
+  id?: string;
   myTab?: {
     shouldNotBeLocalized?: string | null;
   };
@@ -2547,7 +2547,7 @@ export interface LocalizedWithinLocalizedInput {
  * via the `definition` "array-with-fallback-fields_input".
  */
 export interface ArrayWithFallbackFieldInput {
-  id?: string | null;
+  id?: string;
   items: {
     text?: string | null;
     id?: string | null;
@@ -2564,7 +2564,7 @@ export interface ArrayWithFallbackFieldInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -2587,7 +2587,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -2604,7 +2604,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'richText';
@@ -2713,7 +2713,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -2734,7 +2734,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -2743,7 +2743,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "global-array_input".
  */
 export interface GlobalArrayInput {
-  id?: string | null;
+  id?: string;
   array?:
     | {
         text?: string | null;
@@ -2756,7 +2756,7 @@ export interface GlobalArrayInput {
  * via the `definition` "global-text_input".
  */
 export interface GlobalTextInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
 }
 /**
@@ -2764,7 +2764,7 @@ export interface GlobalTextInput {
  * via the `definition` "global-drafts_input".
  */
 export interface GlobalDraftInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
 }
 /**

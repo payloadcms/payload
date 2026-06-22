@@ -1234,7 +1234,7 @@ export interface CollectionsWidget {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   number?: number | null;
   select?: ('a' | 'b') | null;
@@ -1276,7 +1276,7 @@ export interface PostInput {
  * via the `definition` "localized-posts_input".
  */
 export interface LocalizedPostInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   number?: number | null;
   select?: ('a' | 'b') | null;
@@ -1311,7 +1311,7 @@ export interface LocalizedPostInput {
  * via the `definition` "versioned-posts_input".
  */
 export interface VersionedPostInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   number?: number | null;
   array?:
@@ -1327,7 +1327,7 @@ export interface VersionedPostInput {
  * via the `definition` "deep-posts_input".
  */
 export interface DeepPostInput {
-  id?: string | null;
+  id?: string;
   group?: {
     array?:
       | {
@@ -1359,7 +1359,7 @@ export interface DeepPostInput {
  * via the `definition` "pages_input".
  */
 export interface PageInput {
-  id?: string | null;
+  id?: string;
   relatedPage?: string | null;
   content?: IntroductionInput[] | null;
   slug: string;
@@ -1404,7 +1404,7 @@ export interface IntroductionInput {
  * via the `definition` "points_input".
  */
 export interface PointInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   /**
    * @minItems 2
@@ -1417,7 +1417,7 @@ export interface PointInput {
  * via the `definition` "force-select_input".
  */
 export interface ForceSelectInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   field1?: string | null;
   field2?: string | null;
@@ -1427,7 +1427,7 @@ export interface ForceSelectInput {
  * via the `definition` "upload_input".
  */
 export interface UploadInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -1443,7 +1443,7 @@ export interface UploadInput {
  * via the `definition` "rels_input".
  */
 export interface RelInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
 }
 /**
@@ -1451,7 +1451,7 @@ export interface RelInput {
  * via the `definition` "relationships-blocks_input".
  */
 export interface RelationshipsBlockInput {
-  id?: string | null;
+  id?: string;
   blocks?: BlockInput[] | null;
 }
 /**
@@ -1470,7 +1470,7 @@ export interface BlockInput {
  * via the `definition` "custom-ids_input".
  */
 export interface CustomIdInput {
-  id?: number | null;
+  id?: number;
   text?: string | null;
 }
 /**
@@ -1478,7 +1478,7 @@ export interface CustomIdInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   number?: number | null;
   email: string;
@@ -1502,7 +1502,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -1525,7 +1525,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -1542,7 +1542,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'posts';
@@ -1607,7 +1607,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -1628,7 +1628,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -1637,7 +1637,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "global-post_input".
  */
 export interface GlobalPostInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   number?: number | null;
 }
@@ -1646,7 +1646,7 @@ export interface GlobalPostInput {
  * via the `definition` "force-select-global_input".
  */
 export interface ForceSelectGlobalInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   field1?: string | null;
   field2?: string | null;

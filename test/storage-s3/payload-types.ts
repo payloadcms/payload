@@ -675,7 +675,7 @@ export interface CollectionsWidget {
  * via the `definition` "media_input".
  */
 export interface MediaInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -710,7 +710,7 @@ export interface MediaInput {
  * via the `definition` "media-with-always-insert-fields_input".
  */
 export interface MediaWithAlwaysInsertFieldInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   prefix?: string | null;
   url?: string | null;
@@ -728,7 +728,7 @@ export interface MediaWithAlwaysInsertFieldInput {
  * via the `definition` "media-with-direct-access_input".
  */
 export interface MediaWithDirectAccessInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -755,7 +755,7 @@ export interface MediaWithDirectAccessInput {
  * via the `definition` "media-with-dynamic-prefix_input".
  */
 export interface MediaWithDynamicPrefixInput {
-  id?: string | null;
+  id?: string;
   tenant: string;
   prefix?: string | null;
   url?: string | null;
@@ -773,7 +773,7 @@ export interface MediaWithDynamicPrefixInput {
  * via the `definition` "media-with-prefix_input".
  */
 export interface MediaWithPrefixInput {
-  id?: string | null;
+  id?: string;
   prefix?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -790,7 +790,7 @@ export interface MediaWithPrefixInput {
  * via the `definition` "media-with-signed-downloads_input".
  */
 export interface MediaWithSignedDownloadInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -806,7 +806,7 @@ export interface MediaWithSignedDownloadInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -828,7 +828,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -851,7 +851,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -868,7 +868,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'media';
@@ -913,7 +913,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -934,7 +934,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

@@ -903,7 +903,7 @@ export interface CollectionsWidget {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -925,7 +925,7 @@ export interface UserInput {
  * via the `definition` "media_input".
  */
 export interface MediaInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -941,7 +941,7 @@ export interface MediaInput {
  * via the `definition` "addresses_input".
  */
 export interface AddressInput {
-  id?: string | null;
+  id?: string;
   customer?: string | null;
   title?: string | null;
   firstName?: string | null;
@@ -1000,7 +1000,7 @@ export interface AddressInput {
  * via the `definition` "variants_input".
  */
 export interface VariantInput {
-  id?: string | null;
+  id?: string;
   /**
    * Used for administrative purposes, not shown to customers. This is populated by default.
    */
@@ -1021,7 +1021,7 @@ export interface VariantInput {
  * via the `definition` "variantTypes_input".
  */
 export interface VariantTypeInput {
-  id?: string | null;
+  id?: string;
   label: string;
   name: string;
   deletedAt?: string | null;
@@ -1031,7 +1031,7 @@ export interface VariantTypeInput {
  * via the `definition` "variantOptions_input".
  */
 export interface VariantOptionInput {
-  id?: string | null;
+  id?: string;
   _variantOptions_options_order?: string | null;
   variantType: string;
   label: string;
@@ -1046,7 +1046,7 @@ export interface VariantOptionInput {
  * via the `definition` "products_input".
  */
 export interface ProductInput {
-  id?: string | null;
+  id?: string;
   inventory?: number | null;
   enableVariants?: boolean | null;
   variantTypes?: string[] | null;
@@ -1063,12 +1063,12 @@ export interface ProductInput {
  * via the `definition` "carts_input".
  */
 export interface CartInput {
-  id?: string | null;
+  id?: string;
   items?:
     | {
         product?: string | null;
         variant?: string | null;
-        quantity?: number | null;
+        quantity?: number;
         id?: string | null;
       }[]
     | null;
@@ -1083,12 +1083,12 @@ export interface CartInput {
  * via the `definition` "orders_input".
  */
 export interface OrderInput {
-  id?: string | null;
+  id?: string;
   items?:
     | {
         product?: string | null;
         variant?: string | null;
-        quantity?: number | null;
+        quantity?: number;
         id?: string | null;
       }[]
     | null;
@@ -1117,12 +1117,12 @@ export interface OrderInput {
  * via the `definition` "transactions_input".
  */
 export interface TransactionInput {
-  id?: string | null;
+  id?: string;
   items?:
     | {
         product?: string | null;
         variant?: string | null;
-        quantity?: number | null;
+        quantity?: number;
         id?: string | null;
       }[]
     | null;
@@ -1144,7 +1144,7 @@ export interface TransactionInput {
     country?: string | null;
     phone?: string | null;
   };
-  status?: ('pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired' | 'refunded') | null;
+  status?: 'pending' | 'succeeded' | 'failed' | 'cancelled' | 'expired' | 'refunded';
   customer?: string | null;
   customerEmail?: string | null;
   order?: string | null;
@@ -1157,7 +1157,7 @@ export interface TransactionInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -1180,7 +1180,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -1197,7 +1197,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'users';
@@ -1254,7 +1254,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -1275,7 +1275,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

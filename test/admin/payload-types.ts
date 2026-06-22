@@ -1786,7 +1786,7 @@ export interface CollectionsWidget {
  * via the `definition` "uploads_input".
  */
 export interface UploadInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -1813,7 +1813,7 @@ export interface UploadInput {
  * via the `definition` "uploads-two_input".
  */
 export interface UploadsTwoInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -1832,7 +1832,7 @@ export interface UploadsTwoInput {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   description?: string | null;
   number?: number | null;
@@ -1875,7 +1875,7 @@ export interface PostInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   textField?: string | null;
   sidebarField?: string | null;
   email: string;
@@ -1899,7 +1899,7 @@ export interface UserInput {
  * via the `definition` "hidden-collection_input".
  */
 export interface HiddenCollectionInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -1907,7 +1907,7 @@ export interface HiddenCollectionInput {
  * via the `definition` "not-in-view-collection_input".
  */
 export interface NotInViewCollectionInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -1915,14 +1915,14 @@ export interface NotInViewCollectionInput {
  * via the `definition` "collection-no-api-view_input".
  */
 export interface CollectionNoApiViewInput {
-  id?: string | null;
+  id?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-document-controls_input".
  */
 export interface CustomDocumentControlInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -1930,7 +1930,7 @@ export interface CustomDocumentControlInput {
  * via the `definition` "custom-views-one_input".
  */
 export interface CustomViewsOneInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -1938,7 +1938,7 @@ export interface CustomViewsOneInput {
  * via the `definition` "custom-views-two_input".
  */
 export interface CustomViewsTwoInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -1946,7 +1946,7 @@ export interface CustomViewsTwoInput {
  * via the `definition` "custom-collection-view_input".
  */
 export interface CustomCollectionViewInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -1954,7 +1954,7 @@ export interface CustomCollectionViewInput {
  * via the `definition` "reorder-tabs_input".
  */
 export interface ReorderTabInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -1962,7 +1962,7 @@ export interface ReorderTabInput {
  * via the `definition` "custom-fields_input".
  */
 export interface CustomFieldInput {
-  id?: string | null;
+  id?: string;
   customTextServerField?: string | null;
   customTextClientField?: string | null;
   /**
@@ -1994,7 +1994,7 @@ export interface CustomFieldInput {
  * via the `definition` "group-one-collection-ones_input".
  */
 export interface GroupOneCollectionOneInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2002,7 +2002,7 @@ export interface GroupOneCollectionOneInput {
  * via the `definition` "group-one-collection-twos_input".
  */
 export interface GroupOneCollectionTwoInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2010,7 +2010,7 @@ export interface GroupOneCollectionTwoInput {
  * via the `definition` "group-two-collection-ones_input".
  */
 export interface GroupTwoCollectionOneInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2018,7 +2018,7 @@ export interface GroupTwoCollectionOneInput {
  * via the `definition` "group-two-collection-twos_input".
  */
 export interface GroupTwoCollectionTwoInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2026,7 +2026,7 @@ export interface GroupTwoCollectionTwoInput {
  * via the `definition` "geo_input".
  */
 export interface GeoInput {
-  id?: string | null;
+  id?: string;
   /**
    * @minItems 2
    * @maxItems 2
@@ -2038,7 +2038,7 @@ export interface GeoInput {
  * via the `definition` "array_input".
  */
 export interface ArrayInput {
-  id?: string | null;
+  id?: string;
   array?:
     | {
         text?: string | null;
@@ -2051,7 +2051,7 @@ export interface ArrayInput {
  * via the `definition` "disable-duplicate_input".
  */
 export interface DisableDuplicateInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2059,7 +2059,7 @@ export interface DisableDuplicateInput {
  * via the `definition` "disable-copy-to-locale_input".
  */
 export interface DisableCopyToLocaleInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2067,7 +2067,7 @@ export interface DisableCopyToLocaleInput {
  * via the `definition` "edit-menu-items_input".
  */
 export interface EditMenuItemInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2075,7 +2075,7 @@ export interface EditMenuItemInput {
  * via the `definition` "format-doc-url_input".
  */
 export interface FormatDocUrlInput {
-  id?: string | null;
+  id?: string;
   title: string;
   description?: string | null;
   deletedAt?: string | null;
@@ -2085,7 +2085,7 @@ export interface FormatDocUrlInput {
  * via the `definition` "base-list-filters_input".
  */
 export interface BaseListFilterInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2093,7 +2093,7 @@ export interface BaseListFilterInput {
  * via the `definition` "with300documents_input".
  */
 export interface With300DocumentInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   selfRelation?: string | null;
 }
@@ -2102,7 +2102,7 @@ export interface With300DocumentInput {
  * via the `definition` "with-list-drawer_input".
  */
 export interface WithListDrawerInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   description?: string | null;
   number?: number | null;
@@ -2112,7 +2112,7 @@ export interface WithListDrawerInput {
  * via the `definition` "placeholder_input".
  */
 export interface PlaceholderInput {
-  id?: string | null;
+  id?: string;
   defaultSelect?: 'option1' | null;
   placeholderSelect?: 'option1' | null;
   defaultRelationship?: string | null;
@@ -2123,7 +2123,7 @@ export interface PlaceholderInput {
  * via the `definition` "use-as-title-group-field_input".
  */
 export interface UseAsTitleGroupFieldInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -2131,21 +2131,21 @@ export interface UseAsTitleGroupFieldInput {
  * via the `definition` "disable-bulk-edit_input".
  */
 export interface DisableBulkEditInput {
-  id?: string | null;
+  id?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-list-drawer_input".
  */
 export interface CustomListDrawerInput {
-  id?: string | null;
+  id?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "list-view-select-api_input".
  */
 export interface ListViewSelectApiInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   description?: string | null;
   group?: {
@@ -2157,7 +2157,7 @@ export interface ListViewSelectApiInput {
  * via the `definition` "virtuals_input".
  */
 export interface VirtualInput {
-  id?: string | null;
+  id?: string;
   textField?: string | null;
   post?: string | null;
 }
@@ -2166,7 +2166,7 @@ export interface VirtualInput {
  * via the `definition` "no-timestamps_input".
  */
 export interface NoTimestampInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2174,7 +2174,7 @@ export interface NoTimestampInput {
  * via the `definition` "localized_input".
  */
 export interface LocalizedInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2182,7 +2182,7 @@ export interface LocalizedInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -2205,7 +2205,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -2222,7 +2222,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'uploads';
@@ -2375,7 +2375,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -2396,7 +2396,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -2405,7 +2405,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "hidden-global_input".
  */
 export interface HiddenGlobalInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2413,7 +2413,7 @@ export interface HiddenGlobalInput {
  * via the `definition` "not-in-view-global_input".
  */
 export interface NotInViewGlobalInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2421,14 +2421,14 @@ export interface NotInViewGlobalInput {
  * via the `definition` "global-no-api-view_input".
  */
 export interface GlobalNoApiViewInput {
-  id?: string | null;
+  id?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global_input".
  */
 export interface GlobalInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   sidebarField?: string | null;
 }
@@ -2437,7 +2437,7 @@ export interface GlobalInput {
  * via the `definition` "custom-global-document-controls_input".
  */
 export interface CustomGlobalDocumentControlInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2445,7 +2445,7 @@ export interface CustomGlobalDocumentControlInput {
  * via the `definition` "custom-global-views-one_input".
  */
 export interface CustomGlobalViewsOneInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2453,7 +2453,7 @@ export interface CustomGlobalViewsOneInput {
  * via the `definition` "custom-global-views-two_input".
  */
 export interface CustomGlobalViewsTwoInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2461,7 +2461,7 @@ export interface CustomGlobalViewsTwoInput {
  * via the `definition` "group-globals-one_input".
  */
 export interface GroupGlobalsOneInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2469,7 +2469,7 @@ export interface GroupGlobalsOneInput {
  * via the `definition` "group-globals-two_input".
  */
 export interface GroupGlobalsTwoInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2477,7 +2477,7 @@ export interface GroupGlobalsTwoInput {
  * via the `definition` "settings_input".
  */
 export interface SettingInput {
-  id?: string | null;
+  id?: string;
   canAccessProtected?: boolean | null;
 }
 /**

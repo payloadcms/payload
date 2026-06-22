@@ -704,7 +704,7 @@ export interface CollectionsWidget {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   description?: string | null;
   number?: number | null;
@@ -746,7 +746,7 @@ export interface PostInput {
  * via the `definition` "point_input".
  */
 export interface PointInput {
-  id?: string | null;
+  id?: string;
   /**
    * @minItems 2
    * @maxItems 2
@@ -758,7 +758,7 @@ export interface PointInput {
  * via the `definition` "relation_input".
  */
 export interface RelationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -766,7 +766,7 @@ export interface RelationInput {
  * via the `definition` "dummy_input".
  */
 export interface DummyInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   name?: string | null;
 }
@@ -775,7 +775,7 @@ export interface DummyInput {
  * via the `definition` "custom-id_input".
  */
 export interface CustomIdInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -783,7 +783,7 @@ export interface CustomIdInput {
  * via the `definition` "custom-id-number_input".
  */
 export interface CustomIdNumberInput {
-  id?: number | null;
+  id?: number;
   name?: string | null;
 }
 /**
@@ -791,7 +791,7 @@ export interface CustomIdNumberInput {
  * via the `definition` "error-on-hooks_input".
  */
 export interface ErrorOnHookInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   errorBeforeChange?: boolean | null;
   errorAfterDelete?: boolean | null;
@@ -801,14 +801,14 @@ export interface ErrorOnHookInput {
  * via the `definition` "endpoints_input".
  */
 export interface EndpointInput {
-  id?: string | null;
+  id?: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "disabled-bulk-edit-docs_input".
  */
 export interface DisabledBulkEditDocInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
 }
 /**
@@ -816,7 +816,7 @@ export interface DisabledBulkEditDocInput {
  * via the `definition` "disabled-bulk-delete-docs_input".
  */
 export interface DisabledBulkDeleteDocInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
 }
 /**
@@ -824,7 +824,7 @@ export interface DisabledBulkDeleteDocInput {
  * via the `definition` "large-documents_input".
  */
 export interface LargeDocumentInput {
-  id?: string | null;
+  id?: string;
   array?:
     | {
         text?: string | null;
@@ -837,7 +837,7 @@ export interface LargeDocumentInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -859,7 +859,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -882,7 +882,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -899,7 +899,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'posts';
@@ -964,7 +964,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -985,7 +985,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

@@ -1103,7 +1103,7 @@ export interface CollectionsWidget {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   description?: string | null;
   number?: number | null;
@@ -1131,7 +1131,7 @@ export interface BlockInput {
  * via the `definition` "postsLocalized_input".
  */
 export interface PostsLocalizedInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   relationField?: string | null;
 }
@@ -1140,25 +1140,25 @@ export interface PostsLocalizedInput {
  * via the `definition` "relation_input".
  */
 export interface RelationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
-  disableRelation?: boolean | null;
+  disableRelation?: boolean;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "strict-access_input".
  */
 export interface StrictAccessInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
-  disableRelation?: boolean | null;
+  disableRelation?: boolean;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "chained_input".
  */
 export interface ChainedInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   relation?: string | null;
 }
@@ -1167,7 +1167,7 @@ export interface ChainedInput {
  * via the `definition` "custom-id_input".
  */
 export interface CustomIdInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
 }
 /**
@@ -1175,7 +1175,7 @@ export interface CustomIdInput {
  * via the `definition` "custom-id-number_input".
  */
 export interface CustomIdNumberInput {
-  id?: number | null;
+  id?: number;
   name?: string | null;
 }
 /**
@@ -1183,7 +1183,7 @@ export interface CustomIdNumberInput {
  * via the `definition` "screenings_input".
  */
 export interface ScreeningInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   movie?: string | null;
 }
@@ -1192,7 +1192,7 @@ export interface ScreeningInput {
  * via the `definition` "movies_input".
  */
 export interface MovieInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   select?: ('a' | 'b' | 'c')[] | null;
   director?: string | null;
@@ -1212,7 +1212,7 @@ export interface MovieInput {
  * via the `definition` "directors_input".
  */
 export interface DirectorInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   localized?: string | null;
   movies?: string[] | null;
@@ -1224,7 +1224,7 @@ export interface DirectorInput {
  * via the `definition` "movieReviews_input".
  */
 export interface MovieReviewInput {
-  id?: string | null;
+  id?: string;
   movieReviewer: string;
   likes?: string[] | null;
   visibility: 'followers' | 'public';
@@ -1234,7 +1234,7 @@ export interface MovieReviewInput {
  * via the `definition` "polymorphic-relationships_input".
  */
 export interface PolymorphicRelationshipInput {
-  id?: string | null;
+  id?: string;
   polymorphic?: {
     relationTo: 'movies';
     value: string;
@@ -1261,7 +1261,7 @@ export interface PolymorphicRelationshipInput {
  * via the `definition` "tree_input".
  */
 export interface TreeInput {
-  id?: string | null;
+  id?: string;
   text?: string | null;
   parent?: string | null;
 }
@@ -1270,7 +1270,7 @@ export interface TreeInput {
  * via the `definition` "pages_input".
  */
 export interface PageInput {
-  id?: string | null;
+  id?: string;
   menu?:
     | {
         label?: string | null;
@@ -1283,7 +1283,7 @@ export interface PageInput {
  * via the `definition` "rels-to-pages_input".
  */
 export interface RelsToPageInput {
-  id?: string | null;
+  id?: string;
   page?: string | null;
 }
 /**
@@ -1291,7 +1291,7 @@ export interface RelsToPageInput {
  * via the `definition` "rels-to-pages-and-custom-text-ids_input".
  */
 export interface RelsToPagesAndCustomTextIdInput {
-  id?: string | null;
+  id?: string;
   rel?:
     | ({
         relationTo: 'pages';
@@ -1311,7 +1311,7 @@ export interface RelsToPagesAndCustomTextIdInput {
  * via the `definition` "object-writes_input".
  */
 export interface ObjectWriteInput {
-  id?: string | null;
+  id?: string;
   one?: string | null;
   many?: string[] | null;
   onePoly?: {
@@ -1330,7 +1330,7 @@ export interface ObjectWriteInput {
  * via the `definition` "deep-nested_input".
  */
 export interface DeepNestedInput {
-  id?: string | null;
+  id?: string;
   content?: {
     blocks?: TestBlockInput[] | null;
   };
@@ -1352,7 +1352,7 @@ export interface TestBlockInput {
  * via the `definition` "relations_input".
  */
 export interface RelationInput1 {
-  id?: string | null;
+  id?: string;
   item?: {
     relationTo: 'items';
     value: string;
@@ -1363,7 +1363,7 @@ export interface RelationInput1 {
  * via the `definition` "items_input".
  */
 export interface ItemInput {
-  id?: string | null;
+  id?: string;
   status?: ('completed' | 'failed' | 'pending') | null;
 }
 /**
@@ -1371,7 +1371,7 @@ export interface ItemInput {
  * via the `definition` "blocks_input".
  */
 export interface BlockInput1 {
-  id?: string | null;
+  id?: string;
   blocks?: SomeInput[] | null;
 }
 /**
@@ -1390,7 +1390,7 @@ export interface SomeInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -1412,7 +1412,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -1435,7 +1435,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -1452,7 +1452,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'posts';
@@ -1557,7 +1557,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -1578,7 +1578,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

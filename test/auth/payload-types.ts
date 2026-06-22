@@ -861,9 +861,9 @@ export interface CollectionsWidget {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   adminOnlyField?: string | null;
-  roles?: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[] | null;
+  roles?: ('admin' | 'editor' | 'moderator' | 'user' | 'viewer')[];
   loginMetadata?:
     | {
         info?: string | null;
@@ -914,7 +914,7 @@ export interface UserInput {
  * via the `definition` "partial-disable-local-strategies_input".
  */
 export interface PartialDisableLocalStrategyInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -936,7 +936,7 @@ export interface PartialDisableLocalStrategyInput {
  * via the `definition` "disable-local-strategy-password_input".
  */
 export interface DisableLocalStrategyPasswordInput {
-  id?: string | null;
+  id?: string;
   password: string;
 }
 /**
@@ -944,7 +944,7 @@ export interface DisableLocalStrategyPasswordInput {
  * via the `definition` "api-keys_input".
  */
 export interface ApiKeyInput {
-  id?: string | null;
+  id?: string;
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
@@ -954,7 +954,7 @@ export interface ApiKeyInput {
  * via the `definition` "public-users_input".
  */
 export interface PublicUserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -978,7 +978,7 @@ export interface PublicUserInput {
  * via the `definition` "relationsCollection_input".
  */
 export interface RelationsCollectionInput {
-  id?: string | null;
+  id?: string;
   rel?: string | null;
   text?: string | null;
 }
@@ -987,7 +987,7 @@ export interface RelationsCollectionInput {
  * via the `definition` "api-keys-with-field-read-access_input".
  */
 export interface ApiKeysWithFieldReadAccessInput {
-  id?: string | null;
+  id?: string;
   enableAPIKey?: boolean | null;
   apiKey?: string | null;
   apiKeyIndex?: string | null;
@@ -997,7 +997,7 @@ export interface ApiKeysWithFieldReadAccessInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -1020,7 +1020,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -1037,7 +1037,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'users';
@@ -1103,7 +1103,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user:
     | {
         relationTo: 'users';
@@ -1145,7 +1145,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }

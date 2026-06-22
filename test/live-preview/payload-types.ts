@@ -1710,7 +1710,7 @@ export interface CollectionsWidget {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -1734,12 +1734,12 @@ export interface UserInput {
  * via the `definition` "pages_input".
  */
 export interface PageInput {
-  id?: string | null;
+  id?: string;
   slug: string;
   tenant?: string | null;
   title: string;
   hero: {
-    type?: ('none' | 'highImpact' | 'lowImpact') | null;
+    type?: 'none' | 'highImpact' | 'lowImpact';
     richText?: LexicalRichText<LexicalNodes_E88DE8E5_Input> | null;
     media?: string | null;
   };
@@ -1915,12 +1915,12 @@ export interface ArchiveInput {
  * via the `definition` "posts_input".
  */
 export interface PostInput {
-  id?: string | null;
+  id?: string;
   slug: string;
   tenant?: string | null;
   title: string;
   hero: {
-    type?: ('none' | 'highImpact' | 'lowImpact') | null;
+    type?: 'none' | 'highImpact' | 'lowImpact';
     richText?: LexicalRichText<LexicalNodes_E88DE8E5_Input> | null;
     media?: string | null;
   };
@@ -1941,12 +1941,12 @@ export interface PostInput {
  * via the `definition` "ssr_input".
  */
 export interface SsrInput {
-  id?: string | null;
+  id?: string;
   slug: string;
   tenant?: string | null;
   title: string;
   hero: {
-    type?: ('none' | 'highImpact' | 'lowImpact') | null;
+    type?: 'none' | 'highImpact' | 'lowImpact';
     richText?: LexicalRichText<LexicalNodes_E88DE8E5_Input> | null;
     media?: string | null;
   };
@@ -1964,12 +1964,12 @@ export interface SsrInput {
  * via the `definition` "ssr-autosave_input".
  */
 export interface SsrAutosaveInput {
-  id?: string | null;
+  id?: string;
   slug: string;
   tenant?: string | null;
   title: string;
   hero: {
-    type?: ('none' | 'highImpact' | 'lowImpact') | null;
+    type?: 'none' | 'highImpact' | 'lowImpact';
     richText?: LexicalRichText<LexicalNodes_E88DE8E5_Input> | null;
     media?: string | null;
   };
@@ -1985,7 +1985,7 @@ export interface SsrAutosaveInput {
  * via the `definition` "tenants_input".
  */
 export interface TenantInput {
-  id?: string | null;
+  id?: string;
   title: string;
   clientURL: string;
 }
@@ -1994,7 +1994,7 @@ export interface TenantInput {
  * via the `definition` "categories_input".
  */
 export interface CategoryInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2002,7 +2002,7 @@ export interface CategoryInput {
  * via the `definition` "media_input".
  */
 export interface MediaInput {
-  id?: string | null;
+  id?: string;
   alt: string;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -2021,7 +2021,7 @@ export interface MediaInput {
  * via the `definition` "collection-level-config_input".
  */
 export interface CollectionLevelConfigInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2029,7 +2029,7 @@ export interface CollectionLevelConfigInput {
  * via the `definition` "static-url_input".
  */
 export interface StaticUrlInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -2037,12 +2037,12 @@ export interface StaticUrlInput {
  * via the `definition` "custom-live-preview_input".
  */
 export interface CustomLivePreviewInput {
-  id?: string | null;
+  id?: string;
   slug: string;
   tenant?: string | null;
   title: string;
   hero: {
-    type?: ('none' | 'highImpact' | 'lowImpact') | null;
+    type?: 'none' | 'highImpact' | 'lowImpact';
     richText?: LexicalRichText<LexicalNodes_E88DE8E5_Input> | null;
     media?: string | null;
   };
@@ -2058,7 +2058,7 @@ export interface CustomLivePreviewInput {
  * via the `definition` "conditional-url_input".
  */
 export interface ConditionalUrlInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   enabled?: boolean | null;
 }
@@ -2067,7 +2067,7 @@ export interface ConditionalUrlInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -2090,7 +2090,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -2107,7 +2107,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'users';
@@ -2172,7 +2172,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -2193,7 +2193,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
@@ -2202,7 +2202,7 @@ export interface PayloadMigrationInput {
  * via the `definition` "header_input".
  */
 export interface HeaderInput {
-  id?: string | null;
+  id?: string;
   navItems?:
     | {
         link: {
@@ -2233,7 +2233,7 @@ export interface HeaderInput {
  * via the `definition` "footer_input".
  */
 export interface FooterInput {
-  id?: string | null;
+  id?: string;
   navItems?:
     | {
         link: {

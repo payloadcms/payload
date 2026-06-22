@@ -4227,7 +4227,7 @@ export interface CollectionsWidget {
  * via the `definition` "relation_input".
  */
 export interface RelationInput {
-  id?: string | null;
+  id?: string;
   image?: string | null;
   versionedImage?: string | null;
   hideFileInputOnCreate?: string | null;
@@ -4250,7 +4250,7 @@ export interface LocalizedMediaBlockInput {
  * via the `definition` "audio_input".
  */
 export interface AudioInput {
-  id?: string | null;
+  id?: string;
   audio?: string | null;
 }
 /**
@@ -4258,7 +4258,7 @@ export interface AudioInput {
  * via the `definition` "gif-resize_input".
  */
 export interface GifResizeInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4292,7 +4292,7 @@ export interface GifResizeInput {
  * via the `definition` "filename-compound-index_input".
  */
 export interface FilenameCompoundIndexInput {
-  id?: string | null;
+  id?: string;
   /**
    * Alt text to be used for compound index
    */
@@ -4330,7 +4330,7 @@ export interface FilenameCompoundIndexInput {
  * via the `definition` "no-image-sizes_input".
  */
 export interface NoImageSizeInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4346,7 +4346,7 @@ export interface NoImageSizeInput {
  * via the `definition` "object-fit_input".
  */
 export interface ObjectFitInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4396,7 +4396,7 @@ export interface ObjectFitInput {
  * via the `definition` "with-meta-data_input".
  */
 export interface WithMetaDatumInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4422,7 +4422,7 @@ export interface WithMetaDatumInput {
  * via the `definition` "without-meta-data_input".
  */
 export interface WithoutMetaDatumInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4448,7 +4448,7 @@ export interface WithoutMetaDatumInput {
  * via the `definition` "with-only-jpeg-meta-data_input".
  */
 export interface WithOnlyJpegMetaDatumInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4474,7 +4474,7 @@ export interface WithOnlyJpegMetaDatumInput {
  * via the `definition` "crop-only_input".
  */
 export interface CropOnlyInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4516,7 +4516,7 @@ export interface CropOnlyInput {
  * via the `definition` "focal-only_input".
  */
 export interface FocalOnlyInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4558,7 +4558,7 @@ export interface FocalOnlyInput {
  * via the `definition` "image-sizes-only_input".
  */
 export interface ImageSizesOnlyInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4592,7 +4592,7 @@ export interface ImageSizesOnlyInput {
  * via the `definition` "focal-no-sizes_input".
  */
 export interface FocalNoSizeInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4608,7 +4608,7 @@ export interface FocalNoSizeInput {
  * via the `definition` "media_input".
  */
 export interface MediaInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   localized?: string | null;
   url?: string | null;
@@ -4756,7 +4756,7 @@ export interface MediaInput {
  * via the `definition` "allow-list-media_input".
  */
 export interface AllowListMediaInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4772,7 +4772,7 @@ export interface AllowListMediaInput {
  * via the `definition` "skip-safe-fetch-media_input".
  */
 export interface SkipSafeFetchMediaInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4788,7 +4788,7 @@ export interface SkipSafeFetchMediaInput {
  * via the `definition` "skip-safe-fetch-header-filter_input".
  */
 export interface SkipSafeFetchHeaderFilterInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4804,7 +4804,7 @@ export interface SkipSafeFetchHeaderFilterInput {
  * via the `definition` "skip-allow-list-safe-fetch-media_input".
  */
 export interface SkipAllowListSafeFetchMediaInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4820,7 +4820,7 @@ export interface SkipAllowListSafeFetchMediaInput {
  * via the `definition` "restrict-file-types_input".
  */
 export interface RestrictFileTypeInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4836,7 +4836,7 @@ export interface RestrictFileTypeInput {
  * via the `definition` "no-restrict-file-types_input".
  */
 export interface NoRestrictFileTypeInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4852,7 +4852,7 @@ export interface NoRestrictFileTypeInput {
  * via the `definition` "no-restrict-file-mime-types_input".
  */
 export interface NoRestrictFileMimeTypeInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4868,7 +4868,7 @@ export interface NoRestrictFileMimeTypeInput {
  * via the `definition` "pdf-only_input".
  */
 export interface PdfOnlyInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4884,7 +4884,7 @@ export interface PdfOnlyInput {
  * via the `definition` "restricted-mime-types_input".
  */
 export interface RestrictedMimeTypeInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4900,7 +4900,7 @@ export interface RestrictedMimeTypeInput {
  * via the `definition` "animated-type-media_input".
  */
 export interface AnimatedTypeMediaInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -4950,7 +4950,7 @@ export interface AnimatedTypeMediaInput {
  * via the `definition` "enlarge_input".
  */
 export interface EnlargeInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5016,7 +5016,7 @@ export interface EnlargeInput {
  * via the `definition` "without-enlarge_input".
  */
 export interface WithoutEnlargeInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5032,7 +5032,7 @@ export interface WithoutEnlargeInput {
  * via the `definition` "reduce_input".
  */
 export interface ReduceInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5082,7 +5082,7 @@ export interface ReduceInput {
  * via the `definition` "media-trim_input".
  */
 export interface MediaTrimInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5124,7 +5124,7 @@ export interface MediaTrimInput {
  * via the `definition` "custom-file-name-media_input".
  */
 export interface CustomFileNameMediaInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5150,7 +5150,7 @@ export interface CustomFileNameMediaInput {
  * via the `definition` "unstored-media_input".
  */
 export interface UnstoredMediaInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5166,7 +5166,7 @@ export interface UnstoredMediaInput {
  * via the `definition` "externally-served-media_input".
  */
 export interface ExternallyServedMediaInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5182,7 +5182,7 @@ export interface ExternallyServedMediaInput {
  * via the `definition` "uploads-1_input".
  */
 export interface Uploads1Input {
-  id?: string | null;
+  id?: string;
   hasManyUpload?: string[] | null;
   singleUpload?: string | null;
   hasManyThumbnailUpload?: string[] | null;
@@ -5203,7 +5203,7 @@ export interface Uploads1Input {
  * via the `definition` "uploads-2_input".
  */
 export interface Uploads2Input {
-  id?: string | null;
+  id?: string;
   prefix: string;
   title?: string | null;
   url?: string | null;
@@ -5221,7 +5221,7 @@ export interface Uploads2Input {
  * via the `definition` "any-images_input".
  */
 export interface AnyImageInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5237,7 +5237,7 @@ export interface AnyImageInput {
  * via the `definition` "admin-thumbnail-function_input".
  */
 export interface AdminThumbnailFunctionInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5253,7 +5253,7 @@ export interface AdminThumbnailFunctionInput {
  * via the `definition` "admin-thumbnail-with-search-queries_input".
  */
 export interface AdminThumbnailWithSearchQueryInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5269,7 +5269,7 @@ export interface AdminThumbnailWithSearchQueryInput {
  * via the `definition` "admin-thumbnail-size_input".
  */
 export interface AdminThumbnailSizeInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5303,7 +5303,7 @@ export interface AdminThumbnailSizeInput {
  * via the `definition` "admin-upload-control_input".
  */
 export interface AdminUploadControlInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5319,7 +5319,7 @@ export interface AdminUploadControlInput {
  * via the `definition` "no-files-required_input".
  */
 export interface NoFilesRequiredInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -5336,7 +5336,7 @@ export interface NoFilesRequiredInput {
  * via the `definition` "relation-to-no-files-required_input".
  */
 export interface RelationToNoFilesRequiredInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   uploadField?: string | null;
 }
@@ -5345,7 +5345,7 @@ export interface RelationToNoFilesRequiredInput {
  * via the `definition` "optional-file_input".
  */
 export interface OptionalFileInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5361,7 +5361,7 @@ export interface OptionalFileInput {
  * via the `definition` "required-file_input".
  */
 export interface RequiredFileInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5377,7 +5377,7 @@ export interface RequiredFileInput {
  * via the `definition` "versions_input".
  */
 export interface VersionInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -5394,7 +5394,7 @@ export interface VersionInput {
  * via the `definition` "custom-upload-field_input".
  */
 export interface CustomUploadFieldInput {
-  id?: string | null;
+  id?: string;
   alt?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -5411,7 +5411,7 @@ export interface CustomUploadFieldInput {
  * via the `definition` "media-with-relation-preview_input".
  */
 export interface MediaWithRelationPreviewInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -5428,7 +5428,7 @@ export interface MediaWithRelationPreviewInput {
  * via the `definition` "media-without-cache-tags_input".
  */
 export interface MediaWithoutCacheTagInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -5445,7 +5445,7 @@ export interface MediaWithoutCacheTagInput {
  * via the `definition` "media-without-relation-preview_input".
  */
 export interface MediaWithoutRelationPreviewInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -5462,7 +5462,7 @@ export interface MediaWithoutRelationPreviewInput {
  * via the `definition` "relation-preview_input".
  */
 export interface RelationPreviewInput {
-  id?: string | null;
+  id?: string;
   imageWithPreview1?: string | null;
   imageWithPreview2?: string | null;
   imageWithoutPreview1?: string | null;
@@ -5475,7 +5475,7 @@ export interface RelationPreviewInput {
  * via the `definition` "hide-file-input-on-create_input".
  */
 export interface HideFileInputOnCreateInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -5492,7 +5492,7 @@ export interface HideFileInputOnCreateInput {
  * via the `definition` "best-fit_input".
  */
 export interface BestFitInput {
-  id?: string | null;
+  id?: string;
   withAdminThumbnail?: string | null;
   withinRange?: string | null;
   nextSmallestOutOfRange?: string | null;
@@ -5503,7 +5503,7 @@ export interface BestFitInput {
  * via the `definition` "list-view-preview_input".
  */
 export interface ListViewPreviewInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   imageUpload?: string | null;
   imageRelationship?: string | null;
@@ -5513,7 +5513,7 @@ export interface ListViewPreviewInput {
  * via the `definition` "three-dimensional_input".
  */
 export interface ThreeDimensionalInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5527,7 +5527,7 @@ export interface ThreeDimensionalInput {
  * via the `definition` "constructor-options_input".
  */
 export interface ConstructorOptionInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5543,7 +5543,7 @@ export interface ConstructorOptionInput {
  * via the `definition` "bulk-uploads_input".
  */
 export interface BulkUploadInput {
-  id?: string | null;
+  id?: string;
   title: string;
   relationship?: {
     relationTo: 'simple-relationship';
@@ -5564,7 +5564,7 @@ export interface BulkUploadInput {
  * via the `definition` "bulk-uploads-hook-error_input".
  */
 export interface BulkUploadsHookErrorInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   shouldFail?: boolean | null;
   url?: string | null;
@@ -5582,7 +5582,7 @@ export interface BulkUploadsHookErrorInput {
  * via the `definition` "simple-relationship_input".
  */
 export interface SimpleRelationshipInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
 }
 /**
@@ -5590,7 +5590,7 @@ export interface SimpleRelationshipInput {
  * via the `definition` "file-mime-type_input".
  */
 export interface FileMimeTypeInput {
-  id?: string | null;
+  id?: string;
   title?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -5607,7 +5607,7 @@ export interface FileMimeTypeInput {
  * via the `definition` "svg-only_input".
  */
 export interface SvgOnlyInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5623,7 +5623,7 @@ export interface SvgOnlyInput {
  * via the `definition` "media-without-delete-access_input".
  */
 export interface MediaWithoutDeleteAccessInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5639,7 +5639,7 @@ export interface MediaWithoutDeleteAccessInput {
  * via the `definition` "media-with-image-size-admin-props_input".
  */
 export interface MediaWithImageSizeAdminPropInput {
-  id?: string | null;
+  id?: string;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -5689,7 +5689,7 @@ export interface MediaWithImageSizeAdminPropInput {
  * via the `definition` "prefix-media_input".
  */
 export interface PrefixMediaInput {
-  id?: string | null;
+  id?: string;
   prefix?: string | null;
   url?: string | null;
   thumbnailURL?: string | null;
@@ -5706,7 +5706,7 @@ export interface PrefixMediaInput {
  * via the `definition` "users_input".
  */
 export interface UserInput {
-  id?: string | null;
+  id?: string;
   email: string;
   resetPasswordToken?: string | null;
   resetPasswordExpiration?: string | null;
@@ -5728,7 +5728,7 @@ export interface UserInput {
  * via the `definition` "payload-mcp-api-keys_input".
  */
 export interface PayloadMcpApiKeyInput {
-  id?: string | null;
+  id?: string;
   apiKey: string;
   apiKeyIndex: string;
   access?:
@@ -5751,7 +5751,7 @@ export interface PayloadMcpApiKeyInput {
  * via the `definition` "payload-kv_input".
  */
 export interface PayloadKvInput {
-  id?: string | null;
+  id?: string;
   key: string;
   data:
     | {
@@ -5768,7 +5768,7 @@ export interface PayloadKvInput {
  * via the `definition` "payload-locked-documents_input".
  */
 export interface PayloadLockedDocumentInput {
-  id?: string | null;
+  id?: string;
   document?:
     | ({
         relationTo: 'relation';
@@ -6033,7 +6033,7 @@ export interface PayloadLockedDocumentInput {
  * via the `definition` "payload-preferences_input".
  */
 export interface PayloadPreferenceInput {
-  id?: string | null;
+  id?: string;
   user: {
     relationTo: 'users';
     value: string;
@@ -6054,7 +6054,7 @@ export interface PayloadPreferenceInput {
  * via the `definition` "payload-migrations_input".
  */
 export interface PayloadMigrationInput {
-  id?: string | null;
+  id?: string;
   name?: string | null;
   batch?: number | null;
 }
