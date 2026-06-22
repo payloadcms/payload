@@ -2315,5 +2315,117 @@ describe('trash', () => {
       expect(Array.isArray(relatedPosts)).toBe(true)
       expect(relatedPosts).toHaveLength(2)
     })
+
+    it('should return null for a trashed document in a single polymorphic relationship', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with featured item',
+          featuredItem: { relationTo: postsSlug, value: postsDocTwo.id },
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 1,
+      })
+
+      expect(result.featuredItem).toBeNull()
+    })
+
+    it('should populate a non-trashed document in a single polymorphic relationship', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with featured item',
+          featuredItem: { relationTo: postsSlug, value: postsDocOne.id },
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 1,
+      })
+
+      expect(result.featuredItem).toMatchObject({
+        relationTo: postsSlug,
+        value: { id: postsDocOne.id },
+      })
+    })
+
+    it('should not include trashed entries in hasMany polymorphic relationship', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with related items',
+          relatedItems: [
+            { relationTo: postsSlug, value: postsDocOne.id },
+            { relationTo: postsSlug, value: postsDocTwo.id },
+          ],
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 1,
+      })
+
+      expect(result.relatedItems).toHaveLength(1)
+      const [remaining] = result.relatedItems as {
+        relationTo: string
+        value: { id: number | string }
+      }[]
+      expect(remaining?.value?.id).toBe(postsDocOne.id)
+    })
+
+    it('should preserve trashed polymorphic IDs at depth=0', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        data: {
+          title: 'Page with featured item depth 0',
+          featuredItem: { relationTo: postsSlug, value: postsDocTwo.id },
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        depth: 0,
+      })
+
+      expect(result.featuredItem).toEqual({
+        relationTo: postsSlug,
+        value: postsDocTwo.id,
+      })
+    })
+
+    it('should return null per-locale for a trashed document in a localized single polymorphic relationship', async () => {
+      const page = await payload.create({
+        collection: pagesSlug,
+        locale: 'en',
+        data: {
+          title: 'Page with localized featured item',
+          localizedFeaturedItem: { relationTo: postsSlug, value: postsDocTwo.id },
+        },
+      })
+      createdPageIDs.push(page.id)
+
+      const result = await payload.findByID({
+        collection: pagesSlug,
+        id: page.id,
+        locale: 'all',
+        depth: 1,
+      })
+
+      const localized = result.localizedFeaturedItem as Record<string, unknown>
+      expect(localized?.en).toBeNull()
+    })
   })
 })

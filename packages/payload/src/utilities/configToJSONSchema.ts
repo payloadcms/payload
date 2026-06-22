@@ -325,6 +325,23 @@ export function withNullableJSONSchemaType(
   return fieldTypes
 }
 
+/**
+ * Single relationships whose target collection has `trash: true` can be
+ * silently nulled at read time when the target document is trashed (see
+ * `relationshipPopulationPromise`). The generated type must reflect that
+ * even when the field is `required`.
+ */
+function isAnyRelationTargetTrashable(
+  relationTo: string | string[],
+  collections?: SanitizedCollectionConfig[],
+): boolean {
+  if (!collections) {
+    return false
+  }
+  const targets = Array.isArray(relationTo) ? relationTo : [relationTo]
+  return targets.some((slug) => collections.find((c) => c.slug === slug)?.trash === true)
+}
+
 function entityOrFieldToJsDocs({
   entity,
   i18n,
@@ -684,11 +701,13 @@ export function fieldsToJSONSchema({
                   },
                 }
               } else {
+                const isRequiredAndStable =
+                  isRequired && !isAnyRelationTargetTrashable(field.relationTo, config?.collections)
                 fieldSchema = {
                   ...baseFieldSchema,
                   oneOf: field.relationTo.map((relation) => {
                     return {
-                      type: withNullableJSONSchemaType('object', isRequired),
+                      type: withNullableJSONSchemaType('object', isRequiredAndStable),
                       additionalProperties: false,
                       properties: {
                         relationTo: {
@@ -726,13 +745,15 @@ export function fieldsToJSONSchema({
                 },
               }
             } else {
+              const isRequiredAndStable =
+                isRequired && !isAnyRelationTargetTrashable(field.relationTo, config?.collections)
               fieldSchema = {
                 ...baseFieldSchema,
                 oneOf: [
                   {
                     type: withNullableJSONSchemaType(
                       collectionIDFieldTypes[field.relationTo]!,
-                      isRequired,
+                      isRequiredAndStable,
                     ),
                   },
                   { $ref: `#/$defs/${field.relationTo}` },
