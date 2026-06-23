@@ -109,7 +109,12 @@ export const buildMcpServer = ({
       }
     }
 
-    const handlerArgs = { authorizedMCP, input: toolInput, req, serverContext }
+    const handlerArgs = {
+      authorizedMCP,
+      input: toolInput,
+      req,
+      serverContext,
+    }
     const response = await (match.type === 'collectionTool'
       ? match.tool.handler({ ...handlerArgs, collectionSlug: slug })
       : match.tool.handler({ ...handlerArgs, globalSlug: slug }))

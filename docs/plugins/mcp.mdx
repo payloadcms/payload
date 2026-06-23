@@ -23,13 +23,13 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
 ## Core features
 
 - Two transports out of the box:
-  - **HTTP** at `/api/mcp` - for remote clients, protected by per-user API keys
+  - **HTTP** at `/api/mcp` - for remote clients, using Payload auth when provided
   - **stdio** via the `payload-mcp` bin - for local AI clients spawning a child process
-- Stable discovery and CRUD tools for all collections and globals (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `getGlobalSchema`, `findGlobal`, `updateGlobal`) - opt out per operation with simple keys like `tools: { delete: false }`
+- Stable discovery and CRUD tools for configured collections and globals (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `getGlobalSchema`, `findGlobal`, `updateGlobal`) - filtered by Payload access and configurable with simple keys like `tools: { delete: false }`
 - Auth-enabled collections expose opt-in `login`, `auth`, `forgotPassword`, `resetPassword`, `unlock`, `verify` tools
 - Define your own `tools`, `prompts`, and `resources` with full TypeScript inference via `defineTool` / `defineCollectionTool` / `defineGlobalTool` / `definePrompt`
-- Per-API-key access control through an admin-UI managed collection - toggle any tool, prompt, or resource on/off per key in real time
-- Custom auth strategies via `overrideAuth`
+- Gate tools, prompts, and resources with code-level `access` callbacks while Payload access control still protects the underlying documents
+- Custom auth strategies via `overrideGetAuthorizedMCP`
 
 ## Installation
 
@@ -58,13 +58,16 @@ export default buildConfig({
   "mcpServers": {
     "Payload": {
       "command": "npx",
-      "args": ["payload-mcp"]
+      "args": ["payload-mcp"],
+      "env": {
+        "PAYLOAD_MCP_OVERRIDE_ACCESS": "true"
+      }
     }
   }
 }
 ```
 
-That's it - every collection and global is now available through the generic MCP tools. For example, call `getConfigInfo` to see available slugs, inspect a collection with `getCollectionSchema`, then create a document with `createDocument`.
+That's it for local development - every collection and global is now available through the generic MCP tools. For example, call `getConfigInfo` to see available slugs, inspect a collection with `getCollectionSchema`, then create a document with `createDocument`.
 
 The `payload-mcp` bin finds your `payload.config.ts` automatically, since it's installed
 inside your project. If your project has an unusual layout (e.g. a monorepo), see
@@ -74,9 +77,8 @@ inside your project. If your project has an unusual layout (e.g. a monorepo), se
 
 The stdio server above is for local development, and works even when the dev server is not running.
 
-For deployed apps and remote clients, use the HTTP transport - `mcpPlugin` already exposes `POST /api/mcp` and a
-`payload-mcp-api-keys` collection in the admin UI. [Create an API key](#creating-an-api-key),
-then point your client at the endpoint - see [Connecting MCP clients](#http).
+For deployed apps and remote clients, use the HTTP transport - `mcpPlugin` exposes `POST /api/mcp`.
+Most setups should [create a user API key](#creating-an-api-key), then point your client at the endpoint - see [Connecting MCP clients](#http).
 
 ### Configuring per-collection tools
 
@@ -132,23 +134,25 @@ mcpPlugin({
 })
 ```
 
+Like every MCP item, auth tools use default MCP access unless you provide an
+`access` callback. If you want an opt-in auth tool to be callable without an
+authenticated user, provide an override object with `access: () => true`.
+
 ## Options
 
-| Option                                 | Type             | Description                                                                                                                                   |
-| -------------------------------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `collections`                          | `object`         | Map keyed by collection slug. See [Per-collection options](#per-collection-options).                                                          |
-| `globals`                              | `object`         | Map keyed by global slug. See [Per-global options](#per-global-options).                                                                      |
-| `tools`                                | `object`         | Cross-cutting custom tools, keyed by tool name. Values are `Tool` objects (use [`defineTool`](#defining-custom-tools-prompts-and-resources)). |
-| `prompts`                              | `object`         | Custom prompts, keyed by name. Values are `Prompt` objects (use [`definePrompt`](#prompts)).                                                  |
-| `resources`                            | `object`         | Custom resources, keyed by name. Values are `Resource` objects.                                                                               |
-| `disabled`                             | `boolean`        | Skip MCP registration. The API key collection is still added so database schema stays consistent across environments.                         |
-| `userCollection`                       | `CollectionSlug` | The users collection API keys are associated with. Defaults to `config.admin.user` (typically `users`).                                       |
-| `overrideApiKeyCollection`             | `function`       | Modify the auto-generated `payload-mcp-api-keys` collection (add fields, hooks, etc.).                                                        |
-| `overrideAuth`                         | `function`       | Replace the default Bearer-token / API-key auth with a fully custom access strategy. See [Custom auth](#custom-auth).                         |
-| `mcp.serverOptions.serverInfo.name`    | `string`         | The MCP server name advertised to clients. Default `'Payload MCP Server'`.                                                                    |
-| `mcp.serverOptions.serverInfo.version` | `string`         | The MCP server version. Default `'1.0.0'`.                                                                                                    |
-| `mcp.serverOptions.options`            | `object`         | Raw options passed through to the underlying `McpServer` from `@modelcontextprotocol/server`.                                                 |
-| `mcp.verboseLogs`                      | `boolean`        | When `true`, info/debug logs from the plugin surface in Payload's logger. Warnings and errors are always logged. Default `false`.             |
+| Option                                 | Type       | Description                                                                                                                                   |
+| -------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `collections`                          | `object`   | Map keyed by collection slug. See [Per-collection options](#per-collection-options).                                                          |
+| `globals`                              | `object`   | Map keyed by global slug. See [Per-global options](#per-global-options).                                                                      |
+| `tools`                                | `object`   | Cross-cutting custom tools, keyed by tool name. Values are `Tool` objects (use [`defineTool`](#defining-custom-tools-prompts-and-resources)). |
+| `prompts`                              | `object`   | Custom prompts, keyed by name. Values are `Prompt` objects (use [`definePrompt`](#prompts)).                                                  |
+| `resources`                            | `object`   | Custom resources, keyed by name. Values are `Resource` objects.                                                                               |
+| `disabled`                             | `boolean`  | Skip MCP endpoint registration.                                                                                                               |
+| `overrideGetAuthorizedMCP`             | `function` | Replace the default MCP authorization resolver. See [Custom auth](#custom-auth).                                                              |
+| `mcp.serverOptions.serverInfo.name`    | `string`   | The MCP server name advertised to clients. Default `'Payload MCP Server'`.                                                                    |
+| `mcp.serverOptions.serverInfo.version` | `string`   | The MCP server version. Default `'1.0.0'`.                                                                                                    |
+| `mcp.serverOptions.options`            | `object`   | Raw options passed through to the underlying `McpServer` from `@modelcontextprotocol/server`.                                                 |
+| `mcp.verboseLogs`                      | `boolean`  | When `true`, info/debug logs from the plugin surface in Payload's logger. Warnings and errors are always logged. Default `false`.             |
 
 ### Per-collection options
 
@@ -162,10 +166,10 @@ mcpPlugin({
 
 The `tools` map keys can be:
 
-- A built-in key (`getCollectionSchema`, `find`, `create`, `update`, `delete`, plus auth tool names on auth collections): set to `false` to disable, or to an override object `{ description?, overrideResponse? }`. Auth tools also accept `true` to enable with no overrides.
+- A built-in key (`getCollectionSchema`, `find`, `create`, `update`, `delete`, plus auth tool names on auth collections): set to `false` to disable, or to an override object `{ access?, description?, overrideResponse? }`. Auth tools also accept `true` to enable with no overrides.
 - A custom name: a value produced by `defineCollectionTool(...)`.
 
-`getConfigInfo` is always registered as a top-level tool. It returns the collection and global slugs visible to the current MCP client. API keys can disable it like any other top-level tool.
+`getConfigInfo` is always registered as a top-level tool. It returns the collection and global slugs visible to the current MCP client.
 
 ### Per-global options
 
@@ -177,14 +181,14 @@ The plugin ships two transports. You can use either or both.
 
 ### HTTP transport (`/api/mcp`)
 
-Once `mcpPlugin` is in your `plugins` array, `POST /api/mcp` accepts JSON-RPC 2.0 MCP requests. All requests must include a Bearer API key (see [API key authentication](#api-key-authentication)) - except in development.
+Once `mcpPlugin` is in your `plugins` array, `POST /api/mcp` accepts JSON-RPC 2.0 MCP requests. Send Payload authorization when you want MCP to run as a user (see [Authorization](#authorization)); without it, MCP runs access control with no user.
 
 Quick test:
 
 ```bash
 curl -i 'http://localhost:3000/api/mcp' \
   -X POST \
-  -H 'Authorization: Bearer MCP-USER-API-KEY' \
+  -H 'Authorization: users API-Key MCP-USER-API-KEY' \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json, text/event-stream' \
   -d '{"jsonrpc":"2.0","id":"1","method":"tools/list","params":{}}'
@@ -200,14 +204,115 @@ npx payload-mcp
 
 Notes on stdio:
 
-- **You don't need `mcpPlugin` in your `plugins` array** for stdio to work. The bin auto-detects the plugin and falls back to default configuration (all collections / globals enabled with default tools) when it isn't registered. Installing the package is enough.
+- **You don't need `mcpPlugin` in your `plugins` array** for stdio to work. The bin auto-detects the plugin and falls back to default configuration (all collections / globals configured with default tools) when it isn't registered. Access filtering still applies. Installing the package is enough.
 - Add `mcpPlugin({ ... })` to your config when you want to customize tools, descriptions, prompts, or resources - the bin will pick up that configuration too.
-- stdio runs **full access** (no API key, no per-tool filtering). Whoever can spawn the process is treated as the user. Do not use it in production.
+- Pass `PAYLOAD_MCP_AUTHORIZATION` when you want stdio to authenticate with Payload.
+- If you omit auth, MCP still runs access control with no user. Set `PAYLOAD_MCP_OVERRIDE_ACCESS=true` in development when you want local stdio to skip access control.
 - The bin uses `tsx` to load TypeScript configs directly. Pass `--disable-transpile` if your config is already compiled to JavaScript.
+
+## Authorization
+
+HTTP and stdio use Payload authorization. A user API key uses this value:
+
+```txt
+Authorization: <authCollectionSlug> API-Key <key>
+```
+
+For HTTP, send authorization as the `Authorization` header. For stdio, pass the
+same header value through the `PAYLOAD_MCP_AUTHORIZATION` environment variable.
+
+When authorization is sent, MCP authenticates with Payload's normal auth system.
+The authenticated user is used for Payload access control, and MCP only
+advertises tools, prompts, and resources allowed for that request.
+If no authorization is sent, MCP runs access control with no user.
+
+### Creating an API key
+
+1. Start your Payload server and open the admin panel
+2. Open a user document in an auth-enabled collection with `auth.useAPIKey`
+3. Enable API key auth for that user, generate a key, then save and copy it
+4. Use that key as `Authorization: users API-Key <key>` for HTTP, or set
+   `PAYLOAD_MCP_AUTHORIZATION` to `users API-Key <key>` for stdio. Replace
+   `users` with that auth collection's slug.
+
+### `overrideAccess`
+
+By default, MCP runs access control. Set `overrideAccess` explicitly when you
+want MCP to behave like a Payload local API call with `overrideAccess: true`.
+When true, MCP skips item access callbacks, built-in permission checks, and
+Payload access control inside built-in handlers.
+
+For HTTP in development, add `overrideAccess=true` or `overrideAccess=false` to
+the MCP URL:
+
+```txt
+POST /api/mcp?overrideAccess=true
+```
+
+HTTP rejects the `overrideAccess` URL argument outside development.
+
+For stdio, set `PAYLOAD_MCP_OVERRIDE_ACCESS`:
+
+```txt
+PAYLOAD_MCP_OVERRIDE_ACCESS=true
+```
+
+Stdio defaults to `false` and rejects `PAYLOAD_MCP_OVERRIDE_ACCESS=true` outside
+development.
+
+### Custom auth
+
+For custom auth, provide an `AuthorizedMCP` from `overrideGetAuthorizedMCP`.
+Return the authenticated user, whether MCP handlers should call Payload local
+APIs with `overrideAccess`, and the MCP items available to the caller.
+`overrideAccess` follows Payload core semantics: when true, MCP skips item access
+callbacks and built-in permission checks.
+
+This hook replaces the default resolver, so it is responsible for returning only
+the `items` that caller should see.
+
+```ts
+import { type AuthorizedMCP, mcpPlugin } from '@payloadcms/plugin-mcp'
+
+mcpPlugin({
+  overrideGetAuthorizedMCP: async ({ pluginConfig, req }) => {
+    const userId = req.headers.get('X-User-Id')
+    if (userId) {
+      const user = await req.payload.findByID({
+        id: userId,
+        collection: 'users',
+        disableErrors: true,
+      })
+
+      return {
+        items: pluginConfig.items,
+        overrideAccess: false,
+        user,
+      }
+    }
+
+    return {
+      items: [],
+      overrideAccess: false,
+      user: null,
+    }
+  },
+})
+```
+
+The handler receives:
+
+- `req` - the incoming `PayloadRequest`
+- `pluginConfig` - the fully sanitized plugin config, including the registered `items`
+- `overrideAccess` - the requested Payload-style access override
 
 ## Connecting MCP clients
 
-Below are configuration examples for popular MCP clients. The format of these JSON files may change over time - check the client website for current schemas.
+Below are configuration examples for popular MCP clients. Replace
+`users API-Key MCP-USER-API-KEY` with the authorization value from
+[Authorization](#authorization). The format of these JSON files may change over
+time - check the client website for current schemas.
+The examples include authorization because default MCP access requires a user.
 
 ### HTTP
 
@@ -225,7 +330,7 @@ Most clients support the streamable-HTTP transport directly. If yours doesn't, t
         "mcp-remote",
         "http://127.0.0.1:3000/api/mcp",
         "--header",
-        "Authorization: Bearer MCP-USER-API-KEY"
+        "Authorization: users API-Key MCP-USER-API-KEY"
       ]
     }
   }
@@ -244,7 +349,7 @@ Most clients support the streamable-HTTP transport directly. If yours doesn't, t
         "mcp-remote",
         "http://localhost:3000/api/mcp",
         "--header",
-        "Authorization: Bearer MCP-USER-API-KEY"
+        "Authorization: users API-Key MCP-USER-API-KEY"
       ]
     }
   }
@@ -255,7 +360,7 @@ Most clients support the streamable-HTTP transport directly. If yours doesn't, t
 
 ```bash
 claude mcp add --transport http Payload http://127.0.0.1:3000/api/mcp \
-  --header "Authorization: Bearer MCP-USER-API-KEY"
+  --header "Authorization: users API-Key MCP-USER-API-KEY"
 ```
 
 #### Native HTTP (no `mcp-remote`)
@@ -267,7 +372,7 @@ claude mcp add --transport http Payload http://127.0.0.1:3000/api/mcp \
       "type": "http",
       "url": "http://localhost:3000/api/mcp",
       "headers": {
-        "Authorization": "Bearer MCP-USER-API-KEY"
+        "Authorization": "users API-Key MCP-USER-API-KEY"
       }
     }
   }
@@ -283,13 +388,19 @@ For clients that spawn local processes (Claude Desktop, Cursor stdio servers, et
   "mcpServers": {
     "Payload": {
       "command": "npx",
-      "args": ["payload-mcp"]
+      "args": ["payload-mcp"],
+      "env": {
+        "PAYLOAD_MCP_AUTHORIZATION": "users API-Key YOUR_API_KEY"
+      }
     }
   }
 }
 ```
 
-stdio runs with full local access - no API key is required.
+`PAYLOAD_MCP_AUTHORIZATION` is the same value you would send in the HTTP
+`Authorization` header. If you omit it, MCP runs access control with no user.
+Set `PAYLOAD_MCP_OVERRIDE_ACCESS=true` in development to skip access control
+for local stdio.
 
 #### Locating the config
 
@@ -323,90 +434,12 @@ The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is the fa
 npx @modelcontextprotocol/inspector
 ```
 
-- For HTTP: set the URL to `http://127.0.0.1:3000/api/mcp` and add `Authorization: Bearer MCP-USER-API-KEY` as a header.
-- For stdio: choose the stdio transport and set the command to `npx payload-mcp`. Run the
-  Inspector from your project directory, or set `PAYLOAD_CONFIG_PATH` (see
-  [locating the config](#locating-the-config)).
-
-## API key authentication
-
-The HTTP endpoint requires a Bearer API key on every request. API keys live in the `payload-mcp-api-keys` collection that the plugin adds to your admin panel.
-
-### Creating an API key
-
-1. Start your Payload server and open the admin panel
-2. Open the user menu (avatar in the header), then **Settings → Manage API keys**
-3. Click **Create New**, then click **Generate new key**
-4. Pick the user the key represents (its Payload access control rules become the key's ceiling)
-5. Under **Permissions**, leave items checked to allow them, uncheck them to deny - the Collections, Globals, and Server tabs list every collection tool, global tool, prompt, resource, and top-level tool
-6. Optionally check **Override access control** to make local-API calls performed by this key run with `overrideAccess: true` (use sparingly; this bypasses Payload access rules)
-7. Save and copy the key
-
-### Dev-mode session fallback
-
-In `NODE_ENV=development`, requests without an `Authorization` header fall back to no user with `overrideAccess: true`. Production builds require the Bearer token.
-
-### Customizing the API key collection
-
-```ts
-mcpPlugin({
-  overrideApiKeyCollection: (collection) => {
-    collection.fields.push({
-      name: 'department',
-      type: 'select',
-      options: [
-        { label: 'Development', value: 'dev' },
-        { label: 'Marketing', value: 'marketing' },
-      ],
-    })
-
-    return collection
-  },
-})
-```
-
-### Custom auth
-
-Replace the default API-key resolver entirely with `overrideAuth`. Return an `AuthorizedMCP` describing the caller and the items they may use:
-
-```ts
-import { type AuthorizedMCP, mcpPlugin } from '@payloadcms/plugin-mcp'
-
-mcpPlugin({
-  overrideAuth: async ({
-    getAPIKeyDoc,
-    getAuthorizedMCP,
-    pluginConfig,
-    req,
-  }) => {
-    // Option 1: read your own header and translate to AuthorizedMCP
-    const userId = req.headers.get('X-User-Id')
-    if (userId) {
-      const user = await req.payload.findByID({
-        id: userId,
-        collection: 'users',
-        disableErrors: true,
-      })
-      return {
-        user,
-        overrideAccess: false,
-        items: pluginConfig.items, // expose all items to this user
-      }
-    }
-
-    // Option 2: still defer to the built-in API-key lookup when you want to
-    const apiKeyDoc = await getAPIKeyDoc()
-    return getAuthorizedMCP({ apiKeyDoc })
-  },
-})
-```
-
-The handler receives:
-
-- `req` - the incoming `PayloadRequest`
-- `pluginConfig` - the fully sanitized plugin config, including the registered `items`
-- `getAPIKeyDoc(overrideKey?)` - runs the default Bearer-token lookup (optionally with a key you provide)
-- `getAuthorizedMCP({ apiKeyDoc })` - builds an `AuthorizedMCP` from an API key doc the same way the built-in resolver does
+- For HTTP: set the URL to `http://127.0.0.1:3000/api/mcp` and add `Authorization: users API-Key MCP-USER-API-KEY` as a header.
+- For stdio: choose the stdio transport, set the command to `npx payload-mcp`,
+  and set `PAYLOAD_MCP_AUTHORIZATION` to `users API-Key MCP-USER-API-KEY`.
+  In development, set `PAYLOAD_MCP_OVERRIDE_ACCESS=true` instead if you want to skip access control.
+  Run the Inspector from your project directory, or set `PAYLOAD_CONFIG_PATH`
+  (see [locating the config](#locating-the-config)).
 
 ## Defining custom tools, prompts, and resources
 
@@ -448,7 +481,7 @@ mcpPlugin({
 
 ### Collection-scoped tools
 
-A collection tool's wire name is exactly its key. Payload adds a `collectionSlug` string to the MCP input schema automatically; the handler receives the resolved `collectionSlug`. The field is intentionally not enum-restricted so newly-added collections can be used after HMR even if the MCP client cached the previous tool schema.
+A collection tool's wire name is exactly its key. Payload adds a `collectionSlug` string to the MCP input schema automatically; the handler receives the resolved `collectionSlug`. The field is intentionally not enum-restricted so newly-added collections can be used after HMR even if the MCP client cached the previous tool schema. Built-in collection tools still validate the requested slug against Payload access control on the server.
 
 ```ts
 import { defineCollectionTool, mcpPlugin } from '@payloadcms/plugin-mcp'
@@ -489,7 +522,7 @@ mcpPlugin({
 
 ### Global-scoped tools
 
-`defineGlobalTool` mirrors `defineCollectionTool`. Payload adds a `globalSlug` string to the MCP input schema automatically; the handler receives the resolved `globalSlug`. The field is intentionally not enum-restricted so newly-added globals can be used after HMR even if the MCP client cached the previous tool schema.
+`defineGlobalTool` mirrors `defineCollectionTool`. Payload adds a `globalSlug` string to the MCP input schema automatically; the handler receives the resolved `globalSlug`. The field is intentionally not enum-restricted so newly-added globals can be used after HMR even if the MCP client cached the previous tool schema. Built-in global tools still validate the requested slug against Payload access control on the server.
 
 ```ts
 import { defineGlobalTool, mcpPlugin } from '@payloadcms/plugin-mcp'
@@ -522,6 +555,40 @@ mcpPlugin({
   },
 })
 ```
+
+### Access callbacks
+
+Tools, prompts, and resources can include an `access` callback. Return `false`
+to hide that MCP primitive from the current request. Access callbacks receive
+`req` and, when Payload permissions are being enforced, `permissions`.
+Built-in collection and global tools accept the same callback in their override
+object.
+If no `access` callback is defined, MCP uses Payload's default behavior and
+requires `req.user`.
+
+```ts
+mcpPlugin({
+  collections: {
+    posts: {
+      tools: {
+        delete: {
+          access: ({ req }) => Boolean(req.user),
+        },
+      },
+    },
+  },
+  tools: {
+    adminReport: defineTool({
+      description: 'Generate an admin report.',
+      access: ({ req }) => Boolean(req.user),
+    }).handler(async () => ({
+      content: [{ type: 'text', text: 'Report generated.' }],
+    })),
+  },
+})
+```
+
+Built-in collection and global tools include Payload permission checks in their default access callback. If you provide an access callback for a built-in tool, it replaces that default.
 
 ### Prompts
 
@@ -601,13 +668,13 @@ mcpPlugin({
 
 ## `AuthorizedMCP` and `localAPIDefaults`
 
-Every handler receives an `authorizedMCP` object describing the caller:
+Tool handlers receive an `authorizedMCP` object describing the caller:
 
 ```ts
 type AuthorizedMCP = {
   items: MCPItem[] // the items this caller may use
-  overrideAccess: boolean // mirror of the API key doc's setting
-  user: TypedUser | null // the resolved user (null for stdio)
+  overrideAccess: boolean // whether handlers should bypass Payload access control
+  user: TypedUser | null // the resolved user
 }
 ```
 
@@ -624,18 +691,20 @@ await req.payload.create({
 })
 ```
 
-Built-in CRUD tools already use this pattern, so they automatically respect the API key's `overrideAccess` setting and run under the key's user.
+Built-in CRUD tools already use this pattern, so they automatically run under the resolved user unless `overrideAccess` is true.
+
+Prompt and resource handlers receive `req`, but not `authorizedMCP`.
 
 ## Reducing token usage with `select`
 
 The built-in `findDocuments`, `findGlobal`, `createDocument`, `updateDocument`, and `updateGlobal` tools accept an optional `select` parameter. It limits which fields come back, which significantly reduces token usage on large documents.
 
-`select` is a JSON string following [Payload's Select API](https://payloadcms.com/docs/queries/select) syntax - set a field to `true` to include it:
+`select` follows [Payload's Select API](https://payloadcms.com/docs/queries/select) syntax - set a field to `true` to include it:
 
 ```bash
 curl -i 'http://localhost:3000/api/mcp' \
   -X POST \
-  -H 'Authorization: Bearer MCP-USER-API-KEY' \
+  -H 'Authorization: users API-Key MCP-USER-API-KEY' \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json, text/event-stream' \
   -d '{
@@ -646,7 +715,10 @@ curl -i 'http://localhost:3000/api/mcp' \
       "name": "findDocuments",
       "arguments": {
         "collectionSlug": "posts",
-        "select": "{\"title\": true, \"slug\": true}"
+        "select": {
+          "title": true,
+          "slug": true
+        }
       }
     }
   }'
@@ -726,7 +798,7 @@ export const Posts: CollectionConfig = {
 
 ## Localization
 
-When your Payload config has localization enabled, all built-in collection and global tools automatically include `locale` and `fallbackLocale` parameters - no extra plugin configuration is required.
+When your Payload config has localization enabled, built-in collection/global read and write tools include `locale` and `fallbackLocale` parameters - no extra plugin configuration is required.
 
 | Parameter        | Description                                                                                                    |
 | ---------------- | -------------------------------------------------------------------------------------------------------------- |
@@ -738,7 +810,7 @@ Example - find posts in Spanish with English as fallback:
 ```bash
 curl -i 'http://localhost:3000/api/mcp' \
   -X POST \
-  -H 'Authorization: Bearer MCP-USER-API-KEY' \
+  -H 'Authorization: users API-Key MCP-USER-API-KEY' \
   -H 'Content-Type: application/json' \
   -H 'Accept: application/json, text/event-stream' \
   -d '{
@@ -789,7 +861,7 @@ mcpPlugin({
 
 ### Use `select` to return only the fields you need
 
-By default, the full document is returned for every operation. On collections with many fields, rich text, or deeply nested relationships this can be very large. Pass a `select` JSON string to limit what comes back - see [Reducing token usage with `select`](#reducing-token-usage-with-select).
+By default, the full document is returned for every operation. On collections with many fields, rich text, or deeply nested relationships this can be very large. Pass `select` to limit what comes back - see [Reducing token usage with `select`](#reducing-token-usage-with-select).
 
 ### Sanitize responses with `overrideResponse`
 
