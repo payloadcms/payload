@@ -19,9 +19,10 @@ export async function connectMcpClient({
 }): Promise<Client> {
   const client = new Client({ name: 'plugin-mcp-tests', version: '1.0.0' })
   const transport = new StreamableHTTPClientTransport(new URL('http://in-process/api/mcp'), {
-    authProvider: { token: () => Promise.resolve(apiKey) },
     fetch: (_url, init) => {
-      const headers = init?.headers as HeadersInit
+      const headers = new Headers(init?.headers)
+      headers.set('Authorization', `users API-Key ${apiKey}`)
+
       return (init?.method ?? 'GET').toUpperCase() === 'POST'
         ? restClient.POST('/mcp', { body: init?.body as string, headers })
         : restClient.GET('/mcp', { headers })

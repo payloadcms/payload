@@ -1341,9 +1341,6 @@ importers:
       '@modelcontextprotocol/server':
         specifier: 2.0.0-alpha.2
         version: 2.0.0-alpha.2(@cfworker/json-schema@4.1.1)
-      '@payloadcms/translations':
-        specifier: workspace:*
-        version: link:../translations
       tsx:
         specifier: 4.22.4
         version: 4.22.4
@@ -1354,18 +1351,9 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      '@payloadcms/ui':
-        specifier: workspace:*
-        version: link:../ui
-      '@types/react':
-        specifier: 19.2.14
-        version: 19.2.14
       payload:
         specifier: workspace:*
         version: link:../payload
-      react:
-        specifier: 19.2.6
-        version: 19.2.6
 
   packages/plugin-multi-tenant:
     devDependencies:

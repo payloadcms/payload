@@ -377,15 +377,27 @@ src/
 └── payload.config.ts
 ```
 
-## Type Generation
+## Building & Type Generation
+
+Payload generates `payload-types.ts` for you — you rarely need to run `generate:types` by hand.
+
+- **During development:** `typescript.autoGenerate` defaults to `true`, so the dev
+  server regenerates types automatically whenever your config changes. Don't run
+  `generate:types` manually while the dev server is running — it's redundant.
+- **During builds:** `payload build` generates the import map and types before
+  running `next build`. Prefer it over calling `next build` directly so neither is
+  ever stale. Pass `--no-types` to skip type generation.
+- **Manual generation** (`payload generate:types`) is an escape hatch — only when
+  neither the dev server nor a build is in the loop (e.g. a one-off script, or CI
+  before a step that doesn't run `payload build`).
 
 ```ts
 // payload.config.ts
 export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+    // autoGenerate defaults to true — types regenerate in dev automatically
   },
-  // ...
 })
 
 // Usage
@@ -400,7 +412,7 @@ import type { Post, User } from '@/payload-types'
 4. **Field-level access** returns boolean only, no query constraints
 5. **Relationship depth** defaults to 2; set `depth: 0` for IDs only
 6. **Draft status** — `_status` field is auto-injected when drafts are enabled
-7. **Types are stale** until you run `generate:types`
+7. **Types regenerate automatically** in dev (`autoGenerate`) and during `payload build` — avoid running `generate:types` manually
 8. **MongoDB transactions** require replica set configuration
 9. **SQLite transactions** are disabled by default; enable with `transactionOptions: {}`
 10. **Point fields** are not supported in SQLite
@@ -433,7 +445,7 @@ import type { Post, User } from '@/payload-types'
 
 ### Type Safety
 
-- Run `generate:types` after schema changes
+- Let dev (`autoGenerate`) and `payload build` generate types; run `generate:types` manually only when neither is running
 - Import types from generated `payload-types.ts`
 - Type your user object: `import type { User } from '@/payload-types'`
 - Use field type guards for runtime type checking
