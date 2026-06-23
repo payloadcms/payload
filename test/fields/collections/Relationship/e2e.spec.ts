@@ -801,18 +801,30 @@ describe('relationship', () => {
     const selectedChips = valueLocator.locator('.multi-value-label__text')
     await expect(selectedChips).toHaveCount(2)
 
-    // Hold the relation list request that fires when the search input changes, so the
-    // window between the synchronous options-clear and the async reload stays open long
-    // enough to deterministically assert against it, instead of racing real timing.
-    await page.route('**/api/text-fields**', (route) => setTimeout(() => route.continue(), 2000))
+    // Hold the relation list request that fires when the search input changes, so the window
+    // between the synchronous options-clear and the async reload stays open for as long as we
+    // need, instead of racing real timing with a fixed delay.
+    let releaseHeldRequest: () => void
+    const heldRequest = new Promise<void>((resolve) => {
+      releaseHeldRequest = resolve
+    })
+    await page.route('**/api/text-fields**', async (route) => {
+      await heldRequest
+      await route.continue()
+    })
 
     const searchInput = valueLocator.locator('.rs__input[type="text"]')
     await searchInput.fill('Race Text 3')
 
     // While the reload is still held back, the two previously selected chips must still be
-    // rendered — not silently dropped because their matching option was cleared out of the
-    // (now-empty) options list.
+    // present — not silently dropped because their matching option was cleared out of the
+    // (now-empty) options list. They may render with a placeholder label (the raw ID) until
+    // the real option reloads, which is expected.
     await expect(selectedChips).toHaveCount(2)
+
+    // Releasing the held request lets the reload complete; the placeholders should now
+    // resolve back to their real labels.
+    releaseHeldRequest()
     await expect(valueLocator).toContainText('Race Text 1')
     await expect(valueLocator).toContainText('Race Text 2')
   })
