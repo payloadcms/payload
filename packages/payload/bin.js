@@ -23,10 +23,14 @@ if (disableTranspile) {
 
   if (!useSwc) {
     const start = async () => {
-      // Use tsx
-      let tsImport = (await import('tsx/esm/api')).tsImport
+      // Use global tsx registration so nested extensionless imports in the
+      // project's payload.config.ts resolve correctly (e.g. ./collections/Users).
+      // tsImport() only scopes resolution to the entry file and does not
+      // propagate to nested imports the way `node --import tsx/esm` does.
+      const { register } = await import('tsx/esm/api')
+      register()
 
-      const { bin } = await tsImport('./dist/bin/index.js', url)
+      const { bin } = await import('./dist/bin/index.js')
       await bin()
     }
 

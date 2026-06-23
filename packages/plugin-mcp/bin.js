@@ -10,14 +10,7 @@
  * `--disable-transpile` if your config is already JS (or you've registered your
  * own loader).
  */
-import path from 'path'
-import { fileURLToPath, pathToFileURL } from 'url'
-
 const disableTranspile = process.argv.includes('--disable-transpile')
-
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-const baseURL = pathToFileURL(dirname).toString() + '/'
 
 const start = async () => {
   if (disableTranspile) {
@@ -27,8 +20,10 @@ const start = async () => {
     return
   }
 
-  const { tsImport } = await import('tsx/esm/api')
-  const { runMcpStdio } = await tsImport('./dist/stdio.js', baseURL)
+  const { register } = await import('tsx/esm/api')
+  register()
+
+  const { runMcpStdio } = await import('./dist/stdio.js')
   await runMcpStdio()
 }
 
