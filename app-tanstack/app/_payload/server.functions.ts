@@ -42,6 +42,8 @@ const runPayloadServerFn = createServerFn({ method: 'POST' })
     })) as any
   })
 
+// `createServerFunctionClient` sanitizes args for TanStack Start's seroval wire
+// format before dispatching through `runPayloadServerFn`.
 export const serverFunctionHandler = createServerFunctionClient({
   runServerFn: runPayloadServerFn,
 })
