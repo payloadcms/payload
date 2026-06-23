@@ -13,11 +13,7 @@
   "include": [
     "app/**/*",
     "components/**/*",
-    "functions/**/*",
     "router.tsx",
-    "importMap.js",
-    "payload-types.ts",
-    "vite.config.ts",
     "../test/admin/config.ts"
   ]
 }

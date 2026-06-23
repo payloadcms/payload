@@ -82,10 +82,26 @@ async function build() {
   })
 
   try {
-    fs.renameSync('dist-styles/index.css', `${directoryArg}/styles.css`)
+    // The esbuild pass above bundles only component styles. The design tokens
+    // live in `src/css/*.css` (referenced via `src/styles.css`'s `@import`
+    // chain) and are emitted to `${directoryArg}/css/*.css` by `copyfiles`.
+    // `copyfiles` also copies `src/styles.css` to `${directoryArg}/styles.css`,
+    // but the rename below would overwrite it — dropping the tokens entirely.
+    // Consumers that load `styles.css` directly (the `@payloadcms/ui/css`
+    // export, and `scss/app.scss`'s `@import '../styles.css'`) would then get
+    // components with no CSS custom properties, so every `var(--spacer-*)`
+    // resolves empty (e.g. switch toggles collapse to 0×0). Prepend the token
+    // chain so the published `styles.css` is a complete, self-contained sheet.
+    const stylesEntry = fs.readFileSync('src/styles.css', 'utf8')
+    const tokenCss = [...stylesEntry.matchAll(/@import\s+['"]\.\/(css\/[^'"]+)['"]/g)]
+      .map((match) => fs.readFileSync(path.join(directoryArg, match[1]), 'utf8'))
+      .join('\n')
+    const componentCss = fs.readFileSync('dist-styles/index.css', 'utf8')
+
+    fs.writeFileSync(`${directoryArg}/styles.css`, `${tokenCss}\n${componentCss}`, 'utf8')
     fs.rmSync('dist-styles', { recursive: true })
   } catch (err) {
-    console.error(`Error while renaming index.css and dist-styles: ${err}`)
+    console.error(`Error while bundling styles.css and removing dist-styles: ${err}`)
     throw err
   }
 

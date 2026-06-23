@@ -15,7 +15,7 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
   .handler(async ({ data }) => {
     const { loadAdminPage } = await import('@payloadcms/tanstack-start/server')
     const config = await (await import('@payload-config')).default
-    const { importMap } = await import('../../importMap.js')
+    const { importMap } = await import('./importMap.js')
 
     return loadAdminPage({ config, importMap, search: data.search, splat: data._splat })
   })

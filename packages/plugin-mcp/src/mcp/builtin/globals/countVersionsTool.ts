@@ -21,10 +21,7 @@ export const countGlobalVersionsTool = defineGlobalTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
-    locale: z
-      .string()
-      .describe('Optional: locale code to count versions in')
-      .optional(),
+    locale: z.string().describe('Optional: locale code to count versions in').optional(),
     where: whereSchema
       .describe(
         'Optional: where clause for filtering versions. Version document fields are usually under "version". Example: {"version.siteName":{"contains":"test"}}',

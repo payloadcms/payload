@@ -5,6 +5,7 @@
   "description": "Payload test suite",
   "type": "module",
   "scripts": {
+    "build:app-tanstack": "vite build --config vite.tanstack.config.ts --configLoader runner",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation node ./dev.js",
     "test": "pnpm -C \"../\" run test",
     "test:e2e": "pnpm -C \"../\" run test:e2e",
@@ -76,6 +77,7 @@
     "@payloadcms/tanstack-start": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
+    "@rsbuild/core": "2.0.2",
     "@sentry/nextjs": "^8.33.1",
     "@sentry/react": "^7.77.0",
     "@stripe/react-stripe-js": "3.7.0",
@@ -87,6 +89,7 @@
     "@types/react-dom": "19.2.3",
     "@vercel/blob": "2.3.1",
     "@vitejs/plugin-react": "*",
+    "@vitejs/plugin-rsc": "^0.5.21",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "better-sqlite3": "11.10.0",
     "comment-json": "^4.2.3",
@@ -121,7 +124,7 @@
     "ts-essentials": "10.0.3",
     "typescript": "6.0.3",
     "uuid": "14.0.0",
-    "vite": "*",
+    "vite": "^8.0.0",
     "vitest": "4.1.6",
     "wrangler": "~4.61.1",
     "zod": "^4.0.0"

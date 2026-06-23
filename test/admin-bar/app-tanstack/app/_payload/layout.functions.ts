@@ -8,7 +8,7 @@ import { createServerFn } from '@tanstack/react-start'
 export const getLayoutDataFn = createServerFn({ method: 'GET' }).handler(async () => {
   const { loadLayoutData } = await import('@payloadcms/tanstack-start/layouts')
   const config = (await import('@payload-config')).default
-  const { importMap } = await import('../../importMap.js')
+  const { importMap } = await import('./importMap.js')
 
   return loadLayoutData({ config, importMap })
 })

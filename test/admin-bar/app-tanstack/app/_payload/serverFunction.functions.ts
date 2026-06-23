@@ -14,7 +14,7 @@ export const runPayloadServerFn = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => {
     const { handleServerFunctions } = await import('@payloadcms/tanstack-start/server')
     const config = (await import('@payload-config')).default
-    const { importMap } = await import('../../importMap.js')
+    const { importMap } = await import('./importMap.js')
 
     return (await handleServerFunctions({
       name: data.name,

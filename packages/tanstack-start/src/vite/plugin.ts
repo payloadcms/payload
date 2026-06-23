@@ -178,11 +178,6 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
       extensions: ['.mjs', '.js', '.mts', '.ts', '.jsx', '.tsx', '.json'],
       tsconfigPaths: true,
     } as any,
-    server: {
-      // Honor `srcDirectory` so apps that flatten away the `src` wrapper
-      // (srcDirectory: '.') warm up the importMap at the right path.
-      warmup: { clientFiles: [`./${path.posix.join(srcDirectory, 'importMap.js')}`] },
-    },
     ssr: {
       external: [...ssrExternalPackages, ...additionalSsrExternal],
       noExternal: payloadNoExternalPatterns,
