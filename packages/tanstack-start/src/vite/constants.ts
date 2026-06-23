@@ -52,14 +52,21 @@ export const payloadNoExternalPatterns: Array<RegExp | string> = [
 
 /**
  * The subset of `payloadNoExternalPatterns` that needs to participate in the
- * RSC environment. The RSC graph is narrower — plugins and storage adapters
- * don't run in RSC, only the admin UI surface does.
+ * RSC environment. Plugins and storage adapters must be included: they register
+ * custom providers/components (e.g. `plugin-multi-tenant`'s `'use client'`
+ * `TenantSelectionProvider`) that render in the RSC graph via
+ * `RenderServerComponent`. If the package stays external to RSC, `plugin-rsc`
+ * never transforms its `'use client'` modules into client references, so the
+ * component executes server-side and crashes on the first hook
+ * (`Cannot read properties of null (reading 'useState')`).
  */
 export const payloadRscNoExternalPatterns: Array<RegExp | string> = [
   '@payloadcms/ui',
   '@payloadcms/translations',
   '@payloadcms/tanstack-start',
   /^@payloadcms\/richtext-lexical/,
+  /^@payloadcms\/plugin-/,
+  /^@payloadcms\/storage-/,
 ]
 
 /**
