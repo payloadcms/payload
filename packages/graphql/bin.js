@@ -23,10 +23,10 @@ if (disableTranspile) {
 
   if (!useSwc) {
     const start = async () => {
-      // Use tsx
-      let tsImport = (await import('tsx/esm/api')).tsImport
+      const { register } = await import('tsx/esm/api')
+      register()
 
-      const { bin } = await tsImport('./dist/bin/index.js', url)
+      const { bin } = await import('./dist/bin/index.js')
       await bin()
     }
 
