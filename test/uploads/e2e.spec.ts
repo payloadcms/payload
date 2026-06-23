@@ -1588,24 +1588,22 @@ describe('Uploads', () => {
         hasText: exactText('Create New'),
       })
       await fieldBulkUploadButton.click()
-      const fieldBulkUploadDrawer = page.locator(
-        '#hasManyThumbnailUpload-bulk-upload-drawer-slug-1',
-      )
-      await expect(fieldBulkUploadDrawer).toBeVisible()
-      await fieldBulkUploadDrawer
+      const fieldBulkUploadModal = page.locator('#hasManyThumbnailUpload-bulk-upload-drawer-slug-1')
+      await expect(fieldBulkUploadModal).toBeVisible()
+      await fieldBulkUploadModal
         .locator('.dropzone input[type="file"]')
         .setInputFiles([
           path.resolve(dirname, './image.png'),
           path.resolve(dirname, './test-image.png'),
         ])
-      await fieldBulkUploadDrawer
+      await fieldBulkUploadModal
         .locator('.bulk-upload--actions-bar button', { hasText: 'Save' })
         .click()
-      await expect(fieldBulkUploadDrawer).toBeHidden()
+      await expect(fieldBulkUploadModal).toBeHidden()
       await fieldBulkUploadButton.click()
 
       // should show add files dropzone view
-      await expect(fieldBulkUploadDrawer.locator('.bulk-upload--add-files')).toBeVisible()
+      await expect(fieldBulkUploadModal.locator('.bulk-upload--add-files')).toBeVisible()
     })
 
     test('should show error when bulk uploading files with missing filenames and allow retry after fixing', async () => {

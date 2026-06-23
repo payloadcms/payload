@@ -1,4 +1,10 @@
 @layer payload-default {
+  .bulk-upload--file-manager__header-actions {
+    display: flex;
+    gap: var(--spacer-2);
+  }
+
+  /** old code */
   .bulk-upload--file-manager__wrapper {
     display: flex;
     flex-direction: column;

@@ -12,16 +12,16 @@ const baseClass = 'bulk-upload--add-files'
 
 type Props = {
   readonly acceptMimeTypes?: string
-  readonly drawerSlug: string
+  readonly modalSlug: string
   readonly onDrop: (acceptedFiles: FileList) => void
 }
-export function AddFilesView({ acceptMimeTypes, drawerSlug, onDrop }: Props) {
+export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: Props) {
   const { t } = useTranslation()
 
   const inputRef = React.useRef<HTMLInputElement>(null)
 
   return (
-    <DialogModal className={baseClass} size="large" slug={drawerSlug}>
+    <DialogModal className={baseClass} size="large" slug={modalSlug}>
       <DialogHeader showClose title={t('upload:addFiles')} />
       <div className={`${baseClass}__body`}>
         <div className={`${baseClass}__dropArea`}>

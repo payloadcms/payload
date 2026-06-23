@@ -65,6 +65,12 @@ export function FileSidebar() {
     return formattedSize
   }, [])
 
+  // TODO: style collection select input
+
+  // TODO: totalErrorCount move to header
+
+  // TODO: Only show add button when
+  // (typeof maxFiles === 'number' ? totalFileCount < maxFiles : true)
   const totalFileCount = isInitializing
     ? (initialFiles?.length ?? initialForms?.length)
     : forms.length
@@ -113,50 +119,6 @@ export function FileSidebar() {
             value={bulkUploadCollectionSlug}
           />
         )}
-        {totalErrorCount > 0 ? (
-          <div className={`${baseClass}__header__error`}>
-            <ErrorPill count={totalErrorCount} i18n={i18n} withMessage />
-          </div>
-        ) : null}
-        <div className={`${baseClass}__headerTopRow`}>
-          <p className={`${baseClass}__selectedCount`}>
-            <strong
-              title={`${totalFileCount} ${t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}`}
-            >
-              {totalFileCount}{' '}
-              {t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}
-            </strong>
-          </p>
-
-          <div className={`${baseClass}__header__actions`}>
-            {(typeof maxFiles === 'number' ? totalFileCount < maxFiles : true) ? (
-              <Button
-                buttonStyle="secondary"
-                className={`${baseClass}__header__addFile`}
-                onClick={() => openModal(addMoreFilesDrawerSlug)}
-                size="medium"
-              >
-                {t('upload:addFile')}
-              </Button>
-            ) : null}
-            <Button
-              buttonStyle="secondary"
-              className={`${baseClass}__toggler`}
-              icon={<ChevronIcon direction={showFiles ? 'down' : 'up'} size={16} />}
-              onClick={() => setShowFiles((prev) => !prev)}
-              selected={showFiles}
-            >
-              <strong
-                title={`${totalFileCount} ${t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}`}
-              >
-                {totalFileCount}{' '}
-                {t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}
-              </strong>
-            </Button>
-
-            <AddFilesView drawerSlug={addMoreFilesDrawerSlug} onDrop={handleAddFiles} />
-          </div>
-        </div>
       </div>
 
       <div className={`${baseClass}__animateWrapper scrollbar-thin`}>

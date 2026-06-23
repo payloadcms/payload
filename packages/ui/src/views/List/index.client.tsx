@@ -98,7 +98,7 @@ export function DefaultListView(props: ListViewClientProps) {
   }, [query?.where])
 
   const { openModal } = useModal()
-  const { drawerSlug: bulkUploadDrawerSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
+  const { modalSlug: bulkUploadModalSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
@@ -135,9 +135,9 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const openBulkUpload = React.useCallback(() => {
     setCollectionSlug(collectionSlug)
-    openModal(bulkUploadDrawerSlug)
+    openModal(bulkUploadModalSlug)
     setOnSuccess(() => router.refresh())
-  }, [router, collectionSlug, bulkUploadDrawerSlug, openModal, setCollectionSlug, setOnSuccess])
+  }, [router, collectionSlug, bulkUploadModalSlug, openModal, setCollectionSlug, setOnSuccess])
 
   useEffect(() => {
     if (!isInDrawer) {

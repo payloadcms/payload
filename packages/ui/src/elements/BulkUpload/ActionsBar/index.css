@@ -8,7 +8,6 @@
     border-top: var(--stroke-width-small) solid var(--color-border);
     z-index: 1;
     background-color: var(--color-bg);
-    min-height: calc(var(--base) * 2.8);
     gap: var(--spacer-2-5);
   }
 

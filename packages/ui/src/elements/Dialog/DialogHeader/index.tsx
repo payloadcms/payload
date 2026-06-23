@@ -10,11 +10,17 @@ const baseClass = 'dialog'
 
 export type DialogHeaderProps = {
   readonly children?: React.ReactNode
+  readonly onClose?: ({ modalSlug }: { modalSlug: string }) => void
   readonly showClose?: boolean
   readonly title?: React.ReactNode
 }
 
-export const DialogHeader: React.FC<DialogHeaderProps> = ({ children, showClose, title }) => {
+export const DialogHeader: React.FC<DialogHeaderProps> = ({
+  children,
+  onClose,
+  showClose,
+  title,
+}) => {
   const { slug, isConfirming } = useDialogContext()
   const { closeModal } = useModal()
 
@@ -37,7 +43,13 @@ export const DialogHeader: React.FC<DialogHeaderProps> = ({ children, showClose,
           disabled={isConfirming}
           icon={<XIcon />}
           margin={false}
-          onClick={() => closeModal(slug)}
+          onClick={() => {
+            if (onClose) {
+              onClose({ modalSlug: slug })
+            } else {
+              closeModal(slug)
+            }
+          }}
         />
       ) : null}
     </div>

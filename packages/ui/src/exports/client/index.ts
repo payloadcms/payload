@@ -86,10 +86,10 @@ export { AppHeader } from '../../elements/AppHeader/index.js'
 export { MenuSeparator } from '../../elements/MenuSeparator/index.js'
 export { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 export {
-  BulkUploadDrawer,
+  BulkUploadModal,
   BulkUploadProvider,
   useBulkUpload,
-  useBulkUploadDrawerSlug,
+  useBulkUploadModalSlug,
 } from '../../elements/BulkUpload/index.js'
 export { DrawerContentContainer } from '../../elements/DrawerContentContainer/index.js'
 export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'

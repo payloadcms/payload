@@ -137,6 +137,7 @@ export function EditForm({
           <DocumentFields
             docPermissions={docPermissions}
             fields={collectionConfig.fields}
+            forceSidebarWrap
             schemaPathSegments={[collectionConfig.slug]}
           />
         </div>

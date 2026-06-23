@@ -2,9 +2,9 @@
 
 import React from 'react'
 
-import { ChevronIcon } from '../../../icons/Chevron/index.js'
-import { useTranslation } from '../../../providers/Translation/index.js'
-import { Button } from '../../Button/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
 import './index.css'
 
 const baseClass = 'bulk-upload--drawer-header'

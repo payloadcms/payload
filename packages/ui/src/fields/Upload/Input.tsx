@@ -121,7 +121,7 @@ export function UploadInput(props: UploadInputProps) {
 
   const { openModal } = useModal()
   const {
-    drawerSlug,
+    modalSlug: drawerSlug,
     setCollectionSlug,
     setInitialFiles,
     setMaxFiles,
