@@ -755,6 +755,70 @@ describe('relationship', () => {
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })
 
+  test('should not lose previously selected options from a hasMany relationship filter while searching', async () => {
+    await createTextFieldDoc({ text: 'Race Text 1' })
+    await createTextFieldDoc({ text: 'Race Text 2' })
+    await createTextFieldDoc({ text: 'Race Text 3' })
+
+    await page.goto(url.list)
+    await wait(1000)
+
+    await openListFilters(page, {})
+    const whereBuilder = page.locator('.where-builder')
+    const condition = whereBuilder.locator('.condition').last()
+
+    await selectInput({
+      page,
+      selectLocator: condition.locator('.condition__field'),
+      multiSelect: false,
+      option: 'Relationship Has Many',
+    })
+
+    await selectInput({
+      page,
+      selectLocator: condition.locator('.condition__operator'),
+      multiSelect: false,
+      option: 'equals',
+    })
+
+    const valueLocator = condition.locator('.condition__value')
+
+    await selectInput({
+      page,
+      selectLocator: valueLocator,
+      multiSelect: true,
+      options: ['Race Text 1'],
+      selectType: 'relationship',
+    })
+
+    await selectInput({
+      page,
+      selectLocator: valueLocator,
+      multiSelect: true,
+      options: ['Race Text 2'],
+      clear: false,
+      selectType: 'relationship',
+    })
+
+    const selectedChips = valueLocator.locator('.relationship--multi-value-label__text')
+    await expect(selectedChips).toHaveCount(2)
+
+    // Hold the relation list request that fires when the search input changes, so the
+    // window between the synchronous options-clear and the async reload stays open long
+    // enough to deterministically assert against it, instead of racing real timing.
+    await page.route('**/api/text-fields**', (route) => setTimeout(() => route.continue(), 2000))
+
+    const searchInput = valueLocator.locator('.rs__input[type="text"]')
+    await searchInput.fill('Race Text 3')
+
+    // While the reload is still held back, the two previously selected chips must still be
+    // rendered — not silently dropped because their matching option was cleared out of the
+    // (now-empty) options list.
+    await expect(selectedChips).toHaveCount(2)
+    await expect(valueLocator).toContainText('Race Text 1')
+    await expect(valueLocator).toContainText('Race Text 2')
+  })
+
   test('should allow filtering by polymorphic hasMany relationship field / equals', async () => {
     const textDoc1 = await createTextFieldDoc({ text: 'Poly Text 1' })
     const textDoc2 = await createTextFieldDoc({ text: 'Poly Text 2' })
