@@ -788,7 +788,6 @@ describe('relationship', () => {
       selectLocator: valueLocator,
       multiSelect: true,
       options: ['Race Text 1'],
-      selectType: 'relationship',
     })
 
     await selectInput({
@@ -797,10 +796,9 @@ describe('relationship', () => {
       multiSelect: true,
       options: ['Race Text 2'],
       clear: false,
-      selectType: 'relationship',
     })
 
-    const selectedChips = valueLocator.locator('.relationship--multi-value-label__text')
+    const selectedChips = valueLocator.locator('.multi-value-label__text')
     await expect(selectedChips).toHaveCount(2)
 
     // Hold the relation list request that fires when the search input changes, so the
