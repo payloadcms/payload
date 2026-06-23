@@ -1,4 +1,4 @@
-import { payloadApiRoute } from '@payloadcms/tanstack-start/server'
+import { payloadApiRoute } from '@payloadcms/tanstack-start'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_payload/api/$')(
