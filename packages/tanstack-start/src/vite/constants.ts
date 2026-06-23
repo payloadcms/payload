@@ -122,7 +122,20 @@ export const optimizeDepsIncludeDefaults: string[] = [
   '@payloadcms/ui > md5',
   'payload > deepmerge',
   'payload > pluralize',
-  'scheduler',
+  // `scheduler` is a transitive dep of `react-dom`, not a direct dependency of
+  // the app, so a bare `'scheduler'` specifier fails to resolve from an isolated
+  // install (`test/node_modules` built with `pnpm i --ignore-workspace`), where
+  // it isn't hoisted to the top level. Path it through `react-dom` so the
+  // optimizer resolves the exact copy the runtime loads.
+  'react-dom > scheduler',
+  // `@payloadcms/ui` (in `optimizeDeps.exclude`) ships compiled output that the
+  // React Compiler rewrote to `import { c } from 'react/compiler-runtime'`.
+  // Because its parent is excluded, the optimizer never crawls in to discover
+  // this entry, so Vite serves `react/compiler-runtime` raw. That file is
+  // CommonJS (`module.exports = require(...)`), so the named `c` export can't be
+  // statically extracted and every client component throws "does not provide an
+  // export named 'c'". Pre-bundling it lets esbuild synthesize the named export.
+  'react/compiler-runtime',
   // Transitive deps that Vite otherwise discovers *after* the initial crawl
   // (react-select pulls in @floating-ui at runtime; react-is is reached via
   // react-transition-group/prop-types; the default date-fns locale is loaded
