@@ -887,11 +887,11 @@ createAPIKeyFields({
 })
 ```
 
-### `@payloadcms/plugin-mcp` refactored: config API, built-in tool inputs, and API keys
+### `@payloadcms/plugin-mcp` refactored: config API, built-in tool inputs, and user API keys
 
-The MCP plugin was refactored. The public config API, the built-in tool inputs, and the API key collection schema all changed. Update your plugin config and delete + recreate any existing API keys.
+The MCP plugin was refactored. The public config API, the built-in tool inputs, and API-key authentication changed. Update your plugin config and recreate MCP credentials as user API keys.
 
-**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default through the generic built-in tools (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, plus `getGlobalSchema`, `findGlobal`, and `updateGlobal` for globals). Turn individual operations off via simple config keys like `tools: { create: false }`.
+**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default through the generic built-in tools. For collections, this includes tools like `getCollectionSchema`, `findDocuments`, `countDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `duplicateDocument`, and `findDistinct`, plus version tools when versions are enabled. For globals, this includes `getGlobalSchema`, `findGlobal`, and `updateGlobal`, plus version tools when versions are enabled. Turn individual operations off via simple config keys like `tools: { create: false }`.
 
 ```diff
 mcpPlugin({
@@ -899,14 +899,21 @@ mcpPlugin({
 -   posts: { enabled: true },
 -   users: { enabled: { find: true } },
 +   // posts is exposed automatically, no entry needed
-+   users: { tools: { create: false, update: false, delete: false } }, // find only
++   users: {
++     tools: {
++       create: false,
++       delete: false,
++       getCollectionSchema: false,
++       update: false,
++     },
++   }, // find only
   },
 })
 ```
 
 After upgrading, collections you never listed before are reachable over MCP. Review what's exposed and disable anything that shouldn't be.
 
-**Custom tools, prompts and resources moved from arrays under `mcp` to top-level records.** Use the new `defineTool` / `defineCollectionTool` / `defineGlobalTool` / `definePrompt` builders. `parameters` (a Zod raw shape) became `input` (a Zod/Valibot schema or raw JSON Schema), and handlers take one object argument instead of positional ones.
+**Custom tools, prompts and resources moved from arrays under `mcp` to top-level records.** Use the new `defineTool` / `defineCollectionTool` / `defineGlobalTool` builders for tools, and `definePrompt` for prompts. Resources are plain objects in the top-level `resources` record. For tools, `parameters` (a Zod raw shape) became `input` (a Zod/Valibot schema or raw JSON Schema), and handlers take one object argument instead of positional ones.
 
 ```diff
 mcpPlugin({
@@ -931,6 +938,8 @@ mcpPlugin({
 
 Prompts and resources move the same way, into top-level `prompts` and `resources` records.
 
+Tool handlers now receive `authorizedMCP` in that object argument. If a custom tool calls Payload's local API, pass along `authorizedMCP.user` and `authorizedMCP.overrideAccess` so the local API call runs with the same caller identity and access behavior as the MCP request.
+
 For custom collection and global tools, do not add `collectionSlug` / `globalSlug` yourself. Payload adds the slug input to the MCP schema automatically, and the handler receives the resolved slug as a top-level argument.
 
 ```ts
@@ -944,7 +953,7 @@ defineCollectionTool({
 })
 ```
 
-**Built-in collection tools are now generic.** Per-collection names like `createPosts` / `updatePosts` were replaced by `createDocument` / `updateDocument`. Pass the target collection as `collectionSlug`; document fields live under `data` alongside options like `depth`, `draft` and `locale`. `_status`, `id`, `createdAt` and `updatedAt` are no longer accepted inside `data`; set publish state with a custom tool if you need to.
+**Built-in collection tools are now generic.** Per-collection names like `createPosts` / `updatePosts` were replaced by `createDocument` / `updateDocument`. Pass the target collection as `collectionSlug`; document fields live under `data` alongside options like `depth`, `draft` and `locale`. For update and delete calls, pass `id` or `where` as top-level arguments. `_status`, `id`, `createdAt` and `updatedAt` are no longer accepted inside `data`; set publish state with a custom tool if you need to.
 
 ```ts
 // arguments to a `createDocument` tool call
@@ -956,24 +965,40 @@ defineCollectionTool({
 { collectionSlug: 'posts', data: { title: 'Hello' }, draft: true, depth: 2 }
 ```
 
-**Auth tools are per-collection and opt-in.** The old `experimental.tools.auth` block is gone. Opt in per collection via `tools: { login: true }`. Auth tool names are generic (`login`, `auth`, etc.); pass the target auth collection as `collectionSlug`.
+**Auth tools are per-collection and opt-in.** The old `experimental.tools.auth` block is gone. Opt in per auth collection via its `tools` map, and pass the target auth collection as `collectionSlug`. Like every MCP item, auth tools now use default MCP access unless you provide an `access` callback, so unauthenticated auth tools such as `login` need `access: () => true`.
 
 ```diff
 - mcpPlugin({ experimental: { tools: { auth: { enabled: true } } } })
-+ mcpPlugin({ collections: { users: { tools: { login: true } } } })
++ mcpPlugin({
++   collections: {
++     users: {
++       tools: {
++         login: { access: () => true },
++       },
++     },
++   },
++ })
 ```
 
-**`mcp.handlerOptions` is gone.** `verboseLogs` moved to `mcp.verboseLogs`. `onEvent`, `maxDuration`, `disableSse`, `redisUrl` and `basePath` were removed. The `experimental.tools` block (auth, plus the collection / job / config codegen tools) was removed entirely. The unused `GET /api/mcp` route was dropped; only `POST` remains.
+**`mcp.handlerOptions` is gone.** `verboseLogs` moved to `mcp.verboseLogs`. `onEvent`, `maxDuration`, `disableSse`, `redisUrl` and `basePath` were removed. The `experimental.tools` block (auth, plus the collection / job / config codegen tools) was removed entirely. If you opted into SSE/server-push with `disableSse: false`, remove that config; v4 only supports POST streamable HTTP.
 
-**`overrideAuth` signature changed.** It now receives one argument object and returns an `AuthorizedMCP` instead of the old `MCPAccessSettings` (the type was removed).
+**`overrideAuth` was replaced by `overrideGetAuthorizedMCP`.** The hook receives one argument object and returns an `AuthorizedMCP` instead of the old `MCPAccessSettings` type.
 
 ```diff
 mcpPlugin({
 - overrideAuth: (req, getDefaultMcpAccessSettings) => { ... },
-+ overrideAuth: ({ req, pluginConfig, getAPIKeyDoc, getAuthorizedMCP }) => { ... },
++ overrideGetAuthorizedMCP: ({ req, pluginConfig, overrideAccess }) => { ... },
 })
 ```
 
-**API keys must be recreated and are managed from a new admin flow.** The `payload-mcp-api-keys` collection keeps its slug, but it is no longer auth-enabled, is hidden from the main nav, and is linked from the user menu under **Settings → Manage API keys**. Its admin shape changed: the API key value is handled by explicit encrypted `apiKey` and hashed `apiKeyIndex` fields behind a custom generate/copy UI, permissions are stored in one `access` JSON field, `label`, `description`, a required `user`, and `overrideAccess` render in the sidebar, and a `lastUsed` field was added for existing keys. Keys still run as their user when `overrideAccess` is enabled; that setting only bypasses Payload access rules for the key's operations. The list view now defaults to title, last used, and user columns, and renders a custom empty state when no API keys exist. Existing keys keep authenticating but lose their permissions (an empty `access` is treated as "allow everything"), so an un-migrated key silently gets full access. Delete your existing MCP API keys after upgrading and create fresh ones.
+**MCP now uses user API keys.** The `payload-mcp-api-keys` collection was removed. API keys sent to MCP now use Payload's normal `Authorization: <authCollectionSlug> API-Key <key>` header and Payload's normal `auth.useAPIKey` fields. Enable `auth.useAPIKey` on the auth collection whose users should call MCP. Existing `payload-mcp-api-keys` documents no longer authenticate, and `overrideApiKeyCollection` was removed.
 
-**Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`, and moved to `zod` v4. If your custom tools import `zod` directly, make sure it resolves to v4. `@payloadcms/ui` and `react` 19 are now peer dependencies; any Payload 4 project already provides both.
+The `userCollection` option was also removed. MCP now accepts any Payload user authenticated through API-key auth, using the collection slug from the `Authorization` header.
+
+Because the `payload-mcp-api-keys` collection config was removed, run your normal database migration workflow after upgrading so the old collection/table is removed where your database adapter requires schema migrations. Back up any existing MCP API key documents first if you need to reference them while recreating credentials as user API keys.
+
+**MCP tool access is configured in code.** The old per-key permissions UI was removed with the MCP API-key collection. Tools, prompts, and resources can now define an `access` callback; built-in collection/global tools accept `access` in their override object.
+
+By default, MCP items require an authenticated user. Built-in collection and global tools also include Payload permission checks in their default `access` callbacks. If you provide an `access` callback for a built-in tool, it replaces the default callback.
+
+**Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`, and moved to `zod` v4. If your custom tools import `zod` directly, make sure it resolves to v4.

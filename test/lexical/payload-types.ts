@@ -103,7 +103,6 @@ export type LexicalNodes_5AC12460 =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -189,7 +188,6 @@ export type LexicalNodes_2C8551FD =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -248,7 +246,6 @@ export type LexicalNodes_E507B1AE =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -305,7 +302,6 @@ export type LexicalNodes_7946FE5E =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -359,7 +355,6 @@ export type LexicalNodes_2B82BF4F =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -423,7 +418,6 @@ export type LexicalNodes_02CE3078 =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -481,7 +475,6 @@ export type LexicalNodes_72D60A3E =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -531,7 +524,6 @@ export type LexicalNodes_EC568A9D =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -656,7 +648,6 @@ export type LexicalNodes_3E8FEE89 =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -709,7 +700,6 @@ export type LexicalNodes_42C4EBEA =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -764,7 +754,6 @@ export type LexicalNodes_B7407628 =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -819,7 +808,6 @@ export type LexicalNodes_C929D2DF =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -874,7 +862,6 @@ export type LexicalNodes_C20156B0 =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -929,7 +916,6 @@ export type LexicalNodes_4514FA55 =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -984,7 +970,6 @@ export type LexicalNodes_E3EDEE42 =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -1081,7 +1066,6 @@ export type LexicalNodes_D1F4FBEF =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -1147,7 +1131,6 @@ export type LexicalNodes_419CE8C9 =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -1204,7 +1187,6 @@ export type LexicalNodes_54186730 =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -1259,7 +1241,6 @@ export type LexicalNodes_E2F8B3EA =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -1316,7 +1297,6 @@ export type LexicalNodes_D7B0C859 =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -1376,7 +1356,6 @@ export type LexicalNodes_00DF9459 =
       | 'OnDemandOutsideForm'
       | 'lexical-custom-cell'
       | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -1423,7 +1402,6 @@ export interface Config {
     OnDemandOutsideForm: OnDemandOutsideForm;
     'lexical-custom-cell': LexicalCustomCell;
     users: User;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -1462,7 +1440,6 @@ export interface Config {
     OnDemandOutsideForm: OnDemandOutsideFormSelect<false> | OnDemandOutsideFormSelect<true>;
     'lexical-custom-cell': LexicalCustomCellSelect<false> | LexicalCustomCellSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -2101,31 +2078,6 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -2271,10 +2223,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -2819,22 +2767,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

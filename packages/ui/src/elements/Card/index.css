@@ -44,7 +44,7 @@
     }
   }
 
-  .card__click {
+  .card .card__click {
     z-index: 1;
     inset: 0;
     position: absolute;

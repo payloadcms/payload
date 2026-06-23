@@ -62,13 +62,13 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_C77AB37E".
+ * via the `definition` "LexicalNodes_EC517269".
  */
-export type LexicalNodes_C77AB37E =
+export type LexicalNodes_EC517269 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_C77AB37E>
+  | SerializedParagraphNode<LexicalNodes_EC517269>
   | SerializedRelationshipNode<
       | 'posts'
       | 'users'
@@ -103,7 +103,6 @@ export type LexicalNodes_C77AB37E =
       | 'no-timestamps'
       | 'localized'
       | 'fully-featured'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -111,17 +110,17 @@ export type LexicalNodes_C77AB37E =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_6022754B".
+ * via the `definition` "LexicalNodes_6CCD2587".
  */
-export type LexicalNodes_6022754B =
+export type LexicalNodes_6CCD2587 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_6022754B>
+  | SerializedParagraphNode<LexicalNodes_6CCD2587>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads-two'>
-  | SerializedQuoteNode<LexicalNodes_6022754B>
+  | SerializedQuoteNode<LexicalNodes_6CCD2587>
   | SerializedRelationshipNode<
       | 'posts'
       | 'users'
@@ -156,17 +155,16 @@ export type LexicalNodes_6022754B =
       | 'no-timestamps'
       | 'localized'
       | 'fully-featured'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_6022754B, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_6022754B, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_6022754B>
-  | SerializedListItemNode<LexicalNodes_6022754B>
-  | SerializedHeadingNode<LexicalNodes_6022754B>;
+  | SerializedAutoLinkNode<LexicalNodes_6CCD2587, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_6CCD2587, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_6CCD2587>
+  | SerializedListItemNode<LexicalNodes_6CCD2587>
+  | SerializedHeadingNode<LexicalNodes_6CCD2587>;
 
 export interface Config {
   auth: {
@@ -209,7 +207,6 @@ export interface Config {
     'no-timestamps': NoTimestamp;
     localized: Localized;
     'fully-featured': FullyFeatured;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -252,7 +249,6 @@ export interface Config {
     'no-timestamps': NoTimestampsSelect<false> | NoTimestampsSelect<true>;
     localized: LocalizedSelect<false> | LocalizedSelect<true>;
     'fully-featured': FullyFeaturedSelect<false> | FullyFeaturedSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -373,7 +369,7 @@ export interface Post {
   title?: string | null;
   description?: string | null;
   number?: number | null;
-  richText?: LexicalRichText<LexicalNodes_C77AB37E> | null;
+  richText?: LexicalRichText<LexicalNodes_EC517269> | null;
   someTextField?: string | null;
   namedGroup?: {
     someTextField?: string | null;
@@ -801,7 +797,7 @@ export interface FullyFeatured {
   id: string;
   title: string;
   slug?: string | null;
-  content?: LexicalRichText<LexicalNodes_6022754B> | null;
+  content?: LexicalRichText<LexicalNodes_6CCD2587> | null;
   /**
    * Short summary for list views and SEO
    */
@@ -839,7 +835,7 @@ export interface FullyFeatured {
  * via the `definition` "RichTextBlock".
  */
 export interface RichTextBlock {
-  richText?: LexicalRichText<LexicalNodes_6022754B> | null;
+  richText?: LexicalRichText<LexicalNodes_6CCD2587> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'richTextBlock';
@@ -895,31 +891,6 @@ export interface CardGridBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'cardGridBlock';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1084,10 +1055,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'fully-featured';
         value: string | FullyFeatured;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1668,22 +1635,6 @@ export interface FullyFeaturedSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
