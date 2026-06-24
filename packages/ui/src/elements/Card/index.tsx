@@ -1,17 +1,19 @@
 'use client'
 
 import React from 'react'
+import { getTranslation } from '@payloadcms/translations'
 
+import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import './index.css'
 
 export type Props = {
   actions?: React.ReactNode
-  buttonAriaLabel?: string
+  buttonAriaLabel?: Record<string, string> | string
   href?: string
   id?: string
   onClick?: () => void
-  title: string
+  title: Record<string, string> | string
   titleAs?: React.ElementType
 }
 
@@ -19,6 +21,7 @@ const baseClass = 'card'
 
 export const Card: React.FC<Props> = (props) => {
   const { id, actions, buttonAriaLabel, href, onClick, title, titleAs } = props
+  const { i18n } = useTranslation()
 
   const classes = [baseClass, id, (onClick || href) && `${baseClass}--has-onclick`]
     .filter(Boolean)
@@ -28,10 +31,10 @@ export const Card: React.FC<Props> = (props) => {
 
   return (
     <div className={classes} id={id}>
-      <Tag className={`${baseClass}__title`}>{title}</Tag>
+      <Tag className={`${baseClass}__title`}>{getTranslation(title as any, i18n)}</Tag>
       {(onClick || href) && (
         <Button
-          aria-label={buttonAriaLabel}
+          aria-label={buttonAriaLabel ? getTranslation(buttonAriaLabel as any, i18n) : undefined}
           buttonStyle="ghost"
           className={`${baseClass}__click`}
           el="link"
