@@ -455,7 +455,7 @@ The deprecated `HTMLConverterFeature`, `lexicalHTML`, and the per-node `converte
 
 Custom nodes that define `converters.html` should export their converters instead.
 
-### Lexical: `isHTMLElement` removed — use lexical's built-in
+### Lexical: `isHTMLElement` removed — use lexical's built-in ([#17104](https://github.com/payloadcms/payload/pull/17104))
 
 The deprecated `isHTMLElement` utility has been removed from `@payloadcms/richtext-lexical`. It was a thin wrapper around `x instanceof HTMLElement` that duplicated a utility already exported by `lexical`. Import it directly from `lexical` instead.
 
