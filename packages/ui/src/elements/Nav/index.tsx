@@ -44,6 +44,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
   const {
     admin: {
       components: { afterNav, afterNavLinks, beforeNav, beforeNavLinks, settingsMenu },
+      groups: adminGroups,
     },
     collections,
     globals,
@@ -74,6 +75,7 @@ export const DefaultNav: React.FC<NavProps> = async (props) => {
     ],
     permissions,
     i18n,
+    adminGroups,
   )
 
   const navPreferences = await getNavPrefs(req)
