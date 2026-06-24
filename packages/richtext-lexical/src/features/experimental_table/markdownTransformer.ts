@@ -1,6 +1,11 @@
 import type { LexicalNode } from 'lexical'
 
 import {
+  $convertToMarkdownString,
+  type ElementTransformer,
+  type Transformer,
+} from '@lexical/markdown'
+import {
   $createTableCellNode,
   $createTableNode,
   $createTableRowNode,
@@ -14,21 +19,16 @@ import {
 } from '@lexical/table'
 import { $isParagraphNode, $isTextNode } from 'lexical'
 
-import {
-  $convertFromMarkdownString,
-  $convertToMarkdownString,
-  type ElementTransformer,
-  type Transformer,
-} from '../../lexical-proxy/@lexical-markdown.js'
+import { $convertFromMarkdownString } from '../../lexical/utils/markdown/convertFromMarkdownString.js'
 
 // Very primitive table setup
 const TABLE_ROW_REG_EXP = /^\|(.+)\|\s?$/
 // eslint-disable-next-line regexp/no-unused-capturing-group
 const TABLE_ROW_DIVIDER_REG_EXP = /^(\| ?:?-*:? ?)+\|\s?$/
 
-export const TableMarkdownTransformer: (props: {
-  allTransformers: Transformer[]
-}) => ElementTransformer = ({ allTransformers }) => ({
+export const PAYLOAD_TABLE: (props: { allTransformers: Transformer[] }) => ElementTransformer = ({
+  allTransformers,
+}) => ({
   type: 'element',
   dependencies: [TableNode, TableRowNode, TableCellNode],
   export: (node: LexicalNode) => {
@@ -167,7 +167,9 @@ function getTableColumnsSize(table: TableNode) {
 const $createTableCell = (textContent: string, allTransformers: Transformer[]): TableCellNode => {
   textContent = textContent.replace(/\\n/g, '\n')
   const cell = $createTableCellNode(TableCellHeaderStates.NO_STATUS)
-  $convertFromMarkdownString(textContent, allTransformers, cell)
+  // shouldMergeAdjacentLines is true to preserve how cell content was parsed
+  // before the exported $convertFromMarkdownString default changed to false.
+  $convertFromMarkdownString(textContent, allTransformers, cell, false, true)
   return cell
 }
 

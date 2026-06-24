@@ -6,7 +6,7 @@ import type { SanitizedServerEditorConfig } from '../../../lexical/config/types.
 import type { DefaultNodeTypes, TypedEditorState } from '../../../types/nodeTypes.js'
 
 import { getEnabledNodes } from '../../../lexical/nodes/index.js'
-import { $convertFromMarkdownString } from '../../../lexical-proxy/@lexical-markdown.js'
+import { $convertFromMarkdownString } from '../../../lexical/utils/markdown/convertFromMarkdownString.js'
 
 export const convertMarkdownToLexical = <
   TNodeTypes extends SerializedLexicalNode = DefaultNodeTypes,
@@ -25,7 +25,16 @@ export const convertMarkdownToLexical = <
 
   headlessEditor.update(
     () => {
-      $convertFromMarkdownString(markdown, editorConfig.features.markdownTransformers)
+      // shouldMergeAdjacentLines is true so multi-line Payload block tags and
+      // soft-wrapped content keep being parsed as before. The exported
+      // $convertFromMarkdownString now defaults to false to match upstream.
+      $convertFromMarkdownString(
+        markdown,
+        editorConfig.features.markdownTransformers,
+        undefined,
+        false,
+        true,
+      )
     },
     { discrete: true },
   )

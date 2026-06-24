@@ -5,7 +5,7 @@ import { sanitizeFields } from 'payload'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
-import { TableMarkdownTransformer } from '../markdownTransformer.js'
+import { PAYLOAD_TABLE } from '../markdownTransformer.js'
 import { tableCellNodeJSONSchema, tableNodeJSONSchema, tableRowNodeJSONSchema } from './schema.js'
 
 export type {
@@ -51,7 +51,7 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
 
         return schemaMap
       },
-      markdownTransformers: [TableMarkdownTransformer],
+      markdownTransformers: [PAYLOAD_TABLE],
       nodes: [
         createNode({
           jsonSchema: tableNodeJSONSchema,

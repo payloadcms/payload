@@ -9,7 +9,7 @@ import {
 /** Matches upload placeholder written by export: ![relationTo:id]() */
 const UPLOAD_PLACEHOLDER_REGEX = /!\[([^\]:]+):([^\]]+)\]\(\)/
 
-export const UploadMarkdownTransformer: ElementTransformer = {
+export const PAYLOAD_UPLOAD: ElementTransformer = {
   type: 'element',
   dependencies: [UploadServerNode],
   export: (node) => {

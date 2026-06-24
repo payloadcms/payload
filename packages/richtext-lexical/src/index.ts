@@ -324,6 +324,8 @@ export type {
   SlashMenuGroup,
   SlashMenuItem,
 } from './lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+export { $convertFromMarkdownString } from './lexical/utils/markdown/convertFromMarkdownString.js'
+
 export {
   DETAIL_TYPE_TO_DETAIL,
   DOUBLE_LINE_BREAK,
@@ -340,8 +342,6 @@ export {
 } from './lexical/utils/nodeFormat.js'
 
 export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
-
-export { $convertFromMarkdownString } from './lexical-proxy/@lexical-markdown.js'
 
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'

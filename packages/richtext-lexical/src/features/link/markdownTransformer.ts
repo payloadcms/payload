@@ -8,7 +8,7 @@
 
 import type { TextMatchTransformer } from '@lexical/markdown'
 
-import { $createTextNode, $isTextNode } from 'lexical'
+import { $createTextNode } from 'lexical'
 
 import type { SerializedLinkNode } from './server/schema.js'
 
@@ -17,7 +17,7 @@ import { $createLinkNode, $isLinkNode, LinkNode } from './nodes/LinkNode.js'
 
 // - then longer tags match (e.g. ** or __ should go before * or _)
 
-export type CreateLinkMarkdownTransformerArgs = {
+export type CreatePayloadLinkTransformerArgs = {
   /**
    * A function that receives a serialized internal link node and returns the URL string.
    * Required for internal links (linkType === 'internal') to be exported correctly, since
@@ -46,8 +46,8 @@ const replaceTransformer: TextMatchTransformer['replace'] = (textNode, match) =>
   return linkTextNode
 }
 
-export const createLinkMarkdownTransformer = (
-  args?: CreateLinkMarkdownTransformerArgs,
+export const createPayloadLinkTransformer = (
+  args?: CreatePayloadLinkTransformerArgs,
 ): TextMatchTransformer => ({
   type: 'text-match',
   dependencies: [LinkNode],
@@ -83,4 +83,4 @@ export const createLinkMarkdownTransformer = (
   trigger: ')',
 })
 
-export const LinkMarkdownTransformer: TextMatchTransformer = createLinkMarkdownTransformer()
+export const PAYLOAD_LINK: TextMatchTransformer = createPayloadLinkTransformer()

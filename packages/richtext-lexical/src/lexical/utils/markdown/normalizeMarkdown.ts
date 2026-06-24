@@ -2,6 +2,11 @@
  * Payload-specific markdown normalization, run by `$convertFromMarkdownString`
  * before delegating the import to `@lexical/markdown`. Handles nested code
  * fences and preserves table-row whitespace.
+ *
+ * TODO: Remove this file once https://github.com/facebook/lexical/pull/8734 is
+ * merged and we upgrade to a release that includes it. That PR fixes the nested
+ * code fence handling upstream, so `$convertFromMarkdownString` can call
+ * `@lexical/markdown` directly instead of pre-normalizing here.
  */
 
 // These regexes are only used with `.test()` here, so their capturing groups

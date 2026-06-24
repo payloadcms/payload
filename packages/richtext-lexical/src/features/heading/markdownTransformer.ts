@@ -1,34 +1,20 @@
 import type { ElementTransformer } from '@lexical/markdown'
 import type { HeadingTagType } from '@lexical/rich-text'
 
-import { $createHeadingNode, $isHeadingNode, HeadingNode } from '@lexical/rich-text'
+// eslint-disable-next-line payload/no-conflicting-lexical-markdown-imports -- PAYLOAD_HEADING intentionally extends upstream HEADING, overriding only its regExp to respect the enabled heading levels
+import { HEADING } from '@lexical/markdown'
 
-import { createBlockNode } from '../../lexical/utils/markdown/createBlockNode.js'
-
-export const MarkdownTransformer: (enabledHeadingSizes: HeadingTagType[]) => ElementTransformer = (
+export const PAYLOAD_HEADING: (enabledHeadingSizes: HeadingTagType[]) => ElementTransformer = (
   enabledHeadingSizes,
 ) => {
   // Convert enabledHeadingSizes to a list of numbers (1 for h1, 2 for h2, etc.)
   const enabledSizes = enabledHeadingSizes.map((tag) => Number(tag.slice(1)))
 
-  // Create a regex pattern that matches any of the enabled sizes
+  // Only the heading levels enabled in the config should be matched on import.
   const pattern = `^(${enabledSizes.map((size) => `#{${size}}`).join('|')})\\s`
-  const regExp = new RegExp(pattern)
 
   return {
-    type: 'element',
-    dependencies: [HeadingNode],
-    export: (node, exportChildren) => {
-      if (!$isHeadingNode(node)) {
-        return null
-      }
-      const level = Number(node.getTag().slice(1))
-      return '#'.repeat(level) + ' ' + exportChildren(node)
-    },
-    regExp,
-    replace: createBlockNode((match) => {
-      const tag = ('h' + match[1]?.length) as HeadingTagType
-      return $createHeadingNode(tag)
-    }),
+    ...HEADING,
+    regExp: new RegExp(pattern),
   }
 }
