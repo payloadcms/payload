@@ -51,6 +51,8 @@ ruleTester.run('no-conflicting-lexical-markdown-imports', rule, {
     },
     // Unrelated named imports from the markdown package are allowed.
     { code: "import { $createCodeNode } from '@lexical/markdown'" },
+    // Text format transformers do not conflict with Payload-specific markdown nodes.
+    { code: "import { TEXT_FORMAT_TRANSFORMERS } from '@lexical/markdown'" },
     // Type-only HEADING import is fine (PAYLOAD_HEADING references its type).
     { code: "import { type HEADING } from '@lexical/markdown'" },
   ],
