@@ -325,6 +325,12 @@ export const myRichTextAdapter = (): RichTextAdapterProvider => {
 
 The `transactionIDPromise` property on `PayloadRequest` has been removed. It was deprecated and unused — `transactionID` (which already supports `Promise<number | string>`) is the correct property to use for both resolved values and pending transactions.
 
+### `defaults` config export removed from `payload` ([#17103](https://github.com/payloadcms/payload/pull/17103))
+
+The defaults object exported from payload has been removed. It was deprecated because it was a single shared object and mutating it (or any config that used it as a base) leaked changes into every other consumer of the defaults.
+
+If you depended on reading a specific default value at runtime, read it from the sanitized config returned by buildConfig (or payload.config) instead of from the static defaults object.
+
 ### Plugin Import/Export: `toCSV` and `fromCSV` removed
 
 The `toCSV` and `fromCSV` field options in `custom['plugin-import-export']` have been removed. Use `hooks.beforeExport` and `hooks.beforeImport` instead — they work for both CSV and JSON formats.
