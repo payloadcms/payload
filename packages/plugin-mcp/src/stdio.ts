@@ -6,8 +6,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createLocalReq, getPayload } from 'payload'
 import { findConfig } from 'payload/node'
 
-import type { AuthorizedMCP, SanitizedMCPPluginConfig } from './types.js'
+import type { SanitizedMCPPluginConfig } from './types.js'
 
+import { getAuthorizedMCP } from './endpoint/access.js'
 import { buildMcpServer } from './mcp/buildMcpServer.js'
 import { sanitizeMCPConfig } from './mcp/sanitizeMCPConfig.js'
 import { getPluginConfig } from './utils/getPluginConfig.js'
@@ -16,8 +17,9 @@ import { resolveProjectRoot } from './utils/resolveProjectRoot.js'
 /**
  * Stdio adapter for the Payload MCP server.
  *
- * Do not use in production. There's no auth; whoever can spawn the process gets
- * full access to your local data.
+ * Pass PAYLOAD_MCP_AUTHORIZATION when stdio should authenticate with the same
+ * Payload auth header as HTTP. In development, PAYLOAD_MCP_OVERRIDE_ACCESS=true
+ * skips access control for local setup.
  */
 export const runMcpStdio = async (): Promise<void> => {
   /**
@@ -62,14 +64,27 @@ export const runMcpStdio = async (): Promise<void> => {
     ;(payload.config.plugins ??= []).push(fakePluginFn)
   }
 
-  const authorizedMCP: AuthorizedMCP = {
-    items: pluginConfig.items,
-    overrideAccess: true,
-    user: null,
+  const overrideAccessEnv = process.env.PAYLOAD_MCP_OVERRIDE_ACCESS
+  let overrideAccess = false
+
+  if (overrideAccessEnv === 'true') {
+    overrideAccess = true
+  } else if (overrideAccessEnv && overrideAccessEnv !== 'false') {
+    throw new Error('PAYLOAD_MCP_OVERRIDE_ACCESS must be "true" or "false".')
   }
 
-  const req = await createLocalReq({}, payload)
+  if (overrideAccess && process.env.NODE_ENV !== 'development') {
+    throw new Error('PAYLOAD_MCP_OVERRIDE_ACCESS is only available in development.')
+  }
+
+  const headers = new Headers()
+  if (process.env.PAYLOAD_MCP_AUTHORIZATION) {
+    headers.set('Authorization', process.env.PAYLOAD_MCP_AUTHORIZATION)
+  }
+
+  const req = await createLocalReq({ req: { headers } }, payload)
   req.payloadAPI = 'MCP' as const
+  const authorizedMCP = await getAuthorizedMCP({ overrideAccess, req })
 
   const server = buildMcpServer({ authorizedMCP, pluginConfig, req })
 

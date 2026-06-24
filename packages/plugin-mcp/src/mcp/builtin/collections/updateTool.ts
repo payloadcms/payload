@@ -2,6 +2,7 @@ import type { SelectType, Where } from 'payload'
 
 import { z } from 'zod'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import {
@@ -19,6 +20,8 @@ const DEFAULT_DESCRIPTION =
   'Update documents in any collection by passing the collection slug and data.'
 
 export const updateDocumentTool = defineCollectionTool({
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.collectionSlug]?.update),
   annotations: {
     destructiveHint: true,
     idempotentHint: false,
