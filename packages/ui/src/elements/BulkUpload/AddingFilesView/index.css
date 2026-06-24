@@ -4,11 +4,17 @@
     gap: var(--spacer-2);
   }
 
-  /** old code */
+  /* The dialog is otherwise content-sized; give it a definite height so the inner flex chain has
+     something to resolve against and the fields column can scroll internally. */
+  .dialog.bulk-upload--dialog {
+    height: min(720px, var(--dialog-max-height));
+  }
+
   .bulk-upload--file-manager__wrapper {
     display: flex;
     flex-direction: column;
-    height: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
     width: 100%;
     overflow: hidden;
   }
@@ -24,7 +30,8 @@
   .bulk-upload--file-manager__editView {
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
+    /* Edit view holds the 4fr content + 5fr media columns, so it takes 9fr next to the 3fr tree. */
+    flex: 9 1 0;
     min-width: 0;
     height: 100%;
     max-height: 100%;
@@ -38,20 +45,35 @@
     min-height: 0;
   }
 
-  /* Desktop: fields and preview sit side by side (the shared upload-layout class supplies the
-     row + ordering + flex ratios + the divider between them). The shared layout's responsive
-     behaviour is keyed to an `edit-main` container query, which the bulk modal does not establish,
-     so the stacking is handled by the viewport media query below instead. */
+  /* Desktop: fields sit on the left and the preview on the right as a fixed-width side panel,
+     separated by a divider. The shared layout has no base flex rules of its own, so the row,
+     ordering and sizing are established here. The responsive stacking is handled by the viewport
+     media query below (the bulk modal does not establish the `edit-main` container query the
+     document edit page relies on). */
   .bulk-upload--file-manager .collection-edit__upload-layout {
+    display: flex;
+    flex-direction: row;
     height: 100%;
     align-items: stretch;
   }
 
   /* The fields scroll within their own column so the preview stays in place. */
   .bulk-upload--file-manager .collection-edit__upload-layout .document-fields {
+    order: 0;
+    flex: 4 1 0;
+    min-width: 0;
     min-height: 0;
     height: 100%;
+    padding: var(--spacer-3);
     overflow-y: auto;
+  }
+
+  /* The preview sits on the right (5fr media : 4fr content) with a divider. */
+  .bulk-upload--file-manager .collection-edit__upload-layout .file-manager {
+    order: 1;
+    flex: 5 1 0;
+    min-height: 0;
+    border-inline-start: var(--stroke-width-small) solid var(--color-border);
   }
 
   /* Contained file manager (not the full-viewport sticky panel used on the document edit page);

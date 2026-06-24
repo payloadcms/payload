@@ -61,7 +61,7 @@ export function AddingFilesView({ modalSlug }: Props) {
 
   return (
     <>
-      <DialogModal size="large" slug={modalSlug}>
+      <DialogModal className="bulk-upload--dialog" size="large" slug={modalSlug}>
         <DialogHeader
           onClose={() => openModal(discardBulkUploadModalSlug)}
           showClose={true}

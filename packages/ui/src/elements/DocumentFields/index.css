@@ -118,12 +118,13 @@
   .document-fields--force-sidebar-wrap .document-fields__sidebar-wrap {
     position: static;
     width: 100%;
+    min-width: 0;
     height: initial;
     border-left: 0;
   }
 
   .document-fields--force-sidebar-wrap .document-fields__sidebar {
-    padding-bottom: calc(var(--spacer-5) * 2);
+    padding-bottom: calc(2 * var(--spacing-field));
     overflow: visible;
   }
 
