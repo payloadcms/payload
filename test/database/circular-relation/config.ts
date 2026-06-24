@@ -11,6 +11,7 @@ export default buildConfigWithDefaults({
           relationTo: 'teams',
         },
       ],
+      versions: false,
     },
     {
       slug: 'teams',
@@ -21,6 +22,7 @@ export default buildConfigWithDefaults({
           relationTo: 'organizations',
         },
       ],
+      versions: false,
     },
     {
       slug: 'organizations',
@@ -31,6 +33,7 @@ export default buildConfigWithDefaults({
           relationTo: 'media',
         },
       ],
+      versions: false,
     },
   ],
 })

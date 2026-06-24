@@ -1,13 +1,14 @@
 import type { CollectionConfig } from 'payload'
 
-const SearchBarTest: CollectionConfig = {
+export const SearchBarTest: CollectionConfig = {
   slug: 'search-bar-test',
   admin: {
     useAsTitle: 'title',
-    groupBy: {
-      fields: ['category', 'status'],
-    },
+    groupBy: true,
     listSearchableFields: ['title', 'description'],
+    components: {
+      afterList: ['./collections/SearchBarTest/AfterList.js#AfterList'],
+    },
   },
   enableQueryPresets: true,
   fields: [
@@ -45,6 +46,5 @@ const SearchBarTest: CollectionConfig = {
       type: 'number',
     },
   ],
+  versions: false,
 }
-
-export default SearchBarTest

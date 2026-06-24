@@ -19,7 +19,6 @@ import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../../ListSelection/index.js'
 import { Translation } from '../../Translation/index.js'
 import { useHierarchyDrawer } from '../Drawer/useHierarchyDrawer.js'
-import './index.scss'
 
 export const baseClass = 'move-many'
 

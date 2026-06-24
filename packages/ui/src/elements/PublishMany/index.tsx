@@ -5,30 +5,12 @@ import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
 import { useAuth } from '../../providers/Auth/index.js'
-import { SelectAllStatus, useSelection } from '../../providers/Selection/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
 import { PublishManyDrawerContent } from './DrawerContent.js'
 
 export type PublishManyProps = {
   collection: ClientCollectionConfig
-}
-
-export const PublishMany: React.FC<PublishManyProps> = (props) => {
-  const { count, selectAll, selectedIDs, toggleAll } = useSelection()
-
-  return (
-    <PublishMany_v4
-      {...props}
-      count={count}
-      ids={selectedIDs}
-      onSuccess={() => toggleAll()}
-      selectAll={selectAll === SelectAllStatus.AllAvailable}
-    />
-  )
-}
-
-type PublishMany_v4Props = {
   count: number
   ids: (number | string)[]
   /**
@@ -38,9 +20,9 @@ type PublishMany_v4Props = {
   onSuccess?: () => void
   selectAll: boolean
   where?: Where
-} & PublishManyProps
+}
 
-export const PublishMany_v4: React.FC<PublishMany_v4Props> = (props) => {
+export const PublishMany: React.FC<PublishManyProps> = (props) => {
   const {
     collection,
     collection: { slug, versions } = {},

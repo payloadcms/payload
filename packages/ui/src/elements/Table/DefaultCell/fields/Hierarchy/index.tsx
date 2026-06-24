@@ -15,7 +15,7 @@ import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js
 import { Button } from '../../../../Button/index.js'
 import { useHierarchyDrawer } from '../../../../Hierarchy/Drawer/useHierarchyDrawer.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
-import './index.scss'
+import './index.css'
 
 type Value = { relationTo: string; value: number | string }
 const baseClass = 'hierarchy-cell'
@@ -54,8 +54,9 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
       ? hierarchyCollectionConfig.hierarchy
       : undefined
 
-  // Pre-rendered icon from server (supports custom icons)
+  // Pre-rendered icons from server (supports custom icons)
   const preRenderedIcon = customCellProps?.hierarchyIcon as React.ReactNode | undefined
+  const preRenderedSmallIcon = customCellProps?.hierarchySmallIcon as React.ReactNode | undefined
 
   // Fallback icon for client-side rendering
   const fallbackIcon = useMemo(() => {
@@ -67,9 +68,15 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
     return <IconComponent />
   }, [hierarchyConfig, preRenderedIcon])
 
+  // Full icon for drawer subheader
+  const drawerIcon = preRenderedIcon || fallbackIcon
+  // Small icon for compact display (pill button)
+  const displayIcon = preRenderedSmallIcon ?? drawerIcon
+
   // Set up the hierarchy drawer
   const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
     hierarchyCollectionSlug: hierarchyCollectionSlug || '',
+    Icon: drawerIcon,
   })
 
   // Fetch relationship data when visible
@@ -200,7 +207,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
       <Button
         buttonStyle="pill"
         className={`${baseClass}__pill`}
-        icon={preRenderedIcon || fallbackIcon}
+        icon={displayIcon}
         iconPosition="left"
         margin={false}
         onClick={openDrawer}

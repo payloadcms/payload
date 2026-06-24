@@ -29,6 +29,7 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 - `migrate-disabled-fields` — migrates `field.admin.disableListColumn`, `disableListFilter`, `disableGroupBy`, `disableBulkEdit` and their equivalents on `imageSize.admin` into the consolidated `disabled` object form.
 - `globals-components-edit` — Globals: rename `admin.components.elements` to `admin.components.edit` and hoist `Description` to top-level `admin.components.Description` to match Collection conventions.
 - `migrate-force-select` — migrates `forceSelect: { ... }` on Collection/Global configs to a `select` function that augments the caller's `select` when present and returns `undefined` (preserving full-document reads) when not. Shallow values become a spread (`{ ...select, ... }`); nested values use `deepMergeSimple` from `payload/shared` (auto-imported) to preserve the previous deep-merge semantics. Non-literal values, sibling `select` already present, and unsupported member kinds are surfaced as notes for manual review.
+- `migrate-block-references-to-blocks` — renames blocks field `blockReferences` configs to `blocks`, and removes a sibling `blocks: []` placeholder when present. If a non-empty `blocks` sibling already exists, the transform leaves the field untouched and surfaces a note for manual review.
 - `migrate-hide-api-url` — migrates `admin.hideAPIURL: true` to `admin.components.views.edit.api.tab.condition: () => false` on collection and global configs.
 - `migrate-aliased-exports` — rewrites imports of types and utilities that used to be re-exported from `@payloadcms/ui` and `@payloadcms/next/utilities` to their canonical sources in `payload` / `payload/shared`.
 - `migrate-document-title-context` — migrates `title` and `setDocumentTitle` destructured from `useDocumentInfo()` to `useDocumentTitle()`. They were removed from `DocumentInfoContext` in v4 and now live on `DocumentTitleContext`.
@@ -38,6 +39,12 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 - `rename-storage-adapters-to-storage` — renames the top-level `storageAdapters` config property to `storage`. Skips any object that already has a `storage` property. Run this if you previously ran `migrate-storage-adapters-to-config` and need to update the property name.
 - `migrate-import-export-hooks` — migrates the deprecated `toCSV` and `fromCSV` field options in `custom['plugin-import-export']` to `hooks.beforeExport` and `hooks.beforeImport`. If a `hooks` object already exists it is merged into; if `hooks.beforeExport`/`hooks.beforeImport` already exist the deprecated sibling is dropped without overwriting. Review argument shapes after migration: `beforeExport` uses `siblingData` (not `row`) and `data` is the top-level document (previously `doc`).
 - `migrate-db-types-subpath` — rewrites imports from the removed `/types` subpath exports of `@payloadcms/drizzle`, `@payloadcms/db-postgres`, `@payloadcms/db-sqlite`, `@payloadcms/db-vercel-postgres`, and `@payloadcms/db-d1-sqlite` to their main entry points. Also handles re-export declarations and `declare module` augmentations.
+- `migrate-next-subpath-exports` — rewrites imports, re-exports, and string-literal component paths from the removed `@payloadcms/next/client`, `@payloadcms/next/rsc`, and `@payloadcms/next/templates` subpaths to their canonical `@payloadcms/ui` or `@payloadcms/ui/rsc` sources. After running, regenerate the import map with `payload generate:importmap`.
+- `migrate-versions-default` — adds `versions: false` to every `CollectionConfig` or `GlobalConfig` object that does not already have a `versions` property. Preserves the previous opt-in behaviour now that `versions` defaults to `true` for both collections and globals. Detects the three common annotation forms: `: CollectionConfig`, `satisfies GlobalConfig`, and `as CollectionConfig`.
+- `remove-versions-true` — removes the now-redundant `versions: true` property from `CollectionConfig` and `GlobalConfig` objects. Only removes the bare boolean `true`; object-form configs (e.g. `versions: { drafts: true }`) are left untouched.
+- `remove-group-by-true` — removes `admin.groupBy` from `CollectionConfig` objects. The experimental `groupBy` flag has been removed; groupBy is now an always-available per-user UI preference.
+- `rename-typescript-schema-to-json-schema` — renames the `typescriptSchema` field-config property to `jsonSchema` (it always accepted JSON Schema, not TypeScript). Skips any object that already defines a `jsonSchema` sibling and surfaces it as a note for manual review.
+- `migrate-build-script` — rewrites the `build` npm script in `package.json` from `next build` to `payload build`, so the Import Map (and types) are generated before the Next.js build. Matches the `next build` invocation only (leaves `next build-storybook` and the like untouched) and is a no-op when `build` is already `payload build`.
 
 ## Contributing
 
@@ -45,7 +52,7 @@ To add a transform:
 
 1. Create `src/transforms/<name>/` with `index.ts` exporting a `Transform`.
 2. Add fixtures as `<case>.input.ts` and `<case>.output.ts` siblings of `index.ts`.
-3. Add `index.test.ts` verifying both the fixture pair and idempotency (running the transform on the output produces the output unchanged).
+3. Add `index.spec.ts` verifying both the fixture pair and idempotency (running the transform on the output produces the output unchanged).
 4. Register in `src/registry.ts`.
 5. Update the transform list in this README.
 

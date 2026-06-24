@@ -8,7 +8,7 @@ import { sanitizePopulateParam } from '../sanitizePopulateParam.js'
 import { sanitizeSelectParam } from '../sanitizeSelectParam.js'
 import { sanitizeSortParams } from '../sanitizeSortParams.js'
 
-type RawParams = {
+export type RawParams = {
   [key: string]: unknown
   autosave?: string
   data?: string
@@ -23,7 +23,6 @@ type RawParams = {
   pagination?: string
   populate?: unknown
   publishAllLocales?: string
-  publishSpecificLocale?: string
   select?: unknown
   selectedLocales?: string
   sort?: string | string[]
@@ -32,7 +31,7 @@ type RawParams = {
   where?: string | Where
 }
 
-type ParsedParams = {
+export type ParsedParams = {
   autosave?: boolean
   data?: Record<string, unknown>
   depth?: number
@@ -46,7 +45,6 @@ type ParsedParams = {
   pagination?: boolean
   populate?: PopulateType
   publishAllLocales?: boolean
-  publishSpecificLocale?: string
   select?: SelectType
   selectedLocales?: string[]
   sort?: string[]

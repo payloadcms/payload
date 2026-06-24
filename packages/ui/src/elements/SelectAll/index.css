@@ -1,0 +1,5 @@
+@layer payload-default {
+  .select-all__checkbox {
+    display: block;
+  }
+}

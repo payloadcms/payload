@@ -54,16 +54,16 @@
   }
 
   .LexicalEditorTheme__upload__contents--landscape {
-    img,
-    svg {
-      max-width: var(--upload-media-size);
-      min-width: var(--upload-media-size);
+    .thumbnail img,
+    .thumbnail svg {
+      max-width: min(100%, var(--upload-media-size));
+      min-width: min(100%, var(--upload-media-size));
     }
   }
 
   .LexicalEditorTheme__upload__contents--portrait {
-    img,
-    svg {
+    .thumbnail img,
+    .thumbnail svg {
       max-height: var(--upload-media-size);
       min-height: var(--upload-media-size);
     }
@@ -88,14 +88,8 @@
     padding: 0 var(--spacer-2);
     background: var(--color-bg-menu);
     border-radius: var(--radius-large);
-    box-shadow:
-      0 3px 8px 0 rgba(0, 0, 0, 0.35),
-      0 1px 3px 0 rgba(0, 0, 0, 0.5),
-      inset 0 0.5px 0 0 rgba(255, 255, 255, 0.08),
-      inset 0 0 0.5px 0 rgba(255, 255, 255, 0.3);
-    color: var(--color-white-800);
+    color: var(--color-text);
     opacity: 0;
-    transition: opacity 0.15s ease;
     pointer-events: none;
     white-space: nowrap;
     z-index: 1;
@@ -110,7 +104,7 @@
     }
 
     .btn {
-      color: var(--color-white-800);
+      color: var(--color-text);
       width: var(--spacer-4);
       height: var(--spacer-4);
       min-width: var(--spacer-4);
@@ -121,11 +115,11 @@
       cursor: pointer;
 
       &:hover:not(.btn--disabled) {
-        background: var(--color-bg-menu);
+        background: var(--color-bg-transparent-hover);
       }
 
       &:active:not(.btn--disabled) {
-        background: var(--color-bg-menu);
+        background: var(--color-bg-transparent-pressed);
       }
     }
   }
@@ -157,7 +151,7 @@
   .LexicalEditorTheme__upload__divider {
     width: var(--stroke-width-small);
     height: var(--spacer-6);
-    background: var(--color-grey-700);
+    background: var(--color-border);
     flex-shrink: 0;
   }
 
@@ -209,6 +203,8 @@
   border-color: var(--color-border-selected);
   background: transparent;
   border-radius: 0;
+  max-width: min(100%, var(--upload-media-size));
+  min-width: min(100%, var(--upload-media-size));
 }
 
 .LexicalEditorTheme__upload--selected img,

@@ -22,6 +22,7 @@ import {
   clearSelectInput,
   getSelectInputOptions,
   getSelectInputValue,
+  getSelectMenu,
   selectInput,
 } from '../__helpers/e2e/selectInput.js'
 import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
@@ -472,7 +473,7 @@ test.describe('Multi Tenant', () => {
       await expect(page.getByText('Blue Dog Menu')).toBeVisible()
       await expect(page.getByText('Steel Cat Menu')).toBeHidden()
       await expect(page.getByText('Anchor Bar Menu')).toBeHidden()
-      await expect(page.locator('.rs__menu')).toHaveCount(1)
+      await expect(getSelectMenu({ page })).toHaveCount(1)
     })
   })
 
@@ -511,6 +512,7 @@ test.describe('Multi Tenant', () => {
       await expect(editManyDrawer).toBeVisible()
 
       await selectInput({
+        page,
         multiSelect: true,
         options: ['Site'],
         selectLocator: editManyDrawer.locator('.edit-many-bulk-uploads__form .react-select'),
@@ -523,6 +525,7 @@ test.describe('Multi Tenant', () => {
       await expect(inlineTenantField).toBeVisible()
 
       await selectInput({
+        page,
         multiSelect: false,
         option: 'Blue Dog',
         selectLocator: inlineTenantField,
@@ -591,7 +594,7 @@ test.describe('Multi Tenant', () => {
         ),
       ).toBeVisible()
 
-      await confirmationModal.locator('#confirm-action').click()
+      await confirmationModal.locator('[data-dialog-action="confirm"]').click()
       await expect(page.locator('#confirm-leave-without-saving')).toBeHidden()
       await page.goto(menuItemsURL.list)
       await expect
@@ -1128,12 +1131,12 @@ test.describe('Multi Tenant', () => {
       await checkbox.click()
 
       // Open the move drawer
-      const moveButton = page.locator('button', { hasText: 'Move' })
+      const moveButton = page.getByRole('button', { exact: true, name: 'Move' })
       await expect(moveButton).toBeVisible()
       await moveButton.click()
 
       // The move drawer should be visible
-      const moveDrawer = page.locator('.drawer__content')
+      const moveDrawer = page.locator('.hierarchy-drawer__content')
       await expect(moveDrawer).toBeVisible()
 
       // The miller columns should only show Blue Dog folders
@@ -1315,6 +1318,7 @@ test.describe('Multi Tenant', () => {
 async function getTenantOptions({ page }: { page: Page }): Promise<string[]> {
   await openNav(page)
   return await getSelectInputOptions({
+    page,
     selectLocator: page.locator('.tenant-selector'),
   })
 }
@@ -1336,7 +1340,7 @@ async function openAssignTenantModal({
 
   // Open the assign tenant modal
   const docControlsPopup = page.locator('.popup__content')
-  const docControlsButton = page.locator('.doc-controls__popup .popup-button')
+  const docControlsButton = page.locator('.doc-controls__popup .popup__trigger-wrap button')
   await expect(docControlsButton).toBeVisible()
   await docControlsButton.click()
 
@@ -1361,6 +1365,7 @@ async function selectDocumentTenant({
   await closeNav(page)
   await openAssignTenantModal({ page, payload })
   await selectInput({
+    page,
     multiSelect: false,
     option: tenant,
     selectLocator: page.locator('.tenantField'),
@@ -1415,6 +1420,7 @@ async function setTenantFilter({
 
   await openNav(page)
   await selectInput({
+    page,
     multiSelect: false,
     option: tenant,
     selectLocator: page.locator('.tenant-selector'),
@@ -1430,6 +1436,7 @@ async function switchGlobalDocTenant({
 }): Promise<void> {
   await openNav(page)
   await selectInput({
+    page,
     multiSelect: false,
     option: tenant,
     selectLocator: page.locator('.tenant-selector'),

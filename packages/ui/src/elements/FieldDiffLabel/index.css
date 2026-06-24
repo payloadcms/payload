@@ -1,0 +1,21 @@
+@layer payload-default {
+  .field-diff-label {
+    margin-bottom: var(--spacer-2);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    letter-spacing: var(--text-body-medium-strong-letter-spacing);
+    display: flex;
+    flex-direction: row;
+    height: 100%;
+    align-items: center;
+    color: var(--color-text);
+  }
+
+  @media (max-width: 768px) {
+    .field-diff-label {
+      height: min-content;
+    }
+  }
+}

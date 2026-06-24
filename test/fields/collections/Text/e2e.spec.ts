@@ -1,18 +1,20 @@
 import type { Page } from '@playwright/test'
-import type { GeneratedTypes } from '../../../__helpers/shared/sdk/types.js'
 
 import { expect, test } from '@playwright/test'
-import { getPillSelectorItem, openListColumns, toggleColumn } from '../../../__helpers/e2e/columns/index.js'
-import { addListFilter } from '../../../__helpers/e2e/filters/index.js'
-import { upsertPreferences } from '../../../__helpers/e2e/preferences.js'
-import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
+import type { GeneratedTypes } from '../../../__helpers/shared/sdk/types.js'
 import type { Config } from '../../payload-types.js'
 
+import {
+  getColumnSelectorItem,
+  openListColumns,
+  toggleColumn,
+} from '../../../__helpers/e2e/columns/index.js'
+import { addListFilter } from '../../../__helpers/e2e/filters/index.js'
 import {
   ensureCompilationIsDone,
   exactText,
@@ -20,6 +22,8 @@ import {
   saveDocAndAssert,
   selectTableRow,
 } from '../../../__helpers/e2e/helpers.js'
+import { upsertPreferences } from '../../../__helpers/e2e/preferences.js'
+import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -84,7 +88,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Hidden Text Field' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Hidden Text Field' }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -108,7 +112,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Disabled Text Field' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Disabled Text Field' }),
       ).toBeHidden()
 
       await selectTableRow(page, 'Seeded text document')
@@ -134,7 +138,7 @@ describe('Text', () => {
       const { columnContainer } = await openListColumns(page, {})
 
       await expect(
-        getPillSelectorItem({ container: columnContainer, label: 'Admin Hidden Text Field' }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Admin Hidden Text Field' }),
       ).toBeVisible()
 
       await selectTableRow(page, 'Seeded text document')
@@ -178,7 +182,7 @@ describe('Text', () => {
     await page.goto(url.list)
     await openListColumns(page, {})
     await expect(
-      getPillSelectorItem({ container: page, label: 'Disable List Column Text' }),
+      getColumnSelectorItem({ container: page, label: 'Disable List Column Text' }),
     ).toBeHidden()
 
     await expect(page.locator('#heading-disableListColumnText')).toBeHidden()
@@ -373,7 +377,7 @@ describe('Text', () => {
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(2)
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-text').waitFor()

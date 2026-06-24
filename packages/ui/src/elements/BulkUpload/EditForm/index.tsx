@@ -17,7 +17,7 @@ import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
 import { Upload_v4 } from '../../Upload/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'collection-edit'
 

@@ -19,4 +19,5 @@ export const GlobalNoApiView: GlobalConfig = {
     },
   },
   fields: [],
+  versions: false,
 }

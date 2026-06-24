@@ -18,20 +18,12 @@
     gap: var(--spacer-2);
   }
 
-  .relationship-table__columns-inner {
-    padding-bottom: var(--spacer-3);
-  }
-
   .relationship-table__toggle-columns .btn__icon {
     color: var(--color-icon-secondary);
   }
 
   .relationship-table__toggle-columns:hover .btn__icon {
     color: var(--color-text);
-  }
-
-  .relationship-table__columns[aria-hidden='true'] {
-    display: none;
   }
 
   .relationship-table__add-new-polymorphic-wrapper {
@@ -47,7 +39,7 @@
   .relationship-table .table {
     margin-bottom: 0;
     background: var(--color-bg);
-    border: 1px solid var(--color-border);
+    border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
     overflow: hidden;
 

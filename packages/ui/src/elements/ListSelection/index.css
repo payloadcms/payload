@@ -2,7 +2,7 @@
   .list-selection {
     display: flex;
     margin-left: auto;
-    color: var(--theme-elevation-500);
+    color: var(--color-text-secondary);
     gap: var(--spacer-1);
     align-items: center;
   }

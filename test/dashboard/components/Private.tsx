@@ -24,9 +24,9 @@ export default function Private({ widgetSlug }: WidgetServerProps) {
         <h3 style={{ fontSize: '16px', fontWeight: 600, margin: 0 }}>Private Widget</h3>
         <div
           style={{
-            background: 'var(--theme-success-500)',
+            background: 'var(--color-bg-brand)',
             borderRadius: '12px',
-            color: 'var(--theme-elevation-0)',
+            color: 'var(--color-text-onbrand)',
             fontSize: '12px',
             fontWeight: 600,
             padding: '4px 8px',

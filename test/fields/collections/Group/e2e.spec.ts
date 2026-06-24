@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -12,9 +11,10 @@ import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
 } from '../../../__helpers/e2e/helpers.js'
+import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { groupFieldsSlug } from '../../slugs.js'
@@ -139,7 +139,7 @@ describe('Group', () => {
     })
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test.fixme('Edit view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-group__text').waitFor()

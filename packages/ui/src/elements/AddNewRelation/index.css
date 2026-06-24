@@ -12,15 +12,15 @@
 
   .relationship-add-new__add-button {
     display: flex;
+    position: relative;
     align-items: center;
     justify-content: center;
-    width: var(--spacer-5);
-    height: var(--spacer-5);
-    padding: var(--spacer-1);
+    padding-inline: var(--spacer-1);
+    height: var(--field-min-height);
     margin: 0;
     background: var(--color-bg-secondary);
     border: none;
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     color: var(--color-icon);
     cursor: pointer;
     transition: background-color 100ms;

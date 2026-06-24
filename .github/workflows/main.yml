@@ -37,6 +37,8 @@ jobs:
           filters: |
             needs_build:
               - '.github/workflows/main.yml'
+              - '.github/actions/start-services/**'
+              - '.github/actions/setup/**'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
@@ -44,6 +46,7 @@ jobs:
               - 'templates/**'
             needs_tests:
               - '.github/workflows/main.yml'
+              - '.github/actions/start-services/**'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
@@ -212,14 +215,6 @@ jobs:
       AWS_ACCESS_KEY_ID: localstack
       AWS_SECRET_ACCESS_KEY: localstack
       AWS_REGION: us-east-1
-
-    services:
-      redis:
-        image: redis:latest
-        ports:
-          - 6379:6379
-
-        options: --health-cmd "redis-cli ping" --health-timeout 30s --health-retries 3
 
     steps:
       - uses: actions/checkout@v5
@@ -428,9 +423,9 @@ jobs:
   build-and-test-templates:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    # Temporarily disabled: template builds require a published beta of workspace packages.
-    # Re-enable once the next 4.x beta is published on npm.
-    if: false
+    if: needs.changes.outputs.needs_build == 'true'
+    # Non-blocking until templates are updated for 4.x breaking changes.
+    continue-on-error: true
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false
@@ -475,7 +470,7 @@ jobs:
 
       - name: Build Template
         run: |
-          pnpm run script:pack --dest templates/${{ matrix.template }}
+          pnpm run script:pack --all --dest templates/${{ matrix.template }}
           pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $DB_CONNECTION
         env:
           NODE_OPTIONS: --max-old-space-size=8096
@@ -558,7 +553,7 @@ jobs:
       contents: read
     services:
       postgres:
-        image: postgres:13
+        image: postgres:15
         env:
           POSTGRES_DB: figma_content_api
           POSTGRES_USER: postgres

@@ -5,27 +5,18 @@ import React, { useMemo, useState } from 'react'
 import type { TranscriptEvent } from '../../types.js'
 import type { Variant } from '../../variant.js'
 import type { RenderedCode } from './codeDiff.js'
-import type { EvalEntry, RunSnapshot } from './index.js'
+import type { RunGroup } from './configuration.js'
+import type { EvalEntry } from './index.js'
 
 import { getVariant as getVariantFromResult } from '../../variant.js'
 import { CompareTable } from './CompareTable.js'
+import { getConfiguration, groupByRun, runKeyOf } from './configuration.js'
+import { RunsOverview } from './RunsOverview.js'
 
 export type { Variant }
 
 export function getVariant(entry: EvalEntry): null | Variant {
   return getVariantFromResult(entry.result)
-}
-
-type VariantFilter = 'all' | Variant
-
-function getVariantLabel(variant: Variant): string {
-  const labels: Record<Variant, string> = {
-    'agent-baseline': 'Agent Baseline',
-    'agent-skill': 'Agent Skill',
-    baseline: 'Baseline',
-    skill: 'Skill',
-  }
-  return labels[variant]
 }
 
 function VariantBadge({ variant }: { variant: null | Variant }) {
@@ -68,14 +59,33 @@ function VariantBadge({ variant }: { variant: null | Variant }) {
   )
 }
 
+function ModelBadge({ entry }: { entry: EvalEntry }) {
+  const { model } = getConfiguration(entry.result)
+  return (
+    <span
+      style={{
+        color: 'var(--theme-elevation-600)',
+        display: 'inline-block',
+        fontFamily: 'var(--font-mono, monospace)',
+        fontSize: '0.72rem',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      }}
+      title={entry.result.modelId ?? undefined}
+    >
+      {model}
+    </span>
+  )
+}
+
 type Props = {
   adminRoute: string
   codegenHtml?: Record<string, RenderedCode>
   entries: EvalEntry[]
-  runs?: RunSnapshot[]
 }
 
-type ViewMode = 'compare' | 'list'
+type ViewMode = 'compare' | 'list' | 'overview'
 
 type FilterStatus = 'all' | 'fail' | 'pass'
 type FilterType = 'all' | 'codegen'
@@ -581,7 +591,7 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
   )
 }
 
-type SortKey = 'category' | 'question' | 'result' | 'tokens' | 'type' | 'variant'
+type SortKey = 'category' | 'model' | 'question' | 'result' | 'tokens' | 'type' | 'variant'
 type SortDir = 'asc' | 'desc'
 
 function cycleSort(current: null | SortDir): null | SortDir {
@@ -594,12 +604,12 @@ function cycleSort(current: null | SortDir): null | SortDir {
   return null
 }
 
-export function ResultsTable({ codegenHtml, entries, runs }: Props) {
-  const [viewMode, setViewMode] = useState<ViewMode>('list')
-  const [compareMode, setCompareMode] = useState<'run' | 'variant'>('variant')
+export function ResultsTable({ codegenHtml, entries }: Props) {
+  const [viewMode, setViewMode] = useState<ViewMode>('overview')
+  const [compareMode, setCompareMode] = useState<'run' | 'variant'>('run')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
-  const [variantFilter, setVariantFilter] = useState<VariantFilter>('all')
+  const [selectedRunKey, setSelectedRunKey] = useState<string>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
   const [hoveredHash, setHoveredHash] = useState<null | string>(null)
@@ -611,16 +621,21 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
     [entries],
   )
 
-  const variantOptions = useMemo<VariantFilter[]>(() => {
-    const seen = new Set<Variant>()
-    for (const e of entries) {
-      const v = getVariant(e)
-      if (v) {
-        seen.add(v)
-      }
+  const runGroups = useMemo<RunGroup[]>(() => groupByRun(entries), [entries])
+
+  const selectRun = (key: string) => {
+    setSelectedRunKey(key)
+    setViewMode('list')
+  }
+
+  const selectedRunLabel = useMemo(() => {
+    const run = runGroups.find((r) => r.key === selectedRunKey)
+    if (!run) {
+      return null
     }
-    return ['all', ...Array.from(seen).sort()]
-  }, [entries])
+    const when = run.timestamp ? run.timestamp.slice(0, 16).replace('T', ' ') : 'unknown time'
+    return `${run.config.label}${run.isLegacy ? '' : ` · ${when}`}`
+  }, [runGroups, selectedRunKey])
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -657,7 +672,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
       if (typeFilter !== 'all' && e.type !== typeFilter) {
         return false
       }
-      if (variantFilter !== 'all' && getVariant(e) !== variantFilter) {
+      if (selectedRunKey !== 'all' && runKeyOf(e.result) !== selectedRunKey) {
         return false
       }
       if (categoryFilter !== 'all' && e.category !== categoryFilter) {
@@ -686,6 +701,9 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
       } else if (sortKey === 'variant') {
         aVal = getVariant(a) ?? ''
         bVal = getVariant(b) ?? ''
+      } else if (sortKey === 'model') {
+        aVal = (a.result.modelId ?? '').toLowerCase()
+        bVal = (b.result.modelId ?? '').toLowerCase()
       } else if (sortKey === 'result') {
         aVal = a.result.pass ? 'pass' : 'fail'
         bVal = b.result.pass ? 'pass' : 'fail'
@@ -696,7 +714,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
       }
       return aVal < bVal ? -dir : aVal > bVal ? dir : 0
     })
-  }, [entries, statusFilter, typeFilter, categoryFilter, variantFilter, sortKey, sortDir])
+  }, [entries, statusFilter, typeFilter, categoryFilter, selectedRunKey, sortKey, sortDir])
 
   // Summary stats from filtered set
   const stats = useMemo(() => {
@@ -759,11 +777,18 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
         <div style={{ alignItems: 'center', display: 'flex', gap: '6px' }}>
           <button
+            onClick={() => setViewMode('overview')}
+            style={viewBtnStyle(viewMode === 'overview')}
+            type="button"
+          >
+            Overview
+          </button>
+          <button
             onClick={() => setViewMode('list')}
             style={viewBtnStyle(viewMode === 'list')}
             type="button"
           >
-            All Results
+            Results
           </button>
           <button
             onClick={() => setViewMode('compare')}
@@ -775,51 +800,57 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
             }}
             type="button"
           >
-            Compare Results
+            Compare
           </button>
         </div>
 
         {viewMode === 'compare' && (
           <div style={{ alignItems: 'center', display: 'flex', gap: '6px' }}>
             <button
-              onClick={() => setCompareMode('variant')}
-              style={viewBtnStyle(compareMode === 'variant')}
-              type="button"
-            >
-              Variant Comparison
-            </button>
-            <button
               onClick={() => setCompareMode('run')}
               style={viewBtnStyle(compareMode === 'run')}
               type="button"
             >
-              Run Comparison
-              {runs && runs.length > 0 && (
-                <span
-                  style={{
-                    color: 'var(--theme-elevation-400)',
-                    fontSize: '0.72rem',
-                    marginLeft: '5px',
-                  }}
-                >
-                  ({runs.length})
-                </span>
-              )}
+              By category
+            </button>
+            <button
+              onClick={() => setCompareMode('variant')}
+              style={viewBtnStyle(compareMode === 'variant')}
+              type="button"
+            >
+              By case
             </button>
           </div>
         )}
       </div>
 
+      {viewMode === 'overview' && <RunsOverview onSelect={selectRun} runs={runGroups} />}
       {viewMode === 'compare' && (
         <CompareTable
           compareMode={compareMode}
           entries={entries}
           onCompareModeChange={setCompareMode}
-          runs={runs}
+          runGroups={runGroups}
         />
       )}
       {viewMode === 'list' && (
         <>
+          {selectedRunKey === 'all' && runGroups.length > 1 && (
+            <div
+              style={{
+                background: 'rgba(232,168,56,0.12)',
+                border: '1px solid var(--color-warning-300, rgba(232,168,56,0.4))',
+                borderRadius: 'var(--style-radius-m)',
+                color: 'var(--color-warning-700, #8a5d0c)',
+                fontSize: '0.8rem',
+                padding: '8px 12px',
+              }}
+            >
+              ⚠ Showing <strong>all {runGroups.length} runs</strong> — these stats mix different
+              runs, models, and skill settings and aren&apos;t directly comparable. Pick a single
+              run above (or from the Overview tab) for meaningful numbers.
+            </div>
+          )}
           {/* Summary strip */}
           <div
             style={{
@@ -887,6 +918,13 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
             ))}
           </div>
 
+          {selectedRunKey !== 'all' && selectedRunLabel && (
+            <p style={{ color: 'var(--theme-elevation-500)', fontSize: '0.78rem', margin: 0 }}>
+              Showing run <strong>{selectedRunLabel}</strong> — the exact cases from this single
+              invocation.
+            </p>
+          )}
+
           {/* Filters */}
           <div
             style={{
@@ -944,21 +982,40 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
               }}
             />
 
-            <div style={{ display: 'flex', gap: '4px' }}>
-              {variantOptions.map((v) => {
-                const isActive = variantFilter === v
-                return (
-                  <button
-                    key={v}
-                    onClick={() => setVariantFilter(v)}
-                    style={filterBtnStyle(isActive)}
-                    type="button"
-                  >
-                    {v === 'all' ? 'All' : getVariantLabel(v)}
-                  </button>
-                )
-              })}
-            </div>
+            <label
+              style={{
+                alignItems: 'center',
+                color: 'var(--theme-elevation-600)',
+                display: 'flex',
+                fontSize: '0.8rem',
+                gap: '6px',
+              }}
+            >
+              Run
+              <select
+                onChange={(e) => setSelectedRunKey(e.target.value)}
+                style={{
+                  background: 'var(--theme-elevation-0)',
+                  border: '1px solid var(--theme-elevation-200)',
+                  borderRadius: '4px',
+                  color: 'var(--theme-elevation-700)',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  maxWidth: '360px',
+                  padding: '4px 10px',
+                }}
+                value={selectedRunKey}
+              >
+                <option value="all">All runs (mixed)</option>
+                {runGroups.map((run) => (
+                  <option key={run.key} value={run.key}>
+                    {run.isLegacy
+                      ? `${run.config.label} · pre-tracking`
+                      : `${run.config.label} · ${run.timestamp.slice(0, 16).replace('T', ' ')}`}
+                  </option>
+                ))}
+              </select>
+            </label>
 
             <span
               aria-hidden="true"
@@ -1009,13 +1066,15 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
                 fontSize: '0.7rem',
                 fontWeight: 700,
                 gap: '0 12px',
-                gridTemplateColumns: '1fr 100px 70px 80px 100px 100px 32px',
+                gridTemplateColumns: '1fr 100px 70px 80px 120px 100px 100px 32px',
                 letterSpacing: '0.05em',
                 padding: '8px 12px',
                 textTransform: 'uppercase',
               }}
             >
-              {(['question', 'category', 'type', 'variant', 'result', 'tokens'] as SortKey[]).map(
+              {(
+                ['question', 'category', 'type', 'variant', 'model', 'result', 'tokens'] as SortKey[]
+              ).map(
                 (key) => (
                   <span
                     key={key}
@@ -1089,7 +1148,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
                         cursor: 'pointer',
                         display: 'grid',
                         gap: '0 12px',
-                        gridTemplateColumns: '1fr 100px 70px 80px 100px 100px 32px',
+                        gridTemplateColumns: '1fr 100px 70px 80px 120px 100px 100px 32px',
                         padding: '10px 12px',
                         transition: 'background 0.1s',
                       }}
@@ -1115,6 +1174,9 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
                       </span>
                       <span>
                         <VariantBadge variant={getVariant(entry)} />
+                      </span>
+                      <span style={{ minWidth: 0 }}>
+                        <ModelBadge entry={entry} />
                       </span>
                       <span>
                         <ScoreBadge

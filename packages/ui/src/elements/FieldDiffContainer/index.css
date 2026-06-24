@@ -1,0 +1,73 @@
+@layer payload-default {
+  .field-diff__locale-label {
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-medium);
+    padding-inline: var(--spacer-1);
+    margin-inline-end: var(--spacer-1);
+  }
+
+  .field-diff-container {
+    position: relative;
+  }
+
+  .field-diff-content {
+    display: grid;
+    grid-template-columns: var(--field-diff-columns, minmax(0, 1fr) minmax(0, 1fr));
+    background: var(--color-bg-secondary);
+    padding-block: var(--spacer-2);
+    border-radius: var(--radius-medium);
+    overflow: clip;
+  }
+
+  .field-diff-content > * {
+    padding-inline: var(--spacer-2-5);
+  }
+
+  @media (max-width: 768px) {
+    .field-diff-container .field-diff-content {
+      grid-template-columns: 1fr;
+      gap: calc(var(--stroke-width-small) * 2);
+      padding: 0;
+      background: transparent;
+      isolation: isolate;
+    }
+
+    .field-diff-content > * {
+      background: var(--color-bg-secondary);
+      padding: var(--spacer-1) var(--spacer-2);
+      min-height: var(--spacer-5);
+      overflow: hidden;
+      align-content: center;
+    }
+
+    .field-diff-content > *:first-child {
+      border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+    }
+
+    .field-diff-content > *:last-child {
+      border-radius: 0 0 var(--radius-medium) var(--radius-medium);
+    }
+
+    .field-diff-content > .html-diff__diff-old:has([data-match-type]) {
+      background: var(--diff-delete-parent-bg);
+    }
+
+    .field-diff-content > .html-diff__diff-new:has([data-match-type]) {
+      background: var(--diff-create-parent-bg);
+    }
+  }
+
+  .diff-no-value {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    max-height: var(--spacer-5);
+    background-color: var(--color-bg-secondary);
+    border-radius: var(--radius-medium);
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+  }
+}

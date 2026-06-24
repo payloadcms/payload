@@ -8,7 +8,7 @@
     border-radius: var(--radius-medium);
     border: var(--stroke-width-small) solid var(--color-border);
     display: flex;
-    align-items: flex-start;
+    align-items: stretch;
     gap: var(--spacer-2);
   }
 
@@ -44,7 +44,7 @@
     }
   }
 
-  .card__click {
+  .card .card__click {
     z-index: 1;
     inset: 0;
     position: absolute;

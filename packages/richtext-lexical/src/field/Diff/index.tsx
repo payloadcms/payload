@@ -13,7 +13,7 @@ import type {
   HTMLConvertersFunctionAsync,
   HTMLPopulateFn,
 } from '../../features/converters/lexicalToHtml/async/types.js'
-import type { SerializedLinkNode } from '../../nodeTypes.js'
+import type { SerializedLinkNode } from '../../types/nodeTypes.js'
 
 import { convertLexicalToHTMLAsync } from '../../features/converters/lexicalToHtml/async/index.js'
 import { getPayloadPopulateFn } from '../../features/converters/utilities/payloadPopulateFn.js'

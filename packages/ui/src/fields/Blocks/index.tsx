@@ -45,7 +45,6 @@ import { mergeFieldStyles } from '../mergeFieldStyles.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { BlockRow } from './BlockRow.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
-import { SectionTitle } from './SectionTitle/index.js'
 
 const baseClass = 'blocks-field'
 
@@ -58,7 +57,6 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       name,
       type,
       admin: { className, description, isSortable = true } = {},
-      blockReferences,
       blocks,
       label,
       labels: labelsFromProps,
@@ -141,17 +139,12 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
   })
 
   const { clientBlocks, clientBlocksAfterFilter } = useMemo(() => {
-    let resolvedBlocks: ClientBlock[] = []
+    const resolvedBlocks: ClientBlock[] = []
 
-    if (!blockReferences) {
-      resolvedBlocks = blocks
-    } else {
-      for (const blockReference of blockReferences) {
-        const block =
-          typeof blockReference === 'string' ? config.blocksMap[blockReference] : blockReference
-        if (block) {
-          resolvedBlocks.push(block)
-        }
+    for (const blockOrSlug of blocks) {
+      const block = typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
+      if (block) {
+        resolvedBlocks.push(block)
       }
     }
 
@@ -170,7 +163,7 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
       clientBlocks: resolvedBlocks,
       clientBlocksAfterFilter: resolvedBlocks,
     }
-  }, [blockReferences, blocks, blocksFilterOptions, config.blocksMap])
+  }, [blocks, blocksFilterOptions, config.blocksMap])
 
   const getBlockConfig = (blockType: string): ClientBlock | undefined =>
     config.blocksMap[blockType] ?? clientBlocks.find((block) => block.slug === blockType)

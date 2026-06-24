@@ -53,4 +53,5 @@ export const Revenue: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

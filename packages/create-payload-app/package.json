@@ -55,7 +55,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "pack-template-files": "node --no-deprecation --import @swc-node/register/esm-register src/scripts/pack-template-files.ts",
-    "test": "jest",
+    "test": "vitest --run",
     "typecheck": "tsc"
   },
   "dependencies": {

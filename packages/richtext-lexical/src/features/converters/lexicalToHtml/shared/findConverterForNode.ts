@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 import type { SerializedLexicalNode } from 'lexical'
 
-import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../nodeTypes.js'
+import type { SerializedBlockNode, SerializedInlineBlockNode } from '../../../../types/nodeTypes.js'
 import type { HTMLConverterAsync, HTMLConvertersAsync } from '../async/types.js'
 import type { HTMLConverter, HTMLConverters } from '../sync/types.js'
 import type { ProvidedCSS } from './types.js'
