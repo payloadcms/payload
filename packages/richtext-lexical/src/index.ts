@@ -42,6 +42,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             '@lexical/link',
             '@lexical/list',
             '@lexical/mark',
+            '@lexical/markdown',
             '@lexical/react',
             '@lexical/rich-text',
             '@lexical/selection',
