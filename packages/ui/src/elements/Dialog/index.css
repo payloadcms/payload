@@ -51,6 +51,12 @@
     flex-shrink: 0;
   }
 
+  .dialog__header-end {
+    margin-inline-start: auto;
+    display: flex;
+    gap: var(--spacer-2);
+  }
+
   .dialog__header--has-close {
     padding-inline-end: var(--spacer-2);
   }

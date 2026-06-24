@@ -25,12 +25,12 @@ import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
 import { editDrawerSlug, sizePreviewSlug } from '../Upload/index.js'
 import { pasteURLDrawerSlug, UploadFromURLModal } from '../Upload/UploadFromURLModal/index.js'
-import './index.css'
 import { AudioPreview } from './FilePreview/AudioPreview/index.js'
 import { FilePreview } from './FilePreview/index.js'
 import { PdfPreview } from './FilePreview/PdfPreview/index.js'
 import { VideoPreview } from './FilePreview/VideoPreview/index.js'
 import { FileToolbar } from './FileToolbar/index.js'
+import './index.css'
 
 const baseClass = 'file-manager'
 
@@ -446,7 +446,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
               {value && fileSrc && (
                 <Fragment>
                   <Button
-                    buttonStyle="ghost"
+                    buttonStyle="secondary"
                     className={`${baseClass}__remove`}
                     icon="x"
                     onClick={handleFileRemoval}

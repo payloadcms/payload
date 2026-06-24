@@ -1,10 +1,19 @@
 @layer payload-default {
   .bulk-upload--add-files__body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
     padding: var(--spacer-2-5);
   }
 
   .bulk-upload--add-files__dropArea {
     display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+    /* Prefer a 1.5 aspect ratio, but never exceed the available height. When the dialog is height
+       constrained the body shrinks (via the flex chain) and `max-height: 100%` caps the drop area so
+       the ratio yields instead of the bottom being clipped by the dialog's `overflow: clip`. */
+    max-height: 100%;
     aspect-ratio: 1.5;
 
     .dropzone {

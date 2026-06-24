@@ -6,6 +6,7 @@ import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
+import { DialogFooter } from '../../Dialog/DialogFooter/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import './index.css'
 
@@ -16,7 +17,7 @@ export function ActionsBar() {
   const { t } = useTranslation()
 
   return (
-    <div className={baseClass}>
+    <DialogFooter>
       {forms.length > 1 && (
         <div className={`${baseClass}__multipleFiles`}>
           <div className={`${baseClass}__navigation`}>
@@ -61,7 +62,7 @@ export function ActionsBar() {
       )}
 
       <Actions className={`${baseClass}__saveButtons`} />
-    </div>
+    </DialogFooter>
   )
 }
 

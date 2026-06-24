@@ -1,30 +1,33 @@
 @layer payload-default {
-  .bulk-upload--file-manager__header-actions {
+  .bulk-upload--file-manager__header-title-section {
+    display: flex;
+    gap: var(--spacer-2);
+    align-items: center;
+  }
+
+  .bulk-upload--file-manager .dialog__header-extras {
     display: flex;
     gap: var(--spacer-2);
   }
 
   /* The dialog is otherwise content-sized; give it a definite height so the inner flex chain has
      something to resolve against and the fields column can scroll internally. */
-  .dialog.bulk-upload--dialog {
+  .dialog.bulk-upload--file-manager {
     height: min(720px, var(--dialog-max-height));
   }
 
-  .bulk-upload--file-manager__wrapper {
+  /* The body is the two-column row (file tree + edit view) that fills the space between the header
+     and the actions footer. */
+  .bulk-upload--file-manager__body {
     display: flex;
-    flex-direction: column;
     flex: 1 1 auto;
     min-height: 0;
     width: 100%;
     overflow: hidden;
   }
 
-  .bulk-upload--file-manager {
-    display: flex;
-    flex: 1;
-    min-height: 0;
-    width: 100%;
-    overflow: hidden;
+  .bulk-upload--file-manager > .dialog__footer {
+    border-block-start: var(--stroke-width-small) solid var(--color-border);
   }
 
   .bulk-upload--file-manager__editView {
@@ -64,7 +67,6 @@
     min-width: 0;
     min-height: 0;
     height: 100%;
-    padding: var(--spacer-3);
     overflow-y: auto;
   }
 
@@ -80,6 +82,7 @@
      the preview fills its column and bleeds to the edges. */
   .bulk-upload--file-manager .file-manager {
     min-height: 0;
+    border: none;
   }
 
   .bulk-upload--file-manager .file-manager__panel {
@@ -113,7 +116,7 @@
   /* Stack on mobile — the modal is full-screen and there is no room for two columns. The whole
      edit view scrolls as one column (no divider, no internal field scroll). */
   @media (max-width: 1024px) {
-    .bulk-upload--file-manager {
+    .bulk-upload--file-manager__body {
       flex-direction: column-reverse;
     }
 
@@ -143,9 +146,12 @@
       height: auto;
     }
 
-    /* Give the upload area a height in the stacked layout so the preview and the (absolutely
-       positioned) empty-state dropzone both have room instead of collapsing to the top. */
+    /* Stack the preview above the file name and size to content. The base layout uses
+       `flex: 1 0 0`, which caps the upload at the column's available height and lets the file name
+       overflow out the bottom; `flex: 0 0 auto` lets it grow to contain both. The min-height keeps
+       the (absolutely positioned) empty-state dropzone room when no preview is present. */
     .bulk-upload--file-manager .file-manager__upload {
+      flex: 0 0 auto;
       min-height: min(50dvh, 360px);
     }
 
@@ -155,8 +161,17 @@
     }
 
     .bulk-upload--file-manager .collection-edit__upload-layout .document-fields {
+      /* Reset the desktop flex-basis: 0 fill so the fields size to their content in the auto-height
+         stacked column instead of collapsing to zero height. */
+      flex: 0 0 auto;
       height: auto;
       overflow-y: visible;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .bulk-upload--file-manager .document-fields__edit {
+      padding-top: var(--spacer-3);
     }
   }
 }

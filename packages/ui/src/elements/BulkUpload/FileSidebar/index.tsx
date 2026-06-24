@@ -1,59 +1,32 @@
 'use client'
 
-import { useModal } from '@faceless-ui/modal'
-import { useWindowInfo } from '@faceless-ui/window-info'
 import { isImage } from 'payload/shared'
 import React from 'react'
 
 import { SelectInput } from '../../../fields/Select/Input.js'
-import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { AnimateHeight } from '../../AnimateHeight/index.js'
-import { Button } from '../../Button/index.js'
 import { ErrorPill } from '../../ErrorPill/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { createThumbnail } from '../../Thumbnail/createThumbnail.js'
 import { Thumbnail } from '../../Thumbnail/index.js'
-import { AddFilesView } from '../AddFilesView/index.js'
 import './index.css'
 import { useFormsManager } from '../FormsManager/index.js'
 import { useBulkUpload } from '../index.js'
 
-const addMoreFilesDrawerSlug = 'bulk-upload-drawer--add-more-files'
-
 const baseClass = 'file-selections'
 
 export function FileSidebar() {
-  const {
-    activeIndex,
-    addFiles,
-    forms,
-    isInitializing,
-    removeFile,
-    setActiveIndex,
-    totalErrorCount,
-  } = useFormsManager()
-  const { initialFiles, initialForms, maxFiles } = useBulkUpload()
+  const { activeIndex, forms, isInitializing, removeFile, setActiveIndex } = useFormsManager()
+  const { initialFiles, initialForms } = useBulkUpload()
   const { i18n, t } = useTranslation()
-  const { closeModal, openModal } = useModal()
-  const [showFiles, setShowFiles] = React.useState(false)
-  const { breakpoints } = useWindowInfo()
 
   const handleRemoveFile = React.useCallback(
     (indexToRemove: number) => {
       removeFile(indexToRemove)
     },
     [removeFile],
-  )
-
-  const handleAddFiles = React.useCallback(
-    (filelist: FileList) => {
-      void addFiles(filelist)
-      closeModal(addMoreFilesDrawerSlug)
-    },
-    [addFiles, closeModal],
   )
 
   const getFileSize = React.useCallback((file: File) => {
@@ -65,16 +38,6 @@ export function FileSidebar() {
     return formattedSize
   }, [])
 
-  // TODO: style collection select input
-
-  // TODO: totalErrorCount move to header
-
-  // TODO: Only show add button when
-  // (typeof maxFiles === 'number' ? totalFileCount < maxFiles : true)
-  const totalFileCount = isInitializing
-    ? (initialFiles?.length ?? initialForms?.length)
-    : forms.length
-
   const {
     collectionSlug: bulkUploadCollectionSlug,
     selectableCollections,
@@ -84,19 +47,9 @@ export function FileSidebar() {
   const { getEntityConfig } = useConfig()
 
   return (
-    <div
-      className={[baseClass, showFiles && `${baseClass}__showingFiles`].filter(Boolean).join(' ')}
-    >
-      {breakpoints.m && showFiles ? <div className={`${baseClass}__mobileBlur`} /> : null}
-      <div
-        className={[
-          `${baseClass}__header`,
-          totalErrorCount > 0 && `${baseClass}__header--hasErrors`,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        {selectableCollections?.length > 1 && (
+    <div className={baseClass}>
+      {selectableCollections?.length > 1 && (
+        <div className={`${baseClass}__header`}>
           <SelectInput
             className={`${baseClass}__collectionSelect`}
             isClearable={false}
@@ -118,77 +71,75 @@ export function FileSidebar() {
             required
             value={bulkUploadCollectionSlug}
           />
-        )}
-      </div>
+        </div>
+      )}
 
       <div className={`${baseClass}__animateWrapper scrollbar-thin`}>
-        <AnimateHeight height={!breakpoints.m || showFiles ? 'auto' : 0}>
-          <div className={`${baseClass}__filesContainer`}>
-            {isInitializing &&
-            forms.length === 0 &&
-            (initialFiles?.length > 0 || initialForms?.length > 0)
-              ? (initialFiles ? Array.from(initialFiles) : initialForms).map((file, index) => (
-                  <ShimmerEffect
-                    animationDelay={`calc(${index} * ${60}ms)`}
-                    height="35px"
-                    key={index}
-                  />
-                ))
-              : null}
-            {forms.map(({ errorCount, formID, formState }, index) => {
-              const currentFile = (formState?.file?.value as File) || ({} as File)
+        <div className={`${baseClass}__filesContainer`}>
+          {isInitializing &&
+          forms.length === 0 &&
+          (initialFiles?.length > 0 || initialForms?.length > 0)
+            ? (initialFiles ? Array.from(initialFiles) : initialForms).map((file, index) => (
+                <ShimmerEffect
+                  animationDelay={`calc(${index} * ${60}ms)`}
+                  height="35px"
+                  key={index}
+                />
+              ))
+            : null}
+          {forms.map(({ errorCount, formID, formState }, index) => {
+            const currentFile = (formState?.file?.value as File) || ({} as File)
 
-              return (
-                <div
-                  className={[
-                    `${baseClass}__fileRowContainer`,
-                    index === activeIndex && `${baseClass}__fileRowContainer--active`,
-                    errorCount && errorCount > 0 && `${baseClass}__fileRowContainer--error`,
-                  ]
-                    .filter(Boolean)
-                    .join(' ')}
-                  key={formID}
+            return (
+              <div
+                className={[
+                  `${baseClass}__fileRowContainer`,
+                  index === activeIndex && `${baseClass}__fileRowContainer--active`,
+                  errorCount && errorCount > 0 && `${baseClass}__fileRowContainer--error`,
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                key={formID}
+              >
+                <button
+                  className={`${baseClass}__fileRow`}
+                  onClick={() => setActiveIndex(index)}
+                  type="button"
                 >
-                  <button
-                    className={`${baseClass}__fileRow`}
-                    onClick={() => setActiveIndex(index)}
-                    type="button"
-                  >
-                    <SidebarThumbnail file={currentFile} formID={formID} />
-                    <div className={`${baseClass}__fileDetails`}>
-                      <p className={`${baseClass}__fileName`} title={currentFile.name}>
-                        {currentFile.name || t('upload:noFile')}
-                      </p>
-                    </div>
-                    {currentFile instanceof File ? (
-                      <p className={`${baseClass}__fileSize`}>{getFileSize(currentFile)}</p>
-                    ) : null}
-                    <div className={`${baseClass}__remove ${baseClass}__remove--underlay`}>
-                      <XIcon />
-                    </div>
-
-                    {errorCount ? (
-                      <ErrorPill
-                        className={`${baseClass}__errorCount`}
-                        count={errorCount}
-                        i18n={i18n}
-                      />
-                    ) : null}
-                  </button>
-
-                  <button
-                    aria-label={t('general:remove')}
-                    className={`${baseClass}__remove ${baseClass}__remove--overlay`}
-                    onClick={() => handleRemoveFile(index)}
-                    type="button"
-                  >
+                  <SidebarThumbnail file={currentFile} formID={formID} />
+                  <div className={`${baseClass}__fileDetails`}>
+                    <p className={`${baseClass}__fileName`} title={currentFile.name}>
+                      {currentFile.name || t('upload:noFile')}
+                    </p>
+                  </div>
+                  {currentFile instanceof File ? (
+                    <p className={`${baseClass}__fileSize`}>{getFileSize(currentFile)}</p>
+                  ) : null}
+                  <div className={`${baseClass}__remove ${baseClass}__remove--underlay`}>
                     <XIcon />
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        </AnimateHeight>
+                  </div>
+
+                  {errorCount ? (
+                    <ErrorPill
+                      className={`${baseClass}__errorCount`}
+                      count={errorCount}
+                      i18n={i18n}
+                    />
+                  ) : null}
+                </button>
+
+                <button
+                  aria-label={t('general:remove')}
+                  className={`${baseClass}__remove ${baseClass}__remove--overlay`}
+                  onClick={() => handleRemoveFile(index)}
+                  type="button"
+                >
+                  <XIcon />
+                </button>
+              </div>
+            )
+          })}
+        </div>
       </div>
     </div>
   )

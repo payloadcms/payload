@@ -12,6 +12,8 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { DialogHeader } from '../../Dialog/DialogHeader/index.js'
 import { DialogModal } from '../../Dialog/DialogModal/index.js'
+import { DialogTitle } from '../../Dialog/DialogTitle/index.js'
+import { ErrorPill } from '../../ErrorPill/index.js'
 import { ActionsBar } from '../ActionsBar/index.js'
 import { AddFilesView } from '../AddFilesView/index.js'
 import { discardBulkUploadModalSlug, DiscardWithoutSaving } from '../DiscardWithoutSaving/index.js'
@@ -19,6 +21,7 @@ import { EditForm } from '../EditForm/index.js'
 import { EditManyBulkUploads } from '../EditMany/index.js'
 import { FileSidebar } from '../FileSidebar/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
+import { useBulkUpload } from '../index.js'
 import './index.css'
 
 const baseClass = 'bulk-upload--file-manager'
@@ -40,12 +43,15 @@ export function AddingFilesView({ modalSlug }: Props) {
     hasPublishPermission,
     hasSavePermission,
     hasSubmitted,
+    isInitializing,
     resetUploadEdits,
+    totalErrorCount,
     updateUploadEdits,
   } = useFormsManager()
+  const { initialFiles, initialForms, maxFiles } = useBulkUpload()
   const activeForm = forms[activeIndex]
   const { getEntityConfig } = useConfig()
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { user } = useAuth()
   const { closeModal, openModal } = useModal()
 
@@ -57,17 +63,27 @@ export function AddingFilesView({ modalSlug }: Props) {
     [addFiles, closeModal],
   )
 
+  const totalFileCount = isInitializing
+    ? (initialFiles?.length ?? initialForms?.length)
+    : forms.length
+  const canAddMoreFiles = typeof maxFiles === 'number' ? totalFileCount < maxFiles : true
+
   const collectionConfig = getEntityConfig({ collectionSlug })
 
   return (
     <>
-      <DialogModal className="bulk-upload--dialog" size="large" slug={modalSlug}>
+      <DialogModal className={baseClass} size="large" slug={modalSlug}>
         <DialogHeader
           onClose={() => openModal(discardBulkUploadModalSlug)}
           showClose={true}
-          title={t('upload:bulkUpload')}
+          title={
+            <div className={`${baseClass}__header-title-section`}>
+              <DialogTitle title={t('upload:bulkUpload')} />
+              {totalErrorCount > 0 && <ErrorPill count={totalErrorCount} i18n={i18n} withMessage />}
+            </div>
+          }
         >
-          <div className={`${baseClass}__header-actions`}>
+          {canAddMoreFiles ? (
             <Button
               buttonStyle="secondary"
               icon={<PlusIcon size={24} />}
@@ -76,48 +92,46 @@ export function AddingFilesView({ modalSlug }: Props) {
             >
               {t('upload:addFiles')}
             </Button>
+          ) : null}
 
-            <EditManyBulkUploads collection={collectionConfig} />
-          </div>
+          <EditManyBulkUploads collection={collectionConfig} />
         </DialogHeader>
 
-        <div className={`${baseClass}__wrapper`}>
-          <div className={baseClass}>
-            <FileSidebar />
+        <div className={`${baseClass}__body`}>
+          <FileSidebar />
 
-            <div className={`${baseClass}__editView`}>
-              {activeForm ? (
-                <DocumentInfoProvider
-                  collectionSlug={collectionSlug}
-                  currentEditor={user}
-                  docPermissions={docPermissions}
-                  hasPublishedDoc={false}
-                  hasPublishPermission={hasPublishPermission}
-                  hasSavePermission={hasSavePermission}
-                  id={null}
-                  initialData={reduceFieldsToValues(activeForm.formState, true)}
-                  initialState={activeForm.formState}
-                  isLocked={false}
-                  key={`${activeIndex}-${forms.length}`}
-                  lastUpdateTime={0}
-                  mostRecentVersionIsAutosaved={false}
-                  unpublishedVersionCount={0}
-                  Upload={documentSlots.Upload}
-                  versionCount={0}
-                >
-                  <EditForm
-                    resetUploadEdits={resetUploadEdits}
-                    submitted={hasSubmitted}
-                    updateUploadEdits={updateUploadEdits}
-                    uploadEdits={activeForm?.uploadEdits}
-                  />
-                </DocumentInfoProvider>
-              ) : null}
-            </div>
+          <div className={`${baseClass}__editView`}>
+            {activeForm ? (
+              <DocumentInfoProvider
+                collectionSlug={collectionSlug}
+                currentEditor={user}
+                docPermissions={docPermissions}
+                hasPublishedDoc={false}
+                hasPublishPermission={hasPublishPermission}
+                hasSavePermission={hasSavePermission}
+                id={null}
+                initialData={reduceFieldsToValues(activeForm.formState, true)}
+                initialState={activeForm.formState}
+                isLocked={false}
+                key={`${activeIndex}-${forms.length}`}
+                lastUpdateTime={0}
+                mostRecentVersionIsAutosaved={false}
+                unpublishedVersionCount={0}
+                Upload={documentSlots.Upload}
+                versionCount={0}
+              >
+                <EditForm
+                  resetUploadEdits={resetUploadEdits}
+                  submitted={hasSubmitted}
+                  updateUploadEdits={updateUploadEdits}
+                  uploadEdits={activeForm?.uploadEdits}
+                />
+              </DocumentInfoProvider>
+            ) : null}
           </div>
-
-          <ActionsBar />
         </div>
+
+        <ActionsBar />
 
         {/* Nested Modals */}
         <AddFilesView modalSlug={addMoreFilesModalSlug} onDrop={handleAddFiles} />

@@ -28,12 +28,9 @@
     }
   }
 
-  .file-selections__header--hasErrors {
-    padding-top: var(--spacer-2);
-  }
-
   .file-selections__collectionSelect {
     width: 100%;
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
 
     .react-select {
       width: 100%;
@@ -41,7 +38,7 @@
 
     .field-type__wrap {
       width: 100%;
-      padding-block: var(--spacer-4);
+      padding-block: var(--spacer-2-5);
       padding-inline: var(--file-gutter-h);
     }
   }
@@ -182,38 +179,6 @@
     overflow: auto;
   }
 
-  .file-selections__mobileBlur {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    opacity: 0;
-    transition: opacity 100ms cubic-bezier(0, 0.2, 0.2, 1);
-
-    &::before,
-    &::after {
-      content: ' ';
-      position: absolute;
-      inset: 0;
-    }
-
-    &::before {
-      background: var(--color-bg);
-      opacity: 0.75;
-    }
-
-    &::after {
-      backdrop-filter: blur(8px);
-    }
-  }
-
-  .file-selections__showingFiles {
-    .file-selections__mobileBlur {
-      opacity: 1;
-    }
-  }
-
   @media (max-width: 1024px) {
     .file-selections {
       --file-gutter-h: var(--gutter-h);
@@ -222,32 +187,67 @@
       position: sticky;
       bottom: 0;
       flex-shrink: 0;
+      border-right: 0;
+      border-top: var(--stroke-width-small) solid var(--color-border);
+      background: var(--color-bg);
+      flex: 1;
     }
 
-    .file-selections__showingFiles {
-      z-index: 2;
+    /* The file list becomes a horizontal thumbnail carousel that scrolls sideways along the bottom
+       of the body instead of stacking vertically. */
+    .file-selections__animateWrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
     }
 
     .file-selections__filesContainer {
-      &::before,
-      &::after {
-        content: ' ';
-        position: absolute;
-        inset: 0;
-      }
-
-      &::before {
-        background: var(--color-bg);
-        opacity: 0.75;
-      }
-
-      &::after {
-        backdrop-filter: blur(8px);
-      }
+      flex-direction: row;
+      margin-top: 0;
+      padding-block: var(--spacer-2);
+      width: max-content;
+      min-width: 100%;
     }
 
     .file-selections__fileRowContainer {
       z-index: 1;
+      flex: 0 0 auto;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    /* Each carousel item is a compact thumbnail; the file name, size and the desktop remove-button
+       spacer are hidden to keep the strip tight (the active file's name shows in the preview area). */
+    .file-selections__fileRow {
+      gap: 0;
+      padding: var(--spacer-1);
+
+      .file-selections__thumbnail,
+      .file-selections__thumbnail-shimmer {
+        width: var(--spacer-6);
+        height: var(--spacer-6);
+      }
+    }
+
+    .file-selections__fileDetails,
+    .file-selections__fileSize,
+    .file-selections__remove--underlay {
+      display: none;
+    }
+
+    .file-selections__fileRowContainer--active .file-selections__thumbnail {
+      outline: var(--stroke-width-small) solid var(--color-text);
+      outline-offset: 2px;
+    }
+
+    .file-selections__remove--overlay {
+      top: var(--spacer-1);
+      right: var(--spacer-1);
+      transform: none;
+      width: 20px;
+      height: 20px;
+      background: var(--color-bg);
     }
 
     .file-selections__header {
