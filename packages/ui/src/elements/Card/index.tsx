@@ -1,7 +1,7 @@
 'use client'
 
-import React from 'react'
 import { getTranslation } from '@payloadcms/translations'
+import React from 'react'
 
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
