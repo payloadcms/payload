@@ -455,6 +455,17 @@ The deprecated `HTMLConverterFeature`, `lexicalHTML`, and the per-node `converte
 
 Custom nodes that define `converters.html` should export their converters instead.
 
+### Lexical: `isHTMLElement` removed — use lexical's built-in
+
+The deprecated `isHTMLElement` utility has been removed from `@payloadcms/richtext-lexical`. It was a thin wrapper around `x instanceof HTMLElement` that duplicated a utility already exported by `lexical`. Import it directly from `lexical` instead.
+
+```diff
+- import { isHTMLElement } from '@payloadcms/richtext-lexical/client'
++ import { isHTMLElement } from 'lexical'
+```
+
+`lexical`'s built-in `isHTMLElement` is the canonical implementation and narrows against the node's owning-document `HTMLElement`, so it is also safe across iframes and other realms.
+
 ### Field `typescriptSchema` renamed to `jsonSchema`
 
 `typescriptSchema` accepted JSON Schema, not TypeScript, so the name lied. Renamed to `jsonSchema`. Same shape, same array of transforms. The underlying schema is now also consumed by the MCP plugin for runtime validation, not just type generation.
