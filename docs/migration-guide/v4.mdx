@@ -455,6 +455,32 @@ The deprecated `HTMLConverterFeature`, `lexicalHTML`, and the per-node `converte
 
 Custom nodes that define `converters.html` should export their converters instead.
 
+### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.45.0`
+
+`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.45.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
+
+Most projects use markdown through the editor or through `convertMarkdownToLexical` / `convertLexicalToMarkdown` and need no changes. You are only affected if you import from `@payloadcms/richtext-lexical/lexical/markdown` directly.
+
+**`$convertFromMarkdownString` no longer merges adjacent lines by default.** This matches upstream lexical. If you call it directly and relied on the old behavior, pass `shouldMergeAdjacentLines: true` (5th argument):
+
+```diff
+- $convertFromMarkdownString(markdown, transformers)
++ $convertFromMarkdownString(markdown, transformers, undefined, false, true)
+```
+
+**Transformer groups now include `CODE` and `LINK`.** The groups exported from `@payloadcms/richtext-lexical/lexical/markdown` (`TRANSFORMERS`, `ELEMENT_TRANSFORMERS`, ...) are now lexical's defaults and no longer match Payload's enabled features. Use the converters instead, which build the transformer list from your editor config:
+
+```diff
+- import { $convertFromMarkdownString, TRANSFORMERS } from '@payloadcms/richtext-lexical/lexical/markdown'
+- $convertFromMarkdownString(markdown, TRANSFORMERS)
++ import { convertMarkdownToLexical } from '@payloadcms/richtext-lexical'
++ convertMarkdownToLexical({ editorConfig, markdown })
+```
+
+**Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical `0.45` upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
+
+If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.45.0`. None of them require action for typical Payload usage.
+
 ### Field `typescriptSchema` renamed to `jsonSchema`
 
 `typescriptSchema` accepted JSON Schema, not TypeScript, so the name lied. Renamed to `jsonSchema`. Same shape, same array of transforms. The underlying schema is now also consumed by the MCP plugin for runtime validation, not just type generation.
