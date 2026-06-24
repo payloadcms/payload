@@ -467,8 +467,3 @@ export type RelationMap = Map<
     type: 'many' | 'one'
   }
 >
-
-/**
- * @deprecated - will be removed in 4.0. Use query + $dynamic() instead: https://orm.drizzle.team/docs/dynamic-query-building
- */
-export type { ChainedMethods } from './find/chainMethods.js'
