@@ -63,8 +63,9 @@ export async function initDevAndTest(
   const config: SanitizedConfig = await (await import(configUrl)).default
 
   if (framework === 'tanstack-start') {
-    process.env.ROOT_DIR = path.resolve(dirname, 'app-tanstack')
-    config.admin.importMap.importMapFile = importMapPath
+    // ROOT_DIR drives import map auto-discovery; point it at the app that owns the
+    // generated importMap so the `app/_payload/` convention resolves on its own.
+    process.env.ROOT_DIR = tanstackAppDir
   } else {
     process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
   }
