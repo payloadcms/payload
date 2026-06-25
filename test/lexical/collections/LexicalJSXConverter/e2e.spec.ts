@@ -2,7 +2,6 @@ import type { Locator, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import { reInitializeDB } from '__helpers/shared/clearAndSeed/reInitializeDB.js'
-import { lexicalJSXConverterSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -10,6 +9,7 @@ import { ensureCompilationIsDone } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { lexicalJSXConverterSlug } from '../../slugs.js'
 import { LexicalHelpers } from '../utils.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
