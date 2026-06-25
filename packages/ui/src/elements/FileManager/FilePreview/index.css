@@ -20,17 +20,10 @@
   }
 
   .file-preview__image-wrap {
-    /* Fixed height anchored to the initial viewport state so the image doesn't resize as the
-       panel grows during scroll. Overhead = file-toolbar + top-padding + gap + info-height
-       + bottom-padding = file-toolbar + 4 × var(--spacer-3). */
-    flex: 0 0 auto;
-    height: max(
-      200px,
-      calc(
-        100dvh - var(--app-header-height) - var(--doc-controls-height) - var(--doc-header-height) -
-          var(--file-toolbar-height, 0px) - calc(4 * var(--spacer-3))
-      )
-    );
+    /* Take the remaining space but allow shrinking so the info row below is never clipped
+       on short viewports. min-height: 0 lets this flex item shrink below its content size. */
+    flex: 1 1 0;
+    min-height: 0;
     display: flex;
     align-items: center;
     justify-content: center;

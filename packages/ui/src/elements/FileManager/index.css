@@ -4,15 +4,10 @@
     flex: 1 0 0;
     align-self: stretch;
     width: 100%;
-    min-height: max(
-      500px,
-      calc(
-        100dvh - var(--app-header-height) - var(--doc-controls-height) - var(--doc-header-height)
-      )
-    );
     margin-bottom: 0;
     border-radius: 0;
     background–color: var(--color-bg-secondary);
+    min-height: 100px;
 
     .dropzone {
       border: none;
@@ -23,12 +18,8 @@
   .file-manager__panel {
     position: sticky;
     top: var(--doc-controls-height);
-    /* Fill the viewport below the app header, doc controls and doc header. */
-    height: max(
-      500px,
-      calc(
-        100dvh - var(--app-header-height) - var(--doc-controls-height) - var(--doc-header-height)
-      )
+    height: calc(
+      100dvh - var(--app-header-height) - var(--doc-controls-height) - var(--doc-header-height)
     );
     display: flex;
     flex-direction: column;
@@ -37,15 +28,6 @@
     overflow: visible;
     /* Scroll-driven: grow height as the app header and doc header scroll away, matching the
        extra space they free up. Mirrors the MiniCarousel approach. Falls back to static height. */
-    animation: file-manager-panel-expand linear both;
-    animation-timeline: scroll(root block);
-    animation-range: 0 calc(var(--app-header-height) + var(--doc-header-height));
-  }
-
-  @keyframes file-manager-panel-expand {
-    to {
-      height: max(500px, calc(100dvh - var(--doc-controls-height)));
-    }
   }
 
   .file-manager__content {
