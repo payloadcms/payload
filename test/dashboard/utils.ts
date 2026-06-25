@@ -36,6 +36,38 @@ export class DashboardHelper {
   }
 
   /**
+   * Gate measurement on a fully settled grid. On adapters that stream the admin
+   * view in post-hydration (e.g. TanStack Start), the flex grid keeps reflowing
+   * for a frame or two right after a save or `page.reload()`: widgets mount
+   * unsized (a `null` `boundingBox()`) or land a few px off their final x while
+   * sibling widths are still resolving. `toBeVisible()` passes during that
+   * window, so a bare `boundingBox()` read races the reflow. Wait until the
+   * dashboard and every widget report identical bounding boxes across two
+   * consecutive reads (and none are `null`) before measuring.
+   */
+  private waitForStableLayout = async () => {
+    await expect(this.dashboard).toBeVisible()
+    for (const widget of await this.widgets.all()) {
+      await expect(widget).toBeVisible()
+    }
+
+    const readBoxes = async () =>
+      JSON.stringify(
+        await Promise.all(
+          [this.dashboard, ...(await this.widgets.all())].map((locator) => locator.boundingBox()),
+        ),
+      )
+
+    await expect(async () => {
+      const first = await readBoxes()
+      await this.page.waitForTimeout(100)
+      const second = await readBoxes()
+      expect(first).toBe(second)
+      expect(first).not.toContain('null')
+    }).toPass({ timeout: 10000 })
+  }
+
+  /**
    * - Verify that flex wrap is working correctly (If a node exceeds 100% of the available width, it should go in the row below)
    * - Verify that the nodes are positioned without gaps or overlap
    * - Verify that all nodes in a row have the same height
@@ -50,19 +82,13 @@ export class DashboardHelper {
       full: 12,
     }
 
-    // Wait for the dashboard and its widgets to be laid out before measuring
-    // bounding boxes. Adapters that render admin page content after the initial
-    // load (e.g. TanStack Start streams the view in post-hydration) can leave
-    // widgets briefly unmounted/unsized right after a save or `page.reload()`,
-    // producing a null `boundingBox()`. `boundingBox()` does not auto-retry, so
-    // without this the read races the mount. (Callers that change the widget
-    // count first await `toHaveCount` so the set is stable here.)
-    await expect(this.dashboard).toBeVisible()
+    // Wait for the grid to fully settle before measuring (see waitForStableLayout):
+    // on TanStack Start the view streams in post-hydration and the flex layout
+    // reflows for a frame or two after a save / `page.reload()`, so an eager
+    // `boundingBox()` read can capture a null or a few-px-stale x.
+    await this.waitForStableLayout()
 
     const widgets = await this.widgets.all()
-    for (const widget of widgets) {
-      await expect(widget).toBeVisible()
-    }
     let currentPos = 0
     for (let index = 0; index < widgets.length; index++) {
       const widget = widgets[index]!
