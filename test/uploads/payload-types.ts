@@ -292,9 +292,6 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'fr';
-  widgets: {
-    collections: CollectionsWidget;
-  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -2270,6 +2267,7 @@ export interface RelationSelect<T extends boolean = true> {
   versionedImage?: T;
   hideFileInputOnCreate?: T;
   hasManyImage?: T;
+  polymorphicUploads?: T;
   blocks?:
     | T
     | {
@@ -4211,6 +4209,6 @@ export interface LexicalRichText<TNode> {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
