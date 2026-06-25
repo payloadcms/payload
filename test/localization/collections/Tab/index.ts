@@ -83,4 +83,5 @@ export const Tab: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

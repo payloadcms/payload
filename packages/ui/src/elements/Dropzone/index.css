@@ -5,7 +5,7 @@
     align-items: flex-start;
     background: transparent;
     border: var(--stroke-width-small) dashed var(--special-border-translucent);
-    border-radius: var(--radius-medium);
+    border-radius: var(--field-border-radius);
     overflow: clip;
     width: 100%;
 

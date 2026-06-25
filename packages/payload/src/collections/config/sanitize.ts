@@ -1,5 +1,6 @@
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { OrderableJoinInfo } from '../../fields/config/sanitizeJoinField.js'
+import type { SanitizedDrafts } from '../../versions/types.js'
 import type {
   CollectionConfig,
   SanitizedCollectionConfig,
@@ -19,7 +20,6 @@ import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
-import { miniChalk } from '../../utilities/miniChalk.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
@@ -275,21 +275,10 @@ export const sanitizeCollection = async (
 
       const hasLocalizedFields = traverseForLocalizedFields(sanitized.fields)
 
-      if (config.localization) {
-        if (hasLocalizedFields && sanitized.versions.drafts.localizeStatus === undefined) {
-          sanitized.versions.drafts.localizeStatus = false
-        }
-      }
-
-      // TODO v4: remove this sanitization check, should not need to enable the experimental flag
-      if (sanitized.versions.drafts.localizeStatus && !config.experimental?.localizeStatus) {
-        sanitized.versions.drafts.localizeStatus = false
-        console.log(
-          miniChalk.yellowBold(
-            `Warning: "localizeStatus" for drafts is an experimental feature. To enable, set "experimental.localizeStatus" to true in your Payload config.`,
-          ),
-        )
-      }
+      // Auto-enable per-locale status when localization is configured and the collection has localized fields.
+      ;(sanitized.versions.drafts as SanitizedDrafts).localizeStatus = !!(
+        config.localization && hasLocalizedFields
+      )
 
       if (sanitized.versions.drafts.autosave === true) {
         sanitized.versions.drafts.autosave = {
@@ -304,7 +293,7 @@ export const sanitizeCollection = async (
       sanitized.fields = mergeBaseFields(
         sanitized.fields,
         baseVersionFields({
-          localized: sanitized.versions.drafts.localizeStatus ?? false,
+          localized: (sanitized.versions.drafts as SanitizedDrafts).localizeStatus ?? false,
         }),
       )
     }

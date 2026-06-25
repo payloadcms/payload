@@ -5,7 +5,7 @@
     justify-content: center;
     color: var(--color-icon-secondary);
     cursor: not-allowed;
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
 
     &.active {
       cursor: grab;

@@ -11,7 +11,6 @@ import {
   ErrorPill,
   Form,
   formatDrawerSlug,
-  FormSubmit,
   MoreIcon,
   Pill,
   Popup,
@@ -40,10 +39,15 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { ViewMapBlockComponentProps } from '../../../../types/index.js'
-import type { BlockFields } from '../../server/nodes/BlocksNode.js'
+import type { BlockFields } from '../../server/schema.js'
 
 import './index.css'
+import '../../../../utilities/fieldsDrawer/index.css'
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
+import {
+  RegisterFormSubmit,
+  useDrawerSubmit,
+} from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isBlockNode } from '../nodes/BlocksNode.js'
 import {
@@ -335,11 +339,9 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
     componentMapRenderedBlockPath
   ]?.[0] as BlocksFieldClient
 
-  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
-    ? typeof blocksField?.blockReferences?.[0] === 'string'
-      ? config.blocksMap[blocksField?.blockReferences?.[0]]
-      : blocksField?.blockReferences?.[0]
-    : blocksField?.blocks?.[0]
+  const blockOrSlug = blocksField?.blocks?.[0]
+  const clientBlock: ClientBlock | undefined =
+    typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
 
   const { i18n, t } = useTranslation<object, string>()
 
@@ -699,18 +701,21 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
   const blockID = formData?.id
 
+  const { headerActions, submitRef } = useDrawerSubmit()
+
   const BlockDrawer = useMemo(
     () => () => (
       <EditDepthProvider>
         <Drawer
           className={''}
+          headerActions={headerActions}
           slug={drawerSlug}
           title={t(`lexical:blocks:inlineBlocks:${blockID ? 'edit' : 'create'}`, {
             label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
           })}
         >
           {initialState ? (
-            <>
+            <div className="fields-drawer">
               <RenderFields
                 fields={clientBlock?.fields ?? []}
                 forceRender
@@ -720,8 +725,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
                 permissions={true}
                 readOnly={!isEditable}
               />
-              <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
-            </>
+              <RegisterFormSubmit submitRef={submitRef} />
+            </div>
           ) : null}
         </Drawer>
       </EditDepthProvider>
@@ -735,6 +740,8 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
       isEditable,
       clientBlock?.fields,
       schemaFieldsPath,
+      headerActions,
+      submitRef,
       // DO NOT ADD FORMDATA HERE! Adding formData will kick you out of sub block editors while writing.
     ],
   )

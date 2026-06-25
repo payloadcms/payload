@@ -125,7 +125,7 @@ export function RenderField({
       return <RichTextField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'row':
-      return <RowField {...iterableFieldProps} field={clientFieldConfig} />
+      return <RowField {...iterableFieldProps} field={clientFieldConfig} path={path} />
 
     case 'select':
       return <SelectField {...baseFieldProps} field={clientFieldConfig} path={path} />

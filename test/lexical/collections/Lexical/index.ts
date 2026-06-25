@@ -414,5 +414,6 @@ export const getLexicalFieldsCollection: (args: {
         },
       },
     ],
+    versions: false,
   }
 }

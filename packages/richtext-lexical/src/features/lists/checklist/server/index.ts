@@ -2,6 +2,7 @@ import { ListItemNode, ListNode } from '@lexical/list'
 
 import { createServerFeature } from '../../../../utilities/createServerFeature.js'
 import { createNode } from '../../../typeUtilities.js'
+import { listItemNodeJSONSchema, listNodeJSONSchema } from '../../shared/schema.js'
 import { shouldRegisterListBaseNodes } from '../../shared/shouldRegisterListBaseNodes.js'
 import { CHECK_LIST } from '../markdownTransformers.js'
 import { i18n } from './i18n.js'
@@ -15,9 +16,11 @@ export const ChecklistFeature = createServerFeature({
       nodes: shouldRegisterListBaseNodes('checklist', featureProviderMap)
         ? [
             createNode({
+              jsonSchema: listNodeJSONSchema,
               node: ListNode,
             }),
             createNode({
+              jsonSchema: listItemNodeJSONSchema,
               node: ListItemNode,
             }),
           ]

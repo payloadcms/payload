@@ -309,16 +309,15 @@ describe('General', () => {
       await page.goto(postsUrl.admin)
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
       await page.goto(`${postsUrl.admin}/account`)
-      await expect(page.locator('#field-theme-auto')).toBeChecked()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      const themeSelect = page.locator('.payload-settings__theme .react-select')
+      await expect(themeSelect).toContainText('Auto')
     })
 
     test('should explicitly change to light theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-light"]').click()
-      await expect(page.locator('#field-theme-light')).toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      const themeSelect = page.locator('.payload-settings__theme .react-select')
+      await themeSelect.click()
+      await page.locator('.rs__option', { hasText: 'Light' }).click()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
 
       // reload the page and ensure theme is retained
@@ -328,9 +327,9 @@ describe('General', () => {
 
     test('should explicitly change to dark theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-dark"]').click()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
-      await expect(page.locator('#field-theme-dark')).toBeChecked()
+      const themeSelect = page.locator('.payload-settings__theme .react-select')
+      await themeSelect.click()
+      await page.locator('.rs__option', { hasText: 'Dark' }).click()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
       // reload the page and ensure theme is retained
@@ -338,11 +337,84 @@ describe('General', () => {
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
       // reset to light
-      await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-light"]').click()
-      await expect(page.locator('#field-theme-light')).toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      await page.locator('.payload-settings__theme .react-select').click()
+      await page.locator('.rs__option', { hasText: 'Light' }).click()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    })
+
+    describe('user menu', () => {
+      const openThemeSubMenu = async () => {
+        await page.locator('button[aria-label="Account"]').click()
+        await page
+          .locator('.popup-button-list__button--submenu-trigger')
+          .filter({ hasText: 'Theme' })
+          .click()
+      }
+
+      const closePopups = async () => {
+        await page.keyboard.press('Escape')
+        await page.keyboard.press('Escape')
+      }
+
+      test('should switch to dark theme via user menu and reflect correct active state', async () => {
+        await page.goto(postsUrl.admin)
+
+        await openThemeSubMenu()
+        await page
+          .locator('.popup-button-list__button--radio-group-item', { hasText: 'Dark' })
+          .click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+
+        // sub-popup stays open (data-popup-prevent-close) — verify active state directly
+        const darkItem = page.locator('.popup-button-list__button--radio-group-item', {
+          hasText: 'Dark',
+        })
+        await expect(darkItem).toHaveClass(/popup-button-list__button--selected/)
+
+        // navigate to account page and verify theme select shows Dark
+        await page.goto(`${postsUrl.admin}/account`)
+        await expect(page.locator('.payload-settings__theme .react-select')).toContainText('Dark')
+
+        // reload and verify persisted
+        await page.reload()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+        await expect(page.locator('.payload-settings__theme .react-select')).toContainText('Dark')
+
+        // reset to auto
+        await page.locator('.payload-settings__theme .react-select').click()
+        await page.locator('.rs__option', { hasText: 'Automatic' }).click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+      })
+
+      test('should switch to light theme via user menu and reflect active state', async () => {
+        // start with dark so we have something to switch from
+        await page.goto(postsUrl.admin)
+        await openThemeSubMenu()
+        await page
+          .locator('.popup-button-list__button--radio-group-item', { hasText: 'Dark' })
+          .click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+
+        // now switch to light via user menu — sub-popup is still open, click directly
+        await page
+          .locator('.popup-button-list__button--radio-group-item', { hasText: 'Light' })
+          .click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+
+        // verify 'Light' shown as active in submenu (still open)
+        const lightItem = page.locator('.popup-button-list__button--radio-group-item', {
+          hasText: 'Light',
+        })
+        await expect(lightItem).toHaveClass(/popup-button-list__button--selected/)
+
+        // reset to auto — close popups first, then reopen fresh
+        await closePopups()
+        await openThemeSubMenu()
+        await page
+          .locator('.popup-button-list__button--radio-group-item', { hasText: 'Auto' })
+          .click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+      })
     })
   })
 
@@ -1045,7 +1117,7 @@ describe('General', () => {
       await page.goto(postsUrl.edit(id))
       await openDocControls(page)
       await page.locator('#action-delete').click()
-      await page.locator(`[id=delete-${id}] #confirm-action`).click()
+      await page.locator(`[id=delete-${id}] [data-dialog-action="confirm"]`).click()
       await expect(page.locator(`text=Post "${title}" successfully deleted.`)).toBeVisible()
       expect(page.url()).toContain(postsUrl.list)
     })
@@ -1085,7 +1157,7 @@ describe('General', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page.locator('#leave-without-saving .alert-modal__controls .btn--style-primary').click()
+      await page.locator('#leave-without-saving .dialog__footer .btn--style-primary').click()
 
       // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)

@@ -79,15 +79,6 @@ export default buildConfigWithDefaults({
     })(),
 
     mcpPlugin({
-      overrideApiKeyCollection: (collection) => {
-        collection.fields.push({
-          name: 'override',
-          type: 'text',
-          admin: { description: 'This field added by overrideApiKeyCollection' },
-          defaultValue: 'This field added by overrideApiKeyCollection',
-        })
-        return collection
-      },
       collections: {
         users: {
           description: 'User accounts.',
@@ -118,16 +109,24 @@ export default buildConfigWithDefaults({
             return response
           },
           tools: {
-            // Built-in override — keep `find` enabled, just tighten its
+            // Built-in override — keep `findDocuments` enabled, just tighten its
             // client-facing description. (Built-in keys autocomplete here.)
             find: {
+              annotations: { title: 'Find Posts' },
               description:
                 'Find blog posts. Pass an `id` to fetch one; omit it to list with pagination.',
             },
 
-            // Custom collection-scoped tool — surfaced as `publishPosts` on the
-            // wire (auto-prefixed). Flips a draft post to published.
+            // Custom collection-scoped tool — exposed once as `publish`, with
+            // collectionSlug deciding which collection it acts on.
             publish: defineCollectionTool({
+              annotations: {
+                title: 'Publish Post',
+                destructiveHint: false,
+                idempotentHint: false,
+                openWorldHint: false,
+                readOnlyHint: false,
+              },
               description: 'Publish a draft post by ID.',
               input: z.object({
                 id: z.string().describe('The post ID to publish.'),
@@ -164,6 +163,11 @@ export default buildConfigWithDefaults({
       globals: {
         'site-settings': {
           description: 'Site-wide configuration settings.',
+          tools: {
+            find: {
+              annotations: { title: 'Find Site Settings' },
+            },
+          },
         },
       },
       mcp: {
@@ -176,7 +180,20 @@ export default buildConfigWithDefaults({
         verboseLogs: true,
       },
       tools: {
+        hiddenTool: defineTool({
+          access: () => false,
+          description: 'This tool should be hidden by its access callback',
+        }).handler(() => ({
+          content: [{ type: 'text' as const, text: 'hidden' }],
+        })),
         diceRoll: defineTool({
+          annotations: {
+            title: 'Dice Roll',
+            destructiveHint: false,
+            idempotentHint: false,
+            openWorldHint: false,
+            readOnlyHint: false,
+          },
           description: 'Rolls a virtual dice with a specified number of sides',
           input: z.object({
             sides: z

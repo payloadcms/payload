@@ -13,13 +13,13 @@
 
   .paginator__page-input {
     box-sizing: content-box;
-    min-width: calc(24px - var(--spacer-2) - 2px);
-    min-height: var(--spacer-4);
+    min-width: calc(var(--spacer-3) - 2px); /* -2px for content-box sizing */
+    min-height: calc(var(--control-height) - 2px);
     padding: 0 var(--spacer-1);
-    border: var(--stroke-width-small) solid transparent;
-    border-radius: var(--radius-medium);
+    border: var(--stroke-width-small) solid var(--field-color-border);
+    border-radius: var(--field-border-radius);
     background: var(--color-bg-secondary);
-    color: var(--color-text);
+    color: var(--field-color-text);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);

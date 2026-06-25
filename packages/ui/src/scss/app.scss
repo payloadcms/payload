@@ -1,7 +1,6 @@
 @layer payload-default, payload;
 
 @import 'styles';
-@import './toasts.scss';
 @import './colors.scss';
 @import '../styles.css';
 
@@ -94,6 +93,12 @@
     margin: 0;
     // this is for the nav to be able to push the document over
     overflow-x: hidden;
+  }
+
+  // Lock background scroll while a drawer is open. Backs up faceless-ui's JS
+  // body-scroll-lock, which a sibling modal can clear prematurely.
+  body:has(.drawer--is-open) {
+    overflow: hidden;
   }
 
   img {

@@ -23,6 +23,7 @@
   "type": "module",
   "exports": {
     "./css": {
+      "types": "./src/exports/css.ts",
       "import": "./src/dummy.css",
       "default": "./src/dummy.css"
     },
@@ -116,7 +117,7 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@next/eslint-plugin-next": "16.2.6",
+    "@next/eslint-plugin-next": "16.2.7",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
     "@types/react": "19.2.14",
@@ -138,6 +139,7 @@
   "publishConfig": {
     "exports": {
       "./css": {
+        "types": "./dist/exports/css.d.ts",
         "import": "./dist/prod/styles.css",
         "default": "./dist/prod/styles.css"
       },

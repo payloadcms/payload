@@ -7,7 +7,6 @@ const PointFields: CollectionConfig = {
   admin: {
     useAsTitle: 'point',
   },
-  versions: true,
   fields: [
     {
       name: 'point',
@@ -36,7 +35,7 @@ const PointFields: CollectionConfig = {
         },
       ],
     },
-  ],
+  ]
 }
 
 export default PointFields

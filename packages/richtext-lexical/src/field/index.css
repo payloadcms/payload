@@ -35,6 +35,9 @@
   .rich-text-lexical__wrap {
     width: 100%;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
   }
 
   .rich-text-lexical--read-only {

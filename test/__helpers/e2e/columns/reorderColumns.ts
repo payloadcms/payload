@@ -4,6 +4,7 @@ import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 
 import { getColumnSelectorItem } from './clickPillSelectorItem.js'
+import { openListColumns } from './openListColumns.js'
 
 export const reorderColumns = async (
   page: Page,
@@ -19,20 +20,10 @@ export const reorderColumns = async (
     togglerSelector?: string
   },
 ) => {
-  // Scroll toggler to top of viewport so popup renders below it (fully visible)
-  const toggler = page.locator(togglerSelector).first()
-  await toggler.evaluate((el) => {
-    const rect = el.getBoundingClientRect()
-    window.scrollBy({ top: rect.top - 100, behavior: 'instant' })
+  const { columnContainer } = await openListColumns(page, {
+    togglerSelector,
+    columnContainerSelector,
   })
-  await wait(100)
-
-  const columnContainer = page.locator(columnContainerSelector).first()
-  const isAlreadyOpen = await columnContainer.isVisible()
-
-  if (!isAlreadyOpen) {
-    await toggler.click()
-  }
 
   await expect(columnContainer).toBeVisible()
 

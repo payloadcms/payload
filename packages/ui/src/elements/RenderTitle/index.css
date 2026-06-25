@@ -27,6 +27,16 @@
     position: relative;
   }
 
+  .render-title__link {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+
   @media (max-width: 768px) {
     .render-title {
       --render-title-letter-spacing: -0.075px;

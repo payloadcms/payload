@@ -15,6 +15,9 @@ import { rootEslintConfig, rootParserOptions } from '../../eslint.config.js'
 export const index = [
   ...rootEslintConfig,
   {
+    ignores: ['bin.js'],
+  },
+  {
     languageOptions: {
       parserOptions: {
         ...rootParserOptions,

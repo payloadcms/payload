@@ -6,7 +6,7 @@
     align-items: center;
     outline: 0;
     color: var(--color-icon);
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
 
     &:not(.clickable-arrow--is-disabled) {
       &:hover,

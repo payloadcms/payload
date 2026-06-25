@@ -8,13 +8,14 @@ const dirname = path.dirname(filename)
 import type { NextAppDetails } from '../types.js'
 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
-import { getLatestPackageVersion } from '../utils/getLatestPackageVersion.js'
 import { info } from '../utils/log.js'
+import { resolvePackageVersion } from '../utils/resolvePackageVersion.js'
 import { getPackageManager } from './get-package-manager.js'
 import { installPackages } from './install-packages.js'
 
 export async function updatePayloadInProject(
   appDetails: NextAppDetails,
+  versionOrTag?: string,
 ): Promise<{ message: string; success: boolean }> {
   if (!appDetails.nextConfigPath) {
     return { message: 'No Next.js config found', success: false }
@@ -36,8 +37,8 @@ export async function updatePayloadInProject(
 
   const packageManager = await getPackageManager({ projectDir })
 
-  // Fetch latest Payload version
-  const latestPayloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
+  // Resolve the requested Payload version (dist-tag or explicit version)
+  const latestPayloadVersion = await resolvePackageVersion({ packageName: 'payload', versionOrTag })
 
   if (payloadVersion === latestPayloadVersion) {
     return { message: `Payload v${payloadVersion} is already up to date.`, success: true }

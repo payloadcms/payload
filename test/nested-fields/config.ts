@@ -184,6 +184,7 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
     },
   ],
   onInit: async (payload) => {

@@ -16,6 +16,7 @@ const Unauthorized: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }
 
 export default Unauthorized

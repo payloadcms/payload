@@ -337,9 +337,9 @@ function getMarkdownTransformerForBlock(
           }
 
           const node = $createBlockNode({
-            blockType: block.slug,
             ...blockFields,
-          } as any)
+            blockType: block.slug,
+          })
 
           if (node) {
             // Now handle beforeStartLine and afterEndLine. If those are not empty, we need to add them as text nodes before and after the block node.
@@ -421,9 +421,9 @@ function getMarkdownTransformerForBlock(
         }
 
         const node = $createBlockNode({
-          blockType: block.slug,
           ...blockFields,
-        } as any)
+          blockType: block.slug,
+        })
 
         if (node) {
           rootNode.append(node)

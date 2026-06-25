@@ -25,4 +25,5 @@ export const OnDemandOutsideForm: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }

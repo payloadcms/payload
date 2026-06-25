@@ -16,4 +16,5 @@ export const MixedMedia: CollectionConfig = {
       hasMany: true,
     },
   ],
+  versions: false,
 }

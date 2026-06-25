@@ -6,18 +6,19 @@ import type {
   ResourceTemplate,
   ServerContext,
   StandardSchemaWithJSON,
+  ToolAnnotations,
 } from '@modelcontextprotocol/server'
 import type {
   AuthCollectionSlug,
-  CollectionConfig,
   CollectionSlug,
-  DefaultDocumentIDType,
   GlobalSlug,
   MaybePromise,
   PayloadRequest,
+  SanitizedPermissions,
   TypedUser,
 } from 'payload'
 
+import type { GetAuthorizedMCPArgs } from './endpoint/access.js'
 import type {
   MCPCollectionAuthToolName,
   MCPCollectionBuiltinName,
@@ -26,33 +27,14 @@ import type {
 
 export type { MCPCollectionAuthToolName, MCPCollectionBuiltinName, MCPGlobalBuiltinName }
 
-/** Re-exported from `@modelcontextprotocol/server` — the JSON Schema shape the MCP runtime validates against. */
-export type { JsonSchemaType, StandardSchemaWithJSON }
+/** Re-exported from `@modelcontextprotocol/server` — common MCP types used in plugin config. */
+export type { JsonSchemaType, StandardSchemaWithJSON, ToolAnnotations }
 
 /**
  * What a tool's `input` (or a prompt's `argsSchema`) can be — either a raw
  * JSON Schema literal, or a Standard Schema instance (Zod, Valibot, …).
  */
 export type ToolInputSchema = JsonSchemaType | StandardSchemaWithJSON
-
-/**
- * Serializable mirror of `SanitizedMCPPluginConfig` for client components —
- * the full sanitized config carries functions (tool handlers, etc.) that can't
- * cross the server→client boundary. Built by `sanitizeClientPluginConfig` and
- * passed to the `AccessField` component via `clientProps`.
- *
- * @internal
- */
-export type ClientMCPPluginConfig = {
-  items: Array<{
-    collectionSlug?: string
-    description: string
-    globalSlug?: string
-    key: string
-    label: string
-    type: 'collectionTool' | 'globalTool' | 'prompt' | 'resource' | 'tool'
-  }>
-}
 
 export type MCPToolResponse = {
   content: ContentBlock[]
@@ -80,6 +62,19 @@ export type TypedInput<TSchema> = TSchema extends StandardSchemaWithJSON
     : StandardSchemaWithJSON.InferOutput<TSchema>
   : Record<string, unknown>
 
+export type MCPAccessArgs = {
+  permissions?: SanitizedPermissions
+  req: PayloadRequest
+}
+
+export type CollectionMCPAccessArgs = {
+  collectionSlug: CollectionSlug
+} & MCPAccessArgs
+
+export type GlobalMCPAccessArgs = {
+  globalSlug: GlobalSlug
+} & MCPAccessArgs
+
 export type ToolHandlerArgs<TSchema = undefined> = {
   authorizedMCP: AuthorizedMCP
   input: TypedInput<TSchema>
@@ -96,6 +91,8 @@ export type GlobalToolHandlerArgs<TSchema = undefined> = {
 } & ToolHandlerArgs<TSchema>
 
 export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> = {
+  access?: (args: MCPAccessArgs) => MaybePromise<boolean>
+  annotations?: ToolAnnotations
   description: string
   handler: (args: ToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
   input?: TSchema
@@ -105,30 +102,37 @@ export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema |
   overrideResponse?: MCPResponseOverride
 }
 
-/**
- * `TSchema` is the schema itself (Standard Schema, raw JSON Schema, or undefined).
- * The function-form variant of `input` carries a concrete `{ collectionSchema: JsonSchemaType }`
- * parameter type so callers can write `({ collectionSchema }) => …` without annotating it.
- */
 export type CollectionTool<
   TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
 > = {
+  access?: (args: CollectionMCPAccessArgs) => MaybePromise<boolean>
   handler: (args: CollectionToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
-  input?: ((args: { collectionSchema: JsonSchemaType }) => TSchema) | TSchema
-} & Pick<Tool, 'description' | 'overrideResponse'>
+  input?: TSchema
+} & Pick<Tool, 'annotations' | 'description' | 'overrideResponse'>
 
 export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> =
   {
+    access?: (args: GlobalMCPAccessArgs) => MaybePromise<boolean>
     handler: (args: GlobalToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
-    input?: ((args: { globalSchema: JsonSchemaType }) => TSchema) | TSchema
-  } & Pick<Tool, 'description' | 'overrideResponse'>
+    input?: TSchema
+  } & Pick<Tool, 'annotations' | 'description' | 'overrideResponse'>
 
 /**
  * Configures (or disables) a built-in tool without replacing it.
  * `handler?: never` prevents a full `CollectionTool`/`GlobalTool` (which has a
  * required handler) from being silently accepted at a built-in key slot.
  */
-export type MCPBuiltInToolOverride = {
+export type MCPBuiltInCollectionToolOverride = {
+  access?: (args: CollectionMCPAccessArgs) => MaybePromise<boolean>
+  annotations?: ToolAnnotations
+  description?: string
+  handler?: never
+  overrideResponse?: MCPResponseOverride
+}
+
+export type MCPBuiltInGlobalToolOverride = {
+  access?: (args: GlobalMCPAccessArgs) => MaybePromise<boolean>
+  annotations?: ToolAnnotations
   description?: string
   handler?: never
   overrideResponse?: MCPResponseOverride
@@ -142,13 +146,13 @@ export type MCPBuiltInToolOverride = {
 export type MCPTopLevelToolEntry = Tool
 
 export type MCPCollectionToolsMap = {
-  [customToolName: string]: boolean | CollectionTool | MCPBuiltInToolOverride | undefined
+  [customToolName: string]: boolean | CollectionTool | MCPBuiltInCollectionToolOverride | undefined
 } & {
-  [K in MCPCollectionBuiltinName]?: false | MCPBuiltInToolOverride
+  [K in MCPCollectionBuiltinName]?: false | MCPBuiltInCollectionToolOverride
 }
 
 export type MCPAuthCollectionToolsMap = {
-  [K in MCPCollectionAuthToolName]?: MCPBuiltInToolOverride | true
+  [K in MCPCollectionAuthToolName]?: MCPBuiltInCollectionToolOverride | true
 } & MCPCollectionToolsMap
 
 /** Auth-enabled collections get auth-tool name autocomplete; others get CRUD-only. */
@@ -157,9 +161,9 @@ export type MCPToolsMapForCollection<Slug extends CollectionSlug> = Slug extends
   : MCPCollectionToolsMap
 
 export type MCPGlobalToolsMap = {
-  [customToolName: string]: boolean | GlobalTool | MCPBuiltInToolOverride | undefined
+  [customToolName: string]: boolean | GlobalTool | MCPBuiltInGlobalToolOverride | undefined
 } & {
-  [K in MCPGlobalBuiltinName]?: false | MCPBuiltInToolOverride
+  [K in MCPGlobalBuiltinName]?: false | MCPBuiltInGlobalToolOverride
 }
 
 export type MCPTopLevelToolsMap = Record<string, Tool>
@@ -171,6 +175,7 @@ export type PromptHandlerArgs<TSchema = undefined> = {
 }
 
 export type Prompt<TSchema extends ToolInputSchema = ToolInputSchema> = {
+  access?: (args: MCPAccessArgs) => MaybePromise<boolean>
   argsSchema: TSchema
   description: string
   handler: (args: PromptHandlerArgs<TSchema>) => MaybePromise<{
@@ -188,6 +193,7 @@ export type ResourceHandlerArgs = {
 }
 
 export type Resource = {
+  access?: (args: MCPAccessArgs) => MaybePromise<boolean>
   description: string
   handler: (args: ResourceHandlerArgs) => MaybePromise<{
     contents: Array<{ text: string; uri: string }>
@@ -221,7 +227,7 @@ export type MCPPluginConfig = {
   collections?: {
     [Slug in CollectionSlug]?: MCPPluginCollectionConfig<Slug>
   }
-  /** Skip MCP registration. The API key collection is still added (so DB / types stay stable). */
+  /** Skip MCP endpoint registration. */
   disabled?: boolean
   globals?: {
     [Slug in GlobalSlug]?: MCPPluginGlobalConfig
@@ -230,25 +236,21 @@ export type MCPPluginConfig = {
     serverOptions?: MCPServerOptions
     verboseLogs?: boolean
   }
-  overrideApiKeyCollection?: (collection: CollectionConfig) => CollectionConfig
-  /** Replace the default API-key auth with a custom resolver. */
-  overrideAuth?: (args: {
-    getAPIKeyDoc: (overrideApiKey?: string) => Promise<MCPAPIKeysDoc>
-    getAuthorizedMCP: (args: { apiKeyDoc: MCPAPIKeysDoc }) => AuthorizedMCP
-    pluginConfig: SanitizedMCPPluginConfig
-    req: PayloadRequest
-  }) => MaybePromise<AuthorizedMCP>
+  /** Replace the default MCP authorization resolver. */
+  overrideGetAuthorizedMCP?: (
+    args: {
+      pluginConfig: SanitizedMCPPluginConfig
+    } & GetAuthorizedMCPArgs,
+  ) => MaybePromise<AuthorizedMCP>
   prompts?: Record<string, Prompt>
   resources?: Record<string, Resource>
   /** Cross-cutting tools (not scoped to any collection or global). */
   tools?: MCPTopLevelToolsMap
-  userCollection?: CollectionSlug
 }
 
 export type SanitizedMCPPluginConfig = {
   items: MCPItem[]
-  userCollection: CollectionSlug
-} & Pick<MCPPluginConfig, 'disabled' | 'mcp' | 'overrideApiKeyCollection' | 'overrideAuth'>
+} & Pick<MCPPluginConfig, 'disabled' | 'mcp' | 'overrideGetAuthorizedMCP'>
 
 export type MCPServerOptions = {
   options?: ConstructorParameters<typeof McpServer>[1]
@@ -256,71 +258,32 @@ export type MCPServerOptions = {
 }
 
 /**
- * Nested access tree as stored in the collection.
- * A `false` leaf disables that tool; missing keys defer to
- * defaults (built-in CRUD is on, opt-in tools are off).
- */
-export type MCPAPIKeysDocAccessTree = {
-  collections?: {
-    [CollectionSlug: CollectionSlug]: {
-      [ToolKey: string]: boolean
-    }
-  }
-  globals?: {
-    [GlobalSlug: GlobalSlug]: {
-      [ToolKey: string]: boolean
-    }
-  }
-  prompts?: {
-    [PromptKey: string]: boolean
-  }
-  resources?: {
-    [ResourceKey: string]: boolean
-  }
-  tools?: {
-    [ToolKey: string]: boolean
-  }
-}
-
-/**
- * Stored on `payload-mcp-api-keys` docs
- */
-export type MCPAPIKeysDoc = {
-  access: MCPAPIKeysDocAccessTree
-  id: DefaultDocumentIDType
-  overrideAccess?: boolean
-  user: null | TypedUser
-}
-
-/**
- * One MCP primitive — tool, prompt, or resource — paired with the metadata both
- * the endpoint and the API key collection need. Built by `sanitizeMCPConfig`,
- * filtered by `getAuthorizedMCP`, registered by the MCP endpoint.
+ * One MCP primitive plus the metadata needed for config-driven filtering and
+ * registration.
  *
- *  - `key`: the config identifier (`find`, `echo`). Used for the API-key deny
- *    lookup and as the admin checkbox field name. For collection/global tools,
- *    the MCP wire name (`findPosts`) is derived from `key + slug` at
- *    registration time.
- *  - `label`: human-readable admin-UI display text for the checkbox.
- *  - `tool` / `prompt` / `resource`: the live primitive (its own
- *    `description` is what both MCP clients and the admin UI surface).
+ * - `configKey`: the config identifier, e.g. `find` or `echo`.
+ * - `mcpName`: the MCP wire name, e.g. `findDocuments` or `echo`.
+ * - `label`: human-readable display text.
  */
 export type MCPItemBase = {
-  key: string
+  configKey: string
   label: string
+  mcpName: string
 }
 
+export type CollectionMCPItem = {
+  collectionSlug: CollectionSlug
+  tool: CollectionTool
+  type: 'collectionTool'
+} & MCPItemBase
+
+export type GlobalMCPItem = {
+  globalSlug: GlobalSlug
+  tool: GlobalTool
+  type: 'globalTool'
+} & MCPItemBase
+
 export type MCPItem =
-  | ({
-      collectionSlug: CollectionSlug
-      tool: CollectionTool
-      type: 'collectionTool'
-    } & MCPItemBase)
-  | ({
-      globalSlug: GlobalSlug
-      tool: GlobalTool
-      type: 'globalTool'
-    } & MCPItemBase)
   | ({
       prompt: Prompt
       type: 'prompt'
@@ -333,12 +296,14 @@ export type MCPItem =
       tool: Tool
       type: 'tool'
     } & MCPItemBase)
+  | CollectionMCPItem
+  | GlobalMCPItem
 
 /**
- * The caller's identity + the MCP items they can use for this request. Returned
- * by `getAuthorizedMCP`; denied items are simply absent from `items`. Handlers
- * receive this via `args.authorizedMCP` so they can spread
- * `localAPIDefaults(authorizedMCP)` into every local API call.
+ * The caller's identity + the MCP items authorized for this request. Disabled
+ * items and items blocked by access callbacks or Payload operation access are
+ * absent from `items`. Tool handlers receive this via `args.authorizedMCP` so
+ * they can spread `localAPIDefaults(authorizedMCP)` into every local API call.
  */
 export type AuthorizedMCP = {
   items: MCPItem[]

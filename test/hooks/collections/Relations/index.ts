@@ -11,6 +11,7 @@ const Relations: CollectionConfig = {
       required: true,
     },
   ],
+  versions: false,
 }
 
 export default Relations
