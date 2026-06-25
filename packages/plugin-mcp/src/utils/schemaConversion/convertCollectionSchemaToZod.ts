@@ -30,13 +30,16 @@ export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
     // TypeScript 6 prepends a `"use strict";` directive to the transpiled module
     // output (TypeScript 5 did not). Combined with the `return ${output}` wrapper
     // below, that becomes `return "use strict"; <schema>`, so the evaluated
-    // function returns the *string* `"use strict"` instead of the Zod schema. The
-    // create/update tools then call `.partial()` / `.shape` on the result and
-    // throw `convertedFields.partial is not a function`, aborting MCP tool
-    // registration for the entire endpoint. Strip the directive so the schema
-    // expression is what gets returned.
-    // See: https://github.com/payloadcms/payload/issues/16339
-    const transpiledOutput = transpileResult.outputText.replace(/^\s*['"]use strict['"];?/, '')
+    // function returns the *string* `"use strict"` instead of the Zod schema, and
+    // the create/update tools then throw `convertedFields.partial is not a
+    // function`, aborting MCP tool registration for the entire endpoint.
+    //
+    // Strip the directive AND the whitespace that follows it: the transpiled
+    // output is `"use strict";\n<expr>`, and stripping only the directive leaves
+    // `return \n<expr>`, where ASI inserts a semicolon after `return` — yielding
+    // `undefined` and an empty input schema. Consuming the trailing whitespace
+    // keeps the expression on the `return` line.
+    const transpiledOutput = transpileResult.outputText.replace(/^\s*['"]use strict['"];?\s*/, '')
 
     /**
      * This Function evaluation is safe because:
