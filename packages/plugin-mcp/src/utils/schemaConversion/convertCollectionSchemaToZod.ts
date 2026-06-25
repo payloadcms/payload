@@ -27,6 +27,17 @@ export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
       },
     })
 
+    // TypeScript 6 prepends a `"use strict";` directive to the transpiled module
+    // output (TypeScript 5 did not). Combined with the `return ${output}` wrapper
+    // below, that becomes `return "use strict"; <schema>`, so the evaluated
+    // function returns the *string* `"use strict"` instead of the Zod schema. The
+    // create/update tools then call `.partial()` / `.shape` on the result and
+    // throw `convertedFields.partial is not a function`, aborting MCP tool
+    // registration for the entire endpoint. Strip the directive so the schema
+    // expression is what gets returned.
+    // See: https://github.com/payloadcms/payload/issues/16339
+    const transpiledOutput = transpileResult.outputText.replace(/^\s*['"]use strict['"];?/, '')
+
     /**
      * This Function evaluation is safe because:
      * 1. The input schema comes from Payload's collection configuration, which is controlled by the application developer
@@ -36,17 +47,23 @@ export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
      * 5. No user input or external data is involved in the schema generation process
      */
     // eslint-disable-next-line @typescript-eslint/no-implied-eval
-    return new Function('z', `return ${transpileResult.outputText}`)(z)
+    const converted = new Function('z', `return ${transpiledOutput}`)(z)
+
+    // Callers (the create/update tools) rely on the result being a ZodObject —
+    // they spread `.partial().shape`. If conversion produced anything else, fall
+    // back to a permissive object so tool registration can't crash.
+    return converted instanceof z.ZodObject ? converted : z.object({}).passthrough()
   } catch (error) {
     // If schema conversion fails (e.g., due to Zod v4 toJSONSchema null-check bug
     // with record schemas that have undefined valueType, or bundler transforms
     // stripping Zod internals), return a permissive schema so tools/list doesn't
     // crash entirely. The tool will still be listed but without strict validation.
-    // See: https://github.com/colinhacks/zod/issues/5821
+    // A ZodObject (rather than z.record) is returned so callers that rely on
+    // .partial()/.shape don't throw. See: https://github.com/colinhacks/zod/issues/5821
     console.warn(
       `[plugin-mcp] Schema conversion failed, using permissive fallback:`,
       error instanceof Error ? error.message : error,
     )
-    return z.record(z.any())
+    return z.object({}).passthrough()
   }
 }
