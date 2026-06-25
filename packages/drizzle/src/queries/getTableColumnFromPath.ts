@@ -396,7 +396,7 @@ export const getTableColumnFromPath = ({
             addJoinTable({
               condition: and(
                 eq(
-                  adapter.tables[rootTableName].id,
+                  (aliasTable || adapter.tables[rootTableName]).id,
                   aliasRelationshipTable[
                     `${(relationshipField.field as RelationshipField).relationTo as string}ID`
                   ],
