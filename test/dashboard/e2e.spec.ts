@@ -177,11 +177,12 @@ describe('Dashboard', () => {
     }).toPass({ timeout: 1000 })
   })
 
-  test('collection-query long widget caps height and scrolls rows', async ({ page }) => {
+  test('collection-query long widget shows five rows at a time and scrolls', async ({ page }) => {
     const d = new DashboardHelper(page)
 
     const longCard = d.widgetByPos(9).locator('.collection-query-widget')
     const longRows = longCard.locator('.collection-query-widget__row')
+    const maxVisibleRows = 5
 
     // Matches the number of seeded "Dashboard demo" events in test/dashboard/seed.ts.
     await expect(longRows).toHaveCount(22)
@@ -194,9 +195,29 @@ describe('Dashboard', () => {
       expect(hasScrollableRows).toBe(true)
     }).toPass({ timeout: 1000 })
     await expect(async () => {
-      const longCardBox = (await longCard.boundingBox())!
+      const rowViewport = await longCard.locator('.collection-query-widget__rows').evaluate(
+        (el, { maxVisibleRows }) => {
+          const rows = Array.from(el.querySelectorAll<HTMLElement>('.collection-query-widget__row'))
+          const rowGap = Number.parseFloat(window.getComputedStyle(el).rowGap)
+          const expectedHeight =
+            rows
+              .slice(0, maxVisibleRows)
+              .reduce((height, row) => height + row.getBoundingClientRect().height, 0) +
+            rowGap * (maxVisibleRows - 1)
+          const rowsBox = el.getBoundingClientRect()
+          const sixthRowBox = rows[maxVisibleRows]!.getBoundingClientRect()
 
-      expect(longCardBox.height).toBeLessThanOrEqual(371)
+          return {
+            actualHeight: rowsBox.height,
+            expectedHeight,
+            isSixthRowVisible: sixthRowBox.top < rowsBox.bottom,
+          }
+        },
+        { maxVisibleRows },
+      )
+
+      expect(Math.abs(rowViewport.actualHeight - rowViewport.expectedHeight)).toBeLessThanOrEqual(1)
+      expect(rowViewport.isSixthRowVisible).toBe(false)
     }).toPass({ timeout: 1000 })
     await longCard.locator('.collection-query-widget__rows').evaluate((el) => {
       el.scrollTop = el.scrollHeight
