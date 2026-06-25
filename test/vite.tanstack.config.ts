@@ -111,14 +111,28 @@ export default defineConfig((env) =>
       // Keep build output out of the app dirs (they ship as pure source); the
       // repo root already ignores `dist`.
       build: { outDir: path.resolve(repoRoot, 'dist/app-tanstack') },
-      // `recharts` is only reached through the dashboard suite's Revenue widget,
-      // which is rendered on-demand via the `render-widget` server function. Vite
-      // discovers it (and its d3-* subdeps) *after* the initial crawl, forcing a
-      // full dep re-optimization + page reload mid-test. That reload remounts the
-      // admin view and silently drops client state (e.g. the dashboard's
-      // `isEditing`/unsaved layout), flaking the add/delete/reset widget tests.
-      // Pre-bundle it so the first optimization pass is complete.
-      optimizeDeps: { include: ['recharts'] },
+      optimizeDeps: {
+        include: [
+          // `recharts` is only reached through the dashboard suite's Revenue
+          // widget, which is rendered on-demand via the `render-widget` server
+          // function. Vite discovers it (and its d3-* subdeps) *after* the
+          // initial crawl, forcing a full dep re-optimization + page reload
+          // mid-test. That reload remounts the admin view and silently drops
+          // client state (e.g. the dashboard's `isEditing`/unsaved layout),
+          // flaking the add/delete/reset widget tests. Pre-bundle it so the
+          // first optimization pass is complete.
+          'recharts',
+          // `@payloadcms/storage-vercel-blob`'s client upload handler imports
+          // `upload` from `@vercel/blob/client`, which depends on the CommonJS
+          // `async-retry`. Because the storage adapter is `noExternal` (bundled
+          // from source), Vite's optimizer never crawls into it to discover
+          // `@vercel/blob/client`, so it ships raw — and `async-retry`'s bare
+          // `require()` throws "require() is not available in the browser
+          // bundle", breaking the upload field (file input never mounts).
+          // Pre-bundling lets esbuild convert the CJS require to ESM.
+          '@vercel/blob/client',
+        ],
+      },
       customLogger: logger,
       envDir: repoRoot,
       server: {
