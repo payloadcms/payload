@@ -1514,9 +1514,12 @@ describe('Uploads', () => {
       await page.locator('#field-prefix').fill('should-preserve')
 
       // add another file
-      const addFileButton = page.locator('.file-selections__header__actions button', {
-        hasText: 'Add File',
-      })
+      const addFileButton = page.locator(
+        '.bulk-upload--file-manager .dialog__header-extras button',
+        {
+          hasText: 'Add files',
+        },
+      )
       await expect(addFileButton).toBeEnabled()
       await addFileButton.click()
 
@@ -1588,9 +1591,7 @@ describe('Uploads', () => {
           path.resolve(dirname, './image.png'),
           path.resolve(dirname, './test-image.png'),
         ])
-      await fieldBulkUploadModal
-        .locator('.bulk-upload--actions-bar button', { hasText: 'Save' })
-        .click()
+      await fieldBulkUploadModal.locator('.dialog__footer button', { hasText: 'Save' }).click()
       await expect(fieldBulkUploadModal).toBeHidden()
       await fieldBulkUploadButton.click()
 
