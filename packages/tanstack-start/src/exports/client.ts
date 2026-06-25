@@ -17,3 +17,7 @@ export {
 } from '../routes/adminRoutes.js'
 export { type LayoutLoad, payloadLayoutRoute } from '../routes/layoutRoute.js'
 export { viteDevReloadStrategy } from '../utilities/devReloadStrategy.js'
+export {
+  createServerFunctionClient,
+  stripUnserializable,
+} from '../utilities/serverFunctionClient.js'

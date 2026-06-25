@@ -1,6 +1,6 @@
 import type { ServerFunctionClientArgs } from 'payload'
 
-import { createServerFunctionClient } from '@payloadcms/tanstack-start'
+import { createServerFunctionClient } from '@payloadcms/tanstack-start/client'
 import { createServerFn } from '@tanstack/react-start'
 
 type LoadInput = {
