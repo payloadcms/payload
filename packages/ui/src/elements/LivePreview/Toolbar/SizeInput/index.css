@@ -4,7 +4,7 @@
     width: max-content;
   }
 
-  .toolbar-input .unit-input__field {
+  .toolbar-input .form-input {
     flex: 0 0 auto;
     width: calc(var(--spacer-4) * 2);
   }

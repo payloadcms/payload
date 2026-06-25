@@ -7,13 +7,13 @@ import React, { useRef, useState } from 'react'
 import ReactCrop from 'react-image-crop'
 
 import { editDrawerSlug } from '../../elements/Upload/index.js'
+import { NumberInput } from '../../fields/Number/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { ResetIcon } from '../../icons/Reset/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { Button } from '../Button/index.js'
 import { DialogFooter, DialogHeader, DialogModal } from '../Dialog/index.js'
-import { UnitInput } from '../UnitInput/index.js'
 import './index.css'
 import './library.css'
 
@@ -211,18 +211,18 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                     </button>
                   </div>
                   <div className={`${baseClass}__fieldset`}>
-                    <UnitInput
+                    <NumberInput
                       ariaLabel={t('upload:width')}
-                      name="cropWidth"
-                      onChange={(value) => fineTuneCrop({ dimension: 'width', value })}
+                      onChange={(e) => fineTuneCrop({ dimension: 'width', value: e.target.value })}
+                      path="cropWidth"
                       prefix="W"
                       readOnly={!imageLoaded}
                       value={Number(cropWidthPx)}
                     />
-                    <UnitInput
+                    <NumberInput
                       ariaLabel={t('upload:height')}
-                      name="cropHeight"
-                      onChange={(value) => fineTuneCrop({ dimension: 'height', value })}
+                      onChange={(e) => fineTuneCrop({ dimension: 'height', value: e.target.value })}
+                      path="cropHeight"
                       prefix="H"
                       readOnly={!imageLoaded}
                       value={Number(cropHeightPx)}
@@ -245,22 +245,26 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                     </button>
                   </div>
                   <div className={`${baseClass}__fieldset`}>
-                    <UnitInput
+                    <NumberInput
                       ariaLabel={`${t('upload:focalPoint')} X`}
                       max={100}
                       min={0}
-                      name="focalX"
-                      onChange={(value) => fineTuneFocalPosition({ coordinate: 'x', value })}
+                      onChange={(e) =>
+                        fineTuneFocalPosition({ coordinate: 'x', value: e.target.value })
+                      }
+                      path="focalX"
                       prefix="X"
                       suffix="%"
                       value={Math.round(focalPosition.x)}
                     />
-                    <UnitInput
+                    <NumberInput
                       ariaLabel={`${t('upload:focalPoint')} Y`}
                       max={100}
                       min={0}
-                      name="focalY"
-                      onChange={(value) => fineTuneFocalPosition({ coordinate: 'y', value })}
+                      onChange={(e) =>
+                        fineTuneFocalPosition({ coordinate: 'y', value: e.target.value })
+                      }
+                      path="focalY"
                       prefix="Y"
                       suffix="%"
                       value={Math.round(focalPosition.y)}

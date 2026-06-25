@@ -1,8 +1,7 @@
 'use client'
 import React, { useCallback, useEffect } from 'react'
 
-import { InputStepper } from '../../../../elements/InputStepper/index.js'
-import { UnitInput } from '../../../../elements/UnitInput/index.js'
+import { NumberInput } from '../../../../fields/Number/index.js'
 import { useLivePreviewContext } from '../../../../providers/LivePreview/context.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.css'
@@ -89,15 +88,13 @@ export const PreviewFrameSizeInput: React.FC<{
   }, [breakpoint, axis, measuredDeviceSize, size, zoom])
 
   return (
-    <UnitInput
-      actions={
-        <InputStepper onDecrement={() => handleStep('down')} onIncrement={() => handleStep('up')} />
-      }
+    <NumberInput
       ariaLabel={axis === 'x' ? t('upload:width') : t('upload:height')}
       className={baseClass}
       min={0}
-      name={axis === 'x' ? 'live-preview-width' : 'live-preview-height'}
-      onChange={handleChange}
+      onChange={(e) => handleChange(e.target.value)}
+      onStep={handleStep}
+      path={axis === 'x' ? 'live-preview-width' : 'live-preview-height'}
       prefix={axis === 'x' ? 'W' : 'H'}
       step={1}
       value={internalState || 0}
