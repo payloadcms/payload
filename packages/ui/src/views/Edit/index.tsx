@@ -810,8 +810,14 @@ export function DefaultEditView({
             >
               <DocumentFields
                 AfterFields={AfterFields}
-                // code smell to render before fields and not auth?
-                BeforeFields={shouldRenderUploadPanel ? renderAuth : BeforeFields || renderAuth}
+                BeforeFields={
+                  renderAuth || BeforeFields ? (
+                    <>
+                      {renderAuth}
+                      {BeforeFields}
+                    </>
+                  ) : null
+                }
                 Description={Description}
                 docPermissions={docPermissions}
                 fields={docConfig.fields}
