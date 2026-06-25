@@ -265,6 +265,26 @@ The import map is **never regenerated** during:
   map automatically.
 </Banner>
 
+### Generating the Import Map on build
+
+Running `payload build` generates the Import Map (and your TypeScript types) and
+then runs `next build`. Because the Import Map is statically imported at compile
+time, generating it _before_ `next build` ensures your production build always
+bundles an up-to-date Import Map.
+
+The Payload templates seed this for you:
+
+```json
+{
+  "scripts": {
+    "build": "payload build"
+  }
+}
+```
+
+`payload build` forwards any extra arguments to `next build` (e.g. `payload build --turbopack`).
+Pass `--no-types` to skip type generation (`payload build --no-types`).
+
 ## Troubleshooting
 
 ### Import map not found error

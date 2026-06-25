@@ -1,6 +1,6 @@
 @layer payload-default {
   .render-title {
-    --render-title-letter-spacing: -0.408px;
+    --render-title-letter-spacing: var(--text-heading-large-letter-spacing);
 
     display: inline-flex;
     align-items: center;
@@ -25,6 +25,16 @@
   .render-title__id {
     vertical-align: middle;
     position: relative;
+  }
+
+  .render-title__link {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
   }
 
   @media (max-width: 768px) {

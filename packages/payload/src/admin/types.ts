@@ -695,6 +695,9 @@ export type {
   ListViewServerPropsOnly,
   ListViewSlots,
   ListViewSlotSharedClientProps,
+  NoResultsClientProps,
+  NoResultsServerProps,
+  NoResultsServerPropsOnly,
 } from './views/list.js'
 
 type SchemaPath = {} & string

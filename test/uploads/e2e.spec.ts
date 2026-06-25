@@ -10,7 +10,7 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import {
-  getPillSelectorItem,
+  getColumnSelectorItem,
   openListColumns,
   toggleColumn,
 } from '../__helpers/e2e/columns/index.js'
@@ -23,6 +23,7 @@ import {
   saveDocAndAssert,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
@@ -1197,16 +1198,20 @@ describe('Uploads', () => {
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
       await expect(editManyBulkUploadModal).toBeVisible()
 
-      await editManyBulkUploadModal
-        .locator('.edit-many-bulk-uploads__form .react-select')
-        .click({ delay: 100 })
-      const options = editManyBulkUploadModal.locator('.rs__option')
+      const editFieldSelector = editManyBulkUploadModal.locator(
+        '.edit-many-bulk-uploads__form .react-select',
+      )
+      await editFieldSelector.click({ delay: 100 })
+      const editFieldMenu = getSelectMenu({ page })
+      const options = editFieldMenu.locator('.rs__option')
 
       await options.locator('text=Prefix').click()
 
       await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
 
-      await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+      await editManyBulkUploadModal
+        .locator('.edit-many-bulk-uploads__header__actions button')
+        .click()
       await bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button').click()
       await closeAllToasts(page)
 
@@ -1263,13 +1268,16 @@ describe('Uploads', () => {
         '.edit-many-bulk-uploads__form .react-select',
       )
       await fieldSelector.click({ delay: 100 })
-      const options = editManyBulkUploadModal.locator('.rs__option')
+      const fieldSelectorMenu = getSelectMenu({ page })
+      const options = fieldSelectorMenu.locator('.rs__option')
       // Select an option
       await options.locator('text=Prefix').click()
 
       await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
 
-      await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+      await editManyBulkUploadModal
+        .locator('.edit-many-bulk-uploads__header__actions button')
+        .click()
 
       await saveButton.click()
       await expect(page.locator('.payload-toast-container')).toContainText(
@@ -1316,13 +1324,16 @@ describe('Uploads', () => {
         '.edit-many-bulk-uploads__form .react-select',
       )
       await fieldSelector.click({ delay: 100 })
-      const options = editManyBulkUploadModal.locator('.rs__option')
+      const fieldSelectorMenu2 = getSelectMenu({ page })
+      const options = fieldSelectorMenu2.locator('.rs__option')
       // Select an option
       await options.locator('text=Prefix').click()
 
       await editManyBulkUploadModal.locator('#field-prefix').fill('some prefix')
 
-      await editManyBulkUploadModal.locator('.edit-many-bulk-uploads__sidebar-wrap button').click()
+      await editManyBulkUploadModal
+        .locator('.edit-many-bulk-uploads__header__actions button')
+        .click()
 
       await bulkUploadModal.locator('.file-field__upload .file-field__remove').click()
 
@@ -2127,17 +2138,19 @@ describe('Uploads', () => {
     const imageRelationshipCell = firstRow.locator('.cell-imageRelationship .relationship-cell')
     await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
 
-    const pageTwoButton = page.locator('.paginator__page', { hasText: '2' })
-    await expect(pageTwoButton).toBeVisible()
-    await pageTwoButton.click()
+    // Navigate to page 2 using the right arrow
+    const nextPageButton = page.locator('.clickable-arrow--right')
+    await expect(nextPageButton).toBeVisible()
+    await nextPageButton.click()
 
     const imageUploadImg = imageUploadCell.locator('.thumbnail')
     await expect(imageUploadImg).toBeVisible()
     await expect(imageRelationshipCell).toHaveText('image.png')
 
-    const pageOneButton = page.locator('.paginator__page', { hasText: '1' })
-    await expect(pageOneButton).toBeVisible()
-    await pageOneButton.click()
+    // Navigate back to page 1 using the left arrow
+    const prevPageButton = page.locator('.clickable-arrow--left')
+    await expect(prevPageButton).toBeVisible()
+    await prevPageButton.click()
 
     await expect(imageUploadCell).toHaveText('<No Image Upload>')
     await expect(imageRelationshipCell).toHaveText('<No Image Relationship>')
@@ -2205,38 +2218,78 @@ describe('Uploads', () => {
 
     await openListColumns(page, {})
 
-    await expect(getPillSelectorItem({ container: page, label: 'Sizes > one > URL' })).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > one > Width' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > one > URL',
+      }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > one > Height' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > one > Width',
+      }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > one > MIME Type' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > one > Height',
+      }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > one > File Size' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > one > MIME Type',
+      }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > one > File Name' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > one > File Size',
+      }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > one > File Name',
+      }),
     ).toBeHidden()
 
-    await expect(getPillSelectorItem({ container: page, label: 'Sizes > two > URL' })).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > two > Width' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > two > URL',
+      }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > two > Height' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > two > Width',
+      }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > two > MIME Type' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > two > Height',
+      }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > two > File Size' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > two > MIME Type',
+      }),
     ).toBeHidden()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > two > File Name' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > two > File Size',
+      }),
+    ).toBeHidden()
+    await expect(
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > two > File Name',
+      }),
     ).toBeHidden()
   })
 
@@ -2246,41 +2299,77 @@ describe('Uploads', () => {
     await openListColumns(page, {})
 
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > three > URL' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > three > URL',
+      }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > three > Width' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > three > Width',
+      }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > three > Height' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > three > Height',
+      }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > three > MIME Type' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > three > MIME Type',
+      }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > three > File Size' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > three > File Size',
+      }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > three > File Name' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > three > File Name',
+      }),
     ).toBeVisible()
 
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > four > URL' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > four > URL',
+      }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > four > Width' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > four > Width',
+      }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > four > Height' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > four > Height',
+      }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > four > MIME Type' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > four > MIME Type',
+      }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > four > File Size' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > four > File Size',
+      }),
     ).toBeVisible()
     await expect(
-      getPillSelectorItem({ container: page, label: 'Sizes > four > File Name' }),
+      getColumnSelectorItem({
+        container: page.locator('.popup__content .column-selector'),
+        label: 'Sizes > four > File Name',
+      }),
     ).toBeVisible()
   })
 
@@ -2290,15 +2379,13 @@ describe('Uploads', () => {
     await openListFilters(page, {})
 
     const whereBuilder = page.locator('.where-builder')
-    await whereBuilder.locator('.where-builder__add-first-filter').click()
 
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()
 
-    const menuList = conditionField.locator('.rs__menu-list')
+    const menuList = getSelectMenu({ page })
 
     // ensure the image size is not present
-    await expect(menuList.getByText('Sizes > one > URL', { exact: true })).toHaveCount(0)
     await expect(menuList.getByText('Sizes > one > Width', { exact: true })).toHaveCount(0)
     await expect(menuList.getByText('Sizes > one > Height', { exact: true })).toHaveCount(0)
     await expect(menuList.getByText('Sizes > one > MIME Type', { exact: true })).toHaveCount(0)
@@ -2319,12 +2406,11 @@ describe('Uploads', () => {
     await openListFilters(page, {})
 
     const whereBuilder = page.locator('.where-builder')
-    await whereBuilder.locator('.where-builder__add-first-filter').click()
 
     const conditionField = whereBuilder.locator('.condition__field')
     await conditionField.click()
 
-    const menuList = conditionField.locator('.rs__menu-list')
+    const menuList = getSelectMenu({ page })
 
     // ensure the image size is present
     await expect(menuList.getByText('Sizes > two > URL', { exact: true })).toHaveCount(1)

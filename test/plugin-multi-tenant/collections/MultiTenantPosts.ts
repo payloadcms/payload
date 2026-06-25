@@ -19,4 +19,5 @@ export const MultiTenantPosts: CollectionConfig = {
       relationTo: multiTenantPostsSlug,
     },
   ],
+  versions: false,
 }

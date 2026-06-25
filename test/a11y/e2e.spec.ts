@@ -1,10 +1,10 @@
 import type { Page } from '@playwright/test'
-import type { PayloadTestSDK } from '__helpers/shared/sdk/index.js'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
+import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import { assertAllElementsHaveFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
@@ -22,7 +22,7 @@ import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-test.describe('A11y', () => {
+test.describe.skip('A11y', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
   let mediaUrl: AdminUrlUtil

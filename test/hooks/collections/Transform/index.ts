@@ -71,6 +71,7 @@ const TransformHooks: CollectionConfig = {
       },
     ],
   },
+  versions: false,
 }
 
 export default TransformHooks

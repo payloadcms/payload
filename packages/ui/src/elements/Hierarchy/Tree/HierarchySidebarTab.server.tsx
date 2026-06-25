@@ -44,20 +44,25 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
       ? collectionConfig.hierarchy
       : undefined
 
-  const IconComponent = hierarchyConfig?.admin?.components?.Icon
+  const IconComponent = hierarchyConfig?.admin?.components?.SmallIcon
   const icon = IconComponent ? (
     RenderServerComponent({
+      clientProps: { size: 16 },
       Component: IconComponent,
       importMap: payload.importMap,
       key: `hierarchy-sidebar-icon-${hierarchyCollectionSlug}`,
     })
   ) : (
-    <TagIcon />
+    <TagIcon size={16} />
   )
 
   try {
-    // Get selected node from URL (?parent=<id>)
-    selectedNodeId = searchParams?.parent ? String(searchParams.parent) : null
+    // Get parentFieldName from config first (needed for URL parsing)
+    parentFieldName = hierarchyConfig?.parentFieldName ?? 'parent'
+
+    // Get selected node from URL (?<parentFieldName>=<id>)
+    const selectedNodeParam = searchParams?.[parentFieldName]
+    selectedNodeId = selectedNodeParam ? String(selectedNodeParam) : null
 
     // STEP 1: Load user's expanded node preferences
     const preferenceKey = `${PREFERENCE_KEYS.HIERARCHY_TREE}-${hierarchyCollectionSlug}`
@@ -87,7 +92,6 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
     }
 
     // STEP 2: Get remaining config values
-    parentFieldName = hierarchyConfig?.parentFieldName
     treeLimit = hierarchyConfig?.admin?.treeLimit
     typeFieldName =
       hierarchyConfig?.collectionSpecific && typeof hierarchyConfig.collectionSpecific === 'object'

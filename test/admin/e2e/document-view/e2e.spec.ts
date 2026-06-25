@@ -60,7 +60,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 
 import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
-import { selectInput } from '../../../__helpers/e2e/selectInput.js'
+import { getSelectMenu, selectInput } from '../../../__helpers/e2e/selectInput.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { openNav } from '../../../__helpers/e2e/toggleNav.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -416,9 +416,6 @@ describe('Document View', () => {
       const drawer1Content = page.locator('[id^=doc-drawer_posts_1_] .drawer__content')
       await expect(drawer1Content).toBeVisible()
 
-      const drawer1Box = await drawer1Content.boundingBox()
-      await expect.poll(() => drawer1Box).not.toBeNull()
-
       await drawer1Content
         .locator('.field-type.relationship .relationship--single-value__drawer-toggler')
         .click()
@@ -426,15 +423,27 @@ describe('Document View', () => {
       const drawer2Content = page.locator('[id^=doc-drawer_posts_2_] .drawer__content')
       await expect(drawer2Content).toBeVisible()
 
-      const drawer2Box = await drawer2Content.boundingBox()
-      await expect.poll(() => drawer2Box).not.toBeNull()
+      await wait(500)
 
-      // Stacking is done via padding-right on the outer wrapper, which pushes
-      // the content inward from the right. Compare right edges of the content:
-      const drawer1Right = drawer1Box!.x + drawer1Box!.width
-      const drawer2Right = drawer2Box!.x + drawer2Box!.width
+      // Nested drawers stack as layers: each ancestor drawer is pushed left while
+      // the top-most drawer stays pinned to the right edge. Compare right edges of
+      // the content: the deeper (top) drawer should sit further right than its
+      // ancestor.
+      await expect
+        .poll(async () => {
+          const drawer1Box = await drawer1Content.boundingBox()
+          const drawer2Box = await drawer2Content.boundingBox()
 
-      await expect.poll(() => drawer2Right < drawer1Right).toBe(true)
+          if (!drawer1Box || !drawer2Box) {
+            return false
+          }
+
+          const drawer1Right = drawer1Box.x + drawer1Box.width
+          const drawer2Right = drawer2Box.x + drawer2Box.width
+
+          return drawer1Right < drawer2Right
+        })
+        .toBe(true)
     })
 
     test('document drawer displays a link to document', async () => {
@@ -444,7 +453,7 @@ describe('Document View', () => {
       await page.locator('#field-relationship').click()
       await wait(200)
 
-      await page.locator('#field-relationship .rs__option').nth(2).click()
+      await getSelectMenu({ page }).locator('.rs__option').nth(2).click()
       await wait(500)
       await saveDocAndAssert(page)
 
@@ -461,13 +470,16 @@ describe('Document View', () => {
       await page.locator('.drawer__content #field-title').fill('New Title')
       await wait(200)
 
-      // Open link in a new tab by holding down the Meta or Control key
-      const documentLink = page.locator('.id-label a')
-      const documentId = String(await documentLink.textContent())
+      // The drawer header renders the document title as a link to the full document.
+      const titleEl = page.locator('[id^=doc-drawer_posts_1_] .doc-drawer__title')
+      const documentId = String(await titleEl.getAttribute('data-doc-id'))
+      const documentLink = titleEl.locator('a')
       await documentLink.click()
       await wait(200)
 
-      const leavePageModal = page.locator('#leave-without-saving #confirm-action').last()
+      const leavePageModal = page.locator(
+        '[id^="leave-without-saving-doc-drawer_posts_1_"] [data-dialog-action="confirm"]',
+      )
       await expect(leavePageModal).toBeVisible()
 
       await leavePageModal.click()
@@ -485,9 +497,11 @@ describe('Document View', () => {
 
       const currentUrl = page.url()
 
+      // The drawer header renders the document title as a link to the full document.
       // Open link in a new tab by holding down the Meta or Control key
-      const documentLink = page.locator('.id-label a')
-      const documentId = String(await documentLink.textContent())
+      const titleEl = page.locator('[id^=doc-drawer_posts_1_] .doc-drawer__title')
+      const documentId = String(await titleEl.getAttribute('data-doc-id'))
+      const documentLink = titleEl.locator('a')
       const [newPage] = await Promise.all([
         page.context().waitForEvent('page'),
         documentLink.click({ modifiers: ['ControlOrMeta'] }),
@@ -542,7 +556,7 @@ describe('Document View', () => {
   describe('collection — custom document controls', () => {
     test('should render status component', async () => {
       await navigateToDoc(page, postsUrl)
-      const statusComponent = page.locator('.doc-controls__status > .status')
+      const statusComponent = page.locator('.doc-controls__status')
       await expect(statusComponent).toBeVisible()
       await expect(statusComponent).toContainText('Draft')
     })
@@ -625,7 +639,7 @@ describe('Document View', () => {
       await expect(page.locator('#field-customSelectInput')).toBeVisible()
 
       await page.locator('#field-customSelectInput .rs__control').click()
-      await page.locator('#field-customSelectInput .rs__option').first().click()
+      await getSelectMenu({ page }).locator('.rs__option').first().click()
 
       await expect(page.locator('#field-customSelectInput .rs__single-value')).toHaveText(
         'Option 1',
@@ -697,13 +711,13 @@ describe('Document View', () => {
       test('should render custom select options', async () => {
         await page.goto(customFieldsURL.create)
         await page.locator('#field-customSelectField .rs__control').click()
-        await expect(page.locator('#field-customSelectField .rs__option')).toHaveCount(2)
+        await expect(getSelectMenu({ page }).locator('.rs__option')).toHaveCount(2)
       })
 
       test('should render custom multi select options', async () => {
         await page.goto(customFieldsURL.create)
         await page.locator('#field-customMultiSelectField .rs__control').click()
-        await expect(page.locator('#field-customMultiSelectField .rs__option')).toHaveCount(2)
+        await expect(getSelectMenu({ page }).locator('.rs__option')).toHaveCount(2)
       })
 
       test('should allow selecting multiple values in custom multi select', async () => {
@@ -880,6 +894,7 @@ describe('Document View', () => {
       await page.goto(postsUrl.create)
       await page.locator('#field-title').fill('heros')
       await selectInput({
+        page,
         multiSelect: false,
         option: 'sean',
         filter: 'sean',
@@ -900,10 +915,10 @@ describe('Document View', () => {
 
       const leaveModal = page.locator('#leave-without-saving-doc-drawer')
       await expect(leaveModal).toBeVisible()
-      await leaveModal.locator('#confirm-cancel').click()
+      await leaveModal.locator('[data-dialog-action="cancel"]').click()
       await expect(editModal).toBeVisible()
       await closeButton.click()
-      await leaveModal.locator('#confirm-action').click()
+      await leaveModal.locator('[data-dialog-action="confirm"]').click()
       await expect(editModal).toBeHidden()
     })
   })

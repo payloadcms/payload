@@ -18,6 +18,8 @@ import {
   runJobsQueue,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
+import { setPerPageLimit } from '../__helpers/e2e/setPerPageLimit.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -88,7 +90,7 @@ test.describe('Import Export Plugin', () => {
       const formatField = page.locator('.format-field .rs__control')
       await expect(formatField).toBeVisible()
       await formatField.click()
-      await page.locator('.rs__menu .rs__option:has-text("json")').click()
+      await getSelectMenu({ page }).locator('.rs__option', { hasText: 'json' }).click()
 
       await saveDocAndAssert(page)
 
@@ -143,18 +145,7 @@ test.describe('Import Export Plugin', () => {
       await expect(page.locator('body')).not.toContainText('Loading...')
 
       // Change per-page to 25
-      const perPageButton = page.locator('.per-page .popup-button')
-      await expect(perPageButton).toBeVisible()
-      await perPageButton.click()
-
-      const perPage25 = page.locator('.popup__content button.per-page__button', { hasText: '25' })
-      await expect(perPage25).toBeVisible()
-      await perPage25.click()
-
-      // Wait for URL to contain limit=25
-      await expect(() => {
-        expect(page.url()).toContain('limit=25')
-      }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+      await setPerPageLimit({ page, limit: 25 })
 
       // Open export from list menu
       const listMenuButton = page.locator('#list-menu')
@@ -527,7 +518,7 @@ test.describe('Import Export Plugin', () => {
         await expect(collectionField).toBeVisible()
         await collectionField.locator('.rs__control').click()
 
-        const menu = page.locator('.rs__menu')
+        const menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
@@ -587,7 +578,7 @@ test.describe('Import Export Plugin', () => {
         await expect(collectionField).toBeVisible()
         await collectionField.locator('.rs__control').click()
 
-        const menu = page.locator('.rs__menu')
+        const menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         await expect(menu.locator('.rs__option:text-is("Pages")')).toBeVisible()
@@ -604,7 +595,7 @@ test.describe('Import Export Plugin', () => {
         await expect(collectionField).toBeVisible()
         await collectionField.locator('.rs__control').click()
 
-        let menu = page.locator('.rs__menu')
+        let menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         let optionsBefore = 0
@@ -618,7 +609,7 @@ test.describe('Import Export Plugin', () => {
         await expect(page.locator('.collection-edit')).toBeVisible()
 
         await collectionField.locator('.rs__control').click()
-        menu = page.locator('.rs__menu')
+        menu = getSelectMenu({ page })
         await expect(menu).toBeVisible()
 
         await expect(async () => {
@@ -953,8 +944,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.locator('.rs__control').click()
-        await expect(page.locator('.rs__menu')).toBeVisible()
-        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
+        await getSelectMenu({ page }).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({
@@ -982,8 +972,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.locator('.rs__control').click()
-        await expect(page.locator('.rs__menu')).toBeVisible()
-        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
+        await getSelectMenu({ page }).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({
@@ -1026,8 +1015,7 @@ test.describe('Import Export Plugin', () => {
 
         const collectionField = page.locator('#field-collectionSlug')
         await collectionField.locator('.rs__control').click()
-        await expect(page.locator('.rs__menu')).toBeVisible()
-        await page.locator('.rs__option:has-text("Custom Id Pages")').click()
+        await getSelectMenu({ page }).locator('.rs__option', { hasText: 'Custom Id Pages' }).click()
 
         const fileInput = page.locator('input[type="file"]')
         await fileInput.setInputFiles({

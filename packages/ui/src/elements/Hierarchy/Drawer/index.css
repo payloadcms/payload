@@ -1,16 +1,28 @@
 @layer payload-default {
+  .dialog.hierarchy-drawer {
+    width: min(900px, calc(100vw - var(--spacer-6)));
+    height: min(700px, calc(100vh - var(--spacer-6)));
+    max-width: calc(100vw - var(--spacer-6));
+  }
+
   .hierarchy-drawer__content {
     display: flex;
     flex-direction: column;
     height: 100%;
     background: var(--color-bg);
+    border-radius: var(--radius-large);
+    overflow: clip;
+
+    .drawer-action-header {
+      padding: var(--spacer-2) var(--spacer-3);
+    }
   }
 
   .hierarchy-drawer__subheader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacer-3) var(--gutter-h);
+    padding: var(--spacer-2) var(--spacer-2-5);
     border-bottom: 1px solid var(--color-border);
     flex-shrink: 0;
   }

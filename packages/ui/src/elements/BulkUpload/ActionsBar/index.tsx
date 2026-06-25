@@ -25,42 +25,44 @@ export function ActionsBar({ collectionConfig }: Props) {
   return (
     <div className={baseClass}>
       {forms.length > 1 && (
-        <div className={`${baseClass}__navigation`}>
-          <p className={`${baseClass}__locationText`}>
-            <strong>{activeIndex + 1}</strong>
-            {` ${t('general:of')} `}
-            <strong>{forms.length}</strong>
-          </p>
+        <div className={`${baseClass}__multipleFiles`}>
+          <div className={`${baseClass}__navigation`}>
+            <p className={`${baseClass}__locationText`}>
+              <strong>{activeIndex + 1}</strong>
+              {` ${t('general:of')} `}
+              <strong>{forms.length}</strong>
+            </p>
 
-          <div className={`${baseClass}__controls`}>
-            <Button
-              aria-label={t('general:previous')}
-              buttonStyle="secondary"
-              icon={<ChevronIcon direction="left" />}
-              onClick={() => {
-                const nextIndex = activeIndex - 1
-                if (nextIndex < 0) {
-                  setActiveIndex(forms.length - 1)
-                } else {
-                  setActiveIndex(nextIndex)
-                }
-              }}
-              type="button"
-            />
-            <Button
-              aria-label={t('general:next')}
-              buttonStyle="secondary"
-              icon={<ChevronIcon direction="right" />}
-              onClick={() => {
-                const nextIndex = activeIndex + 1
-                if (nextIndex === forms.length) {
-                  setActiveIndex(0)
-                } else {
-                  setActiveIndex(nextIndex)
-                }
-              }}
-              type="button"
-            />
+            <div className={`${baseClass}__controls`}>
+              <Button
+                aria-label={t('general:previous')}
+                buttonStyle="secondary"
+                icon={<ChevronIcon direction="left" />}
+                onClick={() => {
+                  const nextIndex = activeIndex - 1
+                  if (nextIndex < 0) {
+                    setActiveIndex(forms.length - 1)
+                  } else {
+                    setActiveIndex(nextIndex)
+                  }
+                }}
+                type="button"
+              />
+              <Button
+                aria-label={t('general:next')}
+                buttonStyle="secondary"
+                icon={<ChevronIcon direction="right" />}
+                onClick={() => {
+                  const nextIndex = activeIndex + 1
+                  if (nextIndex === forms.length) {
+                    setActiveIndex(0)
+                  } else {
+                    setActiveIndex(nextIndex)
+                  }
+                }}
+                type="button"
+              />
+            </div>
           </div>
           <EditManyBulkUploads collection={collectionConfig} />
         </div>

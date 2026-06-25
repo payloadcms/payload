@@ -12,4 +12,5 @@ export const Media: CollectionConfig = {
     },
   ],
   upload: true,
+  versions: false,
 }

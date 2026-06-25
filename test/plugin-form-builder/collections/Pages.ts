@@ -33,4 +33,5 @@ export const Pages: CollectionConfig = {
       relationTo: 'forms',
     },
   ],
+  versions: false,
 }

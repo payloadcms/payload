@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { openNav } from '__helpers/e2e/toggleNav.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -9,6 +8,7 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Organization } from './payload-types.js'
 
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -17,7 +17,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 /**
- * Safely set a hierarchy filter checkbox to checked or unchecked state.
+ * Safely set a hierarchy filter option to checked or unchecked state.
  * Opens the filter dropdown, checks current state, only toggles if needed, then closes.
  */
 async function setHierarchyFilter({
@@ -31,13 +31,17 @@ async function setHierarchyFilter({
   page: Page
   sidebar: ReturnType<Page['locator']>
 }): Promise<void> {
-  await sidebar.locator('.hierarchy-search-input__filter').click()
-  const checkbox = page.getByRole('checkbox', { name: filterName })
-  await expect(checkbox).toBeVisible()
+  await sidebar.locator('.hierarchy-search__filter').click()
+  const filterButton = page.locator('.popup__content .popup-button-list__button', {
+    hasText: filterName,
+  })
+  await expect(filterButton).toBeVisible()
 
-  const isCurrentlyChecked = await checkbox.isChecked()
+  const isCurrentlyChecked = await filterButton.evaluate((el) =>
+    el.classList.contains('popup-button-list__button--selected'),
+  )
   if (isCurrentlyChecked !== checked) {
-    await checkbox.click()
+    await filterButton.click()
   }
 
   await page.keyboard.press('Escape')
@@ -147,6 +151,63 @@ test.describe('Hierarchy Sidebar', () => {
 
       // Child should be hidden
       await expect(tree.getByText('Engineering Division')).toBeHidden()
+    })
+
+    test('should navigate tree via keyboard and load more with Enter without navigation', async () => {
+      const prefs = await payload.find({
+        collection: 'payload-preferences',
+        where: { key: { equals: 'hierarchy-tree-divisions' } },
+      })
+      for (const pref of prefs.docs) {
+        await payload.delete({ collection: 'payload-preferences', id: pref.id })
+      }
+
+      await page.goto(`${serverURL}/admin`)
+      await openNav(page)
+      await page.getByRole('tab', { name: 'Divisions' }).click()
+
+      const tree = page.getByRole('tree')
+      await expect(tree).toBeVisible()
+
+      const getActiveText = async () =>
+        page.evaluate(() => (document.activeElement?.textContent || '').trim())
+
+      const getActiveClass = async () =>
+        page.evaluate(() => (document.activeElement?.className || '').toString())
+
+      // Focus the first tree node, then close/open with arrows for deterministic keyboard flow
+      const alphaNode = tree.locator('.tree-node').first()
+      await expect(alphaNode).toBeVisible()
+      await alphaNode.focus()
+      await expect.poll(getActiveText).toContain('Alpha Division')
+      await page.keyboard.press('ArrowLeft')
+      await expect(alphaNode).toHaveAttribute('aria-expanded', 'false')
+
+      // Open Alpha Division with ArrowRight, then navigate vertically through its children
+      await page.keyboard.press('ArrowRight')
+      await expect(alphaNode).toHaveAttribute('aria-expanded', 'true')
+      await expect(tree.getByText('Alpha Child 1')).toBeVisible()
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Alpha Child 1')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Alpha Child 2')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Alpha Child 3')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveClass).toContain('tree__load-more-button')
+
+      // Enter should load more children, not navigate
+      const urlBefore = page.url()
+      await page.keyboard.press('Enter')
+      await expect(page).toHaveURL(urlBefore)
+      await expect(tree.getByText('Alpha Child 4')).toBeVisible()
+      await expect
+        .poll(() => page.evaluate(() => document.activeElement?.getAttribute('aria-level')))
+        .toBe('2')
+
+      // Continue vertical navigation to the next root sibling after the newly loaded child
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Beta Division')
     })
   })
 
@@ -375,7 +436,7 @@ test.describe('Hierarchy Sidebar', () => {
       await page.getByRole('tab', { name: 'Folders' }).click()
 
       // Filter button should be visible (it's a div with aria-label="Filter")
-      const filterButton = page.locator('.hierarchy-search-input__filter')
+      const filterButton = page.locator('.hierarchy-search__filter')
       await expect(filterButton).toBeVisible()
     })
 
@@ -387,12 +448,16 @@ test.describe('Hierarchy Sidebar', () => {
 
       // Click filter button in sidebar
       const sidebar = page.getByRole('tabpanel')
-      await sidebar.locator('.hierarchy-search-input__filter').click()
+      await sidebar.locator('.hierarchy-search__filter').click()
 
       // Should show collection options (based on what collections reference folders)
-      // Popup content is rendered in a portal, use role-based selectors
-      await expect(page.getByRole('checkbox', { name: 'Organizations' })).toBeVisible()
-      await expect(page.getByRole('checkbox', { name: 'Products' })).toBeVisible()
+      // Popup content is rendered in a portal, use class-based selectors for PopupList.Button
+      await expect(
+        page.locator('.popup__content .popup-button-list__button', { hasText: 'Organizations' }),
+      ).toBeVisible()
+      await expect(
+        page.locator('.popup__content .popup-button-list__button', { hasText: 'Products' }),
+      ).toBeVisible()
     })
 
     test('should filter tree by selected collection type', async () => {
@@ -464,13 +529,13 @@ test.describe('Hierarchy Sidebar', () => {
       // Wait for filter to apply - Products Only should be hidden
       await expect(tree.getByText('Products Only', { exact: true })).toBeHidden()
 
-      // Create a new folder via the Create New button in the list header
+      // Create a new folder via the Create New button in the list controls
       const uniqueSuffix = Date.now()
       const newFolderName = `Filter Test Folder ${uniqueSuffix}`
 
-      // Click Create New button in the list header
-      const listHeader = page.locator('.hierarchy-list-header')
-      await listHeader.getByRole('button', { name: 'Create New' }).first().click()
+      // Click Create New button in the list controls
+      const listControls = page.locator('.hierarchy-list__controls')
+      await listControls.getByRole('button', { name: 'Create New' }).first().click()
 
       // Select "Folder" from the popup menu
       await page.getByRole('button', { name: 'Folder', exact: true }).click()
@@ -532,8 +597,8 @@ test.describe('Hierarchy Sidebar', () => {
       const uniqueSuffix = Date.now()
       const newFolderName = `Products Only Folder ${uniqueSuffix}`
 
-      const listHeader = page.locator('.hierarchy-list-header')
-      await listHeader.getByRole('button', { name: 'Create New' }).first().click()
+      const listControls = page.locator('.hierarchy-list__controls')
+      await listControls.getByRole('button', { name: 'Create New' }).first().click()
       await page.getByRole('button', { name: 'Folder', exact: true }).click()
 
       const drawer = page.locator('.drawer__content')

@@ -6,29 +6,21 @@ import type { ClientCollectionConfig, ViewTypes } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
-import type { CollectionOption } from '../../../elements/CreateDocumentButton/index.js'
-
-import { CreateDocumentButton } from '../../../elements/CreateDocumentButton/index.js'
 import { DefaultListViewTabs } from '../../../elements/DefaultListViewTabs/index.js'
 import { ListHeader } from '../../../elements/ListHeader/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
-import { useHierarchy } from '../../../providers/Hierarchy/index.js'
-import { useRouteCache } from '../../../providers/RouteCache/index.js'
 import { DocumentListSelection } from '../DocumentListSelection/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'hierarchy-list-header'
 
 export type HierarchyListHeaderProps = {
   collectionConfig: ClientCollectionConfig
-  /** Collections available for creation with their initial data */
-  collections: CollectionOption[]
   /** Title to display - defaults to collection label if not provided */
   currentItemTitle?: string
   Description?: React.ReactNode
   disableBulkDelete?: boolean
   disableBulkEdit?: boolean
-  hasCreatePermission: boolean
   /** Icon to display in the move drawer */
   HierarchyIcon?: React.ReactNode
   i18n: I18nClient
@@ -37,12 +29,10 @@ export type HierarchyListHeaderProps = {
 
 export function HierarchyListHeader({
   collectionConfig,
-  collections,
   currentItemTitle,
   Description,
   disableBulkDelete,
   disableBulkEdit,
-  hasCreatePermission,
   HierarchyIcon,
   i18n,
   viewType,
@@ -50,13 +40,6 @@ export function HierarchyListHeader({
   const { config } = useConfig()
   const { labels } = collectionConfig
   const title = currentItemTitle || getTranslation(labels?.plural, i18n)
-  const { clearRouteCache } = useRouteCache()
-  const { refreshTree } = useHierarchy()
-
-  const handleSave = () => {
-    clearRouteCache()
-    refreshTree(collectionConfig.slug)
-  }
 
   return (
     <ListHeader
@@ -78,18 +61,6 @@ export function HierarchyListHeader({
       AfterListHeaderContent={Description}
       className={baseClass}
       title={title}
-      TitleActions={
-        hasCreatePermission && collections.length > 0
-          ? [
-              <CreateDocumentButton
-                collections={collections}
-                drawerSlug={`hierarchy-create-${collectionConfig.slug}`}
-                key="hierarchy-create-button"
-                onSave={handleSave}
-              />,
-            ]
-          : undefined
-      }
     />
   )
 }

@@ -23,7 +23,7 @@ import {
 import React, { useEffect } from 'react'
 
 import type { PluginComponent } from '../../../typesClient.js'
-import type { Internal_UploadData, UploadData } from '../../server/nodes/UploadNode.js'
+import type { Internal_UploadData, UploadData } from '../../server/schema.js'
 import type { UploadFeaturePropsClient } from '../index.js'
 
 import { useEnabledRelationships } from '../../../relationship/client/utils/useEnabledRelationships.js'

@@ -1,7 +1,12 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { copyPasteField } from '__helpers/e2e/copyPasteField.js'
+import path from 'path'
+import { wait } from 'payload/shared'
+import { fileURLToPath } from 'url'
+
+import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
+import { copyPasteField } from '../../../__helpers/e2e/copyPasteField.js'
 import {
   addBlock,
   addBlockBelow,
@@ -9,20 +14,15 @@ import {
   openBlocksDrawer,
   reorderBlocks,
   selectBlockFromDrawer,
-} from '__helpers/e2e/fields/blocks/index.js'
-import { scrollEntirePage } from '__helpers/e2e/scrollEntirePage.js'
-import { toggleBlockOrArrayRow } from '__helpers/e2e/toggleCollapsible.js'
-import path from 'path'
-import { wait } from 'payload/shared'
-import { fileURLToPath } from 'url'
-
-import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
+} from '../../../__helpers/e2e/fields/blocks/index.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
 } from '../../../__helpers/e2e/helpers.js'
+import { scrollEntirePage } from '../../../__helpers/e2e/scrollEntirePage.js'
+import { toggleBlockOrArrayRow } from '../../../__helpers/e2e/toggleCollapsible.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -111,7 +111,7 @@ describe('Block fields', () => {
       fieldName: 'blocks',
     })
 
-    const searchInput = page.locator('.block-search__input')
+    const searchInput = page.locator('.block-search__input input')
     await searchInput.fill('Number')
 
     // select the first block in the drawer

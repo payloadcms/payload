@@ -16,6 +16,7 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { ServerAdapter } from '../admin/adapters/server.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
   CustomStatus,
@@ -158,6 +159,41 @@ export type Plugin = ((config: Config) => Config | Promise<Config>) & {
   order?: number
   /** @experimental Unique identifier for cross-plugin discovery via `config.plugins`. */
   slug?: string
+}
+
+/**
+ * Configures where uploaded files are stored (S3, GCS, Azure, Vercel Blob, etc.).
+ *
+ * Storage adapters run **before plugins**, so upload hooks, static file handlers,
+ * and presigned-URL endpoints are guaranteed to be in place before any plugin
+ * modifies the config.
+ *
+ * Pass the return value of a storage adapter factory to `storage` in your
+ * Payload config:
+ *
+ * ```ts
+ * import { s3Storage } from '@payloadcms/storage-s3'
+ *
+ * export default buildConfig({
+ *   storage: [
+ *     s3Storage({
+ *       bucket: process.env.S3_BUCKET,
+ *       collections: { media: true },
+ *       config: { region: process.env.S3_REGION },
+ *     }),
+ *   ],
+ * })
+ * ```
+ *
+ * @see https://payloadcms.com/docs/uploads/storage-adapters
+ */
+export interface StorageAdapter {
+  /** Collection slugs this adapter is configured to handle. */
+  collections: string[]
+  /** Initializes the adapter and returns the modified config with upload hooks and handlers injected. */
+  init: (config: Config) => Config | Promise<Config>
+  /** Unique identifier for this adapter (e.g. `'s3'`, `'gcs'`, `'azure'`). Surfaced in telemetry and on `payload.config.upload.adapters`. */
+  name: string
 }
 
 /**
@@ -449,6 +485,12 @@ export type ServerProps = {
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
   readonly searchParams?: Params
+  /**
+   * Framework-agnostic methods for server-side navigation, headers, cookies, and other server-only APIs.
+   * Plugins should call these methods instead of importing directly from `next/navigation`, `next/headers`, etc.
+   * These methods are populated by the given framework adapter, e.g. `@payloadcms/next`.
+   */
+  readonly server: ServerAdapter
   readonly user?: TypedUser
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
@@ -492,6 +534,21 @@ type SanitizedTimezoneConfig = {
 
 export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
   PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
+
+export type UserMenuSettingsGroup = {
+  group: LabelFunction | StaticLabel
+  items: CustomComponent[]
+}
+
+export type UserMenuSettingsItem = CustomComponent | UserMenuSettingsGroup
+
+export const isUserMenuSettingsGroup = (
+  userMenuSettingsItem: UserMenuSettingsItem,
+): userMenuSettingsItem is UserMenuSettingsGroup =>
+  typeof userMenuSettingsItem === 'object' &&
+  userMenuSettingsItem !== null &&
+  'items' in userMenuSettingsItem &&
+  Array.isArray(userMenuSettingsItem.items)
 
 export type Locale = {
   /**
@@ -975,6 +1032,12 @@ export type Config = {
         tabs?: SidebarTab[]
       }
       /**
+       * Add custom items to the user menu popup in the admin panel header.
+       * These components will be rendered in the Settings sub-popup of the user menu.
+       * When empty or absent, the Settings sub-trigger is not shown.
+       */
+      userMenuSettingsItems?: UserMenuSettingsItem[]
+      /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
        * + `Dashboard` - `/admin`
@@ -1168,21 +1231,6 @@ export type Config = {
    */
   collections?: CollectionConfig[]
   /**
-   * Compatibility flags for prior Payload versions
-   */
-  compatibility?: {
-    /**
-     * By default, Payload will remove the `localized: true` property
-     * from fields if a parent field is localized. Set this property
-     * to `true` only if you have an existing Payload database from pre-3.0
-     * that you would like to maintain without migrating. This is only
-     * relevant for MongoDB databases.
-     *
-     * @todo Remove in v4
-     */
-    allowLocalizedWithinLocalized: true
-  }
-  /**
    * Prefix a string to all cookies that Payload sets.
    *
    * @default "payload"
@@ -1222,22 +1270,6 @@ export type Config = {
   email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
-  /**
-   * Experimental features may be unstable or change in future versions.
-   */
-  experimental?: {
-    /**
-     * Enable per-locale status for documents.
-     *
-     * Requires:
-     * - `localization` enabled
-     * - `versions.drafts` enabled
-     * - `versions.drafts.localizeStatus` set at collection or global level
-     *
-     * @experimental
-     */
-    localizeStatus?: boolean
-  }
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
@@ -1500,6 +1532,20 @@ export type Config = {
    *
    */
   sharp?: SharpDependency
+  /**
+   * Storage adapters that handle where uploaded files are stored (S3, GCS, Azure, Vercel Blob, etc.).
+   *
+   * Adapters are initialized **before** `plugins`, so file handling is fully wired before any plugin
+   * runs. Use this instead of placing storage adapter packages in `plugins`.
+   *
+   * Migrate existing `plugins` usage automatically with:
+   * ```sh
+   * npx @payloadcms/codemod --transform migrate-storage-adapters-to-config
+   * ```
+   *
+   * @see https://payloadcms.com/docs/uploads/storage-adapters
+   */
+  storage?: StorageAdapter[]
   /** Send anonymous telemetry data about general usage. */
   telemetry?: boolean
   /** Control how typescript interfaces are generated from your collections. */
@@ -1582,8 +1628,16 @@ export type Config = {
  */
 export type SanitizedConfig = {
   admin: {
+    /**
+     * `Required` (shallow) marks the top-level dashboard props as required, mainly `defaultLayout`,
+     * which sanitizing always fills in. Do not switch this to the `DeepRequired` used below: it
+     * recurses into the widgets and re-expands the whole `Field` type (a large self-referencing
+     * union), which is very expensive to check. Never run a `Field`-bearing type through
+     * `DeepRequired`.
+     */
+    dashboard: Required<NonNullable<NonNullable<Config['admin']>['dashboard']>>
     timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Config['admin']>
+  } & DeepRequired<Omit<NonNullable<Config['admin']>, 'dashboard'>>
   blocks?: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
@@ -1598,6 +1652,7 @@ export type SanitizedConfig = {
     configDir: string
     rawConfig: string
   }
+  storage: StorageAdapter[]
   upload: {
     /**
      * Deduped list of adapters used in the project
@@ -1618,6 +1673,7 @@ export type SanitizedConfig = {
   | 'i18n'
   | 'jobs'
   | 'localization'
+  | 'storage'
   | 'upload'
 >
 
@@ -1736,7 +1792,7 @@ export type SharedEntityViews = {
    * ```
    */
   [key: string]:
-    | { actions?: CustomComponent[]; Component?: PayloadComponent }
+    | { actions?: CustomComponent[]; Component?: PayloadComponent; NoResults?: CustomComponent }
     | AdminViewConfig
     | EditConfig
     | undefined
@@ -1764,7 +1820,7 @@ export type SharedAdminComponents = {
   views?: SharedEntityViews
 }
 
-export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
+export type EntityDescriptionFunction = ({ t }: { t: TFunction<ClientTranslationKeys> }) => string
 
 export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 

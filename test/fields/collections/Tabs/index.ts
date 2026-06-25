@@ -9,7 +9,6 @@ const TabsFields: CollectionConfig = {
   access: {
     read: () => true,
   },
-  versions: true,
   fields: [
     {
       name: 'sidebarField',
@@ -420,7 +419,7 @@ const TabsFields: CollectionConfig = {
         },
       ],
     },
-  ],
+  ]
 }
 
 export default TabsFields

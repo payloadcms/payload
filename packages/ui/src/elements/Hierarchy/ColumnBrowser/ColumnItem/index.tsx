@@ -6,7 +6,7 @@ import type { ColumnItemProps } from '../types.js'
 import { CheckboxInput } from '../../../../fields/Checkbox/Input.js'
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { isSuperset } from '../../../../utilities/isSuperset.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'hierarchy-column-item'
 
@@ -87,7 +87,12 @@ export const ColumnItem: React.FC<ColumnItemProps> = ({
       tabIndex={isDisabled ? -1 : 0}
     >
       <div className={`${baseClass}__checkbox`}>
-        <CheckboxInput checked={isSelected} onToggle={handleCheckboxToggle} readOnly={isDisabled} />
+        <CheckboxInput
+          checked={isSelected}
+          onToggle={handleCheckboxToggle}
+          readOnly={isDisabled}
+          variant="muted"
+        />
       </div>
 
       <span className={`${baseClass}__title`} title={title}>

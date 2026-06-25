@@ -7,7 +7,7 @@ import React from 'react'
 import { Locked } from '../../../elements/Locked/index.js'
 import { CheckboxInput } from '../../../fields/Checkbox/Input.js'
 import { AlignJustifiedIcon } from '../../../icons/AlignJustified/index.js'
-import './SlotTable.scss'
+import './SlotTable.css'
 
 const baseClass = 'slot-table'
 
@@ -155,11 +155,6 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
         {enableHeader && (
           <thead>
             <tr>
-              {enableDragHandle && (
-                <th className={`${baseClass}__th ${baseClass}__th--drag`}>
-                  <span className={`${baseClass}__drag-header`} />
-                </th>
-              )}
               {enableCheckbox && !mergeCheckboxHeader && (
                 <th className={`${baseClass}__th ${baseClass}__th--checkbox`}>
                   {enableSelectAll && (
@@ -168,19 +163,43 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                       className={`${baseClass}__checkbox`}
                       onToggle={handleSelectAll}
                       partialChecked={someSelected && !allSelected}
+                      variant="muted"
                     />
                   )}
                 </th>
               )}
-              {columns.map((col, colIndex) => (
-                <th
-                  className={[`${baseClass}__th`, col.className].filter(Boolean).join(' ')}
-                  colSpan={colIndex === 0 && enableCheckbox && mergeCheckboxHeader ? 2 : undefined}
-                  key={col.accessor}
-                >
-                  {col.heading}
+              {enableDragHandle && (
+                <th className={`${baseClass}__th ${baseClass}__th--drag`}>
+                  <span className={`${baseClass}__drag-header`} />
                 </th>
-              ))}
+              )}
+              {columns.map((col, colIndex) => {
+                const isMergedCheckboxColumn =
+                  colIndex === 0 && enableCheckbox && mergeCheckboxHeader
+
+                return (
+                  <th
+                    className={[`${baseClass}__th`, col.className].filter(Boolean).join(' ')}
+                    colSpan={isMergedCheckboxColumn ? 2 : undefined}
+                    key={col.accessor}
+                  >
+                    {isMergedCheckboxColumn && enableSelectAll ? (
+                      <span className={`${baseClass}__th-merged`}>
+                        <CheckboxInput
+                          checked={allSelected}
+                          className={`${baseClass}__checkbox`}
+                          onToggle={handleSelectAll}
+                          partialChecked={someSelected && !allSelected}
+                          variant="muted"
+                        />
+                        {col.heading}
+                      </span>
+                    ) : (
+                      col.heading
+                    )}
+                  </th>
+                )
+              })}
             </tr>
           </thead>
         )}
@@ -205,13 +224,6 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                 onKeyDown={isClickable ? (e) => handleRowKeyDown(row, rowIndex, e) : undefined}
                 tabIndex={isClickable ? 0 : undefined}
               >
-                {enableDragHandle && (
-                  <td className={`${baseClass}__td ${baseClass}__td--drag`}>
-                    <span className={`${baseClass}__drag-handle`}>
-                      <AlignJustifiedIcon />
-                    </span>
-                  </td>
-                )}
                 {enableCheckbox && (
                   <td className={`${baseClass}__td ${baseClass}__td--checkbox`}>
                     {(() => {
@@ -226,9 +238,17 @@ export function SlotTable<TRow extends Record<string, unknown> = Record<string, 
                           checked={isSelected}
                           className={`${baseClass}__checkbox`}
                           onToggle={() => handleRowCheckbox(row, rowIndex, isSelected)}
+                          variant="muted"
                         />
                       )
                     })()}
+                  </td>
+                )}
+                {enableDragHandle && (
+                  <td className={`${baseClass}__td ${baseClass}__td--drag`}>
+                    <span className={`${baseClass}__drag-handle`}>
+                      <AlignJustifiedIcon />
+                    </span>
                   </td>
                 )}
                 {columns.map((col) => (

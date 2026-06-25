@@ -138,6 +138,7 @@ export function renderCell({
 
   // Check if this is a hierarchy relationship field and pre-render the icon
   let hierarchyIcon: React.ReactNode = undefined
+  let hierarchySmallIcon: React.ReactNode = undefined
   if (clientField.type === 'relationship' && 'relationTo' in clientField) {
     const relationTo = clientField.relationTo
     if (typeof relationTo === 'string') {
@@ -145,15 +146,32 @@ export function renderCell({
       const hierarchyConfig = relatedCollectionConfig?.hierarchy
       if (hierarchyConfig && typeof hierarchyConfig === 'object') {
         const iconComponent = hierarchyConfig.admin?.components?.Icon
+        const smallIconComponent = hierarchyConfig.admin?.components?.SmallIcon
         if (iconComponent) {
           // Pre-render the custom icon
           hierarchyIcon = RenderServerComponent({
             Component: iconComponent,
             importMap: payload.importMap,
+            key: `hierarchy-icon-${relationTo}`,
           })
         } else {
           // Use default icon based on allowHasMany
-          hierarchyIcon = hierarchyConfig.allowHasMany === false ? <FolderIcon /> : <TagIcon />
+          hierarchyIcon =
+            hierarchyConfig.allowHasMany === false ? (
+              <FolderIcon key={`hierarchy-icon-${relationTo}`} />
+            ) : (
+              <TagIcon key={`hierarchy-icon-${relationTo}`} />
+            )
+        }
+        // Pre-render the small icon (used in compact display contexts)
+        if (smallIconComponent && smallIconComponent !== iconComponent) {
+          hierarchySmallIcon = RenderServerComponent({
+            Component: smallIconComponent,
+            importMap: payload.importMap,
+            key: `hierarchy-small-icon-${relationTo}`,
+          })
+        } else {
+          hierarchySmallIcon = hierarchyIcon
         }
       }
     }
@@ -165,6 +183,7 @@ export function renderCell({
     customCellProps: {
       ...baseCellClientProps.customCellProps,
       ...(hierarchyIcon ? { hierarchyIcon } : {}),
+      ...(hierarchySmallIcon ? { hierarchySmallIcon } : {}),
     },
     field: enrichedClientField,
     link: shouldLink,

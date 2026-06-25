@@ -37,4 +37,5 @@ export const BulkUploadsHookErrorCollection: CollectionConfig = {
       },
     ],
   },
+  versions: false,
 }

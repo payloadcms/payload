@@ -33,18 +33,6 @@ export const getSchedulePublishTask = ({
         user.collection = adminUserSlug
       }
 
-      let publishSpecificLocale: string
-
-      if (input?.type === 'publish' && input.locale && req.payload.config.localization) {
-        const matchedLocale = req.payload.config.localization.locales.find(
-          ({ code }) => code === input.locale,
-        )
-
-        if (matchedLocale) {
-          publishSpecificLocale = input.locale
-        }
-      }
-
       if (input.doc) {
         await req.payload.update({
           id: input.doc.value,
@@ -53,8 +41,8 @@ export const getSchedulePublishTask = ({
             _status,
           },
           depth: 0,
+          locale: input.locale,
           overrideAccess: user === null,
-          publishSpecificLocale: publishSpecificLocale!,
           user,
         })
       }
@@ -66,8 +54,8 @@ export const getSchedulePublishTask = ({
             _status,
           },
           depth: 0,
+          locale: input.locale,
           overrideAccess: user === null,
-          publishSpecificLocale: publishSpecificLocale!,
           user,
         })
       }

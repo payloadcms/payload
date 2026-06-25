@@ -3,7 +3,6 @@
 import type { ListViewClientProps } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react'
@@ -11,22 +10,24 @@ import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'reac
 import type { CollectionOption } from '../../elements/CreateDocumentButton/index.js'
 import type { StepNavItem } from '../../elements/StepNav/index.js'
 
-import { Gutter } from '../../elements/Gutter/index.js'
+import { CreateDocumentButton } from '../../elements/CreateDocumentButton/index.js'
+import { ListControlsBar } from '../../elements/ListControlsBar/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
-import { SearchBar } from '../../elements/SearchBar/index.js'
+import { ListSearchFilter } from '../../elements/Search/ListSearchFilter/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
-import { TagIcon } from '../../icons/Tag/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
 import { useHierarchy } from '../../providers/Hierarchy/index.js'
+import { useRouteCache } from '../../providers/RouteCache/index.js'
+import { useRouter, useSearchParams } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { HierarchyListHeader } from './HierarchyListHeader/index.js'
 import { HierarchyTable } from './HierarchyTable/index.js'
 import { TypeFilter } from './TypeFilter/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'hierarchy-list'
 
@@ -40,6 +41,7 @@ export function HierarchyListView(props: ListViewClientProps) {
     hasCreatePermission: hasCreatePermissionFromProps,
     hierarchyData,
     HierarchyIcon,
+    HierarchySmallIcon,
     viewType,
   } = props
 
@@ -64,16 +66,29 @@ export function HierarchyListView(props: ListViewClientProps) {
   const collectionConfig = getEntityConfig({ collectionSlug })
   const { labels } = collectionConfig
 
+  const hierarchyConfig =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy
+      : undefined
+  const parentFieldName = hierarchyConfig?.parentFieldName
+
   const { i18n, t } = useTranslation()
   const collectionLabel = getTranslation(labels?.plural, i18n)
 
   const { setStepNav } = useStepNav()
-  const { parent } = useHierarchy()
+  const { parent, refreshTree } = useHierarchy()
+  const { clearRouteCache } = useRouteCache()
+
+  // Callback for when a new document is created
+  const handleSave = useCallback(() => {
+    clearRouteCache()
+    refreshTree(collectionSlug)
+  }, [clearRouteCache, collectionSlug, refreshTree])
 
   // Get search from URL params
   const searchFromURL = searchParams.get('search') || ''
 
-  // Update URL when search changes (debouncing is handled by SearchFilter)
+  // Update URL when search changes (debouncing is handled by ListSearchFilter)
   // This triggers a server refetch via Next.js router
   const handleSearchChange = useCallback(
     (value: string) => {
@@ -111,28 +126,22 @@ export function HierarchyListView(props: ListViewClientProps) {
       const ancestorBreadcrumbs = hierarchyData?.breadcrumbs?.slice(0, -1) || []
 
       const baseLabel: StepNavItem = {
-        label: (
-          <div className={`${baseClass}__step-nav-icon-label`}>
-            {HierarchyIcon || <TagIcon />}
-            {collectionLabel}
-          </div>
-        ),
-        url: parent?.id
-          ? formatAdminURL({
-              adminRoute,
-              path: `/collections/${collectionSlug}`,
-            })
-          : undefined,
+        label: collectionLabel,
+        url: formatAdminURL({
+          adminRoute,
+          path: `/collections/${collectionSlug}`,
+        }),
       }
 
       let navItems = [baseLabel]
 
       if (ancestorBreadcrumbs.length > 0) {
+        const queryParam = parentFieldName || 'parent'
         const hierarchyBreadcrumbs: StepNavItem[] = ancestorBreadcrumbs.map((crumb) => ({
           label: crumb.title,
           url: formatAdminURL({
             adminRoute,
-            path: `/collections/${collectionSlug}?parent=${crumb.id}`,
+            path: `/collections/${collectionSlug}?${queryParam}=${crumb.id}`,
           }),
         }))
         navItems = [...navItems, ...hierarchyBreadcrumbs]
@@ -147,16 +156,9 @@ export function HierarchyListView(props: ListViewClientProps) {
     collectionSlug,
     hierarchyData,
     collectionLabel,
-    currentItemTitle,
-    parent,
-    HierarchyIcon,
+    parentFieldName,
   ])
 
-  const hierarchyConfig =
-    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
-      ? collectionConfig.hierarchy
-      : undefined
-  const parentFieldName = hierarchyConfig?.parentFieldName
   const parentId = hierarchyData?.parentId ?? null
 
   // Build collections array for create button
@@ -295,6 +297,7 @@ export function HierarchyListView(props: ListViewClientProps) {
       .map(([slug, related]) => ({
         collectionSlug: slug,
         data: related.result,
+        fieldName: related.fieldName,
         hasMany: related.hasMany,
         label: related.label,
       }))
@@ -316,10 +319,9 @@ export function HierarchyListView(props: ListViewClientProps) {
       <div className={`${baseClass} ${baseClass}--${collectionSlug}`}>
         {BeforeList}
         <DocumentSelectionProvider collectionData={collectionData}>
-          <Gutter className={`${baseClass}__wrap`}>
+          <div className={`${baseClass}__wrap`}>
             <HierarchyListHeader
               collectionConfig={collectionConfig}
-              collections={collections}
               currentItemTitle={currentItemTitle}
               Description={
                 <React.Fragment>
@@ -345,28 +347,37 @@ export function HierarchyListView(props: ListViewClientProps) {
                   ) : null}
                 </React.Fragment>
               }
-              hasCreatePermission={hasCreatePermission}
               HierarchyIcon={HierarchyIcon}
               i18n={i18n}
               viewType={viewType}
             />
 
-            <div className={`${baseClass}__controls`}>
-              <SearchBar
-                label={t('general:searchBy', {
-                  label: getTranslation(collectionConfig?.admin?.useAsTitle || 'id', i18n),
-                })}
-                onSearchChange={handleSearchChange}
-                searchQueryParam={searchFromURL}
-              />
-              <TypeFilter
-                i18n={i18n}
-                key={`type-filter-${hierarchyData.parent ? hierarchyData.parent.id : 'root'}`}
-                onChange={handleTypeFilterChange}
-                options={typeOptions}
-                selectedValues={selectedTypes}
-              />
-            </div>
+            <ListControlsBar className={`${baseClass}__controls`}>
+              <div className={`${baseClass}__controls-left`}>
+                <ListSearchFilter
+                  label={t('general:searchBy', {
+                    label: getTranslation(collectionConfig?.admin?.useAsTitle || 'id', i18n),
+                  })}
+                  onSearchChange={handleSearchChange}
+                  searchQueryParam={searchFromURL}
+                />
+                <TypeFilter
+                  i18n={i18n}
+                  key={`type-filter-${hierarchyData.parent ? hierarchyData.parent.id : 'root'}`}
+                  onChange={handleTypeFilterChange}
+                  options={typeOptions}
+                  selectedValues={selectedTypes}
+                />
+              </div>
+              {hasCreatePermission && collections.length > 0 && (
+                <CreateDocumentButton
+                  buttonStyle="primary"
+                  collections={collections}
+                  drawerSlug={`hierarchy-create-${collectionSlug}`}
+                  onSave={handleSave}
+                />
+              )}
+            </ListControlsBar>
 
             <HierarchyTable
               baseFilter={baseFilter}
@@ -374,7 +385,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               collections={collections}
               collectionSlug={collectionSlug}
               hasCreatePermission={hasCreatePermission}
-              HierarchyIcon={HierarchyIcon}
+              HierarchyIcon={HierarchySmallIcon ?? HierarchyIcon}
               hierarchyLabel={collectionLabel}
               key={`${collectionSlug}-${parentId}-${searchFromURL}-${JSON.stringify(baseFilter)}-${filteredChildrenData?.totalDocs}-${Object.entries(
                 hierarchyData?.relatedDocumentsByCollection || {},
@@ -387,7 +398,7 @@ export function HierarchyListView(props: ListViewClientProps) {
               search={searchFromURL}
               useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
             />
-          </Gutter>
+          </div>
         </DocumentSelectionProvider>
         {AfterList}
       </div>

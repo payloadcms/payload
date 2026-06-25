@@ -1,8 +1,8 @@
 @layer payload-default {
   .relationship--multi-value-label {
     display: flex;
-    padding-inline-start: 0.5rem;
-    gap: 0.25rem;
+    padding-inline-start: var(--spacer-2);
+    gap: var(--spacer-1);
   }
 
   .relationship--multi-value-label__content {
@@ -28,10 +28,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 0.25rem;
+    margin-left: var(--spacer-1);
     pointer-events: all;
     border-radius: var(--radius-small);
-    border: 1px solid transparent;
+    border: var(--stroke-width-small) solid transparent;
 
     &:hover {
       background-color: var(--color-bg-transparent-hover);

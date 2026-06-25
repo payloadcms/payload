@@ -112,10 +112,10 @@ import type { CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
-  type DefaultNodeTypes,
   lexicalEditor,
   lexicalHTMLField,
   type SerializedBlockNode,
+  type WithDefaultNodes,
 } from '@payloadcms/richtext-lexical'
 
 const Pages: CollectionConfig = {
@@ -164,7 +164,7 @@ const Pages: CollectionConfig = {
             `<div style="background-color: red;${providedCSSString}">${node.fields.text}</div>`,
         },
       })) as HTMLConvertersFunction<
-        DefaultNodeTypes | SerializedBlockNode<MyTextBlock>
+        WithDefaultNodes<SerializedBlockNode<MyTextBlock>>
       >,
     }),
   ],
@@ -180,9 +180,9 @@ If your rich text includes Lexical blocks, you need to provide a way to convert 
 
 import type { MyInlineBlock, MyTextBlock } from '@/payload-types'
 import type {
-  DefaultNodeTypes,
   SerializedBlockNode,
   SerializedInlineBlockNode,
+  WithDefaultNodes,
 } from '@payloadcms/richtext-lexical'
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 
@@ -192,10 +192,9 @@ import {
 } from '@payloadcms/richtext-lexical/html'
 import React from 'react'
 
-type NodeTypes =
-  | DefaultNodeTypes
-  | SerializedBlockNode<MyTextBlock>
-  | SerializedInlineBlockNode<MyInlineBlock>
+type NodeTypes = WithDefaultNodes<
+  SerializedBlockNode<MyTextBlock> | SerializedInlineBlockNode<MyInlineBlock>
+>
 
 const htmlConverters: HTMLConvertersFunction<NodeTypes> = ({
   defaultConverters,

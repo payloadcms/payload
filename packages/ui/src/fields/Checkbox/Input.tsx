@@ -4,6 +4,7 @@ import type { StaticLabel } from 'payload'
 import React, { useEffect, useId, useState } from 'react'
 
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { Tooltip } from '../../elements/Tooltip/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { CheckIcon } from '../../icons/Check/index.js'
 import { LineIcon } from '../../icons/Line/index.js'
@@ -24,6 +25,13 @@ export type CheckboxInputProps = {
   readonly partialChecked?: boolean
   readonly readOnly?: boolean
   readonly required?: boolean
+  readonly tooltip?: string
+  /**
+   * Visual variant for the checkbox
+   * - 'default': Dark border, transparent background (for form fields)
+   * - 'muted': Light gray background and border (for tables)
+   */
+  readonly variant?: 'default' | 'muted'
 }
 
 export const inputBaseClass = 'checkbox-input'
@@ -44,8 +52,11 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   partialChecked,
   readOnly: readOnlyFromProps,
   required,
+  tooltip,
+  variant = 'default',
 }) => {
   const [isHydrated, setIsHydrated] = useState(false)
+  const [showTooltip, setShowTooltip] = useState(false)
   const fallbackID = useId()
   const id = idFromProps || fallbackID
 
@@ -62,9 +73,13 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         inputBaseClass,
         checked && `${inputBaseClass}--checked`,
         readOnly && `${inputBaseClass}--read-only`,
+        tooltip && `${inputBaseClass}--has-tooltip`,
+        variant !== 'default' && `${inputBaseClass}--${variant}`,
       ]
         .filter(Boolean)
         .join(' ')}
+      onPointerEnter={tooltip ? () => setShowTooltip(true) : undefined}
+      onPointerLeave={tooltip ? () => setShowTooltip(false) : undefined}
     >
       {BeforeInput}
       <div className={`${inputBaseClass}__wrap`}>
@@ -99,6 +114,11 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
         />
         {Error}
       </div>
+      {tooltip && (
+        <Tooltip alignCaret="left" className={`${inputBaseClass}__tooltip`} show={showTooltip}>
+          {tooltip}
+        </Tooltip>
+      )}
       {AfterInput}
     </div>
   )

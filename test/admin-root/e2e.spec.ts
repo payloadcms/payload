@@ -2,7 +2,6 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
-import { adminRoute } from 'shared.js'
 import { fileURLToPath } from 'url'
 
 import { login } from '../__helpers/e2e/auth/login.js'
@@ -15,6 +14,7 @@ import {
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { adminRoute } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -56,14 +56,6 @@ test.describe('Admin Panel (Root)', () => {
     })
   })
 
-  // test.beforeEach(async () => {
-  //   await throttleTest({
-  //     page,
-  //     context,
-  //     delay: 'Fast 4G',
-  //   })
-  // })
-
   test('should redirect `${adminRoute}/collections` to `${adminRoute}', async () => {
     const collectionsURL = `${url.admin}/collections`
     await page.goto(collectionsURL)
@@ -102,7 +94,7 @@ test.describe('Admin Panel (Root)', () => {
     const textField = page.locator('#field-text')
     await textField.fill('test')
     await saveDocAndAssert(page)
-    await page.locator('.doc-controls__popup >> .popup-button').click()
+    await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
     await expect(page.locator('#copy-locale-data__button')).toBeHidden()
   })
 
@@ -150,7 +142,10 @@ test.describe('Admin Panel (Root)', () => {
     await page.goto(url.create)
     const textField = page.locator('#field-text')
     await textField.fill('updated')
-    await page.click('a[aria-label="Account"]')
+    await page.click('button[aria-label="Account"]')
+    const profileLink = page.locator('a.user-menu__profile')
+    await expect(profileLink).toBeVisible()
+    await profileLink.click()
     const modal = page.locator('div.payload__modal-container')
     await expect(modal).toBeVisible()
 

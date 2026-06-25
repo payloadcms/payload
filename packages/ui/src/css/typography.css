@@ -9,13 +9,13 @@
     --text-body-small-font-size: 0.5625rem; /* 9px */
     --text-body-small-font-weight: 450;
     --text-body-small-line-height: 0.875rem; /* 14px */
-    --text-body-small-letter-spacing: 0.5px;
+    --text-body-small-letter-spacing: 0.045px; /* 0.5% */
 
     --text-body-small-strong-font-family: var(--font-family-sans);
     --text-body-small-strong-font-size: 0.5625rem; /* 9px */
     --text-body-small-strong-font-weight: 550;
     --text-body-small-strong-line-height: 0.875rem; /* 14px */
-    --text-body-small-strong-letter-spacing: 0.5px;
+    --text-body-small-strong-letter-spacing: 0.045px; /* 0.5% */
 
     /* Body — Medium */
     --text-body-medium-font-family: var(--font-family-sans);
@@ -28,7 +28,7 @@
     --text-body-medium-strong-font-size: 0.6875rem; /* 11px */
     --text-body-medium-strong-font-weight: 550;
     --text-body-medium-strong-line-height: 1rem; /* 16px */
-    --text-body-medium-strong-letter-spacing: 0.5px;
+    --text-body-medium-strong-letter-spacing: 0.055px;
 
     /* Body — Large */
     --text-body-large-font-family: var(--font-family-sans);
@@ -55,13 +55,13 @@
     --text-heading-medium-font-size: 0.9375rem; /* 15px */
     --text-heading-medium-font-weight: 550;
     --text-heading-medium-line-height: 1.5625rem;
-    --text-heading-medium-letter-spacing: -0.5px;
+    --text-heading-medium-letter-spacing: -0.075px;
 
     /* Heading — Large */
     --text-heading-large-font-family: var(--font-family-sans);
     --text-heading-large-font-size: 1.5rem; /* 24px */
     --text-heading-large-font-weight: 550;
     --text-heading-large-line-height: 2rem; /* 32px */
-    --text-heading-large-letter-spacing: -1.7px;
+    --text-heading-large-letter-spacing: -0.408px;
   }
 }
