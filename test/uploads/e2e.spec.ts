@@ -2078,8 +2078,8 @@ describe('Uploads', () => {
         await page.locator('button[aria-label="Edit Image"]').click()
 
         // set focal point
-        await page.locator('.edit-upload__dialog #field-focalX').fill('12') // left focal point
-        await page.locator('.edit-upload__dialog #field-focalY').fill('50') // top focal point
+        await page.locator('.edit-upload__dialog input[name="focalX"]').fill('12') // left focal point
+        await page.locator('.edit-upload__dialog input[name="focalY"]').fill('50') // top focal point
 
         // apply focal point
         await page.locator('button:has-text("Apply Changes")').click()
@@ -2109,11 +2109,11 @@ describe('Uploads', () => {
       await page.locator('button[aria-label="Edit Image"]').click()
 
       // set crop
-      await page.locator('#field-cropWidth').fill('400')
-      await page.locator('#field-cropHeight').fill('800')
+      await page.locator('input[name="cropWidth"]').fill('400')
+      await page.locator('input[name="cropHeight"]').fill('800')
       // set focal point
-      await page.locator('.edit-upload__dialog #field-focalX').fill('75') // init left focal point
-      await page.locator('.edit-upload__dialog #field-focalY').fill('50') // init top focal point
+      await page.locator('.edit-upload__dialog input[name="focalX"]').fill('75') // init left focal point
+      await page.locator('.edit-upload__dialog input[name="focalY"]').fill('50') // init top focal point
 
       await page.locator('button:has-text("Apply Changes")').click()
       await saveDocAndAssert(page)
@@ -2131,8 +2131,8 @@ describe('Uploads', () => {
 
       await page.locator('button[aria-label="Edit Image"]').click()
 
-      const widthInput = page.locator('#field-cropWidth')
-      const heightInput = page.locator('#field-cropHeight')
+      const widthInput = page.locator('input[name="cropWidth"]')
+      const heightInput = page.locator('input[name="cropHeight"]')
 
       await expect(widthInput).toHaveValue('800')
       await expect(heightInput).toHaveValue('800')
