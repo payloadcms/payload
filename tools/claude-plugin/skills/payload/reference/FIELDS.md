@@ -755,7 +755,7 @@ Type guards for runtime field type checking and safe type narrowing.
 | `valueIsValueWithRelation`  | Value is polymorphic relationship                           | Handle polymorphic relationships         |
 
 ```ts
-import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload'
+import { fieldAffectsData, fieldHasSubFields, fieldIsArrayType } from 'payload/shared'
 
 function processField(field: Field) {
   if (fieldAffectsData(field)) {
