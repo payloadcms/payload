@@ -23,7 +23,6 @@
       justify-content: center;
       display: flex;
       gap: var(--spacer-2);
-      background-color: var(--color-bg-secondary);
 
       p {
         margin: 0;

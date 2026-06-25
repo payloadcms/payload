@@ -12,7 +12,12 @@
     );
     margin-bottom: 0;
     border-radius: 0;
-    background: var(--color-bg-secondary);
+    background–color: var(--color-bg-secondary);
+
+    .dropzone {
+      border: none;
+      border-radius: 0;
+    }
   }
 
   .file-manager__panel {
@@ -57,7 +62,6 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: var(--color-bg-secondary);
     padding: var(--spacer-4);
     position: relative;
   }
