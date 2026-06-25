@@ -84,17 +84,16 @@ export function setupProd() {
     }
   }
 
-  // now add them all to overrides and pnpm.overrides as well
-  packageJson.pnpm = packageJson.pnpm || {}
-  packageJson.pnpm.overrides = packageJson.pnpm.overrides || {}
-  packageJson.overrides = packageJson.overrides || {}
-  for (const [packageName, packageVersion] of Object.entries(allDependencies)) {
-    packageJson.pnpm.overrides[packageName] = packageVersion
-    packageJson.overrides[packageName] = packageVersion
-  }
-
-  // write it out
+  // write out package.json (direct deps now point at local tarballs)
   fs.writeFileSync(path.resolve(dirname, 'package.json'), JSON.stringify(packageJson, null, 2))
+
+  // v11 ignores package.json#pnpm, so overrides live here. Pin @payloadcms deps to local tarballs
+  // (else transitive requests hit the unpublished in-repo beta). graphql mirrors the committed
+  // baseline; dangerouslyAllowAllBuilds keeps build scripts running under v11's strict default.
+  const overrides = { graphql: '16.8.1', ...allDependencies }
+  const overrideLines = Object.entries(overrides).map(([name, spec]) => `  '${name}': '${spec}'`)
+  const workspaceYaml = `overrides:\n${overrideLines.join('\n')}\ndangerouslyAllowAllBuilds: true\n`
+  fs.writeFileSync(path.resolve(dirname, 'pnpm-workspace.yaml'), workspaceYaml)
 }
 
 setupProd()

@@ -59,7 +59,6 @@ async function main() {
   const packageJsonObj = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8')) as {
     dependencies?: Record<string, string>
     devDependencies?: Record<string, string>
-    pnpm?: { overrides?: Record<string, string> }
   }
 
   // Point every workspace dependency the template declares at its local tarball. This also
@@ -76,15 +75,18 @@ async function main() {
     }
   }
 
-  // Force the local tarballs across the entire dependency tree via overrides. Without this, the
-  // packed tarballs request their sibling @payloadcms packages at the in-repo version (e.g. a beta
-  // that is not published to npm), and the install fails with ERR_PNPM_NO_MATCHING_VERSION.
-  packageJsonObj.pnpm = {
-    ...packageJsonObj.pnpm,
-    overrides: { ...packageJsonObj.pnpm?.overrides, ...fileSpecByPackageName },
-  }
-
   await fs.writeFile(packageJsonPath, JSON.stringify(packageJsonObj, null, 2))
+
+  // v11 ignores package.json#pnpm, so config lives here. overrides pin sibling @payloadcms deps to
+  // local tarballs (else they resolve to the unpublished in-repo beta); allowBuilds keeps the
+  // template's build scripts running under v11's strict default.
+  await fs.writeFile(
+    path.join(templatePath, 'pnpm-workspace.yaml'),
+    toWorkspaceYaml({
+      allowBuilds: ['esbuild', 'sharp', 'unrs-resolver'],
+      overrides: fileSpecByPackageName,
+    }),
+  )
 
   execSync('pnpm install --no-frozen-lockfile --ignore-workspace', execOpts)
   await fs.writeFile(
@@ -163,6 +165,24 @@ async function runBuildWithWarningsCheck(args: {
       resolve()
     })
   })
+}
+
+/** Serializes a minimal pnpm-workspace.yaml; quotes keys/values so scoped names and file: specs stay valid. */
+function toWorkspaceYaml(args: {
+  allowBuilds: string[]
+  overrides: Record<string, string>
+}): string {
+  const { allowBuilds, overrides } = args
+
+  const lines = ['overrides:']
+  for (const [name, spec] of Object.entries(overrides)) {
+    lines.push(`  '${name}': '${spec}'`)
+  }
+  lines.push('allowBuilds:')
+  for (const name of allowBuilds) {
+    lines.push(`  ${name}: true`)
+  }
+  return `${lines.join('\n')}\n`
 }
 
 /**
