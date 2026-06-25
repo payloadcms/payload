@@ -387,7 +387,6 @@ export const DocumentControls: React.FC<{
                 size="medium"
               />
             )}
-            size="medium"
             verticalAlign="bottom"
           >
             <PopupList.ButtonGroup>
