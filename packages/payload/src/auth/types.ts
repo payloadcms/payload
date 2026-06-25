@@ -184,6 +184,7 @@ export type AuthStrategyResult = {
   responseHeaders?: Headers
   user:
     | ({
+        _sid?: string
         _strategy?: string
         collection?: string
       } & TypedUser)
