@@ -172,7 +172,7 @@ const addDefaultDashboardWidgets = async ({
     },
   ]
 
-  const adminConfig = config.admin as NonNullable<Config['admin']>
+  const adminConfig: NonNullable<Config['admin']> = config.admin ?? { dashboard: { widgets: [] } }
   const dashboard: DashboardConfig = (adminConfig.dashboard ??= { widgets: [] })
 
   dashboard.widgets.push({
