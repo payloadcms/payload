@@ -87,6 +87,12 @@ export default buildConfigWithDefaults({
           relationTo: hideFileInputOnCreateSlug,
         },
         {
+          name: 'polymorphicUploads',
+          type: 'upload',
+          relationTo: ['uploads-1', 'uploads-2'],
+          hasMany: true,
+        },
+        {
           type: 'tabs',
           tabs: [
             {
