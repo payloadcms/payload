@@ -116,7 +116,7 @@
     }
 
     &:has(:focus-visible) .checkbox-input__input {
-      outline: 1px solid var(--color-bg);
+      outline: var(--stroke-width-small) solid var(--color-bg);
       outline-offset: -2px;
     }
   }
@@ -128,7 +128,7 @@
     }
 
     &:has(:focus-visible) .checkbox-input__input {
-      outline: 1px solid var(--color-bg);
+      outline: var(--stroke-width-small) solid var(--color-bg);
       outline-offset: -2px; /* inset offset */
     }
 
