@@ -26,8 +26,8 @@ export const CollectionQuerySortField: TextFieldClientComponent = ({
     showError,
     value,
   } = useField<string>({ potentiallyStalePath: pathFromProps })
-  const relatedCollectionField = useField({ path: 'relatedCollection' })
-  const relatedCollection = relatedCollectionField.value as string | undefined
+  const relatedCollectionField = useField<string>({ path: 'relatedCollection' })
+  const relatedCollection = relatedCollectionField.value
   const { config } = useConfig()
   const { permissions } = useAuth()
   const { i18n, t } = useTranslation()
