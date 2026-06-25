@@ -11,6 +11,12 @@ symlink: true
 nodeLinker: isolated
 hoistWorkspacePackages: false # the default in pnpm v9 is true, but that can break our runtime dependency checks
 savePrefix: ''
+# pnpm v11 defaults this to `install`, which auto-reinstalls when node_modules looks
+# stale before any `pnpm run`/`pnpm exec`. The root `prepare` script nests `pnpm turbo`
+# inside the outer install's lifecycle, so that check deadlocks against the in-flight
+# install (CI hangs until SIGTERM). Restore the v10 behavior.
+# See https://github.com/pnpm/pnpm/issues/8865
+verifyDepsBeforeRun: false
 
 overrides:
   '@types/request>form-data': '^2.5.6'
