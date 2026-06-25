@@ -83,6 +83,14 @@
       flex: 2;
       border-inline-start: var(--stroke-width-small) solid var(--color-border);
     }
+
+    .collection-edit__main:not(:has(.field-type)) {
+      display: none;
+    }
+
+    .collection-edit__main:not(:has(.field-type)) ~ .file-manager {
+      border-inline-start: none;
+    }
   }
 
   /* Container query (not viewport) so the layout stacks based on the space actually available
