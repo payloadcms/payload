@@ -3,7 +3,7 @@
     position: relative;
     display: flex;
     align-items: flex-start;
-    background: transparent;
+    background-color: var(--color-bg-secondary);
     border: var(--stroke-width-small) dashed var(--special-border-translucent);
     border-radius: var(--field-border-radius);
     overflow: clip;
