@@ -83,7 +83,7 @@
     "@stripe/react-stripe-js": "3.7.0",
     "@stripe/stripe-js": "7.3.1",
     "@tanstack/react-router": "^1.120.0",
-    "@tanstack/react-start": "^1.120.0",
+    "@tanstack/react-start": "^1.168.26",
     "@types/diff": "^8.0.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",

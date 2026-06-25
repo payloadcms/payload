@@ -74,7 +74,7 @@
   },
   "devDependencies": {
     "@tanstack/react-router": "^1.120.0",
-    "@tanstack/react-start": "^1.120.0",
+    "@tanstack/react-start": "^1.168.26",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.0",
@@ -85,7 +85,7 @@
   },
   "peerDependencies": {
     "@tanstack/react-router": "^1.120.0",
-    "@tanstack/react-start": "^1.120.0",
+    "@tanstack/react-start": "^1.168.26",
     "@vitejs/plugin-react": "^6.0.0",
     "payload": "workspace:*",
     "react": "^19.0.0",
