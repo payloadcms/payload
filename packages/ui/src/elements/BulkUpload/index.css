@@ -40,9 +40,9 @@
     }
   }
 
-  @media (max-width: 768px)  {
+  @media (max-width: 768px) {
     .bulk-upload-modal .document-fields__edit {
-      background: padding-top: var(--spacer-4);
+      padding-top: var(--spacer-4);
     }
   }
 }
