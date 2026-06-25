@@ -11,12 +11,20 @@ async function pathOrFileExists(path: string): Promise<boolean> {
 }
 
 /**
- * Default directory patterns for Next.js import map resolution.
- * Other framework adapters can provide their own patterns via `candidateDirectories`.
+ * Default directory patterns for import map resolution, covering the supported
+ * framework conventions. Directories are probed in order and the first existing
+ * one wins; the conventions are mutually exclusive in practice, so a Next.js app
+ * never matches the TanStack patterns and vice versa.
+ *
+ * Adapters with a bespoke layout can still bypass this via `candidateDirectories`.
  */
 const defaultCandidateDirectories = (rootDir: string, adminRoute: string): string[] => [
+  // Next.js App Router: `(payload)` route group nested under the admin route
   path.resolve(rootDir, `app/(payload)${adminRoute}/`),
   path.resolve(rootDir, `src/app/(payload)${adminRoute}/`),
+  // TanStack Start: `_payload` pathless route folder at the app root
+  path.resolve(rootDir, `app/_payload/`),
+  path.resolve(rootDir, `src/app/_payload/`),
 ]
 
 /**
