@@ -332,7 +332,7 @@ describe('Uploads', () => {
     await page.goto(mediaURL.edit(mediaDoc!.id))
     await waitForFormReady(page)
 
-    await expect(page.locator('.collection-edit__upload-layout')).toBeVisible()
+    await expect(page.locator('.collection-edit__main-wrapper--has-upload-panel')).toBeVisible()
     await expect(page.locator('.file-manager')).toBeVisible()
     await expect(page.locator('.file-preview')).toBeVisible()
     await expect(page.locator('.mini-carousel')).toBeVisible()
@@ -363,7 +363,7 @@ describe('Uploads', () => {
     await page.goto(mediaURL.create)
     await waitForFormReady(page)
 
-    await expect(page.locator('.collection-edit__upload-layout')).toBeVisible()
+    await expect(page.locator('.collection-edit__main-wrapper--has-upload-panel')).toBeVisible()
     await expect(page.locator('.file-manager .dropzone')).toBeVisible()
   })
 
@@ -415,7 +415,7 @@ describe('Uploads', () => {
     await page.goto(mediaWithFieldsURL.edit(mediaWithFieldsDoc!.id))
     await waitForFormReady(page)
 
-    await expect(page.locator('.collection-edit__upload-layout')).toBeVisible()
+    await expect(page.locator('.collection-edit__main-wrapper--has-upload-panel')).toBeVisible()
     await expect(page.locator('.file-manager')).toBeVisible()
     await expect(page.locator('.file-preview')).toBeVisible()
 
@@ -447,12 +447,11 @@ describe('Uploads', () => {
     await page.goto(mediaWithFieldsURL.edit(mediaWithFieldsDoc!.id))
     await waitForFormReady(page)
 
-    // Upload collections never show the field sidebar.
-    await expect(page.locator('.document-fields__sidebar-wrap')).toHaveCount(0)
-    await expect(page.locator('.document-fields--no-sidebar')).toBeVisible()
+    // Upload collections collapse the field sidebar inline via the force-sidebar-wrap layout.
+    await expect(page.locator('.document-fields--force-sidebar-wrap')).toBeVisible()
 
-    // The photographer field uses admin.position: 'sidebar' but must render inline in the main column.
-    await expect(page.locator('.document-fields__main #field-photographer')).toBeVisible()
+    // The photographer field uses admin.position: 'sidebar' but renders inline within the wrapped sidebar.
+    await expect(page.locator('#field-photographer')).toBeVisible()
   })
 
   test('should create file upload', async () => {
@@ -1043,21 +1042,14 @@ describe('Uploads', () => {
   test('should show custom upload component', async () => {
     await page.goto(customUploadFieldURL.create)
 
-    const serverText = page.locator(
-      '.collection-edit--custom-upload-field .document-fields__edit h2',
-    )
+    const serverText = page.locator('.collection-edit--custom-upload-field h2')
     await expect(serverText).toHaveText('This text was rendered on the server')
 
-    const clientText = page.locator(
-      '.collection-edit--custom-upload-field .document-fields__edit h3',
-    )
+    const clientText = page.locator('.collection-edit--custom-upload-field h3')
     await expect(clientText).toHaveText('This text was rendered on the client')
 
-    // Custom Upload components render in the legacy single-column path, not the
-    // side-by-side file manager layout.
-    await expect(
-      page.locator('.collection-edit--custom-upload-field .collection-edit__upload-layout'),
-    ).toHaveCount(0)
+    // The custom Upload component replaces the default FileManager in the upload panel.
+    await expect(page.locator('.collection-edit--custom-upload-field .file-manager')).toHaveCount(0)
   })
 
   test('should show original image url on a single upload card for an upload with adminThumbnail defined', async () => {
@@ -1107,7 +1099,7 @@ describe('Uploads', () => {
     })
     await hasManyThumbnailButton.click()
 
-    const hasManyThumbnailModal = page.locator('#hasManyThumbnailUpload-bulk-upload-drawer-slug-1')
+    const hasManyThumbnailModal = page.locator('#hasManyThumbnailUpload-bulk-upload-modal-slug-1')
     await expect(hasManyThumbnailModal).toBeVisible()
 
     await hasManyThumbnailModal
@@ -1177,7 +1169,7 @@ describe('Uploads', () => {
       })
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-modal-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
       // Bulk upload multiple files at once
@@ -1280,7 +1272,7 @@ describe('Uploads', () => {
       })
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-modal-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
       await bulkUploadModal
@@ -1325,7 +1317,7 @@ describe('Uploads', () => {
 
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-modal-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
       // Bulk upload multiple files at once
@@ -1336,7 +1328,7 @@ describe('Uploads', () => {
           path.resolve(dirname, './test-image.png'),
         ])
 
-      await bulkUploadModal.locator('.edit-many-bulk-uploads__toggle').click()
+      await bulkUploadModal.locator('.edit-many-bulk-uploads button').click()
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
       await expect(editManyBulkUploadModal).toBeVisible()
 
@@ -1383,7 +1375,7 @@ describe('Uploads', () => {
       })
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-modal-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
       // Bulk upload multiple files at once
@@ -1400,9 +1392,9 @@ describe('Uploads', () => {
       await closeAllToasts(page)
 
       const errorCount = bulkUploadModal.locator('.file-selections .error-pill__count').first()
-      await expect(errorCount).toHaveText('2')
+      await expect(errorCount).toHaveText('1')
 
-      await bulkUploadModal.locator('.edit-many-bulk-uploads__toggle').click()
+      await bulkUploadModal.locator('.edit-many-bulk-uploads button').click()
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
       await expect(editManyBulkUploadModal).toBeVisible()
 
@@ -1447,7 +1439,7 @@ describe('Uploads', () => {
       })
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-modal-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
       // Bulk upload multiple files at once
@@ -1458,7 +1450,7 @@ describe('Uploads', () => {
           path.resolve(dirname, './test-image.png'),
         ])
 
-      await bulkUploadModal.locator('.edit-many-bulk-uploads__toggle').click()
+      await bulkUploadModal.locator('.edit-many-bulk-uploads button').click()
       const editManyBulkUploadModal = page.locator('#edit-uploads-2-bulk-uploads')
       await expect(editManyBulkUploadModal).toBeVisible()
 
@@ -1588,7 +1580,7 @@ describe('Uploads', () => {
         hasText: exactText('Create New'),
       })
       await fieldBulkUploadButton.click()
-      const fieldBulkUploadModal = page.locator('#hasManyThumbnailUpload-bulk-upload-drawer-slug-1')
+      const fieldBulkUploadModal = page.locator('#hasManyThumbnailUpload-bulk-upload-modal-slug-1')
       await expect(fieldBulkUploadModal).toBeVisible()
       await fieldBulkUploadModal
         .locator('.dropzone input[type="file"]')
@@ -1621,7 +1613,7 @@ describe('Uploads', () => {
       })
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-modal-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
       await bulkUploadModal
@@ -1704,7 +1696,7 @@ describe('Uploads', () => {
       })
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-modal-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
       // Bulk upload multiple files - omit required field to trigger validation error
@@ -1748,7 +1740,7 @@ describe('Uploads', () => {
       })
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-modal-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
       // Upload 3 files
@@ -1836,7 +1828,7 @@ describe('Uploads', () => {
       })
       await bulkUploadButton.click()
 
-      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-drawer-slug-1')
+      const bulkUploadModal = page.locator('#hasManyUpload-bulk-upload-modal-slug-1')
       await expect(bulkUploadModal).toBeVisible()
 
       // Bulk upload multiple files including one that exceeds the 2MB limit

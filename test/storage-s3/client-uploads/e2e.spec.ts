@@ -129,7 +129,7 @@ test.describe('storage-s3 client uploads E2E', () => {
     await expect(createNewButton).toBeEnabled()
     await createNewButton.click()
 
-    const bulkUploadModal = testPage.locator('#files-bulk-upload-drawer-slug-1')
+    const bulkUploadModal = testPage.locator('#files-bulk-upload-modal-slug-1')
     await expect(bulkUploadModal).toBeVisible()
 
     await bulkUploadModal
@@ -198,7 +198,7 @@ test.describe('storage-s3 client uploads E2E', () => {
       path.resolve(dirname, '../../uploads/test-image.png'),
     ])
 
-    const bulkUploadModal = testPage.locator('#media-bulk-upload-drawer-slug-1')
+    const bulkUploadModal = testPage.locator('#media-bulk-upload-modal-slug-1')
     const saveButton = bulkUploadModal.locator('.bulk-upload--actions-bar__saveButtons button')
     await expect(saveButton).toBeVisible()
     await saveButton.click()
