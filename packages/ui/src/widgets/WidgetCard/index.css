@@ -1,14 +1,34 @@
 @layer payload-default {
-  .recently-viewed-widget {
+  .widget-card {
+    --widget-card-visible-rows: 5;
+    --widget-card-row-gap: var(--spacer-1);
+    --widget-card-row-height: 40px;
+    --widget-card-scrollbar-width: 6px;
+    --widget-card-rows-height: calc(
+      (var(--widget-card-row-height) + var(--widget-card-row-gap)) *
+        var(--widget-card-visible-rows) - var(--widget-card-row-gap)
+    );
+
     flex-direction: column;
     align-items: stretch;
     gap: var(--spacer-2-5);
-    max-height: 370px;
+    height: 100%;
+    /* Border + padding + header + header/rows gap + the visible row viewport. */
+    max-height: calc(
+      (var(--stroke-width-small) * 2) + (var(--spacer-2-5) * 3) +
+        var(--text-heading-medium-line-height) + var(--widget-card-rows-height)
+    );
     overflow: hidden;
     padding: var(--spacer-2-5);
   }
 
-  .recently-viewed-widget__title {
+  .widget-card__header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  .widget-card__title {
     margin: 0;
     color: var(--color-text);
     font-family: var(--text-heading-medium-font-family);
@@ -18,17 +38,11 @@
     letter-spacing: var(--text-heading-medium-letter-spacing);
   }
 
-  .recently-viewed-widget__header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacer-2);
-  }
-
-  .recently-viewed-widget__rows {
+  .widget-card__rows {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
-    gap: var(--spacer-1);
+    gap: var(--widget-card-row-gap);
     min-height: 0;
     overflow-y: auto;
     padding: 0;
@@ -38,7 +52,7 @@
     scrollbar-width: thin;
 
     &::-webkit-scrollbar {
-      width: 6px;
+      width: var(--widget-card-scrollbar-width);
       background: transparent;
     }
 
@@ -54,16 +68,16 @@
     }
   }
 
-  .recently-viewed-widget__row {
+  .widget-card__row {
     margin: 0;
   }
 
-  .recently-viewed-widget__row-link {
+  .widget-card__row-link {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--spacer-2);
-    min-height: 40px;
+    min-height: var(--widget-card-row-height);
     padding: var(--spacer-1) calc(var(--spacer-1) * 1.5);
     border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-small, 3px);
@@ -77,19 +91,31 @@
     }
   }
 
-  .recently-viewed-widget__row-main,
-  .recently-viewed-widget__row-meta {
+  .widget-card__row-main,
+  .widget-card__row-meta {
     display: inline-flex;
     align-items: center;
     min-width: 0;
   }
 
-  .recently-viewed-widget__row-main {
+  .widget-card__row-main {
     flex: 1 1 auto;
     gap: calc(var(--spacer-1) * 1.5);
   }
 
-  .recently-viewed-widget__row-meta {
+  .widget-card__row-title {
+    overflow: hidden;
+    color: var(--color-text);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    letter-spacing: var(--text-body-medium-strong-letter-spacing);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .widget-card__row-meta {
     flex: 0 0 auto;
     gap: var(--spacer-1);
     padding-left: calc(var(--spacer-1) * 1.5);
@@ -101,7 +127,7 @@
     white-space: nowrap;
   }
 
-  .recently-viewed-widget__type {
+  .widget-card__type {
     flex: 0 0 auto;
     padding: 0 var(--spacer-1);
     border-radius: var(--radius-small, 3px);
@@ -114,7 +140,7 @@
     white-space: nowrap;
   }
 
-  .recently-viewed-widget__thumbnail {
+  .widget-card__thumbnail {
     width: 24px;
     height: 24px;
     flex: 0 0 auto;
@@ -122,19 +148,7 @@
     border-radius: var(--radius-small, 3px);
   }
 
-  .recently-viewed-widget__row-title {
-    overflow: hidden;
-    color: var(--color-text);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
-    letter-spacing: var(--text-body-medium-strong-letter-spacing);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .recently-viewed-widget__empty {
+  .widget-card__empty {
     margin: 0;
     color: var(--color-text-secondary);
   }

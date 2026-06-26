@@ -5,10 +5,11 @@ import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+import type { WidgetListItem } from '../WidgetCard/index.js'
 import type { CollectionFieldPaths } from './getCollectionFieldPaths.js'
 
 import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
-import '../../elements/Card/index.css'
+import { WidgetCard, WidgetList } from '../WidgetCard/index.js'
 import './index.css'
 import { getCollectionFieldPaths } from './getCollectionFieldPaths.js'
 
@@ -110,49 +111,29 @@ export async function CollectionQueryWidget({
   const documentLabelPath = getCollectionDocumentLabelPath(collectionConfig.admin)
   const relativeTimeFormat = getRelativeTimeFormat(i18n.language)
 
-  return (
-    <div className="card collection-query-widget">
-      <div className="collection-query-widget__header">
-        <h3 className="collection-query-widget__title">{title}</h3>
-      </div>
-      {docs.length > 0 ? (
-        <ul className="collection-query-widget__rows">
-          {docs.map((doc) => {
-            const sortMeta = getDocSortMeta({ doc, i18n, relativeTimeFormat, sortField })
+  const items: WidgetListItem[] = docs.map((doc) => {
+    const sortMeta = getDocSortMeta({ doc, i18n, relativeTimeFormat, sortField })
 
-            return (
-              <li className="collection-query-widget__row" key={doc.id}>
-                <a
-                  className="collection-query-widget__row-link"
-                  href={getDocumentHref({
-                    id: doc.id,
-                    adminRoute,
-                    collectionSlug: relatedCollection,
-                  })}
-                >
-                  <span className="collection-query-widget__row-main">
-                    <span className="collection-query-widget__row-title">
-                      {getDocLabel({ doc, documentLabelPath })}
-                    </span>
-                  </span>
-                  <span className="collection-query-widget__row-meta">
-                    {sortMeta ? (
-                      sortMeta.dateTime ? (
-                        <time dateTime={sortMeta.dateTime}>{sortMeta.label}</time>
-                      ) : (
-                        sortMeta.label
-                      )
-                    ) : null}
-                  </span>
-                </a>
-              </li>
-            )
-          })}
-        </ul>
-      ) : (
-        <p className="collection-query-widget__empty">{i18n.t('general:noResultsFound')}</p>
-      )}
-    </div>
+    return {
+      href: getDocumentHref({ id: doc.id, adminRoute, collectionSlug: relatedCollection }),
+      key: String(doc.id),
+      main: (
+        <span className="widget-card__row-title">{getDocLabel({ doc, documentLabelPath })}</span>
+      ),
+      meta: sortMeta ? (
+        sortMeta.dateTime ? (
+          <time dateTime={sortMeta.dateTime}>{sortMeta.label}</time>
+        ) : (
+          sortMeta.label
+        )
+      ) : null,
+    }
+  })
+
+  return (
+    <WidgetCard className="collection-query-widget" title={title}>
+      <WidgetList emptyMessage={i18n.t('general:noResultsFound')} items={items} />
+    </WidgetCard>
   )
 }
 
@@ -166,10 +147,7 @@ function CollectionQueryError({
   title: string
 }) {
   return (
-    <div className="card collection-query-widget collection-query-widget--error">
-      <div className="collection-query-widget__header">
-        <h3 className="collection-query-widget__title">{title}</h3>
-      </div>
+    <WidgetCard className="collection-query-widget collection-query-widget--error" title={title}>
       <div className="collection-query-widget__error">
         <p className="collection-query-widget__error-title">
           {i18n.t('dashboard:widgetConfigurationError')}
@@ -180,7 +158,7 @@ function CollectionQueryError({
           ))}
         </ul>
       </div>
-    </div>
+    </WidgetCard>
   )
 }
 

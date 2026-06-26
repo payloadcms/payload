@@ -1,142 +1,9 @@
 @layer payload-default {
-  .collection-query-widget {
-    --collection-query-widget-visible-rows: 5;
-    --collection-query-widget-row-gap: var(--spacer-1);
-    --collection-query-widget-row-height: 40px;
-    --collection-query-widget-scrollbar-width: 6px;
-    --collection-query-widget-rows-height: calc(
-      (
-          var(--collection-query-widget-row-height) + var(--collection-query-widget-row-gap)
-        ) * var(--collection-query-widget-visible-rows) - var(--collection-query-widget-row-gap)
-    );
-
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--spacer-2-5);
-    height: 100%;
-    /* Border + padding + header + header/rows gap + the visible row viewport. */
-    max-height: calc(
-      (var(--stroke-width-small) * 2) + (var(--spacer-2-5) * 3) +
-        var(--text-heading-medium-line-height) +
-        var(--collection-query-widget-rows-height)
-    );
-    overflow: hidden;
-    padding: var(--spacer-2-5);
-  }
-
-  .collection-query-widget__title {
-    margin: 0;
-    color: var(--color-text);
-    font-family: var(--text-heading-medium-font-family);
-    font-size: var(--text-heading-medium-font-size);
-    font-weight: var(--text-heading-medium-font-weight);
-    line-height: var(--text-heading-medium-line-height);
-    letter-spacing: var(--text-heading-medium-letter-spacing);
-  }
-
-  .collection-query-widget__header {
-    display: flex;
-    align-items: center;
-    gap: var(--spacer-2);
-  }
-
-  .collection-query-widget__rows {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    gap: var(--collection-query-widget-row-gap);
-    min-height: 0;
-    overflow-y: auto;
-    padding: 0;
-    padding-inline-end: calc(
-      var(--collection-query-widget-scrollbar-width) + var(--spacer-1)
-    );
-    margin: 0;
-    list-style: none;
-    scrollbar-color: GrayText transparent;
-    scrollbar-width: thin;
-
-    &::-webkit-scrollbar {
-      width: var(--collection-query-widget-scrollbar-width);
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-corner,
-    &::-webkit-scrollbar-track,
-    &::-webkit-scrollbar-track-piece {
-      background: transparent;
-    }
-
-    &::-webkit-scrollbar-thumb {
-      border-radius: var(--radius-small, 3px);
-      background: GrayText;
-    }
-  }
-
-  .collection-query-widget__row {
-    margin: 0;
-  }
-
-  .collection-query-widget__row-link {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--spacer-2);
-    min-height: var(--collection-query-widget-row-height);
-    padding: var(--spacer-1) calc(var(--spacer-1) * 1.5);
-    border: var(--stroke-width-small) solid var(--color-border);
-    border-radius: var(--radius-small, 3px);
-    background: var(--color-bg);
-    color: var(--color-text);
-    text-decoration: none;
-
-    &:hover {
-      background: var(--color-bg-secondary-hover);
-      text-decoration: none;
-    }
-  }
-
-  .collection-query-widget__row-main,
-  .collection-query-widget__row-meta {
-    display: inline-flex;
-    align-items: center;
-    min-width: 0;
-  }
-
-  .collection-query-widget__row-main {
-    flex: 1 1 auto;
-    gap: calc(var(--spacer-1) * 1.5);
-  }
-
-  .collection-query-widget__row-meta {
-    flex: 0 0 auto;
-    gap: var(--spacer-1);
-    padding-left: calc(var(--spacer-1) * 1.5);
-    color: var(--color-text-secondary);
-    font-family: var(--text-body-medium-font-family);
-    font-size: var(--text-body-medium-font-size);
-    line-height: var(--text-body-medium-line-height);
-    letter-spacing: var(--text-body-medium-letter-spacing);
-    white-space: nowrap;
-  }
-
-  .collection-query-widget__row-title {
-    overflow: hidden;
-    color: var(--color-text);
-    font-family: var(--text-body-medium-strong-font-family);
-    font-size: var(--text-body-medium-strong-font-size);
-    font-weight: var(--text-body-medium-strong-font-weight);
-    line-height: var(--text-body-medium-strong-line-height);
-    letter-spacing: var(--text-body-medium-strong-letter-spacing);
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   .collection-query-widget--error {
     border-color: var(--color-bg-danger);
   }
 
-  .collection-query-widget--error .collection-query-widget__title {
+  .collection-query-widget--error .widget-card__title {
     color: var(--color-text-danger);
   }
 
@@ -193,10 +60,5 @@
     margin-top: calc(var(--spacer-1) * 1.25);
     border-radius: 50%;
     background: currentColor;
-  }
-
-  .collection-query-widget__empty {
-    margin: 0;
-    color: var(--color-text-secondary);
   }
 }

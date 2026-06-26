@@ -4,10 +4,11 @@ import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL, PREFERENCE_KEYS } from 'payload/shared'
 import React from 'react'
 
+import type { WidgetListItem } from '../WidgetCard/index.js'
+
 import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
-import '../../elements/Card/index.css'
-import './index.css'
 import { getPreferences } from '../../utilities/upsertPreferences.js'
+import { WidgetCard, WidgetList } from '../WidgetCard/index.js'
 
 type RecentlyViewedWidgetData = {
   excludedCollections?: string[]
@@ -40,43 +41,30 @@ export async function RecentlyViewedWidget({
   const enrichedItems = user ? await getEnrichedItems({ req, widgetData }) : []
   const relativeTimeFormat = getRelativeTimeFormat(i18n.language)
 
+  const items: WidgetListItem[] = enrichedItems.map((item) => ({
+    href: item.href,
+    key: `${item.collectionSlug}:${item.id}`,
+    main: (
+      <>
+        {item.thumbnailURL ? (
+          <img alt="" className="widget-card__thumbnail" src={item.thumbnailURL} />
+        ) : (
+          <span className="widget-card__type">{item.typeLabel}</span>
+        )}
+        <span className="widget-card__row-title">{item.title}</span>
+      </>
+    ),
+    meta: (
+      <time dateTime={item.viewedAt}>
+        {formatRelativeDate({ relativeTimeFormat, value: item.viewedAt })}
+      </time>
+    ),
+  }))
+
   return (
-    <div className="card recently-viewed-widget">
-      <div className="recently-viewed-widget__header">
-        <h3 className="recently-viewed-widget__title">{title}</h3>
-      </div>
-      {enrichedItems.length > 0 ? (
-        <ul className="recently-viewed-widget__rows">
-          {enrichedItems.map((item) => (
-            <li className="recently-viewed-widget__row" key={`${item.collectionSlug}:${item.id}`}>
-              <a className="recently-viewed-widget__row-link" href={item.href}>
-                <span className="recently-viewed-widget__row-main">
-                  {item.thumbnailURL ? (
-                    <img
-                      alt=""
-                      className="recently-viewed-widget__thumbnail"
-                      src={item.thumbnailURL}
-                    />
-                  ) : (
-                    <span className="recently-viewed-widget__type">{item.typeLabel}</span>
-                  )}
-                  <span className="recently-viewed-widget__row-title">{item.title}</span>
-                </span>
-                <span className="recently-viewed-widget__row-meta">
-                  <time dateTime={item.viewedAt}>
-                    {formatRelativeDate({ relativeTimeFormat, value: item.viewedAt })}
-                  </time>
-                </span>
-              </a>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="recently-viewed-widget__empty">
-          {i18n.t('dashboard:widgetRecentlyViewedEmpty')}
-        </p>
-      )}
-    </div>
+    <WidgetCard className="recently-viewed-widget" title={title}>
+      <WidgetList emptyMessage={i18n.t('dashboard:widgetRecentlyViewedEmpty')} items={items} />
+    </WidgetCard>
   )
 }
 
