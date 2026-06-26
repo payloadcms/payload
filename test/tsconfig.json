@@ -28,7 +28,7 @@
       }
     ],
     "paths": {
-      "@payload-config": ["./lexical/config.ts"],
+      "@payload-config": ["./tags/config.ts"],
       "__helpers/*": ["./__helpers/*"]
     }
   },
