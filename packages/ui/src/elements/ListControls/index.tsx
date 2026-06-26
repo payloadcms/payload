@@ -154,7 +154,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               className={`${baseClass}__popup`}
               horizontalAlign="right"
               id="list-menu"
-              size="medium"
               verticalAlign="bottom"
             >
               <PopupList.ButtonGroup>

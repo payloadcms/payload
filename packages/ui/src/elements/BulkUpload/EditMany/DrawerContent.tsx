@@ -19,6 +19,7 @@ import { FieldPathContext } from '../../../forms/RenderFields/context.js'
 import { RenderField } from '../../../forms/RenderFields/RenderField.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
+import { DocumentInfoProvider } from '../../../providers/DocumentInfo/index.js'
 import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
@@ -43,7 +44,7 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
   } = props
 
   const [isInitializing, setIsInitializing] = useState(false)
-  const { permissions } = useAuth()
+  const { permissions, user } = useAuth()
   const { i18n, t } = useTranslation()
   const { closeModal } = useModal()
   const { bulkUpdateForm } = useFormsManager()
@@ -145,64 +146,77 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
   })
 
   return (
-    <Form
-      className={`${baseClass}__form`}
-      isInitializing={isInitializing}
-      onChange={[onChange]}
-      onSubmit={handleSubmit}
+    <DocumentInfoProvider
+      collectionSlug={collection.slug}
+      currentEditor={user}
+      hasPublishedDoc={false}
+      id={null}
+      initialData={{}}
+      isLocked={false}
+      lastUpdateTime={0}
+      mostRecentVersionIsAutosaved={false}
+      unpublishedVersionCount={0}
+      versionCount={0}
     >
-      <div className={`${baseClass}__header`}>
-        <Button
-          aria-label={t('general:close')}
-          buttonStyle="ghost"
-          className={`${baseClass}__header__close`}
-          icon={<ChevronIcon direction="left" size={24} />}
-          id={`close-drawer__${drawerSlug}`}
-          onClick={() => closeModal(drawerSlug)}
-        />
-        <h2 className={`${baseClass}__header__title`} title={title}>
-          {title}
-        </h2>
-        <div className={`${baseClass}__header__actions`}>
-          <Button disabled={selectedFields.length === 0} size="medium" type="submit">
-            {t('general:applyChanges')}
-          </Button>
-        </div>
-      </div>
-      <div className={`${baseClass}__body`}>
-        <div className={`${baseClass}__select-fields`}>
-          <FieldSelect
-            fields={fields}
-            onChange={onFieldSelect}
-            permissions={collectionPermissions.fields}
+      <Form
+        className={`${baseClass}__form`}
+        isInitializing={isInitializing}
+        onChange={[onChange]}
+        onSubmit={handleSubmit}
+      >
+        <div className={`${baseClass}__header`}>
+          <Button
+            aria-label={t('general:close')}
+            buttonStyle="ghost"
+            className={`${baseClass}__header__close`}
+            icon={<ChevronIcon direction="left" size={24} />}
+            id={`close-drawer__${drawerSlug}`}
+            onClick={() => closeModal(drawerSlug)}
           />
-        </div>
-        {selectedFields.length === 0 ? null : (
-          <div className={`${baseClass}__edit`}>
-            <div className="render-fields">
-              <FieldPathContext value={undefined}>
-                {selectedFields.map((option, i) => {
-                  const {
-                    value: { field, fieldPermissions, path },
-                  } = option
-
-                  return (
-                    <RenderField
-                      clientFieldConfig={field}
-                      indexPath=""
-                      key={`${path}-${i}`}
-                      parentPath=""
-                      parentSchemaPath=""
-                      path={path}
-                      permissions={fieldPermissions}
-                    />
-                  )
-                })}
-              </FieldPathContext>
-            </div>
+          <h2 className={`${baseClass}__header__title`} title={title}>
+            {title}
+          </h2>
+          <div className={`${baseClass}__header__actions`}>
+            <Button disabled={selectedFields.length === 0} size="medium" type="submit">
+              {t('general:applyChanges')}
+            </Button>
           </div>
-        )}
-      </div>
-    </Form>
+        </div>
+        <div className={`${baseClass}__body`}>
+          <div className={`${baseClass}__select-fields`}>
+            <FieldSelect
+              fields={fields}
+              onChange={onFieldSelect}
+              permissions={collectionPermissions.fields}
+            />
+          </div>
+          {selectedFields.length === 0 ? null : (
+            <div className={`${baseClass}__edit`}>
+              <div className="render-fields">
+                <FieldPathContext value={undefined}>
+                  {selectedFields.map((option, i) => {
+                    const {
+                      value: { field, fieldPermissions, path },
+                    } = option
+
+                    return (
+                      <RenderField
+                        clientFieldConfig={field}
+                        indexPath=""
+                        key={`${path}-${i}`}
+                        parentPath=""
+                        parentSchemaPath=""
+                        path={path}
+                        permissions={fieldPermissions}
+                      />
+                    )
+                  })}
+                </FieldPathContext>
+              </div>
+            </div>
+          )}
+        </div>
+      </Form>
+    </DocumentInfoProvider>
   )
 }

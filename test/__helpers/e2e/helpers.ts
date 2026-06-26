@@ -553,6 +553,12 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted
       !msg.text().includes('TypeError: network error') && // Transient network errors during chunk loading
       !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') && // This is a weird error that happens in the console
+      // Expected lexical-converter warning for blocks/inline-blocks intentionally
+      // configured without an HTML converter (e.g. the `diff` test collection's
+      // `myBlock`). Logged server-side via `console.error`; harmless in Next, but
+      // the TanStack/vite-rsc adapter forwards server `console.error` to the
+      // browser console, so it would otherwise fail every diff-view test.
+      !msg.text().includes('no converter is provided') &&
       // Conditionally ignore CORS errors based on the `ignoreCORS` option
       !(
         ignoreCORS &&

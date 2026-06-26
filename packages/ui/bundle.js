@@ -84,17 +84,19 @@ async function build() {
   try {
     // The esbuild pass above bundles only component styles. The design tokens
     // live in `src/css/*.css` (referenced via `src/styles.css`'s `@import`
-    // chain) and are emitted to `${directoryArg}/css/*.css` by `copyfiles`.
-    // `copyfiles` also copies `src/styles.css` to `${directoryArg}/styles.css`,
-    // but the rename below would overwrite it — dropping the tokens entirely.
+    // chain). `copyfiles` also copies `src/styles.css` to `dist/styles.css`,
+    // but the write below would overwrite it — dropping the tokens entirely.
     // Consumers that load `styles.css` directly (the `@payloadcms/ui/css`
     // export, and `scss/app.scss`'s `@import '../styles.css'`) would then get
     // components with no CSS custom properties, so every `var(--spacer-*)`
     // resolves empty (e.g. switch toggles collapse to 0×0). Prepend the token
     // chain so the published `styles.css` is a complete, self-contained sheet.
+    // Read the tokens straight from `src/css/*.css` so this works regardless of
+    // `directoryArg` (e.g. `dist` for the normal build, `esbuild` for the
+    // bundle-size analysis build, which `copyfiles` does not populate).
     const stylesEntry = fs.readFileSync('src/styles.css', 'utf8')
     const tokenCss = [...stylesEntry.matchAll(/@import\s+['"]\.\/(css\/[^'"]+)['"]/g)]
-      .map((match) => fs.readFileSync(path.join(directoryArg, match[1]), 'utf8'))
+      .map((match) => fs.readFileSync(path.join('src', match[1]), 'utf8'))
       .join('\n')
     const componentCss = fs.readFileSync('dist-styles/index.css', 'utf8')
 
@@ -161,6 +163,13 @@ function require(m) {
       'react-dom',
       'next',
       'crypto',
+      // `sonner` owns a module-level toast event bus that the mounted `<Toaster>`
+      // (in the externalized ToastContainer provider) subscribes to. If the barrel
+      // inlines its own sonner copy, the `toast` it re-exports dispatches to a
+      // different bus than the one `<Toaster>` listens on, so toasts fired from
+      // consumer code imported via `@payloadcms/ui` never render. Keep it external
+      // so every consumer shares the single node_modules instance.
+      'sonner',
     ],
     //packages: 'external',
     minify: true,

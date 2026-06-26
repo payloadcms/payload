@@ -22,6 +22,7 @@ const baseClass = 'number'
 export const NumberInput: React.FC<NumberInputProps> = (props) => {
   const {
     AfterInput,
+    ariaLabel,
     BeforeInput,
     className,
     Description,
@@ -38,11 +39,13 @@ export const NumberInput: React.FC<NumberInputProps> = (props) => {
     onStep,
     path,
     placeholder: placeholderFromProps,
+    prefix,
     readOnly,
     required,
     showError,
     step = 1,
     style,
+    suffix,
     value,
     valueToRender,
   } = props
@@ -109,8 +112,9 @@ export const NumberInput: React.FC<NumberInputProps> = (props) => {
           />
         ) : (
           <div className="form-input-group">
+            {prefix ? <span className={`${baseClass}__prefix`}>{prefix}</span> : null}
             <input
-              aria-label={getTranslation(label, i18n) || path}
+              aria-label={ariaLabel || getTranslation(label, i18n) || path}
               className="form-input"
               disabled={readOnly}
               id={`field-${path.replace(/\./g, '__')}`}
@@ -127,6 +131,7 @@ export const NumberInput: React.FC<NumberInputProps> = (props) => {
               type="number"
               value={typeof value === 'number' ? value : ''}
             />
+            {suffix ? <span className={`${baseClass}__suffix`}>{suffix}</span> : null}
             {onStep && (
               <InputStepper
                 disabled={readOnly}

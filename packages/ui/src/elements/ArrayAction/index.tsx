@@ -132,7 +132,6 @@ export const ArrayAction: React.FC<Props> = ({
           </PopupList.MenuItem>
         )
       }}
-      size="medium"
     />
   )
 }

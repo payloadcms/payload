@@ -510,7 +510,7 @@ test.describe('Multi Tenant', () => {
       await expect(perFileAssignModal).toBeHidden()
 
       // Open the bulk-upload "Edit all" drawer and pick the Site (tenant) field.
-      await page.locator('.edit-many-bulk-uploads__toggle').click()
+      await page.locator('.edit-many-bulk-uploads button').click()
       const editManyDrawer = page.locator('dialog#edit-media-bulk-uploads')
       await expect(editManyDrawer).toBeVisible()
 

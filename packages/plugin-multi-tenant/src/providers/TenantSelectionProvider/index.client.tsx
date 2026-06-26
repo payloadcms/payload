@@ -258,6 +258,30 @@ export const TenantSelectionProviderClient = ({
   }, [userID, userChanged, syncTenants, initialValue, router])
 
   /**
+   * Populate tenant options when the provider mounts already-authenticated but
+   * without server-provided options. This happens when a provider setup remounts
+   * this subtree on login (see `config.conditionalProvider`): the remounted
+   * instance initializes `prevUserID` to the current user, so `userChanged` above
+   * is `false` and never fires `syncTenants`, while the server still rendered the
+   * logged-out tree so `initialTenantOptions` is empty — leaving the selector
+   * unrendered. Unlike `router.refresh()`, `syncTenants()` is a plain client fetch
+   * that cannot trigger a remount loop, so this is safe on every framework adapter.
+   */
+  const didInitialSync = React.useRef(false)
+  React.useEffect(() => {
+    if (
+      !didInitialSync.current &&
+      !userChanged &&
+      userID &&
+      tenantOptions.length === 0 &&
+      initialTenantOptions.length === 0
+    ) {
+      didInitialSync.current = true
+      void syncTenants()
+    }
+  }, [userChanged, userID, tenantOptions.length, initialTenantOptions, syncTenants])
+
+  /**
    * If there is no initial value, clear the tenant and refresh the router.
    * Needed for stale tenantIDs set as a cookie.
    *

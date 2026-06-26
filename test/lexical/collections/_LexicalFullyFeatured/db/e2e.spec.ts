@@ -4,7 +4,6 @@ import {
   type SerializedInlineBlockNode,
 } from '@payloadcms/richtext-lexical'
 import { expect, type Page, test } from '@playwright/test'
-import { lexicalFullyFeaturedSlug } from '../../../slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -17,6 +16,7 @@ import { AdminUrlUtil } from '../../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../../playwright.config.js'
+import { lexicalFullyFeaturedSlug } from '../../../slugs.js'
 import { LexicalHelpers, type PasteMode } from '../../utils.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -66,9 +66,11 @@ describe('Lexical Fully Featured - database', () => {
         await lexical.pasteFile({ filePath, mode })
       }
 
-      await expect(lexical.drawer).toBeVisible()
-      await lexical.drawer.locator('.bulk-upload--actions-bar').getByText('Save').click()
-      await expect(lexical.drawer).toBeHidden()
+      await expect(lexical.bulkUploadDrawer).toBeVisible()
+      await lexical.bulkUploadDrawer
+        .locator('.bulk-upload--actions-bar__saveButtons button')
+        .click()
+      await expect(lexical.bulkUploadDrawer).toBeHidden()
 
       await expect(lexical.editor.locator('.LexicalEditorTheme__upload')).toHaveCount(1)
       await expect(
