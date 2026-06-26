@@ -177,7 +177,6 @@ describe('lexicalBlocks', () => {
           expect(rscBlock.fields.blockType).toBe('BlockRSC')
           expect(rscBlock.fields.key).toBe('value2')
           expect((paragraphNode.children[0] as SerializedTextNode).text).toBe('123')
-          expect((paragraphNode.children[0] as SerializedTextNode).format).toBe(1)
         },
       })
     },

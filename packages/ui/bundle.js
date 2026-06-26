@@ -161,6 +161,13 @@ function require(m) {
       'react-dom',
       'next',
       'crypto',
+      // `sonner` owns a module-level toast event bus that the mounted `<Toaster>`
+      // (in the externalized ToastContainer provider) subscribes to. If the barrel
+      // inlines its own sonner copy, the `toast` it re-exports dispatches to a
+      // different bus than the one `<Toaster>` listens on, so toasts fired from
+      // consumer code imported via `@payloadcms/ui` never render. Keep it external
+      // so every consumer shares the single node_modules instance.
+      'sonner',
     ],
     //packages: 'external',
     minify: true,
