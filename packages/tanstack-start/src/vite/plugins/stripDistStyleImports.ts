@@ -22,6 +22,37 @@ const STATIC_STYLE_IMPORT_RE = /^[ \t]*import\s+['"][^'"]+\.(?:s?css|less)['"]\s
 const PAYLOAD_PKG_SRC_RE = /\/packages\/[^/]+\/src\//
 
 /**
+ * The version-diff component trees — matched in either published `dist/` or
+ * workspace `src/` form. The `.css` side-effect imports of these must be
+ * stripped in the RSC env (the rest of `@payloadcms/ui` must NOT be — see the
+ * note in `resolveId`/`transform` below), for two reasons rooted in the same
+ * `@vitejs/plugin-rsc` behaviour: it wraps every exported CSS-importing
+ * component with an async CSS-collector child
+ * (`__vite_rsc_wrap_css__` → `await import('virtual:vite-rsc/css?…')`).
+ *
+ * 1. Correctness: the diff converters render `CheckIcon` (`icons/*`) and `File`
+ *    (`graphics/*`) through the SYNCHRONOUS `renderToStaticMarkup` (see
+ *    `reactDomServerInRsc`). The async wrapper suspends, crashing that render
+ *    with "A component suspended while responding to synchronous input" and
+ *    taking down the entire field-diffs tree.
+ * 2. Performance: the diff view (`views/Version/*` — `RenderFieldsToDiff` and
+ *    its per-field components, `DiffCollapser`, `SelectComparison`, the
+ *    `Default` template — plus the `HTMLDiff`/`FieldDiffContainer`/
+ *    `FieldDiffLabel` elements and lexical's `field/Diff/*`) renders dozens of
+ *    these wrapped components in the Flight stream. Each async CSS import
+ *    serializes a round-trip, ballooning the render from ~3s to ~25s and
+ *    blowing past the e2e waits. Stripping them collapses it back to ~3s.
+ *
+ * Safe because every one of these components' styles also ship in the global
+ * `@payloadcms/ui/scss/app.scss` the admin imports, so dropping the per-module
+ * RSC collection here changes nothing visually (verified: diff + Nav stay
+ * styled). The admin `Nav` etc. are deliberately excluded — they rely on the
+ * RSC collection and a broad strip leaves them unstyled.
+ */
+const DIFF_VIEW_COMPONENT_RE =
+  /@payloadcms\/ui\/(?:dist|src)\/(?:icons|graphics|views\/Version|elements\/(?:HTMLDiff|FieldDiffContainer|FieldDiffLabel))\/|@payloadcms\/richtext-lexical\/(?:dist|src)\/field\/Diff\//
+
+/**
  * Stops Vite (and the underlying Node ESM loader) from trying to load
  * SCSS/CSS/LESS during SSR/RSC when the importer lives inside a built
  * `dist/` directory or when the specifier is a bare package name.
@@ -81,9 +112,11 @@ export function ssrStripDistStyleImports(): PluginOption {
       if (!isServerEnv) {
         return
       }
-      // Skip the RSC env so plugin-rsc can collect server-component CSS — see
-      // the matching note in `resolveId` above.
-      if (envName === 'rsc') {
+      // In the RSC env, only strip from the version-diff component trees (see
+      // `DIFF_VIEW_COMPONENT_RE`). Every other server component (the admin
+      // `Nav`, etc.) must keep its `.css` import so plugin-rsc can collect it —
+      // see the matching note in `resolveId` above.
+      if (envName === 'rsc' && !DIFF_VIEW_COMPONENT_RE.test(id)) {
         return
       }
       // Only touch Payload dependency files: published `node_modules/.../dist/`
@@ -95,7 +128,10 @@ export function ssrStripDistStyleImports(): PluginOption {
       if (!isPayloadDistFile && !isPayloadSrcFile) {
         return
       }
-      if (!/\.[mc]?[jt]sx?$/.test(id)) {
+      // Allow a trailing query (`?v=…`, `?t=…`): Vite appends version/timestamp
+      // queries to module ids, especially in the RSC graph, so a strict `$`
+      // anchor would skip e.g. `icons/Check/index.js?v=83de8543`.
+      if (!/\.[mc]?[jt]sx?(?:$|\?)/.test(id)) {
         return
       }
       if (!STATIC_STYLE_IMPORT_RE.test(code)) {
