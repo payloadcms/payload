@@ -1,5 +1,7 @@
-# Used by the standalone prod-test flow (`cd test && pnpm i --ignore-workspace`),
-# where pnpm treats this dir as its own root. v11 ignores `package.json#pnpm`,
-# so the graphql override lives here.
+# Makes test/ its own pnpm workspace root for the standalone prod-test flow (`cd test && pnpm i`),
+# isolating it from the monorepo without `--ignore-workspace` (which, under v11, would make pnpm
+# skip this file). setupProd.ts overwrites this with the full tarball overrides before install;
+# v11 ignores `package.json#pnpm`, so the graphql override lives here.
+verifyDepsBeforeRun: false
 overrides:
   graphql: '16.8.1'
