@@ -77,9 +77,13 @@ async function main() {
 
   await fs.writeFile(packageJsonPath, JSON.stringify(packageJsonObj, null, 2))
 
-  // v11 ignores package.json#pnpm, so config lives here. overrides pin sibling @payloadcms deps to
-  // local tarballs (else they resolve to the unpublished in-repo beta); allowBuilds keeps the
-  // template's build scripts running under v11's strict default.
+  // This file makes the template its own pnpm workspace root, shielding it from the monorepo root
+  // (which lists templates/* as workspace packages) without `--ignore-workspace` — which we cannot
+  // use, because under v11 it makes pnpm skip this file entirely (overrides and allowBuilds alike).
+  // overrides pin sibling @payloadcms deps to local tarballs (else they resolve to the unpublished
+  // in-repo beta -> ERR_PNPM_NO_MATCHING_VERSION); allowBuilds keeps the template's build scripts
+  // running under v11's strict default; verifyDepsBeforeRun disables the v11 re-install check that
+  // would otherwise fire on the later `pnpm run` commands.
   await fs.writeFile(
     path.join(templatePath, 'pnpm-workspace.yaml'),
     toWorkspaceYaml({
@@ -88,7 +92,7 @@ async function main() {
     }),
   )
 
-  execSync('pnpm install --no-frozen-lockfile --ignore-workspace', execOpts)
+  execSync('pnpm install --no-frozen-lockfile', execOpts)
   await fs.writeFile(
     path.resolve(templatePath, '.env'),
     // Populate POSTGRES_URL just in case it's needed
@@ -100,8 +104,8 @@ BLOB_READ_WRITE_TOKEN=vercel_blob_rw_TEST_asdf`,
   // Important: run generate:types and generate:importmap first
   if (templateName !== 'plugin') {
     // TODO: fix in a separate PR - these commands currently fail in the plugin template
-    execSync('pnpm --ignore-workspace run generate:types', execOpts)
-    execSync('pnpm --ignore-workspace run generate:importmap', execOpts)
+    execSync('pnpm run generate:types', execOpts)
+    execSync('pnpm run generate:importmap', execOpts)
   }
 
   await runBuildWithWarningsCheck({ cwd: templatePath, allowWarnings })
@@ -129,7 +133,7 @@ async function runBuildWithWarningsCheck(args: {
   const { allowWarnings, cwd } = args
 
   return new Promise((resolve, reject) => {
-    const buildProcess = spawn('pnpm', ['--ignore-workspace', 'run', 'build'], {
+    const buildProcess = spawn('pnpm', ['run', 'build'], {
       cwd,
       shell: true,
     })
@@ -167,14 +171,19 @@ async function runBuildWithWarningsCheck(args: {
   })
 }
 
-/** Serializes a minimal pnpm-workspace.yaml; quotes keys/values so scoped names and file: specs stay valid. */
+/**
+ * Serializes the template's standalone pnpm-workspace.yaml; quotes keys/values so scoped names and
+ * file: specs stay valid. Omitting `packages` makes the template a single-package workspace root,
+ * isolating it from the monorepo. `verifyDepsBeforeRun: false` stops v11 from re-installing before
+ * the `pnpm run` build/generate commands.
+ */
 function toWorkspaceYaml(args: {
   allowBuilds: string[]
   overrides: Record<string, string>
 }): string {
   const { allowBuilds, overrides } = args
 
-  const lines = ['overrides:']
+  const lines = ['verifyDepsBeforeRun: false', 'overrides:']
   for (const [name, spec] of Object.entries(overrides)) {
     lines.push(`  '${name}': '${spec}'`)
   }
