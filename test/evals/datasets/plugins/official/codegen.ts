@@ -53,7 +53,7 @@ export const pluginsOfficialCodegenDataset: CodegenEvalCase[] = [
     input:
       'Add the MCP plugin from "@payloadcms/plugin-mcp" to the config. Enable find and create operations for the "posts" collection, and set its description to "Blog posts for content creation".',
     expected:
-      'named import { mcpPlugin } from "@payloadcms/plugin-mcp", mcpPlugin({ collections: { posts: { enabled: { find: true, create: true }, description: "Blog posts for content creation" } } }) added to plugins array',
+      'named import { mcpPlugin } from "@payloadcms/plugin-mcp", mcpPlugin({ collections: { posts: { tools: { find: true, create: true }, description: "Blog posts for content creation" } } }) added to plugins array',
     category: 'plugins',
     fixturePath: 'plugins/official/codegen/mcp',
   },

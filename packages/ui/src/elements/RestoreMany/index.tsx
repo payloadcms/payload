@@ -20,11 +20,8 @@ import { requests } from '../../utilities/api.js'
 import { parseSearchParams } from '../../utilities/parseSearchParams.js'
 import { ConfirmationModal } from '../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../ListSelection/index.js'
-import './index.scss'
 
 const confirmManyRestoreDrawerSlug = `confirm-restore-many-docs`
-
-const baseClass = 'restore-many'
 
 export type Props = {
   collection: ClientCollectionConfig
@@ -170,7 +167,6 @@ export const RestoreMany: React.FC<Props> = (props) => {
     <React.Fragment>
       <ListSelectionButton
         aria-label={t('general:restore')}
-        className="restore-documents__toggle"
         onClick={() => {
           openModal(confirmManyRestoreDrawerSlug)
         }}
@@ -190,19 +186,16 @@ export const RestoreMany: React.FC<Props> = (props) => {
               },
             )}
             {collectionConfig?.versions?.drafts && (
-              <div className={`${baseClass}__checkbox`}>
-                <CheckboxInput
-                  checked={restoreAsPublished}
-                  id="restore-as-published-many"
-                  label={t('general:restoreAsPublished')}
-                  name="restore-as-published-many"
-                  onToggle={(e) => setRestoreAsPublished(e.target.checked)}
-                />
-              </div>
+              <CheckboxInput
+                checked={restoreAsPublished}
+                id="restore-as-published-many"
+                label={t('general:restoreAsPublished')}
+                name="restore-as-published-many"
+                onToggle={(e) => setRestoreAsPublished(e.target.checked)}
+              />
             )}
           </React.Fragment>
         }
-        className={baseClass}
         confirmingLabel={t('general:restoring')}
         heading={t('general:confirmRestoration')}
         modalSlug={confirmManyRestoreDrawerSlug}

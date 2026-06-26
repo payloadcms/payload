@@ -37,6 +37,7 @@ export const Categories: CollectionConfig = {
     },
     parentFieldName: 'parent',
   },
+  versions: false,
 }
 
 // Pages collection with dedicated slug field (tests slugField config option)
@@ -68,6 +69,7 @@ export const Pages: CollectionConfig = {
     parentFieldName: 'parent',
     slugField: 'slug', // Use dedicated slug field for _h_slugPath
   },
+  versions: false,
 }
 
 // Regions collection with explicit group (should appear in BOTH nav and as sidebar tab)
@@ -95,6 +97,7 @@ export const Regions: CollectionConfig = {
     },
     parentFieldName: 'parent',
   },
+  versions: false,
 }
 
 // Departments collection with custom field names
@@ -123,6 +126,29 @@ export const Departments: CollectionConfig = {
     slugPathFieldName: '_breadcrumbSlug',
     titlePathFieldName: '_breadcrumbTitle',
   },
+  versions: false,
+}
+
+// Divisions collection - dedicated to tree-limit / load-more keyboard regression tests
+export const Divisions: CollectionConfig = {
+  slug: 'divisions',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+  ],
+  hierarchy: {
+    admin: {
+      treeLimit: 3,
+    },
+    parentFieldName: 'parent',
+  },
+  versions: false,
 }
 
 // Organizations collection with hierarchy (main test collection)
@@ -184,6 +210,7 @@ export const Folders: CollectionConfig = {
       required: true,
     },
   ],
+  versions: false,
 }
 
 // Products collection with localized title field
@@ -228,7 +255,16 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  collections: [Categories, Departments, Folders, Organizations, Pages, Products, Regions],
+  collections: [
+    Categories,
+    Departments,
+    Divisions,
+    Folders,
+    Organizations,
+    Pages,
+    Products,
+    Regions,
+  ],
   debug: true,
   localization: {
     defaultLocale: 'en',

@@ -1,5 +1,5 @@
 'use client'
-import type { Field, OptionObject, TextFieldClientComponent } from 'payload'
+import type { OptionObject, TextFieldClientComponent } from 'payload'
 
 import React, { useCallback, useMemo } from 'react'
 
@@ -26,8 +26,8 @@ export const CollectionQuerySortField: TextFieldClientComponent = ({
     showError,
     value,
   } = useField<string>({ potentiallyStalePath: pathFromProps })
-  const relatedCollectionField = useField({ path: 'relatedCollection' })
-  const relatedCollection = relatedCollectionField.value as string | undefined
+  const relatedCollectionField = useField<string>({ path: 'relatedCollection' })
+  const relatedCollection = relatedCollectionField.value
   const { config } = useConfig()
   const { permissions } = useAuth()
   const { i18n, t } = useTranslation()
@@ -47,9 +47,7 @@ export const CollectionQuerySortField: TextFieldClientComponent = ({
 
     // Reuse the same sortable-path rules as the server widget so the dropdown only offers fields
     // the API can actually sort by (e.g. excluding array sub-fields).
-    const { sortableFieldPaths } = getCollectionFieldPaths(
-      collectionConfig.fields as unknown as Field[],
-    )
+    const { sortableFieldPaths } = getCollectionFieldPaths(collectionConfig.fields)
 
     const fieldOptions = reduceFieldsToOptions({
       fieldPermissions: permissions?.collections?.[relatedCollection]?.fields ?? true,

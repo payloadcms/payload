@@ -2,6 +2,7 @@ import type { SelectType } from 'payload'
 
 import { z } from 'zod'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import {
@@ -9,50 +10,56 @@ import {
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
-import { prepareCollectionSchema } from '../../../utils/schemaConversion/prepareCollectionSchema.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
+import { validateCollectionData } from '../validateEntityData.js'
+import { formatCollectionError } from './formatCollectionError.js'
 
-const DEFAULT_DESCRIPTION = 'Create a document in a collection.'
+const DEFAULT_DESCRIPTION =
+  'Create a document in any collection by passing the collection slug and data.'
 
-export const createCollectionTool = defineCollectionTool({
+export const createDocumentTool = defineCollectionTool({
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.collectionSlug]?.create),
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'Create Document',
+  },
   description: DEFAULT_DESCRIPTION,
-  input: ({ collectionSchema }) =>
-    z.object({
-      data: z
-        .fromJSONSchema(
-          prepareCollectionSchema(collectionSchema) as unknown as z.core.JSONSchema.JSONSchema,
-        )
-        .describe('The document fields to create'),
-      depth: z
-        .number()
-        .int()
-        .min(0)
-        .max(10)
-        .describe('How many levels deep to populate relationships in response')
-        .optional()
-        .default(0),
-      draft: z
-        .boolean()
-        .describe('Whether to create the document as a draft')
-        .optional()
-        .default(false),
-      fallbackLocale: z
-        .string()
-        .describe('Optional: fallback locale code to use when requested locale is not available')
-        .optional(),
-      locale: z
-        .string()
-        .describe(
-          'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
-        )
-        .optional(),
-      select: z
-        .string()
-        .describe(
-          'Optional: define exactly which fields you\'d like to create (JSON), e.g., \'{"title": "My Post"}\'',
-        )
-        .optional(),
-    }),
+  input: z.object({
+    data: z.record(z.string(), z.unknown()).describe('The document fields to create'),
+    depth: z
+      .number()
+      .int()
+      .min(0)
+      .max(10)
+      .describe('How many levels deep to populate relationships in response')
+      .optional()
+      .default(0),
+    draft: z
+      .boolean()
+      .describe('Whether to create the document as a draft')
+      .optional()
+      .default(false),
+    fallbackLocale: z
+      .string()
+      .describe('Optional: fallback locale code to use when requested locale is not available')
+      .optional(),
+    locale: z
+      .string()
+      .describe(
+        'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+      )
+      .optional(),
+    select: z
+      .record(z.string(), z.unknown())
+      .describe(
+        'Optional: define exactly which fields you\'d like to return, e.g., {"title": true}',
+      )
+      .optional(),
+  }),
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
@@ -64,19 +71,15 @@ export const createCollectionTool = defineCollectionTool({
   )
 
   try {
-    let parsedData = transformPointDataToPayload(data as Record<string, unknown>)
     const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
-    parsedData = stripVirtualFields(parsedData, virtualFieldNames)
+    const inputData = stripVirtualFields(data, virtualFieldNames)
+    const validationError = validateCollectionData({ collectionSlug, data: inputData, req })
 
-    let selectClause: SelectType | undefined
-    if (select) {
-      try {
-        selectClause = JSON.parse(select) as SelectType
-      } catch {
-        logger.warn(`Invalid select clause JSON: ${select}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
-      }
+    if (validationError) {
+      return validationError
     }
+
+    const parsedData = transformPointDataToPayload(inputData)
 
     const result = await payload.create({
       collection: collectionSlug,
@@ -87,7 +90,7 @@ export const createCollectionTool = defineCollectionTool({
       ...localAPIDefaults(authorizedMCP),
       ...(locale ? { locale } : {}),
       ...(fallbackLocale ? { fallbackLocale } : {}),
-      ...(selectClause ? { select: selectClause } : {}),
+      ...(select ? { select: select as SelectType } : {}),
     })
 
     logger.info(`Successfully created document in ${collectionSlug} with ID: ${result.id}`)
@@ -104,13 +107,6 @@ export const createCollectionTool = defineCollectionTool({
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : 'Unknown error'
     logger.error(`Error creating document in ${collectionSlug}: ${errorMessage}`)
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Error creating document in collection "${collectionSlug}": ${errorMessage}`,
-        },
-      ],
-    }
+    return formatCollectionError({ action: 'creating', collectionSlug, error, req })
   }
 })

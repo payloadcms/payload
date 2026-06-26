@@ -146,5 +146,13 @@ export const Button: React.FC<MenuButtonProps> = ({
  * Automatically shows a checkmark icon when active.
  */
 export const RadioGroupItem: React.FC<Omit<MenuButtonProps, 'icon'>> = (props) => {
-  return <Button {...props} icon={props.active ? <CheckIcon size={16} /> : undefined} />
+  return (
+    <Button
+      {...props}
+      className={[`${baseClass}__button--radio-group-item`, props.className]
+        .filter(Boolean)
+        .join(' ')}
+      icon={props.active ? <CheckIcon size={16} /> : undefined}
+    />
+  )
 }

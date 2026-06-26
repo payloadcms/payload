@@ -28,6 +28,34 @@
     animation: fade-out ease;
   }
 
+  /*
+   * Drawer variant: the overlay is just a calm, opaque backdrop shown while the
+   * drawer loads. It appears instantly (no fade-in ramp); the graceful reveal is
+   * handled by the content fading in once it's ready (.drawer__fade-in). The
+   * spinner is held back so quick (nested) drawer loads never flash it.
+   */
+  .loading-overlay--drawer::after {
+    opacity: 1;
+    background-color: var(--color-bg);
+  }
+
+  .loading-overlay--drawer.loading-overlay--entering {
+    animation: none;
+    opacity: 1;
+  }
+
+  .loading-overlay--drawer .spinner {
+    opacity: 0;
+    animation: fade-in 200ms ease 450ms forwards;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .loading-overlay--drawer .spinner {
+      animation: none;
+      opacity: 1;
+    }
+  }
+
   .loading-overlay::after {
     content: '';
     position: absolute;
@@ -38,80 +66,6 @@
     background-color: var(--color-bg);
     opacity: 0.85;
     z-index: -1;
-  }
-
-  .loading-overlay__bars {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
-    gap: 7px;
-    align-items: center;
-  }
-
-  .loading-overlay__bar {
-    width: 2px;
-    background-color: currentColor;
-    height: 15px;
-
-    &:nth-child(1) {
-      transform: translateY(0);
-      animation: animate-bar--odd 1.25s infinite;
-    }
-
-    &:nth-child(2) {
-      transform: translateY(-2px);
-      animation: animate-bar--even 1.25s infinite;
-    }
-
-    &:nth-child(3) {
-      transform: translateY(0);
-      animation: animate-bar--odd 1.25s infinite;
-    }
-
-    &:nth-child(4) {
-      transform: translateY(-2px);
-      animation: animate-bar--even 1.25s infinite;
-    }
-
-    &:nth-child(5) {
-      transform: translateY(0);
-      animation: animate-bar--odd 1.25s infinite;
-    }
-  }
-
-  .loading-overlay__text {
-    margin-top: var(--spacer-3);
-    text-transform: uppercase;
-    font-family: var(--text-body-medium-font-family);
-    font-size: var(--text-body-medium-font-size);
-    letter-spacing: 3px;
-  }
-
-  @keyframes animate-bar--even {
-    0% {
-      transform: translateY(2px);
-    }
-
-    50% {
-      transform: translateY(-2px);
-    }
-
-    100% {
-      transform: translateY(2px);
-    }
-  }
-
-  @keyframes animate-bar--odd {
-    0% {
-      transform: translateY(-2px);
-    }
-
-    50% {
-      transform: translateY(2px);
-    }
-
-    100% {
-      transform: translateY(-2px);
-    }
   }
 
   @keyframes fade-in {

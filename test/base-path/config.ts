@@ -15,6 +15,7 @@ export default buildConfigWithDefaults({
       slug: 'media',
       upload: true,
       fields: [],
+      versions: false,
     },
   ],
   onInit: seed,

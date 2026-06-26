@@ -65,8 +65,11 @@ Important scoring guidance:
   or value differs.`,
   })
 
-  const score = 0.6 * output.correctness + 0.4 * output.completeness
+  // The schema no longer constrains these to 0–1 (Anthropic compat), so clamp.
+  const correctness = Math.max(0, Math.min(1, output.correctness))
+  const completeness = Math.max(0, Math.min(1, output.completeness))
+  const score = 0.6 * correctness + 0.4 * completeness
   const pass = score >= SCORE_THRESHOLD
 
-  return { ...output, pass, score, usage }
+  return { ...output, completeness, correctness, pass, score, usage }
 }

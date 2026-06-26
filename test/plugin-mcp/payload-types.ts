@@ -64,7 +64,6 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -77,7 +76,6 @@ export interface Config {
     'returned-resources': ReturnedResource;
     pages: Page;
     'field-types': FieldType;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -94,7 +92,6 @@ export interface Config {
     'returned-resources': ReturnedResourcesSelect<false> | ReturnedResourcesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'field-types': FieldTypesSelect<false> | FieldTypesSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -114,31 +111,13 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
   };
-  user: User | PayloadMcpApiKey;
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
   };
 }
 export interface UserAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
-  };
-}
-export interface PayloadMcpApiKeyAuthOperations {
   forgotPassword: {
     email: string;
     password: string;
@@ -318,17 +297,7 @@ export interface ReturnedResource {
 export interface Page {
   id: string;
   title: string;
-  layout?:
-    | (
-        | HeroBlock
-        | {
-            body?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textContent';
-          }
-      )[]
-    | null;
+  layout?: (HeroBlock | TextContent)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -342,6 +311,16 @@ export interface HeroBlock {
   id?: string | null;
   blockName?: string | null;
   blockType: 'hero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextContent".
+ */
+export interface TextContent {
+  body?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textContent';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -439,57 +418,6 @@ export interface FieldType {
   updatedAt: string;
   createdAt: string;
 }
-/**
- * API keys control which collections, resources, tools, and prompts MCP clients can access
- *
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  /**
-   * The user that the API key is associated with.
-   */
-  user: string | User;
-  /**
-   * A useful label for the API key.
-   */
-  label?: string | null;
-  /**
-   * The purpose of the API key.
-   */
-  description?: string | null;
-  /**
-   * When checked, this key bypasses Payload access control on every operation it performs. Leave unchecked unless you have a specific reason.
-   */
-  overrideAccess?: boolean | null;
-  /**
-   * Access for this API key — uncheck to revoke individual tools.
-   */
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  /**
-   * This field added by overrideApiKeyCollection
-   */
-  override?: string | null;
-  updatedAt: string;
-  createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'payload-mcp-api-keys';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
 export interface PayloadKv {
   id: string;
   key: string;
@@ -545,21 +473,12 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'field-types';
         value: string | FieldType;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -569,15 +488,10 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   key?: string | null;
   value?:
     | {
@@ -774,27 +688,6 @@ export interface FieldTypesSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
 }
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  user?: T;
-  label?: T;
-  description?: T;
-  overrideAccess?: T;
-  access?: T;
-  override?: T;
-  updatedAt?: T;
-  createdAt?: T;
-  enableAPIKey?: T;
-  apiKey?: T;
-  apiKeyIndex?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
 export interface PayloadKvSelect<T extends boolean = true> {
   key?: T;
   data?: T;

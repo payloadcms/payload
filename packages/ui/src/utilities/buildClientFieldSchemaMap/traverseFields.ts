@@ -60,7 +60,7 @@ export const traverseFields = ({
       }
 
       case 'blocks':
-        ;(field.blockReferences ?? field.blocks).map((_block) => {
+        field.blocks.map((_block) => {
           const block =
             typeof _block === 'string'
               ? config.blocksMap

@@ -103,4 +103,5 @@ export const Events: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

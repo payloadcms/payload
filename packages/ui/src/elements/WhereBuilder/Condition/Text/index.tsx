@@ -1,17 +1,17 @@
 'use client'
+import { getTranslation } from '@payloadcms/translations'
 import React from 'react'
 
 import type { TextFilterProps as Props } from './types.js'
 
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
-import './index.scss'
-
-const baseClass = 'condition-value-text'
 
 export const Text: React.FC<Props> = (props) => {
   const { disabled, field, onChange, operator, value } = props
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
+
+  const ariaLabel = field?.label ? getTranslation(field.label, i18n) : t('general:enterAValue')
 
   const hasMany = field?.hasMany ?? false
   const isMulti = ['in', 'not_in'].includes(operator) || hasMany
@@ -59,6 +59,7 @@ export const Text: React.FC<Props> = (props) => {
 
   return isMulti ? (
     <ReactSelect
+      aria-label={ariaLabel}
       disabled={disabled}
       isClearable
       isCreatable
@@ -71,7 +72,8 @@ export const Text: React.FC<Props> = (props) => {
     />
   ) : (
     <input
-      className={baseClass}
+      aria-label={ariaLabel}
+      className="form-input"
       disabled={disabled}
       onChange={(e) => onChange(e.target.value)}
       placeholder={t('general:enterAValue')}

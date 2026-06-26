@@ -19,7 +19,7 @@ export {
   generateNKeysBetween,
 } from '../config/orderable/fractional-indexing.js'
 
-export { serverProps } from '../config/types.js'
+export { isUserMenuSettingsGroup, serverProps } from '../config/types.js'
 
 export { type Slugify } from '../fields/baseFields/slug/index.js'
 

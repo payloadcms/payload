@@ -228,4 +228,5 @@ export const Categories: CollectionConfig = {
       defaultValue: false,
     },
   ],
+  versions: false,
 }

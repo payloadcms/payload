@@ -1,6 +1,8 @@
-import type { Field, FlattenedField } from 'payload'
+import type { ClientField, Field } from 'payload'
 
-import { fieldAffectsData, flattenAllFields, sortableFieldTypes } from 'payload/shared'
+import { fieldAffectsData, sortableFieldTypes } from 'payload/shared'
+
+type QueryableField = ClientField | Field
 
 const baseFieldPaths = ['createdAt', 'id', 'updatedAt']
 const sortableFieldTypeSet = new Set<string>(sortableFieldTypes)
@@ -16,18 +18,18 @@ export type CollectionFieldPaths = {
 }
 
 /**
- * Builds the queryable field paths for a collection by reusing Payload's own field flattening and
- * `sortableFieldTypes`. Keeping the widget's validation anchored on core means it stays correct as
- * field types and sorting rules evolve, instead of duplicating that knowledge.
+ * Builds the queryable field paths for a collection from either server or client field schemas.
+ * Sortability stays anchored on Payload's `sortableFieldTypes` so the widget follows core rules as
+ * field types evolve, while array sub-fields remain filter-only.
  */
-export function getCollectionFieldPaths(fields: Field[]): CollectionFieldPaths {
+export function getCollectionFieldPaths(fields: QueryableField[]): CollectionFieldPaths {
   const paths: CollectionFieldPaths = {
     filterableFieldPaths: new Set(baseFieldPaths),
     relationshipFieldPaths: new Set(),
     sortableFieldPaths: new Set(baseFieldPaths),
   }
 
-  addFieldPaths({ fields: flattenAllFields({ fields }), paths })
+  addFieldPaths({ fields, paths })
 
   return paths
 }
@@ -39,7 +41,7 @@ function addFieldPaths({
   paths,
 }: {
   canSort?: boolean
-  fields: FlattenedField[]
+  fields: QueryableField[]
   parentPath?: string
   paths: CollectionFieldPaths
 }) {
@@ -48,20 +50,36 @@ function addFieldPaths({
       continue
     }
 
-    // Groups and named tabs are flattened into queryable columns, so recurse while keeping sort.
-    if ((field.type === 'group' || field.type === 'tab') && 'flattenedFields' in field) {
-      const path = 'name' in field && field.name ? joinPath(parentPath, field.name) : parentPath
+    if (field.type === 'tabs' && 'tabs' in field) {
+      for (const tab of field.tabs) {
+        const path = 'name' in tab && tab.name ? joinPath(parentPath, tab.name) : parentPath
 
-      addFieldPaths({ canSort, fields: field.flattenedFields, parentPath: path, paths })
+        addFieldPaths({ canSort, fields: tab.fields, parentPath: path, paths })
+      }
+
+      continue
+    }
+
+    if ((field.type === 'collapsible' || field.type === 'row') && 'fields' in field) {
+      addFieldPaths({ canSort, fields: field.fields, parentPath, paths })
+
+      continue
+    }
+
+    // Groups are queryable by their child paths. Named groups prefix those paths.
+    if (field.type === 'group' && 'fields' in field) {
+      const path = fieldAffectsData(field) ? joinPath(parentPath, field.name) : parentPath
+
+      addFieldPaths({ canSort, fields: field.fields, parentPath: path, paths })
 
       continue
     }
 
     // Array sub-fields can be filtered on, but the API cannot sort by them.
-    if (field.type === 'array' && 'flattenedFields' in field) {
+    if (field.type === 'array' && 'fields' in field) {
       addFieldPaths({
         canSort: false,
-        fields: field.flattenedFields,
+        fields: field.fields,
         parentPath: joinPath(parentPath, field.name),
         paths,
       })

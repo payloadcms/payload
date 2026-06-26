@@ -32,6 +32,11 @@
       "types": "./src/exports/shared/index.ts",
       "default": "./src/exports/shared/index.ts"
     },
+    "./layouts": {
+      "import": "./src/exports/layouts.ts",
+      "types": "./src/exports/layouts.ts",
+      "default": "./src/exports/layouts.ts"
+    },
     "./scss": {
       "import": "./src/scss/styles.scss",
       "default": "./src/scss/styles.scss"
@@ -40,6 +45,106 @@
       "import": "./src/icons/*/index.tsx",
       "types": "./src/icons/*/index.tsx",
       "default": "./src/icons/*/index.tsx"
+    },
+    "./utilities/formatMetadata": {
+      "import": "./src/utilities/formatMetadata.ts",
+      "types": "./src/utilities/formatMetadata.ts",
+      "default": "./src/utilities/formatMetadata.ts"
+    },
+    "./views/API/generateAPIViewMetadata": {
+      "import": "./src/views/API/generateAPIViewMetadata.ts",
+      "types": "./src/views/API/generateAPIViewMetadata.ts",
+      "default": "./src/views/API/generateAPIViewMetadata.ts"
+    },
+    "./views/CollectionTrash/generateCollectionTrashMetadata": {
+      "import": "./src/views/CollectionTrash/generateCollectionTrashMetadata.ts",
+      "types": "./src/views/CollectionTrash/generateCollectionTrashMetadata.ts",
+      "default": "./src/views/CollectionTrash/generateCollectionTrashMetadata.ts"
+    },
+    "./views/Document/generateEditViewMetadata": {
+      "import": "./src/views/Document/generateEditViewMetadata.ts",
+      "types": "./src/views/Document/generateEditViewMetadata.ts",
+      "default": "./src/views/Document/generateEditViewMetadata.ts"
+    },
+    "./views/List/generateListViewMetadata": {
+      "import": "./src/views/List/generateListViewMetadata.ts",
+      "types": "./src/views/List/generateListViewMetadata.ts",
+      "default": "./src/views/List/generateListViewMetadata.ts"
+    },
+    "./views/Root/generateCustomViewMetadata": {
+      "import": "./src/views/Root/generateCustomViewMetadata.ts",
+      "types": "./src/views/Root/generateCustomViewMetadata.ts",
+      "default": "./src/views/Root/generateCustomViewMetadata.ts"
+    },
+    "./views/Version/generateVersionViewMetadata": {
+      "import": "./src/views/Version/generateVersionViewMetadata.ts",
+      "types": "./src/views/Version/generateVersionViewMetadata.ts",
+      "default": "./src/views/Version/generateVersionViewMetadata.ts"
+    },
+    "./views/Versions/generateVersionsViewMetadata": {
+      "import": "./src/views/Versions/generateVersionsViewMetadata.ts",
+      "types": "./src/views/Versions/generateVersionsViewMetadata.ts",
+      "default": "./src/views/Versions/generateVersionsViewMetadata.ts"
+    },
+    "./views/Dashboard/serverFunctions": {
+      "import": "./src/views/Dashboard/serverFunctions.ts",
+      "types": "./src/views/Dashboard/serverFunctions.ts",
+      "default": "./src/views/Dashboard/serverFunctions.ts"
+    },
+    "./views/Document/handleServerFunction": {
+      "import": "./src/views/Document/handleServerFunction.tsx",
+      "types": "./src/views/Document/handleServerFunction.tsx",
+      "default": "./src/views/Document/handleServerFunction.tsx"
+    },
+    "./views/Document/renderDocumentSlots": {
+      "import": "./src/views/Document/renderDocumentSlots.tsx",
+      "types": "./src/views/Document/renderDocumentSlots.tsx",
+      "default": "./src/views/Document/renderDocumentSlots.tsx"
+    },
+    "./views/List/handleServerFunction": {
+      "import": "./src/views/List/handleServerFunction.tsx",
+      "types": "./src/views/List/handleServerFunction.tsx",
+      "default": "./src/views/List/handleServerFunction.tsx"
+    },
+    "./views/Versions/fetchVersions": {
+      "import": "./src/views/Versions/fetchVersions.ts",
+      "types": "./src/views/Versions/fetchVersions.ts",
+      "default": "./src/views/Versions/fetchVersions.ts"
+    },
+    "./views/NotFound/page": {
+      "import": "./src/views/NotFound/page.tsx",
+      "types": "./src/views/NotFound/page.tsx",
+      "default": "./src/views/NotFound/page.tsx"
+    },
+    "./views/Root/getCustomViewByRoute": {
+      "import": "./src/views/Root/getCustomViewByRoute.ts",
+      "types": "./src/views/Root/getCustomViewByRoute.ts",
+      "default": "./src/views/Root/getCustomViewByRoute.ts"
+    },
+    "./views/Root/adminViews": {
+      "import": "./src/views/Root/adminViews.tsx",
+      "types": "./src/views/Root/adminViews.tsx",
+      "default": "./src/views/Root/adminViews.tsx"
+    },
+    "./views/Root/generatePageMetadata": {
+      "import": "./src/views/Root/generatePageMetadata.ts",
+      "types": "./src/views/Root/generatePageMetadata.ts",
+      "default": "./src/views/Root/generatePageMetadata.ts"
+    },
+    "./views/Document/getMetaBySegment": {
+      "import": "./src/views/Document/getMetaBySegment.ts",
+      "types": "./src/views/Document/getMetaBySegment.ts",
+      "default": "./src/views/Document/getMetaBySegment.ts"
+    },
+    "./views/*/metadata": {
+      "import": "./src/views/*/metadata.ts",
+      "types": "./src/views/*/metadata.ts",
+      "default": "./src/views/*/metadata.ts"
+    },
+    "./views/*": {
+      "import": "./src/views/*/index.tsx",
+      "types": "./src/views/*/index.tsx",
+      "default": "./src/views/*/index.tsx"
     },
     "./elements/*": {
       "import": "./src/elements/*/index.tsx",
@@ -55,6 +160,31 @@
       "import": "./src/exports/rsc/index.ts",
       "types": "./src/exports/rsc/index.ts",
       "default": "./src/exports/rsc/index.ts"
+    },
+    "./utilities/getDocumentPermissions": {
+      "import": "./src/utilities/getDocumentPermissions.ts",
+      "types": "./src/utilities/getDocumentPermissions.ts",
+      "default": "./src/utilities/getDocumentPermissions.ts"
+    },
+    "./utilities/getIsLocked": {
+      "import": "./src/utilities/getIsLocked.ts",
+      "types": "./src/utilities/getIsLocked.ts",
+      "default": "./src/utilities/getIsLocked.ts"
+    },
+    "./utilities/getVersions": {
+      "import": "./src/utilities/getVersions.ts",
+      "types": "./src/utilities/getVersions.ts",
+      "default": "./src/utilities/getVersions.ts"
+    },
+    "./utilities/getDocPreferences": {
+      "import": "./src/utilities/getDocPreferences.ts",
+      "types": "./src/utilities/getDocPreferences.ts",
+      "default": "./src/utilities/getDocPreferences.ts"
+    },
+    "./utilities/getDocumentData": {
+      "import": "./src/utilities/getDocumentData.ts",
+      "types": "./src/utilities/getDocumentData.ts",
+      "default": "./src/utilities/getDocumentData.ts"
     },
     "./utilities/buildFormState": {
       "import": "./src/utilities/buildFormState.ts",
@@ -76,15 +206,60 @@
       "types": "./src/utilities/getSchemaMap.ts",
       "default": "./src/utilities/getSchemaMap.ts"
     },
+    "./utilities/handleServerFunctions": {
+      "import": "./src/utilities/handleServerFunctions.ts",
+      "types": "./src/utilities/handleServerFunctions.ts",
+      "default": "./src/utilities/handleServerFunctions.ts"
+    },
     "./utilities/schedulePublishHandler": {
       "import": "./src/utilities/schedulePublishHandler.ts",
       "types": "./src/utilities/schedulePublishHandler.ts",
       "default": "./src/utilities/schedulePublishHandler.ts"
     },
+    "./utilities/slugify": {
+      "import": "./src/utilities/slugify.ts",
+      "types": "./src/utilities/slugify.ts",
+      "default": "./src/utilities/slugify.ts"
+    },
+    "./utilities/getHierarchyAncestry": {
+      "import": "./src/utilities/getHierarchyAncestry.ts",
+      "types": "./src/utilities/getHierarchyAncestry.ts",
+      "default": "./src/utilities/getHierarchyAncestry.ts"
+    },
     "./utilities/getClientConfig": {
       "import": "./src/utilities/getClientConfig.ts",
       "types": "./src/utilities/getClientConfig.ts",
       "default": "./src/utilities/getClientConfig.ts"
+    },
+    "./utilities/getRouteWithoutAdmin": {
+      "import": "./src/utilities/getRouteWithoutAdmin.ts",
+      "types": "./src/utilities/getRouteWithoutAdmin.ts",
+      "default": "./src/utilities/getRouteWithoutAdmin.ts"
+    },
+    "./utilities/isCustomAdminView": {
+      "import": "./src/utilities/isCustomAdminView.ts",
+      "types": "./src/utilities/isCustomAdminView.ts",
+      "default": "./src/utilities/isCustomAdminView.ts"
+    },
+    "./utilities/isPublicAdminRoute": {
+      "import": "./src/utilities/isPublicAdminRoute.ts",
+      "types": "./src/utilities/isPublicAdminRoute.ts",
+      "default": "./src/utilities/isPublicAdminRoute.ts"
+    },
+    "./utilities/handleAuthRedirect": {
+      "import": "./src/utilities/handleAuthRedirect.ts",
+      "types": "./src/utilities/handleAuthRedirect.ts",
+      "default": "./src/utilities/handleAuthRedirect.ts"
+    },
+    "./utilities/getPreferences": {
+      "import": "./src/utilities/getPreferences.ts",
+      "types": "./src/utilities/getPreferences.ts",
+      "default": "./src/utilities/getPreferences.ts"
+    },
+    "./utilities/initReq": {
+      "import": "./src/utilities/initReq.ts",
+      "types": "./src/utilities/initReq.ts",
+      "default": "./src/utilities/initReq.ts"
     },
     "./utilities/buildFieldSchemaMap/traverseFields": {
       "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
@@ -134,6 +309,7 @@
   "dependencies": {
     "@date-fns/tz": "1.2.0",
     "@dnd-kit/core": "6.3.1",
+    "@dnd-kit/modifiers": "9.0.0",
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
     "@faceless-ui/modal": "3.0.0",
@@ -146,6 +322,7 @@
     "dequal": "2.0.3",
     "md5": "2.3.0",
     "object-to-formdata": "4.5.1",
+    "path-to-regexp": "6.3.0",
     "qs-esm": "8.0.1",
     "react-datepicker": "7.6.0",
     "react-image-crop": "10.1.8",
@@ -190,6 +367,11 @@
         "import": "./dist/exports/shared/index.js",
         "types": "./dist/exports/shared/index.d.ts",
         "default": "./dist/exports/shared/index.js"
+      },
+      "./layouts": {
+        "import": "./dist/exports/layouts.js",
+        "types": "./dist/exports/layouts.d.ts",
+        "default": "./dist/exports/layouts.js"
       },
       "./css": {
         "import": "./dist/styles.css",
@@ -255,6 +437,106 @@
         "import": "./dist/icons/*/index.js",
         "types": "./dist/icons/*/index.d.ts",
         "default": "./dist/icons/*/index.js"
+      },
+      "./utilities/formatMetadata": {
+        "import": "./dist/utilities/formatMetadata.js",
+        "types": "./dist/utilities/formatMetadata.d.ts",
+        "default": "./dist/utilities/formatMetadata.js"
+      },
+      "./views/API/generateAPIViewMetadata": {
+        "import": "./dist/views/API/generateAPIViewMetadata.js",
+        "types": "./dist/views/API/generateAPIViewMetadata.d.ts",
+        "default": "./dist/views/API/generateAPIViewMetadata.js"
+      },
+      "./views/CollectionTrash/generateCollectionTrashMetadata": {
+        "import": "./dist/views/CollectionTrash/generateCollectionTrashMetadata.js",
+        "types": "./dist/views/CollectionTrash/generateCollectionTrashMetadata.d.ts",
+        "default": "./dist/views/CollectionTrash/generateCollectionTrashMetadata.js"
+      },
+      "./views/Document/generateEditViewMetadata": {
+        "import": "./dist/views/Document/generateEditViewMetadata.js",
+        "types": "./dist/views/Document/generateEditViewMetadata.d.ts",
+        "default": "./dist/views/Document/generateEditViewMetadata.js"
+      },
+      "./views/List/generateListViewMetadata": {
+        "import": "./dist/views/List/generateListViewMetadata.js",
+        "types": "./dist/views/List/generateListViewMetadata.d.ts",
+        "default": "./dist/views/List/generateListViewMetadata.js"
+      },
+      "./views/Root/generateCustomViewMetadata": {
+        "import": "./dist/views/Root/generateCustomViewMetadata.js",
+        "types": "./dist/views/Root/generateCustomViewMetadata.d.ts",
+        "default": "./dist/views/Root/generateCustomViewMetadata.js"
+      },
+      "./views/Version/generateVersionViewMetadata": {
+        "import": "./dist/views/Version/generateVersionViewMetadata.js",
+        "types": "./dist/views/Version/generateVersionViewMetadata.d.ts",
+        "default": "./dist/views/Version/generateVersionViewMetadata.js"
+      },
+      "./views/Versions/generateVersionsViewMetadata": {
+        "import": "./dist/views/Versions/generateVersionsViewMetadata.js",
+        "types": "./dist/views/Versions/generateVersionsViewMetadata.d.ts",
+        "default": "./dist/views/Versions/generateVersionsViewMetadata.js"
+      },
+      "./views/Dashboard/serverFunctions": {
+        "import": "./dist/views/Dashboard/serverFunctions.js",
+        "types": "./dist/views/Dashboard/serverFunctions.d.ts",
+        "default": "./dist/views/Dashboard/serverFunctions.js"
+      },
+      "./views/Document/handleServerFunction": {
+        "import": "./dist/views/Document/handleServerFunction.js",
+        "types": "./dist/views/Document/handleServerFunction.d.ts",
+        "default": "./dist/views/Document/handleServerFunction.js"
+      },
+      "./views/Document/renderDocumentSlots": {
+        "import": "./dist/views/Document/renderDocumentSlots.js",
+        "types": "./dist/views/Document/renderDocumentSlots.d.ts",
+        "default": "./dist/views/Document/renderDocumentSlots.js"
+      },
+      "./views/List/handleServerFunction": {
+        "import": "./dist/views/List/handleServerFunction.js",
+        "types": "./dist/views/List/handleServerFunction.d.ts",
+        "default": "./dist/views/List/handleServerFunction.js"
+      },
+      "./views/Versions/fetchVersions": {
+        "import": "./dist/views/Versions/fetchVersions.js",
+        "types": "./dist/views/Versions/fetchVersions.d.ts",
+        "default": "./dist/views/Versions/fetchVersions.js"
+      },
+      "./views/NotFound/page": {
+        "import": "./dist/views/NotFound/page.js",
+        "types": "./dist/views/NotFound/page.d.ts",
+        "default": "./dist/views/NotFound/page.js"
+      },
+      "./views/Root/getCustomViewByRoute": {
+        "import": "./dist/views/Root/getCustomViewByRoute.js",
+        "types": "./dist/views/Root/getCustomViewByRoute.d.ts",
+        "default": "./dist/views/Root/getCustomViewByRoute.js"
+      },
+      "./views/Root/adminViews": {
+        "import": "./dist/views/Root/adminViews.js",
+        "types": "./dist/views/Root/adminViews.d.ts",
+        "default": "./dist/views/Root/adminViews.js"
+      },
+      "./views/Root/generatePageMetadata": {
+        "import": "./dist/views/Root/generatePageMetadata.js",
+        "types": "./dist/views/Root/generatePageMetadata.d.ts",
+        "default": "./dist/views/Root/generatePageMetadata.js"
+      },
+      "./views/Document/getMetaBySegment": {
+        "import": "./dist/views/Document/getMetaBySegment.js",
+        "types": "./dist/views/Document/getMetaBySegment.d.ts",
+        "default": "./dist/views/Document/getMetaBySegment.js"
+      },
+      "./views/*/metadata": {
+        "import": "./dist/views/*/metadata.js",
+        "types": "./dist/views/*/metadata.d.ts",
+        "default": "./dist/views/*/metadata.js"
+      },
+      "./views/*": {
+        "import": "./dist/views/*/index.js",
+        "types": "./dist/views/*/index.d.ts",
+        "default": "./dist/views/*/index.js"
       },
       "./providers/*": {
         "import": "./dist/providers/*/index.js",

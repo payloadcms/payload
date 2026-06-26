@@ -9,7 +9,7 @@
     border: none;
     cursor: pointer;
     color: var(--color-icon-tertiary);
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
 
     &:hover {
       color: var(--color-icon);

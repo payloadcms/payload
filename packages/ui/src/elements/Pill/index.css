@@ -13,9 +13,9 @@
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
     display: inline-flex;
-    background: var(--color-black-200);
+    background: var(--color-bg-secondary);
     color: var(--color-text);
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     cursor: inherit;
     border: 0;
     align-items: center;
@@ -100,17 +100,17 @@
   }
 
   .pill--style-dark {
-    background: var(--color-grey-600);
-    color: var(--color-white-800);
+    background: var(--ramp-grey-600);
+    color: var(--ramp-white-800);
   }
 
   .pill--style-dark svg .stroke {
-    stroke: var(--color-white-800);
+    stroke: var(--ramp-white-800);
     fill: none;
   }
 
   .pill--style-dark svg .fill {
-    fill: var(--color-white-800);
+    fill: var(--ramp-white-800);
   }
 
   .pill--size-medium {

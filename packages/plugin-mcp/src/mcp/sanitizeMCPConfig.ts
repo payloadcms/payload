@@ -8,16 +8,16 @@ import type {
 } from 'payload'
 
 import type {
+  CollectionMCPItem,
   CollectionTool,
+  GlobalMCPItem,
   GlobalTool,
-  MCPBuiltInToolOverride,
   MCPItem,
-  MCPPluginCollectionConfig,
   MCPPluginConfig,
-  MCPPluginGlobalConfig,
   SanitizedMCPPluginConfig,
 } from '../types.js'
 
+import { defaultAccess } from '../defaultAccess.js'
 import {
   COLLECTION_AUTH_BUILTIN_ENTRIES,
   COLLECTION_AUTH_BUILTINS,
@@ -25,6 +25,8 @@ import {
   COLLECTION_BUILTINS,
   GLOBAL_BUILTIN_ENTRIES,
   GLOBAL_BUILTINS,
+  TOOL_BUILTIN_ENTRIES,
+  TOOL_BUILTINS,
 } from './builtinTools.js'
 
 /**
@@ -32,7 +34,6 @@ import {
  *  - Flattens `tools` / `prompts` / `resources` / per-collection / per-global
  *    tool maps into a single `items` array.
  *  - Applies built-in tools for collections and globals, respecting opt-out user overrides.
- *  - Applies the `userCollection` default
  *
  * Called once during plugin init. After that, `plugins['@payloadcms/plugin-mcp']
  * ?.options` holds the sanitized result
@@ -54,44 +55,54 @@ export const sanitizeMCPConfig = ({
     items.push(...sanitizeGlobalConfig({ global, pluginConfig }))
   }
 
-  for (const [key, tool] of Object.entries(pluginConfig.tools ?? {})) {
+  for (const [configKey, { mcpName, tool }] of TOOL_BUILTIN_ENTRIES) {
     items.push({
       type: 'tool',
-      key,
-      label: key,
-      tool,
+      configKey,
+      label: tool.annotations?.title ?? configKey,
+      mcpName,
+      tool: { ...tool, access: tool.access ?? defaultAccess },
     })
   }
 
-  for (const [key, prompt] of Object.entries(pluginConfig.prompts ?? {})) {
+  for (const [configKey, tool] of Object.entries(pluginConfig.tools ?? {})) {
+    if (configKey in TOOL_BUILTINS) {
+      continue
+    }
+    items.push({
+      type: 'tool',
+      configKey,
+      label: tool.annotations?.title ?? configKey,
+      mcpName: configKey,
+      tool: { ...tool, access: tool.access ?? defaultAccess },
+    })
+  }
+
+  for (const [configKey, prompt] of Object.entries(pluginConfig.prompts ?? {})) {
     items.push({
       type: 'prompt',
-      key,
-      label: prompt.title ?? key,
-      prompt,
+      configKey,
+      label: prompt.title ?? configKey,
+      mcpName: configKey,
+      prompt: { ...prompt, access: prompt.access ?? defaultAccess },
     })
   }
 
-  for (const [key, resource] of Object.entries(pluginConfig.resources ?? {})) {
+  for (const [configKey, resource] of Object.entries(pluginConfig.resources ?? {})) {
     items.push({
       type: 'resource',
-      key,
-      label: resource.title ?? key,
-      resource,
+      configKey,
+      label: resource.title ?? configKey,
+      mcpName: configKey,
+      resource: { ...resource, access: resource.access ?? defaultAccess },
     })
   }
-
-  // Mirror Payload's own admin.user detection (sanitize.ts) since plugins run first.
-  const firstCollectionWithAuth = config.collections!.find(({ auth }) => Boolean(auth))
 
   return {
     disabled: pluginConfig.disabled,
     items,
     mcp: pluginConfig.mcp,
-    overrideApiKeyCollection: pluginConfig.overrideApiKeyCollection,
-    overrideAuth: pluginConfig.overrideAuth,
-    userCollection:
-      pluginConfig.userCollection ?? config.admin?.user ?? firstCollectionWithAuth?.slug ?? 'users',
+    overrideGetAuthorizedMCP: pluginConfig.overrideGetAuthorizedMCP,
   }
 }
 
@@ -101,42 +112,78 @@ const sanitizeCollectionConfig = ({
 }: {
   collection: CollectionConfig | SanitizedCollectionConfig
   pluginConfig: MCPPluginConfig
-}): MCPItem[] => {
-  if (collection.slug === 'payload-mcp-api-keys') {
-    return []
-  }
+}): CollectionMCPItem[] => {
   const slug = collection.slug
   const collectionPluginConfig = pluginConfig.collections?.[slug]
-  const items: MCPItem[] = []
+  const items: CollectionMCPItem[] = []
+  /**
+   * Payload disables duplicate for auth collections by default unless the
+   * collection explicitly opts back in with `disableDuplicate: false`.
+   */
+  const isDuplicateDisabled =
+    collection.disableDuplicate === true ||
+    (Boolean(collection.auth) && collection.disableDuplicate !== false)
 
-  for (const [toolKey, tool] of COLLECTION_BUILTIN_ENTRIES) {
+  for (const [
+    toolKey,
+    { mcpName, requiresDuplicateEnabled, requiresVersions, tool },
+  ] of COLLECTION_BUILTIN_ENTRIES) {
+    if (requiresVersions && !collection.versions) {
+      continue
+    }
+    if (requiresDuplicateEnabled && isDuplicateDisabled) {
+      continue
+    }
     const matchedConfigEntry = collectionPluginConfig?.tools?.[toolKey]
     if (matchedConfigEntry === false) {
       continue
     }
+    const override = typeof matchedConfigEntry === 'object' ? matchedConfigEntry : undefined
+    const annotations = { ...tool.annotations, ...override?.annotations }
     items.push({
       type: 'collectionTool',
       collectionSlug: slug,
-      key: toolKey,
-      label: capitalize(toolKey),
-      tool: overrideBuiltinTool(tool, matchedConfigEntry, collectionPluginConfig),
+      configKey: toolKey,
+      label: annotations.title ?? toolKey,
+      mcpName,
+      tool: {
+        ...tool,
+        access: override?.access ?? tool.access ?? defaultAccess,
+        annotations,
+        description: override?.description ?? tool.description,
+        overrideResponse:
+          override?.overrideResponse ??
+          collectionPluginConfig?.overrideResponse ??
+          tool.overrideResponse,
+      },
     })
   }
 
   if (collection.auth) {
-    for (const [authToolKey, { label, tool }] of COLLECTION_AUTH_BUILTIN_ENTRIES) {
+    for (const [authToolKey, { mcpName, tool }] of COLLECTION_AUTH_BUILTIN_ENTRIES) {
       const matchedConfigEntry = collectionPluginConfig?.tools?.[authToolKey]
       if (!matchedConfigEntry) {
         continue
       }
       // `true` means "enable, no override"; only the object form carries fields.
       const override = typeof matchedConfigEntry === 'object' ? matchedConfigEntry : undefined
+      const annotations = { ...tool.annotations, ...override?.annotations }
       items.push({
         type: 'collectionTool',
         collectionSlug: slug,
-        key: authToolKey,
-        label,
-        tool: overrideBuiltinTool(tool, override, collectionPluginConfig),
+        configKey: authToolKey,
+        label: annotations.title ?? authToolKey,
+        mcpName,
+        tool: {
+          ...tool,
+          access: override?.access ?? tool.access ?? defaultAccess,
+          annotations,
+          description: override?.description ?? tool.description,
+          overrideResponse:
+            override?.overrideResponse ??
+            collectionPluginConfig?.overrideResponse ??
+            tool.overrideResponse,
+        },
       })
     }
   }
@@ -146,8 +193,8 @@ const sanitizeCollectionConfig = ({
   const customEntries = Object.entries(collectionPluginConfig?.tools ?? {}) as Array<
     [string, CollectionTool | undefined]
   >
-  for (const [key, customTool] of customEntries) {
-    if (key in COLLECTION_BUILTINS || key in COLLECTION_AUTH_BUILTINS) {
+  for (const [configKey, customTool] of customEntries) {
+    if (configKey in COLLECTION_BUILTINS || configKey in COLLECTION_AUTH_BUILTINS) {
       continue
     }
     if (!customTool) {
@@ -156,9 +203,10 @@ const sanitizeCollectionConfig = ({
     items.push({
       type: 'collectionTool',
       collectionSlug: slug,
-      key,
-      label: key,
-      tool: customTool,
+      configKey,
+      label: customTool.annotations?.title ?? configKey,
+      mcpName: configKey,
+      tool: { ...customTool, access: customTool.access ?? defaultAccess },
     })
   }
 
@@ -171,30 +219,45 @@ const sanitizeGlobalConfig = ({
 }: {
   global: GlobalConfig | SanitizedGlobalConfig
   pluginConfig: MCPPluginConfig
-}): MCPItem[] => {
+}): GlobalMCPItem[] => {
   const slug = global.slug
   const globalPluginConfig = pluginConfig.globals?.[slug]
-  const items: MCPItem[] = []
+  const items: GlobalMCPItem[] = []
 
-  for (const [toolKey, baseTool] of GLOBAL_BUILTIN_ENTRIES) {
+  for (const [toolKey, { mcpName, requiresVersions, tool }] of GLOBAL_BUILTIN_ENTRIES) {
+    if (requiresVersions && !global.versions) {
+      continue
+    }
     const matchedConfigEntry = globalPluginConfig?.tools?.[toolKey]
     if (matchedConfigEntry === false) {
       continue
     }
+    const override = typeof matchedConfigEntry === 'object' ? matchedConfigEntry : undefined
+    const annotations = { ...tool.annotations, ...override?.annotations }
     items.push({
       type: 'globalTool',
+      configKey: toolKey,
       globalSlug: slug,
-      key: toolKey,
-      label: capitalize(toolKey),
-      tool: overrideBuiltinTool(baseTool, matchedConfigEntry, globalPluginConfig),
+      label: annotations.title ?? toolKey,
+      mcpName,
+      tool: {
+        ...tool,
+        access: override?.access ?? tool.access ?? defaultAccess,
+        annotations,
+        description: override?.description ?? tool.description,
+        overrideResponse:
+          override?.overrideResponse ??
+          globalPluginConfig?.overrideResponse ??
+          tool.overrideResponse,
+      },
     })
   }
 
   const customEntries = Object.entries(globalPluginConfig?.tools ?? {}) as Array<
     [string, GlobalTool | undefined]
   >
-  for (const [key, customTool] of customEntries) {
-    if (key in GLOBAL_BUILTINS) {
+  for (const [configKey, customTool] of customEntries) {
+    if (configKey in GLOBAL_BUILTINS) {
       continue
     }
     if (!customTool) {
@@ -202,38 +265,13 @@ const sanitizeGlobalConfig = ({
     }
     items.push({
       type: 'globalTool',
+      configKey,
       globalSlug: slug,
-      key,
-      label: key,
-      tool: customTool,
+      label: customTool.annotations?.title ?? configKey,
+      mcpName: configKey,
+      tool: { ...customTool, access: customTool.access ?? defaultAccess },
     })
   }
 
   return items
-}
-
-const capitalize = (s: string): string => s.charAt(0).toUpperCase() + s.slice(1)
-
-/**
- * Spread the static built-in tool and apply consumer-side overrides.
- * Precedence: per-tool override > scope-level (collection/global) override >
- * the static tool's defaults. `toolEntry` is whatever the user put under
- * `tools: { find: ... }` — could be `true`, `false`, or an override object —
- * so it's narrowed internally.
- */
-const overrideBuiltinTool = <TTool extends CollectionTool | GlobalTool>(
-  tool: TTool,
-  toolOverride?: MCPBuiltInToolOverride,
-  entityPluginConfig?: TTool extends CollectionTool
-    ? MCPPluginCollectionConfig<any>
-    : MCPPluginGlobalConfig,
-): TTool => {
-  return {
-    ...tool,
-    description: toolOverride?.description ?? entityPluginConfig?.description ?? tool.description,
-    overrideResponse:
-      toolOverride?.overrideResponse ??
-      entityPluginConfig?.overrideResponse ??
-      tool.overrideResponse,
-  }
 }

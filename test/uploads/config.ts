@@ -93,6 +93,12 @@ export default buildConfigWithDefaults({
           hasMany: true,
         },
         {
+          name: 'polymorphicUploads',
+          type: 'upload',
+          relationTo: ['uploads-1', 'uploads-2'],
+          hasMany: true,
+        },
+        {
           type: 'tabs',
           tabs: [
             {
@@ -144,6 +150,7 @@ export default buildConfigWithDefaults({
           relationTo: 'media',
         },
       ],
+      versions: false,
     },
     {
       slug: 'gif-resize',
@@ -174,6 +181,7 @@ export default buildConfigWithDefaults({
         },
         staticDir: path.resolve(dirname, './media-gif'),
       },
+      versions: false,
     },
     {
       slug: 'filename-compound-index',
@@ -205,6 +213,7 @@ export default buildConfigWithDefaults({
         mimeTypes: ['image/*'],
         staticDir: path.resolve(dirname, './media'),
       },
+      versions: false,
     },
     {
       slug: 'no-image-sizes',
@@ -218,6 +227,7 @@ export default buildConfigWithDefaults({
         },
         staticDir: path.resolve(dirname, './no-image-sizes'),
       },
+      versions: false,
     },
     {
       slug: 'object-fit',
@@ -252,6 +262,7 @@ export default buildConfigWithDefaults({
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './object-fit'),
       },
+      versions: false,
     },
     {
       slug: 'with-meta-data',
@@ -268,6 +279,7 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './with-meta-data'),
         withMetadata: true,
       },
+      versions: false,
     },
     {
       slug: 'without-meta-data',
@@ -284,6 +296,7 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './without-meta-data'),
         withMetadata: false,
       },
+      versions: false,
     },
     {
       slug: 'with-only-jpeg-meta-data',
@@ -306,6 +319,7 @@ export default buildConfigWithDefaults({
           return false
         },
       },
+      versions: false,
     },
     {
       slug: 'crop-only',
@@ -332,6 +346,7 @@ export default buildConfigWithDefaults({
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './crop-only'),
       },
+      versions: false,
     },
     {
       slug: 'focal-only',
@@ -358,6 +373,7 @@ export default buildConfigWithDefaults({
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './focal-only'),
       },
+      versions: false,
     },
     {
       slug: imageSizesOnlySlug,
@@ -379,6 +395,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
+      versions: false,
     },
     {
       slug: focalNoSizesSlug,
@@ -389,6 +406,7 @@ export default buildConfigWithDefaults({
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, './focal-no-sizes'),
       },
+      versions: false,
     },
     {
       slug: mediaSlug,
@@ -501,6 +519,7 @@ export default buildConfigWithDefaults({
         ],
         pasteURL: false,
       },
+      versions: false,
     },
     {
       slug: allowListMediaSlug,
@@ -522,6 +541,7 @@ export default buildConfigWithDefaults({
         },
         staticDir: path.resolve(dirname, './media'),
       },
+      versions: false,
     },
     {
       slug: skipSafeFetchMediaSlug,
@@ -530,6 +550,7 @@ export default buildConfigWithDefaults({
         skipSafeFetch: true,
         staticDir: path.resolve(dirname, './media'),
       },
+      versions: false,
     },
     {
       slug: skipSafeFetchHeaderFilterSlug,
@@ -539,6 +560,7 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './media'),
         externalFileHeaderFilter: (headers) => headers, // Keep all headers including cookies
       },
+      versions: false,
     },
     {
       slug: skipAllowListSafeFetchMediaSlug,
@@ -547,6 +569,7 @@ export default buildConfigWithDefaults({
         skipSafeFetch: [{ protocol: 'http', hostname: '127.0.0.1', port: '', search: '' }],
         staticDir: path.resolve(dirname, './media'),
       },
+      versions: false,
     },
     {
       slug: restrictFileTypesSlug,
@@ -555,6 +578,7 @@ export default buildConfigWithDefaults({
         allowRestrictedFileTypes: false,
         staticDir: path.resolve(dirname, './media'),
       },
+      versions: false,
     },
     {
       slug: noRestrictFileTypesSlug,
@@ -563,6 +587,7 @@ export default buildConfigWithDefaults({
         allowRestrictedFileTypes: true,
         staticDir: path.resolve(dirname, './media'),
       },
+      versions: false,
     },
     {
       slug: noRestrictFileMimeTypesSlug,
@@ -571,6 +596,7 @@ export default buildConfigWithDefaults({
         mimeTypes: ['text/html'],
         staticDir: path.resolve(dirname, './media'),
       },
+      versions: false,
     },
     {
       slug: pdfOnlySlug,
@@ -579,6 +605,7 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './media'),
         mimeTypes: ['application/pdf'],
       },
+      versions: false,
     },
     {
       slug: restrictedMimeTypesSlug,
@@ -587,6 +614,7 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './media'),
         mimeTypes: ['image/png'],
       },
+      versions: false,
     },
     {
       slug: animatedTypeMedia,
@@ -623,6 +651,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
+      versions: false,
     },
     {
       slug: enlargeSlug,
@@ -676,6 +705,7 @@ export default buildConfigWithDefaults({
         ],
         staticDir: path.resolve(dirname, './media/enlarge'),
       },
+      versions: false,
     },
     {
       slug: withoutEnlargeSlug,
@@ -689,6 +719,7 @@ export default buildConfigWithDefaults({
         },
         staticDir: path.resolve(dirname, './media/without-enlarge'),
       },
+      versions: false,
     },
     {
       slug: reduceSlug,
@@ -730,6 +761,7 @@ export default buildConfigWithDefaults({
         ],
         staticDir: path.resolve(dirname, './media/reduce'),
       },
+      versions: false,
     },
     {
       slug: 'media-trim',
@@ -762,6 +794,7 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './media-trim'),
         trimOptions: 0,
       },
+      versions: false,
     },
     {
       slug: customFileNameMediaSlug,
@@ -779,6 +812,7 @@ export default buildConfigWithDefaults({
         mimeTypes: ['image/png', 'image/jpg', 'image/jpeg'],
         staticDir: path.resolve(dirname, `./${customFileNameMediaSlug}`),
       },
+      versions: false,
     },
     {
       slug: unstoredMediaSlug,
@@ -787,6 +821,7 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './media'),
         disableLocalStorage: true,
       },
+      versions: false,
     },
     {
       slug: 'externally-served-media',
@@ -795,6 +830,7 @@ export default buildConfigWithDefaults({
         // Either use another web server like `npx serve -l 4000` (http://localhost:4000) or use the static server from the previous collection to serve the media folder (http://localhost:3000/media)
         staticDir: path.resolve(dirname, './media'),
       },
+      versions: false,
     },
     Uploads1,
     Uploads2,
@@ -812,6 +848,7 @@ export default buildConfigWithDefaults({
         filesRequiredOnCreate: false,
         staticDir: path.resolve(dirname, './optional'),
       },
+      versions: false,
     },
     {
       slug: 'required-file',
@@ -820,6 +857,7 @@ export default buildConfigWithDefaults({
         filesRequiredOnCreate: true,
         staticDir: path.resolve(dirname, './required'),
       },
+      versions: false,
     },
     {
       slug: versionSlug,
@@ -850,6 +888,7 @@ export default buildConfigWithDefaults({
         displayPreview: true,
         staticDir: path.resolve(dirname, './media-with-relation-preview'),
       },
+      versions: false,
     },
     {
       slug: mediaWithoutCacheTagsSlug,
@@ -863,6 +902,7 @@ export default buildConfigWithDefaults({
         cacheTags: false,
         staticDir: path.resolve(dirname, './media'),
       },
+      versions: false,
     },
     {
       slug: mediaWithoutRelationPreviewSlug,
@@ -876,6 +916,7 @@ export default buildConfigWithDefaults({
         displayPreview: false,
         staticDir: path.resolve(dirname, './media'),
       },
+      versions: false,
     },
     {
       slug: relationPreviewSlug,
@@ -915,6 +956,7 @@ export default buildConfigWithDefaults({
           displayPreview: false,
         },
       ],
+      versions: false,
     },
     {
       slug: hideFileInputOnCreateSlug,
@@ -945,6 +987,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'best-fit',
@@ -970,6 +1013,7 @@ export default buildConfigWithDefaults({
           relationTo: 'focal-only',
         },
       ],
+      versions: false,
     },
     {
       slug: listViewPreviewSlug,
@@ -990,6 +1034,7 @@ export default buildConfigWithDefaults({
           relationTo: mediaWithRelationPreviewSlug,
         },
       ],
+      versions: false,
     },
     {
       slug: threeDimensionalSlug,
@@ -999,6 +1044,7 @@ export default buildConfigWithDefaults({
         focalPoint: false,
         staticDir: path.resolve(dirname, './media'),
       },
+      versions: false,
     },
     {
       slug: constructorOptionsSlug,
@@ -1009,6 +1055,7 @@ export default buildConfigWithDefaults({
         },
         staticDir: path.resolve(dirname, './media'),
       },
+      versions: false,
     },
     BulkUploadsCollection,
     BulkUploadsHookErrorCollection,
@@ -1021,6 +1068,7 @@ export default buildConfigWithDefaults({
         mimeTypes: ['image/svg+xml'],
         staticDir: path.resolve(dirname, './svg-only'),
       },
+      versions: false,
     },
     {
       slug: mediaWithoutDeleteAccessSlug,
@@ -1029,6 +1077,7 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './media'),
       },
       access: { delete: () => false },
+      versions: false,
     },
     {
       slug: mediaWithImageSizeAdminPropsSlug,
@@ -1067,6 +1116,7 @@ export default buildConfigWithDefaults({
           },
         ],
       },
+      versions: false,
     },
     {
       slug: prefixMediaSlug,
@@ -1079,6 +1129,7 @@ export default buildConfigWithDefaults({
       upload: {
         staticDir: path.resolve(dirname, './prefix-media'),
       },
+      versions: false,
     },
   ],
   onInit: async (payload) => {

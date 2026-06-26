@@ -32,13 +32,18 @@ const wrapError =
   }
 
 export const authCollectionTool = defineCollectionTool({
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+    readOnlyHint: true,
+    title: 'Check Auth Status',
+  },
   description: 'Checks authentication status for the current user.',
   input: z.object({
     headers: z
-      .string()
-      .describe(
-        'Optional JSON string containing custom headers to send with the authentication request',
-      )
+      .record(z.string(), z.string())
+      .describe('Optional custom headers to send with the authentication request')
       .optional(),
   }),
 }).handler(async ({ collectionSlug, input, req }) => {
@@ -46,11 +51,7 @@ export const authCollectionTool = defineCollectionTool({
   try {
     let authHeaders = new Headers()
     if (input.headers) {
-      try {
-        authHeaders = new Headers(JSON.parse(input.headers) as Record<string, string>)
-      } catch {
-        logger.warn(`Invalid headers JSON for auth: ${input.headers}, using empty headers`)
-      }
+      authHeaders = new Headers(input.headers)
     }
     const result = await req.payload.auth({ headers: authHeaders })
     return {
@@ -70,6 +71,13 @@ export const authCollectionTool = defineCollectionTool({
 })
 
 export const forgotPasswordCollectionTool = defineCollectionTool({
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: true,
+    readOnlyHint: false,
+    title: 'Forgot Password',
+  },
   description: 'Sends a password reset email to a user.',
   input: z.object({
     disableEmail: z
@@ -104,6 +112,13 @@ export const forgotPasswordCollectionTool = defineCollectionTool({
 })
 
 export const loginCollectionTool = defineCollectionTool({
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'User Login',
+  },
   description: 'Authenticates a user with email and password.',
   input: z.object({
     depth: z
@@ -148,6 +163,13 @@ export const loginCollectionTool = defineCollectionTool({
 })
 
 export const resetPasswordCollectionTool = defineCollectionTool({
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'Reset Password',
+  },
   description: 'Resets a user password with a reset token.',
   input: z.object({
     password: z.string().describe('The new password for the user'),
@@ -178,6 +200,13 @@ export const resetPasswordCollectionTool = defineCollectionTool({
 })
 
 export const unlockCollectionTool = defineCollectionTool({
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'Unlock Account',
+  },
   description: 'Unlocks a user account that has been locked due to failed login attempts.',
   input: z.object({ email: emailSchema }),
 }).handler(async ({ collectionSlug, input, req }) => {
@@ -205,6 +234,13 @@ export const unlockCollectionTool = defineCollectionTool({
 })
 
 export const verifyCollectionTool = defineCollectionTool({
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'Email Verification',
+  },
   description: 'Verifies a user email with a verification token.',
   input: z.object({
     token: z.string().describe('The verification token sent to the user email'),

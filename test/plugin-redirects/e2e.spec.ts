@@ -92,8 +92,9 @@ test.describe('Redirects Plugin', () => {
     test('should display translated field labels in German (custom translation)', async () => {
       // Change user language to German
       await page.goto(serverURL + '/admin/account')
-      await page.waitForSelector('.payload-settings__language .react-select')
-      await page.locator('.payload-settings__language .react-select').click()
+      const languageField = page.locator('.payload-settings__language .react-select')
+      await expect(languageField).toBeVisible()
+      await languageField.click()
       await page.locator('.rs__option', { hasText: 'Deutsch' }).click()
 
       // Wait for settings to save

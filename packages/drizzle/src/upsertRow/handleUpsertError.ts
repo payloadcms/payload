@@ -81,6 +81,7 @@ export const handleUpsertError = ({
           {
             message: req?.t ? req.t('error:valueMustBeUnique') : 'Value must be unique',
             path: fieldName,
+            tableName,
           },
         ],
         global: globalSlug,

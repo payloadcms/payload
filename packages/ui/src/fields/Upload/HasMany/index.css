@@ -4,6 +4,10 @@
     max-width: 100%;
   }
 
+  .upload--has-many__drag {
+    cursor: grab;
+  }
+
   .upload--has-many__drag[aria-disabled='true']:hover {
     cursor: default;
   }

@@ -5,17 +5,16 @@
 
   .doc-tabs__tabs {
     display: flex;
-    gap: var(--spacer-2);
+    gap: var(--spacer-1);
     list-style: none;
     align-items: center;
     margin: 0;
-    padding-left: 0;
+    padding: var(--spacer-1) 0;
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 768px) {
     .doc-tabs {
       width: 100%;
-      padding: 0;
       overflow: auto;
     }
 
@@ -37,18 +36,8 @@
       pointer-events: none;
     }
 
-    .doc-tabs__tabs {
-      padding: 0;
-    }
-  }
-
-  @media (max-width: 768px) {
     .doc-tabs__tabs-container {
-      margin-right: var(--spacer-6);
-    }
-
-    .doc-tabs__tabs {
-      gap: var(--spacer-6);
+      margin-right: auto;
     }
   }
 }

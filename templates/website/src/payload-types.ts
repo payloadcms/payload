@@ -60,6 +60,55 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_106E6C8F".
+ */
+export type LexicalNodes_106E6C8F =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_106E6C8F>
+  | SerializedHeadingNode<LexicalNodes_106E6C8F, 'h1' | 'h2' | 'h3' | 'h4'>
+  | SerializedAutoLinkNode<LexicalNodes_106E6C8F, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_106E6C8F, LexicalLinkFields>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_D0F9AE76".
+ */
+export type LexicalNodes_D0F9AE76 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_D0F9AE76>
+  | SerializedHeadingNode<LexicalNodes_D0F9AE76, 'h2' | 'h3' | 'h4'>
+  | SerializedAutoLinkNode<LexicalNodes_D0F9AE76, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_D0F9AE76, LexicalLinkFields>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_744BEF80".
+ */
+export type LexicalNodes_744BEF80 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_744BEF80>
+  | SerializedAutoLinkNode<LexicalNodes_744BEF80, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_744BEF80, LexicalLinkFields>;
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_658A03C4".
+ */
+export type LexicalNodes_658A03C4 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_658A03C4>
+  | SerializedHorizontalRuleNode
+  | SerializedBlockNode<BannerBlock | CodeBlock | MediaBlock_7426DDFC>
+  | SerializedHeadingNode<LexicalNodes_658A03C4, 'h1' | 'h2' | 'h3' | 'h4'>
+  | SerializedAutoLinkNode<LexicalNodes_658A03C4, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_658A03C4, LexicalLinkFields>;
 
 export interface Config {
   auth: {
@@ -67,6 +116,7 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    folders: Folder;
     pages: Page;
     posts: Post;
     media: Media;
@@ -78,17 +128,13 @@ export interface Config {
     search: Search;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
-    'payload-folders': FolderInterface;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
   };
-  collectionsJoins: {
-    'payload-folders': {
-      documentsAndFolders: 'payload-folders' | 'media';
-    };
-  };
+  collectionsJoins: {};
   collectionsSelect: {
+    folders: FoldersSelect<false> | FoldersSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
@@ -100,7 +146,6 @@ export interface Config {
     search: SearchSelect<false> | SearchSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
-    'payload-folders': PayloadFoldersSelect<false> | PayloadFoldersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -153,6 +198,19 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders".
+ */
+export interface Folder {
+  id: string;
+  _h_folders?: (string | null) | Folder;
+  name: string;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
@@ -160,21 +218,7 @@ export interface Page {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
-    richText?: {
-      root: {
-        type: string;
-        children: {
-          type: any;
-          version: number;
-          [k: string]: unknown;
-        }[];
-        direction: ('ltr' | 'rtl') | null;
-        format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-        indent: number;
-        version: number;
-      };
-      [k: string]: unknown;
-    } | null;
+    richText?: LexicalRichText<LexicalNodes_106E6C8F> | null;
     links?:
       | {
           link: {
@@ -228,21 +272,7 @@ export interface Post {
   id: string;
   title: string;
   heroImage?: (string | null) | Media;
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
+  content: LexicalRichText<LexicalNodes_658A03C4>;
   relatedPosts?: (string | Post)[] | null;
   categories?: (string | Category)[] | null;
   meta?: {
@@ -277,22 +307,8 @@ export interface Post {
 export interface Media {
   id: string;
   alt?: string | null;
-  caption?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  folder?: (string | null) | FolderInterface;
+  _h_folders?: (string | null) | Folder;
+  caption?: LexicalRichText<LexicalNodes_744BEF80> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -365,32 +381,6 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-folders".
- */
-export interface FolderInterface {
-  id: string;
-  name: string;
-  folder?: (string | null) | FolderInterface;
-  documentsAndFolders?: {
-    docs?: (
-      | {
-          relationTo?: 'payload-folders';
-          value: string | FolderInterface;
-        }
-      | {
-          relationTo?: 'media';
-          value: string | Media;
-        }
-    )[];
-    hasNextPage?: boolean;
-    totalDocs?: number;
-  };
-  folderType?: 'media'[] | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "categories".
  */
 export interface Category {
@@ -444,21 +434,7 @@ export interface User {
  * via the `definition` "CallToActionBlock".
  */
 export interface CallToActionBlock {
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_106E6C8F> | null;
   links?:
     | {
         link: {
@@ -495,21 +471,7 @@ export interface ContentBlock {
   columns?:
     | {
         size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-        richText?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
+        richText?: LexicalRichText<LexicalNodes_D0F9AE76> | null;
         enableLink?: boolean | null;
         link?: {
           type?: ('reference' | 'custom') | null;
@@ -552,21 +514,7 @@ export interface MediaBlock {
  * via the `definition` "ArchiveBlock".
  */
 export interface ArchiveBlock {
-  introContent?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  introContent?: LexicalRichText<LexicalNodes_106E6C8F> | null;
   populateBy?: ('collection' | 'selection') | null;
   relationTo?: 'posts' | null;
   categories?: (string | Category)[] | null;
@@ -588,21 +536,7 @@ export interface ArchiveBlock {
 export interface FormBlock {
   form: string | Form;
   enableIntro?: boolean | null;
-  introContent?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  introContent?: LexicalRichText<LexicalNodes_106E6C8F> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'formBlock';
@@ -614,135 +548,13 @@ export interface FormBlock {
 export interface Form {
   id: string;
   title: string;
-  fields?:
-    | (
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            defaultValue?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'checkbox';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'country';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'email';
-          }
-        | {
-            message?: {
-              root: {
-                type: string;
-                children: {
-                  type: any;
-                  version: number;
-                  [k: string]: unknown;
-                }[];
-                direction: ('ltr' | 'rtl') | null;
-                format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-                indent: number;
-                version: number;
-              };
-              [k: string]: unknown;
-            } | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'message';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'number';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            placeholder?: string | null;
-            options?:
-              | {
-                  label: string;
-                  value: string;
-                  id?: string | null;
-                }[]
-              | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'select';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'state';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'text';
-          }
-        | {
-            name: string;
-            label?: string | null;
-            width?: number | null;
-            defaultValue?: string | null;
-            required?: boolean | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'textarea';
-          }
-      )[]
-    | null;
+  fields?: (Checkbox | Country | Email | Message | Number | Select | State | Text | Textarea)[] | null;
   submitButtonLabel?: string | null;
   /**
    * Choose whether to display an on-page message or redirect to a different page after they submit the form.
    */
   confirmationType?: ('message' | 'redirect') | null;
-  confirmationMessage?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  confirmationMessage?: LexicalRichText<LexicalNodes_106E6C8F>;
   redirect?: {
     url: string;
   };
@@ -760,26 +572,139 @@ export interface Form {
         /**
          * Enter the message that should be sent in this email.
          */
-        message?: {
-          root: {
-            type: string;
-            children: {
-              type: any;
-              version: number;
-              [k: string]: unknown;
-            }[];
-            direction: ('ltr' | 'rtl') | null;
-            format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-            indent: number;
-            version: number;
-          };
-          [k: string]: unknown;
-        } | null;
+        message?: LexicalRichText<LexicalNodes_744BEF80> | null;
         id?: string | null;
       }[]
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Checkbox".
+ */
+export interface Checkbox {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  defaultValue?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'checkbox';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Country".
+ */
+export interface Country {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'country';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Email".
+ */
+export interface Email {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'email';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Message".
+ */
+export interface Message {
+  message?: LexicalRichText<LexicalNodes_744BEF80> | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'message';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Number".
+ */
+export interface Number {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  defaultValue?: number | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'number';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Select".
+ */
+export interface Select {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  defaultValue?: string | null;
+  placeholder?: string | null;
+  options?:
+    | {
+        label: string;
+        value: string;
+        id?: string | null;
+      }[]
+    | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'select';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "State".
+ */
+export interface State {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'state';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Text".
+ */
+export interface Text {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  defaultValue?: string | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'text';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Textarea".
+ */
+export interface Textarea {
+  name: string;
+  label?: string | null;
+  width?: number | null;
+  defaultValue?: string | null;
+  required?: boolean | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textarea';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -972,6 +897,10 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'folders';
+        value: string | Folder;
+      } | null)
+    | ({
         relationTo: 'pages';
         value: string | Page;
       } | null)
@@ -1006,10 +935,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'search';
         value: string | Search;
-      } | null)
-    | ({
-        relationTo: 'payload-folders';
-        value: string | FolderInterface;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1052,6 +977,18 @@ export interface PayloadMigration {
   batch?: number | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "folders_select".
+ */
+export interface FoldersSelect<T extends boolean = true> {
+  _h_folders?: T;
+  name?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1225,8 +1162,8 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  _h_folders?: T;
   caption?: T;
-  folder?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -1589,18 +1526,6 @@ export interface PayloadJobsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-folders_select".
- */
-export interface PayloadFoldersSelect<T extends boolean = true> {
-  name?: T;
-  folder?: T;
-  documentsAndFolders?: T;
-  folderType?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents_select".
  */
 export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
@@ -1772,36 +1697,34 @@ export interface TaskSchedulePublish {
  * via the `definition` "BannerBlock".
  */
 export interface BannerBlock {
-  style: 'info' | 'warning' | 'error' | 'success';
-  content: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  id?: string | null;
-  blockName?: string | null;
+  id: string;
   blockType: 'banner';
+  style: 'info' | 'warning' | 'error' | 'success';
+  content: LexicalRichText<LexicalNodes_744BEF80>;
+  blockName?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "CodeBlock".
  */
 export interface CodeBlock {
+  id: string;
+  blockType: 'code';
   language?: ('typescript' | 'javascript' | 'css') | null;
   code: string;
-  id?: string | null;
   blockName?: string | null;
-  blockType: 'code';
+}
+/**
+ * Multiple blocks resolve to the `MediaBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MediaBlock_7426DDFC".
+ */
+export interface MediaBlock_7426DDFC {
+  id: string;
+  blockType: 'mediaBlock';
+  media: string | Media;
+  blockName?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1810,6 +1733,110 @@ export interface CodeBlock {
 export interface Auth {
   [k: string]: unknown;
 }
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
+}
+
+export interface SerializedHorizontalRuleNode {
+  type: 'horizontalrule';
+  version: number;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
 
 
 declare module 'payload' {

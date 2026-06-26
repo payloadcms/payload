@@ -56,6 +56,7 @@ import { getRowByCellValueAndAssert } from '../../../__helpers/e2e/getRowByCellV
 import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
+import { getSelectMenu } from '../../../__helpers/e2e/selectInput.js'
 import { expectPerPageLimits, setPerPageLimit } from '../../../__helpers/e2e/setPerPageLimit.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
@@ -274,7 +275,7 @@ describe('List View', () => {
       await page.goto(`${postsUrl.list}?search=dennis`)
 
       // input should be filled out, list should filter
-      await expect(page.locator('.search-filter__input')).toHaveValue('dennis')
+      await expect(page.locator('#search-filter-input')).toHaveValue('dennis')
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
 
@@ -300,10 +301,10 @@ describe('List View', () => {
         title: 'find me',
       })
 
-      await page.locator('.search-filter__input').fill('find me')
+      await page.locator('#search-filter-input').fill('find me')
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
 
-      await page.locator('.search-filter__input').fill('this is fun')
+      await page.locator('#search-filter-input').fill('this is fun')
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
 
@@ -337,7 +338,7 @@ describe('List View', () => {
   })
 
   describe('filters', () => {
-    test('should not close where builder when clearing final condition', async () => {
+    test('should close where builder when clearing final condition', async () => {
       await page.goto(postsUrl.list)
 
       await addListFilter({
@@ -354,11 +355,7 @@ describe('List View', () => {
 
       await page.locator('.condition__actions .btn.condition__actions-remove').click()
 
-      await page.waitForURL(new RegExp(encodedQueryString))
-
-      await expect(
-        page.locator('.list-controls__where.rah-static.rah-static--height-auto'),
-      ).toBeVisible()
+      await expect(page.locator('.where-builder')).toBeHidden()
     })
 
     test('should respect base list filters', async () => {
@@ -412,13 +409,12 @@ describe('List View', () => {
       await openListFilters(page, {})
 
       const whereBuilder = page.locator('.where-builder')
-      await whereBuilder.locator('.where-builder__add-first-filter').click()
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
       await conditionField.locator('input.rs__input').fill('Title')
 
       await expect(
-        conditionField.locator('.rs__menu-list').locator('div', {
+        getSelectMenu({ page }).locator('.rs__option', {
           hasText: exactText('Title'),
         }),
       ).toBeVisible()
@@ -430,12 +426,11 @@ describe('List View', () => {
       await openListFilters(page, {})
 
       const whereBuilder = page.locator('.where-builder')
-      await whereBuilder.locator('.where-builder__add-first-filter').click()
 
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
 
-      const menuList = conditionField.locator('.rs__menu-list')
+      const menuList = getSelectMenu({ page })
 
       // ensure the virtual field is not present
       await expect(menuList.locator('div', { hasText: exactText('Virtual Text') })).toHaveCount(0)
@@ -477,7 +472,7 @@ describe('List View', () => {
 
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
 
-      await page.locator('.condition__actions .btn.condition__actions-remove').click()
+      await page.locator('.condition__actions .btn.condition__actions-remove').first().click()
       await addListFilter({
         page,
         fieldLabel: 'Array > Text',
@@ -502,7 +497,8 @@ describe('List View', () => {
       await filterField.click()
 
       // select new filter field of Number
-      const dropdownFieldOption = filterField.locator('.rs__option', {
+      const filterFieldMenu = getSelectMenu({ page })
+      const dropdownFieldOption = filterFieldMenu.locator('.rs__option', {
         hasText: exactText('Status'),
       })
 
@@ -546,7 +542,8 @@ describe('List View', () => {
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
 
-      await conditionField
+      const conditionFieldMenu = getSelectMenu({ page })
+      await conditionFieldMenu
         .locator('.rs__option', {
           hasText: exactText('Users'),
         })
@@ -556,13 +553,14 @@ describe('List View', () => {
 
       const operatorInput = whereBuilder.locator('.condition__operator')
       await operatorInput.click()
-      const operatorOptions = operatorInput.locator('.rs__option')
+      const operatorInputMenu = getSelectMenu({ page })
+      const operatorOptions = operatorInputMenu.locator('.rs__option')
       await operatorOptions.locator(`text=equals`).click()
 
       await whereBuilder.locator('.condition__value').click()
 
-      const valueOptions = await whereBuilder
-        .locator('.condition__value .rs__option')
+      const valueOptions = await getSelectMenu({ page })
+        .locator('.rs__option')
         .evaluateAll((options) => options.map((option) => option.textContent))
 
       expect(valueOptions).not.toContain('post1')
@@ -703,13 +701,9 @@ describe('List View', () => {
         value: 'Test',
       })
 
-      await whereBuilder.locator('.condition__actions-add').click()
-      const secondLi = whereBuilder.locator('.where-builder__and-filters li:nth-child(2)')
+      await whereBuilder.locator('.where-builder__add-or').click()
+      const secondLi = whereBuilder.locator('.where-builder__and-filters').nth(1)
       await expect(secondLi).toBeVisible()
-
-      await expect(
-        secondLi.locator('.condition__field').locator('.rs__single-value'),
-      ).toContainText('Title')
 
       await expect(secondLi.locator('.condition__operator >> input')).toHaveValue('')
       await expect(secondLi.locator('.condition__value >> input')).toHaveValue('')
@@ -776,46 +770,62 @@ describe('List View', () => {
 
       await wait(500)
 
-      await whereBuilder.locator('.condition__actions-add').click()
+      await whereBuilder.locator('.where-builder__add-or').click()
 
-      const secondLi = whereBuilder.locator('.where-builder__and-filters li:nth-child(2)')
+      // The newly added filter is its own OR group by default. Fill it in, then
+      // switch its join dropdown to "And" to move it into the first group.
+      const secondLi = whereBuilder.locator('.where-builder__and-filters').nth(1)
       await expect(secondLi).toBeVisible()
       const secondConditionField = secondLi.locator('.condition__field')
       const secondOperatorField = secondLi.locator('.condition__operator')
       const secondValueField = secondLi.locator('.condition__value >> input')
       await secondConditionField.click()
 
-      await secondConditionField.locator('.rs__option', { hasText: exactText('Title') }).click()
+      const secondConditionMenu = getSelectMenu({ page })
+      await secondConditionMenu.locator('.rs__option', { hasText: exactText('Title') }).click()
 
       await expect(secondConditionField.locator('.rs__single-value')).toContainText('Title')
       await secondOperatorField.click()
-      await secondOperatorField.locator('.rs__option').locator('text=equals').click()
+      const secondOperatorMenu = getSelectMenu({ page })
+      await secondOperatorMenu.locator('.rs__option').locator('text=equals').click()
       await secondValueField.fill('Test 2')
       await expect(secondValueField).toHaveValue('Test 2')
 
-      const firstLi = page.locator('.where-builder__and-filters li:nth-child(1)')
+      // Wait for the debounced value to commit to the where state before changing
+      // the join, otherwise the flatten/rebuild reads a stale (empty) value.
+      await wait(500)
+
+      // Change the join from "Or" to "And" so both conditions live in the same group.
+      const joinDropdown = secondLi.locator('.condition__join')
+      await joinDropdown.click()
+      const joinMenu = getSelectMenu({ page })
+      await joinMenu.locator('.rs__option', { hasText: exactText('And') }).click()
+
+      // Both conditions are now part of a single AND group.
+      await expect(whereBuilder.locator('.condition')).toHaveCount(2)
+
+      const firstLi = whereBuilder.locator('.condition').nth(0)
       const removeButton = firstLi.locator('.condition__actions-remove')
 
       await wait(500)
 
       // remove first filter
       await removeButton.click()
-      const filterListItems = page.locator('.where-builder__and-filters li')
+      const filterListItems = whereBuilder.locator('.condition')
       await expect(filterListItems).toHaveCount(1)
-      const firstValueField = page.locator('.condition__value >> input')
+      const firstValueField = whereBuilder.locator('.condition__value >> input')
       await expect(firstValueField).toHaveValue('Test 2')
     })
 
     test('should hide field filter when admin.disableListFilter is true', async () => {
       await page.goto(postsUrl.list)
       await openListFilters(page, {})
-      await page.locator('.where-builder__add-first-filter').click()
 
       const initialField = page.locator('.condition__field')
       await initialField.click()
 
       await expect(
-        initialField.locator(`.rs__option :has-text("Disable List Filter Text")`),
+        initialField.page().locator(`.rs__option :has-text("Disable List Filter Text")`),
       ).toBeHidden()
     })
 
@@ -846,13 +856,15 @@ describe('List View', () => {
       const condition = page.locator('.condition__field')
       await expect(condition.locator('input.rs__input')).toBeDisabled()
       await expect(page.locator('.condition__operator input.rs__input')).toBeDisabled()
-      await expect(page.locator('.condition__value input.condition-value-text')).toBeDisabled()
+      await expect(page.locator('.condition__value input.form-input')).toBeDisabled()
       await expect(condition.locator('.rs__single-value')).toHaveText('Disable List Filter Text')
-      await page.locator('button.condition__actions-add').click()
+      await page.locator('.where-builder__add-or').click()
       const condition2 = page.locator('.condition__field').nth(1)
       await condition2.click()
       await expect(
-        condition2?.locator('.rs__menu-list:has-text("Disable List Filter Text")'),
+        getSelectMenu({ page }).filter({
+          hasText: 'Disable List Filter Text',
+        }),
       ).toBeHidden()
     })
 
@@ -869,7 +881,7 @@ describe('List View', () => {
       await valueField.click()
       await page.keyboard.type('4')
 
-      const options = whereBuilder.locator('.condition__value .rs__option')
+      const options = getSelectMenu({ page }).locator('.rs__option')
 
       await expect(options).toHaveCount(10)
 
@@ -937,13 +949,12 @@ describe('List View', () => {
     test('should still show field in filter when admin.disableListColumn is true', async () => {
       await page.goto(postsUrl.list)
       await openListFilters(page, {})
-      await page.locator('.where-builder__add-first-filter').click()
 
       const initialField = page.locator('.condition__field')
       await initialField.click()
 
       await expect(
-        initialField.locator(`.rs__menu-list:has-text("Disable List Column Text")`),
+        initialField.page().locator(`.rs__menu-list:has-text("Disable List Column Text")`),
       ).toBeVisible()
     })
 
@@ -1246,7 +1257,7 @@ describe('List View', () => {
       await collectionSelector.click()
 
       await page
-        .locator('[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option', {
+        .locator('.rs__option', {
           hasText: exactText('Post'),
         })
         .click()
@@ -1364,7 +1375,9 @@ describe('List View', () => {
     test('should delete many', async () => {
       await page.goto(postsUrl.list)
       // delete should not appear without selection
-      await expect(page.locator('#confirm-delete-many-docs #confirm-action')).toHaveCount(0)
+      await expect(
+        page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]'),
+      ).toHaveCount(0)
       // select one row
       await page.locator('.row-1 .cell-_select input').check()
 
@@ -1374,7 +1387,7 @@ describe('List View', () => {
       await page.locator('.row-2 .cell-_select input').check()
 
       await deleteBtn.click()
-      await page.locator('#confirm-delete-many-docs #confirm-action').click()
+      await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
 
@@ -1823,7 +1836,7 @@ describe('List View', () => {
         )}`,
       )
 
-      const conditionValueSelects = page.locator('#list-controls-where .condition__value')
+      const conditionValueSelects = page.locator('.where-builder .condition__value')
       await expect(conditionValueSelects.nth(0)).toHaveText('Select a value')
       await expect(conditionValueSelects.nth(1)).toHaveText('Custom placeholder')
       await expect(conditionValueSelects.nth(2)).toHaveText('Select a value')

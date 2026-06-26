@@ -46,4 +46,5 @@ export const SearchBarTest: CollectionConfig = {
       type: 'number',
     },
   ],
+  versions: false,
 }

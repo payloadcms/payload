@@ -18,7 +18,7 @@ import {
   AssignTenantFieldModal,
   assignTenantModalSlug,
 } from '../AssignTenantFieldModal/index.client.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'tenantField'
 

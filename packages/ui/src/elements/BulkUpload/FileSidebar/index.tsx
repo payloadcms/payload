@@ -84,7 +84,14 @@ export function FileSidebar() {
       className={[baseClass, showFiles && `${baseClass}__showingFiles`].filter(Boolean).join(' ')}
     >
       {breakpoints.m && showFiles ? <div className={`${baseClass}__mobileBlur`} /> : null}
-      <div className={`${baseClass}__header`}>
+      <div
+        className={[
+          `${baseClass}__header`,
+          totalErrorCount > 0 && `${baseClass}__header--hasErrors`,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
         {selectableCollections?.length > 1 && (
           <SelectInput
             className={`${baseClass}__collectionSelect`}
@@ -108,18 +115,20 @@ export function FileSidebar() {
             value={bulkUploadCollectionSlug}
           />
         )}
-        <div className={`${baseClass}__headerTopRow`}>
-          <div className={`${baseClass}__header__text`}>
+        {totalErrorCount > 0 ? (
+          <div className={`${baseClass}__header__error`}>
             <ErrorPill count={totalErrorCount} i18n={i18n} withMessage />
-            <p>
-              <strong
-                title={`${totalFileCount} ${t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}`}
-              >
-                {totalFileCount}{' '}
-                {t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}
-              </strong>
-            </p>
           </div>
+        ) : null}
+        <div className={`${baseClass}__headerTopRow`}>
+          <p className={`${baseClass}__selectedCount`}>
+            <strong
+              title={`${totalFileCount} ${t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}`}
+            >
+              {totalFileCount}{' '}
+              {t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}
+            </strong>
+          </p>
 
           <div className={`${baseClass}__header__actions`}>
             {(typeof maxFiles === 'number' ? totalFileCount < maxFiles : true) ? (
@@ -135,17 +144,16 @@ export function FileSidebar() {
             <Button
               buttonStyle="secondary"
               className={`${baseClass}__toggler`}
+              icon={<ChevronIcon direction={showFiles ? 'down' : 'up'} size={16} />}
               onClick={() => setShowFiles((prev) => !prev)}
+              selected={showFiles}
             >
-              <span className={`${baseClass}__toggler__label`}>
-                <strong
-                  title={`${totalFileCount} ${t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}`}
-                >
-                  {totalFileCount}{' '}
-                  {t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}
-                </strong>
-              </span>
-              <ChevronIcon direction={showFiles ? 'down' : 'up'} />
+              <strong
+                title={`${totalFileCount} ${t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}`}
+              >
+                {totalFileCount}{' '}
+                {t(totalFileCount > 1 ? 'upload:filesToUpload' : 'upload:fileToUpload')}
+              </strong>
             </Button>
 
             <Drawer Header={null} slug={addMoreFilesDrawerSlug}>
@@ -162,7 +170,7 @@ export function FileSidebar() {
         </div>
       </div>
 
-      <div className={`${baseClass}__animateWrapper`}>
+      <div className={`${baseClass}__animateWrapper scrollbar-thin`}>
         <AnimateHeight height={!breakpoints.m || showFiles ? 'auto' : 0}>
           <div className={`${baseClass}__filesContainer`}>
             {isInitializing &&

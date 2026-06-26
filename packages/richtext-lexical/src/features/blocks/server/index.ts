@@ -4,12 +4,11 @@ import type {
   BlockSlug,
   Config,
   FieldSchemaMap,
-  FlattenedBlocksField,
   UIFieldClientProps,
   UIFieldServerProps,
 } from 'payload'
 
-import { fieldsToJSONSchema, flattenAllFields, sanitizeFields } from 'payload'
+import { sanitizeFields } from 'payload'
 
 import { applyBaseFilterToFields } from '../../../utilities/applyBaseFilterToFields.js'
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
@@ -19,7 +18,16 @@ import { i18n } from './i18n.js'
 import { getBlockMarkdownTransformers } from './markdown/markdownTransformer.js'
 import { ServerBlockNode } from './nodes/BlocksNode.js'
 import { ServerInlineBlockNode } from './nodes/InlineBlocksNode.js'
+import { createBlockNodeJSONSchema, createInlineBlockNodeJSONSchema } from './schema.js'
 import { blockValidationHOC } from './validate.js'
+
+export type {
+  BlockFields,
+  BlockFieldsOptionalID,
+  InlineBlockFields,
+  SerializedBlockNode,
+  SerializedInlineBlockNode,
+} from './schema.js'
 
 export type BlocksFeatureProps = {
   blocks?: (Block | BlockSlug)[] | Block[]
@@ -36,14 +44,12 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
         {
           name: 'lexical_blocks',
           type: 'blocks',
-          blockReferences: _props.blocks ?? [],
-          blocks: [],
+          blocks: _props.blocks ?? [],
         },
         {
           name: 'lexical_inline_blocks',
           type: 'blocks',
-          blockReferences: _props.inlineBlocks ?? [],
-          blocks: [],
+          blocks: _props.inlineBlocks ?? [],
         },
       ],
       parentIsLocalized,
@@ -52,8 +58,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
     })
 
     const blockConfigs: Block[] = []
-    for (const _block of (sanitized[0] as BlocksField).blockReferences ??
-      (sanitized[0] as BlocksField).blocks) {
+    for (const _block of (sanitized[0] as BlocksField).blocks) {
       const block =
         typeof _block === 'string' ? _config?.blocks?.find((b) => b.slug === _block) : _block
       if (!block) {
@@ -69,8 +74,7 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
     }
 
     const inlineBlockConfigs: Block[] = []
-    for (const _block of (sanitized[1] as BlocksField).blockReferences ??
-      (sanitized[1] as BlocksField).blocks) {
+    for (const _block of (sanitized[1] as BlocksField).blocks) {
       const block =
         typeof _block === 'string' ? _config?.blocks?.find((b) => b.slug === _block) : _block
       if (!block) {
@@ -87,61 +91,6 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#BlocksFeatureClient',
-      generatedTypes: {
-        modifyJSONSchema: ({
-          collectionIDFieldTypes,
-          config,
-          currentSchema,
-          field,
-          i18n,
-          interfaceNameDefinitions,
-        }) => {
-          if (!blockConfigs?.length && !inlineBlockConfigs?.length) {
-            return currentSchema
-          }
-
-          const fields: FlattenedBlocksField[] = []
-
-          if (blockConfigs?.length) {
-            fields.push({
-              name: field?.name + '_lexical_blocks',
-              type: 'blocks',
-              blocks: blockConfigs.map((block) => {
-                return {
-                  ...block,
-                  flattenedFields: flattenAllFields({ fields: block.fields }),
-                }
-              }),
-            })
-          }
-          if (inlineBlockConfigs?.length) {
-            fields.push({
-              name: field?.name + '_lexical_inline_blocks',
-              type: 'blocks',
-              blocks: inlineBlockConfigs.map((block) => {
-                return {
-                  ...block,
-                  flattenedFields: flattenAllFields({ fields: block.fields }),
-                }
-              }),
-            })
-          }
-
-          if (fields.length) {
-            // This is only done so that interfaceNameDefinitions sets those block's interfaceNames.
-            // we don't actually use the JSON Schema itself in the generated types yet.
-            fieldsToJSONSchema(
-              collectionIDFieldTypes,
-              fields,
-              interfaceNameDefinitions,
-              config,
-              i18n,
-            )
-          }
-
-          return currentSchema
-        },
-      },
       generateSchemaMap: ({ config }) => {
         /**
          * Add sub-fields to the schemaMap. E.g. if you have an array field as part of the block, and it runs addRow, it will request these
@@ -216,24 +165,24 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
 
       nodes: [
         createNode({
+          jsonSchema: blockConfigs.length ? createBlockNodeJSONSchema(blockConfigs) : undefined,
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
-              if (blockConfigs?.length) {
-                return [
-                  {
-                    name: 'lexical_blocks',
-                    type: 'blocks',
-                    blocks: blockConfigs,
-                  },
-                ]
+              if (!blockConfigs.length) {
+                return []
               }
-              return []
+              return [
+                {
+                  name: 'lexical_blocks',
+                  type: 'blocks',
+                  blocks: blockConfigs,
+                },
+              ]
             }
 
             const blockType = node.fields.blockType
-
-            const block = blockConfigs?.find((block) => block.slug === blockType)
+            const block = blockConfigs.find((block) => block.slug === blockType)
             return block?.fields
           },
           getSubFieldsData: ({ node }) => {
@@ -244,24 +193,26 @@ export const BlocksFeature = createServerFeature<BlocksFeatureProps, BlocksFeatu
           validations: [blockValidationHOC(blockConfigs)],
         }),
         createNode({
+          jsonSchema: inlineBlockConfigs.length
+            ? createInlineBlockNodeJSONSchema(inlineBlockConfigs)
+            : undefined,
           // @ts-expect-error - TODO: fix this
           getSubFields: ({ node }) => {
             if (!node) {
-              if (inlineBlockConfigs?.length) {
-                return [
-                  {
-                    name: 'lexical_inline_blocks',
-                    type: 'blocks',
-                    blocks: inlineBlockConfigs,
-                  },
-                ]
+              if (!inlineBlockConfigs.length) {
+                return []
               }
-              return []
+              return [
+                {
+                  name: 'lexical_inline_blocks',
+                  type: 'blocks',
+                  blocks: inlineBlockConfigs,
+                },
+              ]
             }
 
             const blockType = node.fields.blockType
-
-            const block = inlineBlockConfigs?.find((block) => block.slug === blockType)
+            const block = inlineBlockConfigs.find((block) => block.slug === blockType)
             return block?.fields
           },
           getSubFieldsData: ({ node }) => {

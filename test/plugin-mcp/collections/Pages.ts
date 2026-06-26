@@ -1,10 +1,15 @@
 import type { CollectionConfig } from 'payload'
 
+import { limitedMCPUserEmail } from '../limitedAccess.js'
+
 export const heroBlockSlug = 'hero'
 export const textBlockSlug = 'textContent'
 
 export const Pages: CollectionConfig = {
   slug: 'pages',
+  access: {
+    update: ({ req }) => req.user?.email !== limitedMCPUserEmail,
+  },
   fields: [
     {
       name: 'title',
@@ -42,4 +47,5 @@ export const Pages: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

@@ -37,6 +37,8 @@ export type DocumentInfoProps = {
   readonly hasPublishedDoc: boolean
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
+  /** Whether the document or global has an upcoming scheduled publish/unpublish job. */
+  readonly hasScheduledPublish?: boolean
   /** Whether the user can trash (soft delete) documents. Only applicable when `trash` is enabled. */
   readonly hasTrashPermission?: boolean
   readonly id?: number | string
@@ -68,6 +70,7 @@ export type DocumentInfoContext = {
   } | null>
   getDocPermissions: GetDocPermissions
   getDocPreferences: () => Promise<DocumentPreferences>
+  hasScheduledPublish: boolean
   incrementVersionCount: () => void
   isInitializing: boolean
   preferencesKey?: string
@@ -84,6 +87,7 @@ export type DocumentInfoContext = {
   ) => void
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
   setHasPublishedDoc: React.Dispatch<React.SetStateAction<boolean>>
+  setHasScheduledPublish: React.Dispatch<React.SetStateAction<boolean>>
   setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>

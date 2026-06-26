@@ -4,7 +4,7 @@ import type { DOMConversionOutput, LexicalNode, SerializedLexicalNode } from 'le
 import { $applyNodeReplacement } from 'lexical'
 import * as React from 'react'
 
-import type { SerializedHorizontalRuleNode } from '../../server/nodes/HorizontalRuleNode.js'
+import type { SerializedHorizontalRuleNode } from '../../server/schema.js'
 
 import { HorizontalRuleServerNode } from '../../server/nodes/HorizontalRuleNode.js'
 

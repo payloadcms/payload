@@ -6,4 +6,5 @@ export const MediaWithGenerateFileURL: CollectionConfig = {
     disableLocalStorage: true,
   },
   fields: [],
+  versions: false,
 }

@@ -100,7 +100,7 @@ const getInitialDrawerData = ({
   }
 
   if (field.type === 'blocks') {
-    for (const _block of field.blockReferences ?? field.blocks) {
+    for (const _block of field.blocks) {
       const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
 
       const blockInitialData = getInitialDrawerData({
