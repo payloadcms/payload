@@ -1476,7 +1476,7 @@ describe('Locked Documents', () => {
         // Stale data modal should appear for user 2
         const modalContainer = user2Page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
-        await expect(user2Page.locator('#document-stale-data .dialog__title')).toHaveText(
+        await expect(user2Page.locator('#document-stale-data .dialog-title')).toHaveText(
           'Document modified',
         )
       })
@@ -1887,7 +1887,7 @@ describe('Locked Documents', () => {
         // Stale data modal should appear for user 2
         const modalContainer = user2Page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
-        await expect(user2Page.locator('#document-stale-data .dialog__title')).toHaveText(
+        await expect(user2Page.locator('#document-stale-data .dialog-title')).toHaveText(
           'Document modified',
         )
       })
@@ -2078,7 +2078,7 @@ describe('Locked Documents', () => {
         // Stale data modal should appear for user 2
         const modalContainer = user2Page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
-        await expect(user2Page.locator('#document-stale-data .dialog__title')).toHaveText(
+        await expect(user2Page.locator('#document-stale-data .dialog-title')).toHaveText(
           'Document modified',
         )
       })

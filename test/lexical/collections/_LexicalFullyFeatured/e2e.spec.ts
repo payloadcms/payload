@@ -34,7 +34,7 @@ describe('Lexical Fully Featured', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
-    await ensureCompilationIsDone({ serverURL, browser })
+    await ensureCompilationIsDone({ browser, serverURL })
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
@@ -53,12 +53,12 @@ describe('Lexical Fully Featured', () => {
     await lexical.slashCommand('upload')
     await lexical.drawer.locator('.list-drawer__header').getByText('Create New').click()
     await lexical.drawer.getByText('Paste URL').click()
-    await lexical.drawer
-      .locator('.file-field__remote-file')
+    await lexical.page
+      .locator('#upload-paste-url #field-url')
       .fill(
         'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg',
       )
-    await lexical.drawer.getByText('Add file').click()
+    await lexical.page.locator('#upload-paste-url button', { hasText: 'Add file' }).click()
     await lexical.save('drawer')
     await expect(lexical.decorator).toHaveCount(3)
     const paragraph = lexical.editor.locator('> p')
@@ -71,8 +71,8 @@ describe('Lexical Fully Featured', () => {
     await lexical.drawer.getByText('Paste URL').click()
     const url =
       'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/universal-truth.jpg'
-    await lexical.drawer.locator('.file-field__remote-file').fill(url)
-    await lexical.drawer.getByText('Add file').click()
+    await lexical.page.locator('#upload-paste-url #field-url').fill(url)
+    await lexical.page.locator('#upload-paste-url button', { hasText: 'Add file' }).click()
     await lexical.save('drawer')
     const img = lexical.editor.locator('img').first()
     await img.click()
@@ -109,16 +109,16 @@ describe('Lexical Fully Featured', () => {
     await page.keyboard.press('ControlOrMeta+A')
 
     await lexical.clickInlineToolbarButton({
-      dropdownKey: 'textState',
       buttonKey: 'bg-red',
+      dropdownKey: 'textState',
     })
 
     const colored = page.locator('span').filter({ hasText: 'Hello' })
     await expect(colored).toHaveCSS('background-color', 'oklch(0.704 0.191 22.216)')
     await expect(colored).toHaveAttribute('data-background-color', 'bg-red')
     await lexical.clickInlineToolbarButton({
-      dropdownKey: 'textState',
       buttonKey: 'clear-style',
+      dropdownKey: 'textState',
     })
 
     await expect(colored).toBeVisible()
@@ -195,8 +195,8 @@ describe('Lexical Fully Featured', () => {
   })
 
   test('ensure copy and paste works inside a code block and is not hijacked by the editor', async ({
-    page,
     context,
+    page,
   }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
 
@@ -223,8 +223,8 @@ describe('Lexical Fully Featured', () => {
   })
 
   test('ensure copy and paste works inside a JSON field block and is not hijacked by the editor', async ({
-    page,
     context,
+    page,
   }) => {
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
 

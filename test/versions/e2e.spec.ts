@@ -1151,7 +1151,8 @@ describe('Versions', () => {
 
       // The file input is only rendered once the existing file is removed.
       // Click the remove button on the current file to reveal the file input.
-      await page.locator('.file-details__remove').click()
+      await page.locator('.file-toolbar__filename-btn').click()
+      await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
       await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'), {
         force: true,
       })
@@ -1185,7 +1186,8 @@ describe('Versions', () => {
 
       // The file input is only rendered once the existing file is removed.
       // Click the remove button on the current file to reveal the file input.
-      await page.locator('.file-details__remove').click()
+      await page.locator('.file-toolbar__filename-btn').click()
+      await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
       await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'), {
         force: true,
       })
