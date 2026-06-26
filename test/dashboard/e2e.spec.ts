@@ -499,6 +499,12 @@ describe('Dashboard', () => {
   test('move widgets', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
+    // Fit the whole dashboard in the viewport so dragging never triggers a mid-drag scroll. dnd-kit
+    // measures droppable rects at drag start, so an instant programmatic scroll (from
+    // scrollIntoViewIfNeeded) would leave those rects stale and break collision detection.
+    const { width } = page.viewportSize()!
+    const contentHeight = await page.evaluate(() => document.body.scrollHeight)
+    await page.setViewportSize({ height: Math.max(contentHeight + 100, 720), width })
     // moveWidget already contains validations
     await d.moveWidget(2, 1) // to first position
     await d.moveWidget(1, 2, 'after') // after last in row
