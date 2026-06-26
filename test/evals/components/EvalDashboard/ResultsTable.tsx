@@ -1073,33 +1073,37 @@ export function ResultsTable({ codegenHtml, entries }: Props) {
               }}
             >
               {(
-                ['question', 'category', 'type', 'variant', 'model', 'result', 'tokens'] as SortKey[]
-              ).map(
-                (key) => (
-                  <span
-                    key={key}
-                    onClick={() => handleSort(key)}
-                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSort(key)}
-                    role="button"
-                    style={{
-                      alignItems: 'center',
-                      color:
-                        sortKey === key
-                          ? 'var(--theme-elevation-800)'
-                          : 'var(--theme-elevation-500)',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      userSelect: 'none',
-                    }}
-                    tabIndex={0}
-                  >
-                    {key === 'question'
-                      ? 'Question / Task'
-                      : key.charAt(0).toUpperCase() + key.slice(1)}
-                    {sortIndicator(key)}
-                  </span>
-                ),
-              )}
+                [
+                  'question',
+                  'category',
+                  'type',
+                  'variant',
+                  'model',
+                  'result',
+                  'tokens',
+                ] as SortKey[]
+              ).map((key) => (
+                <span
+                  key={key}
+                  onClick={() => handleSort(key)}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSort(key)}
+                  role="button"
+                  style={{
+                    alignItems: 'center',
+                    color:
+                      sortKey === key ? 'var(--theme-elevation-800)' : 'var(--theme-elevation-500)',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    userSelect: 'none',
+                  }}
+                  tabIndex={0}
+                >
+                  {key === 'question'
+                    ? 'Question / Task'
+                    : key.charAt(0).toUpperCase() + key.slice(1)}
+                  {sortIndicator(key)}
+                </span>
+              ))}
               <span />
             </div>
 

@@ -35,6 +35,9 @@
     /* Modal */
     --color-modalbackdrop: rgba(0, 0, 0, 0.5);
 
+    /* Focal point */
+    --color-focal-point-backdrop: var(--ramp-black-500);
+
     /* ——————————————————————————————————————————————
        Light Theme (default)
 
