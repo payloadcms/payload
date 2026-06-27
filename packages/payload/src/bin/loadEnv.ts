@@ -1,7 +1,6 @@
-import nextEnvImport from '@next/env'
+import { loadEnvConfig } from '@next/env'
 
 import { findUpSync } from '../utilities/findUp.js'
-const { loadEnvConfig } = nextEnvImport
 
 /**
  * Try to find user's env files and load it. Uses the same algorithm next.js uses to parse env files, meaning this also supports .env.local, .env.development, .env.production, etc.
