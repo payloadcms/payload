@@ -1,4 +1,4 @@
-import type { CollectionSlug, Payload } from 'payload'
+import type { CollectionSlug, Payload, RequiredDataFromCollectionSlug } from 'payload'
 
 import path from 'path'
 import { getFileByPath } from 'payload'
@@ -7,9 +7,13 @@ import { fileURLToPath } from 'url'
 import { devUser } from '../credentials.js'
 import { AdminThumbnailSize } from './collections/AdminThumbnailSize/index.js'
 import {
+  adminUploadFilePreviewMapSlug,
+  adminUploadFilePreviewSingleSlug,
   animatedTypeMedia,
   audioSlug,
+  filePreviewSlug,
   mediaSlug,
+  mediaWithFieldsSlug,
   mediaWithoutDeleteAccessSlug,
   relationPreviewSlug,
   relationSlug,
@@ -173,12 +177,12 @@ export const seed = async (payload: Payload) => {
   await payload.create({
     collection: relationPreviewSlug,
     data: {
-      imageWithPreview1: uploadedImageWithPreview,
-      imageWithPreview2: uploadedImageWithPreview,
       imageWithoutPreview1: uploadedImageWithPreview,
       imageWithoutPreview2: uploadedImageWithoutPreview,
-      imageWithPreview3: uploadedImageWithoutPreview,
       imageWithoutPreview3: uploadedImageWithoutPreview,
+      imageWithPreview1: uploadedImageWithPreview,
+      imageWithPreview2: uploadedImageWithPreview,
+      imageWithPreview3: uploadedImageWithoutPreview,
     },
   })
 
@@ -192,9 +196,9 @@ export const seed = async (payload: Payload) => {
 
   for (let i = 0; i < 20; i++) {
     const data = {
-      title: `List View Preview ${i + 1}`,
-      imageUpload: uploadedImageWithPreview,
       imageRelationship: uploadedImageWithPreview,
+      imageUpload: uploadedImageWithPreview,
+      title: `List View Preview ${i + 1}`,
     }
     if (i > 15) {
       data.imageUpload = ''
@@ -205,4 +209,268 @@ export const seed = async (payload: Payload) => {
       data,
     })
   }
+
+  // Seed filePreview single collection — one image and one audio doc
+  const pdfFilePath = path.resolve(dirname, './test-pdf.pdf')
+  const pdfFile = await getFileByPath(pdfFilePath)
+
+  // PDF and video in the media collection (which has no custom filePreview) so the file manager's
+  // built-in previews — a browser iframe for PDFs and a native player for video/audio — are
+  // exercised alongside the audio doc seeded into media above.
+  await payload.create({
+    collection: mediaSlug,
+    data: {},
+    file: pdfFile,
+  })
+
+  const videoFilePath = path.resolve(dirname, './christmas-mariachi-in-guadalajara.mp4')
+  const videoFile = await getFileByPath(videoFilePath)
+
+  await payload.create({
+    collection: mediaSlug,
+    data: {},
+    file: videoFile,
+  })
+
+  // Seed media-with-fields with one of each supported file type, every field filled in and the
+  // content derived from the filename. The local API used here bypasses the 2 MB HTTP upload limit.
+  // Filenames are prefixed because this collection shares its staticDir with the media collection.
+  const horizontalSquaresFile = await getFileByPath(
+    path.resolve(dirname, './horizontal-squares.jpg'),
+  )
+
+  const mediaWithFieldsDocs: Array<{
+    data: RequiredDataFromCollectionSlug<typeof mediaWithFieldsSlug>
+    file: Awaited<ReturnType<typeof getFileByPath>>
+  }> = [
+    {
+      data: {
+        altText: 'Mariachi band performing on a festive stage in Guadalajara',
+        caption: 'Christmas mariachi playing in the streets of Guadalajara',
+        category: 'People',
+        colorProfile: 'sRGB',
+        credit: 'Field Recordings Co.',
+        description:
+          'A festive mariachi performance filmed in Guadalajara during the Christmas season.',
+        dimensions: { heightCm: 108, widthCm: 192 },
+        exifData: {
+          aperture: 'f/2.8',
+          camera: 'Sony A7 IV',
+          iso: 3200,
+          lens: '24-70mm f/2.8',
+          shutterSpeed: '1/50',
+        },
+        featured: true,
+        license: 'CC BY',
+        licenseUrl: 'https://creativecommons.org/licenses/by/4.0/',
+        location: { city: 'Guadalajara', country: 'Mexico' },
+        notes:
+          'Seeded from christmas-mariachi-in-guadalajara.mp4 to exercise the built-in video preview.',
+        photographer: 'Alejandro Hernández',
+        priority: 'High',
+        published: true,
+        rating: 5,
+        shootDate: '2024-12-24T20:00:00.000Z',
+        source: 'https://example.com/christmas-mariachi-in-guadalajara',
+        tags: ['christmas', 'mariachi', 'guadalajara', 'music', 'video'],
+        title: 'Christmas Mariachi in Guadalajara',
+      },
+      file: videoFile,
+    },
+    {
+      data: {
+        altText: 'Test PDF document cover page',
+        caption: 'Test PDF document',
+        category: 'Technology',
+        colorProfile: 'CMYK',
+        credit: 'Payload',
+        description:
+          'A sample PDF document used to exercise the built-in PDF preview (browser iframe).',
+        dimensions: { heightCm: 29.7, widthCm: 21 },
+        exifData: { aperture: 'N/A', camera: 'N/A', iso: 0, lens: 'N/A', shutterSpeed: 'N/A' },
+        featured: false,
+        license: 'All Rights Reserved',
+        licenseUrl: 'https://example.com/licenses/test-pdf',
+        location: { city: 'San Francisco', country: 'United States' },
+        notes: 'Seeded from test-pdf.pdf to exercise the built-in PDF preview.',
+        photographer: 'Payload Docs Team',
+        priority: 'Medium',
+        published: true,
+        rating: 3,
+        shootDate: '2024-01-15T09:00:00.000Z',
+        source: 'https://example.com/test-pdf',
+        tags: ['pdf', 'document', 'test'],
+        title: 'Test PDF',
+      },
+      file: pdfFile,
+    },
+    {
+      data: {
+        altText: 'Audio waveform',
+        caption: 'Audio clip',
+        category: 'Abstract',
+        colorProfile: 'sRGB',
+        credit: 'Sound Library',
+        description:
+          'A short audio clip used to exercise the built-in native audio player preview.',
+        dimensions: { heightCm: 0, widthCm: 0 },
+        exifData: { aperture: 'N/A', camera: 'Zoom H6', iso: 0, lens: 'N/A', shutterSpeed: 'N/A' },
+        featured: false,
+        license: 'CC BY-SA',
+        licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/',
+        location: { city: 'Berlin', country: 'Germany' },
+        notes: 'Seeded from audio.mp3 to exercise the built-in audio preview.',
+        photographer: 'Sound Recordist',
+        priority: 'Low',
+        published: true,
+        rating: 4,
+        shootDate: '2023-06-01T12:00:00.000Z',
+        source: 'https://example.com/audio',
+        tags: ['audio', 'sound', 'mp3'],
+        title: 'Audio',
+      },
+      file: audioFile,
+    },
+    {
+      data: {
+        altText: 'Rows of horizontal squares forming an abstract pattern',
+        caption: 'Horizontal squares pattern',
+        category: 'Abstract',
+        colorProfile: 'Adobe RGB',
+        credit: 'Studio Abstract',
+        description: 'An abstract composition of horizontal squares.',
+        dimensions: { heightCm: 30, widthCm: 40 },
+        exifData: {
+          aperture: 'f/8',
+          camera: 'Canon EOS R5',
+          iso: 100,
+          lens: 'RF 50mm f/1.8 STM',
+          shutterSpeed: '1/250',
+        },
+        featured: true,
+        license: 'CC BY-NC',
+        licenseUrl: 'https://creativecommons.org/licenses/by-nc/4.0/',
+        location: { city: 'New York', country: 'United States' },
+        notes: 'Seeded from horizontal-squares.jpg.',
+        photographer: 'Jamie Doe',
+        priority: 'Medium',
+        published: true,
+        rating: 4,
+        shootDate: '2024-03-10T14:30:00.000Z',
+        source: 'https://example.com/horizontal-squares',
+        tags: ['abstract', 'squares', 'pattern', 'geometric'],
+        title: 'Horizontal Squares',
+      },
+      file: horizontalSquaresFile,
+    },
+    {
+      data: {
+        altText: 'Sample PNG image',
+        caption: 'Sample image',
+        category: 'Technology',
+        colorProfile: 'sRGB',
+        credit: 'Payload',
+        description: 'A sample PNG image.',
+        dimensions: { heightCm: 30, widthCm: 30 },
+        exifData: { aperture: 'N/A', camera: 'N/A', iso: 0, lens: 'N/A', shutterSpeed: 'N/A' },
+        featured: false,
+        license: 'Public Domain',
+        licenseUrl: 'https://example.com/licenses/public-domain',
+        location: { city: 'Denver', country: 'United States' },
+        notes: 'Seeded from image.png.',
+        photographer: 'Payload',
+        priority: 'Medium',
+        published: true,
+        rating: 3,
+        shootDate: '2024-02-20T10:00:00.000Z',
+        source: 'https://example.com/image',
+        tags: ['image', 'png', 'sample'],
+        title: 'Image',
+      },
+      file: imageFile,
+    },
+  ]
+
+  for (const { data, file } of mediaWithFieldsDocs) {
+    await payload.create({
+      collection: mediaWithFieldsSlug,
+      data,
+      file: { ...file, name: `with-fields-${file?.name}` } as File,
+    })
+  }
+
+  await payload.create({
+    collection: adminUploadFilePreviewSingleSlug,
+    data: {},
+    file: {
+      ...imageFile,
+      name: `single-preview-image-${imageFile?.name}`,
+    } as File,
+  })
+
+  await payload.create({
+    collection: adminUploadFilePreviewSingleSlug,
+    data: {},
+    file: {
+      ...audioFile,
+      name: `single-preview-audio-${audioFile?.name}`,
+    } as File,
+  })
+
+  // Seed filePreview map collection — one image (no match), one PDF (exact), one audio (category
+  // wildcard) and one video (category wildcard)
+  await payload.create({
+    collection: adminUploadFilePreviewMapSlug,
+    data: {},
+    file: {
+      ...imageFile,
+      name: `map-preview-image-${imageFile?.name}`,
+    } as File,
+  })
+
+  await payload.create({
+    collection: adminUploadFilePreviewMapSlug,
+    data: {},
+    file: {
+      ...pdfFile,
+      name: `map-preview-pdf-${pdfFile?.name}`,
+    } as File,
+  })
+
+  await payload.create({
+    collection: adminUploadFilePreviewMapSlug,
+    data: {},
+    file: {
+      ...audioFile,
+      name: `map-preview-audio-${audioFile?.name}`,
+    } as File,
+  })
+
+  await payload.create({
+    collection: adminUploadFilePreviewMapSlug,
+    data: {},
+    file: {
+      ...videoFile,
+      name: `map-preview-video-${videoFile?.name}`,
+    } as File,
+  })
+
+  // Seed file-preview collection — image and audio to exercise the switch-case component
+  await payload.create({
+    collection: filePreviewSlug,
+    data: {},
+    file: {
+      ...imageFile,
+      name: `file-preview-image-${imageFile?.name}`,
+    } as File,
+  })
+
+  await payload.create({
+    collection: filePreviewSlug,
+    data: {},
+    file: {
+      ...audioFile,
+      name: `file-preview-audio-${audioFile?.name}`,
+    } as File,
+  })
 }
