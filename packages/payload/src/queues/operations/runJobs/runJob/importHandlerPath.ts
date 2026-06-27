@@ -1,17 +1,28 @@
+import { pathToFileURL } from 'node:url'
+
 import type { TaskConfig, TaskHandler, TaskType } from '../../../config/types/taskTypes.js'
 
 import { dynamicImport } from '../../../../utilities/dynamicImport.js'
+import { extractPathAndExportName } from '../../../../utilities/extractPathAndExportName.js'
 
 /**
  * Imports a handler function from a given path.
  */
 export async function importHandlerPath<T>(path: string): Promise<T> {
   let runner!: T
-  const [runnerPath, runnerImportName] = path.split('#')
+  const { exportName: runnerImportName, path: runnerPath } = extractPathAndExportName(path)
 
   let runnerModule: Record<string, unknown>
   try {
     runnerModule = await dynamicImport<Record<string, unknown>>(runnerPath!)
+
+    // We need to check for `require` for compatibility with outdated frameworks that do not
+    // properly support ESM, like Jest. This is not done to support projects without "type": "module" set
+    runnerModule =
+      typeof require === 'function'
+        ? await eval(`require('${runnerPath.replaceAll('\\', '/')}')`)
+        : await eval(`import('${pathToFileURL(runnerPath).href}')`)
+
   } catch (e) {
     throw new Error(
       `Error importing job queue handler module for path ${path}. This is an advanced feature that may require a sophisticated build pipeline, especially when using it in production or within Next.js, e.g. by calling opening the /api/payload-jobs/run endpoint. You will have to transpile the handler files separately and ensure they are available in the same location when the job is run. If you're using an endpoint to execute your jobs, it's recommended to define your handlers as functions directly in your Payload Config, or use import paths handlers outside of Next.js. Import Error: \n${e instanceof Error ? e.message : 'Unknown error'}`,
