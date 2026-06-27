@@ -39,6 +39,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadHandlers } from '../../providers/UploadHandlers/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../utilities/abortAndIgnore.js'
 import { requests } from '../../utilities/api.js'
+import { getImageDimensions } from '../../utilities/getImageDimensions.js'
 import {
   BackgroundProcessingContext,
   DocumentFormContext,
@@ -591,12 +592,16 @@ export const Form: React.FC<FormProps> = (props) => {
             },
           })
 
+          const { height, width } = await getImageDimensions(file)
+
           file = JSON.stringify({
             clientUploadContext,
             collectionSlug,
             filename,
+            height,
             mimeType: file.type,
             size: file.size,
+            width,
           })
         }
       }

@@ -5,6 +5,8 @@ import { reduceFieldsToValues } from 'payload/shared'
 
 import type { UploadHandlersContext } from '../../../providers/UploadHandlers/index.js'
 
+import { getImageDimensions } from '../../../utilities/getImageDimensions.js'
+
 export async function createFormData(
   formState: FormState = {},
   overrides: Record<string, any> = {},
@@ -29,12 +31,16 @@ export async function createFormData(
       },
     })
 
+    const { height, width } = await getImageDimensions(file)
+
     file = JSON.stringify({
       clientUploadContext,
       collectionSlug,
       filename,
+      height,
       mimeType: file.type,
       size: file.size,
+      width,
     })
   }
 

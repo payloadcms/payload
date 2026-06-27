@@ -1,7 +1,9 @@
 import type { PayloadRequest } from '../types/index.js'
+import type { UploadEdits } from '../uploads/types.js'
 
 import { APIError } from '../errors/APIError.js'
 import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js'
+import { uploadRequiresFileData } from '../uploads/uploadRequiresFileData.js'
 
 type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
 
@@ -58,56 +60,83 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        let clientUploadContext, collectionSlug, filename, mimeType, size
+        let clientUploadContext, collectionSlug, filename, height, mimeType, size, width
         try {
-          ;({ clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
-            fields.file,
-          ))
+          ;({ clientUploadContext, collectionSlug, filename, height, mimeType, size, width } =
+            JSON.parse(fields.file))
         } catch {
           throw new APIError('A file name is required.', 400)
         }
         const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
 
-        if (!uploadConfig.handlers) {
-          throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
-        }
+        // When the client supplied dimensions and no server-side image processing is needed,
+        // skip the staticHandler fetch-back entirely — the bytes already live in storage and
+        // never need to enter the server.
+        const hasClientDimensions = typeof width === 'number' && typeof height === 'number'
 
-        let response: null | Response = null
-        let error: unknown
+        if (
+          hasClientDimensions &&
+          !uploadRequiresFileData({
+            hasSharp: Boolean(req.payload.config.sharp),
+            mimeType,
+            uploadConfig,
+            uploadEdits: req.query?.uploadEdits as undefined | UploadEdits,
+          })
+        ) {
+          req.file = {
+            name: filename,
+            clientUploadContext,
+            data: Buffer.alloc(0),
+            height,
+            mimetype: mimeType,
+            size,
+            width,
+          }
+        } else {
+          if (!uploadConfig.handlers) {
+            throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
+          }
 
-        for (const handler of uploadConfig.handlers) {
-          try {
-            const result = await handler(req, {
-              doc: null!,
-              params: {
-                clientUploadContext, // Pass additional specific to adapters context returned from UploadHandler, then staticHandler can use them.
-                collection: collectionSlug,
-                filename,
-              },
-            })
-            if (result) {
-              response = result
+          let response: null | Response = null
+          let error: unknown
+
+          for (const handler of uploadConfig.handlers) {
+            try {
+              const result = await handler(req, {
+                doc: null!,
+                params: {
+                  clientUploadContext, // Pass additional specific to adapters context returned from UploadHandler, then staticHandler can use them.
+                  collection: collectionSlug,
+                  filename,
+                },
+              })
+              if (result) {
+                response = result
+              }
+              // If we couldn't get the file from that handler, save the error and try other.
+            } catch (err) {
+              error = err
             }
-            // If we couldn't get the file from that handler, save the error and try other.
-          } catch (err) {
-            error = err
-          }
-        }
-
-        if (!response) {
-          if (error) {
-            payload.logger.error(error)
           }
 
-          throw new APIError('Expected response from the upload handler.')
-        }
+          if (!response) {
+            if (error) {
+              payload.logger.error(error)
+            }
 
-        req.file = {
-          name: filename,
-          clientUploadContext,
-          data: Buffer.from(await response.arrayBuffer()),
-          mimetype: response.headers.get('Content-Type') || mimeType,
-          size,
+            throw new APIError('Expected response from the upload handler.')
+          }
+
+          req.file = {
+            name: filename,
+            clientUploadContext,
+            data: Buffer.from(await response.arrayBuffer()),
+            // Carry client-supplied dimensions so generateFileData can fall back to them
+            // if the handler returned an empty/redirect body.
+            ...(hasClientDimensions ? { height, width } : {}),
+            mimetype: response.headers.get('Content-Type') || mimeType,
+            size,
+          }
         }
       }
     }
