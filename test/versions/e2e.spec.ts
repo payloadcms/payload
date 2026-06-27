@@ -83,6 +83,7 @@ import {
   postCollectionSlug,
   simpleDraftGlobalSlug,
   textCollectionSlug,
+  unpublishHookFormResetSlug,
   versionCollectionSlug,
 } from './slugs.js'
 
@@ -812,6 +813,47 @@ describe('Versions', () => {
       await expect(
         page.locator('.payload-toast-item:has-text("Custom error on unpublish")'),
       ).toBeVisible()
+    })
+
+    test('collections — should reset form with server data after unpublish when beforeChange hook modifies fields', async () => {
+      const unpublishHookFormResetURL = new AdminUrlUtil(serverURL, unpublishHookFormResetSlug)
+
+      const publishedDoc = await payload.create({
+        collection: unpublishHookFormResetSlug,
+        data: {
+          _status: 'published',
+          title: 'unpublish hook form reset test',
+          note: 'published note',
+        },
+      })
+
+      await page.goto(unpublishHookFormResetURL.edit(String(publishedDoc.id)))
+
+      await expect(page.locator('#field-note')).toHaveValue('published note')
+
+      await openDocControls(page)
+      await page.locator('#action-unpublish').click()
+      await page.locator('[id^="confirm-un-publish-"] [data-dialog-action="confirm"]').click()
+      await expect(page.locator('.payload-toast-item')).toBeVisible()
+
+      await expect(page.locator('#field-note')).toHaveValue('')
+
+      const { docs } = await payload.find({
+        collection: unpublishHookFormResetSlug,
+        where: {
+          id: {
+            equals: publishedDoc.id,
+          },
+        },
+        depth: 0,
+      })
+
+      expect(docs[0]?.note).toBeNull()
+
+      await payload.delete({
+        collection: unpublishHookFormResetSlug,
+        id: publishedDoc.id,
+      })
     })
 
     test('collections — should render custom unpublish button', async () => {
