@@ -246,6 +246,11 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 fieldToSort = sortOptions[relation]
               }
 
+              const primarySort = Array.isArray(fieldToSort) ? fieldToSort[0] : fieldToSort
+              const shouldSortAlphabetically = sort
+                ? primarySort?.replace(/^-/, '') === 'id'
+                : false
+
               const query: {
                 [key: string]: unknown
                 where: Where
@@ -323,7 +328,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                     config,
                     docs: data.docs,
                     i18n,
-                    sort,
+                    sort: shouldSortAlphabetically,
                   })
                 }
               } else if (response.status === 403) {
@@ -335,7 +340,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                   docs: [],
                   i18n,
                   ids: relationMap[relation],
-                  sort,
+                  sort: shouldSortAlphabetically,
                 })
               } else {
                 setErrorLoading(t('error:unspecific'))
@@ -432,6 +437,15 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         const collection = getEntityConfig({ collectionSlug: relation })
         const fieldToSelect = collection?.admin?.useAsTitle || 'id'
 
+        let fieldToSortBy = collection?.defaultSort || 'id'
+        if (typeof sortOptions === 'string') {
+          fieldToSortBy = sortOptions
+        } else if (sortOptions?.[relation]) {
+          fieldToSortBy = sortOptions[relation]
+        }
+        const primarySortBy = Array.isArray(fieldToSortBy) ? fieldToSortBy[0] : fieldToSortBy
+        const shouldSortAlphabetically = primarySortBy?.replace(/^-/, '') === 'id'
+
         const query = {
           depth: 0,
           draft: true,
@@ -478,7 +492,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
             docs,
             i18n,
             ids: idsToLoad,
-            sort: true,
+            sort: shouldSortAlphabetically,
           })
         }
       }
@@ -557,13 +571,23 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
 
   const onDuplicate = useCallback<DocumentDrawerProps['onDuplicate']>(
     (args) => {
+      const relation = args.collectionConfig.slug
+      let fieldToSort = args.collectionConfig.defaultSort || 'id'
+      if (typeof sortOptions === 'string') {
+        fieldToSort = sortOptions
+      } else if (sortOptions?.[relation]) {
+        fieldToSort = sortOptions[relation]
+      }
+      const primarySort = Array.isArray(fieldToSort) ? fieldToSort[0] : fieldToSort
+      const shouldSortAlphabetically = primarySort?.replace(/^-/, '') === 'id'
+
       dispatchOptions({
         type: 'ADD',
         collection: args.collectionConfig,
         config,
         docs: [args.doc],
         i18n,
-        sort: true,
+        sort: shouldSortAlphabetically,
       })
 
       if (hasMany) {
@@ -582,7 +606,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         })
       }
     },
-    [i18n, config, hasMany, onChange, value],
+    [i18n, config, hasMany, onChange, value, sortOptions],
   )
 
   const onDelete = useCallback<DocumentDrawerProps['onDelete']>(
