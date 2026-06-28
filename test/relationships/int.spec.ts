@@ -2145,6 +2145,23 @@ describe('Relationships', () => {
   })
 })
 
+describe.skipIf(mongooseList.includes(process.env.PAYLOAD_DATABASE || ''))('Cascade Delete', () => {
+  it('should set onDelete cascade in schema for cascade: delete', () => {
+    const db = payload.db as import('@payloadcms/drizzle').DrizzleAdapter
+    expect(db.rawTables['movies'].columns['director'].reference?.onDelete).toBe('cascade')
+  })
+
+  it('should set onDelete set null in schema for cascade: set-null', () => {
+    const db = payload.db as import('@payloadcms/drizzle').DrizzleAdapter
+    expect(db.rawTables['movies'].columns['directorSetNull'].reference?.onDelete).toBe('set null')
+  })
+
+  it('should set onDelete set null in schema when cascade is undefined', () => {
+    const db = payload.db as import('@payloadcms/drizzle').DrizzleAdapter
+    expect(db.rawTables['movies'].columns['directorNoCascade'].reference?.onDelete).toBe('set null')
+  })
+})
+
 async function createPost(overrides?: Partial<Post>) {
   return payload.create({ collection: slug, data: { title: 'title', ...overrides } })
 }
