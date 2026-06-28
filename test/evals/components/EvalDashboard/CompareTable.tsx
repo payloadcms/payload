@@ -1094,9 +1094,7 @@ export function CompareTable({
         }
       `}</style>
           {/* A vs B configuration selectors */}
-          <div
-            style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '8px' }}
-          >
+          <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             <span
               style={{
                 color: 'var(--theme-elevation-500)',
@@ -1129,7 +1127,9 @@ export function CompareTable({
                 </option>
               ))}
             </select>
-            <span style={{ color: 'var(--theme-elevation-400)', fontSize: '1.1rem', padding: '0 2px' }}>
+            <span
+              style={{ color: 'var(--theme-elevation-400)', fontSize: '1.1rem', padding: '0 2px' }}
+            >
               →
             </span>
             <select

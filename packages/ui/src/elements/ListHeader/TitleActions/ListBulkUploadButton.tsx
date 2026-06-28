@@ -29,7 +29,7 @@ export function ListBulkUploadButton({
   openBulkUpload?: () => void
 }) {
   const {
-    drawerSlug: bulkUploadDrawerSlug,
+    modalSlug: bulkUploadModalSlug,
     setCollectionSlug,
     setOnSuccess,
     setParentID,
@@ -45,7 +45,7 @@ export function ListBulkUploadButton({
     } else {
       setCollectionSlug(collectionSlug)
       setParentID(parent?.id)
-      openModal(bulkUploadDrawerSlug)
+      openModal(bulkUploadModalSlug)
       setOnSuccess(() => {
         if (typeof onBulkUploadSuccess === 'function') {
           onBulkUploadSuccess()
@@ -57,7 +57,7 @@ export function ListBulkUploadButton({
   }, [
     router,
     collectionSlug,
-    bulkUploadDrawerSlug,
+    bulkUploadModalSlug,
     parent,
     openModal,
     setCollectionSlug,
