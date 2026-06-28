@@ -1,3 +1,4 @@
+import type { TokenCredential } from '@azure/core-auth'
 import type {
   ClientUploadsConfig,
   PluginOptions as CloudStoragePluginOptions,
@@ -55,14 +56,20 @@ export type AzureStorageOptions = {
   collections: Partial<Record<UploadCollectionSlug, Omit<CollectionOptions, 'adapter'> | true>>
 
   /**
-   * Azure Blob storage connection string
+   * Azure Blob storage connection string (when using connection string authentication)
    */
-  connectionString: string
+  connectionString?: string
 
   /**
    * Azure Blob storage container name
    */
   containerName: string
+
+  /**
+   * Azure Blob storage credentials (alternative to connectionString)
+   * Use this for UMI (User Managed Identity) or other Azure identity-based authentication
+   */
+  credentials?: TokenCredential
 
   /**
    * Whether or not to enable the plugin
@@ -96,8 +103,10 @@ export const azureStorage: AzureStorageFactory = (
   init: (incomingConfig: Config): Config => {
     const getStorageClient = () =>
       getStorageClientFunc({
+        baseURL: azureStorageOptions.baseURL,
         connectionString: azureStorageOptions.connectionString,
         containerName: azureStorageOptions.containerName,
+        credentials: azureStorageOptions.credentials,
       })
 
     const isPluginDisabled = azureStorageOptions.enabled === false
@@ -126,8 +135,10 @@ export const azureStorage: AzureStorageFactory = (
 
     const createContainerIfNotExists = () => {
       void getStorageClientFunc({
+        baseURL: azureStorageOptions.baseURL,
         connectionString: azureStorageOptions.connectionString,
         containerName: azureStorageOptions.containerName,
+        credentials: azureStorageOptions.credentials,
       }).createIfNotExists({
         access: 'blob',
       })
