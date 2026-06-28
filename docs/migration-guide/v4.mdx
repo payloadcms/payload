@@ -455,6 +455,34 @@ The deprecated `HTMLConverterFeature`, `lexicalHTML`, and the per-node `converte
 
 Custom nodes that define `converters.html` should export their converters instead.
 
+### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.45.0`
+
+`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.45.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
+
+Most projects use markdown through the editor or through `convertMarkdownToLexical` / `convertLexicalToMarkdown` and need no changes. You are only affected if you import from `@payloadcms/richtext-lexical/lexical/markdown` directly.
+
+**`$convertFromMarkdownString` no longer merges adjacent lines by default.** This matches upstream lexical. If you call it directly and relied on the old behavior, pass `shouldMergeAdjacentLines: true` (5th argument):
+
+```diff
+- $convertFromMarkdownString(markdown, transformers)
++ $convertFromMarkdownString(markdown, transformers, undefined, false, true)
+```
+
+**Markdown transformer defaults now match upstream lexical (not Payload's features).** The vendored fork shipped a curated `TRANSFORMERS` set (no `CODE`, no `LINK`). Both `@payloadcms/richtext-lexical/lexical/markdown` (now a pure passthrough) and the default argument to `$convertFromMarkdownString` exported from `@payloadcms/richtext-lexical` now use lexical's `TRANSFORMERS`, which bundles `CODE`, `LINK`, and `HEADING` transformers that conflict with Payload's features. You are affected if you imported a group (`TRANSFORMERS`, `ELEMENT_TRANSFORMERS`, ...) from the passthrough path, or called `$convertFromMarkdownString(markdown)` from the main package without passing a transformer list. Use the converters instead, which build the list from your editor config:
+
+```diff
+- import { $convertFromMarkdownString, TRANSFORMERS } from '@payloadcms/richtext-lexical/lexical/markdown'
+- $convertFromMarkdownString(markdown, TRANSFORMERS)
++ import { convertMarkdownToLexical } from '@payloadcms/richtext-lexical'
++ convertMarkdownToLexical({ editorConfig, markdown })
+```
+
+If you keep calling `$convertFromMarkdownString` directly, pass `editorConfig.features.markdownTransformers` as the second argument. Enable `payload/no-conflicting-lexical-markdown-imports` (included in `@payloadcms/eslint-config`) to catch imports and calls that rely on these mismatching defaults.
+
+**Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical `0.45` upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
+
+If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.45.0`. None of them require action for typical Payload usage.
+
 ### Field `typescriptSchema` renamed to `jsonSchema`
 
 `typescriptSchema` accepted JSON Schema, not TypeScript, so the name lied. Renamed to `jsonSchema`. Same shape, same array of transforms. The underlying schema is now also consumed by the MCP plugin for runtime validation, not just type generation.
@@ -891,7 +919,7 @@ createAPIKeyFields({
 
 The MCP plugin was refactored. The public config API, the built-in tool inputs, and API-key authentication changed. Update your plugin config and recreate MCP credentials as user API keys.
 
-**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default through the generic built-in tools (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, plus `getGlobalSchema`, `findGlobal`, and `updateGlobal` for globals). Turn individual operations off via simple config keys like `tools: { create: false }`.
+**Collections and globals are now opt-out.** Drop the `enabled` flag. Every collection and global is exposed by default through the generic built-in tools. For collections, this includes tools like `getCollectionSchema`, `findDocuments`, `countDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `duplicateDocument`, and `findDistinct`, plus version tools when versions are enabled. For globals, this includes `getGlobalSchema`, `findGlobal`, and `updateGlobal`, plus version tools when versions are enabled. Turn individual operations off via simple config keys like `tools: { create: false }`.
 
 ```diff
 mcpPlugin({

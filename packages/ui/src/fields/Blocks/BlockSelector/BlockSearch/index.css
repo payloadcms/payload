@@ -6,7 +6,7 @@
     width: 100%;
     align-items: flex-start;
     padding: var(--spacer-2-5) var(--spacer-3);
-    border-bottom: 1px solid var(--color-border);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
     z-index: 1;
     background: var(--color-bg);
   }

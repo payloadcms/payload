@@ -15,7 +15,7 @@ import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { abortAndIgnore, handleAbortRef } from '../../../utilities/abortAndIgnore.js'
 import { useDocumentDrawerContext } from '../../DocumentDrawer/Provider.js'
 import { DocumentFields } from '../../DocumentFields/index.js'
-import { Upload_v4 } from '../../Upload/index.js'
+import { FileManager } from '../../FileManager/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import './index.css'
 
@@ -26,7 +26,6 @@ const baseClass = 'collection-edit'
 // This is solely to support custom edit views which get server-rendered
 
 export function EditForm({
-  BeforeDocumentMeta,
   resetUploadEdits,
   submitted,
   updateUploadEdits,
@@ -124,26 +123,24 @@ export function EditForm({
         onSuccess={onSave}
         submitted={submitted}
       >
-        <DocumentFields
-          BeforeFields={
-            <React.Fragment>
-              {CustomUpload || (
-                <Upload_v4
-                  collectionSlug={collectionConfig.slug}
-                  customActions={[BeforeDocumentMeta].filter(Boolean)}
-                  initialState={initialState}
-                  resetUploadEdits={resetUploadEdits}
-                  updateUploadEdits={updateUploadEdits}
-                  uploadConfig={collectionConfig.upload}
-                  uploadEdits={uploadEdits}
-                />
-              )}
-            </React.Fragment>
-          }
-          docPermissions={docPermissions}
-          fields={collectionConfig.fields}
-          schemaPathSegments={[collectionConfig.slug]}
-        />
+        <div className={`${baseClass}__upload-layout`}>
+          {CustomUpload || (
+            <FileManager
+              collectionSlug={collectionConfig.slug}
+              initialState={initialState}
+              resetUploadEdits={resetUploadEdits}
+              updateUploadEdits={updateUploadEdits}
+              uploadConfig={collectionConfig.upload}
+              uploadEdits={uploadEdits}
+            />
+          )}
+          <DocumentFields
+            docPermissions={docPermissions}
+            fields={collectionConfig.fields}
+            forceSidebarWrap
+            schemaPathSegments={[collectionConfig.slug]}
+          />
+        </div>
         <ReportAllErrors />
         <GetFieldProxy />
       </Form>

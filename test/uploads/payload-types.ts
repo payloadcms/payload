@@ -105,6 +105,9 @@ export type LexicalNodes_5E1E700A =
   | SerializedUploadNode<'admin-thumbnail-with-search-queries'>
   | SerializedUploadNode<'admin-thumbnail-size'>
   | SerializedUploadNode<'admin-upload-control'>
+  | SerializedUploadNode<'admin-upload-file-preview-single'>
+  | SerializedUploadNode<'admin-upload-file-preview-map'>
+  | SerializedUploadNode<'file-preview'>
   | SerializedUploadNode<'no-files-required'>
   | SerializedUploadNode<'optional-file'>
   | SerializedUploadNode<'required-file'>
@@ -187,6 +190,9 @@ export interface Config {
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQuery;
     'admin-thumbnail-size': AdminThumbnailSize;
     'admin-upload-control': AdminUploadControl;
+    'admin-upload-file-preview-single': AdminUploadFilePreviewSingle;
+    'admin-upload-file-preview-map': AdminUploadFilePreviewMap;
+    'file-preview': FilePreview;
     'no-files-required': NoFilesRequired;
     'relation-to-no-files-required': RelationToNoFilesRequired;
     'optional-file': OptionalFile;
@@ -256,6 +262,9 @@ export interface Config {
     'admin-thumbnail-with-search-queries': AdminThumbnailWithSearchQueriesSelect<false> | AdminThumbnailWithSearchQueriesSelect<true>;
     'admin-thumbnail-size': AdminThumbnailSizeSelect<false> | AdminThumbnailSizeSelect<true>;
     'admin-upload-control': AdminUploadControlSelect<false> | AdminUploadControlSelect<true>;
+    'admin-upload-file-preview-single': AdminUploadFilePreviewSingleSelect<false> | AdminUploadFilePreviewSingleSelect<true>;
+    'admin-upload-file-preview-map': AdminUploadFilePreviewMapSelect<false> | AdminUploadFilePreviewMapSelect<true>;
+    'file-preview': FilePreviewSelect<false> | FilePreviewSelect<true>;
     'no-files-required': NoFilesRequiredSelect<false> | NoFilesRequiredSelect<true>;
     'relation-to-no-files-required': RelationToNoFilesRequiredSelect<false> | RelationToNoFilesRequiredSelect<true>;
     'optional-file': OptionalFileSelect<false> | OptionalFileSelect<true>;
@@ -292,9 +301,6 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'es' | 'fr';
-  widgets: {
-    collections: CollectionsWidget;
-  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -1529,6 +1535,60 @@ export interface AdminUploadControl {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-upload-file-preview-single".
+ */
+export interface AdminUploadFilePreviewSingle {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-upload-file-preview-map".
+ */
+export interface AdminUploadFilePreviewMap {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-preview".
+ */
+export interface FilePreview {
+  id: string;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "no-files-required".
  */
 export interface NoFilesRequired {
@@ -2124,6 +2184,18 @@ export interface PayloadLockedDocument {
         value: string | AdminUploadControl;
       } | null)
     | ({
+        relationTo: 'admin-upload-file-preview-single';
+        value: string | AdminUploadFilePreviewSingle;
+      } | null)
+    | ({
+        relationTo: 'admin-upload-file-preview-map';
+        value: string | AdminUploadFilePreviewMap;
+      } | null)
+    | ({
+        relationTo: 'file-preview';
+        value: string | FilePreview;
+      } | null)
+    | ({
         relationTo: 'no-files-required';
         value: string | NoFilesRequired;
       } | null)
@@ -2216,6 +2288,10 @@ export interface PayloadLockedDocument {
         value: string | PrefixMedia;
       } | null)
     | ({
+        relationTo: 'media-with-fields';
+        value: string | MediaWithField;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -2270,6 +2346,7 @@ export interface RelationSelect<T extends boolean = true> {
   versionedImage?: T;
   hideFileInputOnCreate?: T;
   hasManyImage?: T;
+  polymorphicUploads?: T;
   blocks?:
     | T
     | {
@@ -3533,6 +3610,57 @@ export interface AdminUploadControlSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-upload-file-preview-single_select".
+ */
+export interface AdminUploadFilePreviewSingleSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "admin-upload-file-preview-map_select".
+ */
+export interface AdminUploadFilePreviewMapSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "file-preview_select".
+ */
+export interface FilePreviewSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "no-files-required_select".
  */
 export interface NoFilesRequiredSelect<T extends boolean = true> {
@@ -4211,6 +4339,6 @@ export interface LexicalRichText<TNode> {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

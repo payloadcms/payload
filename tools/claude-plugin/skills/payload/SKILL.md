@@ -80,22 +80,47 @@ export default buildConfig({
 
 ## Essential Patterns
 
+### Defaults & Conventions
+
+Apply these defaults when modeling content unless there's a clear reason not to:
+
+- **Enable drafts/versions by default:** `versions: { drafts: true }`. This is the
+  recommended starting point for any content collection. It auto-injects a
+  `_status` field (`draft` / `published` / `changed`) — **don't add your own
+  `status` field**, it's redundant. Only skip versions for collections that have
+  no publish/draft lifecycle (e.g. internal join tables, settings).
+- **Use `slugField()` for all slugs** instead of hand-rolling
+  `{ name: 'slug', type: 'text', unique: true }`. It auto-generates the slug from
+  the title, adds a regenerate toggle, and handles uniqueness/indexing for you.
+  It defaults to generating from a `title` field — if the collection has no
+  `title`, pass the source field: `slugField({ useAsSlug: 'name' })`.
+- **`position: 'sidebar'` is for short, at-a-glance fields** — status, category,
+  author, publish date. Avoid it for long fields that need horizontal space to be
+  usable (description, rich text content, long text). Those belong in the main
+  document area.
+
 ### Basic Collection
 
 ```ts
 import type { CollectionConfig } from 'payload'
+import { slugField } from 'payload'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'author', 'status', 'createdAt'],
+    // _status (from versions.drafts) shows the draft/published state — no custom status field needed
+    defaultColumns: ['title', 'author', '_status', 'createdAt'],
+  },
+  versions: {
+    drafts: true,
   },
   fields: [
     { name: 'title', type: 'text', required: true },
-    { name: 'slug', type: 'text', unique: true, index: true },
-    { name: 'content', type: 'richText' },
-    { name: 'author', type: 'relationship', relationTo: 'users' },
+    slugField(), // auto-generates from `title`, unique + indexed, sidebar position
+    { name: 'content', type: 'richText' }, // long field — stays in the main area, not the sidebar
+    // short, at-a-glance field — good sidebar candidate
+    { name: 'author', type: 'relationship', relationTo: 'users', admin: { position: 'sidebar' } },
   ],
   timestamps: true,
 }
@@ -115,8 +140,11 @@ For more collection patterns (auth, upload, drafts, live preview), see [COLLECTI
 // Rich text
 { name: 'content', type: 'richText', required: true }
 
-// Select
-{ name: 'status', type: 'select', options: ['draft', 'published'], defaultValue: 'draft' }
+// Slug — use the helper instead of a hand-rolled text field
+slugField()
+
+// Select (for genuine taxonomy — NOT publish state; use versions.drafts + _status for that)
+{ name: 'category', type: 'select', options: ['news', 'tutorial', 'opinion'] }
 
 // Upload
 { name: 'image', type: 'upload', relationTo: 'media' }
@@ -418,6 +446,14 @@ import type { Post, User } from '@/payload-types'
 10. **Point fields** are not supported in SQLite
 
 ## Best Practices
+
+### Content Modeling
+
+- Enable `versions: { drafts: true }` by default on content collections; rely on the
+  auto-injected `_status` field rather than adding a custom `status` field
+- Use `slugField()` for slugs instead of hand-rolling a unique text field
+- Reserve `position: 'sidebar'` for short, at-a-glance fields (status, category,
+  author, date); keep long fields (description, rich text) in the main area
 
 ### Security
 

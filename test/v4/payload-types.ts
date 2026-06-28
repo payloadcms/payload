@@ -722,6 +722,7 @@ export interface DocControl {
   id: string;
   title: string;
   content?: string | null;
+  test?: string | null;
   parent?: (string | null) | Folder;
   updatedAt: string;
   createdAt: string;
@@ -2602,6 +2603,7 @@ export interface UsersSelect<T extends boolean = true> {
 export interface DocControlsSelect<T extends boolean = true> {
   title?: T;
   content?: T;
+  test?: T;
   parent?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -4120,6 +4122,6 @@ export interface SerializedTableCellNode<TChildren> extends SerializedLexicalEle
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }
