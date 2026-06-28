@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import type { UserMenuSettingsGroup } from '../UserMenu/SettingsMenu/index.js'
 
+import { useElementHeightVariable } from '../../hooks/useElementHeightVariable.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { LanguageIcon } from '../../icons/Language/index.js'
 import { SidebarIcon } from '../../icons/Sidebar/index.js'
@@ -36,8 +37,11 @@ export function AppHeader({ CustomAvatar, settingsItemGroups }: Props) {
     config: { localization },
   } = useConfig()
 
+  const headerRef = useRef<HTMLElement>(null)
   const customControlsRef = useRef<HTMLDivElement>(null)
   const [isScrollable, setIsScrollable] = useState(false)
+
+  useElementHeightVariable({ cssVar: '--app-header-height', ref: headerRef })
 
   useEffect(() => {
     const checkIsScrollable = () => {
@@ -59,7 +63,10 @@ export function AppHeader({ CustomAvatar, settingsItemGroups }: Props) {
   const ActionComponents = Actions ? Object.values(Actions) : []
 
   return (
-    <header className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
+    <header
+      className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}
+      ref={headerRef}
+    >
       <div className={`${baseClass}__content`}>
         <div className={`${baseClass}__wrapper`}>
           <NavToggler className={`${baseClass}__mobile-nav-toggler`} tabIndex={-1} />

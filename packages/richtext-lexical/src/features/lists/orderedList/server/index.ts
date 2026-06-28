@@ -1,10 +1,10 @@
 import { ListItemNode, ListNode } from '@lexical/list'
+import { ORDERED_LIST } from '@lexical/markdown'
 
 import { createServerFeature } from '../../../../utilities/createServerFeature.js'
 import { createNode } from '../../../typeUtilities.js'
 import { listItemNodeJSONSchema, listNodeJSONSchema } from '../../shared/schema.js'
 import { shouldRegisterListBaseNodes } from '../../shared/shouldRegisterListBaseNodes.js'
-import { ORDERED_LIST } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
 
 export const OrderedListFeature = createServerFeature({

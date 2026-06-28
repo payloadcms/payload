@@ -6,7 +6,7 @@
 
     & + .nav-group {
       margin-block-start: var(--spacer-2);
-      border-top: 1px solid var(--color-border);
+      border-top: var(--stroke-width-small) solid var(--color-border);
       padding-top: var(--spacer-2-5);
     }
   }

@@ -24,7 +24,7 @@ export type DraggableFileDetailsProps = {
   hasImageSizes?: boolean
   hasMany: boolean
   hideRemoveFile?: boolean
-  imageCacheTag?: string
+  imageCacheTag?: false | string
   isSortable?: boolean
   removeItem?: (index: number) => void
   rowIndex: number

@@ -61,7 +61,6 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
       method: 'PUT',
       headers: {
         'Content-Type': 'image/png',
-        'Content-Length': String(file.length),
       },
       body: file,
     })
@@ -101,7 +100,7 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     })
 
     expect(response.status).toBe(200)
-    const { url } = (await response.json()) as any
+    const { url } = await response.json()
     expect(url).toBeDefined()
     expect(url).toContain(getTestBucketName())
     expect(url).toContain('small-file.png')
@@ -113,7 +112,7 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     })
 
     expect(response.status).toBe(400)
-    const { errors } = (await response.json()) as any
+    const { errors } = await response.json()
     expect(errors).toBeDefined()
     expect(errors[0].message).toContain('Exceeded file size limit')
     expect(errors[0].message).toMatch(/Limit: 10\.0\dMB/)
@@ -126,7 +125,7 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     })
 
     expect(response.status).toBe(400)
-    const { errors } = (await response.json()) as any
+    const { errors } = await response.json()
     expect(errors).toBeDefined()
     expect(errors[0].message).toContain('Exceeded file size limit')
   })
@@ -137,7 +136,7 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     })
 
     expect(response.status).toBe(200)
-    const { url } = (await response.json()) as any
+    const { url } = await response.json()
     expect(url).toBeDefined()
   })
 
@@ -161,7 +160,6 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
       method: 'PUT',
       headers: {
         'Content-Type': mimeType,
-        'Content-Length': String(actualFilesize),
       },
       body: file,
     })
