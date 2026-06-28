@@ -330,6 +330,7 @@ The `transactionIDPromise` property on `PayloadRequest` has been removed. It was
 The defaults object exported from payload has been removed. It was deprecated because it was a single shared object and mutating it (or any config that used it as a base) leaked changes into every other consumer of the defaults.
 
 If you depended on reading a specific default value at runtime, read it from the sanitized config returned by buildConfig (or payload.config) instead of from the static defaults object.
+Alternatively, you can call `addDefaultsToConfig` to get the unsanitized config but populated with the default properties.
 
 ### Plugin Import/Export: `toCSV` and `fromCSV` removed
 

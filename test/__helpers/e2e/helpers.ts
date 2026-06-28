@@ -6,10 +6,9 @@ import type {
   Locator,
   Page,
 } from '@playwright/test'
-import type { Config, SanitizedConfig } from 'payload'
 
 import { expect } from '@playwright/test'
-import { defaults } from 'payload'
+import { addDefaultsToConfig, type Config, type SanitizedConfig } from 'payload'
 import { formatAdminURL, wait } from 'payload/shared'
 import { setTimeout } from 'timers/promises'
 
@@ -483,6 +482,10 @@ export function getRoutes({
   }
   routes: NonNullable<SanitizedConfig['routes']>
 } {
+  const defaults = addDefaultsToConfig({
+    db: { defaultIDType: 'text', init: () => ({}) as any },
+    secret: '',
+  })
   let routes = defaults.routes
   let adminRoutes = defaults.admin?.routes
 

@@ -1407,6 +1407,7 @@ export {
   serverOnlyConfigProperties,
   type UnauthenticatedClientConfig,
 } from './config/client.js'
+export { addDefaultsToConfig } from './config/defaults.js'
 export { definePlugin } from './config/definePlugin.js'
 
 export { type OrderableEndpointBody } from './config/orderable/index.js'
