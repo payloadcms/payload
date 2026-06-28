@@ -373,8 +373,8 @@ importers:
         specifier: 8.22.1
         version: 8.22.1(@aws-sdk/credential-providers@3.1063.0)
       mongoose-paginate-v2:
-        specifier: 1.9.4
-        version: 1.9.4(mongoose@8.22.1(@aws-sdk/credential-providers@3.1063.0))
+        specifier: 1.9.5
+        version: 1.9.5(mongoose@8.22.1(@aws-sdk/credential-providers@3.1063.0))
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -12058,8 +12058,8 @@ packages:
     peerDependencies:
       mongoose: '>=5.11.10'
 
-  mongoose-paginate-v2@1.9.4:
-    resolution: {integrity: sha512-0LOsVEQmjrbJKVDi/IvFEhIezmuRjUE4loGgslv57j9nK/NMC+mbKT0QnaPSPpib4lByKVBcy3VbDa1TvlHZjA==}
+  mongoose-paginate-v2@1.9.5:
+    resolution: {integrity: sha512-sgPbV0G7SfdW1XdEuNMokzJOT85GNx786itp6UiNmDvKGyxMSHbeyn4tMZBseOmGu2uOo5ByVgfjhaxkOBY71A==}
     engines: {node: '>=4.0.0'}
 
   mongoose@8.22.1:
@@ -25623,7 +25623,7 @@ snapshots:
       mongoose: 8.22.1(@aws-sdk/credential-providers@3.1063.0)
       mpath: 0.8.4
 
-  mongoose-paginate-v2@1.9.4(mongoose@8.22.1(@aws-sdk/credential-providers@3.1063.0)):
+  mongoose-paginate-v2@1.9.5(mongoose@8.22.1(@aws-sdk/credential-providers@3.1063.0)):
     dependencies:
       mongoose-lean-virtuals: 1.1.1(mongoose@8.22.1(@aws-sdk/credential-providers@3.1063.0))
     transitivePeerDependencies:
