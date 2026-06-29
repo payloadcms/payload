@@ -257,33 +257,32 @@ export interface UntypedPayloadTypes {
   }
   locale: null | string
   /**
-   * Fallback shape of a user when no types have been generated; backs the exported `User` type.
-   * Mirrors the shape a generated `User` takes (no index signature - custom auth-collection fields
-   * require generated types), so a generated `User` stays assignable to it. A superset of every
-   * built-in field that can be read or written (e.g. read-only `collection`, write-only
-   * `password`). Not the logged-in `req.user`, which adds `_strategy`/`_sid` - see `AuthenticatedUser`.
+   * User shape used when generated types are unavailable.
+   * Includes common document fields and fields managed by Payload auth. Custom fields and
+   * collection features such as drafts, trash, and uploads require generated types. Runtime fields
+   * `_strategy` and `_sid` belong to `AuthenticatedUser`.
    */
   user: {
     /** Email verification token. Hidden (needs `showHiddenFields`). Only with `auth.verify`, until verified. */
     _verificationToken?: null | string
     /** Whether the email is verified. Only with `auth.verify`. */
-    _verified?: boolean
+    _verified?: boolean | null
     /** The user's API key. Only with `auth.useAPIKey`, once enabled for this user. */
     apiKey?: null | string
     /** Internal lookup index for the API key. Hidden (needs `showHiddenFields`). Only with `auth.useAPIKey`. */
     apiKeyIndex?: null | string
     /** Slug of the auth collection this user belongs to. Always present; identifies the source collection. */
     collection: string
-    /** When the user was created. Always present. */
-    createdAt: string
+    /** When the user was created. Not present when timestamps are disabled. */
+    createdAt?: string
     /** The user's email. Absent if email login is disabled via `auth.loginWithUsername`. */
-    email?: string
+    email?: null | string
     /** Whether API key auth is enabled for this user. Only with `auth.useAPIKey`. */
-    enableAPIKey?: boolean
+    enableAPIKey?: boolean | null
     /** Hashed password. Hidden (needs `showHiddenFields`). Only with the local strategy. */
     hash?: null | string
     /** The user's ID. Always present. */
-    id: DefaultDocumentIDType
+    id: UntypedPayloadTypes['db']['defaultIDType']
     /** Locked-until timestamp. Hidden (needs `showHiddenFields`). Only with `auth.maxLoginAttempts`, while locked. */
     lockUntil?: null | string
     /** Failed login attempt count. Hidden (needs `showHiddenFields`). Only with `auth.maxLoginAttempts`. */
@@ -298,10 +297,10 @@ export interface UntypedPayloadTypes {
     salt?: null | string
     /** Active login sessions. Only with `auth.useSessions` (the default). */
     sessions?: Array<UserSession> | null
-    /** When the user was last updated. Always present. */
-    updatedAt: string
+    /** When the user was last updated. Not present when timestamps are disabled. */
+    updatedAt?: string
     /** The user's username. Only with `auth.loginWithUsername`. */
-    username?: string
+    username?: null | string
   }
   widgets: {
     [slug: string]: JsonObject
@@ -407,10 +406,9 @@ export type TypedLocale<T extends PayloadTypesShape = PayloadTypes> = T['locale'
 export type TypedFallbackLocale = PayloadTypes['fallbackLocale']
 
 /**
- * The user type for an auth-enabled collection. Holds every user property - both what you read
- * back and what you write (e.g. `password`) - in a single type.
- *
- * Can be a union of several user types when you have multiple auth-enabled collections.
+ * User document type for auth-enabled collections.
+ * Uses generated types when available and the auth-only fallback above otherwise. Generated types
+ * include custom fields and can be a union when several collections support auth.
  *
  * Not the signed-in `req.user`, which also has `_strategy` and `_sid` - use `AuthenticatedUser`.
  */

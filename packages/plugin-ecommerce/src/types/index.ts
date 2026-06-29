@@ -1,5 +1,7 @@
 import type {
   Access,
+  AuthenticatedUser,
+  ClientUser,
   CollectionConfig,
   CollectionSlug,
   DefaultDocumentIDType,
@@ -11,7 +13,6 @@ import type {
   PopulateType,
   SelectType,
   TypedCollection,
-  User,
   Where,
 } from 'payload'
 import type React from 'react'
@@ -45,16 +46,17 @@ type DefaultCartType = {
 
 export type Cart = DefaultCartType
 
-/**
- * A user whose collection may define a reverse `cart` join. The ecommerce plugin does not add
- * this field, but projects such as the ecommerce template can define it. Plugin code supports the
- * join when present through this optional augmented shape.
- */
-export type UserWithCart = {
+type CartJoin = {
   cart?: {
     docs?: (Cart | DefaultDocumentIDType)[]
   } | null
-} & User
+}
+
+/** Adds the optional reverse `cart` join that a project may define on its user collection. */
+export type UserWithCart = AuthenticatedUser & CartJoin
+
+/** The browser-safe user with the optional cart join. */
+export type ClientUserWithCart = CartJoin & ClientUser
 
 type InitiatePaymentReturnType = {
   /**
@@ -1065,5 +1067,5 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
   /**
    * The current authenticated user, or null if not logged in.
    */
-  user: null | User
+  user: ClientUserWithCart | null
 }

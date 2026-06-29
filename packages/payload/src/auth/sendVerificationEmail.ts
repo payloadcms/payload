@@ -30,7 +30,7 @@ export async function sendVerificationEmail(args: Args): Promise<void> {
     user,
   } = args
 
-  if (!disableEmail) {
+  if (!disableEmail && user.email) {
     const serverURL = getRequestOrigin({ config, req })
 
     const verificationURL = formatAdminURL({

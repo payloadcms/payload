@@ -87,11 +87,13 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
 
       const existingSession = user.sessions.find(({ id }) => id === sid)
 
-      if (existingSession) {
-        const now = new Date()
-        const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
-        existingSession.expiresAt = new Date(now.getTime() + tokenExpInMs)
+      if (!existingSession) {
+        throw new Forbidden(args.req.t)
       }
+
+      const now = new Date()
+      const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
+      existingSession.expiresAt = new Date(now.getTime() + tokenExpInMs)
 
       await req.payload.db.updateOne({
         id: user.id,

@@ -43,6 +43,7 @@ import { describe, expect, test } from 'tstyche'
 import type {
   DraftPost,
   DraftPostInput,
+  FallbackUser,
   LexicalUploadFields_9521FA4A as GalleryUploadFields,
   SerializedAutoLinkNode as GenAutoLink,
   SerializedHeadingNode as GenHeading,
@@ -51,7 +52,7 @@ import type {
   SerializedListItemNode as GenLI,
   SerializedLinkNode as GenLink,
   SerializedListNode as GenList,
-  LexicalNodes_51F9F5BE as GenNodeUnion,
+  LexicalNodes_D5E7E2D8 as GenNodeUnion,
   SerializedParagraphNode as GenParagraph,
   SerializedQuoteNode as GenQuote,
   SerializedTabNode as GenTab,
@@ -195,12 +196,12 @@ describe('Types testing', () => {
     })
 
     test('generated User is assignable to the untyped fallback user type', () => {
-      // `UntypedPayloadTypes['user']` is the fallback shape `User` resolves to when no types have
-      // been generated. A generated `User` must be assignable to it, so the type behaves the same
-      // whether or not types have been generated, and the fallback faithfully mirrors a real user.
-      type FallbackUser = UntypedPayloadTypes['user']
+      // Payload uses this auth contract when generated types are unavailable, so every generated
+      // user must be readable through it.
+      type UntypedFallbackUser = UntypedPayloadTypes['user']
 
-      expect<User>().type.toBeAssignableTo<FallbackUser>()
+      expect<User>().type.toBeAssignableTo<UntypedFallbackUser>()
+      expect<FallbackUser>().type.toBeAssignableTo<UntypedFallbackUser>()
     })
 
     test('payload operations return users with collection property', async () => {
@@ -1154,6 +1155,7 @@ describe('Types testing', () => {
       const _sdk = new PayloadSDK({ baseURL: '' })
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'fallback-users'
         | 'gallery'
         | 'input-types'
         | 'media'
@@ -1173,6 +1175,7 @@ describe('Types testing', () => {
       // ensure collection property of sdk.create has posts in the union type
       expect<Parameters<typeof _sdk.create>[0]['collection']>().type.toBe<
         | 'draft-posts'
+        | 'fallback-users'
         | 'gallery'
         | 'input-types'
         | 'media'

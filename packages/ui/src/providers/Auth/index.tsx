@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, SanitizedPermissions, User } from 'payload'
+import type { ClientUser, SanitizedPermissions } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { formatAdminURL } from 'payload/shared'
@@ -24,7 +24,7 @@ export type UserWithToken<T = ClientUser> = {
 }
 
 export type AuthContext<T = ClientUser> = {
-  fetchFullUser: () => Promise<null | User>
+  fetchFullUser: () => Promise<null | T>
   logOut: () => Promise<boolean>
   /**
    * These are the permissions for the current user from a global scope.
