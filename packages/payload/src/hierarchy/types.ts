@@ -41,6 +41,13 @@ export type HierarchyConfig = {
      */
     injectSidebarTab?: boolean
     /**
+     * Separator used to join ancestor labels for title paths.
+     * This affects human-readable title paths only (_h_titlePath by default),
+     * not slug paths.
+     * @default ' > '
+     */
+    labelSeparator?: string
+    /**
      * Maximum number of items to load in tree views
      * @default 100
      */
@@ -51,6 +58,15 @@ export type HierarchyConfig = {
      * @default true
      */
     useHeaderButton?: boolean
+    /**
+     * When true, overrides admin.useAsTitle to the title path field (_h_titlePath by default).
+     * This causes the document header and relationship pills to display the full ancestor path
+     * (e.g. "Acme Corp > Engineering Division > Frontend Team") instead of just the document's
+     * own title. The real title field (original admin.useAsTitle) continues to be used as
+     * each ancestor's label when building the path.
+     * @default false
+     */
+    usePathAsTitle?: boolean
   }
   /**
    * Whether related documents can have multiple values of this hierarchy
@@ -121,8 +137,10 @@ export type SanitizedHierarchyConfig = {
       SmallIcon: PayloadComponent
     }
     injectSidebarTab: boolean
+    labelSeparator: string
     treeLimit: number
     useHeaderButton: boolean
+    usePathAsTitle: boolean
   }
   allowHasMany: boolean
   collectionSpecific:
@@ -145,6 +163,12 @@ export type SanitizedHierarchyConfig = {
   slugField?: string
   slugify: (text: string) => string
   slugPathFieldName: string
+  /**
+   * The real content field used as each ancestor's title segment when building paths.
+   * Stored explicitly so path-building code uses the correct field even when
+   * admin.useAsTitle is overridden to the virtual title path field (usePathAsTitle).
+   */
+  titleField: string
   titlePathFieldName: string
 }
 

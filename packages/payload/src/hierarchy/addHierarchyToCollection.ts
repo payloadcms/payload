@@ -12,14 +12,19 @@ export const addHierarchyToCollection = ({
   slugFieldName,
   slugPathFieldName,
   titlePathFieldName,
+  usePathAsTitle = false,
 }: {
   collectionConfig: CollectionConfig
   parentFieldName: string
   slugFieldName?: string
   slugPathFieldName: string
   titlePathFieldName: string
-}) => {
-  const { titleFieldName } = findUseAsTitleField(collectionConfig)
+  usePathAsTitle?: boolean
+}): { isTitleLocalized: boolean; titleFieldName: string } => {
+  // Read the real title field BEFORE adding virtual fields or overriding useAsTitle.
+  // When usePathAsTitle is true, useAsTitle still points at the real content field here
+  // (e.g. 'title') — we capture it now so path-building and listSearchableFields keep using it.
+  const { localized: isTitleLocalized, titleFieldName } = findUseAsTitleField(collectionConfig)
   // Verify slug field exists if configured
   const slugFieldInfo = slugFieldName ? findFieldByName(collectionConfig, slugFieldName) : undefined
   const validatedSlugFieldName = slugFieldInfo ? slugFieldName : undefined
@@ -53,6 +58,13 @@ export const addHierarchyToCollection = ({
   if (!collectionConfig.admin) {
     collectionConfig.admin = {}
   }
+
+  // When usePathAsTitle is enabled, override useAsTitle to the virtual path field so that
+  // the document header and relationship pills display the full ancestor path.
+  if (usePathAsTitle) {
+    collectionConfig.admin.useAsTitle = titlePathFieldName
+  }
+
   if (!collectionConfig.admin.listSearchableFields) {
     collectionConfig.admin.listSearchableFields = [titleFieldName]
   } else if (!collectionConfig.admin.listSearchableFields.includes(titleFieldName)) {
@@ -63,7 +75,13 @@ export const addHierarchyToCollection = ({
     ...(collectionConfig.hooks || {}),
     afterRead: [
       ...(collectionConfig.hooks?.afterRead || []),
-      hierarchyCollectionAfterRead({ parentFieldName, slugPathFieldName, titlePathFieldName }),
+      hierarchyCollectionAfterRead({
+        alwaysComputePaths: usePathAsTitle,
+        isTitleLocalized,
+        parentFieldName,
+        slugPathFieldName,
+        titlePathFieldName,
+      }),
     ],
     beforeChange: [
       ...(collectionConfig.hooks?.beforeChange || []),
@@ -84,4 +102,6 @@ export const addHierarchyToCollection = ({
       }),
     ],
   }
+
+  return { isTitleLocalized, titleFieldName }
 }

@@ -1,6 +1,7 @@
 import type { Payload } from 'payload'
 
 import {
+  articlesSlug,
   departmentsSlug,
   divisionsSlug,
   foldersSlug,
@@ -56,7 +57,7 @@ export async function seed(payload: Payload): Promise<void> {
     data: { parent: acmeCorp.id, title: 'Engineering Division' },
   })
 
-  await payload.create({
+  const frontendTeam = await payload.create({
     collection: organizationsSlug,
     data: { parent: engineeringDiv.id, title: 'Frontend Team' },
   })
@@ -74,6 +75,12 @@ export async function seed(payload: Payload): Promise<void> {
   await payload.create({
     collection: organizationsSlug,
     data: { parent: acmeCorp.id, title: 'Zeta Division' },
+  })
+
+  // Create an article linked to a deeply-nested org to test relationship pill title
+  await payload.create({
+    collection: articlesSlug,
+    data: { organization: frontendTeam.id, title: 'Intro to Hierarchy' },
   })
 
   // Create department hierarchy (tests custom field names)

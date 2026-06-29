@@ -61,6 +61,8 @@ describe('Hierarchy', () => {
         expect(deptsCollection.hierarchy.slugPathFieldName).toBe('_breadcrumbSlug')
         // eslint-disable-next-line vitest/no-conditional-expect
         expect(deptsCollection.hierarchy.titlePathFieldName).toBe('_breadcrumbTitle')
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(deptsCollection.hierarchy.admin.labelSeparator).toBe(' > ')
       }
 
       // Verify custom path fields were added
@@ -78,6 +80,38 @@ describe('Hierarchy', () => {
       await payload.delete({ collection: 'organizations', where: {} })
     })
 
+    describe('Title Path Label Separator', () => {
+      beforeEach(async () => {
+        await payload.delete({ collection: 'departments', where: {} })
+      })
+
+      afterEach(async () => {
+        await payload.delete({ collection: 'departments', where: {} })
+      })
+
+      it('should use configured label separator for title paths', async () => {
+        const rootDepartment = await payload.create({
+          collection: 'departments',
+          data: {
+            deptName: 'Engineering',
+            parentDept: null,
+          },
+        })
+
+        const childDepartment = await payload.create({
+          collection: 'departments',
+          context: { hierarchy: { computePaths: true } },
+          data: {
+            deptName: 'Platform',
+            parentDept: rootDepartment.id,
+          },
+        })
+
+        expect(childDepartment._breadcrumbSlug).toBe('engineering/platform')
+        expect(childDepartment._breadcrumbTitle).toBe('Engineering > Platform')
+      })
+    })
+
     afterEach(async () => {
       // Clean up data after each test
       await payload.delete({ collection: 'organizations', where: {} })
@@ -86,7 +120,7 @@ describe('Hierarchy', () => {
     it('should compute correct paths for root document', async () => {
       const rootPage = await payload.create({
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         data: {
           parent: null,
           title: 'Root Page',
@@ -110,7 +144,7 @@ describe('Hierarchy', () => {
       // Create child
       const childPage = await payload.create({
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         data: {
           parent: rootPage.id,
           title: 'Child',
@@ -118,12 +152,12 @@ describe('Hierarchy', () => {
       })
 
       expect(childPage._h_slugPath).toBe('root/child')
-      expect(childPage._h_titlePath).toBe('Root/Child')
+      expect(childPage._h_titlePath).toBe('Root > Child')
 
       // Create grandchild
       const grandchildPage = await payload.create({
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         data: {
           parent: childPage.id,
           title: 'Grandchild',
@@ -131,7 +165,7 @@ describe('Hierarchy', () => {
       })
 
       expect(grandchildPage._h_slugPath).toBe('root/child/grandchild')
-      expect(grandchildPage._h_titlePath).toBe('Root/Child/Grandchild')
+      expect(grandchildPage._h_titlePath).toBe('Root > Child > Grandchild')
     })
 
     it('should compute updated paths when parent changes', async () => {
@@ -160,23 +194,23 @@ describe('Hierarchy', () => {
       const updatedChild = await payload.update({
         id: childPage.id,
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         data: { parent: anotherRoot.id },
       })
 
       // Check child path reflects new parent
       expect(updatedChild._h_slugPath).toBe('another-root/child')
-      expect(updatedChild._h_titlePath).toBe('Another Root/Child')
+      expect(updatedChild._h_titlePath).toBe('Another Root > Child')
 
       // Check grandchild path automatically reflects change (walks up parent chain)
       const updatedGrandchild = await payload.findByID({
         id: grandchildPage.id,
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
       })
 
       expect(updatedGrandchild._h_slugPath).toBe('another-root/child/grandchild')
-      expect(updatedGrandchild._h_titlePath).toBe('Another Root/Child/Grandchild')
+      expect(updatedGrandchild._h_titlePath).toBe('Another Root > Child > Grandchild')
     })
 
     it('should compute updated paths when ancestor title changes', async () => {
@@ -202,11 +236,11 @@ describe('Hierarchy', () => {
       const updatedChild = await payload.findByID({
         id: childPage.id,
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
       })
 
       expect(updatedChild._h_slugPath).toBe('updated-root/child')
-      expect(updatedChild._h_titlePath).toBe('Updated Root/Child')
+      expect(updatedChild._h_titlePath).toBe('Updated Root > Child')
     })
 
     it('should handle moving to root level', async () => {
@@ -225,7 +259,7 @@ describe('Hierarchy', () => {
       const updatedChild = await payload.update({
         id: childPage.id,
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         data: { parent: null },
       })
 
@@ -323,7 +357,7 @@ describe('Hierarchy', () => {
       const updated = await payload.update({
         id: child.id,
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         data: { parent: page2.id },
         depth: 0,
       })
@@ -413,7 +447,7 @@ describe('Hierarchy', () => {
     it('should use custom field names for path fields', async () => {
       const parentDept = await payload.create({
         collection: 'departments',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         data: { deptName: 'Engineering' },
       })
 
@@ -422,7 +456,7 @@ describe('Hierarchy', () => {
 
       const childDept = await payload.create({
         collection: 'departments',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         data: {
           deptName: 'Frontend',
           parentDept: parentDept.id,
@@ -430,7 +464,7 @@ describe('Hierarchy', () => {
       })
 
       expect(childDept._breadcrumbSlug).toBe('engineering/frontend')
-      expect(childDept._breadcrumbTitle).toBe('Engineering/Frontend')
+      expect(childDept._breadcrumbTitle).toBe('Engineering > Frontend')
     })
   })
 
@@ -452,7 +486,7 @@ describe('Hierarchy', () => {
       for (let i = 0; i < 10; i++) {
         currentParent = await payload.create({
           collection: 'organizations',
-          context: { computeHierarchyPaths: true },
+          context: { hierarchy: { computePaths: true } },
           data: {
             parent: currentParent?.id || null,
             title: `Level ${i}`,
@@ -513,7 +547,7 @@ describe('Hierarchy', () => {
       const publishedChild = await payload.findByID({
         id: child.id,
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         draft: false,
       })
 
@@ -523,7 +557,7 @@ describe('Hierarchy', () => {
       const draftChild = await payload.findByID({
         id: child.id,
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         draft: true,
       })
 
@@ -556,7 +590,7 @@ describe('Hierarchy', () => {
       const publishedChild = await payload.findByID({
         id: child.id,
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
       })
 
       expect(publishedChild._h_slugPath).toBe('offerings/services/consulting')
@@ -566,7 +600,7 @@ describe('Hierarchy', () => {
       const draftChild = await payload.findByID({
         id: child.id,
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         draft: true,
       })
 
@@ -604,7 +638,7 @@ describe('Hierarchy', () => {
       const draftChild = await payload.findByID({
         id: child.id,
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         draft: true,
       })
 
@@ -638,7 +672,7 @@ describe('Hierarchy', () => {
       const updatedChild = await payload.findByID({
         id: child.id,
         collection: 'organizations',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
       })
 
       expect(updatedChild._h_slugPath).toBe('tech/electronics/phones')
@@ -701,7 +735,7 @@ describe('Hierarchy', () => {
       const childWithAllLocales = await payload.findByID({
         id: child.id,
         collection: 'products',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         locale: 'all',
       })
 
@@ -713,9 +747,9 @@ describe('Hierarchy', () => {
       })
 
       expect(childWithAllLocales._h_titlePath).toEqual({
-        de: 'Kleidung/Hemden',
-        en: 'Clothing/Shirts',
-        es: 'Ropa/Camisas',
+        de: 'Kleidung > Hemden',
+        en: 'Clothing > Shirts',
+        es: 'Ropa > Camisas',
       })
     })
 
@@ -800,7 +834,7 @@ describe('Hierarchy', () => {
       const updatedChild = await payload.findByID({
         id: child.id,
         collection: 'products',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         locale: 'all',
       })
 
@@ -811,9 +845,9 @@ describe('Hierarchy', () => {
       })
 
       expect(updatedChild._h_titlePath).toEqual({
-        de: 'Bekleidung/Kleidung/Hemden',
-        en: 'Apparel/Clothing/Shirts',
-        es: 'Indumentaria/Ropa/Camisas',
+        de: 'Bekleidung > Kleidung > Hemden',
+        en: 'Apparel > Clothing > Shirts',
+        es: 'Indumentaria > Ropa > Camisas',
       })
     })
 
@@ -890,7 +924,7 @@ describe('Hierarchy', () => {
       const updatedChild = await payload.findByID({
         id: child.id,
         collection: 'products',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         locale: 'all',
       })
 
@@ -901,9 +935,9 @@ describe('Hierarchy', () => {
       })
 
       expect(updatedChild._h_titlePath).toEqual({
-        de: 'Bekleidung/Hemden',
-        en: 'Apparel/Shirts',
-        es: 'Indumentaria/Camisas',
+        de: 'Bekleidung > Hemden',
+        en: 'Apparel > Shirts',
+        es: 'Indumentaria > Camisas',
       })
     })
 
@@ -1015,7 +1049,7 @@ describe('Hierarchy', () => {
       const publishedChild = await payload.findByID({
         id: child.id,
         collection: 'products',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         locale: 'all',
       })
 
@@ -1029,7 +1063,7 @@ describe('Hierarchy', () => {
       const draftChild = await payload.findByID({
         id: child.id,
         collection: 'products',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         draft: true,
         locale: 'all',
       })
@@ -1131,7 +1165,7 @@ describe('Hierarchy', () => {
       const draftChild = await payload.findByID({
         id: child.id,
         collection: 'products',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         draft: true,
         locale: 'all',
       })
@@ -1143,9 +1177,9 @@ describe('Hierarchy', () => {
       })
 
       expect(draftChild._h_titlePath).toEqual({
-        de: 'Fahrplan/Zukunft/Pläne',
-        en: 'Roadmap/Future/Plans',
-        es: 'Hoja de Ruta/Futuro/Planes',
+        de: 'Fahrplan > Zukunft > Pläne',
+        en: 'Roadmap > Future > Plans',
+        es: 'Hoja de Ruta > Futuro > Planes',
       })
     })
   })
@@ -1192,7 +1226,7 @@ describe('Hierarchy', () => {
       const results = await payload.find({
         collection: 'organizations',
         context: {
-          computeHierarchyPaths: true,
+          hierarchy: { computePaths: true },
           hierarchyCacheStats: cacheStats,
         },
         where: {
@@ -1217,7 +1251,7 @@ describe('Hierarchy', () => {
       // Verify all paths computed correctly
       for (const doc of results.docs) {
         expect(doc._h_slugPath).toContain('root/category/')
-        expect(doc._h_titlePath).toContain('Root/Category/')
+        expect(doc._h_titlePath).toContain('Root > Category >')
       }
     })
 
@@ -1267,7 +1301,7 @@ describe('Hierarchy', () => {
       await payload.find({
         collection: 'organizations',
         context: {
-          computeHierarchyPaths: true,
+          hierarchy: { computePaths: true },
           hierarchyCacheStats: cacheStats,
         },
         where: {
@@ -1302,7 +1336,7 @@ describe('Hierarchy', () => {
       // Pages collection has slugField: 'slug' configured
       const page = await payload.create({
         collection: 'pages',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         data: {
           parent: null,
           slug: 'about-us', // Different from title
@@ -1331,7 +1365,7 @@ describe('Hierarchy', () => {
       // Create child page
       const childPage = await payload.create({
         collection: 'pages',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         data: {
           parent: rootPage.id,
           slug: 'services',
@@ -1342,13 +1376,13 @@ describe('Hierarchy', () => {
 
       // Should use slug field values for path
       expect(childPage._h_slugPath).toBe('home/services')
-      expect(childPage._h_titlePath).toBe('Home Page/Our Services')
+      expect(childPage._h_titlePath).toBe('Home Page > Our Services')
     })
 
     it('should fall back to slugified title when slug field is empty', async () => {
       const page = await payload.create({
         collection: 'pages',
-        context: { computeHierarchyPaths: true },
+        context: { hierarchy: { computePaths: true } },
         data: {
           parent: null,
           slug: '', // Empty slug
@@ -1405,7 +1439,7 @@ describe('Hierarchy', () => {
 
       // Should have full paths (not flat paths)
       expect(result._h_slugPath).toBe('parent-org/child-org')
-      expect(result._h_titlePath).toBe('Parent Org/Child Org')
+      expect(result._h_titlePath).toBe('Parent Org > Child Org')
     })
 
     it('should not expose auto-added fields in response', async () => {
@@ -1508,7 +1542,7 @@ describe('Hierarchy', () => {
 
       // Should have full 3-level path
       expect(result._h_slugPath).toBe('level-1/level-2/level-3')
-      expect(result._h_titlePath).toBe('Level 1/Level 2/Level 3')
+      expect(result._h_titlePath).toBe('Level 1 > Level 2 > Level 3')
     })
   })
 })

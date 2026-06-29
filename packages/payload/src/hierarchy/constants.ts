@@ -15,5 +15,8 @@ export const DEFAULT_HIERARCHY_LIST_LIMIT = 25
 /** Default value for allowing hasMany on hierarchy fields */
 export const DEFAULT_ALLOW_HAS_MANY = true
 
+/** Default separator used when joining human-readable title path labels */
+export const DEFAULT_HIERARCHY_LABEL_SEPARATOR = ' > '
+
 /** Generate a hierarchy field name from a hierarchy slug (e.g., 'folders' -> '_h_folders') */
 export const getHierarchyFieldName = (hierarchySlug: string): string => `_h_${hierarchySlug}`

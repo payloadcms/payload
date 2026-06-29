@@ -28,6 +28,11 @@ type BuildLocalizedPathsArgs = {
    */
   slugValue?: Record<string, string>
   /**
+   * Separator used to join human-readable title segments.
+   * Does not affect slug path joining.
+   */
+  titleSeparator?: string
+  /**
    * The localized title value object (e.g., { en: "Home", es: "Inicio", de: "Startseite" })
    */
   titleValue: Record<string, string>
@@ -80,7 +85,15 @@ type BuildLocalizedPathsResult = {
 export function buildLocalizedHierarchyPaths(
   args: BuildLocalizedPathsArgs,
 ): BuildLocalizedPathsResult {
-  const { parentSlugPath, parentTitlePath, req, slugify, slugValue, titleValue } = args
+  const {
+    parentSlugPath,
+    parentTitlePath,
+    req,
+    slugify,
+    slugValue,
+    titleSeparator = ' > ',
+    titleValue,
+  } = args
 
   const slugPathsByLocale: Record<string, string> = {}
   const titlePathsByLocale: Record<string, string> = {}
@@ -115,7 +128,7 @@ export function buildLocalizedHierarchyPaths(
         ? `${parentSlugPath[loc]}/${slugSegment}`
         : slugSegment
       titlePathsByLocale[loc] = parentTitlePath
-        ? `${parentTitlePath[loc]}/${titleSegment}`
+        ? `${parentTitlePath[loc]}${titleSeparator}${titleSegment}`
         : titleSegment
     }
   }

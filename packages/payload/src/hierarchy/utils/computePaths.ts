@@ -128,7 +128,23 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
   const slugify =
     (collection.hierarchy !== false && collection.hierarchy.slugify) ||
     ((text: string) => payloadSlugify(text) || '')
-  const { localized: isTitleLocalized, titleFieldName } = findUseAsTitleField(collection)
+  const titleSeparator =
+    collection.hierarchy !== false ? collection.hierarchy.admin.labelSeparator : ' > '
+
+  // Use the stored real title field from hierarchy config when available.
+  // This handles the usePathAsTitle case where admin.useAsTitle has been overridden
+  // to the virtual path field — findUseAsTitleField would return the wrong field.
+  let titleFieldName: string
+  let isTitleLocalized: boolean
+  if (collection.hierarchy !== false && collection.hierarchy.titleField) {
+    titleFieldName = collection.hierarchy.titleField
+    const fieldInfo = findFieldByName(collection, titleFieldName)
+    isTitleLocalized = fieldInfo?.localized ?? false
+  } else {
+    const titleInfo = findUseAsTitleField(collection)
+    titleFieldName = titleInfo.titleFieldName
+    isTitleLocalized = titleInfo.localized
+  }
 
   // Check for dedicated slug field
   const slugFieldName = collection.hierarchy !== false ? collection.hierarchy.slugField : undefined
@@ -202,6 +218,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
           req,
           slugify,
           slugValue: slugValue as Record<string, string> | undefined,
+          titleSeparator,
           titleValue: titleValue as Record<string, string>,
         })
       }
@@ -235,17 +252,23 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
         context.hierarchyCacheStats.queries += 1
       }
 
-      const parentTitleField = findUseAsTitleField(parentCollectionConfig).titleFieldName
+      const parentTitleField =
+        (parentCollectionConfig.hierarchy !== false &&
+          parentCollectionConfig.hierarchy.titleField) ||
+        findUseAsTitleField(parentCollectionConfig).titleFieldName
 
       // parentID is guaranteed to be defined here (we're inside if (parentID))
       const validParentID = parentID
 
-      // Create new context with computeHierarchyPaths enabled to trigger recursive path computation
+      // Create new context with hierarchy.computePaths enabled to trigger recursive path computation
       const parentReq = {
         ...req,
         context: {
           ...req.context,
-          computeHierarchyPaths: true,
+          hierarchy: {
+            ...((req.context as { hierarchy?: { computePaths?: boolean } })?.hierarchy || {}),
+            computePaths: true,
+          },
         },
       }
 
@@ -293,12 +316,16 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
 
             // Fetch parent for each locale to get paths
             for (const loc of locales) {
-              // Create a new request with this specific locale but keep computeHierarchyPaths flag
+              // Create a new request with this specific locale but keep hierarchy.computePaths flag
               const localeReq = {
                 ...req,
                 context: {
                   ...req.context,
-                  computeHierarchyPaths: true,
+                  hierarchy: {
+                    ...((req.context as { hierarchy?: { computePaths?: boolean } })?.hierarchy ||
+                      {}),
+                    computePaths: true,
+                  },
                 },
                 locale: loc,
               }
@@ -420,6 +447,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
           req,
           slugify,
           slugValue: slugValue as Record<string, string> | undefined,
+          titleSeparator,
           titleValue: titleValue as Record<string, string>,
         })
       }
@@ -507,6 +535,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
         req,
         slugify,
         slugValue: docSlugValue as Record<string, string> | undefined,
+        titleSeparator,
         titleValue: docTitle as Record<string, string>,
       })
 
@@ -537,7 +566,8 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
 
     const result = {
       slugPath: (parent[parentSlugPathFieldName] as string) + '/' + slugSegment,
-      titlePath: (parent[parentTitlePathFieldName] as string) + '/' + (docTitle as string),
+      titlePath:
+        (parent[parentTitlePathFieldName] as string) + titleSeparator + (docTitle as string),
     }
 
     // Update cache with computed paths
@@ -577,6 +607,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
         req,
         slugify,
         slugValue: rootSlugValue as Record<string, string> | undefined,
+        titleSeparator,
         titleValue: titleValue as Record<string, string>,
       })
     }

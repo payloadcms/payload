@@ -34,9 +34,22 @@ export const validateUseAsTitle = (config: CollectionConfig) => {
       }
     } else {
       if (useAsTitleField && 'virtual' in useAsTitleField && useAsTitleField.virtual === true) {
-        throw new InvalidConfiguration(
-          `The field "${config.admin.useAsTitle}" specified in "admin.useAsTitle" in the collection "${config.slug}" is virtual. A virtual field can be used as the title only when linked to a relationship field.`,
-        )
+        // Virtual fields are allowed as useAsTitle when they are hierarchy path fields
+        // (set automatically by hierarchy's usePathAsTitle option).
+        // Detect this by checking if the collection has hierarchy and the field matches the titlePathFieldName.
+        const isHierarchyPathField =
+          config.hierarchy !== false &&
+          config.hierarchy &&
+          typeof config.hierarchy === 'object' &&
+          'titlePathFieldName' in config.hierarchy &&
+          (config.hierarchy as { titlePathFieldName: string }).titlePathFieldName ===
+            config.admin?.useAsTitle
+
+        if (!isHierarchyPathField) {
+          throw new InvalidConfiguration(
+            `The field "${config.admin.useAsTitle}" specified in "admin.useAsTitle" in the collection "${config.slug}" is virtual. A virtual field can be used as the title only when linked to a relationship field.`,
+          )
+        }
       }
       if (!useAsTitleField) {
         throw new InvalidConfiguration(

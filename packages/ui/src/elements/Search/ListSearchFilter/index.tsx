@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 import { useDebounce } from '../../../hooks/useDebounce.js'
+import { useTranslation } from '../../../providers/Translation/index.js'
 import { SearchInput } from '../SearchInput/index.js'
 
 type ListSearchFilterProps = {
@@ -16,18 +17,21 @@ type ListSearchFilterProps = {
 export function ListSearchFilter({
   className,
   disabled,
-  label = 'Search...',
+  label: labelFromProps,
   onSearchChange,
   searchQueryParam,
 }: ListSearchFilterProps) {
   const [search, setSearch] = useState(
     typeof searchQueryParam === 'string' ? searchQueryParam : undefined,
   )
+  const { t } = useTranslation()
 
   const shouldUpdateState = useRef(true)
   const previousSearch = useRef(typeof searchQueryParam === 'string' ? searchQueryParam : undefined)
 
   const debouncedSearch = useDebounce(search, 300)
+
+  const label = labelFromProps || t('general:searchBy', { label: '' }).split(' ')[0] // Simplified placeholder - just "Search" instead of "Search by X, Y, Z"
 
   useEffect(() => {
     if (searchQueryParam !== previousSearch.current) {

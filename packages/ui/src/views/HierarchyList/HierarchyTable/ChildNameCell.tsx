@@ -6,6 +6,7 @@ import React from 'react'
 import type { SlotColumn } from './SlotTable.js'
 import type { TableRow } from './types.js'
 
+import { Button } from '../../../elements/Button/index.js'
 import { Link } from '../../../elements/Link/index.js'
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { EditIcon } from '../../../icons/Edit/index.js'
@@ -54,20 +55,25 @@ export const ChildNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
     <div className={`${baseClass}__name-cell`}>
       <Link className={`${baseClass}__name-link`} href={hierarchyURL}>
         <span className={`${baseClass}__name-icon`}>{row._hierarchyIcon || DefaultIcon}</span>
-        <span className={`${baseClass}__name-text`}>{title}</span>
+        <span className={`${baseClass}__name-label`}>
+          <span className={`${baseClass}__name-text-truncated`}>{title}</span>
+        </span>
         {row._hasChildren && (
           <span className={`${baseClass}__chevron`}>
             <ChevronIcon direction="right" />
           </span>
         )}
       </Link>
-      <Link
+      <Button
         aria-label={t('general:editLabel', { label: title })}
+        buttonStyle="ghost"
         className={`${baseClass}__edit-button`}
-        href={documentURL}
-      >
-        <EditIcon />
-      </Link>
+        el="link"
+        icon={<EditIcon size={16} />}
+        margin={false}
+        size="medium"
+        to={documentURL}
+      />
     </div>
   )
 }
