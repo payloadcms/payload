@@ -119,11 +119,5 @@
     "vitest": "4.1.6",
     "wrangler": "~4.61.1",
     "zod": "^4.0.0"
-  },
-  "pnpm": {
-    "neverBuiltDependencies": [],
-    "overrides": {
-      "graphql": "16.8.1"
-    }
   }
 }
