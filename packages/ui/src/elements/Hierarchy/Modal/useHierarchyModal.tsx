@@ -10,7 +10,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { DrawerToggler as ModalToggler } from '../../Drawer/index.js'
-import { baseClass, HierarchyDrawer as HierarchyModal } from './index.js'
+import { baseClass, HierarchyModal } from './index.js'
 
 export const formatHierarchyModalSlug = ({
   depth,

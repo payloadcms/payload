@@ -10,7 +10,7 @@ import React, {
 } from 'react'
 
 import type { HierarchyColumnBrowserRef } from '../ColumnBrowser/index.js'
-import type { HierarchyDrawerInternalProps, SelectionWithPath } from './types.js'
+import type { HierarchyModalInternalProps, SelectionWithPath } from './types.js'
 
 import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
@@ -27,16 +27,16 @@ import './index.css'
 
 export const baseClass = 'hierarchy-modal'
 
-type HierarchyDrawerContentProps = {
+type HierarchyModalContentProps = {
   columnBrowserRef?: React.RefObject<HierarchyColumnBrowserRef | null>
   onCreateNew?: (params: { parentId: null | number | string }) => void
-} & HierarchyDrawerInternalProps
+} & HierarchyModalInternalProps
 
-export type HierarchyDrawerContentRef = {
+export type HierarchyModalContentRef = {
   selectItem: (id: number | string) => void
 }
 
-export const HierarchyDrawerContent = function HierarchyDrawerContent({
+export const HierarchyModalContent = function HierarchyModalContent({
   baseFilter,
   closeModal,
   columnBrowserRef,
@@ -53,7 +53,7 @@ export const HierarchyDrawerContent = function HierarchyDrawerContent({
   ref,
   showMoveToRoot,
   useAsTitle,
-}: { ref?: React.RefObject<HierarchyDrawerContentRef | null> } & HierarchyDrawerContentProps) {
+}: { ref?: React.RefObject<HierarchyModalContentRef | null> } & HierarchyModalContentProps) {
   const { i18n, t } = useTranslation()
   // NOTE: Do NOT use useModal() here - it causes re-renders when any modal state changes
   // Use closeModal prop instead which already handles closing the modal
@@ -266,7 +266,7 @@ export const HierarchyDrawerContent = function HierarchyDrawerContent({
   )
 }
 
-export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) => {
+export const HierarchyModal: React.FC<HierarchyModalInternalProps> = (props) => {
   const { hierarchyCollectionSlug, modalSlug, parentFieldName, reopenCount } = props
 
   const { refreshTree } = useHierarchy()
@@ -286,7 +286,7 @@ export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) =
   const columnBrowserRef = useRef<HierarchyColumnBrowserRef | null>(null)
 
   // Ref to access drawer content's selectItem function
-  const drawerContentRef = useRef<HierarchyDrawerContentRef | null>(null)
+  const modalContentRef = useRef<HierarchyModalContentRef | null>(null)
 
   // Key for DocumentDrawer to force remount when parentId changes
   const [documentDrawerKey, setDocumentDrawerKey] = useState(0)
@@ -294,7 +294,7 @@ export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) =
   // Stable drawer slug for the document drawer - must not change on remount
   const documentDrawerSlug = `${modalSlug}-create-doc`
 
-  // Document drawer for creating new items - rendered OUTSIDE the Drawer to avoid nested modal issues
+  // Document drawer for creating new items - rendered OUTSIDE the modal to avoid nested modal issues
   const [DocumentDrawer, , { closeDrawer: closeDocumentDrawer, openDrawer: openDocumentDrawer }] =
     useDocumentDrawer({
       collectionSlug: hierarchyCollectionSlug,
@@ -322,8 +322,8 @@ export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) =
       if (columnBrowserRef.current && createParentId !== undefined) {
         void columnBrowserRef.current.refreshColumn(createParentId)
       }
-      if (drawerContentRef.current && doc?.id) {
-        drawerContentRef.current.selectItem(doc.id)
+      if (modalContentRef.current && doc?.id) {
+        modalContentRef.current.selectItem(doc.id)
       }
       refreshTree(hierarchyCollectionSlug)
       closeDocumentDrawer()
@@ -332,14 +332,14 @@ export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) =
   )
 
   // Memoize the content - only depends on stable values
-  const drawerContent = useMemo(
+  const modalContent = useMemo(
     () => (
-      <HierarchyDrawerContent
+      <HierarchyModalContent
         {...props}
         columnBrowserRef={columnBrowserRef}
         key={reopenCount}
         onCreateNew={handleCreateNew}
-        ref={drawerContentRef}
+        ref={modalContentRef}
       />
     ),
     [handleCreateNew, props],
@@ -348,7 +348,7 @@ export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) =
   return (
     <>
       <DialogModal className={baseClass} closeOnBlur size="large" slug={modalSlug}>
-        {drawerContent}
+        {modalContent}
       </DialogModal>
       <DrawerDepthProvider>
         <DocumentDrawer
