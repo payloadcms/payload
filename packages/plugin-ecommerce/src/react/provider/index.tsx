@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultDocumentIDType, User } from 'payload'
+import type { DefaultDocumentIDType } from 'payload'
 
 import { deepMergeSimple, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -12,6 +12,7 @@ import type {
   Currency,
   EcommerceConfig,
   EcommerceContextType,
+  UserWithCart,
 } from '../../types/index.js'
 
 const defaultContext: EcommerceContextType = {
@@ -115,7 +116,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
   const [isLoading, setIsLoading] = useState(false)
 
-  const [user, setUser] = useState<null | User>(null)
+  const [user, setUser] = useState<null | UserWithCart>(null)
 
   const [addresses, setAddresses] = useState<AddressesCollection[]>()
 
@@ -657,15 +658,18 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         throw new Error(`Failed to fetch user: ${errorText}`)
       }
 
-      const userData = await response.json()
+      const userData: {
+        error?: string
+        user?: UserWithCart
+      } = await response.json()
 
       if (userData.error) {
         throw new Error(`User fetch error: ${userData.error}`)
       }
 
       if (userData.user) {
-        setUser(userData.user as User)
-        return userData.user as User
+        setUser(userData.user)
+        return userData.user
       }
     } catch (error) {
       if (debug) {

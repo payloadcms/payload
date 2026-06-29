@@ -45,6 +45,16 @@ type DefaultCartType = {
 
 export type Cart = DefaultCartType
 
+/**
+ * A user with the ecommerce `cart` join field. The plugin adds `cart` to the auth collection,
+ * but it is not part of the base `User` type, so plugin code reads it through this augmented shape.
+ */
+export type UserWithCart = {
+  cart?: {
+    docs?: (Cart | DefaultDocumentIDType)[]
+  } | null
+} & User
+
 type InitiatePaymentReturnType = {
   /**
    * Allows for additional data to be returned, such as payment method specific data
