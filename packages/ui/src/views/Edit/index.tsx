@@ -682,7 +682,8 @@ export function DefaultEditView({
     />
   ) : undefined
 
-  const shouldRenderUploadPanel = Boolean(upload)
+  const shouldRenderUploadPanel =
+    Boolean(upload) && !(operation === 'create' && upload.hideFileInputOnCreate)
   const shouldScrollFieldsOnly = shouldRenderUploadPanel
 
   return (
