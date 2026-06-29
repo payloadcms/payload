@@ -122,7 +122,7 @@ export type PopupProps = {
    * When set, `verticalAlign`, `horizontalAlign`, and the caret are ignored.
    */
   side?: 'left' | 'right'
-  size?: 'fit-content' | 'large' | 'medium' | 'small'
+  size?: 'fit-content' | 'large' | 'small'
   /**
    * Theme for the popup content. Defaults to 'dark'.
    * Set to 'auto' to inherit the current theme.
@@ -172,7 +172,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     showOnHover = false,
     showScrollbar = false,
     side,
-    size = 'medium',
+    size = 'fit-content',
     theme = 'dark',
     verticalAlign = 'bottom',
   } = props

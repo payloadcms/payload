@@ -7,12 +7,12 @@ import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { slashMenuBasicGroupWithItems } from '../../shared/slashMenu/basicGroup.js'
 import { toolbarAddDropdownGroupWithItems } from '../../shared/toolbar/addDropdownGroup.js'
 import { INSERT_HORIZONTAL_RULE_COMMAND } from '../server/nodes/HorizontalRuleNode.js'
-import { MarkdownTransformer } from './markdownTransformer.js'
+import { PAYLOAD_HORIZONTAL_RULE } from './markdownTransformer.js'
 import { $isHorizontalRuleNode, HorizontalRuleNode } from './nodes/HorizontalRuleNode.js'
 import { HorizontalRulePlugin } from './plugin/index.js'
 
 export const HorizontalRuleFeatureClient = createClientFeature({
-  markdownTransformers: [MarkdownTransformer],
+  markdownTransformers: [PAYLOAD_HORIZONTAL_RULE],
   nodes: [HorizontalRuleNode],
   plugins: [
     {

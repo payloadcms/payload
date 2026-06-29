@@ -106,7 +106,6 @@ export type LexicalNodes_47963D26 =
       | 'posts-with-field-hooks'
       | 'posts-with-column-map'
       | 'custom-id-pages'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-jobs'
       | 'payload-locked-documents'
@@ -148,7 +147,6 @@ export interface Config {
     'posts-with-hooks-import': PostsWithHooksImport;
     'posts-with-field-hooks-import': PostsWithFieldHooksImport;
     'posts-with-column-map-import': PostsWithColumnMapImport;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -185,7 +183,6 @@ export interface Config {
     'posts-with-hooks-import': PostsWithHooksImportSelect<false> | PostsWithHooksImportSelect<true>;
     'posts-with-field-hooks-import': PostsWithFieldHooksImportSelect<false> | PostsWithFieldHooksImportSelect<true>;
     'posts-with-column-map-import': PostsWithColumnMapImportSelect<false> | PostsWithColumnMapImportSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -1140,31 +1137,6 @@ export interface PostsWithColumnMapImport {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1330,10 +1302,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'custom-id-pages';
         value: string | CustomIdPage;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -2105,22 +2073,6 @@ export interface PostsWithColumnMapImportSelect<T extends boolean = true> {
   height?: T;
   focalX?: T;
   focalY?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

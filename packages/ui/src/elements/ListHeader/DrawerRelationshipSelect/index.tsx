@@ -26,9 +26,13 @@ export const DrawerRelationshipSelect = () => {
 
     return (
       <div className={`${drawerBaseClass}__select-collection-wrap`}>
-        <FieldLabel label={t('upload:selectCollectionToBrowse')} />
+        <FieldLabel
+          htmlFor={`select-collection__${drawerBaseClass}`}
+          label={t('upload:selectCollectionToBrowse')}
+        />
         <ReactSelect
           className={`${listHeaderClass}__select-collection`}
+          id={`select-collection__${drawerBaseClass}`}
           isClearable={false}
           onChange={setSelectedOption}
           options={enabledCollectionConfigs.map((coll) => ({

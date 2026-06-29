@@ -250,6 +250,10 @@ export class LexicalHelpers {
     }
   }
 
+  get bulkUploadDrawer() {
+    return this.page.locator('.bulk-upload--file-manager')
+  }
+
   get decorator() {
     return this.editor.locator('[data-lexical-decorator="true"]')
   }

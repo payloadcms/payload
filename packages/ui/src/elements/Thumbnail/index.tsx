@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'thumbnail'
 
@@ -17,7 +17,7 @@ export type ThumbnailProps = {
   doc?: Record<string, unknown>
   fileSrc?: string
   height?: number
-  imageCacheTag?: string
+  imageCacheTag?: false | string
   size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
   uploadConfig?: SanitizedCollectionConfig['upload']
   width?: number
@@ -73,7 +73,7 @@ type ThumbnailComponentProps = {
   readonly className?: string
   readonly filename: string
   readonly fileSrc: string
-  readonly imageCacheTag?: string
+  readonly imageCacheTag?: false | string
   readonly size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
 }
 export function ThumbnailComponent(props: ThumbnailComponentProps) {
