@@ -71,6 +71,7 @@ const buildLinkFieldsJSONSchema = (
     i18n,
     interfaceNameDefinitions,
     typeStringDefinitions,
+    variant,
   }: JSONSchemaArgs,
 ): JSONSchema4 => {
   const flattenedExtraFields = flattenAllFields({ fields: sanitizedFieldsWithoutText })
@@ -83,6 +84,7 @@ const buildLinkFieldsJSONSchema = (
           i18n,
           interfaceNameDefinitions,
           typeStringDefinitions,
+          variant,
         })
       : { properties: {}, required: [] }
 

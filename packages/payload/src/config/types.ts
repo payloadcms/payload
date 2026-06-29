@@ -1570,6 +1570,32 @@ export type Config = {
         }
       | false
 
+    /**
+     * Also generate a write-shaped input type (e.g. `PostInput`) next to each read type, describing
+     * what `create`/`update` accept: relationships and uploads as IDs only, `id` and `defaultValue`
+     * fields optional, and `createdAt`/`updatedAt`/`_status`/virtual/join fields removed. These are
+     * exposed on `Config['collectionsInput']` and `Config['globalsInput']`. Set `true` to turn them on.
+     *
+     * @default false
+     *
+     * @remarks
+     * Off by default. The Local API's `create`/`update` still type their `data` against the read
+     * type, so these input types aren't used internally - they're here for you to opt into, e.g. to
+     * type a form payload, a seed script, or an API client. `@payloadcms/plugin-mcp` also uses the
+     * input schema, but it builds that itself at runtime, so MCP gets the accurate write schema
+     * whether or not this flag is on.
+     *
+     * @todo We'd like to turn this on by default (or have the Local API use the input type
+     * directly), but there's a catch. When you read a document with `depth > 0`, its relationships
+     * come back as full documents rather than IDs. A strict ID-only input type would reject that and
+     * break the common "read a doc, change a field, save it back" pattern. To enable it by default,
+     * the input type would first need to accept a relationship as either an ID or the full document
+     * (which is what Payload already does at runtime), while keeping `id`, `defaultValue`, and
+     * auto-managed fields optional. Until then it stays opt-in, so we don't put a type that's
+     * stricter than the runtime on the main write path.
+     */
+    generateInputTypes?: boolean
+
     /** Filename to write the generated types to */
     outputFile?: string
 

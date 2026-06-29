@@ -1369,6 +1369,7 @@ export type {
   CollectionConfig,
   DataFromCollectionSlug,
   HookOperationType,
+  IDTypeForCollectionSlug,
   MeHook as CollectionMeHook,
   RefreshHook as CollectionRefreshHook,
   RequiredDataFromCollection,
@@ -1846,6 +1847,7 @@ export {
   fieldsToJSONSchema,
   type FieldsToJSONSchemaArgs,
   registerBlockInterface,
+  type SchemaVariant,
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
