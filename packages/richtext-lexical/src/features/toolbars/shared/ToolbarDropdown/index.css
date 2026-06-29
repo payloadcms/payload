@@ -60,7 +60,7 @@
     align-items: center;
     justify-content: center;
     width: 6px;
-    margin: 0 4px 0 2px;
+    margin: 0 var(--spacer-1) 0 calc(var(--spacer-1) / 2);
     height: 4px;
     background-color: var(--color-icon);
     mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='6' height='4' viewBox='0 0 6 4' fill='none'%3E%3Cpath d='M4.38921 0.146406C4.58445 -0.0488286 4.90098 -0.0487744 5.09624 0.146406C5.29151 0.341668 5.29151 0.658175 5.09624 0.853437L2.97515 2.97453C2.77987 3.16959 2.46332 3.16972 2.26812 2.97453L0.146049 0.853437C-0.0487219 0.6583 -0.0486443 0.341591 0.146049 0.146406C0.341285 -0.0488288 0.658788 -0.0487749 0.854057 0.146406L2.62164 1.91398L4.38921 0.146406Z' fill='black'/%3E%3C/svg%3E");
@@ -77,11 +77,7 @@
     padding: var(--spacer-2);
     min-width: var(--dropdown-min-width);
     z-index: 100;
-    box-shadow:
-      0 2px 6px 0 rgba(0, 0, 0, 0.12),
-      0 10px 16px 0 rgba(0, 0, 0, 0.08),
-      0 0 0.5px 0 rgba(0, 0, 0, 0.12),
-      0 0 0 1px rgba(0, 0, 0, 0.04);
+    box-shadow: var(--elevation-300-tooltip);
 
     .toolbar-popup__dropdown-item {
       all: unset;
@@ -101,7 +97,7 @@
       display: flex;
       align-items: center;
       gap: var(--spacer-1);
-      margin-right: -var(--spacer-3);
+      margin-inline-end: -var(--spacer-3);
 
       .text {
         overflow: hidden;
@@ -168,15 +164,15 @@
       }
 
       .btn__tooltip {
-        background-color: var(--ramp-grey-900);
-        color: var(--ramp-grey-100);
+        background-color: var(--color-bg-tooltip);
+        color: var(--color-text-ontooltip);
 
         &.tooltip--position-top::after {
-          border-top-color: var(--ramp-grey-900);
+          border-top-color: var(--color-bg-tooltip);
         }
 
         &.tooltip--position-bottom::after {
-          border-bottom-color: var(--ramp-grey-900);
+          border-bottom-color: var(--color-bg-tooltip);
         }
       }
     }
@@ -198,7 +194,7 @@
     & .toolbar-popup__dropdown-item.active::before {
       content: '';
       position: absolute;
-      left: var(--spacer-2-5);
+      inset-inline-start: var(--spacer-2-5);
       top: 50%;
       width: var(--spacer-1);
       height: var(--spacer-2);
