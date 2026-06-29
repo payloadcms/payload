@@ -167,7 +167,7 @@ export {
   formatHierarchyModalSlug,
   HierarchyModalToggler,
   useHierarchyModal,
-} from '../../elements/Hierarchy/Drawer/useHierarchyDrawer.js'
+} from '../../elements/Hierarchy/Modal/useHierarchyModal.js'
 export type {
   HierarchyDrawerProps,
   HierarchyDrawerTogglerProps,
@@ -176,7 +176,7 @@ export type {
   SelectionWithPath,
   UseHierarchyModal,
   UseHierarchyModalArgs,
-} from '../../elements/Hierarchy/Drawer/types.js'
+} from '../../elements/Hierarchy/Modal/types.js'
 export { ListSelection } from '../../views/List/ListSelection/index.js'
 export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'
 export { GroupByHeader } from '../../views/List/GroupByHeader/index.js'

@@ -4,7 +4,7 @@ import type { RelationshipFieldClientProps } from 'payload'
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useMemo } from 'react'
 
-import type { SelectionWithPath } from '../Drawer/types.js'
+import type { SelectionWithPath } from '../Modal/types.js'
 
 import { FieldDescription } from '../../../fields/FieldDescription/index.js'
 import { FieldError } from '../../../fields/FieldError/index.js'
@@ -18,7 +18,7 @@ import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { RenderCustomComponent } from '../../RenderCustomComponent/index.js'
-import { useHierarchyModal } from '../Drawer/useHierarchyDrawer.js'
+import { useHierarchyModal } from '../Modal/useHierarchyModal.js'
 import { SelectedHierarchies } from './SelectedHierarchies.js'
 import './index.css'
 

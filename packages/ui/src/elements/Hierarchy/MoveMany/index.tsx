@@ -8,7 +8,7 @@ import * as qs from 'qs-esm'
 import React, { useCallback, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { SelectionWithPath } from '../Drawer/types.js'
+import type { SelectionWithPath } from '../Modal/types.js'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentSelection } from '../../../providers/DocumentSelection/index.js'
@@ -18,7 +18,7 @@ import { requests } from '../../../utilities/api.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../../ListSelection/index.js'
 import { Translation } from '../../Translation/index.js'
-import { useHierarchyModal } from '../Drawer/useHierarchyDrawer.js'
+import { useHierarchyModal } from '../Modal/useHierarchyModal.js'
 
 export const baseClass = 'move-many'
 

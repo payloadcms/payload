@@ -2,14 +2,14 @@
 import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 
-import type { SelectionWithPath } from '../Drawer/types.js'
+import type { SelectionWithPath } from '../Modal/types.js'
 
 import { useForm, useFormFields } from '../../../forms/Form/context.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
-import { useHierarchyModal } from '../Drawer/useHierarchyDrawer.js'
+import { useHierarchyModal } from '../Modal/useHierarchyModal.js'
 import './index.css'
 
 const baseClass = 'hierarchy-button'

@@ -1,11 +1,11 @@
 @layer payload-default {
-  .dialog.hierarchy-drawer {
+  .dialog.hierarchy-modal {
     width: min(900px, calc(100vw - var(--spacer-6)));
     height: min(700px, calc(100vh - var(--spacer-6)));
     max-width: calc(100vw - var(--spacer-6));
   }
 
-  .hierarchy-drawer__content {
+  .hierarchy-modal__content {
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -14,18 +14,18 @@
     overflow: clip;
   }
 
-  .hierarchy-drawer__header-actions {
+  .hierarchy-modal__header-actions {
     display: flex;
     gap: var(--spacer-2);
   }
 
-  .dialog.hierarchy-drawer .dialog__body {
+  .dialog.hierarchy-modal .dialog__body {
     display: flex;
     flex-direction: column;
     padding: 0;
   }
 
-  .hierarchy-drawer__subheader {
+  .hierarchy-modal__subheader {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -35,7 +35,7 @@
     flex-shrink: 0;
   }
 
-  .hierarchy-drawer__subheader-left {
+  .hierarchy-modal__subheader-left {
     display: flex;
     align-items: center;
     gap: var(--spacer-1);
@@ -43,18 +43,18 @@
     color: var(--color-text);
   }
 
-  .hierarchy-drawer__subheader-right {
+  .hierarchy-modal__subheader-right {
     display: flex;
     align-items: center;
     gap: var(--spacer-2);
   }
 
-  .hierarchy-drawer__selection-info {
+  .hierarchy-modal__selection-info {
     color: var(--color-text-secondary);
   }
 
-  .hierarchy-drawer__move-to-root,
-  .hierarchy-drawer__clear-all {
+  .hierarchy-modal__move-to-root,
+  .hierarchy-modal__clear-all {
     height: auto;
     padding: 0;
     border: 0;
@@ -65,24 +65,24 @@
     text-underline-offset: 2px;
   }
 
-  .hierarchy-drawer__move-to-root:hover:not(.btn--disabled),
-  .hierarchy-drawer__clear-all:hover:not(.btn--disabled) {
+  .hierarchy-modal__move-to-root:hover:not(.btn--disabled),
+  .hierarchy-modal__clear-all:hover:not(.btn--disabled) {
     background: transparent;
     color: var(--color-text);
   }
 
-  .hierarchy-drawer__move-to-root:active:not(.btn--disabled),
-  .hierarchy-drawer__clear-all:active:not(.btn--disabled) {
+  .hierarchy-modal__move-to-root:active:not(.btn--disabled),
+  .hierarchy-modal__clear-all:active:not(.btn--disabled) {
     background: transparent;
   }
 
-  .hierarchy-drawer__columns {
+  .hierarchy-modal__columns {
     flex: 1;
     overflow: hidden;
     display: flex;
   }
 
-  .hierarchy-drawer__toggler {
+  .hierarchy-modal__toggler {
     cursor: pointer;
   }
 }

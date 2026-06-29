@@ -3,7 +3,7 @@ import type { DefaultCellComponentProps, RelationshipFieldClient } from 'payload
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { SelectionWithPath } from '../../../../Hierarchy/Drawer/types.js'
+import type { SelectionWithPath } from '../../../../Hierarchy/Modal/types.js'
 
 import { useIntersect } from '../../../../../hooks/useIntersect.js'
 import { FolderIcon } from '../../../../../icons/Folder/index.js'
@@ -13,7 +13,7 @@ import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
 import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js'
 import { Button } from '../../../../Button/index.js'
-import { useHierarchyModal } from '../../../../Hierarchy/Drawer/useHierarchyDrawer.js'
+import { useHierarchyModal } from '../../../../Hierarchy/Modal/useHierarchyModal.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
 import './index.css'
 
