@@ -79,6 +79,28 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
     Icon: drawerIcon,
   })
 
+  // Lazy-mount the drawer so its column browser doesn't eagerly fetch root items
+  // for every cell in the list view. Only mount once the user opens it.
+  const [hasMountedDrawer, setHasMountedDrawer] = useState(false)
+  const shouldOpenAfterMountRef = useRef(false)
+
+  const handleOpenDrawer = useCallback(() => {
+    if (hasMountedDrawer) {
+      openDrawer()
+      return
+    }
+    shouldOpenAfterMountRef.current = true
+    setHasMountedDrawer(true)
+  }, [hasMountedDrawer, openDrawer])
+
+  // Open the drawer once it has mounted (state update from handleOpenDrawer).
+  useEffect(() => {
+    if (hasMountedDrawer && shouldOpenAfterMountRef.current) {
+      shouldOpenAfterMountRef.current = false
+      openDrawer()
+    }
+  }, [hasMountedDrawer, openDrawer])
+
   // Fetch relationship data when visible
   useEffect(() => {
     // Reset tracking if data changed
@@ -210,12 +232,12 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
         icon={displayIcon}
         iconPosition="left"
         margin={false}
-        onClick={openDrawer}
+        onClick={handleOpenDrawer}
         size="medium"
       >
         {isLoading ? `${t('general:loading')}...` : displayText}
       </Button>
-      {hierarchyCollectionSlug && (
+      {hierarchyCollectionSlug && hasMountedDrawer && (
         <HierarchyDrawer
           hasMany={hasMany}
           initialSelections={initialSelections}

@@ -65,9 +65,9 @@ describe('Upload', () => {
 
     // create a jpg upload
     await page
-      .locator('.file-field__upload input[type="file"]')
+      .locator('.file-manager input[type="file"]')
       .setInputFiles(path.resolve(dirname, './collections/Upload/payload.jpg'))
-    await expect(page.locator('.file-field .file-field__filename')).toHaveValue('payload.jpg')
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('payload.jpg')
     await saveDocAndAssert(page)
   }
 
@@ -78,7 +78,7 @@ describe('Upload', () => {
   test('should upload files from remote URL', async () => {
     await page.goto(url.create)
 
-    const pasteURLButton = page.locator('.file-field__upload button', {
+    const pasteURLButton = page.locator('.file-manager__upload button', {
       hasText: 'Paste URL',
     })
     await pasteURLButton.click()
@@ -86,17 +86,17 @@ describe('Upload', () => {
     const remoteImage =
       'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg'
 
-    const inputField = page.locator('.file-field__upload .file-field__remote-file')
+    const inputField = page.locator('#upload-paste-url #field-url')
     await inputField.fill(remoteImage)
 
-    const addFileButton = page.locator('.file-field__add-file')
+    const addFileButton = page.locator('#upload-paste-url button', { hasText: 'Add file' })
     await addFileButton.click()
 
-    await expect(page.locator('.file-field .file-field__filename')).toHaveValue('og-image.jpg')
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('og-image.jpg')
 
     await saveDocAndAssert(page)
 
-    await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
+    await expect(page.locator('.file-preview__thumbnail img')).toHaveAttribute(
       'src',
       /\/api\/uploads\/file\/og-image\.jpg(\?.*)?$/,
     )
@@ -105,7 +105,7 @@ describe('Upload', () => {
   test('should disable save button during upload progress from remote URL', async () => {
     await page.goto(url.create)
 
-    const pasteURLButton = page.locator('.file-field__upload button', {
+    const pasteURLButton = page.locator('.file-manager__upload button', {
       hasText: 'Paste URL',
     })
     await pasteURLButton.click()
@@ -113,7 +113,7 @@ describe('Upload', () => {
     const remoteImage =
       'https://raw.githubusercontent.com/payloadcms/website/refs/heads/main/public/images/og-image.jpg'
 
-    const inputField = page.locator('.file-field__upload .file-field__remote-file')
+    const inputField = page.locator('#upload-paste-url #field-url')
     await inputField.fill(remoteImage)
 
     // Intercept the upload request
@@ -122,7 +122,7 @@ describe('Upload', () => {
       (route) => setTimeout(() => route.continue(), 2000), // Artificial 2-second delay
     )
 
-    const addFileButton = page.locator('.file-field__add-file')
+    const addFileButton = page.locator('#upload-paste-url button', { hasText: 'Add file' })
     await addFileButton.click()
 
     const submitButton = page.locator('.form-submit .btn')
@@ -140,7 +140,7 @@ describe('Upload', () => {
   // test that the image renders
   test('should render uploaded image', async () => {
     await uploadImage()
-    await expect(page.locator('.file-field .file-details img')).toHaveAttribute(
+    await expect(page.locator('.file-preview__thumbnail img')).toHaveAttribute(
       'src',
       /\/api\/uploads\/file\/payload-1\.jpg(\?.*)?$/,
     )
@@ -154,11 +154,11 @@ describe('Upload', () => {
     await openDocDrawer({ page, selector: '#field-media .upload__createNewToggler' })
 
     await page
-      .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
+      .locator('[id^=doc-drawer_uploads_1_] input[type="file"]')
       .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
 
     await expect(
-      page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
+      page.locator('[id^=doc-drawer_uploads_1_] #field-filemanager-filename'),
     ).toHaveValue('payload.png')
 
     await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
@@ -179,7 +179,11 @@ describe('Upload', () => {
     await saveDocAndAssert(page)
   })
 
-  test('should upload after editing image inside a document drawer', async () => {
+  // Skip until the crop tool is reworked to v4 design. The redesigned upload UI removed pre-save
+  // image editing — cropping now happens after save via the file toolbar's "Edit Image" button
+  // (see test/uploads `should resize image after crop`), and the create doc-drawer closes on save,
+  // so this drawer-based "edit before save" flow needs reworking once the v4 crop tool lands.
+  test.skip('should upload after editing image inside a document drawer', async () => {
     await uploadImage()
     await wait(1000)
     // Open the media drawer and create a png upload
@@ -227,10 +231,10 @@ describe('Upload', () => {
     await wait(1000)
 
     await page
-      .locator('[id^=doc-drawer_uploads_1_] .file-field__upload input[type="file"]')
+      .locator('[id^=doc-drawer_uploads_1_] input[type="file"]')
       .setInputFiles(path.resolve(dirname, './uploads/payload.png'))
     await expect(
-      page.locator('[id^=doc-drawer_uploads_1_] .file-field__upload .file-field__filename'),
+      page.locator('[id^=doc-drawer_uploads_1_] #field-filemanager-filename'),
     ).toHaveValue('payload.png')
     await page.locator('[id^=doc-drawer_uploads_1_] #action-save').click()
     await expect(page.locator('.payload-toast-container')).toContainText('successfully')
@@ -273,10 +277,10 @@ describe('Upload', () => {
       await page.locator('#field-text').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.collection-edit__main'],
         page,
         testInfo,
-        include: ['.collection-edit__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -290,10 +294,10 @@ describe('Upload', () => {
       await page.locator('#field-text').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.collection-edit__main'],
         page,
         testInfo,
-        include: ['.collection-edit__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -305,8 +309,8 @@ describe('Upload', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.collection-edit__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

@@ -1,96 +1,168 @@
 @layer payload-default {
-  .edit-upload {
-    --edit-upload-cell-spacing: var(--gutter-h);
-    --edit-upload-sidebar-width: calc(350px + var(--gutter-h));
+  /* Allow the ReactCrop 9999px box-shadow overlay to escape the dialog bounds. */
+  .edit-upload__dialog {
+    overflow: visible;
+  }
+
+  .edit-upload__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: visible;
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  /* Mobile: canvas and sidebar stack in a column; the desktop two-column row is restored in the
+     media query below. */
+  .edit-upload__content {
+    --edit-upload-content-min-height: 480px;
+    --edit-upload-sidebar-width: 240px;
+
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: unset;
+  }
+
+  /* Canvas area */
+  .edit-upload__crop {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacer-4);
+    background: var(--color-bg-secondary);
+  }
+
+  .edit-upload .ReactCrop__selection-addon,
+  .edit-upload__crop-window {
     height: 100%;
+    width: 100%;
+  }
+
+  .edit-upload__focal-wrapper {
+    position: relative;
+    display: inline-flex;
+    max-height: 100%;
+    max-width: 100%;
+  }
+
+  /* Sidebar */
+  .edit-upload__sidebar {
+    flex-shrink: 0;
+    width: 100%;
+    border-inline-start: none;
+    border-top: var(--stroke-width-small) solid var(--color-border);
     display: flex;
     flex-direction: column;
   }
 
-  .edit-upload__header {
-    border-bottom: 1px solid var(--color-border);
-    padding: var(--spacer-2-5);
+  .edit-upload__section {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    padding-block-end: var(--spacer-2);
+  }
+
+  .edit-upload__section + .edit-upload__section {
+    border-top: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .edit-upload__section:last-child {
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .edit-upload__section-header {
+    display: flex;
     align-items: center;
+    justify-content: space-between;
+    height: var(--spacer-6);
+    padding-inline-start: var(--spacer-3);
+    padding-inline-end: var(--spacer-2);
   }
 
-  .edit-upload__header h2 {
-    margin: 0;
-    text-wrap: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+  .edit-upload__section-title {
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-strong-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    color: var(--color-text);
   }
 
-  [dir='rtl'] .edit-upload__actions {
-    margin-right: auto;
-    margin-left: unset;
-  }
-
-  .edit-upload__actions {
-    min-width: 350px;
-    margin-left: auto;
-    padding: var(--spacer-2) 0 var(--spacer-2) var(--spacer-4);
-    justify-content: flex-end;
+  .edit-upload__reset {
     display: flex;
-    gap: var(--spacer-3);
-    text-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-medium);
+    background: transparent;
+    color: var(--color-icon);
+    cursor: pointer;
   }
 
-  .edit-upload__toolWrap {
-    display: flex;
-    justify-content: flex-end;
-    flex: 1;
-    min-height: 0;
-    flex-direction: column-reverse;
+  .edit-upload__reset:hover {
+    background: var(--color-bg-secondary);
   }
 
-  /* ... */
+  .edit-upload__reset:focus-visible {
+    outline: var(--accessibility-outline);
+  }
+
+  .edit-upload__fieldset {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--spacer-2);
+    padding-inline-start: var(--spacer-3);
+    padding-inline-end: var(--spacer-2);
+    padding-block: var(--spacer-1);
+  }
+
+  /* Draggable focal point */
+  .edit-upload__draggable-container {
+    position: absolute;
+    inset: 0;
+    pointer-events: none; /* let clicks pass through to the image/crop layer */
+  }
+
+  .edit-upload__draggable {
+    position: absolute;
+    pointer-events: all; /* only the handle itself is interactive */
+  }
 
   .edit-upload__focalPoint {
-    /* ... */
-    border-right: none;
-    padding: var(--spacer-3) 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--spacer-5);
+    height: var(--spacer-5);
+    border-radius: 50%;
+    background: var(--color-focal-point-backdrop);
+    color: white;
+    cursor: grab;
+    transform: translate3d(-50%, -50%, 0);
+    pointer-events: all;
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
   }
-
-  /* ... */
-
-  .edit-upload__sidebar {
-    padding-left: 0;
-    border-left: 0;
-    width: 100%;
-    padding-top: var(--edit-upload-cell-spacing);
-    min-width: 0;
-  }
-
-  .edit-upload__inputsWrap {
-    flex-direction: column;
-  }
-
-  /* ... */
 
   @media (min-width: 768px) {
-    .edit-upload__inputsWrap {
+    .edit-upload__content {
       flex-direction: row;
+      min-height: var(--edit-upload-content-min-height);
     }
 
     .edit-upload__sidebar {
-      min-width: var(--edit-upload-sidebar-width);
-    }
-  }
-
-  @media (min-width: 1024px) {
-    .edit-upload {
-      --edit-upload-cell-spacing: var(--spacer-4);
-    }
-
-    .edit-upload__sidebar {
-      border-left: 1px solid var(--color-border);
-      width: unset;
-    }
-
-    .edit-upload__toolWrap {
-      flex-direction: row;
+      width: var(--edit-upload-sidebar-width);
+      border-inline-start: var(--stroke-width-small) solid var(--color-border);
+      border-top: 0;
     }
   }
 }

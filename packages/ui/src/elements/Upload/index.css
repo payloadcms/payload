@@ -6,8 +6,10 @@
     border-radius: var(--radius-small);
   }
 
+  /* Mobile: the upload row wraps; the desktop nowrap row is restored in the media query below. */
   .file-field__upload {
     display: flex;
+    position: relative;
     flex-wrap: wrap;
     justify-content: space-between;
   }
@@ -23,8 +25,8 @@
 
   .file-field__thumbnail-wrap {
     position: relative;
-    width: 50%;
     order: 1;
+    width: 50%;
 
     .thumbnail {
       position: relative;
@@ -36,24 +38,21 @@
   }
 
   .file-field__remove {
+    position: absolute;
+    top: var(--spacer-2);
+    right: var(--spacer-2);
     margin: var(--spacer-3);
     order: 2;
-    place-self: flex-start;
-  }
-
-  .file-field__file-adjustments,
-  .file-field__remote-file-wrap {
-    padding: var(--spacer-3);
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacer-2);
+    z-index: 1;
   }
 
   .file-field__file-adjustments {
     order: 3;
     border-top: 2px solid var(--color-bg-primary);
     padding: var(--spacer-2);
+    width: 100%;
+    display: flex;
+    flex-direction: column;
     gap: 0;
   }
 
@@ -61,48 +60,10 @@
     display: none;
   }
 
-  .file-field__filename,
-  .file-field__remote-file {
-    font-family: var(--font-body);
-    width: 100%;
-    border: var(--stroke-width-small) solid var(--color-border);
-    border-radius: var(--radius-small);
-    background: var(--color-bg-primary);
-    color: var(--color-text);
-    font-size: 1rem;
-    height: var(--spacer-6);
-    line-height: var(--spacer-3);
-    padding: var(--spacer-1) var(--spacer-2-5);
-    -webkit-appearance: none;
-
-    &[data-rtl='true'] {
-      direction: rtl;
-    }
-
-    &::-webkit-input-placeholder {
-      color: var(--color-text-tertiary);
-      font-weight: normal;
-      font-size: 1rem;
-    }
-
-    &:hover {
-      border-color: var(--color-border-hover);
-    }
-
-    &:focus {
-      border-color: var(--color-border-selected);
-      outline: none;
-    }
-  }
-
-  .file-field__upload-actions,
-  .file-field__add-file-wrap {
+  .file-field__upload-actions {
     display: flex;
     gap: var(--spacer-2);
     flex-wrap: wrap;
-  }
-
-  .file-field__upload-actions {
     margin-top: var(--spacer-2);
   }
 
@@ -119,13 +80,18 @@
   .file-field .dropzone {
     background-color: transparent;
     padding: var(--spacer-2-5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .file-field__dropzoneContent {
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
-    gap: var(--spacer-1);
-    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacer-2);
+    justify-content: center;
     width: 100%;
   }
 
@@ -148,22 +114,118 @@
     color: var(--color-text-tertiary);
   }
 
+  .file-field--side-panel {
+    position: relative;
+    flex: 1 0 0;
+    width: 100%;
+    min-height: 400px;
+    margin-bottom: 0;
+    border-radius: 0;
+    background: var(--color-bg-secondary);
+  }
+
+  /* Mobile: the side panel stacks its preview above the upload; the desktop row and full-height
+     sticky panel are restored in the media query below. */
+  .file-field__side-panel {
+    position: static;
+    height: auto;
+    min-height: 400px;
+  }
+
+  .file-field__side-panel__content {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .file-field__side-panel__preview {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 0;
+    min-width: 0;
+    height: auto;
+    background: var(--color-bg-secondary);
+    padding: var(--spacer-3) var(--spacer-4);
+    gap: var(--spacer-3);
+    overflow: hidden;
+  }
+
+  .file-field__side-panel__info {
+    display: flex;
+    align-items: center;
+    align-self: center;
+    gap: var(--spacer-2);
+    flex-shrink: 0;
+    min-width: 0;
+  }
+
+  .file-field__side-panel__info-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--spacer-2);
+    height: 16px;
+    border-radius: var(--radius-small);
+    background: var(--color-bg-secondary-hover);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    color: var(--color-text);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .file-field__side-panel__info-meta {
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .file-field__side-panel__image-wrap {
+    flex: 1 0 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    .thumbnail {
+      max-width: 100%;
+      max-height: 100%;
+
+      img,
+      svg {
+        object-fit: scale-down;
+      }
+    }
+  }
+
+  .file-field__side-panel__upload {
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    background: var(--color-bg-secondary);
+    padding: var(--spacer-4);
+    height: 100%;
+
+    .dropzone {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
   @media (min-width: 768px) {
     .file-field__upload {
-      flex-wrap: nowrap;
+      flex-wrap: unset;
       justify-content: unset;
-    }
-
-    .file-field__remove {
-      margin: var(--spacer-4) var(--spacer-3) var(--spacer-3) 0;
-      order: unset;
-    }
-
-    .file-field__file-adjustments {
-      order: unset;
-      border-top: none;
-      padding: var(--spacer-3);
-      gap: var(--spacer-2);
     }
 
     .file-field__thumbnail-wrap {
@@ -171,8 +233,40 @@
       width: 150px;
     }
 
+    .file-field__remove {
+      margin: 0;
+      order: unset;
+    }
+
+    .file-field__file-adjustments {
+      order: unset;
+      border-top: 0;
+      padding: var(--spacer-3);
+      gap: var(--spacer-2);
+    }
+
     .file-field__edit {
-      display: unset;
+      display: flex;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .file-field--side-panel {
+      min-height: max(500px, calc(100dvh - var(--doc-controls-height) - var(--app-header-height)));
+    }
+
+    .file-field__side-panel {
+      position: unset;
+      height: unset;
+      min-height: unset;
+    }
+
+    .file-field__side-panel__content {
+      flex-direction: row;
+    }
+
+    .file-field__side-panel__preview {
+      height: unset;
     }
   }
 }
