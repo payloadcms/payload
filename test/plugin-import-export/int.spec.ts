@@ -1,4 +1,4 @@
-import type { CollectionSlug, Payload } from 'payload'
+import type { AuthenticatedUser, CollectionSlug, Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -18,7 +18,7 @@ import { customIdPagesSlug, postsWithS3Slug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
-let user: any
+let user: AuthenticatedUser
 let restrictedUser: any
 
 const filename = fileURLToPath(import.meta.url)
@@ -27,13 +27,15 @@ const dirname = path.dirname(filename)
 describe('@payloadcms/plugin-import-export', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
-    user = await payload.login({
+    const loginResult = await payload.login({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
     })
+
+    user = loginResult.user!
     const userDocs = await payload.find({
       collection: 'users',
       where: {
@@ -8465,13 +8467,15 @@ describe('@payloadcms/plugin-import-export', () => {
         })
 
         // Restore the original user login state
-        user = await payload.login({
+        const loginResult = await payload.login({
           collection: 'users',
           data: {
             email: devUser.email,
             password: devUser.password,
           },
         })
+
+        user = loginResult.user!
 
         // Clean up test documents
         for (const id of createdPostIds) {
