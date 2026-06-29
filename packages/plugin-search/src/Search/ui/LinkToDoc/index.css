@@ -3,13 +3,24 @@
     margin-bottom: var(--spacing-field);
   }
 
-  .link-to-doc__label {
-    color: var(--color-text-secondary);
+  .link-to-doc__header {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    gap: var(--spacer-1);
   }
 
   .link-to-doc__url {
     overflow: hidden;
     font-weight: 600;
     text-overflow: ellipsis;
+  }
+
+  .link-to-doc__url a {
+    color: var(--color-text-secondary);
+
+    &:hover {
+      color: var(--color-text);
+    }
   }
 }

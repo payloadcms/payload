@@ -1,6 +1,6 @@
 'use client'
 
-import { CopyToClipboard, Link, useConfig, useField } from '@payloadcms/ui'
+import { CopyToClipboard, FieldLabel, Link, useConfig, useField } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
@@ -32,8 +32,8 @@ export const LinkToDocClient: React.FC = () => {
 
   return (
     <div className={baseClass}>
-      <div>
-        <span className={`label ${baseClass}__label`}>Doc URL</span>
+      <div className={`${baseClass}__header`}>
+        <FieldLabel htmlFor={baseClass} label="Doc URL" />
         <CopyToClipboard value={href} />
       </div>
       <div className={`${baseClass}__url`}>
