@@ -4,8 +4,8 @@ import {
   type PayloadRequest,
   type SelectType,
   type Sort,
-  type User,
   type TypeWithVersion,
+  type User,
   type Where,
 } from 'payload'
 

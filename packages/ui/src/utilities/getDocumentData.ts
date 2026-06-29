@@ -3,8 +3,8 @@ import {
   logError,
   type Payload,
   type PayloadRequest,
-  type User,
   type TypeWithID,
+  type User,
 } from 'payload'
 
 import { sanitizeID } from '../utilities/sanitizeID.js'
