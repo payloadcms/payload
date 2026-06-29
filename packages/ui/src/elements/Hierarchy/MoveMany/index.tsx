@@ -18,16 +18,16 @@ import { requests } from '../../../utilities/api.js'
 import { ConfirmationModal } from '../../ConfirmationModal/index.js'
 import { ListSelectionButton } from '../../ListSelection/index.js'
 import { Translation } from '../../Translation/index.js'
-import { useHierarchyDrawer } from '../Drawer/useHierarchyDrawer.js'
+import { useHierarchyModal } from '../Drawer/useHierarchyDrawer.js'
 
 export const baseClass = 'move-many'
 
 type MoveManyProps = {
-  /** Current parent ID - drawer will open expanded to this location */
+  /** Current parent ID - modal will open expanded to this location */
   currentParentID?: null | number | string
   /** The hierarchy collection slug (e.g., 'folders') */
   hierarchySlug: string
-  /** Icon to display in the hierarchy drawer */
+  /** Icon to display in the hierarchy modal */
   Icon?: React.ReactNode
   /** When multiple MoveMany components are rendered on the page, this will differentiate them */
   modalPrefix?: string
@@ -109,7 +109,7 @@ export function MoveMany({
     return parentIds?.length ? new Set(parentIds) : undefined
   }, [selections, hierarchySlug])
 
-  const [HierarchyDrawer, , { closeDrawer, openDrawer }] = useHierarchyDrawer({
+  const [HierarchyModal, , { closeModal, openModal: openHierarchyModal }] = useHierarchyModal({
     disabledIds,
     filterByCollection: requiredCollections,
     hierarchyCollectionSlug: hierarchySlug,
@@ -246,7 +246,7 @@ export function MoveMany({
       }
 
       if (!hasErrors || totalMoved > 0) {
-        closeDrawer()
+        closeModal()
         onSuccess?.()
       }
     } catch (_err) {
@@ -254,18 +254,7 @@ export function MoveMany({
     } finally {
       setDestination(null)
     }
-  }, [
-    closeDrawer,
-    destination,
-    selections,
-    parentFieldName,
-    locale,
-    api,
-    i18n,
-    t,
-    label,
-    onSuccess,
-  ])
+  }, [closeModal, destination, selections, parentFieldName, locale, api, i18n, t, label, onSuccess])
 
   if (count === 0 || !canMove) {
     return null
@@ -276,11 +265,11 @@ export function MoveMany({
       <ListSelectionButton
         aria-label={t('general:move')}
         className={`${baseClass}__toggle`}
-        onClick={openDrawer}
+        onClick={openHierarchyModal}
       >
         {t('general:move')}
       </ListSelectionButton>
-      <HierarchyDrawer
+      <HierarchyModal
         hasMany={false}
         initialSelections={currentParentID ? [currentParentID] : null}
         onMoveToRoot={handleMoveToRoot}
