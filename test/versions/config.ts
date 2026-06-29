@@ -26,6 +26,7 @@ import {
 } from './collections/DraftsWithUploadCloudStorage.js'
 import { Media } from './collections/Media.js'
 import { Media2 } from './collections/Media2.js'
+import NestedArraySelect from './collections/NestedArraySelect.js'
 import Posts from './collections/Posts.js'
 import { TextCollection } from './collections/Text.js'
 import VersionPosts from './collections/Versions.js'
@@ -56,6 +57,7 @@ export default buildConfigWithDefaults({
     AutosavePosts,
     AutosaveWithDraftButtonPosts,
     AutosaveWithMultiSelectPosts,
+    NestedArraySelect,
     AutosaveWithDraftValidate,
     DraftPosts,
     DraftsNoReadVersions,
