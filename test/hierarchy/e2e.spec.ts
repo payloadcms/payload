@@ -634,7 +634,7 @@ test.describe('Hierarchy Sidebar', () => {
     })
   })
 
-  test.describe('Column Drawer', () => {
+  test.describe('Column Modal', () => {
     let productsURL: AdminUrlUtil
     let parentFolder: { id: number | string }
     let childFolder: { id: number | string }
@@ -685,7 +685,7 @@ test.describe('Hierarchy Sidebar', () => {
       }
     })
 
-    test('should expand column drawer to show currently selected folder', async () => {
+    test('should expand column modal to show currently selected folder', async () => {
       // Navigate to the product edit page
       await page.goto(productsURL.edit(String(productWithFolder.id)))
 
@@ -698,79 +698,79 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(folderButton).toBeVisible()
       await folderButton.click()
 
-      // The drawer should open and show columns expanded to the current selection:
+      // The modal should open and show columns expanded to the current selection:
       // Column 1 (root): Parent folder visible
       // Column 2 (Parent's children): Child folder visible (and selected)
-      const drawer = page.locator('.hierarchy-drawer')
-      await expect(drawer).toBeVisible()
+      const modal = page.locator('.hierarchy-modal')
+      await expect(modal).toBeVisible()
 
       // Both folders should be visible in their respective columns
-      await expect(drawer.getByRole('button', { name: parentFolderName })).toBeVisible()
-      await expect(drawer.getByRole('button', { name: childFolderName })).toBeVisible()
+      await expect(modal.getByRole('button', { name: parentFolderName })).toBeVisible()
+      await expect(modal.getByRole('button', { name: childFolderName })).toBeVisible()
     })
 
-    test('should reset transient selections after canceling and reopening the drawer', async () => {
+    test('should reset transient selections after canceling and reopening the modal', async () => {
       await page.goto(productsURL.edit(String(productWithFolder.id)))
 
       const folderButton = page.getByRole('button', { name: childFolderName })
       await expect(folderButton).toBeVisible()
 
       await folderButton.click()
-      const drawer = page.locator('.hierarchy-drawer')
-      await expect(drawer).toBeVisible()
+      const modal = page.locator('.hierarchy-modal')
+      await expect(modal).toBeVisible()
 
-      const parentFolderItem = drawer
+      const parentFolderItem = modal
         .locator('.hierarchy-column-item', { hasText: parentFolderName })
         .first()
       await parentFolderItem.locator('.hierarchy-column-item__checkbox').click()
 
       await expect(
-        drawer.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
+        modal.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
           hasText: parentFolderName,
         }),
       ).toBeVisible()
 
-      await drawer.getByRole('button', { name: 'Cancel' }).click()
-      await expect(drawer).toBeHidden()
+      await modal.getByRole('button', { name: 'Cancel' }).click()
+      await expect(modal).toBeHidden()
 
       await folderButton.click()
-      await expect(drawer).toBeVisible()
+      await expect(modal).toBeVisible()
 
       await expect(
-        drawer.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
+        modal.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
           hasText: childFolderName,
         }),
       ).toBeVisible()
       await expect(
-        drawer.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
+        modal.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
           hasText: parentFolderName,
         }),
       ).toBeHidden()
     })
 
-    test('should reset transient expanded location after canceling and reopening the drawer', async () => {
+    test('should reset transient expanded location after canceling and reopening the modal', async () => {
       await page.goto(productsURL.edit(String(productWithFolder.id)))
 
       const folderButton = page.getByRole('button', { name: childFolderName })
       await expect(folderButton).toBeVisible()
 
       await folderButton.click()
-      const drawer = page.locator('.hierarchy-drawer')
-      await expect(drawer).toBeVisible()
+      const modal = page.locator('.hierarchy-modal')
+      await expect(modal).toBeVisible()
 
-      await expect(drawer.locator('.hierarchy-column')).toHaveCount(2)
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
 
-      await drawer.locator('.hierarchy-column-item', { hasText: childFolderName }).first().click()
+      await modal.locator('.hierarchy-column-item', { hasText: childFolderName }).first().click()
 
-      await expect(drawer.locator('.hierarchy-column')).toHaveCount(3)
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(3)
 
-      await drawer.getByRole('button', { name: 'Cancel' }).click()
-      await expect(drawer).toBeHidden()
+      await modal.getByRole('button', { name: 'Cancel' }).click()
+      await expect(modal).toBeHidden()
 
       await folderButton.click()
-      await expect(drawer).toBeVisible()
+      await expect(modal).toBeVisible()
 
-      await expect(drawer.locator('.hierarchy-column')).toHaveCount(2)
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
     })
   })
 })
