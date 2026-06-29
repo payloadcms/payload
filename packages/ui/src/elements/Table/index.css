@@ -200,16 +200,19 @@
         padding: 0;
       }
 
-      > :is(a, button) {
+      > :is(a, button, .drawer-link) {
         display: flex;
         align-items: center;
         width: 100%;
         padding: 0 var(--spacer-2-5);
         min-height: var(--spacer-5);
+      }
+
+      > :is(a, button) {
         cursor: pointer;
       }
 
-      &:first-child > :is(a, button) {
+      &:first-child > :is(a, button, .drawer-link) {
         padding-inline-start: var(--spacer-2-5);
       }
     }
