@@ -87,13 +87,12 @@ export function setupProd() {
   // write out package.json (direct deps now point at local tarballs)
   fs.writeFileSync(path.resolve(dirname, 'package.json'), JSON.stringify(packageJson, null, 2))
 
-  // This file makes test/ its own pnpm workspace root, isolating it from the monorepo (which lists
-  // `test` as a workspace package) without `--ignore-workspace` — which we cannot use, because under
-  // v11 it makes pnpm skip this file entirely (overrides and build approvals alike). v11 also ignores
-  // package.json#pnpm, so config has nowhere else to live. overrides pin @payloadcms deps to local
-  // tarballs (else transitive requests hit the unpublished in-repo beta); graphql mirrors the
-  // committed baseline; dangerouslyAllowAllBuilds keeps build scripts running under v11's strict
-  // default; verifyDepsBeforeRun disables the v11 re-install check on later `pnpm run` commands.
+  /*
+   * Make test/ its own workspace root (no `--ignore-workspace`, which v11 uses to skip this file).
+   * Since v11 ignores package.json#pnpm, all config lives here: overrides pin @payloadcms deps to
+   * local tarballs (graphql mirrors the committed baseline), dangerouslyAllowAllBuilds keeps build
+   * scripts running, and verifyDepsBeforeRun stops re-installs on later `pnpm run` commands.
+   */
   const overrides = { graphql: '16.8.1', ...allDependencies }
   const overrideLines = Object.entries(overrides).map(([name, spec]) => `  '${name}': '${spec}'`)
   const workspaceYaml = `verifyDepsBeforeRun: false\noverrides:\n${overrideLines.join('\n')}\ndangerouslyAllowAllBuilds: true\n`

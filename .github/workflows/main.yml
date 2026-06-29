@@ -350,9 +350,8 @@ jobs:
 
       - name: Store Playwright's Version
         run: |
-          # Extract the version number using a more targeted regex pattern with awk.
-          # `exit` after the first match: under pnpm v11, `pnpm ls` at the workspace root lists the
-          # dep across every workspace project, and a multi-line value breaks the GITHUB_ENV write.
+          # `exit` after the first match: v11's `pnpm ls` lists the dep across every workspace
+          # project, and a multi-line value would break the GITHUB_ENV write.
           PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2; exit}')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
@@ -480,9 +479,8 @@ jobs:
 
       - name: Store Playwright's Version
         run: |
-          # Extract the version number using a more targeted regex pattern with awk.
-          # `exit` after the first match: under pnpm v11, `pnpm ls` at the workspace root lists the
-          # dep across every workspace project, and a multi-line value breaks the GITHUB_ENV write.
+          # `exit` after the first match: v11's `pnpm ls` lists the dep across every workspace
+          # project, and a multi-line value would break the GITHUB_ENV write.
           PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2; exit}')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV

@@ -77,16 +77,12 @@ async function main() {
 
   await fs.writeFile(packageJsonPath, JSON.stringify(packageJsonObj, null, 2))
 
-  // This file makes the template its own pnpm workspace root, shielding it from the monorepo root
-  // (which lists templates/* as workspace packages) without `--ignore-workspace` — which we cannot
-  // use, because under v11 it makes pnpm skip this file entirely (overrides and allowBuilds alike).
-  // overrides pin sibling @payloadcms deps to local tarballs (else they resolve to the unpublished
-  // in-repo beta -> ERR_PNPM_NO_MATCHING_VERSION); allowBuilds (a per-package map honored by both v10
-  // and v11) keeps each template's build scripts running under v11's strict default. We enumerate
-  // rather than use dangerouslyAllowAllBuilds because the latter is mutually exclusive with the
-  // templates' package.json `onlyBuiltDependencies` (the with-vercel templates pin pnpm@10 via
-  // packageManager, which still reads that field -> ERR_PNPM_CONFIG_CONFLICT_BUILT_DEPENDENCIES).
-  // verifyDepsBeforeRun disables the v11 re-install check that would otherwise fire on later `pnpm run`.
+  /*
+   * Make the template its own workspace root (no `--ignore-workspace`, which v11 uses to skip this
+   * file entirely). `allowBuilds` is a per-package map honored by v10 and v11; we enumerate instead
+   * of `dangerouslyAllowAllBuilds` because the latter conflicts with the templates' package.json
+   * `onlyBuiltDependencies` (ERR_PNPM_CONFIG_CONFLICT_BUILT_DEPENDENCIES on the pnpm@10-pinned ones).
+   */
   await fs.writeFile(
     path.join(templatePath, 'pnpm-workspace.yaml'),
     toWorkspaceYaml({
@@ -176,10 +172,9 @@ async function runBuildWithWarningsCheck(args: {
 }
 
 /**
- * Serializes the template's standalone pnpm-workspace.yaml; quotes keys/values so scoped names and
- * file: specs stay valid. Omitting `packages` makes the template a single-package workspace root,
- * isolating it from the monorepo. `verifyDepsBeforeRun: false` stops v11 from re-installing before
- * the `pnpm run` build/generate commands.
+ * Serializes the standalone pnpm-workspace.yaml. Omitting `packages` makes the template a
+ * single-package workspace root; `verifyDepsBeforeRun: false` stops v11 re-installing before
+ * the later `pnpm run` commands. Keys/values are quoted so scoped names and file: specs stay valid.
  */
 function toWorkspaceYaml(args: {
   allowBuilds: string[]
