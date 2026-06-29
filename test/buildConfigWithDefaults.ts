@@ -175,9 +175,7 @@ export async function buildConfigWithDefaults(
   }
 
   // Auto-add the MCP plugin so every test suite exercises it. Suites that need
-  // to configure it explicitly add their own `mcpPlugin({...})` call. The
-  // plugin itself adds a default `users` collection when needed so its own
-  // auth-enabled `payload-mcp-api-keys` doesn't end up as `admin.user`.
+  // to configure it explicitly add their own `mcpPlugin({...})` call.
   const hasMcpPlugin = (config.plugins ?? []).some((p) => p.slug === '@payloadcms/plugin-mcp')
   if (!hasMcpPlugin) {
     config.plugins = [...(config.plugins ?? []), mcpPlugin({})]

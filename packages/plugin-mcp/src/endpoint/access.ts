@@ -1,144 +1,119 @@
-import type { DefaultDocumentIDType, PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, SanitizedPermissions } from 'payload'
 
-import crypto from 'crypto'
-import { UnauthorizedError } from 'payload'
+import { getAccessResults, UnauthorizedError } from 'payload'
 
-import type { AuthorizedMCP, MCPAPIKeysDoc } from '../types.js'
+import type { AuthorizedMCP, MCPItem } from '../types.js'
 
-import { getLogger } from '../utils/getLogger.js'
 import { getPluginConfig } from '../utils/getPluginConfig.js'
 
+export type GetAuthorizedMCPArgs = {
+  overrideAccess: boolean
+  req: PayloadRequest
+}
+
 /**
- * Resolves the API key (or dev-mode session) and returns the items the caller
- * may use. Denied items are dropped from the array.
+ * Resolves the MCP caller and returns the MCP surface authorized for that request.
+ *
+ * Authorization has two layers:
+ * 1. Payload collection/global permissions determine whether built-in operation tools are shown.
+ * 2. MCP `access` callbacks can further hide any configured tool, prompt, or resource.
+ *
+ * Like Payload core operations, `overrideAccess` skips both layers.
  */
-export const getAuthorizedMCP: (args: { req: PayloadRequest }) => Promise<AuthorizedMCP> = async ({
+export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<AuthorizedMCP> = async ({
+  overrideAccess,
   req,
 }) => {
-  const logger = getLogger({ payload: req.payload })
   const pluginConfig = getPluginConfig({ config: req.payload.config })
 
-  const authHeader = req.headers.get('Authorization')
-  const hasBearerToken = authHeader?.startsWith('Bearer ')
-
-  const buildAuthorized = (apiKeyDoc: MCPAPIKeysDoc): AuthorizedMCP => ({
-    items: pluginConfig.items.filter((item) => {
-      switch (item.type) {
-        case 'collectionTool':
-          return apiKeyDoc.access.collections?.[item.collectionSlug]?.[item.configKey] !== false
-        case 'globalTool':
-          return apiKeyDoc.access.globals?.[item.globalSlug]?.[item.configKey] !== false
-        case 'prompt':
-          return apiKeyDoc.access.prompts?.[item.configKey] !== false
-        case 'resource':
-          return apiKeyDoc.access.resources?.[item.configKey] !== false
-        case 'tool':
-          return apiKeyDoc.access.tools?.[item.configKey] !== false
-      }
-    }),
-    overrideAccess:
-      typeof apiKeyDoc.overrideAccess === 'boolean' ? apiKeyDoc.overrideAccess : false,
-    user: apiKeyDoc.user,
-  })
-
-  if (pluginConfig.overrideAuth) {
-    return await pluginConfig.overrideAuth({
-      getAPIKeyDoc: (overrideApiKey) => getAPIKeyDoc({ logger, overrideApiKey, pluginConfig, req }),
-      getAuthorizedMCP: ({ apiKeyDoc }) => buildAuthorized(apiKeyDoc),
+  if (pluginConfig.overrideGetAuthorizedMCP) {
+    return await pluginConfig.overrideGetAuthorizedMCP({
+      overrideAccess,
       pluginConfig,
       req,
     })
   }
 
-  if (process.env.NODE_ENV === 'development' && !hasBearerToken) {
-    logger.info('Dev mode: skipping API key check, using session user')
-    return buildAuthorized({
-      id: -1,
-      access: {},
-      overrideAccess: true,
-      user: req.user ?? null,
-    })
-  }
+  if (req.headers) {
+    const headers = new Headers(req.headers)
+    const hasAuthorization = headers.has('Authorization')
 
-  return buildAuthorized(await getAPIKeyDoc({ logger, pluginConfig, req }))
-}
+    headers.set('DisableAutologin', 'true')
+    req.user = (await req.payload.auth({ headers, req })).user
 
-const getAPIKeyDoc = async ({
-  logger,
-  overrideApiKey,
-  pluginConfig,
-  req,
-}: {
-  logger: ReturnType<typeof getLogger>
-  overrideApiKey?: string
-  pluginConfig: ReturnType<typeof getPluginConfig>
-  req: PayloadRequest
-}): Promise<MCPAPIKeysDoc> => {
-  const authHeader = req.headers.get('Authorization')
-  const hasBearerToken = authHeader?.startsWith('Bearer ')
-
-  const apiKey =
-    overrideApiKey ?? (hasBearerToken ? authHeader?.replace('Bearer ', '').trim() || null : null)
-
-  if (!apiKey) {
-    throw new UnauthorizedError()
-  }
-
-  const sha256APIKeyIndex = crypto
-    .createHmac('sha256', req.payload.secret)
-    .update(apiKey)
-    .digest('hex')
-
-  const doc = await req.payload.db.findOne<MCPAPIKeysDoc>({
-    collection: 'payload-mcp-api-keys',
-    req,
-    where: {
-      apiKeyIndex: { equals: sha256APIKeyIndex },
-    },
-  })
-
-  if (!doc || !doc.user) {
-    throw new UnauthorizedError()
-  }
-
-  logger.info('API Key is valid')
-
-  const userRef = doc.user
-  const userID =
-    typeof userRef === 'object' && userRef !== null && 'id' in userRef
-      ? userRef.id
-      : (userRef as unknown as DefaultDocumentIDType)
-
-  const user = (await req.payload.findByID({
-    id: userID,
-    collection: pluginConfig.userCollection,
-    depth: 0,
-    disableErrors: true,
-    req,
-  })) as null | TypedUser
-
-  if (!user) {
-    throw new UnauthorizedError()
-  }
-
-  try {
-    await req.payload.db.updateOne({
-      id: doc.id,
-      collection: 'payload-mcp-api-keys',
-      data: { lastUsed: new Date().toISOString() },
-      req,
-      returning: false,
-    })
-  } catch (err) {
-    logger.warn({ err, msg: 'Failed to update MCP API key last-used timestamp' })
+    if (hasAuthorization && !req.user) {
+      throw new UnauthorizedError(req.t)
+    }
   }
 
   return {
-    ...doc,
-    user: {
-      ...user,
-      _strategy: 'mcp-api-key' as const,
-      collection: pluginConfig.userCollection,
-    },
+    items: await filterMCPItems({
+      items: pluginConfig.items,
+      overrideAccess,
+      req,
+    }),
+    overrideAccess,
+    user: req.user,
+  }
+}
+
+export const filterMCPItems = async ({
+  items,
+  overrideAccess,
+  req,
+}: {
+  items: MCPItem[]
+  overrideAccess: boolean
+  req: PayloadRequest
+}): Promise<MCPItem[]> => {
+  // Match Payload core: overrideAccess bypasses access evaluation instead of
+  // forcing each access function to return true.
+  if (overrideAccess) {
+    return items
+  }
+
+  const authorizedItems: MCPItem[] = []
+
+  const permissions = await getAccessResults({ req })
+
+  for (const item of items) {
+    if (!(await checkItemAccess({ item, permissions, req }))) {
+      continue
+    }
+    authorizedItems.push(item)
+  }
+
+  return authorizedItems
+}
+
+/**
+ * Runs MCP item access callbacks
+ */
+const checkItemAccess = async ({
+  item,
+  permissions,
+  req,
+}: {
+  item: MCPItem
+  permissions?: SanitizedPermissions
+  req: PayloadRequest
+}): Promise<boolean> => {
+  switch (item.type) {
+    case 'collectionTool':
+      return (
+        !item.tool.access ||
+        (await item.tool.access({ collectionSlug: item.collectionSlug, permissions, req }))
+      )
+    case 'globalTool':
+      return (
+        !item.tool.access ||
+        (await item.tool.access({ globalSlug: item.globalSlug, permissions, req }))
+      )
+    case 'prompt':
+      return !item.prompt.access || (await item.prompt.access({ permissions, req }))
+    case 'resource':
+      return !item.resource.access || (await item.resource.access({ permissions, req }))
+    case 'tool':
+      return !item.tool.access || (await item.tool.access({ permissions, req }))
   }
 }

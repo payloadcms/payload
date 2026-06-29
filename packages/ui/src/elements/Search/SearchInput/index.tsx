@@ -37,7 +37,7 @@ export const SearchInput: React.FC<SearchInputProps> = ({
 
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter' && value.length > 0) {
+      if (e.key === 'Enter' && !e.nativeEvent.isComposing && value.length > 0) {
         onSearch(value)
       }
     },

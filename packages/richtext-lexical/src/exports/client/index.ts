@@ -60,7 +60,6 @@ export {
 export { CAN_USE_DOM } from '../../lexical/utils/canUseDOM.js'
 export { getDOMRangeRect } from '../../lexical/utils/getDOMRangeRect.js'
 export { getSelectedNode } from '../../lexical/utils/getSelectedNode.js'
-export { isHTMLElement } from '../../lexical/utils/guard.js'
 export { joinClasses } from '../../lexical/utils/joinClasses.js'
 
 export { createBlockNode } from '../../lexical/utils/markdown/createBlockNode.js'

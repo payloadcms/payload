@@ -86,6 +86,9 @@
     position: relative;
     line-height: 1;
     border-top: var(--stroke-width-small) solid var(--color-border);
+  }
+
+  .slot-table__tr--clickable {
     cursor: pointer;
 
     &:hover {

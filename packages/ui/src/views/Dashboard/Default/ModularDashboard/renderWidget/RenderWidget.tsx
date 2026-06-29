@@ -61,8 +61,8 @@ export const RenderWidget: React.FC<{
             'div',
             {
               style: {
-                background: 'var(--color-bg-danger-tertiary)',
-                border: '1px solid var(--color-border-danger)',
+                background: 'var(--theme-error-50)',
+                border: 'var(--stroke-width-small) solid var(--theme-error-200)',
                 borderRadius: '4px',
                 color: 'var(--color-text-danger)',
                 padding: '20px',

@@ -94,6 +94,7 @@
     "prepare": "husky && pnpm turbo build --filter @payloadcms/typescript-plugin",
     "prepare-run-test-against-prod": "pnpm bf && rm -rf test/packed && rm -rf test/node_modules && rm -rf app && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i --ignore-workspace && cd ..",
     "prepare-run-test-against-prod:ci": "rm -rf test/packed && rm -rf test/node_modules && rm -rf app && rm -f test/pnpm-lock.yaml && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i --ignore-workspace && cd ..",
+    "prepare-run-test-against-prod:ci:frozen": "rm -rf test/packed && rm -rf test/node_modules && rm -rf app && pnpm run script:pack --all --no-build --dest test/packed && pnpm runts test/setupProd.ts && cd test && pnpm i --frozen-lockfile --ignore-workspace && cd ..",
     "publish-prerelease": "pnpm --filter releaser publish-prerelease",
     "reinstall": "pnpm clean:all && pnpm install",
     "release": "pnpm --filter releaser release --tag beta",
@@ -219,7 +220,7 @@
       "workerd"
     ],
     "overrides": {
-      "@vercel/blob>undici": "6.24.1",
+      "@types/request>form-data": "^2.5.6",
       "amazon-cognito-identity-js>js-cookie": "^3.0.7",
       "copyfiles": "$copyfiles",
       "cross-env": "$cross-env",

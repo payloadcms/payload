@@ -1,3 +1,8 @@
+import type {
+  MultilineElementTransformer,
+  TextMatchTransformer,
+  Transformer,
+} from '@lexical/markdown'
 import type { ClientBlock } from 'payload'
 
 import {
@@ -8,12 +13,6 @@ import {
   type LexicalNodeReplacement,
   type SerializedLexicalNode,
 } from 'lexical'
-
-import type { Transformer } from '../../../../packages/@lexical/markdown/index.js'
-import type {
-  MultilineElementTransformer,
-  TextMatchTransformer,
-} from '../../../../packages/@lexical/markdown/MarkdownTransformers.js'
 
 import { extractPropsFromJSXPropsString } from '../../../../utilities/jsx/extractPropsFromJSXPropsString.js'
 import { propsToJSXString } from '../../../../utilities/jsx/jsx.js'

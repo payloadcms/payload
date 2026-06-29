@@ -26,6 +26,11 @@ export type TextInputProps = {
     autoComplete?: JSX.IntrinsicElements['input']['autoComplete']
     readOnly?: JSX.IntrinsicElements['input']['readOnly']
   }
+  /**
+   * Overrides the input `id` and label `htmlFor`. Defaults to 'field-' + path.
+   * Use to avoid duplicate IDs when two inputs share a path.
+   */
+  readonly id?: string
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
