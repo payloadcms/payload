@@ -77,7 +77,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
   const { i18n } = useTranslation()
   const editDepth = useEditDepth()
   const { uuid } = useForm()
-  const inputId = generateFieldID(path, editDepth, uuid)
+  const inputId = `${generateFieldID(path, editDepth, uuid)}-input`
 
   let valueToRender
 
@@ -117,7 +117,13 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            htmlFor={inputId}
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>

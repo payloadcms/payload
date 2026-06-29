@@ -91,7 +91,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const { code: locale } = useLocale()
   const editDepth = useEditDepth()
   const { uuid } = useForm()
-  const inputId = generateFieldID(path, editDepth, uuid)
+  const inputId = `${generateFieldID(path, editDepth, uuid)}-input`
 
   const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
     Parameters<ReactSelectAdapterProps['customProps']['onDocumentOpen']>[0]
@@ -770,7 +770,13 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel label={label} localized={localized} path={path} required={required} />
+          <FieldLabel
+            htmlFor={inputId}
+            label={label}
+            localized={localized}
+            path={path}
+            required={required}
+          />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
