@@ -33,7 +33,6 @@ overrides:
   cross-env: 'catalog:'
   dotenv: 'catalog:'
   graphql: '16.8.1'
-  'mcp-handler>@modelcontextprotocol/sdk': '1.27.1'
   react: 'catalog:'
   react-dom: 'catalog:'
   typescript: 'catalog:'
