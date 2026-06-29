@@ -661,6 +661,8 @@ Code that imported field types from `payload-types.ts` and cast through `unknown
 
 The hand-written `TypedEditorState` / `DefaultTypedEditorState` helpers (used to type rich text in converters, custom renderers, and so on) got stricter to match. `TypedEditorState` dropped the `{ [k: string]: unknown }` at the editor-state root, and a node's `children` are now the real node union at any depth — they used to fall back to the loose `SerializedLexicalNode`. Runtime data is unchanged, but narrow by `node.type` where you read nested nodes loosely.
 
+Relationship and upload node `value` - and the exported `RelationshipData` / `UploadData` types - now use each collection's own ID type instead of `number | string`. This is narrower, but it only removes an ID type that was never valid for that collection (e.g. `number` for a string-ID collection).
+
 Element nodes are now generic over their `children`, and you pass the node union into them yourself (previously `TypedEditorState` did this for you via an internal `RecursiveNodes` helper):
 
 ```diff
