@@ -185,6 +185,35 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 
 Run `npx @payloadcms/codemod --transform migrate-aliased-exports` to migrate automatically. Renamed types are imported using an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'`) so existing usages keep compiling — drop the alias and rename usages manually if you want to fully commit to the new name.
 
+### User types: `TypedUser` and `UntypedUser` removed; new `AuthenticatedUser`
+
+Payload's user types have been consolidated so each one has a clear job. Previously the public `User` type was a loose `{ [key: string]: any }` shape, the real generated type was `TypedUser`, and `ClientUser` incorrectly dropped the `collection` discriminator. The runtime auth fields `_strategy` and `_sid` were also not typed on `req.user`.
+
+There are now three types:
+
+- **`User`** — the generated type for a user of an auth-enabled collection (what `TypedUser` used to be). It's what document reads return, and what the Local API types write `data` against.
+- **`AuthenticatedUser`** — new. The signed-in user: `User` plus the runtime auth markers `_strategy` and `_sid`. This is what `req.user`, `payload.auth()`, the `me` operation, and auth strategies return.
+- **`ClientUser`** — the user as seen on the client (`useAuth().user`). Equal to `AuthenticatedUser`, and now correctly includes `collection`.
+
+**What changes:**
+
+- `TypedUser` is removed — replace it with `User`.
+- `UntypedUser` is removed — replace it with `User`.
+- `User` is no longer a loose `{ [key: string]: any }` shape; it's the precise generated user type. Code that read arbitrary properties off `User` may now need generated types or an explicit cast.
+- `req.user` is now typed `AuthenticatedUser` instead of `User`, so reading `req.user._strategy` / `req.user._sid` type-checks.
+- `ClientUser` now includes `collection` (it was always present at runtime — the old type omitted it).
+- The `user` option on Local API operations (`find`, `findByID`, `update`, `delete`, `duplicate`, `findDistinct`, the version operations, and their global equivalents) is now typed `null | User` instead of the loose `Document` (which was `any`). Passing `req.user` still works; passing an arbitrary object now type-errors.
+
+```diff
+- import type { TypedUser, UntypedUser } from 'payload'
++ import type { User, AuthenticatedUser } from 'payload'
+
+- const user: TypedUser = req.user
++ const user: AuthenticatedUser = req.user
+```
+
+These are type-only changes — there are no runtime differences.
+
 ### `next/navigation` and `next/link` replaced by framework-agnostic `RouterAdapter` hooks
 
 `@payloadcms/ui` no longer depends on `next` directly. Custom admin components (field components, custom views, plugins) that previously imported router hooks or the `Link` component from `next/*` must now import the framework-agnostic equivalents from `@payloadcms/ui`. Behavior is identical when running on Next.js — the `NextRouterAdapter` shipped by `@payloadcms/next` wires `next/navigation` hooks and `next/link` into the same context — but ui code can now also run on non-Next adapters (e.g. TanStack Start) without modification.
