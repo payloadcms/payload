@@ -46,8 +46,9 @@ type DefaultCartType = {
 export type Cart = DefaultCartType
 
 /**
- * A user with the ecommerce `cart` join field. The plugin adds `cart` to the auth collection,
- * but it is not part of the base `User` type, so plugin code reads it through this augmented shape.
+ * A user whose collection may define a reverse `cart` join. The ecommerce plugin does not add
+ * this field, but projects such as the ecommerce template can define it. Plugin code supports the
+ * join when present through this optional augmented shape.
  */
 export type UserWithCart = {
   cart?: {
