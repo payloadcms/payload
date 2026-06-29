@@ -164,16 +164,18 @@ export type { HierarchyButtonClientProps } from '../../elements/Hierarchy/DocHea
 export { HierarchyFieldClient } from '../../elements/Hierarchy/Field/index.client.js'
 export type { HierarchyFieldClientProps } from '../../elements/Hierarchy/Field/index.client.js'
 export {
-  formatHierarchyDrawerSlug,
-  HierarchyDrawerToggler,
-  useHierarchyDrawer,
+  formatHierarchyModalSlug,
+  HierarchyModalToggler,
+  useHierarchyModal,
 } from '../../elements/Hierarchy/Drawer/useHierarchyDrawer.js'
 export type {
   HierarchyDrawerProps,
   HierarchyDrawerTogglerProps,
+  HierarchyModalProps,
+  HierarchyModalTogglerProps,
   SelectionWithPath,
-  UseHierarchyDrawer,
-  UseHierarchyDrawerArgs,
+  UseHierarchyModal,
+  UseHierarchyModalArgs,
 } from '../../elements/Hierarchy/Drawer/types.js'
 export { ListSelection } from '../../views/List/ListSelection/index.js'
 export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'

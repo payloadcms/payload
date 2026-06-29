@@ -7,7 +7,7 @@ export type SelectionWithPath = {
   path: Array<{ id: number | string; title: string }>
 }
 
-export type UseHierarchyDrawerArgs = {
+export type UseHierarchyModalArgs = {
   /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
   disabledIds?: Set<number | string>
   /**
@@ -19,24 +19,23 @@ export type UseHierarchyDrawerArgs = {
   Icon?: React.ReactNode
 }
 
-export type HierarchyDrawerProps = {
+export type HierarchyModalProps = {
   readonly hasMany?: boolean
   readonly initialSelections?: (number | string)[]
   readonly onMoveToRoot?: () => void
   readonly onSave: (params: {
-    closeDrawer: () => void
+    closeModal: () => void
     selections: Map<number | string, SelectionWithPath>
   }) => void
   readonly showMoveToRoot?: boolean
 }
 
-export type HierarchyDrawerInternalProps = {
+export type HierarchyModalInternalProps = {
   /** Base filter constraint (e.g., tenant filter) to apply to all queries */
   readonly baseFilter?: null | Where
-  readonly closeDrawer: () => void
+  readonly closeModal: () => void
   /** IDs that should be disabled (e.g., items being moved can't be selected as destination) */
   readonly disabledIds?: Set<number | string>
-  readonly drawerSlug: string
   /**
    * When provided, filters hierarchy items to only show those that accept these collections.
    * Used with collectionSpecific hierarchy config.
@@ -44,30 +43,36 @@ export type HierarchyDrawerInternalProps = {
   readonly filterByCollection?: string[]
   readonly hierarchyCollectionSlug: string
   readonly Icon?: React.ReactNode
+  readonly modalSlug: string
   readonly parentFieldName: string
   readonly reopenCount?: number
   readonly useAsTitle?: string
-} & HierarchyDrawerProps
+} & HierarchyModalProps
 
-export type HierarchyDrawerTogglerProps = {
+export type HierarchyModalTogglerProps = {
   children?: React.ReactNode
   className?: string
   disabled?: boolean
-  drawerSlug?: string
+  modalSlug?: string
 } & HTMLAttributes<HTMLButtonElement>
 
-export type UseHierarchyDrawer = (args: UseHierarchyDrawerArgs) => [
-  React.FC<HierarchyDrawerProps>,
-  React.FC<Omit<HierarchyDrawerTogglerProps, 'drawerSlug'>>,
+export type UseHierarchyModal = (args: UseHierarchyModalArgs) => [
+  React.FC<HierarchyModalProps>,
+  React.FC<Omit<HierarchyModalTogglerProps, 'modalSlug'>>,
   {
-    closeDrawer: () => void
-    drawerDepth: number
-    drawerSlug: string
-    isDrawerOpen: boolean
-    openDrawer: () => void
-    toggleDrawer: () => void
+    closeModal: () => void
+    isModalOpen: boolean
+    modalDepth: number
+    modalSlug: string
+    openModal: () => void
+    toggleModal: () => void
   },
 ]
+
+// Backward-compatible aliases
+export type HierarchyDrawerProps = HierarchyModalProps
+export type HierarchyDrawerInternalProps = HierarchyModalInternalProps
+export type HierarchyDrawerTogglerProps = HierarchyModalTogglerProps
 
 // Re-export column browser types for backwards compatibility
 export type { ColumnItemData } from '../ColumnBrowser/types.js'

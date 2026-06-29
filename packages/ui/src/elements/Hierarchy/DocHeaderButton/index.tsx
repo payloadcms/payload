@@ -9,7 +9,7 @@ import { useConfig } from '../../../providers/Config/index.js'
 import { useDocumentInfo } from '../../../providers/DocumentInfo/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
-import { useHierarchyDrawer } from '../Drawer/useHierarchyDrawer.js'
+import { useHierarchyModal } from '../Drawer/useHierarchyDrawer.js'
 import './index.css'
 
 const baseClass = 'hierarchy-button'
@@ -49,7 +49,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
 
   const isHierarchyCollection = documentCollectionSlug === hierarchyCollectionSlug
 
-  // When in hierarchy collection, let the drawer use allowedCollections from context
+  // When in hierarchy collection, let the modal use allowedCollections from context
   // When in other collections, filter by that collection's slug
   // Memoize to prevent new array references on every render
   const filterByCollection = useMemo(
@@ -57,7 +57,7 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
     [isHierarchyCollection, documentCollectionSlug],
   )
 
-  const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
+  const [HierarchyModal, , { openModal }] = useHierarchyModal({
     filterByCollection,
     hierarchyCollectionSlug,
     Icon,
@@ -100,12 +100,12 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
     void fetchItemName()
   }, [currentId, hierarchyCollectionSlug, config.routes.api, config.serverURL, useAsTitle, t])
 
-  const handleDrawerSave = useCallback(
+  const handleModalSave = useCallback(
     ({
-      closeDrawer,
+      closeModal,
       selections,
     }: {
-      closeDrawer: () => void
+      closeModal: () => void
       selections: Map<number | string, SelectionWithPath>
     }) => {
       const ids = Array.from(selections.keys())
@@ -119,16 +119,16 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
         })
         setModified(true)
       }
-      closeDrawer()
+      closeModal()
     },
     [currentFieldValue?.value, dispatchField, fieldName, hasMany, setModified],
   )
 
   const handleClick = useCallback(() => {
     if (!readOnly) {
-      openDrawer()
+      openModal()
     }
-  }, [openDrawer, readOnly])
+  }, [openModal, readOnly])
 
   const label = isLoading ? `${t('general:loading')}...` : displayName
 
@@ -145,10 +145,10 @@ export const HierarchyButtonClient: React.FC<HierarchyButtonClientProps> = ({
       >
         {label}
       </Button>
-      <HierarchyDrawer
+      <HierarchyModal
         hasMany={hasMany}
         initialSelections={currentId ? [currentId] : undefined}
-        onSave={handleDrawerSave}
+        onSave={handleModalSave}
       />
     </>
   )
