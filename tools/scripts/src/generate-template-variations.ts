@@ -306,11 +306,26 @@ async function main() {
       })
     }
 
+    /*
+     * Non-workspace variants must install in isolation from the monorepo. `--ignore-workspace`
+     * can't do this under pnpm v11 (it reads the flag as "skip pnpm-workspace.yaml entirely",
+     * dropping build approvals -> ERR_PNPM_IGNORED_BUILDS). Instead drop a transient standalone
+     * workspace root carrying the templates' build allowances; it's removed before commit so the
+     * generated template ships unchanged. verifyDepsBeforeRun stops v11 re-installing before the
+     * later `pnpm generate:*`/`build` runs.
+     */
+    if (!workspace) {
+      await fs.writeFile(
+        path.join(destDir, 'pnpm-workspace.yaml'),
+        `verifyDepsBeforeRun: false\nallowBuilds:\n  'esbuild': true\n  'sharp': true\n  'unrs-resolver': true\n`,
+      )
+    }
+
     // Install packages BEFORE running any commands that load the config
     // This ensures all imports in payload.config.ts can be resolved
     log('Installing dependencies...')
 
-    execSyncSafe(`pnpm install ${workspace ? '' : '--ignore-workspace'} --no-frozen-lockfile`, {
+    execSyncSafe(`pnpm install --no-frozen-lockfile`, {
       cwd: destDir,
     })
 
@@ -356,19 +371,24 @@ async function main() {
 
     // Generate importmap
     log('Generating import map')
-    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:importmap`, {
+    execSyncSafe(`pnpm generate:importmap`, {
       cwd: destDir,
     })
 
     // Generate types
     log('Generating types')
-    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:types`, {
+    execSyncSafe(`pnpm generate:types`, {
       cwd: destDir,
     })
 
     if (shouldBuild) {
       log('Building...')
-      execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}build`, { cwd: destDir })
+      execSyncSafe(`pnpm build`, { cwd: destDir })
+    }
+
+    // Remove the transient workspace root so it isn't committed into the generated template.
+    if (!workspace) {
+      await fs.rm(path.join(destDir, 'pnpm-workspace.yaml'), { force: true })
     }
 
     // TODO: Email?
