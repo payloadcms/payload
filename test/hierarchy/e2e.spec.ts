@@ -760,11 +760,7 @@ test.describe('Hierarchy Sidebar', () => {
 
       await expect(drawer.locator('.hierarchy-column')).toHaveCount(2)
 
-      await drawer
-        .locator('.hierarchy-column-item', { hasText: childFolderName })
-        .first()
-        .locator('.hierarchy-column-item__expand-button')
-        .click()
+      await drawer.locator('.hierarchy-column-item', { hasText: childFolderName }).first().click()
 
       await expect(drawer.locator('.hierarchy-column')).toHaveCount(3)
 
