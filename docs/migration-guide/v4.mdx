@@ -187,33 +187,40 @@ Run `npx @payloadcms/codemod --transform migrate-aliased-exports` to migrate aut
 
 ### User types: `TypedUser` and `UntypedUser` removed; new `AuthenticatedUser`
 
-Payload's user types have been consolidated so each one has a clear job. Previously the public `User` type was a loose `{ [key: string]: any }` shape, the real generated type was `TypedUser`, and `ClientUser` incorrectly dropped the `collection` discriminator. The runtime auth fields `_strategy` and `_sid` were also not typed on `req.user`.
+Payload's user types have been consolidated so each one has a clear job. This completes a cleanup already planned in 3.x: `UntypedUser` was deprecated for removal in 4.0, and `TypedUser` was marked to be renamed to `User` in 4.0.
+
+Previously, the public `User` type was an alias of the loose `UntypedUser`, while `TypedUser` was the generated type for auth-enabled collections. `ClientUser` was also loose, and the runtime auth fields `_strategy` and `_sid` were not typed on `req.user`.
 
 There are now three types:
 
-- **`User`** — the generated type for a user of an auth-enabled collection (what `TypedUser` used to be). It's what document reads return, and what the Local API types write `data` against.
-- **`AuthenticatedUser`** — new. The signed-in user: `User` plus the runtime auth markers `_strategy` and `_sid`. This is what `req.user`, `payload.auth()`, the `me` operation, and auth strategies return.
-- **`ClientUser`** — the user as seen on the client (`useAuth().user`). Equal to `AuthenticatedUser`, and now correctly includes `collection`.
+- **`User`** — the generated type for a user of an auth-enabled collection (what `TypedUser` used to be). Without generated types, it falls back to a documented shape containing Payload's built-in auth fields.
+- **`AuthenticatedUser`** — `User` plus the optional runtime auth fields `_strategy` and `_sid`. This is what `req.user`, `payload.auth()`, and auth strategies return.
+- **`ClientUser`** — the user as seen on the client (`useAuth().user`) and in `me` responses. It is an alias of `AuthenticatedUser`; `_sid` is optional in the type but is not sent to the client.
+
+`ClientUser` already included `collection` through its old base type, and `collection` was already present in client responses. The old comment claiming it was server-only was incorrect. The change is that `ClientUser` now uses the generated user shape instead of a loose index signature.
 
 **What changes:**
 
 - `TypedUser` is removed — replace it with `User`.
-- `UntypedUser` is removed — replace it with `User`.
-- `User` is no longer a loose `{ [key: string]: any }` shape; it's the precise generated user type. Code that read arbitrary properties off `User` may now need generated types or an explicit cast.
-- `req.user` is now typed `AuthenticatedUser` instead of `User`, so reading `req.user._strategy` / `req.user._sid` type-checks.
-- `ClientUser` now includes `collection` (it was always present at runtime — the old type omitted it).
-- The `user` option on Local API operations (`find`, `findByID`, `update`, `delete`, `duplicate`, `findDistinct`, the version operations, and their global equivalents) is now typed `null | User` instead of the loose `Document` (which was `any`). Passing `req.user` still works; passing an arbitrary object now type-errors.
-- `UserSession.createdAt` is now optional and nullable (`Date | null | string`), to match the generated session shape
+- `UntypedUser` is removed — use `User` for a user document, `AuthenticatedUser` for a signed-in request user, or `ClientUser` in client code.
+- `User` and `ClientUser` no longer have a `{ [key: string]: any }` index signature. Custom auth-collection fields require generated types or an explicit augmented type or cast.
+- `req.user` and `payload.auth().user` are now typed as `AuthenticatedUser`, so `_strategy` and `_sid` type-check.
+- The Local API `user` option is now `User | null` instead of the loose `Document` type for collection `count`, `create`, `delete`, `duplicate`, `find`, `findByID`, `findDistinct`, and `update`; collection and global version operations; and global `findOne` and `update`.
+- `UserSession.createdAt` is now optional and nullable (`createdAt?: Date | null | string`) to match the generated session shape. Callers must handle a missing value.
+
+`AuthenticatedUser` is assignable to `User`, so passing `req.user` to Local API operations continues to work. Passing an arbitrary object now type-errors.
 
 ```diff
 - import type { TypedUser, UntypedUser } from 'payload'
-+ import type { User, AuthenticatedUser } from 'payload'
++ import type { AuthenticatedUser, User } from 'payload'
 
 - const user: TypedUser = req.user
 + const user: AuthenticatedUser = req.user
 ```
 
-These are type-only changes — there are no runtime differences.
+Use `User` for stored or read user documents. Use `AuthenticatedUser` when code specifically receives the signed-in user from `req.user`, `payload.auth()`, or an auth strategy.
+
+No fields are added to or removed from user objects at runtime. Payload also adds defensive handling for missing users, sessions, and session `createdAt` values during session handling.
 
 ### `next/navigation` and `next/link` replaced by framework-agnostic `RouterAdapter` hooks
 
