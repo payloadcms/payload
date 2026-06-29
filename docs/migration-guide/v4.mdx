@@ -203,6 +203,7 @@ There are now three types:
 - `req.user` is now typed `AuthenticatedUser` instead of `User`, so reading `req.user._strategy` / `req.user._sid` type-checks.
 - `ClientUser` now includes `collection` (it was always present at runtime — the old type omitted it).
 - The `user` option on Local API operations (`find`, `findByID`, `update`, `delete`, `duplicate`, `findDistinct`, the version operations, and their global equivalents) is now typed `null | User` instead of the loose `Document` (which was `any`). Passing `req.user` still works; passing an arbitrary object now type-errors.
+- `UserSession.createdAt` is now optional and nullable (`Date | null | string`), to match the generated session shape
 
 ```diff
 - import type { TypedUser, UntypedUser } from 'payload'

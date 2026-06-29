@@ -258,17 +258,12 @@ export interface UntypedPayloadTypes {
   locale: null | string
   /**
    * Fallback shape of a user when no types have been generated; backs the exported `User` type.
-   * A superset of every built-in field that can be read or written (e.g. read-only `collection`,
-   * write-only `password`). Not the logged-in `req.user`, which adds `_strategy`/`_sid` - see
-   * `AuthenticatedUser`.
+   * Mirrors the shape a generated `User` takes (no index signature - custom auth-collection fields
+   * require generated types), so a generated `User` stays assignable to it. A superset of every
+   * built-in field that can be read or written (e.g. read-only `collection`, write-only
+   * `password`). Not the logged-in `req.user`, which adds `_strategy`/`_sid` - see `AuthenticatedUser`.
    */
   user: {
-    /**
-     * Index signature for the untyped fallback only: when types have not been generated, custom
-     * auth-collection fields are unknown, so they must remain accessible. Generated `User` types
-     * do not carry this.
-     */
-    [key: string]: unknown
     /** Email verification token. Hidden (needs `showHiddenFields`). Only with `auth.verify`, until verified. */
     _verificationToken?: null | string
     /** Whether the email is verified. Only with `auth.verify`. */
@@ -302,7 +297,7 @@ export interface UntypedPayloadTypes {
     /** Password salt. Hidden (needs `showHiddenFields`). Only with the local strategy. */
     salt?: null | string
     /** Active login sessions. Only with `auth.useSessions` (the default). */
-    sessions?: Array<UserSession>
+    sessions?: Array<UserSession> | null
     /** When the user was last updated. Always present. */
     updatedAt: string
     /** The user's username. Only with `auth.loginWithUsername`. */

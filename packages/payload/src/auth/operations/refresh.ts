@@ -1,5 +1,5 @@
 import type { Collection } from '../../collections/config/types.js'
-import type { User } from '../../index.js'
+import type { AuthenticatedUser } from '../../index.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
@@ -68,7 +68,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
 
     const isGraphQL = pathname === config.routes.graphQL
 
-    let user = await req.payload.db.findOne<User>({
+    let user = await req.payload.db.findOne<AuthenticatedUser>({
       collection: collectionConfig.slug,
       req,
       where: { id: { equals: args.req.user.id } },
@@ -112,7 +112,7 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
       collection: collectionConfig.slug,
       depth: isGraphQL ? 0 : args.collection.config.auth.depth,
       req: args.req,
-    })) as User
+    })) as AuthenticatedUser
 
     if (user) {
       user.collection = args.req.user.collection

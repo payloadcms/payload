@@ -151,7 +151,11 @@ export type AuthenticatedUser = AuthRuntimeFields & User
  */
 export type ClientUser = AuthenticatedUser
 
-export type UserSession = { createdAt: Date | string; expiresAt: Date | string; id: string }
+export type UserSession = {
+  createdAt?: Date | null | string
+  expiresAt: Date | string
+  id: string
+}
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
   req: PayloadRequest
   token: string

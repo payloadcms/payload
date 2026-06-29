@@ -3,7 +3,7 @@ import type {
   Collection,
   DataFromCollectionSlug,
 } from '../../collections/config/types.js'
-import type { AuthCollectionSlug, User } from '../../index.js'
+import type { AuthCollectionSlug, AuthenticatedUser, User } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { AuthRuntimeFields } from '../types.js'
 
@@ -208,7 +208,7 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     collection: collectionConfig.slug,
     req,
     where: whereConstraint,
-  })) as User
+  })) as AuthenticatedUser
 
   checkLoginPermission({
     loggingInWithUsername: Boolean(canLoginWithUsername && sanitizedUsername),

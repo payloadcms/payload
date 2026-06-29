@@ -6,13 +6,12 @@ import type {
   DefaultDocumentViewConfig,
   GeneratedTypes,
   JoinQuery,
-  JsonObject,
   PaginatedDocs,
   PayloadTypesShape,
   SelectType,
   TypedCollectionSelect,
-  TypeWithID,
   TypeWithVersion,
+  UntypedPayloadTypes,
   Where,
 } from 'payload'
 
@@ -33,7 +32,6 @@ import {
   type SerializedRelationshipNode,
   type SerializedTabNode,
   type SerializedTextNode,
-  type SerializedUploadNode,
   type TypedEditorState,
   type WithDefaultNodes,
 } from '@payloadcms/richtext-lexical'
@@ -184,6 +182,15 @@ describe('Types testing', () => {
       // The collection property should be directly on the User interface, not an intersection
       expect<User>().type.toHaveProperty('collection')
       expect<User['collection']>().type.toBe<'users'>()
+    })
+
+    test('generated User is assignable to the untyped fallback user type', () => {
+      // `UntypedPayloadTypes['user']` is the fallback shape `User` resolves to when no types have
+      // been generated. A generated `User` must be assignable to it, so the type behaves the same
+      // whether or not types have been generated, and the fallback faithfully mirrors a real user.
+      type FallbackUser = UntypedPayloadTypes['user']
+
+      expect<User>().type.toBeAssignableTo<FallbackUser>()
     })
 
     test('payload operations return users with collection property', async () => {

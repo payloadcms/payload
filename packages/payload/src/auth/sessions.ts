@@ -1,7 +1,7 @@
 import { v4 as uuid } from 'uuid'
 
 import type { SanitizedCollectionConfig } from '../collections/config/types.js'
-import type { User, UserSession } from '../index.js'
+import type { AuthenticatedUser, User, UserSession } from '../index.js'
 import type { Payload, PayloadRequest } from '../types/index.js'
 
 /**
@@ -29,7 +29,7 @@ export const addSessionToUser = async ({
   collectionConfig: SanitizedCollectionConfig
   payload: Payload
   req: PayloadRequest
-  user: User
+  user: AuthenticatedUser
 }): Promise<{ sid?: string }> => {
   let sid: string | undefined
   if (collectionConfig.auth.useSessions) {

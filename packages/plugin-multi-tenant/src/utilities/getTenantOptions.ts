@@ -28,7 +28,11 @@ export const getTenantOptions = async ({
   const isOrderable = payload.collections[tenantsCollectionSlug]?.config?.orderable || false
 
   const userTenantIds = !userHasAccessToAllTenants(user)
-    ? ((user[tenantsArrayFieldName] as { [key: string]: unknown }[]) || []).map((tenantRow) => {
+    ? (
+        ((user as Record<string, unknown>)[tenantsArrayFieldName] as {
+          [key: string]: unknown
+        }[]) || []
+      ).map((tenantRow) => {
         const tenantField = tenantRow[tenantsArrayTenantFieldName]
         if (typeof tenantField === 'string' || typeof tenantField === 'number') {
           return tenantField

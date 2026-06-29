@@ -129,7 +129,7 @@ export const incrementLoginAttempts = async ({
       if (currentUser?.sessions?.length) {
         // Does not hurt also removing expired sessions
         currentUser.sessions = currentUser.sessions.filter((session) => {
-          const sessionCreatedAt = new Date(session.createdAt)
+          const sessionCreatedAt = new Date(session.createdAt ?? 0)
           const twentySecondsAgo = new Date(currentTime - 20000)
 
           // Remove sessions created within the last 20 seconds
