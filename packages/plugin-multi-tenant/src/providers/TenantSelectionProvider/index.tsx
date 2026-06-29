@@ -1,4 +1,4 @@
-import type { Payload, ServerAdapter, TypedUser } from 'payload'
+import type { Payload, ServerAdapter, User } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../../types.js'
 
@@ -13,7 +13,7 @@ type Args<ConfigType> = {
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
-  user: TypedUser
+  user: User
   userHasAccessToAllTenants: Required<
     MultiTenantPluginConfig<ConfigType>
   >['userHasAccessToAllTenants']

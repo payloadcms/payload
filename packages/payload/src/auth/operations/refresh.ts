@@ -1,4 +1,5 @@
 import type { Collection } from '../../collections/config/types.js'
+import type { User } from '../../index.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
@@ -67,11 +68,15 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
 
     const isGraphQL = pathname === config.routes.graphQL
 
-    let user = await req.payload.db.findOne<any>({
+    let user = await req.payload.db.findOne<User>({
       collection: collectionConfig.slug,
       req,
       where: { id: { equals: args.req.user.id } },
     })
+
+    if (!user) {
+      throw new Forbidden(args.req.t)
+    }
 
     const sid = args.req.user._sid
 
@@ -80,33 +85,34 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
         throw new Forbidden(args.req.t)
       }
 
-      const existingSession = user.sessions.find(({ id }: { id: number }) => id === sid)
+      const existingSession = user.sessions.find(({ id }) => id === sid)
 
-      const now = new Date()
-      const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
-      existingSession.expiresAt = new Date(now.getTime() + tokenExpInMs)
-
-      // Prevent updatedAt from being updated when only refreshing a session
-      user.updatedAt = null
+      if (existingSession) {
+        const now = new Date()
+        const tokenExpInMs = collectionConfig.auth.tokenExpiration * 1000
+        existingSession.expiresAt = new Date(now.getTime() + tokenExpInMs)
+      }
 
       await req.payload.db.updateOne({
         id: user.id,
         collection: collectionConfig.slug,
         data: {
           ...user,
+          // Prevent updatedAt from being updated when only refreshing a session
           sessions: removeExpiredSessions(user.sessions),
+          updatedAt: null,
         },
         req,
         returning: false,
       })
     }
 
-    user = await req.payload.findByID({
+    user = (await req.payload.findByID({
       id: user.id,
       collection: collectionConfig.slug,
       depth: isGraphQL ? 0 : args.collection.config.auth.depth,
       req: args.req,
-    })
+    })) as User
 
     if (user) {
       user.collection = args.req.user.collection

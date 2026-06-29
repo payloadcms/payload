@@ -1,4 +1,4 @@
-import type { SanitizedPermissions, TypedUser } from '../../index.js'
+import type { SanitizedPermissions, User } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -17,7 +17,7 @@ export type AuthArgs = {
 export type AuthResult = {
   permissions: SanitizedPermissions
   responseHeaders?: Headers
-  user: null | TypedUser
+  user: null | User
 }
 
 export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {

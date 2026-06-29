@@ -15,7 +15,7 @@ import type {
   MaybePromise,
   PayloadRequest,
   SanitizedPermissions,
-  TypedUser,
+  User,
 } from 'payload'
 
 import type { GetAuthorizedMCPArgs } from './endpoint/access.js'
@@ -308,5 +308,5 @@ export type MCPItem =
 export type AuthorizedMCP = {
   items: MCPItem[]
   overrideAccess: boolean
-  user: null | TypedUser
+  user: null | User
 }

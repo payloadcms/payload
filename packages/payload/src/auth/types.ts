@@ -1,6 +1,6 @@
 import type { DeepRequired } from 'ts-essentials'
 
-import type { CollectionSlug, GlobalSlug, Payload, TypedUser } from '../index.js'
+import type { CollectionSlug, GlobalSlug, Payload, User } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
 /**
@@ -118,28 +118,38 @@ export type SanitizedPermissions = {
   }
 }
 
-type BaseUser = {
-  collection: string
-  email?: string
-  id: number | string
-  sessions?: Array<UserSession>
-  username?: string
+/**
+ * Fields injected onto a user at authentication time. They are never stored in the database and
+ * never present on a plain document read (e.g. `payload.findByID`) - only on the authenticated
+ * user (`req.user`, login/auth/me results, auth strategies).
+ */
+export type AuthRuntimeFields = {
+  /**
+   * The session ID of the current request. Present only when sessions are enabled.
+   */
+  _sid?: string
+  /**
+   * The name of the auth strategy that authenticated the request (e.g. `local-jwt`).
+   */
+  _strategy?: string
 }
 
 /**
- * @deprecated Use `TypedUser` instead. This will be removed in 4.0.
+ * Note: AuthenticatedUser still carries the write-only `password` from `User` (always `undefined` at runtime).
+ * Stripping it cleanly isn't possible, because auth operations build the authenticated user
+ * from a read `User` doc, so a `never`-typed `password` would break those assignments
  */
-export type UntypedUser = {
-  [key: string]: any
-} & BaseUser
+/**
+ * The signed-in user: the read user plus the runtime auth markers (`_strategy`, `_sid`). This is
+ * what `req.user`, `payload.auth()`, the `me` operation, and auth strategies return.
+ */
+export type AuthenticatedUser = AuthRuntimeFields & User
 
 /**
- * `collection` is not available one the client. It's only available on the server (req.user)
- * On the client, you can access the collection via config.admin.user. Config can be accessed using the useConfig() hook
+ * The user as available on the client (`useAuth().user`). It is the authenticated user as
+ * serialized to the browser: `collection` and `_strategy` are present, `_sid` is not sent.
  */
-export type ClientUser = {
-  [key: string]: any
-} & BaseUser
+export type ClientUser = AuthenticatedUser
 
 export type UserSession = { createdAt: Date | string; expiresAt: Date | string; id: string }
 type GenerateVerifyEmailHTML<TUser = any> = (args: {
@@ -182,12 +192,7 @@ export type AuthStrategyFunctionArgs = {
 
 export type AuthStrategyResult = {
   responseHeaders?: Headers
-  user:
-    | ({
-        _strategy?: string
-        collection?: string
-      } & TypedUser)
-    | null
+  user: AuthenticatedUser | null
 }
 
 export type AuthStrategyFunction = (

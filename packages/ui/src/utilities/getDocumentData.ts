@@ -3,7 +3,7 @@ import {
   logError,
   type Payload,
   type PayloadRequest,
-  type TypedUser,
+  type User,
   type TypeWithID,
 } from 'payload'
 
@@ -17,7 +17,7 @@ type Args = {
   payload: Payload
   req?: PayloadRequest
   segments?: string[]
-  user?: TypedUser
+  user?: User
 }
 
 export const getDocumentData = async ({

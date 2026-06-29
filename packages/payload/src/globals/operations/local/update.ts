@@ -1,7 +1,6 @@
 import type { DeepPartial } from 'ts-essentials'
 
 import type {
-  Document,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -22,6 +21,7 @@ import {
   type Payload,
   type RequestContext,
   type TypedLocale,
+  type User,
 } from '../../../index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
 import { updateOperation } from '../update.js'
@@ -92,11 +92,10 @@ type BaseOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = {
    * and the global has localized fields.
    */
   unpublishAllLocales?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
 export type Options<TSlug extends GlobalSlug, TSelect extends SelectType> = BaseOptions<

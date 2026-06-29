@@ -11,7 +11,7 @@ import type {
   PopulateType,
   SelectType,
   TypedCollection,
-  TypedUser,
+  User,
   Where,
 } from 'payload'
 import type React from 'react'
@@ -1054,5 +1054,5 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
   /**
    * The current authenticated user, or null if not logged in.
    */
-  user: null | TypedUser
+  user: null | User
 }

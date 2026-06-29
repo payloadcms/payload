@@ -4,7 +4,7 @@ import {
   type PayloadRequest,
   type SelectType,
   type Sort,
-  type TypedUser,
+  type User,
   type TypeWithVersion,
   type Where,
 } from 'payload'
@@ -28,7 +28,7 @@ export const fetchVersion = async <TVersionData extends object = object>({
   overrideAccess?: boolean
   req: PayloadRequest
   select?: SelectType
-  user?: TypedUser
+  user?: User
 }): Promise<null | TypeWithVersion<TVersionData>> => {
   try {
     if (collectionSlug) {
@@ -88,7 +88,7 @@ export const fetchVersions = async <TVersionData extends object = object>({
   req: PayloadRequest
   select?: SelectType
   sort?: Sort
-  user?: TypedUser
+  user?: User
   where?: Where
 }): Promise<null | PaginatedDocs<TypeWithVersion<TVersionData>>> => {
   const where: Where = { and: [...(whereFromArgs ? [whereFromArgs] : [])] }
@@ -160,7 +160,7 @@ export const fetchLatestVersion = async <TVersionData extends object = object>({
   req: PayloadRequest
   select?: SelectType
   status: 'draft' | 'published'
-  user?: TypedUser
+  user?: User
   where?: Where
 }): Promise<null | TypeWithVersion<TVersionData>> => {
   // Get the entity config to check if drafts are enabled

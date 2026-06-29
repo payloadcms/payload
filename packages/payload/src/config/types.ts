@@ -59,8 +59,8 @@ import type {
   RegisteredPlugins,
   RequestContext,
   SelectField,
-  TypedUser,
   TypedWidget,
+  User,
   WidgetSlug,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
@@ -491,7 +491,7 @@ export type ServerProps = {
    * These methods are populated by the given framework adapter, e.g. `@payloadcms/next`.
    */
   readonly server: ServerAdapter
-  readonly user?: TypedUser
+  readonly user?: User
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
 }

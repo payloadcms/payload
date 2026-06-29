@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultDocumentIDType, TypedUser } from 'payload'
+import type { DefaultDocumentIDType, User } from 'payload'
 
 import { deepMergeSimple, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -115,7 +115,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
   const [isLoading, setIsLoading] = useState(false)
 
-  const [user, setUser] = useState<null | TypedUser>(null)
+  const [user, setUser] = useState<null | User>(null)
 
   const [addresses, setAddresses] = useState<AddressesCollection[]>()
 
@@ -664,8 +664,8 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
       }
 
       if (userData.user) {
-        setUser(userData.user as TypedUser)
-        return userData.user as TypedUser
+        setUser(userData.user as User)
+        return userData.user as User
       }
     } catch (error) {
       if (debug) {

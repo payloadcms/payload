@@ -1,4 +1,4 @@
-import type { BasePayload, TypedUser } from 'payload'
+import type { BasePayload, User } from 'payload'
 
 import { PREFERENCE_KEYS } from 'payload/shared'
 
@@ -8,7 +8,7 @@ import { getPreferences } from '../../../../../utilities/upsertPreferences.js'
 
 export async function getItemsFromPreferences(
   payload: BasePayload,
-  user: TypedUser,
+  user: User,
 ): Promise<null | WidgetItem[]> {
   const savedPreferences = await getPreferences(
     PREFERENCE_KEYS.DASHBOARD_LAYOUT,

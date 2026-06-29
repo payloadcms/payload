@@ -14,7 +14,7 @@ import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
 import type { LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
-import type { AuthStrategy, UntypedUser } from './auth/types.js'
+import type { AuthStrategy, UserSession } from './auth/types.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -256,7 +256,58 @@ export interface UntypedPayloadTypes {
     }
   }
   locale: null | string
-  user: UntypedUser
+  /**
+   * Fallback shape of a user when no types have been generated; backs the exported `User` type.
+   * A superset of every built-in field that can be read or written (e.g. read-only `collection`,
+   * write-only `password`). Not the logged-in `req.user`, which adds `_strategy`/`_sid` - see
+   * `AuthenticatedUser`.
+   */
+  user: {
+    /**
+     * Index signature for the untyped fallback only: when types have not been generated, custom
+     * auth-collection fields are unknown, so they must remain accessible. Generated `User` types
+     * do not carry this.
+     */
+    [key: string]: unknown
+    /** Email verification token. Hidden (needs `showHiddenFields`). Only with `auth.verify`, until verified. */
+    _verificationToken?: null | string
+    /** Whether the email is verified. Only with `auth.verify`. */
+    _verified?: boolean
+    /** The user's API key. Only with `auth.useAPIKey`, once enabled for this user. */
+    apiKey?: null | string
+    /** Internal lookup index for the API key. Hidden (needs `showHiddenFields`). Only with `auth.useAPIKey`. */
+    apiKeyIndex?: null | string
+    /** Slug of the auth collection this user belongs to. Always present; identifies the source collection. */
+    collection: string
+    /** When the user was created. Always present. */
+    createdAt: string
+    /** The user's email. Absent if email login is disabled via `auth.loginWithUsername`. */
+    email?: string
+    /** Whether API key auth is enabled for this user. Only with `auth.useAPIKey`. */
+    enableAPIKey?: boolean
+    /** Hashed password. Hidden (needs `showHiddenFields`). Only with the local strategy. */
+    hash?: null | string
+    /** The user's ID. Always present. */
+    id: DefaultDocumentIDType
+    /** Locked-until timestamp. Hidden (needs `showHiddenFields`). Only with `auth.maxLoginAttempts`, while locked. */
+    lockUntil?: null | string
+    /** Failed login attempt count. Hidden (needs `showHiddenFields`). Only with `auth.maxLoginAttempts`. */
+    loginAttempts?: null | number
+    /** Plain-text password. Write-only: accepted on `create`/`update`, never returned on reads. */
+    password?: null | string
+    /** Reset-token expiry. Hidden (needs `showHiddenFields`). Only after `forgotPassword`, until reset. */
+    resetPasswordExpiration?: null | string
+    /** Active password-reset token. Hidden (needs `showHiddenFields`). Only after `forgotPassword`, until reset. */
+    resetPasswordToken?: null | string
+    /** Password salt. Hidden (needs `showHiddenFields`). Only with the local strategy. */
+    salt?: null | string
+    /** Active login sessions. Only with `auth.useSessions` (the default). */
+    sessions?: Array<UserSession>
+    /** When the user was last updated. Always present. */
+    updatedAt: string
+    /** The user's username. Only with `auth.loginWithUsername`. */
+    username?: string
+  }
   widgets: {
     [slug: string]: JsonObject
   }
@@ -361,13 +412,14 @@ export type TypedLocale<T extends PayloadTypesShape = PayloadTypes> = T['locale'
 export type TypedFallbackLocale = PayloadTypes['fallbackLocale']
 
 /**
+ * The user type for an auth-enabled collection. Holds every user property - both what you read
+ * back and what you write (e.g. `password`) - in a single type.
  *
- * TypedUser is the type of the user object. This can be a union of multiple user types, if you have multiple
- * auth-enabled collections.
+ * Can be a union of several user types when you have multiple auth-enabled collections.
  *
- * @todo rename to `User` in 4.0
+ * Not the signed-in `req.user`, which also has `_strategy` and `_sid` - use `AuthenticatedUser`.
  */
-export type TypedUser = PayloadTypes['user']
+export type User = PayloadTypes['user']
 
 export type TypedAuthOperations<T extends PayloadTypesShape = PayloadTypes> = T['auth']
 
@@ -1325,7 +1377,6 @@ export type {
   SanitizedFieldPermissions,
   SanitizedGlobalPermission,
   SanitizedPermissions,
-  UntypedUser as User,
   VerifyConfig,
 } from './auth/types.js'
 export { generateImportMap } from './bin/generateImportMap/index.js'
