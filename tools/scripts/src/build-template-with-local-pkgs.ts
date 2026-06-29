@@ -4,6 +4,8 @@ import { execSync, spawn } from 'child_process'
 import fs from 'fs/promises'
 import path from 'path'
 
+import { mapTarballsToFileSpecs } from './local-package-tarballs.js'
+
 main().catch((error) => {
   console.error(error)
   process.exit(1)
@@ -33,17 +35,7 @@ async function main() {
 
   // Map every packed .tgz (produced by `script:pack --all`) to its package name and a local
   // `file:` spec, e.g. `@payloadcms/translations` -> `file:./payloadcms-translations-4.0.0.tgz`.
-  const allFiles = await fs.readdir(templatePath, { withFileTypes: true })
-  const fileSpecByPackageName = Object.fromEntries(
-    allFiles
-      .filter(
-        (file) =>
-          file.isFile() &&
-          file.name.endsWith('.tgz') &&
-          (file.name.startsWith('payload-') || file.name.startsWith('payloadcms-')),
-      )
-      .map((file) => [tgzToPackageName(file.name), `file:./${file.name}`]),
-  )
+  const fileSpecByPackageName = await mapTarballsToFileSpecs(templatePath)
 
   if (Object.keys(fileSpecByPackageName).length === 0) {
     throw new Error(
@@ -191,17 +183,4 @@ function toWorkspaceYaml(args: {
     lines.push(`  '${name}': true`)
   }
   return `${lines.join('\n')}\n`
-}
-
-/**
- * Derives a package name from a `pnpm pack` tarball filename, e.g.
- * `payload-4.0.0.tgz` -> `payload` and `payloadcms-db-mongodb-4.0.0.tgz` -> `@payloadcms/db-mongodb`.
- * pnpm names scoped tarballs `<scope>-<name>-<version>.tgz`, so the version is the first
- * hyphen-delimited segment that starts with a digit.
- */
-export function tgzToPackageName(tgzFileName: string): string {
-  const nameWithoutVersion = tgzFileName.replace(/-\d.*\.tgz$/, '')
-  return nameWithoutVersion === 'payload'
-    ? 'payload'
-    : `@payloadcms/${nameWithoutVersion.replace(/^payloadcms-/, '')}`
 }
