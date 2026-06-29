@@ -216,7 +216,7 @@ const RichTextComponent: React.FC<
           {/* Lexical may be in a drawer. We need to define another BulkUploadProvider to ensure that the bulk upload drawer
           is rendered in the correct depth (not displayed *behind* the current drawer).
           The `lexical-` prefix prevents drawer-slug collisions with non-lexical `BulkUploadProvider`s up the tree. */}
-          <BulkUploadProvider drawerSlugPrefix={`lexical-${path}`}>
+          <BulkUploadProvider modalSlugPrefix={`lexical-${path}`}>
             <LexicalProvider
               composerKey={pathWithEditDepth}
               editorConfig={editorConfig}

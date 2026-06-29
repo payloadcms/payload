@@ -130,9 +130,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { closeModal } = useModal()
   const {
     collectionSlug,
-    drawerSlug,
     initialFiles,
     initialForms,
+    modalSlug: drawerSlug,
     onSuccess,
     parentID,
     setInitialFiles,

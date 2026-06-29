@@ -88,7 +88,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
   })
 
   const {
-    drawerSlug: bulkUploadDrawerSlug,
+    modalSlug: bulkUploadModalSlug,
     setCollectionSlug,
     setInitialForms,
     setOnCancel,
@@ -111,7 +111,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
       })),
     ])
 
-    if (!isModalOpen(bulkUploadDrawerSlug)) {
+    if (!isModalOpen(bulkUploadModalSlug)) {
       if (!enabledCollectionSlugs.length || !enabledCollectionSlugs[0]) {
         return
       }
@@ -163,7 +163,7 @@ export const UploadPlugin: PluginComponent<UploadFeaturePropsClient> = ({ client
         })
       })
 
-      openModal(bulkUploadDrawerSlug)
+      openModal(bulkUploadModalSlug)
     }
   })
 
