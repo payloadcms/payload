@@ -1,0 +1,15 @@
+@layer payload-default {
+  .link-to-doc {
+    margin-bottom: var(--spacing-field);
+  }
+
+  .link-to-doc__label {
+    color: var(--color-text-secondary);
+  }
+
+  .link-to-doc__url {
+    overflow: hidden;
+    font-weight: 600;
+    text-overflow: ellipsis;
+  }
+}
