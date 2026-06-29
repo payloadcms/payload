@@ -249,6 +249,9 @@ export const renderListView = async (
   }
 
   const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
+  const hierarchyConfig =
+    typeof collectionConfig.hierarchy === 'object' ? collectionConfig.hierarchy : undefined
+  const useAsTitle = hierarchyConfig?.titleField || collectionConfig.admin.useAsTitle || 'id'
 
   const columns = getColumns({
     clientConfig,
@@ -373,7 +376,7 @@ export const renderListView = async (
         payload: req.payload,
         query,
         req,
-        useAsTitle: collectionConfig.admin.useAsTitle,
+        useAsTitle,
         viewType,
       }))
     }

@@ -72,6 +72,63 @@ describe('Hierarchy', () => {
       expect(slugField).toBeDefined()
       expect(titleField).toBeDefined()
     })
+
+    it('should set useAsTitle to path field when usePathAsTitle is enabled', () => {
+      const foldersCollection = payload.collections.folders.config
+
+      expect(foldersCollection.hierarchy).not.toBe(false)
+      if (foldersCollection.hierarchy !== false) {
+        // eslint-disable-next-line vitest/no-conditional-expect
+        expect(foldersCollection.hierarchy.admin.usePathAsTitle).toBe(true)
+      }
+
+      // admin.useAsTitle should be overridden to the virtual title path field
+      expect(foldersCollection.admin.useAsTitle).toBe('_h_titlePath')
+    })
+  })
+
+  describe('usePathAsTitle', () => {
+    beforeEach(async () => {
+      await payload.delete({ collection: 'folders', where: {} })
+    })
+
+    afterEach(async () => {
+      await payload.delete({ collection: 'folders', where: {} })
+    })
+
+    it('should automatically compute _h_titlePath on read without context flag', async () => {
+      const parent = await payload.create({
+        collection: 'folders',
+        data: { name: 'General' },
+      })
+
+      const child = await payload.create({
+        collection: 'folders',
+        data: { name: 'Subfolder', parentFolder: parent.id },
+      })
+
+      // Fetch without context.hierarchy.computePaths — should still compute because usePathAsTitle=true
+      const result = await payload.findByID({
+        id: child.id,
+        collection: 'folders',
+      })
+
+      expect(result._h_titlePath).toBe('General > Subfolder')
+    })
+
+    it('should set _h_titlePath to document title for root documents', async () => {
+      const root = await payload.create({
+        collection: 'folders',
+        data: { name: 'Root Folder' },
+      })
+
+      const result = await payload.findByID({
+        id: root.id,
+        collection: 'folders',
+      })
+
+      expect(result._h_titlePath).toBe('Root Folder')
+    })
   })
 
   describe('Tree Data Generation', () => {

@@ -218,6 +218,7 @@ export const Folders: CollectionConfig = {
           path: '/components/ColorCircleIcon.tsx#ColorCircleIcon',
         },
       },
+      usePathAsTitle: true,
     },
     collectionSpecific: { fieldName: 'allowedTypes' },
     parentFieldName: 'parentFolder',

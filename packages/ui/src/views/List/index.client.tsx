@@ -101,6 +101,11 @@ export function DefaultListView(props: ListViewClientProps) {
   const { modalSlug: bulkUploadModalSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
+  const hierarchyConfig =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy
+      : undefined
+  const useAsTitle = hierarchyConfig?.titleField || collectionConfig?.admin?.useAsTitle || 'id'
 
   const { labels, upload } = collectionConfig
 
@@ -288,7 +293,7 @@ export function DefaultListView(props: ListViewClientProps) {
                       label: related.label,
                     }),
                   )}
-                  useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+                  useAsTitle={useAsTitle}
                 />
                 <DocumentListSelection
                   disableBulkDelete={disableBulkDelete}

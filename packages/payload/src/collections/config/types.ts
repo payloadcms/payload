@@ -368,6 +368,13 @@ export type FoldersConfig = {
     injectSidebarTab?: boolean
     treeLimit?: number
     useHeaderButton?: boolean
+    /**
+     * When true, overrides admin.useAsTitle to show the full ancestor path
+     * (e.g. "Root Folder > Subfolder > My Folder") in the document header and
+     * relationship pills instead of just the folder's own name.
+     * @default false
+     */
+    usePathAsTitle?: boolean
   }
   collectionSpecific?:
     | {
