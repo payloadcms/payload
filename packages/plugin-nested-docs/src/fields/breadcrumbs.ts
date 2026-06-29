@@ -6,6 +6,12 @@ export const createBreadcrumbsField = (
 ): Field => ({
   name: 'breadcrumbs',
   type: 'array',
+  labels: {
+    // @ts-expect-error - translations are not typed in plugins yet
+    plural: ({ t }) => t('plugin-nested-docs:breadcrumbsPlural'),
+    // @ts-expect-error - translations are not typed in plugins yet
+    singular: ({ t }) => t('plugin-nested-docs:breadcrumbsSingular'),
+  },
   localized: true,
   ...(overrides || {}),
   admin: {
@@ -19,6 +25,8 @@ export const createBreadcrumbsField = (
       admin: {
         disabled: true,
       },
+      // @ts-expect-error - translations are not typed in plugins yet
+      label: ({ t }) => t('plugin-nested-docs:doc'),
       maxDepth: 0,
       relationTo,
     },
@@ -31,7 +39,8 @@ export const createBreadcrumbsField = (
           admin: {
             width: '50%',
           },
-          label: 'URL',
+          // @ts-expect-error - translations are not typed in plugins yet
+          label: ({ t }) => t('plugin-nested-docs:url'),
         },
         {
           name: 'label',
@@ -39,6 +48,8 @@ export const createBreadcrumbsField = (
           admin: {
             width: '50%',
           },
+          // @ts-expect-error - translations are not typed in plugins yet
+          label: ({ t }) => t('plugin-nested-docs:label'),
         },
       ],
     },
