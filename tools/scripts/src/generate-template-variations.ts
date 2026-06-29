@@ -310,14 +310,18 @@ async function main() {
      * Non-workspace variants must install in isolation from the monorepo. `--ignore-workspace`
      * can't do this under pnpm v11 (it reads the flag as "skip pnpm-workspace.yaml entirely",
      * dropping build approvals -> ERR_PNPM_IGNORED_BUILDS). Instead drop a transient standalone
-     * workspace root carrying the templates' build allowances; it's removed before commit so the
-     * generated template ships unchanged. verifyDepsBeforeRun stops v11 re-installing before the
-     * later `pnpm generate:*`/`build` runs.
+     * workspace root; it's removed before commit so the generated template ships unchanged.
+     * dangerouslyAllowAllBuilds runs every dependency's build script: this is throwaway generation
+     * tooling, not a shipped config, so there's no allowlist to drift out of sync with the templates'
+     * deps (e.g. the d1 variant's `workerd`). The install always runs under v11 here — the vercel
+     * variants' pnpm@10 packageManager pin is added after install — so package.json#pnpm is ignored
+     * and dangerouslyAllowAllBuilds can't conflict with its onlyBuiltDependencies. verifyDepsBeforeRun
+     * stops v11 re-installing before the later `pnpm generate:*`/`build` runs.
      */
     if (!workspace) {
       await fs.writeFile(
         path.join(destDir, 'pnpm-workspace.yaml'),
-        `verifyDepsBeforeRun: false\nallowBuilds:\n  'esbuild': true\n  'sharp': true\n  'unrs-resolver': true\n`,
+        `verifyDepsBeforeRun: false\ndangerouslyAllowAllBuilds: true\n`,
       )
     }
 
