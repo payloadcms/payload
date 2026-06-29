@@ -98,7 +98,12 @@ const toAdminPageMetadata = (meta: MetaConfig): AdminPageMetadata => {
   return {
     description: typeof meta.description === 'string' ? meta.description : undefined,
     icons: icons?.length ? icons : undefined,
-    keywords: typeof keywords === 'string' ? keywords : Array.isArray(keywords) ? keywords.join(', ') : undefined,
+    keywords:
+      typeof keywords === 'string'
+        ? keywords
+        : Array.isArray(keywords)
+          ? keywords.join(', ')
+          : undefined,
     openGraph: og
       ? {
           description: typeof og.description === 'string' ? og.description : undefined,
@@ -215,6 +220,11 @@ export const loadAdminPageRSC = createServerFn({ method: 'GET' })
         notFound,
         params: Promise.resolve({ segments }),
         redirect,
+        // The TanStack root layout renders on the client and can't resolve the
+        // config's `admin.components.providers` from the import map, so nest them
+        // around the server-rendered view here (Next does this in its server
+        // layout instead).
+        renderCustomProviders: true,
         searchParams: Promise.resolve(searchParams),
       })
 

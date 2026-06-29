@@ -114,7 +114,7 @@ export const ImportPreview: React.FC = () => {
           if (fileField?.value && fileField.value instanceof File) {
             // File is being uploaded, read its contents
             const arrayBuffer = await fileField.value.arrayBuffer()
-            const base64 = Buffer.from(arrayBuffer).toString('base64')
+            const base64 = arrayBufferToBase64(arrayBuffer)
             fileData = base64
           } else if (url) {
             // File has been saved, fetch from URL
@@ -123,7 +123,7 @@ export const ImportPreview: React.FC = () => {
               throw new Error('Failed to fetch file')
             }
             const arrayBuffer = await response.arrayBuffer()
-            const base64 = Buffer.from(arrayBuffer).toString('base64')
+            const base64 = arrayBufferToBase64(arrayBuffer)
             fileData = base64
           }
 
@@ -648,4 +648,20 @@ export const ImportPreview: React.FC = () => {
       )}
     </div>
   )
+}
+
+/**
+ * Encodes an ArrayBuffer as base64 using browser-native APIs. `Buffer` is a Node
+ * global that Next.js polyfills in the browser, but Vite-based adapters (e.g.
+ * TanStack Start) do not, so this client component must avoid it.
+ */
+function arrayBufferToBase64(arrayBuffer: ArrayBuffer): string {
+  const bytes = new Uint8Array(arrayBuffer)
+  let binary = ''
+  // Chunk to stay within argument-count limits of String.fromCharCode for large files.
+  const chunkSize = 0x8000
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize))
+  }
+  return btoa(binary)
 }

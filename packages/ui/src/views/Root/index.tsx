@@ -20,6 +20,7 @@ import React from 'react'
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
 import { PageConfigProvider } from '../../exports/client/index.js'
+import { NestProviders } from '../../layouts/Root/NestProviders.js'
 import { DefaultTemplate } from '../../templates/Default/index.js'
 import { MinimalTemplate } from '../../templates/Minimal/index.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
@@ -49,6 +50,15 @@ export type RenderRootArgs = {
   params: Promise<{ segments: string[] }>
   /** Framework redirect implementation (e.g. next/navigation redirect). Called before req is available. */
   redirect: (url: string) => never
+  /**
+   * Wrap the rendered admin view with the config's `admin.components.providers`
+   * (via {@link NestProviders}). Next.js renders these in its server layout
+   * (`@payloadcms/ui` `RootLayout`), so it leaves this `false`. Adapters whose
+   * root layout runs on the client (e.g. TanStack Start) can't resolve provider
+   * components from the import map there, so they opt in here to nest them
+   * around the server-rendered view instead.
+   */
+  renderCustomProviders?: boolean
   searchParams: Promise<{ [key: string]: string | string[] }>
 }
 
@@ -60,6 +70,7 @@ export const renderRoot = async ({
   notFound,
   params: paramsPromise,
   redirect,
+  renderCustomProviders = false,
   searchParams: searchParamsPromise,
 }: RenderRootArgs) => {
   const config = await configPromise
@@ -336,7 +347,9 @@ export const renderRoot = async ({
     } satisfies AdminViewServerPropsOnly,
   })
 
-  return (
+  const customProviders = config.admin?.components?.providers
+
+  const tree = (
     <PageConfigProvider config={clientConfig}>
       {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
       {templateType === 'minimal' && (
@@ -370,4 +383,24 @@ export const renderRoot = async ({
       )}
     </PageConfigProvider>
   )
+
+  if (renderCustomProviders && Array.isArray(customProviders) && customProviders.length > 0) {
+    return (
+      <NestProviders
+        importMap={importMap}
+        providers={customProviders}
+        serverProps={{
+          i18n: req.i18n,
+          payload: req.payload,
+          permissions,
+          server: req.server,
+          user: req.user,
+        }}
+      >
+        {tree}
+      </NestProviders>
+    )
+  }
+
+  return tree
 }
