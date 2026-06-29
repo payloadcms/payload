@@ -81,13 +81,13 @@ async function main() {
   // (which lists templates/* as workspace packages) without `--ignore-workspace` — which we cannot
   // use, because under v11 it makes pnpm skip this file entirely (overrides and allowBuilds alike).
   // overrides pin sibling @payloadcms deps to local tarballs (else they resolve to the unpublished
-  // in-repo beta -> ERR_PNPM_NO_MATCHING_VERSION); allowBuilds keeps the template's build scripts
-  // running under v11's strict default; verifyDepsBeforeRun disables the v11 re-install check that
-  // would otherwise fire on the later `pnpm run` commands.
+  // in-repo beta -> ERR_PNPM_NO_MATCHING_VERSION); dangerouslyAllowAllBuilds keeps every template's
+  // build scripts (sharp, esbuild, unrs-resolver, plus the plugin template's mongodb-memory-server
+  // and @swc/core) running under v11's strict default without enumerating each one; verifyDepsBeforeRun
+  // disables the v11 re-install check that would otherwise fire on the later `pnpm run` commands.
   await fs.writeFile(
     path.join(templatePath, 'pnpm-workspace.yaml'),
     toWorkspaceYaml({
-      allowBuilds: ['esbuild', 'sharp', 'unrs-resolver'],
       overrides: fileSpecByPackageName,
     }),
   )
@@ -177,19 +177,12 @@ async function runBuildWithWarningsCheck(args: {
  * isolating it from the monorepo. `verifyDepsBeforeRun: false` stops v11 from re-installing before
  * the `pnpm run` build/generate commands.
  */
-function toWorkspaceYaml(args: {
-  allowBuilds: string[]
-  overrides: Record<string, string>
-}): string {
-  const { allowBuilds, overrides } = args
+function toWorkspaceYaml(args: { overrides: Record<string, string> }): string {
+  const { overrides } = args
 
-  const lines = ['verifyDepsBeforeRun: false', 'overrides:']
+  const lines = ['verifyDepsBeforeRun: false', 'dangerouslyAllowAllBuilds: true', 'overrides:']
   for (const [name, spec] of Object.entries(overrides)) {
     lines.push(`  '${name}': '${spec}'`)
-  }
-  lines.push('allowBuilds:')
-  for (const name of allowBuilds) {
-    lines.push(`  ${name}: true`)
   }
   return `${lines.join('\n')}\n`
 }
