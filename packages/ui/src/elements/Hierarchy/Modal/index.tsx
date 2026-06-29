@@ -335,14 +335,14 @@ export const HierarchyModal: React.FC<HierarchyModalInternalProps> = (props) => 
   const modalContent = useMemo(
     () => (
       <HierarchyModalContent
+        key={reopenCount}
         {...props}
         columnBrowserRef={columnBrowserRef}
-        key={reopenCount}
         onCreateNew={handleCreateNew}
         ref={modalContentRef}
       />
     ),
-    [handleCreateNew, props],
+    [handleCreateNew, props, reopenCount],
   )
 
   return (
