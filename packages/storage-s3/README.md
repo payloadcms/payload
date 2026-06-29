@@ -18,6 +18,31 @@ pnpm add @payloadcms/storage-s3
 - When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client. You must allow CORS PUT method for the bucket to your website.
 - Configure `signedDownloads` (either globally of per-collection in `collections`) to use [presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html) for files downloading. This can improve performance for large files (like videos) while still respecting your access control. Additionally, with `signedDownloads.shouldUseSignedURL` you can specify a condition whether Payload should use a presigned URL, if you want to use this feature only for specific files.
 
+### Client uploads and file size limits
+
+When `clientUploads` is enabled, files are uploaded directly from the browser to S3. This bypasses server/Vercel request-body size limits, but **Payload still enforces** `upload.limits.fileSize` from your Payload config on the signed-URL endpoints (both single-part and multipart).
+
+Raise the global limit to match your largest expected upload:
+
+```ts
+export default buildConfig({
+  upload: {
+    limits: {
+      fileSize: 7 * 1024 * 1024 * 1024, // 7 GiB in bytes
+    },
+  },
+  // ...
+})
+```
+
+To disable the signer-side cap entirely, set `fileSize: Infinity` (treated as no limit by the S3 adapter).
+
+**Multipart routing:** The client uses a single presigned `PutObject` URL for files up to **5 GiB** (the S3 single-request limit). Files **larger than 5 GiB** automatically use S3 multipart upload (`initiateMultipart` → part uploads → `completeMultipart`). Multipart does not bypass `upload.limits.fileSize`—you must raise that limit for large files regardless of upload method.
+
+For debugging multipart uploads, set `PAYLOAD_UPLOAD_DEBUG=true`.
+
+When developing in the Payload monorepo, `pnpm run dev storage-s3/client-uploads` uses a config with no signer cap. Integration tests that assert the 10 MB limit use `config-limit-tests.ts` instead. You can swap configs at dev time with `pnpm run dev storage-s3/client-uploads#config-limit-tests.ts`.
+
 ```ts
 import { s3Storage } from '@payloadcms/storage-s3'
 import { Media } from './collections/Media'

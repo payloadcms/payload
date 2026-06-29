@@ -1,5 +1,6 @@
 import type { Payload } from 'payload'
 
+import * as AWS from '@aws-sdk/client-s3'
 import { readFileSync } from 'fs'
 import path from 'path'
 import { assert } from 'ts-essentials'
@@ -40,7 +41,12 @@ const signedURLBody = (
 
 describe('@payloadcms/storage-s3 clientUploads', () => {
   beforeAll(async () => {
-    ;({ payload, restClient } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(
+      dirname,
+      undefined,
+      true,
+      'config-limit-tests.ts',
+    ))
 
     await createTestBucket()
     await clearTestBucket()
@@ -173,6 +179,269 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
 
     expect(uploadResponse.ok).toBe(false)
     expect(uploadResponse.status).toBe(403)
+  })
+
+  describe('multipart actions', () => {
+    it('should initiate multipart upload and return a stable response shape', async () => {
+      const response = await restClient.POST(signedURLEndpoint, {
+        body: JSON.stringify({
+          action: 'initiateMultipart',
+          collectionSlug: 'media',
+          filename: 'multipart-initiate.png',
+          filesize: MB(6),
+          mimeType: 'image/png',
+          partSize: MB(5),
+        }),
+      })
+
+      expect(response.status).toBe(200)
+      const body = await response.json()
+
+      expect(body.action).toBe('initiateMultipart')
+      expect(body.ok).toBe(true)
+      expect(body.key).toContain('multipart-initiate.png')
+      expect(body.partCount).toBe(2)
+      expect(body.partSize).toBe(MB(5))
+      expect(body.uploadId).toBeDefined()
+    })
+
+    it('should reject multipart initiate for invalid filesize', async () => {
+      const response = await restClient.POST(signedURLEndpoint, {
+        body: JSON.stringify({
+          action: 'initiateMultipart',
+          collectionSlug: 'media',
+          filename: 'invalid-size.png',
+          filesize: 0,
+          mimeType: 'image/png',
+        }),
+      })
+
+      expect(response.status).toBe(400)
+      const { errors } = (await response.json()) as any
+      expect(errors[0].message).toContain('valid filesize is required to initiate multipart upload')
+    })
+
+    it('should reject multipart initiate when file exceeds upload.limits.fileSize', async () => {
+      const response = await restClient.POST(signedURLEndpoint, {
+        body: JSON.stringify({
+          action: 'initiateMultipart',
+          collectionSlug: 'media',
+          filename: 'large-multipart.png',
+          filesize: MB(11),
+          mimeType: 'image/png',
+        }),
+      })
+
+      expect(response.status).toBe(400)
+      const { errors } = (await response.json()) as any
+      expect(errors).toBeDefined()
+      expect(errors[0].message).toContain('initiateMultipart: Exceeded file size limit')
+      expect(errors[0].message).toMatch(/Limit: 10\.0\dMB/)
+      expect(errors[0].message).toMatch(/got: 11\.0\dMB/)
+    })
+
+    it('should reject multipart part signing for invalid part number', async () => {
+      const response = await restClient.POST(signedURLEndpoint, {
+        body: JSON.stringify({
+          action: 'signMultipartPart',
+          collectionSlug: 'media',
+          key: 'fake-key',
+          partNumber: 0,
+          uploadId: 'fake-upload-id',
+        }),
+      })
+
+      expect(response.status).toBe(400)
+      const { errors } = (await response.json()) as any
+      expect(errors[0].message).toContain('valid partNumber')
+    })
+
+    it('should complete multipart upload and normalize unsorted parts', async () => {
+      const initiate = await restClient
+        .POST(signedURLEndpoint, {
+          body: JSON.stringify({
+            action: 'initiateMultipart',
+            collectionSlug: 'media',
+            filename: 'multipart-complete.png',
+            filesize: MB(6),
+            mimeType: 'image/png',
+            partSize: MB(5),
+          }),
+        })
+        .then((res) =>
+          res.json<{
+            action: string
+            key: string
+            partCount: number
+            uploadId: string
+          }>(),
+        )
+
+      const partUploadResults: { ETag: string; PartNumber: number }[] = []
+
+      for (let partNumber = 1; partNumber <= initiate.partCount; partNumber++) {
+        const partSign = await restClient
+          .POST(signedURLEndpoint, {
+            body: JSON.stringify({
+              action: 'signMultipartPart',
+              collectionSlug: 'media',
+              key: initiate.key,
+              partNumber,
+              uploadId: initiate.uploadId,
+            }),
+          })
+          .then((res) => res.json<{ url: string }>())
+
+        const chunk = Buffer.alloc(MB(5), partNumber)
+        const uploadResponse = await fetch(partSign.url, {
+          body: chunk,
+          method: 'PUT',
+        })
+
+        expect(uploadResponse.ok).toBe(true)
+        const etag = uploadResponse.headers.get('etag')
+        expect(etag).toBeDefined()
+        partUploadResults.push({
+          ETag: etag!,
+          PartNumber: partNumber,
+        })
+      }
+
+      const reversedParts = [...partUploadResults].reverse()
+      const complete = await restClient
+        .POST(signedURLEndpoint, {
+          body: JSON.stringify({
+            action: 'completeMultipart',
+            collectionSlug: 'media',
+            key: initiate.key,
+            parts: reversedParts,
+            uploadId: initiate.uploadId,
+          }),
+        })
+        .then((res) =>
+          res.json<{
+            action: string
+            key: string
+            ok: boolean
+            partCount: number
+            uploadId: string
+          }>(),
+        )
+
+      expect(complete.action).toBe('completeMultipart')
+      expect(complete.ok).toBe(true)
+      expect(complete.partCount).toBe(initiate.partCount)
+      expect(complete.key).toBe(initiate.key)
+      expect(complete.uploadId).toBe(initiate.uploadId)
+    })
+
+    it('should allow cleanup via abort after multipart completion failure', async () => {
+      const initiate = await restClient
+        .POST(signedURLEndpoint, {
+          body: JSON.stringify({
+            action: 'initiateMultipart',
+            collectionSlug: 'media',
+            filename: 'multipart-failure-cleanup.png',
+            filesize: MB(6),
+            mimeType: 'image/png',
+            partSize: MB(5),
+          }),
+        })
+        .then((res) =>
+          res.json<{
+            key: string
+            uploadId: string
+          }>(),
+        )
+
+      const failedComplete = await restClient.POST(signedURLEndpoint, {
+        body: JSON.stringify({
+          action: 'completeMultipart',
+          collectionSlug: 'media',
+          key: initiate.key,
+          parts: [],
+          uploadId: initiate.uploadId,
+        }),
+      })
+
+      expect(failedComplete.status).toBe(400)
+
+      await restClient.POST(signedURLEndpoint, {
+        body: JSON.stringify({
+          action: 'abortMultipart',
+          collectionSlug: 'media',
+          key: initiate.key,
+          uploadId: initiate.uploadId,
+        }),
+      })
+
+      const multipartUploads = await getAWSClient().send(
+        new AWS.ListMultipartUploadsCommand({
+          Bucket: getTestBucketName(),
+          Prefix: initiate.key,
+        }),
+      )
+
+      const matchedUpload = multipartUploads.Uploads?.find(
+        (upload) => upload.Key === initiate.key && upload.UploadId === initiate.uploadId,
+      )
+      expect(matchedUpload).toBeUndefined()
+    })
+
+    it('should abort multipart upload and remove pending upload', async () => {
+      const initiate = await restClient
+        .POST(signedURLEndpoint, {
+          body: JSON.stringify({
+            action: 'initiateMultipart',
+            collectionSlug: 'media',
+            filename: 'multipart-abort.png',
+            filesize: MB(6),
+            mimeType: 'image/png',
+            partSize: MB(5),
+          }),
+        })
+        .then((res) =>
+          res.json<{
+            key: string
+            uploadId: string
+          }>(),
+        )
+
+      const abortResponse = await restClient
+        .POST(signedURLEndpoint, {
+          body: JSON.stringify({
+            action: 'abortMultipart',
+            collectionSlug: 'media',
+            key: initiate.key,
+            uploadId: initiate.uploadId,
+          }),
+        })
+        .then((res) =>
+          res.json<{
+            action: string
+            key: string
+            ok: boolean
+            uploadId: string
+          }>(),
+        )
+
+      expect(abortResponse.action).toBe('abortMultipart')
+      expect(abortResponse.ok).toBe(true)
+      expect(abortResponse.key).toBe(initiate.key)
+      expect(abortResponse.uploadId).toBe(initiate.uploadId)
+
+      const multipartUploads = await getAWSClient().send(
+        new AWS.ListMultipartUploadsCommand({
+          Bucket: getTestBucketName(),
+          Prefix: initiate.key,
+        }),
+      )
+
+      const matchedUpload = multipartUploads.Uploads?.find(
+        (upload) => upload.Key === initiate.key && upload.UploadId === initiate.uploadId,
+      )
+      expect(matchedUpload).toBeUndefined()
+    })
   })
 
   describe('filename handling', () => {
