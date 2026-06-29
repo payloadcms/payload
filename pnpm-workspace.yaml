@@ -6,6 +6,14 @@ packages:
   - 'templates/website'
   - 'templates/ecommerce'
 
+catalog:
+  copyfiles: '2.4.1'
+  cross-env: '10.1.0'
+  dotenv: '16.4.7'
+  react: '19.2.6'
+  react-dom: '19.2.6'
+  typescript: '6.0.3'
+
 updateNotifier: false
 symlink: true
 nodeLinker: isolated
@@ -21,14 +29,14 @@ verifyDepsBeforeRun: false
 overrides:
   '@types/request>form-data': '^2.5.6'
   'amazon-cognito-identity-js>js-cookie': '^3.0.7'
-  copyfiles: $copyfiles
-  cross-env: $cross-env
-  dotenv: $dotenv
+  copyfiles: 'catalog:'
+  cross-env: 'catalog:'
+  dotenv: 'catalog:'
   graphql: '16.8.1'
   'mcp-handler>@modelcontextprotocol/sdk': '1.27.1'
-  react: $react
-  react-dom: $react-dom
-  typescript: $typescript
+  react: 'catalog:'
+  react-dom: 'catalog:'
+  typescript: 'catalog:'
 
 # Replaces pnpm v10 `onlyBuiltDependencies`: packages permitted to run install scripts.
 allowBuilds:
