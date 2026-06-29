@@ -1,4 +1,4 @@
-import type { User, User } from 'payload'
+import type { User } from 'payload'
 
 import type { PayloadTestSDK } from '../shared/sdk/index.js'
 import type { GeneratedTypes } from '../shared/sdk/types.js'
