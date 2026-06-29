@@ -40,7 +40,7 @@
     &:focus-visible {
       outline: none;
       border: var(--accessibility-outline);
-      border-width: 1px;
+      border-width: var(--stroke-width-small);
     }
   }
 }
