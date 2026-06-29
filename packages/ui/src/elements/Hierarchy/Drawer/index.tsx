@@ -17,10 +17,10 @@ import { TagIcon } from '../../../icons/Tag/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { DialogModal } from '../../Dialog/index.js'
+import { Button } from '../../Button/index.js'
+import { DialogBody, DialogHeader, DialogModal } from '../../Dialog/index.js'
 import { useDocumentDrawer } from '../../DocumentDrawer/index.js'
 import { DrawerDepthProvider } from '../../Drawer/index.js'
-import { DrawerActionHeader } from '../../DrawerActionHeader/index.js'
 import { HierarchyColumnBrowser } from '../ColumnBrowser/index.js'
 import { fetchAncestorPath } from './fetchAncestorPath.js'
 import './index.css'
@@ -80,6 +80,18 @@ export const HierarchyDrawerContent = function HierarchyDrawerContent({
   const hasLoadedPathRef = React.useRef(false)
   const firstSelection = initialSelections?.[0]
 
+  const mapSelections = useCallback((ids?: (number | string)[]) => {
+    const map = new Map<number | string, SelectionWithPath>()
+
+    if (ids) {
+      for (const id of ids) {
+        map.set(id, { id, path: [] })
+      }
+    }
+
+    return map
+  }, [])
+
   const loadAncestorPath = useEffectEvent(async (itemId?: number | string) => {
     if (!itemId) {
       setIsLoadingPath(false)
@@ -111,26 +123,14 @@ export const HierarchyDrawerContent = function HierarchyDrawerContent({
     void loadAncestorPath(firstSelection)
   }, [firstSelection])
 
-  const [selections, setSelections] = useState<Map<number | string, SelectionWithPath>>(() => {
-    const map = new Map<number | string, SelectionWithPath>()
-
-    if (initialSelections) {
-      for (const id of initialSelections) {
-        map.set(id, { id, path: [] })
-      }
-    }
-
-    return map
-  })
+  const [selections, setSelections] = useState<Map<number | string, SelectionWithPath>>(() =>
+    mapSelections(initialSelections),
+  )
 
   const selectedIds = useMemo(() => new Set(selections.keys()), [selections])
 
   // For now, ancestorsWithSelections is empty - will be computed when we have path tracking
   const ancestorsWithSelections = useMemo(() => new Set<number | string>(), [])
-
-  const handleCancel = useCallback(() => {
-    closeDrawer()
-  }, [closeDrawer])
 
   const handleSave = useCallback(() => {
     onSave({ closeDrawer, selections })
@@ -167,6 +167,11 @@ export const HierarchyDrawerContent = function HierarchyDrawerContent({
     setSelections(new Map())
   }, [])
 
+  const handleCancel = useCallback(() => {
+    setSelections(mapSelections(initialSelections))
+    closeDrawer()
+  }, [closeDrawer, initialSelections, mapSelections])
+
   // Expose selectItem for programmatic selection (e.g., after creating a new item)
   useImperativeHandle(
     ref,
@@ -190,57 +195,79 @@ export const HierarchyDrawerContent = function HierarchyDrawerContent({
 
   return (
     <div className={`${baseClass}__content`}>
-      <DrawerActionHeader
-        onCancel={handleCancel}
-        onSave={handleSave}
-        saveLabel={t('general:select')}
-        title={t('general:selectValue', { label: collectionLabel })}
-      />
-      <div className={`${baseClass}__subheader`}>
-        <div className={`${baseClass}__subheader-left`}>
-          {Icon || <TagIcon />}
-          <h4>{collectionLabel}</h4>
+      <DialogHeader title={t('general:selectValue', { label: collectionLabel })}>
+        <div className={`${baseClass}__header-actions`}>
+          <Button buttonStyle="secondary" margin={false} onClick={handleCancel} size="medium">
+            {t('general:cancel')}
+          </Button>
+          <Button margin={false} onClick={handleSave} size="medium">
+            {t('general:select')}
+          </Button>
         </div>
-        <div className={`${baseClass}__subheader-right`}>
-          {showMoveToRoot && onMoveToRoot && (
-            <button className={`${baseClass}__move-to-root`} onClick={onMoveToRoot} type="button">
-              {t('hierarchy:moveToRoot')}
-            </button>
-          )}
-          {selectionCount > 0 && (
-            <>
-              <span className={`${baseClass}__selection-info`}>{selectionCount} selected</span>
-              <span>—</span>
-              <button className={`${baseClass}__clear-all`} onClick={handleClearAll} type="button">
-                {t('general:clearAll')}
-              </button>
-            </>
-          )}
+      </DialogHeader>
+      <DialogBody>
+        <div className={`${baseClass}__subheader`}>
+          <div className={`${baseClass}__subheader-left`}>
+            {Icon || <TagIcon />}
+            <h4>{collectionLabel}</h4>
+          </div>
+          <div className={`${baseClass}__subheader-right`}>
+            {showMoveToRoot && onMoveToRoot && (
+              <Button
+                buttonStyle="ghost"
+                className={`${baseClass}__move-to-root`}
+                margin={false}
+                onClick={onMoveToRoot}
+                size="medium"
+              >
+                {t('hierarchy:moveToRoot')}
+              </Button>
+            )}
+            {Boolean(selectionCount) && (
+              <>
+                {
+                  <span className={`${baseClass}__selection-info`}>
+                    {t('general:selectedCount', { count: selectionCount, label: '' })}
+                  </span>
+                }
+                <span>—</span>
+                <Button
+                  buttonStyle="ghost"
+                  className={`${baseClass}__clear-all`}
+                  margin={false}
+                  onClick={handleClearAll}
+                  size="medium"
+                >
+                  {t('general:clear')}
+                </Button>
+              </>
+            )}
+          </div>
         </div>
-      </div>
-      <div className={`${baseClass}__columns`}>
-        <HierarchyColumnBrowser
-          ancestorsWithSelections={ancestorsWithSelections}
-          baseFilter={baseFilter}
-          disabledIds={disabledIds}
-          filterByCollection={filterByCollection}
-          hierarchyCollectionSlug={hierarchyCollectionSlug}
-          initialExpandedPath={initialExpandedPath}
-          isLoadingPath={isLoadingPath}
-          onCreateNew={onCreateNew}
-          onSelect={handleSelect}
-          parentFieldName={parentFieldName}
-          ref={columnBrowserRef}
-          selectedIds={selectedIds}
-          useAsTitle={useAsTitle}
-        />
-      </div>
+        <div className={`${baseClass}__columns`}>
+          <HierarchyColumnBrowser
+            ancestorsWithSelections={ancestorsWithSelections}
+            baseFilter={baseFilter}
+            disabledIds={disabledIds}
+            filterByCollection={filterByCollection}
+            hierarchyCollectionSlug={hierarchyCollectionSlug}
+            initialExpandedPath={initialExpandedPath}
+            isLoadingPath={isLoadingPath}
+            onCreateNew={onCreateNew}
+            onSelect={handleSelect}
+            parentFieldName={parentFieldName}
+            ref={columnBrowserRef}
+            selectedIds={selectedIds}
+            useAsTitle={useAsTitle}
+          />
+        </div>
+      </DialogBody>
     </div>
   )
 }
 
 export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) => {
-  const { drawerSlug, hierarchyCollectionSlug, parentFieldName } = props
+  const { drawerSlug, hierarchyCollectionSlug, parentFieldName, reopenCount } = props
 
   const { refreshTree } = useHierarchy()
 
@@ -310,6 +337,7 @@ export const HierarchyDrawer: React.FC<HierarchyDrawerInternalProps> = (props) =
       <HierarchyDrawerContent
         {...props}
         columnBrowserRef={columnBrowserRef}
+        key={reopenCount}
         onCreateNew={handleCreateNew}
         ref={drawerContentRef}
       />

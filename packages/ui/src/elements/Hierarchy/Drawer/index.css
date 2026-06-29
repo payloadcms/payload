@@ -12,17 +12,25 @@
     background: var(--color-bg);
     border-radius: var(--radius-large);
     overflow: clip;
+  }
 
-    .drawer-action-header {
-      padding: var(--spacer-2) var(--spacer-3);
-    }
+  .hierarchy-drawer__header-actions {
+    display: flex;
+    gap: var(--spacer-2);
+  }
+
+  .dialog.hierarchy-drawer .dialog__body {
+    display: flex;
+    flex-direction: column;
+    padding: 0;
   }
 
   .hierarchy-drawer__subheader {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacer-2) var(--spacer-2-5);
+    padding: var(--spacer-1) var(--spacer-3);
+    padding-inline-start: var(--spacer-2-5);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
     flex-shrink: 0;
   }
@@ -30,14 +38,9 @@
   .hierarchy-drawer__subheader-left {
     display: flex;
     align-items: center;
-    gap: var(--spacer-2);
+    gap: var(--spacer-1);
     font-weight: 500;
     color: var(--color-text);
-
-    svg {
-      width: var(--spacer-3);
-      height: var(--spacer-3);
-    }
   }
 
   .hierarchy-drawer__subheader-right {
@@ -50,32 +53,27 @@
     color: var(--color-text-secondary);
   }
 
+  .hierarchy-drawer__move-to-root,
   .hierarchy-drawer__clear-all {
+    height: auto;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
     color: var(--color-text-secondary);
     text-decoration: underline;
-    cursor: pointer;
-    background: none;
-    border: none;
-    padding: 0;
-    font-size: inherit;
-
-    &:hover {
-      color: var(--color-text);
-    }
+    text-underline-offset: 2px;
   }
 
-  .hierarchy-drawer__move-to-root {
-    background: none;
-    border: none;
-    color: var(--color-text-secondary);
-    cursor: pointer;
-    font-size: inherit;
-    padding: 0;
-    text-decoration: underline;
+  .hierarchy-drawer__move-to-root:hover:not(.btn--disabled),
+  .hierarchy-drawer__clear-all:hover:not(.btn--disabled) {
+    background: transparent;
+    color: var(--color-text);
+  }
 
-    &:hover {
-      color: var(--color-text);
-    }
+  .hierarchy-drawer__move-to-root:active:not(.btn--disabled),
+  .hierarchy-drawer__clear-all:active:not(.btn--disabled) {
+    background: transparent;
   }
 
   .hierarchy-drawer__columns {

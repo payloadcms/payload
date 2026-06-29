@@ -1,6 +1,6 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useId, useMemo, useRef } from 'react'
+import React, { useCallback, useId, useMemo, useRef, useState } from 'react'
 
 import type {
   HierarchyDrawerProps,
@@ -97,6 +97,7 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({
   const drawerDepth = useEditDepth()
   const uuid = useId()
   const { closeModal, openModal, toggleModal } = useModal()
+  const [reopenCount, setReopenCount] = useState(0)
 
   const drawerSlug = formatHierarchyDrawerSlug({
     depth: drawerDepth,
@@ -122,6 +123,7 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({
   }, [drawerSlug])
 
   const openDrawer = useCallback(() => {
+    setReopenCount((count) => count + 1)
     openModalRef.current(drawerSlug)
   }, [drawerSlug])
 
@@ -138,6 +140,7 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({
         Icon={Icon}
         key={drawerSlug}
         parentFieldName={parentFieldName}
+        reopenCount={reopenCount}
         useAsTitle={useAsTitle}
       />
     )
@@ -151,6 +154,7 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({
     filterByCollection,
     Icon,
     parentFieldName,
+    reopenCount,
     hierarchyCollectionSlug,
     useAsTitle,
   ])

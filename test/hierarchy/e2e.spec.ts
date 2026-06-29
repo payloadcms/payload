@@ -708,5 +708,73 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(drawer.getByRole('button', { name: parentFolderName })).toBeVisible()
       await expect(drawer.getByRole('button', { name: childFolderName })).toBeVisible()
     })
+
+    test('should reset transient selections after canceling and reopening the drawer', async () => {
+      await page.goto(productsURL.edit(String(productWithFolder.id)))
+
+      const folderButton = page.getByRole('button', { name: childFolderName })
+      await expect(folderButton).toBeVisible()
+
+      await folderButton.click()
+      const drawer = page.locator('.hierarchy-drawer')
+      await expect(drawer).toBeVisible()
+
+      const parentFolderItem = drawer
+        .locator('.hierarchy-column-item', { hasText: parentFolderName })
+        .first()
+      await parentFolderItem.locator('.hierarchy-column-item__checkbox').click()
+
+      await expect(
+        drawer.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
+          hasText: parentFolderName,
+        }),
+      ).toBeVisible()
+
+      await drawer.getByRole('button', { name: 'Cancel' }).click()
+      await expect(drawer).toBeHidden()
+
+      await folderButton.click()
+      await expect(drawer).toBeVisible()
+
+      await expect(
+        drawer.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
+          hasText: childFolderName,
+        }),
+      ).toBeVisible()
+      await expect(
+        drawer.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
+          hasText: parentFolderName,
+        }),
+      ).toBeHidden()
+    })
+
+    test('should reset transient expanded location after canceling and reopening the drawer', async () => {
+      await page.goto(productsURL.edit(String(productWithFolder.id)))
+
+      const folderButton = page.getByRole('button', { name: childFolderName })
+      await expect(folderButton).toBeVisible()
+
+      await folderButton.click()
+      const drawer = page.locator('.hierarchy-drawer')
+      await expect(drawer).toBeVisible()
+
+      await expect(drawer.locator('.hierarchy-column')).toHaveCount(2)
+
+      await drawer
+        .locator('.hierarchy-column-item', { hasText: childFolderName })
+        .first()
+        .locator('.hierarchy-column-item__expand-button')
+        .click()
+
+      await expect(drawer.locator('.hierarchy-column')).toHaveCount(3)
+
+      await drawer.getByRole('button', { name: 'Cancel' }).click()
+      await expect(drawer).toBeHidden()
+
+      await folderButton.click()
+      await expect(drawer).toBeVisible()
+
+      await expect(drawer.locator('.hierarchy-column')).toHaveCount(2)
+    })
   })
 })

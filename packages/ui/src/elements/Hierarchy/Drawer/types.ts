@@ -45,6 +45,7 @@ export type HierarchyDrawerInternalProps = {
   readonly hierarchyCollectionSlug: string
   readonly Icon?: React.ReactNode
   readonly parentFieldName: string
+  readonly reopenCount?: number
   readonly useAsTitle?: string
 } & HierarchyDrawerProps
 
