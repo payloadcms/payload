@@ -42,8 +42,8 @@ export type Export = {
   name: string
   page?: number
   sort?: Sort
-  userCollection: string
-  userID: number | string
+  userCollection?: string
+  userID?: number | string
   where?: Where
 }
 
@@ -110,7 +110,7 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   if (!user && req.user) {
-    user = req?.user?.id ? req.user : (req?.user?.user as User)
+    user = req.user
   }
 
   if (!user) {
