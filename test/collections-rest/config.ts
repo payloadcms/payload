@@ -6,6 +6,7 @@ import { APIError, type CollectionConfig, type Endpoint } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
+import { ConcurrentDeleteCollection } from './collections/ConcurrentDelete/index.js'
 import { LargeDocuments } from './collections/LargeDocuments.js'
 
 export interface Relation {
@@ -302,6 +303,7 @@ export default buildConfigWithDefaults({
       versions: false,
     },
     LargeDocuments,
+    ConcurrentDeleteCollection,
   ],
   bodyParser: {
     limits: {

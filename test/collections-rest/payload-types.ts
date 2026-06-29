@@ -78,6 +78,7 @@ export interface Config {
     'disabled-bulk-edit-docs': DisabledBulkEditDoc;
     'disabled-bulk-delete-docs': DisabledBulkDeleteDoc;
     'large-documents': LargeDocument;
+    'concurrent-delete': ConcurrentDelete;
     users: User;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -97,6 +98,7 @@ export interface Config {
     'disabled-bulk-edit-docs': DisabledBulkEditDocsSelect<false> | DisabledBulkEditDocsSelect<true>;
     'disabled-bulk-delete-docs': DisabledBulkDeleteDocsSelect<false> | DisabledBulkDeleteDocsSelect<true>;
     'large-documents': LargeDocumentsSelect<false> | LargeDocumentsSelect<true>;
+    'concurrent-delete': ConcurrentDeleteSelect<false> | ConcurrentDeleteSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -294,6 +296,16 @@ export interface LargeDocument {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "concurrent-delete".
+ */
+export interface ConcurrentDelete {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
@@ -384,6 +396,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'large-documents';
         value: string | LargeDocument;
+      } | null)
+    | ({
+        relationTo: 'concurrent-delete';
+        value: string | ConcurrentDelete;
       } | null)
     | ({
         relationTo: 'users';
@@ -557,6 +573,15 @@ export interface LargeDocumentsSelect<T extends boolean = true> {
         text?: T;
         id?: T;
       };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "concurrent-delete_select".
+ */
+export interface ConcurrentDeleteSelect<T extends boolean = true> {
+  title?: T;
   updatedAt?: T;
   createdAt?: T;
 }

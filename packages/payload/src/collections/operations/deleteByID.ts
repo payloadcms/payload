@@ -102,10 +102,6 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       }
     }
 
-    // /////////////////////////////////////
-    // Retrieve document
-    // /////////////////////////////////////
-
     let where = combineQueries({ id: { equals: id } }, accessResults)
 
     // Exclude trashed documents when trash: false
@@ -114,20 +110,6 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       trash,
       where,
     })
-
-    const docToDelete = await req.payload.db.findOne({
-      collection: collectionConfig.slug,
-      locale: req.locale!,
-      req,
-      where,
-    })
-
-    if (!docToDelete && !hasWhereAccess) {
-      throw new NotFound(req.t)
-    }
-    if (!docToDelete && hasWhereAccess) {
-      throw new Forbidden(req.t)
-    }
 
     // /////////////////////////////////////
     // Handle potentially locked documents
@@ -141,39 +123,6 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
       req,
     })
 
-    await deleteAssociatedFiles({
-      collectionConfig,
-      config,
-      doc: docToDelete!,
-      overrideDelete: true,
-      req,
-    })
-
-    // /////////////////////////////////////
-    // Delete versions
-    // /////////////////////////////////////
-
-    if (collectionConfig.versions) {
-      await deleteCollectionVersions({
-        id,
-        slug: collectionConfig.slug,
-        payload,
-        req,
-      })
-    }
-
-    // /////////////////////////////////////
-    // Delete scheduled posts
-    // /////////////////////////////////////
-    if (hasScheduledPublishEnabled(collectionConfig)) {
-      await deleteScheduledPublishJobs({
-        id,
-        slug: collectionConfig.slug,
-        payload,
-        req,
-      })
-    }
-
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
       select: resolveSelect({
@@ -185,15 +134,81 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     })
 
     // /////////////////////////////////////
-    // Delete document
+    // Delete document (atomic at the adapter level)
     // /////////////////////////////////////
 
     let result: DataFromCollectionSlug<TSlug> = await req.payload.db.deleteOne({
       collection: collectionConfig.slug,
       req,
       select,
-      where: { id: { equals: id } },
+      where,
     })
+
+    let wasAlreadyDeleted = false
+
+    if (!result) {
+      if (hasWhereAccess) {
+        throw new Forbidden(req.t)
+      }
+
+      if (collectionConfig.trash && !trash) {
+        const trashedDoc = await req.payload.db.findOne({
+          collection: collectionConfig.slug,
+          locale: req.locale!,
+          req,
+          where: combineQueries(
+            {
+              id: { equals: id },
+              deletedAt: { exists: true },
+            },
+            accessResults,
+          ),
+        })
+
+        if (trashedDoc) {
+          throw new NotFound(req.t)
+        }
+      }
+
+      // Atomic deleteOne returned no row — the document was already removed by a concurrent delete
+      wasAlreadyDeleted = true
+      result = { id } as DataFromCollectionSlug<TSlug>
+    }
+
+    if (!wasAlreadyDeleted) {
+      await deleteAssociatedFiles({
+        collectionConfig,
+        config,
+        doc: result,
+        overrideDelete: true,
+        req,
+      })
+
+      // /////////////////////////////////////
+      // Delete versions
+      // /////////////////////////////////////
+
+      if (collectionConfig.versions) {
+        await deleteCollectionVersions({
+          id,
+          slug: collectionConfig.slug,
+          payload,
+          req,
+        })
+      }
+
+      // /////////////////////////////////////
+      // Delete scheduled posts
+      // /////////////////////////////////////
+      if (hasScheduledPublishEnabled(collectionConfig)) {
+        await deleteScheduledPublishJobs({
+          id,
+          slug: collectionConfig.slug,
+          payload,
+          req,
+        })
+      }
+    }
 
     // /////////////////////////////////////
     // Add collection property for auth collections
@@ -255,7 +270,7 @@ export const deleteByIDOperation = async <TSlug extends CollectionSlug, TSelect 
     // afterDelete - Collection
     // /////////////////////////////////////
 
-    if (collectionConfig.hooks?.afterDelete?.length) {
+    if (collectionConfig.hooks?.afterDelete?.length && !wasAlreadyDeleted) {
       for (const hook of collectionConfig.hooks.afterDelete) {
         result =
           (await hook({

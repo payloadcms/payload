@@ -13,6 +13,10 @@ import type { Post } from './payload-types.js'
 
 import { getFormDataSize } from '../__helpers/shared/getFormDataSize.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import {
+  concurrentDeleteSlug,
+  resetConcurrentDeleteState,
+} from './collections/ConcurrentDelete/index.js'
 import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
 import {
   customIdNumberSlug,
@@ -541,6 +545,67 @@ describe('collections-rest', () => {
 
       expect(response.status).toEqual(200)
       expect(doc.id).toEqual(id)
+    })
+
+    describe('concurrent deleteByID', () => {
+      beforeEach(() => {
+        resetConcurrentDeleteState()
+      })
+
+      it('should be idempotent when deleting the same document concurrently via local API', async () => {
+        const doc = await payload.create({
+          collection: concurrentDeleteSlug,
+          data: {
+            title: 'concurrent delete test',
+          },
+        })
+
+        const results = await Promise.all([
+          payload.delete({ collection: concurrentDeleteSlug, id: doc.id }),
+          payload.delete({ collection: concurrentDeleteSlug, id: doc.id }),
+        ])
+
+        expect(results).toHaveLength(2)
+        results.forEach((result) => {
+          expect(result.id).toEqual(doc.id)
+        })
+
+        const remaining = await payload.find({
+          collection: concurrentDeleteSlug,
+          where: { id: { equals: doc.id } },
+        })
+
+        expect(remaining.totalDocs).toEqual(0)
+      })
+
+      it('should be idempotent when deleting the same document concurrently via REST API', async () => {
+        const { doc } = await restClient
+          .POST(`/${concurrentDeleteSlug}`, {
+            body: JSON.stringify({ title: 'concurrent delete test' }),
+          })
+          .then((res) => res.json())
+
+        const [response1, response2] = await Promise.all([
+          restClient.DELETE(`/${concurrentDeleteSlug}/${doc.id}`),
+          restClient.DELETE(`/${concurrentDeleteSlug}/${doc.id}`),
+        ])
+
+        expect(response1.status).toEqual(200)
+        expect(response2.status).toEqual(200)
+
+        const { doc: deletedDoc1 } = await response1.json()
+        const { doc: deletedDoc2 } = await response2.json()
+
+        expect(deletedDoc1.id).toEqual(doc.id)
+        expect(deletedDoc2.id).toEqual(doc.id)
+
+        const remaining = await payload.find({
+          collection: concurrentDeleteSlug,
+          where: { id: { equals: doc.id } },
+        })
+
+        expect(remaining.totalDocs).toEqual(0)
+      })
     })
 
     it('should include metadata', async () => {
