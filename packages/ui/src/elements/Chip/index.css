@@ -4,13 +4,13 @@
     display: inline-flex;
     align-items: center;
     gap: 0;
-    border-radius: var(--radius-medium);
-    border: 1px solid var(--color-border);
+    border-radius: var(--button-radius);
+    border: var(--stroke-width-small) solid var(--color-border);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
-    color: var(--text-default);
+    color: var(--color-text);
     background-color: var(--color-bg);
     user-select: none;
 

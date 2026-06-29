@@ -27,6 +27,7 @@ export const defaultESLintIgnores = [
   'src/**/*.spec.ts',
   'packages/payload/rollup.dts.config.mjs',
   'scripts/**/*.js',
+  'packages/plugin-mcp/bin.js',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
@@ -49,6 +50,8 @@ export const rootEslintConfig = [
       'templates/**',
       'examples/**',
       'packages/drizzle/src/postgres/predefinedMigrations/v2-v3/**',
+      'packages/drizzle/src/postgres/predefinedMigrations/localize-status/**',
+      'packages/drizzle/src/sqlite/predefinedMigrations/localize-status/**',
       'packages/codemod/src/transforms/**/*.input.ts',
       'packages/codemod/src/transforms/**/*.output.ts',
     ],

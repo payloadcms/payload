@@ -36,6 +36,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: noEndpointsCollectionSlug,
@@ -47,6 +48,7 @@ export default buildConfigWithDefaults({
         },
       ],
       graphQL: false,
+      versions: false,
     },
   ],
   endpoints,
@@ -55,6 +57,7 @@ export default buildConfigWithDefaults({
       slug: globalSlug,
       endpoints: globalEndpoints,
       fields: [],
+      versions: false,
     },
     {
       slug: noEndpointsGlobalSlug,
@@ -66,6 +69,7 @@ export default buildConfigWithDefaults({
         },
       ],
       graphQL: false,
+      versions: false,
     },
   ],
   onInit: async (payload) => {

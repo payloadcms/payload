@@ -2,11 +2,11 @@
 import type { CollectionSlug } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { useRouter } from 'next/navigation.js'
 import React from 'react'
 
 import { useBulkUpload } from '../../../elements/BulkUpload/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
+import { useRouter } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 
@@ -29,7 +29,7 @@ export function ListBulkUploadButton({
   openBulkUpload?: () => void
 }) {
   const {
-    drawerSlug: bulkUploadDrawerSlug,
+    modalSlug: bulkUploadModalSlug,
     setCollectionSlug,
     setOnSuccess,
     setParentID,
@@ -45,7 +45,7 @@ export function ListBulkUploadButton({
     } else {
       setCollectionSlug(collectionSlug)
       setParentID(parent?.id)
-      openModal(bulkUploadDrawerSlug)
+      openModal(bulkUploadModalSlug)
       setOnSuccess(() => {
         if (typeof onBulkUploadSuccess === 'function') {
           onBulkUploadSuccess()
@@ -57,7 +57,7 @@ export function ListBulkUploadButton({
   }, [
     router,
     collectionSlug,
-    bulkUploadDrawerSlug,
+    bulkUploadModalSlug,
     parent,
     openModal,
     setCollectionSlug,

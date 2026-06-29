@@ -32,6 +32,7 @@ export const Uploads: CollectionConfig = {
   upload: {
     staticDir: path.resolve(dirname, './uploads'),
   },
+  versions: false,
 }
 
 export const Uploads2: CollectionConfig = {
@@ -44,4 +45,5 @@ export const Uploads2: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

@@ -56,13 +56,13 @@
     /* Locked state - override form-input-group styles */
     &.slug-field-component--locked {
       .slug-field-component__input-container {
-        background: var(--color-bg);
-        border-color: var(--color-border);
+        background: var(--field-color-bg-readonly);
+        border-color: var(--field-color-border-readonly);
       }
 
       .slug-field-component__input:disabled {
-        color: var(--color-text-secondary);
-        -webkit-text-fill-color: var(--color-text-secondary);
+        color: var(--field-color-text-readonly);
+        -webkit-text-fill-color: var(--field-color-text-readonly);
       }
     }
 
@@ -71,20 +71,20 @@
       .slug-field-component__input-container,
       .slug-field-component__input-container:hover,
       .slug-field-component__input-container:focus-within {
-        border-color: var(--color-border-danger-strong);
+        border-color: var(--field-color-border-error);
       }
     }
 
     /* Read-only state (admin.readOnly) */
     &.slug-field-component--read-only {
       .slug-field-component__input-container {
-        background: var(--color-bg);
-        border-color: var(--color-border);
+        background: var(--field-color-bg-readonly);
+        border-color: var(--field-color-border-readonly);
       }
 
       .slug-field-component__input:disabled {
-        color: var(--color-text-secondary);
-        -webkit-text-fill-color: var(--color-text-secondary);
+        color: var(--field-color-text-readonly);
+        -webkit-text-fill-color: var(--field-color-text-readonly);
       }
     }
   }

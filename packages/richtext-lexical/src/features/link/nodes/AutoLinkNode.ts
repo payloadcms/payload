@@ -1,8 +1,14 @@
-import type { ElementNode, LexicalNode, LexicalUpdateJSON, RangeSelection } from 'lexical'
+import type {
+  ElementNode,
+  LexicalNode,
+  LexicalUpdateJSON,
+  RangeSelection,
+  SerializedElementNode,
+} from 'lexical'
 
 import { $applyNodeReplacement, $isElementNode } from 'lexical'
 
-import type { LinkFields, SerializedAutoLinkNode } from './types.js'
+import type { LinkFields, SerializedAutoLinkNode } from '../server/schema.js'
 
 import { LinkNode } from './LinkNode.js'
 
@@ -65,7 +71,8 @@ export class AutoLinkNode extends LinkNode {
     return null
   }
 
-  override updateFromJSON(serializedNode: LexicalUpdateJSON<SerializedAutoLinkNode>): this {
+  override updateFromJSON(_serializedNode: LexicalUpdateJSON<SerializedElementNode>): this {
+    const serializedNode = _serializedNode as unknown as SerializedAutoLinkNode
     return super.updateFromJSON(serializedNode).setFields(serializedNode.fields)
   }
 }

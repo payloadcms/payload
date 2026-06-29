@@ -3,33 +3,12 @@
     width: 100%;
     display: flex;
     --doc-sidebar-width: 325px;
-    --sidebar-gutter-h-right: var(--gutter-h);
-    --sidebar-gutter-h-left: var(--spacer-6);
-    --main-gutter-h-left: var(--gutter-h);
-    --main-gutter-h-right: var(--spacer-6);
-  }
-
-  [dir='rtl'] .document-fields:not(.document-fields--force-sidebar-wrap) {
-    --sidebar-gutter-h-left: var(--gutter-h);
-    --sidebar-gutter-h-right: var(--spacer-6);
-    --main-gutter-h-left: var(--spacer-6);
-    --main-gutter-h-right: var(--gutter-h);
-  }
-
-  .document-fields--force-sidebar-wrap,
-  .document-fields:has(
-      .document-fields__sidebar-wrap .document-fields__sidebar-fields > .render-fields:empty
-    ) {
-    --sidebar-gutter-h-left: var(--gutter-h);
-    --sidebar-gutter-h-right: var(--gutter-h);
-    --main-gutter-h-left: var(--gutter-h);
-    --main-gutter-h-right: var(--gutter-h);
   }
 
   .document-fields--has-sidebar {
     --main-width: 66.66%;
-    --main-border: 1px solid var(--color-border);
-    --main-field-margin: calc(var(--spacer-6) * -1);
+    --main-border: var(--stroke-width-small) solid var(--color-border);
+    --main-field-margin: calc(var(--gutter-h) * -1);
   }
 
   .document-fields--has-sidebar:has(
@@ -45,8 +24,8 @@
   }
 
   .document-fields--has-sidebar .document-fields__edit {
-    padding-left: var(--main-gutter-h-left);
-    padding-right: var(--main-gutter-h-right);
+    padding-left: var(--gutter-h);
+    padding-right: var(--gutter-h);
   }
 
   [dir='ltr'] .document-fields--has-sidebar .document-fields__edit {
@@ -61,9 +40,13 @@
     border-left: var(--main-border);
   }
 
-  .document-fields--has-sidebar .document-fields__fields > .tabs-field,
-  .document-fields--has-sidebar .document-fields__fields > .group-field {
+  .document-fields--has-sidebar .document-fields__fields > .tabs-field {
     margin-right: var(--main-field-margin);
+  }
+
+  /* Extend group border to the main/sidebar divider */
+  .document-fields--has-sidebar .document-fields__fields > .group-field::before {
+    right: calc(var(--gutter-h) * -1);
   }
 
   .document-fields__main {
@@ -75,7 +58,7 @@
   }
 
   .document-fields__edit {
-    padding-top: var(--spacer-5);
+    padding-top: var(--spacer-4);
     padding-bottom: var(--spacing-view-bottom);
     flex-grow: 1;
   }
@@ -84,7 +67,7 @@
     position: var(--sidebar-wrap-position, sticky);
     top: var(--sidebar-wrap-top, var(--doc-controls-height));
     width: var(--sidebar-wrap-width, 33.33%);
-    height: var(--sidebar-wrap-height, calc(100vh - var(--doc-controls-height)));
+    height: var(--sidebar-wrap-height, calc(100dvh - var(--doc-controls-height)));
     min-width: var(--sidebar-wrap-min-width, var(--doc-sidebar-width));
     flex-shrink: var(--sidebar-wrap-flex-shrink, 0);
   }
@@ -111,9 +94,9 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacer-3);
-    padding-top: var(--spacer-5);
-    padding-left: var(--sidebar-gutter-h-left);
-    padding-right: var(--sidebar-gutter-h-right);
+    padding-top: var(--spacer-4);
+    padding-left: var(--gutter-h);
+    padding-right: var(--gutter-h);
     padding-bottom: var(--spacing-view-bottom);
   }
 
@@ -122,8 +105,11 @@
   }
 
   .document-fields--force-sidebar-wrap {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-color) transparent;
     display: block;
     isolation: isolate;
+    --main-border: none; /* Reset the sidebar divider — the live preview window provides its own border-left */
   }
 
   .document-fields--force-sidebar-wrap .document-fields__main {
@@ -134,12 +120,13 @@
   .document-fields--force-sidebar-wrap .document-fields__sidebar-wrap {
     position: static;
     width: 100%;
+    min-width: 0;
     height: initial;
     border-left: 0;
   }
 
   .document-fields--force-sidebar-wrap .document-fields__sidebar {
-    padding-bottom: calc(var(--spacer-5) * 2);
+    padding-bottom: calc(2 * var(--spacing-field));
     overflow: visible;
   }
 
@@ -151,17 +138,6 @@
   @media (max-width: 1024px) {
     .document-fields {
       display: block;
-      --main-gutter-h-left: var(--gutter-h);
-      --main-gutter-h-right: var(--gutter-h);
-      --sidebar-gutter-h-left: var(--gutter-h);
-      --sidebar-gutter-h-right: var(--gutter-h);
-    }
-
-    [dir='rtl'] .document-fields:not(.document-fields--force-sidebar-wrap) {
-      --sidebar-gutter-h-left: var(--gutter-h);
-      --sidebar-gutter-h-right: var(--gutter-h);
-      --main-gutter-h-left: var(--gutter-h);
-      --main-gutter-h-right: var(--gutter-h);
     }
 
     .document-fields--has-sidebar .document-fields__main {
@@ -176,8 +152,7 @@
       border-left: 0;
     }
 
-    .document-fields--has-sidebar .document-fields__fields > .tabs-field,
-    .document-fields--has-sidebar .document-fields__fields > .group-field {
+    .document-fields--has-sidebar .document-fields__fields > .tabs-field {
       margin-right: calc(var(--gutter-h) * -1);
     }
 
@@ -220,7 +195,66 @@
     }
   }
 
+  /* Inside a drawer, collapse the sidebar based on the drawer container width
+     rather than the viewport. Sidebars show when the drawer is >= 768px wide. */
+  @container drawer (max-width: 768px) {
+    .document-fields--has-sidebar .document-fields__main {
+      width: 100%;
+    }
+
+    [dir='ltr'] .document-fields--has-sidebar .document-fields__edit {
+      border-right: 0;
+    }
+
+    [dir='rtl'] .document-fields--has-sidebar .document-fields__edit {
+      border-left: 0;
+    }
+
+    .document-fields--has-sidebar .document-fields__fields > .tabs-field {
+      margin-right: calc(var(--gutter-h) * -1);
+    }
+
+    .document-fields {
+      display: block;
+    }
+
+    .document-fields__main {
+      width: 100%;
+      min-height: initial;
+    }
+
+    .document-fields__sidebar-wrap {
+      position: static;
+      width: 100%;
+      height: initial;
+      min-width: initial;
+      border-left: 0;
+    }
+
+    .document-fields__form {
+      display: block;
+    }
+
+    .document-fields__sidebar-fields {
+      padding-top: 0;
+      padding-bottom: 0;
+      gap: var(--spacer-2);
+    }
+
+    .document-fields__sidebar {
+      padding-bottom: calc(var(--spacer-5) * 2);
+      overflow: visible;
+    }
+  }
+
+  /* When shown inside a drawer (container >= 768px), keep a minimum sidebar width of 320px. */
+  @container drawer (min-width: 768px) {
+    .document-fields--has-sidebar .document-fields__sidebar-wrap {
+      min-width: 320px;
+    }
+  }
+
   .drawer .document-fields__edit {
-    padding: var(--spacer-2-5);
+    padding: var(--gutter-h);
   }
 }

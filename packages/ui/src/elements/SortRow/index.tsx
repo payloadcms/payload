@@ -3,8 +3,8 @@
 import React from 'react'
 
 import { AlignJustifiedIcon } from '../../icons/AlignJustified/index.js'
-import './index.scss'
 import { useListQuery } from '../../providers/ListQuery/index.js'
+import './index.css'
 
 const baseClass = 'sort-row'
 
@@ -14,7 +14,7 @@ export const SortRow = () => {
 
   return (
     <div className={`${baseClass} ${isActive ? 'active' : ''}`} role="button" tabIndex={0}>
-      <AlignJustifiedIcon className={`${baseClass}__icon`} />
+      <AlignJustifiedIcon />
     </div>
   )
 }

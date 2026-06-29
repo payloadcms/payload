@@ -1,26 +1,8 @@
 @layer payload-default {
-  /* Override drawer to be a centered modal instead of side panel */
-  .hierarchy-drawer.drawer {
-    justify-content: center;
-    align-items: center;
-  }
-
-  .hierarchy-drawer .drawer__blur-bg {
-    background: var(--color-modalbackdrop);
-  }
-
-  .hierarchy-drawer .drawer__content {
+  .dialog.hierarchy-drawer {
     width: min(900px, calc(100vw - var(--spacer-6)));
     height: min(700px, calc(100vh - var(--spacer-6)));
-    border-radius: var(--radius-large);
-    transform: none;
-    box-shadow: var(--elevation-500-dialog);
-  }
-
-  .hierarchy-drawer .drawer__close {
-    position: absolute;
-    inset: 0;
-    background: transparent;
+    max-width: calc(100vw - var(--spacer-6));
   }
 
   .hierarchy-drawer__content {
@@ -40,8 +22,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: var(--spacer-2) var(--gutter-h);
-    border-bottom: 1px solid var(--color-border);
+    padding: var(--spacer-2) var(--spacer-2-5);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
     flex-shrink: 0;
   }
 

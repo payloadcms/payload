@@ -15,6 +15,7 @@ export const BeforeDeleteCollection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }
 
 export const BeforeDelete2Collection: CollectionConfig = {
@@ -32,4 +33,5 @@ export const BeforeDelete2Collection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

@@ -1,4 +1,5 @@
 import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { SanitizedDrafts } from '../../versions/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
@@ -97,6 +98,8 @@ export const sanitizeGlobal = async (
     }
   }
 
+  global.versions = global.versions ?? true
+
   if (global.versions) {
     if (global.versions === true) {
       global.versions = {
@@ -117,15 +120,10 @@ export const sanitizeGlobal = async (
 
       const hasLocalizedFields = traverseForLocalizedFields(global.fields)
 
-      if (config.localization && hasLocalizedFields) {
-        if (global.versions.drafts.localizeStatus === undefined) {
-          global.versions.drafts.localizeStatus = false
-        }
-      }
-
-      global.versions.drafts.localizeStatus = config.experimental?.localizeStatus
-        ? global.versions.drafts.localizeStatus
-        : false
+      // Auto-enable per-locale status when localization is configured and the global has localized fields.
+      ;(global.versions.drafts as SanitizedDrafts).localizeStatus = !!(
+        config.localization && hasLocalizedFields
+      )
 
       if (global.versions.drafts.autosave === true) {
         global.versions.drafts.autosave = {
@@ -140,7 +138,7 @@ export const sanitizeGlobal = async (
       global.fields = mergeBaseFields(
         global.fields,
         baseVersionFields({
-          localized: global.versions.drafts.localizeStatus ?? false,
+          localized: (global.versions.drafts as SanitizedDrafts).localizeStatus ?? false,
         }),
       )
     }

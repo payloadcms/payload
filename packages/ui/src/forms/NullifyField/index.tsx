@@ -8,7 +8,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useForm } from '../Form/context.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'nullify-locale-field'
 

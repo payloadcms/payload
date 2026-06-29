@@ -22,7 +22,105 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
     {
       name: 'title',
       type: 'text',
+      admin: {
+        className: 'query-preset-title',
+      },
       required: true,
+    },
+    {
+      type: 'row',
+      admin: {
+        className: 'query-preset-controls-row',
+      },
+      fields: [
+        {
+          name: 'presetsHeading',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: {
+                clientProps: {
+                  i18nKey: 'general:presets',
+                },
+                path: '@payloadcms/ui#QueryPresetsHeading',
+              },
+            },
+          },
+        },
+        {
+          name: 'groupBy',
+          type: 'text',
+          admin: {
+            components: {
+              Cell: '@payloadcms/ui#QueryPresetsGroupByCell',
+              Field: '@payloadcms/ui#QueryPresetsGroupByField',
+            },
+          },
+          label: 'Group By',
+        },
+        {
+          name: 'columns',
+          type: 'json',
+          admin: {
+            components: {
+              Cell: '@payloadcms/ui#QueryPresetsColumnsCell',
+              Field: '@payloadcms/ui#QueryPresetsColumnField',
+            },
+          },
+          validate: (value) => {
+            if (value) {
+              try {
+                JSON.parse(JSON.stringify(value))
+              } catch {
+                return 'Invalid JSON'
+              }
+            }
+
+            return true
+          },
+        },
+      ],
+    },
+    {
+      name: 'where',
+      type: 'json',
+      admin: {
+        components: {
+          Cell: '@payloadcms/ui#QueryPresetsWhereCell',
+          Field: '@payloadcms/ui#QueryPresetsWhereField',
+        },
+      },
+      hooks: {
+        beforeValidate: [
+          ({ data }) => {
+            // transform the "where" query here so that the client-side doesn't have to
+            if (data?.where) {
+              if (validateWhereQuery(data.where)) {
+                return data.where
+              } else {
+                return transformWhereQuery(data.where)
+              }
+            }
+
+            return data?.where
+          },
+        ],
+      },
+      label: 'Filters',
+    },
+    {
+      name: 'accessHeading',
+      type: 'ui',
+      admin: {
+        components: {
+          Field: {
+            clientProps: {
+              i18nKey: 'general:access',
+            },
+            path: '@payloadcms/ui#QueryPresetsHeading',
+          },
+        },
+      },
     },
     {
       name: 'isShared',
@@ -46,65 +144,6 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       },
     },
     getConstraints(config),
-    {
-      name: 'where',
-      type: 'json',
-      admin: {
-        components: {
-          Cell: '@payloadcms/next/client#QueryPresetsWhereCell',
-          Field: '@payloadcms/next/client#QueryPresetsWhereField',
-        },
-      },
-      hooks: {
-        beforeValidate: [
-          ({ data }) => {
-            // transform the "where" query here so that the client-side doesn't have to
-            if (data?.where) {
-              if (validateWhereQuery(data.where)) {
-                return data.where
-              } else {
-                return transformWhereQuery(data.where)
-              }
-            }
-
-            return data?.where
-          },
-        ],
-      },
-      label: 'Filters',
-    },
-    {
-      name: 'columns',
-      type: 'json',
-      admin: {
-        components: {
-          Cell: '@payloadcms/next/client#QueryPresetsColumnsCell',
-          Field: '@payloadcms/next/client#QueryPresetsColumnField',
-        },
-      },
-      validate: (value) => {
-        if (value) {
-          try {
-            JSON.parse(JSON.stringify(value))
-          } catch {
-            return 'Invalid JSON'
-          }
-        }
-
-        return true
-      },
-    },
-    {
-      name: 'groupBy',
-      type: 'text',
-      admin: {
-        components: {
-          Cell: '@payloadcms/next/client#QueryPresetsGroupByCell',
-          Field: '@payloadcms/next/client#QueryPresetsGroupByField',
-        },
-      },
-      label: 'Group By',
-    },
     {
       name: 'relatedCollection',
       type: 'select',
@@ -183,4 +222,5 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
   },
   lockDocuments: false,
   select: ({ select }) => (select ? { ...select, relatedCollection: true } : undefined),
+  versions: false,
 })

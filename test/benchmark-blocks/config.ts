@@ -23,6 +23,7 @@ export default buildConfigWithDefaults({
         read: () => true,
       },
       fields: generateBlockFields(40, 30 * 20, USE_BLOCK_REFERENCES),
+      versions: false,
     },
     MediaCollection,
   ],

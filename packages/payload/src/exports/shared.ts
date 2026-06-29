@@ -19,7 +19,7 @@ export {
   generateNKeysBetween,
 } from '../config/orderable/fractional-indexing.js'
 
-export { serverProps } from '../config/types.js'
+export { isUserMenuSettingsGroup, serverProps } from '../config/types.js'
 
 export { type Slugify } from '../fields/baseFields/slug/index.js'
 
@@ -66,6 +66,7 @@ export { validOperators, validOperatorSet } from '../types/constants.js'
 
 export { formatFilesize } from '../uploads/formatFilesize.js'
 export { isImage } from '../uploads/isImage.js'
+export { matchMimeType } from '../uploads/matchMimeType.js'
 export { appendDateTimezoneSelectFields } from '../utilities/appendDateTimezoneSelectFields.js'
 export { appendUploadSelectFields } from '../utilities/appendUploadSelectFields.js'
 export { applyLocaleFiltering } from '../utilities/applyLocaleFiltering.js'

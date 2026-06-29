@@ -11,7 +11,7 @@
       left: calc(var(--gutter-h) * -1);
       right: calc(var(--gutter-h) * -1);
       height: 0;
-      border-top: 1px solid var(--color-border);
+      border-top: var(--stroke-width-small) solid var(--color-border);
     }
 
     &:first-child {
@@ -33,7 +33,7 @@
       left: calc(var(--spacer-3) * -1);
       right: calc(var(--spacer-3) * -1);
       height: 0;
-      border-top: 1px solid var(--color-border);
+      border-top: var(--stroke-width-small) solid var(--color-border);
     }
 
     &:first-child {
@@ -79,7 +79,7 @@
   }
 
   .group-field--gutter {
-    border-left: 1px solid var(--color-border);
+    border-left: var(--stroke-width-small) solid var(--color-border);
     padding-left: var(--spacer-3);
   }
 
@@ -132,7 +132,7 @@
         left: calc(var(--gutter-h) * -1);
         right: calc(var(--gutter-h) * -1);
         height: 0;
-        border-top: 1px solid var(--border-default);
+        border-top: var(--stroke-width-small) solid var(--color-border);
       }
     }
   }

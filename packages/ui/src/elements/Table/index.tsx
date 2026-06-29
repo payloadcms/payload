@@ -56,7 +56,15 @@ export const Table: React.FC<Props> = ({ appearance, BeforeTable, columns, data 
                     const { accessor } = col
 
                     return (
-                      <td className={`cell-${accessor.replace(/\./g, '__')}`} key={colIndex}>
+                      <td
+                        className={[
+                          `cell-${accessor.replace(/\./g, '__')}`,
+                          col.isLinkedColumn && 'cell--linked',
+                        ]
+                          .filter(Boolean)
+                          .join(' ')}
+                        key={colIndex}
+                      >
                         {col.renderedCells[rowIndex]}
                       </td>
                     )

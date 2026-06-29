@@ -58,6 +58,7 @@ export const contactForm: RequiredDataFromCollectionSlug<'forms'> = {
               format: '',
               indent: 0,
               textFormat: 0,
+              textStyle: '',
               version: 1,
             },
           ],

@@ -6,9 +6,8 @@ import React, { useState } from 'react'
 
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { usePreferences } from '../../providers/Preferences/index.js'
-import './index.css'
-import { AnimateHeight } from '../AnimateHeight/index.js'
 import { useNav } from '../Nav/context.js'
+import './index.css'
 
 const baseClass = 'nav-group'
 
@@ -23,13 +22,11 @@ export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, l
     typeof isOpenFromProps !== 'undefined' ? !isOpenFromProps : false,
   )
 
-  const [animate, setAnimate] = useState(false)
   const { setPreference } = usePreferences()
   const { navOpen } = useNav()
 
   if (label) {
     const toggleCollapsed = () => {
-      setAnimate(true)
       const newGroupPrefs: NavPreferences['groups'] = {}
 
       if (!newGroupPrefs?.[label]) {
@@ -65,9 +62,7 @@ export const NavGroup: React.FC<Props> = ({ children, isOpen: isOpenFromProps, l
           </div>
           <div className={`${baseClass}__label`}>{label}</div>
         </button>
-        <AnimateHeight duration={animate ? 200 : 0} height={collapsed ? 0 : 'auto'}>
-          <div className={`${baseClass}__content`}>{children}</div>
-        </AnimateHeight>
+        {!collapsed && <div className={`${baseClass}__content`}>{children}</div>}
       </div>
     )
   }

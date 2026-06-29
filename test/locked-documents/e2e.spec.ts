@@ -27,6 +27,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -209,7 +210,7 @@ describe('Locked Documents', () => {
       // Should be partial since one doc is locked and cannot be selected
       await expect(page.locator('.select-all .checkbox-input__icon.partial')).toBeVisible()
       await page.locator('.delete-documents__toggle').click()
-      await expect(page.locator('#confirm-delete-many-docs .alert-modal__content p')).toHaveText(
+      await expect(page.locator('#confirm-delete-many-docs .dialog__body p')).toHaveText(
         'You are about to delete 2 Posts',
       )
     })
@@ -228,7 +229,7 @@ describe('Locked Documents', () => {
       await page.locator('input#select-all').check()
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.delete-documents__toggle').click()
-      await page.locator('#confirm-delete-many-docs #confirm-action').click()
+      await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
 
@@ -246,7 +247,8 @@ describe('Locked Documents', () => {
       await page.locator('input#select-all').check()
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.list-selection__button[aria-label="Publish"]').click()
-      await page.locator('#publish-posts #confirm-action').click()
+      await page.locator('#publish-posts [data-dialog-action="confirm"]').click()
+      await expect(page.locator('#publish-posts')).toBeHidden()
 
       await goToNextPage(page)
       await expect(page.locator('.row-1 .cell-_status')).toContainText('Draft')
@@ -265,7 +267,7 @@ describe('Locked Documents', () => {
       await page.locator('input#select-all').check()
       await page.locator('.list-selection .list-selection__button#select-all-across-pages').click()
       await page.locator('.list-selection__button[aria-label="Unpublish"]').click()
-      await page.locator('#unpublish-posts #confirm-action').click()
+      await page.locator('#unpublish-posts [data-dialog-action="confirm"]').click()
       await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
         'Updated 10 Posts successfully.',
       )
@@ -289,7 +291,7 @@ describe('Locked Documents', () => {
 
       await page.locator('.field-select .rs__control').click()
 
-      const textOption = page.locator('.field-select .rs__option', {
+      const textOption = getSelectMenu({ page }).locator('.rs__option', {
         hasText: exactText('Text'),
       })
 
@@ -509,7 +511,7 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page.locator('#leave-without-saving .alert-modal__controls .btn--style-primary').click()
+      await page.locator('#leave-without-saving .dialog__footer .btn--style-primary').click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)
@@ -560,7 +562,7 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page.locator('#leave-without-saving .alert-modal__controls .btn--style-primary').click()
+      await page.locator('#leave-without-saving .dialog__footer .btn--style-primary').click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(500)
@@ -693,7 +695,7 @@ describe('Locked Documents', () => {
       const modalContainer = page.locator('.payload__modal-container')
       await expect(modalContainer).toBeVisible()
 
-      await page.locator('#document-locked-go-back').click()
+      await page.locator('#document-locked-cancel').click()
 
       // should go back to collection list view
       expect(page.url()).toContain(postsUrl.list)
@@ -712,7 +714,7 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click Go Back
-      await page.locator('#document-locked-go-back').click()
+      await page.locator('#document-locked-cancel').click()
 
       // Wait for navigation to complete
       await page.waitForURL(`**${postsUrl.list}`)
@@ -725,7 +727,7 @@ describe('Locked Documents', () => {
 
       // Modal should appear again (verifies no stuck modal state)
       await expect(modalContainer).toBeVisible()
-      await expect(page.locator('#document-locked-go-back')).toBeVisible()
+      await expect(page.locator('#document-locked-cancel')).toBeVisible()
     })
 
     test('should not show Document Locked modal for incoming user when entering expired locked document', async () => {
@@ -766,10 +768,10 @@ describe('Locked Documents', () => {
       // Click read-only button to view doc in read-only mode
       await page.locator('#document-locked-view-read-only').click()
 
-      // save buttons should be readOnly / disabled
-      await expect(page.locator('#action-save-draft')).toBeDisabled()
-      await expect(page.locator('#action-save')).toBeDisabled()
-      await expect(page.locator('.doc-controls__dots')).toBeHidden()
+      // save buttons should be hidden in read-only mode
+      await expect(page.locator('#action-save-draft')).toBeHidden()
+      await expect(page.locator('#action-save')).toBeHidden()
+      await expect(page.locator('.doc-controls__popup')).toBeHidden()
 
       // fields should be readOnly / disabled
       await expect(page.locator('#field-text')).toBeDisabled()
@@ -872,7 +874,7 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click take-over button to take over editing rights of locked doc
-      await page.locator('#document-locked-take-over').click()
+      await page.locator('#document-locked-confirm').click()
 
       // eslint-disable-next-line payload/no-wait-function
       await wait(1000)
@@ -908,7 +910,7 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click take-over button to take over editing rights of locked doc
-      await page.locator('#document-locked-take-over').click()
+      await page.locator('#document-locked-confirm').click()
 
       // Wait for the modal to disappear
       await expect(modalContainer).toBeHidden()
@@ -1156,7 +1158,7 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click read-only button to view doc in read-only mode
-      await page.locator('#document-take-over-back-to-dashboard').click()
+      await page.locator('#document-take-over-confirm').click()
 
       expect(page.url()).toContain(postsUrl.admin)
 
@@ -1211,11 +1213,11 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click read-only button to view doc in read-only mode
-      await page.locator('#document-take-over-view-read-only').click()
+      await page.locator('#document-take-over-cancel').click()
 
-      // save buttons should be readOnly / disabled
-      await expect(page.locator('#action-save-draft')).toBeDisabled()
-      await expect(page.locator('#action-save')).toBeDisabled()
+      // save buttons should be hidden in read-only mode
+      await expect(page.locator('#action-save-draft')).toBeHidden()
+      await expect(page.locator('#action-save')).toBeHidden()
 
       // fields should be readOnly / disabled
       await expect(page.locator('#field-text')).toBeDisabled()
@@ -1266,7 +1268,7 @@ describe('Locked Documents', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click read-only button to view doc in read-only mode
-      await page.locator('#document-take-over-view-read-only').click()
+      await page.locator('#document-take-over-cancel').click()
 
       // fields should be readOnly / disabled
       await expect(page.locator('#field-customTextServer')).toBeDisabled()
@@ -1474,7 +1476,7 @@ describe('Locked Documents', () => {
         // Stale data modal should appear for user 2
         const modalContainer = user2Page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
-        await expect(user2Page.locator('#document-stale-data .alert-modal__title')).toHaveText(
+        await expect(user2Page.locator('#document-stale-data .dialog-title')).toHaveText(
           'Document modified',
         )
       })
@@ -1500,7 +1502,7 @@ describe('Locked Documents', () => {
         await wait(500)
 
         // User 2 clicks reload button in modal
-        await user2Page.locator('#document-stale-data-reload').click()
+        await user2Page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)
@@ -1536,7 +1538,7 @@ describe('Locked Documents', () => {
         await expect(modalContainer).toBeVisible()
 
         // User 2 reloads
-        await user2Page.locator('#document-stale-data-reload').click()
+        await user2Page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)
@@ -1560,7 +1562,7 @@ describe('Locked Documents', () => {
         await expect(modalContainer).toBeVisible()
 
         // User 1 reloads
-        await page.locator('#document-stale-data-reload').click()
+        await page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)
@@ -1584,7 +1586,7 @@ describe('Locked Documents', () => {
         await expect(modalContainer).toBeVisible()
 
         // User 2 reloads
-        await user2Page.locator('#document-stale-data-reload').click()
+        await user2Page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)
@@ -1632,7 +1634,7 @@ describe('Locked Documents', () => {
         await expect(modalContainer).toBeVisible()
 
         // User 2 reloads
-        await user2Page.locator('#document-stale-data-reload').click()
+        await user2Page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)
@@ -1656,7 +1658,7 @@ describe('Locked Documents', () => {
         await expect(modalContainer).toBeVisible()
 
         // User 1 reloads
-        await page.locator('#document-stale-data-reload').click()
+        await page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)
@@ -1680,7 +1682,7 @@ describe('Locked Documents', () => {
         await expect(modalContainer).toBeVisible()
 
         // User 2 reloads
-        await user2Page.locator('#document-stale-data-reload').click()
+        await user2Page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)
@@ -1874,7 +1876,7 @@ describe('Locked Documents', () => {
         // Stale data modal should appear for user 2
         const modalContainer = user2Page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
-        await expect(user2Page.locator('#document-stale-data .alert-modal__title')).toHaveText(
+        await expect(user2Page.locator('#document-stale-data .dialog-title')).toHaveText(
           'Document modified',
         )
       })
@@ -1909,7 +1911,7 @@ describe('Locked Documents', () => {
         await wait(500)
 
         // User 2 clicks reload button in modal
-        await user2Page.locator('#document-stale-data-reload').click()
+        await user2Page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)
@@ -1954,7 +1956,7 @@ describe('Locked Documents', () => {
         await expect(modalContainer).toBeVisible()
 
         // User 2 reloads
-        await user2Page.locator('#document-stale-data-reload').click()
+        await user2Page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)
@@ -1978,7 +1980,7 @@ describe('Locked Documents', () => {
         await expect(modalContainer).toBeVisible()
 
         // User 1 reloads
-        await page.locator('#document-stale-data-reload').click()
+        await page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)
@@ -2002,7 +2004,7 @@ describe('Locked Documents', () => {
         await expect(modalContainer).toBeVisible()
 
         // User 2 reloads
-        await user2Page.locator('#document-stale-data-reload').click()
+        await user2Page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)
@@ -2065,7 +2067,7 @@ describe('Locked Documents', () => {
         // Stale data modal should appear for user 2
         const modalContainer = user2Page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
-        await expect(user2Page.locator('#document-stale-data .alert-modal__title')).toHaveText(
+        await expect(user2Page.locator('#document-stale-data .dialog-title')).toHaveText(
           'Document modified',
         )
       })
@@ -2110,7 +2112,7 @@ describe('Locked Documents', () => {
         await expect(modalContainer).toBeVisible()
 
         // User 2 reloads
-        await user2Page.locator('#document-stale-data-reload').click()
+        await user2Page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)
@@ -2134,7 +2136,7 @@ describe('Locked Documents', () => {
         await expect(modalContainer).toBeVisible()
 
         // User 1 reloads
-        await page.locator('#document-stale-data-reload').click()
+        await page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)
@@ -2158,7 +2160,7 @@ describe('Locked Documents', () => {
         await expect(modalContainer).toBeVisible()
 
         // User 2 reloads
-        await user2Page.locator('#document-stale-data-reload').click()
+        await user2Page.locator('#document-stale-data-confirm').click()
 
         // eslint-disable-next-line payload/no-wait-function
         await wait(500)

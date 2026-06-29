@@ -68,6 +68,14 @@ export const Pages: CollectionConfig = {
           label: 'Test',
           fields: [
             {
+              name: 'testNumber',
+              type: 'number',
+              label: 'Test Number Field',
+              admin: {
+                description: 'A number field for visual comparison with toolbar size inputs',
+              },
+            },
+            {
               name: 'localizedTitle',
               type: 'text',
               localized: true,
@@ -205,4 +213,5 @@ export const Pages: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
