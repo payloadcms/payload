@@ -62,13 +62,13 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_5AC9F469".
+ * via the `definition` "LexicalNodes_2AD6024E".
  */
-export type LexicalNodes_5AC9F469 =
+export type LexicalNodes_2AD6024E =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_5AC9F469>
+  | SerializedParagraphNode<LexicalNodes_2AD6024E>
   | SerializedHorizontalRuleNode
   | {
       type: 'upload';
@@ -78,7 +78,7 @@ export type LexicalNodes_5AC9F469 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_5AC9F469>
+  | SerializedQuoteNode<LexicalNodes_2AD6024E>
   | SerializedRelationshipNode<
       | 'posts'
       | 'relation-a'
@@ -86,17 +86,17 @@ export type LexicalNodes_5AC9F469 =
       | 'shops'
       | 'items'
       | 'itemTags'
-      | 'users'
       | 'payload-kv'
+      | 'users'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_5AC9F469, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_5AC9F469, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_5AC9F469>
-  | SerializedListItemNode<LexicalNodes_5AC9F469>
-  | SerializedHeadingNode<LexicalNodes_5AC9F469>;
+  | SerializedAutoLinkNode<LexicalNodes_2AD6024E, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_2AD6024E, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_2AD6024E>
+  | SerializedListItemNode<LexicalNodes_2AD6024E>
+  | SerializedHeadingNode<LexicalNodes_2AD6024E>;
 
 export interface Config {
   auth: {
@@ -110,8 +110,8 @@ export interface Config {
     shops: Shop;
     items: Item;
     itemTags: ItemTag;
-    users: User;
     'payload-kv': PayloadKv;
+    users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -124,8 +124,8 @@ export interface Config {
     shops: ShopsSelect<false> | ShopsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
     itemTags: ItemTagsSelect<false> | ItemTagsSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -207,7 +207,7 @@ export interface User {
 export interface RelationA {
   id: string;
   relationship?: (string | null) | RelationB;
-  richText?: LexicalRichText<LexicalNodes_5AC9F469> | null;
+  richText?: LexicalRichText<LexicalNodes_2AD6024E> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -218,7 +218,7 @@ export interface RelationA {
 export interface RelationB {
   id: string;
   relationship?: (string | null) | RelationA;
-  richText?: LexicalRichText<LexicalNodes_5AC9F469> | null;
+  richText?: LexicalRichText<LexicalNodes_2AD6024E> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -409,6 +409,14 @@ export interface ItemTagsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -428,14 +436,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -548,7 +548,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -563,7 +563,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

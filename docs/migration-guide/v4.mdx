@@ -362,6 +362,13 @@ export const myRichTextAdapter = (): RichTextAdapterProvider => {
 
 The `transactionIDPromise` property on `PayloadRequest` has been removed. It was deprecated and unused — `transactionID` (which already supports `Promise<number | string>`) is the correct property to use for both resolved values and pending transactions.
 
+### `defaults` config export removed from `payload` ([#17103](https://github.com/payloadcms/payload/pull/17103))
+
+The defaults object exported from payload has been removed. It was deprecated because it was a single shared object and mutating it (or any config that used it as a base) leaked changes into every other consumer of the defaults.
+
+If you depended on reading a specific default value at runtime, read it from the sanitized config returned by buildConfig (or payload.config) instead of from the static defaults object.
+Alternatively, you can call `addDefaultsToConfig` to get the unsanitized config but populated with the default properties.
+
 ### Plugin Import/Export: `toCSV` and `fromCSV` removed
 
 The `toCSV` and `fromCSV` field options in `custom['plugin-import-export']` have been removed. Use `hooks.beforeExport` and `hooks.beforeImport` instead — they work for both CSV and JSON formats.
@@ -708,6 +715,8 @@ Block nodes come through as `SerializedBlockNode<TFields>` / `SerializedInlineBl
 Code that imported field types from `payload-types.ts` and cast through `unknown` may now type-check tighter and surface real bugs.
 
 The hand-written `TypedEditorState` / `DefaultTypedEditorState` helpers (used to type rich text in converters, custom renderers, and so on) got stricter to match. `TypedEditorState` dropped the `{ [k: string]: unknown }` at the editor-state root, and a node's `children` are now the real node union at any depth — they used to fall back to the loose `SerializedLexicalNode`. Runtime data is unchanged, but narrow by `node.type` where you read nested nodes loosely.
+
+Relationship and upload node `value` - and the exported `RelationshipData` / `UploadData` types - now use each collection's own ID type instead of `number | string`. This is narrower, but it only removes an ID type that was never valid for that collection (e.g. `number` for a string-ID collection).
 
 Element nodes are now generic over their `children`, and you pass the node union into them yourself (previously `TypedEditorState` did this for you via an internal `RecursiveNodes` helper):
 

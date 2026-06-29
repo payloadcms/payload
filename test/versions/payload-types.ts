@@ -62,24 +62,24 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_F50D3E7C".
+ * via the `definition` "LexicalNodes_E98BC274".
  */
-export type LexicalNodes_F50D3E7C =
+export type LexicalNodes_E98BC274 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_F50D3E7C>
+  | SerializedParagraphNode<LexicalNodes_E98BC274>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_F50D3E7C>
+  | SerializedHeadingNode<LexicalNodes_E98BC274>
   | SerializedUploadNode<'draft-with-upload'>
   | SerializedUploadNode<'draft-with-upload-cloud-storage'>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
   | SerializedUploadNode<'media2'>
-  | SerializedQuoteNode<LexicalNodes_F50D3E7C>
-  | SerializedListNode<LexicalNodes_F50D3E7C>
-  | SerializedListItemNode<LexicalNodes_F50D3E7C>
-  | SerializedAutoLinkNode<LexicalNodes_F50D3E7C, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_F50D3E7C, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_E98BC274>
+  | SerializedListNode<LexicalNodes_E98BC274>
+  | SerializedListItemNode<LexicalNodes_E98BC274>
+  | SerializedAutoLinkNode<LexicalNodes_E98BC274, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_E98BC274, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'disable-publish'
       | 'posts'
@@ -99,8 +99,8 @@ export type LexicalNodes_F50D3E7C =
       | 'custom-ids'
       | 'diff'
       | 'text'
-      | 'users'
       | 'payload-kv'
+      | 'users'
       | 'payload-jobs'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -135,8 +135,8 @@ export interface Config {
     'draft-with-upload-cloud-storage': DraftWithUploadCloudStorage;
     media: Media;
     media2: Media2;
-    users: User;
     'payload-kv': PayloadKv;
+    users: User;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -166,8 +166,8 @@ export interface Config {
     'draft-with-upload-cloud-storage': DraftWithUploadCloudStorageSelect<false> | DraftWithUploadCloudStorageSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     media2: Media2Select<false> | Media2Select<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -265,7 +265,7 @@ export interface AutosavePost {
   title: string;
   relationship?: (string | null) | Post;
   computedTitle?: string | null;
-  richText?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
+  richText?: LexicalRichText<LexicalNodes_E98BC274> | null;
   json?:
     | {
         [k: string]: unknown;
@@ -563,8 +563,8 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
-  richtext?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
-  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_F50D3E7C> | null;
+  richtext?: LexicalRichText<LexicalNodes_E98BC274> | null;
+  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_E98BC274> | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
@@ -1437,6 +1437,14 @@ export interface Media2Select<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -1456,14 +1464,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1887,7 +1887,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -1936,7 +1936,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

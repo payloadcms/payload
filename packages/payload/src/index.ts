@@ -1415,6 +1415,7 @@ export type {
   CollectionConfig,
   DataFromCollectionSlug,
   HookOperationType,
+  IDTypeForCollectionSlug,
   MeHook as CollectionMeHook,
   RefreshHook as CollectionRefreshHook,
   RequiredDataFromCollection,
@@ -1453,7 +1454,7 @@ export {
   serverOnlyConfigProperties,
   type UnauthenticatedClientConfig,
 } from './config/client.js'
-export { defaults } from './config/defaults.js'
+export { addDefaultsToConfig } from './config/defaults.js'
 export { definePlugin } from './config/definePlugin.js'
 
 export { type OrderableEndpointBody } from './config/orderable/index.js'
@@ -1892,6 +1893,7 @@ export {
   fieldsToJSONSchema,
   type FieldsToJSONSchemaArgs,
   registerBlockInterface,
+  type SchemaVariant,
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'

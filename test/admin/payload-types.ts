@@ -62,13 +62,13 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_7DB35FFD".
+ * via the `definition` "LexicalNodes_A6C43894".
  */
-export type LexicalNodes_7DB35FFD =
+export type LexicalNodes_A6C43894 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_7DB35FFD>
+  | SerializedParagraphNode<LexicalNodes_A6C43894>
   | SerializedRelationshipNode<
       | 'posts'
       | 'users'
@@ -309,7 +309,7 @@ export interface Post {
   title?: string | null;
   description?: string | null;
   number?: number | null;
-  richText?: LexicalRichText<LexicalNodes_7DB35FFD> | null;
+  richText?: LexicalRichText<LexicalNodes_A6C43894> | null;
   someTextField?: string | null;
   namedGroup?: {
     someTextField?: string | null;
@@ -1694,7 +1694,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
