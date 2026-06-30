@@ -220,7 +220,23 @@ There are now three types:
 
 Use `User` for stored or read user documents. Use `AuthenticatedUser` when code specifically receives the signed-in user from `req.user`, `payload.auth()`, or an auth strategy.
 
-No fields are added to or removed from user objects at runtime. Payload also adds defensive handling for missing users, sessions, and session `createdAt` values during session handling.
+**For plugin authors:** because `User` no longer has an index signature, reading a field your plugin adds to the user collection off `req.user` (or `User`) no longer type-checks. Declare an augmented type and cast `req.user` to it — this is what the first-party plugins now do (e.g. `@payloadcms/plugin-ecommerce` for its `cart` join field):
+
+```ts
+import type { User } from 'payload'
+
+// Your plugin adds a `cart` join field (or any custom field) to the user collection.
+type UserWithCart = { cart?: { docs?: (Cart | string)[] } | null } & User
+
+const user = req.user as null | UserWithCart
+user?.cart?.docs // now typed
+```
+
+If the field name is dynamic (configurable at runtime), index through `Record<string, unknown>` instead:
+
+```ts
+const value = (user as Record<string, unknown>)[fieldNameFromConfig]
+```
 
 ### `next/navigation` and `next/link` replaced by framework-agnostic `RouterAdapter` hooks
 
