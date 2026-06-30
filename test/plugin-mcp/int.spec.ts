@@ -2035,6 +2035,62 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(toolNames).not.toContain('getGlobalSchema')
     })
 
+    it('getCollectionSchema: should hide inaccessible fields inside groups and arrays', async ({
+      mcp,
+    }) => {
+      const apiKey = await getApiKey({
+        fields: {
+          'field-types.arrayField.item': {
+            create: false,
+            update: false,
+          },
+          'field-types.groupField.groupText': {
+            create: false,
+            update: false,
+          },
+        },
+      })
+      const client = await mcp.connect(apiKey)
+      const response = await client.callTool({
+        arguments: {
+          collectionSlug: 'field-types',
+        },
+        name: 'getCollectionSchema',
+      })
+      const schema = getToolDoc<JsonSchemaType>(response)
+
+      expect(schema).not.toHaveProperty('properties.groupField.properties.groupText')
+      expect(schema).toHaveProperty('properties.groupField.properties.groupNumber')
+      expect(schema).not.toHaveProperty('properties.arrayField.items.properties.item')
+      expect(schema).toHaveProperty('properties.arrayField.items.properties.itemNumber')
+    })
+
+    it('getCollectionSchema: should hide inaccessible fields inside blocks', async ({ mcp }) => {
+      const apiKey = await getApiKey({
+        fields: {
+          'pages.layout.hero.heading': {
+            create: false,
+            update: false,
+          },
+        },
+      })
+      const client = await mcp.connect(apiKey)
+      const response = await client.callTool({
+        arguments: {
+          collectionSlug: 'pages',
+        },
+        name: 'getCollectionSchema',
+      })
+      const schema = getToolDoc<JsonSchemaType>(response)
+
+      expect(schema).not.toHaveProperty('properties.layout.items.oneOf.0.properties.heading')
+      expect(schema).toHaveProperty('properties.layout.items.oneOf.0.properties.subheading')
+      expect(schema).not.toHaveProperty(
+        'properties.layout.items.oneOf.0.required',
+        expect.arrayContaining(['heading']),
+      )
+    })
+
     it('getCollectionSchema: should intersect collection and field write access', async ({
       mcp,
     }) => {
