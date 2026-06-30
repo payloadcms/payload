@@ -7,6 +7,7 @@ import type {
   Where,
 } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import { dequal } from 'dequal/lite'
 import { formatAdminURL, wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -25,17 +26,14 @@ import { RenderCustomComponent } from '../../elements/RenderCustomComponent/inde
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
 import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
-import { useForm } from '../../forms/Form/context.js'
 import { useDebouncedCallback } from '../../hooks/useDebouncedCallback.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useQueue } from '../../hooks/useQueue.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
-import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { generateFieldID } from '../../utilities/generateFieldID.js'
 import { sanitizeFilterOptionsQuery } from '../../utilities/sanitizeFilterOptionsQuery.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
@@ -89,9 +87,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const { i18n, t } = useTranslation()
   const { permissions } = useAuth()
   const { code: locale } = useLocale()
-  const editDepth = useEditDepth()
-  const { uuid } = useForm()
-  const inputId = `${generateFieldID(path, editDepth, uuid)}-input`
 
   const [currentlyOpenRelationship, setCurrentlyOpenRelationship] = useState<
     Parameters<ReactSelectAdapterProps['customProps']['onDocumentOpen']>[0]
@@ -770,13 +765,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       <RenderCustomComponent
         CustomComponent={Label}
         Fallback={
-          <FieldLabel
-            htmlFor={inputId}
-            label={label}
-            localized={localized}
-            path={path}
-            required={required}
-          />
+          <FieldLabel label={label} localized={localized} path={path} required={required} />
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
@@ -791,6 +780,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 Fallback={<FieldError path={path} showError={showError} />}
               />
               <ReactSelect
+                aria-label={getTranslation(label, i18n)}
                 backspaceRemovesValue={!(isDrawerOpen || isListDrawerOpen)}
                 components={{
                   MultiValueLabel,
@@ -812,7 +802,6 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                     ? `${option.relationTo}_${option.value}`
                     : (option.value as string)
                 }}
-                inputId={inputId}
                 isLoading={appearance === 'select' && isLoading}
                 isMulti={hasMany}
                 isSearchable={appearance === 'select'}
