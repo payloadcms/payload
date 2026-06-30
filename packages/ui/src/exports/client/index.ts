@@ -39,6 +39,7 @@ export { QueryPresetsGroupByCell } from '../../elements/QueryPresets/cells/Group
 export { QueryPresetsColumnField } from '../../elements/QueryPresets/fields/ColumnsField/index.js'
 export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
 export { QueryPresetsGroupByField } from '../../elements/QueryPresets/fields/GroupByField/index.js'
+export { CollectionQuerySortField } from '../../widgets/CollectionQuery/SortField/index.js'
 export { QueryPresetsHeading } from '../../elements/QueryPresets/fields/Heading/index.js'
 
 // elements
@@ -164,17 +165,19 @@ export type { HierarchyButtonClientProps } from '../../elements/Hierarchy/DocHea
 export { HierarchyFieldClient } from '../../elements/Hierarchy/Field/index.client.js'
 export type { HierarchyFieldClientProps } from '../../elements/Hierarchy/Field/index.client.js'
 export {
-  formatHierarchyDrawerSlug,
-  HierarchyDrawerToggler,
-  useHierarchyDrawer,
-} from '../../elements/Hierarchy/Drawer/useHierarchyDrawer.js'
+  formatHierarchyModalSlug,
+  HierarchyModalToggler,
+  useHierarchyModal,
+} from '../../elements/Hierarchy/Modal/useHierarchyModal.js'
 export type {
   HierarchyDrawerProps,
   HierarchyDrawerTogglerProps,
+  HierarchyModalProps,
+  HierarchyModalTogglerProps,
   SelectionWithPath,
-  UseHierarchyDrawer,
-  UseHierarchyDrawerArgs,
-} from '../../elements/Hierarchy/Drawer/types.js'
+  UseHierarchyModal,
+  UseHierarchyModalArgs,
+} from '../../elements/Hierarchy/Modal/types.js'
 export { ListSelection } from '../../views/List/ListSelection/index.js'
 export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'
 export { GroupByHeader } from '../../views/List/GroupByHeader/index.js'

@@ -115,6 +115,22 @@ export const hrTranslations: DefaultTranslationsObject = {
       'Na vašoj nadzornoj ploči nema widgeta. Možete ih dodati iz izbornika "Nadzorna ploča" smještenog na vrhu.',
     resetLayout: 'Resetiraj raspored',
     searchWidgets: 'Pretraži widgete...',
+    widgetCollectionRequired: 'Collection je obvezan.',
+    widgetConfigurationError: 'Pogreška u konfiguraciji widgeta',
+    widgetInvalidCollection: 'Collection "{{collection}}" ne postoji.',
+    widgetInvalidFilterField: 'Filter polje "{{field}}" ne postoji u kolekciji "{{collection}}".',
+    widgetInvalidSortField:
+      'Polje za sortiranje "{{field}}" ne postoji u kolekciji "{{collection}}".',
+    widgetLimitLabel: 'Ograničenje',
+    widgetNonSortableSortField:
+      'Polje sortiranja "{{field}}" nije moguće sortirati u kolekciji "{{collection}}".',
+    widgetQueryError: 'Nije bilo moguće učitati dokumente za ovaj widget.',
+    widgetSelectCollectionFirst: 'Odaberite Collection prije odabira sortiranja.',
+    widgetSelectSortField: 'Odaberite polje za sortiranje',
+    widgetSortDirectionLabel: 'Smjer sortiranja',
+    widgetSortFieldLabel: 'Sortiraj polje',
+    widgetTitleFallback: 'Upit kolekcije',
+    widgetTitleLabel: 'Naslov',
   },
   error: {
     accountAlreadyActivated: 'Ovaj račun je već aktiviran.',
@@ -184,6 +200,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     addRelationship: 'Dodaj odnos',
     addUpload: 'Dodaj učitavanje',
     block: 'Blokiranje',
+    blockName: 'Naziv bloka',
     blocks: 'blokiranja',
     blockType: 'Vrsta blokiranja',
     chooseBetweenCustomTextOrDocument:

@@ -827,7 +827,7 @@
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     width: 100%;
-    min-height: var(--field-min-height);
+    min-height: var(--field-min-height-large);
     border: var(--stroke-width-small) solid var(--field-color-border);
     border-radius: var(--field-border-radius);
     background: var(--field-color-bg);

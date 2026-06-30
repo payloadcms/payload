@@ -114,6 +114,22 @@ export const svTranslations: DefaultTranslationsObject = {
       'Det finns inga widgets på din instrumentpanel. Du kan lägga till dem från "Instrumentpanel" -menyn som finns i den översta fältet.',
     resetLayout: 'Återställ layout',
     searchWidgets: 'Sök efter widget...',
+    widgetCollectionRequired: 'Collection är obligatorisk.',
+    widgetConfigurationError: 'Fel i widgetkonfiguration',
+    widgetInvalidCollection: 'Collection "{{collection}}" finns inte.',
+    widgetInvalidFilterField: 'Filterfältet "{{field}}" finns inte i Collection "{{collection}}".',
+    widgetInvalidSortField:
+      'Sorteringsfältet "{{field}}" finns inte i Collection "{{collection}}".',
+    widgetLimitLabel: 'Begränsning',
+    widgetNonSortableSortField:
+      'Sorteringsfältet "{{field}}" kan inte sorteras i Collection "{{collection}}".',
+    widgetQueryError: 'Kunde inte läsa in dokument för denna widget.',
+    widgetSelectCollectionFirst: 'Välj en Collection innan du väljer sortering',
+    widgetSelectSortField: 'Välj ett fält att sortera efter',
+    widgetSortDirectionLabel: 'Sorteringsriktning',
+    widgetSortFieldLabel: 'Sorteringsfält',
+    widgetTitleFallback: 'Collectiefråga',
+    widgetTitleLabel: 'Titel',
   },
   error: {
     accountAlreadyActivated: 'Detta konto har redan aktiverats',
@@ -183,6 +199,7 @@ export const svTranslations: DefaultTranslationsObject = {
     addRelationship: 'Lägg till relation',
     addUpload: 'Lägg till uppladdning',
     block: 'Block',
+    blockName: 'Block-namn',
     blocks: 'block',
     blockType: 'Blocktyp',
     chooseBetweenCustomTextOrDocument:
