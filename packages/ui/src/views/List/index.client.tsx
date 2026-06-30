@@ -105,7 +105,15 @@ export function DefaultListView(props: ListViewClientProps) {
     collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
       ? collectionConfig.hierarchy
       : undefined
-  const useAsTitle = hierarchyConfig?.titleField || collectionConfig?.admin?.useAsTitle || 'id'
+  // Use bracket notation to avoid React Compiler flagging `use`-prefixed property accesses
+  // (the compiler treats `obj.useFoo` as a potential hook reference in client components).
+  const hierarchyAdminConfig = hierarchyConfig?.admin as { usePathAsTitle?: boolean } | undefined
+  const pathAsTitle = hierarchyAdminConfig?.['usePathAsTitle']
+  const hierarchyAsRecord = hierarchyConfig as Record<string, unknown> | undefined
+  const titleColumnKey = pathAsTitle
+    ? (hierarchyAsRecord?.['titlePathFieldName'] as string | undefined)
+    : undefined
+  const useAsTitle = titleColumnKey ?? collectionConfig?.admin?.useAsTitle ?? 'id'
 
   const { labels, upload } = collectionConfig
 

@@ -131,9 +131,8 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
   const titleSeparator =
     collection.hierarchy !== false ? collection.hierarchy.admin.labelSeparator : ' > '
 
-  // Use the stored real title field from hierarchy config when available.
-  // This handles the usePathAsTitle case where admin.useAsTitle has been overridden
-  // to the virtual path field — findUseAsTitleField would return the wrong field.
+  // Use the stored real title field from hierarchy config when available (optimization
+  // to avoid re-traversing collection fields on every path computation).
   let titleFieldName: string
   let isTitleLocalized: boolean
   if (collection.hierarchy !== false && collection.hierarchy.titleField) {

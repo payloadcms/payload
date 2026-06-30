@@ -37,7 +37,7 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
     collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
       ? collectionConfig.hierarchy
       : null
-  const titleField = hierarchyConfig?.titleField || collectionConfig?.admin?.useAsTitle || 'id'
+  const titleField = collectionConfig?.admin?.useAsTitle || 'id'
 
   const { clearResults, hasNextPage, isLoading, loadMore, results, search, totalDocs } =
     useHierarchySearch({

@@ -80,15 +80,6 @@ export const RelationshipProvider: React.FC<{ readonly children?: React.ReactNod
 
           select[fieldToSelect] = true
 
-          const hierarchyConfig =
-            collection.hierarchy && typeof collection.hierarchy === 'object'
-              ? collection.hierarchy
-              : undefined
-
-          if (hierarchyConfig?.titleField) {
-            select[hierarchyConfig.titleField] = true
-          }
-
           if (collection.upload) {
             appendUploadSelectFields({ collectionConfig: collection, select })
           }

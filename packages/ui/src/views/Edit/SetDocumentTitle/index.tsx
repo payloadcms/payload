@@ -16,9 +16,23 @@ export const SetDocumentTitle: React.FC<{
 }> = (props) => {
   const { collectionConfig, config, fallback, globalConfig } = props
 
+  const hierarchyConfig =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy
+      : undefined
+
   const useAsTitle = collectionConfig?.admin?.useAsTitle
 
-  const field = useFormFields(([fields]) => (useAsTitle && fields && fields?.[useAsTitle]) || null)
+  // When usePathAsTitle is enabled, watch the virtual path field for real-time title updates.
+  // Since it's read-only/virtual, it only updates after a server save.
+  const fieldNameToWatch =
+    (hierarchyConfig?.admin?.usePathAsTitle && hierarchyConfig.titlePathFieldName) ||
+    useAsTitle ||
+    ''
+
+  const field = useFormFields(
+    ([fields]) => (fieldNameToWatch && fields && fields?.[fieldNameToWatch]) || null,
+  )
 
   const hasInitialized = useRef(false)
 
@@ -28,14 +42,19 @@ export const SetDocumentTitle: React.FC<{
 
   const dateFormatFromConfig = config?.admin?.dateFormat
 
-  const title = formatDocTitle({
-    collectionConfig,
-    data: { id: '', [useAsTitle]: field?.value || '' },
-    dateFormat: dateFormatFromConfig,
-    fallback,
-    globalConfig,
-    i18n,
-  })
+  let title: string
+  if (hierarchyConfig?.admin?.usePathAsTitle && typeof field?.value === 'string' && field.value) {
+    title = field.value
+  } else {
+    title = formatDocTitle({
+      collectionConfig,
+      data: { id: '', [useAsTitle || '']: field?.value || '' },
+      dateFormat: dateFormatFromConfig,
+      fallback,
+      globalConfig,
+      i18n,
+    })
+  }
 
   useEffect(() => {
     if (!hasInitialized.current) {

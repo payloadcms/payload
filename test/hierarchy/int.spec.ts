@@ -82,8 +82,8 @@ describe('Hierarchy', () => {
         expect(foldersCollection.hierarchy.admin.usePathAsTitle).toBe(true)
       }
 
-      // admin.useAsTitle should be overridden to the virtual title path field
-      expect(foldersCollection.admin.useAsTitle).toBe('_h_titlePath')
+      // admin.useAsTitle should remain the real content field, never mutated
+      expect(foldersCollection.admin.useAsTitle).toBe('name')
     })
   })
 

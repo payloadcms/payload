@@ -251,7 +251,12 @@ export const renderListView = async (
   const clientCollectionConfig = clientConfig.collections.find((c) => c.slug === collectionSlug)
   const hierarchyConfig =
     typeof collectionConfig.hierarchy === 'object' ? collectionConfig.hierarchy : undefined
-  const useAsTitle = hierarchyConfig?.titleField || collectionConfig.admin.useAsTitle || 'id'
+  // When usePathAsTitle is enabled, show the full path as the first (title) column.
+  // Otherwise use the collection's real useAsTitle field.
+  const useAsTitle =
+    (hierarchyConfig?.admin?.usePathAsTitle ? hierarchyConfig.titlePathFieldName : null) ??
+    collectionConfig.admin.useAsTitle ??
+    'id'
 
   const columns = getColumns({
     clientConfig,

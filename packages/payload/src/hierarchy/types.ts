@@ -165,8 +165,7 @@ export type SanitizedHierarchyConfig = {
   slugPathFieldName: string
   /**
    * The real content field used as each ancestor's title segment when building paths.
-   * Stored explicitly so path-building code uses the correct field even when
-   * admin.useAsTitle is overridden to the virtual title path field (usePathAsTitle).
+   * Typically matches admin.useAsTitle.
    */
   titleField: string
   titlePathFieldName: string

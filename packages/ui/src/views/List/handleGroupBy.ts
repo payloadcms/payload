@@ -60,9 +60,7 @@ export const handleGroupBy = async ({
   data: PaginatedDocs
   Table: null | React.ReactNode | React.ReactNode[]
 }> => {
-  const hierarchyConfig =
-    typeof collectionConfig.hierarchy === 'object' ? collectionConfig.hierarchy : undefined
-  const useAsTitle = hierarchyConfig?.titleField || collectionConfig.admin.useAsTitle || 'id'
+  const useAsTitle = collectionConfig.admin.useAsTitle || 'id'
 
   let Table: React.ReactNode | React.ReactNode[] = null
   let columnState: Column[]
@@ -87,10 +85,8 @@ export const handleGroupBy = async ({
     populate = {}
     relationTo.forEach((rel) => {
       const config = clientConfig.collections.find((c) => c.slug === rel)
-      const relatedHierarchyConfig =
-        config?.hierarchy && typeof config.hierarchy === 'object' ? config.hierarchy : undefined
       populate[rel] = {
-        [relatedHierarchyConfig?.titleField || config?.admin?.useAsTitle || 'id']: true,
+        [config?.admin?.useAsTitle || 'id']: true,
       }
     })
   }

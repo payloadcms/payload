@@ -59,12 +59,6 @@ export const addHierarchyToCollection = ({
     collectionConfig.admin = {}
   }
 
-  // When usePathAsTitle is enabled, override useAsTitle to the virtual path field so that
-  // the document header and relationship pills display the full ancestor path.
-  if (usePathAsTitle) {
-    collectionConfig.admin.useAsTitle = titlePathFieldName
-  }
-
   if (!collectionConfig.admin.listSearchableFields) {
     collectionConfig.admin.listSearchableFields = [titleFieldName]
   } else if (!collectionConfig.admin.listSearchableFields.includes(titleFieldName)) {

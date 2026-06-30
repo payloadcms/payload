@@ -13,19 +13,13 @@ export const extractRelationshipDisplayValue = (
   // Handle polymorphic relationships
   if (typeof relationship === 'object' && relationship?.relationTo && relationship?.value) {
     const config = clientConfig.collections.find((c) => c.slug === relationship.relationTo)
-    const hierarchyConfig =
-      config?.hierarchy && typeof config.hierarchy === 'object' ? config.hierarchy : undefined
-    const useAsTitle = hierarchyConfig?.titleField || config?.admin?.useAsTitle || 'id'
+    const useAsTitle = config?.admin?.useAsTitle || 'id'
     return relationship.value?.[useAsTitle] || ''
   }
 
   // Handle regular relationships
   if (typeof relationship === 'object' && relationship?.id) {
-    const hierarchyConfig =
-      relationshipConfig?.hierarchy && typeof relationshipConfig.hierarchy === 'object'
-        ? relationshipConfig.hierarchy
-        : undefined
-    const useAsTitle = hierarchyConfig?.titleField || relationshipConfig?.admin?.useAsTitle || 'id'
+    const useAsTitle = relationshipConfig?.admin?.useAsTitle || 'id'
     return relationship[useAsTitle] || ''
   }
 

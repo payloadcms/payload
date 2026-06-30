@@ -49,7 +49,7 @@ export const handleHierarchy = async ({
 
   const parentFieldName = hierarchyConfig.parentFieldName
 
-  const useAsTitle = hierarchyConfig.titleField || collectionConfig.admin?.useAsTitle || 'id'
+  const useAsTitle = collectionConfig.admin?.useAsTitle || 'id'
 
   // Fetch the parent item and breadcrumbs (skip for root level)
   let parent: null | (Record<string, unknown> & TypeWithID) = null
@@ -208,12 +208,7 @@ export const handleHierarchy = async ({
     }
 
     // Add search filter if provided
-    const relatedHierarchyConfig =
-      relatedCollectionConfig.hierarchy && typeof relatedCollectionConfig.hierarchy === 'object'
-        ? relatedCollectionConfig.hierarchy
-        : undefined
-    const relatedUseAsTitle =
-      relatedHierarchyConfig?.titleField || relatedCollectionConfig.admin?.useAsTitle || 'id'
+    const relatedUseAsTitle = relatedCollectionConfig.admin?.useAsTitle || 'id'
     const whereWithSearch = search
       ? { and: [relationshipWhere, { [relatedUseAsTitle]: { like: search } }] }
       : relationshipWhere
