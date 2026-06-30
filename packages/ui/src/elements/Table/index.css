@@ -131,6 +131,8 @@
   /* Condensed appearance */
   .table--appearance-condensed {
     border-radius: var(--radius-medium);
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-color) transparent;
 
     table {
       border-collapse: collapse;
