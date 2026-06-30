@@ -12,9 +12,11 @@ import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
  */
 export async function connectMcpClient({
   apiKey,
+  overrideAccess = false,
   restClient,
 }: {
   apiKey: string
+  overrideAccess?: boolean
   restClient: NextRESTClient
 }): Promise<Client> {
   const client = new Client({ name: 'plugin-mcp-tests', version: '1.0.0' })
@@ -23,9 +25,11 @@ export async function connectMcpClient({
       const headers = new Headers(init?.headers)
       headers.set('Authorization', `users API-Key ${apiKey}`)
 
+      const path = overrideAccess ? '/mcp?overrideAccess=true' : '/mcp'
+
       return (init?.method ?? 'GET').toUpperCase() === 'POST'
-        ? restClient.POST('/mcp', { body: init?.body as string, headers })
-        : restClient.GET('/mcp', { headers })
+        ? restClient.POST(path, { body: init?.body as string, headers })
+        : restClient.GET(path, { headers })
     },
   })
 
