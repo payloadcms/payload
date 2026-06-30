@@ -79,6 +79,7 @@
     --sidebar-wrap-top: initial;
     --sidebar-wrap-height: initial;
     --sidebar-wrap-flex-shrink: initial;
+    display: none;
   }
 
   .document-fields__sidebar {

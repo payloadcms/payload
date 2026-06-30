@@ -16,6 +16,7 @@
     justify-content: space-between;
     gap: var(--spacer-2);
     padding: var(--spacer-1) var(--spacer-3);
+    padding-inline-end: var(--spacer-2);
     flex-shrink: 0;
     margin-bottom: var(--spacer-2);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
@@ -23,6 +24,7 @@
 
   .hierarchy-column__add-button {
     flex-shrink: 0;
+    color: var(--color-text-secondary);
   }
 
   .hierarchy-column__header-checkbox {
@@ -45,7 +47,7 @@
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    margin: 0 var(--spacer-2);
+    margin: 0 var(--spacer-1);
     gap: var(--spacer-1);
   }
 
