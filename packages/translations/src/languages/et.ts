@@ -113,6 +113,22 @@ export const etTranslations: DefaultTranslationsObject = {
       'Teie armatuurlauale pole vidinaid. Saate neid lisada ülemisel ribal asuvast "Armatuurlaua" menüüst.',
     resetLayout: 'Lähtesta Paigutus',
     searchWidgets: 'Otsi vidinaid...',
+    widgetCollectionRequired: 'Kogu on nõutav.',
+    widgetConfigurationError: 'Vidina konfiguratsiooni viga',
+    widgetInvalidCollection: 'Kogumikku "{{collection}}" ei eksisteeri.',
+    widgetInvalidFilterField: 'Filtri väli "{{field}}" ei eksisteeri kogumikus "{{collection}}".',
+    widgetInvalidSortField:
+      'Sorteerimisväli "{{field}}" ei eksisteeri kollektsioonis "{{collection}}".',
+    widgetLimitLabel: 'Piirang',
+    widgetNonSortableSortField:
+      'Sortimisväli "{{field}}" ei ole kogu "{{collection}}" puhul sorditav.',
+    widgetQueryError: 'Selle vidina jaoks ei õnnestunud dokumente laadida.',
+    widgetSelectCollectionFirst: 'Valige kogu enne sortimise valimist',
+    widgetSelectSortField: 'Valige väli, mille alusel sorteerida',
+    widgetSortDirectionLabel: 'Sorteerimissuund',
+    widgetSortFieldLabel: 'Sorteeri väli',
+    widgetTitleFallback: 'Kogumi päring',
+    widgetTitleLabel: 'Pealkiri',
   },
   error: {
     accountAlreadyActivated: 'See konto on juba aktiveeritud.',

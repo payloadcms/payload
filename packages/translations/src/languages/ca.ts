@@ -115,6 +115,23 @@ export const caTranslations: DefaultTranslationsObject = {
       'No hi ha cap widget al vostre tauler de control. Podeu afegir-los des del menú "Dashboard" situat a la barra superior.',
     resetLayout: 'Restableix la disposició',
     searchWidgets: 'Cerca de ginys...',
+    widgetCollectionRequired: 'Cal especificar una Collection.',
+    widgetConfigurationError: 'Error de configuració del widget',
+    widgetInvalidCollection: 'La Collection "{{collection}}" no existeix.',
+    widgetInvalidFilterField:
+      'El camp de filtre "{{field}}" no existeix a la Collection "{{collection}}".',
+    widgetInvalidSortField:
+      'El camp d\'ordenació "{{field}}" no existeix a la col·lecció "{{collection}}".',
+    widgetLimitLabel: 'Límit',
+    widgetNonSortableSortField:
+      'El camp d’ordenació "{{field}}" no es pot ordenar a la col·lecció "{{collection}}".',
+    widgetQueryError: "No s'han pogut carregar els documents per a aquest widget.",
+    widgetSelectCollectionFirst: "Seleccioneu una Collection abans de triar l'ordre",
+    widgetSelectSortField: 'Seleccioneu un camp per ordenar',
+    widgetSortDirectionLabel: "Direcció d'ordenació",
+    widgetSortFieldLabel: 'Ordenar camp',
+    widgetTitleFallback: 'Consulta de la Collection',
+    widgetTitleLabel: 'Títol',
   },
   error: {
     accountAlreadyActivated: 'Aquest compte ja ha estat activat.',

@@ -59,6 +59,112 @@ export default buildConfigWithDefaults({
             width: 'full',
           })
         }
+
+        const collectionQueryWidgets: WidgetInstance[] = [
+          {
+            data: {
+              limit: 3,
+              relatedCollection: 'revenue',
+              sortDirection: 'desc',
+              sortField: 'amount',
+              title: 'Top revenue entries',
+            },
+            widgetSlug: 'collection-query',
+            width: 'medium',
+          },
+          {
+            data: {
+              limit: 25,
+              relatedCollection: 'events',
+              sortDirection: 'asc',
+              sortField: 'startDate',
+              title: 'Event timeline',
+              where: {
+                location: {
+                  equals: 'Dashboard demo',
+                },
+              },
+            },
+            widgetSlug: 'collection-query',
+            width: 'medium',
+          },
+          // These intentionally stale widget configs simulate persisted JSON after migrations.
+          {
+            data: {
+              limit: 3,
+              relatedCollection: 'archived-posts',
+              sortDirection: 'desc',
+              sortField: 'updatedAt',
+              title: 'Missing collection',
+            },
+            widgetSlug: 'collection-query',
+            width: 'x-small',
+          } as unknown as WidgetInstance,
+          {
+            data: {
+              limit: 3,
+              relatedCollection: 'tickets',
+              sortDirection: 'desc',
+              sortField: 'assignee',
+              title: 'Non-sortable sort field',
+            },
+            widgetSlug: 'collection-query',
+            width: 'x-small',
+          },
+          {
+            data: {
+              limit: 3,
+              relatedCollection: 'events',
+              sortDirection: 'asc',
+              sortField: 'startDate',
+              title: 'Missing filter field',
+              where: {
+                visibility: {
+                  equals: 'public',
+                },
+              },
+            },
+            widgetSlug: 'collection-query',
+            width: 'x-small',
+          },
+          {
+            data: {
+              limit: 3,
+              relatedCollection: 'revenue',
+              sortDirection: 'desc',
+              sortField: 'total',
+              title: 'Multiple stale fields',
+              where: {
+                channel: {
+                  equals: 'enterprise',
+                },
+              },
+            },
+            widgetSlug: 'collection-query',
+            width: 'x-small',
+          },
+          // Sorts by a nested group field (`details.priority`) to exercise dot-path
+          // sorting/filtering in the widget.
+          {
+            data: {
+              limit: 5,
+              relatedCollection: 'events',
+              sortDirection: 'desc',
+              sortField: 'details.priority',
+              title: 'Events by priority',
+              where: {
+                location: {
+                  equals: 'Nested field demo',
+                },
+              },
+            },
+            widgetSlug: 'collection-query',
+            width: 'medium',
+          },
+        ]
+
+        baseWidgets.push(...collectionQueryWidgets)
+
         return baseWidgets
       },
       widgets: [
@@ -116,8 +222,8 @@ export default buildConfigWithDefaults({
             {
               name: 'title',
               type: 'text',
-              required: true,
               localized: true,
+              required: true,
             },
             {
               name: 'description',
@@ -154,10 +260,6 @@ export default buildConfigWithDefaults({
       baseDir: path.resolve(dirname),
     },
   },
-  localization: {
-    defaultLocale: 'en',
-    locales: ['en', 'es'],
-  },
   collections: [
     Tickets,
     Revenue,
@@ -167,6 +269,10 @@ export default buildConfigWithDefaults({
     //   fields: [],
     // })),
   ],
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
+  },
   onInit: async (payload) => {
     await seed(payload)
   },

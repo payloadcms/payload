@@ -115,6 +115,23 @@ export const ptTranslations: DefaultTranslationsObject = {
       'Não existem widgets no seu painel. Você pode adicioná-los a partir do menu "Painel", localizado na barra superior.',
     resetLayout: 'Redefinir Layout',
     searchWidgets: 'Pesquisar widgets...',
+    widgetCollectionRequired: 'Coleção é obrigatória.',
+    widgetConfigurationError: 'Erro de configuração do widget',
+    widgetInvalidCollection: 'A Coleção "{{collection}}" não existe.',
+    widgetInvalidFilterField:
+      'O campo de filtro "{{field}}" não existe na coleção "{{collection}}".',
+    widgetInvalidSortField:
+      'O campo de ordenação "{{field}}" não existe na coleção "{{collection}}".',
+    widgetLimitLabel: 'Limite',
+    widgetNonSortableSortField:
+      'O campo de ordenação "{{field}}" não pode ser ordenado na Collection "{{collection}}".',
+    widgetQueryError: 'Não foi possível carregar os documentos para este widget.',
+    widgetSelectCollectionFirst: 'Selecione uma Collection antes de escolher a ordenação.',
+    widgetSelectSortField: 'Selecione um campo para ordenar por',
+    widgetSortDirectionLabel: 'Direção de Ordenação',
+    widgetSortFieldLabel: 'Campo de Ordenação',
+    widgetTitleFallback: 'Consulta de Collection',
+    widgetTitleLabel: 'Título',
   },
   error: {
     accountAlreadyActivated: 'Essa conta já foi ativada.',

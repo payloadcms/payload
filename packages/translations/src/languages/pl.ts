@@ -115,6 +115,22 @@ export const plTranslations: DefaultTranslationsObject = {
       'Na Twoim pulpicie nie ma żadnych widgetów. Możesz je dodać z menu "Pulpit", które znajduje się na górnej belce.',
     resetLayout: 'Zresetuj Układ',
     searchWidgets: 'Szukaj widgetów...',
+    widgetCollectionRequired: 'Collection jest wymagana.',
+    widgetConfigurationError: 'Błąd konfiguracji widgetu',
+    widgetInvalidCollection: 'Kolekcja "{{collection}}" nie istnieje.',
+    widgetInvalidFilterField:
+      'Pole filtrujące „{{field}}” nie istnieje w kolekcji „{{collection}}”.',
+    widgetInvalidSortField: 'Pole sortujące „{{field}}” nie istnieje w kolekcji „{{collection}}”.',
+    widgetLimitLabel: 'Limit',
+    widgetNonSortableSortField:
+      'Pole sortujące "{{field}}" nie jest sortowalne w kolekcji "{{collection}}".',
+    widgetQueryError: 'Nie można załadować dokumentów dla tego widżetu.',
+    widgetSelectCollectionFirst: 'Wybierz kolekcję przed wybraniem sortowania',
+    widgetSelectSortField: 'Wybierz pole, według którego chcesz sortować',
+    widgetSortDirectionLabel: 'Kierunek sortowania',
+    widgetSortFieldLabel: 'Sortuj Pole',
+    widgetTitleFallback: 'Zapytanie dotyczące Collection',
+    widgetTitleLabel: 'Tytuł',
   },
   error: {
     accountAlreadyActivated: 'To konto zostało już aktywowane.',

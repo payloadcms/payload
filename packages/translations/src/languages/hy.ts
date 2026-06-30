@@ -113,6 +113,23 @@ export const hyTranslations: DefaultTranslationsObject = {
     noItems: 'Ձեր վահագործի վրա վիջեթներ չկան։ Դուք կարող եք ավելացնել դրանք "Վահագործ" մենյուից',
     resetLayout: 'Վերադասավորել Կառուցվածքը',
     searchWidgets: 'Որոնել վիջեթներ...',
+    widgetCollectionRequired: 'Collection-ը պարտադիր է։',
+    widgetConfigurationError: 'Վիջեթի կազմաձևման սխալ',
+    widgetInvalidCollection: 'Collection "{{collection}}" չի գոյություն ունի։',
+    widgetInvalidFilterField:
+      'Զտիչ դաշտը "{{field}}" գոյություն չունի Collection "{{collection}}"-ում։',
+    widgetInvalidSortField:
+      'Դասաբանման Field-ը "{{field}}" գոյություն չունի Collection "{{collection}}"-ում։',
+    widgetLimitLabel: 'Սահմանաչափ',
+    widgetNonSortableSortField:
+      'Դասակարգման դաշտը "{{field}}" հնարավոր չէ դասակարգել հավաքածուում "{{collection}}":',
+    widgetQueryError: 'Չհաջողվեց բեռնել փաստաթղթերը այս վիդջեթի համար:',
+    widgetSelectCollectionFirst: 'Նախ ընտրեք Collection, ապա ընտրեք դասավորումը',
+    widgetSelectSortField: 'Ընտրեք դաշտը՝ դասավորելու համար',
+    widgetSortDirectionLabel: 'Տեսակավորման ուղղություն',
+    widgetSortFieldLabel: 'Դաշտի դասավորում',
+    widgetTitleFallback: 'Collection-ի հարցում',
+    widgetTitleLabel: 'Վերնագիր',
   },
   error: {
     accountAlreadyActivated: 'Այս հաշիվն արդեն ակտիվացված է։',

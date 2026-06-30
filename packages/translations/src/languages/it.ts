@@ -115,6 +115,23 @@ export const itTranslations: DefaultTranslationsObject = {
       'Non ci sono widget sulla tua dashboard. Puoi aggiungerli dal menu "Dashboard" situato nella barra superiore.',
     resetLayout: 'Ripristina Layout',
     searchWidgets: 'Cerca widget...',
+    widgetCollectionRequired: 'Collection è obbligatoria.',
+    widgetConfigurationError: 'Errore di configurazione del widget',
+    widgetInvalidCollection: 'La Collection "{{collection}}" non esiste.',
+    widgetInvalidFilterField:
+      'Il campo di filtro "{{field}}" non esiste nella Collection "{{collection}}".',
+    widgetInvalidSortField:
+      'Il campo di ordinamento "{{field}}" non esiste nella Collection "{{collection}}".',
+    widgetLimitLabel: 'Limite',
+    widgetNonSortableSortField:
+      'Il campo di ordinamento "{{field}}" non può essere ordinato nella Collection "{{collection}}".',
+    widgetQueryError: 'Impossibile caricare i documenti per questo widget.',
+    widgetSelectCollectionFirst: 'Seleziona una Collection prima di scegliere l’ordinamento.',
+    widgetSelectSortField: 'Selezionare un field per l’ordinamento',
+    widgetSortDirectionLabel: 'Direzione di ordinamento',
+    widgetSortFieldLabel: 'Campo di ordinamento',
+    widgetTitleFallback: 'Query di Collection',
+    widgetTitleLabel: 'Titolo',
   },
   error: {
     accountAlreadyActivated: 'Questo account è già stato attivato.',

@@ -117,6 +117,23 @@ export const huTranslations: DefaultTranslationsObject = {
       'Nincsenek widgetek az irányítópulton. Hozzáadhatja őket a felső sávban található "Irányítópult" menüből.',
     resetLayout: 'Alaphelyzet visszaállítása',
     searchWidgets: 'Keresés widgetek...',
+    widgetCollectionRequired: 'A Collection megadása kötelező.',
+    widgetConfigurationError: 'Widget konfigurációs hiba',
+    widgetInvalidCollection: 'A(z) "{{collection}}" Collection nem létezik.',
+    widgetInvalidFilterField:
+      'A(z) „{{field}}” szűrőmező nem létezik a(z) „{{collection}}” Collection-ben.',
+    widgetInvalidSortField:
+      'A "{{field}}" rendezési mező nem létezik a(z) "{{collection}}" Collection-ben.',
+    widgetLimitLabel: 'Korlátozás',
+    widgetNonSortableSortField:
+      'A(z) "{{field}}" mező nem rendezhető a(z) "{{collection}}" Collection-ben.',
+    widgetQueryError: 'Nem sikerült betölteni a dokumentumokat ehhez a widgethez.',
+    widgetSelectCollectionFirst: 'Válasszon ki egy Collection-t a rendezés kiválasztása előtt.',
+    widgetSelectSortField: 'Válassza ki a rendezni kívánt mezőt',
+    widgetSortDirectionLabel: 'Rendezési irány',
+    widgetSortFieldLabel: 'Mező rendezése',
+    widgetTitleFallback: 'Gyűjtemény lekérdezés',
+    widgetTitleLabel: 'Cím',
   },
   error: {
     accountAlreadyActivated: 'Ez a fiók már aktiválva van.',

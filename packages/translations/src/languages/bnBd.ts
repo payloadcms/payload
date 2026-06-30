@@ -115,6 +115,23 @@ export const bnBdTranslations: DefaultTranslationsObject = {
       'আপনার ড্যাশবোর্ডে কোনো উইজেট নেই। আপনি তা শীর্ষ বারে অবস্থিত "ড্যাশবোর্ড" মেনু থেকে যোগ করতে পারেন।',
     resetLayout: 'লেআউট রিসেট করুন',
     searchWidgets: 'উইজেটগুলি অনুসন্ধান করুন...',
+    widgetCollectionRequired: 'Collection প্রয়োজনীয়।',
+    widgetConfigurationError: 'উইজেট কনফিগারেশন ত্রুটি',
+    widgetInvalidCollection: 'Collection "{{collection}}" বিদ্যমান নেই।',
+    widgetInvalidFilterField:
+      'ফিল্টার Field "{{field}}" সংশ্লিষ্ট Collection "{{collection}}" -এ বিদ্যমান নয়।',
+    widgetInvalidSortField:
+      'সংগ্রহ "{{collection}}" এ "{{field}}" নামক কোন sort field বিদ্যমান নেই।',
+    widgetLimitLabel: 'সীমা',
+    widgetNonSortableSortField:
+      'Collection "{{collection}}"-এ "{{field}}" fieldটি সাজানো (sortable) নয়।',
+    widgetQueryError: 'এই উইজেটের জন্য ডকুমেন্টসমূহ লোড করা যায়নি।',
+    widgetSelectCollectionFirst: 'সাজানোর পদ্ধতি নির্বাচন করার আগে একটি Collection নির্বাচন করুন।',
+    widgetSelectSortField: 'ক্রম অনুযায়ী বাছাই করার জন্য একটি field নির্বাচন করুন',
+    widgetSortDirectionLabel: 'সর্ট করার দিক নির্দেশনা',
+    widgetSortFieldLabel: 'Field বিন্যাস করুন',
+    widgetTitleFallback: 'Collection অনুসন্ধান',
+    widgetTitleLabel: 'শিরোনাম',
   },
   error: {
     accountAlreadyActivated: 'এই অ্যাকাউন্ট ইতিমধ্যে সক্রিয় করা হয়েছে।',

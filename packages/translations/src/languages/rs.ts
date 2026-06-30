@@ -115,6 +115,22 @@ export const rsTranslations: DefaultTranslationsObject = {
       'Na vašoj kontrolnoj tabli nema vidžeta. Možete ih dodati iz menija "Kontrolna tabla" koji se nalazi na vrhu.',
     resetLayout: 'Ресетуј распоред',
     searchWidgets: 'Pretraži widgete...',
+    widgetCollectionRequired: 'Kolekcija je obavezna.',
+    widgetConfigurationError: 'Greška u konfiguraciji vidžeta',
+    widgetInvalidCollection: 'Kolekcija "{{collection}}" ne postoji.',
+    widgetInvalidFilterField: 'Filter polje "{{field}}" ne postoji u kolekciji "{{collection}}".',
+    widgetInvalidSortField:
+      'Polje za sortiranje "{{field}}" ne postoji u kolekciji "{{collection}}".',
+    widgetLimitLabel: 'Ograničenje',
+    widgetNonSortableSortField:
+      'Polje sortiranja "{{field}}" nije moguće sortirati u kolekciji "{{collection}}".',
+    widgetQueryError: 'Nije bilo moguće učitati dokumente za ovaj vidžet.',
+    widgetSelectCollectionFirst: 'Izaberite Collection pre nego što odaberete sortiranje',
+    widgetSelectSortField: 'Odaberite polje za sortiranje',
+    widgetSortDirectionLabel: 'Smer sortiranja',
+    widgetSortFieldLabel: 'Sortiraj polje',
+    widgetTitleFallback: 'Upit za kolekciju',
+    widgetTitleLabel: 'Naslov',
   },
   error: {
     accountAlreadyActivated: 'Овај налог је већ активиран.',
