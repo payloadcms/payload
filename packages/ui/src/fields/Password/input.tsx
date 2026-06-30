@@ -38,6 +38,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
     required,
     rtl,
     showError,
+    size = 'large',
     style,
     value,
     width,
@@ -57,6 +58,7 @@ export const PasswordInput: React.FC<PasswordInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-size={size}
       style={{
         ...style,
         width,

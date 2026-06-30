@@ -39,6 +39,10 @@ export type SelectInputProps = {
   readonly readOnly?: boolean
   readonly required?: boolean
   readonly showError?: boolean
+  /**
+   * Controls the height of the input. Defaults to `'large'`.
+   */
+  readonly size?: 'large' | 'medium'
   readonly style?: React.CSSProperties
   readonly value?: string | string[]
 }
@@ -67,6 +71,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
     readOnly,
     required,
     showError,
+    size = 'large',
     style,
     value,
   } = props
@@ -105,6 +110,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-size={size}
       id={`field-${path.replace(/\./g, '__')}`}
       style={style}
     >
