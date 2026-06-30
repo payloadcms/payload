@@ -346,4 +346,63 @@ describe('getSafeFileName', () => {
 
     expect(result).toBe('video-1.mp4')
   })
+
+  it('should pass docId to docWithFilenameExists when provided', async () => {
+    mockDocWithFilenameExists.mockResolvedValue(false)
+    mockFileExists.mockResolvedValue(false)
+
+    await getSafeFileName({
+      collectionSlug: 'media',
+      desiredFilename: 'photo.jpg',
+      docId: 42,
+      req: mockReq,
+      staticPath: '/uploads',
+    })
+
+    expect(mockDocWithFilenameExists).toHaveBeenCalledWith({
+      collectionSlug: 'media',
+      docId: 42,
+      filename: 'photo.jpg',
+      path: '/uploads',
+      prefix: undefined,
+      req: mockReq,
+    })
+  })
+
+  it('should return original filename on update when only the document itself has that filename', async () => {
+    // Simulates a PATCH where the doc being updated already owns the filename.
+    // Without docId exclusion, docWithFilenameExists would return true and
+    // getSafeFileName would increment to 'photo-1.jpg'.
+    // With docId, the self-collision is excluded and the original name is returned.
+    mockDocWithFilenameExists.mockResolvedValue(false)
+    mockFileExists.mockResolvedValue(false)
+
+    const result = await getSafeFileName({
+      collectionSlug: 'media',
+      desiredFilename: 'photo.jpg',
+      docId: 'abc123',
+      req: mockReq,
+      staticPath: '/uploads',
+    })
+
+    expect(result).toBe('photo.jpg')
+    expect(mockDocWithFilenameExists).toHaveBeenCalledTimes(1)
+  })
+
+  it('should still increment when a different document has the same filename', async () => {
+    // docId is set (update context) but a *different* doc owns the filename —
+    // docWithFilenameExists correctly returns true and the name is incremented.
+    mockDocWithFilenameExists.mockResolvedValueOnce(true).mockResolvedValueOnce(false)
+    mockFileExists.mockResolvedValue(false)
+
+    const result = await getSafeFileName({
+      collectionSlug: 'media',
+      desiredFilename: 'photo.jpg',
+      docId: 'abc123',
+      req: mockReq,
+      staticPath: '/uploads',
+    })
+
+    expect(result).toBe('photo-1.jpg')
+  })
 })
