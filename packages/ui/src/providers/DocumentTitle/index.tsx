@@ -1,4 +1,4 @@
-import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
+import type { ClientCollectionConfig, ClientGlobalConfig, TypeWithID } from 'payload'
 
 import { createContext, use, useEffect, useState } from 'react'
 
@@ -25,7 +25,7 @@ function resolveDocTitle({
   i18n,
 }: {
   collectionConfig?: ClientCollectionConfig
-  data: Record<string, unknown>
+  data: TypeWithID
   dateFormat: string
   fallback?: string
   globalConfig?: ClientGlobalConfig
