@@ -5,6 +5,7 @@ import { definePlugin } from 'payload'
 import { fileURLToPath } from 'url'
 import * as z from 'zod'
 
+import { testRBACPlugin } from '../__helpers/plugins/rbac/index.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { FieldTypes } from './collections/FieldTypes.js'
 import { Media } from './collections/Media.js'
@@ -57,6 +58,8 @@ export default buildConfigWithDefaults({
   globals: [SiteSettings],
   onInit: seed,
   plugins: [
+    testRBACPlugin(),
+
     // Plugin listed BEFORE mcp in the array — injects a tool via slug + options
     definePlugin({
       order: 1,

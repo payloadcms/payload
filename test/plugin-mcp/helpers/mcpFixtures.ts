@@ -5,19 +5,18 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { test as base } from 'vitest'
 
+import type { TestRBAC } from '../../__helpers/plugins/rbac/index.js'
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../../credentials.js'
-import { limitedMCPUserEmail } from '../limitedAccess.js'
 import { createMcpClient, type McpClient } from './mcpClient.js'
 
 export let payload: Payload
 export let restClient: NextRESTClient
-export let limitedUserId: number | string
 export let userId: string
 
-export async function getApiKey(): Promise<string> {
+export async function getApiKey(rbac: TestRBAC = {}): Promise<string> {
   const apiKey = randomUUID()
 
   await payload.update({
@@ -26,22 +25,7 @@ export async function getApiKey(): Promise<string> {
     data: {
       apiKey,
       enableAPIKey: true,
-    },
-    overrideAccess: true,
-  })
-
-  return apiKey
-}
-
-export async function getLimitedApiKey(): Promise<string> {
-  const apiKey = randomUUID()
-
-  await payload.update({
-    id: limitedUserId,
-    collection: 'users',
-    data: {
-      apiKey,
-      enableAPIKey: true,
+      rbac,
     },
     overrideAccess: true,
   })
@@ -71,16 +55,6 @@ export const it = base.extend<ScopedFixtures>({
         })
         .then((res) => res.json())
       userId = loginResponse.user.id
-
-      const limitedUser = await payload.create({
-        collection: 'users',
-        data: {
-          email: limitedMCPUserEmail,
-          password: randomUUID(),
-        },
-        overrideAccess: true,
-      })
-      limitedUserId = limitedUser.id
 
       await use()
 
