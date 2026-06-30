@@ -15,7 +15,6 @@ import type {
   MaybePromise,
   PayloadRequest,
   SanitizedPermissions,
-  TypedUser,
 } from 'payload'
 
 import type { GetAuthorizedMCPArgs } from './endpoint/access.js'
@@ -236,7 +235,12 @@ export type MCPPluginConfig = {
     serverOptions?: MCPServerOptions
     verboseLogs?: boolean
   }
-  /** Replace the default MCP authorization resolver. */
+  /**
+   * Replace the default MCP authorization resolver.
+   *
+   * This hook replaces the default authentication flow. It must set `req.user` to the
+   * authenticated Payload user, or to `null` for an anonymous caller, before returning.
+   */
   overrideGetAuthorizedMCP?: (
     args: {
       pluginConfig: SanitizedMCPPluginConfig
@@ -300,13 +304,10 @@ export type MCPItem =
   | GlobalMCPItem
 
 /**
- * The caller's identity + the MCP items authorized for this request. Disabled
- * items and items blocked by access callbacks or Payload operation access are
- * absent from `items`. Tool handlers receive this via `args.authorizedMCP` so
- * they can spread `localAPIDefaults(authorizedMCP)` into every local API call.
+ * The MCP items and access mode authorized for this request. The authenticated user is available
+ * as `req.user`.
  */
 export type AuthorizedMCP = {
   items: MCPItem[]
   overrideAccess: boolean
-  user: null | TypedUser
 }

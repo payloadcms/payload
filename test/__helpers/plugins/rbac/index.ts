@@ -60,8 +60,8 @@ export type TestRBAC = {
  * This test helper mutates the supplied config and should be applied once per config.
  */
 export const testRBACPlugin = definePlugin({
-  order: Number.MAX_SAFE_INTEGER,
   slug: 'test-rbac',
+  order: Number.MAX_SAFE_INTEGER,
   plugin: ({ config }) => {
     const fieldSchemaPathSets = new Set<Set<FieldSchemaPath>>()
     const rbacAccessFunctions = new WeakSet<object>()
@@ -250,8 +250,8 @@ async function addFieldAccess({
 
   for (const collection of payload.config.collections) {
     addFieldAccessForEntity({
-      fieldSchemaPathSets,
       fields: collection.fields,
+      fieldSchemaPathSets,
       i18n,
       parentSchemaPath: collection.slug,
       payload,
@@ -263,8 +263,8 @@ async function addFieldAccess({
 
   for (const global of payload.config.globals) {
     addFieldAccessForEntity({
-      fieldSchemaPathSets,
       fields: global.fields,
+      fieldSchemaPathSets,
       i18n,
       parentSchemaPath: global.slug,
       payload,
@@ -282,8 +282,8 @@ async function addFieldAccess({
 }
 
 function addFieldAccessForEntity({
-  fieldSchemaPathSets,
   fields,
+  fieldSchemaPathSets,
   i18n,
   parentSchemaPath,
   payload,

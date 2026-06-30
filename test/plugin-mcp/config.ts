@@ -141,7 +141,6 @@ export default buildConfigWithDefaults({
                 data: { _status: 'published' },
                 req,
                 overrideAccess: authorizedMCP.overrideAccess,
-                user: authorizedMCP.user,
               })
               return {
                 content: [
@@ -226,7 +225,6 @@ export default buildConfigWithDefaults({
             req,
             draft: true,
             overrideAccess: authorizedMCP.overrideAccess,
-            user: authorizedMCP.user,
           })
 
           return {
@@ -261,7 +259,6 @@ export default buildConfigWithDefaults({
             req,
             draft: true,
             overrideAccess: false,
-            user: req.user,
           })
 
           return {
@@ -300,7 +297,6 @@ export default buildConfigWithDefaults({
               req,
               draft: true,
               overrideAccess: false,
-              user: req.user,
             })
 
             return {
@@ -332,7 +328,6 @@ export default buildConfigWithDefaults({
               req,
               draft: true,
               overrideAccess: false,
-              user: req.user,
             })
 
             return {
