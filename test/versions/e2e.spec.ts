@@ -3105,5 +3105,52 @@ describe('Versions', () => {
       // Cleanup
       await payload.delete({ collection: diffCollectionSlug, id: doc.id })
     })
+
+    test('should render diff when a block with unnamed layout containers is newly added', async () => {
+      // Version 1: no blocks. Version 2: adds GroupsBlock.
+      // When comparing v2 vs v1, fromRow.blockType is undefined at that position.
+      // This causes all unnamed fields to collapse to one entry at index 0.
+      // Ultimately, this generates wrong schema paths (e.g. _index-0.fieldC instead of _index-2.fieldC).
+      const doc = await payload.create({
+        collection: diffCollectionSlug,
+        draft: true,
+        data: { text: 'initial' },
+      })
+
+      await payload.update({
+        collection: diffCollectionSlug,
+        id: doc.id,
+        draft: true,
+        data: {
+          blocks: [
+            {
+              blockType: 'GroupsBlock',
+              fieldA: 'a',
+              fieldB: 'b',
+              fieldC: 1,
+            },
+          ],
+        },
+      })
+
+      const versions = await payload.findVersions({
+        collection: diffCollectionSlug,
+        depth: 0,
+        limit: 1,
+        where: { parent: { equals: doc.id } },
+      })
+
+      const versionID = versions?.docs?.[0]?.id
+      const versionURL = formatAdminURL({
+        adminRoute,
+        path: `/collections/${diffCollectionSlug}/${doc.id}/versions/${versionID}`,
+        serverURL,
+      })
+
+      await page.goto(versionURL)
+      await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+
+      await payload.delete({ collection: diffCollectionSlug, id: doc.id })
+    })
   })
 })
