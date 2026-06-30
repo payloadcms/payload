@@ -217,6 +217,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                       path="cropWidth"
                       prefix="W"
                       readOnly={!imageLoaded}
+                      size="medium"
                       value={Number(cropWidthPx)}
                     />
                     <NumberInput
@@ -225,6 +226,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                       path="cropHeight"
                       prefix="H"
                       readOnly={!imageLoaded}
+                      size="medium"
                       value={Number(cropHeightPx)}
                     />
                   </div>
@@ -254,6 +256,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                       }
                       path="focalX"
                       prefix="X"
+                      size="medium"
                       suffix="%"
                       value={Math.round(focalPosition.x)}
                     />
@@ -266,6 +269,7 @@ export const EditUpload: React.FC<EditUploadProps> = ({
                       }
                       path="focalY"
                       prefix="Y"
+                      size="medium"
                       suffix="%"
                       value={Math.round(focalPosition.y)}
                     />

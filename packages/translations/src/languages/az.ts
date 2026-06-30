@@ -114,6 +114,23 @@ export const azTranslations: DefaultTranslationsObject = {
       'Sizin panelinizdə heç bir vidjet yoxdur. Siz onları yuxarıdaki çubuqda yerləşən "Panel" menyusundan əlavə edə bilərsiniz.',
     resetLayout: 'Düzəni sıfırlama',
     searchWidgets: 'Widgetləri axtarın...',
+    widgetCollectionRequired: 'Collection tələb olunur.',
+    widgetConfigurationError: 'Vidjet konfiqurasiyası xətası',
+    widgetInvalidCollection: 'Collection "{{collection}}" mövcud deyil.',
+    widgetInvalidFilterField:
+      'Filter sahəsi "{{field}}" "{{collection}}" kolleksiyasında mövcud deyil.',
+    widgetInvalidSortField:
+      'Sıralama field-i "{{field}}" "{{collection}}" collection-unda mövcud deyil.',
+    widgetLimitLabel: 'Limit',
+    widgetNonSortableSortField:
+      'Sıralama sahəsi "{{field}}" "{{collection}}" kolleksiyasında sıralana bilmir.',
+    widgetQueryError: 'Bu vidjet üçün sənədləri yükləmək mümkün olmadı.',
+    widgetSelectCollectionFirst: 'Sıralama seçməzdən əvvəl bir Collection seçin',
+    widgetSelectSortField: 'Sıralamaq üçün bir Field seçin',
+    widgetSortDirectionLabel: 'Sıralama İstiqaməti',
+    widgetSortFieldLabel: 'Field-u sırala',
+    widgetTitleFallback: 'Collection sorğusu',
+    widgetTitleLabel: 'Başlıq',
   },
   error: {
     accountAlreadyActivated: 'Bu hesab artıq aktivləşdirilib.',
@@ -183,6 +200,7 @@ export const azTranslations: DefaultTranslationsObject = {
     addRelationship: 'Relationship əlavə et',
     addUpload: 'Yükləmə əlavə et',
     block: 'Blok',
+    blockName: 'Blok adı',
     blocks: 'bloklar',
     blockType: 'Blok Növü',
     chooseBetweenCustomTextOrDocument:

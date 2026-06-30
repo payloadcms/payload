@@ -14,10 +14,14 @@ import './index.css'
 export type ConfirmPasswordFieldProps = {
   readonly disabled?: boolean
   readonly path?: string
+  /**
+   * Controls the height of the input. Defaults to `'large'`.
+   */
+  readonly size?: 'large' | 'medium'
 }
 
 export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props) => {
-  const { disabled: disabledFromProps, path = 'confirm-password' } = props
+  const { disabled: disabledFromProps, path = 'confirm-password', size = 'large' } = props
   const { t } = useTranslation()
   const [showPassword, setShowPassword] = useState(false)
 
@@ -45,6 +49,7 @@ export const ConfirmPasswordField: React.FC<ConfirmPasswordFieldProps> = (props)
       ]
         .filter(Boolean)
         .join(' ')}
+      data-size={size}
     >
       <FieldLabel
         htmlFor="field-confirm-password"

@@ -116,6 +116,23 @@ export const trTranslations: DefaultTranslationsObject = {
       'Panoda hiç widgetiniz yok. Bunları, üst çubukta yer alan "Gösterge Tablosu" menüsünden ekleyebilirsiniz.',
     resetLayout: 'Düzeni Sıfırla',
     searchWidgets: "Arama widget'ları...",
+    widgetCollectionRequired: 'Collection gereklidir.',
+    widgetConfigurationError: 'Widget yapılandırma hatası',
+    widgetInvalidCollection: 'Collection "{{collection}}" mevcut değil.',
+    widgetInvalidFilterField:
+      'Filtre alanı "{{field}}", "{{collection}}" koleksiyonunda mevcut değil.',
+    widgetInvalidSortField:
+      'Sıralama Field\'i "{{field}}", "{{collection}}" Collection\'ında mevcut değildir.',
+    widgetLimitLabel: 'Sınırla',
+    widgetNonSortableSortField:
+      '"{{field}}" sıralama alanı, "{{collection}}" koleksiyonu üzerinde sıralanabilir değildir.',
+    widgetQueryError: 'Bu widget için belgeler yüklenemedi.',
+    widgetSelectCollectionFirst: 'Sıralama seçmeden önce bir Collection seçin',
+    widgetSelectSortField: 'Sıralama yapmak için bir Field seçin',
+    widgetSortDirectionLabel: 'Sıralama Yönü',
+    widgetSortFieldLabel: 'Field Sıralama',
+    widgetTitleFallback: 'Collection sorgusu',
+    widgetTitleLabel: 'Başlık',
   },
   error: {
     accountAlreadyActivated: 'Hesap zaten etkinleştirildi.',
@@ -186,6 +203,7 @@ export const trTranslations: DefaultTranslationsObject = {
     addRelationship: 'İlişki Ekle',
     addUpload: 'Yükleme Ekle',
     block: 'Blok',
+    blockName: 'Blok adı',
     blocks: 'blok',
     blockType: 'Blok tipi',
     chooseBetweenCustomTextOrDocument:

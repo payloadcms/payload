@@ -33,6 +33,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     rows,
     rtl,
     showError,
+    size = 'large',
     style,
     value,
   } = props
@@ -50,6 +51,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-size={size}
       style={style}
     >
       <RenderCustomComponent

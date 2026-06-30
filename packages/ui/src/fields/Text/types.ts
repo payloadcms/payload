@@ -44,6 +44,10 @@ export type TextInputProps = {
   readonly required?: boolean
   readonly rtl?: boolean
   readonly showError?: boolean
+  /**
+   * Controls the height of the input. Defaults to `'large'`.
+   */
+  readonly size?: 'large' | 'medium'
   readonly style?: React.CSSProperties
   readonly value?: string
   readonly valueToRender?: Option[]

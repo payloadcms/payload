@@ -114,6 +114,24 @@ export const taTranslations: DefaultTranslationsObject = {
       'உங்கள் டாஷ்போர்டில் விட்ஜெட்கள் எதுவும் இல்லை. உங்களுக்கு அவைகளை மேல் பட்டையில் அமைந்துள்ள "டாஷ்போர்ட்" பட்டியல',
     resetLayout: 'அமைப்பை மீட்டமைக்க',
     searchWidgets: 'தேடல் கருவிகள்...',
+    widgetCollectionRequired: 'Collection அவசியமாக 필요.',
+    widgetConfigurationError: 'விட்ஜெட் உள்ளமைவு பிழை',
+    widgetInvalidCollection: 'Collection "{{collection}}" இல்லை.',
+    widgetInvalidFilterField:
+      'Filter field "{{field}}" குறிப்பாக Collection "{{collection}}" இல் இருப்பதில்லை.',
+    widgetInvalidSortField:
+      'வரிசைப்படுத்தும் Field "{{field}}" என்பது Collection "{{collection}}" இல் காணப்படவில்லை.',
+    widgetLimitLabel: 'வரம்பு',
+    widgetNonSortableSortField:
+      'வரிசைப்படுத்தும் களம் "{{field}}" என்பது தொகுப்பு "{{collection}}" இல் வரிசைப்படுத்த முடியாததாகும்.',
+    widgetQueryError: 'இந்த வித்‌ஜெட்டிற்கான ஆவணங்களை ஏற்ற முடியவில்லை.',
+    widgetSelectCollectionFirst:
+      'வரிசை தேர்வு செய்வதற்கு முன்பு ஒரு Collection-ஐ தேர்ந்தெடுக்கவும்.',
+    widgetSelectSortField: 'வரிசைப்படுத்தத் தலைப்பைத் தேர்ந்தெடுக்கவும்',
+    widgetSortDirectionLabel: 'வரிசை திசை',
+    widgetSortFieldLabel: 'Field ஐ வரிசைப்படுத்து',
+    widgetTitleFallback: 'Collection வினா',
+    widgetTitleLabel: 'தலைப்பு',
   },
   error: {
     accountAlreadyActivated: 'இந்த கணக்கு ஏற்கனவே செயல்படுத்தப்பட்டுள்ளது.',
@@ -183,6 +201,7 @@ export const taTranslations: DefaultTranslationsObject = {
     addRelationship: 'உறவைக் (Relationship) சேர்க்கவும்',
     addUpload: 'பதிவேற்றத்தைச் சேர்க்கவும்',
     block: 'தொகுதி',
+    blockName: 'பிளாக் பெயர்',
     blocks: 'தொகுதிகள்',
     blockType: 'தொகுதி வகை',
     chooseBetweenCustomTextOrDocument:

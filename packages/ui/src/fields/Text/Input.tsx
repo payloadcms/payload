@@ -40,6 +40,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
     required,
     rtl,
     showError,
+    size = 'large',
     style,
     value,
     valueToRender,
@@ -109,6 +110,7 @@ export const TextInput: React.FC<TextInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-size={size}
       style={style}
     >
       <RenderCustomComponent

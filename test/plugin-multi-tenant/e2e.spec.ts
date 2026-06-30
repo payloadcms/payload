@@ -1136,13 +1136,13 @@ test.describe('Multi Tenant', () => {
       await moveButton.click()
 
       // The move drawer should be visible
-      const moveDrawer = page.locator('.hierarchy-drawer__content')
-      await expect(moveDrawer).toBeVisible()
+      const moveModal = page.locator('.hierarchy-modal__content')
+      await expect(moveModal).toBeVisible()
 
       // The miller columns should only show Blue Dog folders
-      await expect(moveDrawer.getByText('Blue Dog Documents')).toBeVisible()
-      await expect(moveDrawer.getByText('Steel Cat Documents')).toBeHidden()
-      await expect(moveDrawer.getByText('Anchor Bar Files')).toBeHidden()
+      await expect(moveModal.getByText('Blue Dog Documents')).toBeVisible()
+      await expect(moveModal.getByText('Steel Cat Documents')).toBeHidden()
+      await expect(moveModal.getByText('Anchor Bar Files')).toBeHidden()
     })
 
     test('should show all tenant folders when tenant selector is cleared', async () => {
