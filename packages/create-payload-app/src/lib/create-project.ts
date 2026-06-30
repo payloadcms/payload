@@ -18,6 +18,7 @@ import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, info, warning } from '../utils/log.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
 import { configurePluginProject } from './configure-plugin-project.js'
+import { ensurePnpmBuildApprovals } from './configure-pnpm-builds.js'
 import { downloadExample } from './download-example.js'
 import { downloadSkill } from './download-skill.js'
 import { downloadTemplate } from './download-template.js'
@@ -53,6 +54,8 @@ async function installDeps(args: {
   } else if (packageManager === 'bun') {
     installCmd = 'bun install'
   }
+
+  await ensurePnpmBuildApprovals({ packageManager, projectDir })
 
   try {
     await execa.command(installCmd, {
