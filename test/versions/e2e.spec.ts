@@ -488,6 +488,24 @@ describe('Versions', () => {
       await expect(drawer.locator('.id-label')).toBeVisible()
     })
 
+    test('collection - autosave - should redirect from create to edit URL after first save', async () => {
+      await page.goto(autosaveURL.create)
+      await expect.poll(() => page.url()).toContain('/create')
+
+      await page.locator('#field-title').fill('autosave redirect title')
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
+
+      const editURLPattern = new RegExp(`/collections/${autosaveCollectionSlug}/[^/]+$`)
+      await expect
+        .poll(() => new URL(page.url()).pathname, { timeout: POLL_TOPASS_TIMEOUT })
+        .toMatch(editURLPattern)
+
+      // value should persist across the redirect, confirming it's the same doc
+      await expect(page.locator('#field-title')).toHaveValue('autosave redirect title')
+    })
+
     test('collection - should autosave using proper depth', async () => {
       const { id: postID } = await payload.create({
         collection: postCollectionSlug,
