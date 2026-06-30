@@ -16,7 +16,7 @@
     align-items: center;
     justify-content: center;
     padding-inline: var(--spacer-1);
-    height: var(--field-min-height);
+    height: var(--field-min-height-large);
     margin: 0;
     background: var(--color-bg-secondary);
     border: none;
