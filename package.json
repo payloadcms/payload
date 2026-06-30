@@ -244,9 +244,5 @@
     "wrangler": "~4.61.1",
     "zod": "4.3.6"
   },
-  "packageManager": "pnpm@11.9.0",
-  "engines": {
-    "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^9 || ^10 || ^11"
-  }
+  "packageManager": "pnpm@11.9.0"
 }
