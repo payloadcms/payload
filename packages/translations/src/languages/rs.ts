@@ -184,6 +184,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     addRelationship: 'Додај релацију',
     addUpload: 'Додај учитавање',
     block: 'Блокирање',
+    blockName: 'Ime bloka',
     blocks: 'блокирања',
     blockType: 'Врста блокирања',
     chooseBetweenCustomTextOrDocument:

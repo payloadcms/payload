@@ -185,6 +185,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     addRelationship: 'Pridėti santykį',
     addUpload: 'Pridėti Įkelti',
     block: 'Blokas',
+    blockName: 'Bloko pavadinimas',
     blocks: 'blokai',
     blockType: 'Blokas Tipas',
     chooseBetweenCustomTextOrDocument:

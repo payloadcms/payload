@@ -183,6 +183,7 @@ export const plTranslations: DefaultTranslationsObject = {
     addRelationship: 'Dodaj Relację',
     addUpload: 'Dodaj ładowanie',
     block: 'Blok',
+    blockName: 'Nazwa bloku',
     blocks: 'Bloki',
     blockType: 'Typ Bloku',
     chooseBetweenCustomTextOrDocument:

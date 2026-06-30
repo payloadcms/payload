@@ -182,6 +182,7 @@ export const daTranslations: DefaultTranslationsObject = {
     addRelationship: 'Tilføj forhold',
     addUpload: 'Tilføj upload',
     block: 'Blok',
+    blockName: 'Bloknavn',
     blocks: 'blokke',
     blockType: 'Blok type',
     chooseBetweenCustomTextOrDocument:

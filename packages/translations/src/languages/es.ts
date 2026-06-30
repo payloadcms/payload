@@ -188,6 +188,7 @@ export const esTranslations: DefaultTranslationsObject = {
     addRelationship: 'Añadir Relación',
     addUpload: 'Añadir documento',
     block: 'Bloque',
+    blockName: 'Nombre del bloque',
     blocks: 'bloques',
     blockType: 'Tipo de bloque',
     chooseBetweenCustomTextOrDocument:

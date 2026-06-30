@@ -184,6 +184,7 @@ export const viTranslations: DefaultTranslationsObject = {
     addRelationship: 'Thêm liên kết',
     addUpload: 'Thêm tệp tải lên',
     block: 'Block',
+    blockName: 'Tên khối',
     blocks: 'blocks',
     blockType: 'Block Type',
     chooseBetweenCustomTextOrDocument:

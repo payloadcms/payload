@@ -182,6 +182,7 @@ export const koTranslations: DefaultTranslationsObject = {
     addRelationship: '관계 추가',
     addUpload: '업로드 추가',
     block: '블록',
+    blockName: '블록 이름',
     blocks: '블록',
     blockType: '블록 유형',
     chooseBetweenCustomTextOrDocument:

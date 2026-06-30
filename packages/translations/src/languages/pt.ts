@@ -183,6 +183,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     addRelationship: 'Adicionar Relação',
     addUpload: 'Adicionar Upload',
     block: 'Bloco',
+    blockName: 'Nome do bloco',
     blocks: 'blocos',
     blockType: 'Tipo de bloco',
     chooseBetweenCustomTextOrDocument:

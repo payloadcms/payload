@@ -176,6 +176,7 @@ export const heTranslations: DefaultTranslationsObject = {
     addRelationship: 'הוסף יחס',
     addUpload: 'הוסף העלאה',
     block: 'בלוק',
+    blockName: 'שם הבלוק',
     blocks: 'בלוקים',
     blockType: 'סוג בלוק',
     chooseBetweenCustomTextOrDocument: 'בחר בין הזנת טקסט מותאם אישית או קישור למסמך אחר.',

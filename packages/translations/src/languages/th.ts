@@ -180,6 +180,7 @@ export const thTranslations: DefaultTranslationsObject = {
     addRelationship: 'เพิ่มความสัมพันธ์',
     addUpload: 'เพิ่มการอัปโหลด',
     block: 'Block',
+    blockName: 'ชื่อบล็อก',
     blocks: 'Blocks',
     blockType: 'ประเภท Block',
     chooseBetweenCustomTextOrDocument: 'เลือกระหว่างกำหนด URL เองหรือเชื่อมไปยังเอกสารอื่น',

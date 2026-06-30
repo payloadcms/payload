@@ -183,6 +183,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     addRelationship: 'Legg til relasjon',
     addUpload: 'Legg til opplasting',
     block: 'Blokk',
+    blockName: 'Blokknavn',
     blocks: 'blokker',
     blockType: 'Blokktype',
     chooseBetweenCustomTextOrDocument:

@@ -186,6 +186,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     addRelationship: 'Добавить Отношения',
     addUpload: 'Добавить загрузку',
     block: 'Блок',
+    blockName: 'Название блока',
     blocks: 'Блоки',
     blockType: 'Тип Блока',
     chooseBetweenCustomTextOrDocument:

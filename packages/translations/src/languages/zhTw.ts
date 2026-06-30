@@ -172,6 +172,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     addRelationship: '新增關聯',
     addUpload: '新增上傳',
     block: '區塊',
+    blockName: '區塊名稱',
     blocks: '區塊',
     blockType: '區塊類型',
     chooseBetweenCustomTextOrDocument: '選擇輸入自訂文字網址，或連結到其他文件。',

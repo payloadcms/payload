@@ -183,6 +183,7 @@ export const svTranslations: DefaultTranslationsObject = {
     addRelationship: 'Lägg till relation',
     addUpload: 'Lägg till uppladdning',
     block: 'Block',
+    blockName: 'Block-namn',
     blocks: 'block',
     blockType: 'Blocktyp',
     chooseBetweenCustomTextOrDocument:

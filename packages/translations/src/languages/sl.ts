@@ -183,6 +183,7 @@ export const slTranslations: DefaultTranslationsObject = {
     addRelationship: 'Dodaj povezavo',
     addUpload: 'Dodaj nalaganje',
     block: 'Blok',
+    blockName: 'Ime bloka',
     blocks: 'bloki',
     blockType: 'Tip bloka',
     chooseBetweenCustomTextOrDocument:

@@ -121,6 +121,7 @@ export const SelectInput: React.FC<SelectInputProps> = (props) => {
         />
         {BeforeInput}
         <ReactSelect
+          aria-label={getTranslation(label, i18n)}
           disabled={readOnly}
           filterOption={filterOption}
           id={id}

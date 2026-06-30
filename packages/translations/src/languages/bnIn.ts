@@ -185,6 +185,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     addRelationship: 'সম্পর্ক যোগ করুন',
     addUpload: 'আপলোড যোগ করুন',
     block: 'ব্লক',
+    blockName: 'ব্লক নাম',
     blocks: 'ব্লকগুলি',
     blockType: 'ব্লক প্রকার',
     chooseBetweenCustomTextOrDocument:

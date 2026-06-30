@@ -186,6 +186,7 @@ export const trTranslations: DefaultTranslationsObject = {
     addRelationship: 'İlişki Ekle',
     addUpload: 'Yükleme Ekle',
     block: 'Blok',
+    blockName: 'Blok adı',
     blocks: 'blok',
     blockType: 'Blok tipi',
     chooseBetweenCustomTextOrDocument:

@@ -188,6 +188,7 @@ export const roTranslations: DefaultTranslationsObject = {
     addRelationship: 'Adăugați o relație',
     addUpload: 'Adăugați un fișier',
     block: 'Bloc',
+    blockName: 'Nume de bloc',
     blocks: 'Blocuri',
     blockType: 'Tip de bloc',
     chooseBetweenCustomTextOrDocument:

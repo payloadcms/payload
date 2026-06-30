@@ -186,6 +186,7 @@ export const skTranslations: DefaultTranslationsObject = {
     addRelationship: 'Pridať vzťah',
     addUpload: 'Pridať nahrávanie',
     block: 'Blok',
+    blockName: 'Názov bloku',
     blocks: 'bloky',
     blockType: 'Typ bloku',
     chooseBetweenCustomTextOrDocument:

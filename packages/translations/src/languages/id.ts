@@ -184,6 +184,7 @@ export const idTranslations: DefaultTranslationsObject = {
     addRelationship: 'Tambah Hubungan',
     addUpload: 'Tambah Unggahan',
     block: 'Blok',
+    blockName: 'Nama blok',
     blocks: 'blok',
     blockType: 'Tipe Blok',
     chooseBetweenCustomTextOrDocument:

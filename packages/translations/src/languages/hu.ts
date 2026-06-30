@@ -186,6 +186,7 @@ export const huTranslations: DefaultTranslationsObject = {
     addRelationship: 'Kapcsolat hozzáadása',
     addUpload: 'Feltöltés hozzáadása',
     block: 'Blokk',
+    blockName: 'Blokk neve',
     blocks: 'blokkok',
     blockType: 'Blokk típusa',
     chooseBetweenCustomTextOrDocument:

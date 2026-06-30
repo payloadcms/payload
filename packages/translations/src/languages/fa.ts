@@ -180,6 +180,7 @@ export const faTranslations: DefaultTranslationsObject = {
     addRelationship: 'افزودن ارتباط',
     addUpload: 'افزودن فایل',
     block: 'بلاک',
+    blockName: 'نام بلوک',
     blocks: 'بلاک‌ها',
     blockType: 'نوع بلاک',
     chooseBetweenCustomTextOrDocument: 'یک URL سفارشی وارد کنید یا به یک صفحه دیگر لینک دهید.',

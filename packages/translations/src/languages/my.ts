@@ -185,6 +185,7 @@ export const myTranslations: DefaultTranslationsObject = {
     addRelationship: 'Relationship အသစ်ထည့်သွင်းမည်။',
     addUpload: 'Upload ထည့်ပါ။',
     block: 'ဘလောက်',
+    blockName: 'ဘလော့ခ်အမည်',
     blocks: 'ဘလောက်များ',
     blockType: 'ဘလောက် အမျိုးအစား',
     chooseBetweenCustomTextOrDocument:

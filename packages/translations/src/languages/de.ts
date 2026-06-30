@@ -189,6 +189,7 @@ export const deTranslations: DefaultTranslationsObject = {
     addRelationship: 'Verknüpfung hinzufügen',
     addUpload: 'Neue Datei hochladen',
     block: 'Block',
+    blockName: 'Blockname',
     blocks: 'Blöcke',
     blockType: 'Block-Typ',
     chooseBetweenCustomTextOrDocument:
