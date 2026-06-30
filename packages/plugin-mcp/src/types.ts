@@ -90,6 +90,11 @@ export type GlobalToolHandlerArgs<TSchema = undefined> = {
 } & ToolHandlerArgs<TSchema>
 
 export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> = {
+  /**
+   * Runs while authorizing each MCP request, before the tool is advertised or called. Return
+   * `false` to make the tool unavailable for that request. This is skipped when `overrideAccess`
+   * is enabled.
+   */
   access?: (args: MCPAccessArgs) => MaybePromise<boolean>
   annotations?: ToolAnnotations
   description: string
@@ -104,6 +109,12 @@ export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema |
 export type CollectionTool<
   TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
 > = {
+  /**
+   * Runs while authorizing each MCP request for this collection. Return `false` to reject calls
+   * to this tool for the collection. The shared tool is not advertised when no collections allow
+   * it, but can remain advertised when it is available for another collection. This is skipped
+   * when `overrideAccess` is enabled.
+   */
   access?: (args: CollectionMCPAccessArgs) => MaybePromise<boolean>
   handler: (args: CollectionToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
   input?: TSchema
@@ -111,6 +122,12 @@ export type CollectionTool<
 
 export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> =
   {
+    /**
+     * Runs while authorizing each MCP request for this global. Return `false` to reject calls to
+     * this tool for the global. The shared tool is not advertised when no globals allow it, but
+     * can remain advertised when it is available for another global. This is skipped when
+     * `overrideAccess` is enabled.
+     */
     access?: (args: GlobalMCPAccessArgs) => MaybePromise<boolean>
     handler: (args: GlobalToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
     input?: TSchema
@@ -122,6 +139,10 @@ export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSc
  * required handler) from being silently accepted at a built-in key slot.
  */
 export type MCPBuiltInCollectionToolOverride = {
+  /**
+   * Replaces the built-in tool's access check. Return `false` to make the tool unavailable for
+   * this collection. This is skipped when `overrideAccess` is enabled.
+   */
   access?: (args: CollectionMCPAccessArgs) => MaybePromise<boolean>
   annotations?: ToolAnnotations
   description?: string
@@ -130,6 +151,10 @@ export type MCPBuiltInCollectionToolOverride = {
 }
 
 export type MCPBuiltInGlobalToolOverride = {
+  /**
+   * Replaces the built-in tool's access check. Return `false` to make the tool unavailable for
+   * this global. This is skipped when `overrideAccess` is enabled.
+   */
   access?: (args: GlobalMCPAccessArgs) => MaybePromise<boolean>
   annotations?: ToolAnnotations
   description?: string
@@ -174,6 +199,11 @@ export type PromptHandlerArgs<TSchema = undefined> = {
 }
 
 export type Prompt<TSchema extends ToolInputSchema = ToolInputSchema> = {
+  /**
+   * Runs while authorizing each MCP request, before the prompt is advertised or used. Return
+   * `false` to make the prompt unavailable for that request. This is skipped when
+   * `overrideAccess` is enabled.
+   */
   access?: (args: MCPAccessArgs) => MaybePromise<boolean>
   argsSchema: TSchema
   description: string
@@ -192,6 +222,11 @@ export type ResourceHandlerArgs = {
 }
 
 export type Resource = {
+  /**
+   * Runs while authorizing each MCP request, before the resource is advertised or read. Return
+   * `false` to make the resource unavailable for that request. This is skipped when
+   * `overrideAccess` is enabled.
+   */
   access?: (args: MCPAccessArgs) => MaybePromise<boolean>
   description: string
   handler: (args: ResourceHandlerArgs) => MaybePromise<{
