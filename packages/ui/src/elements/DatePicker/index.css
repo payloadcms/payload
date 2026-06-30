@@ -277,7 +277,7 @@
   .react-datepicker__month-year-read-view--down-arrow {
     border-color: var(--color-icon-secondary);
     border-style: solid;
-    border-width: 2px 2px 0 0;
+    border-width: var(--stroke-width-medium) var(--stroke-width-medium) 0 0;
     content: '';
     display: block;
     height: 6px;
@@ -373,7 +373,7 @@
   }
 
   .react-datepicker__monthPicker {
-    border-top: 1px solid var(--color-border);
+    border-top: var(--stroke-width-small) solid var(--color-border);
   }
 
   .react-datepicker__month-text {
@@ -413,7 +413,7 @@
     background-color: transparent;
     padding: var(--spacer-2);
     padding-bottom: 0;
-    border-top: 1px solid var(--color-border);
+    border-top: var(--stroke-width-small) solid var(--color-border);
     width: 100%;
     order: 3;
   }
@@ -614,13 +614,13 @@
 
   .react-datepicker__time-container {
     float: right;
-    border-left: 1px solid var(--color-border);
+    border-left: var(--stroke-width-small) solid var(--color-border);
     width: var(--time-column-width);
 
     .react-datepicker__time {
       position: relative;
       background: transparent;
-      border-top: 1px solid var(--color-border);
+      border-top: var(--stroke-width-small) solid var(--color-border);
       border-bottom-right-radius: var(--radius-large);
 
       .react-datepicker__time-box {
@@ -722,7 +722,7 @@
 
   .react-datepicker__today-button {
     background: var(--color-bg-secondary);
-    border-top: 1px solid var(--color-border);
+    border-top: var(--stroke-width-small) solid var(--color-border);
     cursor: pointer;
     text-align: center;
     font-weight: var(--text-body-medium-strong-font-weight);
@@ -868,7 +868,7 @@
   /* ——— Error state ——— */
   .date-time-picker--has-error .react-datepicker__input-container input {
     border-color: var(--field-color-border-error);
-    border-width: 2px;
+    border-width: var(--stroke-width-medium);
     padding: calc(var(--spacer-1) - 1px) calc(var(--spacer-2-5) - 1px);
     padding-right: calc(2.25rem - 1px);
   }
@@ -894,7 +894,7 @@
 
     .date-time-picker .react-datepicker__time-container {
       width: auto;
-      border-top: 1px solid var(--color-border);
+      border-top: var(--stroke-width-small) solid var(--color-border);
     }
 
     .date-time-picker .react-datepicker__header--time {

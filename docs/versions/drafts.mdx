@@ -203,13 +203,7 @@ export const Pages: CollectionConfig = {
 <Banner type="warning">
   **Note regarding adding versions to an existing collection**
 
-If you already have a collection with documents, and you _opt in_ to draft functionality
-after you have already created existing documents, all of your old documents
-_will not have a `_status` field_ until you resave them. For this reason, if you are
-_adding_ versions into an existing collection, you might want to write your Access Control
-function to allow for users to read both documents where
-**`_status` is equal to `"published"`** as well as where
-**`_status` does not exist**.
+If you already have a collection with documents, and you _opt in_ to draft functionality after you have already created existing documents, all of your old documents \_will not have a `_status` field\_ until you resave them. For this reason, if you are \_adding\_ versions into an existing collection, you might want to write your Access Control function to allow for users to read both documents where **`_status` is equal to `"published"`** as well as where **`_status` does not exist**.
 
 </Banner>
 

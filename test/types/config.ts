@@ -1,4 +1,9 @@
-import { lexicalEditor, UploadFeature } from '@payloadcms/richtext-lexical'
+import {
+  BlocksFeature,
+  lexicalEditor,
+  RelationshipFeature,
+  UploadFeature,
+} from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
@@ -159,6 +164,44 @@ export default buildConfigWithDefaults({
         },
       ],
     },
+    {
+      // Exercises every input-vs-output divergence for the type tests in types.spec.ts.
+      slug: 'input-types',
+      fields: [
+        { name: 'title', type: 'text', required: true },
+        {
+          name: 'status',
+          type: 'select',
+          defaultValue: 'draft',
+          options: [
+            { label: 'Draft', value: 'draft' },
+            { label: 'Published', value: 'published' },
+          ],
+          required: true,
+        },
+        { name: 'category', type: 'relationship', relationTo: 'pages-categories' },
+        { name: 'categories', type: 'relationship', hasMany: true, relationTo: 'pages-categories' },
+        { name: 'related', type: 'relationship', relationTo: ['pages', 'pages-categories'] },
+        { name: 'image', type: 'upload', relationTo: 'media' },
+        {
+          name: 'richText',
+          type: 'richText',
+          editor: lexicalEditor({
+            features: ({ defaultFeatures }) => [
+              ...defaultFeatures,
+              RelationshipFeature(),
+              BlocksFeature({
+                blocks: [
+                  { slug: 'cta', fields: [{ name: 'link', type: 'relationship', relationTo: 'pages' }] },
+                ],
+              }),
+            ],
+          }),
+        },
+        { name: 'computedTitle', type: 'text', virtual: true },
+      ],
+      versions: false,
+    },
   ],
   admin: {
     importMap: {
@@ -209,6 +252,7 @@ export default buildConfigWithDefaults({
     },
   ],
   typescript: {
+    generateInputTypes: true,
     outputFile: path.resolve(dirname, 'payload-types.ts'),
     strictDraftTypes: true,
     postProcess: [

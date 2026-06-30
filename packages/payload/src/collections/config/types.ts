@@ -73,6 +73,14 @@ import type {
 
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
 
+/**
+ * The ID type of a given collection (e.g. `string` or `number`), taken from its generated type.
+ * Use this instead of the project-wide {@link DefaultDocumentIDType} when the collection slug is
+ * known, since each collection can have its own ID type.
+ */
+export type IDTypeForCollectionSlug<TSlug extends CollectionSlug> =
+  DataFromCollectionSlug<TSlug>['id']
+
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
 
 /**

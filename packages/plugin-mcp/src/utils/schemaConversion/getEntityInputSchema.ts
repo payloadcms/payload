@@ -9,11 +9,6 @@ import {
 
 import type { JsonSchemaType } from '../../types.js'
 
-import {
-  getCollectionVirtualFieldNames,
-  getGlobalVirtualFieldNames,
-} from '../getVirtualFieldNames.js'
-import { removeVirtualFieldsFromSchema } from './removeVirtualFieldsFromSchema.js'
 import { sanitizeEntitySchema } from './sanitizeEntitySchema.js'
 
 export const getCollectionInputSchema = ({
@@ -29,11 +24,7 @@ export const getCollectionInputSchema = ({
     return null
   }
 
-  return buildEntityInputSchema({
-    entity: collection,
-    req,
-    virtualFieldNames: getCollectionVirtualFieldNames(req.payload.config, collectionSlug),
-  })
+  return buildEntityInputSchema({ entity: collection, req })
 }
 
 export const getGlobalInputSchema = ({
@@ -49,30 +40,23 @@ export const getGlobalInputSchema = ({
     return null
   }
 
-  return buildEntityInputSchema({
-    entity: global,
-    req,
-    virtualFieldNames: getGlobalVirtualFieldNames(req.payload.config, globalSlug),
-  })
+  return buildEntityInputSchema({ entity: global, req })
 }
 
 const buildEntityInputSchema = ({
   entity,
   req,
-  virtualFieldNames,
 }: {
   entity: SanitizedCollectionConfig | SanitizedGlobalConfig
   req: PayloadRequest
-  virtualFieldNames: string[]
 }): JsonSchemaType =>
+  // The `input` variant is already the write shape; sanitizeEntitySchema only adds MCP-specific passes.
   sanitizeEntitySchema(
-    removeVirtualFieldsFromSchema(
-      entityToStandaloneJSONSchema({
-        config: req.payload.config,
-        defaultIDType: req.payload.db.defaultIDType,
-        entity,
-        i18n: req.i18n,
-      }) as unknown as JsonSchemaType,
-      virtualFieldNames,
-    ),
+    entityToStandaloneJSONSchema({
+      config: req.payload.config,
+      defaultIDType: req.payload.db.defaultIDType,
+      entity,
+      i18n: req.i18n,
+      variant: 'input',
+    }) as unknown as JsonSchemaType,
   )

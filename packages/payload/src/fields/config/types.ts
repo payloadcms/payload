@@ -147,6 +147,7 @@ import type {
   PickPreserveOptional,
   Where,
 } from '../../types/index.js'
+import type { SchemaVariant } from '../../utilities/configToJSONSchema.js'
 import type { DisabledOptions } from '../isFieldDisabled.js'
 import type {
   NumberFieldManyValidation,
@@ -508,8 +509,11 @@ export interface FieldBase {
    * Allows you to modify the base JSON schema that is generated for this field.
    * This JSON schema will be used to generate the TypeScript interface of this field, and to
    * validate the field's value in the MCP plugin.
+   *
+   * `variant` is `'input'` when generating the write shape (`create`/`update`) and `'output'` when
+   * generating the read shape, so a transform can differ between the two.
    */
-  jsonSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
+  jsonSchema?: Array<(args: { jsonSchema: JSONSchema4; variant: SchemaVariant }) => JSONSchema4>
   label?: false | LabelFunction | StaticLabel
   localized?: boolean
   /**
