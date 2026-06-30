@@ -114,6 +114,23 @@ export const bgTranslations: DefaultTranslationsObject = {
       'Няма джаджи на таблото ви. Можете да ги добавите от менюто "Табло", което е разположено в горната лента.',
     resetLayout: 'Рестартирай Оформлението',
     searchWidgets: 'Търсене на джаджи...',
+    widgetCollectionRequired: 'Collection е задължително.',
+    widgetConfigurationError: 'Грешка при конфигуриране на уиджета',
+    widgetInvalidCollection: 'Collection "{{collection}}" не съществува.',
+    widgetInvalidFilterField:
+      'Филтър полето "{{field}}" не съществува в колекцията "{{collection}}".',
+    widgetInvalidSortField:
+      'Полето за сортиране "{{field}}" не съществува в collection "{{collection}}".',
+    widgetLimitLabel: 'Ограничение',
+    widgetNonSortableSortField:
+      'Полето за сортиране "{{field}}" не може да бъде сортирано в Collection "{{collection}}".',
+    widgetQueryError: 'Неуспешно зареждане на документи за този уиджет.',
+    widgetSelectCollectionFirst: 'Изберете Collection, преди да изберете начин на сортиране.',
+    widgetSelectSortField: 'Изберете поле за сортиране',
+    widgetSortDirectionLabel: 'Посока на сортиране',
+    widgetSortFieldLabel: 'Сортирай Field',
+    widgetTitleFallback: 'Заявка към Collection',
+    widgetTitleLabel: 'Заглавие',
   },
   error: {
     accountAlreadyActivated: 'Този профил вече е активиран.',
@@ -183,6 +200,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     addRelationship: 'Добави отношение',
     addUpload: 'Качи',
     block: 'Блок',
+    blockName: 'Име на блок',
     blocks: 'блокове',
     blockType: 'Тип блок',
     chooseBetweenCustomTextOrDocument:

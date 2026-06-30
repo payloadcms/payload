@@ -1,29 +1,21 @@
 import type { JsonSchemaType } from '../../types.js'
 
 /**
- * Turns the JSON Schema that Payload generates for a collection or global into the input schema for
- * an MCP create/update tool. In short, it:
- *
- * - drops fields a client can't set (`id`, `createdAt`, the draft `_status`, …),
- * - rewrites Payload-specific field shapes (points, relationships) into plain JSON the model can fill,
- * - and shrinks the result so it's cheaper for the model to read,
- *
- * while keeping every node valid JSON Schema draft 2020-12. Each step below is tagged with why it runs -
- * **Correctness** (valid input the API accepts), **Size** (equivalence-preserving shrink), or **LLM
- * ergonomics** (easier for the model to read/fill) - and carries a before/after example on its definition.
+ * Refines Payload's `input`-variant JSON Schema into an MCP create/update tool's input schema. The
+ * variant already covers correctness (ID-only relationships, no managed/virtual/join fields); the
+ * passes here are MCP-specific - reshaping fields for the model and shrinking the result - and keep
+ * every node valid JSON Schema draft 2020-12. Each is tagged **Correctness**, **Size**, or **LLM
+ * ergonomics**, with a before/after example on its definition.
  */
 export const sanitizeEntitySchema = (schema: JsonSchemaType): JsonSchemaType => {
   // Work on a copy — the caller reuses the original schema elsewhere (e.g. when listing tools).
   let result = structuredClone(schema)
 
-  // Correctness — drop the fields a client can't set (id, createdAt, updatedAt, draft _status) + collapse nullable types.
-  result = removeManagedFields(result)
+  // LLM ergonomics — drop the redundant `'null'` from optional arrays/objects (`['array','null']` → `'array'`).
+  result = collapseOptionalContainerTypes(result)
 
   // LLM ergonomics — rewrite point fields from a `[number, number]` tuple into a `{ longitude, latitude }` object.
   result = pointFieldsToObjects(result)
-
-  // Correctness — a relationship value can be an ID or a populated doc; on input only the ID is valid, so keep that.
-  result = relationshipsToIds(result)
 
   // Size — strip inert type-gen leftovers that only bloat the schema (`tsType`, block-collision notes).
   result = removeTypeGenArtifacts(result)
@@ -58,26 +50,20 @@ const mapNodes = (node: unknown, visit: (node: JsonSchemaType) => JsonSchemaType
   for (const [key, value] of Object.entries(node)) {
     out[key] = mapNodes(value, visit)
   }
-  return visit(out as JsonSchemaType)
+  return visit(out)
 }
 
-// Payload sets these on every document, so an MCP client never provides them when creating/updating.
-const PAYLOAD_MANAGED_FIELDS = new Set(['_status', 'createdAt', 'id', 'updatedAt'])
-
 /**
- * **Correctness.** Removes the fields a client can't set on create/update - `id`, `createdAt`, `updatedAt`, and the draft
- * `_status` - from every field object's `properties` and `required` (recursing into nested objects and
- * array items). Along the way it also collapses optional array/object types via {@link collapseNullableType}.
+ * **LLM ergonomics.** Collapses optional array/object types (`['array', 'null']` → `'array'`) via
+ * {@link collapseNullableType}, recursing through `properties` and array items. The `required` list
+ * already conveys optionality, so the `'null'` is redundant noise for the model.
  *
  * @example
- * { properties: { id: { type: 'string' }, tags: { type: ['array', 'null'], items: {} } }, required: ['id', 'tags'] }
- * → { properties: { tags: { type: 'array', items: {} } }, required: ['tags'] }
+ * { properties: { tags: { type: ['array', 'null'], items: {} } }, required: [] }
+ * → { properties: { tags: { type: 'array', items: {} } }, required: [] }
  */
-const removeManagedFields = (schema: JsonSchemaType): JsonSchemaType => {
+const collapseOptionalContainerTypes = (schema: JsonSchemaType): JsonSchemaType => {
   if (schema.properties && typeof schema.properties === 'object') {
-    for (const field of PAYLOAD_MANAGED_FIELDS) {
-      delete schema.properties[field]
-    }
     for (const key of Object.keys(schema.properties)) {
       const prop = schema.properties[key] as JsonSchemaType
       if (!prop || typeof prop !== 'object') {
@@ -86,18 +72,11 @@ const removeManagedFields = (schema: JsonSchemaType): JsonSchemaType => {
       const isRequired = Array.isArray(schema.required) && schema.required.includes(key)
       collapseNullableType(prop, isRequired)
       if (prop.properties) {
-        removeManagedFields(prop)
+        collapseOptionalContainerTypes(prop)
       }
       if (prop.items && typeof prop.items === 'object' && !Array.isArray(prop.items)) {
-        removeManagedFields(prop.items)
+        collapseOptionalContainerTypes(prop.items)
       }
-    }
-  }
-
-  if (Array.isArray(schema.required)) {
-    schema.required = schema.required.filter((name) => !PAYLOAD_MANAGED_FIELDS.has(name))
-    if (schema.required.length === 0) {
-      delete schema.required
     }
   }
 
@@ -191,82 +170,6 @@ const pointFieldsToObjects = (schema: JsonSchemaType): JsonSchemaType => {
   }
 
   return transformed
-}
-
-/**
- * **Correctness.** Reduces relationship/upload fields to the IDs a client actually sends. Payload types the value as
- * "an ID or the full related document" - but the populated-document form only appears in read responses;
- * on create/update you always reference a relationship by its ID. So we drop that `$ref` option, leaving
- * the bare ID. A single remaining target collapses inline (with a description naming the target
- * collection); several targets become an `anyOf` of IDs.
- *
- * @example
- * { oneOf: [{ type: 'string' }, { $ref: '#/$defs/posts' }] }
- * → { type: 'string', description: 'The ID of the related "posts" document.' }
- */
-const relationshipsToIds = (schema: JsonSchemaType): JsonSchemaType => {
-  if (!schema || typeof schema !== 'object') {
-    return schema
-  }
-
-  const processed = { ...schema }
-
-  if (Array.isArray(processed.oneOf)) {
-    const isRelatedDocRef = (option: unknown): option is { $ref: string } =>
-      !!option && typeof option === 'object' && '$ref' in option
-
-    if (processed.oneOf.some(isRelatedDocRef)) {
-      // A relationship value is "an ID, or the populated related document". Keep the ID option(s) and
-      // drop the `$ref`s to the related collections, since a client only ever sends the ID.
-      const idOptions = processed.oneOf
-        .filter((option) => !isRelatedDocRef(option))
-        .map((option) => (typeof option === 'object' ? relationshipsToIds(option) : option))
-      const targetCollections = processed.oneOf
-        .filter(isRelatedDocRef)
-        .map((option) => option.$ref.replace('#/$defs/', ''))
-
-      if (idOptions.length === 1) {
-        delete processed.oneOf
-        Object.assign(processed, idOptions[0])
-        if (targetCollections.length > 0 && !processed.description) {
-          processed.description = `The ID of the related "${targetCollections.join('" or "')}" document.`
-        }
-      } else if (idOptions.length > 1) {
-        delete processed.oneOf
-        processed.anyOf = idOptions
-      }
-    } else {
-      processed.oneOf = processed.oneOf.map((option) =>
-        typeof option === 'object' ? relationshipsToIds(option) : option,
-      )
-    }
-  }
-
-  if (processed.properties && typeof processed.properties === 'object') {
-    processed.properties = Object.fromEntries(
-      Object.entries(processed.properties).map(([key, value]) => [
-        key,
-        typeof value === 'object' ? relationshipsToIds(value) : value,
-      ]),
-    )
-  }
-
-  if (processed.items && typeof processed.items === 'object' && !Array.isArray(processed.items)) {
-    processed.items = relationshipsToIds(processed.items)
-  }
-
-  // Lexical node unions and blocks live under `$defs` and have their own relationship fields, so walk
-  // those too — otherwise their `$ref`s would dangle once we don't bundle the related collections.
-  if (processed.$defs && typeof processed.$defs === 'object') {
-    processed.$defs = Object.fromEntries(
-      Object.entries(processed.$defs).map(([key, value]) => [
-        key,
-        typeof value === 'object' ? relationshipsToIds(value) : value,
-      ]),
-    )
-  }
-
-  return processed
 }
 
 /**
@@ -448,7 +351,7 @@ const deduplicateIntoDefinitions = (schema: JsonSchemaType): JsonSchemaType => {
         if (!name) {
           name = `shared_${nameByKey.size}`
           nameByKey.set(key, name)
-          sharedEntries[name] = node as JsonSchemaType
+          sharedEntries[name] = node
         }
         return { $ref: `#/$defs/${name}` }
       }

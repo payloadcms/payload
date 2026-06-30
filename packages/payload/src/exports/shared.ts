@@ -83,7 +83,7 @@ export { getDefaultValue } from '../fields/getDefaultValue.js'
 export { getFieldPaths } from '../fields/getFieldPaths.js'
 export { isFieldDisabled } from '../fields/isFieldDisabled.js'
 export type { DisabledArea, DisabledOptions } from '../fields/isFieldDisabled.js'
-
+export { sortableFieldTypes } from '../fields/sortableFieldTypes.js'
 export * from '../fields/validations.js'
 
 export {
@@ -115,7 +115,6 @@ export { applyLocaleFiltering } from '../utilities/applyLocaleFiltering.js'
 export { canAccessAdmin } from '../utilities/canAccessAdmin.js'
 
 export { combineWhereConstraints } from '../utilities/combineWhereConstraints.js'
-
 export {
   deepCopyObject,
   deepCopyObjectComplex,
@@ -130,7 +129,6 @@ export {
   deepMergeWithSourceArrays,
 } from '../utilities/deepMerge.js'
 export { extractID } from '../utilities/extractID.js'
-
 export { flattenAllFields } from '../utilities/flattenAllFields.js'
 
 export { flattenTopLevelFields } from '../utilities/flattenTopLevelFields.js'

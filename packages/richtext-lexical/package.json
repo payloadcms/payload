@@ -179,11 +179,6 @@
       "types": "./src/lexical-proxy/@lexical-react/LexicalContentEditable.ts",
       "default": "./src/lexical-proxy/@lexical-react/LexicalContentEditable.ts"
     },
-    "./lexical/react/LexicalContextMenuPlugin": {
-      "import": "./src/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.ts",
-      "types": "./src/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.ts",
-      "default": "./src/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.ts"
-    },
     "./lexical/react/LexicalNodeContextMenuPlugin": {
       "import": "./src/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.ts",
       "types": "./src/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.ts",
@@ -368,17 +363,18 @@
     ]
   },
   "dependencies": {
-    "@lexical/clipboard": "0.41.0",
-    "@lexical/headless": "0.41.0",
-    "@lexical/html": "0.41.0",
-    "@lexical/link": "0.41.0",
-    "@lexical/list": "0.41.0",
-    "@lexical/mark": "0.41.0",
-    "@lexical/react": "0.41.0",
-    "@lexical/rich-text": "0.41.0",
-    "@lexical/selection": "0.41.0",
-    "@lexical/table": "0.41.0",
-    "@lexical/utils": "0.41.0",
+    "@lexical/clipboard": "0.45.0",
+    "@lexical/headless": "0.45.0",
+    "@lexical/html": "0.45.0",
+    "@lexical/link": "0.45.0",
+    "@lexical/list": "0.45.0",
+    "@lexical/mark": "0.45.0",
+    "@lexical/markdown": "0.45.0",
+    "@lexical/react": "0.45.0",
+    "@lexical/rich-text": "0.45.0",
+    "@lexical/selection": "0.45.0",
+    "@lexical/table": "0.45.0",
+    "@lexical/utils": "0.45.0",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "acorn": "8.16.0",
@@ -387,7 +383,7 @@
     "dequal": "2.0.3",
     "escape-html": "1.0.3",
     "jsox": "1.2.125",
-    "lexical": "0.41.0",
+    "lexical": "0.45.0",
     "mdast-util-from-markdown": "2.0.3",
     "mdast-util-mdx-jsx": "3.2.0",
     "micromark-extension-mdx-jsx": "3.0.2",
@@ -402,7 +398,7 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@lexical/eslint-plugin": "0.41.0",
+    "@lexical/eslint-plugin": "0.45.0",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/escape-html": "1.0.4",
     "@types/json-schema": "7.0.15",
@@ -584,11 +580,6 @@
         "import": "./dist/lexical-proxy/@lexical-react/LexicalContentEditable.js",
         "types": "./dist/lexical-proxy/@lexical-react/LexicalContentEditable.d.ts",
         "default": "./dist/lexical-proxy/@lexical-react/LexicalContentEditable.js"
-      },
-      "./lexical/react/LexicalContextMenuPlugin": {
-        "import": "./dist/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.js",
-        "types": "./dist/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.d.ts",
-        "default": "./dist/lexical-proxy/@lexical-react/LexicalContextMenuPlugin.js"
       },
       "./lexical/react/LexicalNodeContextMenuPlugin": {
         "import": "./dist/lexical-proxy/@lexical-react/LexicalNodeContextMenuPlugin.js",

@@ -24,7 +24,7 @@ import { richTextValidateHOC } from './validate/index.js'
 
 let checkedDependencies = false
 
-export const lexicalTargetVersion = '0.41.0'
+export const lexicalTargetVersion = '0.45.0'
 
 export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   if (
@@ -43,6 +43,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             '@lexical/link',
             '@lexical/list',
             '@lexical/mark',
+            '@lexical/markdown',
             '@lexical/react',
             '@lexical/rich-text',
             '@lexical/selection',
@@ -384,6 +385,8 @@ export type {
   SlashMenuGroup,
   SlashMenuItem,
 } from './lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+export { $convertFromMarkdownString } from './lexical/utils/markdown/convertFromMarkdownString.js'
+
 export {
   DETAIL_TYPE_TO_DETAIL,
   DOUBLE_LINE_BREAK,
@@ -400,8 +403,6 @@ export {
 } from './lexical/utils/nodeFormat.js'
 
 export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
-
-export { $convertFromMarkdownString } from './packages/@lexical/markdown/index.js'
 
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'

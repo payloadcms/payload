@@ -25,7 +25,7 @@ import type {
 import type { ImportPreviewResponse } from '../../types.js'
 
 import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'import-preview'
 

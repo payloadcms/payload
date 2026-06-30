@@ -55,6 +55,7 @@ export const SelectComparison: React.FC<Props> = memo((props) => {
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
       <ReactSelect
+        aria-label={t('version:selectVersionToCompare')}
         isClearable={false}
         isSearchable={false}
         onChange={onChange}

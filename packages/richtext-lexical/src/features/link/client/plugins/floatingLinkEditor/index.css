@@ -10,17 +10,13 @@
     vertical-align: middle;
     position: absolute;
     top: 0;
-    left: 0;
+    inset-inline-start: 0;
     opacity: 0;
     border-radius: var(--radius-large);
     transition: opacity 0.2s;
     will-change: transform;
     overflow: clip;
-    box-shadow:
-      0px 3px 8px 0px rgba(0, 0, 0, 0.35),
-      0px 1px 3px 0px rgba(0, 0, 0, 0.5),
-      inset 0px 0.5px 0px 0px rgba(255, 255, 255, 0.08),
-      inset 0px 0px 0.5px 0px rgba(255, 255, 255, 0.3);
+    box-shadow: var(--elevation-100-canvas);
 
     .link-input {
       display: flex;
@@ -37,7 +33,7 @@
       font-family: var(--font-body);
 
       > .icon:first-child {
-        color: var(--ramp-white-400);
+        color: var(--color-icon-onbrand-secondary);
         flex-shrink: 0;
       }
 
@@ -65,13 +61,13 @@
     .link-input__divider {
       width: var(--stroke-width-small);
       align-self: stretch;
-      background-color: var(--ramp-white-400);
-      margin-left: var(--spacer-2);
+      background-color: var(--color-text-onbrand-secondary);
+      margin-inline-start: var(--spacer-2);
     }
 
     .link-input__label-pure {
       color: var(--color-text-onbrand);
-      margin-right: var(--spacer-3);
+      margin-inline-end: var(--spacer-3);
       display: block;
       white-space: nowrap;
       overflow: hidden;
@@ -97,7 +93,7 @@
 
       &:hover:not([disabled]) {
         color: var(--color-icon-onbrand);
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: var(--color-bg-transparent-hover);
       }
 
       &:focus-visible {

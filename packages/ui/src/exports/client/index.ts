@@ -39,6 +39,7 @@ export { QueryPresetsGroupByCell } from '../../elements/QueryPresets/cells/Group
 export { QueryPresetsColumnField } from '../../elements/QueryPresets/fields/ColumnsField/index.js'
 export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
 export { QueryPresetsGroupByField } from '../../elements/QueryPresets/fields/GroupByField/index.js'
+export { CollectionQuerySortField } from '../../widgets/CollectionQuery/SortField/index.js'
 export { QueryPresetsHeading } from '../../elements/QueryPresets/fields/Heading/index.js'
 
 // elements

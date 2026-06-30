@@ -115,6 +115,23 @@ export const myTranslations: DefaultTranslationsObject = {
       'သင့်ဒက်ရှ်ဘုတ်တွင် ဝစ်ဂျက်များ မရှိပါ။ အပေါ်ဘားရှိ "Dashboard" မီနူးမှ ထည့်သွင်းနိုင်ပါသည်။',
     resetLayout: 'စီစဉ်မှုကို ပြန်လည်သတ်မှတ်ပါ',
     searchWidgets: 'ဝစ်ဂျက်များ ရှာဖွေပါ...',
+    widgetCollectionRequired: 'Collection သည် မဖြစ်မနေလိုအပ်ပါသည်။',
+    widgetConfigurationError: 'Widget အတည်ပြုခြင်းအမှား',
+    widgetInvalidCollection: 'Collection "{{collection}}" မရှိပါ။',
+    widgetInvalidFilterField:
+      'Filter field "{{field}}" သည် collection "{{collection}}" တွင် မရှိပါ။',
+    widgetInvalidSortField:
+      'မည်သည့် Sort field "{{field}}" မဟုတ်ပါ collection "{{collection}}" တွင် မတည်ရှိပါ။',
+    widgetLimitLabel: 'ကန့်သတ်ချက်',
+    widgetNonSortableSortField:
+      'အမျိုးအစား "{{collection}}" တွင် Sort field "{{field}}" ကို စီခန့်နိုင်မှုမရှိပါ။',
+    widgetQueryError: 'ဤ widget အတွက် Document များကို မဖော်ပြနိုင်ခဲ့ပါ။',
+    widgetSelectCollectionFirst: 'စီညွှန်းမှုရွေးချယ်မည်မီ Collection တစ်ခုအား ရွေးချယ်ပါ။',
+    widgetSelectSortField: 'စီအစဉ်ရန် field တစ်ခုရွေးပါ',
+    widgetSortDirectionLabel: 'စီခြင်းဦးတည်ရာ',
+    widgetSortFieldLabel: 'Field တူညီခြင်း အလိုက် စီစဉ်ရန်',
+    widgetTitleFallback: 'Collection query (မေးခွန်း)',
+    widgetTitleLabel: 'ခေါင်းစဉ်',
   },
   error: {
     accountAlreadyActivated: 'ဤအကောင့်ကို အသက်သွင်းပြီးဖြစ်သည်။',
@@ -185,6 +202,7 @@ export const myTranslations: DefaultTranslationsObject = {
     addRelationship: 'Relationship အသစ်ထည့်သွင်းမည်။',
     addUpload: 'Upload ထည့်ပါ။',
     block: 'ဘလောက်',
+    blockName: 'ဘလော့ခ်အမည်',
     blocks: 'ဘလောက်များ',
     blockType: 'ဘလောက် အမျိုးအစား',
     chooseBetweenCustomTextOrDocument:

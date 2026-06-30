@@ -115,6 +115,22 @@ export const enTranslations = {
       'There are no widgets on your dashboard. You can add them from the "Dashboard" menu located in the top bar.',
     resetLayout: 'Reset Layout',
     searchWidgets: 'Search widgets...',
+    widgetCollectionRequired: 'Collection is required.',
+    widgetConfigurationError: 'Widget configuration error',
+    widgetInvalidCollection: 'Collection "{{collection}}" does not exist.',
+    widgetInvalidFilterField:
+      'Filter field "{{field}}" does not exist on collection "{{collection}}".',
+    widgetInvalidSortField: 'Sort field "{{field}}" does not exist on collection "{{collection}}".',
+    widgetLimitLabel: 'Limit',
+    widgetNonSortableSortField:
+      'Sort field "{{field}}" is not sortable on collection "{{collection}}".',
+    widgetQueryError: 'Could not load documents for this widget.',
+    widgetSelectCollectionFirst: 'Select a collection before choosing sort',
+    widgetSelectSortField: 'Select a field to sort by',
+    widgetSortDirectionLabel: 'Sort Direction',
+    widgetSortFieldLabel: 'Sort Field',
+    widgetTitleFallback: 'Collection query',
+    widgetTitleLabel: 'Title',
   },
   error: {
     accountAlreadyActivated: 'This account has already been activated.',
@@ -183,6 +199,7 @@ export const enTranslations = {
     addRelationship: 'Add Relationship',
     addUpload: 'Add Upload',
     block: 'Block',
+    blockName: 'Block name',
     blocks: 'blocks',
     blockType: 'Block Type',
     chooseBetweenCustomTextOrDocument:

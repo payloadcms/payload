@@ -7,6 +7,7 @@ import type {
   Where,
 } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import { dequal } from 'dequal/lite'
 import { formatAdminURL, wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -779,6 +780,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                 Fallback={<FieldError path={path} showError={showError} />}
               />
               <ReactSelect
+                aria-label={getTranslation(label, i18n)}
                 backspaceRemovesValue={!(isDrawerOpen || isListDrawerOpen)}
                 components={{
                   MultiValueLabel,

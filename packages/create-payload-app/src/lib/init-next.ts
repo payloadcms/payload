@@ -18,6 +18,7 @@ import {
   DEFAULT_PAYLOAD_VERSION_TAG,
   resolvePackageVersion,
 } from '../utils/resolvePackageVersion.js'
+import { ensurePnpmBuildApprovals } from './configure-pnpm-builds.js'
 import { installPackages } from './install-packages.js'
 import { wrapNextConfig } from './wrap-next-config.js'
 
@@ -249,6 +250,8 @@ async function installDeps(args: {
 
   // Match graphql version of @payloadcms/next
   packagesToInstall.push('graphql@^16.8.1')
+
+  await ensurePnpmBuildApprovals({ packageManager, projectDir })
 
   return await installPackages({ packageManager, packagesToInstall, projectDir })
 }
