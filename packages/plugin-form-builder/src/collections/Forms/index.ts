@@ -48,10 +48,15 @@ export const generateFormCollection = (
       {
         name: 'url',
         type: 'text',
-        label: 'URL to redirect to',
+        label: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:urlToRedirectTo'),
         required: true,
       },
     ],
+    label: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:redirect'),
   }
 
   if (formConfig.redirectRelationships) {
@@ -61,7 +66,9 @@ export const generateFormCollection = (
       admin: {
         condition: (_, siblingData) => siblingData?.type === 'reference',
       },
-      label: 'Document to link to',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:documentToLinkTo'),
       maxDepth: 2,
       relationTo: formConfig.redirectRelationships,
       required: true,
@@ -76,18 +83,24 @@ export const generateFormCollection = (
       defaultValue: 'reference',
       options: [
         {
-          label: 'Internal link',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:internalLink'),
           value: 'reference',
         },
         {
-          label: 'Custom URL',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:customURL'),
           value: 'custom',
         },
       ],
     })
 
     if (redirect.fields[2]!.type !== 'row') {
-      redirect.fields[2]!.label = 'Custom URL'
+      redirect.fields[2]!.label = ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:customURL')
     }
 
     redirect.fields[2]!.admin = {
@@ -99,6 +112,9 @@ export const generateFormCollection = (
     {
       name: 'title',
       type: 'text',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:title'),
       required: true,
     },
     {
@@ -137,28 +153,50 @@ export const generateFormCollection = (
           return null
         })
         .filter(Boolean) as Block[],
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:fields'),
+      labels: {
+        plural: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:fields'),
+        singular: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:field'),
+      },
     },
     {
       name: 'submitButtonLabel',
       type: 'text',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:submitButtonLabel'),
       localized: true,
     },
     {
       name: 'confirmationType',
       type: 'radio',
       admin: {
-        description:
-          'Choose whether to display an on-page message or redirect to a different page after they submit the form.',
+        description: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:chooseConfirmationType'),
         layout: 'horizontal',
       },
       defaultValue: 'message',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:confirmationType'),
       options: [
         {
-          label: 'Message',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:message'),
           value: 'message',
         },
         {
-          label: 'Redirect',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:redirect'),
           value: 'redirect',
         },
       ],
@@ -169,6 +207,9 @@ export const generateFormCollection = (
       admin: {
         condition: (_, siblingData) => siblingData?.confirmationType === 'message',
       },
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:confirmationMessage'),
       localized: true,
       required: true,
     },
@@ -180,8 +221,9 @@ export const generateFormCollection = (
         read: ({ req: { user } }) => !!user,
       },
       admin: {
-        description:
-          "Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.",
+        description: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:emailsDescription'),
       },
       fields: [
         {
@@ -194,7 +236,9 @@ export const generateFormCollection = (
                 placeholder: '"Email Sender" <sender@email.com>',
                 width: '100%',
               },
-              label: 'Email To',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:emailTo'),
             },
             {
               name: 'cc',
@@ -204,7 +248,9 @@ export const generateFormCollection = (
                   maxWidth: '50%',
                 },
               },
-              label: 'CC',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:cc'),
             },
             {
               name: 'bcc',
@@ -214,7 +260,9 @@ export const generateFormCollection = (
                   maxWidth: '50%',
                 },
               },
-              label: 'BCC',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:bcc'),
             },
           ],
         },
@@ -228,7 +276,9 @@ export const generateFormCollection = (
                 placeholder: '"Reply To" <reply-to@email.com>',
                 width: '50%',
               },
-              label: 'Reply To',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:replyTo'),
             },
             {
               name: 'emailFrom',
@@ -237,7 +287,9 @@ export const generateFormCollection = (
                 placeholder: '"Email From" <email-from@email.com>',
                 width: '50%',
               },
-              label: 'Email From',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:emailFrom'),
             },
           ],
         },
@@ -245,7 +297,9 @@ export const generateFormCollection = (
           name: 'subject',
           type: 'text',
           defaultValue: "You've received a new message.",
-          label: 'Subject',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:subject'),
           localized: true,
           required: true,
         },
@@ -253,9 +307,13 @@ export const generateFormCollection = (
           name: 'message',
           type: 'richText',
           admin: {
-            description: 'Enter the message that should be sent in this email.',
+            description: ({ t }) =>
+              // @ts-expect-error - translations are not typed in plugins yet
+              t('plugin-form-builder:messageDescription'),
           },
-          label: 'Message',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:message'),
           localized: true,
         },
       ],
