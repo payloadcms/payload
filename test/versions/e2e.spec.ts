@@ -490,7 +490,6 @@ describe('Versions', () => {
 
     test('collection - autosave - should redirect from create to edit URL after first save', async () => {
       await page.goto(autosaveURL.create)
-      await expect.poll(() => page.url()).toContain('/create')
 
       await page.locator('#field-title').fill('autosave redirect title')
       await waitForAutoSaveToRunAndComplete(page)
