@@ -2035,11 +2035,23 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(toolNames).not.toContain('getGlobalSchema')
     })
 
-    it('getCollectionSchema: should hide inaccessible fields inside groups and arrays', async ({
+    it('getCollectionSchema: should hide inaccessible fields inside nested field layouts', async ({
       mcp,
     }) => {
       const apiKey = await getApiKey({
         fields: {
+          'field-types._index-15.rowText': {
+            create: false,
+            update: false,
+          },
+          'field-types._index-16-1.unnamedTabText': {
+            create: false,
+            update: false,
+          },
+          'field-types._index-16.namedTab.namedTabText': {
+            create: false,
+            update: false,
+          },
           'field-types.arrayField.item': {
             create: false,
             update: false,
@@ -2063,6 +2075,9 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(schema).toHaveProperty('properties.groupField.properties.groupNumber')
       expect(schema).not.toHaveProperty('properties.arrayField.items.properties.item')
       expect(schema).toHaveProperty('properties.arrayField.items.properties.itemNumber')
+      expect(schema).not.toHaveProperty('properties.rowText')
+      expect(schema).not.toHaveProperty('properties.namedTab.properties.namedTabText')
+      expect(schema).not.toHaveProperty('properties.unnamedTabText')
     })
 
     it('getCollectionSchema: should hide inaccessible fields inside blocks', async ({ mcp }) => {
