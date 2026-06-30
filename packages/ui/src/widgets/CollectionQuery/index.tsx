@@ -9,7 +9,6 @@ import type { CollectionFieldPaths } from './getCollectionFieldPaths.js'
 
 import '../../elements/Card/index.css'
 import './index.css'
-import { Link } from '../../elements/Link/index.js'
 import { getCollectionFieldPaths } from './getCollectionFieldPaths.js'
 
 type CollectionQueryWidgetData = {
@@ -122,7 +121,7 @@ export async function CollectionQueryWidget({
 
             return (
               <li className="collection-query-widget__row" key={doc.id}>
-                <Link
+                <a
                   className="collection-query-widget__row-link"
                   href={getDocumentHref({
                     id: doc.id,
@@ -144,7 +143,7 @@ export async function CollectionQueryWidget({
                       )
                     ) : null}
                   </span>
-                </Link>
+                </a>
               </li>
             )
           })}
