@@ -1,12 +1,33 @@
 import { createHash } from 'node:crypto'
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import type { EvalResult } from './types.js'
+import type { RunnerKind, SkillInstallMode } from './runner/types.js'
+import type { EvalResult, SystemPromptKey } from './types.js'
+
+import { SKILL_SYSTEM_PROMPT } from './runner/claudeCode.js'
+import { getSkillTreeHash } from './runner/workdir.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const cacheDir = path.join(__dirname, 'eval-results', 'cache')
+const runIdFile = path.join(__dirname, 'eval-results', '.run-id')
+
+let runIdLoaded = false
+let runIdValue: string | undefined
+
+/** The current invocation's run id, written by globalSetup. Read once per worker. */
+function getRunId(): string | undefined {
+  if (!runIdLoaded) {
+    runIdLoaded = true
+    try {
+      runIdValue = readFileSync(runIdFile, 'utf-8').trim() || undefined
+    } catch {
+      runIdValue = undefined
+    }
+  }
+  return runIdValue
+}
 
 type CacheEntry = {
   createdAt: string
@@ -21,29 +42,6 @@ function hashKey(parts: Record<string, string | undefined>): string {
 
 function cacheFilePath(key: string): string {
   return path.join(cacheDir, `${key}.json`)
-}
-
-/**
- * Prompt keys that inject SKILL.md content into the system prompt.
- * Cache entries for these keys must be invalidated when the skill file changes.
- */
-const SKILL_PROMPT_KEYS = new Set(['codegenWithSkill', 'qaWithSkill'])
-
-/** Lazy-loaded 8-char prefix of the skill file's SHA-256 hash. Computed once per process. */
-let _skillHash: null | string = null
-
-function getSkillHash(): string {
-  if (_skillHash !== null) {
-    return _skillHash
-  }
-  try {
-    const skillPath = path.resolve(process.cwd(), 'tools/claude-plugin/skills/payload/SKILL.md')
-    const content = readFileSync(skillPath, 'utf-8')
-    _skillHash = createHash('sha256').update(content).digest('hex').slice(0, 8)
-  } catch {
-    _skillHash = 'unknown'
-  }
-  return _skillHash
 }
 
 /** Returns true when EVAL_NO_CACHE=true is set, meaning cache reads are bypassed. */
@@ -77,54 +75,86 @@ export function setCachedResult(key: string, result: EvalResult): void {
   const entry: CacheEntry = {
     version: 1,
     createdAt: new Date().toISOString(),
-    result,
+    result: { ...result, runId: result.runId ?? getRunId() },
   }
   writeFileSync(cacheFilePath(key), JSON.stringify(entry, null, 2), 'utf-8')
 }
 
 /**
- * Generates a cache key for a QA eval case.
- * Keyed on: question input, expected answer, system prompt, fixture path (if any), and model ID.
- * For skill-variant prompts, also includes an 8-char hash of SKILL.md so the cache is
- * automatically invalidated whenever the skill file changes.
+ * Removes cache files whose result matches `match` but whose key differs from
+ * `currentKey`. Used after writing a fresh result so prior entries for the same
+ * logical case (e.g. earlier fixture or skill content) are dropped, keeping
+ * the dashboard from showing duplicate or stale rows.
  */
-export function qaKey(params: {
-  expected: string
-  fixturePath?: string
-  input: string
-  modelId: string
-  systemPromptKey: string
-}): string {
-  return hashKey({
-    type: 'qa',
-    input: params.input,
-    expected: params.expected,
-    fixturePath: params.fixturePath ?? '',
-    systemPromptKey: params.systemPromptKey,
-    modelId: params.modelId,
-    skillHash: SKILL_PROMPT_KEYS.has(params.systemPromptKey) ? getSkillHash() : undefined,
-  })
+export function pruneStaleEntries(
+  currentKey: string,
+  match: (result: EvalResult) => boolean,
+): void {
+  let files: string[]
+  try {
+    files = readdirSync(cacheDir).filter((f) => f.endsWith('.json'))
+  } catch {
+    return
+  }
+  for (const file of files) {
+    const fileKey = file.replace(/\.json$/, '')
+    if (fileKey === currentKey) {
+      continue
+    }
+    const filePath = path.join(cacheDir, file)
+    try {
+      const entry = JSON.parse(readFileSync(filePath, 'utf-8')) as CacheEntry
+      if (entry.version === 1 && match(entry.result)) {
+        rmSync(filePath, { force: true })
+      }
+    } catch {
+      // skip unreadable / corrupt entries
+    }
+  }
 }
 
 /**
  * Generates a cache key for a codegen eval case.
- * Keyed on: instruction input, expected outcome, fixture *content* (not path), model ID,
- * and systemPromptKey. Using content instead of path means the cache is automatically
- * invalidated when a fixture changes. systemPromptKey distinguishes skill vs baseline runs.
+ *
+ * Keyed on instruction input, expected outcome, fixture content, runner kind,
+ * `modelId` (which for agent runs already encodes `agentModel` + `agentVersion`),
+ * and runner-specific options. Includes the skill-tree fingerprint when the run
+ * depends on the skill content (LLM `codegenWithSkill` or claude-code `embedded`
+ * install), so any change to the skill files invalidates the relevant entries.
  */
 export function codegenKey(params: {
   expected: string
   fixtureContent: string
   input: string
-  modelId: string
-  systemPromptKey: string
+  modelId?: string
+  runnerKind: RunnerKind
+  skillInstall?: SkillInstallMode
+  systemPromptKey?: SystemPromptKey
 }): string {
+  const skillIncluded =
+    (params.runnerKind === 'llm' && params.systemPromptKey === 'codegenWithSkill') ||
+    (params.runnerKind === 'claude-code' && params.skillInstall === 'embedded')
+
+  // For claude-code embedded runs the runner appends a system-prompt directive
+  // nudging the agent to invoke the skill. Any tweak to that text changes
+  // observable behavior, so factor it into the cache key.
+  const agentSystemPrompt =
+    params.runnerKind === 'claude-code' && params.skillInstall === 'embedded'
+      ? SKILL_SYSTEM_PROMPT
+      : undefined
+
+  // agentModel and agentVersion are deliberately omitted: for claude-code runs,
+  // modelId is `claude-code/<agentModel>/<version>`, so they're already in the hash.
   return hashKey({
     type: 'codegen',
+    runnerKind: params.runnerKind,
     input: params.input,
     expected: params.expected,
     fixtureContent: params.fixtureContent,
     modelId: params.modelId,
     systemPromptKey: params.systemPromptKey,
+    skillInstall: params.skillInstall,
+    skillHash: skillIncluded ? getSkillTreeHash() : undefined,
+    agentSystemPrompt,
   })
 }

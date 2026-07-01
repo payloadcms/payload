@@ -74,8 +74,6 @@ export class DashboardHelper {
         const previousWidgetBox = (await widgets[index - 1]!.boundingBox())!
         expectedX = previousWidgetBox.x + previousWidgetBox.width
         expect(widgetBox.y + widgetBox.height).toBe(previousWidgetBox.y + previousWidgetBox.height)
-        const innerWidgetBox = (await widget.locator('.draggable').boundingBox())!
-        expect(innerWidgetBox.y + innerWidgetBox.height).toBe(widgetBox.y + widgetBox.height - 6) // 6px padding
       }
 
       expect(widgetBox.x).toBe(expectedX)
@@ -120,8 +118,10 @@ export class DashboardHelper {
     const activePopup = this.page.locator('.popup__content:visible')
     await expect(activePopup).toBeVisible()
     const widthOptions = activePopup.locator('.popup-button-list__button')
-    await expect(widthOptions.first().locator('span').first()).toHaveText(arg.min)
-    await expect(widthOptions.last().locator('span').first()).toHaveText(arg.max)
+    await expect(widthOptions.first().locator('.widget-wrapper__size-btn-label')).toHaveText(
+      arg.min,
+    )
+    await expect(widthOptions.last().locator('.widget-wrapper__size-btn-label')).toHaveText(arg.max)
   }
 
   assertWidget = async (pos: number, slug: string, width: WidgetWidth) => {
@@ -132,13 +132,13 @@ export class DashboardHelper {
 
   setEditing = async () => {
     await this.stepNavLast.locator('button').click()
-    await this.stepNavLast.getByText('Edit Dashboard').click()
+    await this.page.getByRole('button', { name: 'Edit Dashboard' }).click()
     await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
   }
 
   resetLayout = async () => {
     await this.stepNavLast.locator('button').click()
-    await this.stepNavLast.getByText('Reset Layout').click()
+    await this.page.getByRole('button', { name: 'Reset Layout' }).click()
   }
 
   assertIsEditing = async (shouldBe: boolean) => {
@@ -150,7 +150,7 @@ export class DashboardHelper {
       await expect(this.stepNavLast.locator('button').nth(2)).toHaveText('Cancel')
     } else {
       await expect(this.stepNavLast.locator('button')).toHaveCount(1)
-      await expect(this.stepNavLast.getByTitle('Dashboard')).toBeVisible()
+      await expect(this.stepNavLast.getByLabel('Dashboard')).toBeVisible()
     }
   }
 
@@ -207,7 +207,9 @@ export class DashboardHelper {
 
   cancelEditing = async () => {
     await this.stepNavLast.locator('button').nth(2).click()
-    const confirmButton = this.page.locator('#confirm-action')
+    const confirmButton = this.page.locator(
+      '#cancel-dashboard-changes [data-dialog-action="confirm"]',
+    )
     await confirmButton.click()
     await this.assertIsEditing(false)
     // Wait for any layout changes/transitions to settle

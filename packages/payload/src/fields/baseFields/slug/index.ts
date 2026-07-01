@@ -118,10 +118,7 @@ export const slugField: SlugField = ({
         admin: {
           description:
             'When enabled, the slug will auto-generate from the title field on save and autosave.',
-          disableBulkEdit: true,
-          disableGroupBy: true,
-          disableListColumn: true,
-          disableListFilter: true,
+          disabled: { bulkEdit: true, column: true, filter: true, groupBy: true },
           hidden: true,
         },
         defaultValue: true,
@@ -139,7 +136,7 @@ export const slugField: SlugField = ({
               clientProps: {
                 useAsSlug,
               } satisfies SlugFieldClientPropsOnly,
-              path: '@payloadcms/next/client#SlugField',
+              path: '@payloadcms/ui#SlugField',
             },
           },
           width: '100%',

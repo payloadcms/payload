@@ -1,6 +1,6 @@
 import escapeHTML from 'escape-html'
 
-import type { SerializedTextNode } from '../../../../../nodeTypes.js'
+import type { SerializedTextNode } from '../../../../../types/nodeTypes.js'
 import type { HTMLConverters } from '../types.js'
 
 import { NodeFormat } from '../../../../../lexical/utils/nodeFormat.js'

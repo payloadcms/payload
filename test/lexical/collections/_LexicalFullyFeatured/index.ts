@@ -77,6 +77,15 @@ export const LexicalFullyFeatured: CollectionConfig = {
                   },
                 ],
               },
+              {
+                slug: 'jsonBlock',
+                fields: [
+                  {
+                    name: 'json',
+                    type: 'json',
+                  },
+                ],
+              },
             ],
             inlineBlocks: [
               {
@@ -126,4 +135,5 @@ export const LexicalFullyFeatured: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

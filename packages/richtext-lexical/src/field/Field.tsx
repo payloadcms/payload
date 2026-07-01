@@ -1,5 +1,6 @@
 'use client'
 import type { EditorState, SerializedEditorState } from 'lexical'
+import type { FallbackProps } from 'react-error-boundary'
 
 import {
   BulkUploadProvider,
@@ -22,11 +23,11 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
 
-import '../lexical/theme/EditorTheme.scss'
+import '../lexical/theme/EditorTheme.css'
 import './bundled.css'
-import './index.scss'
+import './index.css'
 
-import type { LexicalRichTextFieldProps } from '../types.js'
+import type { LexicalRichTextFieldProps } from '../types/index.js'
 
 import { LexicalProvider } from '../lexical/LexicalProvider.js'
 import { useRunDeprioritized } from '../utilities/useRunDeprioritized.js'
@@ -199,10 +200,6 @@ const RichTextComponent: React.FC<
       key={pathWithEditDepth}
       style={styles}
     >
-      <RenderCustomComponent
-        CustomComponent={Error}
-        Fallback={<FieldError path={path} showError={showError} />}
-      />
       <div className={`${baseClass}__label-row`}>
         {Label || (
           <FieldLabel label={label} localized={localized} path={path} required={required} />
@@ -210,11 +207,16 @@ const RichTextComponent: React.FC<
         {!isControlledByParent && <ViewSelector />}
       </div>
       <div className={`${baseClass}__wrap`}>
+        <RenderCustomComponent
+          CustomComponent={Error}
+          Fallback={<FieldError path={path} showError={showError} />}
+        />
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
           {/* Lexical may be in a drawer. We need to define another BulkUploadProvider to ensure that the bulk upload drawer
-          is rendered in the correct depth (not displayed *behind* the current drawer)*/}
-          <BulkUploadProvider drawerSlugPrefix={path}>
+          is rendered in the correct depth (not displayed *behind* the current drawer).
+          The `lexical-` prefix prevents drawer-slug collisions with non-lexical `BulkUploadProvider`s up the tree. */}
+          <BulkUploadProvider modalSlugPrefix={`lexical-${path}`}>
             <LexicalProvider
               composerKey={pathWithEditDepth}
               editorConfig={editorConfig}
@@ -238,13 +240,11 @@ const RichTextComponent: React.FC<
   )
 }
 
-function fallbackRender({ error }: { error: Error }) {
-  // Call resetErrorBoundary() to reset the error boundary and retry the render.
-
+function fallbackRender({ error }: FallbackProps) {
   return (
     <div className="errorBoundary" role="alert">
       <p>Something went wrong:</p>
-      <pre style={{ color: 'red' }}>{error.message}</pre>
+      <pre style={{ color: 'red' }}>{error instanceof Error ? error.message : String(error)}</pre>
     </div>
   )
 }

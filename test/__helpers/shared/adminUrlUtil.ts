@@ -1,4 +1,5 @@
 import type { Config } from 'payload'
+
 import { formatAdminURL } from 'payload/shared'
 
 // IMPORTANT: ensure that imports do not contain React components, etc. as this breaks Playwright tests
@@ -14,6 +15,8 @@ export class AdminUrlUtil {
   create: string
 
   entitySlug: string
+
+  hierarchy: string
 
   list: string
 
@@ -75,6 +78,12 @@ export class AdminUrlUtil {
     this.byFolder = formatAdminURL({
       adminRoute: this.routes.admin,
       path: `/collections/${this.entitySlug}/payload-folders`,
+      serverURL: this.serverURL,
+    })
+
+    this.hierarchy = formatAdminURL({
+      adminRoute: this.routes.admin,
+      path: `/collections/${this.entitySlug}/hierarchy`,
       serverURL: this.serverURL,
     })
 

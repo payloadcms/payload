@@ -28,6 +28,7 @@ import { useUploadHandlers } from '../../../providers/UploadHandlers/index.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
 import { LoadingOverlay } from '../../Loading/index.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
+import { FieldErrorsToast } from '../../Toasts/fieldErrors.js'
 import { useBulkUpload } from '../index.js'
 import { createFormData } from './createFormData.js'
 import { formsManagementReducer } from './reducer.js'
@@ -101,11 +102,10 @@ type FormsManagerProps = {
 }
 
 export function FormsManagerProvider({ children }: FormsManagerProps) {
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const {
     routes: { api },
   } = config
-  const folderFieldName = config.folders ? config.folders.fieldName : undefined
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
 
@@ -130,15 +130,20 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { closeModal } = useModal()
   const {
     collectionSlug,
-    drawerSlug,
-    folderID,
     initialFiles,
     initialForms,
+    modalSlug: drawerSlug,
     onSuccess,
+    parentID,
     setInitialFiles,
     setInitialForms,
     setSuccessfullyUploaded,
   } = useBulkUpload()
+
+  const collectionConfig = getEntityConfig({ collectionSlug })
+  const folderFieldName = collectionConfig?.hierarchy
+    ? collectionConfig.hierarchy.parentFieldName
+    : undefined
 
   const [isUploading, setIsUploading] = React.useState(false)
   const [loadingText, setLoadingText] = React.useState('')
@@ -267,19 +272,19 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const applyFolderToState = React.useCallback(
     (baseState: FormState | null): FormState | null => {
-      if (folderID && folderFieldName && baseState?.[folderFieldName]) {
+      if (parentID && folderFieldName && baseState?.[folderFieldName]) {
         return {
           ...baseState,
           [folderFieldName]: {
             ...baseState[folderFieldName],
-            initialValue: folderID,
-            value: folderID,
+            initialValue: parentID,
+            value: parentID,
           },
         }
       }
       return baseState
     },
-    [folderID, folderFieldName],
+    [parentID, folderFieldName],
   )
 
   const addFiles = React.useCallback(
@@ -404,7 +409,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           const json = await req.json()
 
-          if (req.status === 201 && json?.doc) {
+          const wasSuccessful = req.status === 201 && json?.doc
+
+          if (wasSuccessful) {
             newDocs.push({
               collectionSlug,
               doc: json.doc,
@@ -490,13 +497,28 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
             toast.error(nonFieldErrors[0]?.message)
           } else {
+            let errorCount = fieldErrors.length
+
+            // Fall back to non-field errors when no field errors are present
+            // (e.g., APIError thrown from a hook).
+            if (!wasSuccessful && errorCount === 0) {
+              errorCount = nonFieldErrors.length || 1
+            }
+
             currentForms[i] = {
-              errorCount: fieldErrors.length,
+              errorCount,
               formID: currentForms[i].formID,
               formState: fieldReducer(currentForms[i].formState, {
                 type: 'ADD_SERVER_ERRORS',
                 errors: fieldErrors,
               }),
+            }
+
+            // Mimic forms/Form/index.tsx.
+            if (!wasSuccessful) {
+              nonFieldErrors.forEach((err) => {
+                toast.error(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
+              })
             }
           }
         } catch (_) {

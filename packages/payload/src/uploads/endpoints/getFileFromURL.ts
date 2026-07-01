@@ -118,11 +118,15 @@ export const getFileFromURLHandler: PayloadHandler = async (req) => {
   // Strip quotes, backslashes, and control chars from the ASCII fallback
   const asciiFileName = safeFileName.replace(/["\\\r\n]/g, '_')
 
-  return new Response(response.body, {
-    headers: {
-      'Content-Disposition': `attachment; filename="${asciiFileName}"; filename*=UTF-8''${encodedFileName}`,
-      'Content-Length': response.headers.get('content-length') || '',
-      'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
-    },
-  })
+  const headers: Record<string, string> = {
+    'Content-Disposition': `attachment; filename="${asciiFileName}"; filename*=UTF-8''${encodedFileName}`,
+    'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
+  }
+
+  const contentLength = response.headers.get('content-length')
+  if (contentLength) {
+    headers['Content-Length'] = contentLength
+  }
+
+  return new Response(response.body, { headers })
 }

@@ -53,38 +53,38 @@
     "@payloadcms/next": "3.82.1",
     "@payloadcms/richtext-lexical": "3.82.1",
     "@payloadcms/ui": "3.82.1",
-    "@playwright/test": "1.58.2",
+    "@playwright/test": "1.59.1",
     "@swc-node/register": "1.10.9",
     "@swc/cli": "0.6.0",
-    "@types/node": "22.19.9",
+    "@types/node": "24.12.3",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "copyfiles": "2.4.1",
-    "cross-env": "^7.0.3",
+    "cross-env": "10.1.0",
     "eslint": "^9.23.0",
-    "eslint-config-next": "16.2.3",
+    "eslint-config-next": "16.2.7",
     "graphql": "^16.8.1",
     "mongodb-memory-server": "10.1.4",
-    "next": "16.2.3",
+    "next": "16.2.7",
     "open": "^10.1.0",
     "payload": "3.82.1",
     "prettier": "^3.4.2",
     "qs-esm": "8.0.1",
-    "react": "19.2.4",
-    "react-dom": "19.2.4",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
     "rimraf": "3.0.2",
     "sharp": "0.34.2",
     "sort-package-json": "^2.10.0",
-    "typescript": "5.7.3",
+    "typescript": "6.0.3",
     "vite-tsconfig-paths": "6.0.5",
-    "vitest": "4.0.18"
+    "vitest": "4.1.6"
   },
   "peerDependencies": {
     "payload": "^3.82.1"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^9 || ^10"
+    "node": ">=24.15.0",
+    "pnpm": "^9 || ^10 || ^11"
   },
   "publishConfig": {
     "exports": {

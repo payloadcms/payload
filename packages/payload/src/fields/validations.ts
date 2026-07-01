@@ -298,7 +298,7 @@ export const textarea: TextareaFieldValidation = (
 export type CodeFieldValidation = Validate<string, unknown, unknown, CodeField>
 
 export const code: CodeFieldValidation = (value, { req: { t }, required }) => {
-  if (required && value === undefined) {
+  if (required && (!value || (typeof value === 'string' && value.length === 0))) {
     return t('validation:required')
   }
 

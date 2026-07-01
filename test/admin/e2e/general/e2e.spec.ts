@@ -9,6 +9,7 @@ import {
   ensureCompilationIsDone,
   getRoutes,
   initPageConsoleErrorCatch,
+  openLocaleSelector,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
   // throttleTest,
@@ -304,55 +305,149 @@ describe('General', () => {
   })
 
   describe('theme', () => {
-    test('should render light theme by default', async () => {
+    test('should default to automatic theme mode', async () => {
       await page.goto(postsUrl.admin)
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
       await page.goto(`${postsUrl.admin}/account`)
-      await expect(page.locator('#field-theme-auto')).toBeChecked()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      const themeSelect = page.locator('.payload-settings__theme .react-select')
+      await expect(themeSelect).toContainText('Auto')
     })
 
     test('should explicitly change to light theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-light"]').click()
-      await expect(page.locator('#field-theme-auto')).not.toBeChecked()
-      await expect(page.locator('#field-theme-light')).toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      const themeSelect = page.locator('.payload-settings__theme .react-select')
+      await themeSelect.click()
+      await page.locator('.rs__option', { hasText: 'Light' }).click()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
 
-      // reload the page an ensure theme is retained
+      // reload the page and ensure theme is retained
       await page.reload()
-      await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
-
-      // go back to auto theme
-      await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-auto"]').click()
-      await expect(page.locator('#field-theme-auto')).toBeChecked()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
     })
 
     test('should explicitly change to dark theme', async () => {
       await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-dark"]').click()
-      await expect(page.locator('#field-theme-auto')).not.toBeChecked()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
-      await expect(page.locator('#field-theme-dark')).toBeChecked()
+      const themeSelect = page.locator('.payload-settings__theme .react-select')
+      await themeSelect.click()
+      await page.locator('.rs__option', { hasText: 'Dark' }).click()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
-      // reload the page an ensure theme is retained
+      // reload the page and ensure theme is retained
       await page.reload()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
 
-      // go back to auto theme
-      await page.goto(`${postsUrl.admin}/account`)
-      await page.locator('label[for="field-theme-auto"]').click()
-      await expect(page.locator('#field-theme-auto')).toBeChecked()
-      await expect(page.locator('#field-theme-light')).not.toBeChecked()
-      await expect(page.locator('#field-theme-dark')).not.toBeChecked()
+      // reset to light
+      await page.locator('.payload-settings__theme .react-select').click()
+      await page.locator('.rs__option', { hasText: 'Light' }).click()
       await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+    })
+
+    describe('user menu', () => {
+      const openThemeSubMenu = async () => {
+        await page.locator('button[aria-label="Account"]').click()
+        await page
+          .locator('.popup-button-list__button--submenu-trigger')
+          .filter({ hasText: 'Theme' })
+          .click()
+      }
+
+      const closePopups = async () => {
+        await page.keyboard.press('Escape')
+        await page.keyboard.press('Escape')
+      }
+
+      test('should switch to dark theme via user menu and reflect correct active state', async () => {
+        await page.goto(postsUrl.admin)
+
+        await openThemeSubMenu()
+        await page
+          .locator('.popup-button-list__button--radio-group-item', { hasText: 'Dark' })
+          .click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+
+        // sub-popup stays open (data-popup-prevent-close) — verify active state directly
+        const darkItem = page.locator('.popup-button-list__button--radio-group-item', {
+          hasText: 'Dark',
+        })
+        await expect(darkItem).toHaveClass(/popup-button-list__button--selected/)
+
+        // navigate to account page and verify theme select shows Dark
+        await page.goto(`${postsUrl.admin}/account`)
+        await expect(page.locator('.payload-settings__theme .react-select')).toContainText('Dark')
+
+        // reload and verify persisted
+        await page.reload()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+        await expect(page.locator('.payload-settings__theme .react-select')).toContainText('Dark')
+
+        // reset to auto
+        await page.locator('.payload-settings__theme .react-select').click()
+        await page.locator('.rs__option', { hasText: 'Automatic' }).click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+      })
+
+      test('should switch to light theme via user menu and reflect active state', async () => {
+        // start with dark so we have something to switch from
+        await page.goto(postsUrl.admin)
+        await openThemeSubMenu()
+        await page
+          .locator('.popup-button-list__button--radio-group-item', { hasText: 'Dark' })
+          .click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+
+        // now switch to light via user menu — sub-popup is still open, click directly
+        await page
+          .locator('.popup-button-list__button--radio-group-item', { hasText: 'Light' })
+          .click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+
+        // verify 'Light' shown as active in submenu (still open)
+        const lightItem = page.locator('.popup-button-list__button--radio-group-item', {
+          hasText: 'Light',
+        })
+        await expect(lightItem).toHaveClass(/popup-button-list__button--selected/)
+
+        // reset to auto — close popups first, then reopen fresh
+        await closePopups()
+        await openThemeSubMenu()
+        await page
+          .locator('.popup-button-list__button--radio-group-item', { hasText: 'Auto' })
+          .click()
+        await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
+      })
+    })
+  })
+
+  describe('enhanced contrast mode', () => {
+    test('should not have data-enhanced-contrast attribute by default', async () => {
+      await page.goto(postsUrl.admin)
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+      await page.goto(`${postsUrl.admin}/account`)
+      await expect(page.locator('#field-highContrastMode')).not.toBeChecked()
+    })
+
+    test('should add data-enhanced-contrast when enabled and persist after reload', async () => {
+      await page.goto(`${postsUrl.admin}/account`)
+      await page.locator('label[for="field-highContrastMode"]').click()
+      await expect(page.locator('#field-highContrastMode')).toBeChecked()
+      await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+
+      await page.reload()
+      await expect(page.locator('html')).toHaveAttribute('data-enhanced-contrast', '')
+
+      await page.goto(`${postsUrl.admin}/account`)
+      await page.locator('label[for="field-highContrastMode"]').click()
+      await expect(page.locator('#field-highContrastMode')).not.toBeChecked()
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+    })
+
+    test('should not have data-enhanced-contrast attribute after reload when off', async () => {
+      await page.goto(`${postsUrl.admin}/account`)
+      await expect(page.locator('#field-highContrastMode')).not.toBeChecked()
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
+
+      await page.reload()
+      await expect(page.locator('html')).not.toHaveAttribute('data-enhanced-contrast')
     })
   })
 
@@ -397,8 +492,8 @@ describe('General', () => {
         )
 
       // Should show warning banner about document not found
-      await expect(page.locator('.banner--type-error')).toBeVisible()
-      await expect(page.locator('.banner--type-error')).toContainText('999999')
+      await expect(page.locator('.banner--type-danger')).toBeVisible()
+      await expect(page.locator('.banner--type-danger')).toContainText('999999')
     })
 
     test('should not redirect `${adminRoute}/collections` to `${adminRoute} if there is a custom view', async () => {
@@ -525,7 +620,7 @@ describe('General', () => {
     test('should disable active nav item', async () => {
       await page.goto(postsUrl.list)
       await openNav(page)
-      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      const activeItem = page.locator('.nav .nav__link--selected')
       await expect(activeItem).toBeVisible()
       const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
       expect(tagName).toBe('div')
@@ -534,7 +629,7 @@ describe('General', () => {
     test('should keep active nav item enabled in the edit view', async () => {
       await page.goto(postsUrl.create)
       await openNav(page)
-      const activeItem = page.locator('.nav .nav__link:has(.nav__link-indicator)')
+      const activeItem = page.locator('.nav .nav__link--selected')
       await expect(activeItem).toBeVisible()
       const tagName = await activeItem.evaluate((el) => el.tagName.toLowerCase())
       expect(tagName).toBe('a')
@@ -552,10 +647,8 @@ describe('General', () => {
       await expect(uploadsNavItem).toBeVisible()
       await expect(uploadsTwoNavItem).toBeVisible()
 
-      // Locate all nav items containing the nav__link-indicator
-      const activeNavItems = page.locator(
-        '.nav-group__content .nav__link:has(.nav__link-indicator), .nav-group__content div.nav__link:has(.nav__link-indicator)',
-      )
+      // Locate all nav items with the selected state
+      const activeNavItems = page.locator('.nav-group__content .nav__link--selected')
 
       // Expect exactly one nav item to have the indicator
       await expect(activeNavItems).toHaveCount(1)
@@ -564,7 +657,7 @@ describe('General', () => {
     test('settings menu — should show gear icon when settingsMenu is configured', async () => {
       await page.goto(postsUrl.admin)
       await openNav(page)
-      const gearIcon = page.locator('.nav__controls .popup#settings-menu .gear')
+      const gearIcon = page.locator('.nav__controls .popup#settings-menu .icon--gear')
       await expect(gearIcon).toBeVisible()
     })
 
@@ -677,7 +770,7 @@ describe('General', () => {
       await page.goto(disableCopyToLocale.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await page.locator('.doc-controls__popup >> .popup-button').click()
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
       await expect(page.locator('#copy-locale-data__button')).toBeHidden()
     })
   })
@@ -851,7 +944,7 @@ describe('General', () => {
     test('should reset actions array when navigating from view with actions to view without actions', async () => {
       await page.goto(geoUrl.list)
       await expect(page.locator('.app-header .collection-list-button')).toHaveCount(1)
-      await page.locator('button.nav-toggler[aria-label="Open Menu"][tabindex="0"]').click()
+      await openNav(page)
       await page.locator(`#nav-posts`).click()
       await expect(page.locator('.app-header .collection-list-button')).toHaveCount(0)
     })
@@ -928,10 +1021,7 @@ describe('General', () => {
       const options = page.locator('.rs__option')
       await options.locator('text=Español').click()
 
-      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
-        'title',
-        'Panel de Control',
-      )
+      await expect(page.locator('.step-nav__first')).toHaveText('Panel de Control')
 
       await field.click()
       await options.locator('text=English').click()
@@ -941,10 +1031,7 @@ describe('General', () => {
 
     test('should allow custom translation', async () => {
       await page.goto(postsUrl.account)
-      await expect(page.locator('.step-nav a').first().locator('span')).toHaveAttribute(
-        'title',
-        'Home',
-      )
+      await expect(page.locator('.step-nav__first')).toHaveText('Home')
     })
 
     test('should allow custom translation of locale labels', async () => {
@@ -953,11 +1040,10 @@ describe('General', () => {
       await wait(1000)
 
       const selectOptionClass = '.popup__content .popup-button-list__button'
-      const localizerButton = page.locator('.localizer .popup-button')
       const localeListItem1 = page.locator(selectOptionClass).nth(0)
 
       async function checkLocaleLabels(firstLabel: string, secondLabel: string) {
-        await localizerButton.click()
+        await openLocaleSelector(page)
         await expect(page.locator(selectOptionClass).first()).toContainText(firstLabel)
         await expect(page.locator(selectOptionClass).nth(1)).toContainText(secondLabel)
       }
@@ -983,7 +1069,7 @@ describe('General', () => {
       // Change locale and language back to English
       await languageField.click()
       await options.locator('text=English').click()
-      await localizerButton.click()
+      await openLocaleSelector(page)
       await expect(localeListItem1).toContainText('Spanish (es)')
     })
   })
@@ -1031,7 +1117,7 @@ describe('General', () => {
       await page.goto(postsUrl.edit(id))
       await openDocControls(page)
       await page.locator('#action-delete').click()
-      await page.locator(`[id=delete-${id}] #confirm-action`).click()
+      await page.locator(`[id=delete-${id}] [data-dialog-action="confirm"]`).click()
       await expect(page.locator(`text=Post "${title}" successfully deleted.`)).toBeVisible()
       expect(page.url()).toContain(postsUrl.list)
     })
@@ -1049,7 +1135,7 @@ describe('General', () => {
       await page.goto(disableDuplicateURL.create)
       await page.locator('#field-title').fill(title)
       await saveDocAndAssert(page)
-      await page.locator('.doc-controls__popup >> .popup-button').click()
+      await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
       await expect(page.locator('#action-duplicate')).toBeHidden()
     })
 
@@ -1071,9 +1157,7 @@ describe('General', () => {
       await expect(modalContainer).toBeVisible()
 
       // Click the "Leave anyway" button
-      await page
-        .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
-        .click()
+      await page.locator('#leave-without-saving .dialog__footer .btn--style-primary').click()
 
       // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)

@@ -6,18 +6,46 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import React from 'react'
 
+import './codeDiff.scss'
+
 import type { EvalResult, SystemPromptKey } from '../../types.js'
 import type { Audience } from './audience.js'
+import type { RenderedCode } from './codeDiff.js'
 
+import { collectionsCodegenDataset } from '../../datasets/collections/codegen.js'
+import { configCodegenDataset } from '../../datasets/config/codegen.js'
+import { fieldsCodegenDataset } from '../../datasets/fields/codegen.js'
+import { negativeCorrectionCodegenDataset } from '../../datasets/negative/codegen.js'
+import { pluginsCodegenDataset } from '../../datasets/plugins/codegen.js'
+import { pluginsOfficialCodegenDataset } from '../../datasets/plugins/official/codegen.js'
 import { getAudience } from './audience.js'
+import { renderCodegenDiff, renderCodegenFile } from './codeDiff.js'
+import { runKeyOf } from './configuration.js'
 import { ResultsTable } from './ResultsTable.js'
+
+const codegenFixtureByQuestion: Record<string, string> = (() => {
+  const map: Record<string, string> = {}
+  for (const ds of [
+    collectionsCodegenDataset,
+    configCodegenDataset,
+    fieldsCodegenDataset,
+    negativeCorrectionCodegenDataset,
+    pluginsCodegenDataset,
+    pluginsOfficialCodegenDataset,
+  ]) {
+    for (const c of ds) {
+      map[c.input] = c.fixturePath
+    }
+  }
+  return map
+})()
 
 export type RunSnapshotResult = {
   category: string
   pass: boolean
   question: string
   score?: number
-  type: 'codegen' | 'qa'
+  type: 'codegen'
 }
 
 export type RunSnapshot = {
@@ -34,6 +62,22 @@ const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const cacheDir = path.resolve(__dirname, '../../eval-results/cache')
+const fixturesDir = path.resolve(__dirname, '../../fixtures')
+const completedRunsFile = path.resolve(__dirname, '../../eval-results/.completed-runs')
+
+/** Run ids that finished (written by the launcher on a clean exit). Cancelled runs aren't listed. */
+function readCompletedRunIds(): Set<string> {
+  try {
+    return new Set(
+      readFileSync(completedRunsFile, 'utf-8')
+        .split('\n')
+        .map((line) => line.trim())
+        .filter(Boolean),
+    )
+  } catch {
+    return new Set()
+  }
+}
 
 type CacheEntry = {
   createdAt: string
@@ -48,7 +92,7 @@ export type EvalEntry = {
   hash: string
   result: EvalResult
   systemPromptKey?: SystemPromptKey
-  type: 'codegen' | 'qa'
+  type: 'codegen'
 }
 
 function readCacheEntries(): EvalEntry[] {
@@ -59,6 +103,7 @@ function readCacheEntries(): EvalEntry[] {
     return []
   }
 
+  const completed = readCompletedRunIds()
   const entries: EvalEntry[] = []
   for (const file of files) {
     try {
@@ -68,9 +113,13 @@ function readCacheEntries(): EvalEntry[] {
         continue
       }
       const { result } = entry
-      const isCodegen = result.changeDescription !== undefined || Boolean(result.tscErrors?.length)
+      // Hide runs that never finished (e.g. Ctrl+C'd). Pre-run-tracking entries
+      // have no runId and are always kept.
+      if (result.runId && !completed.has(result.runId)) {
+        continue
+      }
       entries.push({
-        type: isCodegen ? 'codegen' : 'qa',
+        type: 'codegen',
         audience: getAudience(result.category),
         category: result.category,
         createdAt: entry.createdAt,
@@ -86,41 +135,41 @@ function readCacheEntries(): EvalEntry[] {
   return entries.sort((a, b) => a.category.localeCompare(b.category))
 }
 
-const runsBaseDir = path.resolve(__dirname, '../../eval-results/runs')
-
-function readRunSnapshots(): RunSnapshot[] {
-  const snapshots: RunSnapshot[] = []
-  let variants: string[]
-  try {
-    variants = readdirSync(runsBaseDir)
-  } catch {
-    return []
-  }
-  for (const variant of variants) {
-    const variantDir = path.join(runsBaseDir, variant)
-    let files: string[]
-    try {
-      files = readdirSync(variantDir)
-        .filter((f) => f.endsWith('.json'))
-        .sort()
-    } catch {
-      continue
-    }
-    for (const file of files) {
-      try {
-        const raw = JSON.parse(readFileSync(path.join(variantDir, file), 'utf-8'))
-        snapshots.push({ ...raw, filename: `${variant}/${file}` })
-      } catch {
-        // skip corrupt snapshot files
-      }
-    }
-  }
-  return snapshots
+async function buildCodegenHtml(entries: EvalEntry[]): Promise<Record<string, RenderedCode>> {
+  const out: Record<string, RenderedCode> = {}
+  await Promise.all(
+    entries
+      .filter((e) => e.type === 'codegen')
+      .map(async (e) => {
+        const modified = e.result.answer ?? ''
+        let starter = e.result.starterContent
+        if (!starter) {
+          const fixturePath = e.result.fixturePath ?? codegenFixtureByQuestion[e.result.question]
+          if (fixturePath) {
+            try {
+              starter = readFileSync(
+                path.join(fixturesDir, fixturePath, 'payload.config.ts'),
+                'utf-8',
+              )
+            } catch {
+              // legacy entry whose fixture was renamed/removed — render answer alone
+            }
+          }
+        }
+        if (starter !== undefined) {
+          out[e.hash] = await renderCodegenDiff({ modified, starter })
+          return
+        }
+        out[e.hash] = await renderCodegenFile({ modified })
+      }),
+  )
+  return out
 }
 
-export function EvalDashboardView({ initPageResult }: AdminViewServerProps) {
+export async function EvalDashboardView({ initPageResult }: AdminViewServerProps) {
   const entries = readCacheEntries()
-  const runs = readRunSnapshots()
+  const runCount = new Set(entries.map((e) => runKeyOf(e.result))).size
+  const codegenHtml = await buildCodegenHtml(entries)
   const adminRoute = initPageResult.req.payload.config.routes.admin
 
   return (
@@ -157,7 +206,8 @@ export function EvalDashboardView({ initPageResult }: AdminViewServerProps) {
       >
         <h1 style={{ margin: 0 }}>Eval Results</h1>
         <span style={{ color: 'var(--theme-elevation-400)', fontSize: '0.875rem' }}>
-          {entries.length} cached result{entries.length !== 1 ? 's' : ''}
+          {entries.length} result{entries.length !== 1 ? 's' : ''} · {runCount} run
+          {runCount !== 1 ? 's' : ''}
         </span>
       </div>
 
@@ -173,11 +223,11 @@ export function EvalDashboardView({ initPageResult }: AdminViewServerProps) {
           }}
         >
           <p style={{ margin: 0 }}>
-            No cached results found. Run the eval suite first: <code>pnpm run test:eval</code>
+            No results yet. Run the eval suite first: <code>pnpm test:eval</code>
           </p>
         </div>
       ) : (
-        <ResultsTable adminRoute={adminRoute} entries={entries} runs={runs} />
+        <ResultsTable adminRoute={adminRoute} codegenHtml={codegenHtml} entries={entries} />
       )}
     </div>
   )

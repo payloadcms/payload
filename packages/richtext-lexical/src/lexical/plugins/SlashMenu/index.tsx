@@ -13,7 +13,7 @@ import type {
 } from './LexicalTypeaheadMenuPlugin/types.js'
 
 import { useEditorConfigContext } from '../../config/client/EditorConfigProvider.js'
-import './index.scss'
+import './index.css'
 import { LexicalTypeaheadMenuPlugin } from './LexicalTypeaheadMenuPlugin/index.js'
 import { useMenuTriggerMatch } from './useMenuTriggerMatch.js'
 
@@ -207,7 +207,7 @@ export function SlashMenuPlugin({
       ) =>
         anchorElementRef.current && groups.length
           ? ReactDOM.createPortal(
-              <div className={baseClass}>
+              <div className={baseClass} data-theme="dark">
                 {groups.map((group) => {
                   let groupTitle = group.key
                   if (group.label && featureClientSchemaMap) {

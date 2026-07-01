@@ -1,0 +1,249 @@
+'use client'
+import type { DefaultCellComponentProps, RelationshipFieldClient } from 'payload'
+
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
+
+import type { SelectionWithPath } from '../../../../Hierarchy/Modal/types.js'
+
+import { useIntersect } from '../../../../../hooks/useIntersect.js'
+import { FolderIcon } from '../../../../../icons/Folder/index.js'
+import { TagIcon } from '../../../../../icons/Tag/index.js'
+import { useConfig } from '../../../../../providers/Config/index.js'
+import { useTranslation } from '../../../../../providers/Translation/index.js'
+import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
+import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js'
+import { Button } from '../../../../Button/index.js'
+import { useHierarchyModal } from '../../../../Hierarchy/Modal/useHierarchyModal.js'
+import { useListRelationships } from '../../../RelationshipProvider/index.js'
+import './index.css'
+
+type Value = { relationTo: string; value: number | string }
+const baseClass = 'hierarchy-cell'
+
+export type HierarchyCellProps = DefaultCellComponentProps<RelationshipFieldClient>
+
+export const HierarchyCell: React.FC<HierarchyCellProps> = ({
+  cellData: cellDataFromProps,
+  collectionSlug,
+  customCellProps,
+  field,
+  rowData,
+}) => {
+  const relationTo = 'relationTo' in field ? field.relationTo : undefined
+  const hasMany = field.hasMany ?? false
+
+  const { config, getEntityConfig } = useConfig()
+  const [intersectionRef, entry] = useIntersect()
+  const [values, setValues] = useState<Value[]>([])
+  const { documents, getRelationships } = useListRelationships()
+  const hasRequestedRef = useRef(false)
+  const prevCellDataRef = useRef<typeof cellDataFromProps>(undefined)
+  const { i18n, t } = useTranslation()
+
+  const isAboveViewport = canUseDOM ? entry?.boundingClientRect?.top < window.innerHeight : false
+
+  // Get the hierarchy collection config
+  const hierarchyCollectionSlug = typeof relationTo === 'string' ? relationTo : undefined
+  const hierarchyCollectionConfig = hierarchyCollectionSlug
+    ? getEntityConfig({ collectionSlug: hierarchyCollectionSlug })
+    : undefined
+
+  // Use pre-rendered icon from server if available, otherwise determine on client
+  const hierarchyConfig =
+    hierarchyCollectionConfig?.hierarchy && typeof hierarchyCollectionConfig.hierarchy === 'object'
+      ? hierarchyCollectionConfig.hierarchy
+      : undefined
+
+  // Pre-rendered icons from server (supports custom icons)
+  const preRenderedIcon = customCellProps?.hierarchyIcon as React.ReactNode | undefined
+  const preRenderedSmallIcon = customCellProps?.hierarchySmallIcon as React.ReactNode | undefined
+
+  // Fallback icon for client-side rendering
+  const fallbackIcon = useMemo(() => {
+    if (preRenderedIcon) {
+      return null // Don't need fallback if we have pre-rendered icon
+    }
+    // Default based on allowHasMany: false = folder-like, true = tag-like
+    const IconComponent = hierarchyConfig?.allowHasMany === false ? FolderIcon : TagIcon
+    return <IconComponent />
+  }, [hierarchyConfig, preRenderedIcon])
+
+  // Full icon for modal subheader
+  const drawerIcon = preRenderedIcon || fallbackIcon
+  // Small icon for compact display (pill button)
+  const displayIcon = preRenderedSmallIcon ?? drawerIcon
+
+  // Set up the hierarchy modal
+  const [HierarchyModal, , { openModal }] = useHierarchyModal({
+    hierarchyCollectionSlug: hierarchyCollectionSlug || '',
+    Icon: drawerIcon,
+  })
+
+  // Lazy-mount the modal so its column browser doesn't eagerly fetch root items
+  // for every cell in the list view. Only mount once the user opens it.
+  const [hasMountedModal, setHasMountedModal] = useState(false)
+  const shouldOpenAfterMountRef = useRef(false)
+
+  const handleOpenModal = useCallback(() => {
+    if (hasMountedModal) {
+      openModal()
+      return
+    }
+    shouldOpenAfterMountRef.current = true
+    setHasMountedModal(true)
+  }, [hasMountedModal, openModal])
+
+  // Open the modal once it has mounted (state update from handleOpenModal).
+  useEffect(() => {
+    if (hasMountedModal && shouldOpenAfterMountRef.current) {
+      shouldOpenAfterMountRef.current = false
+      openModal()
+    }
+  }, [hasMountedModal, openModal])
+
+  // Fetch relationship data when visible
+  useEffect(() => {
+    // Reset tracking if data changed
+    if (prevCellDataRef.current !== cellDataFromProps) {
+      prevCellDataRef.current = cellDataFromProps
+      hasRequestedRef.current = false
+    }
+
+    if (
+      (cellDataFromProps || typeof cellDataFromProps === 'number') &&
+      isAboveViewport &&
+      !hasRequestedRef.current &&
+      typeof relationTo === 'string'
+    ) {
+      const formattedValues: Value[] = []
+      const arrayCellData = Array.isArray(cellDataFromProps)
+        ? cellDataFromProps
+        : [cellDataFromProps]
+
+      arrayCellData.forEach((cell) => {
+        if (typeof cell === 'object' && 'relationTo' in cell && 'value' in cell) {
+          formattedValues.push(cell)
+        }
+        if (typeof cell === 'number' || typeof cell === 'string') {
+          formattedValues.push({
+            relationTo,
+            value: cell,
+          })
+        }
+      })
+
+      getRelationships(formattedValues)
+      hasRequestedRef.current = true
+      setValues(formattedValues)
+    }
+  }, [cellDataFromProps, relationTo, isAboveViewport, getRelationships])
+
+  // Get current selection IDs for the modal
+  const initialSelections = useMemo(() => {
+    if (!cellDataFromProps) {
+      return []
+    }
+    const data = Array.isArray(cellDataFromProps) ? cellDataFromProps : [cellDataFromProps]
+    return data.map((item) => {
+      if (typeof item === 'object' && 'value' in item) {
+        return item.value
+      }
+      return item
+    }) as (number | string)[]
+  }, [cellDataFromProps])
+
+  // Handle save from modal
+  const handleSave = useCallback(
+    async ({
+      closeModal,
+      selections,
+    }: {
+      closeModal: () => void
+      selections: Map<number | string, SelectionWithPath>
+    }) => {
+      // Get selected IDs
+      const selectedIds = Array.from(selections.keys())
+      const newValue = hasMany ? selectedIds : (selectedIds[0] ?? null)
+
+      // Update the document via API
+      try {
+        const response = await fetch(
+          `${config.serverURL}${config.routes.api}/${collectionSlug}/${rowData.id}`,
+          {
+            body: JSON.stringify({
+              [field.name]: newValue,
+            }),
+            credentials: 'include',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            method: 'PATCH',
+          },
+        )
+
+        if (response.ok && typeof relationTo === 'string') {
+          // Update local state with new selection to avoid page reload
+          const newValues: Value[] = selectedIds.map((id) => ({
+            relationTo,
+            value: id,
+          }))
+          setValues(newValues)
+
+          // Request the new relationship docs to update the display
+          if (newValues.length > 0) {
+            getRelationships(newValues)
+          }
+        }
+      } catch (_error) {
+        // swallow error and close modal anyway, user can try again
+      }
+
+      closeModal()
+    },
+    [collectionSlug, config, field.name, hasMany, rowData, relationTo, getRelationships],
+  )
+
+  // Build display labels
+  const labels = useMemo(() => {
+    return values.map(({ relationTo: rel, value }) => {
+      const document = documents[rel]?.[value]
+      const relatedCollection = getEntityConfig({ collectionSlug: rel })
+
+      return formatDocTitle({
+        collectionConfig: relatedCollection,
+        data: document || null,
+        dateFormat: config.admin.dateFormat,
+        fallback: `${t('general:untitled')} - ID: ${value}`,
+        i18n,
+      })
+    })
+  }, [values, documents, getEntityConfig, config.admin.dateFormat, t, i18n])
+
+  const displayText = labels.length > 0 ? labels.join(', ') : t('general:none')
+  const isLoading =
+    values.length > 0 &&
+    values.some(({ relationTo: rel, value }) => documents[rel]?.[value] === null)
+
+  return (
+    <div className={baseClass} ref={intersectionRef}>
+      <Button
+        buttonStyle="pill"
+        className={`${baseClass}__pill`}
+        icon={displayIcon}
+        iconPosition="left"
+        margin={false}
+        onClick={handleOpenModal}
+        size="medium"
+      >
+        {isLoading ? `${t('general:loading')}...` : displayText}
+      </Button>
+      {hierarchyCollectionSlug && hasMountedModal && (
+        <HierarchyModal
+          hasMany={hasMany}
+          initialSelections={initialSelections}
+          onSave={handleSave}
+        />
+      )}
+    </div>
+  )
+}

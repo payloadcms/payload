@@ -8,7 +8,7 @@ import type { Option as OptionType } from '../types.js'
 import { XIcon } from '../../../icons/X/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Tooltip } from '../../Tooltip/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'multi-value-remove'
 
@@ -19,10 +19,15 @@ export const MultiValueRemove: React.FC<
 > = (props) => {
   const {
     innerProps: { className, onClick, onTouchEnd },
+    selectProps: { isDisabled },
   } = props
 
   const [showTooltip, setShowTooltip] = React.useState(false)
   const { t } = useTranslation()
+
+  if (isDisabled) {
+    return null
+  }
 
   return (
     <button
@@ -46,7 +51,7 @@ export const MultiValueRemove: React.FC<
       <Tooltip className={`${baseClass}__tooltip`} show={showTooltip}>
         {t('general:remove')}
       </Tooltip>
-      <XIcon className={`${baseClass}__icon`} />
+      <XIcon className={`${baseClass}__icon`} size={16} />
     </button>
   )
 }

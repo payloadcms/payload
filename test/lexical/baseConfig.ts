@@ -14,6 +14,7 @@ import {
 } from './collections/Lexical/index.js'
 import { LexicalAccessControl } from './collections/LexicalAccessControl/index.js'
 import { LexicalAutosave } from './collections/LexicalAutosave/index.js'
+import { LexicalAutosaveBlock } from './collections/LexicalAutosaveBlock/index.js'
 import { LexicalBenchmark } from './collections/LexicalBenchmark/index.js'
 import { LexicalCustomCell } from './collections/LexicalCustomCell/index.js'
 import { LexicalHeadingFeature } from './collections/LexicalHeadingFeature/index.js'
@@ -29,6 +30,7 @@ import {
 } from './collections/LexicalNestedBlocks/index.js'
 import { LexicalObjectReferenceBugCollection } from './collections/LexicalObjectReferenceBug/index.js'
 import { LexicalRelationshipsFields } from './collections/LexicalRelationships/index.js'
+import { LexicalSlugFieldNameCollision } from './collections/LexicalSlugFieldNameCollision/index.js'
 import { LexicalViews } from './collections/LexicalViews/index.js'
 import { LexicalViewsFrontend } from './collections/LexicalViewsFrontend/index.js'
 import { LexicalViewsNested } from './collections/LexicalViewsNested/index.js'
@@ -70,8 +72,10 @@ export const baseConfig: Partial<Config> = {
     LexicalLocalizedFields,
     LexicalObjectReferenceBugCollection,
     LexicalInBlock,
+    LexicalAutosaveBlock,
     LexicalAccessControl,
     LexicalRelationshipsFields,
+    LexicalSlugFieldNameCollision,
     LexicalNestedBlocks,
     RichTextFields,
     TextFields,

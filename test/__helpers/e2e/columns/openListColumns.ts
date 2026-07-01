@@ -5,12 +5,12 @@ import { expect } from '@playwright/test'
 export const openListColumns = async (
   page: Page,
   {
-    togglerSelector = '.list-controls__toggle-columns',
-    columnContainerSelector = '.list-controls__columns',
+    togglerSelector = '.columns-button__button',
+    columnContainerSelector = '.popup__content .column-selector',
   }: {
     columnContainerSelector?: string
     togglerSelector?: string
-  },
+  } = {},
 ): Promise<{
   columnContainer: Locator
 }> => {
@@ -19,10 +19,17 @@ export const openListColumns = async (
   const isAlreadyOpen = await columnContainer.isVisible()
 
   if (!isAlreadyOpen) {
-    await page.locator(togglerSelector).first().click()
+    // Scroll toggler to top of viewport before opening so the popup renders
+    // below the button and not off the top of the page
+    const toggler = page.locator(togglerSelector).first()
+    await toggler.evaluate((el) => {
+      const rect = el.getBoundingClientRect()
+      window.scrollBy({ top: rect.top - 100, behavior: 'instant' })
+    })
+    await toggler.click()
   }
 
-  await expect(page.locator(`${columnContainerSelector}.rah-static--height-auto`)).toBeVisible()
+  await expect(columnContainer).toBeVisible()
 
   return { columnContainer }
 }

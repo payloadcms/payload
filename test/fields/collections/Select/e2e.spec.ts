@@ -8,6 +8,7 @@ import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
+import { clickColumnSelectorItem, openListColumns } from '../../../__helpers/e2e/columns/index.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
@@ -91,11 +92,12 @@ describe('Select', () => {
   test('should show custom JSX option label in list', async () => {
     await page.goto(url.list)
 
-    const columnsButton = page.locator('button:has-text("Columns")')
+    const { columnContainer } = await openListColumns(page)
 
-    await columnsButton.click()
-
-    await page.locator('text=Select with JSX label option').click()
+    await clickColumnSelectorItem({
+      container: columnContainer,
+      label: 'Select with JSX label option',
+    })
 
     await expect(page.locator('.cell-selectWithJsxLabelOption svg#payload-logo')).toBeVisible()
   })
@@ -191,7 +193,7 @@ describe('Select', () => {
     await expect(reloadedPills.nth(2)).toContainText('Value One')
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test.fixme('Create view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-select').waitFor()

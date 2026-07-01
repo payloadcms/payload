@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "_dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
-    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "build": "cross-env NODE_OPTIONS=--no-deprecation payload build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation && pnpm seed && next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:schema": "payload-graphql generate:schema",
@@ -35,7 +35,7 @@
   "devDependencies": {
     "@payloadcms/graphql": "latest",
     "@swc/core": "^1.6.13",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "eslint": "^8.57.0",
     "eslint-config-next": "^15.0.0",

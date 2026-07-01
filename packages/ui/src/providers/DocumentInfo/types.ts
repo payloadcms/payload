@@ -37,6 +37,8 @@ export type DocumentInfoProps = {
   readonly hasPublishedDoc: boolean
   readonly hasPublishPermission?: boolean
   readonly hasSavePermission?: boolean
+  /** Whether the document or global has an upcoming scheduled publish/unpublish job. */
+  readonly hasScheduledPublish?: boolean
   /** Whether the user can trash (soft delete) documents. Only applicable when `trash` is enabled. */
   readonly hasTrashPermission?: boolean
   readonly id?: number | string
@@ -68,6 +70,7 @@ export type DocumentInfoContext = {
   } | null>
   getDocPermissions: GetDocPermissions
   getDocPreferences: () => Promise<DocumentPreferences>
+  hasScheduledPublish: boolean
   incrementVersionCount: () => void
   isInitializing: boolean
   preferencesKey?: string
@@ -83,33 +86,12 @@ export type DocumentInfoContext = {
     fieldPreferences: { [key: string]: unknown } & Partial<InsideFieldsPreferences>,
   ) => void
   setDocumentIsLocked?: React.Dispatch<React.SetStateAction<boolean>>
-  /**
-   * @deprecated This property is deprecated and will be removed in v4.
-   * This is for performance reasons. Use the `DocumentTitleContext` instead
-   * via the `useDocumentTitle` hook.
-   * @example
-   * ```tsx
-   * import { useDocumentTitle } from '@payloadcms/ui'
-   * const { setDocumentTitle } = useDocumentTitle()
-   * ```
-   */
-  setDocumentTitle: React.Dispatch<React.SetStateAction<string>>
   setHasPublishedDoc: React.Dispatch<React.SetStateAction<boolean>>
+  setHasScheduledPublish: React.Dispatch<React.SetStateAction<boolean>>
   setLastUpdateTime: React.Dispatch<React.SetStateAction<number>>
   setMostRecentVersionIsAutosaved: React.Dispatch<React.SetStateAction<boolean>>
   setUnpublishedVersionCount: React.Dispatch<React.SetStateAction<number>>
   setUploadStatus?: (status: 'failed' | 'idle' | 'uploading') => void
-  /**
-   * @deprecated This property is deprecated and will be removed in v4.
-   * This is for performance reasons. Use the `DocumentTitleContext` instead
-   * via the `useDocumentTitle` hook.
-   * @example
-   * ```tsx
-   * import { useDocumentTitle } from '@payloadcms/ui'
-   * const { title } = useDocumentTitle()
-   * ```
-   */
-  title: string
   unlockDocument: (docID: number | string, slug: string) => Promise<void>
   unpublishedVersionCount: number
   updateDocumentEditor: (docID: number | string, slug: string, user: ClientUser) => Promise<void>

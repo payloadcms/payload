@@ -4,9 +4,7 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-
     "noEmit": true,
-    "rootDir": ".",
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
@@ -29,9 +27,8 @@
         "name": "@payloadcms/typescript-plugin"
       }
     ],
-    "baseUrl": ".",
     "paths": {
-      "@payload-config": ["./_community/config.ts"]
+      "@payload-config": ["./tags/config.ts"]
     }
   },
   "exclude": [
@@ -42,6 +39,19 @@
     "dist/**/*.js",
     "**/dist/**/*.js"
   ],
-  "include": ["./**/*.ts", "./**/*.tsx", "next-env.d.ts", ".next/types/**/*.ts", "setup.js"],
+  // Each test suite (for example ./fields) has its own tsconfig listing only its own files, so
+  // opening one test file does not pull the whole test/ folder into the program. This root config
+  // is only the fallback for top-level files and the folders without their own tsconfig. Give a
+  // new suite its own tsconfig rather than adding it here.
+  "include": [
+    "./*.ts",
+    "./*.tsx",
+    "./__helpers/**/*.ts",
+    "./__helpers/**/*.tsx",
+    "./app/**/*.ts",
+    "./app/**/*.tsx",
+    "./evals/**/*.ts",
+    "./evals/**/*.tsx"
+  ],
   "references": []
 }

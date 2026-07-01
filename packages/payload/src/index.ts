@@ -37,7 +37,7 @@ import {
   verifyEmailLocal,
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
-export type { FieldState } from './admin/forms/Form.js'
+export type * from './admin/adapters/index.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
@@ -119,8 +119,14 @@ import {
   updateGlobalLocal,
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
+export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
 export { EntityType } from './admin/views/dashboard.js'
+/**
+ * Export of all base fields that could potentially be
+ * useful as users wish to extend built-in fields with custom logic
+ */
+export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
 import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
@@ -150,18 +156,14 @@ import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
-/**
- * Export of all base fields that could potentially be
- * useful as users wish to extend built-in fields with custom logic
- */
-export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
-export { apiKeyFields as baseAPIKeyFields } from './auth/baseFields/apiKey.js'
+export { createAPIKeyFields } from './auth/baseFields/apiKey.js'
 export { baseAuthFields } from './auth/baseFields/auth.js'
 export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
 export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sessions.js'
 export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
-
 export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
+export { defaultUserCollection } from './auth/defaultUser.js'
+
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
@@ -761,8 +763,6 @@ export class BasePayload {
               },
               // Do not run consecutive crons if previous crons still ongoing
               protect: true,
-              // TODO: Remove this compatibility option in 4.0. This only exists to ensure backwards-compatibility between Croner v9 and Croner v10 cron syntax
-              sloppyRanges: true,
             },
           )
 
@@ -1329,11 +1329,10 @@ export type {
   VerifyConfig,
 } from './auth/types.js'
 export { generateImportMap } from './bin/generateImportMap/index.js'
-
 export type { ImportMap } from './bin/generateImportMap/index.js'
+
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export { migrate as migrateCLI } from './bin/migrate.js'
-
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1370,6 +1369,7 @@ export type {
   CollectionConfig,
   DataFromCollectionSlug,
   HookOperationType,
+  IDTypeForCollectionSlug,
   MeHook as CollectionMeHook,
   RefreshHook as CollectionRefreshHook,
   RequiredDataFromCollection,
@@ -1380,10 +1380,11 @@ export type {
   TypeWithTimestamps,
 } from './collections/config/types.js'
 
-export type { CompoundIndex } from './collections/config/types.js'
-export type { SanitizedCompoundIndex } from './collections/config/types.js'
+export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
 
+export type { SanitizedCompoundIndex } from './collections/config/types.js'
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
+
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
 export { deleteOperation } from './collections/operations/delete.js'
@@ -1407,10 +1408,11 @@ export {
   serverOnlyConfigProperties,
   type UnauthenticatedClientConfig,
 } from './config/client.js'
-export { defaults } from './config/defaults.js'
+export { addDefaultsToConfig } from './config/defaults.js'
 export { definePlugin } from './config/definePlugin.js'
 
 export { type OrderableEndpointBody } from './config/orderable/index.js'
+
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
@@ -1534,12 +1536,10 @@ export {
 export type { ValidationFieldError } from './errors/index.js'
 
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
-
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 export { slugField, type SlugFieldClientProps } from './fields/baseFields/slug/index.js'
 
 export { type SlugField } from './fields/baseFields/slug/index.js'
-
 export {
   createClientBlocks,
   createClientField,
@@ -1671,14 +1671,24 @@ export type {
   ValueWithRelation,
 } from './fields/config/types.js'
 
+export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
+
 export { getDefaultValue } from './fields/getDefaultValue.js'
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
+
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
-
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export { validateBlocksFilterOptions, validations } from './fields/validations.js'
 
@@ -1713,8 +1723,7 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
-export type { FolderSortKeys } from './folders/types.js'
-export { getFolderData } from './folders/utils/getFolderData.js'
+
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1734,17 +1743,41 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
+
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
-
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
-
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
+
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
+export {
+  DEFAULT_ALLOW_HAS_MANY,
+  DEFAULT_HIERARCHY_TREE_LIMIT,
+  getHierarchyFieldName,
+  HIERARCHY_DEFAULT_LOCALE,
+  HIERARCHY_SLUG_PATH_FIELD,
+  HIERARCHY_TITLE_PATH_FIELD,
+} from './hierarchy/constants.js'
+export { createFolderField } from './hierarchy/createFolderField.js'
+export type { CreateFolderFieldOptions } from './hierarchy/createFolderField.js'
+export { createTagField } from './hierarchy/createTagField.js'
+export type { CreateTagFieldOptions } from './hierarchy/createTagField.js'
+export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
+export type { GetInitialTreeDataArgs, InitialTreeData } from './hierarchy/getInitialTreeData.js'
+export { injectHierarchyButton } from './hierarchy/injectHierarchyButton.js'
+export { resolveHierarchyCollections } from './hierarchy/resolveHierarchyCollections.js'
+export type {
+  HierarchyConfig,
+  SanitizedHierarchyConfig,
+  SanitizedHierarchyRelatedCollection,
+} from './hierarchy/types.js'
+export type { Ancestor } from './hierarchy/utils/getAncestors.js'
+export { getAncestors } from './hierarchy/utils/getAncestors.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'
 export * from './kv/adapters/InMemoryKVAdapter.js'
 export * from './kv/index.js'
+
 export type {
   CollapsedPreferences,
   CollectionPreferences,
@@ -1758,6 +1791,8 @@ export type {
   InsideFieldsPreferences,
   PreferenceRequest,
   PreferenceUpdateRequest,
+  RecentlyViewedItem,
+  RecentlyViewedPreferences,
   TabsPreferences,
 } from './preferences/types.js'
 export type { QueryPreset } from './query-presets/types.js'
@@ -1799,9 +1834,9 @@ export {
 } from './queues/utilities/getCurrentDate.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
+
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
-
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
@@ -1810,7 +1845,11 @@ export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
   entityToJSONSchema,
+  entityToStandaloneJSONSchema,
   fieldsToJSONSchema,
+  type FieldsToJSONSchemaArgs,
+  registerBlockInterface,
+  type SchemaVariant,
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
@@ -1863,29 +1902,29 @@ export type { PayloadLogger } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeHeaders } from './utilities/mergeHeaders.js'
 export { parseDocumentID } from './utilities/parseDocumentID.js'
+export { parseParams } from './utilities/parseParams/index.js'
+export type { ParsedParams, RawParams } from './utilities/parseParams/index.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
+export type { JoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
 export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
+export { sanitizeSortParams } from './utilities/sanitizeSortParams.js'
 export { stripUnselectedFields } from './utilities/stripUnselectedFields.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
+
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
-
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-export { localizeStatus } from './versions/migrations/localizeStatus/index.js'
-export type {
-  MongoLocalizeStatusArgs,
-  SqlLocalizeStatusArgs,
-} from './versions/migrations/localizeStatus/index.js'
+
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 

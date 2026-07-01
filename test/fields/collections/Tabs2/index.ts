@@ -36,4 +36,5 @@ export const TabsFields2: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

@@ -39,6 +39,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'queryPresets'
   | 'secret'
   | 'sharp'
+  | 'storage'
   | 'typescript'
 >
 
@@ -99,6 +100,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'logger',
   'kv',
   'queryPresets',
+  'storage',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
@@ -228,7 +230,7 @@ export const createClientConfig = ({
           defaultIDType: config.db.defaultIDType,
           i18n,
           importMap,
-        }).filter((block) => typeof block !== 'string') as ClientBlock[]
+        }).filter((block) => typeof block !== 'string')
 
         clientConfig.blocksMap = {}
         if (clientConfig.blocks?.length) {
@@ -251,18 +253,6 @@ export const createClientConfig = ({
           i18n,
           importMap,
         })
-
-        break
-
-      case 'folders':
-        if (config.folders) {
-          clientConfig.folders = {
-            slug: config.folders.slug,
-            browseByFolder: config.folders.browseByFolder,
-            debug: config.folders.debug,
-            fieldName: config.folders.fieldName,
-          }
-        }
 
         break
 

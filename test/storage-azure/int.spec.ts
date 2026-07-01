@@ -22,6 +22,12 @@ describe('@payloadcms/storage-azure', () => {
   let TEST_CONTAINER: string
   let client: ContainerClient
 
+  const clearContainer = async () => {
+    for await (const blob of client.listBlobsFlat()) {
+      await client.deleteBlob(blob.name)
+    }
+  }
+
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
     TEST_CONTAINER = process.env.AZURE_STORAGE_CONTAINER_NAME!
@@ -92,12 +98,6 @@ describe('@payloadcms/storage-azure', () => {
     expect(response.status).toBe(404)
   })
 
-  async function clearContainer() {
-    for await (const blob of client.listBlobsFlat()) {
-      await client.deleteBlob(blob.name)
-    }
-  }
-
   async function verifyUploads({
     collectionSlug,
     uploadId,
@@ -112,10 +112,9 @@ describe('@payloadcms/storage-azure', () => {
       id: uploadId,
     })) as unknown as { filename: string; sizes: Record<string, { filename: string }> }
 
-    const fileKeys = Object.keys(uploadData.sizes || {}).map((key) => {
-      const rawFilename = uploadData.sizes[key].filename
-      return prefix ? `${prefix}/${rawFilename}` : rawFilename
-    })
+    const fileKeys = Object.values(uploadData.sizes || {}).map(({ filename: rawFilename }) =>
+      prefix ? `${prefix}/${rawFilename}` : rawFilename,
+    )
 
     fileKeys.push(`${prefix ? `${prefix}/` : ''}${uploadData.filename}`)
 

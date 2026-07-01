@@ -1,6 +1,6 @@
 import type { AdminViewConfig } from '../../admin/views/index.js'
 import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
-import type { SanitizedConfig } from '../../config/types.js'
+import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
 import { genImportMapIterateFields } from './iterateFields.js'
@@ -38,6 +38,7 @@ export function iterateCollections({
     addToImportMap(collection.admin?.components?.Description)
 
     addToImportMap(collection.admin?.components?.edit?.beforeDocumentControls)
+    addToImportMap(collection.admin?.components?.edit?.BeforeDocumentMeta)
     addToImportMap(collection.admin?.components?.edit?.editMenuItems)
     addToImportMap(collection.admin?.components?.edit?.PreviewButton)
     addToImportMap(collection.admin?.components?.edit?.PublishButton)
@@ -49,6 +50,20 @@ export function iterateCollections({
 
     if (collection.upload?.admin?.components?.controls) {
       addToImportMap(collection.upload?.admin?.components?.controls)
+    }
+
+    const filePreview = collection.upload?.admin?.components?.filePreview
+    if (filePreview) {
+      if (
+        typeof filePreview === 'string' ||
+        (typeof filePreview === 'object' && 'path' in filePreview)
+      ) {
+        addToImportMap(filePreview as PayloadComponent)
+      } else {
+        for (const component of Object.values(filePreview as Record<string, PayloadComponent>)) {
+          addToImportMap(component)
+        }
+      }
     }
 
     if (collection.admin?.components?.views?.edit) {
@@ -70,6 +85,7 @@ export function iterateCollections({
 
     addToImportMap(collection.admin?.components?.views?.list?.Component)
     addToImportMap(collection.admin?.components?.views?.list?.actions)
+    addToImportMap(collection.admin?.components?.views?.list?.NoResults)
 
     // Register custom collection view components (any key other than 'edit' and 'list')
     if (collection.admin?.components?.views) {

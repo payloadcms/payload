@@ -1,23 +1,32 @@
 'use client'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter } from 'next/navigation.js'
 import * as qs from 'qs-esm'
 import React, { Fragment } from 'react'
 
+import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { LanguageIcon } from '../../icons/Language/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useLocale, useLocaleLoading } from '../../providers/Locale/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { Button } from '../Button/index.js'
 import { Popup, PopupList } from '../Popup/index.js'
-import './index.scss'
-import { LocalizerLabel } from './LocalizerLabel/index.js'
+import './index.css'
 
 const baseClass = 'localizer'
 
 export const Localizer: React.FC<{
   className?: string
+  renderButton?: (props: {
+    active: boolean
+    'aria-expanded': boolean
+    'aria-haspopup': true
+    onClick: React.MouseEventHandler
+    onKeyDown: React.KeyboardEventHandler
+  }) => React.ReactNode
 }> = (props) => {
-  const { className } = props
+  const { className, renderButton } = props
   const {
     config: { localization },
   } = useConfig()
@@ -27,7 +36,7 @@ export const Localizer: React.FC<{
 
   const { setLocaleIsLoading } = useLocaleLoading()
 
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const locale = useLocale()
 
   if (localization) {
@@ -36,15 +45,14 @@ export const Localizer: React.FC<{
     return (
       <div className={[baseClass, className].filter(Boolean).join(' ')}>
         <Popup
-          button={<LocalizerLabel />}
           horizontalAlign="right"
           render={({ close }) => (
-            <PopupList.ButtonGroup>
+            <PopupList.RadioGroup>
               {locales.map((localeOption) => {
                 const localeOptionLabel = getTranslation(localeOption.label, i18n)
 
                 return (
-                  <PopupList.Button
+                  <PopupList.RadioGroupItem
                     active={locale.code === localeOption.code}
                     disabled={locale.code === localeOption.code}
                     key={localeOption.code}
@@ -87,13 +95,31 @@ export const Localizer: React.FC<{
                         {localeOptionLabel}
                       </span>
                     )}
-                  </PopupList.Button>
+                  </PopupList.RadioGroupItem>
                 )
               })}
-            </PopupList.ButtonGroup>
+            </PopupList.RadioGroup>
           )}
+          renderButton={
+            renderButton ??
+            (({ active: _active, onClick, onKeyDown, ...ariaProps }) => (
+              <Button
+                aria-label={t('general:locale')}
+                buttonStyle="secondary"
+                extraButtonProps={{ onKeyDown }}
+                icon={<LanguageIcon size={24} />}
+                iconPosition="left"
+                onClick={onClick}
+                {...ariaProps}
+              >
+                <div className={`${baseClass}__button-content`}>
+                  {locale.code}
+                  <ChevronIcon size={16} />
+                </div>
+              </Button>
+            ))
+          }
           showScrollbar
-          size="large"
         />
       </div>
     )

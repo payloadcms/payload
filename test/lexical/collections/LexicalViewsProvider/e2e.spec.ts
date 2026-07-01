@@ -73,7 +73,9 @@ describe('Lexical Views Provider', () => {
       page,
     }) => {
       // Add a block to the richtext field
-      await lexical.paragraph.last().click()
+      // Use focus() instead of click() because hideGutter=true causes the
+      // InsertParagraphAtEnd overlay to intercept clicks on the last paragraph
+      await lexical.editor.first().focus()
       await lexical.slashCommand('contentblock', true, 'Content Block')
 
       // Wait for block to be added

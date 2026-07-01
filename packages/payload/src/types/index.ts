@@ -3,6 +3,7 @@ import type DataLoader from 'dataloader'
 import type { OptionalKeys, RequiredKeys } from 'ts-essentials'
 import type { URL } from 'url'
 
+import type { ServerAdapter } from '../admin/adapters/server.js'
 import type {
   DataFromCollectionSlug,
   QueryDraftDataFromCollectionSlug,
@@ -24,6 +25,7 @@ import type {
 } from '../index.js'
 import type { File } from '../uploads/types.js'
 import type { Operator } from './constants.js'
+export type { TypeWithID } from '../collections/config/types.js'
 export type { Payload } from '../index.js'
 
 export type CustomPayloadRequestProperties = {
@@ -73,6 +75,15 @@ export type CustomPayloadRequestProperties = {
    * { collection: 'posts', id: '123' }
    */
   routeParams?: Record<string, unknown>
+  /**
+   * Framework abstraction for server-only navigation, cookies, and headers APIs.
+   * Populated by the framework adapter (e.g. `@payloadcms/next`). Plugins that
+   * have access to `req` should call methods here (`req.server.unauthorized()`,
+   * `req.server.redirect(...)`) instead of importing from `next/navigation` or
+   * `next/headers` directly. Optional because non-framework contexts (jobs,
+   * scripts, tests) construct requests without a server adapter.
+   */
+  server?: ServerAdapter
   /** Translate function - duplicate of i18n.t */
   t: TFunction
   /**
@@ -80,11 +91,6 @@ export type CustomPayloadRequestProperties = {
    * Can also be used to ensure consistency when multiple operations try to create a transaction concurrently on the same request.
    */
   transactionID?: number | Promise<number | string> | string
-  /**
-   * Used to ensure consistency when multiple operations try to create a transaction concurrently on the same request
-   * @deprecated This is not used anywhere, instead `transactionID` is used for the above. Will be removed in next major version.
-   */
-  transactionIDPromise?: Promise<void>
   /** The signed-in user */
   user: null | TypedUser
 } & Pick<
@@ -205,6 +211,55 @@ export type SelectExcludeType = {
 export type SelectMode = 'exclude' | 'include'
 
 export type SelectType = SelectExcludeType | SelectIncludeType
+
+/**
+ * Operations that invoke an entity-level `select` function.
+ *
+ * Narrower than `HookOperationType`: `select` runs only for read- and
+ * write-path operations that materialize a document (`create`, `delete`,
+ * `read`, `restoreVersion`, `update`). Operations like `autosave`, `count`,
+ * `countVersions`, `forgotPassword`, `login`, `readDistinct`, `refresh`, and
+ * `resetPassword` do not invoke `select` and are intentionally excluded.
+ */
+export type SelectFnOperation = 'create' | 'delete' | 'read' | 'restoreVersion' | 'update'
+
+export type SelectFnArgs = {
+  operation: SelectFnOperation
+  req: PayloadRequest
+  /** The caller's `select` arg, or `undefined` if not provided. */
+  select?: SelectType
+}
+
+export type SelectFn<TSelect extends SelectType = SelectType> = (
+  args: SelectFnArgs,
+) => TSelect | undefined
+
+/**
+ * Shared shape for the entity-level `select` config used by Collections and Globals.
+ * The JSDoc on the `select` property is the single source of truth — pick from this
+ * type when defining the config:
+ *
+ *   & Pick<WithSelectFn<...>, 'select'>
+ */
+export type WithSelectFn<TSelect extends SelectType = SelectType> = {
+  /**
+   * Entity-level Select API configuration.
+   *
+   * A function that receives the current request context (`operation`, `req`,
+   * the caller's `select`) and returns the final `select` to apply, replacing
+   * the caller's. Return `undefined` to leave the caller's `select` unchanged.
+   *
+   * Useful to dynamically modify the caller's selection based on the request context:
+   *  - Forcing a field to be populated for reference within hooks / access control.
+   *  - Differentiating between API requests and admin panel requests, to optimize
+   *    the amount of data being queried in each case.
+   *
+   * Note: per-document data is not available — this runs before the read.
+   *
+   * @see https://payloadcms.com/docs/queries/select
+   */
+  select?: SelectFn<TSelect>
+}
 
 export type ApplyDisableErrors<T, DisableErrors = false> = false extends DisableErrors
   ? T

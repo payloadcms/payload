@@ -6,14 +6,14 @@ import type {
   Locator,
   Page,
 } from '@playwright/test'
-import type { Config, SanitizedConfig } from 'payload'
 
 import { expect } from '@playwright/test'
-import { defaults } from 'payload'
+import { addDefaultsToConfig, type Config, type SanitizedConfig } from 'payload'
 import { formatAdminURL, wait } from 'payload/shared'
 import { setTimeout } from 'timers/promises'
 
 import { POLL_TOPASS_TIMEOUT } from '../../playwright.config.js'
+import { hideNextDevTools } from './hideNextDevTools.js'
 
 export type AdminRoutes = NonNullable<NonNullable<Config['admin']>['routes']>
 
@@ -80,6 +80,9 @@ export async function ensureCompilationIsDone({
   }
 
   const page = pageFromArgs ?? (await browser!.newPage())
+
+  // Hide Next.js dev tools to prevent them from blocking interactions
+  await hideNextDevTools(page)
 
   const { routes: { admin: adminRoute } = {} } = getRoutes({ customAdminRoutes, customRoutes })
 
@@ -275,7 +278,7 @@ export async function openCreateDocDrawer(page: Page, fieldSelector: string): Pr
 }
 
 export async function openLocaleSelector(page: Page): Promise<void> {
-  const button = page.locator('.localizer button.popup-button')
+  const button = page.locator('.localizer button')
   const popup = page.locator('.popup__content')
 
   if (!(await popup.isVisible())) {
@@ -296,11 +299,11 @@ export async function closeLocaleSelector(page: Page): Promise<void> {
 export async function changeLocale(page: Page, newLocale: string) {
   await openLocaleSelector(page)
 
-  const currentlySelectedLocale = await page
-    .locator(`.popup__content .popup-button-list__button--selected .localizer__locale-code`)
-    .textContent()
+  const selectedLocale = await page
+    .locator(`.popup__content .popup-button-list__button--selected [data-locale]`)
+    .getAttribute('data-locale')
 
-  if (currentlySelectedLocale !== `(${newLocale})`) {
+  if (selectedLocale !== newLocale) {
     const localeButton = page
       .locator('.popup__content .popup-button-list__button')
       .filter({ has: page.locator(`[data-locale="${newLocale}"]`) })
@@ -385,8 +388,8 @@ export async function switchTab(page: Page, selector: string) {
 }
 
 export const openColumnControls = async (page: Page) => {
-  await page.locator('.list-controls__toggle-columns').click()
-  await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+  await page.locator('.columns-button__button').click()
+  await expect(page.locator('.popup__content .column-selector')).toBeVisible()
 }
 
 /**
@@ -418,6 +421,7 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       !msg.text().includes('Error getting document data') &&
       !msg.text().includes('Failed trying to load default language strings') &&
       !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted
+      !msg.text().includes('TypeError: network error') && // Transient network errors during chunk loading
       !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') && // This is a weird error that happens in the console
       // Conditionally ignore CORS errors based on the `ignoreCORS` option
       !(
@@ -478,6 +482,10 @@ export function getRoutes({
   }
   routes: NonNullable<SanitizedConfig['routes']>
 } {
+  const defaults = addDefaultsToConfig({
+    db: { defaultIDType: 'text', init: () => ({}) as any },
+    secret: '',
+  })
   let routes = defaults.routes
   let adminRoutes = defaults.admin?.routes
 

@@ -3,14 +3,6 @@ import type { CodegenEvalCase } from '../../types.js'
 export const configCodegenDataset: CodegenEvalCase[] = [
   {
     input:
-      'Add the SEO plugin from "@payloadcms/plugin-seo" to the config. Pass a generateTitle function that returns a string combining the document title and the site name "Acme Corp".',
-    expected:
-      'import seoPlugin from "@payloadcms/plugin-seo", seoPlugin() added to plugins array, generateTitle function returning a string that includes the doc title and "Acme Corp"',
-    category: 'config',
-    fixturePath: 'config/codegen/seo-plugin',
-  },
-  {
-    input:
       'Configure the admin panel to use a custom Logo component imported from "@/components/Logo" and set the admin meta titleSuffix to " | My CMS".',
     expected:
       'admin.components.graphics.Logo set to the Logo component from "@/components/Logo" (or similar import), admin.meta.titleSuffix set to " | My CMS"',

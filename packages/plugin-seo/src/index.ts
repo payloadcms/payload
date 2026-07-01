@@ -55,6 +55,15 @@ export const seoPlugin =
       },
     ]
 
+    const collectionConfigBySlug = new Map<string, NonNullable<Config['collections']>[number]>()
+    for (const c of config.collections ?? []) {
+      collectionConfigBySlug.set(c.slug, c)
+    }
+    const globalConfigBySlug = new Map<string, NonNullable<Config['globals']>[number]>()
+    for (const g of config.globals ?? []) {
+      globalConfigBySlug.set(g.slug, g)
+    }
+
     return {
       ...config,
       collections:
@@ -144,10 +153,12 @@ export const seoPlugin =
             const result = pluginConfig.generateTitle
               ? await pluginConfig.generateTitle({
                   ...data,
-                  collectionConfig: config.collections?.find(
-                    (c) => c.slug === reqData.collectionSlug,
-                  ),
-                  globalConfig: config.globals?.find((g) => g.slug === reqData.globalSlug),
+                  collectionConfig: reqData.collectionSlug
+                    ? collectionConfigBySlug.get(reqData.collectionSlug)
+                    : undefined,
+                  globalConfig: reqData.globalSlug
+                    ? globalConfigBySlug.get(reqData.globalSlug)
+                    : undefined,
                   req,
                 } satisfies Parameters<GenerateTitle>[0])
               : ''
@@ -168,10 +179,12 @@ export const seoPlugin =
             const result = pluginConfig.generateDescription
               ? await pluginConfig.generateDescription({
                   ...data,
-                  collectionConfig: config.collections?.find(
-                    (c) => c.slug === reqData.collectionSlug,
-                  ),
-                  globalConfig: config.globals?.find((g) => g.slug === reqData.globalSlug),
+                  collectionConfig: reqData.collectionSlug
+                    ? collectionConfigBySlug.get(reqData.collectionSlug)
+                    : undefined,
+                  globalConfig: reqData.globalSlug
+                    ? globalConfigBySlug.get(reqData.globalSlug)
+                    : undefined,
                   req,
                 } satisfies Parameters<GenerateDescription>[0])
               : ''
@@ -192,10 +205,12 @@ export const seoPlugin =
             const result = pluginConfig.generateURL
               ? await pluginConfig.generateURL({
                   ...data,
-                  collectionConfig: config.collections?.find(
-                    (c) => c.slug === reqData.collectionSlug,
-                  ),
-                  globalConfig: config.globals?.find((g) => g.slug === reqData.globalSlug),
+                  collectionConfig: reqData.collectionSlug
+                    ? collectionConfigBySlug.get(reqData.collectionSlug)
+                    : undefined,
+                  globalConfig: reqData.globalSlug
+                    ? globalConfigBySlug.get(reqData.globalSlug)
+                    : undefined,
                   req,
                 } satisfies Parameters<GenerateURL>[0])
               : ''
@@ -216,10 +231,12 @@ export const seoPlugin =
             const result = pluginConfig.generateImage
               ? await pluginConfig.generateImage({
                   ...data,
-                  collectionConfig: config.collections?.find(
-                    (c) => c.slug === reqData.collectionSlug,
-                  ),
-                  globalConfig: config.globals?.find((g) => g.slug === reqData.globalSlug),
+                  collectionConfig: reqData.collectionSlug
+                    ? collectionConfigBySlug.get(reqData.collectionSlug)
+                    : undefined,
+                  globalConfig: reqData.globalSlug
+                    ? globalConfigBySlug.get(reqData.globalSlug)
+                    : undefined,
                   req,
                 } satisfies Parameters<GenerateImage>[0])
               : ''

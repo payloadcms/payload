@@ -83,7 +83,7 @@ export async function validateConfigTypes(
   const tsconfig = {
     extends: `${relToFixtures}/tsconfig.json`,
     compilerOptions: { noEmit: true },
-    include: [configFileName],
+    include: [configFileName, `${relToFixtures}/ambient.d.ts`],
   }
 
   writeFileSync(configFilePath, configContent, 'utf-8')

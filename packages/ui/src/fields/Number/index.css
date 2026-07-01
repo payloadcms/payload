@@ -1,0 +1,58 @@
+@layer payload-default {
+  .field-type.number {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+
+    .field-type__wrap {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
+    }
+
+    input {
+      /* Hide native spinners */
+      appearance: textfield;
+      -moz-appearance: textfield;
+
+      &::-webkit-outer-spin-button,
+      &::-webkit-inner-spin-button {
+        appearance: none;
+        -webkit-appearance: none;
+        margin: 0;
+      }
+    }
+
+    &.error .form-input-group:not(:focus-within) {
+      border-color: var(--field-color-border-error);
+
+      &:hover {
+        border-color: var(--field-color-border-error);
+      }
+    }
+
+    &.read-only .input-stepper {
+      display: none;
+    }
+
+    .number__prefix,
+    .number__suffix {
+      display: flex;
+      flex-shrink: 0;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--text-body-medium-font-size);
+      color: var(--color-text-secondary);
+      user-select: none;
+    }
+
+    .number__prefix {
+      padding-inline-start: var(--field-padding-inline);
+    }
+
+    .number__suffix {
+      padding-inline-end: var(--field-padding-inline);
+    }
+  }
+}

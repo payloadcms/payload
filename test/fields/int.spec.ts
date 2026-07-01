@@ -2388,7 +2388,7 @@ describe('Fields', () => {
       const idFields = arrayWithNestedCustomIDField?.fields.filter((f) => f.name === 'id')
 
       expect(idFields).toHaveLength(1)
-      expect(idFields[0].admin?.disableListFilter).toBe(true)
+      expect((idFields[0].admin?.disabled as { filter?: boolean })?.filter).toBe(true)
     })
 
     it('should query exists true', { db: 'mongo' }, async () => {
@@ -4998,7 +4998,7 @@ describe('Fields', () => {
     })
 
     it('should apply timezone override function to customize the field', async () => {
-      // The dateWithTimezoneWithDisabledColumns field has an override that sets disableListColumn: true
+      // The dateWithTimezoneWithDisabledColumns field has an override that sets disabled.column: true
       // We can verify this by checking the collection config has the modified field
       const dateCollection = payload.collections[dateFieldsSlug]
       const fields = dateCollection.config.flattenedFields
@@ -5006,7 +5006,7 @@ describe('Fields', () => {
       const timezoneField = fields.find((f) => f.name === 'dateWithTimezoneWithDisabledColumns_tz')
       expect(timezoneField).toBeDefined()
       expect(timezoneField?.type).toEqual('select')
-      expect(timezoneField?.admin?.disableListColumn).toBe(true)
+      expect((timezoneField?.admin?.disabled as { column?: boolean })?.column).toBe(true)
       expect(timezoneField?.admin?.description).toEqual(
         'This timezone field was customized via override',
       )

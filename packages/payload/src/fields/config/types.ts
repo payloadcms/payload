@@ -4,7 +4,7 @@ import type { EditorProps } from '@monaco-editor/react'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
 import type React from 'react'
-import type { DeepUndefinable, MarkRequired } from 'ts-essentials'
+import type { DeepUndefinable, MarkOptional, MarkRequired } from 'ts-essentials'
 
 import type {
   JoinFieldClientProps,
@@ -147,6 +147,8 @@ import type {
   PickPreserveOptional,
   Where,
 } from '../../types/index.js'
+import type { SchemaVariant } from '../../utilities/configToJSONSchema.js'
+import type { DisabledOptions } from '../isFieldDisabled.js'
 import type {
   NumberFieldManyValidation,
   NumberFieldSingleValidation,
@@ -369,23 +371,12 @@ export type FieldAdmin = {
    * we use the field description to generate JSDoc comments for the generated TypeScript types.
    */
   description?: Description
-  disableBulkEdit?: boolean
-  disabled?: boolean
   /**
-   * Shows / hides fields from appearing in the list view groupBy options.
-   * @type boolean
+   * Controls where this field is disabled in the admin UI.
+   * - `true` disables the field everywhere (edit form, list column, list filter, groupBy, bulk edit).
+   * - An object enables granular control per area: `{ field?, column?, filter?, groupBy?, bulkEdit? }`.
    */
-  disableGroupBy?: boolean
-  /**
-   * Shows / hides fields from appearing in the list view column selector.
-   * @type boolean
-   */
-  disableListColumn?: boolean
-  /**
-   * Shows / hides fields from appearing in the list view filter options.
-   * @type boolean
-   */
-  disableListFilter?: boolean
+  disabled?: boolean | DisabledOptions
   hidden?: boolean
   position?: FieldPosition
   readOnly?: boolean
@@ -398,23 +389,12 @@ export type AdminClient = {
   /** Extension point to add your custom data. Available in server and client. */
   custom?: Record<string, any>
   description?: StaticDescription
-  disableBulkEdit?: boolean
-  disabled?: boolean
   /**
-   * Shows / hides fields from appearing in the list view groupBy options.
-   * @type boolean
+   * Controls where this field is disabled in the admin UI.
+   * - `true` disables the field everywhere (edit form, list column, list filter, groupBy, bulk edit).
+   * - An object enables granular control per area: `{ field?, column?, filter?, groupBy?, bulkEdit? }`.
    */
-  disableGroupBy?: boolean
-  /**
-   * Shows / hides fields from appearing in the list view column selector.
-   * @type boolean
-   */
-  disableListColumn?: boolean
-  /**
-   * Shows / hides fields from appearing in the list view filter options.
-   * @type boolean
-   */
-  disableListFilter?: boolean
+  disabled?: boolean | DisabledOptions
   hidden?: boolean
   position?: FieldPosition
   readOnly?: boolean
@@ -525,6 +505,15 @@ export interface FieldBase {
     beforeValidate?: FieldHook[]
   }
   index?: boolean
+  /**
+   * Allows you to modify the base JSON schema that is generated for this field.
+   * This JSON schema will be used to generate the TypeScript interface of this field, and to
+   * validate the field's value in the MCP plugin.
+   *
+   * `variant` is `'input'` when generating the write shape (`create`/`update`) and `'output'` when
+   * generating the read shape, so a transform can differ between the two.
+   */
+  jsonSchema?: Array<(args: { jsonSchema: JSONSchema4; variant: SchemaVariant }) => JSONSchema4>
   label?: false | LabelFunction | StaticLabel
   localized?: boolean
   /**
@@ -536,11 +525,6 @@ export interface FieldBase {
   name: string
   required?: boolean
   saveToJWT?: boolean | string
-  /**
-   * Allows you to modify the base JSON schema that is generated during generate:types for this field.
-   * This JSON schema will be used to generate the TypeScript interface of this field.
-   */
-  typescriptSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
   unique?: boolean
   validate?: Validate
   /**
@@ -551,27 +535,13 @@ export interface FieldBase {
   virtual?: boolean | string
 }
 
-export interface FieldBaseClient {
+export interface FieldBaseClient
+  extends Pick<
+    FieldBase,
+    'hidden' | 'index' | 'jsonSchema' | 'localized' | 'name' | 'required' | 'saveToJWT' | 'unique'
+  > {
   admin?: AdminClient
-  hidden?: boolean
-  index?: boolean
   label?: StaticLabel
-  localized?: boolean
-  /**
-   * The name of the field. Must be alphanumeric and cannot contain ' . '
-   *
-   * Must not be one of reserved field names: ['__v', 'salt', 'hash', 'file']
-   * @link https://payloadcms.com/docs/fields/overview#field-names
-   */
-  name: string
-  required?: boolean
-  saveToJWT?: boolean | string
-  /**
-   * Allows you to modify the base JSON schema that is generated during generate:types for this field.
-   * This JSON schema will be used to generate the TypeScript interface of this field.
-   */
-  typescriptSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
-  unique?: boolean
 }
 
 export type NumberField = {
@@ -968,15 +938,12 @@ export type UIField = {
     /** Extension point to add your custom data. Available in server and client. */
     custom?: Record<string, any>
     /**
-     * Set `false` make the UI field appear in the list view column selector. `true` by default for UI fields.
-     * @default true
+     * Controls where this UI field is disabled in the admin UI.
+     * - `true` disables the field everywhere.
+     * - An object enables granular control per area: `{ field?, column?, filter?, groupBy?, bulkEdit? }`.
+     * UI fields default to `disabled: { bulkEdit: true }` via sanitize.
      */
-    disableBulkEdit?: boolean
-    /**
-     * Shows / hides fields from appearing in the list view column selector.
-     * @type boolean
-     */
-    disableListColumn?: boolean
+    disabled?: boolean | DisabledOptions
     position?: string
     width?: CSSProperties['width']
   }
@@ -991,10 +958,7 @@ export type UIFieldClient = {
   // still include FieldBaseClient.admin (even if it's undefinable) so that we don't need constant type checks (e.g. if('xy' in field))
 
   admin: DeepUndefinable<FieldBaseClient['admin']> &
-    Pick<
-      UIField['admin'],
-      'custom' | 'disableBulkEdit' | 'disableListColumn' | 'position' | 'width'
-    >
+    Pick<UIField['admin'], 'custom' | 'disabled' | 'position' | 'width'>
 } & Omit<DeepUndefinable<FieldBaseClient>, 'admin'> & // still include FieldBaseClient (even if it's undefinable) so that we don't need constant type checks (e.g. if('xy' in field))
   Pick<UIField, 'label' | 'name' | 'type'>
 
@@ -1014,29 +978,13 @@ type SharedUploadProperties = {
 } & (
   | {
       hasMany: true
-      /**
-       * @deprecated Use 'maxRows' instead
-       */
-      max?: number
       maxRows?: number
-      /**
-       * @deprecated Use 'minRows' instead
-       */
-      min?: number
       minRows?: number
       validate?: UploadFieldManyValidation
     }
   | {
       hasMany?: false | undefined
-      /**
-       * @deprecated Use 'maxRows' instead
-       */
-      max?: undefined
       maxRows?: undefined
-      /**
-       * @deprecated Use 'minRows' instead
-       */
-      min?: undefined
       minRows?: undefined
       validate?: UploadFieldSingleValidation
     }
@@ -1045,10 +993,7 @@ type SharedUploadProperties = {
   Omit<FieldBase, 'validate'>
 
 type SharedUploadPropertiesClient = FieldBaseClient &
-  Pick<
-    SharedUploadProperties,
-    'hasMany' | 'max' | 'maxDepth' | 'maxRows' | 'min' | 'minRows' | 'type'
-  >
+  Pick<SharedUploadProperties, 'hasMany' | 'maxDepth' | 'maxRows' | 'minRows' | 'type'>
 
 type UploadAdmin = {
   allowCreate?: boolean
@@ -1225,29 +1170,13 @@ type SharedRelationshipProperties = {
 } & (
   | {
       hasMany: true
-      /**
-       * @deprecated Use 'maxRows' instead
-       */
-      max?: number
       maxRows?: number
-      /**
-       * @deprecated Use 'minRows' instead
-       */
-      min?: number
       minRows?: number
       validate?: RelationshipFieldManyValidation
     }
   | {
       hasMany?: false | undefined
-      /**
-       * @deprecated Use 'maxRows' instead
-       */
-      max?: undefined
       maxRows?: undefined
-      /**
-       * @deprecated Use 'minRows' instead
-       */
-      min?: undefined
       minRows?: undefined
       validate?: RelationshipFieldSingleValidation
     }
@@ -1256,10 +1185,7 @@ type SharedRelationshipProperties = {
   Omit<FieldBase, 'validate'>
 
 type SharedRelationshipPropertiesClient = FieldBaseClient &
-  Pick<
-    SharedRelationshipProperties,
-    'hasMany' | 'max' | 'maxDepth' | 'maxRows' | 'min' | 'minRows' | 'type'
-  >
+  Pick<SharedRelationshipProperties, 'hasMany' | 'maxDepth' | 'maxRows' | 'minRows' | 'type'>
 
 type RelationshipAdmin = {
   allowCreate?: boolean
@@ -1449,8 +1375,8 @@ export type RadioFieldClient = {
 
 type BlockFields = {
   [key: string]: any
-  blockName?: string
-  blockType?: string
+  blockName?: null | string
+  blockType: string
 }
 
 export type BlockJSX = {
@@ -1508,7 +1434,7 @@ export type BlockJSX = {
     markdownToLexical: (props: { markdown: string }) => Record<string, any>
     openMatch?: RegExpMatchArray
     props: Record<string, any>
-  }) => BlockFields | false
+  }) => false | MarkOptional<BlockFields, 'blockType'>
 }
 
 export type Block = {
@@ -1587,11 +1513,12 @@ export type Block = {
    * @deprecated Use `admin.images` instead. Preferred aspect ratio of the image is 3:2.
    */
   imageURL?: string
-  /** Customize generated GraphQL and Typescript schema names.
-   * The slug is used by default.
-   *
-   * This is useful if you would like to generate a top level type to share amongst collections/fields.
-   * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
+  /**
+   * Override the name of the top-level TypeScript interface and GraphQL
+   * type generated for this block. Blocks **always** generate a top-level
+   * interface - by default it's a PascalCase form of the slug
+   * (`'content-block'` → `ContentBlock`). Set this to take control of the
+   * generated name
    */
   interfaceName?: string
   jsx?: BlockJSX
@@ -1620,12 +1547,9 @@ export type BlocksField = {
     isSortable?: boolean
   } & FieldAdmin
   /**
-   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
-   *
-   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   * Blocks to use in this field. Inline block configs and string slugs of blocks defined in `config.blocks` are both supported.
    */
-  blockReferences?: (Block | BlockSlug)[]
-  blocks: Block[]
+  blocks: (Block | BlockSlug)[]
   defaultValue?: DefaultValue
   /**
    * Blocks can be conditionally enabled using the `filterOptions` property on the blocks field.
@@ -1667,13 +1591,7 @@ export type BlocksField = {
 export type BlocksFieldClient = {
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
-  /**
-   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
-   *
-   * @todo `blockReferences` will be merged with `blocks` in 4.0
-   */
-  blockReferences?: (ClientBlock | string)[]
-  blocks: ClientBlock[]
+  blocks: (ClientBlock | string)[]
   labels?: LabelsClient
 } & FieldBaseClient &
   Pick<BlocksField, 'maxRows' | 'minRows' | 'type'>
@@ -1794,14 +1712,8 @@ export type FlattenedBlock = {
 } & Block
 
 export type FlattenedBlocksField = {
-  /**
-   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
-   *
-   * @todo `blockReferences` will be merged with `blocks` in 4.0
-   */
-  blockReferences?: (FlattenedBlock | string)[]
-  blocks: FlattenedBlock[]
-} & Omit<BlocksField, 'blockReferences' | 'blocks'>
+  blocks: (FlattenedBlock | string)[]
+} & Omit<BlocksField, 'blocks'>
 
 export type FlattenedGroupField = {
   flattenedFields: FlattenedField[]
@@ -2029,7 +1941,7 @@ export type FieldWithMaxDepthClient = JoinFieldClient | RelationshipFieldClient 
 
 export function fieldHasSubFields<TField extends ClientField | Field | TabAsField>(
   field: TField,
-): field is TField & (TField extends ClientField ? FieldWithSubFieldsClient : FieldWithSubFields) {
+): field is Extract<TField, FieldWithSubFields | FieldWithSubFieldsClient> {
   return (
     field.type === 'group' ||
     field.type === 'array' ||
@@ -2040,19 +1952,19 @@ export function fieldHasSubFields<TField extends ClientField | Field | TabAsFiel
 
 export function fieldIsArrayType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? ArrayFieldClient : ArrayField) {
+): field is Extract<TField, ArrayField | ArrayFieldClient> {
   return field.type === 'array'
 }
 
 export function fieldIsBlockType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? BlocksFieldClient : BlocksField) {
+): field is Extract<TField, BlocksField | BlocksFieldClient> {
   return field.type === 'blocks'
 }
 
 export function fieldIsGroupType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? GroupFieldClient : GroupField) {
+): field is Extract<TField, GroupField | GroupFieldClient> {
   return field.type === 'group'
 }
 
@@ -2070,13 +1982,13 @@ export function optionIsValue(option: Option): option is string {
 
 export function fieldSupportsMany<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? FieldWithManyClient : FieldWithMany) {
+): field is Extract<TField, FieldWithMany | FieldWithManyClient> {
   return field.type === 'select' || field.type === 'relationship' || field.type === 'upload'
 }
 
 export function fieldHasMaxDepth<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? FieldWithMaxDepthClient : FieldWithMaxDepth) {
+): field is Extract<TField, FieldWithMaxDepth | FieldWithMaxDepthClient> {
   return (
     (field.type === 'upload' || field.type === 'relationship' || field.type === 'join') &&
     typeof field.maxDepth === 'number'
@@ -2085,9 +1997,7 @@ export function fieldHasMaxDepth<TField extends ClientField | Field>(
 
 export function fieldIsPresentationalOnly<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
->(
-  field: TField,
-): field is TField & (TField extends ClientField | TabAsFieldClient ? UIFieldClient : UIField) {
+>(field: TField): field is Extract<TField, UIField | UIFieldClient> {
   return field.type === 'ui'
 }
 
@@ -2106,18 +2016,27 @@ export function fieldIsID<TField extends ClientField | Field>(
 export function fieldIsHiddenOrDisabled<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
 >(field: TField): field is { admin: { hidden: true } } & TField {
-  return (
-    ('hidden' in field && field.hidden) ||
-    ('admin' in field && 'disabled' in field.admin! && field.admin.disabled!)
-  )
+  if ('hidden' in field && field.hidden) {
+    return true
+  }
+  if (!('admin' in field) || !field.admin || !('disabled' in field.admin)) {
+    return false
+  }
+  const disabled = field.admin.disabled
+  if (disabled === true) {
+    return true
+  }
+  return typeof disabled === 'object' && disabled !== null && disabled.field === true
 }
 
 export function fieldAffectsData<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
 >(
   field: TField,
-): field is TField &
-  (TField extends ClientField | TabAsFieldClient ? FieldAffectingDataClient : FieldAffectingData) {
+  // Narrows to field types that hold data (`name` fields). `Extract` keeps the
+  // existing `TField` members instead of creating intersections. Avoid `TField & (...)`
+  // here: with the large recursive `Field` union, it is much slower to typecheck.
+): field is Extract<TField, FieldAffectingData | FieldAffectingDataClient> {
   return 'name' in field && !fieldIsPresentationalOnly(field)
 }
 
@@ -2152,12 +2071,7 @@ export function fieldShouldBeLocalized({
   field: ClientField | ClientTab | Field | Tab
   parentIsLocalized: boolean
 }): boolean {
-  return (
-    'localized' in field &&
-    field.localized! &&
-    (!parentIsLocalized ||
-      process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true')
-  )
+  return 'localized' in field && field.localized! && !parentIsLocalized
 }
 
 export function fieldIsVirtual(field: Field | Tab): boolean {

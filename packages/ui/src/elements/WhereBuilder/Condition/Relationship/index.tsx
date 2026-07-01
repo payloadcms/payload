@@ -14,7 +14,7 @@ import { useConfig } from '../../../../providers/Config/index.js'
 import { useLocale } from '../../../../providers/Locale/index.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { ReactSelect } from '../../../ReactSelect/index.js'
-import './index.scss'
+import './index.css'
 import optionsReducer from './optionsReducer.js'
 
 const baseClass = 'condition-value-relationship'

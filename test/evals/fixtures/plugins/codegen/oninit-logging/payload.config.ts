@@ -1,5 +1,6 @@
 import type { Plugin } from 'payload'
 
+import { stubAdapter } from '@/db-stub.js'
 import { buildConfig } from 'payload'
 
 // TODO: implement this plugin so that it extends the config's onInit
@@ -9,14 +10,14 @@ export const withInitLogging: Plugin = (incomingConfig) => {
   return incomingConfig
 }
 
-// db is a required field; the eval fixture uses a stub so the LLM can focus on the specific task
 export default buildConfig({
-  db: null as unknown as Parameters<typeof buildConfig>[0]['db'],
+  db: stubAdapter,
   secret: 'eval-fixture',
   collections: [
     {
       slug: 'posts',
       fields: [{ name: 'title', type: 'text', required: true }],
+      versions: false,
     },
   ],
   plugins: [withInitLogging],

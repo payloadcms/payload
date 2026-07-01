@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { waitForAutoSaveToRunAndComplete } from '__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -18,6 +17,7 @@ import {
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
 import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
+import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -50,7 +50,7 @@ describe('Join Field', () => {
   let categoriesVersionsURL: AdminUrlUtil
   let versionsURL: AdminUrlUtil
   let categoryID: number | string
-  let rootFolderID: number | string
+  let rootParentID: number | string
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -103,7 +103,7 @@ describe('Join Field', () => {
     ;({ id: categoryID } = docs[0])
 
     const folder = await payload.find({ collection: 'folders', sort: 'createdAt', depth: 0 })
-    rootFolderID = folder.docs[0]!.id
+    rootParentID = folder.docs[0]!.id
   })
 
   test('should populate joined relationships in table cells of list view', async () => {
@@ -167,8 +167,9 @@ describe('Join Field', () => {
 
     await navigateToDoc(page, categoriesURL)
     const joinField = page.locator('#field-relatedPosts.field-type.join')
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
     await expect(joinField.locator('.row-1 > .cell-title')).toContainText('z')
-    await expect(joinField.locator('.paginator > .clickable-arrow--right')).toBeVisible()
+    await expect(joinField.locator('.relationship-table-pagination')).toBeVisible()
     const rows = joinField.locator('.relationship-table tbody tr')
     await expect(rows).toHaveCount(5)
   })
@@ -305,8 +306,7 @@ describe('Join Field', () => {
     await expect(link).toBeHidden()
 
     await reorderColumns(page, {
-      togglerSelector: '.relationship-table__toggle-columns',
-      columnContainerSelector: '.relationship-table__columns',
+      togglerSelector: '#field-relatedPosts .columns-button__button',
       fromColumn: 'Category',
       toColumn: 'Title',
     })
@@ -319,8 +319,7 @@ describe('Join Field', () => {
 
     // put columns back in original order for the next test
     await reorderColumns(page, {
-      togglerSelector: '.relationship-table__toggle-columns',
-      columnContainerSelector: '.relationship-table__columns',
+      togglerSelector: '#field-relatedPosts .columns-button__button',
       fromColumn: 'Title',
       toColumn: 'Category',
     })
@@ -497,7 +496,7 @@ describe('Join Field', () => {
     await editButton.click()
     const drawer = page.locator('[id^=doc-drawer_posts_1_]')
     await expect(drawer).toBeVisible()
-    const popupButton = drawer.locator('.doc-controls__popup button.popup-button')
+    const popupButton = drawer.locator('.doc-controls__popup .popup__trigger-wrap button')
     await expect(popupButton).toBeVisible()
     await popupButton.click()
     const deleteButton = page.locator('.popup__content #action-delete')
@@ -505,7 +504,7 @@ describe('Join Field', () => {
     await deleteButton.click()
     const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
     await expect(deleteConfirmModal).toBeVisible()
-    const confirmDeleteButton = deleteConfirmModal.locator('button#confirm-action')
+    const confirmDeleteButton = deleteConfirmModal.locator('button[data-dialog-action="confirm"]')
     await expect(confirmDeleteButton).toBeVisible()
     await confirmDeleteButton.click()
     await expect(drawer).toBeHidden()
@@ -633,7 +632,7 @@ describe('Join Field', () => {
   })
 
   test('should render join field with array of collections', async () => {
-    await page.goto(foldersURL.edit(rootFolderID))
+    await page.goto(foldersURL.edit(rootParentID))
     const joinField = page.locator('#field-children.field-type.join')
     await expect(joinField).toBeVisible()
 
@@ -651,9 +650,10 @@ describe('Join Field', () => {
   })
 
   test('should create a new document from join field with array of collections', async () => {
-    await page.goto(foldersURL.edit(rootFolderID))
+    await page.goto(foldersURL.edit(rootParentID))
     const joinField = page.locator('#field-children.field-type.join')
     await expect(joinField).toBeVisible()
+    await expect(joinField.locator('.relationship-table table')).toBeVisible()
 
     const addNewPopupBtn = joinField.locator('.relationship-table__add-new-polymorphic')
     await expect(addNewPopupBtn).toBeVisible()
@@ -688,7 +688,7 @@ describe('Join Field', () => {
     await page.locator('#field-enableErrorOnJoin').click()
     await page.locator('#action-save').click()
 
-    await expect(page.locator('#field-joinWithError')).toContainText('enableErrorOnJoin is true')
+    await expect(page.locator('#field-joinWithError .error-pill')).toBeVisible()
   })
 
   test('should render localized data in table when locale changes', async () => {

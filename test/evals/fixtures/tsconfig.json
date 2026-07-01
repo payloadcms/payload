@@ -12,6 +12,9 @@
     "skipLibCheck": true,
     "lib": ["ES2022"],
     "jsx": "react-jsx",
-    "jsxImportSource": "react"
+    "jsxImportSource": "react",
+    "paths": {
+      "@/*": ["./*"]
+    }
   }
 }

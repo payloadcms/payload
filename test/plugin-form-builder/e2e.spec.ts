@@ -77,7 +77,7 @@ test.describe('Form Builder Plugin', () => {
         .locator('button.thumbnail-card', {
           hasText: 'Text Area',
         })
-        .click()
+        .dblclick()
 
       await expect(() =>
         expect(
@@ -160,6 +160,7 @@ test.describe('Form Builder Plugin', () => {
 
       const formSelect = page.locator('#field-form')
       await selectInput({
+        page,
         multiSelect: false,
         option: 'Contact Form',
         selectLocator: formSelect,

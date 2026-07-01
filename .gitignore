@@ -5,12 +5,20 @@ dist
 !/.idea/runConfigurations
 /.idea/runConfigurations/_template*
 !/.idea/payload.iml
+.pnpm-store
 
 # Local AI Agent files
 AGENTS.local.md
 CLAUDE.local.md
 .claude/commands/*.local.md
 .claude/artifacts
+.claude/skills/add-config-custom-component/
+.claude/skills/check-payload-patterns/
+.claude/skills/log-pattern/
+.claude/skills/payload-hooks/
+.claude/skills/payload-operations/
+.claude/skills/refactoring/
+.claude/skills/writing-scss/
 .worktrees/
 
 # Custom actions
@@ -18,7 +26,6 @@ CLAUDE.local.md
 
 test/packed
 test-results
-.devcontainer
 .localstack
 /migrations
 .localstack
@@ -46,8 +53,8 @@ test/media
 *payloadtests.db-journal
 *payloadtests.db-shm
 *payloadtests.db-wal
-*payload.db
 /versions
+/uploads
 no-restrict-file-*
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,macos,windows,webstorm,sublimetext,visualstudiocode
@@ -355,6 +362,7 @@ licenses.csv
 
 # SQLite DB
 payload.db
+test/payload.db
 
 # Screenshots created by Playwright MCP
 .playwright-mcp

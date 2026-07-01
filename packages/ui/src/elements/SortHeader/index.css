@@ -1,0 +1,28 @@
+@layer payload-default {
+  .sort-header {
+    margin: 0;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-icon-tertiary);
+    border-radius: var(--button-radius);
+
+    &:hover {
+      color: var(--color-icon);
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+      color: var(--color-icon);
+    }
+  }
+
+  .sort-header--active {
+    color: var(--color-icon);
+  }
+}

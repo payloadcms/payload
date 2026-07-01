@@ -25,6 +25,7 @@ jobs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       needs_tests: ${{ steps.filter.outputs.needs_tests }}
       templates: ${{ steps.filter.outputs.templates }}
+      build_approvals: ${{ steps.filter.outputs.build_approvals }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
@@ -37,6 +38,8 @@ jobs:
           filters: |
             needs_build:
               - '.github/workflows/main.yml'
+              - '.github/actions/start-services/**'
+              - '.github/actions/setup/**'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
@@ -44,17 +47,72 @@ jobs:
               - 'templates/**'
             needs_tests:
               - '.github/workflows/main.yml'
+              - '.github/actions/start-services/**'
               - 'packages/**'
               - 'test/**'
               - 'pnpm-lock.yaml'
               - 'package.json'
             templates:
               - 'templates/**'
+            build_approvals:
+              - '.github/workflows/main.yml'
+              # Any dependency-graph change (packages/* or the blank workspace member) lands in
+              # the root lockfile; that, plus the allowlist itself, is what can introduce drift.
+              - 'pnpm-lock.yaml'
+              - 'packages/create-payload-app/src/lib/configure-pnpm-builds.ts'
       - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
+          echo "build_approvals: ${{ steps.filter.outputs.build_approvals }}"
+
+  # Detects upstream Next.js canary publishes that are missing `@next/env` or
+  # `@next/eslint-plugin-next` for the same version (would break
+  # `pnpm create next-app@canary` with `ERR_PNPM_NO_MATCHING_VERSION`).
+  probe-next-canary:
+    name: probe-next-canary
+    runs-on: ubuntu-24.04
+    needs: changes
+    if: needs.changes.outputs.needs_tests == 'true'
+    outputs:
+      healthy: ${{ steps.probe.outputs.healthy }}
+      next_version: ${{ steps.probe.outputs.next_version }}
+    steps:
+      - name: Probe registry for complete canary publish
+        id: probe
+        run: |
+          retry_npm_view() {
+            local spec="$1"
+            for attempt in 1 2 3; do
+              if npm view "$spec" version >/dev/null 2>&1; then
+                return 0
+              fi
+              sleep $((attempt * 2))
+            done
+            return 1
+          }
+
+          NEXT_VERSION=""
+          for attempt in 1 2 3; do
+            NEXT_VERSION="$(npm view next@canary version 2>/dev/null || true)"
+            if [ -n "$NEXT_VERSION" ]; then
+              break
+            fi
+            sleep $((attempt * 2))
+          done
+          echo "Resolved next@canary version: ${NEXT_VERSION:-<empty>}"
+          echo "next_version=${NEXT_VERSION}" >> "$GITHUB_OUTPUT"
+          if [ -z "$NEXT_VERSION" ]; then
+            echo "healthy=unknown" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if retry_npm_view "@next/env@${NEXT_VERSION}" \
+            && retry_npm_view "@next/eslint-plugin-next@${NEXT_VERSION}"; then
+            echo "healthy=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "healthy=false" >> "$GITHUB_OUTPUT"
+          fi
 
   lint:
     runs-on: ubuntu-24.04
@@ -152,7 +210,7 @@ jobs:
 
   tests-int:
     runs-on: ubuntu-24.04
-    needs: [changes, build, int-matrix]
+    needs: [changes, build, int-matrix, probe-next-canary]
     if: needs.changes.outputs.needs_tests == 'true'
     name: int-${{ matrix.database }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}
     timeout-minutes: 45
@@ -165,14 +223,6 @@ jobs:
       AWS_ACCESS_KEY_ID: localstack
       AWS_SECRET_ACCESS_KEY: localstack
       AWS_REGION: us-east-1
-
-    services:
-      redis:
-        image: redis:latest
-        ports:
-          - 6379:6379
-
-        options: --health-cmd "redis-cli ping" --health-timeout 30s --health-retries 3
 
     steps:
       - uses: actions/checkout@v5
@@ -193,13 +243,19 @@ jobs:
           database: ${{ matrix.database }}
 
       - name: Integration Tests
-        run: pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
         env:
           NODE_OPTIONS: --max-old-space-size=8096
           PAYLOAD_DATABASE: ${{ matrix.database }}
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
           MONGODB_ATLAS_URL: ${{ steps.db.outputs.MONGODB_ATLAS_URL }}
+        run: |
+          if [ "${{ needs.probe-next-canary.outputs.healthy }}" = "false" ]; then
+            echo "::warning::Next.js canary publish is incomplete on npm (next@${{ needs.probe-next-canary.outputs.next_version }}); skipping Canary tests for this run."
+            pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }} -t '^(?!.*Canary).*$'
+          else
+            pnpm test:int --shard=${{ matrix.shard }}/${{ matrix.total-shards }}
+          fi
 
   # Generate the E2E test matrix from TypeScript config
   e2e-matrix:
@@ -302,8 +358,9 @@ jobs:
 
       - name: Store Playwright's Version
         run: |
-          # Extract the version number using a more targeted regex pattern with awk
-          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          # `exit` after the first match: v11's `pnpm ls` lists the dep across every workspace
+          # project, and a multi-line value would break the GITHUB_ENV write.
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2; exit}')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
@@ -354,6 +411,7 @@ jobs:
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
+          PAYLOAD_DATABASE: mongodb
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
@@ -374,9 +432,7 @@ jobs:
   build-and-test-templates:
     runs-on: ubuntu-24.04
     needs: [changes, build]
-    # Temporarily disabled: template builds require a published beta of workspace packages.
-    # Re-enable once the next 4.x beta is published on npm.
-    if: false
+    if: needs.changes.outputs.needs_build == 'true'
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false
@@ -421,7 +477,7 @@ jobs:
 
       - name: Build Template
         run: |
-          pnpm run script:pack --dest templates/${{ matrix.template }}
+          pnpm run script:pack --all --dest templates/${{ matrix.template }}
           pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $DB_CONNECTION
         env:
           NODE_OPTIONS: --max-old-space-size=8096
@@ -429,8 +485,9 @@ jobs:
 
       - name: Store Playwright's Version
         run: |
-          # Extract the version number using a more targeted regex pattern with awk
-          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          # `exit` after the first match: v11's `pnpm ls` lists the dep across every workspace
+          # project, and a multi-line value would break the GITHUB_ENV write.
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2; exit}')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
@@ -465,6 +522,21 @@ jobs:
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
           NEXT_TELEMETRY_DISABLED: 1
+
+  # Fails if create-payload-app's build-script allowlist drifts from the blank template's deps:
+  # scaffolds blank, installs it standalone under pnpm v11, and asserts no ERR_PNPM_IGNORED_BUILDS.
+  check-template-build-approvals:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: needs.changes.outputs.build_approvals == 'true'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+
+      - name: Check create-payload-app build approvals
+        run: pnpm --filter scripts check-template-build-approvals
 
   tests-type-generation:
     runs-on: ubuntu-24.04
@@ -504,7 +576,7 @@ jobs:
       contents: read
     services:
       postgres:
-        image: postgres:13
+        image: postgres:15
         env:
           POSTGRES_DB: figma_content_api
           POSTGRES_USER: postgres
@@ -536,13 +608,13 @@ jobs:
           restore-build: true
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
         with:
           role-to-assume: arn:aws:iam::060562746757:role/content-api-external-ci-pull
           aws-region: us-west-2
 
       - name: Login to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
+        uses: aws-actions/amazon-ecr-login@fa648b43de3d4d023bcb3f89ed6940096949c419 # v2.1.5
 
       # Figma publishes ECR tags as the 40-char SHA of the figma/figma commit
       # that built the image. There is no reliable floating alias, so pick the
@@ -570,7 +642,7 @@ jobs:
       # figma/figma image skip the ~55s ECR pull.
       - name: Cache Content API image
         id: cache-content-api-image
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: /tmp/content-api-image.tar
           key: content-api-image-${{ steps.resolve-image.outputs.tag }}
@@ -676,6 +748,6 @@ jobs:
       - name: Analyze esbuild bundle size
         # Temporarily disable this for community PRs until this can be implemented in a separate workflow
         if: github.event.pull_request.head.repo.fork == false
-        uses: exoego/esbuild-bundle-analyzer@v1
+        uses: exoego/esbuild-bundle-analyzer@42795b5c2540f6c622dc3445103fabbb7776a6f9 # v1.5.5
         with:
           metafiles: 'packages/payload/meta_index.json,packages/payload/meta_shared.json,packages/ui/meta_client.json,packages/ui/meta_shared.json,packages/next/meta_index.json,packages/richtext-lexical/meta_client.json'

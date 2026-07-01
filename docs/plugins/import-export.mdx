@@ -8,13 +8,12 @@ keywords: plugins, plugin, import, export, csv, JSON, data, ETL, download
 
 ![https://www.npmjs.com/package/@payloadcms/plugin-import-export](https://img.shields.io/npm/v/@payloadcms/plugin-import-export)
 
-<Banner type="warning">
-  **Note**: This plugin is in **beta** as some aspects of it may change on any
-  minor releases. It is under development.
-</Banner>
-
 This plugin adds features that give admin users the ability to download or create export data as an upload collection and import it back into a project.
 
+<YouTube
+  id="lyAOXO5TcZw"
+  title="A simple, powerful way to manage your data in Payload: Import/Export Plugin"
+/>
 ## Core Features
 
 - Export data as CSV or JSON format via the admin UI
@@ -128,6 +127,7 @@ Each item in the `collections` array can have the following properties:
 | `disableJobsQueue`   | boolean              | Run exports synchronously for this collection.                                                   |
 | `disableSave`        | boolean              | Disable save button for this collection.                                                         |
 | `format`             | string               | Force format (`csv` or `json`) for this collection.                                              |
+| `hooks`              | object               | Lifecycle hooks — `before` and `after`. See [Hooks](#hooks).                                     |
 | `limit`              | `number \| function` | Maximum documents to export. Set to `0` for unlimited (default). Overrides global `exportLimit`. |
 | `overrideCollection` | function             | Override the export collection config for this specific target.                                  |
 
@@ -138,6 +138,7 @@ Each item in the `collections` array can have the following properties:
 | `batchSize`            | number               | Documents per batch during import. Default: `100`.                                               |
 | `defaultVersionStatus` | string               | Default status for imported docs (`draft` or `published`).                                       |
 | `disableJobsQueue`     | boolean              | Run imports synchronously for this collection.                                                   |
+| `hooks`                | object               | Lifecycle hooks — `before` and `after`. See [Hooks](#hooks).                                     |
 | `limit`                | `number \| function` | Maximum documents to import. Set to `0` for unlimited (default). Overrides global `importLimit`. |
 | `overrideCollection`   | function             | Override the import collection config for this specific target.                                  |
 
@@ -366,15 +367,236 @@ importExportPlugin({
 })
 ```
 
+## Hooks
+
+Collection-level hooks let you intercept each batch of documents before it is written (to file on export, or to the database on import) and after it has been written. Hooks fire once per batch and work for both `csv` and `json` formats.
+
+### Hook arguments
+
+All hooks receive:
+
+| Argument       | Type                        | Description                                                          |
+| -------------- | --------------------------- | -------------------------------------------------------------------- |
+| `batchNumber`  | number                      | Current batch, starting at `1`.                                      |
+| `data`         | `Record<string, unknown>[]` | Transformed batch — flat rows for CSV export, nested docs otherwise. |
+| `format`       | string                      | Export/import format. Open-ended (`'csv' \| 'json' \| string`).      |
+| `originalData` | array                       | Source data before transformation. Read-only — do not mutate.        |
+| `req`          | `PayloadRequest`            | The full request object.                                             |
+| `totalBatches` | number                      | Total number of batches in this operation.                           |
+
+`ImportAfterHook` additionally receives `result: ImportResult` (per-batch counts and errors) instead of `data`/`originalData`.
+
+### before hooks — modify data
+
+`before` hooks return the (optionally modified) `data` array, which replaces the batch going into the write step. Returning an empty array skips the write for that batch without aborting remaining batches.
+
+```ts
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
+
+importExportPlugin({
+  collections: [
+    {
+      slug: 'users',
+      export: {
+        hooks: {
+          // Mask sensitive fields before the batch is written to file
+          before: ({ data, format }) => {
+            return data.map((row) => {
+              const { passwordHash: _ph, ssn: _ssn, ...safe } = row
+              return safe
+            })
+          },
+        },
+      },
+      import: {
+        hooks: {
+          // Normalise incoming data before it is written to the database
+          before: ({ data }) => {
+            return data.map((doc) => ({
+              ...doc,
+              email:
+                typeof doc.email === 'string'
+                  ? doc.email.toLowerCase()
+                  : doc.email,
+            }))
+          },
+        },
+      },
+    },
+  ],
+})
+```
+
+### after hooks — logging and observability
+
+`after` hooks fire after the write has completed. Their return value is ignored — use them for logging, metrics, or notifications.
+
+```ts
+importExportPlugin({
+  collections: [
+    {
+      slug: 'orders',
+      export: {
+        hooks: {
+          after: ({ batchNumber, totalBatches, data, format, req }) => {
+            req.payload.logger.info({
+              msg: `Export batch ${batchNumber}/${totalBatches} written`,
+              format,
+              docsInBatch: data.length,
+            })
+          },
+        },
+      },
+      import: {
+        hooks: {
+          after: ({ batchNumber, totalBatches, result, req }) => {
+            req.payload.logger.info({
+              msg: `Import batch ${batchNumber}/${totalBatches} complete`,
+              imported: result.imported,
+              updated: result.updated,
+              errors: result.errors.length,
+            })
+          },
+        },
+      },
+    },
+  ],
+})
+```
+
+### Using originalData for context
+
+`originalData` gives you the raw source before any transformation. For exports it is the original DB documents; for imports it is the raw parsed file rows. This is useful when you need context from the full document while building modified flat rows.
+
+```ts
+export: {
+  hooks: {
+    before: ({ data, originalData }) => {
+      return data.map((row, i) => ({
+        ...row,
+        // Add a computed column not present in the DB document
+        displayName: `${originalData[i]?.firstName} ${originalData[i]?.lastName}`,
+      }))
+    },
+  },
+},
+```
+
+### Column name mapping for foreign systems
+
+When importing from or exporting to a foreign system, column names rarely match your Payload field names. Use the batch `before` hooks to rename keys on the way in or out.
+
+#### Exporting with renamed CSV columns
+
+Use `export.hooks.before` to rewrite every row's keys to the foreign system's column names. The returned shape is what gets written to the file.
+
+```ts
+import { importExportPlugin } from '@payloadcms/plugin-import-export'
+
+const exportRenameMap: Record<string, string> = {
+  title: 'Post Title',
+  excerpt: 'Summary',
+  count: 'View Count',
+}
+
+importExportPlugin({
+  collections: [
+    {
+      slug: 'posts',
+      export: {
+        hooks: {
+          before: ({ data }) =>
+            data.map((row) => {
+              const renamed: Record<string, unknown> = {}
+              for (const [key, value] of Object.entries(row)) {
+                renamed[exportRenameMap[key] ?? key] = value
+              }
+              return renamed
+            }),
+        },
+      },
+    },
+  ],
+})
+```
+
+JSON exports work the same way — the hook receives the fully-transformed batch, and the returned keys become the top-level JSON keys.
+
+#### Importing from foreign CSV columns
+
+Use `import.hooks.before` to rewrite incoming keys back to Payload field names. The hook receives already-unflattened documents, so foreign top-level keys like `Post Title` are still present and can be remapped to `title` before the DB write. Keys you don't include in the returned object are dropped.
+
+```ts
+const importRenameMap: Record<string, string> = {
+  'Post Title': 'title',
+  Summary: 'excerpt',
+  'View Count': 'count',
+}
+
+importExportPlugin({
+  collections: [
+    {
+      slug: 'posts',
+      import: {
+        hooks: {
+          before: ({ data }) =>
+            data.map((doc) => {
+              const renamed: Record<string, unknown> = {}
+              for (const [key, value] of Object.entries(doc)) {
+                const payloadKey = importRenameMap[key]
+                if (payloadKey) {
+                  renamed[payloadKey] = value
+                }
+                // Foreign keys not present in the rename map are dropped.
+              }
+              return renamed
+            }),
+        },
+      },
+    },
+  ],
+})
+```
+
+CSV cell values arrive as strings. Payload coerces basic scalar types automatically on write, but if a target field has stricter validation you can coerce inside the hook (`renamed.count = Number(value)`).
+
+#### Field-level export rename for shared fields
+
+When a field definition is shared across collections and the rename should travel with the field, use the field's own `hooks.beforeExport`. Mutate `siblingData` to add the renamed key and return `undefined` so the original field key is dropped from the output:
+
+```ts
+import type { FieldBeforeExportHook } from '@payloadcms/plugin-import-export'
+
+const sharedNameField = {
+  name: 'sharedName',
+  type: 'text' as const,
+  custom: {
+    'plugin-import-export': {
+      hooks: {
+        beforeExport: (({ siblingData, value }) => {
+          siblingData['Display Name'] = value
+          return undefined
+        }) satisfies FieldBeforeExportHook,
+      },
+    },
+  },
+}
+```
+
+This pattern is export-only. Field-level `hooks.beforeImport` does **not** fire for foreign columns — it's keyed by the incoming column name, so it can't pick up a column whose name doesn't already match a Payload field. For the reverse direction, use the collection-level `import.hooks.before` recipe above.
+
 ## Field Options
 
-In addition to the above plugin configuration options, you can granularly set the following field level options using the `custom['plugin-import-export']` properties in any of your collections.
+In addition to collection-level hooks, you can configure field-level export and import behavior directly on any field's `custom['plugin-import-export']` config. This is especially useful when:
 
-| Property   | Type     | Description                                                                                                                   |
-| ---------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `disabled` | boolean  | When `true` the field is completely excluded from the import-export plugin.                                                   |
-| `toCSV`    | function | Custom function used to modify the outgoing CSV data by manipulating the data, siblingData or by returning the desired value. |
-| `fromCSV`  | function | Custom function used to transform incoming CSV data during import.                                                            |
+- You share a field definition across multiple collections and want the behavior to travel with the field
+- You need to transform a deeply nested field without navigating the full document structure in a collection-level hook
+
+| Property             | Type     | Description                                                                 |
+| -------------------- | -------- | --------------------------------------------------------------------------- |
+| `disabled`           | boolean  | When `true` the field is completely excluded from the import-export plugin. |
+| `hooks.beforeExport` | function | Runs before a field value is exported. Works for CSV and JSON.              |
+| `hooks.beforeImport` | function | Runs before a field value is imported. Works for CSV and JSON.              |
 
 ### Disabling Fields
 
@@ -398,96 +620,107 @@ When a field is disabled:
 - It will be ignored during import operations
 - Nested fields inside disabled parent fields are also excluded
 
-### Customizing Export Data with toCSV
+### hooks.beforeExport
 
-To manipulate the data that a field exports, you can add `toCSV` custom functions. This allows you to modify the outgoing CSV data by manipulating the row object or by returning the desired value.
+Use `hooks.beforeExport` to transform a field's value before it is exported. Works for both `csv` and `json` formats.
 
-The `toCSV` function receives an object with the following properties:
+The `beforeExport` function receives:
 
-| Property     | Type    | Description                                                       |
-| ------------ | ------- | ----------------------------------------------------------------- |
-| `columnName` | string  | The CSV column name given to the field.                           |
-| `doc`        | object  | The top level document.                                           |
-| `row`        | object  | The object data that can be manipulated to assign data to the CSV |
-| `siblingDoc` | object  | The document data at the level where it belongs.                  |
-| `value`      | unknown | The data for the field.                                           |
+| Property      | Type    | Description                                                                                                     |
+| ------------- | ------- | --------------------------------------------------------------------------------------------------------------- |
+| `columnName`  | string  | Column/field path, underscore-separated for nested fields (includes array indices).                             |
+| `data`        | object  | The top-level document being exported.                                                                          |
+| `format`      | string  | `'csv'` or `'json'`.                                                                                            |
+| `siblingData` | object  | Writable output at the current level. CSV: the flat row accumulator. JSON: the sibling output object.           |
+| `siblingDoc`  | object  | Read-only source at the current level, before any transformation. Use this to read another sibling's raw value. |
+| `value`       | unknown | The field value from the source document.                                                                       |
 
-Example - splitting a relationship into multiple columns:
+Return a value to replace the field, `undefined` to use default behavior, or mutate `siblingData` to add extra columns at the same level.
+
+Example — splitting a relationship into multiple columns:
 
 ```ts
-const pages: CollectionConfig = {
-  slug: 'pages',
-  fields: [
-    {
-      name: 'author',
-      type: 'relationship',
-      relationTo: 'users',
-      custom: {
-        'plugin-import-export': {
-          toCSV: ({ value, columnName, row }) => {
-            // Add both `author_id` and the `author_email` to the CSV export
-            if (
-              value &&
-              typeof value === 'object' &&
-              'id' in value &&
-              'email' in value
-            ) {
-              row[`${columnName}_id`] = (value as { id: number | string }).id
-              row[`${columnName}_email`] = (value as { email: string }).email
-            }
-          },
-        },
+import type { FieldBeforeExportHook } from '@payloadcms/plugin-import-export'
+
+const authorFieldWithHooks = {
+  name: 'author',
+  type: 'relationship',
+  relationTo: 'users',
+  custom: {
+    'plugin-import-export': {
+      hooks: {
+        beforeExport: (({ value, columnName, siblingData, format }) => {
+          if (
+            format === 'csv' &&
+            value &&
+            typeof value === 'object' &&
+            'id' in value &&
+            'email' in value
+          ) {
+            siblingData[`${columnName}_id`] = (
+              value as { id: number | string }
+            ).id
+            siblingData[`${columnName}_email`] = (
+              value as { email: string }
+            ).email
+            return undefined
+          }
+          return value
+        }) satisfies FieldBeforeExportHook,
       },
     },
-  ],
+  },
 }
 ```
 
-### Customizing Import Data with fromCSV
+Because the hook is defined on the field itself, you can share `authorFieldWithHooks` across multiple collections and each will get the same export behavior automatically.
 
-To transform data during import, add `fromCSV` custom functions. This allows you to transform incoming CSV data before it's saved to the database.
+### hooks.beforeImport
 
-The `fromCSV` function receives an object with the following properties:
+Use `hooks.beforeImport` to transform a field's value before it is imported. Works for both `csv` and `json` formats.
 
-| Property      | Type    | Description                                 |
-| ------------- | ------- | ------------------------------------------- |
-| `columnName`  | string  | The CSV column name for the field.          |
-| `data`        | object  | The full document data being built.         |
-| `siblingData` | object  | The data at the sibling level of the field. |
-| `value`       | unknown | The raw CSV value for the field.            |
+The `beforeImport` function receives:
 
-Return values:
+| Property      | Type    | Description                                                                              |
+| ------------- | ------- | ---------------------------------------------------------------------------------------- |
+| `columnName`  | string  | Column/field path.                                                                       |
+| `data`        | object  | The full flat row (CSV) or top-level parsed document (JSON) being imported.              |
+| `format`      | string  | `'csv'` or `'json'`.                                                                     |
+| `siblingData` | object  | Data at the current level. CSV: same reference as `data`. JSON: the parent-level object. |
+| `siblingDoc`  | object  | Read-only source at the current level, before any transformation. CSV: same as `data`.   |
+| `value`       | unknown | The raw value from the import file.                                                      |
 
-- Return a value to use that value for the field
-- Return `undefined` to skip setting the field (keeps existing value)
-- Return `null` to explicitly set the field to null
-
-Example - reconstructing a relationship from split columns:
+Return the transformed value, `undefined` to skip, or `null` to explicitly set `null`.
 
 ```ts
-const pages: CollectionConfig = {
-  slug: 'pages',
-  fields: [
-    {
-      name: 'author',
-      type: 'relationship',
-      relationTo: 'users',
-      custom: {
-        'plugin-import-export': {
-          fromCSV: ({ data, columnName }) => {
-            // Reconstruct the relationship from the split columns created by toCSV
+import type { FieldBeforeImportHook } from '@payloadcms/plugin-import-export'
+
+{
+  name: 'author',
+  type: 'relationship',
+  relationTo: 'users',
+  custom: {
+    'plugin-import-export': {
+      hooks: {
+        beforeImport: (({ value, columnName, data, format }) => {
+          if (format === 'csv') {
             const id = data[`${columnName}_id`]
-            if (id) {
-              return id // Return just the ID for the relationship
-            }
-            return undefined // Skip if no ID provided
-          },
-        },
+            return id ?? undefined
+          }
+          return value
+        }) satisfies FieldBeforeImportHook,
       },
     },
-  ],
+  },
 }
 ```
+
+### Execution Order
+
+Field-level hooks run **before** collection-level hooks:
+
+1. **Field-level `hooks.beforeExport`/`hooks.beforeImport`**: run per-field, per-document, during transformation
+2. **Collection-level `export.hooks.before`/`import.hooks.before`**: run per-batch, on the already-field-transformed data
 
 ### Virtual Fields
 
@@ -630,15 +863,15 @@ For relationship fields, the column format varies based on the relationship type
 
 During CSV import, certain values are automatically converted:
 
-| CSV Value        | Converted To      | Notes                                    |
-| ---------------- | ----------------- | ---------------------------------------- |
-| `true`, `TRUE`   | `true` (boolean)  | Case-insensitive                         |
-| `false`, `FALSE` | `false` (boolean) | Case-insensitive                         |
-| `null`, `NULL`   | `null`            | Use `fromCSV` hook to preserve as string |
-| Empty string     | `''` or omitted   | Depends on field type                    |
-| Numeric strings  | `number`          | Auto-detected for integers and floats    |
+| CSV Value        | Converted To      | Notes                                          |
+| ---------------- | ----------------- | ---------------------------------------------- |
+| `true`, `TRUE`   | `true` (boolean)  | Case-insensitive                               |
+| `false`, `FALSE` | `false` (boolean) | Case-insensitive                               |
+| `null`, `NULL`   | `null`            | Use `hooks.beforeImport` to preserve as string |
+| Empty string     | `''` or omitted   | Depends on field type                          |
+| Numeric strings  | `number`          | Auto-detected for integers and floats          |
 
-To preserve literal strings like "null" or "true", use a `fromCSV` function:
+To preserve literal strings like "null" or "true", use `hooks.beforeImport`:
 
 ```ts
 {
@@ -646,9 +879,11 @@ To preserve literal strings like "null" or "true", use a `fromCSV` function:
   type: 'text',
   custom: {
     'plugin-import-export': {
-      fromCSV: ({ value }) => {
-        // Return raw value without automatic conversion
-        return value
+      hooks: {
+        beforeImport: ({ value }) => {
+          // Return raw value without automatic conversion
+          return value
+        },
       },
     },
   },

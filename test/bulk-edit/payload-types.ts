@@ -149,19 +149,22 @@ export interface Post {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | {
-        textFieldForBlock?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'textBlock';
-      }[]
-    | null;
+  blocks?: TextBlock[] | null;
   noRead?: string | null;
   noUpdate?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlock".
+ */
+export interface TextBlock {
+  textFieldForBlock?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

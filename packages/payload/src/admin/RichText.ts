@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { GenericLanguages, I18n } from '@payloadcms/translations'
+import type { I18n } from '@payloadcms/translations'
 import type { JSONSchema4 } from 'json-schema'
 
 import type { SanitizedCollectionConfig, TypeWithID } from '../collections/config/types.js'
@@ -14,6 +14,7 @@ import type {
 import type { SanitizedGlobalConfig } from '../globals/config/types.js'
 import type { RequestContext, TypedFallbackLocale } from '../index.js'
 import type { JsonObject, PayloadRequest, PopulateType } from '../types/index.js'
+import type { FieldsToJSONSchemaArgs } from '../utilities/configToJSONSchema.js'
 import type { RichTextFieldClientProps, RichTextFieldServerProps } from './fields/RichText.js'
 import type { FieldDiffClientProps, FieldDiffServerProps, FieldSchemaMap } from './types.js'
 
@@ -245,26 +246,24 @@ type RichTextAdapterBase<
   }) => void
   hooks?: RichTextHooks
   /**
-   * @deprecated - manually merge i18n translations into the config.i18n.translations object within the adapter provider instead.
-   * This property will be removed in v4.
-   */
-  i18n?: Partial<GenericLanguages>
-  /**
    * Return the JSON schema for the field value. The JSON schema is read by
    * `json-schema-to-typescript` which is used to generate types for this richtext field
    * payload-types.ts)
    */
-  outputSchema?: (args: {
-    collectionIDFieldTypes: { [key: string]: 'number' | 'string' }
-    config?: SanitizedConfig
-    field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
-    i18n?: I18n
-    /**
-     * Allows you to define new top-level interfaces that can be re-used in the output schema.
-     */
-    interfaceNameDefinitions: Map<string, JSONSchema4>
-    isRequired: boolean
-  }) => JSONSchema4
+  jsonSchema?: (
+    args: {
+      field: RichTextField<Value, AdapterProps, ExtraFieldProperties>
+      isRequired: boolean
+    } & Pick<
+      FieldsToJSONSchemaArgs,
+      | 'collectionIDFieldTypes'
+      | 'config'
+      | 'i18n'
+      | 'interfaceNameDefinitions'
+      | 'typeStringDefinitions'
+      | 'variant'
+    >,
+  ) => JSONSchema4
   /**
    * Provide validation function for the richText field. This function is run the same way
    * as other field validation functions.

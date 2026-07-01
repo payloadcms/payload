@@ -3,7 +3,7 @@ import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types
 import type { PayloadHandler } from 'payload'
 
 import { BlobSASPermissions, generateBlobSASQueryParameters } from '@azure/storage-blob'
-import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
 
 import type { AzureStorageOptions } from './index.js'
@@ -49,10 +49,12 @@ export const getGenerateSignedURLHandler = ({
       throw new Forbidden()
     }
 
-    const { fileKey, sanitizedDocPrefix } = getFileKey({
+    const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
       collectionPrefix,
-      docPrefix: docPrefix || '',
+      collectionSlug,
+      docPrefix,
       filename,
+      req,
       useCompositePrefixes,
     })
 
@@ -72,6 +74,7 @@ export const getGenerateSignedURLHandler = ({
 
     return Response.json({
       docPrefix: sanitizedDocPrefix,
+      filename: sanitizedFilename,
       url: `${blobClient.url}?${sasToken.toString()}`,
     })
   }

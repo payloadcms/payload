@@ -59,7 +59,13 @@ export type {
   EditMenuItemsServerProps,
   EditMenuItemsServerPropsOnly,
 } from './elements/EditMenuItems.js'
-export type { NavGroupPreferences, NavPreferences } from './elements/Nav.js'
+export type {
+  NavGroupPreferences,
+  NavPreferences,
+  SidebarTabClientProps,
+  SidebarTabServerProps,
+  SidebarTabServerPropsOnly,
+} from './elements/Nav.js'
 export type {
   PreviewButtonClientProps,
   PreviewButtonServerProps,
@@ -567,6 +573,7 @@ export type FieldRow = {
 
 export type DocumentSlots = {
   BeforeDocumentControls?: React.ReactNode
+  BeforeDocumentMeta?: React.ReactNode
   Description?: React.ReactNode
   EditMenuItems?: React.ReactNode
   LivePreview?: React.ReactNode
@@ -578,13 +585,12 @@ export type DocumentSlots = {
   UnpublishButton?: React.ReactNode
   Upload?: React.ReactNode
   UploadControls?: React.ReactNode
+  UploadFilePreview?: React.ReactNode
 }
 
 export type {
-  BuildCollectionFolderViewResult,
   BuildTableStateArgs,
   DefaultServerFunctionArgs,
-  GetFolderResultsComponentAndDataArgs,
   InitReqResult,
   ListQuery,
   ServerFunction,
@@ -643,25 +649,7 @@ export type {
   RenderDocumentVersionsProperties,
 } from './views/document.js'
 
-export type {
-  AfterFolderListClientProps,
-  AfterFolderListServerProps,
-  AfterFolderListServerPropsOnly,
-  AfterFolderListTableClientProps,
-  AfterFolderListTableServerProps,
-  AfterFolderListTableServerPropsOnly,
-  BeforeFolderListClientProps,
-  BeforeFolderListServerProps,
-  BeforeFolderListServerPropsOnly,
-  BeforeFolderListTableClientProps,
-  BeforeFolderListTableServerProps,
-  BeforeFolderListTableServerPropsOnly,
-  FolderListViewClientProps,
-  FolderListViewServerProps,
-  FolderListViewServerPropsOnly,
-  FolderListViewSlots,
-  FolderListViewSlotSharedClientProps,
-} from './views/folderList.js'
+export type { RelatedDocumentsGrouped } from './views/hierarchyList.js'
 
 export type {
   AdminViewClientProps,
@@ -702,11 +690,15 @@ export type {
   BeforeListTableClientProps,
   BeforeListTableServerProps,
   BeforeListTableServerPropsOnly,
+  HierarchyViewData,
   ListViewClientProps,
   ListViewServerProps,
   ListViewServerPropsOnly,
   ListViewSlots,
   ListViewSlotSharedClientProps,
+  NoResultsClientProps,
+  NoResultsServerProps,
+  NoResultsServerPropsOnly,
 } from './views/list.js'
 
 type SchemaPath = {} & string

@@ -27,7 +27,7 @@ import {
 } from 'lexical'
 import { useEffect } from 'react'
 
-import './index.scss'
+import './index.css'
 
 // TODO: This should ideally be fixed in Lexical. See
 // https://github.com/facebook/lexical/pull/7072

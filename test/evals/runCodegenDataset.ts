@@ -4,8 +4,16 @@ import { fileURLToPath } from 'node:url'
 
 import type { CodegenEvalCase, EvalResult, RunCodegenDatasetOptions } from './types.js'
 
-import { codegenKey, getCachedResult, isCacheBypassed, setCachedResult } from './cache.js'
+import { evaluateAssertions } from './assertions/index.js'
+import {
+  codegenKey,
+  getCachedResult,
+  isCacheBypassed,
+  pruneStaleEntries,
+  setCachedResult,
+} from './cache.js'
 import { DEFAULT_RUNNER_MODEL, DEFAULT_SCORER_MODEL } from './models.js'
+import { getAgentVersion } from './runner/claudeCode.js'
 import { runCodegenEval } from './runner/index.js'
 import { scoreConfigChange } from './scorer/index.js'
 import { accuracySummary, writeFailedCodegenAssertion } from './utils/index.js'
@@ -28,74 +36,93 @@ export async function runCodegenCase(
   options: RunCodegenDatasetOptions = {},
 ): Promise<EvalResult> {
   const {
+    agentModel,
+    kind = 'llm',
     runnerModel = DEFAULT_RUNNER_MODEL,
     scorerModel = DEFAULT_SCORER_MODEL,
-    systemPromptKey = 'qaWithSkill',
+    skillInstall,
+    systemPromptKey = 'codegenWithSkill',
   } = options
 
-  const m = runnerModel as { modelId?: string; provider?: string }
-  const runnerModelId = `${m.provider ?? 'unknown'}/${m.modelId ?? 'unknown'}`
+  const llmModelId = (() => {
+    const m = runnerModel as { modelId?: string; provider?: string }
+    return `${m.provider ?? 'unknown'}/${m.modelId ?? 'unknown'}`
+  })()
+
+  const agentVersion = kind === 'claude-code' ? await getAgentVersion() : undefined
+  const resolvedModelId =
+    kind === 'claude-code'
+      ? `claude-code/${agentModel ?? 'claude-opus-4-6'}/${agentVersion ?? 'unknown'}`
+      : llmModelId
 
   const starterConfig = readFileSync(
     path.join(fixturesDir, testCase.fixturePath, 'payload.config.ts'),
     'utf-8',
   )
 
+  const isSameLogicalCase = (r: EvalResult): boolean =>
+    r.question === testCase.input &&
+    r.fixturePath === testCase.fixturePath &&
+    (r.runnerKind ?? 'llm') === kind &&
+    (kind === 'llm'
+      ? r.modelId === resolvedModelId && r.systemPromptKey === systemPromptKey
+      : r.modelId === resolvedModelId && r.skillInstall === skillInstall)
+
   const key = codegenKey({
     expected: testCase.expected,
     fixtureContent: starterConfig,
     input: testCase.input,
-    modelId: runnerModelId,
-    systemPromptKey,
+    modelId: resolvedModelId,
+    runnerKind: kind,
+    skillInstall: kind === 'claude-code' ? skillInstall : undefined,
+    systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
   })
 
   const bypassCache = isCacheBypassed()
   const cached = !bypassCache && getCachedResult(key)
   if (cached) {
-    const needsBackfill = !cached.modelId || !cached.systemPromptKey
-    const taggedResult = needsBackfill
-      ? {
-          ...cached,
-          modelId: cached.modelId ?? runnerModelId,
-          systemPromptKey: cached.systemPromptKey ?? systemPromptKey,
-        }
-      : cached
-    if (needsBackfill) {
-      setCachedResult(key, taggedResult)
-    }
-    const cachedScore =
-      taggedResult.score != null ? `  score: ${taggedResult.score.toFixed(2)}` : ''
-    console.log(
-      `[${taggedResult.category}] ${taggedResult.pass ? '✓ PASS' : '✗ FAIL'} (cached)${cachedScore}`,
-    )
-    console.log(`  Task: ${taggedResult.question}`)
-    return taggedResult
+    const cachedScore = cached.score != null ? `  score: ${cached.score.toFixed(2)}` : ''
+    console.log(`[${cached.category}] ${cached.pass ? '✓ PASS' : '✗ FAIL'} (cached)${cachedScore}`)
+    console.log(`  Task: ${cached.question}`)
+    return cached
   }
 
-  const {
-    confidence,
-    modifiedConfig,
-    usage: runnerUsage,
-  } = await runCodegenEval(testCase.input, starterConfig, {
+  const runnerOutput = await runCodegenEval(testCase.input, starterConfig, {
+    agentModel,
+    kind,
     model: runnerModel,
+    skillInstall,
     systemPromptKey,
   })
+  const { confidence, modifiedConfig, usage: runnerUsage } = runnerOutput
+  const agentLog = runnerOutput.agentLog
+  const agentExitCode = runnerOutput.agentExitCode
+  const transcript = runnerOutput.transcript
 
   const { errors: tscErrors, valid } = await validateConfigTypes(
     modifiedConfig,
     testCase.fixturePath,
   )
 
+  const assertionErrors = valid ? evaluateAssertions(modifiedConfig, testCase.assertions ?? []) : []
+
   if (!valid) {
     const result: EvalResult = {
+      agentExitCode,
+      agentLog,
       answer: modifiedConfig,
       category: testCase.category,
       confidence,
-      modelId: runnerModelId,
+      fixturePath: testCase.fixturePath,
+      modelId: resolvedModelId,
       pass: false,
       question: testCase.input,
-      systemPromptKey,
       reasoning: `TypeScript compilation failed:\n${tscErrors.join('\n')}`,
+      runnerKind: kind,
+      skillInstall: kind === 'claude-code' ? skillInstall : undefined,
+      starterContent: starterConfig,
+      systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
+      transcript,
       tscErrors,
       usage: {
         runner: runnerUsage,
@@ -108,6 +135,7 @@ export async function runCodegenCase(
       },
     }
     setCachedResult(key, result)
+    pruneStaleEntries(key, isSameLogicalCase)
     writeFailedCodegenAssertion({
       category: testCase.category,
       confidence,
@@ -126,6 +154,53 @@ export async function runCodegenCase(
     return result
   }
 
+  if (assertionErrors.length > 0) {
+    const result: EvalResult = {
+      agentExitCode,
+      agentLog,
+      answer: modifiedConfig,
+      assertionErrors,
+      category: testCase.category,
+      confidence,
+      fixturePath: testCase.fixturePath,
+      modelId: resolvedModelId,
+      pass: false,
+      question: testCase.input,
+      reasoning: `Structural assertions failed:\n${assertionErrors.join('\n')}`,
+      runnerKind: kind,
+      skillInstall: kind === 'claude-code' ? skillInstall : undefined,
+      starterContent: starterConfig,
+      systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
+      transcript,
+      usage: {
+        runner: runnerUsage,
+        total: {
+          cachedInputTokens: runnerUsage.cachedInputTokens,
+          inputTokens: runnerUsage.inputTokens,
+          outputTokens: runnerUsage.outputTokens,
+          totalTokens: runnerUsage.totalTokens,
+        },
+      },
+    }
+    setCachedResult(key, result)
+    pruneStaleEntries(key, isSameLogicalCase)
+    writeFailedCodegenAssertion({
+      category: testCase.category,
+      confidence,
+      fixturePath: testCase.fixturePath,
+      label,
+      modifiedConfig,
+      question: testCase.input,
+      reasoning: result.reasoning,
+      starterConfig,
+    })
+    console.log(`[${result.category}] ✗ FAIL [ASSERT]  ${testCase.fixturePath}`)
+    for (const err of assertionErrors) {
+      console.log(`  ASSERT: ${err}`)
+    }
+    return result
+  }
+
   const {
     changeDescription,
     completeness,
@@ -139,18 +214,25 @@ export async function runCodegenCase(
   })
 
   const result: EvalResult = {
+    agentExitCode,
+    agentLog,
     answer: modifiedConfig,
     category: testCase.category,
     changeDescription,
     completeness,
     confidence,
     correctness,
-    modelId: runnerModelId,
+    fixturePath: testCase.fixturePath,
+    modelId: resolvedModelId,
     pass,
     question: testCase.input,
-    systemPromptKey,
     reasoning,
+    runnerKind: kind,
     score,
+    skillInstall: kind === 'claude-code' ? skillInstall : undefined,
+    starterContent: starterConfig,
+    systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
+    transcript,
     usage: {
       runner: runnerUsage,
       scorer: scorerUsage,
@@ -164,6 +246,7 @@ export async function runCodegenCase(
   }
 
   setCachedResult(key, result)
+  pruneStaleEntries(key, isSameLogicalCase)
 
   if (!pass) {
     writeFailedCodegenAssertion({

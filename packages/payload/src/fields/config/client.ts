@@ -1,8 +1,9 @@
 // @ts-strict-ignore
 /* eslint-disable perfectionist/sort-switch-case */
 // Keep perfectionist/sort-switch-case disabled - it incorrectly messes up the ordering of the switch cases, causing it to break
-import type { I18nClient, TFunction } from '@payloadcms/translations'
+import type { ClientTranslationKeys, I18nClient, TFunction } from '@payloadcms/translations'
 
+import type { LabelFunction } from '../../config/types.js'
 import type {
   AdminClient,
   ArrayFieldClient,
@@ -39,8 +40,8 @@ export type ServerOnlyFieldProperties =
   | 'enumName' // can be a function
   | 'filterOptions' // This is a `relationship`, `upload`, and `select` only property
   | 'graphQL'
+  | 'jsonSchema'
   | 'label'
-  | 'typescriptSchema'
   | 'validate'
   | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks'>
 
@@ -58,7 +59,7 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   'filterOptions', // This is a `relationship`, `upload`, and `select` only property
   'editor', // This is a `richText` only property
   'custom',
-  'typescriptSchema',
+  'jsonSchema',
   'dbName', // can be a function
   'enumName', // can be a function
   'graphQL', // client does not need graphQL
@@ -89,7 +90,7 @@ export const createClientBlocks = ({
   defaultIDType: Payload['config']['db']['defaultIDType']
   i18n: I18nClient
   importMap: ImportMap
-}): (ClientBlock | string)[] | ClientBlock[] => {
+}): (ClientBlock | string)[] => {
   const clientBlocks: (ClientBlock | string)[] = []
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i]!
@@ -311,22 +312,13 @@ export const createClientField = ({
         }
       }
 
-      if (incomingField.blockReferences?.length) {
-        field.blockReferences = createClientBlocks({
-          blocks: incomingField.blockReferences,
-          defaultIDType,
-          i18n,
-          importMap,
-        })
-      }
-
       if (incomingField.blocks?.length) {
         field.blocks = createClientBlocks({
           blocks: incomingField.blocks,
           defaultIDType,
           i18n,
           importMap,
-        }) as ClientBlock[]
+        })
       }
 
       break
@@ -424,12 +416,20 @@ export const createClientField = ({
                 i18n,
                 importMap,
               })
-            } else if (
-              (key === 'label' || key === 'description') &&
-              typeof tabProp === 'function'
-            ) {
-              // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-              clientTab[key] = tabProp({ t: i18n.t })
+            } else if (key === 'label' && typeof tabProp === 'function') {
+              const label = tabProp as LabelFunction
+
+              clientTab.label = label({
+                i18n,
+                t: i18n.t,
+              })
+            } else if (key === 'description' && typeof tabProp === 'function') {
+              const description = tabProp as LabelFunction
+
+              clientTab.description = description({
+                i18n,
+                t: i18n.t,
+              })
             } else if (key === 'admin') {
               clientTab.admin = {} as AdminClient
 
@@ -444,7 +444,7 @@ export const createClientField = ({
                       if (typeof tab.admin?.description === 'function') {
                         clientTab.admin.description = tab.admin.description({
                           i18n,
-                          t: i18n.t as TFunction,
+                          t: i18n.t,
                         })
                       } else {
                         clientTab.admin.description = tab.admin.description
@@ -512,8 +512,7 @@ export const createClientFields = ({
       type: defaultIDType,
       admin: {
         description: 'The unique identifier for this document',
-        disableBulkEdit: true,
-        disabled: true,
+        disabled: { bulkEdit: true },
         hidden: true,
       },
       hidden: true,

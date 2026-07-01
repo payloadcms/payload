@@ -10,9 +10,6 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
-// @todo remove in 4.0 - will behave like this by default in 4.0
-process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
-
 shelljs.env.DISABLE_LOGGING = 'true'
 
 const prod = process.argv.includes('--prod')
@@ -33,6 +30,7 @@ const {
   bail,
   'fully-parallel': fullyParallel,
   grep,
+  headed,
   part,
   shard,
   workers,
@@ -76,7 +74,17 @@ if (!suiteName) {
     if (!baseTestFolder) {
       throw new Error(`No base test folder found for ${file}`)
     }
-    await executePlaywright(file, baseTestFolder, bail)
+    await executePlaywright(
+      file,
+      baseTestFolder,
+      bail,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      headed,
+    )
   }
 } else {
   let inputSuitePath: string | undefined = suiteName
@@ -118,6 +126,7 @@ if (!suiteName) {
     fullyParallel,
     workers,
     grep,
+    headed,
   )
 }
 
@@ -139,6 +148,7 @@ async function executePlaywright(
   fullyParallelArg?: boolean,
   workersArg?: number,
   grepArg?: string,
+  headedArg?: boolean,
 ) {
   const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
   console.log(`Executing ${paths.join(', ')}...`)
@@ -188,8 +198,9 @@ async function executePlaywright(
   const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
   const workersFlag = workersArg !== undefined ? ` --workers=${workersArg}` : ''
   const grepFlag = grepArg ? ` --grep="${grepArg}"` : ''
+  const headedFlag = headedArg ? ' --headed' : ''
   const cmd = slash(
-    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${grepFlag}`,
+    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${grepFlag}${headedFlag}`,
   )
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {

@@ -28,7 +28,7 @@ export function DashboardInfo() {
       >
         {/* What are evals */}
         <Card
-          body="Evals are automated tests that ask an LLM questions about Payload (QA) or ask it to modify a real config file (Codegen)."
+          body="Evals are automated tests that ask an LLM to modify a real Payload config file and score how well the change matches the requested outcome."
           title="What are evals?"
         />
 

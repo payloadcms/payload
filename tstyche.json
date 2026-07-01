@@ -1,0 +1,5 @@
+{
+  "$schema": "./node_modules/tstyche/schemas/config.json",
+  "checkDeclarationFiles": false,
+  "testFileMatch": ["test/**/types.spec.ts", "test/**/r2-types.spec.ts"]
+}

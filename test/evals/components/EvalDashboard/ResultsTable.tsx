@@ -2,25 +2,21 @@
 
 import React, { useMemo, useState } from 'react'
 
-import type { Audience } from './audience.js'
-import type { EvalEntry, RunSnapshot } from './index.js'
+import type { TranscriptEvent } from '../../types.js'
+import type { Variant } from '../../variant.js'
+import type { RenderedCode } from './codeDiff.js'
+import type { RunGroup } from './configuration.js'
+import type { EvalEntry } from './index.js'
 
-import { AUDIENCE_CONFIG } from './audience.js'
+import { getVariant as getVariantFromResult } from '../../variant.js'
 import { CompareTable } from './CompareTable.js'
+import { getConfiguration, groupByRun, runKeyOf } from './configuration.js'
+import { RunsOverview } from './RunsOverview.js'
 
-type Variant = 'baseline' | 'low-power' | 'skill'
+export type { Variant }
 
-function getVariant(entry: EvalEntry): null | Variant {
-  if (entry.result.systemPromptKey === 'qaNoSkill') {
-    return 'baseline'
-  }
-  const { modelId } = entry.result
-  if (!modelId) {
-    return null
-  }
-  const isHighPower =
-    modelId.includes('gpt-5') || modelId.includes('o3') || modelId.includes('claude-3-5')
-  return isHighPower ? 'skill' : 'low-power'
+export function getVariant(entry: EvalEntry): null | Variant {
+  return getVariantFromResult(entry.result)
 }
 
 function VariantBadge({ variant }: { variant: null | Variant }) {
@@ -28,12 +24,21 @@ function VariantBadge({ variant }: { variant: null | Variant }) {
     return <span style={{ color: 'var(--theme-elevation-300)', fontSize: '0.72rem' }}>—</span>
   }
   const config: Record<Variant, { bg: string; color: string; label: string }> = {
+    'agent-baseline': {
+      bg: 'var(--theme-elevation-100)',
+      color: 'var(--theme-warning-700)',
+      label: 'Agent Baseline',
+    },
+    'agent-skill': {
+      bg: 'var(--theme-success-100)',
+      color: 'var(--theme-warning-700)',
+      label: 'Agent Skill',
+    },
     baseline: {
       bg: 'var(--theme-elevation-100)',
       color: 'var(--theme-elevation-600)',
       label: 'Baseline',
     },
-    'low-power': { bg: 'rgba(232,168,56,0.15)', color: '#e8a838', label: 'Low Power' },
     skill: { bg: 'var(--theme-success-100)', color: 'var(--theme-success-700)', label: 'Skill' },
   }
   const { bg, color, label } = config[variant]
@@ -54,17 +59,36 @@ function VariantBadge({ variant }: { variant: null | Variant }) {
   )
 }
 
-type Props = {
-  adminRoute: string
-  entries: EvalEntry[]
-  runs?: RunSnapshot[]
+function ModelBadge({ entry }: { entry: EvalEntry }) {
+  const { model } = getConfiguration(entry.result)
+  return (
+    <span
+      style={{
+        color: 'var(--theme-elevation-600)',
+        display: 'inline-block',
+        fontFamily: 'var(--font-mono, monospace)',
+        fontSize: '0.72rem',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      }}
+      title={entry.result.modelId ?? undefined}
+    >
+      {model}
+    </span>
+  )
 }
 
-type ViewMode = 'compare' | 'list'
+type Props = {
+  adminRoute: string
+  codegenHtml?: Record<string, RenderedCode>
+  entries: EvalEntry[]
+}
+
+type ViewMode = 'compare' | 'list' | 'overview'
 
 type FilterStatus = 'all' | 'fail' | 'pass'
-type FilterType = 'all' | 'codegen' | 'qa'
-type FilterAudience = 'all' | Audience
+type FilterType = 'all' | 'codegen'
 
 function ScoreBadge({
   pass,
@@ -126,11 +150,11 @@ function CategoryBadge({ category }: { category: string }) {
   )
 }
 
-function TypeBadge({ type }: { type: 'codegen' | 'qa' }) {
+function TypeBadge({ type }: { type: 'codegen' }) {
   return (
     <span
       style={{
-        background: type === 'codegen' ? 'var(--theme-elevation-150)' : 'transparent',
+        background: 'var(--theme-elevation-150)',
         border: '1px solid var(--theme-elevation-200)',
         borderRadius: '4px',
         color: 'var(--theme-elevation-700)',
@@ -139,33 +163,7 @@ function TypeBadge({ type }: { type: 'codegen' | 'qa' }) {
         whiteSpace: 'nowrap',
       }}
     >
-      {type === 'codegen' ? 'Codegen' : 'QA'}
-    </span>
-  )
-}
-
-function AudienceBadges({ audiences }: { audiences: Audience[] }) {
-  return (
-    <span style={{ display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
-      {audiences.map((a) => {
-        const { bg, color, label } = AUDIENCE_CONFIG[a]
-        return (
-          <span
-            key={a}
-            style={{
-              background: bg,
-              borderRadius: '4px',
-              color,
-              fontSize: '0.68rem',
-              fontWeight: 600,
-              padding: '2px 5px',
-              whiteSpace: 'nowrap',
-            }}
-          >
-            {label}
-          </span>
-        )
-      })}
+      {type === 'codegen' ? 'Codegen' : null}
     </span>
   )
 }
@@ -203,7 +201,167 @@ function TokenDisplay({
   )
 }
 
-function ExpandedRow({ entry }: { entry: EvalEntry }) {
+function TranscriptView({ events }: { events: TranscriptEvent[] }) {
+  const skillInvoked = events.some((event) => event.type === 'tool_use' && event.name === 'Skill')
+  return (
+    <div
+      style={{
+        background: 'var(--theme-elevation-50)',
+        border: '1px solid var(--theme-elevation-150)',
+        borderRadius: '4px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        margin: '6px 0 0',
+        maxHeight: '600px',
+        overflow: 'auto',
+        padding: '10px',
+      }}
+    >
+      <SkillInvocationBadge invoked={skillInvoked} />
+      {events.map((event, i) => (
+        <TranscriptEventView event={event} key={i} />
+      ))}
+    </div>
+  )
+}
+
+function SkillInvocationBadge({ invoked }: { invoked: boolean }) {
+  return (
+    <span
+      style={{
+        alignSelf: 'flex-start',
+        background: invoked ? 'var(--color-bg-success)' : 'var(--color-bg-danger)',
+        borderRadius: '4px',
+        color: invoked ? 'var(--color-text-onsuccess)' : 'var(--color-text-ondanger)',
+        fontSize: '0.7rem',
+        fontWeight: 600,
+        padding: '3px 8px',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {invoked ? '✓ Skill invoked' : '✗ Skill not invoked'}
+    </span>
+  )
+}
+
+function TranscriptEventView({ event }: { event: TranscriptEvent }) {
+  if (event.type === 'text') {
+    return (
+      <div
+        style={{
+          color: 'var(--theme-elevation-800)',
+          fontSize: '0.8rem',
+          lineHeight: 1.55,
+          whiteSpace: 'pre-wrap',
+          wordBreak: 'break-word',
+        }}
+      >
+        {event.text}
+      </div>
+    )
+  }
+  if (event.type === 'thinking') {
+    return (
+      <details open>
+        <summary
+          style={{
+            color: 'var(--theme-elevation-500)',
+            cursor: 'pointer',
+            fontSize: '0.72rem',
+            fontStyle: 'italic',
+            userSelect: 'none',
+          }}
+        >
+          Thinking
+        </summary>
+        <div
+          style={{
+            color: 'var(--theme-elevation-600)',
+            fontSize: '0.78rem',
+            fontStyle: 'italic',
+            lineHeight: 1.5,
+            marginTop: '4px',
+            paddingLeft: '12px',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          }}
+        >
+          {event.text}
+        </div>
+      </details>
+    )
+  }
+  if (event.type === 'tool_use') {
+    return (
+      <details open>
+        <summary
+          style={{
+            color: 'var(--theme-elevation-700)',
+            cursor: 'pointer',
+            fontFamily: 'var(--font-mono, monospace)',
+            fontSize: '0.78rem',
+            userSelect: 'none',
+          }}
+        >
+          → {event.name}
+        </summary>
+        <pre
+          style={{
+            background: 'var(--theme-elevation-0)',
+            border: '1px solid var(--theme-elevation-100)',
+            borderRadius: '3px',
+            color: 'var(--theme-elevation-700)',
+            fontFamily: 'var(--font-mono, monospace)',
+            fontSize: '0.72rem',
+            margin: '4px 0 0',
+            maxHeight: '300px',
+            overflow: 'auto',
+            padding: '6px 8px',
+            whiteSpace: 'pre-wrap',
+          }}
+        >
+          {JSON.stringify(event.input, null, 2)}
+        </pre>
+      </details>
+    )
+  }
+  // tool_result
+  return (
+    <details open>
+      <summary
+        style={{
+          color: event.isError ? 'var(--theme-error-600)' : 'var(--theme-elevation-600)',
+          cursor: 'pointer',
+          fontFamily: 'var(--font-mono, monospace)',
+          fontSize: '0.78rem',
+          userSelect: 'none',
+        }}
+      >
+        ← result{event.isError ? ' (error)' : ''}
+      </summary>
+      <pre
+        style={{
+          background: 'var(--theme-elevation-0)',
+          border: '1px solid var(--theme-elevation-100)',
+          borderRadius: '3px',
+          color: event.isError ? 'var(--theme-error-700)' : 'var(--theme-elevation-700)',
+          fontFamily: 'var(--font-mono, monospace)',
+          fontSize: '0.72rem',
+          margin: '4px 0 0',
+          maxHeight: '300px',
+          overflow: 'auto',
+          padding: '6px 8px',
+          whiteSpace: 'pre-wrap',
+        }}
+      >
+        {event.content}
+      </pre>
+    </details>
+  )
+}
+
+function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: RenderedCode }) {
   const { result } = entry
   const sectionStyle: React.CSSProperties = {
     display: 'flex',
@@ -240,25 +398,77 @@ function ExpandedRow({ entry }: { entry: EvalEntry }) {
     >
       {/* Question / Task */}
       <div style={sectionStyle}>
-        <span style={labelStyle}>{entry.type === 'codegen' ? 'Task' : 'Question'}</span>
+        <span style={labelStyle}>Task</span>
         <span style={valueStyle}>{result.question}</span>
       </div>
 
-      {/* QA: Answer */}
-      {entry.type === 'qa' && result.answer && (
-        <div style={sectionStyle}>
-          <span style={labelStyle}>Answer</span>
-          <span style={valueStyle}>{result.answer}</span>
-        </div>
-      )}
-
       {/* Codegen: Change Description */}
-      {entry.type === 'codegen' && result.changeDescription && (
+      {result.changeDescription && (
         <div style={sectionStyle}>
           <span style={labelStyle}>Change Description</span>
           <span style={valueStyle}>{result.changeDescription}</span>
         </div>
       )}
+
+      {/* Codegen: Generated Code */}
+      <div style={sectionStyle}>
+        <span
+          style={{
+            ...labelStyle,
+            alignItems: 'center',
+            display: 'flex',
+            gap: '8px',
+            justifyContent: 'space-between',
+          }}
+        >
+          <span>Generated Code</span>
+          <span
+            style={{
+              color: 'var(--theme-elevation-500)',
+              fontSize: '0.7rem',
+              fontWeight: 500,
+              letterSpacing: 0,
+              textTransform: 'none',
+            }}
+          >
+            payload.config.ts ·{' '}
+            {rendered?.mode === 'diff'
+              ? 'Diff'
+              : rendered?.mode === 'file'
+                ? 'Generated File'
+                : 'Raw'}
+            {rendered?.mode === 'diff' && (
+              <>
+                {' '}
+                · <span style={{ color: 'var(--theme-success-600)' }}>
+                  +{rendered.added ?? 0}
+                </span>{' '}
+                <span style={{ color: 'var(--theme-error-600)' }}>−{rendered.removed ?? 0}</span>
+              </>
+            )}
+          </span>
+        </span>
+        {rendered ? (
+          <div dangerouslySetInnerHTML={{ __html: rendered.html }} />
+        ) : (
+          <pre
+            style={{
+              background: 'var(--theme-elevation-50)',
+              border: '1px solid var(--theme-elevation-150)',
+              borderRadius: '4px',
+              fontFamily: 'monospace',
+              fontSize: '0.75rem',
+              margin: 0,
+              maxHeight: '600px',
+              overflow: 'auto',
+              padding: '8px 10px',
+              whiteSpace: 'pre',
+            }}
+          >
+            {result.answer}
+          </pre>
+        )}
+      </div>
 
       {/* TSC Errors */}
       {result.tscErrors && result.tscErrors.length > 0 && (
@@ -286,6 +496,44 @@ function ExpandedRow({ entry }: { entry: EvalEntry }) {
         <div style={sectionStyle}>
           <span style={labelStyle}>Reasoning</span>
           <span style={valueStyle}>{result.reasoning}</span>
+        </div>
+      )}
+
+      {/* Transcript (Claude Code runner) */}
+      {(result.transcript?.length || result.agentLog) && (
+        <div style={sectionStyle}>
+          <details open>
+            <summary
+              style={{
+                ...labelStyle,
+                cursor: 'pointer',
+                userSelect: 'none',
+              }}
+            >
+              Transcript
+            </summary>
+            {result.transcript && result.transcript.length > 0 ? (
+              <TranscriptView events={result.transcript} />
+            ) : result.agentLog ? (
+              <pre
+                style={{
+                  background: 'var(--theme-elevation-50)',
+                  border: '1px solid var(--theme-elevation-150)',
+                  borderRadius: '4px',
+                  color: 'var(--theme-elevation-700)',
+                  fontFamily: 'var(--font-mono, monospace)',
+                  fontSize: '0.75rem',
+                  margin: '6px 0 0',
+                  maxHeight: '600px',
+                  overflow: 'auto',
+                  padding: '8px 10px',
+                  whiteSpace: 'pre-wrap',
+                }}
+              >
+                {result.agentLog}
+              </pre>
+            ) : null}
+          </details>
         </div>
       )}
 
@@ -343,7 +591,7 @@ function ExpandedRow({ entry }: { entry: EvalEntry }) {
   )
 }
 
-type SortKey = 'audience' | 'category' | 'question' | 'result' | 'tokens' | 'type' | 'variant'
+type SortKey = 'category' | 'model' | 'question' | 'result' | 'tokens' | 'type' | 'variant'
 type SortDir = 'asc' | 'desc'
 
 function cycleSort(current: null | SortDir): null | SortDir {
@@ -356,32 +604,38 @@ function cycleSort(current: null | SortDir): null | SortDir {
   return null
 }
 
-export function ResultsTable({ entries, runs }: Props) {
-  const [viewMode, setViewMode] = useState<ViewMode>('list')
-  const [compareMode, setCompareMode] = useState<'run' | 'variant'>('variant')
+export function ResultsTable({ codegenHtml, entries }: Props) {
+  const [viewMode, setViewMode] = useState<ViewMode>('overview')
+  const [compareMode, setCompareMode] = useState<'run' | 'variant'>('run')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
-  const [audienceFilter, setAudienceFilter] = useState<FilterAudience>('all')
+  const [selectedRunKey, setSelectedRunKey] = useState<string>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
   const [hoveredHash, setHoveredHash] = useState<null | string>(null)
   const [sortKey, setSortKey] = useState<null | SortKey>(null)
   const [sortDir, setSortDir] = useState<null | SortDir>(null)
 
-  const comparablePairs = useMemo(
-    () =>
-      entries.filter(
-        (e) =>
-          e.type === 'qa' &&
-          (e.systemPromptKey === 'qaWithSkill' || e.systemPromptKey === 'qaNoSkill'),
-      ).length,
-    [entries],
-  )
-
   const categories = useMemo(
     () => ['all', ...Array.from(new Set(entries.map((e) => e.category))).sort()],
     [entries],
   )
+
+  const runGroups = useMemo<RunGroup[]>(() => groupByRun(entries), [entries])
+
+  const selectRun = (key: string) => {
+    setSelectedRunKey(key)
+    setViewMode('list')
+  }
+
+  const selectedRunLabel = useMemo(() => {
+    const run = runGroups.find((r) => r.key === selectedRunKey)
+    if (!run) {
+      return null
+    }
+    const when = run.timestamp ? run.timestamp.slice(0, 16).replace('T', ' ') : 'unknown time'
+    return `${run.config.label}${run.isLegacy ? '' : ` · ${when}`}`
+  }, [runGroups, selectedRunKey])
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -418,7 +672,7 @@ export function ResultsTable({ entries, runs }: Props) {
       if (typeFilter !== 'all' && e.type !== typeFilter) {
         return false
       }
-      if (audienceFilter !== 'all' && !e.audience.includes(audienceFilter)) {
+      if (selectedRunKey !== 'all' && runKeyOf(e.result) !== selectedRunKey) {
         return false
       }
       if (categoryFilter !== 'all' && e.category !== categoryFilter) {
@@ -441,15 +695,15 @@ export function ResultsTable({ entries, runs }: Props) {
       } else if (sortKey === 'category') {
         aVal = a.category.toLowerCase()
         bVal = b.category.toLowerCase()
-      } else if (sortKey === 'audience') {
-        aVal = [...a.audience].sort().join(',')
-        bVal = [...b.audience].sort().join(',')
       } else if (sortKey === 'type') {
         aVal = a.type
         bVal = b.type
       } else if (sortKey === 'variant') {
         aVal = getVariant(a) ?? ''
         bVal = getVariant(b) ?? ''
+      } else if (sortKey === 'model') {
+        aVal = (a.result.modelId ?? '').toLowerCase()
+        bVal = (b.result.modelId ?? '').toLowerCase()
       } else if (sortKey === 'result') {
         aVal = a.result.pass ? 'pass' : 'fail'
         bVal = b.result.pass ? 'pass' : 'fail'
@@ -460,7 +714,7 @@ export function ResultsTable({ entries, runs }: Props) {
       }
       return aVal < bVal ? -dir : aVal > bVal ? dir : 0
     })
-  }, [entries, statusFilter, typeFilter, audienceFilter, categoryFilter, sortKey, sortDir])
+  }, [entries, statusFilter, typeFilter, categoryFilter, selectedRunKey, sortKey, sortDir])
 
   // Summary stats from filtered set
   const stats = useMemo(() => {
@@ -523,11 +777,18 @@ export function ResultsTable({ entries, runs }: Props) {
       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
         <div style={{ alignItems: 'center', display: 'flex', gap: '6px' }}>
           <button
+            onClick={() => setViewMode('overview')}
+            style={viewBtnStyle(viewMode === 'overview')}
+            type="button"
+          >
+            Overview
+          </button>
+          <button
             onClick={() => setViewMode('list')}
             style={viewBtnStyle(viewMode === 'list')}
             type="button"
           >
-            All Results
+            Results
           </button>
           <button
             onClick={() => setViewMode('compare')}
@@ -539,56 +800,57 @@ export function ResultsTable({ entries, runs }: Props) {
             }}
             type="button"
           >
-            Compare Results
+            Compare
           </button>
-          {comparablePairs === 0 && viewMode === 'compare' && (
-            <span style={{ color: 'var(--theme-elevation-400)', fontSize: '0.75rem' }}>
-              · Re-run evals to populate comparison data
-            </span>
-          )}
         </div>
 
         {viewMode === 'compare' && (
           <div style={{ alignItems: 'center', display: 'flex', gap: '6px' }}>
             <button
-              onClick={() => setCompareMode('variant')}
-              style={viewBtnStyle(compareMode === 'variant')}
-              type="button"
-            >
-              Variant Comparison
-            </button>
-            <button
               onClick={() => setCompareMode('run')}
               style={viewBtnStyle(compareMode === 'run')}
               type="button"
             >
-              Run Comparison
-              {runs && runs.length > 0 && (
-                <span
-                  style={{
-                    color: 'var(--theme-elevation-400)',
-                    fontSize: '0.72rem',
-                    marginLeft: '5px',
-                  }}
-                >
-                  ({runs.length})
-                </span>
-              )}
+              By category
+            </button>
+            <button
+              onClick={() => setCompareMode('variant')}
+              style={viewBtnStyle(compareMode === 'variant')}
+              type="button"
+            >
+              By case
             </button>
           </div>
         )}
       </div>
 
+      {viewMode === 'overview' && <RunsOverview onSelect={selectRun} runs={runGroups} />}
       {viewMode === 'compare' && (
         <CompareTable
           compareMode={compareMode}
           entries={entries}
           onCompareModeChange={setCompareMode}
-          runs={runs}
+          runGroups={runGroups}
         />
       )}
       {viewMode === 'list' && (
         <>
+          {selectedRunKey === 'all' && runGroups.length > 1 && (
+            <div
+              style={{
+                background: 'rgba(232,168,56,0.12)',
+                border: '1px solid var(--color-warning-300, rgba(232,168,56,0.4))',
+                borderRadius: 'var(--style-radius-m)',
+                color: 'var(--color-warning-700, #8a5d0c)',
+                fontSize: '0.8rem',
+                padding: '8px 12px',
+              }}
+            >
+              ⚠ Showing <strong>all {runGroups.length} runs</strong> — these stats mix different
+              runs, models, and skill settings and aren&apos;t directly comparable. Pick a single
+              run above (or from the Overview tab) for meaningful numbers.
+            </div>
+          )}
           {/* Summary strip */}
           <div
             style={{
@@ -656,6 +918,13 @@ export function ResultsTable({ entries, runs }: Props) {
             ))}
           </div>
 
+          {selectedRunKey !== 'all' && selectedRunLabel && (
+            <p style={{ color: 'var(--theme-elevation-500)', fontSize: '0.78rem', margin: 0 }}>
+              Showing run <strong>{selectedRunLabel}</strong> — the exact cases from this single
+              invocation.
+            </p>
+          )}
+
           {/* Filters */}
           <div
             style={{
@@ -690,14 +959,14 @@ export function ResultsTable({ entries, runs }: Props) {
             />
 
             <div style={{ display: 'flex', gap: '4px' }}>
-              {(['all', 'qa', 'codegen'] as FilterType[]).map((t) => (
+              {(['all', 'codegen'] as FilterType[]).map((t) => (
                 <button
                   key={t}
                   onClick={() => setTypeFilter(t)}
                   style={filterBtnStyle(typeFilter === t)}
                   type="button"
                 >
-                  {t === 'all' ? 'All' : t === 'qa' ? 'QA' : 'Codegen'}
+                  {t === 'all' ? 'All' : 'Codegen'}
                 </button>
               ))}
             </div>
@@ -713,33 +982,40 @@ export function ResultsTable({ entries, runs }: Props) {
               }}
             />
 
-            <div style={{ display: 'flex', gap: '4px' }}>
-              {(['all', 'users', 'admins', 'maintainers'] as FilterAudience[]).map((a) => (
-                <button
-                  key={a}
-                  onClick={() => setAudienceFilter(a)}
-                  style={
-                    audienceFilter === a && a !== 'all'
-                      ? {
-                          ...filterBtnStyle(true),
-                          background: AUDIENCE_CONFIG[a].bg,
-                          border: `1px solid ${AUDIENCE_CONFIG[a].color}`,
-                          color: AUDIENCE_CONFIG[a].color,
-                        }
-                      : filterBtnStyle(audienceFilter === a)
-                  }
-                  type="button"
-                >
-                  {a === 'all'
-                    ? 'All'
-                    : a === 'users'
-                      ? 'Users'
-                      : a === 'admins'
-                        ? 'Admins'
-                        : 'Maintainers'}
-                </button>
-              ))}
-            </div>
+            <label
+              style={{
+                alignItems: 'center',
+                color: 'var(--theme-elevation-600)',
+                display: 'flex',
+                fontSize: '0.8rem',
+                gap: '6px',
+              }}
+            >
+              Run
+              <select
+                onChange={(e) => setSelectedRunKey(e.target.value)}
+                style={{
+                  background: 'var(--theme-elevation-0)',
+                  border: '1px solid var(--theme-elevation-200)',
+                  borderRadius: '4px',
+                  color: 'var(--theme-elevation-700)',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  maxWidth: '360px',
+                  padding: '4px 10px',
+                }}
+                value={selectedRunKey}
+              >
+                <option value="all">All runs (mixed)</option>
+                {runGroups.map((run) => (
+                  <option key={run.key} value={run.key}>
+                    {run.isLegacy
+                      ? `${run.config.label} · pre-tracking`
+                      : `${run.config.label} · ${run.timestamp.slice(0, 16).replace('T', ' ')}`}
+                  </option>
+                ))}
+              </select>
+            </label>
 
             <span
               aria-hidden="true"
@@ -790,7 +1066,7 @@ export function ResultsTable({ entries, runs }: Props) {
                 fontSize: '0.7rem',
                 fontWeight: 700,
                 gap: '0 12px',
-                gridTemplateColumns: '1fr 100px 120px 70px 80px 100px 100px 32px',
+                gridTemplateColumns: '1fr 100px 70px 80px 120px 100px 100px 32px',
                 letterSpacing: '0.05em',
                 padding: '8px 12px',
                 textTransform: 'uppercase',
@@ -800,9 +1076,9 @@ export function ResultsTable({ entries, runs }: Props) {
                 [
                   'question',
                   'category',
-                  'audience',
                   'type',
                   'variant',
+                  'model',
                   'result',
                   'tokens',
                 ] as SortKey[]
@@ -876,7 +1152,7 @@ export function ResultsTable({ entries, runs }: Props) {
                         cursor: 'pointer',
                         display: 'grid',
                         gap: '0 12px',
-                        gridTemplateColumns: '1fr 100px 120px 70px 80px 100px 100px 32px',
+                        gridTemplateColumns: '1fr 100px 70px 80px 120px 100px 100px 32px',
                         padding: '10px 12px',
                         transition: 'background 0.1s',
                       }}
@@ -898,13 +1174,13 @@ export function ResultsTable({ entries, runs }: Props) {
                         <CategoryBadge category={entry.category} />
                       </span>
                       <span>
-                        <AudienceBadges audiences={entry.audience} />
-                      </span>
-                      <span>
                         <TypeBadge type={entry.type} />
                       </span>
                       <span>
                         <VariantBadge variant={getVariant(entry)} />
+                      </span>
+                      <span style={{ minWidth: 0 }}>
+                        <ModelBadge entry={entry} />
                       </span>
                       <span>
                         <ScoreBadge
@@ -927,7 +1203,9 @@ export function ResultsTable({ entries, runs }: Props) {
                       </span>
                     </div>
 
-                    {isExpanded && <ExpandedRow entry={entry} />}
+                    {isExpanded && (
+                      <ExpandedRow entry={entry} rendered={codegenHtml?.[entry.hash]} />
+                    )}
                   </div>
                 )
               })

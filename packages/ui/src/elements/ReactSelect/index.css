@@ -1,0 +1,155 @@
+@layer payload-default {
+  .react-select-container {
+    width: 100%;
+  }
+
+  .react-select {
+    .rs__control {
+      position: relative;
+      width: 100%;
+      min-height: var(--field-min-height-large);
+      background: var(--field-color-bg);
+      border: var(--stroke-width-small) solid var(--field-color-border);
+      border-radius: var(--field-border-radius);
+      color: var(--color-text);
+      font-family: var(--text-body-medium-font-family);
+      font-size: var(--text-body-medium-font-size);
+      font-weight: var(--text-body-medium-font-weight);
+      line-height: var(--text-body-medium-line-height);
+      -webkit-appearance: none;
+      appearance: none;
+      transition-property: box-shadow, background-color;
+      transition-duration: 100ms;
+      transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
+      height: auto;
+      padding-block: calc(var(--spacer-1) + 1px);
+      padding-inline: var(--field-padding-inline) var(--spacer-5);
+      flex-wrap: wrap;
+      gap: var(--spacer-1);
+
+      &.rs__control--is-focused {
+        border-color: var(--field-color-border-focus);
+      }
+
+      &:has(.clear-indicator) {
+        padding-inline-end: calc(var(--spacer-4) * 2);
+      }
+
+      &:hover:not(:focus-within) {
+        border-color: var(--field-color-border-hover);
+      }
+    }
+
+    .rs__placeholder {
+      color: var(--color-text-tertiary);
+    }
+
+    .rs__indicator {
+      padding: 0 0.25rem;
+      cursor: pointer;
+    }
+
+    .rs__indicator-separator {
+      display: none;
+    }
+
+    .rs__indicators {
+      position: absolute;
+      right: var(--spacer-1);
+      top: -1px; /* Adjust for border */
+      min-height: var(--field-min-height-large);
+      display: flex;
+    }
+
+    .rs__input-container {
+      color: var(--color-text);
+      height: var(--text-body-medium-line-height);
+      margin: 0;
+      padding: 0;
+    }
+
+    &.rs--is-disabled .rs__control {
+      background: var(--field-color-bg-disabled);
+      border-color: var(--field-color-border-disabled);
+      color: var(--field-color-text-disabled);
+    }
+
+    &.react-select--error .rs__control:not(.rs__control--is-focused) {
+      &:hover {
+        border-color: var(--field-color-border-error);
+      }
+    }
+  }
+
+  /* Menu rules are top-level so they apply when the menu is portaled to document.body */
+  .rs__menu-notice {
+    padding: 0.625rem 0.75rem;
+  }
+
+  .rs__menu {
+    z-index: 4;
+    border-radius: var(--radius-medium);
+    box-shadow: var(--elevation-400-menu-panel);
+    background: var(--color-bg);
+    /* overflow: clip; */
+  }
+
+  .rs__menu--placement-bottom {
+    margin-top: var(--spacer-1);
+  }
+
+  .rs__menu--placement-top {
+    margin-bottom: var(--spacer-1);
+  }
+
+  .rs__menu-list {
+    overflow-y: auto;
+  }
+
+  .rs__group-heading {
+    color: var(--color-text-tertiary);
+    padding: var(--spacer-2-5) var(--spacer-3) var(--spacer-1);
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+  }
+
+  .rs__option {
+    font-family: var(--text-body-medium-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    padding-inline: var(--spacer-3) var(--spacer-1);
+    padding-block: var(--spacer-2);
+    color: var(--color-text);
+  }
+
+  .rs__option--is-focused {
+    background-color: var(--color-bg-secondary);
+  }
+
+  .rs__option--is-selected {
+    background-color: var(--color-bg-selected);
+  }
+
+  .react-select--error {
+    div.rs__control {
+      border: var(--stroke-width-small) solid var(--field-color-border-error);
+
+      & > div.rs__indicator > button.dropdown-indicator[type='button'] {
+        border: none;
+      }
+    }
+  }
+
+  .react-select--error .rs__control:hover {
+    border-color: var(--field-color-border-error);
+  }
+
+  .react-select--error:focus-within {
+    div.rs__control {
+      border-color: var(--field-color-border-focus);
+    }
+  }
+}

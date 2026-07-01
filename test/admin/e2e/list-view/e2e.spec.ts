@@ -36,9 +36,6 @@ const description = 'Description'
 
 let payload: PayloadTestSDK<Config>
 
-import { listViewSelectAPISlug } from 'admin/collections/ListViewSelectAPI/index.js'
-import { noTimestampsSlug } from 'admin/collections/NoTimestamps.js'
-import { devUser } from 'credentials.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -46,6 +43,8 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 
 import {
+  clickColumnSelectorItem,
+  getColumnSelectorItem,
   openListColumns,
   reorderColumns,
   sortColumn,
@@ -57,9 +56,14 @@ import { getRowByCellValueAndAssert } from '../../../__helpers/e2e/getRowByCellV
 import { goToNextPage, goToPreviousPage } from '../../../__helpers/e2e/goToNextPage.js'
 import { goToFirstCell } from '../../../__helpers/e2e/navigateToDoc.js'
 import { deletePreferences } from '../../../__helpers/e2e/preferences.js'
+import { getSelectMenu } from '../../../__helpers/e2e/selectInput.js'
+import { expectPerPageLimits, setPerPageLimit } from '../../../__helpers/e2e/setPerPageLimit.js'
 import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { closeListDrawer } from '../../../__helpers/e2e/toggleListDrawer.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { listViewSelectAPISlug } from '../../../admin/collections/ListViewSelectAPI/index.js'
+import { noTimestampsSlug } from '../../../admin/collections/NoTimestamps.js'
+import { devUser } from '../../../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -177,14 +181,9 @@ describe('List View', () => {
         `${adminRoutes.routes?.admin}/collections/posts/${id}`,
       )
 
-      await page.locator('.list-controls__toggle-columns').click()
-      await expect(page.locator('.list-controls__columns.rah-static--height-auto')).toBeVisible()
+      const { columnContainer } = await openListColumns(page)
 
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('ID'),
-        })
-        .click()
+      await clickColumnSelectorItem({ container: columnContainer, label: 'ID' })
 
       await page.locator('#heading-id').waitFor({ state: 'detached' })
       await page.locator('.cell-id').first().waitFor({ state: 'detached' })
@@ -223,7 +222,7 @@ describe('List View', () => {
     test('should render custom beforeListTable component', async () => {
       await page.goto(postsUrl.list)
       await expect(
-        page.locator('.collection-list__wrap').locator('div', {
+        page.locator('.collection-list').locator('div', {
           hasText: exactText('BeforeListTable custom component'),
         }),
       ).toBeVisible()
@@ -241,10 +240,10 @@ describe('List View', () => {
       ).toBeVisible()
     })
 
-    test('should render custom afterList component', async () => {
+    test('should render custom afterListTable component', async () => {
       await page.goto(postsUrl.list)
       await expect(
-        page.locator('.collection-list__wrap').locator('div', {
+        page.locator('.collection-list').locator('div', {
           hasText: exactText('AfterListTable custom component'),
         }),
       ).toBeVisible()
@@ -265,15 +264,6 @@ describe('List View', () => {
           .first(),
       ).toBeVisible()
     })
-
-    test('should render custom afterListTable component', async () => {
-      await page.goto(postsUrl.list)
-      await expect(
-        page.locator('.collection-list--posts').locator('div', {
-          hasText: exactText('AfterList custom component'),
-        }),
-      ).toBeVisible()
-    })
   })
 
   describe('search', () => {
@@ -285,7 +275,7 @@ describe('List View', () => {
       await page.goto(`${postsUrl.list}?search=dennis`)
 
       // input should be filled out, list should filter
-      await expect(page.locator('.search-filter__input')).toHaveValue('dennis')
+      await expect(page.locator('#search-filter-input')).toHaveValue('dennis')
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
 
@@ -311,10 +301,10 @@ describe('List View', () => {
         title: 'find me',
       })
 
-      await page.locator('.search-filter__input').fill('find me')
+      await page.locator('#search-filter-input').fill('find me')
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
 
-      await page.locator('.search-filter__input').fill('this is fun')
+      await page.locator('#search-filter-input').fill('this is fun')
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
     })
 
@@ -337,7 +327,7 @@ describe('List View', () => {
 
       await expect(page.locator('#search-filter-input')).toHaveValue('test')
 
-      await page.locator('.nav-toggler.template-default__nav-toggler').click()
+      await page.locator('.app-header__sidebar-toggle').click()
       await expect(page.locator('#nav-uploads')).toContainText('Uploads')
 
       const uploadsUrl = await page.locator('#nav-uploads').getAttribute('href')
@@ -348,7 +338,7 @@ describe('List View', () => {
   })
 
   describe('filters', () => {
-    test('should not close where builder when clearing final condition', async () => {
+    test('should close where builder when clearing final condition', async () => {
       await page.goto(postsUrl.list)
 
       await addListFilter({
@@ -365,11 +355,7 @@ describe('List View', () => {
 
       await page.locator('.condition__actions .btn.condition__actions-remove').click()
 
-      await page.waitForURL(new RegExp(encodedQueryString))
-
-      await expect(
-        page.locator('.list-controls__where.rah-static.rah-static--height-auto'),
-      ).toBeVisible()
+      await expect(page.locator('.where-builder')).toBeHidden()
     })
 
     test('should respect base list filters', async () => {
@@ -379,23 +365,22 @@ describe('List View', () => {
 
     test('should filter rows', async () => {
       // open the column controls
-      await page.locator('.list-controls__toggle-columns').click()
+      const { columnContainer } = await openListColumns(page)
 
       // wait until the column toggle UI is visible and fully expanded
-      await expect(page.locator('.pill-selector')).toBeVisible()
+      await expect(page.locator('.column-selector')).toBeVisible()
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
       // ensure the ID column is active
-      const idButton = page.locator('.pill-selector .pill-selector__pill', {
-        hasText: exactText('ID'),
-      })
+      const idButton = getColumnSelectorItem({ container: columnContainer, label: 'ID' })
 
       const id = (await page.locator('.cell-id').first().innerText()).replace('ID: ', '')
 
       const buttonClasses = await idButton.getAttribute('class')
 
-      if (buttonClasses && !buttonClasses.includes('pill-selector__pill--selected')) {
-        await idButton.click()
+      // New column selector uses --inactive class when column is hidden
+      if (buttonClasses && buttonClasses.includes('column-selector__item--inactive')) {
+        await idButton.locator('.switch').click()
         await expect(page.locator(tableRowLocator).first().locator('.cell-id')).toBeVisible()
       }
 
@@ -424,13 +409,12 @@ describe('List View', () => {
       await openListFilters(page, {})
 
       const whereBuilder = page.locator('.where-builder')
-      await whereBuilder.locator('.where-builder__add-first-filter').click()
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
       await conditionField.locator('input.rs__input').fill('Title')
 
       await expect(
-        conditionField.locator('.rs__menu-list').locator('div', {
+        getSelectMenu({ page }).locator('.rs__option', {
           hasText: exactText('Title'),
         }),
       ).toBeVisible()
@@ -442,12 +426,11 @@ describe('List View', () => {
       await openListFilters(page, {})
 
       const whereBuilder = page.locator('.where-builder')
-      await whereBuilder.locator('.where-builder__add-first-filter').click()
 
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
 
-      const menuList = conditionField.locator('.rs__menu-list')
+      const menuList = getSelectMenu({ page })
 
       // ensure the virtual field is not present
       await expect(menuList.locator('div', { hasText: exactText('Virtual Text') })).toHaveCount(0)
@@ -489,7 +472,7 @@ describe('List View', () => {
 
       await expect(page.locator(tableRowLocator)).toHaveCount(1)
 
-      await page.locator('.condition__actions .btn.condition__actions-remove').click()
+      await page.locator('.condition__actions .btn.condition__actions-remove').first().click()
       await addListFilter({
         page,
         fieldLabel: 'Array > Text',
@@ -514,7 +497,8 @@ describe('List View', () => {
       await filterField.click()
 
       // select new filter field of Number
-      const dropdownFieldOption = filterField.locator('.rs__option', {
+      const filterFieldMenu = getSelectMenu({ page })
+      const dropdownFieldOption = filterFieldMenu.locator('.rs__option', {
         hasText: exactText('Status'),
       })
 
@@ -558,7 +542,8 @@ describe('List View', () => {
       const conditionField = whereBuilder.locator('.condition__field')
       await conditionField.click()
 
-      await conditionField
+      const conditionFieldMenu = getSelectMenu({ page })
+      await conditionFieldMenu
         .locator('.rs__option', {
           hasText: exactText('Users'),
         })
@@ -568,13 +553,14 @@ describe('List View', () => {
 
       const operatorInput = whereBuilder.locator('.condition__operator')
       await operatorInput.click()
-      const operatorOptions = operatorInput.locator('.rs__option')
+      const operatorInputMenu = getSelectMenu({ page })
+      const operatorOptions = operatorInputMenu.locator('.rs__option')
       await operatorOptions.locator(`text=equals`).click()
 
       await whereBuilder.locator('.condition__value').click()
 
-      const valueOptions = await whereBuilder
-        .locator('.condition__value .rs__option')
+      const valueOptions = await getSelectMenu({ page })
+        .locator('.rs__option')
         .evaluateAll((options) => options.map((option) => option.textContent))
 
       expect(valueOptions).not.toContain('post1')
@@ -691,7 +677,7 @@ describe('List View', () => {
 
       await expect(tableItems).toHaveCount(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
-      await expect(page.locator('.per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.per-page button')).toContainText('5')
       await page.goto(`${postsUrl.list}?limit=5&page=2`)
 
       await addListFilter({
@@ -715,13 +701,9 @@ describe('List View', () => {
         value: 'Test',
       })
 
-      await whereBuilder.locator('.condition__actions-add').click()
-      const secondLi = whereBuilder.locator('.where-builder__and-filters li:nth-child(2)')
+      await whereBuilder.locator('.where-builder__add-or').click()
+      const secondLi = whereBuilder.locator('.where-builder__and-filters').nth(1)
       await expect(secondLi).toBeVisible()
-
-      await expect(
-        secondLi.locator('.condition__field').locator('.rs__single-value'),
-      ).toContainText('Title')
 
       await expect(secondLi.locator('.condition__operator >> input')).toHaveValue('')
       await expect(secondLi.locator('.condition__value >> input')).toHaveValue('')
@@ -788,46 +770,62 @@ describe('List View', () => {
 
       await wait(500)
 
-      await whereBuilder.locator('.condition__actions-add').click()
+      await whereBuilder.locator('.where-builder__add-or').click()
 
-      const secondLi = whereBuilder.locator('.where-builder__and-filters li:nth-child(2)')
+      // The newly added filter is its own OR group by default. Fill it in, then
+      // switch its join dropdown to "And" to move it into the first group.
+      const secondLi = whereBuilder.locator('.where-builder__and-filters').nth(1)
       await expect(secondLi).toBeVisible()
       const secondConditionField = secondLi.locator('.condition__field')
       const secondOperatorField = secondLi.locator('.condition__operator')
       const secondValueField = secondLi.locator('.condition__value >> input')
       await secondConditionField.click()
 
-      await secondConditionField.locator('.rs__option', { hasText: exactText('Title') }).click()
+      const secondConditionMenu = getSelectMenu({ page })
+      await secondConditionMenu.locator('.rs__option', { hasText: exactText('Title') }).click()
 
       await expect(secondConditionField.locator('.rs__single-value')).toContainText('Title')
       await secondOperatorField.click()
-      await secondOperatorField.locator('.rs__option').locator('text=equals').click()
+      const secondOperatorMenu = getSelectMenu({ page })
+      await secondOperatorMenu.locator('.rs__option').locator('text=equals').click()
       await secondValueField.fill('Test 2')
       await expect(secondValueField).toHaveValue('Test 2')
 
-      const firstLi = page.locator('.where-builder__and-filters li:nth-child(1)')
+      // Wait for the debounced value to commit to the where state before changing
+      // the join, otherwise the flatten/rebuild reads a stale (empty) value.
+      await wait(500)
+
+      // Change the join from "Or" to "And" so both conditions live in the same group.
+      const joinDropdown = secondLi.locator('.condition__join')
+      await joinDropdown.click()
+      const joinMenu = getSelectMenu({ page })
+      await joinMenu.locator('.rs__option', { hasText: exactText('And') }).click()
+
+      // Both conditions are now part of a single AND group.
+      await expect(whereBuilder.locator('.condition')).toHaveCount(2)
+
+      const firstLi = whereBuilder.locator('.condition').nth(0)
       const removeButton = firstLi.locator('.condition__actions-remove')
 
       await wait(500)
 
       // remove first filter
       await removeButton.click()
-      const filterListItems = page.locator('.where-builder__and-filters li')
+      const filterListItems = whereBuilder.locator('.condition')
       await expect(filterListItems).toHaveCount(1)
-      const firstValueField = page.locator('.condition__value >> input')
+      const firstValueField = whereBuilder.locator('.condition__value >> input')
       await expect(firstValueField).toHaveValue('Test 2')
     })
 
     test('should hide field filter when admin.disableListFilter is true', async () => {
       await page.goto(postsUrl.list)
       await openListFilters(page, {})
-      await page.locator('.where-builder__add-first-filter').click()
 
       const initialField = page.locator('.condition__field')
       await initialField.click()
 
       await expect(
-        initialField.locator(`.rs__option :has-text("Disable List Filter Text")`),
+        initialField.page().locator(`.rs__option :has-text("Disable List Filter Text")`),
       ).toBeHidden()
     })
 
@@ -858,13 +856,15 @@ describe('List View', () => {
       const condition = page.locator('.condition__field')
       await expect(condition.locator('input.rs__input')).toBeDisabled()
       await expect(page.locator('.condition__operator input.rs__input')).toBeDisabled()
-      await expect(page.locator('.condition__value input.condition-value-text')).toBeDisabled()
+      await expect(page.locator('.condition__value input.form-input')).toBeDisabled()
       await expect(condition.locator('.rs__single-value')).toHaveText('Disable List Filter Text')
-      await page.locator('button.condition__actions-add').click()
+      await page.locator('.where-builder__add-or').click()
       const condition2 = page.locator('.condition__field').nth(1)
       await condition2.click()
       await expect(
-        condition2?.locator('.rs__menu-list:has-text("Disable List Filter Text")'),
+        getSelectMenu({ page }).filter({
+          hasText: 'Disable List Filter Text',
+        }),
       ).toBeHidden()
     })
 
@@ -881,7 +881,7 @@ describe('List View', () => {
       await valueField.click()
       await page.keyboard.type('4')
 
-      const options = whereBuilder.locator('.condition__value .rs__option')
+      const options = getSelectMenu({ page }).locator('.rs__option')
 
       await expect(options).toHaveCount(10)
 
@@ -910,68 +910,51 @@ describe('List View', () => {
   describe('table columns', () => {
     test('should hide field column when field.hidden is true', async () => {
       await page.goto(postsUrl.list)
-      await page.locator('.list-controls__toggle-columns').click()
-
-      await expect(page.locator('.pill-selector')).toBeVisible()
+      const { columnContainer } = await openListColumns(page)
 
       await expect(
-        page.locator(`.pill-selector .pill-selector__pill`, {
-          hasText: exactText('Hidden Field'),
-        }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Hidden Field' }),
       ).toBeHidden()
     })
 
     test('should show field column despite admin.hidden being true', async () => {
       await page.goto(postsUrl.list)
-      await page.locator('.list-controls__toggle-columns').click()
-
-      await expect(page.locator('.pill-selector')).toBeVisible()
+      const { columnContainer } = await openListColumns(page)
 
       await expect(
-        page.locator(`.pill-selector .pill-selector__pill`, {
-          hasText: exactText('Admin Hidden Field'),
-        }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Admin Hidden Field' }),
       ).toBeVisible()
     })
 
     test('should hide field in column selector when admin.disableListColumn is true', async () => {
       await page.goto(postsUrl.list)
-      await page.locator('.list-controls__toggle-columns').click()
-
-      await expect(page.locator('.pill-selector')).toBeVisible()
+      const { columnContainer } = await openListColumns(page)
 
       // Check if "Disable List Column Text" is not present in the column options
       await expect(
-        page.locator(`.pill-selector .pill-selector__pill`, {
-          hasText: exactText('Disable List Column Text'),
-        }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Disable List Column Text' }),
       ).toBeHidden()
     })
 
     test('should display field in column selector despite admin.disableListFilter', async () => {
       await page.goto(postsUrl.list)
-      await page.locator('.list-controls__toggle-columns').click()
-
-      await expect(page.locator('.pill-selector')).toBeVisible()
+      const { columnContainer } = await openListColumns(page)
 
       // Check if "Disable List Filter Text" is present in the column options
       await expect(
-        page.locator(`.pill-selector .pill-selector__pill`, {
-          hasText: exactText('Disable List Filter Text'),
-        }),
+        getColumnSelectorItem({ container: columnContainer, label: 'Disable List Filter Text' }),
       ).toBeVisible()
     })
 
     test('should still show field in filter when admin.disableListColumn is true', async () => {
       await page.goto(postsUrl.list)
       await openListFilters(page, {})
-      await page.locator('.where-builder__add-first-filter').click()
 
       const initialField = page.locator('.condition__field')
       await initialField.click()
 
       await expect(
-        initialField.locator(`.rs__menu-list:has-text("Disable List Column Text")`),
+        initialField.page().locator(`.rs__menu-list:has-text("Disable List Column Text")`),
       ).toBeVisible()
     })
 
@@ -992,7 +975,7 @@ describe('List View', () => {
 
       await openListColumns(page, {})
       const numberOfColumns = await page.locator(tableHeaders).count()
-      await expect(page.locator('.pill-selector')).toBeVisible()
+      await expect(page.locator('.column-selector')).toBeVisible()
       await expect(page.locator('table > thead > tr > th:nth-child(2)')).toHaveText('ID')
 
       await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
@@ -1011,7 +994,7 @@ describe('List View', () => {
       await toggleColumn(page, { columnLabel: 'ID', columnName: 'id', targetState: 'off' })
     })
 
-    describe('enableListViewSelectAPI', () => {
+    describe('list view select API', () => {
       test('`id` should always be selected even when toggled off', async () => {
         const doc = await payload.create({
           collection: listViewSelectAPISlug,
@@ -1153,11 +1136,7 @@ describe('List View', () => {
       await createPost({ namedGroup: { someTextField: 'nested group text field' } })
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Named Group > Some Text Field'),
-        })
-        .click()
+      await clickColumnSelectorItem({ container: page, label: 'Named Group > Some Text Field' })
       await expect(page.locator('.row-1 .cell-namedGroup__someTextField')).toHaveText(
         'nested group text field',
       )
@@ -1167,11 +1146,7 @@ describe('List View', () => {
       await createPost({ textFieldInUnnamedGroup: 'nested text in unnamed group' })
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Text Field In Unnamed Group'),
-        })
-        .click()
+      await clickColumnSelectorItem({ container: page, label: 'Text Field In Unnamed Group' })
       await expect(page.locator('.row-1 .cell-textFieldInUnnamedGroup')).toHaveText(
         'nested text in unnamed group',
       )
@@ -1181,11 +1156,7 @@ describe('List View', () => {
       await createPost({ namedGroup: { someTextField: 'nested group text field' } })
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await expect(
-        page.locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Named Group'),
-        }),
-      ).toBeHidden()
+      await expect(getColumnSelectorItem({ container: page, label: 'Named Group' })).toBeHidden()
     })
 
     test('should render group field as top level column when custom cell is defined', async () => {
@@ -1197,9 +1168,7 @@ describe('List View', () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
       await expect(
-        page.locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Group With Custom Cell'),
-        }),
+        getColumnSelectorItem({ container: page, label: 'Group With Custom Cell' }),
       ).toBeVisible()
     })
 
@@ -1213,18 +1182,10 @@ describe('List View', () => {
       await openColumnControls(page)
 
       // Enable top-level column
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Some Text Field'),
-        })
-        .click()
+      await clickColumnSelectorItem({ container: page, label: 'Some Text Field' })
 
       // Enable group column
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Named Group > Some Text Field'),
-        })
-        .click()
+      await clickColumnSelectorItem({ container: page, label: 'Named Group > Some Text Field' })
 
       // Expect top-level cell
       await expect(page.locator('.row-1 .cell-someTextField')).toHaveText('top-level text field')
@@ -1239,11 +1200,10 @@ describe('List View', () => {
       await createPost({ namedTab: { nestedTextFieldInNamedTab: 'nested text in named tab' } })
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Named Tab > Nested Text Field In Named Tab'),
-        })
-        .click()
+      await clickColumnSelectorItem({
+        container: page,
+        label: 'Named Tab > Nested Text Field In Named Tab',
+      })
       await expect(page.locator('.row-1 .cell-namedTab__nestedTextFieldInNamedTab')).toHaveText(
         'nested text in named tab',
       )
@@ -1253,11 +1213,7 @@ describe('List View', () => {
       await createPost({ nestedTextFieldInUnnamedTab: 'nested text in unnamed tab' })
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Nested Text Field In Unnamed Tab'),
-        })
-        .click()
+      await clickColumnSelectorItem({ container: page, label: 'Nested Text Field In Unnamed Tab' })
       await expect(page.locator('.row-1 .cell-nestedTextFieldInUnnamedTab')).toHaveText(
         'nested text in unnamed tab',
       )
@@ -1269,9 +1225,12 @@ describe('List View', () => {
       // reload to ensure the columns were stored and loaded from preferences
       await page.reload()
 
-      await expect(
-        page.locator('.list-controls .pill-selector .pill-selector__pill').first(),
-      ).toHaveText('Number')
+      // open column selector to verify order
+      await openListColumns(page, {})
+
+      await expect(page.locator('.column-selector .column-selector__item').first()).toHaveText(
+        'Number',
+      )
 
       await expect(page.locator('table thead tr th').nth(1)).toHaveText('Number')
     })
@@ -1298,22 +1257,20 @@ describe('List View', () => {
       await collectionSelector.click()
 
       await page
-        .locator('[id^=list-drawer_1_] .list-header__select-collection.react-select .rs__option', {
+        .locator('.rs__option', {
           hasText: exactText('Post'),
         })
         .click()
 
       await openListColumns(page, {
-        columnContainerSelector: '.list-controls__columns',
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+        columnContainerSelector: '.column-selector',
+        togglerSelector: '[id^=list-drawer_1_] .columns-button__button',
       })
 
       // ensure that the columns are in the correct order
-      await expect(
-        page
-          .locator('[id^=list-drawer_1_] .list-controls .pill-selector .pill-selector__pill')
-          .first(),
-      ).toHaveText('Number')
+      await expect(page.locator('.column-selector .column-selector__item').first()).toHaveText(
+        'Number',
+      )
     })
 
     test('should toggle columns in list drawer', async () => {
@@ -1332,13 +1289,13 @@ describe('List View', () => {
       await expect(listDrawer).toBeVisible()
 
       await openListColumns(page, {
-        columnContainerSelector: '.list-controls__columns',
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+        columnContainerSelector: '.column-selector',
+        togglerSelector: '[id^=list-drawer_1_] .columns-button__button',
       })
 
       await toggleColumn(page, {
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
-        columnContainerSelector: '.list-controls__columns',
+        togglerSelector: '[id^=list-drawer_1_] .columns-button__button',
+        columnContainerSelector: '.column-selector',
         columnLabel: 'ID',
         targetState: 'off',
         expectURLChange: false,
@@ -1354,17 +1311,15 @@ describe('List View', () => {
       })
 
       await openListColumns(page, {
-        columnContainerSelector: '.list-controls__columns',
-        togglerSelector: '[id^=list-drawer_1_] .list-controls__toggle-columns',
+        columnContainerSelector: '.column-selector',
+        togglerSelector: '[id^=list-drawer_1_] .columns-button__button',
       })
 
-      const columnContainer = page.locator('.list-controls__columns').first()
+      const columnContainer = page.locator('.column-selector').first()
 
-      const column = columnContainer.locator(`.pill-selector .pill-selector__pill`, {
-        hasText: exactText('ID'),
-      })
+      const column = getColumnSelectorItem({ container: columnContainer, label: 'ID' })
 
-      await expect(column).not.toHaveClass(/pill-selector__pill--selected/)
+      await expect(column).toHaveClass(/column-selector__item--inactive/)
     })
 
     test('should render custom table cell component', async () => {
@@ -1420,7 +1375,9 @@ describe('List View', () => {
     test('should delete many', async () => {
       await page.goto(postsUrl.list)
       // delete should not appear without selection
-      await expect(page.locator('#confirm-delete-many-docs #confirm-action')).toHaveCount(0)
+      await expect(
+        page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]'),
+      ).toHaveCount(0)
       // select one row
       await page.locator('.row-1 .cell-_select input').check()
 
@@ -1430,7 +1387,7 @@ describe('List View', () => {
       await page.locator('.row-2 .cell-_select input').check()
 
       await deleteBtn.click()
-      await page.locator('#confirm-delete-many-docs #confirm-action').click()
+      await page.locator('#confirm-delete-many-docs [data-dialog-action="confirm"]').click()
       await expect(page.locator('.cell-_select')).toHaveCount(1)
     })
 
@@ -1455,8 +1412,8 @@ describe('List View', () => {
 
       await page.goto(postsUrl.list)
       await expect
-        .poll(async () => await page.locator('.per-page .per-page__base-button').textContent())
-        .toContain('Per Page: 5')
+        .poll(async () => await page.locator('.per-page button').textContent())
+        .toContain('5')
       await expect(page.locator(tableRowLocator)).toHaveCount(5)
     })
 
@@ -1471,17 +1428,9 @@ describe('List View', () => {
 
       await wait(1000)
 
-      await expect
-        .poll(async () => await page.locator('.per-page .popup-button').isVisible())
-        .toBe(true)
+      await expect.poll(async () => await page.locator('.per-page button').isVisible()).toBe(true)
 
-      await page.locator('.per-page .popup-button').click()
-      await wait(500)
-      const options = page.locator('.popup__content button.per-page__button')
-      await expect.poll(async () => await options.count()).toBe(3)
-      await expect(options.nth(0)).toContainText('5')
-      await expect(options.nth(1)).toContainText('10')
-      await expect(options.nth(2)).toContainText('15')
+      await expectPerPageLimits({ page, expectedLimits: [5, 10, 15] })
     })
 
     test('should paginate', async () => {
@@ -1491,13 +1440,15 @@ describe('List View', () => {
         await createPost()
       })
 
-      await page.reload()
+      await page.goto(postsUrl.list)
 
       await wait(1000)
 
+      // Set per-page limit to 5
+      await setPerPageLimit({ page, limit: 5 })
+
       await expect.poll(async () => await page.locator(tableRowLocator).count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 6')
-      await expect(page.locator('.per-page')).toContainText('Per Page: 5')
 
       await wait(500)
 
@@ -1517,35 +1468,28 @@ describe('List View', () => {
         await createPost()
       })
 
-      await page.reload()
+      await page.goto(postsUrl.list)
 
       await wait(1000)
+
+      // Set per-page limit to 5 first
+      await setPerPageLimit({ page, limit: 5 })
 
       const tableItems = page.locator(tableRowLocator)
       await expect.poll(async () => await tableItems.count()).toBe(5)
       await expect(page.locator('.page-controls__page-info')).toHaveText('1-5 of 16')
-      await expect(page.locator('.per-page')).toContainText('Per Page: 5')
 
       await wait(500)
 
-      await page.locator('.per-page .popup-button').click()
-
-      await wait(500)
-
-      await page
-        .locator('.popup__content button.per-page__button', {
-          hasText: '15',
-        })
-        .click()
-      await wait(500)
-
+      // Now change to 15
+      await setPerPageLimit({ page, limit: 15 })
       await expect(tableItems).toHaveCount(15)
-      await expect(page.locator('.per-page .per-page__base-button')).toContainText('Per Page: 15')
 
       await goToNextPage(page)
+
       await wait(500)
       await expect(tableItems).toHaveCount(1)
-      await expect(page.locator('.per-page')).toContainText('Per Page: 15') // ensure this hasn't changed
+      await expectPerPageLimits({ page, expectedLimits: [5, 10, 15] })
       await expect(page.locator('.page-controls__page-info')).toHaveText('16-16 of 16')
     })
 
@@ -1558,9 +1502,7 @@ describe('List View', () => {
 
       await wait(1000)
 
-      await page.locator('.per-page .popup-button').click()
-      await page.getByRole('button', { name: '5', exact: true }).click()
-      await page.waitForURL(/limit=5/)
+      await setPerPageLimit({ page, limit: 5 })
 
       const firstPageIds = await page.locator('.cell-id').allInnerTexts()
       await goToNextPage(page)
@@ -1605,14 +1547,12 @@ describe('List View', () => {
       await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
-      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 10')
+      await expect(page.locator('.list-drawer .per-page button')).toContainText('10')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(10)
 
       // Change per-page to 5
-      await page.locator('.list-drawer .per-page .popup-button').click()
-      await page.getByRole('button', { name: '5', exact: true }).click()
+      await setPerPageLimit({ page, limit: 5, scope: listDrawer, waitForURL: false })
 
-      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
 
       await page.locator('.list-drawer .list-drawer__header .close-modal-button').click()
@@ -1624,7 +1564,7 @@ describe('List View', () => {
       await listDrawer.waitFor({ state: 'visible' })
       await expect(listDrawer).toBeVisible()
 
-      await expect(page.locator('.list-drawer .per-page')).toContainText('Per Page: 5')
+      await expect(page.locator('.list-drawer .per-page button')).toContainText('5')
       await expect(page.locator('.list-drawer table tbody tr')).toHaveCount(5)
     })
   })
@@ -1663,11 +1603,7 @@ describe('List View', () => {
     test('should allow sorting by nested field within group in separate column', async () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Named Group > Some Text Field'),
-        })
-        .click()
+      await clickColumnSelectorItem({ container: page, label: 'Named Group > Some Text Field' })
 
       await sortColumn(page, {
         fieldPath: 'namedGroup.someTextField',
@@ -1699,11 +1635,10 @@ describe('List View', () => {
     test('should allow sorting by nested field within tab in separate column', async () => {
       await page.goto(postsUrl.list)
       await openColumnControls(page)
-      await page
-        .locator('.pill-selector .pill-selector__pill', {
-          hasText: exactText('Named Tab > Nested Text Field In Named Tab'),
-        })
-        .click()
+      await clickColumnSelectorItem({
+        container: page,
+        label: 'Named Tab > Nested Text Field In Named Tab',
+      })
 
       await sortColumn(page, {
         fieldPath: 'namedTab.nestedTextFieldInNamedTab',
@@ -1741,14 +1676,12 @@ describe('List View', () => {
       await page.locator('#heading-title button.sort-column__asc').click()
       await page.waitForURL(/sort=title/)
 
-      const columnAfterSort = page.locator(
-        `.list-controls__columns .pill-selector .pill-selector__pill`,
-        {
-          hasText: exactText('ID'),
-        },
-      )
+      const columnAfterSort = getColumnSelectorItem({
+        container: page.locator('.column-selector'),
+        label: 'ID',
+      })
 
-      await expect(columnAfterSort).not.toHaveClass('pill-selector__pill--selected')
+      await expect(columnAfterSort).toHaveClass(/column-selector__item--inactive/)
       await expect(page.locator('#heading-id')).toBeHidden()
       await expect(page.locator('.cell-id')).toHaveCount(0)
     })
@@ -1786,14 +1719,12 @@ describe('List View', () => {
 
       await page.locator('#heading-_status').waitFor({ state: 'visible' })
 
-      const columnAfterSort = page.locator(
-        `.list-controls__columns .pill-selector .pill-selector__pill`,
-        {
-          hasText: exactText('Status'),
-        },
-      )
+      const columnAfterSort = getColumnSelectorItem({
+        container: page.locator('.column-selector'),
+        label: 'Status',
+      })
 
-      await expect(columnAfterSort).toHaveClass(/pill-selector__pill--selected/)
+      await expect(columnAfterSort).not.toHaveClass(/column-selector__item--inactive/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
 
@@ -1811,18 +1742,12 @@ describe('List View', () => {
       })
       await wait(500)
 
-      // check that the cells have the classes added per value selected
-      await expect(
-        page.locator('.cell-_status').first().locator("[class*='selected--']"),
-      ).toBeVisible()
+      // check that the toggled-on columns are visible
+      await expect(page.locator('.cell-_status').first()).toBeVisible()
 
-      await expect(
-        page.locator('.cell-wavelengths').first().locator("[class*='selected--']"),
-      ).toBeVisible()
+      await expect(page.locator('.cell-wavelengths').first()).toBeVisible()
 
-      await expect(
-        page.locator('.cell-selectField').first().locator("[class*='selected--']"),
-      ).toBeVisible()
+      await expect(page.locator('.cell-selectField').first()).toBeVisible()
 
       // sort by title again in descending order
       await page.locator('#heading-title button.sort-column__desc').click()
@@ -1832,14 +1757,12 @@ describe('List View', () => {
       await wait(500)
 
       // ensure the column is still visible
-      const columnAfterSecondSort = page.locator(
-        `.list-controls__columns .pill-selector .pill-selector__pill`,
-        {
-          hasText: exactText('Status'),
-        },
-      )
+      const columnAfterSecondSort = getColumnSelectorItem({
+        container: page.locator('.column-selector'),
+        label: 'Status',
+      })
 
-      await expect(columnAfterSecondSort).toHaveClass(/pill-selector__pill--selected/)
+      await expect(columnAfterSecondSort).not.toHaveClass(/column-selector__item--inactive/)
       await expect(page.locator('#heading-_status')).toBeVisible()
       await expect(page.locator('.cell-_status').first()).toBeVisible()
     })
@@ -1913,7 +1836,7 @@ describe('List View', () => {
         )}`,
       )
 
-      const conditionValueSelects = page.locator('#list-controls-where .condition__value')
+      const conditionValueSelects = page.locator('.where-builder .condition__value')
       await expect(conditionValueSelects.nth(0)).toHaveText('Select a value')
       await expect(conditionValueSelects.nth(1)).toHaveText('Custom placeholder')
       await expect(conditionValueSelects.nth(2)).toHaveText('Select a value')
@@ -1940,17 +1863,19 @@ describe('List View', () => {
     await Promise.all(Array.from({ length: 12 }, (_, i) => createPost({ title: `post${i + 1}` })))
     await page.goto(postsUrl.list)
 
-    const pageOneButton = page.locator('.paginator__page', { hasText: '1' })
-    await expect(pageOneButton).toBeVisible()
-    await pageOneButton.click()
+    // Ensure we're on page 1
+    const paginatorInput = page.locator('.paginator__page-input')
+    await expect(paginatorInput).toBeVisible()
+    await expect(paginatorInput).toHaveValue('1')
 
     await page.locator('.checkbox-input:has(#select-all)').locator('input').click()
     await expect(page.locator('.checkbox-input:has(#select-all)').locator('input')).toBeChecked()
     await expect(page.locator('.list-selection')).toContainText('5 selected')
 
-    const pageTwoButton = page.locator('.paginator__page', { hasText: '2' })
-    await expect(pageTwoButton).toBeVisible()
-    await pageTwoButton.click()
+    // Navigate to page 2 using the right arrow
+    const nextPageButton = page.locator('.clickable-arrow--right')
+    await expect(nextPageButton).toBeVisible()
+    await nextPageButton.click()
 
     await expect(
       page.locator('.checkbox-input:has(#select-all) input:not([checked])'),
@@ -2137,6 +2062,43 @@ describe('List View', () => {
           `${adminRoutes.routes?.admin}/collections/${formatDocURLCollectionSlug}/${publishedDoc.id}\\?published=true`,
         ),
       )
+    })
+
+    test('should disable linking in ListDrawer for documents with formatDocURL returning null', async () => {
+      await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'no-link', description: 'This should not be linkable in drawer' },
+      })
+
+      await payload.create({
+        collection: formatDocURLCollectionSlug,
+        data: { title: 'linkable', description: 'This should be linkable in drawer' },
+      })
+
+      await page.goto(formatDocURLUrl.list)
+
+      const selectButton = page.locator('button:has-text("Select format doc")')
+      await selectButton.waitFor({ state: 'visible' })
+      await selectButton.click()
+
+      const listDrawer = page.locator('.list-drawer.drawer--is-open')
+      await listDrawer.waitFor({ state: 'visible' })
+      await expect(listDrawer).toBeVisible()
+
+      await expect(listDrawer.locator('table tbody tr')).toHaveCount(2)
+
+      // The 'no-link' row should NOT have any clickable link-styled cell —
+      // formatDocURL returned null for it, so the drawer must not attach the
+      // underline className or the selection click handler to any cell.
+      const noLinkRow = listDrawer.locator('table tbody tr').filter({ hasText: 'no-link' })
+      await expect(noLinkRow.locator('button.default-cell__first-cell')).toHaveCount(0)
+      await expect(noLinkRow.locator('a')).toHaveCount(0)
+
+      // The 'linkable' row's linked cell should still be rendered as a
+      // clickable selection button (drawer overrides the link with an
+      // onSelect handler).
+      const linkableRow = listDrawer.locator('table tbody tr').filter({ hasText: 'linkable' })
+      await expect(linkableRow.locator('button.default-cell__first-cell')).toHaveCount(1)
     })
   })
 })
