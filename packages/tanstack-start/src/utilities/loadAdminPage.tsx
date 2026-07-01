@@ -242,6 +242,25 @@ export async function loadAdminPage({
 
     const rscPayload = await renderServerComponent(node as React.ReactElement)
 
+    // The server-function (client-nav RPC) path returns the flight stream unread —
+    // unlike the router/SSR path, which awaits a decode that drives the render to
+    // completion. So streamed side effects (e.g. DocumentView's autosave-create
+    // `server.redirect()`) haven't run yet and `nav` is empty. Buffer the stream to
+    // completion to force the render (populating `nav`), then hand the client a fresh
+    // replayable stream from that buffer.
+    if (!nav.type) {
+      const wrapper = (
+        rscPayload as unknown as Record<
+          symbol,
+          { createReplayStream?: () => ReadableStream<Uint8Array> } | undefined
+        >
+      )[Symbol.for('tanstack.rsc.stream')]
+      if (typeof wrapper?.createReplayStream === 'function') {
+        const buffer = await new Response(wrapper.createReplayStream()).arrayBuffer()
+        wrapper.createReplayStream = () => new Response(buffer).body as ReadableStream<Uint8Array>
+      }
+    }
+
     // Navigation thrown deep inside a streamed view component (e.g. access
     // denied → notFound, already-authenticated → redirect) is swallowed into
     // the RSC stream and never rejects the render. Honor it from the holder,
