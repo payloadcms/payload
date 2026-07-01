@@ -1,4 +1,4 @@
-import type { CollectionConfig, PayloadRequest, UploadConfig } from 'payload'
+import type { CollectionConfig, PayloadRequest, TextField, UploadConfig } from 'payload'
 
 import { sanitizePrefix } from './sanitizePrefix.js'
 
@@ -10,6 +10,8 @@ import { sanitizePrefix } from './sanitizePrefix.js'
  * 1. `prefixQueryParam`
  * 2. `clientUploadContext.prefix`
  * 3. Stored document `prefix` from the database
+ * 4. `defaultValue` of the injected `prefix` field on the collection (fallback
+ *    for in-flight creates where the document is not yet committed)
  *
  * Resolved values are passed through `sanitizePrefix`.
  */
@@ -59,6 +61,23 @@ export async function getFilePrefix({
       ],
     },
   })
-  const prefix = files?.docs?.[0]?.prefix
-  return prefix ? sanitizePrefix(prefix as string) : ''
+
+  if (files?.docs?.length) {
+    const prefix = files.docs[0].prefix
+    return prefix ? sanitizePrefix(prefix as string) : ''
+  }
+
+  // The document may not be committed yet (e.g. crop/save during a create
+  // transaction). Fall back to the `defaultValue` of the `prefix` field that
+  // the cloud-storage plugin injects via `getFields()`. That value equals the
+  // collection-level prefix configured in the adapter, which is what was used
+  // when the file was originally uploaded.
+  const prefixField = collection.fields?.find(
+    (field): field is TextField => 'name' in field && field.name === 'prefix',
+  )
+  if (prefixField && typeof prefixField.defaultValue === 'string' && prefixField.defaultValue) {
+    return sanitizePrefix(prefixField.defaultValue)
+  }
+
+  return ''
 }
