@@ -17,7 +17,7 @@ export const findOneHandler: PayloadHandler = async (req) => {
     ? data.flattenLocales
     : searchParams.has('flattenLocales')
       ? searchParams.get('flattenLocales') === 'true'
-      : // flattenLocales should be undfined if not provided, so that the default (true) is applied in the operation
+      : // flattenLocales should be undefined if not provided, so that the default (true) is applied in the operation
         undefined
 
   const result = await findOneOperation({

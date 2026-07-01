@@ -270,7 +270,7 @@ export interface IncomingAuthType {
    */
   removeTokenFromResponses?: true
   /**
-   * Advanced - an array of custom authentification strategies to extend this collection's authentication with.
+   * Advanced - an array of custom authentication strategies to extend this collection's authentication with.
    * @link https://payloadcms.com/docs/authentication/custom-strategies
    */
   strategies?: AuthStrategy[]
