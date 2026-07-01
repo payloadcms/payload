@@ -100,17 +100,29 @@ export const populateFieldPermissions = ({
         const fieldPermissions: FieldPermissions = permissionsObject[field.name]!
 
         if ('access' in field && field.access && typeof field.access[operation] === 'function') {
-          const accessResult = field.access[operation]({
-            id,
-            collection,
-            data,
-            doc: data,
-            global,
-            req,
-            // We cannot include siblingData or blockData here, as we do not have siblingData/blockData available once we reach block or array
-            // rows, as we're calculating schema permissions, which do not include individual rows.
-            // For consistency, it's thus better to never include the siblingData and blockData
-          })
+          const accessResult = field.access[operation](
+            collection
+              ? {
+                  id,
+                  collection,
+                  data,
+                  doc: data,
+                  req,
+                  // We cannot include siblingData or blockData here, as we do not have siblingData/blockData available once we reach block or array
+                  // rows, as we're calculating schema permissions, which do not include individual rows.
+                  // For consistency, it's thus better to never include the siblingData and blockData
+                }
+              : {
+                  id,
+                  data,
+                  doc: data,
+                  global: global!,
+                  req,
+                  // We cannot include siblingData or blockData here, as we do not have siblingData/blockData available once we reach block or array
+                  // rows, as we're calculating schema permissions, which do not include individual rows.
+                  // For consistency, it's thus better to never include the siblingData and blockData
+                },
+          )
 
           // Handle both sync and async access results
           if (isThenable(accessResult)) {

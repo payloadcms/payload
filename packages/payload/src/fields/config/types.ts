@@ -235,13 +235,11 @@ export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData
   args: FieldHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
-export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
+type SharedFieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
   blockData?: JsonObject | undefined
-  /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
-  collection: null | SanitizedCollectionConfig
   /**
    * The incoming, top-level document data used to `create` or `update` the document with.
    */
@@ -250,8 +248,6 @@ export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> 
    * The original data of the document before the `update` is applied. `doc` is undefined during the `create` operation.
    */
   doc?: TData
-  /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
-  global: null | SanitizedGlobalConfig
   /**
    * The `id` of the current document being read or updated. `id` is undefined during the `create` operation.
    */
@@ -263,6 +259,16 @@ export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> 
    */
   siblingData?: Partial<TSiblingData>
 }
+
+export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> =
+  | ({ collection: SanitizedCollectionConfig; global?: never } & SharedFieldAccessArgs<
+      TData,
+      TSiblingData
+    >)
+  | ({ collection?: never; global: SanitizedGlobalConfig } & SharedFieldAccessArgs<
+      TData,
+      TSiblingData
+    >)
 
 export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (
   args: FieldAccessArgs<TData, TSiblingData>,

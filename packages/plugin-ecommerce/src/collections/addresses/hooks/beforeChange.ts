@@ -6,13 +6,13 @@ interface Props {
 
 export const beforeChange: (args: Props) => CollectionBeforeChangeHook =
   ({ isCustomer }) =>
-  async (accessArgs) => {
-    const { data, req } = accessArgs
+  async (hookArgs) => {
+    const { data, req } = hookArgs
     if (!isCustomer) {
       return data
     }
 
-    const userIsCustomer = await isCustomer({ ...accessArgs, global: null })
+    const userIsCustomer = await isCustomer({ ...hookArgs })
 
     // Ensure that the customer field is set to the current user's ID if the user is a customer.
     // Admins can set to any customer.

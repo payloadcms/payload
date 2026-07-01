@@ -212,18 +212,20 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
 
     if (typeof field?.access?.read === 'function') {
+      const collection = collectionSlug
+        ? (req.payload.collections[collectionSlug]?.config ?? null)
+        : null
+      const global = globalSlug
+        ? (req.payload.globals.config.find((g) => g.slug === globalSlug) ?? null)
+        : null
+
       hasPermission = await field.access.read({
         id,
         blockData,
-        collection: collectionSlug
-          ? (req.payload.collections[collectionSlug]?.config ?? null)
-          : null,
         data: fullData,
-        global: globalSlug
-          ? (req.payload.globals.config.find((g) => g.slug === globalSlug) ?? null)
-          : null,
         req,
         siblingData: data,
+        ...(collection ? { collection } : { global }),
       })
     } else {
       hasPermission = true
