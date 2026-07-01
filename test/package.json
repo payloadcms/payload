@@ -124,7 +124,7 @@
     "ts-essentials": "10.0.3",
     "typescript": "6.0.3",
     "uuid": "14.0.0",
-    "vite": "^8.0.0",
+    "vite": "8.1.0",
     "vitest": "4.1.6",
     "wrangler": "~4.61.1",
     "zod": "^4.0.0"
