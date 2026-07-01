@@ -78,8 +78,23 @@ async function main() {
   await fs.writeFile(
     path.join(templatePath, 'pnpm-workspace.yaml'),
     toWorkspaceYaml({
-      // sharp/esbuild/unrs-resolver: all templates; mongodb-memory-server/@swc/core: plugin template.
-      allowBuilds: ['esbuild', 'sharp', 'unrs-resolver', 'mongodb-memory-server', '@swc/core'],
+      // Mirrors the root pnpm-workspace.yaml allowBuilds so any package a template pulls (e.g.
+      // bufferutil/utf-8-validate via ws in with-vercel-postgres) can run its install script under
+      // v11. Entries for packages a given template lacks are harmless no-ops.
+      allowBuilds: [
+        '@parcel/watcher',
+        '@sentry/cli',
+        '@swc/core',
+        '@vercel/git-hooks',
+        'better-sqlite3',
+        'bufferutil',
+        'esbuild',
+        'mongodb-memory-server',
+        'sharp',
+        'unrs-resolver',
+        'utf-8-validate',
+        'workerd',
+      ],
       overrides: fileSpecByPackageName,
     }),
   )

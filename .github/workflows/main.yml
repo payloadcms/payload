@@ -428,7 +428,7 @@ jobs:
 
       - name: Build Template
         run: |
-          pnpm run script:pack --dest templates/${{ matrix.template }}
+          pnpm run script:pack --all --dest templates/${{ matrix.template }}
           pnpm run script:build-template-with-local-pkgs ${{ matrix.template }} $DB_CONNECTION
         env:
           NODE_OPTIONS: --max-old-space-size=8096
