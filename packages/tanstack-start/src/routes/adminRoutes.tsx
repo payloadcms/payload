@@ -1,7 +1,7 @@
 'use client'
 
 import { NotFoundClient } from '@payloadcms/ui'
-import { notFound, redirect, useLoaderData } from '@tanstack/react-router'
+import { notFound, type NotFoundRouteProps, redirect, useLoaderData } from '@tanstack/react-router'
 import { Fragment, type ReactNode } from 'react'
 
 import { getAdminMeta } from '../utilities/meta.js'
@@ -37,12 +37,19 @@ function AdminPage() {
   return <Fragment key={data?.routeKey}>{data?.rscPayload}</Fragment>
 }
 
-function AdminNotFound(props: { data?: { routeKey?: string; rscPayload?: ReactNode } }) {
-  const rscPayload = props?.data?.rscPayload
-  if (!rscPayload) {
+type AdminNotFoundData = {
+  routeKey?: string
+  rscPayload?: ReactNode
+}
+
+const isAdminNotFoundData = (data: unknown): data is AdminNotFoundData =>
+  typeof data === 'object' && data !== null
+
+function AdminNotFound({ data }: NotFoundRouteProps) {
+  if (!isAdminNotFoundData(data) || !data.rscPayload) {
     return <NotFoundClient />
   }
-  return <Fragment key={props?.data?.routeKey}>{rscPayload}</Fragment>
+  return <Fragment key={data.routeKey}>{data.rscPayload}</Fragment>
 }
 
 /**
@@ -60,7 +67,12 @@ export function payloadAdminSplatRoute({ load }: { load: AdminLoad }) {
       const data = await runLoader(load, params._splat ?? '', location.searchStr)
       if (data?._notFound) {
         // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing notFound objects
-        throw notFound({ data: { routeKey: data.routeKey, rscPayload: data.rscPayload } })
+        throw notFound({
+          data: {
+            routeKey: data.routeKey,
+            rscPayload: data.rscPayload,
+          } satisfies AdminNotFoundData,
+        })
       }
       return data
     },

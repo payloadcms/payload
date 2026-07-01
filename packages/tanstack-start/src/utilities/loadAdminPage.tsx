@@ -15,8 +15,17 @@ export type LoadAdminPageArgs = {
   splat?: string
 }
 
+/**
+ * The serializable RSC handle returned by `renderServerComponent`, not raw
+ * `React.ReactNode`. TanStack's `createServerFn` return-type guard recognizes
+ * this handle as wire-serializable; widening it to `React.ReactNode` surfaces a
+ * `SerializationError<"JSX is not be serializable">` at every consuming server
+ * function.
+ */
+type RenderedRsc = Awaited<ReturnType<typeof renderServerComponent<React.ReactElement>>>
+
 export type LoadAdminPageResult =
-  | { _notFound: true; routeKey?: string; rscPayload?: React.ReactNode }
+  | { _notFound: true; routeKey?: string; rscPayload?: RenderedRsc }
   | { _redirect: string }
   | {
       metadata: AdminPageMetadata
@@ -32,7 +41,7 @@ export type LoadAdminPageResult =
        * so search-only changes (e.g. list-view filtering) reconcile in place.
        */
       routeKey: string
-      rscPayload: React.ReactNode
+      rscPayload: RenderedRsc
     }
 
 const resolveTitle = (title: MetaConfig['title']): string | undefined => {
