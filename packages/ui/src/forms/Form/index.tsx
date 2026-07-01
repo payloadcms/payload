@@ -278,11 +278,19 @@ export const Form: React.FC<FormProps> = (props) => {
       const hasFormSubmitAction =
         actionArg || typeof action === 'string' || typeof action === 'function'
 
-      if (redirect || disableToast || !hasFormSubmitAction) {
+      if (redirect || !hasFormSubmitAction) {
         // Do not show submitting toast, as the promise toast may never disappear under these conditions.
         // Instead, make successToast() or errorToast() throw toast.success / toast.error
         successToast = (data) => toast.success(data)
         errorToast = (data) => toast.error(data)
+      } else if (disableToast) {
+        const toastID = toast.loading(t('general:submitting'))
+
+        successToast = () => toast.dismiss(toastID)
+        errorToast = (data) => {
+          toast.dismiss(toastID)
+          toast.error(data)
+        }
       } else {
         toast.promise(promise, {
           error: (data) => {
