@@ -29,8 +29,7 @@ const fixturesDir = path.join(__dirname, 'fixtures')
  * Runs the full codegen pipeline for a single eval case:
  *   1. LLM modifies the per-case starter payload.config.ts
  *   2. TypeScript compiler validates the result (hard check)
- *   3. `verify.type` decides whether to run the LLM scorer or boot the
- *      generated config and check real DB state.
+ *   3. `verify` decides whether to run runtime checks, the LLM scorer, or both.
  *
  * Results are cached by a hash of the inputs. Pass label for logging context.
  */
@@ -72,10 +71,13 @@ export async function runCodegenCase(
       ? r.modelId === resolvedModelId && r.systemPromptKey === systemPromptKey
       : r.modelId === resolvedModelId && r.skillInstall === skillInstall)
 
+  const runtime = testCase.verify.runtime
+  const scorer = testCase.verify.scorer
+  const shouldCache = Boolean(scorer && !runtime)
   const key =
-    testCase.verify.type === 'scorer'
+    scorer && shouldCache
       ? codegenKey({
-          expected: testCase.verify.expected,
+          expected: scorer.expected,
           fixtureContent: starterConfig,
           input: testCase.input,
           modelId: resolvedModelId,
@@ -124,6 +126,7 @@ export async function runCodegenCase(
       question: testCase.input,
       reasoning: `TypeScript compilation failed:\n${tscErrors.join('\n')}`,
       runnerKind: kind,
+      score: scorer ? 0 : undefined,
       skillInstall: kind === 'claude-code' ? skillInstall : undefined,
       starterContent: starterConfig,
       systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
@@ -161,55 +164,6 @@ export async function runCodegenCase(
     return result
   }
 
-  if (testCase.verify.type === 'runtime') {
-    const problems = await runRuntimeVerification(testCase, modifiedConfig)
-    const pass = problems.length === 0
-    const result: EvalResult = {
-      agentExitCode,
-      agentLog,
-      answer: modifiedConfig,
-      category: testCase.category,
-      confidence,
-      configPath: testCase.configPath,
-      modelId: resolvedModelId,
-      pass,
-      question: testCase.input,
-      reasoning: pass ? 'Runtime verification passed' : problems.join('\n'),
-      runnerKind: kind,
-      skillInstall: kind === 'claude-code' ? skillInstall : undefined,
-      starterContent: starterConfig,
-      systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
-      transcript,
-      usage: {
-        runner: runnerUsage,
-        total: {
-          cachedInputTokens: runnerUsage.cachedInputTokens,
-          inputTokens: runnerUsage.inputTokens,
-          outputTokens: runnerUsage.outputTokens,
-          totalTokens: runnerUsage.totalTokens,
-        },
-      },
-    }
-
-    const status = pass ? '✓ PASS' : '✗ FAIL'
-    console.log(`[${result.category}] ${status} [RUNTIME]  ${testCase.configPath}`)
-    if (!pass) {
-      writeFailedCodegenAssertion({
-        category: testCase.category,
-        confidence,
-        configPath: testCase.configPath,
-        label,
-        modifiedConfig,
-        question: testCase.input,
-        reasoning: result.reasoning,
-        starterConfig,
-      })
-      console.log(`  Reason: ${result.reasoning}`)
-    }
-
-    return result
-  }
-
   const assertionErrors = evaluateAssertions(modifiedConfig, testCase.verify.assertions ?? [])
 
   if (assertionErrors.length > 0) {
@@ -226,6 +180,7 @@ export async function runCodegenCase(
       question: testCase.input,
       reasoning: `Structural assertions failed:\n${assertionErrors.join('\n')}`,
       runnerKind: kind,
+      score: scorer ? 0 : undefined,
       skillInstall: kind === 'claude-code' ? skillInstall : undefined,
       starterContent: starterConfig,
       systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
@@ -261,6 +216,63 @@ export async function runCodegenCase(
     return result
   }
 
+  if (runtime) {
+    const problems = await runRuntimeVerification(testCase, modifiedConfig)
+    const pass = problems.length === 0
+    const result: EvalResult = {
+      agentExitCode,
+      agentLog,
+      answer: modifiedConfig,
+      category: testCase.category,
+      confidence,
+      configPath: testCase.configPath,
+      modelId: resolvedModelId,
+      pass,
+      question: testCase.input,
+      reasoning: pass ? 'Runtime verification passed' : problems.join('\n'),
+      runnerKind: kind,
+      score: !pass && scorer ? 0 : undefined,
+      skillInstall: kind === 'claude-code' ? skillInstall : undefined,
+      starterContent: starterConfig,
+      systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
+      transcript,
+      usage: {
+        runner: runnerUsage,
+        total: {
+          cachedInputTokens: runnerUsage.cachedInputTokens,
+          inputTokens: runnerUsage.inputTokens,
+          outputTokens: runnerUsage.outputTokens,
+          totalTokens: runnerUsage.totalTokens,
+        },
+      },
+    }
+
+    const status = pass ? '✓ PASS' : '✗ FAIL'
+    console.log(`[${result.category}] ${status} [RUNTIME]  ${testCase.configPath}`)
+    if (!pass) {
+      writeFailedCodegenAssertion({
+        category: testCase.category,
+        confidence,
+        configPath: testCase.configPath,
+        label,
+        modifiedConfig,
+        question: testCase.input,
+        reasoning: result.reasoning,
+        starterConfig,
+      })
+      console.log(`  Reason: ${result.reasoning}`)
+      return result
+    }
+
+    if (!scorer) {
+      return result
+    }
+  }
+
+  if (!scorer) {
+    throw new Error(`Eval case has no verifier: ${testCase.configPath}`)
+  }
+
   const {
     changeDescription,
     completeness,
@@ -269,15 +281,9 @@ export async function runCodegenCase(
     reasoning,
     score,
     usage: scorerUsage,
-  } = await scoreConfigChange(
-    testCase.input,
-    testCase.verify.expected,
-    starterConfig,
-    modifiedConfig,
-    {
-      model: scorerModel,
-    },
-  )
+  } = await scoreConfigChange(testCase.input, scorer.expected, starterConfig, modifiedConfig, {
+    model: scorerModel,
+  })
 
   const result: EvalResult = {
     agentExitCode,
@@ -349,10 +355,8 @@ async function runRuntimeVerification(
   testCase: EvalCase,
   modifiedConfig: string,
 ): Promise<string[]> {
-  if (testCase.verify.type !== 'runtime') {
-    throw new Error(
-      `Runtime verifier received ${testCase.verify.type} case: ${testCase.configPath}`,
-    )
+  if (!testCase.verify.runtime) {
+    throw new Error(`Runtime verifier received case without runtime check: ${testCase.configPath}`)
   }
 
   let payload: Payload | undefined
@@ -368,7 +372,7 @@ async function runRuntimeVerification(
 
     payload = (await initPayloadInt(configDir, suiteName, undefined, configFile)).payload
 
-    return await testCase.verify.check({ payload })
+    return await testCase.verify.runtime.check({ payload })
   } finally {
     await payload?.destroy()
     rmSync(configFilePath, { force: true })

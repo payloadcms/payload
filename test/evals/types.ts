@@ -33,28 +33,21 @@ export type EvalCase = {
   /** Task prompt given to the model. */
   input: string
   /** Defines how this case is checked. */
-  verify:
-    | {
-        /** Optional structural assertions. Failures short-circuit before the scorer. */
-        assertions?: Assertion[]
-        /** Expected change description passed to the LLM scorer. */
-        expected: string
-        /**
-         * Runs the codegen pipeline: model edits the config, TypeScript and
-         * optional structural assertions run, then the LLM scorer compares the
-         * output to `expected`.
-         */
-        type: 'scorer'
-      }
-    | {
-        check: (args: { payload: Payload }) => Promise<string[]> | string[]
-        /**
-         * Runs the codegen pipeline, boots the generated config, and calls
-         * `check` with a real Payload Local API object. Return `[]` to pass,
-         * or problem strings to fail.
-         */
-        type: 'runtime'
-      }
+  verify: {
+    /** Optional structural assertions. Failures stop before runtime or scorer. */
+    assertions?: Assertion[]
+    runtime?: {
+      /**
+       * Boots the generated config and calls `check` with a real Payload Local
+       * API object. Return `[]` to pass, or problem strings to fail.
+       */
+      check: (args: { payload: Payload }) => Promise<string[]> | string[]
+    }
+    scorer?: {
+      /** Expected change description passed to the LLM scorer. */
+      expected: string
+    }
+  }
 }
 
 // Models

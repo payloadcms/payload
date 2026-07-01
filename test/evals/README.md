@@ -14,8 +14,8 @@ Three orthogonal knobs select what runs (defaults: direct LLM, skill on):
 
 `EVAL_MODEL` is interpreted per runner, and overrides only the **runner** (the LLM scorer keeps its own default):
 
-- `llm` — a key from `models.ts` (e.g. `anthropic:claude-sonnet-4-6`, `openai:gpt-5.2`). Unset → key-based default (OpenAI when `OPENAI_API_KEY` is set, else Anthropic).
-- `claude-code` — a bare `claude --model` name (e.g. `claude-opus-4-6`). Unset → `claude-opus-4-6`.
+- `llm` — a key from `models.ts` (e.g. `anthropic:claude-sonnet-4-6`, `openai:gpt-5.2`). Unset -> key-based default (OpenAI when `OPENAI_API_KEY` is set, else Anthropic).
+- `claude-code` — a bare `claude --model` name (e.g. `claude-opus-4-6`). Unset -> `claude-opus-4-6`.
 
 The skill is delivered per harness: system-prompt injection for `llm`, embedded in the workdir's `.claude/skills/` for `claude-code`.
 
@@ -36,7 +36,7 @@ If neither works, the runner fails with the exact fix (set `ANTHROPIC_API_KEY` o
 ## Running
 
 `pnpm test:eval` is a single launcher ([cli.ts](cli.ts)). With no flags it shows
-an interactive picker (runner → skill → suite → model); pass flags to skip the
+an interactive picker (runner -> skill -> suite -> model); pass flags to skip the
 prompts:
 
 ```bash
@@ -70,8 +70,19 @@ setting `EVAL_RUNNER` / `EVAL_SKILL` / `EVAL_MODEL` directly works too.
 See `~/.claude/plans/2026-05-06_ai-evals-agent-runners_agent-eval-runners/2-DESIGN.md`
 for the agent-runner design and rationale.
 
-Every dataset row has a `verify` object. `verify.type: 'scorer'` runs the
-normal codegen pipeline, optional structural assertions, and the LLM scorer.
-`verify.type: 'runtime'` runs the same codegen pipeline, boots the generated
-config, and calls `verify.check` against the database. It skips only the LLM
-scorer.
+Every dataset row has a `verify` object. `verify.assertions` runs deterministic
+structural checks. `verify.runtime` boots the generated config and calls
+`verify.runtime.check` against the database. `verify.scorer` runs the LLM
+scorer. Cases can combine these checks as needed.
+
+```text
+agent generates config
+-> TypeScript check
+-> structural assertions, if configured
+-> runtime check, if configured
+-> scorer, if configured
+```
+
+TypeScript, assertion, or runtime failures stop the case early. Runtime failures
+score `0` when a scorer is configured. If runtime passes and a scorer exists,
+the case continues to the scorer and uses the scorer score.

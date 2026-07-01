@@ -32,12 +32,14 @@ export function registerCodegenCases(
     testNamePrefix = '',
   } = options
 
-  const codegenCases = dataset.filter((testCase) => testCase.verify.type === 'scorer')
-  const runtimeCases = dataset.filter((testCase) => testCase.verify.type === 'runtime')
+  const scorerOnlyCases = dataset.filter(
+    (testCase) => testCase.verify.scorer && !testCase.verify.runtime,
+  )
+  const runtimeCases = dataset.filter((testCase) => testCase.verify.runtime)
 
-  if (codegenCases.length > 0) {
+  if (scorerOnlyCases.length > 0) {
     describe.concurrent(`${groupName}${labelSuffix}`, () => {
-      for (const testCase of codegenCases) {
+      for (const testCase of scorerOnlyCases) {
         it(`${testNamePrefix}${testCase.configPath}`, async () => {
           const result = await runCodegenCase(testCase, label, {
             agentModel,

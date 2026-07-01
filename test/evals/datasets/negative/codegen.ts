@@ -12,9 +12,10 @@ export const negativeCorrectionCodegenDataset: EvalCase[] = [
     input:
       'This config has a bug in the access control. Fix the read access function so it returns a proper boolean instead of a string.',
     verify: {
-      type: 'scorer',
-      expected:
-        'access.read returns a boolean (e.g. Boolean(req.user) or true) instead of the string "yes"/"no"',
+      scorer: {
+        expected:
+          'access.read returns a boolean (e.g. Boolean(req.user) or true) instead of the string "yes"/"no"',
+      },
     },
   },
   {
@@ -23,9 +24,10 @@ export const negativeCorrectionCodegenDataset: EvalCase[] = [
     input:
       'This config has a bug in the beforeChange hook. Fix it so the hook correctly returns the data object after mutation.',
     verify: {
-      type: 'scorer',
-      expected:
-        'beforeChange hook adds a return statement returning the data object after setting data.updatedAt',
+      scorer: {
+        expected:
+          'beforeChange hook adds a return statement returning the data object after setting data.updatedAt',
+      },
     },
   },
   {
@@ -34,8 +36,9 @@ export const negativeCorrectionCodegenDataset: EvalCase[] = [
     input:
       "This config has an invalid field type. Fix the title field so it uses a valid Payload field type ('text') instead of the invalid one.",
     verify: {
-      type: 'scorer',
-      expected: "title field type changed from 'not-a-real-type' to 'text'",
+      scorer: {
+        expected: "title field type changed from 'not-a-real-type' to 'text'",
+      },
     },
   },
 ]
@@ -52,9 +55,10 @@ export const negativeInvalidInstructionDataset: EvalCase[] = [
     input:
       "Change the type of the title field from 'text' to 'not-a-real-type'. This is an intentional negative test to verify the evaluation pipeline correctly catches TypeScript type errors.",
     verify: {
-      type: 'scorer',
-      expected:
-        "TypeScript compilation error — 'not-a-real-type' is not a valid Payload field type and must be rejected by tsc",
+      scorer: {
+        expected:
+          "TypeScript compilation error — 'not-a-real-type' is not a valid Payload field type and must be rejected by tsc",
+      },
     },
   },
 ]
