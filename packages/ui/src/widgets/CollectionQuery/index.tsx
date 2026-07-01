@@ -5,9 +5,11 @@ import { getTranslation } from '@payloadcms/translations'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
+import type { WidgetListItem } from '../WidgetCard/index.js'
 import type { CollectionFieldPaths } from './getCollectionFieldPaths.js'
 
-import '../../elements/Card/index.css'
+import { formatRelativeDate, getRelativeTimeFormat } from '../../utilities/formatRelativeDate.js'
+import { WidgetCard, WidgetList } from '../WidgetCard/index.js'
 import './index.css'
 import { getCollectionFieldPaths } from './getCollectionFieldPaths.js'
 
@@ -109,49 +111,29 @@ export async function CollectionQueryWidget({
   const documentLabelPath = getCollectionDocumentLabelPath(collectionConfig.admin)
   const relativeTimeFormat = getRelativeTimeFormat(i18n.language)
 
-  return (
-    <div className="card collection-query-widget">
-      <div className="collection-query-widget__header">
-        <h3 className="collection-query-widget__title">{title}</h3>
-      </div>
-      {docs.length > 0 ? (
-        <ul className="collection-query-widget__rows">
-          {docs.map((doc) => {
-            const sortMeta = getDocSortMeta({ doc, i18n, relativeTimeFormat, sortField })
+  const items: WidgetListItem[] = docs.map((doc) => {
+    const sortMeta = getDocSortMeta({ doc, i18n, relativeTimeFormat, sortField })
 
-            return (
-              <li className="collection-query-widget__row" key={doc.id}>
-                <a
-                  className="collection-query-widget__row-link"
-                  href={getDocumentHref({
-                    id: doc.id,
-                    adminRoute,
-                    collectionSlug: relatedCollection,
-                  })}
-                >
-                  <span className="collection-query-widget__row-main">
-                    <span className="collection-query-widget__row-title">
-                      {getDocLabel({ doc, documentLabelPath })}
-                    </span>
-                  </span>
-                  <span className="collection-query-widget__row-meta">
-                    {sortMeta ? (
-                      sortMeta.dateTime ? (
-                        <time dateTime={sortMeta.dateTime}>{sortMeta.label}</time>
-                      ) : (
-                        sortMeta.label
-                      )
-                    ) : null}
-                  </span>
-                </a>
-              </li>
-            )
-          })}
-        </ul>
-      ) : (
-        <p className="collection-query-widget__empty">{i18n.t('general:noResultsFound')}</p>
-      )}
-    </div>
+    return {
+      href: getDocumentHref({ id: doc.id, adminRoute, collectionSlug: relatedCollection }),
+      key: String(doc.id),
+      main: (
+        <span className="widget-card__row-title">{getDocLabel({ doc, documentLabelPath })}</span>
+      ),
+      meta: sortMeta ? (
+        sortMeta.dateTime ? (
+          <time dateTime={sortMeta.dateTime}>{sortMeta.label}</time>
+        ) : (
+          sortMeta.label
+        )
+      ) : null,
+    }
+  })
+
+  return (
+    <WidgetCard className="collection-query-widget" title={title}>
+      <WidgetList emptyMessage={i18n.t('general:noResultsFound')} items={items} />
+    </WidgetCard>
   )
 }
 
@@ -165,10 +147,7 @@ function CollectionQueryError({
   title: string
 }) {
   return (
-    <div className="card collection-query-widget collection-query-widget--error">
-      <div className="collection-query-widget__header">
-        <h3 className="collection-query-widget__title">{title}</h3>
-      </div>
+    <WidgetCard className="collection-query-widget collection-query-widget--error" title={title}>
       <div className="collection-query-widget__error">
         <p className="collection-query-widget__error-title">
           {i18n.t('dashboard:widgetConfigurationError')}
@@ -179,7 +158,7 @@ function CollectionQueryError({
           ))}
         </ul>
       </div>
-    </div>
+    </WidgetCard>
   )
 }
 
@@ -407,50 +386,6 @@ function getValueByPath({ object, path }: { object: Record<string, unknown>; pat
 
     return (value as Record<string, unknown>)[segment]
   }, object)
-}
-
-function getRelativeTimeFormat(language: string) {
-  try {
-    return new Intl.RelativeTimeFormat(language, { numeric: 'auto', style: 'narrow' })
-  } catch {
-    return new Intl.RelativeTimeFormat('en', { numeric: 'auto', style: 'narrow' })
-  }
-}
-
-const relativeTimeDivisions: { amount: number; unit: Intl.RelativeTimeFormatUnit }[] = [
-  { amount: 60, unit: 'seconds' },
-  { amount: 60, unit: 'minutes' },
-  { amount: 24, unit: 'hours' },
-  { amount: 7, unit: 'days' },
-  { amount: 4.34524, unit: 'weeks' },
-  { amount: 12, unit: 'months' },
-  { amount: Number.POSITIVE_INFINITY, unit: 'years' },
-]
-
-function formatRelativeDate({
-  relativeTimeFormat,
-  value,
-}: {
-  relativeTimeFormat: Intl.RelativeTimeFormat
-  value: string
-}) {
-  const date = new Date(value)
-
-  if (Number.isNaN(date.getTime())) {
-    return value
-  }
-
-  let duration = (date.getTime() - Date.now()) / 1000
-
-  for (const division of relativeTimeDivisions) {
-    if (Math.abs(duration) < division.amount) {
-      return relativeTimeFormat.format(Math.round(duration), division.unit)
-    }
-
-    duration /= division.amount
-  }
-
-  return relativeTimeFormat.format(Math.round(duration), 'years')
 }
 
 function isDateString(value: string) {

@@ -125,6 +125,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Polje za sortiranje "{{field}}" nije moguće sortirati u kolekciji "{{collection}}".',
     widgetQueryError: 'Nije moguće učitati dokumente za ovaj vidžet.',
+    widgetRecentlyViewedEmpty: 'Još uvek niste pregledali nijedan dokument.',
+    widgetRecentlyViewedTitle: 'Nedavno ste pregledali',
     widgetSelectCollectionFirst: 'Izaberite Collection pre nego što izaberete sortiranje',
     widgetSelectSortField: 'Izaberite polje po kojem želite da sortirate',
     widgetSortDirectionLabel: 'Smer sortiranja',
