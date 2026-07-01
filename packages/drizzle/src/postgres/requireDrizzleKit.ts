@@ -1,10 +1,8 @@
-import { createRequire } from 'module'
-
 import type { RequireDrizzleKit } from '../types.js'
 
-const require = createRequire(import.meta.url)
-
 export const requireDrizzleKit: RequireDrizzleKit = () => {
+  const { createRequire } = require('module')
+  const require = createRequire(import.meta.url)
   const {
     generateDrizzleJson,
     generateMigration,
