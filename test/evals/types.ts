@@ -1,7 +1,9 @@
 import type { LanguageModel } from 'ai'
 import type { Payload } from 'payload'
+import type { ExpectStatic } from 'vitest'
 
-import type { Assertion } from './assertions/types.js'
+import type { ParsedConfig } from './assertions/parseConfig.js'
+import type { EvalConfig } from './evalConfig.js'
 import type { RunnerKind, SkillInstallMode } from './runner/types.js'
 
 // Dataset
@@ -32,23 +34,46 @@ export type EvalCase = {
   configPath: string
   /** Task prompt given to the model. */
   input: string
-  /** Defines how this case is checked. */
-  verify: {
-    /** Optional structural assertions. Failures stop before runtime or scorer. */
-    assertions?: Assertion[]
-    runtime?: {
-      /**
-       * Boots the generated config and calls `check` with a real Payload Local
-       * API object. Return `[]` to pass, or problem strings to fail.
-       */
-      check: (args: { payload: Payload }) => Promise<string[]> | string[]
-    }
-    scorer?: {
-      /** Expected change description passed to the LLM scorer. */
-      expected: string
-    }
-  }
+  /**
+   * Checks the generated config after TypeScript passes.
+   *
+   * Use `config` for deterministic checks against the imported generated
+   * config, `ast` for source-level checks, `payload.*` when the generated
+   * config must boot and write/read real data, and `return score(...)` when
+   * the LLM scorer should judge the result.
+   */
+  verify: (args: EvalVerifyContext) => EvalVerifyResult | Promise<EvalVerifyResult>
 }
+
+export type EvalExpect = ExpectStatic
+
+export type EvalScore = (
+  expected: string,
+  evidence?: unknown,
+) => ConfigChangeScorerResult | Promise<ConfigChangeScorerResult>
+
+export type EvalVerifyContext = {
+  /** Source-level AST summary from the existing TypeScript parser. */
+  ast: ParsedConfig
+  /** Imported generated config, normalized for easy eval assertions. */
+  config: EvalConfig
+  expect: EvalExpect
+  /**
+   * Lazy Payload Local API for the generated config. The eval only boots Payload
+   * if this object is actually used.
+   */
+  payload: Payload
+  /**
+   * Runs the LLM scorer. Return this from `verify` when the scorer should decide
+   * the final score, optionally with runtime evidence to score instead of a pure
+   * config diff.
+   */
+  score: EvalScore
+  /** Complete generated `payload.config.ts` source. */
+  source: string
+}
+
+export type EvalVerifyResult = ConfigChangeScorerResult | void
 
 // Models
 export type ModelKey = 'openai:gpt-4o-mini' | 'openai:gpt-5.2'
@@ -117,8 +142,8 @@ export type EvalResult = {
   /** Scorer sub-score: fraction of key concepts present (0–1) */
   completeness?: number
   confidence: number
-  /** For codegen results: folder under `test/evals/fixtures/` that contains the starter config. */
-  configPath?: string
+  /** Folder under `test/evals/fixtures/` that contains the starter config. */
+  configPath: string
   /** Scorer sub-score: factual accuracy of the answer (0–1) */
   correctness?: number
   /** Runner model ID (e.g. "openai/gpt-5.2") — surfaced in the dashboard for cross-run comparison */
@@ -138,6 +163,8 @@ export type EvalResult = {
    * read sites should default-coerce to `'llm'`.
    */
   runnerKind: RunnerKind
+  /** True when `verify` booted the generated config through the lazy Payload API. */
+  runtimeUsed?: boolean
   /** Weighted score: (0.6 × correctness) + (0.4 × completeness) */
   score?: number
   /** For agent results only: how the skill was installed in the workdir. */

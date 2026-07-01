@@ -32,51 +32,26 @@ export function registerCodegenCases(
     testNamePrefix = '',
   } = options
 
-  const scorerOnlyCases = dataset.filter(
-    (testCase) => testCase.verify.scorer && !testCase.verify.runtime,
-  )
-  const runtimeCases = dataset.filter((testCase) => testCase.verify.runtime)
-
-  if (scorerOnlyCases.length > 0) {
-    describe.concurrent(`${groupName}${labelSuffix}`, () => {
-      for (const testCase of scorerOnlyCases) {
-        it(`${testNamePrefix}${testCase.configPath}`, async () => {
-          const result = await runCodegenCase(testCase, label, {
-            agentModel,
-            kind,
-            runnerModel,
-            skillInstall,
-            systemPromptKey,
-          })
-
-          if (expectPass) {
-            expect(result.pass, caseFailureMessage(result)).toBe(true)
-          } else {
-            expect(
-              result.pass,
-              'Pipeline should have caught the deliberately broken config but it passed',
-            ).toBe(false)
-          }
+  describe.concurrent(`${groupName}${labelSuffix}`, () => {
+    for (const testCase of dataset) {
+      it(`${testNamePrefix}${testCase.configPath}`, async () => {
+        const result = await runCodegenCase(testCase, label, {
+          agentModel,
+          kind,
+          runnerModel,
+          skillInstall,
+          systemPromptKey,
         })
-      }
-    })
-  }
 
-  if (runtimeCases.length > 0) {
-    describe(`Runtime${labelSuffix}`, () => {
-      for (const testCase of runtimeCases) {
-        it(`${testNamePrefix}${testCase.input}`, async () => {
-          const result = await runCodegenCase(testCase, label, {
-            agentModel,
-            kind,
-            runnerModel,
-            skillInstall,
-            systemPromptKey,
-          })
-
+        if (expectPass) {
           expect(result.pass, caseFailureMessage(result)).toBe(true)
-        })
-      }
-    })
-  }
+        } else {
+          expect(
+            result.pass,
+            'Pipeline should have caught the deliberately broken config but it passed',
+          ).toBe(false)
+        }
+      })
+    }
+  })
 }
