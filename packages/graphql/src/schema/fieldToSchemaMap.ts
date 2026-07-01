@@ -165,16 +165,29 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     parentIsLocalized,
     parentName,
   }) => {
+    // Per-field map of block slug -> GraphQL type, used by the union's `resolveType`.
+    // Block slugs are unique within a single blocks field, but not across collections,
+    // so resolution must not rely on the shared `graphqlResult.types.blockTypes` cache,
+    // which is keyed by the globally-unique GraphQL type name.
+    const blockTypesBySlug: Record<string, GraphQLObjectType<any, any>> = {}
+
     const blockTypes: GraphQLObjectType<any, any>[] = field.blocks.reduce((acc, _block) => {
-      const blockSlug = typeof _block === 'string' ? _block : _block.slug
-      if (!graphqlResult.types.blockTypes[blockSlug]) {
-        // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
-        const block =
-          typeof _block === 'string' ? config.blocks.find((b) => b.slug === _block) : _block
+      // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
+      const block =
+        typeof _block === 'string' ? config.blocks.find((b) => b.slug === _block) : _block
 
-        const interfaceName =
-          block?.interfaceName || block?.graphQL?.singularName || toWords(block.slug, true)
+      if (!block) {
+        return acc
+      }
 
+      const interfaceName =
+        block.interfaceName || block.graphQL?.singularName || toWords(block.slug, true)
+
+      // Cache by the GraphQL type name, not the slug. Two different collections can each
+      // define an inline block that shares a slug but has a different interfaceName and
+      // fields; keying by slug made the second reuse the first's type. Type names are
+      // globally unique, so the interfaceName is the correct, collision-free key.
+      if (!graphqlResult.types.blockTypes[interfaceName]) {
         const objectType = buildObjectType({
           name: interfaceName,
           config,
@@ -197,12 +210,14 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
             ...objectType.extensions,
             blockSlug: block.slug,
           }
-          graphqlResult.types.blockTypes[block.slug] = objectType
+          graphqlResult.types.blockTypes[interfaceName] = objectType
         }
       }
 
-      if (graphqlResult.types.blockTypes[blockSlug]) {
-        acc.push(graphqlResult.types.blockTypes[blockSlug])
+      const objectType = graphqlResult.types.blockTypes[interfaceName]
+      if (objectType) {
+        acc.push(objectType)
+        blockTypesBySlug[block.slug] = objectType
       }
 
       return acc
@@ -218,7 +233,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       new GraphQLNonNull(
         new GraphQLUnionType({
           name: fullName,
-          resolveType: (data) => graphqlResult.types.blockTypes[data.blockType].name,
+          resolveType: (data) => blockTypesBySlug[data.blockType].name,
           types: blockTypes,
         }),
       ),
