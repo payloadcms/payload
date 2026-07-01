@@ -4,6 +4,7 @@ import { upload } from '@vercel/blob/client'
 import { formatAdminURL } from 'payload/shared'
 
 export type VercelBlobClientUploadHandlerExtra = {
+  access: 'private' | 'public'
   addRandomSuffix: boolean
   useCompositePrefixes: boolean
 }
@@ -21,7 +22,7 @@ export const VercelBlobClientUploadHandler =
       apiRoute,
       collectionSlug,
       docPrefix,
-      extra: { addRandomSuffix, useCompositePrefixes = false },
+      extra: { access, addRandomSuffix, useCompositePrefixes = false },
       file,
       prefix,
       serverHandlerPath,
@@ -42,7 +43,7 @@ export const VercelBlobClientUploadHandler =
 
       // upload the file directly to Vercel Blob using the signed URL
       const result = await upload(pathname, file, {
-        access: 'public',
+        access,
         clientPayload: collectionSlug,
         contentType: file.type,
         handleUploadUrl: endpointRoute,
