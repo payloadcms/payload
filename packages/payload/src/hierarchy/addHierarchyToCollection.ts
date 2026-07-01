@@ -12,14 +12,12 @@ export const addHierarchyToCollection = ({
   slugFieldName,
   slugPathFieldName,
   titlePathFieldName,
-  usePathAsTitle = false,
 }: {
   collectionConfig: CollectionConfig
   parentFieldName: string
   slugFieldName?: string
   slugPathFieldName: string
   titlePathFieldName: string
-  usePathAsTitle?: boolean
 }): { isTitleLocalized: boolean; titleFieldName: string } => {
   // Read the real title field BEFORE adding virtual fields or overriding useAsTitle.
   // When usePathAsTitle is true, useAsTitle still points at the real content field here
@@ -70,7 +68,6 @@ export const addHierarchyToCollection = ({
     afterRead: [
       ...(collectionConfig.hooks?.afterRead || []),
       hierarchyCollectionAfterRead({
-        alwaysComputePaths: usePathAsTitle,
         isTitleLocalized,
         parentFieldName,
         slugPathFieldName,

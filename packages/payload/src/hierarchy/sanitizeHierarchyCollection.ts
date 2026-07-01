@@ -118,7 +118,6 @@ export const sanitizeHierarchyCollection = (
     slugFieldName: slugField,
     slugPathFieldName,
     titlePathFieldName,
-    usePathAsTitle,
   })
 
   // If collectionSpecific, add beforeValidate hook to enforce scope inheritance

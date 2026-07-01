@@ -96,7 +96,7 @@ describe('Hierarchy', () => {
       await payload.delete({ collection: 'folders', where: {} })
     })
 
-    it('should automatically compute _h_titlePath on read without context flag', async () => {
+    it('should not compute _h_titlePath on read without opt-in flags', async () => {
       const parent = await payload.create({
         collection: 'folders',
         data: { name: 'General' },
@@ -107,16 +107,16 @@ describe('Hierarchy', () => {
         data: { name: 'Subfolder', parentFolder: parent.id },
       })
 
-      // Fetch without context.hierarchy.computePaths — should still compute because usePathAsTitle=true
+      // Fetch without any path-compute opt-in flags
       const result = await payload.findByID({
         id: child.id,
         collection: 'folders',
       })
 
-      expect(result._h_titlePath).toBe('General > Subfolder')
+      expect(result._h_titlePath).toBeUndefined()
     })
 
-    it('should set _h_titlePath to document title for root documents', async () => {
+    it('should set _h_titlePath to document title for root documents when opt-in is set', async () => {
       const root = await payload.create({
         collection: 'folders',
         data: { name: 'Root Folder' },
@@ -125,6 +125,7 @@ describe('Hierarchy', () => {
       const result = await payload.findByID({
         id: root.id,
         collection: 'folders',
+        context: { hierarchy: { computePaths: true } },
       })
 
       expect(result._h_titlePath).toBe('Root Folder')

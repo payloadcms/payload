@@ -41,16 +41,8 @@ function isPathFieldSelected(
 
 type Args = {
   /**
-   * When true, always compute paths on every read (used when usePathAsTitle is enabled
-   * so the full path is available wherever the document is used — including as the text
-   * shown in relationship pills populated via depth). When false (default), paths are
-   * only computed on demand via select, context flag, or query param.
-   */
-  alwaysComputePaths?: boolean
-  /**
    * Whether the title field is localized. Passed explicitly to avoid re-deriving from
-   * collection config (which may have useAsTitle overridden to the virtual path field
-   * when usePathAsTitle is enabled).
+   * collection config on every read.
    */
   isTitleLocalized: boolean
   /**
@@ -69,7 +61,6 @@ type Args = {
 
 export const hierarchyCollectionAfterRead =
   ({
-    alwaysComputePaths = false,
     isTitleLocalized,
     parentFieldName,
     slugPathFieldName,
@@ -96,7 +87,6 @@ export const hierarchyCollectionAfterRead =
 
     // Determine if paths should be computed
     const shouldComputePaths =
-      alwaysComputePaths || // Always on when usePathAsTitle is enabled
       hierarchyContext?.computePaths === true || // Explicit namespaced context flag
       hierarchyContext?.computePathsViaSelect === true || // Flag from beforeOperation (select-triggered)
       hasHierarchyComputePathsQuery || // Namespaced query parameter
