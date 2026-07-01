@@ -1,4 +1,5 @@
 import type { LanguageModel } from 'ai'
+import type { Payload } from 'payload'
 
 import type { Assertion } from './assertions/types.js'
 import type { RunnerKind, SkillInstallMode } from './runner/types.js'
@@ -19,14 +20,41 @@ export type EvalCategory =
   | 'structure'
   | 'testing'
 
-export type CodegenEvalCase = {
-  /** Optional structural assertions evaluated against the LLM output. Failing any short-circuits the case to fail before the LLM scorer runs. */
-  assertions?: Assertion[]
+export type EvalCase = {
   category: EvalCategory
-  expected: string
-  /** Path to the starter fixture directory relative to test/evals/fixtures/ */
-  fixturePath: string
+  /**
+   * Folder under `test/evals/fixtures/` that contains the `payload.config.ts`
+   * for this case.
+   *
+   * Eval cases read it as the starter config the model edits. Runtime cases
+   * boot the generated config after TypeScript passes.
+   */
+  configPath: string
+  /** Task prompt given to the model. */
   input: string
+  /** Defines how this case is checked. */
+  verify:
+    | {
+        /** Optional structural assertions. Failures short-circuit before the scorer. */
+        assertions?: Assertion[]
+        /** Expected change description passed to the LLM scorer. */
+        expected: string
+        /**
+         * Runs the codegen pipeline: model edits the config, TypeScript and
+         * optional structural assertions run, then the LLM scorer compares the
+         * output to `expected`.
+         */
+        type: 'scorer'
+      }
+    | {
+        check: (args: { payload: Payload }) => Promise<string[]> | string[]
+        /**
+         * Runs the codegen pipeline, boots the generated config, and calls
+         * `check` with a real Payload Local API object. Return `[]` to pass,
+         * or problem strings to fail.
+         */
+        type: 'runtime'
+      }
 }
 
 // Models
@@ -96,10 +124,10 @@ export type EvalResult = {
   /** Scorer sub-score: fraction of key concepts present (0–1) */
   completeness?: number
   confidence: number
+  /** For codegen results: folder under `test/evals/fixtures/` that contains the starter config. */
+  configPath?: string
   /** Scorer sub-score: factual accuracy of the answer (0–1) */
   correctness?: number
-  /** For codegen results: the fixture directory the starter file came from, relative to test/evals/fixtures/. Used by the dashboard to render a diff. */
-  fixturePath?: string
   /** Runner model ID (e.g. "openai/gpt-5.2") — surfaced in the dashboard for cross-run comparison */
   modelId?: string
   pass: boolean

@@ -56,7 +56,7 @@ setting `EVAL_RUNNER` / `EVAL_SKILL` / `EVAL_MODEL` directly works too.
 
 ## Required env vars
 
-- `OPENAI_API_KEY` **or** `ANTHROPIC_API_KEY` — at least one is required for **all** runs. Both the runner and the LLM scorer default to OpenAI models when `OPENAI_API_KEY` is set, and otherwise fall back to Anthropic (`claude-sonnet-4-6` runner, `claude-haiku-4-5` scorer).
+- `OPENAI_API_KEY` **or** `ANTHROPIC_API_KEY` — at least one is required. Both the runner and the LLM scorer default to OpenAI models when `OPENAI_API_KEY` is set, and otherwise fall back to Anthropic (`claude-sonnet-4-6` runner, `claude-haiku-4-5` scorer).
 - The `claude-code` runner uses `ANTHROPIC_API_KEY` by default; if that's rejected (e.g. an org OAuth pin), it automatically falls back to a one-time login into an isolated sandbox config dir (see Variants above).
 
 ## Optional env knobs
@@ -69,3 +69,9 @@ setting `EVAL_RUNNER` / `EVAL_SKILL` / `EVAL_MODEL` directly works too.
 
 See `~/.claude/plans/2026-05-06_ai-evals-agent-runners_agent-eval-runners/2-DESIGN.md`
 for the agent-runner design and rationale.
+
+Every dataset row has a `verify` object. `verify.type: 'scorer'` runs the
+normal codegen pipeline, optional structural assertions, and the LLM scorer.
+`verify.type: 'runtime'` runs the same codegen pipeline, boots the generated
+config, and calls `verify.check` against the database. It skips only the LLM
+scorer.

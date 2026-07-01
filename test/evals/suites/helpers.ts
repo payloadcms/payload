@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import type { CodegenEvalCase } from '../types.js'
+import type { EvalCase } from '../types.js'
 import type { SuiteOptions } from './types.js'
 
 import { runCodegenCase } from '../runCodegenDataset.js'
@@ -11,12 +11,12 @@ type RegisterCodegenOptions = {
   expectPass?: boolean
   /** Custom group name. Defaults to "Codegen". */
   groupName?: string
-  /** Prefix prepended to each test's fixturePath name. */
+  /** Prefix prepended to each test's config path/name. */
   testNamePrefix?: string
 } & SuiteOptions
 
 export function registerCodegenCases(
-  dataset: CodegenEvalCase[],
+  dataset: EvalCase[],
   label: string,
   options: RegisterCodegenOptions = {},
 ) {
@@ -31,25 +31,50 @@ export function registerCodegenCases(
     systemPromptKey,
     testNamePrefix = '',
   } = options
-  describe.concurrent(`${groupName}${labelSuffix}`, () => {
-    for (const testCase of dataset) {
-      it(`${testNamePrefix}${testCase.fixturePath}`, async () => {
-        const result = await runCodegenCase(testCase, label, {
-          agentModel,
-          kind,
-          runnerModel,
-          skillInstall,
-          systemPromptKey,
+
+  const codegenCases = dataset.filter((testCase) => testCase.verify.type === 'scorer')
+  const runtimeCases = dataset.filter((testCase) => testCase.verify.type === 'runtime')
+
+  if (codegenCases.length > 0) {
+    describe.concurrent(`${groupName}${labelSuffix}`, () => {
+      for (const testCase of codegenCases) {
+        it(`${testNamePrefix}${testCase.configPath}`, async () => {
+          const result = await runCodegenCase(testCase, label, {
+            agentModel,
+            kind,
+            runnerModel,
+            skillInstall,
+            systemPromptKey,
+          })
+
+          if (expectPass) {
+            expect(result.pass, caseFailureMessage(result)).toBe(true)
+          } else {
+            expect(
+              result.pass,
+              'Pipeline should have caught the deliberately broken config but it passed',
+            ).toBe(false)
+          }
         })
-        if (expectPass) {
+      }
+    })
+  }
+
+  if (runtimeCases.length > 0) {
+    describe(`Runtime${labelSuffix}`, () => {
+      for (const testCase of runtimeCases) {
+        it(`${testNamePrefix}${testCase.input}`, async () => {
+          const result = await runCodegenCase(testCase, label, {
+            agentModel,
+            kind,
+            runnerModel,
+            skillInstall,
+            systemPromptKey,
+          })
+
           expect(result.pass, caseFailureMessage(result)).toBe(true)
-        } else {
-          expect(
-            result.pass,
-            'Pipeline should have caught the deliberately broken config but it passed',
-          ).toBe(false)
-        }
-      })
-    }
-  })
+        })
+      }
+    })
+  }
 }

@@ -1,8 +1,11 @@
-import { readFileSync } from 'node:fs'
+import type { Payload } from 'payload'
+
+import { randomUUID } from 'node:crypto'
+import { readFileSync, rmSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import type { CodegenEvalCase, EvalResult, RunCodegenDatasetOptions } from './types.js'
+import type { EvalCase, EvalResult, RunCodegenDatasetOptions } from './types.js'
 
 import { evaluateAssertions } from './assertions/index.js'
 import {
@@ -26,12 +29,13 @@ const fixturesDir = path.join(__dirname, 'fixtures')
  * Runs the full codegen pipeline for a single eval case:
  *   1. LLM modifies the per-case starter payload.config.ts
  *   2. TypeScript compiler validates the result (hard check)
- *   3. LLM scorer compares before/after and names the precise change (soft check)
+ *   3. `verify.type` decides whether to run the LLM scorer or boot the
+ *      generated config and check real DB state.
  *
  * Results are cached by a hash of the inputs. Pass label for logging context.
  */
 export async function runCodegenCase(
-  testCase: CodegenEvalCase,
+  testCase: EvalCase,
   label: string,
   options: RunCodegenDatasetOptions = {},
 ): Promise<EvalResult> {
@@ -56,30 +60,33 @@ export async function runCodegenCase(
       : llmModelId
 
   const starterConfig = readFileSync(
-    path.join(fixturesDir, testCase.fixturePath, 'payload.config.ts'),
+    path.join(fixturesDir, testCase.configPath, 'payload.config.ts'),
     'utf-8',
   )
 
   const isSameLogicalCase = (r: EvalResult): boolean =>
     r.question === testCase.input &&
-    r.fixturePath === testCase.fixturePath &&
+    r.configPath === testCase.configPath &&
     (r.runnerKind ?? 'llm') === kind &&
     (kind === 'llm'
       ? r.modelId === resolvedModelId && r.systemPromptKey === systemPromptKey
       : r.modelId === resolvedModelId && r.skillInstall === skillInstall)
 
-  const key = codegenKey({
-    expected: testCase.expected,
-    fixtureContent: starterConfig,
-    input: testCase.input,
-    modelId: resolvedModelId,
-    runnerKind: kind,
-    skillInstall: kind === 'claude-code' ? skillInstall : undefined,
-    systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
-  })
+  const key =
+    testCase.verify.type === 'scorer'
+      ? codegenKey({
+          expected: testCase.verify.expected,
+          fixtureContent: starterConfig,
+          input: testCase.input,
+          modelId: resolvedModelId,
+          runnerKind: kind,
+          skillInstall: kind === 'claude-code' ? skillInstall : undefined,
+          systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
+        })
+      : undefined
 
   const bypassCache = isCacheBypassed()
-  const cached = !bypassCache && getCachedResult(key)
+  const cached = key && !bypassCache ? getCachedResult(key) : null
   if (cached) {
     const cachedScore = cached.score != null ? `  score: ${cached.score.toFixed(2)}` : ''
     console.log(`[${cached.category}] ${cached.pass ? '✓ PASS' : '✗ FAIL'} (cached)${cachedScore}`)
@@ -101,10 +108,8 @@ export async function runCodegenCase(
 
   const { errors: tscErrors, valid } = await validateConfigTypes(
     modifiedConfig,
-    testCase.fixturePath,
+    testCase.configPath,
   )
-
-  const assertionErrors = valid ? evaluateAssertions(modifiedConfig, testCase.assertions ?? []) : []
 
   if (!valid) {
     const result: EvalResult = {
@@ -113,7 +118,7 @@ export async function runCodegenCase(
       answer: modifiedConfig,
       category: testCase.category,
       confidence,
-      fixturePath: testCase.fixturePath,
+      configPath: testCase.configPath,
       modelId: resolvedModelId,
       pass: false,
       question: testCase.input,
@@ -134,12 +139,14 @@ export async function runCodegenCase(
         },
       },
     }
-    setCachedResult(key, result)
-    pruneStaleEntries(key, isSameLogicalCase)
+    if (key) {
+      setCachedResult(key, result)
+      pruneStaleEntries(key, isSameLogicalCase)
+    }
     writeFailedCodegenAssertion({
       category: testCase.category,
       confidence,
-      fixturePath: testCase.fixturePath,
+      configPath: testCase.configPath,
       label,
       modifiedConfig,
       question: testCase.input,
@@ -147,12 +154,63 @@ export async function runCodegenCase(
       starterConfig,
       tscErrors,
     })
-    console.log(`[${result.category}] ✗ FAIL [TSC]  ${testCase.fixturePath}`)
+    console.log(`[${result.category}] ✗ FAIL [TSC]  ${testCase.configPath}`)
     for (const err of tscErrors) {
       console.log(`  TSC: ${err}`)
     }
     return result
   }
+
+  if (testCase.verify.type === 'runtime') {
+    const problems = await runRuntimeVerification(testCase, modifiedConfig)
+    const pass = problems.length === 0
+    const result: EvalResult = {
+      agentExitCode,
+      agentLog,
+      answer: modifiedConfig,
+      category: testCase.category,
+      confidence,
+      configPath: testCase.configPath,
+      modelId: resolvedModelId,
+      pass,
+      question: testCase.input,
+      reasoning: pass ? 'Runtime verification passed' : problems.join('\n'),
+      runnerKind: kind,
+      skillInstall: kind === 'claude-code' ? skillInstall : undefined,
+      starterContent: starterConfig,
+      systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
+      transcript,
+      usage: {
+        runner: runnerUsage,
+        total: {
+          cachedInputTokens: runnerUsage.cachedInputTokens,
+          inputTokens: runnerUsage.inputTokens,
+          outputTokens: runnerUsage.outputTokens,
+          totalTokens: runnerUsage.totalTokens,
+        },
+      },
+    }
+
+    const status = pass ? '✓ PASS' : '✗ FAIL'
+    console.log(`[${result.category}] ${status} [RUNTIME]  ${testCase.configPath}`)
+    if (!pass) {
+      writeFailedCodegenAssertion({
+        category: testCase.category,
+        confidence,
+        configPath: testCase.configPath,
+        label,
+        modifiedConfig,
+        question: testCase.input,
+        reasoning: result.reasoning,
+        starterConfig,
+      })
+      console.log(`  Reason: ${result.reasoning}`)
+    }
+
+    return result
+  }
+
+  const assertionErrors = evaluateAssertions(modifiedConfig, testCase.verify.assertions ?? [])
 
   if (assertionErrors.length > 0) {
     const result: EvalResult = {
@@ -162,7 +220,7 @@ export async function runCodegenCase(
       assertionErrors,
       category: testCase.category,
       confidence,
-      fixturePath: testCase.fixturePath,
+      configPath: testCase.configPath,
       modelId: resolvedModelId,
       pass: false,
       question: testCase.input,
@@ -182,19 +240,21 @@ export async function runCodegenCase(
         },
       },
     }
-    setCachedResult(key, result)
-    pruneStaleEntries(key, isSameLogicalCase)
+    if (key) {
+      setCachedResult(key, result)
+      pruneStaleEntries(key, isSameLogicalCase)
+    }
     writeFailedCodegenAssertion({
       category: testCase.category,
       confidence,
-      fixturePath: testCase.fixturePath,
+      configPath: testCase.configPath,
       label,
       modifiedConfig,
       question: testCase.input,
       reasoning: result.reasoning,
       starterConfig,
     })
-    console.log(`[${result.category}] ✗ FAIL [ASSERT]  ${testCase.fixturePath}`)
+    console.log(`[${result.category}] ✗ FAIL [ASSERT]  ${testCase.configPath}`)
     for (const err of assertionErrors) {
       console.log(`  ASSERT: ${err}`)
     }
@@ -209,9 +269,15 @@ export async function runCodegenCase(
     reasoning,
     score,
     usage: scorerUsage,
-  } = await scoreConfigChange(testCase.input, testCase.expected, starterConfig, modifiedConfig, {
-    model: scorerModel,
-  })
+  } = await scoreConfigChange(
+    testCase.input,
+    testCase.verify.expected,
+    starterConfig,
+    modifiedConfig,
+    {
+      model: scorerModel,
+    },
+  )
 
   const result: EvalResult = {
     agentExitCode,
@@ -221,8 +287,8 @@ export async function runCodegenCase(
     changeDescription,
     completeness,
     confidence,
+    configPath: testCase.configPath,
     correctness,
-    fixturePath: testCase.fixturePath,
     modelId: resolvedModelId,
     pass,
     question: testCase.input,
@@ -245,15 +311,17 @@ export async function runCodegenCase(
     },
   }
 
-  setCachedResult(key, result)
-  pruneStaleEntries(key, isSameLogicalCase)
+  if (key) {
+    setCachedResult(key, result)
+    pruneStaleEntries(key, isSameLogicalCase)
+  }
 
   if (!pass) {
     writeFailedCodegenAssertion({
       category: testCase.category,
       changeDescription,
       confidence,
-      fixturePath: testCase.fixturePath,
+      configPath: testCase.configPath,
       label,
       modifiedConfig,
       question: testCase.input,
@@ -277,20 +345,51 @@ export async function runCodegenCase(
   return result
 }
 
+async function runRuntimeVerification(
+  testCase: EvalCase,
+  modifiedConfig: string,
+): Promise<string[]> {
+  if (testCase.verify.type !== 'runtime') {
+    throw new Error(
+      `Runtime verifier received ${testCase.verify.type} case: ${testCase.configPath}`,
+    )
+  }
+
+  let payload: Payload | undefined
+  const configDir = path.resolve(fixturesDir, testCase.configPath)
+  const configFile = `payload.generated.${randomUUID()}.config.ts`
+  const configFilePath = path.join(configDir, configFile)
+  const suiteName = path.join('evals', 'fixtures', testCase.configPath)
+
+  writeFileSync(configFilePath, modifiedConfig, 'utf-8')
+
+  try {
+    const { initPayloadInt } = await import('../__helpers/shared/initPayloadInt.js')
+
+    payload = (await initPayloadInt(configDir, suiteName, undefined, configFile)).payload
+
+    return await testCase.verify.check({ payload })
+  } finally {
+    await payload?.destroy()
+    rmSync(configFilePath, { force: true })
+  }
+}
+
 /**
  * Runs codegen evals for an entire dataset and returns aggregate accuracy.
  * Delegates per-case work to runCodegenCase.
  */
 export async function runCodegenDataset(
-  dataset: CodegenEvalCase[],
+  dataset: EvalCase[],
   label: string,
   options: RunCodegenDatasetOptions = {},
 ): Promise<{ accuracy: number; results: EvalResult[] }> {
   const categories = [...new Set(dataset.map((c) => c.category))]
+
   console.log(`\n=== ${label} Eval Results (${dataset.length} cases) ===`)
   console.log(`  Categories: ${categories.join(', ')}`)
   for (const c of dataset) {
-    console.log(`  · ${c.fixturePath}`)
+    console.log(`  · ${c.configPath}`)
   }
 
   if (isCacheBypassed()) {

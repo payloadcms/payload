@@ -91,6 +91,14 @@ export default defineConfig({
         },
       },
       {
+        // Runtime eval cases in this project boot a real Payload config, which
+        // can import TSX routes from packages/next.
+        oxc: {
+          jsx: {
+            runtime: 'automatic',
+            importSource: 'react',
+          },
+        },
         test: {
           include: ['test/evals/**/*.spec.ts'],
           name: 'eval',
