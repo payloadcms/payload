@@ -62,16 +62,16 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_A6D73F5A".
+ * via the `definition` "LexicalNodes_D543C5B5".
  */
-export type LexicalNodes_A6D73F5A =
+export type LexicalNodes_D543C5B5 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_A6D73F5A>
+  | SerializedParagraphNode<LexicalNodes_D543C5B5>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_A6D73F5A>
+  | SerializedQuoteNode<LexicalNodes_D543C5B5>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -84,30 +84,29 @@ export type LexicalNodes_A6D73F5A =
       | 'static-url'
       | 'custom-live-preview'
       | 'conditional-url'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_A6D73F5A, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_A6D73F5A, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_A6D73F5A>
-  | SerializedListItemNode<LexicalNodes_A6D73F5A>
-  | SerializedHeadingNode<LexicalNodes_A6D73F5A>;
+  | SerializedAutoLinkNode<LexicalNodes_D543C5B5, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_D543C5B5, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_D543C5B5>
+  | SerializedListItemNode<LexicalNodes_D543C5B5>
+  | SerializedHeadingNode<LexicalNodes_D543C5B5>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_850D1707".
+ * via the `definition` "LexicalNodes_EBA54163".
  */
-export type LexicalNodes_850D1707 =
+export type LexicalNodes_EBA54163 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_850D1707>
+  | SerializedParagraphNode<LexicalNodes_EBA54163>
   | SerializedBlockNode<MediaBlock_1EDC4A89>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_850D1707>
+  | SerializedQuoteNode<LexicalNodes_EBA54163>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -120,34 +119,33 @@ export type LexicalNodes_850D1707 =
       | 'static-url'
       | 'custom-live-preview'
       | 'conditional-url'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_850D1707, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_850D1707, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_850D1707>
-  | SerializedListItemNode<LexicalNodes_850D1707>
-  | SerializedHeadingNode<LexicalNodes_850D1707>;
+  | SerializedAutoLinkNode<LexicalNodes_EBA54163, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_EBA54163, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_EBA54163>
+  | SerializedListItemNode<LexicalNodes_EBA54163>
+  | SerializedHeadingNode<LexicalNodes_EBA54163>;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_1A3BAFDD".
+ * via the `definition` "LexicalNodes_660DF7D8".
  */
-export type LexicalNodes_1A3BAFDD =
+export type LexicalNodes_660DF7D8 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_1A3BAFDD>
+  | SerializedParagraphNode<LexicalNodes_660DF7D8>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_1A3BAFDD>
+  | SerializedHeadingNode<LexicalNodes_660DF7D8>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
-  | SerializedQuoteNode<LexicalNodes_1A3BAFDD>
-  | SerializedListNode<LexicalNodes_1A3BAFDD>
-  | SerializedListItemNode<LexicalNodes_1A3BAFDD>
-  | SerializedAutoLinkNode<LexicalNodes_1A3BAFDD, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_1A3BAFDD, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_660DF7D8>
+  | SerializedListNode<LexicalNodes_660DF7D8>
+  | SerializedListItemNode<LexicalNodes_660DF7D8>
+  | SerializedAutoLinkNode<LexicalNodes_660DF7D8, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_660DF7D8, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -160,7 +158,6 @@ export type LexicalNodes_1A3BAFDD =
       | 'static-url'
       | 'custom-live-preview'
       | 'conditional-url'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -187,7 +184,6 @@ export interface Config {
     'static-url': StaticUrl;
     'custom-live-preview': CustomLivePreview;
     'conditional-url': ConditionalUrl;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -207,7 +203,6 @@ export interface Config {
     'static-url': StaticUrlSelect<false> | StaticUrlSelect<true>;
     'custom-live-preview': CustomLivePreviewSelect<false> | CustomLivePreviewSelect<true>;
     'conditional-url': ConditionalUrlSelect<false> | ConditionalUrlSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -322,7 +317,7 @@ export interface Page {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -332,8 +327,8 @@ export interface Page {
   testNumber?: number | null;
   localizedTitle?: string | null;
   relationToLocalized?: (string | null) | Post;
-  richTextLexical?: LexicalRichText<LexicalNodes_850D1707> | null;
-  richTextLexicalLocalized?: LexicalRichText<LexicalNodes_850D1707> | null;
+  richTextLexical?: LexicalRichText<LexicalNodes_EBA54163> | null;
+  richTextLexicalLocalized?: LexicalRichText<LexicalNodes_EBA54163> | null;
   relationshipAsUpload?: (string | null) | Media;
   relationshipMonoHasOne?: (string | null) | Post;
   relationshipMonoHasMany?: (string | Post)[] | null;
@@ -350,7 +345,7 @@ export interface Page {
   arrayOfRelationships?:
     | {
         uploadInArray?: (string | null) | Media;
-        richTextInArray?: LexicalRichText<LexicalNodes_1A3BAFDD> | null;
+        richTextInArray?: LexicalRichText<LexicalNodes_660DF7D8> | null;
         relationshipInArrayMonoHasOne?: (string | null) | Post;
         relationshipInArrayMonoHasMany?: (string | Post)[] | null;
         relationshipInArrayPolyHasOne?: {
@@ -394,7 +389,7 @@ export interface Tenant {
  */
 export interface Cta {
   invertBackground?: boolean | null;
-  richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+  richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
   links?:
     | {
         link: {
@@ -434,7 +429,7 @@ export interface Post {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -458,7 +453,7 @@ export interface Content {
   columns?:
     | {
         size?: ('oneThird' | 'half' | 'twoThirds' | 'full') | null;
-        richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+        richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
         enableLink?: boolean | null;
         link?: {
           type?: ('reference' | 'custom') | null;
@@ -491,7 +486,7 @@ export interface Content {
  * via the `definition` "Archive".
  */
 export interface Archive {
-  introContent?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+  introContent?: LexicalRichText<LexicalNodes_D543C5B5> | null;
   populateBy?: ('collection' | 'selection') | null;
   relationTo?: 'posts' | null;
   categories?: (string | Category)[] | null;
@@ -542,7 +537,7 @@ export interface Ssr {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -567,7 +562,7 @@ export interface SsrAutosave {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -613,7 +608,7 @@ export interface CustomLivePreview {
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'lowImpact';
-    richText?: LexicalRichText<LexicalNodes_A6D73F5A> | null;
+    richText?: LexicalRichText<LexicalNodes_D543C5B5> | null;
     media?: (string | null) | Media;
   };
   layout?: (Cta | Content | MediaBlock | Archive)[] | null;
@@ -633,31 +628,6 @@ export interface ConditionalUrl {
   id: string;
   title?: string | null;
   enabled?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -732,10 +702,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'conditional-url';
         value: string | ConditionalUrl;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1398,22 +1364,6 @@ export interface ConditionalUrlSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1698,7 +1648,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -1713,7 +1663,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

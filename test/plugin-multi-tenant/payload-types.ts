@@ -62,17 +62,17 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_68925DC9".
+ * via the `definition` "LexicalNodes_FABA6FC2".
  */
-export type LexicalNodes_68925DC9 =
+export type LexicalNodes_FABA6FC2 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_68925DC9>
+  | SerializedParagraphNode<LexicalNodes_FABA6FC2>
   | SerializedBlockNode<BlockWithRelationship>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_68925DC9>
+  | SerializedQuoteNode<LexicalNodes_FABA6FC2>
   | SerializedRelationshipNode<
       | 'tenants'
       | 'users'
@@ -83,17 +83,16 @@ export type LexicalNodes_68925DC9 =
       | 'multi-tenant-posts'
       | 'notTenanted'
       | 'folders'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_68925DC9, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_68925DC9, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_68925DC9>
-  | SerializedListItemNode<LexicalNodes_68925DC9>
-  | SerializedHeadingNode<LexicalNodes_68925DC9>;
+  | SerializedAutoLinkNode<LexicalNodes_FABA6FC2, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_FABA6FC2, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_FABA6FC2>
+  | SerializedListItemNode<LexicalNodes_FABA6FC2>
+  | SerializedHeadingNode<LexicalNodes_FABA6FC2>;
 
 export interface Config {
   auth: {
@@ -111,7 +110,6 @@ export interface Config {
     media: Media;
     notTenanted: NotTenanted;
     folders: Folder;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -133,7 +131,6 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     notTenanted: NotTenantedSelect<false> | NotTenantedSelect<true>;
     folders: FoldersSelect<false> | FoldersSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -233,7 +230,7 @@ export interface FoodItem {
   tenant?: (string | null) | Tenant;
   name: string;
   localizedName?: string | null;
-  content?: LexicalRichText<LexicalNodes_68925DC9> | null;
+  content?: LexicalRichText<LexicalNodes_FABA6FC2> | null;
   polymorphicRelationship?:
     | ({
         relationTo: 'relationships';
@@ -356,31 +353,6 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -442,10 +414,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'folders';
         value: string | Folder;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -641,22 +609,6 @@ export interface FoldersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -796,7 +748,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -811,7 +763,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

@@ -19,6 +19,7 @@ import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
+import { useElementHeightVariable } from '../../hooks/useElementHeightVariable.js'
 import { MoreIcon } from '../../icons/More/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
@@ -157,7 +158,16 @@ export const DocumentControls: React.FC<{
   const processing = useFormProcessing()
   const initializing = useFormInitializing()
 
+  const rootRef = useRef<HTMLDivElement>(null)
   const i18nRef = useRef(i18n)
+
+  // Only the page-level controls bar feeds the sticky layout offsets. Drawer instances
+  // (variant="drawerHeaderActions") must not publish the shared var or they'd clobber it.
+  useElementHeightVariable({
+    cssVar: '--doc-controls-height',
+    isEnabled: variant === 'default',
+    ref: rootRef,
+  })
   i18nRef.current = i18n
 
   const updateRelativeTime = useCallback(() => {
@@ -222,6 +232,7 @@ export const DocumentControls: React.FC<{
       className={[baseClass, variant !== 'default' && `${baseClass}--${variant}`]
         .filter(Boolean)
         .join(' ')}
+      ref={rootRef}
     >
       {variant === 'default' && (
         <div className={`${baseClass}__content`}>
@@ -369,6 +380,7 @@ export const DocumentControls: React.FC<{
             renderButton={({ active, ...buttonProps }) => (
               <Button
                 {...buttonProps}
+                aria-label={t('general:moreOptions')}
                 buttonStyle="ghost"
                 className={`${baseClass}__popup-button`}
                 icon={<MoreIcon />}
@@ -376,7 +388,6 @@ export const DocumentControls: React.FC<{
                 size="medium"
               />
             )}
-            size="medium"
             verticalAlign="bottom"
           >
             <PopupList.ButtonGroup>

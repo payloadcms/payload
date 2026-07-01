@@ -65,6 +65,174 @@ describe('configToJSONSchema', () => {
     })
   })
 
+  it('should generate separate input types when generateInputTypes is enabled', async () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [
+        { slug: 'authors', fields: [{ name: 'name', type: 'text' }] },
+        { slug: 'categories', fields: [{ name: 'title', type: 'text' }] },
+        {
+          slug: 'posts',
+          fields: [
+            { name: 'title', type: 'text', required: true },
+            {
+              name: 'status',
+              type: 'select',
+              defaultValue: 'draft',
+              options: ['draft', 'published'],
+              required: true,
+            },
+            { name: 'author', type: 'relationship', relationTo: 'authors' },
+            { name: 'categories', type: 'relationship', hasMany: true, relationTo: 'categories' },
+          ],
+        },
+      ],
+      typescript: { generateInputTypes: true },
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
+
+    // Output (read) shape is unchanged: relationships may be populated, managed fields are present,
+    // and a required field with a defaultValue stays required.
+    const postsOutput = schema?.$defs?.posts as JSONSchema4
+    expect(postsOutput.title).toBe('Post')
+    expect(postsOutput.properties!.author).toStrictEqual({
+      oneOf: [{ type: ['string', 'null'] }, { $ref: '#/$defs/authors' }],
+    })
+    expect(postsOutput.properties!.categories).toStrictEqual({
+      type: ['array', 'null'],
+      items: { oneOf: [{ type: 'string' }, { $ref: '#/$defs/categories' }] },
+    })
+    expect(postsOutput.required).toStrictEqual(['id', 'title', 'status', 'updatedAt', 'createdAt'])
+
+    // Input (write) shape: relationships are ID-only, the defaultValue field is optional, `id` is
+    // optional, and createdAt/updatedAt are dropped. `id` and the defaulted `status` are optional
+    // but NOT nullable - nullability follows the read shape, where they're non-null.
+    expect(schema?.$defs?.posts_input).toStrictEqual({
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        id: { type: 'string' },
+        title: { type: 'string' },
+        status: { type: 'string', enum: ['draft', 'published'] },
+        author: { type: ['string', 'null'] },
+        categories: { type: ['array', 'null'], items: { type: 'string' } },
+      },
+      required: ['title'],
+      title: 'PostInput',
+    })
+
+    // The Config type exposes input shapes under `collectionsInput`.
+    expect((schema?.properties?.collectionsInput as JSONSchema4)?.properties?.posts).toStrictEqual({
+      $ref: '#/$defs/posts_input',
+    })
+  })
+
+  it('should skip input types by default and generate them when enabled', async () => {
+    // @ts-expect-error partial config
+    const offByDefault: Config = {
+      collections: [{ slug: 'posts', fields: [{ name: 'title', type: 'text' }] }],
+    }
+    const { jsonSchema: defaultSchema } = configToJSONSchema(
+      await sanitizeConfig(offByDefault),
+      'text',
+    )
+    expect(defaultSchema?.$defs?.posts_input).toBeUndefined()
+    expect(defaultSchema?.properties?.collectionsInput).toBeUndefined()
+
+    // @ts-expect-error partial config
+    const enabled: Config = {
+      collections: [{ slug: 'posts', fields: [{ name: 'title', type: 'text' }] }],
+      typescript: { generateInputTypes: true },
+    }
+    const { jsonSchema: enabledSchema } = configToJSONSchema(
+      await sanitizeConfig(enabled),
+      'text',
+    )
+    expect(enabledSchema?.$defs?.posts_input).toBeDefined()
+    expect(enabledSchema?.properties?.collectionsInput).toBeDefined()
+  })
+
+  it('should generate Input-suffixed definitions for named interfaces and blocks', async () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [
+        { slug: 'authors', fields: [{ name: 'name', type: 'text' }] },
+        {
+          slug: 'pages',
+          fields: [
+            {
+              name: 'meta',
+              type: 'group',
+              interfaceName: 'Meta',
+              fields: [{ name: 'author', type: 'relationship', relationTo: 'authors' }],
+            },
+            {
+              name: 'layout',
+              type: 'blocks',
+              blocks: [
+                {
+                  slug: 'hero',
+                  fields: [
+                    { name: 'heading', type: 'text', required: true },
+                    { name: 'cta', type: 'relationship', relationTo: 'authors' },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      typescript: { generateInputTypes: true },
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
+
+    // Read-shaped named interface keeps the populated-doc union...
+    expect((schema?.$defs?.Meta as JSONSchema4).properties!.author).toStrictEqual({
+      oneOf: [{ type: ['string', 'null'] }, { $ref: '#/$defs/authors' }],
+    })
+    // ...and a separate `Input` definition is ID-only, so the two don't collide.
+    expect((schema?.$defs?.MetaInput as JSONSchema4).properties!.author).toStrictEqual({
+      type: ['string', 'null'],
+    })
+
+    // Blocks get the same treatment: read-shaped `Hero`, write-shaped `HeroInput`.
+    const heroInput = schema?.$defs?.HeroInput as JSONSchema4
+    expect(heroInput.properties!.cta).toStrictEqual({ type: ['string', 'null'] })
+    expect(heroInput.required).toStrictEqual(['blockType', 'heading'])
+    expect((schema?.$defs?.Hero as JSONSchema4).properties!.cta).toStrictEqual({
+      oneOf: [{ type: ['string', 'null'] }, { $ref: '#/$defs/authors' }],
+    })
+  })
+
+  it('passes the variant to field-level jsonSchema transforms', async () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [
+        {
+          slug: 'posts',
+          fields: [
+            {
+              name: 'custom',
+              type: 'text',
+              jsonSchema: [({ jsonSchema, variant }) => ({ ...jsonSchema, description: variant })],
+            },
+          ],
+        },
+      ],
+      typescript: { generateInputTypes: true },
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
+
+    expect((schema?.$defs?.posts as JSONSchema4).properties!.custom.description).toBe('output')
+    expect((schema?.$defs?.posts_input as JSONSchema4).properties!.custom.description).toBe('input')
+  })
+
   it('should handle block fields with no blocks', async () => {
     // @ts-expect-error
     const config: Config = {

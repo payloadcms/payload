@@ -20,6 +20,7 @@ const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
 })
 
+const TOTAL_WIDGETS = 15
 const url = new AdminUrlUtil(serverURL, 'users')
 
 describe('Dashboard', () => {
@@ -41,7 +42,7 @@ describe('Dashboard', () => {
 
   test('initial dashboard', async ({ page }) => {
     const d = new DashboardHelper(page)
-    await expect(d.widgets).toHaveCount(7)
+    await expect(d.widgets).toHaveCount(TOTAL_WIDGETS)
 
     await d.assertIsEditing(false)
     await d.assertWidget(1, 'collections', 'full')
@@ -51,19 +52,330 @@ describe('Dashboard', () => {
     await d.assertWidget(5, 'count', 'x-small')
     await d.assertWidget(6, 'revenue', 'full')
     await d.assertWidget(7, 'private', 'full')
+    await d.assertWidget(8, 'collection-query', 'medium')
+    await d.assertWidget(9, 'collection-query', 'medium')
+    await d.assertWidget(10, 'collection-query', 'x-small')
+    await d.assertWidget(11, 'collection-query', 'x-small')
+    await d.assertWidget(12, 'collection-query', 'x-small')
+    await d.assertWidget(13, 'collection-query', 'x-small')
+    await d.assertWidget(14, 'collection-query', 'medium')
+    await d.assertWidget(15, 'activity', 'medium')
     await d.validateLayout()
+  })
+
+  test('collection-query default layout includes valid and stale config examples', async ({
+    page,
+  }) => {
+    const d = new DashboardHelper(page)
+
+    await d.assertWidget(8, 'collection-query', 'medium')
+    await d.assertWidget(9, 'collection-query', 'medium')
+    await d.assertWidget(10, 'collection-query', 'x-small')
+    await d.assertWidget(11, 'collection-query', 'x-small')
+    await d.assertWidget(12, 'collection-query', 'x-small')
+    await d.assertWidget(13, 'collection-query', 'x-small')
+    await expect(
+      d.widgetByPos(8).locator('.collection-query-widget .widget-card__title'),
+    ).toHaveText('Top revenue entries')
+    await expect(
+      d.widgetByPos(9).locator('.collection-query-widget .widget-card__title'),
+    ).toHaveText('Event timeline')
+  })
+
+  test('collection-query short widget grows to its row height', async ({ page }) => {
+    const d = new DashboardHelper(page)
+
+    const shortCard = d.widgetByPos(8).locator('.collection-query-widget')
+    const longCard = d.widgetByPos(9).locator('.collection-query-widget')
+    const shortRows = shortCard.locator('.widget-card__row')
+
+    await expect(shortRows).toHaveCount(3)
+    await expect(async () => {
+      const shortCardBox = (await shortCard.boundingBox())!
+      const longCardBox = (await longCard.boundingBox())!
+
+      expect(shortCardBox.height).toBe(longCardBox.height)
+    }).toPass({ timeout: 1000 })
+    await expect(async () => {
+      const hasScrollableRows = await shortCard.locator('.widget-card__rows').evaluate((el) => {
+        return el.scrollHeight > el.clientHeight
+      })
+
+      expect(hasScrollableRows).toBe(false)
+    }).toPass({ timeout: 1000 })
+  })
+
+  test('collection-query row metadata shows configured sort values', async ({ page }) => {
+    const d = new DashboardHelper(page)
+
+    const shortCard = d.widgetByPos(8).locator('.collection-query-widget')
+    const longCard = d.widgetByPos(9).locator('.collection-query-widget')
+
+    await expect(async () => {
+      const amountLabels = await shortCard.locator('.widget-card__row-meta').allTextContents()
+
+      expect(amountLabels).toHaveLength(3)
+      for (const amountLabel of amountLabels) {
+        expect(amountLabel.trim()).toMatch(/^\d/)
+      }
+    }).toPass({ timeout: 1000 })
+
+    await expect(async () => {
+      const dateLabels = (await longCard.locator('.widget-card__row-meta').allTextContents()).map(
+        (label) => label.trim(),
+      )
+
+      expect(new Set(dateLabels).size).toBeGreaterThan(1)
+      // The timeline spans past and future, so labels render in both relative directions
+      // (e.g. "5m ago", "last week", "in 2d", "next month") via Intl.RelativeTimeFormat.
+      for (const dateLabel of dateLabels) {
+        expect(dateLabel).toMatch(
+          /^(?:now|today|yesterday|tomorrow|last\s.+|next\s.+|in\s.+|.+\sago)$/,
+        )
+      }
+      expect(dateLabels.some((label) => /\sago|^yesterday$|^last\s/.test(label))).toBe(true)
+      expect(dateLabels.some((label) => /^in\s|^tomorrow$|^next\s/.test(label))).toBe(true)
+    }).toPass({ timeout: 1000 })
+  })
+
+  test('collection-query renders relative dates in the active admin language', async ({ page }) => {
+    // Force the admin UI language to Spanish for this request. The server resolves the
+    // language from the `payload-lng` cookie, which the widget reads via req.i18n.language.
+    await page.context().addCookies([
+      {
+        name: 'payload-lng',
+        domain: new URL(serverURL).hostname,
+        path: '/',
+        value: 'es',
+      },
+    ])
+    await page.goto(url.admin)
+
+    const d = new DashboardHelper(page)
+    const timelineCard = d.widgetByPos(9).locator('.collection-query-widget')
+
+    // Spanish relative time via Intl.RelativeTimeFormat('es'): "hace ...", "dentro de ...",
+    // "la semana pasada", "el próximo mes". None of these strings appear in the English output.
+    const englishMarker = /(?:\sago$|^in\s|^now$|^today$|^tomorrow$|^yesterday$|^(?:next|last)\s)/
+    const spanishPast = /^hace\s|pasad[ao]|^ayer$|^anteayer$/
+    const spanishFuture = /^dentro de\s|^en\s|próxim[ao]|^mañana$/
+
+    await expect(async () => {
+      const dateLabels = (
+        await timelineCard.locator('.widget-card__row-meta').allTextContents()
+      ).map((label) => label.trim())
+
+      expect(dateLabels.length).toBeGreaterThan(1)
+      for (const dateLabel of dateLabels) {
+        expect(dateLabel).not.toMatch(englishMarker)
+      }
+      expect(dateLabels.some((label) => spanishPast.test(label))).toBe(true)
+      expect(dateLabels.some((label) => spanishFuture.test(label))).toBe(true)
+    }).toPass({ timeout: 1000 })
+  })
+
+  test('collection-query long widget shows five rows at a time and scrolls', async ({ page }) => {
+    const d = new DashboardHelper(page)
+
+    const longCard = d.widgetByPos(9).locator('.collection-query-widget')
+    const longRows = longCard.locator('.widget-card__row')
+    const maxVisibleRows = 5
+
+    // Matches the number of seeded "Dashboard demo" events in test/dashboard/seed.ts.
+    await expect(longRows).toHaveCount(22)
+    await expect(async () => {
+      const hasScrollableRows = await longCard.locator('.widget-card__rows').evaluate((el) => {
+        return el.scrollHeight > el.clientHeight
+      })
+      expect(hasScrollableRows).toBe(true)
+    }).toPass({ timeout: 1000 })
+    await expect(async () => {
+      const rowViewport = await longCard.locator('.widget-card__rows').evaluate(
+        (el, { maxVisibleRows }) => {
+          const rows = Array.from(el.querySelectorAll<HTMLElement>('.widget-card__row'))
+          const rowGap = Number.parseFloat(window.getComputedStyle(el).rowGap)
+          const expectedHeight =
+            rows
+              .slice(0, maxVisibleRows)
+              .reduce((height, row) => height + row.getBoundingClientRect().height, 0) +
+            rowGap * (maxVisibleRows - 1)
+          const rowsBox = el.getBoundingClientRect()
+          const sixthRowBox = rows[maxVisibleRows]!.getBoundingClientRect()
+
+          return {
+            actualHeight: rowsBox.height,
+            expectedHeight,
+            isSixthRowVisible: sixthRowBox.top < rowsBox.bottom,
+          }
+        },
+        { maxVisibleRows },
+      )
+
+      expect(Math.abs(rowViewport.actualHeight - rowViewport.expectedHeight)).toBeLessThanOrEqual(1)
+      expect(rowViewport.isSixthRowVisible).toBe(false)
+    }).toPass({ timeout: 1000 })
+    await longCard.locator('.widget-card__rows').evaluate((el) => {
+      el.scrollTop = el.scrollHeight
+    })
+    await expect(longCard.locator('.widget-card__title')).toBeVisible()
+  })
+
+  test('collection-query stale config widgets show parameter errors', async ({ page }) => {
+    const errorWidgets = page.locator('.collection-query-widget--error')
+
+    await expect(errorWidgets).toHaveCount(4)
+    await expect(errorWidgets.nth(0)).toContainText('Collection "archived-posts" does not exist.')
+    await expect(errorWidgets.nth(1)).toContainText(
+      'Sort field "assignee" is not sortable on collection "tickets".',
+    )
+    await expect(errorWidgets.nth(2)).toContainText(
+      'Filter field "visibility" does not exist on collection "events".',
+    )
+    await expect(errorWidgets.nth(3)).toContainText(
+      'Sort field "total" does not exist on collection "revenue".',
+    )
+    await expect(errorWidgets.nth(3)).toContainText(
+      'Filter field "channel" does not exist on collection "revenue".',
+    )
+
+    await expect(async () => {
+      const errorBorderColor = await errorWidgets.first().evaluate((el) => {
+        return window.getComputedStyle(el).borderColor
+      })
+
+      expect(errorBorderColor).not.toBe('rgba(0, 0, 0, 0)')
+    }).toPass({ timeout: 1000 })
+  })
+
+  test('collection-query sorts and renders a nested (dot-path) field', async ({ page }) => {
+    const d = new DashboardHelper(page)
+
+    const nestedCard = d.widgetByPos(14).locator('.collection-query-widget')
+
+    await expect(nestedCard.locator('.widget-card__title')).toHaveText('Events by priority')
+    // The nested sort field is valid, so the widget renders rows instead of a config error.
+    await expect(d.widgetByPos(14).locator('.collection-query-widget--error')).toHaveCount(0)
+
+    const rows = nestedCard.locator('.widget-card__row')
+    await expect(rows).toHaveCount(4)
+
+    // Row metadata reflects `details.priority`, sorted descending (seed priorities: 10, 30, 20, 5).
+    await expect(async () => {
+      const priorityLabels = (
+        await nestedCard.locator('.widget-card__row-meta').allTextContents()
+      ).map((label) => label.trim())
+
+      expect(priorityLabels).toEqual(['30', '20', '10', '5'])
+    }).toPass({ timeout: 1000 })
+  })
+
+  test('activity widget lists recently viewed documents, most recent first', async ({ page }) => {
+    const ticketsUrl = new AdminUrlUtil(serverURL, 'tickets')
+
+    // Fetch two tickets to view. page.request shares the authenticated browser context cookies.
+    const response = await page.request.get(`${serverURL}/api/tickets?limit=2&sort=title`)
+    const { docs } = await response.json()
+    const [firstDoc, secondDoc] = docs
+
+    // Visiting a document edit view records it as recently viewed server-side in renderDocument.
+    await page.goto(ticketsUrl.edit(firstDoc.id))
+    await expect(page.locator('#field-title')).toHaveValue(firstDoc.title)
+    await page.goto(ticketsUrl.edit(secondDoc.id))
+    await expect(page.locator('#field-title')).toHaveValue(secondDoc.title)
+
+    await page.goto(url.admin)
+
+    const d = new DashboardHelper(page)
+    const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
+
+    await expect(activityCard.locator('.widget-card__title')).toHaveText('You recently viewed')
+
+    const rowTitles = activityCard.locator('.widget-card__row-title')
+    await expect(rowTitles).toHaveCount(2)
+    // The most recently viewed document is listed first.
+    await expect(rowTitles.nth(0)).toHaveText(secondDoc.title)
+    await expect(rowTitles.nth(1)).toHaveText(firstDoc.title)
+  })
+
+  test('activity widget collections filter shows inclusion checkboxes and excludes unchecked', async ({
+    page,
+  }) => {
+    const ticketsUrl = new AdminUrlUtil(serverURL, 'tickets')
+    const eventsUrl = new AdminUrlUtil(serverURL, 'events')
+
+    const ticket = (await (await page.request.get(`${serverURL}/api/tickets?limit=1`)).json())
+      .docs[0]
+    const event = (await (await page.request.get(`${serverURL}/api/events?limit=1`)).json()).docs[0]
+
+    // Record both documents as recently viewed.
+    await page.goto(ticketsUrl.edit(ticket.id))
+    await expect(page.locator('#field-title')).toHaveValue(ticket.title)
+    await page.goto(eventsUrl.edit(event.id))
+    await expect(page.locator('#field-title')).toHaveValue(event.title)
+
+    await page.goto(url.admin)
+
+    const d = new DashboardHelper(page)
+    const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
+    await expect(activityCard.locator('.widget-card__row-title')).toHaveCount(2)
+
+    // Open the activity widget configuration.
+    await d.setEditing()
+    const widget = d.widgetByPos(15)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    const collectionsField = drawer.locator('.recently-viewed-collections-field')
+    await expect(collectionsField).toBeVisible()
+
+    // Every collection is included (checked) by default - the stored exclusion list is empty.
+    const checkboxes = collectionsField.locator('.checkbox-input')
+    const checkboxCount = await checkboxes.count()
+    expect(checkboxCount).toBeGreaterThanOrEqual(3)
+    await expect(collectionsField.locator('.checkbox-input--checked')).toHaveCount(checkboxCount)
+
+    // Unchecking "Tickets" adds it to the stored exclusion list.
+    const ticketsOption = collectionsField.locator('.recently-viewed-collections-field__option', {
+      hasText: 'Tickets',
+    })
+    await expect(ticketsOption.locator('input[type="checkbox"]')).toBeEnabled()
+    await ticketsOption.locator('label').click()
+    await expect(ticketsOption.locator('.checkbox-input')).not.toHaveClass(
+      /checkbox-input--checked/,
+    )
+
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+
+    await d.saveChangesAndValidate()
+
+    // The excluded collection's document drops out; the remaining document still renders.
+    const rowTitles = activityCard.locator('.widget-card__row-title')
+    await expect(rowTitles).toHaveCount(1)
+    await expect(rowTitles.nth(0)).toHaveText(event.title)
   })
 
   test('respects min and max width', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
-    await d.assertWidthRange({ position: 1, min: 'full', max: 'full' })
-    await d.assertWidthRange({ position: 2, min: 'x-small', max: 'medium' })
-    await d.assertWidthRange({ position: 3, min: 'x-small', max: 'medium' })
-    await d.assertWidthRange({ position: 4, min: 'x-small', max: 'medium' })
-    await d.assertWidthRange({ position: 5, min: 'x-small', max: 'medium' })
-    await d.assertWidthRange({ position: 6, min: 'medium', max: 'full' })
-    await d.assertWidthRange({ position: 7, min: 'x-small', max: 'full' })
+    await d.assertWidthRange({ max: 'full', min: 'full', position: 1 })
+    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 2 })
+    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 3 })
+    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 4 })
+    await d.assertWidthRange({ max: 'medium', min: 'x-small', position: 5 })
+    await d.assertWidthRange({ max: 'full', min: 'medium', position: 6 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 7 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 8 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 9 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 10 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 11 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 12 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 13 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 14 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 15 })
   })
 
   test('resize widget', async ({ page }) => {
@@ -79,7 +391,7 @@ describe('Dashboard', () => {
     const d = new DashboardHelper(page)
     await d.setEditing()
     await d.addWidget('revenue')
-    await d.assertWidget(8, 'revenue', 'medium')
+    await d.assertWidget(TOTAL_WIDGETS + 1, 'revenue', 'medium')
     await d.saveChangesAndValidate()
   })
 
@@ -89,7 +401,7 @@ describe('Dashboard', () => {
     await d.deleteWidget(1)
     await d.assertWidget(1, 'count', 'x-small')
     await d.assertWidget(6, 'private', 'full')
-    await expect(d.widgets).toHaveCount(6)
+    await expect(d.widgets).toHaveCount(TOTAL_WIDGETS - 1)
     await d.saveChangesAndValidate()
   })
 
@@ -136,13 +448,9 @@ describe('Dashboard', () => {
   test('empty dashboard - delete all widgets', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
-    await d.deleteWidget(1)
-    await d.deleteWidget(1)
-    await d.deleteWidget(1)
-    await d.deleteWidget(1)
-    await d.deleteWidget(1)
-    await d.deleteWidget(1)
-    await d.deleteWidget(1)
+    while ((await d.widgets.count()) > 0) {
+      await d.deleteWidget(1)
+    }
     await expect(d.widgets).toHaveCount(0)
     await expect(page.getByText('There are no widgets on your dashboard')).toBeVisible()
     await d.saveChangesAndValidate()
@@ -164,7 +472,7 @@ describe('Dashboard', () => {
     await d.setEditing()
     await d.addWidget('revenue')
     await d.cancelEditing()
-    await expect(d.widgets).toHaveCount(7)
+    await expect(d.widgets).toHaveCount(TOTAL_WIDGETS)
     await d.validateLayout()
   })
 
@@ -174,18 +482,24 @@ describe('Dashboard', () => {
     await d.addWidget('revenue')
     await d.saveChangesAndValidate()
     await d.resetLayout()
-    await expect(d.widgets).toHaveCount(7)
+    await expect(d.widgets).toHaveCount(TOTAL_WIDGETS)
     await d.validateLayout()
   })
 
   test('move widgets', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
+    // Fit the whole dashboard in the viewport so dragging never triggers a mid-drag scroll. dnd-kit
+    // measures droppable rects at drag start, so an instant programmatic scroll (from
+    // scrollIntoViewIfNeeded) would leave those rects stale and break collision detection.
+    const { width } = page.viewportSize()!
+    const contentHeight = await page.evaluate(() => document.body.scrollHeight)
+    await page.setViewportSize({ height: Math.max(contentHeight + 100, 720), width })
     // moveWidget already contains validations
     await d.moveWidget(2, 1) // to first position
     await d.moveWidget(1, 2, 'after') // after last in row
-    await d.moveWidget(2, 7, 'after') // to last position
-    await d.moveWidget(3, 6, 'before') // before first in row
+    await d.moveWidget(2, TOTAL_WIDGETS, 'after') // to last position
+    await d.moveWidget(TOTAL_WIDGETS, 5, 'before') // before first full-width row after counts
     await d.saveChangesAndValidate()
   })
 
@@ -209,7 +523,7 @@ describe('Dashboard', () => {
 
   test('Responsiveness - all widgets have a 100% width on mobile', async ({ page }) => {
     // Set viewport to mobile size
-    await page.setViewportSize({ width: 500, height: 667 })
+    await page.setViewportSize({ height: 667, width: 500 })
     const d = new DashboardHelper(page)
     const widgets = await d.widgets.all()
     for (const widget of widgets) {
@@ -430,7 +744,7 @@ describe('Dashboard', () => {
     const d = new DashboardHelper(page)
     await d.setEditing()
     await d.addWidget('page query')
-    await d.assertWidget(8, 'page-query', 'x-small')
+    await d.assertWidget(TOTAL_WIDGETS + 1, 'page-query', 'x-small')
     await d.saveChangesAndValidate()
 
     // Find the page-query widget

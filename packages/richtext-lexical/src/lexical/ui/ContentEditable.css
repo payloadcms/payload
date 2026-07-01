@@ -7,8 +7,8 @@
     outline: 0;
     padding-top: var(--spacer-2);
     padding-bottom: var(--spacer-2);
-    padding-left: 0;
-    padding-right: 0;
+    padding-inline-start: 0;
+    padding-inline-end: 0;
 
     &:focus-visible {
       outline: none !important;
@@ -37,7 +37,7 @@
           > .editor-scroller
           > .editor
           > .ContentEditable__root::before {
-          border-left: 2px solid var(--color-border-danger);
+          border-inline-start: var(--stroke-width-medium) solid var(--color-border-danger);
         }
       }
 
@@ -47,7 +47,7 @@
           > .editor-scroller
           > .editor
           > .ContentEditable__root::before {
-          border-left: 2px solid var(--color-border-danger);
+          border-inline-start: var(--stroke-width-medium) solid var(--color-border-danger);
         }
       }
     }
@@ -72,7 +72,7 @@
           > .editor-scroller
           > .editor
           > .ContentEditable__root::before {
-          border-left: 2px solid var(--color-border-danger);
+          border-inline-start: var(--stroke-width-medium) solid var(--color-border-danger);
         }
       }
     }

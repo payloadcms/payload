@@ -39,6 +39,9 @@ export { QueryPresetsGroupByCell } from '../../elements/QueryPresets/cells/Group
 export { QueryPresetsColumnField } from '../../elements/QueryPresets/fields/ColumnsField/index.js'
 export { QueryPresetsWhereField } from '../../elements/QueryPresets/fields/WhereField/index.js'
 export { QueryPresetsGroupByField } from '../../elements/QueryPresets/fields/GroupByField/index.js'
+export { CollectionQuerySortField } from '../../widgets/CollectionQuery/SortField/index.js'
+export { RecentlyViewedCollectionsField } from '../../widgets/RecentlyViewed/CollectionsField/index.js'
+export { QueryPresetsHeading } from '../../elements/QueryPresets/fields/Heading/index.js'
 
 // elements
 export { ConfirmationModal } from '../../elements/ConfirmationModal/index.js'
@@ -85,10 +88,10 @@ export { AppHeader } from '../../elements/AppHeader/index.js'
 export { MenuSeparator } from '../../elements/MenuSeparator/index.js'
 export { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
 export {
-  BulkUploadDrawer,
+  BulkUploadModal,
   BulkUploadProvider,
   useBulkUpload,
-  useBulkUploadDrawerSlug,
+  useBulkUploadModalSlug,
 } from '../../elements/BulkUpload/index.js'
 export { DrawerContentContainer } from '../../elements/DrawerContentContainer/index.js'
 export type { BulkUploadProps } from '../../elements/BulkUpload/index.js'
@@ -111,6 +114,7 @@ export { CopyLocaleData } from '../../elements/CopyLocaleData/index.js'
 export { CopyToClipboard } from '../../elements/CopyToClipboard/index.js'
 export { DeleteMany } from '../../elements/DeleteMany/index.js'
 export { DocumentControls } from '../../elements/DocumentControls/index.js'
+export { DocumentHeaderRoot } from '../../elements/DocumentHeader/DocumentHeaderRoot/index.js'
 export { Dropzone } from '../../elements/Dropzone/index.js'
 export { documentDrawerBaseClass, useDocumentDrawer } from '../../elements/DocumentDrawer/index.js'
 export {
@@ -162,17 +166,19 @@ export type { HierarchyButtonClientProps } from '../../elements/Hierarchy/DocHea
 export { HierarchyFieldClient } from '../../elements/Hierarchy/Field/index.client.js'
 export type { HierarchyFieldClientProps } from '../../elements/Hierarchy/Field/index.client.js'
 export {
-  formatHierarchyDrawerSlug,
-  HierarchyDrawerToggler,
-  useHierarchyDrawer,
-} from '../../elements/Hierarchy/Drawer/useHierarchyDrawer.js'
+  formatHierarchyModalSlug,
+  HierarchyModalToggler,
+  useHierarchyModal,
+} from '../../elements/Hierarchy/Modal/useHierarchyModal.js'
 export type {
   HierarchyDrawerProps,
   HierarchyDrawerTogglerProps,
+  HierarchyModalProps,
+  HierarchyModalTogglerProps,
   SelectionWithPath,
-  UseHierarchyDrawer,
-  UseHierarchyDrawerArgs,
-} from '../../elements/Hierarchy/Drawer/types.js'
+  UseHierarchyModal,
+  UseHierarchyModalArgs,
+} from '../../elements/Hierarchy/Modal/types.js'
 export { ListSelection } from '../../views/List/ListSelection/index.js'
 export { CollectionListHeader as ListHeader } from '../../views/List/ListHeader/index.js'
 export { GroupByHeader } from '../../views/List/GroupByHeader/index.js'
@@ -364,12 +370,12 @@ export {
   AlignJustifiedIcon as DragHandleIcon,
 } from '../../icons/AlignJustified/index.js'
 export { EditIcon } from '../../icons/Edit/index.js'
-export { ExternalLinkIcon } from '../../icons/ExternalLink/index.js'
 export { LineIcon } from '../../icons/Line/index.js'
 export { LinkIcon } from '../../icons/Link/index.js'
 export { LogOutIcon } from '../../icons/LogOut/index.js'
 export { MinimizeMaximizeIcon } from '../../icons/MinimizeMaximize/index.js'
 export { MoreIcon } from '../../icons/More/index.js'
+export { NewTabIcon } from '../../icons/NewTab/index.js'
 export { PlusIcon } from '../../icons/Plus/index.js'
 export { SearchIcon } from '../../icons/Search/index.js'
 export { SwapIcon } from '../../icons/Swap/index.js'
@@ -394,6 +400,7 @@ export { LockIcon } from '../../icons/Lock/index.js'
 export { LockOpenIcon } from '../../icons/LockOpen/index.js'
 export { PeopleIcon } from '../../icons/People/index.js'
 export { RefreshIcon } from '../../icons/Refresh/index.js'
+export { ReplaceIcon } from '../../icons/Replace/index.js'
 export { SortDownIcon } from '../../icons/Sort/index.js'
 export { ThreeDotsIcon } from '../../icons/ThreeDots/index.js'
 export { TrashIcon } from '../../icons/Trash/index.js'

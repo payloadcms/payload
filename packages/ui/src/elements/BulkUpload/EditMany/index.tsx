@@ -2,16 +2,18 @@
 
 import type { ClientCollectionConfig } from 'payload'
 
+import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
+import { WriteIcon } from '../../../icons/Write/index.js'
 import { useAuth } from '../../../providers/Auth/index.js'
 import { EditDepthProvider } from '../../../providers/EditDepth/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import { Drawer, DrawerToggler } from '../../Drawer/index.js'
+import { Button } from '../../Button/index.js'
+import { Drawer } from '../../Drawer/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import { EditManyBulkUploadsDrawerContent } from './DrawerContent.js'
 import './index.css'
-
 export const baseClass = 'edit-many-bulk-uploads'
 
 export type EditManyBulkUploadsProps = {
@@ -25,6 +27,7 @@ export const EditManyBulkUploads: React.FC<EditManyBulkUploadsProps> = (props) =
 
   const { t } = useTranslation()
   const { forms } = useFormsManager() // Access forms managed in bulk uploads
+  const { openModal } = useModal()
 
   const collectionPermissions = permissions?.collections?.[slug]
   const hasUpdatePermission = collectionPermissions?.update
@@ -37,14 +40,15 @@ export const EditManyBulkUploads: React.FC<EditManyBulkUploadsProps> = (props) =
 
   return (
     <div className={baseClass}>
-      <DrawerToggler
-        aria-label={t('general:editAll')}
+      <Button
         buttonStyle="secondary"
-        className={`${baseClass}__toggle`}
-        slug={drawerSlug}
+        icon={<WriteIcon size={24} />}
+        iconPosition="left"
+        onClick={() => openModal(drawerSlug)}
       >
         {t('general:editAll')}
-      </DrawerToggler>
+      </Button>
+
       <EditDepthProvider>
         <Drawer Header={null} slug={drawerSlug}>
           <EditManyBulkUploadsDrawerContent

@@ -62,31 +62,25 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_47A9529B".
+ * via the `definition` "LexicalNodes_0568D85A".
  */
-export type LexicalNodes_47A9529B =
+export type LexicalNodes_0568D85A =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_47A9529B>
+  | SerializedParagraphNode<LexicalNodes_0568D85A>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'documents'>
-  | SerializedQuoteNode<LexicalNodes_47A9529B>
+  | SerializedQuoteNode<LexicalNodes_0568D85A>
   | SerializedRelationshipNode<
-      | 'pages'
-      | 'users'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
+      'pages' | 'users' | 'payload-kv' | 'payload-locked-documents' | 'payload-preferences' | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_47A9529B, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_47A9529B, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_47A9529B>
-  | SerializedListItemNode<LexicalNodes_47A9529B>
-  | SerializedHeadingNode<LexicalNodes_47A9529B>;
+  | SerializedAutoLinkNode<LexicalNodes_0568D85A, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_0568D85A, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_0568D85A>
+  | SerializedListItemNode<LexicalNodes_0568D85A>
+  | SerializedHeadingNode<LexicalNodes_0568D85A>;
 
 export interface Config {
   auth: {
@@ -100,7 +94,6 @@ export interface Config {
     documents: Document;
     forms: Form;
     'form-submissions': FormSubmission;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -114,7 +107,6 @@ export interface Config {
     documents: DocumentsSelect<false> | DocumentsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -195,7 +187,7 @@ export interface Form {
    * Choose whether to display an on-page message or redirect to a different page after they submit the form.
    */
   confirmationType?: ('message' | 'redirect') | null;
-  confirmationMessage?: LexicalRichText<LexicalNodes_47A9529B>;
+  confirmationMessage?: LexicalRichText<LexicalNodes_0568D85A>;
   redirect?: {
     type?: ('reference' | 'custom') | null;
     reference?: {
@@ -218,7 +210,7 @@ export interface Form {
         /**
          * Enter the message that should be sent in this email.
          */
-        message?: LexicalRichText<LexicalNodes_47A9529B> | null;
+        message?: LexicalRichText<LexicalNodes_0568D85A> | null;
         id?: string | null;
       }[]
     | null;
@@ -271,7 +263,7 @@ export interface Email {
  * via the `definition` "Message".
  */
 export interface Message {
-  message?: LexicalRichText<LexicalNodes_47A9529B> | null;
+  message?: LexicalRichText<LexicalNodes_0568D85A> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'message';
@@ -551,31 +543,6 @@ export interface FormSubmission {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -621,10 +588,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'form-submissions';
         value: string | FormSubmission;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -975,22 +938,6 @@ export interface FormSubmissionsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1108,7 +1055,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -1123,7 +1070,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

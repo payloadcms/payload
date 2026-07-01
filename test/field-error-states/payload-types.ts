@@ -62,21 +62,21 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_9326F794".
+ * via the `definition` "LexicalNodes_1486C0E2".
  */
-export type LexicalNodes_9326F794 =
+export type LexicalNodes_1486C0E2 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_9326F794>
+  | SerializedParagraphNode<LexicalNodes_1486C0E2>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_9326F794>
+  | SerializedHeadingNode<LexicalNodes_1486C0E2>
   | SerializedUploadNode<'uploads'>
-  | SerializedQuoteNode<LexicalNodes_9326F794>
-  | SerializedListNode<LexicalNodes_9326F794>
-  | SerializedListItemNode<LexicalNodes_9326F794>
-  | SerializedAutoLinkNode<LexicalNodes_9326F794, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_9326F794, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_1486C0E2>
+  | SerializedListNode<LexicalNodes_1486C0E2>
+  | SerializedListItemNode<LexicalNodes_1486C0E2>
+  | SerializedAutoLinkNode<LexicalNodes_1486C0E2, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_1486C0E2, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'error-fields'
       | 'validate-drafts-on'
@@ -84,9 +84,8 @@ export type LexicalNodes_9326F794 =
       | 'validate-drafts-on-autosave'
       | 'prev-value'
       | 'prev-value-relation'
-      | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
+      | 'users'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
@@ -105,9 +104,8 @@ export interface Config {
     'validate-drafts-on-autosave': ValidateDraftsOnAutosave;
     'prev-value': PrevValue;
     'prev-value-relation': PrevValueRelation;
-    users: User;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
+    users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -121,9 +119,8 @@ export interface Config {
     'validate-drafts-on-autosave': ValidateDraftsOnAutosaveSelect<false> | ValidateDraftsOnAutosaveSelect<true>;
     'prev-value': PrevValueSelect<false> | PrevValueSelect<true>;
     'prev-value-relation': PrevValueRelationSelect<false> | PrevValueRelationSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -212,7 +209,7 @@ export interface ErrorField {
           point: [number, number];
           radio: 'mint' | 'dark_gray';
           relationship: string | User;
-          richtext: LexicalRichText<LexicalNodes_9326F794>;
+          richtext: LexicalRichText<LexicalNodes_1486C0E2>;
           select: 'mint' | 'dark_gray';
           upload: string | Upload;
           text: string;
@@ -251,7 +248,7 @@ export interface ErrorField {
         point: [number, number];
         radio: 'mint' | 'dark_gray';
         relationship: string | User;
-        richtext: LexicalRichText<LexicalNodes_9326F794>;
+        richtext: LexicalRichText<LexicalNodes_1486C0E2>;
         select: 'mint' | 'dark_gray';
         upload: string | Upload;
         text: string;
@@ -309,7 +306,7 @@ export interface Upload {
   id: string;
   text?: string | null;
   media?: (string | null) | Upload;
-  richText?: LexicalRichText<LexicalNodes_9326F794> | null;
+  richText?: LexicalRichText<LexicalNodes_1486C0E2> | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -357,7 +354,7 @@ export interface Block1 {
         point: [number, number];
         radio: 'mint' | 'dark_gray';
         relationship: string | User;
-        richtext: LexicalRichText<LexicalNodes_9326F794>;
+        richtext: LexicalRichText<LexicalNodes_1486C0E2>;
         select: 'mint' | 'dark_gray';
         upload: string | Upload;
         text: string;
@@ -449,31 +446,6 @@ export interface PrevValueRelation {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -527,10 +499,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -789,6 +757,14 @@ export interface PrevValueRelationSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -808,30 +784,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1019,7 +971,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -1068,7 +1020,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

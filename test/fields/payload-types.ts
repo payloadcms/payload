@@ -64,22 +64,22 @@ export type SupportedTimezones =
   | 'UTC';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_937A3078".
+ * via the `definition` "LexicalNodes_A4A493AA".
  */
-export type LexicalNodes_937A3078 =
+export type LexicalNodes_A4A493AA =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_937A3078>
+  | SerializedParagraphNode<LexicalNodes_A4A493AA>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_937A3078>
+  | SerializedHeadingNode<LexicalNodes_A4A493AA>
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_937A3078>
-  | SerializedListNode<LexicalNodes_937A3078>
-  | SerializedListItemNode<LexicalNodes_937A3078>
-  | SerializedAutoLinkNode<LexicalNodes_937A3078, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_937A3078, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_A4A493AA>
+  | SerializedListNode<LexicalNodes_A4A493AA>
+  | SerializedListItemNode<LexicalNodes_A4A493AA>
+  | SerializedAutoLinkNode<LexicalNodes_A4A493AA, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_A4A493AA, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -114,7 +114,6 @@ export type LexicalNodes_937A3078 =
       | 'uploads-multi-poly'
       | 'uploads-restricted'
       | 'ui-fields'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -122,17 +121,17 @@ export type LexicalNodes_937A3078 =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_313DC238".
+ * via the `definition` "LexicalNodes_54E9BFFB".
  */
-export type LexicalNodes_313DC238 =
+export type LexicalNodes_54E9BFFB =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_313DC238>
+  | SerializedParagraphNode<LexicalNodes_54E9BFFB>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_313DC238>
+  | SerializedQuoteNode<LexicalNodes_54E9BFFB>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -167,17 +166,16 @@ export type LexicalNodes_313DC238 =
       | 'uploads-multi-poly'
       | 'uploads-restricted'
       | 'ui-fields'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_313DC238, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_313DC238, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_313DC238>
-  | SerializedListItemNode<LexicalNodes_313DC238>
-  | SerializedHeadingNode<LexicalNodes_313DC238>;
+  | SerializedAutoLinkNode<LexicalNodes_54E9BFFB, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_54E9BFFB, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_54E9BFFB>
+  | SerializedListItemNode<LexicalNodes_54E9BFFB>
+  | SerializedHeadingNode<LexicalNodes_54E9BFFB>;
 
 export interface Config {
   auth: {
@@ -225,7 +223,6 @@ export interface Config {
     'uploads-multi-poly': UploadsMultiPoly;
     'uploads-restricted': UploadsRestricted;
     'ui-fields': UiField;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -269,7 +266,6 @@ export interface Config {
     'uploads-multi-poly': UploadsMultiPolySelect<false> | UploadsMultiPolySelect<true>;
     'uploads-restricted': UploadsRestrictedSelect<false> | UploadsRestrictedSelect<true>;
     'ui-fields': UiFieldsSelect<false> | UiFieldsSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -404,7 +400,7 @@ export interface ArrayField {
     text: string;
     anotherText?: string | null;
     localizedText?: string | null;
-    richTextField?: LexicalRichText<LexicalNodes_937A3078> | null;
+    richTextField?: LexicalRichText<LexicalNodes_A4A493AA> | null;
     subArray?:
       | {
           text?: string | null;
@@ -571,7 +567,7 @@ export interface BlockField {
  */
 export interface ContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_313DC238> | null;
+  richText?: LexicalRichText<LexicalNodes_54E9BFFB> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -643,7 +639,7 @@ export interface TabsBlock {
  */
 export interface LocalizedContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_313DC238> | null;
+  richText?: LexicalRichText<LexicalNodes_54E9BFFB> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedContent';
@@ -1058,7 +1054,7 @@ export interface ConditionalLogic {
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
   customServerFieldWithCondition?: string | null;
-  conditionalRichText?: LexicalRichText<LexicalNodes_937A3078> | null;
+  conditionalRichText?: LexicalRichText<LexicalNodes_A4A493AA> | null;
   userConditional?: string | null;
   parentGroup?: {
     enableParentGroupFields?: boolean | null;
@@ -2051,31 +2047,6 @@ export interface UiField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -2241,10 +2212,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'ui-fields';
         value: string | UiField;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -3874,22 +3841,6 @@ export interface UiFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -4054,7 +4005,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -4103,7 +4054,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

@@ -35,7 +35,7 @@
     > .editor
     > div
     > .LexicalEditorTheme__placeholder {
-    left: var(--spacer-5);
+    inset-inline-start: var(--spacer-5);
   }
 
   .rich-text-lexical:not(.rich-text-lexical--show-gutter)
@@ -45,6 +45,6 @@
     > .editor
     > div
     > .LexicalEditorTheme__placeholder {
-    left: 0;
+    inset-inline-start: 0;
   }
 }

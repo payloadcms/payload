@@ -6,7 +6,7 @@
     flex-shrink: 0;
     height: 100vh;
     width: var(--nav-width);
-    border-right: 1px solid var(--color-border);
+    border-right: var(--stroke-width-small) solid var(--color-border);
     overflow: hidden;
     --nav-padding-inline-start: var(--spacer-2-5);
     --nav-padding-inline-end: var(--spacer-2-5);
@@ -16,7 +16,7 @@
 
   [dir='rtl'] .nav {
     border-right: none;
-    border-left: 1px solid var(--color-border);
+    border-left: var(--stroke-width-small) solid var(--color-border);
   }
 
   .nav__mobile-close {

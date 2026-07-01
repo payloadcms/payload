@@ -116,12 +116,35 @@ export type FileAllowList = Array<{
   mimeType: string
 }>
 
+export type UploadFilePreviewClientProps = {
+  filename: string
+  filesize: number
+  /** Resolved URL of the file (data.url). */
+  fileSrc: string
+  height?: number
+  mimeType: string
+  width?: number
+}
+
+type UploadFilePreviewMap = {
+  [mimeTypePattern: string]: PayloadComponent
+}
+
 type Admin = {
   components?: {
     /**
      * The Controls component to extend the upload controls in the admin panel.
      */
     controls?: PayloadComponent[]
+    /**
+     * A custom component to render in place of the default Thumbnail in the upload side panel.
+     *
+     * Can be a single PayloadComponent (renders for all MIME types) or a Record keyed by
+     * MIME type patterns. Pattern resolution priority: exact match → category wildcard
+     * (e.g. `video/*`) → universal fallback (`*`). Falls back to the default Thumbnail
+     * when nothing matches.
+     */
+    filePreview?: PayloadComponent | UploadFilePreviewMap
   }
 }
 
