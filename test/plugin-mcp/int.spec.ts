@@ -74,6 +74,26 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(client.getProtocolEra()).toBe(protocolEra)
   })
 
+  it('should reject invalid API keys before MCP handling', async ({ mcp }) => {
+    await expect(mcp.connect('invalid-api-key')).rejects.toThrow()
+
+    expect(
+      mcp.getHTTPResponses().some(({ method, status }) => method === 'POST' && status === 401),
+    ).toBe(true)
+  })
+
+  it('should keep simultaneous requests separate', async ({ mcp }) => {
+    const [apiKey, limitedApiKey] = await Promise.all([getApiKey(), getLimitedApiKey()])
+    const [client, limitedClient] = await Promise.all([
+      mcp.connect(apiKey),
+      mcp.connect(limitedApiKey),
+    ])
+    const [tools, limitedTools] = await Promise.all([client.listTools(), limitedClient.listTools()])
+
+    expect(tools.tools.some((tool) => tool.name === 'updateGlobal')).toBe(true)
+    expect(limitedTools.tools.some((tool) => tool.name === 'updateGlobal')).toBe(false)
+  })
+
   it('should return JSON responses without SSE in either protocol era', async ({ mcp }) => {
     const apiKey = await getApiKey()
     const client = await mcp.connect(apiKey)

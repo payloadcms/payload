@@ -1,7 +1,7 @@
-import type { MaybePromise, Plugin, SanitizedConfig } from 'payload'
+import type { Config, Plugin, SanitizedConfig } from 'payload'
 
 /* eslint-disable no-console */
-import { StdioServerTransport } from '@modelcontextprotocol/server'
+import { serveStdio } from '@modelcontextprotocol/server/stdio'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createLocalReq, getPayload } from 'payload'
 import { findConfig } from 'payload/node'
@@ -15,23 +15,14 @@ import { getPluginConfig } from './utils/getPluginConfig.js'
 import { resolveProjectRoot } from './utils/resolveProjectRoot.js'
 
 /**
- * Stdio adapter for the Payload MCP server.
+ * Starts Payload's MCP server over stdin and stdout.
  *
- * Pass PAYLOAD_MCP_AUTHORIZATION when stdio should authenticate with the same
- * Payload auth header as HTTP. In development, PAYLOAD_MCP_OVERRIDE_ACCESS=true
- * skips access control for local setup.
+ * Set `PAYLOAD_MCP_AUTHORIZATION` to authenticate. In development,
+ * `PAYLOAD_MCP_OVERRIDE_ACCESS=true` skips access checks.
  */
 export const runMcpStdio = async (): Promise<void> => {
-  /**
-   * If MCP clients spawn stdio servers from an arbitrary working directory,
-   * Payload's cwd-anchored `findConfig()` can't locate the project on
-   * its own. This module always lives inside the project's `node_modules`, so
-   * we derive the project root from its own path and `chdir` into it.
-   *
-   * An absolute `PAYLOAD_CONFIG_PATH` still overrides everything; unusual
-   * layouts (e.g. a monorepo where the package is hoisted above the app) can
-   * fall back to it. See the implementation of findConfig for details.
-   */
+  // MCP clients may start this command from another folder. Move to the Payload
+  // project so findConfig() can find the config.
   const projectRoot = resolveProjectRoot(fileURLToPath(import.meta.url))
   if (projectRoot) {
     process.chdir(projectRoot)
@@ -39,29 +30,42 @@ export const runMcpStdio = async (): Promise<void> => {
 
   const configPath = findConfig()
   const configModule = await import(pathToFileURL(configPath).toString())
-  const config = (await (configModule.default ?? configModule)) as MaybePromise<SanitizedConfig>
+  const config = (await (configModule.default ?? configModule)) as SanitizedConfig
+
+  /**
+   * stdout is only for MCP messages. The spec says the server must not write
+   * logs there and may write them to stderr instead.
+   *
+   * The beta.1 client library recovers from stray stdout logs, but that behavior is not
+   * guaranteed. Move Payload logs to stderr so Payload does not add invalid data
+   * to stdout. Keep options from configurable loggers. Replace pre-built loggers
+   * because their output cannot be redirected.
+   *
+   * @see https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#stdio
+   */
+  const loggerConfig: { logger?: Config['logger'] } = config
+  if (loggerConfig.logger && loggerConfig.logger !== 'sync' && 'options' in loggerConfig.logger) {
+    loggerConfig.logger.destination = process.stderr
+  } else {
+    loggerConfig.logger = { destination: process.stderr, options: {} }
+  }
 
   const payload = await getPayload({ config })
 
-  /**
-   * If the user added `mcpPlugin({...})` to their `plugins` array, read the
-   * sanitized config they registered. Otherwise fall back to the defaults. That way,
-   * the mcp works on any project that has `@payloadcms/plugin-mcp` installed,
-   * even if the plugin is not added to the plugins array.
-   */
   let pluginConfig: SanitizedMCPPluginConfig
   try {
     pluginConfig = getPluginConfig({ config: payload.config })
   } catch {
+    // The command also works when mcpPlugin() is not in the Payload config.
     pluginConfig = sanitizeMCPConfig({ config: payload.config, pluginConfig: {} })
 
-    const fakePluginFn: Plugin = (config) => config
-    fakePluginFn.slug = '@payloadcms/plugin-mcp'
-    // @ts-expect-error
-    fakePluginFn.sanitizedOptions = pluginConfig
-
-    // Push to payload config, to ensure consecutive calls to `getPluginConfig()` work
-    ;(payload.config.plugins ??= []).push(fakePluginFn)
+    const fallbackPlugin: Plugin = (config) => config
+    Object.assign(fallbackPlugin, {
+      slug: '@payloadcms/plugin-mcp',
+      sanitizedOptions: pluginConfig,
+    })
+    payload.config.plugins ??= []
+    payload.config.plugins.push(fallbackPlugin)
   }
 
   const overrideAccessEnv = process.env.PAYLOAD_MCP_OVERRIDE_ACCESS
@@ -86,28 +90,37 @@ export const runMcpStdio = async (): Promise<void> => {
   req.payloadAPI = 'MCP' as const
   const authorizedMCP = await getAuthorizedMCP({ overrideAccess, req })
 
-  const server = buildMcpServer({ authorizedMCP, pluginConfig, req })
+  const stdioServer = serveStdio(() => buildMcpServer({ authorizedMCP, pluginConfig, req }), {
+    onerror: (err) => {
+      // MCP messages use stdout, so write SDK errors to stderr.
+      console.error('[payload-mcp] error serving MCP over stdio:', err)
+    },
+  })
 
-  const transport = new StdioServerTransport()
-  await server.connect(transport)
+  // Close the MCP server and Payload when the client disconnects or the process stops.
+  let isShuttingDown = false
+  const shutdown = async () => {
+    if (isShuttingDown) {
+      return
+    }
+    isShuttingDown = true
 
-  // Process now lives until stdin closes. Wire graceful shutdown so DB
-  // connections (and any other Payload-managed resources) get released.
-  const shutdown = async (code = 0) => {
     try {
-      await server.close()
+      await stdioServer.close()
     } catch (err) {
       console.error('[payload-mcp] error closing server:', err)
     }
+
     try {
       await payload.destroy()
     } catch (err) {
       console.error('[payload-mcp] error destroying payload:', err)
     }
-    process.exit(code)
+
+    process.exit(0)
   }
 
-  process.on('SIGINT', () => void shutdown(0))
-  process.on('SIGTERM', () => void shutdown(0))
-  process.stdin.on('close', () => void shutdown(0))
+  process.once('SIGINT', () => void shutdown())
+  process.once('SIGTERM', () => void shutdown())
+  process.stdin.once('close', () => void shutdown())
 }
