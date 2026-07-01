@@ -241,7 +241,7 @@ export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> 
    */
   blockData?: JsonObject | undefined
   /** The collection which the field belongs to. If the field belongs to a global, this will be null. */
-  collection?: null | SanitizedCollectionConfig
+  collection: null | SanitizedCollectionConfig
   /**
    * The incoming, top-level document data used to `create` or `update` the document with.
    */
@@ -251,7 +251,7 @@ export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> 
    */
   doc?: TData
   /** The global which the field belongs to. If the field belongs to a collection, this will be null. */
-  global?: null | SanitizedGlobalConfig
+  global: null | SanitizedGlobalConfig
   /**
    * The `id` of the current document being read or updated. `id` is undefined during the `create` operation.
    */
