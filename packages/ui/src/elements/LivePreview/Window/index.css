@@ -8,7 +8,7 @@
   .live-preview-window {
     background-color: var(--color-bg);
     display: none;
-    width: 60%;
+    width: 100%;
     flex-shrink: 0;
     flex-grow: 0;
     position: sticky;
@@ -48,9 +48,9 @@
     padding: var(--spacer-3);
   }
 
-  @media (max-width: 1024px) {
+  @media (min-width: 1024px) {
     .live-preview-window {
-      width: 100%;
+      width: 60%;
     }
   }
 }

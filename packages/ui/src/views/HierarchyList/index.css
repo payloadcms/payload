@@ -1,5 +1,6 @@
 @layer payload-default {
   .hierarchy-list {
+    margin-top: var(--spacer-1);
     width: 100%;
     flex: 1;
     display: flex;
@@ -7,7 +8,7 @@
   }
 
   .hierarchy-list__wrap {
-    padding-bottom: var(--spacing-view-bottom);
+    padding-bottom: 0;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -52,13 +53,13 @@
     margin: 0;
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     .hierarchy-list {
-      margin-top: var(--spacer-1);
+      margin-top: 0;
     }
 
     .hierarchy-list__wrap {
-      padding-bottom: 0;
+      padding-bottom: var(--spacing-view-bottom);
     }
 
     .hierarchy-list__sub-header {

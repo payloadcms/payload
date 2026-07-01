@@ -17,13 +17,21 @@
     }
   }
 
-  @media (max-width: 768px) {
+  .field-diff-content .date-diff {
+    display: contents;
+  }
+
+  .date-diff .field-diff-content > .html-diff {
+    justify-content: center;
+  }
+
+  @media (min-width: 768px) {
     .field-diff-content .date-diff {
-      display: contents;
+      display: revert;
     }
 
     .date-diff .field-diff-content > .html-diff {
-      justify-content: center;
+      justify-content: revert;
     }
   }
 }

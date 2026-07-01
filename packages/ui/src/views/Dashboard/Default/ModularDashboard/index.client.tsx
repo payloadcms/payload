@@ -155,9 +155,11 @@ export function ModularDashboardClient({
               <DraggableItem
                 disabled={!isEditing}
                 id={widget.item.id}
-                style={{
-                  width: `${WIDTH_TO_PERCENTAGE[widget.item.width]}%`,
-                }}
+                style={
+                  {
+                    '--widget-width': `${WIDTH_TO_PERCENTAGE[widget.item.width]}%`,
+                  } as React.CSSProperties
+                }
                 width={widget.item.width}
               >
                 <div className={`widget-wrapper ${isEditing ? 'widget-wrapper--editing' : ''}`}>

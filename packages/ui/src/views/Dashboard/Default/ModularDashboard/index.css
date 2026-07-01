@@ -26,13 +26,17 @@
     }
   }
 
-  @media (max-width: 768px) {
+  .modular-dashboard .widget {
+    width: 100%;
+  }
+
+  @media (min-width: 768px) {
     .modular-dashboard .widget {
-      width: 100% !important;
+      width: var(--widget-width);
     }
 
     .modular-dashboard .widget-wrapper__size-btn {
-      display: none;
+      display: flex;
     }
   }
 
@@ -175,7 +179,7 @@
   }
 
   .widget-wrapper__size-btn {
-    display: flex;
+    display: none;
     align-items: center;
     gap: var(--spacer-1);
     padding: var(--spacer-1) var(--spacer-2);

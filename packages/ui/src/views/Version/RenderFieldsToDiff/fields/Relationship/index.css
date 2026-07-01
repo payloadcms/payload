@@ -15,14 +15,15 @@
   }
 
   .relationship-diff-container--hasOne .field-diff-content {
-    padding-block: var(--spacer-2);
-    background: var(--color-bg-secondary);
+    padding: 0;
+    background: transparent;
   }
 
   .relationship-diff-container--hasOne .field-diff-content > .html-diff {
     position: relative;
     z-index: 1;
     flex: 1;
+    justify-content: center;
   }
 
   .relationship-diff-container--hasOne
@@ -51,8 +52,10 @@
   }
 
   .relationship-diff-container--hasMany .field-diff-content {
-    background: var(--color-bg-secondary);
-    padding-block: var(--spacer-1);
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    gap: calc(var(--stroke-width-small) * 2);
 
     .html-diff {
       display: flex;
@@ -180,14 +183,14 @@
     text-decoration-line: line-through;
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     .relationship-diff-container--hasOne .field-diff-content {
-      padding: 0;
-      background: transparent;
+      padding-block: var(--spacer-2);
+      background: var(--color-bg-secondary);
     }
 
     .relationship-diff-container--hasOne .field-diff-content > .html-diff {
-      justify-content: center;
+      justify-content: unset;
     }
 
     .relationship-diff-container--hasOne
@@ -196,14 +199,14 @@
     .relationship-diff-container--hasOne
       .field-diff-content
       > .html-diff:has(.relationship-diff[data-match-type='delete'])::before {
-      inset: calc(var(--spacer-1) * -1) calc(var(--spacer-2) * -1);
+      inset: calc(var(--spacer-2) * -1) 0;
     }
 
     .relationship-diff-container--hasMany .field-diff-content {
-      padding: 0;
-      background: transparent;
-      border-radius: 0;
-      gap: calc(var(--stroke-width-small) * 2);
+      background: var(--color-bg-secondary);
+      padding-block: var(--spacer-1);
+      border-radius: unset;
+      gap: unset;
     }
   }
 }

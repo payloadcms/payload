@@ -25,6 +25,7 @@
     border-radius: var(--radius-medium);
     box-shadow: var(--elevation-300-tooltip);
     visibility: hidden;
+    display: none;
 
     &.field-error {
       background-color: var(--color-bg-danger);
@@ -46,8 +47,8 @@
       width: 100%;
     }
 
-    @media (max-width: 768px) {
-      display: none;
+    @media (min-width: 768px) {
+      display: revert;
     }
   }
 

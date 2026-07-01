@@ -13,14 +13,16 @@
     border-bottom: var(--stroke-width-small) solid var(--color-border);
   }
 
+  /* Mobile: canvas and sidebar stack in a column; the desktop two-column row is restored in the
+     media query below. */
   .edit-upload__content {
     --edit-upload-content-min-height: 480px;
     --edit-upload-sidebar-width: 240px;
 
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     flex: 1 1 auto;
-    min-height: var(--edit-upload-content-min-height);
+    min-height: unset;
   }
 
   /* Canvas area */
@@ -50,8 +52,9 @@
   /* Sidebar */
   .edit-upload__sidebar {
     flex-shrink: 0;
-    width: var(--edit-upload-sidebar-width);
-    border-inline-start: var(--stroke-width-small) solid var(--color-border);
+    width: 100%;
+    border-inline-start: none;
+    border-top: var(--stroke-width-small) solid var(--color-border);
     display: flex;
     flex-direction: column;
   }
@@ -150,16 +153,16 @@
     }
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     .edit-upload__content {
-      flex-direction: column;
-      min-height: unset;
+      flex-direction: row;
+      min-height: var(--edit-upload-content-min-height);
     }
 
     .edit-upload__sidebar {
-      width: 100%;
-      border-inline-start: none;
-      border-top: var(--stroke-width-small) solid var(--color-border);
+      width: var(--edit-upload-sidebar-width);
+      border-inline-start: var(--stroke-width-small) solid var(--color-border);
+      border-top: 0;
     }
   }
 }

@@ -1,7 +1,20 @@
 {
-  "customSyntax": "postcss-scss",
-  "plugins": ["./.stylelint/no-tilde-imports.js"],
+  "plugins": [
+    "./.stylelint/no-tilde-imports.js",
+    "./.stylelint/no-max-width-media-query.js",
+    "./.stylelint/no-non-standard-breakpoints.js"
+  ],
   "rules": {
-    "plugin/no-tilde-imports": true
-  }
+    "plugin/no-max-width-media-query": true,
+    "plugin/no-non-standard-breakpoints": true
+  },
+  "overrides": [
+    {
+      "files": ["**/*.scss"],
+      "customSyntax": "postcss-scss",
+      "rules": {
+        "plugin/no-tilde-imports": true
+      }
+    }
+  ]
 }

@@ -19,41 +19,71 @@
     overflow: clip;
   }
 
-  .field-diff-content > * {
-    padding-inline: var(--spacer-2-5);
+  .field-diff-container .field-diff-content {
+    grid-template-columns: 1fr;
+    gap: calc(var(--stroke-width-small) * 2);
+    padding: 0;
+    background: transparent;
+    isolation: isolate;
   }
 
-  @media (max-width: 768px) {
+  .field-diff-content > * {
+    padding-inline: var(--spacer-2-5);
+    background: var(--color-bg-secondary);
+    padding: var(--spacer-1) var(--spacer-2);
+    min-height: var(--spacer-5);
+    overflow: hidden;
+    align-content: center;
+  }
+
+  .field-diff-content > *:first-child {
+    border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+  }
+
+  .field-diff-content > *:last-child {
+    border-radius: 0 0 var(--radius-medium) var(--radius-medium);
+  }
+
+  .field-diff-content > .html-diff__diff-old:has([data-match-type]) {
+    background: var(--diff-delete-parent-bg);
+  }
+
+  .field-diff-content > .html-diff__diff-new:has([data-match-type]) {
+    background: var(--diff-create-parent-bg);
+  }
+
+  @media (min-width: 768px) {
     .field-diff-container .field-diff-content {
-      grid-template-columns: 1fr;
-      gap: calc(var(--stroke-width-small) * 2);
-      padding: 0;
-      background: transparent;
-      isolation: isolate;
+      grid-template-columns: var(--field-diff-columns, minmax(0, 1fr) minmax(0, 1fr));
+      gap: unset;
+      padding-block: var(--spacer-2);
+      background: var(--color-bg-secondary);
+      isolation: unset;
     }
 
     .field-diff-content > * {
-      background: var(--color-bg-secondary);
-      padding: var(--spacer-1) var(--spacer-2);
-      min-height: var(--spacer-5);
-      overflow: hidden;
-      align-content: center;
+      padding-inline: var(--spacer-2-5);
+      background: unset;
+      padding: unset;
+      min-height: unset;
+      overflow: unset;
+      align-content: unset;
     }
 
     .field-diff-content > *:first-child {
-      border-radius: var(--radius-medium) var(--radius-medium) 0 0;
+      border-radius: unset;
     }
 
     .field-diff-content > *:last-child {
-      border-radius: 0 0 var(--radius-medium) var(--radius-medium);
+      border-radius: unset;
     }
 
     .field-diff-content > .html-diff__diff-old:has([data-match-type]) {
-      background: var(--diff-delete-parent-bg);
+      background: unset;
     }
 
     .field-diff-content > .html-diff__diff-new:has([data-match-type]) {
-      background: var(--diff-create-parent-bg);
+      background: unset;
     }
   }
 

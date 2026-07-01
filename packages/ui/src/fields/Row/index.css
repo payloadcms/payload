@@ -7,6 +7,10 @@
 
       display: flex;
       flex-wrap: wrap;
+      flex-direction: column;
+      margin-left: 0;
+      margin-right: 0;
+      width: 100%;
       row-gap: var(--row-gap);
 
       > * {
@@ -15,6 +19,11 @@
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
+        margin-left: 0;
+        margin-right: 0;
+        width: 100% !important;
+        padding-left: 0;
+        padding-right: 0;
       }
 
       /* Negative margin technique: each item gets half the gap as margin-inline,
@@ -29,19 +38,19 @@
       }
     }
 
-    @media (max-width: 1024px) {
+    @media (min-width: 1024px) {
       .row__fields {
-        flex-direction: column;
-        margin-left: 0;
-        margin-right: 0;
-        width: 100%;
+        flex-direction: row;
+        margin-left: unset;
+        margin-right: unset;
+        width: unset;
 
         > * {
-          margin-left: 0;
-          margin-right: 0;
-          width: 100% !important;
-          padding-left: 0;
-          padding-right: 0;
+          margin-left: unset;
+          margin-right: unset;
+          width: unset !important;
+          padding-left: unset;
+          padding-right: unset;
         }
       }
     }
