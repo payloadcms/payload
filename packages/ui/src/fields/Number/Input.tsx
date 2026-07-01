@@ -43,6 +43,7 @@ export const NumberInput: React.FC<NumberInputProps> = (props) => {
     readOnly,
     required,
     showError,
+    size = 'large',
     step = 1,
     style,
     suffix,
@@ -67,6 +68,7 @@ export const NumberInput: React.FC<NumberInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-size={size}
       style={style}
     >
       <RenderCustomComponent

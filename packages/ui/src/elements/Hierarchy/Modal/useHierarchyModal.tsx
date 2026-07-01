@@ -1,71 +1,67 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useId, useMemo, useRef } from 'react'
+import React, { useCallback, useId, useMemo, useRef, useState } from 'react'
 
-import type {
-  HierarchyDrawerProps,
-  HierarchyDrawerTogglerProps,
-  UseHierarchyDrawer,
-} from './types.js'
+import type { HierarchyModalProps, HierarchyModalTogglerProps, UseHierarchyModal } from './types.js'
 
 export * from './types.js'
 
 import { useConfig } from '../../../providers/Config/index.js'
 import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
-import { DrawerToggler } from '../../Drawer/index.js'
-import { baseClass, HierarchyDrawer } from './index.js'
+import { DrawerToggler as ModalToggler } from '../../Drawer/index.js'
+import { baseClass, HierarchyModal } from './index.js'
 
-export const formatHierarchyDrawerSlug = ({
+export const formatHierarchyModalSlug = ({
   depth,
   uuid,
 }: {
   depth: number
   uuid: string
-}): string => `hierarchy-drawer_${depth}_${uuid}`
+}): string => `hierarchy-modal_${depth}_${uuid}`
 
-export const HierarchyDrawerToggler: React.FC<HierarchyDrawerTogglerProps> = ({
+export const HierarchyModalToggler: React.FC<HierarchyModalTogglerProps> = ({
   children,
   className,
   disabled,
-  drawerSlug,
+  modalSlug,
   onClick,
   ...rest
 }) => {
   return (
-    <DrawerToggler
+    <ModalToggler
       className={[className, `${baseClass}__toggler`].filter(Boolean).join(' ')}
       disabled={disabled}
       onClick={onClick}
-      slug={drawerSlug}
+      slug={modalSlug}
       {...rest}
     >
       {children}
-    </DrawerToggler>
+    </ModalToggler>
   )
 }
 
 /**
- * Hook for using a hierarchy drawer for selecting hierarchy items.
+ * Hook for using a hierarchy modal for selecting hierarchy items.
  *
  * @example
  * ```tsx
- * const [HierarchyDrawer, HierarchyDrawerToggler, { closeDrawer, openDrawer }] = useHierarchyDrawer({
+ * const [HierarchyModal, HierarchyModalToggler, { closeModal, openModal }] = useHierarchyModal({
  *   collectionSlug: 'categories',
  * })
  *
  * return (
  *   <>
- *     <HierarchyDrawer
+ *     <HierarchyModal
  *       onSave={(selections) => console.log(selections)}
  *       hasMany={true}
  *     />
- *     <HierarchyDrawerToggler>Select Categories</HierarchyDrawerToggler>
+ *     <HierarchyModalToggler>Select Categories</HierarchyModalToggler>
  *   </>
  * )
  * ```
  */
-export const useHierarchyDrawer: UseHierarchyDrawer = ({
+export const useHierarchyModal: UseHierarchyModal = ({
   disabledIds,
   filterByCollection: filterByCollectionProp,
   hierarchyCollectionSlug,
@@ -94,12 +90,13 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({
     return allowedCollections !== null ? allowedCollections.map((c) => c.slug) : undefined
   }, [filterByCollectionProp, allowedCollections])
 
-  const drawerDepth = useEditDepth()
+  const modalDepth = useEditDepth()
   const uuid = useId()
   const { closeModal, openModal, toggleModal } = useModal()
+  const [reopenCount, setReopenCount] = useState(0)
 
-  const drawerSlug = formatHierarchyDrawerSlug({
-    depth: drawerDepth,
+  const modalSlug = formatHierarchyModalSlug({
+    depth: modalDepth,
     uuid,
   })
 
@@ -113,69 +110,72 @@ export const useHierarchyDrawer: UseHierarchyDrawer = ({
   toggleModalRef.current = toggleModal
 
   // Stable callbacks using refs - these will NEVER change
-  const toggleDrawer = useCallback(() => {
-    toggleModalRef.current(drawerSlug)
-  }, [drawerSlug])
+  const toggleHierarchyModal = useCallback(() => {
+    toggleModalRef.current(modalSlug)
+  }, [modalSlug])
 
-  const closeDrawer = useCallback(() => {
-    closeModalRef.current(drawerSlug)
-  }, [drawerSlug])
+  const closeHierarchyModal = useCallback(() => {
+    closeModalRef.current(modalSlug)
+  }, [modalSlug])
 
-  const openDrawer = useCallback(() => {
-    openModalRef.current(drawerSlug)
-  }, [drawerSlug])
+  const openHierarchyModal = useCallback(() => {
+    setReopenCount((count) => count + 1)
+    openModalRef.current(modalSlug)
+  }, [modalSlug])
 
-  const MemoizedDrawer = useMemo(() => {
-    const DrawerComponent: React.FC<HierarchyDrawerProps> = (props) => (
-      <HierarchyDrawer
+  const MemoizedModal = useMemo(() => {
+    const ModalComponent: React.FC<HierarchyModalProps> = (props) => (
+      <HierarchyModal
+        key={modalSlug}
         {...props}
         baseFilter={baseFilter}
-        closeDrawer={closeDrawer}
+        closeModal={closeHierarchyModal}
         disabledIds={disabledIds}
-        drawerSlug={drawerSlug}
         filterByCollection={filterByCollection}
         hierarchyCollectionSlug={hierarchyCollectionSlug}
         Icon={Icon}
-        key={drawerSlug}
+        modalSlug={modalSlug}
         parentFieldName={parentFieldName}
+        reopenCount={reopenCount}
         useAsTitle={useAsTitle}
       />
     )
 
-    return DrawerComponent
+    return ModalComponent
   }, [
     baseFilter,
-    drawerSlug,
-    closeDrawer,
+    closeHierarchyModal,
     disabledIds,
     filterByCollection,
     Icon,
+    modalSlug,
     parentFieldName,
+    reopenCount,
     hierarchyCollectionSlug,
     useAsTitle,
   ])
 
-  const MemoizedDrawerToggler = useMemo(() => {
-    const TogglerComponent: React.FC<Omit<HierarchyDrawerTogglerProps, 'drawerSlug'>> = (props) => (
-      <HierarchyDrawerToggler {...props} drawerSlug={drawerSlug} />
+  const MemoizedModalToggler = useMemo(() => {
+    const TogglerComponent: React.FC<Omit<HierarchyModalTogglerProps, 'modalSlug'>> = (props) => (
+      <HierarchyModalToggler {...props} modalSlug={modalSlug} />
     )
 
     return TogglerComponent
-  }, [drawerSlug])
+  }, [modalSlug])
 
-  const MemoizedDrawerState = useMemo(
+  const MemoizedModalState = useMemo(
     () => ({
-      closeDrawer,
-      drawerDepth,
-      drawerSlug,
-      // Note: Not tracking isDrawerOpen to prevent re-renders when other modals change state
+      closeModal: closeHierarchyModal,
+      modalDepth,
+      modalSlug,
+      // Note: Not tracking isModalOpen to prevent re-renders when other modals change state
       // Consumers needing this can use useModal() directly
-      isDrawerOpen: false,
-      openDrawer,
-      toggleDrawer,
+      isModalOpen: false,
+      openModal: openHierarchyModal,
+      toggleModal: toggleHierarchyModal,
     }),
-    [drawerDepth, drawerSlug, toggleDrawer, closeDrawer, openDrawer],
+    [closeHierarchyModal, modalDepth, modalSlug, openHierarchyModal, toggleHierarchyModal],
   )
 
-  return [MemoizedDrawer, MemoizedDrawerToggler, MemoizedDrawerState]
+  return [MemoizedModal, MemoizedModalToggler, MemoizedModalState]
 }

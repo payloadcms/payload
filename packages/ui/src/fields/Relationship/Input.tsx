@@ -72,6 +72,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     relationTo,
     required,
     showError,
+    size = 'large',
     sortOptions,
     style,
     value,
@@ -759,6 +760,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-size={size}
       id={`field-${path.replace(/\./g, '__')}`}
       style={style}
     >

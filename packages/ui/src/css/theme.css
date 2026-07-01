@@ -10,7 +10,8 @@
 @layer payload-default {
   :root {
     /* Fields — controls text inputs, selects, date pickers, code editors, etc. */
-    --field-min-height: var(--spacer-5);
+    --field-min-height-large: var(--spacer-5);
+    --field-min-height-medium: var(--spacer-4);
     --field-padding-inline: var(--spacer-2);
     --field-border-radius: var(--radius-medium);
 
