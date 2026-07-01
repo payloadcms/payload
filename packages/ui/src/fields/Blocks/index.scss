@@ -89,6 +89,7 @@
       padding: 0;
       border: none;
       align-self: flex-start;
+      cursor: pointer;
 
       .btn {
         color: var(--theme-elevation-400);
@@ -97,6 +98,39 @@
         &:hover {
           color: var(--theme-elevation-800);
         }
+      }
+    }
+
+    &__add-button-group {
+      display: flex;
+      align-items: center;
+      align-self: flex-start;
+      gap: 0;
+    }
+
+    &__fast-add {
+      align-self: center;
+    }
+
+    &__fast-add-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: base(1.5);
+      height: base(1.5);
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--theme-elevation-400);
+      padding: 0;
+
+      &:hover {
+        color: var(--theme-elevation-800);
+      }
+
+      .icon--chevron {
+        width: base(0.75);
+        height: base(0.75);
       }
     }
   }
