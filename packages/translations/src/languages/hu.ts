@@ -128,6 +128,8 @@ export const huTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'A(z) "{{field}}" mező nem rendezhető a(z) "{{collection}}" Collection-ben.',
     widgetQueryError: 'Nem sikerült betölteni a dokumentumokat ehhez a widgethez.',
+    widgetRecentlyViewedEmpty: 'Még nem tekintett meg egyetlen dokumentumot sem.',
+    widgetRecentlyViewedTitle: 'Ön nemrég megtekintette',
     widgetSelectCollectionFirst: 'Válasszon ki egy Collection-t a rendezés kiválasztása előtt.',
     widgetSelectSortField: 'Válassza ki a rendezni kívánt mezőt',
     widgetSortDirectionLabel: 'Rendezési irány',

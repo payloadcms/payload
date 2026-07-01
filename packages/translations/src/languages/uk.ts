@@ -124,6 +124,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Поле сортування «{{field}}» не можна сортувати в колекції «{{collection}}».',
     widgetQueryError: 'Не вдалося завантажити документи для цього віджета.',
+    widgetRecentlyViewedEmpty: 'Ви ще не переглядали жодного документа.',
+    widgetRecentlyViewedTitle: 'Ви нещодавно переглядали',
     widgetSelectCollectionFirst: 'Виберіть Collection перед вибором сортування',
     widgetSelectSortField: 'Виберіть поле для сортування',
     widgetSortDirectionLabel: 'Напрямок сортування',

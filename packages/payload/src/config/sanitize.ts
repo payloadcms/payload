@@ -172,6 +172,30 @@ const addDefaultDashboardWidgets = async ({
     },
   ]
 
+  const recentlyViewedFields: NonNullable<Widget['fields']> = [
+    {
+      name: 'excludedCollections',
+      type: 'select',
+      admin: {
+        components: {
+          // Presents an inclusion filter (all collections checked by default) while persisting the
+          // inverse as an exclusion list, so collections added later stay visible by default.
+          Field: '@payloadcms/ui#RecentlyViewedCollectionsField',
+        },
+      },
+      hasMany: true,
+      label: ({ t }) => t('general:collections'),
+      // Exclusion list, so an empty value shows every collection and newly added collections are
+      // included by default. Hidden collections are never offered as options.
+      options: (config.collections ?? [])
+        .filter((collection) => collection.admin?.hidden !== true)
+        .map((collection) => ({
+          label: collection.labels?.plural || collection.slug,
+          value: collection.slug,
+        })),
+    },
+  ]
+
   const adminConfig: NonNullable<Config['admin']> = config.admin ?? { dashboard: { widgets: [] } }
   const dashboard: DashboardConfig = (adminConfig.dashboard ??= { widgets: [] })
 
@@ -191,6 +215,20 @@ const addDefaultDashboardWidgets = async ({
       richTextSanitizationPromises,
       validRelationships,
     }),
+    minWidth: 'x-small',
+  })
+  dashboard.widgets.push({
+    slug: 'activity',
+    Component: '@payloadcms/ui/rsc#RecentlyViewedWidget',
+    fields: await sanitizeFields({
+      config: config as unknown as Config,
+      existingFieldNames: new Set(),
+      fields: recentlyViewedFields,
+      parentIsLocalized: false,
+      richTextSanitizationPromises,
+      validRelationships,
+    }),
+    label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
     minWidth: 'x-small',
   })
   dashboard.defaultLayout ??= [

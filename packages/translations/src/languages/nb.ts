@@ -125,6 +125,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Sorteringsfeltet "{{field}}" kan ikke sorteres i Collection "{{collection}}".',
     widgetQueryError: 'Kunne ikke laste dokumenter for denne widgeten.',
+    widgetRecentlyViewedEmpty: 'Du har ikke sett noen dokumenter ennå.',
+    widgetRecentlyViewedTitle: 'Du har nylig sett',
     widgetSelectCollectionFirst: 'Velg en Collection før du velger sortering',
     widgetSelectSortField: 'Velg et Field du vil sortere etter',
     widgetSortDirectionLabel: 'Sorteringsretning',

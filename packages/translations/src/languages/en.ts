@@ -125,6 +125,8 @@ export const enTranslations = {
     widgetNonSortableSortField:
       'Sort field "{{field}}" is not sortable on collection "{{collection}}".',
     widgetQueryError: 'Could not load documents for this widget.',
+    widgetRecentlyViewedEmpty: 'You have not viewed any documents yet.',
+    widgetRecentlyViewedTitle: 'You recently viewed',
     widgetSelectCollectionFirst: 'Select a collection before choosing sort',
     widgetSelectSortField: 'Select a field to sort by',
     widgetSortDirectionLabel: 'Sort Direction',
