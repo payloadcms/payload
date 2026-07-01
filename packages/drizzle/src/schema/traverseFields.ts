@@ -5,6 +5,7 @@ import {
   fieldAffectsData,
   fieldIsVirtual,
   fieldShouldBeLocalized,
+  flattenAllFields,
   optionIsObject,
 } from 'payload/shared'
 import toSnakeCase from 'to-snake-case'
@@ -947,9 +948,9 @@ export const traverseFields = ({
 
           // get the id type of the related collection
           let colType: IDType = isUUIDType(adapter.idType) ? 'uuid' : 'integer'
-          const relatedCollectionCustomID = relationshipConfig.fields.find(
-            (field) => fieldAffectsData(field) && field.name === 'id',
-          )
+          const relatedCollectionCustomID = flattenAllFields({
+            fields: relationshipConfig.fields,
+          }).find((field) => fieldAffectsData(field) && field.name === 'id')
           if (relatedCollectionCustomID?.type === 'number') {
             colType = 'numeric'
           }
