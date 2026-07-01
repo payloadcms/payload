@@ -14,6 +14,7 @@ import type { CliArgs, DbType, NextAppDetails, NextConfigType, PackageManager } 
 import { copyRecursiveSync } from '../utils/copy-recursive-sync.js'
 import { debug as origDebug, warning } from '../utils/log.js'
 import { moveMessage } from '../utils/messages.js'
+import { ensurePnpmBuildApprovals } from './configure-pnpm-builds.js'
 import { installPackages } from './install-packages.js'
 import { wrapNextConfig } from './wrap-next-config.js'
 
@@ -232,6 +233,8 @@ async function installDeps(projectDir: string, packageManager: PackageManager, d
 
   // Match graphql version of @payloadcms/next
   packagesToInstall.push('graphql@^16.8.1')
+
+  await ensurePnpmBuildApprovals({ packageManager, projectDir })
 
   return await installPackages({ packageManager, packagesToInstall, projectDir })
 }
