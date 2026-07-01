@@ -3782,6 +3782,7 @@ describe('Fields', () => {
                   },
                 },
               ],
+              number: 5
             },
           },
         })
@@ -3813,6 +3814,26 @@ describe('Fields', () => {
               {
                 'json.array.object.notexists': {
                   exists: false,
+                },
+              },
+              {
+                'json.number': {
+                  greater_than: 1,
+                },
+              },
+              {
+                'json.number': {
+                  greater_than_equal: 1,
+                },
+              },
+              {
+                'json.number': {
+                  less_than: 10,
+                },
+              },
+              {
+                'json.number': {
+                  less_than_equal: 10,
                 },
               },
             ],
