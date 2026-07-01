@@ -2,7 +2,6 @@
 import type { ReactSelectOption } from '@payloadcms/ui'
 import type { ViewTypes } from 'payload'
 
-import { getTranslation } from '@payloadcms/translations'
 import { ConfirmationModal, SelectInput, useModal, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
@@ -10,7 +9,6 @@ import type {
   PluginMultiTenantTranslationKeys,
   PluginMultiTenantTranslations,
 } from '../../translations/index.js'
-import type { MultiTenantPluginConfig } from '../../types.js'
 
 import { useTenantSelection } from '../../providers/TenantSelectionProvider/index.client.js'
 import './index.css'
@@ -21,11 +19,9 @@ const baseClass = 'tenant-selector'
 
 export const TenantSelectorClient = ({
   disabled: disabledFromProps,
-  label,
   viewType,
 }: {
   disabled?: boolean
-  label?: MultiTenantPluginConfig['tenantSelectorLabel']
   viewType?: ViewTypes
 }) => {
   const { entityType, modified, options, selectedTenantID, setTenant } = useTenantSelection()
@@ -77,9 +73,7 @@ export const TenantSelectorClient = ({
       <SelectInput
         className={`${baseClass}__select`}
         isClearable={['dashboard', 'list'].includes(viewType ?? '')}
-        label={
-          label ? getTranslation(label, i18n) : t('plugin-multi-tenant:nav-tenantSelector-label')
-        }
+        label={t('plugin-multi-tenant:nav-tenantSelector-label')}
         name="setTenant"
         onChange={onChange}
         options={options}
