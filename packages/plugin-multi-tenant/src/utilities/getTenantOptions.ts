@@ -1,4 +1,4 @@
-import type { OptionObject, Payload, TypedUser } from 'payload'
+import type { OptionObject, Payload, User } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 
@@ -16,7 +16,7 @@ export const getTenantOptions = async ({
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
-  user: TypedUser
+  user: User
   userHasAccessToAllTenants: Required<MultiTenantPluginConfig<any>>['userHasAccessToAllTenants']
 }): Promise<OptionObject[]> => {
   let tenantOptions: OptionObject[] = []
@@ -28,7 +28,11 @@ export const getTenantOptions = async ({
   const isOrderable = payload.collections[tenantsCollectionSlug]?.config?.orderable || false
 
   const userTenantIds = !userHasAccessToAllTenants(user)
-    ? ((user[tenantsArrayFieldName] as { [key: string]: unknown }[]) || []).map((tenantRow) => {
+    ? (
+        ((user as Record<string, unknown>)[tenantsArrayFieldName] as {
+          [key: string]: unknown
+        }[]) || []
+      ).map((tenantRow) => {
         const tenantField = tenantRow[tenantsArrayTenantFieldName]
         if (typeof tenantField === 'string' || typeof tenantField === 'number') {
           return tenantField

@@ -148,7 +148,7 @@ authenticated user, provide an override object with `access: () => true`.
 | `prompts`                              | `object`   | Custom prompts, keyed by name. Values are `Prompt` objects (use [`definePrompt`](#prompts)).                                                  |
 | `resources`                            | `object`   | Custom resources, keyed by name. Values are `Resource` objects.                                                                               |
 | `disabled`                             | `boolean`  | Skip MCP endpoint registration.                                                                                                               |
-| `overrideGetAuthorizedMCP`             | `function` | Replace the default MCP authorization resolver. See [Custom auth](#custom-auth).                                                             |
+| `overrideGetAuthorizedMCP`             | `function` | Replace the default MCP authorization resolver. See [Custom auth](#custom-auth).                                                              |
 | `mcp.serverOptions.serverInfo.name`    | `string`   | The MCP server name advertised to clients. Default `'Payload MCP Server'`.                                                                    |
 | `mcp.serverOptions.serverInfo.version` | `string`   | The MCP server version. Default `'1.0.0'`.                                                                                                    |
 | `mcp.serverOptions.options`            | `object`   | Raw options passed through to the underlying `McpServer` from `@modelcontextprotocol/server`.                                                 |
@@ -674,7 +674,7 @@ Tool handlers receive an `authorizedMCP` object describing the caller:
 type AuthorizedMCP = {
   items: MCPItem[] // the items this caller may use
   overrideAccess: boolean // whether handlers should bypass Payload access control
-  user: TypedUser | null // the resolved user
+  user: User | null // the resolved user
 }
 ```
 
