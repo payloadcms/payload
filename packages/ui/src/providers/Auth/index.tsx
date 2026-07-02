@@ -269,32 +269,23 @@ export function AuthProvider({
     [apiRoute, i18n.language, redirectToInactivityRoute, setNewUser, userSlug, user],
   )
 
-  const logOut = useCallback(
-    async (options?: { collection?: string }) => {
-      // The current client user is the default target. Callers may pass an
-      // explicit collection to log out when the client auth state has already
-      // been cleared (e.g. the logout view for a non-admin user, whose `/me`
-      // against the admin collection resolves to `null`).
-      const collection = user?.collection ?? options?.collection
-
-      try {
-        if (collection) {
-          setNewUser(null)
-          await requests.post(
-            formatAdminURL({
-              apiRoute,
-              path: `/${collection}/logout`,
-            }),
-          )
-        }
-      } catch (_) {
-        // fail silently and log the user out in state
+  const logOut = useCallback(async () => {
+    try {
+      if (user && user.collection) {
+        setNewUser(null)
+        await requests.post(
+          formatAdminURL({
+            apiRoute,
+            path: `/${user.collection}/logout`,
+          }),
+        )
       }
+    } catch (_) {
+      // fail silently and log the user out in state
+    }
 
-      return true
-    },
-    [apiRoute, setNewUser, user],
-  )
+    return true
+  }, [apiRoute, setNewUser, user])
 
   const refreshPermissions = useCallback(
     async ({ locale }: { locale?: string } = {}) => {

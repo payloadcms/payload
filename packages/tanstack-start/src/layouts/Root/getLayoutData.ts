@@ -77,7 +77,7 @@ export async function getLayoutData({
       payload: req.payload,
       permissions,
       searchParams: {},
-      server: req.server,
+      server: req.server!,
       user: req.user ?? undefined,
     }
     // Mirror the Next adapter's `NestProviders`: render each configured provider

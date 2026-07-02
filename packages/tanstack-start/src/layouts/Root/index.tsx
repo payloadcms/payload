@@ -5,7 +5,7 @@ import type {
   LanguageOptions,
   SanitizedPermissions,
   ServerFunctionClient,
-  TypedUser,
+  User,
 } from 'payload'
 
 import { rtlLanguages } from '@payloadcms/translations'
@@ -33,7 +33,7 @@ export type RootLayoutData = {
   providers?: React.ReactNode
   theme: Theme
   translations: I18nClient['translations']
-  user: null | TypedUser
+  user: null | User
 }
 
 export type RootLayoutProps = {
