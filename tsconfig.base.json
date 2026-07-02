@@ -97,6 +97,6 @@
       "@payloadcms/storage-r2/client": ["./packages/storage-r2/src/exports/client.ts"]
     }
   },
-  "include": ["${configDir}/src"],
+  "include": ["${configDir}/src", "tools/assets.d.ts"],
   "exclude": ["${configDir}/dist", "${configDir}/build", "${configDir}/temp", "**/*.spec.ts"]
 }
