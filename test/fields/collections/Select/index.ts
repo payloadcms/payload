@@ -225,7 +225,7 @@ const SelectFields: CollectionConfig = {
     {
       name: 'selectWithJsxLabelOption',
       label: 'Select with JSX label option',
-      type: 'select' as const,
+      type: 'select',
       defaultValue: 'three',
       options: [
         {

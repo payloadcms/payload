@@ -11,13 +11,11 @@ export const AdminUploadControl: CollectionConfig = {
   slug: adminUploadControlSlug,
   upload: {
     staticDir: path.resolve(dirname, 'test/uploads/media'),
-    ...{
-      admin: {
-        components: {
-          controls: [
-            '/collections/AdminUploadControl/components/UploadControl/index.js#UploadControlRSC',
-          ],
-        },
+    admin: {
+      components: {
+        controls: [
+          '/collections/AdminUploadControl/components/UploadControl/index.js#UploadControlRSC',
+        ],
       },
     },
   },

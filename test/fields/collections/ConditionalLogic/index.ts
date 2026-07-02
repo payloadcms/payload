@@ -94,7 +94,7 @@ const ConditionalLogic: CollectionConfig = {
         components: {
           Field: '/collections/ConditionalLogic/CustomServerField.js',
         },
-        condition: ({ toggleField }: any) => Boolean(toggleField),
+        condition: ({ toggleField }) => Boolean(toggleField),
       },
     },
     {

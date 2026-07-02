@@ -117,10 +117,8 @@ export const Posts: CollectionConfig = {
               type: 'ui',
               admin: {
                 components: {
-                  ...{
-                    Cell: '/components/DemoUIField/Cell.js#DemoUIFieldCell',
-                    Field: '/components/DemoUIField/Field.js#DemoUIField',
-                  },
+                  Cell: '/components/DemoUIField/Cell.js#DemoUIFieldCell',
+                  Field: '/components/DemoUIField/Field.js#DemoUIField',
                 },
               },
               label: 'Demo UI Field',
@@ -169,7 +167,7 @@ export const Posts: CollectionConfig = {
       type: 'group',
       admin: {
         components: {
-          ...{ Cell: '/components/CustomGroupCell/index.js#CustomGroupCell' },
+          Cell: '/components/CustomGroupCell/index.js#CustomGroupCell',
         },
       },
       fields: [
@@ -223,7 +221,7 @@ export const Posts: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          ...{ Cell: '/components/CustomCell/index.js#CustomCell' },
+          Cell: '/components/CustomCell/index.js#CustomCell',
         },
       },
     },

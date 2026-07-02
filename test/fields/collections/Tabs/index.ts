@@ -122,7 +122,7 @@ const TabsFields: CollectionConfig = {
           description: 'This tab has an array.',
           fields: [
             {
-              type: 'ui' as const,
+              type: 'ui',
               name: 'demoUIField',
               label: 'Demo UI Field',
               admin: {
