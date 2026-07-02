@@ -126,6 +126,8 @@ export const myTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'အမျိုးအစား "{{collection}}" တွင် Sort field "{{field}}" ကို စီခန့်နိုင်မှုမရှိပါ။',
     widgetQueryError: 'ဤ widget အတွက် Document များကို မဖော်ပြနိုင်ခဲ့ပါ။',
+    widgetRecentlyViewedEmpty: 'သင်သည် Document မည်သည့်ခုကိုမျှ မကြည့်ရှုသေးပါ။',
+    widgetRecentlyViewedTitle: 'သင်မကြာသေးမီကကြည့်ရှုခဲ့သည်',
     widgetSelectCollectionFirst: 'စီညွှန်းမှုရွေးချယ်မည်မီ Collection တစ်ခုအား ရွေးချယ်ပါ။',
     widgetSelectSortField: 'စီအစဉ်ရန် field တစ်ခုရွေးပါ',
     widgetSortDirectionLabel: 'စီခြင်းဦးတည်ရာ',

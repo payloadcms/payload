@@ -125,6 +125,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Полето за сортиране "{{field}}" не може да бъде сортирано в Collection "{{collection}}".',
     widgetQueryError: 'Неуспешно зареждане на документи за този уиджет.',
+    widgetRecentlyViewedEmpty: 'Все още не сте разгледали нито един документ.',
+    widgetRecentlyViewedTitle: 'Последно прегледани',
     widgetSelectCollectionFirst: 'Изберете Collection, преди да изберете начин на сортиране.',
     widgetSelectSortField: 'Изберете поле за сортиране',
     widgetSortDirectionLabel: 'Посока на сортиране',

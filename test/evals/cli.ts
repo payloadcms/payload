@@ -77,6 +77,9 @@ function parseArgs(argv: string[]): ParsedArgs {
   const out: ParsedArgs = { noCache: false }
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
+    if (!arg) {
+      continue
+    }
     if (arg === '-t') {
       out.testPattern = argv[++i]
       continue

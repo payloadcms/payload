@@ -93,6 +93,8 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'dashboard:widgetLimitLabel',
   'dashboard:widgetNonSortableSortField',
   'dashboard:widgetQueryError',
+  'dashboard:widgetRecentlyViewedEmpty',
+  'dashboard:widgetRecentlyViewedTitle',
   'dashboard:widgetSelectCollectionFirst',
   'dashboard:widgetSelectSortField',
   'dashboard:widgetSortDirectionLabel',

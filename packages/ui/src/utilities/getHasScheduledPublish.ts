@@ -1,4 +1,4 @@
-import type { Payload, SanitizedCollectionConfig, SanitizedGlobalConfig, TypedUser } from 'payload'
+import type { Payload, SanitizedCollectionConfig, SanitizedGlobalConfig, User } from 'payload'
 
 import { hasScheduledPublishEnabled } from 'payload/shared'
 
@@ -11,7 +11,7 @@ type Args = {
   hasPublishPermission?: boolean
   id?: number | string
   payload: Payload
-  user: TypedUser
+  user: User
 }
 
 export const getHasScheduledPublish = async ({

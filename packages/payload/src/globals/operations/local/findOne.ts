@@ -5,9 +5,9 @@ import type {
   RequestContext,
   TypedFallbackLocale,
   TypedLocale,
+  User,
 } from '../../../index.js'
 import type {
-  Document,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -81,11 +81,10 @@ type BaseFindOneOptions<TSlug extends GlobalSlug, TSelect extends SelectType> = 
    * the Global slug to operate against.
    */
   slug: TSlug
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
 } & Pick<FindOptions<string, SelectType>, 'select'> &
   Pick<GlobalFindOneArgs, 'flattenLocales'>
 

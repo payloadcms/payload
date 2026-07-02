@@ -126,6 +126,8 @@ export const itTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Il campo di ordinamento "{{field}}" non può essere ordinato nella Collection "{{collection}}".',
     widgetQueryError: 'Impossibile caricare i documenti per questo widget.',
+    widgetRecentlyViewedEmpty: 'Non hai ancora visualizzato alcun documento.',
+    widgetRecentlyViewedTitle: 'Visualizzato di recente',
     widgetSelectCollectionFirst: 'Seleziona una Collection prima di scegliere l’ordinamento.',
     widgetSelectSortField: 'Selezionare un field per l’ordinamento',
     widgetSortDirectionLabel: 'Direzione di ordinamento',

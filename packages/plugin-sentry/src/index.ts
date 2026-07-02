@@ -63,9 +63,10 @@ export const sentryPlugin =
                   user: {
                     id: args.req.user.id,
                     collection: args.req.user.collection,
-                    email: args.req.user.email,
+                    // Payload types email/username as nullable; Sentry's user expects string | undefined
+                    email: args.req.user.email ?? undefined,
                     ip_address: args.req.headers?.get('X-Forwarded-For') ?? undefined,
-                    username: args.req.user.username,
+                    username: args.req.user.username ?? undefined,
                   },
                 }),
               }

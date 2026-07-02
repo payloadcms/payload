@@ -125,6 +125,8 @@ export const idTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Field pengurutan "{{field}}" tidak dapat diurutkan pada Collection "{{collection}}".',
     widgetQueryError: 'Tidak dapat memuat dokumen untuk widget ini.',
+    widgetRecentlyViewedEmpty: 'Anda belum melihat dokumen apa pun.',
+    widgetRecentlyViewedTitle: 'Baru-baru ini Anda lihat',
     widgetSelectCollectionFirst: 'Pilih sebuah Collection sebelum memilih urutan',
     widgetSelectSortField: 'Pilih Field untuk diurutkan',
     widgetSortDirectionLabel: 'Arah Pengurutan',

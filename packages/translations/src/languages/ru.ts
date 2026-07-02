@@ -127,6 +127,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Поле сортировки "{{field}}" не может быть отсортировано в коллекции "{{collection}}".',
     widgetQueryError: 'Не удалось загрузить документы для этого виджета.',
+    widgetRecentlyViewedEmpty: 'Вы ещё не просматривали ни одного документа.',
+    widgetRecentlyViewedTitle: 'Вы недавно просмотрели',
     widgetSelectCollectionFirst: 'Выберите коллекцию перед выбором сортировки',
     widgetSelectSortField: 'Выберите поле для сортировки',
     widgetSortDirectionLabel: 'Направление сортировки',
