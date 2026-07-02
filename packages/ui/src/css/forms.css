@@ -1,7 +1,7 @@
 @layer payload-default {
   .form-input {
     width: 100%;
-    min-height: var(--field-min-height);
+    min-height: var(--field-min-height-large);
     background: var(--field-color-bg);
     border: var(--stroke-width-small) solid var(--field-color-border);
     border-radius: var(--field-border-radius);
@@ -69,7 +69,7 @@
     background: var(--field-color-bg);
     border: var(--stroke-width-small) solid var(--field-color-border);
     border-radius: var(--field-border-radius);
-    min-height: var(--field-min-height);
+    min-height: var(--field-min-height-large);
     transition-property: box-shadow, background-color;
     transition-duration: 100ms;
     transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
@@ -91,7 +91,6 @@
 
     input.form-input {
       flex: 1 1 0%;
-      width: 0;
       min-width: 0;
       background: transparent;
       border: none;
@@ -111,5 +110,9 @@
     &:focus-within {
       border-color: var(--field-color-border-focus);
     }
+  }
+
+  .field-type[data-size='medium'] {
+    --field-min-height-large: var(--field-min-height-medium);
   }
 }

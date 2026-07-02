@@ -147,6 +147,7 @@ import type {
   PickPreserveOptional,
   Where,
 } from '../../types/index.js'
+import type { SchemaVariant } from '../../utilities/configToJSONSchema.js'
 import type { DisabledOptions } from '../isFieldDisabled.js'
 import type {
   NumberFieldManyValidation,
@@ -234,7 +235,7 @@ export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData
   args: FieldHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
-export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
+type SharedFieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
@@ -258,6 +259,16 @@ export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> 
    */
   siblingData?: Partial<TSiblingData>
 }
+
+export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> =
+  | ({ collection: SanitizedCollectionConfig; global?: never } & SharedFieldAccessArgs<
+      TData,
+      TSiblingData
+    >)
+  | ({ collection?: never; global: SanitizedGlobalConfig } & SharedFieldAccessArgs<
+      TData,
+      TSiblingData
+    >)
 
 export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (
   args: FieldAccessArgs<TData, TSiblingData>,
@@ -508,8 +519,11 @@ export interface FieldBase {
    * Allows you to modify the base JSON schema that is generated for this field.
    * This JSON schema will be used to generate the TypeScript interface of this field, and to
    * validate the field's value in the MCP plugin.
+   *
+   * `variant` is `'input'` when generating the write shape (`create`/`update`) and `'output'` when
+   * generating the read shape, so a transform can differ between the two.
    */
-  jsonSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
+  jsonSchema?: Array<(args: { jsonSchema: JSONSchema4; variant: SchemaVariant }) => JSONSchema4>
   label?: false | LabelFunction | StaticLabel
   localized?: boolean
   /**

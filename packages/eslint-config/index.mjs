@@ -52,6 +52,7 @@ const baseRules = {
     },
   ],*/
   'payload/no-jsx-import-statements': 'error',
+  'payload/no-conflicting-lexical-markdown-imports': 'warn',
 }
 
 const reactA11yRules = {

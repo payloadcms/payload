@@ -2,6 +2,7 @@ import type { SelectType } from 'payload'
 
 import { z } from 'zod'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import {
@@ -17,6 +18,15 @@ const DEFAULT_DESCRIPTION =
   'Create a document in any collection by passing the collection slug and data.'
 
 export const createDocumentTool = defineCollectionTool({
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.collectionSlug]?.create),
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: false,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'Create Document',
+  },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     data: z.record(z.string(), z.unknown()).describe('The document fields to create'),
@@ -44,9 +54,9 @@ export const createDocumentTool = defineCollectionTool({
       )
       .optional(),
     select: z
-      .string()
+      .record(z.string(), z.unknown())
       .describe(
-        "Optional: define exactly which fields you'd like to return (JSON), e.g., '{\"title\": true}'",
+        'Optional: define exactly which fields you\'d like to return, e.g., {"title": true}',
       )
       .optional(),
   }),
@@ -71,16 +81,6 @@ export const createDocumentTool = defineCollectionTool({
 
     const parsedData = transformPointDataToPayload(inputData)
 
-    let selectClause: SelectType | undefined
-    if (select) {
-      try {
-        selectClause = JSON.parse(select) as SelectType
-      } catch {
-        logger.warn(`Invalid select clause JSON: ${select}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
-      }
-    }
-
     const result = await payload.create({
       collection: collectionSlug,
       data: parsedData,
@@ -90,7 +90,7 @@ export const createDocumentTool = defineCollectionTool({
       ...localAPIDefaults(authorizedMCP),
       ...(locale ? { locale } : {}),
       ...(fallbackLocale ? { fallbackLocale } : {}),
-      ...(selectClause ? { select: selectClause } : {}),
+      ...(select ? { select: select as SelectType } : {}),
     })
 
     logger.info(`Successfully created document in ${collectionSlug} with ID: ${result.id}`)

@@ -63,15 +63,15 @@ export type SupportedTimezones =
   | 'UTC';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_47963D26".
+ * via the `definition` "LexicalNodes_0DD453D3".
  */
-export type LexicalNodes_47963D26 =
+export type LexicalNodes_0DD453D3 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_47963D26>
+  | SerializedParagraphNode<LexicalNodes_0DD453D3>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_47963D26>
+  | SerializedHeadingNode<LexicalNodes_0DD453D3>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
   | SerializedUploadNode<'exports'>
   | SerializedUploadNode<'posts-export'>
@@ -88,11 +88,11 @@ export type LexicalNodes_47963D26 =
   | SerializedUploadNode<'posts-with-hooks-import'>
   | SerializedUploadNode<'posts-with-field-hooks-import'>
   | SerializedUploadNode<'posts-with-column-map-import'>
-  | SerializedQuoteNode<LexicalNodes_47963D26>
-  | SerializedListNode<LexicalNodes_47963D26>
-  | SerializedListItemNode<LexicalNodes_47963D26>
-  | SerializedAutoLinkNode<LexicalNodes_47963D26, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_47963D26, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_0DD453D3>
+  | SerializedListNode<LexicalNodes_0DD453D3>
+  | SerializedListItemNode<LexicalNodes_0DD453D3>
+  | SerializedAutoLinkNode<LexicalNodes_0DD453D3, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_0DD453D3, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'pages'
@@ -106,7 +106,6 @@ export type LexicalNodes_47963D26 =
       | 'posts-with-field-hooks'
       | 'posts-with-column-map'
       | 'custom-id-pages'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-jobs'
       | 'payload-locked-documents'
@@ -148,7 +147,6 @@ export interface Config {
     'posts-with-hooks-import': PostsWithHooksImport;
     'posts-with-field-hooks-import': PostsWithFieldHooksImport;
     'posts-with-column-map-import': PostsWithColumnMapImport;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
@@ -185,7 +183,6 @@ export interface Config {
     'posts-with-hooks-import': PostsWithHooksImportSelect<false> | PostsWithHooksImportSelect<true>;
     'posts-with-field-hooks-import': PostsWithFieldHooksImportSelect<false> | PostsWithFieldHooksImportSelect<true>;
     'posts-with-column-map-import': PostsWithColumnMapImportSelect<false> | PostsWithColumnMapImportSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -317,7 +314,7 @@ export interface Page {
     | number
     | boolean
     | null;
-  richTextField?: LexicalRichText<LexicalNodes_47963D26> | null;
+  richTextField?: LexicalRichText<LexicalNodes_0DD453D3> | null;
   relationship?: (string | null) | User;
   excerpt?: string | null;
   /**
@@ -385,7 +382,7 @@ export interface Hero {
  * via the `definition` "Content".
  */
 export interface Content {
-  richText?: LexicalRichText<LexicalNodes_47963D26> | null;
+  richText?: LexicalRichText<LexicalNodes_0DD453D3> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -398,7 +395,7 @@ export interface FaqSection {
   faqs?:
     | {
         question?: string | null;
-        answer?: LexicalRichText<LexicalNodes_47963D26> | null;
+        answer?: LexicalRichText<LexicalNodes_0DD453D3> | null;
         id?: string | null;
       }[]
     | null;
@@ -413,7 +410,7 @@ export interface FaqSection {
 export interface Post {
   id: string;
   title: string;
-  content?: LexicalRichText<LexicalNodes_47963D26> | null;
+  content?: LexicalRichText<LexicalNodes_0DD453D3> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -444,7 +441,7 @@ export interface Media {
 export interface PostsExportsOnly {
   id: string;
   title: string;
-  content?: LexicalRichText<LexicalNodes_47963D26> | null;
+  content?: LexicalRichText<LexicalNodes_0DD453D3> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -456,7 +453,7 @@ export interface PostsExportsOnly {
 export interface PostsImportsOnly {
   id: string;
   title: string;
-  content?: LexicalRichText<LexicalNodes_47963D26> | null;
+  content?: LexicalRichText<LexicalNodes_0DD453D3> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -468,7 +465,7 @@ export interface PostsImportsOnly {
 export interface PostsNoJobsQueue {
   id: string;
   title: string;
-  content?: LexicalRichText<LexicalNodes_47963D26> | null;
+  content?: LexicalRichText<LexicalNodes_0DD453D3> | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -1140,31 +1137,6 @@ export interface PostsWithColumnMapImport {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1330,10 +1302,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'custom-id-pages';
         value: string | CustomIdPage;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -2108,22 +2076,6 @@ export interface PostsWithColumnMapImportSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -2404,7 +2356,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -2453,7 +2405,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

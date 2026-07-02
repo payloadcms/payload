@@ -2,6 +2,7 @@ import type { SelectType } from 'payload'
 
 import { z } from 'zod'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import {
@@ -15,6 +16,15 @@ import { validateGlobalData } from '../validateEntityData.js'
 const DEFAULT_DESCRIPTION = 'Update any Payload global by passing the global slug and data.'
 
 export const updateGlobalTool = defineGlobalTool({
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.globals?.[args.globalSlug]?.update),
+  annotations: {
+    destructiveHint: true,
+    idempotentHint: false,
+    openWorldHint: false,
+    readOnlyHint: false,
+    title: 'Update Global',
+  },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     data: z.record(z.string(), z.unknown()).describe('The global fields to update'),
@@ -39,9 +49,9 @@ export const updateGlobalTool = defineGlobalTool({
       )
       .optional(),
     select: z
-      .string()
+      .record(z.string(), z.unknown())
       .describe(
-        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"siteName\": true}'",
+        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"siteName": true}',
       )
       .optional(),
   }),
@@ -66,16 +76,6 @@ export const updateGlobalTool = defineGlobalTool({
 
     const parsedData = transformPointDataToPayload(inputData)
 
-    let selectClause: SelectType | undefined
-    if (select) {
-      try {
-        selectClause = JSON.parse(select) as SelectType
-      } catch {
-        logger.warn(`Invalid select clause JSON for global: ${select}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
-      }
-    }
-
     const updateOptions: Parameters<typeof payload.updateGlobal>[0] = {
       slug: globalSlug,
       data: parsedData,
@@ -90,8 +90,8 @@ export const updateGlobalTool = defineGlobalTool({
     if (fallbackLocale) {
       updateOptions.fallbackLocale = fallbackLocale
     }
-    if (selectClause) {
-      updateOptions.select = selectClause
+    if (select) {
+      updateOptions.select = select as SelectType
     }
 
     const result = await payload.updateGlobal(updateOptions)

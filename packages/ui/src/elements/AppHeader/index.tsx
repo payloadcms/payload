@@ -1,6 +1,9 @@
 'use client'
 import React, { useEffect, useRef, useState } from 'react'
 
+import type { UserMenuSettingsGroup } from '../UserMenu/SettingsMenu/index.js'
+
+import { useElementHeightVariable } from '../../hooks/useElementHeightVariable.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { LanguageIcon } from '../../icons/Language/index.js'
 import { SidebarIcon } from '../../icons/Sidebar/index.js'
@@ -20,9 +23,10 @@ const baseClass = 'app-header'
 
 type Props = {
   CustomAvatar?: React.ReactNode
-  settingsItems?: React.ReactNode[]
+  CustomLogoutButton?: React.ReactNode
+  settingsItemGroups?: UserMenuSettingsGroup[]
 }
-export function AppHeader({ CustomAvatar, settingsItems }: Props) {
+export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups }: Props) {
   const { t } = useTranslation()
   const locale = useLocale()
 
@@ -34,8 +38,11 @@ export function AppHeader({ CustomAvatar, settingsItems }: Props) {
     config: { localization },
   } = useConfig()
 
+  const headerRef = useRef<HTMLElement>(null)
   const customControlsRef = useRef<HTMLDivElement>(null)
   const [isScrollable, setIsScrollable] = useState(false)
+
+  useElementHeightVariable({ cssVar: '--app-header-height', ref: headerRef })
 
   useEffect(() => {
     const checkIsScrollable = () => {
@@ -57,7 +64,10 @@ export function AppHeader({ CustomAvatar, settingsItems }: Props) {
   const ActionComponents = Actions ? Object.values(Actions) : []
 
   return (
-    <header className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
+    <header
+      className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}
+      ref={headerRef}
+    >
       <div className={`${baseClass}__content`}>
         <div className={`${baseClass}__wrapper`}>
           <NavToggler className={`${baseClass}__mobile-nav-toggler`} tabIndex={-1} />
@@ -114,7 +124,11 @@ export function AppHeader({ CustomAvatar, settingsItems }: Props) {
                 )}
               />
             )}
-            <UserMenu CustomAvatar={CustomAvatar} settingsItems={settingsItems} />
+            <UserMenu
+              CustomAvatar={CustomAvatar}
+              CustomLogoutButton={CustomLogoutButton}
+              settingsItemGroups={settingsItemGroups}
+            />
           </div>
         </div>
       </div>

@@ -35,6 +35,9 @@
     /* Modal */
     --color-modalbackdrop: rgba(0, 0, 0, 0.5);
 
+    /* Focal point */
+    --color-focal-point-backdrop: var(--ramp-black-500);
+
     /* ——————————————————————————————————————————————
        Light Theme (default)
 
@@ -315,6 +318,9 @@
     --color-bg-component-tertiary: var(--ramp-pale-purple-800);
     --color-bg-component-tertiary-hover: var(--ramp-pale-purple-700);
 
+    --color-bg-danger: var(--ramp-dark-red-500);
+    --color-bg-danger-hover: var(--ramp-dark-red-600);
+    --color-bg-danger-pressed: var(--ramp-dark-red-700);
     --color-bg-danger-tertiary: var(--ramp-pale-red-800);
     --color-bg-danger-tertiary-hover: var(--ramp-pale-red-700);
     --color-bg-danger-tertiary-pressed: var(--ramp-pale-red-600);

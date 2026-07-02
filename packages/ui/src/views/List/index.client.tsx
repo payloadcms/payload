@@ -10,6 +10,7 @@ import { useBulkUpload } from '../../elements/BulkUpload/index.js'
 import { Button } from '../../elements/Button/index.js'
 import { ListControls } from '../../elements/ListControls/index.js'
 import { useListDrawerContext } from '../../elements/ListDrawer/Provider.js'
+import { ListWhereBuilder } from '../../elements/ListWhereBuilder/index.js'
 import { useModal } from '../../elements/Modal/index.js'
 import { NoListResults } from '../../elements/NoListResults/index.js'
 import { PageControls } from '../../elements/PageControls/index.js'
@@ -18,7 +19,6 @@ import { SelectMany } from '../../elements/SelectMany/index.js'
 import { useStepNav } from '../../elements/StepNav/index.js'
 import { RelationshipProvider } from '../../elements/Table/RelationshipProvider/index.js'
 import { ViewDescription } from '../../elements/ViewDescription/index.js'
-import { WhereBuilder } from '../../elements/WhereBuilder/index.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { DocumentSelectionProvider } from '../../providers/DocumentSelection/index.js'
@@ -98,7 +98,7 @@ export function DefaultListView(props: ListViewClientProps) {
   }, [query?.where])
 
   const { openModal } = useModal()
-  const { drawerSlug: bulkUploadDrawerSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
+  const { modalSlug: bulkUploadModalSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
 
@@ -135,9 +135,9 @@ export function DefaultListView(props: ListViewClientProps) {
 
   const openBulkUpload = React.useCallback(() => {
     setCollectionSlug(collectionSlug)
-    openModal(bulkUploadDrawerSlug)
+    openModal(bulkUploadModalSlug)
     setOnSuccess(() => router.refresh())
-  }, [router, collectionSlug, bulkUploadDrawerSlug, openModal, setCollectionSlug, setOnSuccess])
+  }, [router, collectionSlug, bulkUploadModalSlug, openModal, setCollectionSlug, setOnSuccess])
 
   useEffect(() => {
     if (!isInDrawer) {
@@ -252,11 +252,11 @@ export function DefaultListView(props: ListViewClientProps) {
               resolvedFilterOptions={resolvedFilterOptions}
             />
             {isWhereOpen && (
-              <WhereBuilder
+              <ListWhereBuilder
                 collectionPluralLabel={collectionConfig?.labels?.plural}
                 collectionSlug={collectionSlug}
                 fields={collectionConfig?.fields}
-                onClose={() => setIsWhereOpen(false)}
+                onEmptyRemove={() => setIsWhereOpen(false)}
                 renderedFilters={renderedFilters}
                 resolvedFilterOptions={resolvedFilterOptions}
               />
@@ -299,8 +299,8 @@ export function DefaultListView(props: ListViewClientProps) {
               <RelationshipProvider>{Table}</RelationshipProvider>
             ) : null}
             {/* HierarchyTable handles its own empty state, skip for hierarchy views */}
-            {docs?.length === 0 && (
-              NoResults ?? (
+            {docs?.length === 0 &&
+              (NoResults ?? (
                 <NoListResults
                   Actions={
                     hasCreatePermission && newDocumentURL && viewType !== 'trash'
@@ -335,8 +335,7 @@ export function DefaultListView(props: ListViewClientProps) {
                   title={viewType !== 'trash' ? i18n.t('general:noResultsFound') : undefined}
                   withMargin
                 />
-              )
-            )}
+              ))}
             {AfterListTable}
             {AfterList}
             {docs?.length > 0 && !isGroupingBy && (

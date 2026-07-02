@@ -45,7 +45,7 @@ export const renderWidgetHandler: ServerFunction<
         {
           style: {
             background: 'var(--theme-elevation-50)',
-            border: '1px solid var(--theme-elevation-200)',
+            border: 'var(--stroke-width-small) solid var(--theme-elevation-200)',
             borderRadius: '4px',
             color: 'var(--theme-text)',
             padding: '20px',
@@ -93,7 +93,7 @@ export const renderWidgetHandler: ServerFunction<
         {
           style: {
             background: 'var(--theme-error-50)',
-            border: '1px solid var(--theme-error-200)',
+            border: 'var(--stroke-width-small) solid var(--theme-error-200)',
             borderRadius: '4px',
             color: 'var(--theme-error-text)',
             padding: '20px',

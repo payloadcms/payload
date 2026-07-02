@@ -5,7 +5,7 @@
     top: 0;
     display: flex;
     justify-content: space-between;
-    z-index: 1;
+    z-index: var(--z-nav);
     gap: var(--spacer-2);
     padding: var(--spacer-2-5) var(--gutter-h);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
@@ -150,10 +150,16 @@
     }
 
     .doc-controls {
-      padding: var(--spacer-2) var(--spacer-3);
+      padding: var(--spacer-2-5);
       padding-right: var(--spacer-2-5);
       gap: var(--spacer-2);
       flex-wrap: wrap;
+    }
+
+    .doc-controls--drawerHeaderActions {
+      padding: 0;
+      gap: 0;
+      flex-wrap: nowrap;
     }
 
     .doc-controls__content {

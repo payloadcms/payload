@@ -1,11 +1,11 @@
 import type { SerializedEditorState } from 'lexical'
 
 import { createHeadlessEditor } from '@lexical/headless'
+import { $convertToMarkdownString } from '@lexical/markdown'
 
 import type { SanitizedServerEditorConfig } from '../../../lexical/config/types.js'
 
 import { getEnabledNodes } from '../../../lexical/nodes/index.js'
-import { $convertToMarkdownString } from '../../../packages/@lexical/markdown/index.js'
 
 export const convertLexicalToMarkdown = ({
   data,

@@ -3,6 +3,8 @@ import { useWindowInfo } from '@faceless-ui/window-info'
 import { formatAdminURL } from 'payload/shared'
 import React, { useEffect, useState } from 'react'
 
+import type { UserMenuSettingsGroup } from './SettingsMenu/index.js'
+
 import { Account } from '../../graphics/Account/index.js'
 import { LogOutIcon } from '../../icons/LogOut/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
@@ -21,10 +23,15 @@ const baseClass = 'user-menu'
 
 type UserMenuProps = {
   CustomAvatar?: React.ReactNode
-  settingsItems?: React.ReactNode[]
+  CustomLogoutButton?: React.ReactNode
+  settingsItemGroups?: UserMenuSettingsGroup[]
 }
 
-export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems = [] }) => {
+export const UserMenu: React.FC<UserMenuProps> = ({
+  CustomAvatar,
+  CustomLogoutButton,
+  settingsItemGroups = [],
+}) => {
   const { user } = useAuth()
   const { languageOptions, t } = useTranslation()
   const {
@@ -63,7 +70,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
   const identifier = user?.username ?? user?.email ?? ''
   const hasMultipleLanguages = Array.isArray(languageOptions) && languageOptions.length > 1
   const showThemeMenu = adminTheme === 'all'
-  const hasSettingsItems = settingsItems.length > 0
+  const hasSettingsItems = settingsItemGroups.some((group) => group.items.length > 0)
   const showPreferencesGroup = showThemeMenu || hasMultipleLanguages
 
   const logoutHref = formatAdminURL({ adminRoute, path: logoutRoute })
@@ -118,7 +125,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
                 onBack={() => setActiveMobileSubmenu(null)}
                 title={t('general:settings')}
               />
-              <SettingsMenuContent items={settingsItems} />
+              <SettingsMenuContent groups={settingsItemGroups} />
             </>
           )}
         </>
@@ -159,7 +166,7 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
             <>
               <PopupList.ButtonGroup>
                 <SettingsMenu
-                  items={settingsItems}
+                  groups={settingsItemGroups}
                   onMobileOpen={isMobile ? () => setActiveMobileSubmenu('settings') : undefined}
                 />
               </PopupList.ButtonGroup>
@@ -169,9 +176,11 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItems 
 
           {/* Account actions */}
           <PopupList.MenuItem>
-            <PopupList.Button href={logoutHref} icon={<LogOutIcon />}>
-              {t('authentication:logOut')}
-            </PopupList.Button>
+            {CustomLogoutButton ?? (
+              <PopupList.Button href={logoutHref} icon={<LogOutIcon />}>
+                {t('authentication:logOut')}
+              </PopupList.Button>
+            )}
           </PopupList.MenuItem>
         </>
       )}

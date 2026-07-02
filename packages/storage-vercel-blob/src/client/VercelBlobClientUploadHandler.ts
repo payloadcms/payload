@@ -1,6 +1,5 @@
 'use client'
-import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
-import { getFileKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { createClientUploadHandler, getFileKey } from '@payloadcms/plugin-cloud-storage/client'
 import { upload } from '@vercel/blob/client'
 import { formatAdminURL } from 'payload/shared'
 

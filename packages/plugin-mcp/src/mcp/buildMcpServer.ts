@@ -109,7 +109,12 @@ export const buildMcpServer = ({
       }
     }
 
-    const handlerArgs = { authorizedMCP, input: toolInput, req, serverContext }
+    const handlerArgs = {
+      authorizedMCP,
+      input: toolInput,
+      req,
+      serverContext,
+    }
     const response = await (match.type === 'collectionTool'
       ? match.tool.handler({ ...handlerArgs, collectionSlug: slug })
       : match.tool.handler({ ...handlerArgs, globalSlug: slug }))
@@ -137,6 +142,7 @@ export const buildMcpServer = ({
           server.registerTool(
             item.mcpName,
             {
+              annotations: item.tool.annotations,
               description: item.tool.description,
               inputSchema: toStandardSchema(inputSchema),
             },
@@ -193,6 +199,7 @@ export const buildMcpServer = ({
           server.registerTool(
             item.mcpName,
             {
+              annotations: tool.annotations,
               description: tool.description,
               inputSchema: tool.input ? toStandardSchema(tool.input) : undefined,
             },

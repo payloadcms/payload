@@ -215,6 +215,7 @@ export const buildFormState = async (
     documentData,
     fields,
     fieldSchemaMap: schemaMap,
+    globalSlug,
     initialBlockData: blockData,
     mockRSCs,
     operation,

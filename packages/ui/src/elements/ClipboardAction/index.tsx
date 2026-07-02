@@ -92,6 +92,7 @@ export const ClipboardAction: FC<Props> = ({
   return (
     <Popup
       button={<MoreIcon />}
+      buttonAriaLabel={t('general:moreOptions')}
       buttonClassName={`${baseClass}__button`}
       caret={false}
       className={classes}

@@ -5,10 +5,11 @@ import type { JsonSchemaType } from '../../types.js'
 import { sanitizeEntitySchema } from './sanitizeEntitySchema.js'
 
 describe('sanitizeEntitySchema', () => {
-  it('keeps a Lexical node union strict (oneOf) while simplifying relationship values to IDs', () => {
-    // Shaped like the schema the MCP server prepares for a collection with a Lexical richText field:
-    // a `$defs` node union (a `oneOf` of node shapes) where a relationship node's `value` is either
-    // an ID or a `$ref` to the populated related collection.
+  it('renames the Lexical node-union definition to a short name and keeps it a strict oneOf', () => {
+    // Shaped like the schema the MCP server prepares for a collection with a Lexical richText field
+    // (Payload's `input` variant): a `$defs` node union (a `oneOf` of node shapes). The input variant
+    // already types the relationship node's `value` as a bare ID - there is no populated-doc `$ref` to
+    // reduce here (the variant did that upstream), so sanitize leaves the value untouched.
     const standalone: JsonSchemaType = {
       type: 'object',
       $defs: {
@@ -25,16 +26,11 @@ describe('sanitizeEntitySchema', () => {
               additionalProperties: false,
               properties: {
                 type: { const: 'relationship' },
-                value: { oneOf: [{ type: 'string' }, { $ref: '#/$defs/posts' }] },
+                value: { type: 'string', description: 'The related document ID.' },
               },
               required: ['type'],
             },
           ],
-        },
-        posts: {
-          type: 'object',
-          additionalProperties: false,
-          properties: { id: { type: 'string' }, title: { type: 'string' } },
         },
       },
       properties: {
@@ -57,7 +53,7 @@ describe('sanitizeEntitySchema', () => {
       type: 'object',
       $defs: {
         // The node union is renamed to a short, readable `node`, and stays a strict discriminated
-        // `oneOf` - not loosened to `anyOf`...
+        // `oneOf` - not loosened to `anyOf`.
         node: {
           oneOf: [
             {
@@ -71,21 +67,18 @@ describe('sanitizeEntitySchema', () => {
               additionalProperties: false,
               properties: {
                 type: { const: 'relationship' },
-                // ...while the relationship `value` is simplified to a bare ID (the populated-doc `$ref` is dropped).
-                value: { type: 'string', description: 'The ID of the related "posts" document.' },
+                // The value is already ID-only from the input variant - left as-is.
+                value: { type: 'string', description: 'The related document ID.' },
               },
               required: ['type'],
             },
           ],
         },
-        posts: {
-          type: 'object',
-          additionalProperties: false,
-          properties: { id: { type: 'string' }, title: { type: 'string' } },
-        },
       },
       properties: {
-        // `id` is dropped - it's a Payload-managed field MCP clients never set.
+        // Managed fields (createdAt/updatedAt/_status) are excluded upstream by the `input` variant;
+        // `id` stays because it's a valid optional input (a client may supply a custom ID).
+        id: { type: 'string' },
         content: {
           type: 'object',
           properties: {
