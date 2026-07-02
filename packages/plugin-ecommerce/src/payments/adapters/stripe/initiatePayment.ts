@@ -18,7 +18,8 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
     const customerEmail = data.customerEmail
     const currency = data.currency
     const cart = data.cart
-    const amount = cart.subtotal
+    const summary = data.summary
+    const amount = summary.total
     const billingAddressFromData = data.billingAddress
     const shippingAddressFromData = data.shippingAddress
 
@@ -99,6 +100,7 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
           cartID: cart.id,
           cartItemsSnapshot: JSON.stringify(flattenedCart),
           shippingAddress: shippingAddressAsString,
+          summary: JSON.stringify(summary),
         },
       })
 
@@ -126,6 +128,7 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
         clientSecret: paymentIntent.client_secret || '',
         message: 'Payment initiated successfully',
         paymentIntentID: paymentIntent.id,
+        transactionID: transaction.id,
       }
 
       return returnData

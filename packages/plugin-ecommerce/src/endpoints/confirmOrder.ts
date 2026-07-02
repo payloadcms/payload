@@ -1,6 +1,16 @@
 import { addDataAndFileToRequest, type DefaultDocumentIDType, type Endpoint } from 'payload'
 
-import type { CurrenciesConfig, PaymentAdapter, ProductsValidation } from '../types/index.js'
+import type {
+  CurrenciesConfig,
+  PaymentAdapter,
+  PaymentHooks,
+  ProductsValidation,
+} from '../types/index.js'
+
+import {
+  runAfterConfirmOrderHooks,
+  runBeforeConfirmOrderHooks,
+} from '../utilities/runPaymentHooks.js'
 
 type Args = {
   /**
@@ -13,9 +23,19 @@ type Args = {
    */
   customersSlug?: string
   /**
+   * Whether the transactions/orders collections have the `summary` field.
+   * When true, the handler copies the summary from the transaction onto the
+   * created order and includes it in the response.
+   */
+  hasHooks?: boolean
+  /**
    * The slug of the orders collection, defaults to 'orders'.
    */
   ordersSlug?: string
+  /**
+   * Plugin-level payment hooks that run for all payment methods.
+   */
+  paymentHooks?: PaymentHooks
   paymentMethod: PaymentAdapter
   /**
    * The slug of the products collection, defaults to 'products'.
@@ -46,7 +66,9 @@ export const confirmOrderHandler: ConfirmOrderHandler =
     cartsSlug = 'carts',
     currenciesConfig,
     customersSlug = 'users',
+    hasHooks = false,
     ordersSlug = 'orders',
+    paymentHooks,
     paymentMethod,
     productsSlug = 'products',
     productsValidation,
@@ -155,6 +177,32 @@ export const confirmOrderHandler: ConfirmOrderHandler =
       )
     }
 
+    // Run beforeConfirmOrder hooks (plugin-level then adapter-level)
+    const pluginBeforeHooks = paymentHooks?.beforeConfirmOrder ?? []
+    const adapterBeforeHooks = paymentMethod.hooks?.beforeConfirmOrder ?? []
+    const allBeforeConfirmHooks = [...pluginBeforeHooks, ...adapterBeforeHooks]
+
+    if (allBeforeConfirmHooks.length > 0) {
+      try {
+        await runBeforeConfirmOrderHooks(allBeforeConfirmHooks, {
+          customerEmail,
+          data: data as Record<string, unknown>,
+          req,
+        })
+      } catch (error) {
+        payload.logger.error(error, 'Error in beforeConfirmOrder hook.')
+
+        return Response.json(
+          {
+            message: error instanceof Error ? error.message : 'Error in beforeConfirmOrder hook.',
+          },
+          {
+            status: 400,
+          },
+        )
+      }
+    }
+
     try {
       const paymentResponse = await paymentMethod.confirmOrder({
         cartsSlug,
@@ -168,6 +216,8 @@ export const confirmOrderHandler: ConfirmOrderHandler =
         transactionsSlug,
       })
 
+      let persistedSummary: unknown
+
       if (paymentResponse.transactionID) {
         const transaction = await payload.findByID({
           id: paymentResponse.transactionID,
@@ -176,8 +226,13 @@ export const confirmOrderHandler: ConfirmOrderHandler =
           select: {
             id: true,
             items: true,
+            ...(hasHooks ? { summary: true } : {}),
           },
         })
+
+        if (hasHooks && transaction && 'summary' in transaction) {
+          persistedSummary = (transaction as { summary?: unknown }).summary
+        }
 
         if (transaction && Array.isArray(transaction.items) && transaction.items.length > 0) {
           for (const item of transaction.items) {
@@ -210,8 +265,49 @@ export const confirmOrderHandler: ConfirmOrderHandler =
         }
       }
 
+      // Copy the summary from the transaction onto the order so the breakdown
+      // is available on both records. Errors are logged, not thrown — the order
+      // has already been successfully created by the adapter.
+      if (hasHooks && paymentResponse.orderID && persistedSummary) {
+        try {
+          await payload.update({
+            id: paymentResponse.orderID,
+            collection: ordersSlug,
+            data: { summary: persistedSummary },
+            overrideAccess: true,
+            req,
+          })
+        } catch (error) {
+          payload.logger.error(error, 'Failed to copy summary onto order.')
+        }
+      }
+
+      // Run afterConfirmOrder hooks (plugin-level then adapter-level)
+      // Errors are logged but do not fail the response
+      if (paymentResponse.orderID && paymentResponse.transactionID) {
+        const pluginAfterHooks = paymentHooks?.afterConfirmOrder ?? []
+        const adapterAfterHooks = paymentMethod.hooks?.afterConfirmOrder ?? []
+        const allAfterConfirmHooks = [...pluginAfterHooks, ...adapterAfterHooks]
+
+        if (allAfterConfirmHooks.length > 0) {
+          await runAfterConfirmOrderHooks(
+            allAfterConfirmHooks,
+            {
+              orderID: paymentResponse.orderID,
+              req,
+              transactionID: paymentResponse.transactionID,
+            },
+            payload.logger,
+          )
+        }
+      }
+
       if ('paymentResponse.transactionID' in paymentResponse && paymentResponse.transactionID) {
         delete (paymentResponse as Partial<typeof paymentResponse>).transactionID
+      }
+
+      if (hasHooks && persistedSummary) {
+        return Response.json({ ...paymentResponse, summary: persistedSummary })
       }
 
       return Response.json(paymentResponse)
