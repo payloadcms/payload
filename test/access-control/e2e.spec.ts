@@ -398,11 +398,6 @@ describe('Access Control', () => {
       })
     })
 
-    test('should not show in card list', async () => {
-      await page.goto(url.admin)
-      await expect(page.locator(`#card-${fullyRestrictedSlug}`)).toHaveCount(0)
-    })
-
     test('should not show in nav', async () => {
       await page.goto(url.admin)
       await openNav(page)
@@ -449,11 +444,6 @@ describe('Access Control', () => {
       })
     })
 
-    test('should show in card list', async () => {
-      await page.goto(url.admin)
-      await expect(page.locator(`#card-${readOnlySlug}`)).toHaveCount(1)
-    })
-
     test('should show in nav', async () => {
       await page.goto(url.admin)
       await expect(page.locator(`.nav a[href="/admin/collections/${readOnlySlug}"]`)).toHaveCount(1)
@@ -467,11 +457,6 @@ describe('Access Control', () => {
     test('should not have "Create New" button', async () => {
       await page.goto(readOnlyCollectionUrl.create)
       await expect(page.locator('.collection-list__header a')).toHaveCount(0)
-    })
-
-    test('should not have quick create button', async () => {
-      await page.goto(url.admin)
-      await expect(page.locator(`#card-${readOnlySlug}`)).not.toHaveClass('card__actions')
     })
 
     test('should not display actions on edit view', async () => {

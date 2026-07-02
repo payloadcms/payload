@@ -247,7 +247,6 @@ The `./client`, `./rsc`, and `./templates` subpath exports on `@payloadcms/next`
 | -------------------------- | ---------------------------- | -------------------- |
 | `DefaultTemplate`          | `@payloadcms/next/templates` | `@payloadcms/ui/rsc` |
 | `MinimalTemplate`          | `@payloadcms/next/templates` | `@payloadcms/ui/rsc` |
-| `CollectionCards`          | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
 | `DefaultNav`               | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
 | `DocumentHeader`           | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
 | `HierarchyTypeFieldServer` | `@payloadcms/next/rsc`       | `@payloadcms/ui/rsc` |
@@ -273,9 +272,21 @@ The `./client`, `./rsc`, and `./templates` subpath exports on `@payloadcms/next`
 + import { HierarchyTypeField, SlugField } from '@payloadcms/ui'
 ```
 
-If you reference any of these components by string path in your Payload config (e.g. `Component: '@payloadcms/next/rsc#CollectionCards'`), update the path string too — then regenerate the import map with `payload generate:importmap`.
+If you reference any of these components by string path in your Payload config (e.g. `Component: '@payloadcms/next/rsc#DefaultNav'`), update the path string too — then regenerate the import map with `payload generate:importmap`.
 
 Run `npx @payloadcms/codemod --transform migrate-next-subpath-exports` to migrate automatically. It rewrites both `import` declarations and string component paths.
+
+### `collections` dashboard widget (`CollectionCards`) removed
+
+The built-in `collections` dashboard widget and its `CollectionCards` component have been removed. This widget rendered a grid of collection and global cards on the dashboard, duplicating the information already available in the navigation sidebar. The default dashboard now ships the `activity` (recently viewed documents) widget instead.
+
+This is a breaking change. Anything that relies on the removed widget will fail:
+
+- Configs that reference `CollectionCards` by import or by string path (`@payloadcms/ui/rsc#CollectionCards`, or the pre-v4 `@payloadcms/next/rsc#CollectionCards`) no longer resolve, because the export no longer exists. Remove those references and regenerate the import map with `payload generate:importmap`.
+- `defaultLayout` entries with `widgetSlug: 'collections'` no longer match a registered widget and are dropped from the rendered dashboard. Remove them, or replace them with another widget such as `{ widgetSlug: 'activity', width: 'small' }`.
+- Saved user dashboard preferences that contain the `collections` widget silently drop it on next render; the rest of the layout is unaffected.
+
+The navigation sidebar continues to provide access to every collection and global, so no navigation capability is lost.
 
 ### `title` and `setDocumentTitle` removed from `useDocumentInfo`
 

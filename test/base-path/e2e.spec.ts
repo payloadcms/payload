@@ -12,6 +12,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
+import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -69,8 +70,9 @@ test.describe('Base Path', () => {
     await login({ page, serverURL })
     await page.goto(url.admin)
 
-    // click first dashboard card
-    await page.locator('.collections__card-list .card').first().click()
+    // click the posts nav link
+    await openNav(page)
+    await page.locator('#nav-posts').click()
 
     // should navigate to basePath url
     await expect.poll(() => page.url()).toContain('/cms/admin/collections/posts')

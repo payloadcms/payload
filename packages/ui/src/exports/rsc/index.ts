@@ -33,6 +33,5 @@ export { addRecentlyViewedItem, recentlyViewedMaxItems } from '../../utilities/r
 export { renderFilters, renderTable } from '../../utilities/renderTable.js'
 export { resolveFilterOptions } from '../../utilities/resolveFilterOptions.js'
 export { upsertPreferences } from '../../utilities/upsertPreferences.js'
-export { CollectionCards } from '../../widgets/CollectionCards/index.js'
 export { CollectionQueryWidget } from '../../widgets/CollectionQuery/index.js'
 export { RecentlyViewedWidget } from '../../widgets/RecentlyViewed/index.js'
