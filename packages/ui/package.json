@@ -281,6 +281,56 @@
       "import": "./src/assets/index.ts",
       "types": "./src/assets/index.ts",
       "default": "./src/assets/index.ts"
+    },
+    "./server": {
+      "import": "./src/exports/server.ts",
+      "types": "./src/exports/server.ts",
+      "default": "./src/exports/server.ts"
+    },
+    "./views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.ts"
+    },
+    "./views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn": {
+      "import": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts",
+      "types": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts",
+      "default": "./src/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.ts"
+    },
+    "./elements/Nav/SidebarTabs/renderTabServerFn": {
+      "import": "./src/elements/Nav/SidebarTabs/renderTabServerFn.ts",
+      "types": "./src/elements/Nav/SidebarTabs/renderTabServerFn.ts",
+      "default": "./src/elements/Nav/SidebarTabs/renderTabServerFn.ts"
+    },
+    "./elements/RenderServerComponent/clientOnly": {
+      "import": "./src/elements/RenderServerComponent/clientOnly.tsx",
+      "types": "./src/elements/RenderServerComponent/clientOnly.tsx",
+      "default": "./src/elements/RenderServerComponent/clientOnly.tsx"
+    },
+    "./elements/Nav/getNavPrefs": {
+      "import": "./src/elements/Nav/getNavPrefs.ts",
+      "types": "./src/elements/Nav/getNavPrefs.ts",
+      "default": "./src/elements/Nav/getNavPrefs.ts"
+    },
+    "./elements/DocumentHeader/Tabs/Tab/TabLink": {
+      "import": "./src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx",
+      "types": "./src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx",
+      "default": "./src/elements/DocumentHeader/Tabs/Tab/TabLink.tsx"
+    },
+    "./elements/DocumentHeader/Tabs/ShouldRenderTabs": {
+      "import": "./src/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx",
+      "types": "./src/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx",
+      "default": "./src/elements/DocumentHeader/Tabs/ShouldRenderTabs.tsx"
+    },
+    "./widgets/CollectionCards/index.client": {
+      "import": "./src/widgets/CollectionCards/index.client.tsx",
+      "types": "./src/widgets/CollectionCards/index.client.tsx",
+      "default": "./src/widgets/CollectionCards/index.client.tsx"
+    },
+    "./utilities/serverFunctionRegistry": {
+      "import": "./src/utilities/serverFunctionRegistry.ts",
+      "types": "./src/utilities/serverFunctionRegistry.ts",
+      "default": "./src/utilities/serverFunctionRegistry.ts"
     }
   },
   "main": "./src/exports/client/index.ts",
@@ -299,12 +349,12 @@
     "build:remove-artifact": "rm dist/prod/index.js",
     "build:swc": "swc ./src -d dist --config-file .swcrc --strip-leading-paths",
     "build:swc:debug": "swc ./src -d ./dist --config-file .swcrc-debug --strip-leading-paths",
-    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "build:types": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" tsc --emitDeclarationOnly --outDir dist",
     "build:without_reactcompiler": "rm -rf dist && rm -rf tsconfig.tsbuildinfo && pnpm copyfiles && pnpm build:types && pnpm build:swc",
     "clean": "rimraf -g {dist,*.tsbuildinfo,esbuild}",
     "copyfiles": "copyfiles -u 1 \"src/**/*.{html,css,scss,ttf,woff,woff2,eot,svg,jpg,png,json}\" dist/",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" eslint .",
+    "lint:fix": "cross-env NODE_OPTIONS=\"--max-old-space-size=8192\" eslint . --fix"
   },
   "dependencies": {
     "@date-fns/tz": "1.2.0",
@@ -547,6 +597,56 @@
         "import": "./dist/utilities/*.js",
         "types": "./dist/utilities/*.d.ts",
         "default": "./dist/utilities/*.js"
+      },
+      "./server": {
+        "import": "./dist/exports/server.js",
+        "types": "./dist/exports/server.d.ts",
+        "default": "./dist/exports/server.js"
+      },
+      "./views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn": {
+        "import": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js",
+        "types": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.d.ts",
+        "default": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/renderWidgetServerFn.js"
+      },
+      "./views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn": {
+        "import": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js",
+        "types": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.d.ts",
+        "default": "./dist/views/Dashboard/Default/ModularDashboard/renderWidget/getDefaultLayoutServerFn.js"
+      },
+      "./elements/Nav/SidebarTabs/renderTabServerFn": {
+        "import": "./dist/elements/Nav/SidebarTabs/renderTabServerFn.js",
+        "types": "./dist/elements/Nav/SidebarTabs/renderTabServerFn.d.ts",
+        "default": "./dist/elements/Nav/SidebarTabs/renderTabServerFn.js"
+      },
+      "./elements/RenderServerComponent/clientOnly": {
+        "import": "./dist/elements/RenderServerComponent/clientOnly.js",
+        "types": "./dist/elements/RenderServerComponent/clientOnly.d.ts",
+        "default": "./dist/elements/RenderServerComponent/clientOnly.js"
+      },
+      "./elements/Nav/getNavPrefs": {
+        "import": "./dist/elements/Nav/getNavPrefs.js",
+        "types": "./dist/elements/Nav/getNavPrefs.d.ts",
+        "default": "./dist/elements/Nav/getNavPrefs.js"
+      },
+      "./elements/DocumentHeader/Tabs/Tab/TabLink": {
+        "import": "./dist/elements/DocumentHeader/Tabs/Tab/TabLink.js",
+        "types": "./dist/elements/DocumentHeader/Tabs/Tab/TabLink.d.ts",
+        "default": "./dist/elements/DocumentHeader/Tabs/Tab/TabLink.js"
+      },
+      "./elements/DocumentHeader/Tabs/ShouldRenderTabs": {
+        "import": "./dist/elements/DocumentHeader/Tabs/ShouldRenderTabs.js",
+        "types": "./dist/elements/DocumentHeader/Tabs/ShouldRenderTabs.d.ts",
+        "default": "./dist/elements/DocumentHeader/Tabs/ShouldRenderTabs.js"
+      },
+      "./widgets/CollectionCards/index.client": {
+        "import": "./dist/widgets/CollectionCards/index.client.js",
+        "types": "./dist/widgets/CollectionCards/index.client.d.ts",
+        "default": "./dist/widgets/CollectionCards/index.client.js"
+      },
+      "./utilities/serverFunctionRegistry": {
+        "import": "./dist/utilities/serverFunctionRegistry.js",
+        "types": "./dist/utilities/serverFunctionRegistry.d.ts",
+        "default": "./dist/utilities/serverFunctionRegistry.js"
       }
     },
     "main": "./dist/exports/client/index.js",

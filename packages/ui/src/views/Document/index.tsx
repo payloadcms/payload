@@ -497,6 +497,14 @@ export async function DocumentView(props: AdminViewServerProps) {
       throw error
     }
 
+    // The TanStack adapter's `req.server.redirect()` throws `redirect:<url>` as a
+    // control-flow signal — the target is already recorded on `req.server` and
+    // honored upstream in `loadAdminPage`. It isn't a real error, so swallow it
+    // without logging, mirroring the `NEXT_REDIRECT` guard above.
+    if (error?.message?.startsWith('redirect:')) {
+      return
+    }
+
     logError({ err: error, payload: props.initPageResult.req.payload })
 
     if (error.message === 'not-found') {

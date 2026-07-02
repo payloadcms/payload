@@ -489,7 +489,8 @@ describe('Versions', () => {
     })
 
     test('collection - autosave - should redirect from create to edit URL after first save', async () => {
-      await page.goto(autosaveURL.create)
+      await page.goto(autosaveURL.list)
+      await page.locator('#create-new-doc').click()
 
       await page.locator('#field-title').fill('autosave redirect title')
       await waitForAutoSaveToRunAndComplete(page)

@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import WebSocket from 'ws'
 
+import type { DevReloadStrategy } from './admin/adapters/devReload.js'
 import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
 import type { LoginResult } from './auth/operations/login.js'
@@ -1158,11 +1159,11 @@ export const reload = async (
 let _cached: Map<
   string,
   {
+    devReloadCleanup: (() => void) | null
     initializedCrons: boolean
     payload: null | Payload
     promise: null | Promise<Payload>
     reload: boolean | Promise<void>
-    ws: null | WebSocket
   }
 > = (global as any)._payload
 
@@ -1178,8 +1179,61 @@ if (!_cached) {
  * when calling getPayload multiple times or from multiple locations.
  * - adds HMR support and reloads the payload instance when the config changes.
  */
+/**
+ * Default HMR reload strategy using Next.js webpack-hmr WebSocket.
+ * Used as fallback when no custom devReloadStrategy is provided.
+ */
+function defaultNextJsDevReloadStrategy(): DevReloadStrategy | null {
+  try {
+    const port = process.env.PORT || '3000'
+    const hasHTTPS =
+      process.env.USE_HTTPS === 'true' || process.argv.includes('--experimental-https')
+    const protocol = hasHTTPS ? 'wss' : 'ws'
+
+    const hmrPath = '/_next/webpack-hmr'
+    const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
+
+    const url =
+      process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `${protocol}://localhost:${port}${prefix}${hmrPath}`
+
+    return {
+      connect(onReload) {
+        const ws = new WebSocket(url)
+
+        ws.onmessage = (event) => {
+          if (typeof event.data === 'string') {
+            const data = JSON.parse(event.data)
+            if (
+              data.type === 'serverComponentChanges' ||
+              data.action === 'serverComponentChanges'
+            ) {
+              onReload()
+            }
+          }
+        }
+
+        ws.onerror = () => {
+          // swallow any websocket connection error
+        }
+
+        return () => {
+          ws.close()
+        }
+      },
+    }
+  } catch (_) {
+    return null
+  }
+}
+
 export const getPayload = async (
   options: {
+    /**
+     * Custom dev reload strategy. If provided, replaces the default
+     * Next.js HMR WebSocket listener. The strategy's `connect` function
+     * receives a callback to trigger config reload.
+     */
+    devReloadStrategy?: DevReloadStrategy
     /**
      * A unique key to identify the payload instance. You can pass your own key if you want to cache this payload instance separately.
      * This is useful if you pass a different payload config for each instance.
@@ -1198,11 +1252,11 @@ export const getPayload = async (
   let cached = _cached.get(options.key ?? 'default')
   if (!cached) {
     cached = {
+      devReloadCleanup: null,
       initializedCrons: Boolean(options.cron),
       payload: null,
       promise: null,
       reload: false,
-      ws: null,
     }
     _cached.set(options.key ?? 'default', cached)
   } else {
@@ -1265,52 +1319,24 @@ export const getPayload = async (
     cached.payload = await cached.promise
 
     if (
-      !cached.ws &&
+      !cached.devReloadCleanup &&
       process.env.NODE_ENV !== 'production' &&
       process.env.NODE_ENV !== 'test' &&
       process.env.DISABLE_PAYLOAD_HMR !== 'true'
     ) {
-      try {
-        const port = process.env.PORT || '3000'
-        const hasHTTPS =
-          process.env.USE_HTTPS === 'true' || process.argv.includes('--experimental-https')
-        const protocol = hasHTTPS ? 'wss' : 'ws'
+      const strategy = options.devReloadStrategy ?? defaultNextJsDevReloadStrategy()
 
-        const path = '/_next/webpack-hmr'
-        // The __NEXT_ASSET_PREFIX env variable is set for both assetPrefix and basePath (tested in Next.js 15.1.6)
-        const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
-
-        cached.ws = new WebSocket(
-          process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `${protocol}://localhost:${port}${prefix}${path}`,
-        )
-
-        cached.ws.onmessage = (event) => {
-          if (cached.reload instanceof Promise) {
-            // If there is an in-progress reload in the same getPayload
-            // cache instance, do not set reload to true again, which would
-            // trigger another reload.
-            // Instead, wait for the in-progress reload to finish.
-            return
-          }
-
-          if (typeof event.data === 'string') {
-            const data = JSON.parse(event.data)
-
-            if (
-              // On Next.js 15, we need to check for data.action. On Next.js 16, we need to check for data.type.
-              data.type === 'serverComponentChanges' ||
-              data.action === 'serverComponentChanges'
-            ) {
-              cached.reload = true
+      if (strategy) {
+        try {
+          cached.devReloadCleanup = strategy.connect(() => {
+            if (cached.reload instanceof Promise) {
+              return
             }
-          }
+            cached.reload = true
+          })
+        } catch (_) {
+          // swallow connection errors
         }
-
-        cached.ws.onerror = (_) => {
-          // swallow any websocket connection error
-        }
-      } catch (_) {
-        // swallow e
       }
     }
   } catch (e) {
