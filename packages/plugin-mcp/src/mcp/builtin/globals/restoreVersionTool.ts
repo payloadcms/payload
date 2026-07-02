@@ -7,8 +7,7 @@ import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
-const DEFAULT_DESCRIPTION =
-  'Restore a global from a previous version in any version-enabled global.'
+const DEFAULT_DESCRIPTION = 'Restore a global from a previous version in any version-enabled global.'
 
 export const restoreGlobalVersionTool = defineGlobalTool({
   access: (args) =>

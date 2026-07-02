@@ -73,8 +73,7 @@ export const findDistinctTool = defineCollectionTool({
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
-  const { depth, field, limit, locale, page, populate, showHiddenFields, sort, trash, where } =
-    input
+  const { depth, field, limit, locale, page, populate, showHiddenFields, sort, trash, where } = input
 
   logger.info(`Finding distinct values in collection: ${collectionSlug}, field: ${field}`)
 
