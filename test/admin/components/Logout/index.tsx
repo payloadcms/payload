@@ -1,6 +1,6 @@
 'use client'
 
-import { LogOutIcon, useConfig } from '@payloadcms/ui'
+import { LogOutIcon, PopupList, useConfig } from '@payloadcms/ui'
 import React from 'react'
 
 export const Logout: React.FC = () => {
@@ -14,11 +14,10 @@ export const Logout: React.FC = () => {
   } = useConfig()
 
   return (
-    <a
-      href={`${admin}${logoutRoute}#custom`}
-      style={{ alignItems: 'center', display: 'flex', gap: 8 }}
-    >
-      <LogOutIcon /> Custom Logout
+    <a aria-label="Custom Logout" href={`${admin}${logoutRoute}#custom`}>
+      <PopupList.Button className="logout-button" icon={<LogOutIcon />}>
+        Custom Logout
+      </PopupList.Button>
     </a>
   )
 }
