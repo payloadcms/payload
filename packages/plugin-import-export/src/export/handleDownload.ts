@@ -14,7 +14,7 @@ export const handleDownload = async (req: PayloadRequest, debug = false) => {
     }
 
     if (!body || !body.data) {
-      throw new APIError('Request data is required.')
+      throw new APIError(req.t ? req.t('error:requestDataRequired') : 'Request data is required.')
     }
 
     const { collectionSlug, format } = body.data || {}

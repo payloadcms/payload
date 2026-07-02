@@ -27,7 +27,7 @@ export const getGenerateSignedURLHandler = ({
 }: Args): PayloadHandler => {
   return async (req) => {
     if (!req.json) {
-      throw new APIError('Unreachable')
+      throw new APIError(req.t ? req.t('error:unreachable') : 'Unreachable')
     }
 
     const { collectionSlug, docPrefix, filename, mimeType } = (await req.json()) as {

@@ -77,7 +77,12 @@ export const createImport = async ({
   }
 
   if (!user) {
-    throw new APIError('User is required for import operations', 401, null, true)
+    throw new APIError(
+      req.t ? req.t('error:userRequiredForImport') : 'User is required for import operations',
+      401,
+      null,
+      true,
+    )
   }
 
   if (debug) {
@@ -92,11 +97,21 @@ export const createImport = async ({
   }
 
   if (!collectionSlug) {
-    throw new APIError('Collection slug is required', 400, null, true)
+    throw new APIError(
+      req.t ? req.t('error:collectionSlugRequired') : 'Collection slug is required',
+      400,
+      null,
+      true,
+    )
   }
 
   if (!file || !file?.data) {
-    throw new APIError('No file data provided for import', 400, null, true)
+    throw new APIError(
+      req.t ? req.t('error:noFileDataForImport') : 'No file data provided for import',
+      400,
+      null,
+      true,
+    )
   }
 
   if (debug) {
@@ -114,7 +129,12 @@ export const createImport = async ({
 
   if (!collectionConfig) {
     if (!collectionSlug) {
-      throw new APIError('Collection slug is required', 400, null, true)
+      throw new APIError(
+        req.t ? req.t('error:collectionSlugRequired') : 'Collection slug is required',
+        400,
+        null,
+        true,
+      )
     }
     throw new APIError(`Collection with slug ${collectionSlug} not found`, 400, null, true)
   }

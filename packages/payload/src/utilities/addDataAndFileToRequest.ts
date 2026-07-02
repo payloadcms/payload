@@ -25,7 +25,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         req.json = () => Promise.resolve(data)
       } catch (error) {
         if (error instanceof SyntaxError) {
-          throw new APIError('Invalid JSON', 400)
+          throw new APIError(req.t ? req.t('error:invalidJSON') : 'Invalid JSON', 400)
         }
         req.payload.logger.error(error)
         throw error
@@ -64,12 +64,19 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
             fields.file,
           ))
         } catch {
-          throw new APIError('A file name is required.', 400)
+          throw new APIError(
+            req.t ? req.t('error:filenameRequired') : 'A file name is required.',
+            400,
+          )
         }
         const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
 
         if (!uploadConfig.handlers) {
-          throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
+          throw new APIError(
+            req.t
+              ? req.t('error:uploadConfigHandlersMissing', { collection: collectionSlug })
+              : 'uploadConfig.handlers is not present for ' + collectionSlug,
+          )
         }
 
         let response: null | Response = null
@@ -99,7 +106,11 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
             payload.logger.error(error)
           }
 
-          throw new APIError('Expected response from the upload handler.')
+          throw new APIError(
+            req.t
+              ? req.t('error:expectedResponseFromUploadHandler')
+              : 'Expected response from the upload handler.',
+          )
         }
 
         if (response.status >= 300 && response.status < 400) {
