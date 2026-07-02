@@ -657,7 +657,8 @@ export type EmailField = {
     placeholder?: Record<string, string> | string
   } & FieldAdmin
   type: 'email'
-  validate?: EmailFieldValidation
+  validate?: EmailFieldValidation,
+  sterilize?: boolean
 } & Omit<FieldBase, 'validate'>
 
 export type EmailFieldClient = {
