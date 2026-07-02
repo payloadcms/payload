@@ -1,7 +1,6 @@
 import type { GenericLanguages, GenericTranslationsObject } from '@payloadcms/translations'
 
 import { checkDependencies, deepMergeSimple } from 'payload'
-import { isRSCEnabled } from 'payload/shared'
 
 import type { FeatureProviderServer, ResolvedServerFeatureMap } from './features/typesServer.js'
 import type { SanitizedServerEditorConfig } from './lexical/config/types.js'
@@ -102,23 +101,19 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
     config.i18n.translations = deepMergeSimple(config.i18n.translations, supportedLanguagesToMerge)
 
-    const rscEnabled = isRSCEnabled()
-
     return {
-      CellComponent: rscEnabled ? '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell' : false,
+      CellComponent: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
       ClientFieldComponent: '@payloadcms/richtext-lexical/client#ClientEntryLexicalField',
-      DiffComponent: rscEnabled ? '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent' : false,
+      DiffComponent: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
       editorConfig: finalSanitizedEditorConfig,
       features,
-      FieldComponent: rscEnabled
-        ? {
-            path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField',
-            serverProps: {
-              admin: args?.admin,
-              views: args?.views,
-            },
-          }
-        : false,
+      FieldComponent: {
+        path: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalField',
+        serverProps: {
+          admin: args?.admin,
+          views: args?.views,
+        },
+      },
       generateImportMap: getGenerateImportMap({
         lexicalEditorArgs: args,
         resolvedFeatureMap,

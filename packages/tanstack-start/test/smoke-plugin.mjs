@@ -82,10 +82,6 @@ if (!config.optimizeDeps.exclude.includes('@payloadcms/ui')) {
   errors.push("optimizeDeps.exclude missing '@payloadcms/ui'")
 }
 
-if (process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED !== 'true') {
-  errors.push('PAYLOAD_FRAMEWORK_RSC_ENABLED env not set')
-}
-
 if (errors.length) {
   console.error('FAIL\n' + errors.map((e) => ' - ' + e).join('\n'))
   process.exit(1)

@@ -172,8 +172,6 @@ export {
   isReactServerComponentOrFunction,
 } from '../utilities/isReactComponent.js'
 
-export { isRSCEnabled } from '../utilities/isRSCEnabled.js'
-
 export { logError } from '../utilities/logError.js'
 
 export {

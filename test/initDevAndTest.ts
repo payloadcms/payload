@@ -51,10 +51,6 @@ export async function initDevAndTest(
     return
   }
 
-  if (framework === 'tanstack-start') {
-    process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'true'
-  }
-
   // Generate importMap
   const testDir = path.resolve(dirname, testSuiteArg)
   console.log('Generating import map for config:', testDir)

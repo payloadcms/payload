@@ -1,33 +1,29 @@
 import type { CollectionConfig } from 'payload'
 
-import { isRSCEnabled } from 'payload/shared'
-
 import { customFieldsSlug } from '../../slugs.js'
 
 export const CustomFields: CollectionConfig = {
   slug: customFieldsSlug,
   fields: [
-    ...(isRSCEnabled()
-      ? [
-          {
-            name: 'customTextServerField',
-            type: 'text' as const,
-            maxLength: 100,
-            admin: {
-              placeholder: 'This is a placeholder',
-              components: {
-                afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
-                beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
-                Label: '/collections/CustomFields/fields/Text/LabelServer.js#CustomServerLabel',
-                Description:
-                  '/collections/CustomFields/fields/Text/DescriptionServer.js#CustomServerDescription',
-                Error: '/collections/CustomFields/CustomError.js#CustomError',
-              },
-            },
-            minLength: 3,
+    ...[
+      {
+        name: 'customTextServerField',
+        type: 'text' as const,
+        maxLength: 100,
+        admin: {
+          placeholder: 'This is a placeholder',
+          components: {
+            afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+            beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+            Label: '/collections/CustomFields/fields/Text/LabelServer.js#CustomServerLabel',
+            Description:
+              '/collections/CustomFields/fields/Text/DescriptionServer.js#CustomServerDescription',
+            Error: '/collections/CustomFields/CustomError.js#CustomError',
           },
-        ]
-      : []),
+        },
+        minLength: 3,
+      },
+    ],
     {
       name: 'customTextClientField',
       type: 'text',

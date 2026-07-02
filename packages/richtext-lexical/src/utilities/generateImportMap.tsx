@@ -1,7 +1,6 @@
 import type { RichTextAdapter } from 'payload'
 
 import { genImportMapIterateFields } from 'payload'
-import { isRSCEnabled } from 'payload/shared'
 
 import type { ResolvedServerFeatureMap } from '../features/typesServer.js'
 import type { LexicalEditorProps } from '../types/index.js'
@@ -12,11 +11,9 @@ export const getGenerateImportMap =
     resolvedFeatureMap: ResolvedServerFeatureMap
   }): RichTextAdapter['generateImportMap'] =>
   ({ addToImportMap, baseDir, config, importMap, imports }) => {
-    if (isRSCEnabled()) {
-      addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell')
-      addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalField')
-      addToImportMap('@payloadcms/richtext-lexical/rsc#LexicalDiffComponent')
-    }
+    addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell')
+    addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalField')
+    addToImportMap('@payloadcms/richtext-lexical/rsc#LexicalDiffComponent')
     addToImportMap('@payloadcms/richtext-lexical/client#ClientEntryLexicalField')
 
     addToImportMap(args.lexicalEditorArgs?.views)

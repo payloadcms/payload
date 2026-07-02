@@ -68,8 +68,6 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
     tanstackStart,
   } = options
 
-  process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED = 'true'
-
   return (_env) => ({
     css: {
       preprocessorOptions: {
@@ -80,7 +78,6 @@ export function payloadPlugin(options: PayloadPluginOptions): UserConfigFnObject
     },
     define: {
       global: 'globalThis',
-      'process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED': JSON.stringify('true'),
     },
     environments: {
       rsc: { resolve: { noExternal: payloadRscNoExternalPatterns } },

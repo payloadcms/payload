@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { isRSCEnabled } from 'payload/shared'
-
 import {
   customCollectionMetaTitle,
   customCollectionParamViewPath,
@@ -25,80 +23,78 @@ export const CustomViews2: CollectionConfig = {
       title: customCollectionMetaTitle,
     },
     components: {
-      ...(isRSCEnabled()
-        ? {
-            views: {
-              edit: {
-                api: {
-                  tab: {
-                    Component: {
-                      path: '/components/CustomTabComponent/index.js#CustomTabComponent',
-                      clientProps: {
-                        label: overriddenDefaultRouteTabLabel,
-                      },
-                    },
-                  },
-                },
-                customViewWithParam: {
-                  Component: '/components/views/CustomTabWithParam/index.js#CustomTabWithParamView',
-                  tab: {
-                    href: `${customCollectionParamViewPathBase}/123`,
-                    label: 'Custom Param View',
-                  },
-                  path: customCollectionParamViewPath,
-                },
-                default: {
-                  tab: {
-                    label: customEditLabel,
-                  },
-                  meta: {
-                    title: customDefaultTabMetaTitle,
-                  },
-                },
-                myCustomView: {
-                  Component: '/components/views/CustomTabLabel/index.js#CustomTabLabelView',
-                  tab: {
-                    href: '/custom-tab-view',
-                    label: customTabLabel,
-                  },
-                  path: '/custom-tab-view',
-                  meta: {
-                    title: customViewMetaTitle,
-                  },
-                },
-                myCustomViewWithCustomTab: {
-                  Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
-                  tab: {
-                    Component: {
-                      path: '/components/CustomTabComponent/index.js#CustomTabComponent',
-                      clientProps: {
-                        label: customTabComponent,
-                      },
-                    },
-                  },
-                  path: customTabViewPath,
-                },
-                myCustomViewWithNestedPath: {
-                  Component: '/components/views/CustomTabNested/index.js#CustomNestedTabView',
-                  tab: {
-                    href: customNestedTabViewPath,
-                    label: 'Custom Nested Tab View',
-                  },
-                  path: customNestedTabViewPath,
-                  meta: {
-                    title: 'Custom Nested Meta Title',
-                  },
-                },
-                versions: {
-                  Component: '/components/views/CustomVersions/index.js#CustomVersionsView',
-                  meta: {
-                    title: customVersionsTabMetaTitle,
+      ...{
+        views: {
+          edit: {
+            api: {
+              tab: {
+                Component: {
+                  path: '/components/CustomTabComponent/index.js#CustomTabComponent',
+                  clientProps: {
+                    label: overriddenDefaultRouteTabLabel,
                   },
                 },
               },
             },
-          }
-        : {}),
+            customViewWithParam: {
+              Component: '/components/views/CustomTabWithParam/index.js#CustomTabWithParamView',
+              tab: {
+                href: `${customCollectionParamViewPathBase}/123`,
+                label: 'Custom Param View',
+              },
+              path: customCollectionParamViewPath,
+            },
+            default: {
+              tab: {
+                label: customEditLabel,
+              },
+              meta: {
+                title: customDefaultTabMetaTitle,
+              },
+            },
+            myCustomView: {
+              Component: '/components/views/CustomTabLabel/index.js#CustomTabLabelView',
+              tab: {
+                href: '/custom-tab-view',
+                label: customTabLabel,
+              },
+              path: '/custom-tab-view',
+              meta: {
+                title: customViewMetaTitle,
+              },
+            },
+            myCustomViewWithCustomTab: {
+              Component: '/components/views/CustomTabComponent/index.js#CustomTabComponentView',
+              tab: {
+                Component: {
+                  path: '/components/CustomTabComponent/index.js#CustomTabComponent',
+                  clientProps: {
+                    label: customTabComponent,
+                  },
+                },
+              },
+              path: customTabViewPath,
+            },
+            myCustomViewWithNestedPath: {
+              Component: '/components/views/CustomTabNested/index.js#CustomNestedTabView',
+              tab: {
+                href: customNestedTabViewPath,
+                label: 'Custom Nested Tab View',
+              },
+              path: customNestedTabViewPath,
+              meta: {
+                title: 'Custom Nested Meta Title',
+              },
+            },
+            versions: {
+              Component: '/components/views/CustomVersions/index.js#CustomVersionsView',
+              meta: {
+                title: customVersionsTabMetaTitle,
+              },
+            },
+          },
+        },
+      },
     },
   },
   fields: [
@@ -106,5 +102,5 @@ export const CustomViews2: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
-  ]
+  ],
 }

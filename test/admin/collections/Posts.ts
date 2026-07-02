@@ -5,7 +5,6 @@ import {
   lexicalEditor,
   RelationshipFeature,
 } from '@payloadcms/richtext-lexical'
-import { isRSCEnabled } from 'payload/shared'
 
 import { customTabAdminDescription, slugPluralLabel, slugSingularLabel } from '../shared.js'
 import { postsCollectionSlug, uploadCollectionSlug } from '../slugs.js'
@@ -26,60 +25,56 @@ export const Posts: CollectionConfig = {
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
     components: {
-      ...(isRSCEnabled()
-        ? {
-            beforeListTable: [
-              '/components/ResetColumns/index.js#ResetDefaultColumnsButton',
-              {
-                path: '/components/Banner/index.js#Banner',
-                clientProps: {
-                  message: 'BeforeListTable custom component',
-                },
-              },
-            ],
-            Description: {
-              path: '/components/ViewDescription/index.js#ViewDescription',
+      ...{
+        beforeListTable: [
+          '/components/ResetColumns/index.js#ResetDefaultColumnsButton',
+          {
+            path: '/components/Banner/index.js#Banner',
+            clientProps: {
+              message: 'BeforeListTable custom component',
             },
-            afterListTable: [
-              {
-                path: '/components/Banner/index.js#Banner',
-                clientProps: {
-                  message: 'AfterListTable custom component',
-                },
-              },
-            ],
-            listMenuItems: [
-              {
-                path: '/components/ListMenuItems/index.js#ListMenuItemsExample',
-              },
-            ],
-            afterList: [
-              {
-                path: '/components/Banner/index.js#Banner',
-                clientProps: {
-                  message: 'AfterList custom component',
-                },
-              },
-            ],
-            beforeList: [
-              {
-                path: '/components/Banner/index.js#Banner',
-                clientProps: {
-                  message: 'BeforeList custom component',
-                },
-              },
-            ],
-          }
-        : {}),
+          },
+        ],
+        Description: {
+          path: '/components/ViewDescription/index.js#ViewDescription',
+        },
+        afterListTable: [
+          {
+            path: '/components/Banner/index.js#Banner',
+            clientProps: {
+              message: 'AfterListTable custom component',
+            },
+          },
+        ],
+        listMenuItems: [
+          {
+            path: '/components/ListMenuItems/index.js#ListMenuItemsExample',
+          },
+        ],
+        afterList: [
+          {
+            path: '/components/Banner/index.js#Banner',
+            clientProps: {
+              message: 'AfterList custom component',
+            },
+          },
+        ],
+        beforeList: [
+          {
+            path: '/components/Banner/index.js#Banner',
+            clientProps: {
+              message: 'BeforeList custom component',
+            },
+          },
+        ],
+      },
       edit: {
-        ...(isRSCEnabled()
-          ? {
-              beforeDocumentControls: [
-                '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
-                '/components/BeforeDocumentControls/CustomSaveButton/index.js#CustomSaveButton',
-              ],
-            }
-          : {}),
+        ...{
+          beforeDocumentControls: [
+            '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
+            '/components/BeforeDocumentControls/CustomSaveButton/index.js#CustomSaveButton',
+          ],
+        },
       },
     },
     pagination: {
@@ -126,12 +121,10 @@ export const Posts: CollectionConfig = {
               type: 'ui',
               admin: {
                 components: {
-                  ...(isRSCEnabled()
-                    ? {
-                        Cell: '/components/DemoUIField/Cell.js#DemoUIFieldCell',
-                        Field: '/components/DemoUIField/Field.js#DemoUIField',
-                      }
-                    : {}),
+                  ...{
+                    Cell: '/components/DemoUIField/Cell.js#DemoUIFieldCell',
+                    Field: '/components/DemoUIField/Field.js#DemoUIField',
+                  },
                 },
               },
               label: 'Demo UI Field',

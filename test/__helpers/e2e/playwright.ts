@@ -8,18 +8,13 @@ type TestOptions = {
    * - 'all': Run on all frameworks (default)
    * - 'next': Run only on Next.js
    * - 'tanstack-start': Run only on TanStack Start
-   * - 'rsc': Run only when RSC is enabled. Useful for tests that assert server component rendering.
+   * - 'rsc': Alias for 'all'. RSC is always enabled; retained to mark tests that assert server component rendering.
    */
   framework?: 'all' | 'rsc' | PayloadFramework
 }
 
 const currentFramework: PayloadFramework =
   (process.env.PAYLOAD_FRAMEWORK as PayloadFramework) || 'next'
-
-const isRSCEnabled =
-  process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED !== undefined
-    ? process.env.PAYLOAD_FRAMEWORK_RSC_ENABLED !== 'false'
-    : true
 
 /**
  * Custom `test` wrapper that supports framework-specific test execution.
@@ -47,10 +42,6 @@ function testWithOptions(
 
   const framework = options?.framework ?? 'all'
 
-  if (framework === 'rsc' && !isRSCEnabled) {
-    return playwrightTest.skip(name, testFn as Parameters<typeof playwrightTest>[1])
-  }
-
   if (framework !== 'all' && framework !== 'rsc' && framework !== currentFramework) {
     return playwrightTest.skip(name, testFn as Parameters<typeof playwrightTest>[1])
   }
@@ -75,4 +66,4 @@ testWithOptions.extend = playwrightTest.extend
 // Needs to be called `test` for the Playwright VS Code extension to recognize it
 export const test = testWithOptions
 
-export { currentFramework, isRSCEnabled }
+export { currentFramework }
