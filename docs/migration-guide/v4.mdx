@@ -325,6 +325,29 @@ export const myRichTextAdapter = (): RichTextAdapterProvider => {
 
 The `transactionIDPromise` property on `PayloadRequest` has been removed. It was deprecated and unused — `transactionID` (which already supports `Promise<number | string>`) is the correct property to use for both resolved values and pending transactions.
 
+### Collection `afterOperation` hook: `operation: 'read'` removed
+
+The deprecated `'read'` value for the `operation` argument of collection `afterOperation` hooks has been removed. Payload has not dispatched `afterOperation` with `operation: 'read'` for some time — the `find` and `findByID` operations report their own names (`'find'` and `'findByID'`) instead.
+
+If a custom `afterOperation` hook branches on `operation === 'read'`, split it to handle `'find'` and `'findByID'`:
+
+```diff
+const afterOperation: CollectionAfterOperationHook = ({ operation, result }) => {
+-  if (operation === 'read') {
++  if (operation === 'find' || operation === 'findByID') {
+    // ...
+  }
+
+  return result
+}
+```
+
+`'find'` resolves the paginated result (`result.docs`), while `'findByID'` resolves a single document — narrow on the specific operation if your logic depends on the result shape.
+
+Run `npx @payloadcms/codemod --transform migrate-after-operation-read` to migrate inline hooks automatically. The codemod rewrites `operation === 'read'` (and `!==`/`==`/`!=`) comparisons against a destructured, aliased, or property-accessed `operation` argument. Non-inline hooks (hooks referenced by name) and `switch` statements with a `'read'` case are surfaced as notes for manual review.
+
+The `operation: 'read'` value on the `beforeOperation` hook is unchanged.
+
 ### `defaults` config export removed from `payload` ([#17103](https://github.com/payloadcms/payload/pull/17103))
 
 The defaults object exported from payload has been removed. It was deprecated because it was a single shared object and mutating it (or any config that used it as a base) leaked changes into every other consumer of the defaults.
