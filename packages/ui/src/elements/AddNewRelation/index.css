@@ -10,7 +10,7 @@
     }
   }
 
-  .relationship-add-new__add-button {
+  .relationship-add-new .relationship-add-new__add-button {
     display: flex;
     position: relative;
     align-items: center;
@@ -35,7 +35,7 @@
     }
   }
 
-  .relationship-add-new__add-button--unstyled {
+  .relationship-add-new .relationship-add-new__add-button--unstyled {
     background: transparent;
     border: none;
     padding: 0;
