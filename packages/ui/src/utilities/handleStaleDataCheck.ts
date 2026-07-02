@@ -65,9 +65,7 @@ export const handleStaleDataCheck = async ({
     // Only stale when the latest version is strictly newer than the edit's baseline.
     // A concurrent edit always moves `updatedAt` forward; an older-or-equal timestamp
     // is the user's own save (e.g. a single-locale publish), not another editor.
-    const isStale =
-      currentUpdatedAt &&
-      new Date(currentUpdatedAt).getTime() > new Date(originalUpdatedAt).getTime()
+    const isStale = currentUpdatedAt && currentUpdatedAt > originalUpdatedAt
 
     return {
       currentUpdatedAt,
