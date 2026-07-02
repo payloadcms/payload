@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { isRSCEnabled } from 'payload/shared'
-
 import { radioFieldsSlug } from '../../slugs.js'
 import { CustomJSXLabel } from './CustomJSXLabel.js'
 
@@ -30,30 +28,28 @@ const RadioFields: CollectionConfig = {
         },
       ],
     },
-    ...(isRSCEnabled()
-      ? [
+    ...[
+      {
+        name: 'radioWithJsxLabelOption',
+        label: 'Radio with JSX label option',
+        type: 'radio' as const,
+        defaultValue: 'three',
+        options: [
           {
-            name: 'radioWithJsxLabelOption',
-            label: 'Radio with JSX label option',
-            type: 'radio' as const,
-            defaultValue: 'three',
-            options: [
-              {
-                label: 'Value One',
-                value: 'one',
-              },
-              {
-                label: 'Value Two',
-                value: 'two',
-              },
-              {
-                label: CustomJSXLabel,
-                value: 'three',
-              },
-            ],
+            label: 'Value One',
+            value: 'one',
           },
-        ]
-      : []),
+          {
+            label: 'Value Two',
+            value: 'two',
+          },
+          {
+            label: CustomJSXLabel,
+            value: 'three',
+          },
+        ],
+      },
+    ],
   ],
   versions: false,
 }

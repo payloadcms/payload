@@ -314,6 +314,9 @@ jobs:
     needs: [e2e-matrix, e2e-prep]
     name: E2E - ${{ matrix.suite }} [${{ matrix.framework }}]${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.cacheComponents && ' [cacheComponents]' || '' }}
     timeout-minutes: 45
+    # TanStack Start suites are optional for now: their failures must not block the
+    # `all-green` gate. `matrix.optional` is true for tanstack-start entries (see e2e-matrix.ts).
+    continue-on-error: ${{ matrix.optional }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.e2e-matrix.outputs.matrix) }}

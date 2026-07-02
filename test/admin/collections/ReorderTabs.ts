@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { isRSCEnabled } from 'payload/shared'
-
 import { reorderTabsSlug } from '../slugs.js'
 
 export const ReorderTabs: CollectionConfig = {
@@ -20,19 +18,17 @@ export const ReorderTabs: CollectionConfig = {
               order: 0,
             },
           },
-          ...(isRSCEnabled()
-            ? {
-                test: {
-                  path: '/test',
-                  Component: '/components/views/CustomEdit/index.js#CustomEditView',
-                  tab: {
-                    label: 'Test',
-                    href: '/test',
-                    order: 50,
-                  },
-                },
-              }
-            : {}),
+          ...{
+            test: {
+              path: '/test',
+              Component: '/components/views/CustomEdit/index.js#CustomEditView',
+              tab: {
+                label: 'Test',
+                href: '/test',
+                order: 50,
+              },
+            },
+          },
         },
       },
     },
@@ -42,5 +38,5 @@ export const ReorderTabs: CollectionConfig = {
       name: 'title',
       type: 'text',
     },
-  ]
+  ],
 }

@@ -17,7 +17,6 @@ import {
 } from '@payloadcms/richtext-lexical'
 import { createHeadlessEditor } from '@payloadcms/richtext-lexical/lexical/headless'
 import { $convertToMarkdownString } from '@payloadcms/richtext-lexical/lexical/markdown'
-import { isRSCEnabled } from 'payload/shared'
 
 import { lexicalFieldsSlug } from '../../slugs.js'
 import {
@@ -107,29 +106,27 @@ export const lexicalBlocks: (Block | BlockSlug)[] = [
       },
     ],
   },
-  ...(isRSCEnabled()
-    ? [
-        {
-          slug: 'BlockRSC',
+  ...[
+    {
+      slug: 'BlockRSC',
 
-          admin: {
-            components: {
-              Block: '/collections/Lexical/blockComponents/BlockComponentRSC.js#BlockComponentRSC',
-            },
+      admin: {
+        components: {
+          Block: '/collections/Lexical/blockComponents/BlockComponentRSC.js#BlockComponentRSC',
+        },
+      },
+      fields: [
+        {
+          name: 'key',
+          label: () => {
+            return 'Key'
           },
-          fields: [
-            {
-              name: 'key',
-              label: () => {
-                return 'Key'
-              },
-              type: 'select',
-              options: ['value1', 'value2', 'value3'],
-            },
-          ],
-        } satisfies Block,
-      ]
-    : []),
+          type: 'select',
+          options: ['value1', 'value2', 'value3'],
+        },
+      ],
+    } satisfies Block,
+  ],
   {
     slug: 'myBlockWithBlockAndLabel',
     admin: {

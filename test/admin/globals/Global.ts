@@ -1,7 +1,5 @@
 import type { GlobalConfig } from 'payload'
 
-import { isRSCEnabled } from 'payload/shared'
-
 import { globalSlug } from '../slugs.js'
 
 export const Global: GlobalConfig = {
@@ -9,13 +7,11 @@ export const Global: GlobalConfig = {
   admin: {
     components: {
       edit: {
-        ...(isRSCEnabled()
-          ? {
-              beforeDocumentControls: [
-                '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
-              ],
-            }
-          : {}),
+        ...{
+          beforeDocumentControls: [
+            '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
+          ],
+        },
       },
       views: {
         edit: {

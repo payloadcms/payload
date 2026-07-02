@@ -173,9 +173,7 @@ export const Posts: CollectionConfig = {
       type: 'group',
       admin: {
         components: {
-          ...(isRSCEnabled()
-            ? { Cell: '/components/CustomGroupCell/index.js#CustomGroupCell' }
-            : {}),
+          ...{ Cell: '/components/CustomGroupCell/index.js#CustomGroupCell' },
         },
       },
       fields: [
@@ -229,7 +227,7 @@ export const Posts: CollectionConfig = {
       type: 'text',
       admin: {
         components: {
-          ...(isRSCEnabled() ? { Cell: '/components/CustomCell/index.js#CustomCell' } : {}),
+          ...{ Cell: '/components/CustomCell/index.js#CustomCell' },
         },
       },
     },

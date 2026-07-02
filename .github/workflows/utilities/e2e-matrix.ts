@@ -25,6 +25,11 @@ interface MatrixEntry {
   'total-shards': number
   parallel: boolean
   cacheComponents: boolean
+  /**
+   * When true, the matrix job runs with `continue-on-error`, so its failures do
+   * not block the `all-green` gate. TanStack Start suites are optional for now.
+   */
+  optional: boolean
 }
 
 interface Matrix {
@@ -49,6 +54,7 @@ function generateMatrix(testConfigs: TestConfig[]): Matrix {
         'total-shards': shards,
         parallel,
         cacheComponents,
+        optional: framework === 'tanstack-start',
       })
     }
   }

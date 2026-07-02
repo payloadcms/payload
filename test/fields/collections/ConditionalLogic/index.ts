@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { isRSCEnabled } from 'payload/shared'
-
 import { conditionalLogicSlug } from '../../slugs.js'
 
 const ConditionalLogic: CollectionConfig = {
@@ -89,20 +87,18 @@ const ConditionalLogic: CollectionConfig = {
         condition: ({ toggleField }) => Boolean(toggleField),
       },
     },
-    ...(isRSCEnabled()
-      ? [
-          {
-            name: 'customServerFieldWithCondition',
-            type: 'text' as const,
-            admin: {
-              components: {
-                Field: '/collections/ConditionalLogic/CustomServerField.js',
-              },
-              condition: ({ toggleField }: any) => Boolean(toggleField),
-            },
+    ...[
+      {
+        name: 'customServerFieldWithCondition',
+        type: 'text' as const,
+        admin: {
+          components: {
+            Field: '/collections/ConditionalLogic/CustomServerField.js',
           },
-        ]
-      : []),
+          condition: ({ toggleField }: any) => Boolean(toggleField),
+        },
+      },
+    ],
     {
       name: 'conditionalRichText',
       type: 'richText',
