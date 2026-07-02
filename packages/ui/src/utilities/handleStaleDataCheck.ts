@@ -62,8 +62,15 @@ export const handleStaleDataCheck = async ({
       currentUpdatedAt = currentGlobal?.updatedAt as string
     }
 
-    // Compare timestamps
-    const isStale = currentUpdatedAt && currentUpdatedAt !== originalUpdatedAt
+    // The document is only stale when its latest version is strictly NEWER than the
+    // baseline the edit was based on. A concurrent edit always moves `updatedAt`
+    // forward, whereas an older-or-equal timestamp comes from the user's own save —
+    // e.g. publishing a single locale creates a draft snapshot whose `updatedAt` is
+    // older than the just-published version — so a plain "not equal" comparison would
+    // raise a false positive.
+    const isStale =
+      currentUpdatedAt &&
+      new Date(currentUpdatedAt).getTime() > new Date(originalUpdatedAt).getTime()
 
     return {
       currentUpdatedAt,
