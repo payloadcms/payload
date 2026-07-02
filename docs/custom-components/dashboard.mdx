@@ -111,7 +111,7 @@ export default buildConfig({
         const isAdmin = req.user?.roles?.includes('admin')
 
         return [
-          { widgetSlug: 'collections', width: 'full' },
+          { widgetSlug: 'activity', width: 'small' },
           {
             widgetSlug: 'sales-summary',
             data: {
@@ -175,9 +175,12 @@ export default async function SalesSummaryWidgetComponent({
 
 ### Built-in Widgets
 
-Payload includes a built-in `collections` widget that displays collection and global cards.
+Payload includes two built-in widgets:
 
-If you don't define a `defaultLayout`, the collections widget will be automatically included in your dashboard.
+- `activity` — lists the documents the current user recently viewed.
+- `collection-query` — renders a configurable list of documents from a related collection.
+
+If you don't define a `defaultLayout`, the `activity` widget is automatically included in your dashboard.
 
 ### User Customization
 

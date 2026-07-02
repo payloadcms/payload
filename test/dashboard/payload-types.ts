@@ -100,7 +100,6 @@ export interface Config {
     revenue: RevenueWidget;
     'page-query': PageQueryWidget;
     configurable: ConfigurableWidget;
-    collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
     activity: RecentlyViewedWidget;
   };
@@ -449,16 +448,6 @@ export interface ConfigurableWidget {
     };
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collections_widget".
- */
-export interface CollectionsWidget {
-  data?: {
-    [k: string]: unknown;
-  };
-  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
