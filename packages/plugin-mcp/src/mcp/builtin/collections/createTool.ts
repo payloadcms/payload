@@ -9,7 +9,6 @@ import {
   getCollectionVirtualFieldNames,
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { validateCollectionData } from '../validateEntityData.js'
 import { formatCollectionError } from './formatCollectionError.js'
@@ -86,8 +85,8 @@ export const createDocumentTool = defineCollectionTool({
       data: parsedData,
       depth,
       draft,
+      overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(locale ? { locale } : {}),
       ...(fallbackLocale ? { fallbackLocale } : {}),
       ...(select ? { select: select as SelectType } : {}),
