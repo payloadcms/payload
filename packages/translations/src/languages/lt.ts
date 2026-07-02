@@ -126,6 +126,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Rūšiavimo laukas "{{field}}" negali būti rūšiuojamas kolekcijoje "{{collection}}".',
     widgetQueryError: 'Nepavyko įkelti dokumentų šiam valdikliui.',
+    widgetRecentlyViewedEmpty: 'Jūs dar neperžiūrėjote jokių dokumentų.',
+    widgetRecentlyViewedTitle: 'Jūs neseniai peržiūrėjote',
     widgetSelectCollectionFirst: 'Pasirinkite Collection prieš pasirinkdami rūšiavimą',
     widgetSelectSortField: 'Pasirinkite lauką rūšiavimui',
     widgetSortDirectionLabel: 'Rikiavimo kryptis',

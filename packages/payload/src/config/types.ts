@@ -60,8 +60,8 @@ import type {
   RegisteredPlugins,
   RequestContext,
   SelectField,
-  TypedUser,
   TypedWidget,
+  User,
   WidgetSlug,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
@@ -499,8 +499,8 @@ export type ServerProps = {
    *
    * Optional because non-framework contexts (jobs, scripts, tests) may not have an adapter attached.
    */
-  readonly server?: ServerAdapter
-  readonly user?: TypedUser
+  readonly server: ServerAdapter
+  readonly user?: User
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
 }

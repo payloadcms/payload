@@ -11,9 +11,11 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "lib": ["ES2022"],
+    "types": ["node"],
     "jsx": "react-jsx",
     "jsxImportSource": "react",
     "paths": {
+      "@payloadcms/db-mongodb": ["./db-mongodb-stub.ts"],
       "@/*": ["./*"]
     }
   }

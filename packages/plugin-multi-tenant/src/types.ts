@@ -8,7 +8,7 @@ import type {
   Field,
   RelationshipField,
   SingleRelationshipField,
-  TypedUser,
+  User,
 } from 'payload'
 
 export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
@@ -198,7 +198,7 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Useful for super-admin type users
    */
   userHasAccessToAllTenants?: (
-    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : TypedUser,
+    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
   ) => boolean
   /**
    * Override the access result on the users collection access control functions
@@ -258,7 +258,7 @@ export type UserWithTenantsField = {
         tenant: number | string | Tenant
       }[]
     | null
-} & TypedUser
+} & User
 
 type AllAccessKeysT<T extends readonly string[]> = T[number] extends keyof Omit<
   Required<CollectionConfig>['access'],

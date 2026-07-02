@@ -6,6 +6,7 @@ import {
 } from '@payloadcms/richtext-lexical'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+import { defaultUserCollection } from 'payload'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 
@@ -165,6 +166,26 @@ export default buildConfigWithDefaults({
       ],
     },
     {
+      slug: 'fallback-users',
+      auth: {
+        loginWithUsername: {
+          allowEmailLogin: true,
+          requireEmail: false,
+          requireUsername: false,
+        },
+        useAPIKey: true,
+        verify: true,
+      },
+      fields: [
+        {
+          name: 'id',
+          type: 'number',
+        },
+      ],
+      timestamps: false,
+      versions: false,
+    },
+    {
       // Exercises every input-vs-output divergence for the type tests in types.spec.ts.
       slug: 'input-types',
       fields: [
@@ -202,11 +223,13 @@ export default buildConfigWithDefaults({
       ],
       versions: false,
     },
+    defaultUserCollection,
   ],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    user: 'users',
   },
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [

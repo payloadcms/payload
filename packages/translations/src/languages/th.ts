@@ -122,6 +122,8 @@ export const thTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'ไม่สามารถจัดเรียง field "{{field}}" ใน Collection "{{collection}}" ได้',
     widgetQueryError: 'ไม่สามารถโหลดเอกสารสำหรับวิดเจ็ตนี้ได้',
+    widgetRecentlyViewedEmpty: 'คุณยังไม่ได้เปิดดูเอกสารใด ๆ',
+    widgetRecentlyViewedTitle: 'คุณได้ดูเมื่อเร็ว ๆ นี้',
     widgetSelectCollectionFirst: 'โปรดเลือก Collection ก่อนเลือกการจัดลำดับ',
     widgetSelectSortField: 'เลือก Field เพื่อจัดลำดับ',
     widgetSortDirectionLabel: 'ทิศทางการจัดเรียง',

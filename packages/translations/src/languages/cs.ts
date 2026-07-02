@@ -122,6 +122,8 @@ export const csTranslations: DefaultTranslationsObject = {
     widgetLimitLabel: 'Limit',
     widgetNonSortableSortField: 'Pole "{{field}}" nelze řadit v kolekci "{{collection}}".',
     widgetQueryError: 'Dokumenty pro tento widget se nepodařilo načíst.',
+    widgetRecentlyViewedEmpty: 'Zatím jste si žádné dokumenty nezobrazili.',
+    widgetRecentlyViewedTitle: 'Nedávno jste si prohlédli',
     widgetSelectCollectionFirst: 'Nejprve vyberte Collection, než zvolíte způsob řazení.',
     widgetSelectSortField: 'Vyberte pole pro řazení',
     widgetSortDirectionLabel: 'Směr řazení',

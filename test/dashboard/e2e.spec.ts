@@ -20,7 +20,7 @@ const { serverURL } = await initPayloadE2ENoConfig({
   dirname,
 })
 
-const TOTAL_WIDGETS = 14
+const TOTAL_WIDGETS = 15
 const url = new AdminUrlUtil(serverURL, 'users')
 
 describe('Dashboard', () => {
@@ -59,6 +59,7 @@ describe('Dashboard', () => {
     await d.assertWidget(12, 'collection-query', 'x-small')
     await d.assertWidget(13, 'collection-query', 'x-small')
     await d.assertWidget(14, 'collection-query', 'medium')
+    await d.assertWidget(15, 'activity', 'medium')
     await d.validateLayout()
   })
 
@@ -74,10 +75,10 @@ describe('Dashboard', () => {
     await d.assertWidget(12, 'collection-query', 'x-small')
     await d.assertWidget(13, 'collection-query', 'x-small')
     await expect(
-      d.widgetByPos(8).locator('.collection-query-widget .collection-query-widget__title'),
+      d.widgetByPos(8).locator('.collection-query-widget .widget-card__title'),
     ).toHaveText('Top revenue entries')
     await expect(
-      d.widgetByPos(9).locator('.collection-query-widget .collection-query-widget__title'),
+      d.widgetByPos(9).locator('.collection-query-widget .widget-card__title'),
     ).toHaveText('Event timeline')
   })
 
@@ -86,7 +87,7 @@ describe('Dashboard', () => {
 
     const shortCard = d.widgetByPos(8).locator('.collection-query-widget')
     const longCard = d.widgetByPos(9).locator('.collection-query-widget')
-    const shortRows = shortCard.locator('.collection-query-widget__row')
+    const shortRows = shortCard.locator('.widget-card__row')
 
     await expect(shortRows).toHaveCount(3)
     await expect(async () => {
@@ -96,11 +97,9 @@ describe('Dashboard', () => {
       expect(shortCardBox.height).toBe(longCardBox.height)
     }).toPass({ timeout: 1000 })
     await expect(async () => {
-      const hasScrollableRows = await shortCard
-        .locator('.collection-query-widget__rows')
-        .evaluate((el) => {
-          return el.scrollHeight > el.clientHeight
-        })
+      const hasScrollableRows = await shortCard.locator('.widget-card__rows').evaluate((el) => {
+        return el.scrollHeight > el.clientHeight
+      })
 
       expect(hasScrollableRows).toBe(false)
     }).toPass({ timeout: 1000 })
@@ -113,9 +112,7 @@ describe('Dashboard', () => {
     const longCard = d.widgetByPos(9).locator('.collection-query-widget')
 
     await expect(async () => {
-      const amountLabels = await shortCard
-        .locator('.collection-query-widget__row-meta')
-        .allTextContents()
+      const amountLabels = await shortCard.locator('.widget-card__row-meta').allTextContents()
 
       expect(amountLabels).toHaveLength(3)
       for (const amountLabel of amountLabels) {
@@ -124,9 +121,9 @@ describe('Dashboard', () => {
     }).toPass({ timeout: 1000 })
 
     await expect(async () => {
-      const dateLabels = (
-        await longCard.locator('.collection-query-widget__row-meta').allTextContents()
-      ).map((label) => label.trim())
+      const dateLabels = (await longCard.locator('.widget-card__row-meta').allTextContents()).map(
+        (label) => label.trim(),
+      )
 
       expect(new Set(dateLabels).size).toBeGreaterThan(1)
       // The timeline spans past and future, so labels render in both relative directions
@@ -165,7 +162,7 @@ describe('Dashboard', () => {
 
     await expect(async () => {
       const dateLabels = (
-        await timelineCard.locator('.collection-query-widget__row-meta').allTextContents()
+        await timelineCard.locator('.widget-card__row-meta').allTextContents()
       ).map((label) => label.trim())
 
       expect(dateLabels.length).toBeGreaterThan(1)
@@ -181,23 +178,21 @@ describe('Dashboard', () => {
     const d = new DashboardHelper(page)
 
     const longCard = d.widgetByPos(9).locator('.collection-query-widget')
-    const longRows = longCard.locator('.collection-query-widget__row')
+    const longRows = longCard.locator('.widget-card__row')
     const maxVisibleRows = 5
 
     // Matches the number of seeded "Dashboard demo" events in test/dashboard/seed.ts.
     await expect(longRows).toHaveCount(22)
     await expect(async () => {
-      const hasScrollableRows = await longCard
-        .locator('.collection-query-widget__rows')
-        .evaluate((el) => {
-          return el.scrollHeight > el.clientHeight
-        })
+      const hasScrollableRows = await longCard.locator('.widget-card__rows').evaluate((el) => {
+        return el.scrollHeight > el.clientHeight
+      })
       expect(hasScrollableRows).toBe(true)
     }).toPass({ timeout: 1000 })
     await expect(async () => {
-      const rowViewport = await longCard.locator('.collection-query-widget__rows').evaluate(
+      const rowViewport = await longCard.locator('.widget-card__rows').evaluate(
         (el, { maxVisibleRows }) => {
-          const rows = Array.from(el.querySelectorAll<HTMLElement>('.collection-query-widget__row'))
+          const rows = Array.from(el.querySelectorAll<HTMLElement>('.widget-card__row'))
           const rowGap = Number.parseFloat(window.getComputedStyle(el).rowGap)
           const expectedHeight =
             rows
@@ -219,10 +214,10 @@ describe('Dashboard', () => {
       expect(Math.abs(rowViewport.actualHeight - rowViewport.expectedHeight)).toBeLessThanOrEqual(1)
       expect(rowViewport.isSixthRowVisible).toBe(false)
     }).toPass({ timeout: 1000 })
-    await longCard.locator('.collection-query-widget__rows').evaluate((el) => {
+    await longCard.locator('.widget-card__rows').evaluate((el) => {
       el.scrollTop = el.scrollHeight
     })
-    await expect(longCard.locator('.collection-query-widget__title')).toBeVisible()
+    await expect(longCard.locator('.widget-card__title')).toBeVisible()
   })
 
   test('collection-query stale config widgets show parameter errors', async ({ page }) => {
@@ -257,23 +252,110 @@ describe('Dashboard', () => {
 
     const nestedCard = d.widgetByPos(14).locator('.collection-query-widget')
 
-    await expect(nestedCard.locator('.collection-query-widget__title')).toHaveText(
-      'Events by priority',
-    )
+    await expect(nestedCard.locator('.widget-card__title')).toHaveText('Events by priority')
     // The nested sort field is valid, so the widget renders rows instead of a config error.
     await expect(d.widgetByPos(14).locator('.collection-query-widget--error')).toHaveCount(0)
 
-    const rows = nestedCard.locator('.collection-query-widget__row')
+    const rows = nestedCard.locator('.widget-card__row')
     await expect(rows).toHaveCount(4)
 
     // Row metadata reflects `details.priority`, sorted descending (seed priorities: 10, 30, 20, 5).
     await expect(async () => {
       const priorityLabels = (
-        await nestedCard.locator('.collection-query-widget__row-meta').allTextContents()
+        await nestedCard.locator('.widget-card__row-meta').allTextContents()
       ).map((label) => label.trim())
 
       expect(priorityLabels).toEqual(['30', '20', '10', '5'])
     }).toPass({ timeout: 1000 })
+  })
+
+  test('activity widget lists recently viewed documents, most recent first', async ({ page }) => {
+    const ticketsUrl = new AdminUrlUtil(serverURL, 'tickets')
+
+    // Fetch two tickets to view. page.request shares the authenticated browser context cookies.
+    const response = await page.request.get(`${serverURL}/api/tickets?limit=2&sort=title`)
+    const { docs } = await response.json()
+    const [firstDoc, secondDoc] = docs
+
+    // Visiting a document edit view records it as recently viewed server-side in renderDocument.
+    await page.goto(ticketsUrl.edit(firstDoc.id))
+    await expect(page.locator('#field-title')).toHaveValue(firstDoc.title)
+    await page.goto(ticketsUrl.edit(secondDoc.id))
+    await expect(page.locator('#field-title')).toHaveValue(secondDoc.title)
+
+    await page.goto(url.admin)
+
+    const d = new DashboardHelper(page)
+    const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
+
+    await expect(activityCard.locator('.widget-card__title')).toHaveText('You recently viewed')
+
+    const rowTitles = activityCard.locator('.widget-card__row-title')
+    await expect(rowTitles).toHaveCount(2)
+    // The most recently viewed document is listed first.
+    await expect(rowTitles.nth(0)).toHaveText(secondDoc.title)
+    await expect(rowTitles.nth(1)).toHaveText(firstDoc.title)
+  })
+
+  test('activity widget collections filter shows inclusion checkboxes and excludes unchecked', async ({
+    page,
+  }) => {
+    const ticketsUrl = new AdminUrlUtil(serverURL, 'tickets')
+    const eventsUrl = new AdminUrlUtil(serverURL, 'events')
+
+    const ticket = (await (await page.request.get(`${serverURL}/api/tickets?limit=1`)).json())
+      .docs[0]
+    const event = (await (await page.request.get(`${serverURL}/api/events?limit=1`)).json()).docs[0]
+
+    // Record both documents as recently viewed.
+    await page.goto(ticketsUrl.edit(ticket.id))
+    await expect(page.locator('#field-title')).toHaveValue(ticket.title)
+    await page.goto(eventsUrl.edit(event.id))
+    await expect(page.locator('#field-title')).toHaveValue(event.title)
+
+    await page.goto(url.admin)
+
+    const d = new DashboardHelper(page)
+    const activityCard = d.widgetByPos(15).locator('.recently-viewed-widget')
+    await expect(activityCard.locator('.widget-card__row-title')).toHaveCount(2)
+
+    // Open the activity widget configuration.
+    await d.setEditing()
+    const widget = d.widgetByPos(15)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+
+    const collectionsField = drawer.locator('.recently-viewed-collections-field')
+    await expect(collectionsField).toBeVisible()
+
+    // Every collection is included (checked) by default - the stored exclusion list is empty.
+    const checkboxes = collectionsField.locator('.checkbox-input')
+    const checkboxCount = await checkboxes.count()
+    expect(checkboxCount).toBeGreaterThanOrEqual(3)
+    await expect(collectionsField.locator('.checkbox-input--checked')).toHaveCount(checkboxCount)
+
+    // Unchecking "Tickets" adds it to the stored exclusion list.
+    const ticketsOption = collectionsField.locator('.recently-viewed-collections-field__option', {
+      hasText: 'Tickets',
+    })
+    await expect(ticketsOption.locator('input[type="checkbox"]')).toBeEnabled()
+    await ticketsOption.locator('label').click()
+    await expect(ticketsOption.locator('.checkbox-input')).not.toHaveClass(
+      /checkbox-input--checked/,
+    )
+
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+
+    await d.saveChangesAndValidate()
+
+    // The excluded collection's document drops out; the remaining document still renders.
+    const rowTitles = activityCard.locator('.widget-card__row-title')
+    await expect(rowTitles).toHaveCount(1)
+    await expect(rowTitles.nth(0)).toHaveText(event.title)
   })
 
   test('respects min and max width', async ({ page }) => {
@@ -293,6 +375,7 @@ describe('Dashboard', () => {
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 12 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 13 })
     await d.assertWidthRange({ max: 'full', min: 'x-small', position: 14 })
+    await d.assertWidthRange({ max: 'full', min: 'x-small', position: 15 })
   })
 
   test('resize widget', async ({ page }) => {
@@ -406,6 +489,12 @@ describe('Dashboard', () => {
   test('move widgets', async ({ page }) => {
     const d = new DashboardHelper(page)
     await d.setEditing()
+    // Fit the whole dashboard in the viewport so dragging never triggers a mid-drag scroll. dnd-kit
+    // measures droppable rects at drag start, so an instant programmatic scroll (from
+    // scrollIntoViewIfNeeded) would leave those rects stale and break collision detection.
+    const { width } = page.viewportSize()!
+    const contentHeight = await page.evaluate(() => document.body.scrollHeight)
+    await page.setViewportSize({ height: Math.max(contentHeight + 100, 720), width })
     // moveWidget already contains validations
     await d.moveWidget(2, 1) // to first position
     await d.moveWidget(1, 2, 'after') // after last in row

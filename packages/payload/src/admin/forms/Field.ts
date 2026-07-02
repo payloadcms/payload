@@ -3,7 +3,7 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { SanitizedFieldPermissions } from '../../auth/types.js'
 import type { ClientBlock, ClientField, Field } from '../../fields/config/types.js'
-import type { TypedUser } from '../../index.js'
+import type { User } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, Payload, PayloadRequest } from '../../types/index.js'
 import type { ComponentRenderer } from '../adapters/render.js'
@@ -106,7 +106,7 @@ export type ServerComponentProps = {
   renderComponent?: ComponentRenderer
   req: PayloadRequest
   siblingData: Data
-  user: TypedUser
+  user: User
   value?: unknown
 }
 

@@ -124,6 +124,8 @@ export const skTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Triediace pole "{{field}}" nie je možné triediť v kolekcii "{{collection}}".',
     widgetQueryError: 'Nepodarilo sa načítať dokumenty pre tento widget.',
+    widgetRecentlyViewedEmpty: 'Zatiaľ ste si nepozreli žiadne dokumenty.',
+    widgetRecentlyViewedTitle: 'Nedávno ste si prezerali',
     widgetSelectCollectionFirst: 'Vyberte najprv Collection pred výberom spôsobu zoradenia.',
     widgetSelectSortField: 'Vyberte pole, podľa ktorého chcete zoradiť',
     widgetSortDirectionLabel: 'Smer triedenia',

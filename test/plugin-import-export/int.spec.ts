@@ -1,4 +1,4 @@
-import type { CollectionSlug, Payload } from 'payload'
+import type { AuthenticatedUser, CollectionSlug, Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -18,7 +18,7 @@ import { customIdPagesSlug, postsWithS3Slug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
-let user: any
+let user: AuthenticatedUser
 let restrictedUser: any
 
 const filename = fileURLToPath(import.meta.url)
@@ -27,13 +27,15 @@ const dirname = path.dirname(filename)
 describe('@payloadcms/plugin-import-export', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
-    user = await payload.login({
+    const loginResult = await payload.login({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
     })
+
+    user = loginResult.user!
     const userDocs = await payload.find({
       collection: 'users',
       where: {
@@ -1235,7 +1237,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'pages',
           data: {
             title: 'Derived Columns Test',
-            customRelationship: user.user.id,
+            customRelationship: user.id,
             excerpt: 'test excerpt',
             _status: 'published',
           },
@@ -1283,7 +1285,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'pages',
           data: {
             title: 'NameEmail Derived Test',
-            customRelNameEmail: user.user.id,
+            customRelNameEmail: user.id,
             excerpt: 'test excerpt',
             _status: 'published',
           },
@@ -1323,7 +1325,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
         // Verify the values are correct
         expect(data[0].customRelNameEmail_name).toBe('name value')
-        expect(data[0].customRelNameEmail_email).toBe(user.user.email)
+        expect(data[0].customRelNameEmail_email).toBe(user.email)
 
         await payload.delete({ collection: 'pages', id: page.id })
       })
@@ -1333,7 +1335,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'pages',
           data: {
             title: 'IdLocationName Derived Test',
-            customRelIdName: user.user.id,
+            customRelIdName: user.id,
             excerpt: 'test excerpt',
             _status: 'published',
           },
@@ -1372,7 +1374,7 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(excerptIdx).toBeGreaterThan(locationNameIdx)
 
         // Verify the values are correct
-        expect(data[0].customRelIdName_id).toBe(String(user.user.id))
+        expect(data[0].customRelIdName_id).toBe(String(user.id))
         expect(data[0].customRelIdName_locationName).toBe('name value')
 
         await payload.delete({ collection: 'pages', id: page.id })
@@ -1383,7 +1385,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'pages',
           data: {
             title: 'Derived Position With Preview Test',
-            customRelationship: user.user.id,
+            customRelationship: user.id,
             excerpt: 'trailing field value',
             _status: 'published',
           },
@@ -1445,7 +1447,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'pages',
           data: {
             title: 'Custom Order beforeExport First Test',
-            customRelationship: user.user.id,
+            customRelationship: user.id,
             excerpt: 'some excerpt',
             _status: 'published',
           },
@@ -6443,9 +6445,9 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'pages',
         data: {
           title: 'Preview beforeExport Test',
-          customRelationship: user.user.id,
-          customRelNameEmail: user.user.id,
-          customRelIdName: user.user.id,
+          customRelationship: user.id,
+          customRelNameEmail: user.id,
+          customRelIdName: user.id,
           excerpt: 'preview excerpt',
           _status: 'published',
         },
@@ -6492,9 +6494,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(doc.customRelationship_email).toBeDefined()
 
       expect(doc.customRelNameEmail_name).toBe('name value')
-      expect(doc.customRelNameEmail_email).toBe(user.user.email)
+      expect(doc.customRelNameEmail_email).toBe(user.email)
 
-      expect(doc.customRelIdName_id).toBe(user.user.id)
+      expect(doc.customRelIdName_id).toBe(user.id)
       expect(doc.customRelIdName_locationName).toBe('name value')
 
       // excerpt should still be present
@@ -6508,9 +6510,9 @@ describe('@payloadcms/plugin-import-export', () => {
         collection: 'pages',
         data: {
           title: 'Preview No Fields beforeExport Test',
-          customRelationship: user.user.id,
-          customRelNameEmail: user.user.id,
-          customRelIdName: user.user.id,
+          customRelationship: user.id,
+          customRelNameEmail: user.id,
+          customRelIdName: user.id,
           _status: 'published',
         },
       })
@@ -8465,13 +8467,15 @@ describe('@payloadcms/plugin-import-export', () => {
         })
 
         // Restore the original user login state
-        user = await payload.login({
+        const loginResult = await payload.login({
           collection: 'users',
           data: {
             email: devUser.email,
             password: devUser.password,
           },
         })
+
+        user = loginResult.user!
 
         // Clean up test documents
         for (const id of createdPostIds) {

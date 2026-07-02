@@ -438,8 +438,6 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_build == 'true'
-    # Non-blocking until templates are updated for 4.x breaking changes.
-    continue-on-error: true
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false

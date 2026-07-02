@@ -420,6 +420,17 @@ describe('General', () => {
           .click()
         await expect(page.locator('html')).toHaveAttribute('data-theme', 'light')
       })
+
+      test('should render custom logout button from admin.components.logout.Button', async () => {
+        await page.goto(postsUrl.admin)
+
+        // Logout lives inside the user menu popup
+        await page.locator('button[aria-label="Account"]').click()
+
+        // The custom Logout component (admin.components.logout.Button) renders an
+        // anchor ending in `#custom`, replacing the default logout button.
+        await expect(page.locator('a[href$="/custom-logout#custom"]')).toBeVisible()
+      })
     })
   })
 

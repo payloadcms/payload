@@ -38,6 +38,7 @@ import { getPreferences } from '../../utilities/upsertPreferences.js'
 import { NotFoundView } from '../NotFound/index.js'
 import { UnauthorizedViewWithGutter } from '../Unauthorized/index.js'
 import { getDocumentView } from './getDocumentView.js'
+import { recordRecentlyViewed } from './recordRecentlyViewed.js'
 import { renderDocumentSlots } from './renderDocumentSlots.js'
 
 export { getDocumentView } from './getDocumentView.js'
@@ -211,6 +212,13 @@ export const renderDocument = async ({
 
   const operation = (collectionSlug && idFromArgs) || globalSlug ? 'update' : 'create'
 
+  // Record the document as recently viewed (collections only, never on the create route or for
+  // trashed docs). Runs concurrently with the work below and never throws.
+  const recentlyViewedPromise =
+    collectionSlug && idFromArgs && doc && !isTrashedDoc
+      ? recordRecentlyViewed({ id: idFromArgs, collectionSlug, req })
+      : undefined
+
   const [
     { hasPublishedDoc, mostRecentVersionIsAutosaved, unpublishedVersionCount, versionCount },
     { state: formState },
@@ -251,6 +259,8 @@ export const renderDocument = async ({
       user,
     }),
   ])
+
+  await recentlyViewedPromise
 
   const documentViewServerProps: DocumentViewServerPropsOnly = {
     doc,

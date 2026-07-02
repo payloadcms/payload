@@ -102,6 +102,7 @@ export interface Config {
     configurable: ConfigurableWidget;
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
+    activity: RecentlyViewedWidget;
   };
   user: User;
   jobs: {
@@ -479,6 +480,16 @@ export interface CollectionQueryWidget {
     sortField?: string | null;
     sortDirection?: ('asc' | 'desc') | null;
     limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface RecentlyViewedWidget {
+  data?: {
+    excludedCollections?: ('tickets' | 'revenue' | 'events' | 'payload-kv')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

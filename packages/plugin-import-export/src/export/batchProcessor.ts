@@ -2,7 +2,7 @@
  * Export-specific batch processor for processing documents in batches during export.
  * Uses the generic batch processing utilities from useBatchProcessor.
  */
-import type { PayloadRequest, SelectType, Sort, TypedUser, Where } from 'payload'
+import type { PayloadRequest, SelectType, Sort, User, Where } from 'payload'
 
 import type { ExportAfterHook, ExportBeforeHook } from '../types.js'
 
@@ -28,7 +28,7 @@ export interface ExportFindArgs {
   page?: number
   select?: SelectType
   sort?: Sort
-  user?: TypedUser
+  user?: User
   where?: Where
 }
 

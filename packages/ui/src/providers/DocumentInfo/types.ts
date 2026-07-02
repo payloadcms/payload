@@ -9,7 +9,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
-  TypedUser,
+  User,
 } from 'payload'
 
 import React from 'react'
@@ -23,7 +23,7 @@ export type DocumentInfoProps = {
   readonly apiURL?: string
   readonly BeforeFields?: React.ReactNode
   readonly collectionSlug?: SanitizedCollectionConfig['slug']
-  readonly currentEditor: TypedUser
+  readonly currentEditor: User
   readonly disableActions?: boolean
   readonly disableCreate?: boolean
   readonly disableLeaveWithoutSaving?: boolean

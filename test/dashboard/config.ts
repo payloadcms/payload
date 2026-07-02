@@ -165,6 +165,12 @@ export default buildConfigWithDefaults({
 
         baseWidgets.push(...collectionQueryWidgets)
 
+        baseWidgets.push({
+          data: {},
+          widgetSlug: 'activity',
+          width: 'medium',
+        })
+
         return baseWidgets
       },
       widgets: [
