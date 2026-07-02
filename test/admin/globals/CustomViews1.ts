@@ -6,12 +6,10 @@ export const CustomGlobalViews1: GlobalConfig = {
   slug: customGlobalViews1GlobalSlug,
   admin: {
     components: {
-      ...{
-        views: {
-          edit: {
-            default: {
-              Component: '/components/views/CustomEdit/index.js#CustomEditView',
-            },
+      views: {
+        edit: {
+          default: {
+            Component: '/components/views/CustomEdit/index.js#CustomEditView',
           },
         },
       },

@@ -85,7 +85,7 @@ export default buildConfigWithDefaults({
         Button: '/components/Logout/index.js#Logout',
       },
       providers: [
-        ...['/components/CustomProviderServer/index.js#CustomProviderServer'],
+        '/components/CustomProviderServer/index.js#CustomProviderServer',
         '/components/CustomProvider/index.js#CustomProvider',
       ],
       settingsMenu: [
@@ -95,48 +95,46 @@ export default buildConfigWithDefaults({
       views: {
         // Dashboard: CustomDashboardView,
         // Account: CustomAccountView,
-        ...{
-          collections: {
-            Component: '/components/views/CustomView/index.js#CustomView',
-            path: '/collections',
+        collections: {
+          Component: '/components/views/CustomView/index.js#CustomView',
+          path: '/collections',
+        },
+        CustomDefaultView: {
+          Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
+          path: '/custom-default-view',
+        },
+        CustomMinimalView: {
+          Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
+          meta: {
+            title: customRootViewMetaTitle,
           },
-          CustomDefaultView: {
-            Component: '/components/views/CustomDefault/index.js#CustomDefaultView',
-            path: '/custom-default-view',
-          },
-          CustomMinimalView: {
-            Component: '/components/views/CustomMinimal/index.js#CustomMinimalView',
-            meta: {
-              title: customRootViewMetaTitle,
-            },
-            path: '/custom-minimal-view',
-          },
-          CustomNestedView: {
-            Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
-            exact: true,
-            path: customNestedViewPath,
-          },
-          CustomView: {
-            Component: '/components/views/CustomView/index.js#CustomView',
-            exact: true,
-            path: customViewPath,
-            strict: true,
-          },
-          CustomViewWithParam: {
-            Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
-            path: customParamViewPath,
-          },
-          ProtectedCustomNestedView: {
-            Component: '/components/views/CustomProtectedView/index.js#CustomProtectedView',
-            exact: true,
-            path: protectedCustomNestedViewPath,
-          },
-          PublicCustomView: {
-            Component: '/components/views/CustomView/index.js#CustomView',
-            exact: true,
-            path: publicCustomViewPath,
-            strict: true,
-          },
+          path: '/custom-minimal-view',
+        },
+        CustomNestedView: {
+          Component: '/components/views/CustomViewNested/index.js#CustomNestedView',
+          exact: true,
+          path: customNestedViewPath,
+        },
+        CustomView: {
+          Component: '/components/views/CustomView/index.js#CustomView',
+          exact: true,
+          path: customViewPath,
+          strict: true,
+        },
+        CustomViewWithParam: {
+          Component: '/components/views/CustomViewWithParam/index.js#CustomViewWithParam',
+          path: customParamViewPath,
+        },
+        ProtectedCustomNestedView: {
+          Component: '/components/views/CustomProtectedView/index.js#CustomProtectedView',
+          exact: true,
+          path: protectedCustomNestedViewPath,
+        },
+        PublicCustomView: {
+          Component: '/components/views/CustomView/index.js#CustomView',
+          exact: true,
+          path: publicCustomViewPath,
+          strict: true,
         },
         ButtonShowcase: {
           Component: '/components/views/ButtonStyles/index.js#ButtonStyles',

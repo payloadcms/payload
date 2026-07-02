@@ -106,27 +106,25 @@ export const lexicalBlocks: (Block | BlockSlug)[] = [
       },
     ],
   },
-  ...[
-    {
-      slug: 'BlockRSC',
+  {
+    slug: 'BlockRSC',
 
-      admin: {
-        components: {
-          Block: '/collections/Lexical/blockComponents/BlockComponentRSC.js#BlockComponentRSC',
-        },
+    admin: {
+      components: {
+        Block: '/collections/Lexical/blockComponents/BlockComponentRSC.js#BlockComponentRSC',
       },
-      fields: [
-        {
-          name: 'key',
-          label: () => {
-            return 'Key'
-          },
-          type: 'select',
-          options: ['value1', 'value2', 'value3'],
+    },
+    fields: [
+      {
+        name: 'key',
+        label: () => {
+          return 'Key'
         },
-      ],
-    } satisfies Block,
-  ],
+        type: 'select',
+        options: ['value1', 'value2', 'value3'],
+      },
+    ],
+  } satisfies Block,
   {
     slug: 'myBlockWithBlockAndLabel',
     admin: {
