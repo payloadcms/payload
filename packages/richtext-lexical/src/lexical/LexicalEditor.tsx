@@ -7,7 +7,7 @@ import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin.js'
 import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { BLUR_COMMAND, COMMAND_PRIORITY_LOW, FOCUS_COMMAND } from 'lexical'
 import * as React from 'react'
-import { useCallback, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { LexicalProviderProps } from './LexicalProvider.js'
 
@@ -27,30 +27,6 @@ import { SlashMenuPlugin } from './plugins/SlashMenu/index.js'
 import { TextPlugin } from './plugins/TextPlugin/index.js'
 import { LexicalContentEditable } from './ui/ContentEditable.js'
 
-/**
- * Marks the Lexical root element with `data-lexical-editable` once the editor
- * is mounted and interactive. Tests can query this attribute to confirm that
- * React event handlers are attached and keyboard input will be processed.
- */
-function EditorReadyPlugin() {
-  const [editor] = useLexicalComposerContext()
-
-  useEffect(() => {
-    const root = editor.getRootElement()
-    if (root) {
-      root.dataset.lexicalEditable = String(editor.isEditable())
-    }
-    return editor.registerEditableListener((editable) => {
-      const el = editor.getRootElement()
-      if (el) {
-        el.dataset.lexicalEditable = String(editable)
-      }
-    })
-  }, [editor])
-
-  return null
-}
-
 export const LexicalEditor: React.FC<
   {
     editorContainerRef: React.RefObject<HTMLDivElement | null>
@@ -63,11 +39,11 @@ export const LexicalEditor: React.FC<
   const isEditable = useLexicalEditable()
 
   const [floatingAnchorElem, setFloatingAnchorElem] = useState<HTMLDivElement | null>(null)
-  const onRef = useCallback((_floatingAnchorElem: HTMLDivElement) => {
+  const onRef = (_floatingAnchorElem: HTMLDivElement) => {
     if (_floatingAnchorElem !== null) {
       setFloatingAnchorElem(_floatingAnchorElem)
     }
-  }, [])
+  }
 
   useEffect(() => {
     if (!editorConfigContext?.uuid) {
@@ -136,7 +112,6 @@ export const LexicalEditor: React.FC<
           }
           ErrorBoundary={LexicalErrorBoundary}
         />
-        <EditorReadyPlugin />
         <NormalizeSelectionPlugin />
         {isEditable && <InsertParagraphAtEndPlugin />}
         <DecoratorPlugin />

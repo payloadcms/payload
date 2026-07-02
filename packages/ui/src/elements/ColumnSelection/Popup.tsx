@@ -22,13 +22,9 @@ const baseClass = 'column-selector'
 /**
  * Parses a nested field label and returns segments for rendering.
  * - For deeply nested paths (more than 3 segments), truncates to [First, "...", Last]
- *
- * A column label isn't guaranteed to be a string — a field can supply a React
- * element (custom `Label`) or a non-string translation object — so non-strings
- * are returned as a single segment rather than crashing on `.includes`.
  */
-function parseNestedLabel(label: React.ReactNode): React.ReactNode[] {
-  if (typeof label !== 'string' || !label.includes(' > ')) {
+function parseNestedLabel(label: string): string[] {
+  if (!label.includes(' > ')) {
     return [label]
   }
 
@@ -43,7 +39,7 @@ function parseNestedLabel(label: React.ReactNode): React.ReactNode[] {
 }
 
 type NestedLabelProps = {
-  readonly label: React.ReactNode
+  readonly label: string
 }
 
 const NestedLabel: React.FC<NestedLabelProps> = ({ label }) => {
