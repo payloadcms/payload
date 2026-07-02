@@ -1005,6 +1005,19 @@ export type Config = {
         Logo?: CustomComponent
       }
       /**
+       * Optional array of nav group labels in the order they should render in the sidebar.
+       * Groups not listed keep their existing first-encounter order and are appended after
+       * the listed ones. Labels are compared against the translated group label, so the
+       * same value used in `admin.group` (or the `general:collections` / `general:globals`
+       * keys for the default groups) should be used. Omit to keep the default behavior.
+       *
+       * @example
+       * admin: {
+       *   groups: ['System', 'Animals', 'Food', 'Layout', 'Collections'],
+       * }
+       */
+      groups?: (Record<string, string> | string)[]
+      /**
        * Add custom header to top of page globally
        */
       header?: CustomComponent[]

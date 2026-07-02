@@ -44,6 +44,7 @@ export function getNavGroups(
     ],
     permissions,
     i18n,
+    config.admin?.groups,
   )
 
   return navGroups

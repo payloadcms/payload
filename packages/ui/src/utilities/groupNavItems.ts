@@ -34,6 +34,7 @@ export function groupNavItems(
   entities: EntityToGroup[],
   permissions: SanitizedPermissions,
   i18n: I18nClient,
+  groupOrder?: (Record<string, string> | string)[],
 ): NavGroupType[] {
   const result = entities.reduce(
     (groups, entityToGroup) => {
@@ -99,5 +100,49 @@ export function groupNavItems(
     ],
   )
 
-  return result.filter((group) => group.entities.length > 0)
+  const filtered = result.filter((group) => group.entities.length > 0)
+
+  if (groupOrder && groupOrder.length > 0) {
+    return sortGroupsByOrder(filtered, groupOrder, i18n)
+  }
+
+  return filtered
+}
+
+/**
+ * Sorts nav groups to match `groupOrder`, appending any unlisted groups in
+ * their existing first-encounter order. Backward compatible: if `groupOrder`
+ * is empty or omitted, the caller keeps the original order.
+ *
+ * @internal
+ */
+export function sortGroupsByOrder(
+  groups: NavGroupType[],
+  groupOrder: (Record<string, string> | string)[],
+  i18n: I18nClient,
+): NavGroupType[] {
+  const ordered: NavGroupType[] = []
+  const seen = new Set<string>()
+
+  for (const wanted of groupOrder) {
+    const wantedLabel = getTranslation(wanted, i18n)
+    const matched = groups.find(
+      (group) => !seen.has(group.label) && getTranslation(group.label, i18n) === wantedLabel,
+    )
+    if (matched) {
+      ordered.push(matched)
+      seen.add(matched.label)
+    }
+  }
+
+  // Append any groups that weren't listed in groupOrder, preserving their
+  // existing first-encounter order for backward compatibility.
+  for (const group of groups) {
+    if (!seen.has(group.label)) {
+      ordered.push(group)
+      seen.add(group.label)
+    }
+  }
+
+  return ordered
 }
