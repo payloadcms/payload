@@ -770,21 +770,19 @@ describe('Document View', () => {
     test('should not show stale data modal after repeatedly publishing active locale', async () => {
       await page.goto(localizedURL.create)
 
-      // Create the document and publish the active locale (English)
+      // Create and publish the active locale
       await page.locator('#field-title').fill('Version 1')
       await saveDocAndAssert(page)
 
-      // Change and publish the active locale again — a draft snapshot version is
-      // created server-side whose updatedAt the client never receives
+      // Publish the active locale again
       await page.locator('#field-title').fill('Version 2')
       await saveDocAndAssert(page)
 
-      // Editing again triggers the stale data check. Because the document was only
-      // ever modified by the current user (by publishing the active locale), the
-      // stale data modal must NOT appear.
+      // Editing triggers the stale check — but only the current user has touched the
+      // document, so the modal must not appear
       await page.locator('#field-title').fill('Version 3')
 
-      // Give the debounced onChange stale data check time to run
+      // Wait for the debounced stale check to run
       // eslint-disable-next-line payload/no-wait-function
       await wait(1000)
 
