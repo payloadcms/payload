@@ -1,7 +1,6 @@
 import { type SupportedLanguages } from '@payloadcms/translations'
 
 import type { SanitizedDocumentPermissions } from '../../auth/types.js'
-import type { PayloadComponent } from '../../config/types.js'
 import type { Field, Option, TabAsField, Validate } from '../../fields/config/types.js'
 import type { TypedLocale } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
@@ -14,9 +13,6 @@ export type Data = {
 export type Row = {
   addedByServer?: FieldState['addedByServer']
   blockType?: string
-  clientComponentPaths?: {
-    RowLabel?: PayloadComponent
-  }
   collapsed?: boolean
   customComponents?: {
     RowLabel?: React.ReactNode
@@ -44,28 +40,6 @@ export type FieldState = {
    * If this is an empty array, no blocks are allowed.
    */
   blocksFilterOptions?: string[]
-  /**
-   * Serializable PayloadComponent references for field UI slots.
-   * Used by non-RSC adapters (e.g. TanStack) to resolve custom components from the import map
-   * when `customComponents` are unavailable (stripped during serialization).
-   */
-  clientComponentPaths?: {
-    AfterInput?: PayloadComponent | PayloadComponent[]
-    BeforeInput?: PayloadComponent | PayloadComponent[]
-    Description?: PayloadComponent
-    Error?: PayloadComponent
-    Label?: PayloadComponent
-  }
-  /**
-   * PayloadComponent reference for a client-safe field component.
-   * Used by non-RSC adapters (e.g. TanStack) to resolve a fallback component from the import map
-   * when `customComponents.Field` is unavailable (stripped during serialization).
-   */
-  clientFieldComponentPath?: { clientProps?: Record<string, any>; path: string } | string
-  /**
-   * Serializable props for the client field component referenced by `clientFieldComponentPath`.
-   */
-  clientFieldComponentProps?: Record<string, any>
   customComponents?: {
     /**
      * This is used by UI fields, as they can have arbitrary components defined if used

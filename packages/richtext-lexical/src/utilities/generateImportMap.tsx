@@ -14,7 +14,6 @@ export const getGenerateImportMap =
     addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell')
     addToImportMap('@payloadcms/richtext-lexical/rsc#RscEntryLexicalField')
     addToImportMap('@payloadcms/richtext-lexical/rsc#LexicalDiffComponent')
-    addToImportMap('@payloadcms/richtext-lexical/client#ClientEntryLexicalField')
 
     addToImportMap(args.lexicalEditorArgs?.views)
 

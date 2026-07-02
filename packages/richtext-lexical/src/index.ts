@@ -103,7 +103,6 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
 
     return {
       CellComponent: '@payloadcms/richtext-lexical/rsc#RscEntryLexicalCell',
-      ClientFieldComponent: '@payloadcms/richtext-lexical/client#ClientEntryLexicalField',
       DiffComponent: '@payloadcms/richtext-lexical/rsc#LexicalDiffComponent',
       editorConfig: finalSanitizedEditorConfig,
       features,
@@ -121,62 +120,6 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
       generateSchemaMap: getGenerateSchemaMap({
         resolvedFeatureMap,
       }),
-      getClientFieldProps({ clientFieldSchemaMap, path: fieldPath, schemaPath: fieldSchemaPath }) {
-        const serializedFeatures: Record<
-          string,
-          {
-            ClientFeature?: any
-            clientFeatureProps?: Record<string, any>
-            componentImports?: Record<string, any>
-            key: string
-            order: number
-          }
-        > = {}
-
-        for (const [featureKey, resolvedFeature] of finalSanitizedEditorConfig.resolvedFeatureMap) {
-          const entry: (typeof serializedFeatures)[string] = {
-            key: resolvedFeature.key,
-            order: resolvedFeature.order,
-          }
-
-          if (resolvedFeature.ClientFeature) {
-            entry.ClientFeature = resolvedFeature.ClientFeature
-          }
-
-          if (resolvedFeature.clientFeatureProps) {
-            entry.clientFeatureProps = resolvedFeature.clientFeatureProps
-          }
-
-          if (
-            resolvedFeature.componentImports &&
-            typeof resolvedFeature.componentImports === 'object' &&
-            !Array.isArray(resolvedFeature.componentImports)
-          ) {
-            entry.componentImports = resolvedFeature.componentImports
-          }
-
-          serializedFeatures[featureKey] = entry
-        }
-
-        const featureClientSchemaMap: Record<string, Record<string, any>> = {}
-        for (const [featureKey, resolvedFeature] of finalSanitizedEditorConfig.resolvedFeatureMap) {
-          if (!resolvedFeature.generateSchemaMap) {
-            continue
-          }
-          const featureSchemaPath = `${fieldSchemaPath}.lexical_internal_feature.${featureKey}`
-          featureClientSchemaMap[featureKey] = {}
-          for (const [key, entry] of clientFieldSchemaMap.entries()) {
-            if (key.startsWith(featureSchemaPath)) {
-              featureClientSchemaMap[featureKey][key] = 'fields' in entry ? entry.fields : [entry]
-            }
-          }
-        }
-
-        return {
-          featureClientSchemaMap,
-          features: serializedFeatures,
-        }
-      },
       graphQLPopulationPromises({
         context,
         currentDepth,
