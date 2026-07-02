@@ -25,56 +25,52 @@ export const Posts: CollectionConfig = {
     group: 'One',
     listSearchableFields: ['id', 'title', 'description', 'number'],
     components: {
-      ...{
-        beforeListTable: [
-          '/components/ResetColumns/index.js#ResetDefaultColumnsButton',
-          {
-            path: '/components/Banner/index.js#Banner',
-            clientProps: {
-              message: 'BeforeListTable custom component',
-            },
+      beforeListTable: [
+        '/components/ResetColumns/index.js#ResetDefaultColumnsButton',
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'BeforeListTable custom component',
           },
-        ],
-        Description: {
-          path: '/components/ViewDescription/index.js#ViewDescription',
         },
-        afterListTable: [
-          {
-            path: '/components/Banner/index.js#Banner',
-            clientProps: {
-              message: 'AfterListTable custom component',
-            },
-          },
-        ],
-        listMenuItems: [
-          {
-            path: '/components/ListMenuItems/index.js#ListMenuItemsExample',
-          },
-        ],
-        afterList: [
-          {
-            path: '/components/Banner/index.js#Banner',
-            clientProps: {
-              message: 'AfterList custom component',
-            },
-          },
-        ],
-        beforeList: [
-          {
-            path: '/components/Banner/index.js#Banner',
-            clientProps: {
-              message: 'BeforeList custom component',
-            },
-          },
-        ],
+      ],
+      Description: {
+        path: '/components/ViewDescription/index.js#ViewDescription',
       },
-      edit: {
-        ...{
-          beforeDocumentControls: [
-            '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
-            '/components/BeforeDocumentControls/CustomSaveButton/index.js#CustomSaveButton',
-          ],
+      afterListTable: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'AfterListTable custom component',
+          },
         },
+      ],
+      listMenuItems: [
+        {
+          path: '/components/ListMenuItems/index.js#ListMenuItemsExample',
+        },
+      ],
+      afterList: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'AfterList custom component',
+          },
+        },
+      ],
+      beforeList: [
+        {
+          path: '/components/Banner/index.js#Banner',
+          clientProps: {
+            message: 'BeforeList custom component',
+          },
+        },
+      ],
+      edit: {
+        beforeDocumentControls: [
+          '/components/BeforeDocumentControls/CustomDraftButton/index.js#CustomDraftButton',
+          '/components/BeforeDocumentControls/CustomSaveButton/index.js#CustomSaveButton',
+        ],
       },
     },
     pagination: {

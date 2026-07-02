@@ -16,9 +16,7 @@ export const CustomUploadFieldCollection: CollectionConfig = {
   admin: {
     components: {
       edit: {
-        ...{
-          Upload: '/collections/CustomUploadField/components/CustomUpload/index.js#CustomUploadRSC',
-        },
+        Upload: '/collections/CustomUploadField/components/CustomUpload/index.js#CustomUploadRSC',
       },
     },
   },

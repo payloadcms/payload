@@ -7,7 +7,7 @@ export const CustomFields: CollectionConfig = {
   fields: [
     {
       name: 'customTextServerField',
-      type: 'text' as const,
+      type: 'text',
       maxLength: 100,
       admin: {
         placeholder: 'This is a placeholder',

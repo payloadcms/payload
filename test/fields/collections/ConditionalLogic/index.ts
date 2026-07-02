@@ -89,7 +89,7 @@ const ConditionalLogic: CollectionConfig = {
     },
     {
       name: 'customServerFieldWithCondition',
-      type: 'text' as const,
+      type: 'text',
       admin: {
         components: {
           Field: '/collections/ConditionalLogic/CustomServerField.js',

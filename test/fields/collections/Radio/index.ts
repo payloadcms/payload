@@ -28,28 +28,26 @@ const RadioFields: CollectionConfig = {
         },
       ],
     },
-    ...[
-      {
-        name: 'radioWithJsxLabelOption',
-        label: 'Radio with JSX label option',
-        type: 'radio' as const,
-        defaultValue: 'three',
-        options: [
-          {
-            label: 'Value One',
-            value: 'one',
-          },
-          {
-            label: 'Value Two',
-            value: 'two',
-          },
-          {
-            label: CustomJSXLabel,
-            value: 'three',
-          },
-        ],
-      },
-    ],
+    {
+      name: 'radioWithJsxLabelOption',
+      label: 'Radio with JSX label option',
+      type: 'radio' as const,
+      defaultValue: 'three',
+      options: [
+        {
+          label: 'Value One',
+          value: 'one',
+        },
+        {
+          label: 'Value Two',
+          value: 'two',
+        },
+        {
+          label: CustomJSXLabel,
+          value: 'three',
+        },
+      ],
+    },
   ],
   versions: false,
 }
