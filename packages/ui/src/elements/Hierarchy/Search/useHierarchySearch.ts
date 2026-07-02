@@ -64,7 +64,9 @@ export const useHierarchySearch = ({
       try {
         const queryString = qs.stringify(
           {
-            computeHierarchyPaths: true,
+            hierarchy: {
+              computePaths: true,
+            },
             limit,
             locale,
             page: pageToFetch,

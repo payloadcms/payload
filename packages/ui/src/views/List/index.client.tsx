@@ -101,6 +101,19 @@ export function DefaultListView(props: ListViewClientProps) {
   const { modalSlug: bulkUploadModalSlug, setCollectionSlug, setOnSuccess } = useBulkUpload()
 
   const collectionConfig = getEntityConfig({ collectionSlug })
+  const hierarchyConfig =
+    collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
+      ? collectionConfig.hierarchy
+      : undefined
+  // Use bracket notation to avoid React Compiler flagging `use`-prefixed property accesses
+  // (the compiler treats `obj.useFoo` as a potential hook reference in client components).
+  const hierarchyAdminConfig = hierarchyConfig?.admin as { usePathAsTitle?: boolean } | undefined
+  const pathAsTitle = hierarchyAdminConfig?.['usePathAsTitle']
+  const hierarchyAsRecord = hierarchyConfig as Record<string, unknown> | undefined
+  const titleColumnKey = pathAsTitle
+    ? (hierarchyAsRecord?.['titlePathFieldName'] as string | undefined)
+    : undefined
+  const useAsTitle = titleColumnKey ?? collectionConfig?.admin?.useAsTitle ?? 'id'
 
   const { labels, upload } = collectionConfig
 
@@ -288,7 +301,7 @@ export function DefaultListView(props: ListViewClientProps) {
                       label: related.label,
                     }),
                   )}
-                  useAsTitle={collectionConfig?.admin?.useAsTitle || 'id'}
+                  useAsTitle={useAsTitle}
                 />
                 <DocumentListSelection
                   disableBulkDelete={disableBulkDelete}

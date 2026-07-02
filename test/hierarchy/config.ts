@@ -115,6 +115,7 @@ export const Departments: CollectionConfig = {
   ],
   hierarchy: {
     admin: {
+      labelSeparator: ' > ',
       components: {
         Icon: {
           clientProps: { color: '#FF6600' }, // Neon Orange
@@ -151,6 +152,26 @@ export const Divisions: CollectionConfig = {
   versions: false,
 }
 
+// Articles collection (no hierarchy) - used to test relationship pills pointing at hierarchy collections
+export const Articles: CollectionConfig = {
+  slug: 'articles',
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'organization',
+      type: 'relationship',
+      relationTo: 'organizations',
+    },
+  ],
+}
+
 // Organizations collection with hierarchy (main test collection)
 export const Organizations: CollectionConfig = {
   slug: 'organizations',
@@ -177,6 +198,7 @@ export const Organizations: CollectionConfig = {
           path: '/components/ColorCircleIcon.tsx#ColorCircleIcon',
         },
       },
+      usePathAsTitle: true,
     },
     parentFieldName: 'parent',
   },
@@ -196,6 +218,7 @@ export const Folders: CollectionConfig = {
           path: '/components/ColorCircleIcon.tsx#ColorCircleIcon',
         },
       },
+      usePathAsTitle: true,
     },
     collectionSpecific: { fieldName: 'allowedTypes' },
     parentFieldName: 'parentFolder',
@@ -256,6 +279,7 @@ export default buildConfigWithDefaults({
     },
   },
   collections: [
+    Articles,
     Categories,
     Departments,
     Divisions,

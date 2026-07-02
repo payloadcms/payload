@@ -30,6 +30,7 @@
     display: flex;
     align-items: center;
     gap: var(--spacer-2);
+    min-width: 0;
     color: var(--color-text);
     text-decoration: none;
     background: none;
@@ -43,7 +44,10 @@
 
     &:hover {
       color: var(--color-text);
-      text-decoration: underline;
+
+      .hierarchy-tables__name-label {
+        text-decoration-color: var(--color-text);
+      }
     }
   }
 
@@ -60,11 +64,23 @@
     flex-shrink: 0;
   }
 
-  .hierarchy-tables__name-text {
+  .hierarchy-tables__name-text-truncated {
+    line-height: var(--spacer-3);
+    min-width: 0;
+    flex: 1;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    line-height: var(--spacer-3);
+  }
+
+  .hierarchy-tables__name-label {
+    text-decoration-line: underline;
+    text-decoration-style: solid;
+    text-decoration-skip-ink: none;
+    text-decoration-color: var(--color-border);
+    text-decoration-thickness: auto;
+    text-underline-offset: 2px;
+    text-underline-position: from-font;
   }
 
   .hierarchy-tables__chevron {

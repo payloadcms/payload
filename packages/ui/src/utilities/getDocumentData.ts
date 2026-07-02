@@ -35,6 +35,13 @@ export const getDocumentData = async ({
   const { transactionID, ...rest } = req
 
   const isTrashedDoc = segments?.[2] === 'trash' && typeof segments?.[3] === 'string' // id exists at segment 3
+  const hierarchyConfig =
+    collectionSlug &&
+    payload.collections[collectionSlug]?.config.hierarchy &&
+    typeof payload.collections[collectionSlug]?.config.hierarchy === 'object'
+      ? payload.collections[collectionSlug]?.config.hierarchy
+      : undefined
+  const shouldComputeHierarchyPaths = hierarchyConfig?.admin?.usePathAsTitle === true
 
   try {
     if (collectionSlug && id) {
@@ -48,6 +55,20 @@ export const getDocumentData = async ({
         overrideAccess: false,
         req: {
           ...rest,
+          context: shouldComputeHierarchyPaths
+            ? {
+                ...(rest.context || {}),
+                hierarchy: {
+                  ...(rest.context &&
+                  typeof rest.context === 'object' &&
+                  'hierarchy' in rest.context &&
+                  typeof rest.context.hierarchy === 'object'
+                    ? rest.context.hierarchy
+                    : {}),
+                  computePaths: true,
+                },
+              }
+            : rest.context,
         },
         trash: isTrashedDoc ? true : false,
         user,

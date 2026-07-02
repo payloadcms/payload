@@ -355,9 +355,6 @@ export function HierarchyListView(props: ListViewClientProps) {
             <ListControlsBar className={`${baseClass}__controls`}>
               <div className={`${baseClass}__controls-left`}>
                 <ListSearchFilter
-                  label={t('general:searchBy', {
-                    label: getTranslation(collectionConfig?.admin?.useAsTitle || 'id', i18n),
-                  })}
                   onSearchChange={handleSearchChange}
                   searchQueryParam={searchFromURL}
                 />

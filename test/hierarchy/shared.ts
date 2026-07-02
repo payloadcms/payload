@@ -1,3 +1,4 @@
+export const articlesSlug = 'articles'
 export const categoriesSlug = 'categories'
 export const departmentsSlug = 'departments'
 export const divisionsSlug = 'divisions'

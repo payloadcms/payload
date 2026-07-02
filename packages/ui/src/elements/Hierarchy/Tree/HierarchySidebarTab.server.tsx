@@ -97,6 +97,7 @@ export const HierarchySidebarTabServer: React.FC<HierarchySidebarTabServerProps>
       hierarchyConfig?.collectionSpecific && typeof hierarchyConfig.collectionSpecific === 'object'
         ? hierarchyConfig.collectionSpecific.fieldName
         : undefined
+    // Sidebar tree shows plain names, not full paths
     useAsTitle = collectionConfig?.admin?.useAsTitle
 
     // STEP 2.5: Build collection-specific options from related collections

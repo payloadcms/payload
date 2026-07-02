@@ -18,8 +18,11 @@ export const addHierarchyToCollection = ({
   slugFieldName?: string
   slugPathFieldName: string
   titlePathFieldName: string
-}) => {
-  const { titleFieldName } = findUseAsTitleField(collectionConfig)
+}): { isTitleLocalized: boolean; titleFieldName: string } => {
+  // Read the real title field BEFORE adding virtual fields or overriding useAsTitle.
+  // When usePathAsTitle is true, useAsTitle still points at the real content field here
+  // (e.g. 'title') — we capture it now so path-building and listSearchableFields keep using it.
+  const { localized: isTitleLocalized, titleFieldName } = findUseAsTitleField(collectionConfig)
   // Verify slug field exists if configured
   const slugFieldInfo = slugFieldName ? findFieldByName(collectionConfig, slugFieldName) : undefined
   const validatedSlugFieldName = slugFieldInfo ? slugFieldName : undefined
@@ -53,6 +56,7 @@ export const addHierarchyToCollection = ({
   if (!collectionConfig.admin) {
     collectionConfig.admin = {}
   }
+
   if (!collectionConfig.admin.listSearchableFields) {
     collectionConfig.admin.listSearchableFields = [titleFieldName]
   } else if (!collectionConfig.admin.listSearchableFields.includes(titleFieldName)) {
@@ -63,7 +67,12 @@ export const addHierarchyToCollection = ({
     ...(collectionConfig.hooks || {}),
     afterRead: [
       ...(collectionConfig.hooks?.afterRead || []),
-      hierarchyCollectionAfterRead({ parentFieldName, slugPathFieldName, titlePathFieldName }),
+      hierarchyCollectionAfterRead({
+        isTitleLocalized,
+        parentFieldName,
+        slugPathFieldName,
+        titlePathFieldName,
+      }),
     ],
     beforeChange: [
       ...(collectionConfig.hooks?.beforeChange || []),
@@ -84,4 +93,6 @@ export const addHierarchyToCollection = ({
       }),
     ],
   }
+
+  return { isTitleLocalized, titleFieldName }
 }

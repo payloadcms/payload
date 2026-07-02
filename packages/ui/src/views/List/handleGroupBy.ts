@@ -60,6 +60,8 @@ export const handleGroupBy = async ({
   data: PaginatedDocs
   Table: null | React.ReactNode | React.ReactNode[]
 }> => {
+  const useAsTitle = collectionConfig.admin.useAsTitle || 'id'
+
   let Table: React.ReactNode | React.ReactNode[] = null
   let columnState: Column[]
 
@@ -83,7 +85,9 @@ export const handleGroupBy = async ({
     populate = {}
     relationTo.forEach((rel) => {
       const config = clientConfig.collections.find((c) => c.slug === rel)
-      populate[rel] = { [config?.admin?.useAsTitle || 'id']: true }
+      populate[rel] = {
+        [config?.admin?.useAsTitle || 'id']: true,
+      }
     })
   }
 
@@ -206,7 +210,7 @@ export const handleGroupBy = async ({
           orderableFieldName: collectionConfig.orderable === true ? '_order' : undefined,
           payload: req.payload,
           query,
-          useAsTitle: collectionConfig.admin.useAsTitle,
+          useAsTitle,
           viewType,
         })
 

@@ -208,9 +208,24 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
     return values.map(({ relationTo: rel, value }) => {
       const document = documents[rel]?.[value]
       const relatedCollection = getEntityConfig({ collectionSlug: rel })
+      const relatedHierarchyConfig =
+        relatedCollection?.hierarchy && typeof relatedCollection.hierarchy === 'object'
+          ? relatedCollection.hierarchy
+          : undefined
+      const relatedTitleField = relatedHierarchyConfig?.titleField
+      const formattedCollectionConfig =
+        relatedTitleField && relatedCollection
+          ? {
+              ...relatedCollection,
+              admin: {
+                ...relatedCollection.admin,
+                useAsTitle: relatedTitleField,
+              },
+            }
+          : relatedCollection
 
       return formatDocTitle({
-        collectionConfig: relatedCollection,
+        collectionConfig: formattedCollectionConfig,
         data: document || null,
         dateFormat: config.admin.dateFormat,
         fallback: `${t('general:untitled')} - ID: ${value}`,

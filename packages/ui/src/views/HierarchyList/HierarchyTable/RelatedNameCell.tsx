@@ -81,7 +81,9 @@ export const RelatedNameCell: SlotColumn<TableRow>['Cell'] = ({ row }) => {
   return (
     <Link className={`${baseClass}__name-link`} href={editUrl}>
       <RelatedDocIcon collectionSlug={row._collectionSlug} row={row} />
-      <span className={`${baseClass}__name-text`}>{title}</span>
+      <span className={`${baseClass}__name-label`}>
+        <span className={`${baseClass}__name-text-truncated`}>{title}</span>
+      </span>
     </Link>
   )
 }

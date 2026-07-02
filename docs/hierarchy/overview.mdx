@@ -78,7 +78,7 @@ When hierarchy is enabled, virtual path fields are automatically added to your c
 const page = await payload.findByID({
   collection: 'pages',
   id: 'page-id',
-  context: { computeHierarchyPaths: true }, // Request path computation
+  context: { hierarchy: { computePaths: true } }, // Request path computation
 })
 
 // Use in your frontend routing
@@ -110,7 +110,7 @@ const url = `/${page._h_slugPath}` // "/store/products/widgets"
 const page = await payload.findByID({
   collection: 'pages',
   id: 'page-id',
-  context: { computeHierarchyPaths: true },
+  context: { hierarchy: { computePaths: true } },
 })
 
 const breadcrumbs = page._h_titlePath.split('/')
@@ -123,34 +123,34 @@ Path fields (`_h_slugPath` and `_h_titlePath`) are virtual fields that must be e
 
 ### Method 1: Context Flag
 
-Pass `computeHierarchyPaths: true` in the context:
+Pass `hierarchy: { computePaths: true }` in the context:
 
 ```ts
 // Single document
 const page = await payload.findByID({
   collection: 'pages',
   id: 'page-id',
-  context: { computeHierarchyPaths: true },
+  context: { hierarchy: { computePaths: true } },
 })
 
 // Query multiple documents
 const pages = await payload.find({
   collection: 'pages',
   where: { parent: { equals: null } },
-  context: { computeHierarchyPaths: true },
+  context: { hierarchy: { computePaths: true } },
 })
 ```
 
 ### Method 2: Query Parameter
 
-For REST API requests, add the `computeHierarchyPaths` query parameter:
+For REST API requests, add the `hierarchy[computePaths]` query parameter:
 
 ```bash
 # Get single document with paths
-GET /api/pages/abc123?computeHierarchyPaths=true
+GET /api/pages/abc123?hierarchy%5BcomputePaths%5D=true
 
 # Query collection with paths
-GET /api/pages?computeHierarchyPaths=true&where[parent][equals]=null
+GET /api/pages?hierarchy%5BcomputePaths%5D=true&where[parent][equals]=null
 ```
 
 ### Method 3: Field Selection
@@ -183,7 +183,7 @@ const page = await payload.findByID({
 const folders = await payload.find({
   collection: 'folders',
   where: { parent: { equals: 'parent-id' } },
-  context: { computeHierarchyPaths: true },
+  context: { hierarchy: { computePaths: true } },
 })
 // Result: Only 2 queries total (1 for folders, 1 for the shared parent)
 ```
@@ -405,7 +405,7 @@ Paths are computed across collections automatically:
 const post = await payload.findByID({
   collection: 'posts',
   id: post.id,
-  context: { computeHierarchyPaths: true },
+  context: { hierarchy: { computePaths: true } },
 })
 
 // post._h_slugPath: 'blog/first-post'
@@ -415,7 +415,7 @@ const post = await payload.findByID({
 const reply = await payload.findByID({
   collection: 'posts',
   id: reply.id,
-  context: { computeHierarchyPaths: true },
+  context: { hierarchy: { computePaths: true } },
 })
 
 // reply._h_slugPath: 'blog/first-post/reply'
@@ -753,7 +753,7 @@ await payload.update({
 const child = await payload.findByID({
   collection: 'pages',
   id: 'child-id',
-  context: { computeHierarchyPaths: true },
+  context: { hierarchy: { computePaths: true } },
 })
 
 // child._h_titlePath reflects the new parent title:
@@ -814,7 +814,7 @@ When versioning with drafts is enabled, paths are computed based on the current 
 const published = await payload.findByID({
   collection: 'pages',
   id: 'page-id',
-  context: { computeHierarchyPaths: true },
+  context: { hierarchy: { computePaths: true } },
   // draft: false (default)
 })
 // published._h_slugPath: 'products/clothing' (uses published parent title)
@@ -824,7 +824,7 @@ const draft = await payload.findByID({
   collection: 'pages',
   id: 'page-id',
   draft: true,
-  context: { computeHierarchyPaths: true },
+  context: { hierarchy: { computePaths: true } },
 })
 // draft._h_slugPath: 'products/apparel' (uses draft title if changed)
 ```
@@ -927,7 +927,7 @@ Ensure your `admin.useAsTitle` field is stable and always has a value:
 
 For collections with many documents:
 
-- **Only request paths when needed** - Use `computeHierarchyPaths: true` only for UI/breadcrumb display
+- **Only request paths when needed** - Use `hierarchy: { computePaths: true }` only for UI/breadcrumb display
 - **Skip paths for relationships** - When loading related documents, omit path computation to avoid extra queries
 - **Limit tree depth** - Deep trees (10+ levels) will have slower path computation
 - **Leverage caching** - Multiple documents sharing ancestors benefit from request-scoped caching
@@ -940,7 +940,7 @@ const post = await payload.findByID({
   collection: 'posts',
   id: 'post-id',
   depth: 2, // Populates category relationship
-  context: { computeHierarchyPaths: true }, // Computes paths for category too
+  context: { hierarchy: { computePaths: true } }, // Computes paths for category too
 })
 
 // ✅ Only compute paths when you'll use them
@@ -963,7 +963,7 @@ import type { Page } from './payload-types'
 const page = await payload.findByID({
   collection: 'pages',
   id: 'page-id',
-  context: { computeHierarchyPaths: true },
+  context: { hierarchy: { computePaths: true } },
 })
 
 // TypeScript knows about these fields:

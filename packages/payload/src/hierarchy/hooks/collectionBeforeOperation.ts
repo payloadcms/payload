@@ -116,7 +116,10 @@ export const hierarchyCollectionBeforeOperation = <TSlug extends CollectionSlug>
       context.hierarchyAutoSelectedFields = autoAddedFields
     }
 
-    // Set flag to trigger path computation in afterRead
-    context.computeHierarchyPathsViaSelect = true
+    // Set namespaced flag to trigger path computation in afterRead
+    if (!context.hierarchy || typeof context.hierarchy !== 'object') {
+      context.hierarchy = {}
+    }
+    ;(context.hierarchy as { computePathsViaSelect?: boolean }).computePathsViaSelect = true
   }
 }

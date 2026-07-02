@@ -55,9 +55,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
     breakpoints: { s: smallBreak },
   } = useWindowInfo()
 
-  // Simplified placeholder - just "Search" instead of "Search by X, Y, Z"
-  const searchLabelTranslated = t('general:searchBy', { label: '' }).split(' ')[0]
-
   const hasWhereParam = useRef(Boolean(query?.where))
 
   const [visibleDrawer, setVisibleDrawer] = useState<'columns' | 'sort' | 'where'>(
@@ -83,7 +80,6 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
         <div className={`${baseClass}__left`}>
           <ListSearchFilter
             key={collectionSlug}
-            label={searchLabelTranslated}
             onSearchChange={handleSearchChange}
             searchQueryParam={query?.search}
           />

@@ -32,12 +32,12 @@ export const HierarchySearch: React.FC<HierarchySearchProps> = ({
   const [inputValue, setInputValue] = useState('')
 
   const collectionConfig = getEntityConfig({ collectionSlug })
-  const titleField = collectionConfig?.admin?.useAsTitle || 'id'
   const collectionLabel = getTranslation(collectionConfig?.labels?.plural, i18n)
   const hierarchyConfig =
     collectionConfig?.hierarchy && typeof collectionConfig.hierarchy === 'object'
       ? collectionConfig.hierarchy
       : null
+  const titleField = collectionConfig?.admin?.useAsTitle || 'id'
 
   const { clearResults, hasNextPage, isLoading, loadMore, results, search, totalDocs } =
     useHierarchySearch({

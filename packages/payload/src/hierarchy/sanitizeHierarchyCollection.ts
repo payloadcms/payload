@@ -8,6 +8,7 @@ import { addHierarchyToCollection } from './addHierarchyToCollection.js'
 import { buildParentField } from './buildParentField.js'
 import {
   DEFAULT_ALLOW_HAS_MANY,
+  DEFAULT_HIERARCHY_LABEL_SEPARATOR,
   DEFAULT_HIERARCHY_TREE_LIMIT,
   getHierarchyFieldName,
   HIERARCHY_SLUG_PATH_FIELD,
@@ -102,13 +103,16 @@ export const sanitizeHierarchyCollection = (
   const slugify =
     collectionConfig.hierarchy.slugify ?? ((text: string) => defaultSlugify(text) ?? '')
   const treeLimit = collectionConfig.hierarchy.admin?.treeLimit ?? DEFAULT_HIERARCHY_TREE_LIMIT
+  const labelSeparator =
+    collectionConfig.hierarchy.admin?.labelSeparator ?? DEFAULT_HIERARCHY_LABEL_SEPARATOR
   const iconComponent = collectionConfig.hierarchy.admin?.components?.Icon
   const smallIconComponent = collectionConfig.hierarchy.admin?.components?.SmallIcon
 
   const slugField = collectionConfig.hierarchy.slugField
+  const usePathAsTitle = collectionConfig.hierarchy.admin?.usePathAsTitle ?? false
 
   // Apply hierarchy to collection (adds fields and hooks)
-  addHierarchyToCollection({
+  const { titleFieldName } = addHierarchyToCollection({
     collectionConfig,
     parentFieldName: collectionConfig.hierarchy.parentFieldName,
     slugFieldName: slugField,
@@ -147,8 +151,10 @@ export const sanitizeHierarchyCollection = (
         SmallIcon: smallIconComponent || iconComponent || '@payloadcms/ui#TagIcon',
       },
       injectSidebarTab,
+      labelSeparator,
       treeLimit,
       useHeaderButton,
+      usePathAsTitle,
     },
     allowHasMany,
     collectionSpecific,
@@ -158,6 +164,7 @@ export const sanitizeHierarchyCollection = (
     slugField,
     slugify,
     slugPathFieldName,
+    titleField: titleFieldName,
     titlePathFieldName,
   }
 }
