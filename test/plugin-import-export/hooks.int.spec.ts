@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { AuthenticatedUser, Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -14,7 +14,7 @@ import { postsWithColumnMapSlug, postsWithHooksSlug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
-let user: any
+let user: AuthenticatedUser
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -24,10 +24,12 @@ const createdHookPostIDs: (number | string)[] = []
 describe('@payloadcms/plugin-import-export — hooks', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
-    user = await payload.login({
+    const loginResult = await payload.login({
       collection: 'users',
       data: { email: devUser.email, password: devUser.password },
     })
+
+    user = loginResult.user!
   })
 
   afterAll(async () => {

@@ -1,5 +1,5 @@
 'use client'
-import type { TypedUser } from 'payload'
+import type { User } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -15,7 +15,7 @@ import { useTranslation } from '../../../providers/Translation/index.js'
 const confirmResetModalSlug = 'confirm-reset-modal'
 
 export const ResetPreferences: React.FC<{
-  readonly user?: TypedUser
+  readonly user?: User
 }> = ({ user }) => {
   const { openModal } = useModal()
   const { t } = useTranslation()

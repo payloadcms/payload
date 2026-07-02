@@ -126,8 +126,8 @@ export const getExportCollection = ({
       exportCollection: collectionConfig.slug,
       maxLimit,
       req,
-      userCollection: user?.collection || user?.user?.collection,
-      userID: user?.id || user?.user?.id,
+      userCollection: user?.collection,
+      userID: user?.id,
     })
   })
 
@@ -175,8 +175,8 @@ export const getExportCollection = ({
       maxLimit,
       page: doc.page,
       sort: doc.sort,
-      userCollection: user?.collection || user?.user?.collection,
-      userID: user?.id || user?.user?.id,
+      userCollection: user?.collection,
+      userID: user?.id,
       where: doc.where,
     }
 

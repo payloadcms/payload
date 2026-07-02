@@ -1,5 +1,7 @@
 import type {
   Access,
+  AuthenticatedUser,
+  ClientUser,
   CollectionConfig,
   CollectionSlug,
   DefaultDocumentIDType,
@@ -11,7 +13,6 @@ import type {
   PopulateType,
   SelectType,
   TypedCollection,
-  TypedUser,
   Where,
 } from 'payload'
 import type React from 'react'
@@ -44,6 +45,18 @@ type DefaultCartType = {
 }
 
 export type Cart = DefaultCartType
+
+type CartJoin = {
+  cart?: {
+    docs?: (Cart | DefaultDocumentIDType)[]
+  } | null
+}
+
+/** Adds the optional reverse `cart` join that a project may define on its user collection. */
+export type UserWithCart = AuthenticatedUser & CartJoin
+
+/** The browser-safe user with the optional cart join. */
+export type ClientUserWithCart = CartJoin & ClientUser
 
 type InitiatePaymentReturnType = {
   /**
@@ -1054,5 +1067,5 @@ export type EcommerceContextType<T extends EcommerceCollections = EcommerceColle
   /**
    * The current authenticated user, or null if not logged in.
    */
-  user: null | TypedUser
+  user: ClientUserWithCart | null
 }

@@ -7,7 +7,7 @@ import type {
   RouterAdapterComponent,
   SanitizedPermissions,
   ServerFunctionClient,
-  TypedUser,
+  User,
 } from 'payload'
 
 import { DndContext, pointerWithin } from '@dnd-kit/core'
@@ -55,7 +55,7 @@ type Props = {
   readonly serverFunction: ServerFunctionClient
   readonly theme: Theme
   readonly translations: I18nClient['translations']
-  readonly user: null | TypedUser
+  readonly user: null | User
 }
 
 export const RootProvider: React.FC<Props> = ({

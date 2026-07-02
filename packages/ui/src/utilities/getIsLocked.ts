@@ -2,7 +2,7 @@ import type {
   PayloadRequest,
   SanitizedCollectionConfig,
   SanitizedGlobalConfig,
-  TypedUser,
+  User,
   Where,
 } from 'payload'
 
@@ -19,7 +19,7 @@ type Args = {
 }
 
 type Result = Promise<{
-  currentEditor?: TypedUser
+  currentEditor?: User
   isLocked: boolean
   lastUpdateTime?: number
 }>
