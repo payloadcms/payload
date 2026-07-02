@@ -11,11 +11,9 @@ export const EditMenuItems: CollectionConfig = {
           {
             path: '/components/EditMenuItems/index.js#EditMenuItems',
           },
-          ...[
-            {
-              path: '/components/EditMenuItemsServer/index.js#EditMenuItemsServer',
-            },
-          ],
+          {
+            path: '/components/EditMenuItemsServer/index.js#EditMenuItemsServer',
+          },
         ],
       },
     },

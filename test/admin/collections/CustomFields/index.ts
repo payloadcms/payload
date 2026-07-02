@@ -5,25 +5,23 @@ import { customFieldsSlug } from '../../slugs.js'
 export const CustomFields: CollectionConfig = {
   slug: customFieldsSlug,
   fields: [
-    ...[
-      {
-        name: 'customTextServerField',
-        type: 'text' as const,
-        maxLength: 100,
-        admin: {
-          placeholder: 'This is a placeholder',
-          components: {
-            afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
-            beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
-            Label: '/collections/CustomFields/fields/Text/LabelServer.js#CustomServerLabel',
-            Description:
-              '/collections/CustomFields/fields/Text/DescriptionServer.js#CustomServerDescription',
-            Error: '/collections/CustomFields/CustomError.js#CustomError',
-          },
+    {
+      name: 'customTextServerField',
+      type: 'text' as const,
+      maxLength: 100,
+      admin: {
+        placeholder: 'This is a placeholder',
+        components: {
+          afterInput: ['/collections/CustomFields/AfterInput.js#AfterInput'],
+          beforeInput: ['/collections/CustomFields/BeforeInput.js#BeforeInput'],
+          Label: '/collections/CustomFields/fields/Text/LabelServer.js#CustomServerLabel',
+          Description:
+            '/collections/CustomFields/fields/Text/DescriptionServer.js#CustomServerDescription',
+          Error: '/collections/CustomFields/CustomError.js#CustomError',
         },
-        minLength: 3,
       },
-    ],
+      minLength: 3,
+    },
     {
       name: 'customTextClientField',
       type: 'text',

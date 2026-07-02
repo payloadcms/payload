@@ -87,18 +87,16 @@ const ConditionalLogic: CollectionConfig = {
         condition: ({ toggleField }) => Boolean(toggleField),
       },
     },
-    ...[
-      {
-        name: 'customServerFieldWithCondition',
-        type: 'text' as const,
-        admin: {
-          components: {
-            Field: '/collections/ConditionalLogic/CustomServerField.js',
-          },
-          condition: ({ toggleField }: any) => Boolean(toggleField),
+    {
+      name: 'customServerFieldWithCondition',
+      type: 'text' as const,
+      admin: {
+        components: {
+          Field: '/collections/ConditionalLogic/CustomServerField.js',
         },
+        condition: ({ toggleField }: any) => Boolean(toggleField),
       },
-    ],
+    },
     {
       name: 'conditionalRichText',
       type: 'richText',
