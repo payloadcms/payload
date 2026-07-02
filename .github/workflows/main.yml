@@ -312,7 +312,7 @@ jobs:
   tests-e2e:
     runs-on: ubuntu-24.04
     needs: [e2e-matrix, e2e-prep]
-    name: E2E - ${{ matrix.suite }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.cacheComponents && ' [cacheComponents]' || '' }}
+    name: E2E - ${{ matrix.suite }} [${{ matrix.framework }}]${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.cacheComponents && ' [cacheComponents]' || '' }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -320,6 +320,7 @@ jobs:
     env:
       SUITE_NAME: ${{ matrix.suite }}
       PAYLOAD_CACHE_COMPONENTS: ${{ matrix.cacheComponents && 'true' || '' }}
+      PAYLOAD_FRAMEWORK: ${{ matrix.framework }}
     steps:
       - uses: actions/checkout@v5
 
@@ -382,8 +383,9 @@ jobs:
       - name: E2E Tests
         # E2E Test Execution Strategy:
         #
-        # The e2e.config.ts defines each test suite with: { file, shards, parallel? }
+        # The e2e.config.ts defines each test suite with: { file, framework?, shards, parallel? }
         # - shards: Number of CI runners to split this suite across
+        # - framework: Framework adapter used to boot the test app (default: next)
         # - parallel: Whether tests within the suite can run concurrently (default: false)
         #
         # Flags explained:
@@ -407,16 +409,16 @@ jobs:
         #
         # Note: The e2e-prep job runs prepare-run-test-against-prod:ci once and uploads the result
         # as an artifact. This job downloads that artifact, so we use test:e2e:prod:run which skips preparation.
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.shard }}.json pnpm test:e2e:prod:run ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json pnpm test:e2e:prod:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
         env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.shard }}.json
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
           PAYLOAD_DATABASE: mongodb
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: test-results-${{ matrix.suite }}_${{ matrix.shard }}${{ matrix.cacheComponents && '_cc' || '' }}
+          name: test-results-${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}${{ matrix.cacheComponents && '_cc' || '' }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1

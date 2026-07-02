@@ -150,6 +150,13 @@ export interface UserAuthOperations {
 export interface Post {
   id: string;
   title?: string | null;
+  array?:
+    | {
+        title?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  check?: boolean | null;
   content?: LexicalRichText<LexicalNodes_C0124FAC> | null;
   updatedAt: string;
   createdAt: string;
@@ -307,6 +314,13 @@ export interface PayloadMigration {
  */
 export interface PostsSelect<T extends boolean = true> {
   title?: T;
+  array?:
+    | T
+    | {
+        title?: T;
+        id?: T;
+      };
+  check?: T;
   content?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -598,6 +612,6 @@ export interface LexicalRichText<TNode> {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

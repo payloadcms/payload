@@ -195,9 +195,9 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
-  const blocksField: BlocksFieldClient = clientSchemaMap?.[
+  const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
     componentMapRenderedBlockPath
-  ]?.[0] as BlocksFieldClient
+  ]?.[0] as BlocksFieldClient | undefined
 
   const blockOrSlug = blocksField?.blocks?.[0]
   const clientBlock: ClientBlock | undefined =

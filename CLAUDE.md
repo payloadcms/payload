@@ -272,6 +272,29 @@ Examples:
 
 The admin panel is made up of both client and server react components.
 
+### Architecture: shared views, thin adapters
+
+All admin views (`Dashboard`, `List`, `Document`, `Versions`, `Account`, `Login`, …) live in `@payloadcms/ui` as RSCs. Framework adapters (`@payloadcms/next`, `@payloadcms/tanstack-start`) only own request plumbing — they don't fork view source.
+
+Shared entry points in `@payloadcms/ui`:
+
+- `views/Root/renderAdminPage.tsx` — single dispatcher that resolves the route, renders the right view RSC, wraps it in the `Default`/`Minimal` template, and throws an `Error('not-found')` or `Error('redirect:<url>')` to signal navigation.
+- `views/Root/renderAdminView.tsx` + `getRouteData.ts` — view selection.
+- `views/<View>/<View>ViewRSC.tsx` — per-view server components (`ListViewRSC`, `DocumentViewRSC`, `DashboardViewRSC`, …).
+- `utilities/sharedHandlers/` + `utilities/serverFunctionRegistry.ts` — shared `render-list` / `render-document` / `form-state` / `table-state` server-function handlers, registered through `sharedServerFunctions` and merged into each adapter's `handleServerFunctions`.
+
+Each adapter is a ~50–80 line wrapper that calls `initReq`, hands the result to `renderAdminPage`, and ships the resulting React tree to the client (Next does it natively; TanStack pipes through `renderServerComponent` to produce an RSC Flight payload). See `packages/next/src/admin/RootPage.tsx` and `app-tanstack/functions/adminPageRSC.functions.tsx` for the canonical examples.
+
+When adding a new adapter:
+
+1. Implement `initReq({ configPromise, importMap, overrides })` returning a Payload `req` (`InitReqResult`) plus `cookies` / `i18n` / `permissions`.
+2. In your route handler call `renderAdminPage({ config, importMap, initResult, params, searchParams, metadata })`.
+3. Catch the `not-found` / `redirect:` error contract and translate to the framework's native `notFound()` / `redirect(url)`.
+4. Wire up the server-function dispatcher: merge `sharedServerFunctions` from `@payloadcms/ui` with any framework-specific handlers (`render-tab`, `render-widget`, etc.) and expose it at the adapter's chosen URL (`/api/server-function`, `_serverFn`, …).
+5. Implement `NavigationAdapter` for client-side navigation hooks; pass it to `RootProvider` via the `RouterAdapter` prop.
+
+The wire format for on-demand renders (e.g. mid-form re-renders, drawer list/document fetches) is **always RSC Flight** — never JSON. Don't reintroduce a "data-only" branch; if a server handler needs to return a tree, return the React element from the shared handler and let the adapter serialize via Flight (Next: native; TanStack: `serializeForRsc` + `createServerFn`).
+
 ### Patterns
 
 ALWAYS use `formatAdminURL` when formatting api and admin routes.
