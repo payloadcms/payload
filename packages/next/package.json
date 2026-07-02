@@ -104,7 +104,6 @@
     "dequal": "2.0.3",
     "file-type": "22.0.1",
     "graphql-http": "1.22.4",
-    "graphql-playground-html": "1.6.30",
     "http-status": "2.1.0",
     "path-to-regexp": "6.3.0",
     "qs-esm": "8.0.1",
