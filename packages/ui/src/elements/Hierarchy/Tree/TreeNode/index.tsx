@@ -88,7 +88,7 @@ export const TreeNode = ({
     }
   }, [loadMoreFromHook, setFocusedId])
 
-  const { handleFocus, isFocused, tabIndex } = useFocusableItem({
+  const { handleFocus, tabIndex } = useFocusableItem({
     id: `node-${node.id}`,
     type: 'node',
     ref: nodeRef,
@@ -162,45 +162,51 @@ export const TreeNode = ({
       style={{ '--tree-depth': depth } as React.CSSProperties}
       tabIndex={tabIndex}
     >
-      <div
-        className={[
-          `${baseClass}__content`,
-          'sidebar-row',
-          selected && `${baseClass}__content--selected`,
-          selected && 'sidebar-row--selected',
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
-        {hasChildren ? (
+      <div className={`${baseClass}__content-wrapper`}>
+        <div
+          className={[
+            `${baseClass}__content`,
+            'sidebar-row',
+            selected && `${baseClass}__content--selected`,
+            selected && 'sidebar-row--selected',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {hasChildren && (
+            <button
+              aria-label={expanded ? t('general:collapse') : t('general:open')}
+              className={`${baseClass}__toggle`}
+              onClick={handleToggle}
+              onMouseDown={(e) => e.preventDefault()}
+              tabIndex={-1}
+              type="button"
+            >
+              <ChevronIcon direction={expanded ? 'down' : 'right'} size={16} />
+            </button>
+          )}
           <button
-            aria-label={expanded ? t('general:collapse') : t('general:open')}
-            className={`${baseClass}__toggle`}
-            onClick={handleToggle}
+            className={[
+              `${baseClass}__node-trigger`,
+              selected && `${baseClass}__node-trigger--selected`,
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            onClick={handleSelectClick}
             onMouseDown={(e) => e.preventDefault()}
             tabIndex={-1}
+            title={node.title}
             type="button"
           >
-            <ChevronIcon direction={expanded ? 'down' : 'right'} />
+            {Boolean(icon) && <span className="sidebar-row__icon">{icon}</span>}
+            <span className={`${baseClass}__title sidebar-row__title`}>{node.title}</span>
           </button>
-        ) : (
-          <div className={`${baseClass}__toggle-spacer`} />
-        )}
-        {Boolean(icon) && <span className="sidebar-row__icon">{icon}</span>}
-        {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions -- keyboard handled by parent */}
-        <span
-          className={`${baseClass}__title sidebar-row__title`}
-          onClick={handleSelectClick}
-          onMouseDown={(e) => e.preventDefault()}
-          title={node.title}
-        >
-          {node.title}
-        </span>
-        {isLoading && expanded && (
-          <span className={`${baseClass}__loading`}>
-            <Spinner loadingText={null} size="sm" />
-          </span>
-        )}
+          {isLoading && expanded && (
+            <span className={`${baseClass}__loading`}>
+              <Spinner loadingText={null} size="sm" />
+            </span>
+          )}
+        </div>
       </div>
 
       {expanded && children && children.length > 0 && (
