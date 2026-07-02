@@ -60,7 +60,6 @@
     },
     "./rsc": {
       "types": "./src/exports/server/rsc.ts",
-      "browser": "./src/exports/server/rsc.browser.ts",
       "import": "./src/exports/server/rsc.ts",
       "default": "./src/exports/server/rsc.ts"
     },
@@ -462,7 +461,6 @@
       },
       "./rsc": {
         "types": "./dist/exports/server/rsc.d.ts",
-        "browser": "./dist/exports/server/rsc.browser.js",
         "import": "./dist/exports/server/rsc.js",
         "default": "./dist/exports/server/rsc.js"
       },

@@ -1458,6 +1458,7 @@ export interface Config {
   locale: 'en' | 'es' | 'he';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
   };
   user: User;
   jobs: {
@@ -2851,6 +2852,60 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'lexical-benchmark'
+      | 'lexical-fully-featured'
+      | 'lexical-autosave'
+      | 'lexical-link-feature'
+      | 'lexical-lists-features'
+      | 'lexical-heading-feature'
+      | 'lexical-jsx-converter'
+      | 'lexical-fields'
+      | 'lexical-views'
+      | 'lexical-views-frontend'
+      | 'lexical-views-provider'
+      | 'lexical-views-provider-default'
+      | 'lexical-views-provider-fallback'
+      | 'lexical-views-nested'
+      | 'lexical-localized-fields'
+      | 'lexicalObjectReferenceBug'
+      | 'LexicalInBlock'
+      | 'lexical-autosave-block'
+      | 'lexical-access-control'
+      | 'lexical-relationship-fields'
+      | 'collision'
+      | 'lexical-nested-blocks'
+      | 'rich-text-fields'
+      | 'text-fields'
+      | 'uploads'
+      | 'uploads2'
+      | 'array-fields'
+      | 'OnDemandForm'
+      | 'OnDemandOutsideForm'
+      | 'lexical-custom-cell'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

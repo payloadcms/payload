@@ -7,7 +7,7 @@
     "rootDir": "..",
     "baseUrl": ".",
     "paths": {
-      "@payload-config": ["../test/_community/config.ts"]
+      "@payload-config": ["../test/lexical/config.ts"]
     }
   },
   "include": [
