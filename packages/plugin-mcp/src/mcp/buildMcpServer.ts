@@ -17,10 +17,10 @@ import { getLogger } from '../utils/getLogger.js'
 import { toStandardSchema } from '../utils/toStandardSchema.js'
 
 /**
- * Transport-agnostic core: registers every authorized MCP item onto a fresh
- * `McpServer` and returns it. The caller is responsible for picking a transport
- * (`WebStandardStreamableHTTPServerTransport`, `StdioServerTransport`, …) and
- * calling `server.connect(transport)`.
+ * Serving-entry-agnostic core: registers every authorized MCP item onto a fresh
+ * `McpServer` and returns it. The HTTP and stdio entry point callers provide fresh
+ * instances from this builder while they own the transport and protocol-era
+ * decision.
  *
  * `req` is the request context handlers see. For HTTP it's the live
  * `PayloadRequest` derived from the incoming HTTP request; for stdio it's a

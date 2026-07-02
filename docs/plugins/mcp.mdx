@@ -148,7 +148,7 @@ authenticated user, provide an override object with `access: () => true`.
 | `prompts`                              | `object`   | Custom prompts, keyed by name. Values are `Prompt` objects (use [`definePrompt`](#prompts)).                                                  |
 | `resources`                            | `object`   | Custom resources, keyed by name. Values are `Resource` objects.                                                                               |
 | `disabled`                             | `boolean`  | Skip MCP endpoint registration.                                                                                                               |
-| `overrideGetAuthorizedMCP`             | `function` | Replace the default MCP authorization resolver. See [Custom auth](#custom-auth).                                                             |
+| `overrideGetAuthorizedMCP`             | `function` | Replace the default MCP authorization resolver. See [Custom auth](#custom-auth).                                                              |
 | `mcp.serverOptions.serverInfo.name`    | `string`   | The MCP server name advertised to clients. Default `'Payload MCP Server'`.                                                                    |
 | `mcp.serverOptions.serverInfo.version` | `string`   | The MCP server version. Default `'1.0.0'`.                                                                                                    |
 | `mcp.serverOptions.options`            | `object`   | Raw options passed through to the underlying `McpServer` from `@modelcontextprotocol/server`.                                                 |
@@ -444,6 +444,9 @@ npx @modelcontextprotocol/inspector
 ## Defining custom tools, prompts, and resources
 
 The plugin ships four helpers - `defineTool`, `defineCollectionTool`, `defineGlobalTool`, `definePrompt` - that give you full inference of the `input` schema in the handler's argument type. Each helper is a two-stage builder: pass the schema and metadata first, then chain `.handler(fn)`.
+
+Tool inputs and prompt arguments accept Standard Schema libraries such as Zod, or raw
+JSON Schema 2020-12.
 
 ### Top-level tools
 

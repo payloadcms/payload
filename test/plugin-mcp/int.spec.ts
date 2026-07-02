@@ -5,6 +5,7 @@ import {
   getApiKey,
   getLimitedApiKey,
   it,
+  itModern,
   payload,
   restClient,
   userId,
@@ -55,12 +56,85 @@ function draft2020Violations(schema: unknown, rootPath: string): string[] {
 }
 
 describe('@payloadcms/plugin-mcp', () => {
-  it('should ping', async ({ mcp }) => {
+  it('should handle an era-supported basic request', async ({ mcp, protocolEra }) => {
     const apiKey = await getApiKey()
     const client = await mcp.connect(apiKey)
-    const pingResponse = await client.ping()
-    expect(pingResponse).toBeDefined()
+
+    // ping was removed from the modern wire vocabulary, but remains part of
+    // the 2025 era and should retain its previous integration coverage.
+    const response = protocolEra === 'legacy' ? await client.ping() : await client.listTools()
+
+    expect(response).toBeDefined()
   })
+
+  it('should negotiate the requested protocol era', async ({ mcp, protocolEra }) => {
+    const apiKey = await getApiKey()
+    const client = await mcp.connect(apiKey)
+
+    expect(client.getProtocolEra()).toBe(protocolEra)
+  })
+
+  it('should reject invalid API keys before MCP handling', async ({ mcp }) => {
+    await expect(mcp.connect('invalid-api-key')).rejects.toThrow()
+
+    expect(
+      mcp.getHTTPResponses().some(({ method, status }) => method === 'POST' && status === 401),
+    ).toBe(true)
+  })
+
+  it('should keep simultaneous requests separate', async ({ mcp }) => {
+    const [apiKey, limitedApiKey] = await Promise.all([getApiKey(), getLimitedApiKey()])
+    const [client, limitedClient] = await Promise.all([
+      mcp.connect(apiKey),
+      mcp.connect(limitedApiKey),
+    ])
+    const [tools, limitedTools] = await Promise.all([client.listTools(), limitedClient.listTools()])
+
+    expect(tools.tools.some((tool) => tool.name === 'updateGlobal')).toBe(true)
+    expect(limitedTools.tools.some((tool) => tool.name === 'updateGlobal')).toBe(false)
+  })
+
+  it('should return JSON responses without SSE in either protocol era', async ({ mcp }) => {
+    const apiKey = await getApiKey()
+    const client = await mcp.connect(apiKey)
+
+    await client.listTools()
+
+    const responses = mcp.getHTTPResponses()
+    const successfulPostResponses = responses.filter(
+      ({ method, status }) => method === 'POST' && status === 200,
+    )
+
+    expect(successfulPostResponses.length).toBeGreaterThan(0)
+    expect(
+      successfulPostResponses.every(({ contentType }) => contentType === 'application/json'),
+    ).toBe(true)
+    expect(responses.some(({ contentType }) => contentType?.includes('text/event-stream'))).toBe(
+      false,
+    )
+  })
+
+  /* eslint-disable vitest/no-standalone-expect -- itModern is a custom Vitest test registrar. */
+  itModern('should reject subscription streams without opening SSE', async ({ mcp }) => {
+    const apiKey = await getApiKey()
+    const client = await mcp.connect(apiKey)
+
+    await expect(client.listen({ toolsListChanged: true })).rejects.toThrow(
+      'Subscription limit reached',
+    )
+
+    const responses = mcp.getHTTPResponses()
+
+    expect(responses.at(-1)).toMatchObject({
+      contentType: 'application/json',
+      method: 'POST',
+      status: 200,
+    })
+    expect(responses.some(({ contentType }) => contentType?.includes('text/event-stream'))).toBe(
+      false,
+    )
+  })
+  /* eslint-enable vitest/no-standalone-expect */
 
   describe('API Keyed Access', () => {
     it('should not allow GET /api/mcp', async () => {
@@ -701,6 +775,15 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   describe('Collections', () => {
+    const createdPostIDs: Array<number | string> = []
+
+    afterEach(async () => {
+      for (const id of createdPostIDs) {
+        await payload.delete({ collection: 'posts', id })
+      }
+      createdPostIDs.length = 0
+    })
+
     it('getCollectionSchema returns collection fields for createDocument', async ({ mcp }) => {
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
@@ -802,13 +885,14 @@ describe('@payloadcms/plugin-mcp', () => {
     })
 
     it('should call findDocuments', async ({ mcp }) => {
-      await payload.create({
+      const post = await payload.create({
         collection: 'posts',
         data: {
           content: 'Content for test post.',
           title: 'Test Post for Finding',
         },
       })
+      createdPostIDs.push(post.id)
 
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
