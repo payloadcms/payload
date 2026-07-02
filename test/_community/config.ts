@@ -25,40 +25,20 @@ export default buildConfigWithDefaults({
     MenuGlobal,
   ],
   onInit: async (payload) => {
-    const existingDevUsers = await payload.find({
+    await payload.create({
       collection: 'users',
-      limit: 1,
-      where: {
-        email: {
-          equals: devUser.email,
-        },
+      data: {
+        email: devUser.email,
+        password: devUser.password,
       },
     })
 
-    if (existingDevUsers.docs.length === 0) {
-      await payload.create({
-        collection: 'users',
-        data: {
-          email: devUser.email,
-          password: devUser.password,
-        },
-      })
-    }
-
-    const existingExamplePosts = await payload.find({
+    await payload.create({
       collection: postsSlug,
-      limit: 1,
+      data: {
+        title: 'example post',
+      },
     })
-
-    if (existingExamplePosts.docs.length === 0) {
-      await payload.create({
-        collection: postsSlug,
-        data: {
-          title: 'example post',
-          array: [{ title: 'example post' }],
-        },
-      })
-    }
   },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
