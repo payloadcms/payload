@@ -499,6 +499,10 @@ export function DefaultEditView({
         operation === 'update' &&
         !autosaveEnabled
 
+      // Capture the baseline we compare against so we can verify below that the
+      // server's latest version is actually NEWER than it.
+      const originalUpdatedAtSent = checkForStaleData ? originalUpdatedAtRef.current : undefined
+
       if (checkForStaleData) {
         hasCheckedForStaleDataRef.current = true
       }
@@ -536,10 +540,17 @@ export function DefaultEditView({
       // Handle stale data detection.
       // Skip if a save was in-flight when this request started, or if the save counter
       // has advanced — either way the newer updatedAt is from our OWN save.
+      // Only treat the document as stale when the server's latest version is strictly
+      // NEWER than our baseline. Publishing a single locale creates a newer published
+      // version while the draft the check reads keeps an older `updatedAt`, so a plain
+      // "not equal" comparison would otherwise raise a false positive.
       if (
         staleDataState?.isStale &&
         !isSavingAtStart &&
-        saveCounterRef.current === saveCounterAtStart
+        saveCounterRef.current === saveCounterAtStart &&
+        originalUpdatedAtSent &&
+        new Date(staleDataState.currentUpdatedAt).getTime() >
+          new Date(originalUpdatedAtSent).getTime()
       ) {
         setShowStaleDataModal(true)
       }
