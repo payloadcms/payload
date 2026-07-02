@@ -934,9 +934,6 @@ importers:
       http-status:
         specifier: 2.1.0
         version: 2.1.0
-      image-size:
-        specifier: 2.0.2
-        version: 2.0.2
       ipaddr.js:
         specifier: 2.3.0
         version: 2.3.0
@@ -1299,7 +1296,7 @@ importers:
     dependencies:
       '@sentry/nextjs':
         specifier: ^9.5.0
-        version: 9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@16.2.7(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.100.0))(react@19.2.6)(webpack@5.107.2(@swc/core@1.15.3)(esbuild@0.25.12)(postcss@8.5.15))
+        version: 9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@16.2.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.100.0))(react@19.2.6)(webpack@5.107.2(@swc/core@1.15.3)(esbuild@0.25.12)(postcss@8.5.15))
       '@sentry/types':
         specifier: ^9.5.0
         version: 9.47.1
@@ -11099,11 +11096,6 @@ packages:
     resolution: {integrity: sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg==}
     engines: {node: '>= 4'}
 
-  image-size@2.0.2:
-    resolution: {integrity: sha512-IRqXKlaXwgSMAMtpNzZa1ZAe8m+Sa1770Dhk8VkSsP9LS+iHD62Zd8FQKs8fbPiagBE7BzoFX23cxFnwshpV6w==}
-    engines: {node: '>=16.x'}
-    hasBin: true
-
   immediate@3.0.6:
     resolution: {integrity: sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==}
 
@@ -19896,7 +19888,7 @@ snapshots:
       - supports-color
       - webpack
 
-  '@sentry/nextjs@9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@16.2.7(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.100.0))(react@19.2.6)(webpack@5.107.2(@swc/core@1.15.3)(esbuild@0.25.12)(postcss@8.5.15))':
+  '@sentry/nextjs@9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))(next@16.2.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.100.0))(react@19.2.6)(webpack@5.107.2(@swc/core@1.15.3)(esbuild@0.25.12)(postcss@8.5.15))':
     dependencies:
       '@opentelemetry/api': 1.9.1
       '@opentelemetry/semantic-conventions': 1.41.1
@@ -19909,7 +19901,7 @@ snapshots:
       '@sentry/vercel-edge': 9.47.1(@opentelemetry/context-async-hooks@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/core@1.30.1(@opentelemetry/api@1.9.1))(@opentelemetry/sdk-trace-base@1.30.1(@opentelemetry/api@1.9.1))
       '@sentry/webpack-plugin': 3.6.1(webpack@5.107.2(@swc/core@1.15.3)(esbuild@0.25.12)(postcss@8.5.15))
       chalk: 3.0.0
-      next: 16.2.7(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.100.0)
+      next: 16.2.7(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.59.1)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(sass@1.100.0)
       resolve: 1.22.8
       rollup: 4.59.0
       stacktrace-parser: 0.1.11
@@ -24577,8 +24569,6 @@ snapshots:
   ignore@5.3.2: {}
 
   ignore@7.0.5: {}
-
-  image-size@2.0.2: {}
 
   immediate@3.0.6: {}
 

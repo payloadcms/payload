@@ -1,29 +1,38 @@
 import fs from 'fs/promises'
-import { imageSize } from 'image-size'
-import { imageSizeFromFile } from 'image-size/fromFile'
 
+import type { SharpDependency } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { ProbedImageSize } from './types.js'
 
-import { temporaryFileTask } from './tempFile.js'
+import { probeImageSize } from './probeImageSize.js'
 
-export async function getImageSize(file: PayloadRequest['file']): Promise<ProbedImageSize> {
-  if (file?.tempFilePath) {
-    return imageSizeFromFile(file.tempFilePath)
+type Args = {
+  file: PayloadRequest['file']
+  /**
+   * The configured `sharp` instance, when available. Preferred for reading
+   * dimensions because it covers every format sharp can process. Falls back to
+   * the dependency-free probe when sharp is not configured.
+   */
+  sharp?: SharpDependency
+}
+
+export async function getImageSize({ file, sharp }: Args): Promise<ProbedImageSize> {
+  // `tempFilePath` may be an empty string when the file is held in memory
+  const tempFilePath = file?.tempFilePath || undefined
+
+  if (sharp) {
+    try {
+      const { height, width } = await sharp(tempFilePath ?? file!.data).metadata()
+      if (width && height) {
+        return { height, width }
+      }
+    } catch {
+      // sharp decodes the full image and rejects truncated/header-only files
+      // that the byte-level probe can still measure, so fall through to it
+    }
   }
 
-  // Tiff file do not support buffers or streams, so we must write to file first
-  // then retrieve dimensions. https://github.com/image-size/image-size/issues/103
-  if (file?.mimetype === 'image/tiff') {
-    const dimensions = await temporaryFileTask(
-      async (filepath: string) => {
-        await fs.writeFile(filepath, file.data)
-        return imageSizeFromFile(filepath)
-      },
-      { extension: 'tiff' },
-    )
-    return dimensions
-  }
+  const data = tempFilePath ? await fs.readFile(tempFilePath) : file!.data
 
-  return imageSize(file!.data)
+  return probeImageSize(data)
 }
