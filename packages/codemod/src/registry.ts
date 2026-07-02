@@ -11,7 +11,10 @@ import { migrateDocumentTitleContext } from './transforms/migrate-document-title
 import { migrateForceSelect } from './transforms/migrate-force-select/index.js'
 import { migrateHideAPIURL } from './transforms/migrate-hide-api-url/index.js'
 import { migrateImportExportHooks } from './transforms/migrate-import-export-hooks/index.js'
+import { migrateLexicalIsHTMLElement } from './transforms/migrate-lexical-is-html-element/index.js'
 import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-api/index.js'
+import { migrateMultiTenantTenantSelectorLabel } from './transforms/migrate-multi-tenant-tenant-selector-label/index.js'
+import { migrateMultiTenantUseBaseListFilter } from './transforms/migrate-multi-tenant-use-base-list-filter/index.js'
 import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exports/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
 import { migrateVersionsDefault } from './transforms/migrate-versions-default/index.js'
@@ -33,10 +36,13 @@ export const transforms: Transform[] = [
   migrateBlockReferencesToBlocks,
   migrateBuildScript,
   migrateDocumentTitleContext,
+  migrateMultiTenantUseBaseListFilter,
+  migrateMultiTenantTenantSelectorLabel,
   migrateStorageAdaptersToConfig,
   renameStorageAdaptersToStorage,
   migrateImportExportHooks,
   migrateDbTypesSubpath,
+  migrateLexicalIsHTMLElement,
   migrateNextSubpathExports,
   migrateVersionsDefault,
   removeGroupByTrue,

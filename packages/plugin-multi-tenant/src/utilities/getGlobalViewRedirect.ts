@@ -9,12 +9,6 @@ import { getTenantFromCookie } from './getTenantFromCookie.js'
 import { getTenantOptions } from './getTenantOptions.js'
 
 type Args = {
-  /**
-   * This is no longer needed and is handled internally.
-   *
-   * @deprecated
-   */
-  basePath?: string
   docID?: number | string
   headers: Headers
   payload: Payload
