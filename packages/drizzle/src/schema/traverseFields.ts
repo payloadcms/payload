@@ -21,7 +21,6 @@ import type {
 } from '../types.js'
 
 import { createTableName } from '../createTableName.js'
-import { buildIndexName } from '../utilities/buildIndexName.js'
 import { getArrayRelationName } from '../utilities/getArrayRelationName.js'
 import { hasLocalesTable } from '../utilities/hasLocalesTable.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
@@ -129,9 +128,12 @@ export const traverseFields = ({
     let targetTable = columns
     let targetIndexes = indexes
 
-    const columnName = `${columnPrefix || ''}${field.name[0] === '_' ? '_' : ''}${toSnakeCase(
-      field.name,
-    )}`
+    const rawFieldName = `${field.name[0] === '_' ? '_' : ''}${toSnakeCase(field.name)}`
+    const columnName = adapter.getIdentifier({
+      type: 'column',
+      parentTable: newTableName,
+      segments: [(columnPrefix ?? '').replace(/_$/, ''), rawFieldName].filter(Boolean),
+    })
     const fieldName = `${fieldPrefix?.replace('.', '_') || ''}${field.name}`
 
     const isFieldLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
@@ -165,7 +167,11 @@ export const traverseFields = ({
         adapter.fieldConstraints[rootTableName][`${columnName}_idx`] = constraintValue
       }
 
-      const indexName = buildIndexName({ name: `${newTableName}_${columnName}`, adapter })
+      const indexName = adapter.getIdentifier({
+        type: 'index',
+        segments: [newTableName, columnName],
+        suffix: '_idx',
+      })
 
       targetIndexes[indexName] = {
         name: indexName,
@@ -202,18 +208,31 @@ export const traverseFields = ({
 
         const baseIndexes: Record<string, RawIndex> = {
           _orderIdx: {
-            name: `${arrayTableName}_order_idx`,
+            name: adapter.getIdentifier({
+              type: 'index',
+              segments: [arrayTableName, 'order'],
+              suffix: '_idx',
+            }),
             on: ['_order'],
           },
           _parentIDIdx: {
-            name: `${arrayTableName}_parent_id_idx`,
+            name: adapter.getIdentifier({
+              type: 'index',
+              segments: [arrayTableName, 'parent_id'],
+              suffix: '_idx',
+            }),
             on: '_parentID',
           },
         }
 
         const baseForeignKeys: Record<string, RawForeignKey> = {
           _parentIDFk: {
-            name: `${arrayTableName}_parent_id_fk`,
+            name: adapter.getIdentifier({
+              type: 'fk',
+              parentTable: arrayTableName,
+              segments: [arrayTableName, 'parent_id'],
+              suffix: '_fk',
+            }),
             columns: ['_parentID'],
             foreignColumns: [
               {
@@ -239,7 +258,11 @@ export const traverseFields = ({
           }
 
           baseIndexes._localeIdx = {
-            name: `${arrayTableName}_locale_idx`,
+            name: adapter.getIdentifier({
+              type: 'index',
+              segments: [arrayTableName, 'locale'],
+              suffix: '_idx',
+            }),
             on: '_locale',
           }
         }
@@ -410,7 +433,10 @@ export const traverseFields = ({
           ) {
             blocksTableNameMap[blockTableName]++
             setInternalBlockIndex(block, blocksTableNameMap[blockTableName])
-            blockTableName = `${blockTableName}_${blocksTableNameMap[blockTableName]}`
+            blockTableName = adapter.getIdentifier({
+              type: 'table',
+              segments: [blockTableName, String(blocksTableNameMap[blockTableName])],
+            })
           }
           let relationName = `_blocks_${block.slug}`
           if (typeof block[InternalBlockTableNameIndex] !== 'undefined') {
@@ -438,22 +464,39 @@ export const traverseFields = ({
 
             const baseIndexes: Record<string, RawIndex> = {
               _orderIdx: {
-                name: `${blockTableName}_order_idx`,
+                name: adapter.getIdentifier({
+                  type: 'index',
+                  segments: [blockTableName, 'order'],
+                  suffix: '_idx',
+                }),
                 on: '_order',
               },
               _parentIDIdx: {
-                name: `${blockTableName}_parent_id_idx`,
+                name: adapter.getIdentifier({
+                  type: 'index',
+                  segments: [blockTableName, 'parent_id'],
+                  suffix: '_idx',
+                }),
                 on: ['_parentID'],
               },
               _pathIdx: {
-                name: `${blockTableName}_path_idx`,
+                name: adapter.getIdentifier({
+                  type: 'index',
+                  segments: [blockTableName, 'path'],
+                  suffix: '_idx',
+                }),
                 on: '_path',
               },
             }
 
             const baseForeignKeys: Record<string, RawForeignKey> = {
               _parentIdFk: {
-                name: `${blockTableName}_parent_id_fk`,
+                name: adapter.getIdentifier({
+                  type: 'fk',
+                  parentTable: blockTableName,
+                  segments: [blockTableName, 'parent_id'],
+                  suffix: '_fk',
+                }),
                 columns: ['_parentID'],
                 foreignColumns: [
                   {
@@ -479,7 +522,11 @@ export const traverseFields = ({
               }
 
               baseIndexes._localeIdx = {
-                name: `${blockTableName}_locale_idx`,
+                name: adapter.getIdentifier({
+                  type: 'index',
+                  segments: [blockTableName, 'locale'],
+                  suffix: '_idx',
+                }),
                 on: '_locale',
               }
             }
@@ -825,18 +872,31 @@ export const traverseFields = ({
 
           const baseIndexes: Record<string, RawIndex> = {
             orderIdx: {
-              name: `${selectTableName}_order_idx`,
+              name: adapter.getIdentifier({
+                type: 'index',
+                segments: [selectTableName, 'order'],
+                suffix: '_idx',
+              }),
               on: 'order',
             },
             parentIdx: {
-              name: `${selectTableName}_parent_idx`,
+              name: adapter.getIdentifier({
+                type: 'index',
+                segments: [selectTableName, 'parent'],
+                suffix: '_idx',
+              }),
               on: 'parent',
             },
           }
 
           const baseForeignKeys: Record<string, RawForeignKey> = {
             parentFk: {
-              name: `${selectTableName}_parent_fk`,
+              name: adapter.getIdentifier({
+                type: 'fk',
+                parentTable: selectTableName,
+                segments: [selectTableName, 'parent'],
+                suffix: '_fk',
+              }),
               columns: ['parent'],
               foreignColumns: [
                 {
@@ -862,14 +922,22 @@ export const traverseFields = ({
             }
 
             baseIndexes.localeIdx = {
-              name: `${selectTableName}_locale_idx`,
+              name: adapter.getIdentifier({
+                type: 'index',
+                segments: [selectTableName, 'locale'],
+                suffix: '_idx',
+              }),
               on: 'locale',
             }
           }
 
           if (field.index) {
             baseIndexes.value = {
-              name: `${selectTableName}_value_idx`,
+              name: adapter.getIdentifier({
+                type: 'index',
+                segments: [selectTableName, 'value'],
+                suffix: '_idx',
+              }),
               on: 'value',
             }
           }
@@ -958,11 +1026,24 @@ export const traverseFields = ({
           }
 
           // make the foreign key column for relationship using the correct id column type
+          const relFkColName = adapter.getIdentifier({
+            type: 'column',
+            parentTable: newTableName,
+            segments: [columnName, 'id'],
+          })
           targetTable[fieldName] = {
-            name: `${columnName}_id`,
+            name: relFkColName,
             type: colType,
             reference: {
               name: 'id',
+              foreignKeyName: adapter.shouldCompressIdentifiers
+                ? adapter.getIdentifier({
+                    type: 'fk',
+                    parentTable: newTableName,
+                    segments: [newTableName, relFkColName, tableName, 'id'],
+                    suffix: '_fk',
+                  })
+                : undefined,
               onDelete: 'set null',
               table: tableName,
             },

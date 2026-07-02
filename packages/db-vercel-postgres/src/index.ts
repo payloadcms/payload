@@ -1,4 +1,4 @@
-import type { DrizzleAdapter } from '@payloadcms/drizzle'
+import type { DrizzleAdapter, GetIdentifier } from '@payloadcms/drizzle'
 import type { PgTableFn } from 'drizzle-orm/pg-core'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
@@ -11,6 +11,7 @@ import {
   countVersions,
   create,
   createBlocksToJsonMigrator,
+  createGetIdentifier,
   createGlobal,
   createGlobalVersion,
   createSchemaGenerator,
@@ -127,19 +128,26 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
         corePackageSuffix: 'pg-core',
         defaultOutputFile: args.generateSchemaOutputFile,
         enumImport: 'pgEnum',
+        extraConfigReturnType: 'PgTableExtraConfigValue',
         schemaImport: 'pgSchema',
         tableImport: 'pgTable',
       }),
+      getIdentifier: (() => {
+        throw new Error('getIdentifier was called before adapter initialization completed')
+      }) as GetIdentifier,
+      identifiers: new Set<string>(),
       idType: postgresIDType,
       indexes: new Set<string>(),
       initializing,
       localesSuffix: args.localesSuffix || '_locales',
       logger: args.logger,
+      maxIdentifierLength: 63,
       operators: operatorMap,
       pgSchema: adapterSchema,
       pool: undefined,
       poolOptions: args.pool,
       prodMigrations: args.prodMigrations,
+      shouldCompressIdentifiers: args.shouldCompressIdentifiers ?? false,
       // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
       push: args.push,
       rawRelations: {},
@@ -216,6 +224,8 @@ export function vercelPostgresAdapter(args: Args = {}): DatabaseAdapterObj<Verce
       updateVersion,
       upsert,
     })
+
+    adapter.getIdentifier = createGetIdentifier(adapter as unknown as DrizzleAdapter)
 
     adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({
       adapter: adapter as unknown as DrizzleAdapter,

@@ -131,9 +131,25 @@ export const buildDrizzleTable = ({
     }
 
     if (column.reference) {
-      columns[key].references(() => adapter.tables[column.reference.table][column.reference.name], {
-        onDelete: column.reference.onDelete,
-      })
+      if (column.reference.foreignKeyName) {
+        // Store for table-level FK creation (supports custom names)
+        if (!rawTable.foreignKeys) {
+          rawTable.foreignKeys = {}
+        }
+        rawTable.foreignKeys[`${key}_col_fk`] = {
+          name: column.reference.foreignKeyName,
+          columns: [key],
+          foreignColumns: [{ name: column.reference.name, table: column.reference.table }],
+          onDelete: column.reference.onDelete,
+        }
+      } else {
+        columns[key].references(
+          () => adapter.tables[column.reference.table][column.reference.name],
+          {
+            onDelete: column.reference.onDelete,
+          },
+        )
+      }
     }
 
     if (column.primaryKey) {

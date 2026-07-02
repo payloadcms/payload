@@ -97,7 +97,7 @@ export const columnToCodeConverter: ColumnToCodeConverter = ({
     code = `${code}.default(${sanitizedDefault})`
   }
 
-  if (column.reference) {
+  if (column.reference && !column.reference.foreignKeyName) {
     let callback = `()`
 
     if (
