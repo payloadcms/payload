@@ -495,9 +495,9 @@ describe('Dashboard', () => {
     await page.setViewportSize({ height: Math.max(contentHeight + 100, 720), width })
     // moveWidget already contains validations
     await d.moveWidget(2, 1) // to first position
-    await d.moveWidget(1, 2, 'after') // after last in row
-    await d.moveWidget(2, TOTAL_WIDGETS, 'after') // to last position
-    await d.moveWidget(TOTAL_WIDGETS, 5, 'before') // before first full-width row after counts
+    await d.moveWidget(1, 5, 'after') // after the full-width revenue widget
+    await d.moveWidget(5, TOTAL_WIDGETS, 'after') // to last position
+    await d.moveWidget(TOTAL_WIDGETS, 4, 'before') // before the full-width revenue widget
     await d.saveChangesAndValidate()
   })
 
