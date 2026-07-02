@@ -105,6 +105,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   const [enableWordBoundarySearch, setEnableWordBoundarySearch] = useState(false)
   const [menuIsOpen, setMenuIsOpen] = useState(false)
   const hasLoadedFirstPageRef = useRef(false)
+  const isFirstRenderRef = useRef(true)
   const { queueTask } = useQueue()
 
   const [options, dispatchOptions] = useReducer(optionsReducer, [])
@@ -668,10 +669,16 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
   // When (`relationTo` || `filterOptions` || `locale`) changes, reset component
   // Note - effect should not run on first run
   useEffect(() => {
-    // If the menu is open while filterOptions changes
-    // due to latency of form state and fast clicking into this field,
-    // re-fetch options
+    // Skip the first run - there are no loaded options to reset yet, and
+    // clearing here can wipe options that are still being loaded.
+    if (isFirstRenderRef.current) {
+      return
+    }
+
     if (hasLoadedFirstPageRef.current && menuIsOpen) {
+      // If the menu is open while filterOptions changes
+      // due to latency of form state and fast clicking into this field,
+      // re-fetch options in place instead of clearing them.
       setIsLoading(true)
       void updateResultsEffectEvent({
         filterOptions,
@@ -690,21 +697,25 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
               value: valueRef.current as ValueWithRelation,
             }),
       })
+    } else if (!menuIsOpen) {
+      // If the menu is not open, reset the field state
+      // because we need to get new options next time the menu opens.
+      //
+      // This must NOT run while the menu is open: doing so clears the options
+      // that were just loaded (or are still loading, e.g. when `filterOptions`
+      // changes reference due to form-state latency), leaving the dropdown
+      // empty until it is closed and reopened.
+      dispatchOptions({
+        type: 'CLEAR',
+        exemptValues: valueRef.current,
+      })
+
+      setLastFullyLoadedRelation(-1)
+      setLastLoadedPage({})
     }
-
-    // If the menu is not open, still reset the field state
-    // because we need to get new options next time the menu opens
-    dispatchOptions({
-      type: 'CLEAR',
-      exemptValues: valueRef.current,
-    })
-
-    setLastFullyLoadedRelation(-1)
-    setLastLoadedPage({})
   }, [relationTo, filterOptions, locale, path, menuIsOpen, hasMany])
 
   const prevValue = useRef(value)
-  const isFirstRenderRef = useRef(true)
 
   // ///////////////////////////////////
   // Ensure we have an option for each value
