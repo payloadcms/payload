@@ -47,6 +47,6 @@ export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
       `[plugin-mcp] Schema conversion failed, using permissive fallback:`,
       error instanceof Error ? error.message : error,
     )
-    return z.record(z.any())
+    return z.object({})
   }
 }
