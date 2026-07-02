@@ -14,8 +14,11 @@ export const Logout: React.FC = () => {
   } = useConfig()
 
   return (
-    <a href={`${admin}${logoutRoute}#custom`}>
-      <LogOutIcon />
+    <a
+      href={`${admin}${logoutRoute}#custom`}
+      style={{ alignItems: 'center', display: 'flex', gap: 8 }}
+    >
+      <LogOutIcon /> Custom Logout
     </a>
   )
 }
