@@ -1,5 +1,6 @@
 import type { JsonObject, Payload } from 'payload'
 
+import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import { schedulePublishHandler } from '@payloadcms/ui/utilities/schedulePublishHandler'
 import fs from 'fs'
 import path from 'path'
@@ -4002,6 +4003,168 @@ describe('Versions', () => {
           payload,
         })
       })
+    })
+  })
+
+  describe('stale data check with draft/published mismatch', () => {
+    const docPermissions = {
+      create: true,
+      delete: true,
+      fields: true as const,
+      read: true,
+      readVersions: true,
+      update: true,
+    }
+
+    beforeEach(async () => {
+      await cleanupDocuments({ collectionSlugs: [localizedCollectionSlug], payload })
+    })
+
+    // Reproduces https://github.com/payloadcms/payload/issues/16376
+    // When a doc has a published version plus newer unpublished draft changes, the
+    // client's baseline is the published `updatedAt`. The newer draft `updatedAt`
+    // must not be treated as another user's edit.
+    it('should not report stale data when baseline matches the published version but a newer draft exists', async () => {
+      const req = await createLocalReq({ user }, payload)
+
+      const draft = await payload.create({
+        collection: localizedCollectionSlug,
+        data: { text: 'initial draft' },
+        draft: true,
+        locale: 'en',
+      })
+
+      const published = await payload.update({
+        id: draft.id,
+        collection: localizedCollectionSlug,
+        data: { _status: 'published', text: 'published' },
+        draft: false,
+        locale: 'en',
+      })
+
+      // Newer unpublished draft changes now exist over the published version
+      const draftEdit = await payload.update({
+        id: draft.id,
+        collection: localizedCollectionSlug,
+        data: { text: 'unpublished draft edit' },
+        draft: true,
+        locale: 'en',
+      })
+
+      // Sanity check: the draft and published versions have diverged
+      expect(draftEdit.updatedAt).not.toStrictEqual(published.updatedAt)
+
+      const { staleDataState } = await buildFormState({
+        mockRSCs: true,
+        id: draft.id,
+        checkForStaleData: true,
+        collectionSlug: localizedCollectionSlug,
+        data: published,
+        docPermissions,
+        docPreferences: { fields: {} },
+        documentFormState: undefined,
+        operation: 'update',
+        // Client baseline is the published version's updatedAt
+        originalUpdatedAt: published.updatedAt,
+        renderAllFields: false,
+        req,
+        schemaPath: localizedCollectionSlug,
+      })
+
+      expect(staleDataState?.isStale).toBe(false)
+    })
+
+    it('should not report stale data when baseline matches the latest draft', async () => {
+      const req = await createLocalReq({ user }, payload)
+
+      const draft = await payload.create({
+        collection: localizedCollectionSlug,
+        data: { text: 'initial draft' },
+        draft: true,
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: draft.id,
+        collection: localizedCollectionSlug,
+        data: { _status: 'published', text: 'published' },
+        draft: false,
+        locale: 'en',
+      })
+
+      const draftEdit = await payload.update({
+        id: draft.id,
+        collection: localizedCollectionSlug,
+        data: { text: 'unpublished draft edit' },
+        draft: true,
+        locale: 'en',
+      })
+
+      const { staleDataState } = await buildFormState({
+        mockRSCs: true,
+        id: draft.id,
+        checkForStaleData: true,
+        collectionSlug: localizedCollectionSlug,
+        data: draftEdit,
+        docPermissions,
+        docPreferences: { fields: {} },
+        documentFormState: undefined,
+        operation: 'update',
+        originalUpdatedAt: draftEdit.updatedAt,
+        renderAllFields: false,
+        req,
+        schemaPath: localizedCollectionSlug,
+      })
+
+      expect(staleDataState?.isStale).toBe(false)
+    })
+
+    it('should still report stale data when the document was updated elsewhere', async () => {
+      const req = await createLocalReq({ user }, payload)
+
+      const draft = await payload.create({
+        collection: localizedCollectionSlug,
+        data: { text: 'initial draft' },
+        draft: true,
+        locale: 'en',
+      })
+
+      const published = await payload.update({
+        id: draft.id,
+        collection: localizedCollectionSlug,
+        data: { _status: 'published', text: 'published' },
+        draft: false,
+        locale: 'en',
+      })
+
+      // Simulate a concurrent edit by another user after the client loaded the doc
+      await wait(5)
+      await payload.update({
+        id: draft.id,
+        collection: localizedCollectionSlug,
+        data: { text: 'edited by someone else' },
+        draft: true,
+        locale: 'en',
+      })
+
+      const { staleDataState } = await buildFormState({
+        mockRSCs: true,
+        id: draft.id,
+        checkForStaleData: true,
+        collectionSlug: localizedCollectionSlug,
+        data: published,
+        docPermissions,
+        docPreferences: { fields: {} },
+        documentFormState: undefined,
+        operation: 'update',
+        // Stale baseline that matches neither the current draft nor the published version
+        originalUpdatedAt: new Date(new Date(published.updatedAt).getTime() - 60_000).toISOString(),
+        renderAllFields: false,
+        req,
+        schemaPath: localizedCollectionSlug,
+      })
+
+      expect(staleDataState?.isStale).toBe(true)
     })
   })
 

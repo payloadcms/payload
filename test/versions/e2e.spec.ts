@@ -1734,6 +1734,34 @@ describe('Versions', () => {
       })
     })
 
+    test('should not show stale data modal when a newer draft exists over the published version', async () => {
+      // https://github.com/payloadcms/payload/issues/16376
+      await page.goto(url.create)
+
+      const textField = page.locator('#field-text')
+
+      await textField.fill('published title')
+      await saveDocAndAssert(page, '#publish-locale')
+
+      const id = await page.locator('.id-label').getAttribute('title')
+
+      // Make the latest draft newer than the published version the client is tracking
+      await payload.update({
+        id: id!,
+        collection: localizedCollectionSlug,
+        data: { description: 'newer draft content' },
+        draft: true,
+        locale: 'en',
+      })
+
+      await textField.fill('edited title')
+
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(1000)
+
+      await expect(page.locator('#document-stale-data')).toBeHidden()
+    })
+
     test('should preserve block metadata when publishing specific locale after initial save without blocks', async () => {
       // This reproduces the bug where:
       // 1. A doc is saved without blocks (autosave fires before blocks are added)
