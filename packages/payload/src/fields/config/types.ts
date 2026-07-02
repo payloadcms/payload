@@ -235,7 +235,7 @@ export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData
   args: FieldHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
-export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
+type SharedFieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
@@ -259,6 +259,16 @@ export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> 
    */
   siblingData?: Partial<TSiblingData>
 }
+
+export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> =
+  | ({ collection: SanitizedCollectionConfig; global?: never } & SharedFieldAccessArgs<
+      TData,
+      TSiblingData
+    >)
+  | ({ collection?: never; global: SanitizedGlobalConfig } & SharedFieldAccessArgs<
+      TData,
+      TSiblingData
+    >)
 
 export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (
   args: FieldAccessArgs<TData, TSiblingData>,

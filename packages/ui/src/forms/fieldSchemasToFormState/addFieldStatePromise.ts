@@ -64,6 +64,7 @@ export type AddFieldStatePromiseArgs = {
    */
   forceFullValue?: boolean
   fullData: Data
+  globalSlug?: string
   id: number | string
   /**
    * Whether the field schema should be included in the state
@@ -124,6 +125,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     filter,
     forceFullValue = false,
     fullData,
+    globalSlug,
     includeSchema = false,
     indexPath,
     mockRSCs,
@@ -210,12 +212,20 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
 
     if (typeof field?.access?.read === 'function') {
+      const collection = collectionSlug
+        ? (req.payload.collections[collectionSlug]?.config ?? null)
+        : null
+      const global = globalSlug
+        ? (req.payload.globals.config.find((g) => g.slug === globalSlug) ?? null)
+        : null
+
       hasPermission = await field.access.read({
         id,
         blockData,
         data: fullData,
         req,
         siblingData: data,
+        ...(collection ? { collection } : { global }),
       })
     } else {
       hasPermission = true
