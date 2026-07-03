@@ -40,13 +40,14 @@ export const convertCollectionSchemaToZod = (schema: JSONSchema4) => {
   } catch (error) {
     // If schema conversion fails (e.g., due to Zod v4 toJSONSchema null-check bug
     // with record schemas that have undefined valueType, or bundler transforms
-    // stripping Zod internals), return a permissive schema so tools/list doesn't
-    // crash entirely. The tool will still be listed but without strict validation.
+    // stripping Zod internals), return a permissive object schema so tools/list
+    // doesn't crash entirely. Resource create/update tools expect `.shape` and
+    // `.partial()`, so a record schema is not a safe fallback here.
     // See: https://github.com/colinhacks/zod/issues/5821
     console.warn(
       `[plugin-mcp] Schema conversion failed, using permissive fallback:`,
       error instanceof Error ? error.message : error,
     )
-    return z.record(z.any())
+    return z.object({}).catchall(z.any())
   }
 }

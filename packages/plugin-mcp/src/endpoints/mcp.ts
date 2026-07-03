@@ -1,10 +1,135 @@
+import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js'
 import crypto from 'crypto'
 import { type PayloadHandler, type TypedUser, UnauthorizedError, type Where } from 'payload'
 
 import type { MCPAccessSettings, MCPPluginConfig } from '../types.js'
 
 import { createRequestFromPayloadRequest } from '../mcp/createRequest.js'
-import { getMCPHandler } from '../mcp/getMcpHandler.js'
+import { buildMcpServer, getMCPHandler } from '../mcp/getMcpHandler.js'
+
+const methodNotAllowedResponse = () =>
+  new Response(
+    JSON.stringify({
+      jsonrpc: '2.0',
+      error: {
+        code: -32000,
+        message: 'Method not allowed.',
+      },
+      id: null,
+    }),
+    {
+      headers: {
+        Allow: 'POST',
+        'Content-Type': 'application/json',
+      },
+      status: 405,
+    },
+  )
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null
+
+const getMessageID = (message: unknown) => {
+  if (!isRecord(message)) {
+    return
+  }
+
+  const { id } = message
+
+  return typeof id === 'number' || typeof id === 'string' ? String(id) : undefined
+}
+
+const instrumentTransport = (
+  transport: WebStandardStreamableHTTPServerTransport,
+  onEvent?: (event: unknown) => void,
+) => {
+  if (!onEvent) {
+    return
+  }
+
+  const requestMetadata = new Map<
+    string,
+    {
+      method: string
+      requestId: string
+      startTime: number
+    }
+  >()
+
+  const emit = (event: Record<string, unknown>) => {
+    onEvent({
+      ...event,
+      timestamp: Date.now(),
+    })
+  }
+
+  transport.onmessage = (message) => {
+    const messageRecord: unknown = message
+
+    if (!isRecord(messageRecord) || typeof messageRecord.method !== 'string') {
+      return
+    }
+
+    const requestId = crypto.randomUUID()
+    const messageID = getMessageID(messageRecord)
+
+    if (messageID) {
+      requestMetadata.set(messageID, {
+        method: messageRecord.method,
+        requestId,
+        startTime: Date.now(),
+      })
+    }
+
+    emit({
+      method: messageRecord.method,
+      parameters: messageRecord.params,
+      requestId,
+      status: 'success',
+      type: 'REQUEST_RECEIVED',
+    })
+  }
+
+  const send = transport.send.bind(transport)
+
+  transport.send = async (message, options) => {
+    const messageRecord: unknown = message
+    const messageID = getMessageID(messageRecord)
+    const metadata = messageID ? requestMetadata.get(messageID) : undefined
+
+    if (
+      messageID &&
+      metadata &&
+      isRecord(messageRecord) &&
+      ('result' in messageRecord || 'error' in messageRecord)
+    ) {
+      emit({
+        duration: Date.now() - metadata.startTime,
+        error: messageRecord.error,
+        method: metadata.method,
+        requestId: metadata.requestId,
+        result: messageRecord.result,
+        status: 'error' in messageRecord ? 'error' : 'success',
+        type: 'REQUEST_COMPLETED',
+      })
+      requestMetadata.delete(messageID)
+    }
+
+    try {
+      await send(message, options)
+    } catch (error) {
+      emit({
+        context: 'Error sending MCP response',
+        error,
+        severity: 'error',
+        source: 'request',
+        type: 'ERROR',
+      })
+
+      throw error
+    }
+  }
+}
 
 export const initializeMCPHandler = (pluginOptions: MCPPluginConfig) => {
   const mcpHandler: PayloadHandler = async (req) => {
@@ -63,28 +188,32 @@ export const initializeMCPHandler = (pluginOptions: MCPPluginConfig) => {
       ? await pluginOptions.overrideAuth(req, getDefaultMcpAccessSettings)
       : await getDefaultMcpAccessSettings()
 
-    // @modelcontextprotocol/sdk's StreamableHTTPServerTransport uses @hono/node-server's
-    // getRequestListener, which replaces global.Request and global.Response with Hono
-    // custom classes. Unfortunately, we cannot pass overrideGlobalObjects: false because the option is
-    // consumed inside the SDK transport and is not exposed to callers.
-    // Save originals here and restore after the handler resolves so that Next.js
-    // instanceof Response checks on subsequent route handlers keep working.
-    const globals = globalThis as Record<string, unknown>
-    const originalResponse = globals['Response']
-    const originalRequest = globals['Request']
-
-    const handler = getMCPHandler(pluginOptions, mcpAccessSettings, req)
     const request = createRequestFromPayloadRequest(req)
 
-    try {
+    if ((MCPHandlerOptions.disableSse ?? true) === false) {
+      const handler = getMCPHandler(pluginOptions, mcpAccessSettings, req)
+
       return await handler(request)
+    }
+
+    if (req.method !== 'POST') {
+      return methodNotAllowedResponse()
+    }
+
+    const transport = new WebStandardStreamableHTTPServerTransport({
+      enableJsonResponse: true,
+      sessionIdGenerator: undefined,
+    })
+    instrumentTransport(transport, MCPHandlerOptions.onEvent)
+
+    const server = buildMcpServer(pluginOptions, mcpAccessSettings, req)
+
+    await server.connect(transport)
+
+    try {
+      return await transport.handleRequest(request)
     } finally {
-      if (globals['Response'] !== originalResponse) {
-        Object.defineProperty(globalThis, 'Response', { value: originalResponse })
-      }
-      if (globals['Request'] !== originalRequest) {
-        Object.defineProperty(globalThis, 'Request', { value: originalRequest })
-      }
+      await server.close()
     }
   }
   return mcpHandler
