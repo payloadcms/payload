@@ -29,6 +29,22 @@ import './index.css'
 
 const baseClass = 'import-preview'
 
+/**
+ * Browser-native ArrayBuffer → base64. Avoids Node's `Buffer`, which is not
+ * available in the browser under bundlers that don't polyfill it (e.g. Vite),
+ * unlike Next's webpack build. Chunked to stay under `String.fromCharCode`'s
+ * argument-count limit for large files.
+ */
+const arrayBufferToBase64 = (arrayBuffer: ArrayBuffer): string => {
+  const bytes = new Uint8Array(arrayBuffer)
+  const chunkSize = 0x8000
+  let binary = ''
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize))
+  }
+  return btoa(binary)
+}
+
 export const ImportPreview: React.FC = () => {
   const [isPending, startTransition] = useTransition()
   const {
@@ -114,7 +130,7 @@ export const ImportPreview: React.FC = () => {
           if (fileField?.value && fileField.value instanceof File) {
             // File is being uploaded, read its contents
             const arrayBuffer = await fileField.value.arrayBuffer()
-            const base64 = Buffer.from(arrayBuffer).toString('base64')
+            const base64 = arrayBufferToBase64(arrayBuffer)
             fileData = base64
           } else if (url) {
             // File has been saved, fetch from URL
@@ -123,7 +139,7 @@ export const ImportPreview: React.FC = () => {
               throw new Error('Failed to fetch file')
             }
             const arrayBuffer = await response.arrayBuffer()
-            const base64 = Buffer.from(arrayBuffer).toString('base64')
+            const base64 = arrayBufferToBase64(arrayBuffer)
             fileData = base64
           }
 

@@ -185,6 +185,59 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 
 Run `npx @payloadcms/codemod --transform migrate-aliased-exports` to migrate automatically. Renamed types are imported using an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'`) so existing usages keep compiling — drop the alias and rename usages manually if you want to fully commit to the new name.
 
+### User types: `TypedUser` and `UntypedUser` removed; new `AuthenticatedUser`
+
+Payload's user types have been consolidated so each one has a clear job. This completes a cleanup already planned in 3.x: `UntypedUser` was deprecated for removal in 4.0, and `TypedUser` was marked to be renamed to `User` in 4.0.
+
+Previously, the public `User` type was an alias of the loose `UntypedUser`, while `TypedUser` was the generated type for auth-enabled collections. `ClientUser` was also loose, and the runtime auth fields `_strategy` and `_sid` were not typed on `req.user`.
+
+There are now three types:
+
+- **`User`** — the generated type for a user of an auth-enabled collection (what `TypedUser` used to be). Without generated types, it falls back to a documented shape containing Payload's built-in auth fields.
+- **`AuthenticatedUser`** — `User` plus the optional runtime auth fields `_strategy` and `_sid`. This is what `req.user`, `payload.auth()`, and auth strategies return.
+- **`ClientUser`** — the user as seen on the client (`useAuth().user`) and in `me` responses. It is an alias of `AuthenticatedUser`; `_sid` is optional in the type but is not sent to the client.
+
+`ClientUser` already included `collection` through its old base type, and `collection` was already present in client responses. The old comment claiming it was server-only was incorrect. The change is that `ClientUser` now uses the generated user shape instead of a loose index signature.
+
+**What changes:**
+
+- `TypedUser` is removed — replace it with `User`.
+- `UntypedUser` is removed — use `User` for a user document, `AuthenticatedUser` for a signed-in request user, or `ClientUser` in client code.
+- `User` and `ClientUser` no longer have a `{ [key: string]: any }` index signature. Custom auth-collection fields require generated types or an explicit augmented type or cast.
+- `req.user` and `payload.auth().user` are now typed as `AuthenticatedUser`, so `_strategy` and `_sid` type-check.
+- The Local API `user` option is now `User | null` instead of the loose `Document` type for collection `count`, `create`, `delete`, `duplicate`, `find`, `findByID`, `findDistinct`, and `update`; collection and global version operations; and global `findOne` and `update`.
+- `UserSession.createdAt` is now optional and nullable (`createdAt?: Date | null | string`) to match the generated session shape. Callers must handle a missing value.
+
+`AuthenticatedUser` is assignable to `User`, so passing `req.user` to Local API operations continues to work. Passing an arbitrary object now type-errors.
+
+```diff
+- import type { TypedUser, UntypedUser } from 'payload'
++ import type { AuthenticatedUser, User } from 'payload'
+
+- const user: TypedUser = req.user
++ const user: AuthenticatedUser = req.user
+```
+
+Use `User` for stored or read user documents. Use `AuthenticatedUser` when code specifically receives the signed-in user from `req.user`, `payload.auth()`, or an auth strategy.
+
+**For plugin authors:** because `User` no longer has an index signature, reading a field your plugin adds to the user collection off `req.user` (or `User`) no longer type-checks. Declare an augmented type and cast `req.user` to it — this is what the first-party plugins now do (e.g. `@payloadcms/plugin-ecommerce` for its `cart` join field):
+
+```ts
+import type { User } from 'payload'
+
+// Your plugin adds a `cart` join field (or any custom field) to the user collection.
+type UserWithCart = { cart?: { docs?: (Cart | string)[] } | null } & User
+
+const user = req.user as null | UserWithCart
+user?.cart?.docs // now typed
+```
+
+If the field name is dynamic (configurable at runtime), index through `Record<string, unknown>` instead:
+
+```ts
+const value = (user as Record<string, unknown>)[fieldNameFromConfig]
+```
+
 ### `next/navigation` and `next/link` replaced by framework-agnostic `RouterAdapter` hooks
 
 `@payloadcms/ui` no longer depends on `next` directly. Custom admin components (field components, custom views, plugins) that previously imported router hooks or the `Link` component from `next/*` must now import the framework-agnostic equivalents from `@payloadcms/ui`. Behavior is identical when running on Next.js — the `NextRouterAdapter` shipped by `@payloadcms/next` wires `next/navigation` hooks and `next/link` into the same context — but ui code can now also run on non-Next adapters (e.g. TanStack Start) without modification.
@@ -324,6 +377,29 @@ export const myRichTextAdapter = (): RichTextAdapterProvider => {
 ### `transactionIDPromise` removed from `PayloadRequest`
 
 The `transactionIDPromise` property on `PayloadRequest` has been removed. It was deprecated and unused — `transactionID` (which already supports `Promise<number | string>`) is the correct property to use for both resolved values and pending transactions.
+
+### Collection `afterOperation` hook: `operation: 'read'` removed
+
+The deprecated `'read'` value for the `operation` argument of collection `afterOperation` hooks has been removed. Payload has not dispatched `afterOperation` with `operation: 'read'` for some time — the `find` and `findByID` operations report their own names (`'find'` and `'findByID'`) instead.
+
+If a custom `afterOperation` hook branches on `operation === 'read'`, split it to handle `'find'` and `'findByID'`:
+
+```diff
+const afterOperation: CollectionAfterOperationHook = ({ operation, result }) => {
+-  if (operation === 'read') {
++  if (operation === 'find' || operation === 'findByID') {
+    // ...
+  }
+
+  return result
+}
+```
+
+`'find'` resolves the paginated result (`result.docs`), while `'findByID'` resolves a single document — narrow on the specific operation if your logic depends on the result shape.
+
+Run `npx @payloadcms/codemod --transform migrate-after-operation-read` to migrate inline hooks automatically. The codemod rewrites `operation === 'read'` (and `!==`/`==`/`!=`) comparisons against a destructured, aliased, or property-accessed `operation` argument. Non-inline hooks (hooks referenced by name) and `switch` statements with a `'read'` case are surfaced as notes for manual review.
+
+The `operation: 'read'` value on the `beforeOperation` hook is unchanged.
 
 ### `defaults` config export removed from `payload` ([#17103](https://github.com/payloadcms/payload/pull/17103))
 

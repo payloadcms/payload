@@ -42,6 +42,7 @@ describe('Lexical Lists Features', () => {
     const url = new AdminUrlUtil(serverURL, lexicalListsFeatureSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
   test('Registering only ordered list should work', async ({ page }) => {

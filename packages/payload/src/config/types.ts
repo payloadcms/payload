@@ -16,6 +16,7 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { ComponentRenderer } from '../admin/adapters/render.js'
 import type { ServerAdapter } from '../admin/adapters/server.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
@@ -59,8 +60,8 @@ import type {
   RegisteredPlugins,
   RequestContext,
   SelectField,
-  TypedUser,
   TypedWidget,
+  User,
   WidgetSlug,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
@@ -484,14 +485,22 @@ export type ServerProps = {
   readonly params?: Params
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
+  /**
+   * Adapter-injected component renderer. Server components can use this
+   * to render other import map components without importing a
+   * framework-specific renderer directly.
+   */
+  readonly renderComponent?: ComponentRenderer
   readonly searchParams?: Params
   /**
    * Framework-agnostic methods for server-side navigation, headers, cookies, and other server-only APIs.
    * Plugins should call these methods instead of importing directly from `next/navigation`, `next/headers`, etc.
    * These methods are populated by the given framework adapter, e.g. `@payloadcms/next`.
+   *
+   * Optional because non-framework contexts (jobs, scripts, tests) may not have an adapter attached.
    */
   readonly server: ServerAdapter
-  readonly user?: TypedUser
+  readonly user?: User
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
 }
@@ -502,6 +511,7 @@ export const serverProps: (keyof ServerProps)[] = [
   'locale',
   'params',
   'permissions',
+  'renderComponent',
   'searchParams',
   'permissions',
 ]

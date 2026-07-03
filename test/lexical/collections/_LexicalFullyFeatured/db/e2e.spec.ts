@@ -51,6 +51,7 @@ describe('Lexical Fully Featured - database', () => {
     url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
 
@@ -101,6 +102,7 @@ describe('Lexical Fully Featured - database', () => {
     test('ensure auto upload by copy & pasting image works when pasting from website', async ({
       page,
     }) => {
+      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       await page.goto(url.admin + '/custom-image')
       await page.keyboard.press('Meta+A')
       await page.keyboard.press('Control+A')
@@ -109,6 +111,7 @@ describe('Lexical Fully Featured - database', () => {
       await page.keyboard.press('Control+C')
 
       await page.goto(url.create)
+      await expect(lexical.editor.first()).toBeVisible()
       await lexical.editor.first().focus()
       await expect(lexical.editor).toBeFocused()
 
@@ -228,6 +231,7 @@ describe('Lexical Fully Featured - database', () => {
       `/admin/collections/${lexicalFullyFeaturedSlug}`,
       async () => {
         await page.goto(url.edit(doc.id))
+        await expect(lexical.editor.first()).toBeVisible()
         await lexical.editor.first().focus()
       },
       {

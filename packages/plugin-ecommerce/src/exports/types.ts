@@ -1,4 +1,5 @@
 export type {
+  ClientUserWithCart,
   CollectionOverride,
   CollectionSlugMap,
   ContextProps,
@@ -15,6 +16,7 @@ export type {
   PaymentAdapterClientArgs,
   ProductsValidation,
   SanitizedEcommercePluginConfig,
+  UserWithCart,
 } from '../types/index.js'
 
 export type { TypedEcommerce } from '../types/utilities.js'

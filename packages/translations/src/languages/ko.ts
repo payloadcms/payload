@@ -123,6 +123,8 @@ export const koTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       '정렬 필드 "{{field}}"는 컬렉션 "{{collection}}"에서 정렬할 수 없습니다.',
     widgetQueryError: '이 위젯에 대한 문서를 불러올 수 없습니다.',
+    widgetRecentlyViewedEmpty: '아직 어떠한 Document도 열람하지 않으셨습니다.',
+    widgetRecentlyViewedTitle: '최근에 본 항목',
     widgetSelectCollectionFirst: '정렬을 선택하기 전에 Collection을 선택하십시오.',
     widgetSelectSortField: '정렬할 Field를 선택하십시오.',
     widgetSortDirectionLabel: '정렬 방향',

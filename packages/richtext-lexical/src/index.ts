@@ -111,8 +111,6 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
         serverProps: {
           admin: args?.admin,
           views: args?.views,
-          // SanitizedEditorConfig is manually passed by `renderField` in `fieldSchemasToFormState/renderField.tsx`
-          // in order to reduce the size of the field schema
         },
       },
       generateImportMap: getGenerateImportMap({

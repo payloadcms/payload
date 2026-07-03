@@ -127,6 +127,8 @@ export const frTranslations: DefaultTranslationsObject = {
     widgetNonSortableSortField:
       'Le champ de tri "{{field}}" n\'est pas triable dans la Collection "{{collection}}".',
     widgetQueryError: 'Impossible de charger les documents pour ce widget.',
+    widgetRecentlyViewedEmpty: "Vous n'avez encore consulté aucun document.",
+    widgetRecentlyViewedTitle: 'Vous avez récemment consulté',
     widgetSelectCollectionFirst: 'Sélectionnez une Collection avant de choisir le tri',
     widgetSelectSortField: 'Sélectionnez un champ pour trier',
     widgetSortDirectionLabel: 'Sens de tri',

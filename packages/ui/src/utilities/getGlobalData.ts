@@ -1,4 +1,4 @@
-import type { ClientUser, PayloadRequest, TypedUser } from 'payload'
+import type { ClientUser, PayloadRequest, User } from 'payload'
 
 const globalLockDurationDefault = 300
 
@@ -51,7 +51,7 @@ export async function getGlobalData(req: PayloadRequest) {
           data: {
             _isLocked: !!lockedDoc,
             _lastEditedAt: (lockedDoc?.updatedAt as string) ?? null,
-            _userEditing: (lockedDoc?.user as { value?: TypedUser })?.value ?? null,
+            _userEditing: (lockedDoc?.user as { value?: User })?.value ?? null,
           },
           lockDuration,
         }

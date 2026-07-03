@@ -23,9 +23,10 @@ const baseClass = 'app-header'
 
 type Props = {
   CustomAvatar?: React.ReactNode
+  CustomLogoutButton?: React.ReactNode
   settingsItemGroups?: UserMenuSettingsGroup[]
 }
-export function AppHeader({ CustomAvatar, settingsItemGroups }: Props) {
+export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups }: Props) {
   const { t } = useTranslation()
   const locale = useLocale()
 
@@ -123,7 +124,11 @@ export function AppHeader({ CustomAvatar, settingsItemGroups }: Props) {
                 )}
               />
             )}
-            <UserMenu CustomAvatar={CustomAvatar} settingsItemGroups={settingsItemGroups} />
+            <UserMenu
+              CustomAvatar={CustomAvatar}
+              CustomLogoutButton={CustomLogoutButton}
+              settingsItemGroups={settingsItemGroups}
+            />
           </div>
         </div>
       </div>

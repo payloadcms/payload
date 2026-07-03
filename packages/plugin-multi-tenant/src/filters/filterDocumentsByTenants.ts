@@ -1,4 +1,4 @@
-import type { PayloadRequest, TypedUser, Where } from 'payload'
+import type { PayloadRequest, User, Where } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 
@@ -50,7 +50,7 @@ export const filterDocumentsByTenants = <ConfigType = unknown>({
   if (
     req.user &&
     userHasAccessToAllTenants(
-      req?.user as ConfigType extends { user: unknown } ? ConfigType['user'] : TypedUser,
+      req?.user as ConfigType extends { user: unknown } ? ConfigType['user'] : User,
     )
   ) {
     return null

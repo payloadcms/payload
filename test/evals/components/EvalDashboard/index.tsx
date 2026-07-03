@@ -34,7 +34,7 @@ const codegenFixtureByQuestion: Record<string, string> = (() => {
     pluginsOfficialCodegenDataset,
   ]) {
     for (const c of ds) {
-      map[c.input] = c.fixturePath
+      map[c.input] = c.configPath
     }
   }
   return map
@@ -144,11 +144,11 @@ async function buildCodegenHtml(entries: EvalEntry[]): Promise<Record<string, Re
         const modified = e.result.answer ?? ''
         let starter = e.result.starterContent
         if (!starter) {
-          const fixturePath = e.result.fixturePath ?? codegenFixtureByQuestion[e.result.question]
-          if (fixturePath) {
+          const configPath = e.result.configPath ?? codegenFixtureByQuestion[e.result.question]
+          if (configPath) {
             try {
               starter = readFileSync(
-                path.join(fixturesDir, fixturePath, 'payload.config.ts'),
+                path.join(fixturesDir, configPath, 'payload.config.ts'),
                 'utf-8',
               )
             } catch {

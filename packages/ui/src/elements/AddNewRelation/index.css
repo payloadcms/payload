@@ -8,38 +8,38 @@
       align-items: stretch;
       height: 100%;
     }
-  }
 
-  .relationship-add-new__add-button {
-    display: flex;
-    position: relative;
-    align-items: center;
-    justify-content: center;
-    padding-inline: var(--spacer-1);
-    height: var(--field-min-height-large);
-    margin: 0;
-    background: var(--color-bg-secondary);
-    border: none;
-    border-radius: var(--button-radius);
-    color: var(--color-icon);
-    cursor: pointer;
-    transition: background-color 100ms;
+    .relationship-add-new__add-button {
+      display: flex;
+      position: relative;
+      align-items: center;
+      justify-content: center;
+      padding-inline: var(--spacer-1);
+      height: var(--field-min-height-large);
+      margin: 0;
+      background: var(--color-bg-secondary);
+      border: none;
+      border-radius: var(--button-radius);
+      color: var(--color-icon);
+      cursor: pointer;
+      transition: background-color 100ms;
 
-    &:hover {
-      background: var(--color-bg-secondary-hover);
+      &:hover {
+        background: var(--color-bg-secondary-hover);
+      }
+
+      &:focus-visible {
+        outline: var(--accessibility-outline);
+        outline-offset: var(--accessibility-outline-offset);
+      }
     }
 
-    &:focus-visible {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
+    .relationship-add-new__add-button--unstyled {
+      background: transparent;
+      border: none;
+      padding: 0;
+      width: auto;
+      height: auto;
     }
-  }
-
-  .relationship-add-new__add-button--unstyled {
-    background: transparent;
-    border: none;
-    padding: 0;
-    width: auto;
-    height: auto;
   }
 }

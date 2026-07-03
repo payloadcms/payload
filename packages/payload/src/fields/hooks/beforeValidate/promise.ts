@@ -320,14 +320,27 @@ export const promise = async <T>({
     if (field.access && field.access[operation]) {
       const result = overrideAccess
         ? true
-        : await field.access[operation]({
-            id,
-            blockData,
-            data: data as Partial<T>,
-            doc,
-            req,
-            siblingData,
-          })
+        : await field.access[operation](
+            collection
+              ? {
+                  id,
+                  blockData,
+                  collection,
+                  data: data as Partial<T>,
+                  doc,
+                  req,
+                  siblingData,
+                }
+              : {
+                  id,
+                  blockData,
+                  data: data as Partial<T>,
+                  doc,
+                  global: global!,
+                  req,
+                  siblingData,
+                },
+          )
 
       if (!result) {
         delete siblingData[field.name!]

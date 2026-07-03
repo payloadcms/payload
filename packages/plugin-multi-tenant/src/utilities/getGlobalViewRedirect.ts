@@ -1,4 +1,4 @@
-import type { Payload, ServerAdapter, TypedUser, ViewTypes } from 'payload'
+import type { Payload, ServerAdapter, User, ViewTypes } from 'payload'
 
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 
@@ -25,7 +25,7 @@ type Args = {
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
-  user?: TypedUser
+  user?: User
   userHasAccessToAllTenants: Required<MultiTenantPluginConfig<any>>['userHasAccessToAllTenants']
   view: ViewTypes
 }

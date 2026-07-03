@@ -1,11 +1,12 @@
 /* eslint-disable playwright/no-wait-for-selector */
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
-import { copyPasteField } from '../../../__helpers/e2e/copyPasteField.js'
-import { addArrayRow, duplicateArrayRow, removeArrayRow } from '../../../__helpers/e2e/fields/array/index.js'
-import { scrollEntirePage } from '../../../__helpers/e2e/scrollEntirePage.js'
-import { toggleBlockOrArrayRow } from '../../../__helpers/e2e/toggleCollapsible.js'
+import { expect } from '@playwright/test'
+import { copyPasteField } from '__helpers/e2e/copyPasteField.js'
+import { addArrayRow, duplicateArrayRow, removeArrayRow } from '__helpers/e2e/fields/array/index.js'
+import { test } from '__helpers/e2e/playwright.js'
+import { scrollEntirePage } from '__helpers/e2e/scrollEntirePage.js'
+import { toggleBlockOrArrayRow } from '__helpers/e2e/toggleCollapsible.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -88,7 +89,7 @@ describe('Array', () => {
     await expect(page.locator('#field-readOnly .array-field__add-row')).toBeHidden()
   })
 
-  test('should render RowLabel using a component', async () => {
+  test('should render RowLabel using a component', { framework: 'rsc' }, async () => {
     const label = 'custom row label as component'
     await loadCreatePage()
     await addArrayRow(page, { fieldName: 'rowLabelAsComponent' })
@@ -117,38 +118,42 @@ describe('Array', () => {
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
   })
 
-  test('should render custom RowLabel after duplicating array item', async () => {
-    const label = 'test custom row label'
-    const updatedLabel = 'updated custom row label'
-    await loadCreatePage()
-    await addArrayRow(page, { fieldName: 'rowLabelAsComponent' })
+  test(
+    'should render custom RowLabel after duplicating array item',
+    { framework: 'rsc' },
+    async () => {
+      const label = 'test custom row label'
+      const updatedLabel = 'updated custom row label'
+      await loadCreatePage()
+      await addArrayRow(page, { fieldName: 'rowLabelAsComponent' })
 
-    await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
+      await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
 
-    const customRowLabel = page.locator(
-      '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("test custom row label")',
-    )
+      const customRowLabel = page.locator(
+        '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("test custom row label")',
+      )
 
-    await expect(customRowLabel).toBeVisible()
-    await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
+      await expect(customRowLabel).toBeVisible()
+      await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
 
-    await duplicateArrayRow(page, { fieldName: 'rowLabelAsComponent' })
+      await duplicateArrayRow(page, { fieldName: 'rowLabelAsComponent' })
 
-    await expect(page.locator('#rowLabelAsComponent-row-1')).toBeVisible()
-    await expect(
-      page.locator(
-        '#rowLabelAsComponent-row-1 >> .array-field__row-header > :text("test custom row label")',
-      ),
-    ).toBeVisible()
+      await expect(page.locator('#rowLabelAsComponent-row-1')).toBeVisible()
+      await expect(
+        page.locator(
+          '#rowLabelAsComponent-row-1 >> .array-field__row-header > :text("test custom row label")',
+        ),
+      ).toBeVisible()
 
-    await page.locator('#field-rowLabelAsComponent__1__title').fill(updatedLabel)
-    const duplicatedRowLabel = page.locator(
-      '#rowLabelAsComponent-row-1 >> .array-field__row-header > :text("updated custom row label")',
-    )
+      await page.locator('#field-rowLabelAsComponent__1__title').fill(updatedLabel)
+      const duplicatedRowLabel = page.locator(
+        '#rowLabelAsComponent-row-1 >> .array-field__row-header > :text("updated custom row label")',
+      )
 
-    await expect(duplicatedRowLabel).toBeVisible()
-    await expect(duplicatedRowLabel).toHaveCSS('text-transform', 'uppercase')
-  })
+      await expect(duplicatedRowLabel).toBeVisible()
+      await expect(duplicatedRowLabel).toHaveCSS('text-transform', 'uppercase')
+    },
+  )
 
   test('should render default array field within custom component', async () => {
     await loadCreatePage()
@@ -416,11 +421,15 @@ describe('Array', () => {
     )
   })
 
-  test('should externally update array rows and render custom fields', async () => {
-    await loadCreatePage()
-    await page.locator('#updateArrayExternally').click()
-    await expect(page.locator('#custom-text-field')).toBeVisible()
-  })
+  test(
+    'should externally update array rows and render custom fields',
+    { framework: 'rsc' },
+    async () => {
+      await loadCreatePage()
+      await page.locator('#updateArrayExternally').click()
+      await expect(page.locator('#custom-text-field')).toBeVisible()
+    },
+  )
 
   test('should initialize array rows with collapsed state', async () => {
     await page.goto(url.create)
@@ -735,14 +744,18 @@ describe('Array', () => {
       await expect(textInput).toHaveValue('Unique content for first document')
     })
   })
-  test('should return empty array from getDataByPath for array fields without rows', async () => {
-    await page.goto(url.create)
+  test(
+    'should return empty array from getDataByPath for array fields without rows',
+    { framework: 'rsc' },
+    async () => {
+      await page.goto(url.create)
 
-    // Wait for the test component to render
-    await page.waitForSelector('#getDataByPath-test')
+      // Wait for the test component to render
+      await page.waitForSelector('#getDataByPath-test')
 
-    // Check that getDataByPath returned an empty array, not 0
-    await expect(page.locator('#empty-array-result')).toHaveText('ARRAY')
-    await expect(page.locator('#empty-array-length')).toHaveText('0')
-  })
+      // Check that getDataByPath returned an empty array, not 0
+      await expect(page.locator('#empty-array-result')).toHaveText('ARRAY')
+      await expect(page.locator('#empty-array-length')).toHaveText('0')
+    },
+  )
 })

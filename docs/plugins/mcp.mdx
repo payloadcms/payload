@@ -677,7 +677,7 @@ Tool handlers receive an `authorizedMCP` object describing the caller:
 type AuthorizedMCP = {
   items: MCPItem[] // the items this caller may use
   overrideAccess: boolean // whether handlers should bypass Payload access control
-  user: TypedUser | null // the resolved user
+  user: User | null // the resolved user
 }
 ```
 
