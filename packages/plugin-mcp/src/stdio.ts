@@ -50,7 +50,7 @@ export const runMcpStdio = async (): Promise<void> => {
     loggerConfig.logger = { destination: process.stderr, options: {} }
   }
 
-  const payload = await getPayload({ config })
+  const payload = await getPayload({ config, cron: false, disableOnInit: true })
 
   let pluginConfig: SanitizedMCPPluginConfig
   try {
