@@ -1220,8 +1220,8 @@ importers:
   packages/plugin-mcp:
     dependencies:
       '@modelcontextprotocol/server':
-        specifier: 2.0.0-beta.1
-        version: 2.0.0-beta.1
+        specifier: 2.0.0-beta.2
+        version: 2.0.0-beta.2
       tsx:
         specifier: 4.22.4
         version: 4.22.4
@@ -2342,11 +2342,11 @@ importers:
         specifier: 2.14.4
         version: 2.14.4
       '@modelcontextprotocol/client':
-        specifier: 2.0.0-beta.1
-        version: 2.0.0-beta.1
+        specifier: 2.0.0-beta.2
+        version: 2.0.0-beta.2
       '@modelcontextprotocol/server':
-        specifier: 2.0.0-beta.1
-        version: 2.0.0-beta.1
+        specifier: 2.0.0-beta.2
+        version: 2.0.0-beta.2
       '@next/env':
         specifier: 16.2.7
         version: 16.2.7
@@ -2388,7 +2388,7 @@ importers:
         version: link:../packages/eslint-plugin
       '@payloadcms/figma':
         specifier: latest
-        version: 0.0.1-alpha.68(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)
+        version: 0.0.1-alpha.74(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../packages/graphql
@@ -5628,12 +5628,12 @@ packages:
     engines: {node: '>=16.13'}
     deprecated: Miniflare v2 is no longer supported. Please upgrade to Miniflare v4
 
-  '@modelcontextprotocol/client@2.0.0-beta.1':
-    resolution: {integrity: sha512-1YbnguKN7OFGA/lmCtgIthyE5d+j7dvu7hJld+f0mKrM0YAV4Q8TG80RBto+qyupxhHjTMEWItHu7cQlAmVtyA==}
+  '@modelcontextprotocol/client@2.0.0-beta.2':
+    resolution: {integrity: sha512-IKEJQmvM2g7HLSOofLXECjQyeryB1YWgjazHcYygyH3ERSe7b8cFS3WHlupMxees5URNXcqBLVlbDRgodaBQ9A==}
     engines: {node: '>=20'}
 
-  '@modelcontextprotocol/server@2.0.0-beta.1':
-    resolution: {integrity: sha512-83scKauajX9fWbSIC4NBYdnvXajH+cqvX8QqsrPH0XNgqtMmym1kWucMO7YyNkrBD9C7/R+FRCmkjC9kgEKXlQ==}
+  '@modelcontextprotocol/server@2.0.0-beta.2':
+    resolution: {integrity: sha512-XK+sgFntT5ZzeqtTGpT9uti+Sqmq7YJZdx/N76eLJv9UA9vKvP04Qh9Hc45LCeIHGfTKRwDG6eh4C1Hs4omyIg==}
     engines: {node: '>=20'}
 
   '@monaco-editor/loader@1.7.0':
@@ -6475,8 +6475,8 @@ packages:
     resolution: {integrity: sha512-tmmZ3lQxAe/k/+rNnXQRawJ4NjxO2hqiOLTHvWchtGZULp4RyFeh6aU4XdOYBFe2KE1oShQTv4AblOs2iOrNnQ==}
     engines: {node: '>= 10.0.0'}
 
-  '@payloadcms/figma@0.0.1-alpha.68':
-    resolution: {integrity: sha512-uAUOY4qDibeunn32cZ5KeslQ2Co4P/Xhpe01AlzfIFd6rk0rY6fig4cMqjgZbDLzS9O/5eIQeL1lXP7jPjfN8w==}
+  '@payloadcms/figma@0.0.1-alpha.74':
+    resolution: {integrity: sha512-USR22NnmYTbxA673Uk8Ca9EbrXAnjP+aLiVNQ39N68t6nicLJvRdNMdppEz+SBDS9ICTRjQH3sWioSEp6xhfCg==}
     hasBin: true
     peerDependencies:
       '@payloadcms/plugin-cloud-storage': ^3.0.0
@@ -19024,7 +19024,7 @@ snapshots:
     dependencies:
       '@miniflare/shared': 2.14.4
 
-  '@modelcontextprotocol/client@2.0.0-beta.1':
+  '@modelcontextprotocol/client@2.0.0-beta.2':
     dependencies:
       cross-spawn: 7.0.6
       eventsource: 3.0.7
@@ -19033,7 +19033,7 @@ snapshots:
       pkce-challenge: 5.0.1
       zod: 4.3.6
 
-  '@modelcontextprotocol/server@2.0.0-beta.1':
+  '@modelcontextprotocol/server@2.0.0-beta.2':
     dependencies:
       zod: 4.3.6
 
@@ -19895,7 +19895,7 @@ snapshots:
       '@parcel/watcher-win32-x64': 2.5.6
     optional: true
 
-  '@payloadcms/figma@0.0.1-alpha.68(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)':
+  '@payloadcms/figma@0.0.1-alpha.74(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)':
     dependencies:
       '@clack/prompts': 0.11.0
       '@figma/rest-api-spec': 0.34.0

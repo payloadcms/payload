@@ -51,7 +51,3 @@ allowBuilds:
   unrs-resolver: true
   utf-8-validate: true
   workerd: true
-
-minimumReleaseAgeExclude:
-  - '@modelcontextprotocol/client@2.0.0-beta.1'
-  - '@modelcontextprotocol/server@2.0.0-beta.1'
