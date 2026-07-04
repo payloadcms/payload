@@ -1,5 +1,5 @@
 import { spawn, spawnSync } from 'node:child_process'
-import { mkdirSync, rmSync } from 'node:fs'
+import { existsSync, mkdirSync, rmSync } from 'node:fs'
 import { copyFile, mkdtemp } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
@@ -75,18 +75,20 @@ async function runOne(
 ): Promise<CodegenRunnerResult> {
   const {
     agentModel = DEFAULT_AGENT_MODEL,
+    configPath,
+    exposeMcpTools,
     skillInstall = 'embedded',
     timeoutMs = DEFAULT_TIMEOUT_MS,
   } = options
   const init = await ensureInit()
 
-  const workdir = await materialize({ starterConfig })
+  const workdir = await materialize({ configPath, exposeMcpTools, starterConfig })
   assertSafeWorkdir(workdir)
   try {
     gitInit(workdir)
     await installSkill({ mode: skillInstall, workdir })
 
-    const prompt = `${instruction}\n\n${PROMPT_SUFFIX}`
+    const prompt = exposeMcpTools ? instruction : `${instruction}\n\n${PROMPT_SUFFIX}`
     const appendSystemPrompt = skillInstall === 'embedded' ? SKILL_SYSTEM_PROMPT : undefined
     const { exitCode, stderr, transcript, usage } = await spawnAgent({
       agentModel,
@@ -147,6 +149,10 @@ async function spawnAgent({
   ]
   if (appendSystemPrompt) {
     args.push('--append-system-prompt', appendSystemPrompt)
+  }
+  const mcpFile = path.join(workdir, '.mcp.json')
+  if (existsSync(mcpFile)) {
+    args.push('--mcp-config', mcpFile, '--strict-mcp-config')
   }
   args.push(prompt)
   return new Promise((resolve) => {

@@ -3,6 +3,12 @@ import type { LanguageModel } from 'ai'
 import type { CodegenRunnerResult, SystemPromptKey } from '../types.js'
 
 export type RunnerKind = 'claude-code' | 'llm'
+export type RunnerCapability = 'mcp'
+
+export const RUNNER_CAPABILITIES: Record<RunnerKind, RunnerCapability[]> = {
+  'claude-code': ['mcp'],
+  llm: [],
+}
 
 export type SkillInstallMode = 'embedded' | 'none'
 
@@ -13,6 +19,10 @@ export type SkillInstallMode = 'embedded' | 'none'
 export type CodegenRunnerOptions = {
   /** claude-code only: model string passed to the `claude --model` flag. */
   agentModel?: string
+  /** Starter config fixture path. */
+  configPath?: string
+  /** Expose the starter config's Payload MCP tools to the runner. */
+  exposeMcpTools?: boolean
   kind?: RunnerKind
   /** llm only: AI SDK `LanguageModel` instance. */
   model?: LanguageModel

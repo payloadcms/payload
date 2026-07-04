@@ -10,6 +10,7 @@ import ts from 'typescript'
 import { expect as vitestExpect } from 'vitest'
 
 import type {
+  CodegenRunnerResult,
   ConfigChangeScorerResult,
   EvalCase,
   EvalExpect,
@@ -61,6 +62,7 @@ export async function runCodegenCase(
 ): Promise<EvalResult> {
   const {
     agentModel,
+    exposeMcpTools,
     kind = 'llm',
     runnerModel = DEFAULT_RUNNER_MODEL,
     scorerModel = DEFAULT_SCORER_MODEL,
@@ -104,20 +106,32 @@ export async function runCodegenCase(
 
   const bypassCache = isCacheBypassed()
   const cached = !bypassCache ? getCachedResult(key) : null
-  if (cached && cached.runtimeUsed !== true) {
+  if (!testCase.bootConfig && cached && cached.runtimeUsed !== true) {
     const cachedScore = cached.score != null ? `  score: ${cached.score.toFixed(2)}` : ''
     console.log(`[${cached.category}] ${cached.pass ? '✓ PASS' : '✗ FAIL'} (cached)${cachedScore}`)
     console.log(`  Task: ${cached.question}`)
     return cached
   }
 
-  const runnerOutput = await runCodegenEval(testCase.input, starterConfig, {
-    agentModel,
-    kind,
-    model: runnerModel,
-    skillInstall,
-    systemPromptKey,
-  })
+  let lazyPayload = testCase.bootConfig ? createLazyPayload(testCase, starterConfig) : undefined
+  let runnerOutput: CodegenRunnerResult
+
+  try {
+    await lazyPayload?.boot()
+    runnerOutput = await runCodegenEval(testCase.input, starterConfig, {
+      agentModel,
+      configPath: testCase.configPath,
+      exposeMcpTools,
+      kind,
+      model: runnerModel,
+      skillInstall,
+      systemPromptKey,
+    })
+  } catch (error) {
+    await lazyPayload?.cleanup()
+    throw error
+  }
+
   const { confidence, modifiedConfig, usage: runnerUsage } = runnerOutput
   const agentLog = runnerOutput.agentLog
   const agentExitCode = runnerOutput.agentExitCode
@@ -160,6 +174,7 @@ export async function runCodegenCase(
     for (const err of tscErrors) {
       console.log(`  TSC: ${err}`)
     }
+    await lazyPayload?.cleanup()
     return result
   }
 
@@ -182,11 +197,12 @@ export async function runCodegenCase(
       writeFailure({ label, modifiedConfig, result, starterConfig })
       console.log(`[${result.category}] ✗ FAIL [IMPORT]  ${testCase.configPath}`)
       console.log(`  Reason: ${result.reasoning}`)
+      await lazyPayload?.cleanup()
       return result
     }
   }
 
-  const lazyPayload = createLazyPayload(testCase, modifiedConfig)
+  lazyPayload ??= createLazyPayload(testCase, modifiedConfig)
   let scorerResult: ConfigChangeScorerResult | undefined
 
   const score = async (expected: string, evidence?: unknown): Promise<ConfigChangeScorerResult> => {
@@ -391,6 +407,7 @@ function createLazyPayload(
   testCase: EvalCase,
   modifiedConfig: string,
 ): {
+  boot: () => Promise<Payload>
   cleanup: () => Promise<void>
   didBoot: () => boolean
   payload: Payload
@@ -452,6 +469,7 @@ function createLazyPayload(
   ) as Payload
 
   return {
+    boot: getPayload,
     cleanup: async () => {
       try {
         await payloadPromise?.catch(() => undefined)

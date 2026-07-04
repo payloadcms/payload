@@ -27,6 +27,7 @@ const SUITES: Suite[] = [
   { label: 'Collections', spec: 'eval.collections.spec', value: 'collections' },
   { label: 'Fields', spec: 'eval.fields.spec', value: 'fields' },
   { label: 'Config', spec: 'eval.config.spec', value: 'config' },
+  { label: 'MCP', spec: 'eval.mcp.spec', value: 'mcp' },
   { label: 'Negative', spec: 'eval.negative.spec', value: 'negative' },
   { label: 'Official plugins', spec: 'eval.official-plugins.spec', value: 'official-plugins' },
   { label: 'Building plugins', spec: 'eval.building-plugins.spec', value: 'building-plugins' },

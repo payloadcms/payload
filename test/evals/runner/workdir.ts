@@ -8,11 +8,53 @@ import { fileURLToPath } from 'node:url'
 
 // Resolve the skill source relative to this file so behavior is independent of cwd.
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const FIXTURES_DIR = path.resolve(__dirname, '../fixtures')
 const SKILL_SRC = path.resolve(__dirname, '../../../tools/claude-plugin/skills/payload')
+const MCP_BIN = path.resolve(__dirname, '../../../packages/plugin-mcp/bin.js')
 
-export async function materialize({ starterConfig }: { starterConfig: string }): Promise<string> {
+export async function materialize({
+  configPath,
+  exposeMcpTools,
+  starterConfig,
+}: {
+  configPath?: string
+  /** Write agent configuration that exposes the starter config's Payload MCP tools. */
+  exposeMcpTools?: boolean
+  starterConfig: string
+}): Promise<string> {
   const workdir = await mkdtemp(path.join(os.tmpdir(), 'payload-eval-'))
   await writeFile(path.join(workdir, 'payload.config.ts'), starterConfig, 'utf-8')
+
+  if (exposeMcpTools && configPath) {
+    const env = {
+      NODE_ENV: 'development',
+      PAYLOAD_CONFIG_PATH: path.join(FIXTURES_DIR, configPath, 'payload.config.ts'),
+      PAYLOAD_DROP_DATABASE: 'false',
+      PAYLOAD_MCP_OVERRIDE_ACCESS: 'true',
+    }
+    const codexDir = path.join(workdir, '.codex')
+
+    await mkdir(codexDir, { recursive: true })
+    await Promise.all([
+      writeFile(
+        path.join(workdir, '.mcp.json'),
+        JSON.stringify({
+          mcpServers: { payload: { args: [MCP_BIN], command: process.execPath, env } },
+        }),
+        'utf-8',
+      ),
+      writeFile(
+        path.join(codexDir, 'config.toml'),
+        `[mcp_servers.payload]\ncommand = ${JSON.stringify(process.execPath)}\nargs = [${JSON.stringify(MCP_BIN)}]\n\n[mcp_servers.payload.env]\n${Object.entries(
+          env,
+        )
+          .map(([key, value]) => `${key} = ${JSON.stringify(value)}`)
+          .join('\n')}\n`,
+        'utf-8',
+      ),
+    ])
+  }
+
   return workdir
 }
 

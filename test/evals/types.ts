@@ -16,6 +16,7 @@ export type EvalCategory =
   | 'fields'
   | 'graphql'
   | 'local-api'
+  | 'mcp'
   | 'negative'
   | 'plugins'
   | 'rest-api'
@@ -23,6 +24,8 @@ export type EvalCategory =
   | 'testing'
 
 export type EvalCase = {
+  /** Boot the starter config before the agent runs. */
+  bootConfig?: boolean
   category: EvalCategory
   /**
    * Folder under `test/evals/fixtures/` that contains the `payload.config.ts`
@@ -182,6 +185,8 @@ export type EvalResult = {
 }
 export type RunCodegenDatasetOptions = {
   agentModel?: string
+  /** Expose the starter config's Payload MCP tools to the runner. */
+  exposeMcpTools?: boolean
   kind?: RunnerKind
   runnerModel?: LanguageModel
   scorerModel?: LanguageModel
