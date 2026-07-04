@@ -111,6 +111,12 @@ export const POST =
 
     const { payload } = req
 
+    if (payload.config.graphQL?.disable) {
+      return new Response(null, {
+        status: 404,
+      })
+    }
+
     const headers = {}
     const apiResponse = await createHandler({
       context: { headers, req },
