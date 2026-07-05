@@ -170,15 +170,10 @@ export type EvalResult = {
   reasoning: string
   /**
    * Identifies the eval invocation that produced this result (ISO timestamp set
-   * once per `pnpm test:eval` run). Lets the dashboard group results into
-   * discrete runs. Absent on entries cached before run-tracking existed.
+   * once per `pnpm test:eval` run). Lets the dashboard group results into runs.
    */
   runId?: string
-  /**
-   * Which runner produced this result. Surfaced in the dashboard. Required for
-   * all entries written by this branch; old cache entries may be missing it —
-   * read sites should default-coerce to `'llm'`.
-   */
+  /** Which runner produced this result. Surfaced in the dashboard. */
   runnerKind: RunnerKind
   /** True when `verify` booted the generated config through the lazy Payload API. */
   runtimeUsed?: boolean

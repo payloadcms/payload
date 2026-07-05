@@ -21,17 +21,12 @@ import type {
 } from './types.js'
 
 import { parseConfig } from './assertions/parseConfig.js'
-import {
-  codegenKey,
-  getCachedResult,
-  isCacheBypassed,
-  pruneStaleEntries,
-  setCachedResult,
-} from './cache.js'
 import { buildEvalConfig, missingEvalConfig, unwrapEvalConfigValue } from './evalConfig.js'
 import { DEFAULT_RUNNER_MODEL, DEFAULT_SCORER_MODEL } from './models.js'
+import { codegenParamsHash } from './paramsHash.js'
 import { getAgentVersion } from './runner/claudeCode.js'
 import { runCodegenEval } from './runner/index.js'
+import { findReusableResult, recordRunResult, shouldRerun } from './runResults.js'
 import { scoreConfigChange, scoreEvidence } from './scorer/index.js'
 import { accuracySummary, writeFailedCodegenAssertion } from './utils/index.js'
 import { validateConfigTypes } from './validate.js'
@@ -51,9 +46,8 @@ class VerifyFailure extends Error {
  *   3. `verify` performs deterministic config checks, runtime checks, scorer
  *      checks, or any combination of those through one readable function.
  *
- * Results are cached by a hash of the inputs and verifier source. Runtime
- * cases are intentionally not served from cache because their point is booting
- * the generated config.
+ * Cases with identical parameters can reuse a previous result. Runtime cases
+ * always execute because their point is booting the generated config.
  */
 export async function runCodegenCase(
   testCase: EvalCase,
@@ -86,15 +80,7 @@ export async function runCodegenCase(
     'utf-8',
   )
 
-  const isSameLogicalCase = (r: EvalResult): boolean =>
-    r.question === testCase.input &&
-    r.configPath === testCase.configPath &&
-    (r.runnerKind ?? 'llm') === kind &&
-    (kind === 'llm'
-      ? r.modelId === resolvedModelId && r.systemPromptKey === systemPromptKey
-      : r.modelId === resolvedModelId && r.skillInstall === skillInstall)
-
-  const key = codegenKey({
+  const paramsHash = codegenParamsHash({
     expected: testCase.verify.toString(),
     fixtureContent: starterConfig,
     input: testCase.input,
@@ -104,14 +90,23 @@ export async function runCodegenCase(
     systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
   })
 
-  const bypassCache = isCacheBypassed()
-  const cached = !bypassCache ? getCachedResult(key) : null
-  if (!testCase.bootConfig && cached && cached.runtimeUsed !== true) {
-    const cachedScore = cached.score != null ? `  score: ${cached.score.toFixed(2)}` : ''
-    console.log(`[${cached.category}] ${cached.pass ? '✓ PASS' : '✗ FAIL'} (cached)${cachedScore}`)
-    console.log(`  Task: ${cached.question}`)
-    return cached
+  const reusable =
+    !shouldRerun() && !testCase.bootConfig ? findReusableResult({ paramsHash }) : undefined
+  if (reusable && reusable.result.runtimeUsed !== true) {
+    const previous = reusable.result
+    const score = previous.score != null ? `  score: ${previous.score.toFixed(2)}` : ''
+    console.log(
+      `[${previous.category}] ${previous.pass ? '✓ PASS' : '✗ FAIL'} (skipped — identical parameters)${score}`,
+    )
+    console.log(`  Task: ${previous.question}`)
+    return recordRunResult({
+      paramsHash,
+      result: { ...previous, usage: undefined },
+      reusedFromRunId: previous.runId,
+    })
   }
+
+  const recordResult = (result: EvalResult): EvalResult => recordRunResult({ paramsHash, result })
 
   let lazyPayload = testCase.bootConfig ? createLazyPayload(testCase, starterConfig) : undefined
   let runnerOutput: CodegenRunnerResult
@@ -168,15 +163,14 @@ export async function runCodegenCase(
       tscErrors,
       usage: runnerOnlyUsage(runnerUsage),
     }
-    setCachedResult(key, result)
-    pruneStaleEntries(key, isSameLogicalCase)
+    const recordedResult = recordResult(result)
     writeFailure({ label, modifiedConfig, result, starterConfig })
     console.log(`[${result.category}] ✗ FAIL [TSC]  ${testCase.configPath}`)
     for (const err of tscErrors) {
       console.log(`  TSC: ${err}`)
     }
     await lazyPayload?.cleanup()
-    return result
+    return recordedResult
   }
 
   const ast = parseConfig(modifiedConfig)
@@ -193,13 +187,12 @@ export async function runCodegenCase(
         score: 0,
         usage: runnerOnlyUsage(runnerUsage),
       }
-      setCachedResult(key, result)
-      pruneStaleEntries(key, isSameLogicalCase)
+      const recordedResult = recordResult(result)
       writeFailure({ label, modifiedConfig, result, starterConfig })
       console.log(`[${result.category}] ✗ FAIL [IMPORT]  ${testCase.configPath}`)
       console.log(`  Reason: ${result.reasoning}`)
       await lazyPayload?.cleanup()
-      return result
+      return recordedResult
     }
   }
 
@@ -248,15 +241,14 @@ export async function runCodegenCase(
           usage: runnerOnlyUsage(runnerUsage),
         }
 
-    setCachedResult(key, result)
-    pruneStaleEntries(key, isSameLogicalCase)
+    const recordedResult = recordResult(result)
 
     if (!result.pass) {
       writeFailure({ label, modifiedConfig, result, starterConfig })
     }
 
-    logResult(result)
-    return result
+    logResult(recordedResult)
+    return recordedResult
   } catch (error) {
     const verifyError = normalizeVerifyError(error)
     const result: EvalResult = {
@@ -269,13 +261,12 @@ export async function runCodegenCase(
       usage: runnerOnlyUsage(runnerUsage),
     }
 
-    setCachedResult(key, result)
-    pruneStaleEntries(key, isSameLogicalCase)
+    const recordedResult = recordResult(result)
 
     writeFailure({ label, modifiedConfig, result, starterConfig })
     console.log(`[${result.category}] ✗ FAIL [VERIFY]  ${testCase.configPath}`)
     console.log(`  Reason: ${result.reasoning}`)
-    return result
+    return recordedResult
   } finally {
     await lazyPayload.cleanup()
   }
@@ -599,8 +590,8 @@ export async function runCodegenDataset(
     console.log(`  · ${c.configPath}`)
   }
 
-  if (isCacheBypassed()) {
-    console.log('  [cache] EVAL_NO_CACHE=true — cache reads skipped')
+  if (shouldRerun()) {
+    console.log('  EVAL_RERUN=true — running cases even when parameters are identical')
   }
 
   const results = await Promise.all(

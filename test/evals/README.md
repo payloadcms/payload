@@ -44,11 +44,11 @@ pnpm test:eval                                          # interactive picker
 pnpm test:eval --runner=llm --skill=on --suite=collections
 pnpm test:eval --suite=fields --model=anthropic:claude-opus-4-8
 pnpm test:eval --runner=claude-code --skill=off --suite=all
-pnpm test:eval --suite=config --no-cache -t cors-serverurl
+pnpm test:eval --suite=config --rerun -t cors-serverurl
 pnpm test:eval --help
 ```
 
-Suites: `all` (default), `collections`, `fields`, `config`, `negative`,
+Suites: `all` (default), `collections`, `fields`, `config`, `mcp`, `negative`,
 `official-plugins`, `building-plugins`. Each flag maps to the matching env var
 below; any flag you omit is prompted for in a TTY, or defaulted in CI
 (`runner=llm`, `skill=on`, `suite=all`). The launcher is just a front-end —
@@ -63,7 +63,7 @@ setting `EVAL_RUNNER` / `EVAL_SKILL` / `EVAL_MODEL` directly works too.
 
 - `EVAL_AGENT_CONCURRENCY` — max concurrent agent processes. Default `2`.
 - `EVAL_KEEP_WORKDIR=1` — keep the per-case tmpdir for debugging.
-- `EVAL_NO_CACHE=true` — bypass result cache reads.
+- `EVAL_RERUN=true` — run cases even when identical parameters were already evaluated.
 
 ## Architecture
 
@@ -72,6 +72,9 @@ for the agent-runner design and rationale.
 
 Every dataset row gives the model one starter config and one task. The runner
 asks the model to return a complete edited `payload.config.ts`, then verifies it.
+Every invocation writes immutable results under `eval-results/runs/`. By default,
+cases with identical parameters reuse the newest completed result; `--rerun`
+forces them to execute again.
 
 ```text
 agent generates config

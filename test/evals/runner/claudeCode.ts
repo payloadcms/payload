@@ -160,7 +160,7 @@ async function spawnAgent({
   }
   const mcpFile = path.join(workdir, '.mcp.json')
   if (existsSync(mcpFile)) {
-    args.push('--mcp-config', mcpFile, '--strict-mcp-config')
+    args.push('--mcp-config', mcpFile, '--strict-mcp-config', '--allowedTools=mcp__payload')
   }
   args.push(prompt)
   return new Promise((resolve) => {

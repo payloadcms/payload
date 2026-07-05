@@ -4,7 +4,7 @@
 //   pnpm test:eval                                          # interactive picker
 //   pnpm test:eval --runner=llm --skill=on --suite=collections
 //   pnpm test:eval --suite=fields --model=anthropic:claude-opus-4-8
-//   pnpm test:eval --suite=all --no-cache -t cors-serverurl
+//   pnpm test:eval --suite=all --rerun -t cors-serverurl
 //   pnpm test:eval --help
 //
 // Any option omitted on the command line is prompted for (when run in a TTY).
@@ -14,11 +14,11 @@
 
 import * as p from '@clack/prompts'
 import { spawn } from 'node:child_process'
-import { appendFileSync, mkdirSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const evalResultsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'eval-results')
+const runsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'eval-results', 'runs')
 
 type Suite = { label: string; spec?: string; value: string }
 
@@ -54,20 +54,20 @@ Usage:
   pnpm test:eval                                  # interactive picker
   pnpm test:eval --runner=llm --skill=on --suite=collections
   pnpm test:eval --suite=fields --model=anthropic:claude-opus-4-8
-  pnpm test:eval --suite=all --no-cache -t <name>
+  pnpm test:eval --suite=all --rerun -t <name>
 
 Flags (any omitted flag is prompted for in a TTY):
   --runner=llm|claude-code   harness (default llm)
   --skill=on|off             provide the Payload skill (default on)
   --model=<id>               runner model override; llm: a models.ts key, claude-code: a --model name
   --suite=<name>             ${SUITES.map((s) => s.value).join(' | ')}
-  --no-cache                 bypass the result cache (EVAL_NO_CACHE)
+  --rerun                    run cases even when identical parameters were already evaluated
   -t, --test=<name>          only run cases matching <name>
 `
 
 type ParsedArgs = {
   model?: string
-  noCache: boolean
+  rerun: boolean
   runner?: string
   skill?: string
   suite?: string
@@ -75,7 +75,7 @@ type ParsedArgs = {
 }
 
 function parseArgs(argv: string[]): ParsedArgs {
-  const out: ParsedArgs = { noCache: false }
+  const out: ParsedArgs = { rerun: false }
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
     if (!arg) {
@@ -92,8 +92,8 @@ function parseArgs(argv: string[]): ParsedArgs {
       case 'model':
         out.model = value()
         break
-      case 'no-cache':
-        out.noCache = true
+      case 'rerun':
+        out.rerun = true
         break
       case 'runner':
         out.runner = value()
@@ -228,14 +228,14 @@ async function main(): Promise<void> {
   if (model) {
     env.EVAL_MODEL = model
   }
-  if (args.noCache) {
-    env.EVAL_NO_CACHE = 'true'
+  if (args.rerun) {
+    env.EVAL_RERUN = 'true'
   }
 
   if (tty) {
     p.outro(
       `▶ runner=${runner} · skill=${skill} · suite=${suiteValue}` +
-        `${model ? ` · model=${model}` : ''}${args.noCache ? ' · no-cache' : ''}` +
+        `${model ? ` · model=${model}` : ''}${args.rerun ? ' · rerun' : ''}` +
         `${args.testPattern ? ` · -t ${args.testPattern}` : ''}`,
     )
   }
@@ -250,8 +250,9 @@ async function main(): Promise<void> {
     // (Ctrl+C) has code === null, so we don't tag it — the dashboard hides it.
     if (code !== null) {
       try {
-        mkdirSync(evalResultsDir, { recursive: true })
-        appendFileSync(path.join(evalResultsDir, '.completed-runs'), `${runId}\n`)
+        const runDir = path.join(runsDir, runId.replaceAll(':', '-'))
+        mkdirSync(runDir, { recursive: true })
+        writeFileSync(path.join(runDir, 'completed'), '', 'utf8')
       } catch (err) {
         // A finished run that isn't tagged gets hidden by the dashboard, so make
         // the failure loud instead of silently losing the run.

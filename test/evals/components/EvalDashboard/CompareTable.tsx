@@ -24,14 +24,11 @@ function defaultComparePair(groups: RunGroup[]): [string, string] {
   return [older, newer]
 }
 
-/** Label a run for the A/B selectors: config + its timestamp (legacy runs have no time). */
 function runLabel(run: RunGroup | undefined, key: string): string {
   if (!run) {
     return key
   }
-  return run.isLegacy
-    ? run.config.label
-    : `${run.config.label} · ${formatLocalTimestamp(run.timestamp)}`
+  return `${run.config.label} · ${formatLocalTimestamp(run.timestamp)}`
 }
 
 type ComparePair = {
@@ -200,7 +197,7 @@ function ResultCell({ borderLeft, entry }: { borderLeft?: boolean; entry?: EvalE
             <span>
               {' '}
               · {Math.round((usage.total.cachedInputTokens / usage.total.inputTokens) * 100)}%
-              cached
+              prompt-cached
             </span>
           )}
         </span>
@@ -493,14 +490,12 @@ function variantPillStyle(variant: string): { bg: string; color: string } {
 }
 
 function RunDiffView({ runGroups }: { runGroups: RunGroup[] }) {
-  // Adapt a cache run into the snapshot-shaped object this view renders, so the
+  // Adapt a run into the snapshot-shaped object this view renders, so the
   // category rollup compares the same runs as the rest of the dashboard.
   const toSnap = (run: RunGroup) => {
     const stats = configStats(run.entries)
     return {
-      label: run.isLegacy
-        ? run.config.label
-        : `${run.config.label} · ${formatLocalTimestamp(run.timestamp)}`,
+      label: `${run.config.label} · ${formatLocalTimestamp(run.timestamp)}`,
       results: run.entries.map((e) => ({
         type: e.type,
         category: e.category,
