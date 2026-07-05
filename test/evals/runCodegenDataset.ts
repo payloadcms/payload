@@ -248,10 +248,8 @@ export async function runCodegenCase(
           usage: runnerOnlyUsage(runnerUsage),
         }
 
-    if (!result.runtimeUsed) {
-      setCachedResult(key, result)
-      pruneStaleEntries(key, isSameLogicalCase)
-    }
+    setCachedResult(key, result)
+    pruneStaleEntries(key, isSameLogicalCase)
 
     if (!result.pass) {
       writeFailure({ label, modifiedConfig, result, starterConfig })
@@ -271,10 +269,8 @@ export async function runCodegenCase(
       usage: runnerOnlyUsage(runnerUsage),
     }
 
-    if (!result.runtimeUsed) {
-      setCachedResult(key, result)
-      pruneStaleEntries(key, isSameLogicalCase)
-    }
+    setCachedResult(key, result)
+    pruneStaleEntries(key, isSameLogicalCase)
 
     writeFailure({ label, modifiedConfig, result, starterConfig })
     console.log(`[${result.category}] ✗ FAIL [VERIFY]  ${testCase.configPath}`)
