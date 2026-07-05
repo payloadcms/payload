@@ -35,6 +35,15 @@ export function runKeyOf(result: EvalResult): string {
   return result.runId ?? `legacy:${getConfiguration(result).key}`
 }
 
+/** Formats an ISO timestamp in the computer's local timezone. */
+export function formatLocalTimestamp(timestamp: string): string {
+  const date = new Date(timestamp)
+  if (Number.isNaN(date.getTime())) {
+    return timestamp
+  }
+  return date.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })
+}
+
 /** Strips the provider prefix (llm: `anthropic.messages/x` → `x`) or CLI version (agent: `claude-code/x/1.2` → `x`). */
 function shortModel(modelId: string | undefined, runner: RunnerKind): string {
   if (!modelId) {

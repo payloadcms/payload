@@ -10,7 +10,7 @@ import type { EvalEntry } from './index.js'
 
 import { getVariant as getVariantFromResult } from '../../variant.js'
 import { CompareTable } from './CompareTable.js'
-import { getConfiguration, groupByRun, runKeyOf } from './configuration.js'
+import { formatLocalTimestamp, getConfiguration, groupByRun, runKeyOf } from './configuration.js'
 import { RunsOverview } from './RunsOverview.js'
 
 export type { Variant }
@@ -585,7 +585,7 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
 
       {/* Cached at */}
       <div style={{ color: 'var(--theme-elevation-400)', fontSize: '0.7rem', marginTop: '4px' }}>
-        Cached {new Date(entry.createdAt).toLocaleString()} · hash {entry.hash.slice(0, 12)}…
+        Cached {formatLocalTimestamp(entry.createdAt)} · hash {entry.hash.slice(0, 12)}…
       </div>
     </div>
   )
@@ -633,7 +633,7 @@ export function ResultsTable({ codegenHtml, entries }: Props) {
     if (!run) {
       return null
     }
-    const when = run.timestamp ? run.timestamp.slice(0, 16).replace('T', ' ') : 'unknown time'
+    const when = run.timestamp ? formatLocalTimestamp(run.timestamp) : 'unknown time'
     return `${run.config.label}${run.isLegacy ? '' : ` · ${when}`}`
   }, [runGroups, selectedRunKey])
 
@@ -1011,7 +1011,7 @@ export function ResultsTable({ codegenHtml, entries }: Props) {
                   <option key={run.key} value={run.key}>
                     {run.isLegacy
                       ? `${run.config.label} · pre-tracking`
-                      : `${run.config.label} · ${run.timestamp.slice(0, 16).replace('T', ' ')}`}
+                      : `${run.config.label} · ${formatLocalTimestamp(run.timestamp)}`}
                   </option>
                 ))}
               </select>

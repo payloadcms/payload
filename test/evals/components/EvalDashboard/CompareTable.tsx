@@ -8,7 +8,7 @@ import type { EvalEntry, RunSnapshot } from './index.js'
 import type { Variant } from './ResultsTable.js'
 
 import { AUDIENCE_CONFIG, getAudience } from './audience.js'
-import { configStats, runKeyOf } from './configuration.js'
+import { configStats, formatLocalTimestamp, runKeyOf } from './configuration.js'
 
 type Props = {
   compareMode: 'run' | 'variant'
@@ -31,7 +31,7 @@ function runLabel(run: RunGroup | undefined, key: string): string {
   }
   return run.isLegacy
     ? run.config.label
-    : `${run.config.label} · ${run.timestamp.slice(0, 16).replace('T', ' ')}`
+    : `${run.config.label} · ${formatLocalTimestamp(run.timestamp)}`
 }
 
 type ComparePair = {
@@ -500,7 +500,7 @@ function RunDiffView({ runGroups }: { runGroups: RunGroup[] }) {
     return {
       label: run.isLegacy
         ? run.config.label
-        : `${run.config.label} · ${run.timestamp.slice(0, 16).replace('T', ' ')}`,
+        : `${run.config.label} · ${formatLocalTimestamp(run.timestamp)}`,
       results: run.entries.map((e) => ({
         type: e.type,
         category: e.category,
