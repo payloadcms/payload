@@ -61,6 +61,8 @@ export type EvalVerifyContext = {
   /** Imported generated config, normalized for easy eval assertions. */
   config: EvalConfig
   expect: EvalExpect
+  /** Tool calls recorded by the Payload MCP config. */
+  mcpToolCalls: MCPToolCall[]
   /**
    * Lazy Payload Local API for the generated config. The eval only boots Payload
    * if this object is actually used.
@@ -100,6 +102,16 @@ export type EvalUsage = {
 
 // Runner
 export type SystemPromptKey = 'codegenNoSkill' | 'codegenWithSkill'
+export type MCPToolCall = {
+  input: unknown
+  name: string
+  response: {
+    content: unknown[]
+    doc?: Record<string, unknown>
+    isError?: boolean
+    structuredContent?: Record<string, unknown>
+  }
+}
 export type TranscriptEvent =
   | { content: string; isError?: boolean; toolUseId: string; type: 'tool_result' }
   | { id: string; input: unknown; name: string; type: 'tool_use' }
@@ -111,6 +123,8 @@ export type CodegenRunnerResult = {
   /** For agent results: captured stderr from the CLI (fallback when stream-json parsing yields no events), truncated to ~10,000 characters. */
   agentLog?: string
   confidence: number
+  /** Tool calls recorded by the Payload MCP config. */
+  mcpToolCalls?: MCPToolCall[]
   modifiedConfig: string
   /** For agent results: structured per-event transcript parsed from stream-json output. */
   transcript?: TranscriptEvent[]

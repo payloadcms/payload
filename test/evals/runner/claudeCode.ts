@@ -8,7 +8,14 @@ import pLimit from 'p-limit'
 import type { CodegenRunnerResult, TokenUsage, TranscriptEvent } from '../types.js'
 import type { CodegenRunner, CodegenRunnerOptions } from './types.js'
 
-import { cleanup, gitInit, installSkill, materialize, readEntry } from './workdir.js'
+import {
+  cleanup,
+  gitInit,
+  installSkill,
+  materialize,
+  readEntry,
+  readMCPToolCalls,
+} from './workdir.js'
 
 /**
  * Fallback login dir for the agent, used when the API key is rejected (e.g. an
@@ -106,6 +113,7 @@ async function runOne(
       agentExitCode: exitCode,
       agentLog: stderr.length > 0 ? truncate(stderr, 10_000) : undefined,
       confidence: 0,
+      mcpToolCalls: exposeMcpTools ? await readMCPToolCalls({ workdir }) : undefined,
       modifiedConfig,
       transcript: capTranscript(transcript),
       usage: usage ?? zeroUsage(),

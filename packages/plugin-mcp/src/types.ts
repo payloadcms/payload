@@ -52,6 +52,13 @@ export type MCPResponseOverride = (
   req: PayloadRequest,
 ) => MCPToolResponse
 
+export type MCPAfterToolCallHook = (args: {
+  input: unknown
+  req: PayloadRequest
+  response: MCPToolResponse
+  toolName: string
+}) => MaybePromise<MCPToolResponse>
+
 /**
  * The handler's `input` type. A specific Standard Schema (Zod, Valibot, …) gets
  * its inferred output; anything else falls back to `Record<string, unknown>`.
@@ -232,6 +239,10 @@ export type MCPPluginConfig = {
   globals?: {
     [Slug in GlobalSlug]?: MCPPluginGlobalConfig
   }
+  hooks?: {
+    /** Transform a tool response after its handler returns */
+    afterToolCall?: MCPAfterToolCallHook[]
+  }
   mcp?: {
     serverOptions?: MCPServerOptions
     verboseLogs?: boolean
@@ -250,7 +261,7 @@ export type MCPPluginConfig = {
 
 export type SanitizedMCPPluginConfig = {
   items: MCPItem[]
-} & Pick<MCPPluginConfig, 'disabled' | 'mcp' | 'overrideGetAuthorizedMCP'>
+} & Pick<MCPPluginConfig, 'disabled' | 'hooks' | 'mcp' | 'overrideGetAuthorizedMCP'>
 
 export type MCPServerOptions = {
   options?: ConstructorParameters<typeof McpServer>[1]

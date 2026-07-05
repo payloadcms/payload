@@ -135,6 +135,7 @@ export async function runCodegenCase(
   const { confidence, modifiedConfig, usage: runnerUsage } = runnerOutput
   const agentLog = runnerOutput.agentLog
   const agentExitCode = runnerOutput.agentExitCode
+  const mcpToolCalls = runnerOutput.mcpToolCalls ?? []
   const transcript = runnerOutput.transcript
 
   const commonResult = {
@@ -221,6 +222,7 @@ export async function runCodegenCase(
       ast,
       config: evalConfig,
       expect: createEvalExpect(),
+      mcpToolCalls,
       payload: lazyPayload.payload,
       score,
       source: modifiedConfig,
