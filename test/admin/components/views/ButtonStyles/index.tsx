@@ -1,10 +1,7 @@
 'use client'
 
-import { Button } from '@payloadcms/ui'
-import LinkImport from 'next/link.js'
+import { Button, Link } from '@payloadcms/ui'
 import React from 'react'
-
-const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 const buttonStyles = ['primary', 'secondary', 'pill', 'dashed', 'destructive', 'ghost'] as const
 
@@ -174,45 +171,6 @@ export const ButtonStyles: React.FC = () => {
 
       <Section title="Icon Only">
         <ButtonTable icon="edit" iconOnly />
-      </Section>
-
-      <Section title="Other Styles">
-        <table style={{ borderCollapse: 'collapse', width: '100%' }}>
-          <thead>
-            <tr>
-              <th style={headerCellStyle}>Style</th>
-              <th style={headerCellStyle}>Size</th>
-              <th style={headerCellStyle}>Default</th>
-              <th style={headerCellStyle}>Disabled</th>
-            </tr>
-          </thead>
-          <tbody>
-            {(['subtle', 'tab', 'icon-label', 'none'] as const).map((style) =>
-              sizes.map((size, sizeIdx) => (
-                <tr key={`${style}-${size}`}>
-                  {sizeIdx === 0 && (
-                    <td rowSpan={sizes.length} style={labelCellStyle}>
-                      {style}
-                    </td>
-                  )}
-                  <td style={{ ...bodyCellStyle, fontFamily: 'monospace', fontSize: '13px' }}>
-                    {size}
-                  </td>
-                  <td style={bodyCellStyle}>
-                    <Button buttonStyle={style} icon="edit" margin={false} size={size}>
-                      Button
-                    </Button>
-                  </td>
-                  <td style={bodyCellStyle}>
-                    <Button buttonStyle={style} disabled icon="edit" margin={false} size={size}>
-                      Button
-                    </Button>
-                  </td>
-                </tr>
-              )),
-            )}
-          </tbody>
-        </table>
       </Section>
     </div>
   )

@@ -124,7 +124,7 @@ export const lexicalBlocks: (Block | BlockSlug)[] = [
         options: ['value1', 'value2', 'value3'],
       },
     ],
-  },
+  } satisfies Block,
   {
     slug: 'myBlockWithBlockAndLabel',
     admin: {

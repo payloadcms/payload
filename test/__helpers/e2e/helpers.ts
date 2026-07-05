@@ -88,6 +88,12 @@ export async function ensureCompilationIsDone({
 
   const adminURL = formatAdminURL({ adminRoute, path: '', serverURL })
 
+  // Disable the hydration wait during compilation polling — the page won't
+  // have the React tree mounted yet, so waiting 15s per attempt for the
+  // hydration marker would exhaust the beforeAll hook timeout.
+  const patchedPage = page as unknown as { __payloadSkipHydrationWait?: boolean }
+  patchedPage.__payloadSkipHydrationWait = true
+
   const maxAttempts = 15
   let attempt = 1
 
@@ -124,12 +130,14 @@ export async function ensureCompilationIsDone({
       }
 
       console.log('Successfully compiled')
+      patchedPage.__payloadSkipHydrationWait = false
       if (browser) {
         await page.close()
       }
       return
     } catch (error) {
       if (attempt === maxAttempts) {
+        patchedPage.__payloadSkipHydrationWait = false
         console.error(
           'Compilation not done yet. Giving up. The dev server is probably not running or crashed.',
         )
@@ -141,6 +149,8 @@ export async function ensureCompilationIsDone({
       attempt++
     }
   }
+
+  patchedPage.__payloadSkipHydrationWait = false
 
   if (noAutoLogin) {
     if (browser) {
@@ -335,6 +345,30 @@ export async function waitForFormReady(page: Page) {
     .toBe(true)
 }
 
+/**
+ * Wait until a Lexical editor within the given locator is fully interactive.
+ * Checks for `contenteditable="true"` on the Lexical root element, which is only
+ * present after React has hydrated, Lexical has initialized, and the editor is editable.
+ */
+export async function waitForLexicalReady(locator: Locator) {
+  await expect(
+    locator
+      .locator('> .rich-text-lexical__wrap [data-lexical-editor="true"][contenteditable="true"]')
+      .first(),
+  ).toBeVisible()
+}
+
+/**
+ * Navigate to a document page and wait for the form to be ready before interacting.
+ * Necessary because TanStack Start's hydration is asynchronous, and interacting
+ * with form inputs (e.g. setInputFiles) before hydration completes will silently
+ * fail since React event handlers are not yet attached.
+ */
+export async function gotoAndWaitForForm(page: Page, url: string) {
+  await page.goto(url)
+  await waitForFormReady(page)
+}
+
 export function exactText(text: string) {
   return new RegExp(`^${text}$`)
 }
@@ -382,14 +416,22 @@ export const findTableRow = async (page: Page, title: string): Promise<Locator> 
 }
 
 export async function switchTab(page: Page, selector: string) {
-  await page.locator(selector).click()
-  await wait(300)
-  await expect(page.locator(`${selector}.tabs-field__tab-button--active`)).toBeVisible()
+  const activeSelector = `${selector}.tabs-field__tab-button--active`
+
+  await expect(async () => {
+    await page.locator(selector).click()
+    await expect(page.locator(activeSelector)).toBeVisible({ timeout: 1000 })
+  }).toPass({ intervals: [300], timeout: 6000 })
 }
 
 export const openColumnControls = async (page: Page) => {
-  await page.locator('.columns-button__button').click()
-  await expect(page.locator('.popup__content .column-selector')).toBeVisible()
+  const columnSelector = page.locator('.popup__content .column-selector')
+  await expect(async () => {
+    if (!(await columnSelector.isVisible())) {
+      await page.locator('.columns-button__button').click()
+    }
+    await expect(columnSelector).toBeVisible({ timeout: 1500 })
+  }).toPass({ timeout: 18000 })
 }
 
 /**
@@ -400,11 +442,92 @@ export const openColumnControls = async (page: Page) => {
  * @param page
  * @param options
  */
+/**
+ * Each `page.goto()` triggers a fresh SSR + hydration cycle, and on the
+ * TanStack Start adapter (which serves a Vite dev server) hydration can lag
+ * a click by 0.5-2s in CI. When that happens the click reaches the SSR'd
+ * button and focuses it, but React's `onClick` handler is not attached yet
+ * so the underlying state never updates and any follow-up `toBeVisible`
+ * assertion times out. We patch `goto` here to wait for the hydration
+ * marker that the TanStack root component installs (see
+ * `app-tanstack/app/__root.tsx`). The patch is a no-op for the Next.js
+ * adapter, where the marker is never set, so individual tests don't need to
+ * branch on the framework.
+ *
+ * Idempotent: calling this more than once on the same page is safe.
+ */
+export function installTanStackHydrationGotoWait(page: Page) {
+  if (process.env.PAYLOAD_FRAMEWORK !== 'tanstack-start') {
+    return
+  }
+  const patchedPage = page as unknown as {
+    __payloadGotoPatched?: boolean
+    __payloadSkipHydrationWait?: boolean
+  }
+  if (patchedPage.__payloadGotoPatched) {
+    return
+  }
+  patchedPage.__payloadGotoPatched = true
+
+  const waitForHydration = async () => {
+    if (patchedPage.__payloadSkipHydrationWait) {
+      return
+    }
+    try {
+      await page.waitForFunction(
+        () => (window as unknown as { __TANSTACK_HYDRATED__?: boolean }).__TANSTACK_HYDRATED__,
+        undefined,
+        { timeout: 15000 },
+      )
+    } catch {
+      // Best-effort. Don't fail navigation if the marker never shows up;
+      // the underlying assertion in the test will still surface the real
+      // failure.
+    }
+  }
+
+  // Non-admin URLs (e.g. `/api/<collection>` JSON endpoints used by tests that
+  // assert on the raw REST response) never mount the TanStack admin app, so
+  // `__TANSTACK_HYDRATED__` will never be set. Skip the hydration wait for
+  // those, otherwise each such navigation pays the full 15s timeout.
+  const requiresHydrationWait = (url: string | undefined): boolean => {
+    if (!url) {
+      return true
+    }
+    try {
+      const path = new URL(url, 'http://localhost').pathname
+      return !path.startsWith('/api/') && path !== '/api'
+    } catch {
+      return true
+    }
+  }
+
+  const originalGoto = page.goto.bind(page)
+  page.goto = (async (...args: Parameters<Page['goto']>) => {
+    const response = await originalGoto(...args)
+    if (requiresHydrationWait(args[0])) {
+      await waitForHydration()
+    }
+    return response
+  }) as Page['goto']
+
+  const originalReload = page.reload.bind(page)
+  page.reload = (async (...args: Parameters<Page['reload']>) => {
+    const response = await originalReload(...args)
+    if (requiresHydrationWait(page.url())) {
+      await waitForHydration()
+    }
+    return response
+  }) as Page['reload']
+}
+
 export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: boolean }) {
   const { ignoreCORS = false } = options || {} // Default to not ignoring CORS errors
   const consoleErrors: string[] = []
 
   let shouldCollectErrors = false
+
+  installTanStackHydrationGotoWait(page)
 
   page.on('console', (msg) => {
     if (
@@ -413,16 +536,28 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
       // This leads to classnames not matching. Ignore these God-awful errors
       // https://github.com/JedWatson/react-select/issues/3590
       !msg.text().includes('did not match. Server:') &&
+      !msg.text().includes('Hydration failed because the server rendered HTML') &&
       !msg.text().includes('the server responded with a status of') &&
       !msg.text().includes('Failed to fetch RSC payload for') &&
       !msg.text().includes('Error loading language') &&
       !msg.text().includes('Error: NEXT_NOT_FOUND') &&
       !msg.text().includes('Error: NEXT_REDIRECT') &&
+      // TanStack Start adapter nav control-flow contract (analogous to the
+      // NEXT_NOT_FOUND / NEXT_REDIRECT signals above). `req.server.notFound()` /
+      // `redirect()` thrown deep inside a streamed RSC view surface as these.
+      !msg.text().includes('Error: not-found') &&
+      !msg.text().includes('Error: redirect:') &&
       !msg.text().includes('Error getting document data') &&
       !msg.text().includes('Failed trying to load default language strings') &&
       !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted
       !msg.text().includes('TypeError: network error') && // Transient network errors during chunk loading
       !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') && // This is a weird error that happens in the console
+      // Expected lexical-converter warning for blocks/inline-blocks intentionally
+      // configured without an HTML converter (e.g. the `diff` test collection's
+      // `myBlock`). Logged server-side via `console.error`; harmless in Next, but
+      // the TanStack/vite-rsc adapter forwards server `console.error` to the
+      // browser console, so it would otherwise fail every diff-view test.
+      !msg.text().includes('no converter is provided') &&
       // Conditionally ignore CORS errors based on the `ignoreCORS` option
       !(
         ignoreCORS &&
@@ -453,9 +588,14 @@ export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: b
 
   // Capture uncaught errors that do not appear in the console
   page.on('pageerror', (error) => {
+    const message = error?.message ?? String(error)
+
+    if (message.includes('Hydration failed because the server rendered HTML')) {
+      return
+    }
+
     if (shouldCollectErrors) {
       const stack = error?.stack
-      const message = error?.message ?? String(error)
       consoleErrors.push(`Page error: ${message}${stack ? `\n${stack}` : ''}`)
     } else {
       // Rethrow the original error to preserve stack, name, and other metadata

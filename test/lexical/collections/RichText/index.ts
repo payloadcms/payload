@@ -76,11 +76,8 @@ const RichTextFields: CollectionConfig = {
         ...defaultConverters,
         link: async ({ node, nodesToHTML, providedStyleTag }) => {
           const children = (await nodesToHTML({ nodes: node.children })).join('')
-          const href =
-            node.fields.linkType === 'internal' ? '#' : (node.fields.url ?? '')
-          const newTabAttrs = node.fields.newTab
-            ? ' rel="noopener noreferrer" target="_blank"'
-            : ''
+          const href = node.fields.linkType === 'internal' ? '#' : (node.fields.url ?? '')
+          const newTabAttrs = node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''
           return `<a${providedStyleTag} href="${href}"${newTabAttrs}>${children}</a>`
         },
       }),

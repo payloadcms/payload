@@ -1504,6 +1504,12 @@ describe('List View', () => {
 
       await setPerPageLimit({ page, limit: 5 })
 
+      // Wait for the table to reflect the new limit before reading the first
+      // page's rows. `setPerPageLimit` only waits for the URL to update; the
+      // table re-renders asynchronously afterward (the server re-fetch lags the
+      // URL change on streaming adapters), so reading immediately can capture
+      // the pre-limit rows (all 6) and produce a false page-overlap.
+      await expect(page.locator(tableRowLocator)).toHaveCount(5)
       const firstPageIds = await page.locator('.cell-id').allInnerTexts()
       await goToNextPage(page)
       // Wait until only 1 row is visible
