@@ -78,6 +78,7 @@ export interface Config {
     categories: Category;
     media: Media;
     'collection-level-config': CollectionLevelConfig;
+    'open-by-default': OpenByDefault;
     'static-url': StaticUrl;
     'custom-live-preview': CustomLivePreview;
     'conditional-url': ConditionalUrl;
@@ -97,6 +98,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     'collection-level-config': CollectionLevelConfigSelect<false> | CollectionLevelConfigSelect<true>;
+    'open-by-default': OpenByDefaultSelect<false> | OpenByDefaultSelect<true>;
     'static-url': StaticUrlSelect<false> | StaticUrlSelect<true>;
     'custom-live-preview': CustomLivePreviewSelect<false> | CustomLivePreviewSelect<true>;
     'conditional-url': ConditionalUrlSelect<false> | ConditionalUrlSelect<true>;
@@ -900,6 +902,18 @@ export interface CollectionLevelConfig {
   createdAt: string;
 }
 /**
+ * Live Preview opens automatically on first visit via `openByDefault`.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-by-default".
+ */
+export interface OpenByDefault {
+  id: string;
+  title?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "static-url".
  */
@@ -1122,6 +1136,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'collection-level-config';
         value: string | CollectionLevelConfig;
+      } | null)
+    | ({
+        relationTo: 'open-by-default';
+        value: string | OpenByDefault;
       } | null)
     | ({
         relationTo: 'static-url';
@@ -1671,6 +1689,15 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "collection-level-config_select".
  */
 export interface CollectionLevelConfigSelect<T extends boolean = true> {
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "open-by-default_select".
+ */
+export interface OpenByDefaultSelect<T extends boolean = true> {
   title?: T;
   updatedAt?: T;
   createdAt?: T;
