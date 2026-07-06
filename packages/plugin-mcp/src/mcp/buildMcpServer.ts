@@ -17,10 +17,10 @@ import { getLogger } from '../utils/getLogger.js'
 import { toStandardSchema } from '../utils/toStandardSchema.js'
 
 /**
- * Transport-agnostic core: registers every authorized MCP item onto a fresh
- * `McpServer` and returns it. The caller is responsible for picking a transport
- * (`WebStandardStreamableHTTPServerTransport`, `StdioServerTransport`, …) and
- * calling `server.connect(transport)`.
+ * Serving-entry-agnostic core: registers every authorized MCP item onto a fresh
+ * `McpServer` and returns it. The HTTP and stdio entry point callers provide fresh
+ * instances from this builder while they own the transport and protocol-era
+ * decision.
  *
  * `req` is the request context handlers see. For HTTP it's the live
  * `PayloadRequest` derived from the incoming HTTP request; for stdio it's a
@@ -47,11 +47,21 @@ export const buildMcpServer = ({
    * Wrap a tool handler's response with the tool's `overrideResponse`, then
    * strip the internal `doc` field so it doesn't leak onto the wire.
    */
-  const finalizeToolResponse = (
-    response: MCPToolResponse,
-    overrideResponse?: MCPResponseOverride,
-  ): MCPToolResponse => {
-    const overridden = overrideResponse?.(response, response.doc ?? {}, req) ?? response
+  const finalizeToolResponse = async ({
+    input,
+    overrideResponse,
+    response,
+    toolName,
+  }: {
+    input: unknown
+    overrideResponse?: MCPResponseOverride
+    response: MCPToolResponse
+    toolName: string
+  }): Promise<MCPToolResponse> => {
+    let overridden = overrideResponse?.(response, response.doc ?? {}, req) ?? response
+    for (const hook of pluginConfig.hooks?.afterToolCall ?? []) {
+      overridden = await hook({ input, req, response: overridden, toolName })
+    }
     const { doc: _doc, ...rest } = overridden
     return rest
   }
@@ -119,7 +129,12 @@ export const buildMcpServer = ({
       ? match.tool.handler({ ...handlerArgs, collectionSlug: slug })
       : match.tool.handler({ ...handlerArgs, globalSlug: slug }))
 
-    return finalizeToolResponse(response, match.tool.overrideResponse)
+    return finalizeToolResponse({
+      input: toolInput,
+      overrideResponse: match.tool.overrideResponse,
+      response,
+      toolName: match.mcpName,
+    })
   }
 
   try {
@@ -203,16 +218,21 @@ export const buildMcpServer = ({
               description: tool.description,
               inputSchema: tool.input ? toStandardSchema(tool.input) : undefined,
             },
-            async (input: unknown, ctx: ServerContext) =>
-              finalizeToolResponse(
-                await tool.handler({
-                  authorizedMCP,
-                  input: (input ?? {}) as Record<string, unknown>,
-                  req,
-                  serverContext: ctx,
-                }),
-                tool.overrideResponse,
-              ),
+            async (input: unknown, ctx: ServerContext) => {
+              const toolInput = (input ?? {}) as Record<string, unknown>
+              const response = await tool.handler({
+                authorizedMCP,
+                input: toolInput,
+                req,
+                serverContext: ctx,
+              })
+              return finalizeToolResponse({
+                input: toolInput,
+                overrideResponse: tool.overrideResponse,
+                response,
+                toolName: item.mcpName,
+              })
+            },
           )
           logger.info(`✅ Tool: ${item.mcpName} Registered.`)
           break

@@ -1,25 +1,26 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { codegenKey } from './cache.js'
+import { codegenParamsHash } from './paramsHash.js'
 import * as workdir from './runner/workdir.js'
 
 const base = {
-  expected: 'expected',
+  category: 'collections' as const,
+  configPath: 'collections/codegen/example',
   fixtureContent: 'starter',
   input: 'do the thing',
 }
 
-describe('codegenKey', () => {
-  it('produces stable hex keys', () => {
-    const a = codegenKey({ ...base, modelId: 'openai/gpt-5', runnerKind: 'llm' })
-    const b = codegenKey({ ...base, modelId: 'openai/gpt-5', runnerKind: 'llm' })
+describe('codegenParamsHash', () => {
+  it('should produce stable hex hashes', () => {
+    const a = codegenParamsHash({ ...base, modelId: 'openai/gpt-5', runnerKind: 'llm' })
+    const b = codegenParamsHash({ ...base, modelId: 'openai/gpt-5', runnerKind: 'llm' })
     expect(a).toBe(b)
     expect(a).toMatch(/^[a-f0-9]{64}$/)
   })
 
-  it('separates llm and claude-code runs for otherwise-identical inputs', () => {
-    const llm = codegenKey({ ...base, modelId: 'openai/gpt-5', runnerKind: 'llm' })
-    const agent = codegenKey({
+  it('should separate llm and claude-code runs for otherwise-identical inputs', () => {
+    const llm = codegenParamsHash({ ...base, modelId: 'openai/gpt-5', runnerKind: 'llm' })
+    const agent = codegenParamsHash({
       ...base,
       modelId: 'claude-code/claude-opus-4-6/2.0.0',
       runnerKind: 'claude-code',
@@ -28,14 +29,14 @@ describe('codegenKey', () => {
     expect(llm).not.toBe(agent)
   })
 
-  it('separates llm codegenWithSkill from codegenNoSkill via skillHash inclusion', () => {
-    const withSkill = codegenKey({
+  it('should separate llm codegenWithSkill from codegenNoSkill via skillHash inclusion', () => {
+    const withSkill = codegenParamsHash({
       ...base,
       modelId: 'openai/gpt-5',
       runnerKind: 'llm',
       systemPromptKey: 'codegenWithSkill',
     })
-    const noSkill = codegenKey({
+    const noSkill = codegenParamsHash({
       ...base,
       modelId: 'openai/gpt-5',
       runnerKind: 'llm',
@@ -44,14 +45,14 @@ describe('codegenKey', () => {
     expect(withSkill).not.toBe(noSkill)
   })
 
-  it('separates claude-code embedded from claude-code none', () => {
-    const embedded = codegenKey({
+  it('should separate claude-code embedded from claude-code none', () => {
+    const embedded = codegenParamsHash({
       ...base,
       modelId: 'claude-code/claude-opus-4-6/2.0.0',
       runnerKind: 'claude-code',
       skillInstall: 'embedded',
     })
-    const none = codegenKey({
+    const none = codegenParamsHash({
       ...base,
       modelId: 'claude-code/claude-opus-4-6/2.0.0',
       runnerKind: 'claude-code',
@@ -60,14 +61,14 @@ describe('codegenKey', () => {
     expect(embedded).not.toBe(none)
   })
 
-  it('separates two claude-code runs that differ only in model (via modelId)', () => {
-    const opus = codegenKey({
+  it('should separate two claude-code runs that differ only in model (via modelId)', () => {
+    const opus = codegenParamsHash({
       ...base,
       modelId: 'claude-code/claude-opus-4-6/2.0.0',
       runnerKind: 'claude-code',
       skillInstall: 'embedded',
     })
-    const sonnet = codegenKey({
+    const sonnet = codegenParamsHash({
       ...base,
       modelId: 'claude-code/claude-sonnet-4-6/2.0.0',
       runnerKind: 'claude-code',
@@ -76,14 +77,14 @@ describe('codegenKey', () => {
     expect(opus).not.toBe(sonnet)
   })
 
-  it('separates two claude-code runs that differ only in CLI version (via modelId)', () => {
-    const v1 = codegenKey({
+  it('should separate two claude-code runs that differ only in CLI version (via modelId)', () => {
+    const v1 = codegenParamsHash({
       ...base,
       modelId: 'claude-code/claude-opus-4-6/2.0.0',
       runnerKind: 'claude-code',
       skillInstall: 'embedded',
     })
-    const v2 = codegenKey({
+    const v2 = codegenParamsHash({
       ...base,
       modelId: 'claude-code/claude-opus-4-6/2.0.1',
       runnerKind: 'claude-code',
@@ -92,12 +93,12 @@ describe('codegenKey', () => {
     expect(v1).not.toBe(v2)
   })
 
-  describe('skill content invalidation', () => {
-    it('busts the cache for llm codegenWithSkill when skill files change', () => {
+  describe('skill content', () => {
+    it('should change the parameter hash for llm codegenWithSkill when skill files change', () => {
       const spy = vi.spyOn(workdir, 'getSkillTreeHash')
 
       spy.mockReturnValueOnce('aaaaaaaa')
-      const before = codegenKey({
+      const before = codegenParamsHash({
         ...base,
         modelId: 'openai/gpt-5',
         runnerKind: 'llm',
@@ -105,7 +106,7 @@ describe('codegenKey', () => {
       })
 
       spy.mockReturnValueOnce('bbbbbbbb')
-      const after = codegenKey({
+      const after = codegenParamsHash({
         ...base,
         modelId: 'openai/gpt-5',
         runnerKind: 'llm',
@@ -116,11 +117,11 @@ describe('codegenKey', () => {
       spy.mockRestore()
     })
 
-    it('busts the cache for claude-code embedded when skill files change', () => {
+    it('should change the parameter hash for claude-code embedded when skill files change', () => {
       const spy = vi.spyOn(workdir, 'getSkillTreeHash')
 
       spy.mockReturnValueOnce('aaaaaaaa')
-      const before = codegenKey({
+      const before = codegenParamsHash({
         ...base,
         modelId: 'claude-code/claude-opus-4-6/2.0.0',
         runnerKind: 'claude-code',
@@ -128,7 +129,7 @@ describe('codegenKey', () => {
       })
 
       spy.mockReturnValueOnce('bbbbbbbb')
-      const after = codegenKey({
+      const after = codegenParamsHash({
         ...base,
         modelId: 'claude-code/claude-opus-4-6/2.0.0',
         runnerKind: 'claude-code',
@@ -139,13 +140,13 @@ describe('codegenKey', () => {
       spy.mockRestore()
     })
 
-    it('does NOT bust cache for llm codegenNoSkill when skill files change', () => {
+    it('should not change the parameter hash for llm codegenNoSkill when skill files change', () => {
       const spy = vi.spyOn(workdir, 'getSkillTreeHash')
 
       // getSkillTreeHash should not even be called; if it is, two different
-      // mock values would still produce identical keys since hash isn't in payload.
+      // mock values would still produce identical hashes since the skill hash is not included.
       spy.mockReturnValueOnce('aaaaaaaa')
-      const before = codegenKey({
+      const before = codegenParamsHash({
         ...base,
         modelId: 'openai/gpt-5',
         runnerKind: 'llm',
@@ -153,7 +154,7 @@ describe('codegenKey', () => {
       })
 
       spy.mockReturnValueOnce('bbbbbbbb')
-      const after = codegenKey({
+      const after = codegenParamsHash({
         ...base,
         modelId: 'openai/gpt-5',
         runnerKind: 'llm',
@@ -165,11 +166,11 @@ describe('codegenKey', () => {
       spy.mockRestore()
     })
 
-    it('does NOT bust cache for claude-code skillInstall=none when skill files change', () => {
+    it('should not change the parameter hash for claude-code skillInstall=none when skill files change', () => {
       const spy = vi.spyOn(workdir, 'getSkillTreeHash')
 
       spy.mockReturnValueOnce('aaaaaaaa')
-      const before = codegenKey({
+      const before = codegenParamsHash({
         ...base,
         modelId: 'claude-code/claude-opus-4-6/2.0.0',
         runnerKind: 'claude-code',
@@ -177,7 +178,7 @@ describe('codegenKey', () => {
       })
 
       spy.mockReturnValueOnce('bbbbbbbb')
-      const after = codegenKey({
+      const after = codegenParamsHash({
         ...base,
         modelId: 'claude-code/claude-opus-4-6/2.0.0',
         runnerKind: 'claude-code',

@@ -1,6 +1,7 @@
-import type { Client } from '@modelcontextprotocol/client'
+import type { Client, ProtocolEra } from '@modelcontextprotocol/client'
 
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
+import type { McpHTTPResponse } from './realMcpClient.js'
 
 import { connectMcpClient } from './realMcpClient.js'
 
@@ -9,13 +10,22 @@ export type McpClient = {
   close: () => Promise<void>
   /** Returns a connected MCP client for the given API key and access mode (reused). */
   connect: (apiKey: string, options?: { overrideAccess?: boolean }) => Promise<Client>
+  /** Returns the HTTP responses observed by the real MCP transport. */
+  getHTTPResponses: () => McpHTTPResponse[]
   /** Sends a raw POST to `/mcp` — for the auth/malformed-request tests a real client can't make. */
   rawPost: (args: { apiKey?: string; body: unknown }) => Promise<Response>
 }
 
-export function createMcpClient(restClient: NextRESTClient): McpClient {
-  // One connected client per API key — the handshake runs once, then reused.
+export function createMcpClient({
+  protocolEra,
+  restClient,
+}: {
+  protocolEra: ProtocolEra
+  restClient: NextRESTClient
+}): McpClient {
+  // One connected client per API key and access mode — the handshake runs once, then reused.
   const clients = new Map<string, Promise<Client>>()
+  const httpResponses: McpHTTPResponse[] = []
 
   return {
     close: async () => {
@@ -35,11 +45,18 @@ export function createMcpClient(restClient: NextRESTClient): McpClient {
       const cacheKey = `${apiKey}:${overrideAccess}`
       let client = clients.get(cacheKey)
       if (!client) {
-        client = connectMcpClient({ apiKey, overrideAccess, restClient })
+        client = connectMcpClient({
+          apiKey,
+          onResponse: (response) => httpResponses.push(response),
+          overrideAccess,
+          protocolEra,
+          restClient,
+        })
         clients.set(cacheKey, client)
       }
       return client
     },
+    getHTTPResponses: () => [...httpResponses],
     rawPost: async ({ apiKey, body }) =>
       restClient.POST('/mcp', {
         body: JSON.stringify(body),

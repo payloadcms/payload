@@ -16,6 +16,7 @@ export type EvalCategory =
   | 'fields'
   | 'graphql'
   | 'local-api'
+  | 'mcp'
   | 'negative'
   | 'plugins'
   | 'rest-api'
@@ -23,17 +24,22 @@ export type EvalCategory =
   | 'testing'
 
 export type EvalCase = {
+  /** Boot the starter config before the agent runs. */
+  bootConfig?: boolean
   category: EvalCategory
   /**
    * Folder under `test/evals/fixtures/` that contains the `payload.config.ts`
    * for this case.
    *
    * Eval cases read it as the starter config the model edits. Runtime cases
-   * boot the generated config after TypeScript passes.
+   * boot the generated config after TypeScript passes. Multiple cases can
+   * share the same config; their input identifies them as separate tests.
    */
   configPath: string
   /** Task prompt given to the model. */
   input: string
+  /** Creates any data the case needs after Payload boots and before the agent runs. */
+  setup?: (args: { payload: Payload }) => Promise<void> | void
   /**
    * Checks the generated config after TypeScript passes.
    *
@@ -58,6 +64,8 @@ export type EvalVerifyContext = {
   /** Imported generated config, normalized for easy eval assertions. */
   config: EvalConfig
   expect: EvalExpect
+  /** Tool calls recorded by the Payload MCP config. */
+  mcpToolCalls: MCPToolCall[]
   /**
    * Lazy Payload Local API for the generated config. The eval only boots Payload
    * if this object is actually used.
@@ -97,6 +105,16 @@ export type EvalUsage = {
 
 // Runner
 export type SystemPromptKey = 'codegenNoSkill' | 'codegenWithSkill'
+export type MCPToolCall = {
+  input: unknown
+  name: string
+  response: {
+    content: unknown[]
+    doc?: Record<string, unknown>
+    isError?: boolean
+    structuredContent?: Record<string, unknown>
+  }
+}
 export type TranscriptEvent =
   | { content: string; isError?: boolean; toolUseId: string; type: 'tool_result' }
   | { id: string; input: unknown; name: string; type: 'tool_use' }
@@ -108,6 +126,8 @@ export type CodegenRunnerResult = {
   /** For agent results: captured stderr from the CLI (fallback when stream-json parsing yields no events), truncated to ~10,000 characters. */
   agentLog?: string
   confidence: number
+  /** Tool calls recorded by the Payload MCP config. */
+  mcpToolCalls?: MCPToolCall[]
   modifiedConfig: string
   /** For agent results: structured per-event transcript parsed from stream-json output. */
   transcript?: TranscriptEvent[]
@@ -151,17 +171,14 @@ export type EvalResult = {
   pass: boolean
   question: string
   reasoning: string
+  /** Previous run whose identical result was reused instead of executing this case. */
+  reusedFromRunId?: string
   /**
    * Identifies the eval invocation that produced this result (ISO timestamp set
-   * once per `pnpm test:eval` run). Lets the dashboard group results into
-   * discrete runs. Absent on entries cached before run-tracking existed.
+   * once per `pnpm test:eval` run). Lets the dashboard group results into runs.
    */
   runId?: string
-  /**
-   * Which runner produced this result. Surfaced in the dashboard. Required for
-   * all entries written by this branch; old cache entries may be missing it —
-   * read sites should default-coerce to `'llm'`.
-   */
+  /** Which runner produced this result. Surfaced in the dashboard. */
   runnerKind: RunnerKind
   /** True when `verify` booted the generated config through the lazy Payload API. */
   runtimeUsed?: boolean
@@ -182,6 +199,8 @@ export type EvalResult = {
 }
 export type RunCodegenDatasetOptions = {
   agentModel?: string
+  /** Expose the starter config's Payload MCP tools to the runner. */
+  exposeMcpTools?: boolean
   kind?: RunnerKind
   runnerModel?: LanguageModel
   scorerModel?: LanguageModel

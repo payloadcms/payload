@@ -20,6 +20,7 @@ export const LogoutView: React.FC<
           routes: { admin: adminRoute },
         },
       },
+      user,
     },
   } = initPageResult
 
@@ -29,6 +30,7 @@ export const LogoutView: React.FC<
         adminRoute={adminRoute}
         inactivity={inactivity}
         redirect={searchParams.redirect as string}
+        user={user ? { id: user.id, collection: user.collection } : null}
       />
     </div>
   )

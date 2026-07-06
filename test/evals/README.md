@@ -44,15 +44,23 @@ pnpm test:eval                                          # interactive picker
 pnpm test:eval --runner=llm --skill=on --suite=collections
 pnpm test:eval --suite=fields --model=anthropic:claude-opus-4-8
 pnpm test:eval --runner=claude-code --skill=off --suite=all
-pnpm test:eval --suite=config --no-cache -t cors-serverurl
+pnpm test:eval --suite=config --rerun -t cors-serverurl
 pnpm test:eval --help
 ```
 
-Suites: `all` (default), `collections`, `fields`, `config`, `negative`,
+Suites: `all` (default), `collections`, `fields`, `config`, `mcp`, `negative`,
 `official-plugins`, `building-plugins`. Each flag maps to the matching env var
 below; any flag you omit is prompted for in a TTY, or defaulted in CI
 (`runner=llm`, `skill=on`, `suite=all`). The launcher is just a front-end —
 setting `EVAL_RUNNER` / `EVAL_SKILL` / `EVAL_MODEL` directly works too.
+
+## Reusing previous results
+
+By default, evals with identical parameters reuse their latest completed result
+instead of running again. The CLI let you choose whether to skip these
+cases or rerun all selected cases.
+
+Use `--rerun` or set `EVAL_RERUN=true` to always run every selected case.
 
 ## Required env vars
 
@@ -63,7 +71,7 @@ setting `EVAL_RUNNER` / `EVAL_SKILL` / `EVAL_MODEL` directly works too.
 
 - `EVAL_AGENT_CONCURRENCY` — max concurrent agent processes. Default `2`.
 - `EVAL_KEEP_WORKDIR=1` — keep the per-case tmpdir for debugging.
-- `EVAL_NO_CACHE=true` — bypass result cache reads.
+- `EVAL_RERUN=true` — run cases even when identical parameters were already evaluated.
 
 ## Architecture
 
@@ -95,6 +103,7 @@ Add cases to one of the files in `datasets/`. A case has:
 - `configPath` - folder under `fixtures/` that contains the starter
   `payload.config.ts` the model edits.
 - `input` - the task prompt given to the model.
+- `setup` - optional test data setup that runs after Payload boots and before the agent.
 - `verify` - the check that runs after the generated config typechecks.
 
 Simple scorer-only case:

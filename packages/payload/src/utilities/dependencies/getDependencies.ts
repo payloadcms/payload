@@ -21,13 +21,6 @@ import { fileURLToPath } from 'url'
 import { findUp } from '../findUp.js'
 import { resolveFrom } from './resolveFrom.js'
 
-const filename = fileURLToPath(import.meta.url)
-const dirname = path.dirname(filename)
-
-const payloadPkgDirname = path.resolve(dirname, '../../../') // pkg dir (outside src)
-
-const resolvedCwd = path.resolve(process.cwd())
-
 export type NecessaryDependencies = {
   missing: string[]
   resolved: Map<
@@ -43,6 +36,11 @@ export async function getDependencies(
   baseDir: string,
   requiredPackages: string[],
 ): Promise<NecessaryDependencies> {
+  const filename = fileURLToPath(import.meta.url)
+  const dirname = path.dirname(filename)
+  const payloadPkgDirname = path.resolve(dirname, '../../../') // pkg dir (outside src)
+  const resolvedCwd = path.resolve(process.cwd())
+
   const resolutions = new Map<
     string,
     {

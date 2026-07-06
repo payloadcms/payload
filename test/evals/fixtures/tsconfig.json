@@ -16,6 +16,7 @@
     "jsxImportSource": "react",
     "paths": {
       "@payloadcms/db-mongodb": ["./db-mongodb-stub.ts"],
+      "@payloadcms/richtext-lexical": ["./richtext-lexical-stub.ts"],
       "@/*": ["./*"]
     }
   }

@@ -69,6 +69,7 @@ test.describe('storage-azure client uploads E2E', () => {
    * the plugin no longer clobbers the user's callback (see getFields.ts).
    */
   test('respects user-defined prefix.defaultValue when creating a doc via clientUploads', async () => {
+    test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
     await page.goto(mediaWithDocPrefixURL.create)
     await page.setInputFiles('input[type="file"]', path.resolve(dirname, '../../uploads/image.png'))
     await saveDocAndAssert(page)
