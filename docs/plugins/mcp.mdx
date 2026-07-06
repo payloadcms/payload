@@ -447,6 +447,9 @@ npx @modelcontextprotocol/inspector
 
 The plugin ships four helpers - `defineTool`, `defineCollectionTool`, `defineGlobalTool`, `definePrompt` - that give you full inference of the `input` schema in the handler's argument type. Each helper is a two-stage builder: pass the schema and metadata first, then chain `.handler(fn)`.
 
+Tool inputs and prompt arguments accept Standard Schema libraries such as Zod, or raw
+JSON Schema 2020-12.
+
 ### Top-level tools
 
 A "top-level" tool isn't scoped to a collection or global. Its wire name is exactly its key in the `tools` map.
