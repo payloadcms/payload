@@ -620,6 +620,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    */
   defaultSort?: Sort
   /**
+   * Disable the bulk delete operation for the collection in the admin panel and the API
+   */
+  disableBulkDelete?: boolean
+  /**
    * Disable the bulk edit operation for the collection in the admin panel and the API
    */
   disableBulkEdit?: boolean
