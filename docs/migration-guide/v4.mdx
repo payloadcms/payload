@@ -280,13 +280,25 @@ type RouterAdapterRouter = {
 
 If you were relying on Next-specific extras like `prefetch()` on the router instance, switch to the `Link` component's `prefetch` prop instead.
 
-**Custom apps embedding `RootProvider`** — `RootProvider` now requires a `RouterAdapter` prop. Apps using the default Next.js admin layout get this wired automatically. If you assemble `RootProvider` yourself, pass the framework's adapter component:
+**Custom apps embedding `RootProvider`** — `RootProvider` now requires a `RouterAdapter` prop. Apps using the default Next.js admin layout get this wired automatically. If you assemble `RootProvider` yourself, pass the framework's adapter component — `NextRouterAdapter` on Next.js, or `TanStackRouterAdapter` on TanStack Start:
 
 ```diff
 + import { NextRouterAdapter } from '@payloadcms/next/elements/RouterAdapter'
 
   <RootProvider
 +   RouterAdapter={NextRouterAdapter}
+    config={clientConfig}
+    /* ... */
+  />
+```
+
+On TanStack Start, import the adapter from `@payloadcms/tanstack-start/client` instead:
+
+```diff
++ import { TanStackRouterAdapter } from '@payloadcms/tanstack-start/client'
+
+  <RootProvider
++   RouterAdapter={TanStackRouterAdapter}
     config={clientConfig}
     /* ... */
   />

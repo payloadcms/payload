@@ -16,7 +16,7 @@ keywords: live preview, frontend, react, next.js, vue, nuxt.js, svelte, hook, us
   [client-side Live Preview](./client).
 </Banner>
 
-Server-side Live Preview works by making a roundtrip to the server every time your document is saved, i.e. draft save, autosave, or publish. While using Live Preview, the Admin Panel emits a new `window.postMessage` event which your front-end application can use to invoke this process. In Next.js, this means simply calling `router.refresh()` which will hydrate the HTML using new data straight from the [Local API](../local-api/overview).
+Server-side Live Preview works by making a roundtrip to the server every time your document is saved, i.e. draft save, autosave, or publish. While using Live Preview, the Admin Panel emits a new `window.postMessage` event which your front-end application can use to invoke this process. In Next.js, this means simply calling `router.refresh()`; in TanStack Start, calling `router.invalidate()`. Either re-runs the route on the server and hydrates the HTML using new data straight from the [Local API](../local-api/overview).
 
 <Banner type="warning">
   It is recommended that you enable [Autosave](../versions/autosave) alongside
@@ -27,7 +27,7 @@ If your front-end application is built with [React](#react), you can use the `Re
 
 ## React
 
-If your front-end application is built with server-side [React](https://react.dev) like [Next.js App Router](https://nextjs.org/docs/app), you can use the `RefreshRouteOnSave` component that Payload provides.
+If your front-end application is built with server-side [React](https://react.dev) like the [Next.js App Router](https://nextjs.org/docs/app) or [TanStack Start](https://tanstack.com/start/latest), you can use the `RefreshRouteOnSave` component that Payload provides.
 
 First, install the `@payloadcms/live-preview-react` package:
 
@@ -78,6 +78,26 @@ export const RefreshRouteOnSave: React.FC = () => {
     <PayloadLivePreview
       refresh={() => router.refresh()}
       serverURL={process.env.NEXT_PUBLIC_PAYLOAD_URL}
+    />
+  )
+}
+```
+
+On TanStack Start, swap the router: import `useRouter` from `@tanstack/react-router`, refresh with `router.invalidate()`, and read the server URL from `import.meta.env.VITE_PAYLOAD_URL`:
+
+```tsx
+'use client'
+import { RefreshRouteOnSave as PayloadLivePreview } from '@payloadcms/live-preview-react'
+import { useRouter } from '@tanstack/react-router'
+import React from 'react'
+
+export const RefreshRouteOnSave: React.FC = () => {
+  const router = useRouter()
+
+  return (
+    <PayloadLivePreview
+      refresh={() => router.invalidate()}
+      serverURL={import.meta.env.VITE_PAYLOAD_URL}
     />
   )
 }
