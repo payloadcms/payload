@@ -29,6 +29,7 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
 - Auth-enabled collections expose opt-in `login`, `auth`, `forgotPassword`, `resetPassword`, `unlock`, `verify` tools
 - Define your own `tools`, `prompts`, and `resources` with full TypeScript inference via `defineTool` / `defineCollectionTool` / `defineGlobalTool` / `definePrompt`
 - Gate tools, prompts, and resources with code-level `access` callbacks while Payload access control still protects the underlying documents
+- Observe or transform every completed tool response with `hooks.afterToolCall`
 - Custom auth strategies via `overrideGetAuthorizedMCP`
 
 ## Installation
@@ -140,19 +141,20 @@ authenticated user, provide an override object with `access: () => true`.
 
 ## Options
 
-| Option                                 | Type       | Description                                                                                                                                   |
-| -------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| `collections`                          | `object`   | Map keyed by collection slug. See [Per-collection options](#per-collection-options).                                                          |
-| `globals`                              | `object`   | Map keyed by global slug. See [Per-global options](#per-global-options).                                                                      |
-| `tools`                                | `object`   | Cross-cutting custom tools, keyed by tool name. Values are `Tool` objects (use [`defineTool`](#defining-custom-tools-prompts-and-resources)). |
-| `prompts`                              | `object`   | Custom prompts, keyed by name. Values are `Prompt` objects (use [`definePrompt`](#prompts)).                                                  |
-| `resources`                            | `object`   | Custom resources, keyed by name. Values are `Resource` objects.                                                                               |
-| `disabled`                             | `boolean`  | Skip MCP endpoint registration.                                                                                                               |
-| `overrideGetAuthorizedMCP`             | `function` | Replace the default MCP authorization resolver. See [Custom auth](#custom-auth).                                                              |
-| `mcp.serverOptions.serverInfo.name`    | `string`   | The MCP server name advertised to clients. Default `'Payload MCP Server'`.                                                                    |
-| `mcp.serverOptions.serverInfo.version` | `string`   | The MCP server version. Default `'1.0.0'`.                                                                                                    |
-| `mcp.serverOptions.options`            | `object`   | Raw options passed through to the underlying `McpServer` from `@modelcontextprotocol/server`.                                                 |
-| `mcp.verboseLogs`                      | `boolean`  | When `true`, info/debug logs from the plugin surface in Payload's logger. Warnings and errors are always logged. Default `false`.             |
+| Option                                 | Type         | Description                                                                                                                                   |
+| -------------------------------------- | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `collections`                          | `object`     | Map keyed by collection slug. See [Per-collection options](#per-collection-options).                                                          |
+| `globals`                              | `object`     | Map keyed by global slug. See [Per-global options](#per-global-options).                                                                      |
+| `tools`                                | `object`     | Cross-cutting custom tools, keyed by tool name. Values are `Tool` objects (use [`defineTool`](#defining-custom-tools-prompts-and-resources)). |
+| `prompts`                              | `object`     | Custom prompts, keyed by name. Values are `Prompt` objects (use [`definePrompt`](#prompts)).                                                  |
+| `resources`                            | `object`     | Custom resources, keyed by name. Values are `Resource` objects.                                                                               |
+| `disabled`                             | `boolean`    | Skip MCP endpoint registration.                                                                                                               |
+| `hooks.afterToolCall`                  | `function[]` | Run cross-cutting hooks after tool handlers return. See [MCP plugin hooks](#mcp-plugin-hooks).                                                |
+| `overrideGetAuthorizedMCP`             | `function`   | Replace the default MCP authorization resolver. See [Custom auth](#custom-auth).                                                              |
+| `mcp.serverOptions.serverInfo.name`    | `string`     | The MCP server name advertised to clients. Default `'Payload MCP Server'`.                                                                    |
+| `mcp.serverOptions.serverInfo.version` | `string`     | The MCP server version. Default `'1.0.0'`.                                                                                                    |
+| `mcp.serverOptions.options`            | `object`     | Raw options passed through to the underlying `McpServer` from `@modelcontextprotocol/server`.                                                 |
+| `mcp.verboseLogs`                      | `boolean`    | When `true`, info/debug logs from the plugin surface in Payload's logger. Warnings and errors are always logged. Default `false`.             |
 
 ### Per-collection options
 
@@ -765,7 +767,36 @@ For finer-grained control, you can set `overrideResponse` on an individual built
   `select` to remove sensitive fields before they reach the model.
 </Banner>
 
-## Hooks
+## MCP plugin hooks
+
+Use `hooks.afterToolCall` for behavior that should run after every collection, global, or top-level tool handler returns. Hooks run in array order, and each hook must return the response that the next hook receives:
+
+```ts
+mcpPlugin({
+  hooks: {
+    afterToolCall: [
+      ({ input, req, response, toolName }) => {
+        req.payload.logger.info(
+          `[MCP] ${toolName} ${response.isError ? 'failed' : 'completed'}`,
+        )
+
+        return response
+      },
+    ],
+  },
+})
+```
+
+Each hook receives:
+
+| Argument   | Description                                                                      |
+| ---------- | -------------------------------------------------------------------------------- |
+| `input`    | The parsed input passed to the tool.                                             |
+| `req`      | The current Payload request.                                                     |
+| `response` | The response returned by the previous response override or `afterToolCall` hook. |
+| `toolName` | The registered MCP tool name, such as `createDocument` or `getConfigInfo`.       |
+
+## Payload collection hooks
 
 To modify documents at runtime use a collection [Hook](https://payloadcms.com/docs/hooks/collections). Inside the hook you can detect MCP traffic via `req.payloadAPI === 'MCP'`:
 

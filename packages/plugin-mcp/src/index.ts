@@ -6,8 +6,8 @@ import { mcpEndpoint } from './endpoint/index.js'
 import { sanitizeMCPConfig } from './mcp/sanitizeMCPConfig.js'
 
 declare module 'payload' {
-  export interface PayloadRequest {
-    payloadAPI: 'GraphQL' | 'local' | 'MCP' | 'REST'
+  export interface PayloadRequestAPI {
+    MCP: true
   }
   interface RegisteredPlugins {
     /** After the plugin's `plugin` callback runs, `options` holds the sanitized config. */
