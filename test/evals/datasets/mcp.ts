@@ -4,7 +4,11 @@ import { NodeFormat } from '@payloadcms/richtext-lexical'
 
 import type { EvalCase } from '../types.js'
 
-import { expectMCPDocumentRead, expectMCPToolCall } from '../utils/mcpToolCalls.js'
+import {
+  expectMCPDocumentRead,
+  expectMCPToolCall,
+  scoreMCPToolCallFailures,
+} from '../utils/mcpToolCalls.js'
 
 function lexicalNodes({ nodes }: { nodes: DefaultNodeTypes[] }): DefaultNodeTypes[] {
   return nodes.flatMap((node) => [
@@ -46,6 +50,8 @@ export const mcpDataset: EvalCase[] = [
         mcpToolCalls,
         response: { doc: { id: docs[0]!.id } },
       })
+
+      return scoreMCPToolCallFailures({ mcpToolCalls })
     },
   },
   {
@@ -84,6 +90,8 @@ export const mcpDataset: EvalCase[] = [
         mcpToolCalls,
         response: { doc: { id: docs[0]!.id } },
       })
+
+      return scoreMCPToolCallFailures({ mcpToolCalls })
     },
   },
   {
@@ -122,6 +130,8 @@ export const mcpDataset: EvalCase[] = [
         expect.arrayContaining(['MCP Keep', 'MCP Update Target']),
       )
       expect(remainingPosts.docs).toHaveLength(2)
+
+      return scoreMCPToolCallFailures({ mcpToolCalls })
     },
   },
   {
@@ -145,6 +155,8 @@ export const mcpDataset: EvalCase[] = [
       }
 
       expect(settings.tagline).toBe('Updated through Payload MCP')
+
+      return scoreMCPToolCallFailures({ mcpToolCalls })
     },
   },
   {
@@ -198,6 +210,8 @@ export const mcpDataset: EvalCase[] = [
         mcpToolCalls,
         response: { doc: { id: post?.id } },
       })
+
+      return scoreMCPToolCallFailures({ mcpToolCalls })
     },
   },
   {
@@ -252,6 +266,8 @@ export const mcpDataset: EvalCase[] = [
       expect(boldText).toBeDefined()
       expect(list).toBeDefined()
       expect(listItems).toEqual(expect.arrayContaining(['Create content', 'Manage schemas']))
+
+      return scoreMCPToolCallFailures({ mcpToolCalls })
     },
   },
 ]

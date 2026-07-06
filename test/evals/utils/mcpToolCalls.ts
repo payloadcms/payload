@@ -1,4 +1,4 @@
-import type { EvalExpect, MCPToolCall } from '../types.js'
+import type { ConfigChangeScorerResult, EvalExpect, MCPToolCall } from '../types.js'
 
 export function expectMCPToolCall({
   name,
@@ -46,6 +46,29 @@ export function expectMCPDocumentRead({
   expect(document).toBeDefined()
 
   return document!
+}
+
+export function scoreMCPToolCallFailures({
+  mcpToolCalls,
+}: {
+  mcpToolCalls: MCPToolCall[]
+}): ConfigChangeScorerResult {
+  const failedToolCalls = mcpToolCalls.filter((toolCall) => toolCall.response.isError)
+  const score = 0.5 ** failedToolCalls.length
+  const failedToolNames = failedToolCalls.map((toolCall) => toolCall.name).join(', ')
+
+  return {
+    changeDescription: '',
+    completeness: score,
+    correctness: score,
+    pass: true,
+    reasoning:
+      failedToolCalls.length === 0
+        ? 'Runtime verification passed with no failed MCP tool calls.'
+        : `Runtime verification passed with ${failedToolCalls.length} failed MCP tool ${failedToolCalls.length === 1 ? 'call' : 'calls'}: ${failedToolNames}.`,
+    score,
+    usage: { cachedInputTokens: 0, inputTokens: 0, outputTokens: 0, totalTokens: 0 },
+  }
 }
 
 function responseDocuments({
