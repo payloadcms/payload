@@ -2,7 +2,6 @@
   .step-nav {
     display: flex;
     align-items: center;
-    min-width: 0;
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
@@ -50,27 +49,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .step-nav__item {
-    flex-shrink: 0;
   }
 
   .step-nav__last {
     color: var(--color-text-secondary);
-  }
-
-  /* When space is tight, truncate the last breadcrumb item so it doesn't overlap the user menu */
-  .step-nav__last:not(
-      :has(.dashboard-breadcrumb-dropdown, .dashboard-breadcrumb-dropdown__editing)
-    ) {
-    flex-shrink: 1;
-    min-width: 0;
-    max-width: none;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .step-nav__item:not(.btn),

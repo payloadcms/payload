@@ -64,7 +64,6 @@
     flex-grow: 0;
     gap: var(--spacer-1);
     width: 100%;
-    min-width: 0;
   }
 
   .app-header__controls-wrapper {
