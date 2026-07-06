@@ -221,7 +221,9 @@ function getSelectedCases({
   }
 
   const pattern = new RegExp(testPattern)
-  return runnableCases.filter((testCase) => pattern.test(testCase.configPath))
+  return runnableCases.filter(
+    (testCase) => pattern.test(testCase.configPath) || pattern.test(testCase.input),
+  )
 }
 
 async function findIdenticalCases({
@@ -256,6 +258,7 @@ async function findIdenticalCases({
       input: testCase.input,
       modelId: resolvedModelId,
       runnerKind: runner,
+      setup: testCase.setup?.toString(),
       skillInstall,
       systemPromptKey,
     })
@@ -285,7 +288,7 @@ async function getResolvedModelId({
 
 async function chooseRunMode({ identicalCases }: { identicalCases: EvalCase[] }): Promise<boolean> {
   const caseLabel = identicalCases.length === 1 ? 'case' : 'cases'
-  const shown = identicalCases.slice(0, 8).map((testCase) => `• ${testCase.configPath}`)
+  const shown = identicalCases.slice(0, 8).map((testCase) => `• ${testCase.input}`)
   if (identicalCases.length > shown.length) {
     shown.push(`• …and ${identicalCases.length - shown.length} more`)
   }

@@ -44,6 +44,7 @@ export function codegenParamsHash(params: {
   input: string
   modelId?: string
   runnerKind: RunnerKind
+  setup?: string
   skillInstall?: SkillInstallMode
   systemPromptKey?: SystemPromptKey
 }): string {
@@ -64,6 +65,7 @@ export function codegenParamsHash(params: {
     input: params.input,
     modelId: params.modelId,
     runnerKind: params.runnerKind,
+    setup: params.setup ? normalizeFunctionSource(params.setup) : undefined,
     skillHash: skillIncluded ? getSkillTreeHash() : undefined,
     skillInstall: params.skillInstall,
     systemPromptKey: params.systemPromptKey,

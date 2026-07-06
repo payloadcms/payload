@@ -103,6 +103,7 @@ Add cases to one of the files in `datasets/`. A case has:
 - `configPath` - folder under `fixtures/` that contains the starter
   `payload.config.ts` the model edits.
 - `input` - the task prompt given to the model.
+- `setup` - optional test data setup that runs after Payload boots and before the agent.
 - `verify` - the check that runs after the generated config typechecks.
 
 Simple scorer-only case:

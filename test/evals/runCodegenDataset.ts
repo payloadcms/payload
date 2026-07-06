@@ -85,6 +85,7 @@ export async function runCodegenCase(
     input: testCase.input,
     modelId: resolvedModelId,
     runnerKind: kind,
+    setup: testCase.setup?.toString(),
     skillInstall: kind === 'claude-code' ? skillInstall : undefined,
     systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
   })
@@ -107,7 +108,10 @@ export async function runCodegenCase(
   let runnerOutput: CodegenRunnerResult
 
   try {
-    await lazyPayload?.boot()
+    const payload = await lazyPayload?.boot()
+    if (payload && testCase.setup) {
+      await testCase.setup({ payload })
+    }
     runnerOutput = await runCodegenEval(testCase.input, starterConfig, {
       agentModel,
       configPath: testCase.configPath,
@@ -146,7 +150,7 @@ export async function runCodegenCase(
 
   const { errors: tscErrors, valid } = await validateConfigTypes(
     modifiedConfig,
-    testCase.configPath,
+    `${testCase.configPath}-${paramsHash.slice(0, 12)}`,
   )
 
   if (!valid) {
@@ -159,7 +163,7 @@ export async function runCodegenCase(
       usage: runnerOnlyUsage(runnerUsage),
     }
     const recordedResult = recordResult(result)
-    writeFailure({ label, modifiedConfig, result, starterConfig })
+    writeFailure({ label, modifiedConfig, paramsHash, result, starterConfig })
     console.log(`[${result.category}] ✗ FAIL [TSC]  ${testCase.configPath}`)
     for (const err of tscErrors) {
       console.log(`  TSC: ${err}`)
@@ -183,7 +187,7 @@ export async function runCodegenCase(
         usage: runnerOnlyUsage(runnerUsage),
       }
       const recordedResult = recordResult(result)
-      writeFailure({ label, modifiedConfig, result, starterConfig })
+      writeFailure({ label, modifiedConfig, paramsHash, result, starterConfig })
       console.log(`[${result.category}] ✗ FAIL [IMPORT]  ${testCase.configPath}`)
       console.log(`  Reason: ${result.reasoning}`)
       await lazyPayload?.cleanup()
@@ -239,7 +243,7 @@ export async function runCodegenCase(
     const recordedResult = recordResult(result)
 
     if (!result.pass) {
-      writeFailure({ label, modifiedConfig, result, starterConfig })
+      writeFailure({ label, modifiedConfig, paramsHash, result, starterConfig })
     }
 
     logResult(recordedResult)
@@ -258,7 +262,7 @@ export async function runCodegenCase(
 
     const recordedResult = recordResult(result)
 
-    writeFailure({ label, modifiedConfig, result, starterConfig })
+    writeFailure({ label, modifiedConfig, paramsHash, result, starterConfig })
     console.log(`[${result.category}] ✗ FAIL [VERIFY]  ${testCase.configPath}`)
     console.log(`  Reason: ${result.reasoning}`)
     return recordedResult
@@ -525,11 +529,13 @@ function usageWithScorer(runnerUsage: TokenUsage, scorerUsage: TokenUsage): Eval
 function writeFailure({
   label,
   modifiedConfig,
+  paramsHash,
   result,
   starterConfig,
 }: {
   label: string
   modifiedConfig: string
+  paramsHash: string
   result: EvalResult
   starterConfig: string
 }) {
@@ -540,6 +546,7 @@ function writeFailure({
     configPath: result.configPath,
     label,
     modifiedConfig,
+    paramsHash,
     question: result.question,
     reasoning: result.reasoning,
     starterConfig,
@@ -582,7 +589,7 @@ export async function runCodegenDataset(
   console.log(`\n=== ${label} Eval Results (${dataset.length} cases) ===`)
   console.log(`  Categories: ${categories.join(', ')}`)
   for (const c of dataset) {
-    console.log(`  · ${c.configPath}`)
+    console.log(`  · ${c.configPath}: ${c.input}`)
   }
 
   if (shouldRerun()) {

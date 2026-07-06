@@ -1,5 +1,6 @@
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { buildConfig } from 'payload'
 
@@ -16,15 +17,40 @@ const mcpLogPath = process.env.PAYLOAD_MCP_EVAL_LOG_PATH
 export default buildConfig({
   collections: [
     {
+      slug: 'authors',
+      fields: [{ name: 'name', type: 'text', required: true }],
+    },
+    {
       slug: 'posts',
-      fields: [{ name: 'title', type: 'text', required: true }],
+      fields: [
+        { name: 'title', type: 'text', required: true },
+        {
+          name: 'status',
+          type: 'select',
+          defaultValue: 'draft',
+          options: ['draft', 'published'],
+        },
+        { name: 'author', type: 'relationship', relationTo: 'authors' },
+        { name: 'content', type: 'richText' },
+      ],
     },
   ],
   db: mongooseAdapter({ url: databaseURL.toString() }),
+  editor: lexicalEditor({}),
+  globals: [
+    {
+      slug: 'site-settings',
+      fields: [{ name: 'tagline', type: 'text', defaultValue: 'Original tagline' }],
+    },
+  ],
   plugins: [
     mcpPlugin({
       collections: {
+        authors: {},
         posts: {},
+      },
+      globals: {
+        'site-settings': {},
       },
       hooks: {
         afterToolCall: [

@@ -32,11 +32,14 @@ export type EvalCase = {
    * for this case.
    *
    * Eval cases read it as the starter config the model edits. Runtime cases
-   * boot the generated config after TypeScript passes.
+   * boot the generated config after TypeScript passes. Multiple cases can
+   * share the same config; their input identifies them as separate tests.
    */
   configPath: string
   /** Task prompt given to the model. */
   input: string
+  /** Creates any data the case needs after Payload boots and before the agent runs. */
+  setup?: (args: { payload: Payload }) => Promise<void> | void
   /**
    * Checks the generated config after TypeScript passes.
    *

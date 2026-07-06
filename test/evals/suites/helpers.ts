@@ -37,7 +37,7 @@ export function registerCodegenCases(
 
   describe.concurrent(`${groupName}${labelSuffix}`, () => {
     for (const testCase of dataset) {
-      it(`${testNamePrefix}${testCase.configPath}`, async ({ skip }) => {
+      it(`${testNamePrefix}${testCase.configPath}: ${testCase.input}`, async ({ skip }) => {
         const result = await runCodegenCase(testCase, label, {
           agentModel,
           exposeMcpTools,
