@@ -124,12 +124,12 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
                 )}
               />
             )}
-            <UserMenu
-              CustomAvatar={CustomAvatar}
-              CustomLogoutButton={CustomLogoutButton}
-              settingsItemGroups={settingsItemGroups}
-            />
           </div>
+          <UserMenu
+            CustomAvatar={CustomAvatar}
+            CustomLogoutButton={CustomLogoutButton}
+            settingsItemGroups={settingsItemGroups}
+          />
         </div>
       </div>
     </header>
