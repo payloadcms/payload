@@ -14,23 +14,73 @@
 
 import * as p from '@clack/prompts'
 import { spawn } from 'node:child_process'
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { loadEnv } from 'payload/node'
 
-const runsDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'eval-results', 'runs')
+import type { EvalCase } from './types.js'
 
-type Suite = { label: string; spec?: string; value: string }
+import { collectionsCodegenDataset } from './datasets/collections/codegen.js'
+import { configCodegenDataset } from './datasets/config/codegen.js'
+import { fieldsCodegenDataset } from './datasets/fields/codegen.js'
+import { mcpDataset } from './datasets/mcp.js'
+import {
+  negativeCorrectionCodegenDataset,
+  negativeInvalidInstructionDataset,
+} from './datasets/negative/codegen.js'
+import { pluginsCodegenDataset } from './datasets/plugins/codegen.js'
+import { pluginsOfficialCodegenDataset } from './datasets/plugins/official/codegen.js'
+import { codegenParamsHash } from './paramsHash.js'
+import { getAgentVersion } from './runner/claudeCode.js'
+import { readRunResults } from './runResults.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const fixturesDir = path.join(__dirname, 'fixtures')
+const runsDir = path.join(__dirname, 'eval-results', 'runs')
+
+type Suite = { cases: EvalCase[]; label: string; spec?: string; value: string }
+
+const allCases = [
+  ...collectionsCodegenDataset,
+  ...fieldsCodegenDataset,
+  ...configCodegenDataset,
+  ...mcpDataset,
+  ...negativeCorrectionCodegenDataset,
+  ...negativeInvalidInstructionDataset,
+  ...pluginsOfficialCodegenDataset,
+  ...pluginsCodegenDataset,
+]
 
 const SUITES: Suite[] = [
-  { label: 'All suites', value: 'all' },
-  { label: 'Collections', spec: 'eval.collections.spec', value: 'collections' },
-  { label: 'Fields', spec: 'eval.fields.spec', value: 'fields' },
-  { label: 'Config', spec: 'eval.config.spec', value: 'config' },
-  { label: 'MCP', spec: 'eval.mcp.spec', value: 'mcp' },
-  { label: 'Negative', spec: 'eval.negative.spec', value: 'negative' },
-  { label: 'Official plugins', spec: 'eval.official-plugins.spec', value: 'official-plugins' },
-  { label: 'Building plugins', spec: 'eval.building-plugins.spec', value: 'building-plugins' },
+  { cases: allCases, label: 'All suites', value: 'all' },
+  {
+    cases: collectionsCodegenDataset,
+    label: 'Collections',
+    spec: 'eval.collections.spec',
+    value: 'collections',
+  },
+  { cases: fieldsCodegenDataset, label: 'Fields', spec: 'eval.fields.spec', value: 'fields' },
+  { cases: configCodegenDataset, label: 'Config', spec: 'eval.config.spec', value: 'config' },
+  { cases: mcpDataset, label: 'MCP', spec: 'eval.mcp.spec', value: 'mcp' },
+  {
+    cases: [...negativeCorrectionCodegenDataset, ...negativeInvalidInstructionDataset],
+    label: 'Negative',
+    spec: 'eval.negative.spec',
+    value: 'negative',
+  },
+  {
+    cases: pluginsOfficialCodegenDataset,
+    label: 'Official plugins',
+    spec: 'eval.official-plugins.spec',
+    value: 'official-plugins',
+  },
+  {
+    cases: pluginsCodegenDataset,
+    label: 'Building plugins',
+    spec: 'eval.building-plugins.spec',
+    value: 'building-plugins',
+  },
 ]
 
 const RUNNERS = [
@@ -152,12 +202,126 @@ async function pickModel(runner: string): Promise<string | undefined> {
   return typed || undefined
 }
 
+function getSelectedCases({
+  runner,
+  suite,
+  testPattern,
+}: {
+  runner: 'claude-code' | 'llm'
+  suite: Suite
+  testPattern?: string
+}): EvalCase[] {
+  const runnableCases =
+    runner === 'claude-code'
+      ? suite.cases
+      : suite.cases.filter((testCase) => testCase.category !== 'mcp')
+
+  if (!testPattern) {
+    return runnableCases
+  }
+
+  const pattern = new RegExp(testPattern)
+  return runnableCases.filter((testCase) => pattern.test(testCase.configPath))
+}
+
+async function findIdenticalCases({
+  cases,
+  model,
+  runner,
+  skill,
+}: {
+  cases: EvalCase[]
+  model?: string
+  runner: 'claude-code' | 'llm'
+  skill: 'off' | 'on'
+}): Promise<EvalCase[]> {
+  const latestResultByParams = new Map(
+    readRunResults()
+      .sort((a, b) => a.result.runId.localeCompare(b.result.runId))
+      .map((entry) => [entry.paramsHash, entry]),
+  )
+  const resolvedModelId = await getResolvedModelId({ model, runner })
+  const skillInstall = runner === 'claude-code' ? (skill === 'on' ? 'embedded' : 'none') : undefined
+  const systemPromptKey =
+    runner === 'llm' ? (skill === 'on' ? 'codegenWithSkill' : 'codegenNoSkill') : undefined
+
+  return cases.filter((testCase) => {
+    const starterConfig = readFileSync(
+      path.join(fixturesDir, testCase.configPath, 'payload.config.ts'),
+      'utf8',
+    )
+    const paramsHash = codegenParamsHash({
+      expected: testCase.verify.toString(),
+      fixtureContent: starterConfig,
+      input: testCase.input,
+      modelId: resolvedModelId,
+      runnerKind: runner,
+      skillInstall,
+      systemPromptKey,
+    })
+    return latestResultByParams.has(paramsHash)
+  })
+}
+
+async function getResolvedModelId({
+  model,
+  runner,
+}: {
+  model?: string
+  runner: 'claude-code' | 'llm'
+}): Promise<string> {
+  if (runner === 'claude-code') {
+    return `claude-code/${model ?? 'claude-opus-4-6'}/${await getAgentVersion()}`
+  }
+
+  const { DEFAULT_RUNNER_MODEL, MODELS } = await import('./models.js')
+  const runnerModel = model ? MODELS[model as keyof typeof MODELS] : DEFAULT_RUNNER_MODEL
+  if (!runnerModel) {
+    throw new Error(`Unknown model "${model}"`)
+  }
+  const details = runnerModel as { modelId?: string; provider?: string }
+  return `${details.provider ?? 'unknown'}/${details.modelId ?? 'unknown'}`
+}
+
+async function chooseRunMode({ identicalCases }: { identicalCases: EvalCase[] }): Promise<boolean> {
+  const caseLabel = identicalCases.length === 1 ? 'case' : 'cases'
+  const shown = identicalCases.slice(0, 8).map((testCase) => `• ${testCase.configPath}`)
+  if (identicalCases.length > shown.length) {
+    shown.push(`• …and ${identicalCases.length - shown.length} more`)
+  }
+
+  p.note(
+    shown.join('\n'),
+    `${identicalCases.length} selected ${caseLabel} already ${identicalCases.length === 1 ? 'has' : 'have'} an identical result`,
+  )
+  return (
+    (await pick(
+      'How should this run proceed?',
+      [
+        {
+          hint: 'reuse previous results and run the remaining cases',
+          label: `Skip ${identicalCases.length} identical ${caseLabel}`,
+          value: 'skip',
+        },
+        {
+          hint: 'execute every selected case again',
+          label: 'Rerun all selected cases',
+          value: 'rerun',
+        },
+      ],
+      'skip',
+    )) === 'rerun'
+  )
+}
+
 async function main(): Promise<void> {
   const argv = process.argv.slice(2)
   if (argv.includes('--help') || argv.includes('-h')) {
     process.stdout.write(USAGE + '\n')
     return
   }
+
+  loadEnv()
 
   const args = parseArgs(argv)
   const tty = Boolean(process.stdin.isTTY)
@@ -204,6 +368,25 @@ async function main(): Promise<void> {
 
   // Model is optional; only prompt when not given and we're interactive.
   const model = args.model ?? (tty ? await pickModel(runner) : undefined)
+  let rerun = args.rerun || process.env.EVAL_RERUN === 'true'
+
+  if (!rerun) {
+    const identicalCases = await findIdenticalCases({
+      cases: getSelectedCases({ runner, suite, testPattern: args.testPattern }),
+      model,
+      runner,
+      skill,
+    })
+    if (identicalCases.length > 0) {
+      if (tty) {
+        rerun = await chooseRunMode({ identicalCases })
+      } else {
+        process.stderr.write(
+          `Warning: ${identicalCases.length} cases have identical completed results and will be skipped. Use --rerun to execute them.\n`,
+        )
+      }
+    }
+  }
 
   const vitestArgs = ['exec', 'vitest', '--run', '--project', 'eval']
   if (suite.spec) {
@@ -228,14 +411,14 @@ async function main(): Promise<void> {
   if (model) {
     env.EVAL_MODEL = model
   }
-  if (args.rerun) {
+  if (rerun) {
     env.EVAL_RERUN = 'true'
   }
 
   if (tty) {
     p.outro(
       `▶ runner=${runner} · skill=${skill} · suite=${suiteValue}` +
-        `${model ? ` · model=${model}` : ''}${args.rerun ? ' · rerun' : ''}` +
+        `${model ? ` · model=${model}` : ''}${rerun ? ' · rerun' : ''}` +
         `${args.testPattern ? ` · -t ${args.testPattern}` : ''}`,
     )
   }

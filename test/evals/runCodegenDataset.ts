@@ -46,8 +46,7 @@ class VerifyFailure extends Error {
  *   3. `verify` performs deterministic config checks, runtime checks, scorer
  *      checks, or any combination of those through one readable function.
  *
- * Cases with identical parameters can reuse a previous result. Runtime cases
- * always execute because their point is booting the generated config.
+ * Cases with identical parameters can reuse a previous completed result.
  */
 export async function runCodegenCase(
   testCase: EvalCase,
@@ -90,18 +89,14 @@ export async function runCodegenCase(
     systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
   })
 
-  const reusable =
-    !shouldRerun() && !testCase.bootConfig ? findReusableResult({ paramsHash }) : undefined
-  if (reusable && reusable.result.runtimeUsed !== true) {
+  const reusable = !shouldRerun() ? findReusableResult({ paramsHash }) : undefined
+  if (reusable) {
     const previous = reusable.result
-    const score = previous.score != null ? `  score: ${previous.score.toFixed(2)}` : ''
-    console.log(
-      `[${previous.category}] ${previous.pass ? '✓ PASS' : '✗ FAIL'} (skipped — identical parameters)${score}`,
-    )
+    console.log(`[${previous.category}] ↷ SKIP (identical parameters)  ${testCase.configPath}`)
     console.log(`  Task: ${previous.question}`)
     return recordRunResult({
       paramsHash,
-      result: { ...previous, usage: undefined },
+      result: { ...previous, reusedFromRunId: previous.runId, usage: undefined },
       reusedFromRunId: previous.runId,
     })
   }

@@ -54,6 +54,14 @@ below; any flag you omit is prompted for in a TTY, or defaulted in CI
 (`runner=llm`, `skill=on`, `suite=all`). The launcher is just a front-end —
 setting `EVAL_RUNNER` / `EVAL_SKILL` / `EVAL_MODEL` directly works too.
 
+## Reusing previous results
+
+By default, evals with identical parameters reuse their latest completed result
+instead of running again. The CLI let you choose whether to skip these
+cases or rerun all selected cases.
+
+Use `--rerun` or set `EVAL_RERUN=true` to always run every selected case.
+
 ## Required env vars
 
 - `OPENAI_API_KEY` **or** `ANTHROPIC_API_KEY` — at least one is required. Both the runner and the LLM scorer default to OpenAI models when `OPENAI_API_KEY` is set, and otherwise fall back to Anthropic (`claude-sonnet-4-6` runner, `claude-haiku-4-5` scorer).
@@ -72,9 +80,6 @@ for the agent-runner design and rationale.
 
 Every dataset row gives the model one starter config and one task. The runner
 asks the model to return a complete edited `payload.config.ts`, then verifies it.
-Every invocation writes immutable results under `eval-results/runs/`. By default,
-cases with identical parameters reuse the newest completed result; `--rerun`
-forces them to execute again.
 
 ```text
 agent generates config

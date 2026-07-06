@@ -168,6 +168,8 @@ export type EvalResult = {
   pass: boolean
   question: string
   reasoning: string
+  /** Previous run whose identical result was reused instead of executing this case. */
+  reusedFromRunId?: string
   /**
    * Identifies the eval invocation that produced this result (ISO timestamp set
    * once per `pnpm test:eval` run). Lets the dashboard group results into runs.

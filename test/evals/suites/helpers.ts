@@ -37,7 +37,7 @@ export function registerCodegenCases(
 
   describe.concurrent(`${groupName}${labelSuffix}`, () => {
     for (const testCase of dataset) {
-      it(`${testNamePrefix}${testCase.configPath}`, async () => {
+      it(`${testNamePrefix}${testCase.configPath}`, async ({ skip }) => {
         const result = await runCodegenCase(testCase, label, {
           agentModel,
           exposeMcpTools,
@@ -46,6 +46,10 @@ export function registerCodegenCases(
           skillInstall,
           systemPromptKey,
         })
+
+        if (result.reusedFromRunId) {
+          skip(`Identical result reused from ${result.reusedFromRunId}`)
+        }
 
         if (expectPass) {
           expect(result.pass, caseFailureMessage(result)).toBe(true)

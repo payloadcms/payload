@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto'
+import ts from 'typescript'
 
 import type { RunnerKind, SkillInstallMode } from './runner/types.js'
 import type { SystemPromptKey } from './types.js'
@@ -9,6 +10,31 @@ import { getSkillTreeHash } from './runner/workdir.js'
 function hashParams(params: Record<string, string | undefined>): string {
   const stable = JSON.stringify(params, Object.keys(params).sort())
   return createHash('sha256').update(stable).digest('hex')
+}
+
+function normalizeFunctionSource(source: string): string {
+  const sourceFile = ts.createSourceFile(
+    'verify.ts',
+    `const verify = ${source}`,
+    ts.ScriptTarget.Latest,
+    false,
+    ts.ScriptKind.TS,
+  )
+  const parts: string[] = []
+  const visit = (node: ts.Node): void => {
+    if (ts.isParenthesizedExpression(node)) {
+      visit(node.expression)
+      return
+    }
+
+    parts.push(String(node.kind))
+    if (ts.isIdentifier(node) || ts.isLiteralExpression(node)) {
+      parts.push(node.text)
+    }
+    ts.forEachChild(node, visit)
+  }
+  visit(sourceFile)
+  return parts.join('|')
 }
 
 /** Hashes every input that can affect a codegen result. */
@@ -33,7 +59,7 @@ export function codegenParamsHash(params: {
   return hashParams({
     type: 'codegen',
     agentSystemPrompt,
-    expected: params.expected,
+    expected: normalizeFunctionSource(params.expected),
     fixtureContent: params.fixtureContent,
     input: params.input,
     modelId: params.modelId,
