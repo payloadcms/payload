@@ -253,12 +253,12 @@ async function findIdenticalCases({
       'utf8',
     )
     const paramsHash = codegenParamsHash({
-      expected: testCase.verify.toString(),
+      category: testCase.category,
+      configPath: testCase.configPath,
       fixtureContent: starterConfig,
       input: testCase.input,
       modelId: resolvedModelId,
       runnerKind: runner,
-      setup: testCase.setup?.toString(),
       skillInstall,
       systemPromptKey,
     })

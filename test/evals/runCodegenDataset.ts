@@ -80,12 +80,12 @@ export async function runCodegenCase(
   )
 
   const paramsHash = codegenParamsHash({
-    expected: testCase.verify.toString(),
+    category: testCase.category,
+    configPath: testCase.configPath,
     fixtureContent: starterConfig,
     input: testCase.input,
     modelId: resolvedModelId,
     runnerKind: kind,
-    setup: testCase.setup?.toString(),
     skillInstall: kind === 'claude-code' ? skillInstall : undefined,
     systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
   })
@@ -419,7 +419,11 @@ function createLazyPayload(
 
         try {
           const { initPayloadInt } = await import('../__helpers/shared/initPayloadInt.js')
-          payload = (await initPayloadInt(configDir, suiteName, undefined, configFile)).payload
+          payload = (
+            await initPayloadInt(configDir, suiteName, undefined, configFile, {
+              payloadKey: configFile,
+            })
+          ).payload
           return payload
         } finally {
           if (previousDropDatabase === undefined) {

@@ -4,7 +4,8 @@ import { codegenParamsHash } from './paramsHash.js'
 import * as workdir from './runner/workdir.js'
 
 const base = {
-  expected: 'expected',
+  category: 'collections' as const,
+  configPath: 'collections/codegen/example',
   fixtureContent: 'starter',
   input: 'do the thing',
 }
