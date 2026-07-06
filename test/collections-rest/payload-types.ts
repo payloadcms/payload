@@ -76,6 +76,7 @@ export interface Config {
     'error-on-hooks': ErrorOnHook;
     endpoints: Endpoint;
     'disabled-bulk-edit-docs': DisabledBulkEditDoc;
+    'disabled-bulk-delete-docs': DisabledBulkDeleteDoc;
     'large-documents': LargeDocument;
     'payload-kv': PayloadKv;
     users: User;
@@ -94,6 +95,7 @@ export interface Config {
     'error-on-hooks': ErrorOnHooksSelect<false> | ErrorOnHooksSelect<true>;
     endpoints: EndpointsSelect<false> | EndpointsSelect<true>;
     'disabled-bulk-edit-docs': DisabledBulkEditDocsSelect<false> | DisabledBulkEditDocsSelect<true>;
+    'disabled-bulk-delete-docs': DisabledBulkDeleteDocsSelect<false> | DisabledBulkDeleteDocsSelect<true>;
     'large-documents': LargeDocumentsSelect<false> | LargeDocumentsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
@@ -264,6 +266,16 @@ export interface DisabledBulkEditDoc {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disabled-bulk-delete-docs".
+ */
+export interface DisabledBulkDeleteDoc {
+  id: string;
+  text?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "large-documents".
  */
 export interface LargeDocument {
@@ -361,6 +373,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'disabled-bulk-edit-docs';
         value: string | DisabledBulkEditDoc;
+      } | null)
+    | ({
+        relationTo: 'disabled-bulk-delete-docs';
+        value: string | DisabledBulkDeleteDoc;
       } | null)
     | ({
         relationTo: 'large-documents';
@@ -514,6 +530,15 @@ export interface EndpointsSelect<T extends boolean = true> {
  * via the `definition` "disabled-bulk-edit-docs_select".
  */
 export interface DisabledBulkEditDocsSelect<T extends boolean = true> {
+  text?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "disabled-bulk-delete-docs_select".
+ */
+export interface DisabledBulkDeleteDocsSelect<T extends boolean = true> {
   text?: T;
   updatedAt?: T;
   createdAt?: T;

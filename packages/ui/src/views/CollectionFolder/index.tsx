@@ -265,7 +265,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
             Actions={[
               !smallBreak && (
                 <ListSelection
-                  disableBulkDelete={disableBulkDelete}
+                  disableBulkDelete={collectionConfig.disableBulkDelete ?? disableBulkDelete}
                   disableBulkEdit={collectionConfig.disableBulkEdit ?? disableBulkEdit}
                   folderAssignedCollections={
                     Array.isArray(folderType) ? folderType : [collectionSlug]
