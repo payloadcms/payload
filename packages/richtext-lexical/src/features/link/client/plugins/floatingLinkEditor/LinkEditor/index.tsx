@@ -7,8 +7,8 @@ import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import {
-  ExternalLinkIcon,
   formatDrawerSlug,
+  NewTabIcon,
   useConfig,
   useEditDepth,
   useLocale,
@@ -372,7 +372,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
               {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
               {linkNode?.__fields.newTab ? (
                 <>
-                  <ExternalLinkIcon size={16} /> <div className="link-input__divider" />{' '}
+                  <NewTabIcon size={16} /> <div className="link-input__divider" />{' '}
                 </>
               ) : null}
             </a>
@@ -381,7 +381,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
               <span className="link-input__label-pure">{linkLabel}</span>
               {linkNode?.__fields.newTab ? (
                 <>
-                  <ExternalLinkIcon size={16} /> <div className="link-input__divider" />{' '}
+                  <NewTabIcon size={16} /> <div className="link-input__divider" />{' '}
                 </>
               ) : null}
             </>

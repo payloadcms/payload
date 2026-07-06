@@ -57,6 +57,12 @@ export type PopupProps = {
   boundingRef?: React.RefObject<HTMLElement>
   button?: React.ReactNode
   /**
+   * Accessible label for the trigger button.
+   * Necessary when the button has an icon-only content,
+   * so the button has an accessible name for screen readers.
+   */
+  buttonAriaLabel?: string
+  /**
    * The class name to apply to the button that triggers the popup.
    */
   buttonClassName?: string
@@ -116,7 +122,7 @@ export type PopupProps = {
    * When set, `verticalAlign`, `horizontalAlign`, and the caret are ignored.
    */
   side?: 'left' | 'right'
-  size?: 'fit-content' | 'large' | 'medium' | 'small'
+  size?: 'fit-content' | 'large' | 'small'
   /**
    * Theme for the popup content. Defaults to 'dark'.
    * Set to 'auto' to inherit the current theme.
@@ -146,6 +152,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
   const {
     id,
     button,
+    buttonAriaLabel,
     buttonClassName,
     buttonSize,
     buttonType = 'default',
@@ -165,7 +172,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     showOnHover = false,
     showScrollbar = false,
     side,
-    size = 'medium',
+    size = 'fit-content',
     theme = 'dark',
     verticalAlign = 'bottom',
   } = props
@@ -561,6 +568,7 @@ export const Popup: React.FC<PopupProps> = (props) => {
     <PopupTrigger
       active={active}
       button={button}
+      buttonAriaLabel={buttonAriaLabel}
       buttonType={buttonType}
       className={buttonClassName}
       disabled={disabled}

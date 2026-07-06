@@ -130,9 +130,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { closeModal } = useModal()
   const {
     collectionSlug,
-    drawerSlug,
     initialFiles,
     initialForms,
+    modalSlug: drawerSlug,
     onSuccess,
     parentID,
     setInitialFiles,
@@ -615,6 +615,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         }
 
         if (hasSubmitted) {
+          // File/Blob objects cannot be serialized across the server-function
+          // boundary (RSC flight / TanStack seroval), so the `file` value is
+          // dropped during the `getFormState` round-trip. Capture it first and
+          // re-attach it afterwards so the file survives — mirroring the
+          // save-retry path below; without this the next save omits the file
+          // entirely and the server responds "No files were uploaded".
+          const originalFileValue = forms[i].formState.file?.value
+
           const { state } = await getFormState({
             collectionSlug,
             docPermissions,
@@ -623,6 +631,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             operation: 'create',
             schemaPath: collectionSlug,
           })
+
+          if (originalFileValue instanceof File && state.file) {
+            state.file = { ...state.file, value: originalFileValue }
+          }
 
           const newFormErrorCount = Object.values(state).reduce(
             (acc, value) => (value?.valid === false ? acc + 1 : acc),

@@ -43,10 +43,13 @@ describe('Sort functionality', () => {
 
     initPageConsoleErrorCatch(page)
 
+    // Wait for the server to be ready before the node-side REST login: on the
+    // slower TanStack prod cold-start, `client.login()` (a direct fetch, no retry)
+    // can hit the server before it accepts connections → `TypeError: fetch failed`.
+    await ensureCompilationIsDone({ page, serverURL })
+
     client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test.beforeEach(async () => {

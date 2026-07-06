@@ -1,6 +1,7 @@
 'use client'
 
 import { $isListNode, INSERT_UNORDERED_LIST_COMMAND, ListItemNode, ListNode } from '@lexical/list'
+import { UNORDERED_LIST } from '@lexical/markdown'
 import { $isRangeSelection } from 'lexical'
 
 import type { ToolbarGroup } from '../../../toolbars/types.js'
@@ -10,7 +11,6 @@ import { createClientFeature } from '../../../../utilities/createClientFeature.j
 import { toolbarTextDropdownGroupWithItems } from '../../../shared/toolbar/textDropdownGroup.js'
 import { LexicalListPlugin } from '../../plugin/index.js'
 import { slashMenuListGroupWithItems } from '../../shared/slashMenuListGroup.js'
-import { UNORDERED_LIST } from '../markdownTransformer.js'
 
 const toolbarGroups: ToolbarGroup[] = [
   toolbarTextDropdownGroupWithItems([

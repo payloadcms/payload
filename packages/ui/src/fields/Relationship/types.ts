@@ -110,6 +110,10 @@ export type RelationshipInputProps = {
   readonly relationTo: string[]
   readonly required?: boolean
   readonly showError?: boolean
+  /**
+   * Controls the height of the input. Defaults to `'large'`.
+   */
+  readonly size?: 'large' | 'medium'
   readonly sortOptions?: Partial<Record<CollectionSlug, string>>
   readonly style?: React.CSSProperties
 } & SharedRelationshipInputProps

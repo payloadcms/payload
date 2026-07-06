@@ -1,8 +1,12 @@
 'use client'
 
-import { CopyToClipboard, Link, useConfig, useField } from '@payloadcms/ui'
+import { CopyToClipboard, FieldLabel, Link, useConfig, useField } from '@payloadcms/ui'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
+
+import './index.css'
+
+const baseClass = 'link-to-doc'
 
 export const LinkToDocClient: React.FC = () => {
   const { config } = useConfig()
@@ -27,25 +31,12 @@ export const LinkToDocClient: React.FC = () => {
   })
 
   return (
-    <div style={{ marginBottom: 'var(--spacing-field, 1rem)' }}>
-      <div>
-        <span
-          className="label"
-          style={{
-            color: '#9A9A9A',
-          }}
-        >
-          Doc URL
-        </span>
+    <div className={baseClass}>
+      <div className={`${baseClass}__header`}>
+        <FieldLabel htmlFor={baseClass} label="Doc URL" />
         <CopyToClipboard value={href} />
       </div>
-      <div
-        style={{
-          fontWeight: '600',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-        }}
-      >
+      <div className={`${baseClass}__url`}>
         <Link href={href} rel="noopener noreferrer" target="_blank">
           {href}
         </Link>

@@ -1,13 +1,14 @@
 import type { AdminViewServerProps } from 'payload'
 
 import LinkImport from 'next/link.js'
-import { readdirSync, readFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import React from 'react'
 
 import './codeDiff.scss'
 
+import type { StoredRunResult } from '../../runResults.js'
 import type { EvalResult, SystemPromptKey } from '../../types.js'
 import type { Audience } from './audience.js'
 import type { RenderedCode } from './codeDiff.js'
@@ -18,6 +19,7 @@ import { fieldsCodegenDataset } from '../../datasets/fields/codegen.js'
 import { negativeCorrectionCodegenDataset } from '../../datasets/negative/codegen.js'
 import { pluginsCodegenDataset } from '../../datasets/plugins/codegen.js'
 import { pluginsOfficialCodegenDataset } from '../../datasets/plugins/official/codegen.js'
+import { readRunResults } from '../../runResults.js'
 import { getAudience } from './audience.js'
 import { renderCodegenDiff, renderCodegenFile } from './codeDiff.js'
 import { runKeyOf } from './configuration.js'
@@ -34,7 +36,7 @@ const codegenFixtureByQuestion: Record<string, string> = (() => {
     pluginsOfficialCodegenDataset,
   ]) {
     for (const c of ds) {
-      map[c.input] = c.fixturePath
+      map[c.input] = c.configPath
     }
   }
   return map
@@ -61,78 +63,39 @@ export type RunSnapshot = {
 const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const cacheDir = path.resolve(__dirname, '../../eval-results/cache')
 const fixturesDir = path.resolve(__dirname, '../../fixtures')
-const completedRunsFile = path.resolve(__dirname, '../../eval-results/.completed-runs')
-
-/** Run ids that finished (written by the launcher on a clean exit). Cancelled runs aren't listed. */
-function readCompletedRunIds(): Set<string> {
-  try {
-    return new Set(
-      readFileSync(completedRunsFile, 'utf-8')
-        .split('\n')
-        .map((line) => line.trim())
-        .filter(Boolean),
-    )
-  } catch {
-    return new Set()
-  }
-}
-
-type CacheEntry = {
-  createdAt: string
-  result: EvalResult
-  version: 1
-}
 
 export type EvalEntry = {
   audience: Audience[]
   category: string
   createdAt: string
-  hash: string
-  result: EvalResult
+  id: string
+  paramsHash: string
+  result: { runId: string } & EvalResult
+  reusedFromRunId?: string
   systemPromptKey?: SystemPromptKey
   type: 'codegen'
 }
 
-function readCacheEntries(): EvalEntry[] {
-  let files: string[]
-  try {
-    files = readdirSync(cacheDir).filter((f) => f.endsWith('.json'))
-  } catch {
-    return []
+function toEvalEntry(entry: StoredRunResult): EvalEntry {
+  const { paramsHash, result } = entry
+  return {
+    id: `${result.runId}:${paramsHash}`,
+    type: 'codegen',
+    audience: getAudience(result.category),
+    category: result.category,
+    createdAt: entry.createdAt,
+    paramsHash,
+    result,
+    reusedFromRunId: entry.reusedFromRunId,
+    systemPromptKey: result.systemPromptKey,
   }
+}
 
-  const completed = readCompletedRunIds()
-  const entries: EvalEntry[] = []
-  for (const file of files) {
-    try {
-      const raw = readFileSync(path.join(cacheDir, file), 'utf-8')
-      const entry = JSON.parse(raw) as CacheEntry
-      if (entry.version !== 1) {
-        continue
-      }
-      const { result } = entry
-      // Hide runs that never finished (e.g. Ctrl+C'd). Pre-run-tracking entries
-      // have no runId and are always kept.
-      if (result.runId && !completed.has(result.runId)) {
-        continue
-      }
-      entries.push({
-        type: 'codegen',
-        audience: getAudience(result.category),
-        category: result.category,
-        createdAt: entry.createdAt,
-        hash: file.replace('.json', ''),
-        result,
-        systemPromptKey: result.systemPromptKey,
-      })
-    } catch {
-      // skip corrupt entries
-    }
-  }
-
-  return entries.sort((a, b) => a.category.localeCompare(b.category))
+function readEvalEntries(): EvalEntry[] {
+  return readRunResults()
+    .map(toEvalEntry)
+    .sort((a, b) => a.category.localeCompare(b.category))
 }
 
 async function buildCodegenHtml(entries: EvalEntry[]): Promise<Record<string, RenderedCode>> {
@@ -144,30 +107,30 @@ async function buildCodegenHtml(entries: EvalEntry[]): Promise<Record<string, Re
         const modified = e.result.answer ?? ''
         let starter = e.result.starterContent
         if (!starter) {
-          const fixturePath = e.result.fixturePath ?? codegenFixtureByQuestion[e.result.question]
-          if (fixturePath) {
+          const configPath = e.result.configPath ?? codegenFixtureByQuestion[e.result.question]
+          if (configPath) {
             try {
               starter = readFileSync(
-                path.join(fixturesDir, fixturePath, 'payload.config.ts'),
+                path.join(fixturesDir, configPath, 'payload.config.ts'),
                 'utf-8',
               )
             } catch {
-              // legacy entry whose fixture was renamed/removed — render answer alone
+              // The fixture was renamed or removed — render the answer alone.
             }
           }
         }
         if (starter !== undefined) {
-          out[e.hash] = await renderCodegenDiff({ modified, starter })
+          out[e.id] = await renderCodegenDiff({ modified, starter })
           return
         }
-        out[e.hash] = await renderCodegenFile({ modified })
+        out[e.id] = await renderCodegenFile({ modified })
       }),
   )
   return out
 }
 
 export async function EvalDashboardView({ initPageResult }: AdminViewServerProps) {
-  const entries = readCacheEntries()
+  const entries = readEvalEntries()
   const runCount = new Set(entries.map((e) => runKeyOf(e.result))).size
   const codegenHtml = await buildCodegenHtml(entries)
   const adminRoute = initPageResult.req.payload.config.routes.admin

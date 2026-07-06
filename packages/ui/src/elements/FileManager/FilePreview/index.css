@@ -1,0 +1,83 @@
+@layer payload-default {
+  .file-preview {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 0;
+    min-height: 0;
+    /* Visible so the mini carousel can grow past the panel as the headers scroll away. */
+    overflow: visible;
+  }
+
+  .file-preview__main {
+    display: flex;
+    flex-direction: column;
+    flex: 1 0 0;
+    min-width: 0;
+    background: var(--color-bg-secondary);
+    padding: var(--spacer-3) var(--gutter-h);
+    gap: var(--spacer-3);
+    overflow: hidden;
+  }
+
+  .file-preview__image-wrap {
+    /* Take the remaining space but allow shrinking so the info row below is never clipped
+       on short viewports. min-height: 0 lets this flex item shrink below its content size. */
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+
+    .thumbnail {
+      max-width: 100%;
+      max-height: 100%;
+
+      img,
+      svg {
+        object-fit: scale-down;
+      }
+    }
+  }
+
+  .file-preview__info {
+    display: flex;
+    align-items: center;
+    align-self: center;
+    gap: var(--spacer-2);
+    flex-shrink: 0;
+    min-width: 0;
+    margin-top: auto;
+  }
+
+  .file-preview__info-label {
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--spacer-2);
+    border-radius: var(--radius-medium);
+    background: var(--color-bg-secondary-hover);
+    font-family: var(--text-body-medium-strong-font-family);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
+    line-height: var(--text-body-medium-strong-line-height);
+    color: var(--color-text);
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .file-preview__info-meta {
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
+    color: var(--color-text-secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  @container edit-main (max-width: 768px) {
+    .file-preview {
+      flex-direction: column-reverse;
+    }
+  }
+}

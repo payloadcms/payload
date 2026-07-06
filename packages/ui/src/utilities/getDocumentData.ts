@@ -3,8 +3,8 @@ import {
   logError,
   type Payload,
   type PayloadRequest,
-  type TypedUser,
   type TypeWithID,
+  type User,
 } from 'payload'
 
 import { sanitizeID } from '../utilities/sanitizeID.js'
@@ -17,7 +17,7 @@ type Args = {
   payload: Payload
   req?: PayloadRequest
   segments?: string[]
-  user?: TypedUser
+  user?: User
 }
 
 export const getDocumentData = async ({

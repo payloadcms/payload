@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_AAE6FCC0".
+ * via the `definition` "LexicalNodes_BCC912DC".
  */
-export type LexicalNodes_AAE6FCC0 =
+export type LexicalNodes_BCC912DC =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_AAE6FCC0>
+  | SerializedParagraphNode<LexicalNodes_BCC912DC>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_AAE6FCC0>
+  | SerializedHeadingNode<LexicalNodes_BCC912DC>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_AAE6FCC0 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_AAE6FCC0>
-  | SerializedListNode<LexicalNodes_AAE6FCC0>
-  | SerializedListItemNode<LexicalNodes_AAE6FCC0>
-  | SerializedAutoLinkNode<LexicalNodes_AAE6FCC0, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_AAE6FCC0, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_BCC912DC>
+  | SerializedListNode<LexicalNodes_BCC912DC>
+  | SerializedListItemNode<LexicalNodes_BCC912DC>
+  | SerializedAutoLinkNode<LexicalNodes_BCC912DC, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_BCC912DC, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'partial-disable-local-strategies'
@@ -280,7 +280,7 @@ export interface User {
       }[]
     | null;
   namedSaveToJWT?: string | null;
-  richText?: LexicalRichText<LexicalNodes_AAE6FCC0> | null;
+  richText?: LexicalRichText<LexicalNodes_BCC912DC> | null;
   group?: {
     liftedSaveToJWT?: string | null;
   };
@@ -871,7 +871,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -920,7 +920,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

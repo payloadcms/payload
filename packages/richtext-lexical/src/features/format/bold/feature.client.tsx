@@ -1,4 +1,10 @@
 'use client'
+import {
+  BOLD_ITALIC_STAR,
+  BOLD_ITALIC_UNDERSCORE,
+  BOLD_STAR,
+  BOLD_UNDERSCORE,
+} from '@lexical/markdown'
 import { $isTableSelection } from '@lexical/table'
 import { $isRangeSelection, FORMAT_TEXT_COMMAND } from 'lexical'
 
@@ -7,12 +13,6 @@ import type { ToolbarGroup } from '../../toolbars/types.js'
 import { BoldIcon } from '../../../lexical/ui/icons/Bold/index.js'
 import { createClientFeature } from '../../../utilities/createClientFeature.js'
 import { toolbarFormatGroupWithItems } from '../shared/toolbarFormatGroup.js'
-import {
-  BOLD_ITALIC_STAR,
-  BOLD_ITALIC_UNDERSCORE,
-  BOLD_STAR,
-  BOLD_UNDERSCORE,
-} from './markdownTransformers.js'
 
 const toolbarGroups: ToolbarGroup[] = [
   toolbarFormatGroupWithItems([

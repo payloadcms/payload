@@ -15,7 +15,7 @@ import type {
   MaybePromise,
   PayloadRequest,
   SanitizedPermissions,
-  TypedUser,
+  User,
 } from 'payload'
 
 import type { GetAuthorizedMCPArgs } from './endpoint/access.js'
@@ -32,7 +32,8 @@ export type { JsonSchemaType, StandardSchemaWithJSON, ToolAnnotations }
 
 /**
  * What a tool's `input` (or a prompt's `argsSchema`) can be — either a raw
- * JSON Schema literal, or a Standard Schema instance (Zod, Valibot, …).
+ * JSON Schema 2020-12 literal, or a Standard Schema instance (Zod, Valibot, …).
+ * Raw schemas may omit `$schema`; when present it must declare the 2020-12 dialect.
  */
 export type ToolInputSchema = JsonSchemaType | StandardSchemaWithJSON
 
@@ -51,6 +52,13 @@ export type MCPResponseOverride = (
   doc: Record<string, unknown>,
   req: PayloadRequest,
 ) => MCPToolResponse
+
+export type MCPAfterToolCallHook = (args: {
+  input: unknown
+  req: PayloadRequest
+  response: MCPToolResponse
+  toolName: string
+}) => MaybePromise<MCPToolResponse>
 
 /**
  * The handler's `input` type. A specific Standard Schema (Zod, Valibot, …) gets
@@ -232,6 +240,10 @@ export type MCPPluginConfig = {
   globals?: {
     [Slug in GlobalSlug]?: MCPPluginGlobalConfig
   }
+  hooks?: {
+    /** Transform a tool response after its handler returns */
+    afterToolCall?: MCPAfterToolCallHook[]
+  }
   mcp?: {
     serverOptions?: MCPServerOptions
     verboseLogs?: boolean
@@ -250,7 +262,7 @@ export type MCPPluginConfig = {
 
 export type SanitizedMCPPluginConfig = {
   items: MCPItem[]
-} & Pick<MCPPluginConfig, 'disabled' | 'mcp' | 'overrideGetAuthorizedMCP'>
+} & Pick<MCPPluginConfig, 'disabled' | 'hooks' | 'mcp' | 'overrideGetAuthorizedMCP'>
 
 export type MCPServerOptions = {
   options?: ConstructorParameters<typeof McpServer>[1]
@@ -308,5 +320,5 @@ export type MCPItem =
 export type AuthorizedMCP = {
   items: MCPItem[]
   overrideAccess: boolean
-  user: null | TypedUser
+  user: null | User
 }

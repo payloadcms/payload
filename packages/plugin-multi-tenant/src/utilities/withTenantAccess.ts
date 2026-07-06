@@ -1,4 +1,4 @@
-import type { Access, AccessArgs, AccessResult, CollectionConfig, TypedUser, Where } from 'payload'
+import type { Access, AccessArgs, AccessResult, CollectionConfig, User, Where } from 'payload'
 
 import type { AllAccessKeys, MultiTenantPluginConfig, UserWithTenantsField } from '../types.js'
 
@@ -56,7 +56,7 @@ export const withTenantAccess =
       args.req.user &&
       args.req.user.collection === adminUsersSlug &&
       !userHasAccessToAllTenants(
-        args.req.user as ConfigType extends { user: unknown } ? ConfigType['user'] : TypedUser,
+        args.req.user as ConfigType extends { user: unknown } ? ConfigType['user'] : User,
       )
     ) {
       const tenantConstraint = getTenantAccess({

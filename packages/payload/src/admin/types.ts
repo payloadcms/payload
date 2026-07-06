@@ -585,6 +585,7 @@ export type DocumentSlots = {
   UnpublishButton?: React.ReactNode
   Upload?: React.ReactNode
   UploadControls?: React.ReactNode
+  UploadFilePreview?: React.ReactNode
 }
 
 export type {
@@ -598,6 +599,7 @@ export type {
   ServerFunctionClientArgs,
   ServerFunctionConfig,
   ServerFunctionHandler,
+  ServerFunctionMode,
   SlugifyServerFunctionArgs,
 } from './functions/index.js'
 

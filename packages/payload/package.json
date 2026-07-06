@@ -41,8 +41,9 @@
   "type": "module",
   "exports": {
     ".": {
-      "import": "./src/index.ts",
       "types": "./src/index.ts",
+      "browser": "./src/exports/shared.ts",
+      "import": "./src/index.ts",
       "default": "./src/index.ts"
     },
     "./internal": {
@@ -110,6 +111,8 @@
     "croner": "10.0.1",
     "dataloader": "2.2.3",
     "deepmerge": "4.3.1",
+    "dotenv": "16.4.5",
+    "dotenv-expand": "11.0.6",
     "file-type": "22.0.1",
     "get-tsconfig": "4.14.0",
     "http-status": "2.1.0",
@@ -127,7 +130,7 @@
     "sanitize-filename": "1.6.4",
     "ts-essentials": "10.0.3",
     "tsx": "4.22.4",
-    "undici": "7.25.0",
+    "undici": "7.28.0",
     "uuid": "14.0.0",
     "ws": "^8.16.0"
   },
@@ -160,8 +163,9 @@
   "publishConfig": {
     "exports": {
       ".": {
-        "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
+        "browser": "./dist/exports/shared.js",
+        "import": "./dist/index.js",
         "default": "./dist/index.js"
       },
       "./internal": {

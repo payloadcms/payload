@@ -1,4 +1,3 @@
-import Ajv from 'ajv'
 import ObjectIdImport from 'bson-objectid'
 
 const ObjectId = 'default' in ObjectIdImport ? ObjectIdImport.default : ObjectIdImport
@@ -327,7 +326,7 @@ export type JSONFieldValidation = Validate<
   { jsonError?: string } & JSONField
 >
 
-export const json: JSONFieldValidation = (
+export const json: JSONFieldValidation = async (
   value,
   { jsonError, jsonSchema, req: { t }, required },
 ) => {
@@ -384,8 +383,13 @@ export const json: JSONFieldValidation = (
     try {
       jsonSchema.schema = fetchSchema(jsonSchema)
       const { schema } = jsonSchema
-      // @ts-expect-error missing types
-      const ajv = new Ajv()
+      const AjvModule = await import('ajv')
+      // Handle both ESM default export and CJS interop where the module itself is the constructor
+      const AjvClass: any =
+        'default' in AjvModule && typeof AjvModule.default === 'function'
+          ? AjvModule.default
+          : AjvModule
+      const ajv = new AjvClass()
 
       if (!ajv.validate(schema, value)) {
         return ajv.errorsText()
