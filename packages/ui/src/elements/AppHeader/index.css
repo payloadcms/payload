@@ -5,10 +5,6 @@
     z-index: var(--z-modal);
   }
 
-  .app-header__mobile-nav-toggler {
-    display: none;
-  }
-
   .app-header__localizer.localizer {
     flex-shrink: 0;
   }
@@ -148,10 +144,6 @@
   }
 
   @media (max-width: 768px) {
-    .app-header__content {
-      padding: var(--spacer-2-5);
-    }
-
     .app-header__wrapper {
       align-items: flex-start;
     }
@@ -166,15 +158,6 @@
 
     .app-header--nav-open .app-header__localizer {
       display: none;
-    }
-
-    .app-header__mobile-nav-toggler {
-      display: flex;
-      align-items: center;
-    }
-
-    .app-header__mobile-nav-toggler.nav-toggler--is-open {
-      opacity: 0.5;
     }
 
     .app-header__gradient-placeholder {
