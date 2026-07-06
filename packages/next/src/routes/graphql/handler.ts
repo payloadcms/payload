@@ -104,11 +104,6 @@ export const POST =
       request,
     })
 
-    await addDataAndFileToRequest(req)
-    addLocalesToRequestFromData(req)
-
-    const { schema, validationRules } = await getGraphql(config)
-
     const { payload } = req
 
     if (payload.config.graphQL?.disable) {
@@ -116,6 +111,11 @@ export const POST =
         status: 404,
       })
     }
+
+    await addDataAndFileToRequest(req)
+    addLocalesToRequestFromData(req)
+
+    const { schema, validationRules } = await getGraphql(config)
 
     const headers = {}
     const apiResponse = await createHandler({
