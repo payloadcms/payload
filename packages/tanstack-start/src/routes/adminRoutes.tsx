@@ -55,15 +55,23 @@ export function payloadAdminSplatRoute({ load }: { load: AdminLoad }) {
   return {
     component: AdminPage,
     head: ({ loaderData }: { loaderData?: any }) => getAdminMeta(loaderData?.metadata),
-    // Surface query params in `loaderDeps` so `?locale=es` re-runs the loader.
-    loader: async ({ location, params }: { location: any; params: any }) => {
-      const data = await runLoader(load, params._splat ?? '', location.searchStr)
-      if (data?._notFound) {
-        // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing notFound objects
-        throw notFound({ data: { routeKey: data.routeKey, rscPayload: data.rscPayload } })
-      }
-      return data
+    // `staleReloadMode: 'blocking'` (a property of the loader *object*, not a
+    // sibling route option — router-core only reads it off a non-function loader)
+    // makes stale-match revalidation await the fresh loader before committing,
+    // instead of the default background SWR that flashes the pre-navigation list
+    // (e.g. a just-created doc missing) until the reload lands.
+    loader: {
+      handler: async ({ location, params }: { location: any; params: any }) => {
+        const data = await runLoader(load, params._splat ?? '', location.searchStr)
+        if (data?._notFound) {
+          // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing notFound objects
+          throw notFound({ data: { routeKey: data.routeKey, rscPayload: data.rscPayload } })
+        }
+        return data
+      },
+      staleReloadMode: 'blocking',
     },
+    // Surface query params in `loaderDeps` so `?locale=es` re-runs the loader.
     loaderDeps: ({ search }: { search: Record<string, unknown> }) => ({
       searchKey: JSON.stringify(search),
     }),
@@ -80,13 +88,16 @@ export function payloadAdminIndexRoute({ load }: { load: AdminLoad }) {
   return {
     component: AdminPage,
     head: ({ loaderData }: { loaderData?: any }) => getAdminMeta(loaderData?.metadata),
-    loader: async ({ location }: { location: any }) => {
-      const data = await runLoader(load, '', location.searchStr)
-      if (data?._notFound) {
-        // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing notFound objects
-        throw notFound()
-      }
-      return data
+    loader: {
+      handler: async ({ location }: { location: any }) => {
+        const data = await runLoader(load, '', location.searchStr)
+        if (data?._notFound) {
+          // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing notFound objects
+          throw notFound()
+        }
+        return data
+      },
+      staleReloadMode: 'blocking',
     },
     loaderDeps: ({ search }: { search: Record<string, unknown> }) => ({
       searchKey: JSON.stringify(search),
