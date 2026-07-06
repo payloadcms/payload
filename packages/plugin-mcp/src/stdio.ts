@@ -36,7 +36,7 @@ export const runMcpStdio = async (): Promise<void> => {
    * stdout is only for MCP messages. The spec says the server must not write
    * logs there and may write them to stderr instead.
    *
-   * The beta.1 client library recovers from stray stdout logs, but that behavior is not
+   * The 2.0 client library recovers from stray stdout logs, but that behavior is not
    * guaranteed. Move Payload logs to stderr so Payload does not add invalid data
    * to stdout. Keep options from configurable loggers. Replace pre-built loggers
    * because their output cannot be redirected.
@@ -44,7 +44,11 @@ export const runMcpStdio = async (): Promise<void> => {
    * @see https://modelcontextprotocol.io/specification/2025-11-25/basic/transports#stdio
    */
   const loggerConfig: { logger?: Config['logger'] } = config
-  if (loggerConfig.logger && loggerConfig.logger !== 'sync' && 'options' in loggerConfig.logger) {
+  if (
+    loggerConfig.logger &&
+    typeof loggerConfig.logger === 'object' &&
+    'options' in loggerConfig.logger
+  ) {
     loggerConfig.logger.destination = process.stderr
   } else {
     loggerConfig.logger = { destination: process.stderr, options: {} }
