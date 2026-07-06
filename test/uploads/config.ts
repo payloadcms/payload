@@ -23,6 +23,7 @@ import {
   audioSlug,
   constructorOptionsSlug,
   customFileNameMediaSlug,
+  draftReuploadMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
   hideFileInputOnCreateSlug,
@@ -1080,6 +1081,27 @@ export default buildConfigWithDefaults({
       ],
       upload: {
         staticDir: path.resolve(dirname, './prefix-media'),
+      },
+    },
+    {
+      // Drafts + a `prefix` field reproduce the reupload-on-draft access bug:
+      // the file endpoint's access check queries the base row (published state),
+      // which misses a filename that only exists on the latest draft version.
+      slug: draftReuploadMediaSlug,
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'prefix',
+          type: 'text',
+        },
+      ],
+      upload: {
+        staticDir: path.resolve(dirname, `./${draftReuploadMediaSlug}`),
+      },
+      versions: {
+        drafts: true,
       },
     },
   ],

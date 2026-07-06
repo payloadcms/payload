@@ -26,6 +26,7 @@ import {
   adminThumbnailSizeSlug,
   allowListMediaSlug,
   anyImagesSlug,
+  draftReuploadMediaSlug,
   enlargeSlug,
   focalNoSizesSlug,
   focalOnlySlug,
@@ -62,6 +63,74 @@ describe('Collections - Uploads', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  describe('file access on draft reupload', () => {
+    const createdIDs: (number | string)[] = []
+    const filePrefix = 'test'
+    const staticDir = path.resolve(dirname, `./${draftReuploadMediaSlug}`)
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({ collection: draftReuploadMediaSlug as CollectionSlug, id })
+      }
+      createdIDs.length = 0
+
+      // Deleting the document only removes the base row's file; the draft
+      // version's reuploaded file is orphaned on disk. Clear the whole static
+      // dir so filenames don't collide (and get suffixed) across runs.
+      fs.rmSync(staticDir, { force: true, recursive: true })
+    })
+
+    it('should serve a file reuploaded on a draft over a published document', async () => {
+      const published = await payload.create({
+        collection: draftReuploadMediaSlug as CollectionSlug,
+        data: { prefix: filePrefix },
+        draft: false,
+        file: await getFileByPath(path.resolve(dirname, './image.png')),
+      })
+      createdIDs.push(published.id)
+
+      // Reupload a different file and save as a draft (do not publish). The new
+      // filename is written to the latest version only; the base row still
+      // points at the published file.
+      const draft = await payload.update({
+        collection: draftReuploadMediaSlug as CollectionSlug,
+        id: published.id,
+        data: { prefix: filePrefix },
+        draft: true,
+        file: await getFileByPath(path.resolve(dirname, './test-image.png')),
+      })
+
+      expect(draft.filename).not.toBe(published.filename)
+
+      // The prefix query param (as cloud-storage adapters generate) forces the
+      // access check's constrained lookup — the base-row miss this fix repairs
+      // by falling back to the latest draft version.
+      const draftFileResponse = await restClient.GET(
+        `/${draftReuploadMediaSlug}/file/${draft.filename}`,
+        { query: { prefix: filePrefix } },
+      )
+
+      expect(draftFileResponse.status).toBe(200)
+      expect(draftFileResponse.headers.get('content-type')).toContain('image/png')
+    })
+
+    it('should still deny access to a filename that matches no document', async () => {
+      const doc = await payload.create({
+        collection: draftReuploadMediaSlug as CollectionSlug,
+        data: { prefix: filePrefix },
+        draft: true,
+        file: await getFileByPath(path.resolve(dirname, './image.png')),
+      })
+      createdIDs.push(doc.id)
+
+      const response = await restClient.GET(`/${draftReuploadMediaSlug}/file/does-not-exist.png`, {
+        query: { prefix: filePrefix },
+      })
+
+      expect(response.status).toBe(403)
+    })
   })
 
   describe('REST API', () => {
