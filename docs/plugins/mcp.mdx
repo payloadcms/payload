@@ -796,12 +796,6 @@ Each hook receives:
 | `response` | The response returned by the previous response override or `afterToolCall` hook. |
 | `toolName` | The registered MCP tool name, such as `createDocument` or `getConfigInfo`.       |
 
-The first hook receives the response after any applicable `overrideResponse` has run. `response.doc`, when present, is Payload-only metadata containing the raw Local API result. It is available to response hooks but removed before the final response is sent to the MCP client.
-
-Returning an `MCPToolResponse` is required. The last hook's return value, with its internal `doc` removed, becomes the response sent to the client. Hooks also run for tool-level error responses where `response.isError` is `true`, but they do not run when a handler throws before returning a response.
-
-Use `overrideResponse` when behavior belongs to a specific tool, collection, or global. Use `hooks.afterToolCall` for cross-cutting behavior such as logging, tracing, or applying the same response transformation to every tool.
-
 ## Payload collection hooks
 
 To modify documents at runtime use a collection [Hook](https://payloadcms.com/docs/hooks/collections). Inside the hook you can detect MCP traffic via `req.payloadAPI === 'MCP'`:
