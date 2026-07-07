@@ -430,7 +430,9 @@ export const renderDocument = async ({
           breakpoints={livePreviewConfig?.breakpoints}
           isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
           isLivePreviewing={Boolean(
-            entityPreferences?.value?.editViewType === 'live-preview' && livePreviewURL,
+            (entityPreferences?.value?.editViewType === undefined
+              ? livePreviewConfig?.openByDefault
+              : entityPreferences.value.editViewType === 'live-preview') && livePreviewURL,
           )}
           isPreviewEnabled={Boolean(isPreviewEnabled)}
           previewURL={previewURL}
