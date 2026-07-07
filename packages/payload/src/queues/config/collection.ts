@@ -12,6 +12,13 @@ export const jobsCollectionSlug = 'payload-jobs'
 export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => CollectionConfig = (
   jobsConfig,
 ) => {
+  if (
+    !Number.isFinite(jobsConfig.processingLeaseDuration) ||
+    jobsConfig.processingLeaseDuration <= 0
+  ) {
+    throw new Error('jobs.processingLeaseDuration must be a positive number')
+  }
+
   const workflowSlugs: Set<string> = new Set()
   const taskSlugs: Set<string> = new Set(['inline'])
 
@@ -226,12 +233,13 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
         index: true,
       },
       {
-        name: 'processing',
-        type: 'checkbox',
+        name: 'processingUntil',
+        type: 'date',
         admin: {
+          date: { pickerAppearance: 'dayAndTime' },
           position: 'sidebar',
+          readOnly: true,
         },
-        defaultValue: false,
         index: true,
       },
       {
@@ -274,8 +282,8 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
       beforeChange: [
         ({ data, originalDoc }) => {
           if (originalDoc?.error?.cancelled) {
-            data.processing = false
             data.processingToken = null
+            data.processingUntil = null
             data.hasError = true
             delete data.completedAt
             delete data.waitUntil

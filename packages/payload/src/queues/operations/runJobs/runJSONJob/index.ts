@@ -125,7 +125,7 @@ export const runJSONJob = async ({
   if (workflowCompleted) {
     await updateJob({
       completedAt: getCurrentDate().toISOString(),
-      processing: false,
+      processingUntil: null,
       totalTried: (job.totalTried ?? 0) + 1,
     })
 
@@ -133,7 +133,7 @@ export const runJSONJob = async ({
       status: 'success',
     }
   } else {
-    // Retry the job - no need to bump processing or totalTried as this does not count as a retry. A condition of a different task might have just opened up!
+    // Retry the job - no need to bump processingUntil or totalTried as this does not count as a retry. A condition of a different task might have just opened up!
     return await runJSONJob({
       job,
       req,

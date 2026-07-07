@@ -94,7 +94,7 @@ export const runJob = async ({
   // Job log modifications are already updated at the end of the runTask function.
   await updateJob({
     completedAt: getCurrentDate().toISOString(),
-    processing: false,
+    processingUntil: null,
     totalTried: (job.totalTried ?? 0) + 1,
   })
 

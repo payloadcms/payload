@@ -861,6 +861,16 @@ Payload now uses a unique `processingToken` when claiming jobs so multiple worke
 
 The default `updateJobs` implementation has been removed because it could not safely claim jobs across multiple workers. If you maintain a custom database adapter, you must now provide `updateJobs`. It must only claim jobs that still match the provided `where` condition and, when a `processingToken` is provided, return only the jobs claimed with that token. The official Payload database adapters already implement this behavior.
 
+### Jobs now use renewable processing leases
+
+The permanent `processing` checkbox has been replaced by an indexed `processingUntil` date. Payload renews this lease while a worker is alive and recovers it through the normal jobs runner after it expires.
+
+Before migrating the database, stop all v3 job runners. Pending jobs should have an empty `processingUntil`. Migrate unfinished v3 rows with `processing: true` to an already-expired `processingUntil`; the v4 runner will count that abandoned attempt and apply its retry rules. Do not run v3 and v4 job workers at the same time.
+
+Update any custom `jobsCollectionOverrides` or direct queries that reference `processing`. A future `processingUntil` means running; an empty value means pending.
+
+The lease duration defaults to two minutes and can be changed with `jobs.processingLeaseDuration`.
+
 ### Jobs: the `state` field on task return values has been removed ([#16416](https://github.com/payloadcms/payload/pull/16416))
 
 Job task handlers and `inlineTask` callbacks can no longer use the `state` field to signal success or failure. Both shapes were deprecated in v3 and are now removed from tasks and inline tasks.

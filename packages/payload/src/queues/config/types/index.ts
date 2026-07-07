@@ -88,6 +88,10 @@ export type SanitizedJobsConfig = {
    */
   enabled?: boolean
   /**
+   * How long a job remains claimed without a successful lease renewal.
+   */
+  processingLeaseDuration: number
+  /**
    * If set to `true`, at least one task or workflow has scheduling enabled.
    * This property is automatically set during sanitization.
    */
@@ -97,7 +101,7 @@ export type SanitizedJobsConfig = {
    * This property is automatically set during sanitization.
    */
   stats?: boolean
-} & JobsConfig
+} & Omit<JobsConfig, 'processingLeaseDuration'>
 export type JobsConfig = {
   /**
    * Specify access control to determine who can interact with jobs.
@@ -152,6 +156,13 @@ export type JobsConfig = {
    * a new collection.
    */
   jobsCollectionOverrides?: (args: { defaultJobsCollection: CollectionConfig }) => CollectionConfig
+  /**
+   * How long a job remains claimed without a successful lease renewal.
+   * This is not a maximum job runtime; active jobs renew their lease automatically.
+   *
+   * @default 120000 (2 minutes)
+   */
+  processingLeaseDuration?: number
   /**
    * Adjust the job processing order using a Payload sort string. This can be set globally or per queue.
    *
