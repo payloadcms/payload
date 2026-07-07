@@ -105,10 +105,6 @@ export const text: TextFieldValidation = (
 export type SlugFieldValidation = Validate<string, unknown, unknown, SlugField>
 
 export const slug: SlugFieldValidation = (value, { req: { t }, required }) => {
-  if (!required && (value === undefined || value === null)) {
-    return true
-  }
-
   if (required && !value) {
     return t('validation:required')
   }

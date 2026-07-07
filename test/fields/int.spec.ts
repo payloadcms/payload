@@ -125,6 +125,33 @@ describe('Fields', () => {
       expect(again.slug).toBe('manual-value')
     })
 
+    it('should generate localized slugs independently per locale', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Title', localizedTitle: 'English Title' },
+        locale: 'en',
+      })
+      created.push(doc.id)
+      expect(doc.localizedSlug).toBe('english-title')
+
+      const es = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { localizedTitle: 'Titulo Espanol' },
+        locale: 'es',
+      })
+      expect(es.localizedSlug).toBe('titulo-espanol')
+
+      const allLocales = await payload.findByID({
+        collection: 'slug-fields',
+        id: doc.id,
+        locale: 'all',
+      })
+      const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
+      expect(localizedSlug.en).toBe('english-title')
+      expect(localizedSlug.es).toBe('titulo-espanol')
+    })
+
     describe('autosave drafts', () => {
       const created: (number | string)[] = []
 

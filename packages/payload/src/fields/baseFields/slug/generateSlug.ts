@@ -52,9 +52,9 @@ export const generateSlug =
       return value
     }
 
-    // The admin did not touch the slug. Is it still auto-tracking its source?
-    const isAuto = !originalSlug || originalSlug === (await run(originalSource))
-    if (!isAuto) {
+    // The admin did not touch the slug. If a stored slug no longer matches its
+    // source-derived value, it was edited by hand — freeze it.
+    if (originalSlug && originalSlug !== (await run(originalSource))) {
       return originalSlug
     }
 

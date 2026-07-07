@@ -31,7 +31,7 @@ type SlugFieldProps = {
  * @experimental This component is experimental and may change or be removed in the future. Use at your own risk.
  */
 const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
-  const { admin, label, required, useAsSlug = 'title' } = field
+  const { admin, label, required, useAsSlug } = field
   const { description, placeholder, readOnly: readOnlyFromProps } = admin || {}
 
   const { i18n, t } = useTranslation()
