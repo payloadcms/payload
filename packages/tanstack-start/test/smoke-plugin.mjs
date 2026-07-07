@@ -39,9 +39,20 @@ for (const expected of [
   'payload:wrap-cjs-client',
   'payload:ssr-strip-dist-style-imports',
   'payload:react-dom-server-in-rsc',
+  'payload:stub-prettier-in-client',
   'payload:dev-transforms',
 ]) {
   if (!pluginNames.includes(expected)) errors.push(`missing plugin: ${expected}`)
+}
+
+// The `~@payloadcms/ui/scss` tilde importer must be wired for every consumer.
+if (typeof config.css?.preprocessorOptions?.scss?.importers?.[0]?.findFileUrl !== 'function') {
+  errors.push('scss tilde importer not wired')
+}
+
+// Dependency-warning suppression is on by default, so a customLogger is set.
+if (!config.customLogger) {
+  errors.push('customLogger not set (silenceDependencyWarnings default)')
 }
 
 if (!config.ssr.external.includes('drizzle-kit')) errors.push('ssr.external missing drizzle-kit')

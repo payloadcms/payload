@@ -1,13 +1,14 @@
-import type { UserConfig, UserConfigFnObject } from 'vite'
+import type { Logger, UserConfig, UserConfigFnObject } from 'vite'
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import rsc from '@vitejs/plugin-rsc'
 import path from 'node:path'
-import { mergeConfig } from 'vite'
+import { createLogger, mergeConfig } from 'vite'
 
 import { payloadNoExternalPatterns, ssrExternalPackages } from './config/external.js'
 import { optimizeDepsExcludeDefaults, optimizeDepsIncludeDefaults } from './config/optimizeDeps.js'
+import { payloadScssImporters } from './config/scss.js'
 import {
   defaultImportProtectionIgnoreImporters,
   onImportProtectionViolation,
@@ -17,7 +18,39 @@ import { clientModuleResolution } from './workarounds/clientModuleResolution.js'
 import { payloadDevTransforms } from './workarounds/devTransforms.js'
 import { reactDomServerInRsc } from './workarounds/reactDomServerInRsc.js'
 import { ssrStripDistStyleImports } from './workarounds/stripDistStyleImports.js'
+import { stubPrettierInClient } from './workarounds/stubPrettierInClient.js'
 import { wrapCjsForClient } from './workarounds/wrapCjsForClient.js'
+
+/**
+ * Vite dependency warnings Payload consumers can't act on: third-party packages
+ * ship sourcemaps whose original sources aren't published, so Vite warns on
+ * every one. Suppressed by default (see `silenceDependencyWarnings`).
+ */
+const suppressibleWarningPatterns = ['points to missing source files', 'Sourcemap for']
+
+/**
+ * Wraps a Vite logger so warnings matching {@link suppressibleWarningPatterns}
+ * are dropped. Mutates and returns the given logger (or a fresh default one).
+ */
+function withQuietedDependencyWarnings(existing?: Logger): Logger {
+  const logger = existing ?? createLogger()
+  const shouldSuppress = (msg: unknown): boolean =>
+    typeof msg === 'string' && suppressibleWarningPatterns.some((pattern) => msg.includes(pattern))
+
+  const baseWarn = logger.warn.bind(logger)
+  const baseWarnOnce = logger.warnOnce.bind(logger)
+  logger.warn = (msg, options) => {
+    if (!shouldSuppress(msg)) {
+      baseWarn(msg, options)
+    }
+  }
+  logger.warnOnce = (msg, options) => {
+    if (!shouldSuppress(msg)) {
+      baseWarnOnce(msg, options)
+    }
+  }
+  return logger
+}
 
 export type WithPayloadOptions = {
   /**
@@ -30,6 +63,12 @@ export type WithPayloadOptions = {
   payloadConfigPath: string
   /** TanStack router routes directory relative to `srcDirectory`. Defaults to `'app'` */
   routesDirectory?: string
+  /**
+   * Silence Vite warnings about third-party dependency sourcemaps pointing to
+   * missing source files — noise Payload consumers can't act on. Defaults to
+   * `true`; set `false` to see them. Composes with a `vite.customLogger`.
+   */
+  silenceDependencyWarnings?: boolean
   /** TanStack source directory. Defaults to `'src'` */
   srcDirectory?: string
   /**
@@ -71,6 +110,7 @@ export function withPayload(options: WithPayloadOptions): UserConfigFnObject {
     additionalIgnoreImporters = [],
     payloadConfigPath,
     routesDirectory = 'app',
+    silenceDependencyWarnings = true,
     srcDirectory = 'src',
     vite,
   } = options
@@ -80,6 +120,7 @@ export function withPayload(options: WithPayloadOptions): UserConfigFnObject {
       css: {
         preprocessorOptions: {
           scss: {
+            importers: payloadScssImporters,
             silenceDeprecations: ['import', 'global-builtin'],
           } as any,
         },
@@ -100,6 +141,7 @@ export function withPayload(options: WithPayloadOptions): UserConfigFnObject {
         wrapCjsForClient(),
         ssrStripDistStyleImports(),
         reactDomServerInRsc(),
+        stubPrettierInClient(),
         payloadDevTransforms(),
         rsc({ serverHandler: false }),
         tanstackStart({
@@ -191,6 +233,12 @@ export function withPayload(options: WithPayloadOptions): UserConfigFnObject {
       },
     }
 
-    return vite ? mergeConfig(base, vite) : base
+    const merged = vite ? mergeConfig(base, vite) : base
+
+    if (silenceDependencyWarnings) {
+      merged.customLogger = withQuietedDependencyWarnings(merged.customLogger)
+    }
+
+    return merged
   }
 }

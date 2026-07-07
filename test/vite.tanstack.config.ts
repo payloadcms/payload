@@ -2,7 +2,7 @@ import { withPayload } from '@payloadcms/tanstack-start/vite'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createLogger, defineConfig } from 'vite'
+import { defineConfig } from 'vite'
 
 // This config drives the TanStack admin app from the `test` package, mirroring
 // how the Next.js test apps live under `test/`. Its dependencies are declared by
@@ -18,26 +18,6 @@ import { createLogger, defineConfig } from 'vite'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const repoRoot = path.resolve(__dirname, '..')
-
-// Third-party deps (react-datepicker, @faceless-ui/*) ship sourcemaps whose
-// original source files aren't published, so Vite warns on every one. Silence
-// just those warnings to keep dev startup output readable.
-const logger = createLogger()
-const isMissingSourcemapWarning = (msg: string) => msg.includes('points to missing source files')
-const baseWarn = logger.warn.bind(logger)
-const baseWarnOnce = logger.warnOnce.bind(logger)
-logger.warn = (msg, options) => {
-  if (isMissingSourcemapWarning(msg)) {
-    return
-  }
-  baseWarn(msg, options)
-}
-logger.warnOnce = (msg, options) => {
-  if (isMissingSourcemapWarning(msg)) {
-    return
-  }
-  baseWarnOnce(msg, options)
-}
 
 const databaseAdapterPath = path.resolve(__dirname, 'databaseAdapter.js')
 if (!fs.existsSync(databaseAdapterPath)) {
@@ -79,26 +59,10 @@ export default defineConfig(
     routesDirectory: 'app',
     srcDirectory,
     // Everything test/monorepo-specific is layered on via the single `vite`
-    // override — `withPayload` merges it on top of the Payload defaults.
+    // override — `withPayload` merges it on top of the Payload defaults. (The
+    // `~@payloadcms/ui/scss` importer and sourcemap-warning silencing are now
+    // handled by `withPayload` itself.)
     vite: {
-      css: {
-        preprocessorOptions: {
-          scss: {
-            importers: [
-              {
-                findFileUrl(url: string) {
-                  if (url.startsWith('~@payloadcms/ui/scss')) {
-                    return new URL(
-                      'file://' + path.resolve(repoRoot, 'packages/ui/src/scss/styles.scss'),
-                    )
-                  }
-                  return null
-                },
-              },
-            ],
-          },
-        },
-      },
       // Keep build output out of the app dirs (they ship as pure source); the
       // repo root already ignores `dist`.
       build: { outDir: path.resolve(repoRoot, 'dist/app-tanstack') },
@@ -124,7 +88,6 @@ export default defineConfig(
           '@vercel/blob/client',
         ],
       },
-      customLogger: logger,
       envDir: repoRoot,
       server: {
         fs: { allow: [repoRoot] },
