@@ -273,6 +273,25 @@ const results = await payload.jobs.runByID({
 })
 ```
 
+## Processing Leases
+
+Running jobs are owned through a renewable `processingUntil` lease. Payload renews the lease while the worker is alive. If the worker is killed, a later jobs runner call recovers the expired job and applies its existing retry configuration.
+
+The default lease duration is two minutes. You can change it globally:
+
+```ts
+export default buildConfig({
+  jobs: {
+    processingLeaseDuration: 5 * 60 * 1000,
+    tasks: [
+      // your tasks here
+    ],
+  },
+})
+```
+
+This is not a maximum job runtime. Healthy long-running jobs keep renewing their leases. Expiry does not start a new process by itself, so serverless deployments must continue calling the jobs runner from a cron or another callback system.
+
 ## Processing Order
 
 By default, jobs are processed first in, first out (FIFO). This means that the first job added to the queue will be the first one processed. However, you can also configure the order in which jobs are processed.
@@ -626,7 +645,8 @@ jobsCollectionOverrides: ({ defaultJobsCollection }) => ({
 
 Look for jobs with:
 
-- `processing: true` but stuck → Worker may have crashed
+- `processingUntil` in the future → A worker currently owns the job
+- `processingUntil` in the past → The worker may have crashed; the next runner call will recover it
 - `hasError: true` → Check the `log` field for errors
 - `completedAt: null` → Job hasn't run yet
 

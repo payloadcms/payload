@@ -209,7 +209,7 @@ Each job document contains:
   completedAt: '2024-01-15...',  // When job completed (null if pending)
   hasError: false,              // True if job failed
   totalTried: 1,                // Number of attempts
-  processing: false,            // True if currently running
+  processingUntil: null,        // Future date while a worker owns the job
   taskStatus: {                 // Status of each task (for workflows)
     sendEmail: {
       '1': {
@@ -226,6 +226,8 @@ Each job document contains:
   ]
 }
 ```
+
+Payload increments `totalTried` after each attempt. While the handler runs, Payload automatically renews `processingUntil`. If the worker disappears and the lease expires, the next jobs runner call counts the abandoned attempt and recovers the job using its existing retry and backoff configuration.
 
 #### Access Control
 

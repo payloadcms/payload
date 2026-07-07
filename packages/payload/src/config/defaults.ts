@@ -65,6 +65,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
       run: defaultAccess,
       ...(config.jobs?.access || {}),
     },
+    processingLeaseDuration: config.jobs?.processingLeaseDuration ?? 2 * 60 * 1000,
   } as JobsConfig
   config.localization = config.localization ?? false
   config.maxDepth = config.maxDepth ?? 10

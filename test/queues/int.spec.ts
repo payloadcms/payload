@@ -1048,7 +1048,7 @@ describe('Queues - Payload', () => {
       })
 
       expect(jobAfterRun.hasError).toBe(true)
-      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.processingUntil).toBeFalsy()
       expect(jobAfterRun.totalTried).toBe(1)
     })
 
@@ -1072,7 +1072,7 @@ describe('Queues - Payload', () => {
       })
 
       expect(jobAfterRun.hasError).toBe(true)
-      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.processingUntil).toBeFalsy()
       expect(jobAfterRun.totalTried).toBe(1)
     })
   })
@@ -1093,7 +1093,7 @@ describe('Queues - Payload', () => {
     })
 
     expect(jobAfterRun.hasError).toBe(true)
-    expect(jobAfterRun.processing).toBe(false)
+    expect(jobAfterRun.processingUntil).toBeFalsy()
     expect(jobAfterRun.totalTried).toBe(1)
   })
 
@@ -1122,7 +1122,128 @@ describe('Queues - Payload', () => {
     // so the loop naturally bounds at exactly 2 attempts.
     expect(jobAfterRun.totalTried).toBe(2)
     expect(jobAfterRun.hasError).toBe(true)
-    expect(jobAfterRun.processing).toBe(false)
+    expect(jobAfterRun.processingUntil).toBeFalsy()
+  })
+
+  describe('processing leases', () => {
+    it('should recover an expired job using its existing retry configuration', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const job = await payload.jobs.queue({
+        input: { message: 'recovered from expired lease' },
+        task: 'CreateSimple',
+      })
+
+      await payload.update({
+        id: job.id,
+        collection: 'payload-jobs',
+        data: {
+          processingUntil: new Date(Date.now() - 1000).toISOString(),
+          totalTried: 0,
+        },
+      })
+
+      await payload.jobs.run({ silent: true })
+
+      const recoveredJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+
+      expect(recoveredJob.completedAt).toBeTruthy()
+      expect(recoveredJob.processingUntil).toBeFalsy()
+      expect(recoveredJob.totalTried).toBe(2)
+    })
+
+    it('should terminally fail an expired job with no retries', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const job = await payload.jobs.queue({
+        input: { message: 'do not retry expired lease' },
+        task: 'CreateSimpleRetries0',
+      })
+
+      await payload.update({
+        id: job.id,
+        collection: 'payload-jobs',
+        data: {
+          processingUntil: new Date(Date.now() - 1000).toISOString(),
+          totalTried: 0,
+        },
+      })
+
+      await payload.jobs.run({ silent: true })
+
+      const failedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+
+      expect(failedJob.error).toMatchObject({ name: 'JobProcessingTimeoutError' })
+      expect(failedJob.hasError).toBe(true)
+      expect(failedJob.processingUntil).toBeFalsy()
+      expect(failedJob.totalTried).toBe(1)
+    })
+
+    it('should not claim a job with an active lease', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+
+      const job = await payload.jobs.queue({
+        input: { message: 'already owned' },
+        task: 'CreateSimple',
+      })
+
+      await payload.update({
+        id: job.id,
+        collection: 'payload-jobs',
+        data: {
+          processingUntil: new Date(Date.now() + 60_000).toISOString(),
+          totalTried: 0,
+        },
+      })
+
+      const result = await payload.jobs.run({ silent: true })
+      const activeJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+
+      expect(activeJob.completedAt).toBeFalsy()
+      expect(activeJob.processingUntil).toBeTruthy()
+      expect(activeJob.totalTried).toBe(0)
+      expect(result.noJobsRemaining).toBe(true)
+    })
+
+    it('should renew the lease while a job is running', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      const originalLeaseDuration = payload.config.jobs.processingLeaseDuration
+      payload.config.jobs.processingLeaseDuration = 300
+
+      const job = await payload.jobs.queue({
+        input: {},
+        workflow: 'longRunning',
+      })
+      const runPromise = payload.jobs.run({ silent: true })
+
+      await wait(100)
+      const initiallyRunningJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+
+      await wait(350)
+      const renewedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+
+      await runPromise
+      payload.config.jobs.processingLeaseDuration = originalLeaseDuration
+
+      expect(new Date(renewedJob.processingUntil!).getTime()).toBeGreaterThan(
+        new Date(initiallyRunningJob.processingUntil!).getTime(),
+      )
+    })
   })
 
   it('can queue and run via the endpoint single tasks without workflows', async () => {
@@ -1179,7 +1300,7 @@ describe('Queues - Payload', () => {
           input: {
             message: 'Number ' + i + ' Update 1',
           },
-          processing: true,
+          processingUntil: new Date(Date.now() + 60_000).toISOString(),
           taskSlug: 'CreateSimple',
         },
       })
@@ -1201,7 +1322,7 @@ describe('Queues - Payload', () => {
           input: {
             message: 'Number ' + i + ' Update 2',
           },
-          processing: true,
+          processingUntil: new Date(Date.now() + 60_000).toISOString(),
           taskSlug: 'CreateSimple',
         },
       })
@@ -1222,7 +1343,7 @@ describe('Queues - Payload', () => {
           input: {
             message: 'Number ' + i + ' Update 3',
           },
-          processing: true,
+          processingUntil: new Date(Date.now() + 60_000).toISOString(),
           taskSlug: 'CreateSimple',
         },
       })
@@ -1241,7 +1362,7 @@ describe('Queues - Payload', () => {
           input: {
             message: 'Number ' + i + ' Update 4',
           },
-          processing: true,
+          processingUntil: new Date(Date.now() + 60_000).toISOString(),
           taskSlug: 'CreateSimple',
         },
       })
@@ -1671,7 +1792,7 @@ describe('Queues - Payload', () => {
       id: job.id,
       depth: 0,
     })
-    expect(jobAfterRunProcessing.processing).toBe(true)
+    expect(jobAfterRunProcessing.processingUntil).toBeTruthy()
 
     // Should be in processing - cancel job
     await payload.jobs.cancelByID({
@@ -1694,7 +1815,7 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.hasError).toBe(true)
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
-    expect(jobAfterRun.processing).toBe(false)
+    expect(jobAfterRun.processingUntil).toBeFalsy()
 
     // Ensure job is not retried
     const runResponse = await payload.jobs.run({ silent: true })
@@ -1737,7 +1858,7 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.hasError).toBe(true)
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
-    expect(jobAfterRun.processing).toBe(false)
+    expect(jobAfterRun.processingUntil).toBeFalsy()
   })
 
   it('ensure jobs can cancel themselves by throwing a JobCancelledError in workflow handler', async () => {
@@ -1819,7 +1940,7 @@ describe('Queues - Payload', () => {
       expect(jobAfterRun.hasError).toBe(true)
       // @ts-expect-error error is not typed
       expect(jobAfterRun.error?.cancelled).toBe(true)
-      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.processingUntil).toBeFalsy()
 
       // Run again to ensure the job is not retried
       const runResponse2 = await payload.jobs.run({ silent: true })
@@ -1918,7 +2039,7 @@ describe('Queues - Payload', () => {
       expect(jobAfterRun.hasError).toBe(true)
       // @ts-expect-error error is not typed
       expect(jobAfterRun.error?.cancelled).toBe(true)
-      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.processingUntil).toBeFalsy()
 
       // Run again to ensure the job is not retried
       const runResponse2 = await payload.jobs.run({ silent: true })
@@ -2153,7 +2274,7 @@ describe('Queues - Payload', () => {
       expect(job1After.completedAt).toBeDefined()
       // Second job should still be pending (not yet run due to exclusive lock)
       expect(job2After.completedAt).toBeFalsy()
-      expect(job2After.processing).toBe(false)
+      expect(job2After.processingUntil).toBeFalsy()
 
       // Run jobs again - now the second job should complete
       await payload.jobs.run({ silent: true, limit: 10 })
@@ -2482,7 +2603,7 @@ describe('Queues - Payload', () => {
       })
 
       expect(pendingJobStatus.completedAt).toBeFalsy()
-      expect(pendingJobStatus.processing).toBe(false)
+      expect(pendingJobStatus.processingUntil).toBeFalsy()
 
       // Wait for original job to complete
       await runPromise
@@ -2611,7 +2732,7 @@ describe('Queues - Payload', () => {
         })
 
         expect(runningJobAfter).not.toBeNull()
-        expect(runningJobAfter.processing).toBe(true)
+        expect(runningJobAfter.processingUntil).toBeTruthy()
 
         // The new job should exist
         const newJobAfter = await payload.findByID({
@@ -2747,12 +2868,12 @@ describe('Queues - Payload', () => {
         })
 
         // Running job should still exist and be processing
-        expect(runningJobCheck.processing).toBe(true)
+        expect(runningJobCheck.processingUntil).toBeTruthy()
         // Middle job should be deleted (superseded)
         expect(middleJobCheck).toBeNull()
         // Latest job should exist and be pending
         expect(latestJobCheck).not.toBeNull()
-        expect(latestJobCheck.processing).toBe(false)
+        expect(latestJobCheck.processingUntil).toBeFalsy()
 
         // Wait for running job to complete
         await runPromise

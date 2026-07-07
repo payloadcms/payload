@@ -407,8 +407,8 @@ export interface PayloadJob {
     | null;
   queue?: string | null;
   waitUntil?: string | null;
-  processing?: boolean | null;
   processingToken?: string | null;
+  processingUntil?: string | null;
   /**
    * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
    */
@@ -556,8 +556,8 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   taskSlug?: T;
   queue?: T;
   waitUntil?: T;
-  processing?: T;
   processingToken?: T;
+  processingUntil?: T;
   concurrencyKey?: T;
   updatedAt?: T;
   createdAt?: T;
