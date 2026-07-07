@@ -10,7 +10,6 @@ import { useField } from '../../forms/useField/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldError } from '../FieldError/index.js'
 import { FieldLabel } from '../FieldLabel/index.js'
 import { TextInput } from '../Text/index.js'
 import './index.scss'
@@ -76,22 +75,36 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
     <div className="field-type slug-field-component">
       <div className="label-wrapper">
         <FieldLabel htmlFor={`field-${path}`} label={label} />
-        {!readOnlyFromProps && !isLocked && (
-          <Button buttonStyle="none" className="lock-button" onClick={handleGenerate}>
-            {t('authentication:generate')}
-          </Button>
-        )}
-        {!readOnlyFromProps && (
-          <Button buttonStyle="none" className="lock-button" onClick={toggleLock}>
-            {isLocked ? t('general:unlock') : t('general:lock')}
-          </Button>
-        )}
       </div>
       <TextInput
-        Error={<FieldError path={path || field.name} position="bottom" showError={showError} />}
+        AfterInput={
+          readOnlyFromProps ? undefined : (
+            <div className="slug-field-component__actions">
+              {!isLocked && (
+                <Button
+                  buttonStyle="none"
+                  className="lock-button"
+                  id={`field-${path}-generate`}
+                  onClick={handleGenerate}
+                >
+                  {t('authentication:generate')}
+                </Button>
+              )}
+              <Button
+                buttonStyle="none"
+                className="lock-button"
+                id={`field-${path}-lock`}
+                onClick={toggleLock}
+              >
+                {isLocked ? t('general:unlock') : t('general:lock')}
+              </Button>
+            </div>
+          )
+        }
         onChange={setValue}
         path={path || field.name}
         readOnly={Boolean(readOnlyFromProps || isLocked)}
+        showError={showError}
         value={value}
       />
     </div>
