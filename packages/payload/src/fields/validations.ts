@@ -1112,6 +1112,7 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
  * These can be re-used in custom validations
  */
 export const validations = {
+  slug,
   array,
   blocks,
   checkbox,
@@ -1127,7 +1128,6 @@ export const validations = {
   relationship,
   richText,
   select,
-  slug,
   text,
   textarea,
   upload,
