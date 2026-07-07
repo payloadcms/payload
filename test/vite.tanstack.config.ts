@@ -1,11 +1,8 @@
-import { payloadPlugin } from '@payloadcms/tanstack-start/vite'
-import { tanstackStart } from '@tanstack/react-start/plugin/vite'
-import viteReact from '@vitejs/plugin-react'
-import rsc from '@vitejs/plugin-rsc'
+import { withPayload } from '@payloadcms/tanstack-start/vite'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createLogger, defineConfig, mergeConfig } from 'vite'
+import { createLogger, defineConfig } from 'vite'
 
 // This config drives the TanStack admin app from the `test` package, mirroring
 // how the Next.js test apps live under `test/`. Its dependencies are declared by
@@ -73,23 +70,17 @@ const testSuite = process.env.PAYLOAD_TEST_SUITE || '_community'
 const suiteDir = path.resolve(__dirname, testSuite, 'app-tanstack')
 const srcDirectory = fs.existsSync(suiteDir) ? path.relative(__dirname, suiteDir) : 'app-tanstack'
 
-export default defineConfig((env) =>
-  mergeConfig(
-    payloadPlugin({
-      additionalIgnoreImporters: [
-        /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
-      ],
-      payloadConfigPath: path.resolve(__dirname, testSuite, 'config.ts'),
-      reactPlugin: viteReact({
-        exclude: [],
-        include: /\.[jt]sx?$/,
-      }),
-      routesDirectory: 'app',
-      rscPlugin: rsc({ serverHandler: false }),
-      srcDirectory,
-      tanstackStart,
-    })(env),
-    {
+export default defineConfig(
+  withPayload({
+    additionalIgnoreImporters: [
+      /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
+    ],
+    payloadConfigPath: path.resolve(__dirname, testSuite, 'config.ts'),
+    routesDirectory: 'app',
+    srcDirectory,
+    // Everything test/monorepo-specific is layered on via the single `vite`
+    // override — `withPayload` merges it on top of the Payload defaults.
+    vite: {
       css: {
         preprocessorOptions: {
           scss: {
@@ -149,5 +140,5 @@ export default defineConfig((env) =>
         },
       },
     },
-  ),
+  }),
 )
