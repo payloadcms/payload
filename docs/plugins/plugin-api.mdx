@@ -50,7 +50,7 @@ export const seoPlugin = definePlugin<SEOPluginOptions>({
 })
 ```
 
-`options` can be any type - an object, an `interface`, or a generic. To make options optional (callable with no arguments), include `undefined` in the type parameter:
+To make options optional (callable with no arguments), include `undefined` in the type parameter:
 
 ```ts
 export const analyticsPlugin = definePlugin<AnalyticsOptions | undefined>({
