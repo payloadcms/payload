@@ -34,36 +34,38 @@ export const generateSlug =
     const entity = collection || global!
 
     if (operation === 'create') {
-      // Autosave drafts: do not auto-generate on the initial draft — the user is still
-      // entering content. Keep an explicitly provided slug; generation begins on a later autosave.
+      // Autosave drafts: do not auto-generate on the initial draft — the user is still entering content.
+      // Keep the explicit non-slugified value (if any); generation begins on a later autosave.
       if (hasAutosaveEnabled(entity) && data?._status === 'draft') {
         return value || null
       }
+
       // Keep an explicitly provided slug; otherwise generate from the source.
       return await slugify(value || source)
     }
 
-    const originalSlug = originalDoc?.[name]
+    const storedSlug = originalDoc?.[name]
     const originalSource = originalDoc?.[useAsSlug]
 
-    // Explicit edit this save (a value was sent that differs from what is stored): respect it.
-    // Includes an intentional clear (empty string / null), matching the field's prior semantics.
-    if (value !== undefined && value !== originalSlug) {
+    // User explicitly edited the slug (or cleared the value): respect it.
+    if (value !== undefined && value !== storedSlug) {
       return value
     }
 
-    // The admin did not touch the slug. If a stored slug no longer matches its
-    // source-derived value, it was edited by hand — freeze it.
-    if (originalSlug && originalSlug !== (await slugify(originalSource))) {
-      return originalSlug
+    // No explicit edit this save. If the stored slug doesn't match what its source
+    // would generate, it was customized on an earlier save — keep it frozen.
+    const storedSlugIsCustom = storedSlug && storedSlug !== (await slugify(originalSource))
+
+    if (storedSlugIsCustom) {
+      return storedSlug
     }
 
     if (!hasAutosaveEnabled(entity)) {
       // Non-autosave: generate once while empty, then freeze.
-      return originalSlug || (await slugify(source))
+      return storedSlug || (await slugify(source))
     }
 
-    // Autosave / drafts.
+    // Autosave / drafts
     const priorVersions = await countVersions({
       collectionSlug: collection?.slug,
       globalSlug: global?.slug,
@@ -71,14 +73,14 @@ export const generateSlug =
       req,
     })
 
-    // Requirement 1: do not generate on the very first draft (no prior version yet).
+    // Do not generate on the very first draft (no prior version yet).
     if (priorVersions === 0) {
-      return originalSlug ?? null
+      return storedSlug ?? null
     }
 
     // Stabilize after publish to protect live URLs.
     if (data?._status === 'published' || originalDoc?._status === 'published') {
-      return originalSlug
+      return storedSlug
     }
 
     // Still auto-tracking an unpublished draft with content.
