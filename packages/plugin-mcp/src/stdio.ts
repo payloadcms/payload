@@ -94,12 +94,15 @@ export const runMcpStdio = async (): Promise<void> => {
   req.payloadAPI = 'MCP' as const
   const authorizedMCP = await getAuthorizedMCP({ overrideAccess, req })
 
-  const stdioServer = serveStdio(() => buildMcpServer({ authorizedMCP, pluginConfig, req }), {
-    onerror: (err) => {
-      // MCP messages use stdout, so write SDK errors to stderr.
-      console.error('[payload-mcp] error serving MCP over stdio:', err)
+  const stdioServer = serveStdio(
+    () => buildMcpServer({ authorizedMCP, pluginConfig, req, transport: 'stdio' }),
+    {
+      onerror: (err) => {
+        // MCP messages use stdout, so write SDK errors to stderr.
+        console.error('[payload-mcp] error serving MCP over stdio:', err)
+      },
     },
-  })
+  )
 
   // Close the MCP server and Payload when the client disconnects or the process stops.
   let isShuttingDown = false

@@ -2,6 +2,7 @@ import { McpServer, type ServerContext } from '@modelcontextprotocol/server'
 import { APIError, type PayloadRequest } from 'payload'
 import { z } from 'zod'
 
+import type { MCPTransport } from '../telemetry/index.js'
 import type {
   AuthorizedMCP,
   CollectionMCPItem,
@@ -13,6 +14,7 @@ import type {
   ToolInputSchema,
 } from '../types.js'
 
+import { createMcpServerTelemetry } from '../telemetry/index.js'
 import { getLogger } from '../utils/getLogger.js'
 import { toStandardSchema } from '../utils/toStandardSchema.js'
 
@@ -30,10 +32,13 @@ export const buildMcpServer = ({
   authorizedMCP,
   pluginConfig,
   req,
+  transport,
 }: {
   authorizedMCP: AuthorizedMCP
   pluginConfig: SanitizedMCPPluginConfig
   req: PayloadRequest
+  /** Serving transport, recorded on each tool-call telemetry event. */
+  transport: MCPTransport
 }): McpServer => {
   const serverOptions = pluginConfig.mcp?.serverOptions || {}
   const server = new McpServer(
@@ -65,6 +70,13 @@ export const buildMcpServer = ({
     const { doc: _doc, ...rest } = overridden
     return rest
   }
+
+  // Wraps tool handlers to emit mcp-connection (once) + mcp-tool-call telemetry.
+  const wrapToolHandler = createMcpServerTelemetry({
+    authorizedMCP,
+    payload: req.payload,
+    transport,
+  })
 
   /**
    * Runs a collection/global tool call:
@@ -161,8 +173,9 @@ export const buildMcpServer = ({
               description: item.tool.description,
               inputSchema: toStandardSchema(inputSchema),
             },
-            async (input: unknown, ctx: ServerContext) =>
+            wrapToolHandler(item, async (input, ctx) =>
               callEntityTool({ input, item, serverContext: ctx }),
+            ),
           )
           logger.info(`✅ Tool: ${item.mcpName} Registered.`)
           break
@@ -218,7 +231,7 @@ export const buildMcpServer = ({
               description: tool.description,
               inputSchema: tool.input ? toStandardSchema(tool.input) : undefined,
             },
-            async (input: unknown, ctx: ServerContext) => {
+            wrapToolHandler(item, async (input, ctx) => {
               const toolInput = (input ?? {}) as Record<string, unknown>
               const response = await tool.handler({
                 authorizedMCP,
@@ -232,7 +245,7 @@ export const buildMcpServer = ({
                 response,
                 toolName: item.mcpName,
               })
-            },
+            }),
           )
           logger.info(`✅ Tool: ${item.mcpName} Registered.`)
           break

@@ -38,7 +38,7 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
 
   // Keep the old JSON-only, stateless behavior because the SDK's 2025 fallback uses SSE.
   if (await isLegacyRequest(mcpRequest)) {
-    const server = buildMcpServer({ authorizedMCP, pluginConfig, req })
+    const server = buildMcpServer({ authorizedMCP, pluginConfig, req, transport: 'http' })
     const transport = new WebStandardStreamableHTTPServerTransport({
       enableJsonResponse: true,
       sessionIdGenerator: undefined, // stateless mode
@@ -57,15 +57,18 @@ export const mcpEndpoint: PayloadHandler = async (req) => {
     }
   }
 
-  const handler = createMcpHandler(() => buildMcpServer({ authorizedMCP, pluginConfig, req }), {
-    legacy: 'reject',
-    // SDK subscriptions always use SSE, so disable them to keep every response JSON-only.
-    maxSubscriptions: 0,
-    onerror: (err) => {
-      req.payload.logger.error({ err, msg: 'Error serving modern MCP request' })
+  const handler = createMcpHandler(
+    () => buildMcpServer({ authorizedMCP, pluginConfig, req, transport: 'http' }),
+    {
+      legacy: 'reject',
+      // SDK subscriptions always use SSE, so disable them to keep every response JSON-only.
+      maxSubscriptions: 0,
+      onerror: (err) => {
+        req.payload.logger.error({ err, msg: 'Error serving modern MCP request' })
+      },
+      responseMode: 'json',
     },
-    responseMode: 'json',
-  })
+  )
 
   try {
     return await handler.fetch(mcpRequest)
