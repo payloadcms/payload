@@ -238,6 +238,29 @@ If the field name is dynamic (configurable at runtime), index through `Record<st
 const value = (user as Record<string, unknown>)[fieldNameFromConfig]
 ```
 
+### `multiTenantPlugin` and `searchPlugin` no longer take a type argument
+
+The `<ConfigType>` type parameter on `multiTenantPlugin` and `searchPlugin` — and on `MultiTenantPluginConfig` / `SearchPluginConfig` — has been removed. It only existed to override the `user` / `locale` types, which Payload now infers from your generated types automatically: `userHasAccessToAllTenants` receives the generated `User`, and `search`'s `skipSync` callback receives `TypedLocale | undefined`.
+
+Drop the type argument — your callbacks are typed correctly without it.
+
+```diff
+- multiTenantPlugin<{ user: MyUser }>({ ... })
++ multiTenantPlugin({ ... })
+```
+
+### `definePlugin`: options moved to a named `options` argument
+
+The experimental `definePlugin` helper previously spread user options into the `plugin` callback's args, alongside `config` and `plugins`. Options are now under a single `options` property. `TOptions` is also no longer constrained to `Record<string, unknown>`, so `interface` and generic option types work.
+
+```diff
+export const myPlugin = definePlugin<MyPluginOptions>({
+  slug: 'my-plugin',
+- plugin: ({ config, plugins, collections }) => ({ ...config }),
++ plugin: ({ config, options }) => ({ ...config }),
+})
+```
+
 ### `next/navigation` and `next/link` replaced by framework-agnostic `RouterAdapter` hooks
 
 `@payloadcms/ui` no longer depends on `next` directly. Custom admin components (field components, custom views, plugins) that previously imported router hooks or the `Link` component from `next/*` must now import the framework-agnostic equivalents from `@payloadcms/ui`. Behavior is identical when running on Next.js — the `NextRouterAdapter` shipped by `@payloadcms/next` wires `next/navigation` hooks and `next/link` into the same context — but ui code can now also run on non-Next adapters (e.g. TanStack Start) without modification.
