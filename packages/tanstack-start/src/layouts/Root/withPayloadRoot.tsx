@@ -24,6 +24,32 @@ export function buildThemeInitScript(cookiePrefix: string = 'payload'): string {
  */
 export const THEME_INIT_SCRIPT: string = buildThemeInitScript()
 
+/**
+ * The Payload admin head `<style>`: declares the `@layer` order and hides
+ * closed modals from first paint.
+ *
+ * `@faceless-ui/modal` hides closed modals with CSS it injects from a
+ * client-side `<style>` tag (its `generateCSS`), so those rules are absent
+ * during SSR and the first hydration frames. Because `@payloadcms/ui`'s
+ * `dialog` styles render modals regardless of the `open` attribute, any
+ * registered-but-closed modal (e.g. the delete confirmation or stay-logged-in
+ * dialogs) would flash on screen after a refresh until that `<style>` mounts.
+ * Next.js doesn't hit this, but TanStack Start's hydration exposes the gap —
+ * the same reason the theme bootstrap above is hoisted into the SSR'd head. So
+ * ship faceless-ui's visibility rules here too, present at first paint, so
+ * closed modals stay hidden until they actually open.
+ */
+export const PAYLOAD_HEAD_STYLE: string =
+  `@layer payload-default, payload;` +
+  `@layer payload-default{` +
+  `.payload__modal-container,.payload__modal-item{visibility:hidden}` +
+  `.payload__modal-container--appear,.payload__modal-container--appearDone,` +
+  `.payload__modal-container--enter,.payload__modal-container--enterDone,` +
+  `.payload__modal-container--exit,.payload__modal-item--appear,` +
+  `.payload__modal-item--appearDone,.payload__modal-item--enter,` +
+  `.payload__modal-item--enterDone,.payload__modal-item--exit{visibility:visible}` +
+  `}`
+
 export type PayloadAdminShellProps = {
   readonly children: React.ReactNode
   /**
@@ -50,7 +76,7 @@ export function PayloadAdminShell({ children, cookiePrefix }: PayloadAdminShellP
     <html suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        <style>{`@layer payload-default, payload;`}</style>
+        <style>{PAYLOAD_HEAD_STYLE}</style>
         <HeadContent />
       </head>
       <body>

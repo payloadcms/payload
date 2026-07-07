@@ -14,6 +14,7 @@ import React from 'react'
 import '@payloadcms/ui/scss/app.scss'
 
 import { TanStackRouterAdapter } from '../../elements/RouterAdapter/index.js'
+import { PAYLOAD_HEAD_STYLE } from './withPayloadRoot.js'
 
 export type RootLayoutData = {
   clientConfig: ClientConfig
@@ -48,7 +49,7 @@ export function RootLayout({ children, data, serverFunction }: RootLayoutProps) 
   return (
     <html data-theme={data.theme} dir={dir} lang={data.languageCode} suppressHydrationWarning>
       <head>
-        <style>{`@layer payload-default, payload;`}</style>
+        <style>{PAYLOAD_HEAD_STYLE}</style>
       </head>
       <body>
         <RootProvider
