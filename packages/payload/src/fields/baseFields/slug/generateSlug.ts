@@ -26,7 +26,7 @@ export const generateSlug =
   async ({ collection, data, global, operation, originalDoc, req, value }) => {
     const source = data?.[useAsSlug]
 
-    const run = (valueToSlugify: unknown) =>
+    const slugify = (valueToSlugify: unknown) =>
       customSlugify
         ? customSlugify({ data: (data ?? {}) as TypeWithID, req, valueToSlugify })
         : defaultSlugify(valueToSlugify as string)
@@ -54,13 +54,13 @@ export const generateSlug =
 
     // The admin did not touch the slug. If a stored slug no longer matches its
     // source-derived value, it was edited by hand — freeze it.
-    if (originalSlug && originalSlug !== (await run(originalSource))) {
+    if (originalSlug && originalSlug !== (await slugify(originalSource))) {
       return originalSlug
     }
 
     if (!hasAutosaveEnabled(entity)) {
       // Non-autosave: generate once while empty, then freeze.
-      return originalSlug || (await run(source))
+      return originalSlug || (await slugify(source))
     }
 
     // Autosave / drafts.
@@ -82,5 +82,5 @@ export const generateSlug =
     }
 
     // Still auto-tracking an unpublished draft with content.
-    return source ? await run(source) : null
+    return source ? await slugify(source) : null
   }
