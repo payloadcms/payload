@@ -249,13 +249,17 @@ Drop the type argument — your callbacks are typed correctly without it.
 + multiTenantPlugin({ ... })
 ```
 
-### `definePlugin`: options moved to a named `options` argument
+### `definePlugin`: `slug` is required and options moved to a named `options` argument
 
-The experimental `definePlugin` helper previously spread user options into the `plugin` callback's args, alongside `config` and `plugins`. Options are now under a single `options` property. `TOptions` is also no longer constrained to `Record<string, unknown>`, so `interface` and generic option types work.
+Two changes to the experimental `definePlugin` helper:
+
+- **`slug` is now required.** It registers the plugin in the `plugins` map for cross-plugin discovery. Add one to every `definePlugin` call.
+- **Options are a named `options` argument.** They were previously spread into the `plugin` callback's args alongside `config` and `plugins`; they're now under a single `options` property. `TOptions` is also no longer constrained to `Record<string, unknown>`, so `interface` and generic option types work.
 
 ```diff
 export const myPlugin = definePlugin<MyPluginOptions>({
-  slug: 'my-plugin',
+- // slug was optional
++ slug: 'my-plugin',
 - plugin: ({ config, plugins, collections }) => ({ ...config }),
 + plugin: ({ config, options }) => ({ ...config }),
 })

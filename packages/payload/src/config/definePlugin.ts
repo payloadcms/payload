@@ -37,7 +37,7 @@ function buildPluginsMap(plugins: Plugin[] | undefined): PluginsMap {
 export function definePlugin(descriptor: {
   order?: number
   plugin: (args: { config: Config; plugins: PluginsMap }) => Config | Promise<Config>
-  slug?: string
+  slug: string
 }): () => Plugin
 export function definePlugin<TOptions>(descriptor: {
   order?: number
@@ -46,7 +46,7 @@ export function definePlugin<TOptions>(descriptor: {
     options: TOptions
     plugins: PluginsMap
   }) => Config | Promise<Config>
-  slug?: string
+  slug: string
 }): undefined extends TOptions ? (options?: TOptions) => Plugin : (options: TOptions) => Plugin
 export function definePlugin<TOptions>(descriptor: {
   order?: number
@@ -55,7 +55,7 @@ export function definePlugin<TOptions>(descriptor: {
     options: TOptions
     plugins: PluginsMap
   }) => Config | Promise<Config>
-  slug?: string
+  slug: string
 }): (options: TOptions) => Plugin {
   return (options?: TOptions): Plugin => {
     const pluginFn: Plugin = (config) =>
@@ -68,9 +68,7 @@ export function definePlugin<TOptions>(descriptor: {
     if (options !== undefined) {
       pluginFn.options = options as Record<string, unknown>
     }
-    if (descriptor.slug !== undefined) {
-      pluginFn.slug = descriptor.slug
-    }
+    pluginFn.slug = descriptor.slug
     if (descriptor.order !== undefined) {
       pluginFn.order = descriptor.order
     }
