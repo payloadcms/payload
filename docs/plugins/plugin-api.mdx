@@ -34,17 +34,31 @@ Everything below builds on top of this — none of it is required for simple plu
 
 ## `definePlugin` — recommended for published plugins
 
-`definePlugin` replaces the boilerplate of manually attaching `slug`, `order`, and `options` to the function after the fact. Your plugin function receives a single object containing `config`, a `plugins` map, and any user-provided options spread directly in:
+`definePlugin` replaces the boilerplate of manually attaching `slug`, `order`, and `options` to the function after the fact. Your plugin function receives a single object containing `config`, a `plugins` map, and the user-provided `options`:
 
 ```ts
 export const seoPlugin = definePlugin<SEOPluginOptions>({
   slug: 'plugin-seo',
   order: 10,
-  plugin: ({ config, plugins, collections }) => ({
+  plugin: ({ config, options }) => ({
     ...config,
-    collections: [...(config.collections || []), seoCollection],
+    collections: [
+      ...(config.collections || []),
+      seoCollection(options.collections),
+    ],
   }),
 })
+```
+
+`options` can be any type - an object, an `interface`, or a generic. To make options optional (callable with no arguments), include `undefined` in the type parameter:
+
+```ts
+export const analyticsPlugin = definePlugin<AnalyticsOptions | undefined>({
+  slug: 'plugin-analytics',
+  plugin: ({ config, options }) => ({ ...config }), // options: AnalyticsOptions | undefined
+})
+
+analyticsPlugin() // ✅ no arguments required
 ```
 
 Import it from `payload`:
@@ -127,9 +141,9 @@ export type SEOPluginOptions = {
 export const seoPlugin = definePlugin<SEOPluginOptions>({
   slug: 'plugin-seo',
   order: 10,
-  plugin: ({ config, collections }) => ({
+  plugin: ({ config, options }) => ({
     ...config,
-    // extend config here
+    // extend config here using options
   }),
 })
 
@@ -172,11 +186,11 @@ export type ReaderPluginOptions = {
 export const readerPlugin = definePlugin<ReaderPluginOptions>({
   slug: 'my-reader',
   order: 10,
-  plugin: ({ config, items }) => ({
+  plugin: ({ config, options }) => ({
     ...config,
     custom: {
       ...config.custom,
-      items: items.map((i) => i.name),
+      items: options.items.map((i) => i.name),
     },
   }),
 })

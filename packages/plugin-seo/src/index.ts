@@ -1,5 +1,6 @@
 import type { Config, Field, GroupField, TabsField } from 'payload'
 
+import { definePlugin } from 'payload'
 import { deepMergeSimple } from 'payload/shared'
 
 import type {
@@ -17,9 +18,9 @@ import { OverviewField } from './fields/Overview/index.js'
 import { PreviewField } from './fields/Preview/index.js'
 import { translations } from './translations/index.js'
 
-export const seoPlugin =
-  (pluginConfig: SEOPluginConfig) =>
-  (config: Config): Config => {
+export const seoPlugin = definePlugin<SEOPluginConfig>({
+  slug: '@payloadcms/plugin-seo',
+  plugin: ({ config, options: pluginConfig }) => {
     const defaultFields: Field[] = [
       OverviewField({}),
       MetaTitleField({
@@ -297,4 +298,5 @@ export const seoPlugin =
         translations: deepMergeSimple(translations, config.i18n?.translations ?? {}),
       },
     }
-  }
+  },
+})

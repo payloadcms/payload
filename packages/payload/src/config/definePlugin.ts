@@ -16,17 +16,16 @@ function buildPluginsMap(plugins: Plugin[] | undefined): PluginsMap {
  * Helper for authoring plugins with order, slug, and typed options.
  * Eliminates boilerplate and ensures metadata is always set consistently.
  *
- * The `plugin` function receives a single object containing `config`, `plugins`
- * (a slug-keyed map of other plugins), and any user-provided options spread in.
+ * The `plugin` function receives `config`, `plugins` (a slug-keyed map of other
+ * plugins), and the user-provided `options`.
  *
  * @experimental
  *
  * @example
  * // With options:
- * export const seoPlugin = definePlugin<SEOPluginOptions>({
+ * export const seoPlugin = definePlugin<SEOPluginConfig>({
  *   slug: 'plugin-seo',
- *   order: 10,
- *   plugin: ({ config, plugins, collections }) => ({ ...config }),
+ *   plugin: ({ config, options }) => ({ ...config }),
  * })
  *
  * // Without options:
@@ -40,31 +39,35 @@ export function definePlugin(descriptor: {
   plugin: (args: { config: Config; plugins: PluginsMap }) => Config | Promise<Config>
   slug?: string
 }): () => Plugin
-export function definePlugin<TOptions extends Record<string, unknown>>(descriptor: {
+export function definePlugin<TOptions>(descriptor: {
   order?: number
-  plugin: (args: { config: Config; plugins: PluginsMap } & TOptions) => Config | Promise<Config>
+  plugin: (args: {
+    config: Config
+    options: TOptions
+    plugins: PluginsMap
+  }) => Config | Promise<Config>
   slug?: string
-}): (options: TOptions) => Plugin
-export function definePlugin<TOptions extends Record<string, unknown>>(descriptor: {
+}): undefined extends TOptions ? (options?: TOptions) => Plugin : (options: TOptions) => Plugin
+export function definePlugin<TOptions>(descriptor: {
   order?: number
-  plugin: (args: { config: Config; plugins: PluginsMap } & TOptions) => Config | Promise<Config>
+  plugin: (args: {
+    config: Config
+    options: TOptions
+    plugins: PluginsMap
+  }) => Config | Promise<Config>
   slug?: string
-}): (options?: TOptions) => Plugin {
+}): (options: TOptions) => Plugin {
   return (options?: TOptions): Plugin => {
-    const pluginFn: Plugin = (config) => {
-      const plugins = buildPluginsMap(config.plugins)
-
-      const args = {
-        ...options,
+    const pluginFn: Plugin = (config) =>
+      descriptor.plugin({
         config,
-        plugins,
-      } as { config: Config; plugins: PluginsMap } & TOptions
+        options: options as TOptions,
+        plugins: buildPluginsMap(config.plugins),
+      })
 
-      return descriptor.plugin(args)
+    if (options !== undefined) {
+      pluginFn.options = options as Record<string, unknown>
     }
-
-    pluginFn.options = options as Record<string, unknown>
-
     if (descriptor.slug !== undefined) {
       pluginFn.slug = descriptor.slug
     }
