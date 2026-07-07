@@ -14,6 +14,7 @@ import { migrateHideAPIURL } from './transforms/migrate-hide-api-url/index.js'
 import { migrateImportExportHooks } from './transforms/migrate-import-export-hooks/index.js'
 import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-api/index.js'
 import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exports/index.js'
+import { migrateSlugField } from './transforms/migrate-slug-field/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
 import { migrateVersionsDefault } from './transforms/migrate-versions-default/index.js'
 import { removeGroupByTrue } from './transforms/remove-group-by-true/index.js'
@@ -40,6 +41,7 @@ export const transforms: Transform[] = [
   migrateImportExportHooks,
   migrateDbTypesSubpath,
   migrateNextSubpathExports,
+  migrateSlugField,
   migrateVersionsDefault,
   removeGroupByTrue,
   removeLocalizeStatusConfig,
