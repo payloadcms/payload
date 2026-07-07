@@ -1,7 +1,7 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { CollectionConfig, Config } from 'payload'
+import type { CollectionConfig } from 'payload'
 
-import chalk from 'chalk'
+import { definePlugin } from 'payload'
 import { hasAutosaveEnabled } from 'payload/shared'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
@@ -19,9 +19,9 @@ import { addFilterOptionsToFields } from './utilities/addFilterOptionsToFields.j
 import { combineFilters } from './utilities/combineFilters.js'
 import { miniChalk } from './utilities/miniChalk.js'
 
-export const multiTenantPlugin =
-  <ConfigType>(pluginConfig: MultiTenantPluginConfig<ConfigType>) =>
-  (incomingConfig: Config): Config => {
+export const multiTenantPlugin = definePlugin<MultiTenantPluginConfig>({
+  slug: '@payloadcms/plugin-multi-tenant',
+  plugin: ({ config: incomingConfig, options: pluginConfig }) => {
     if (pluginConfig.enabled === false) {
       return incomingConfig
     }
@@ -29,9 +29,7 @@ export const multiTenantPlugin =
     /**
      * Set defaults
      */
-    const userHasAccessToAllTenants: Required<
-      MultiTenantPluginConfig<ConfigType>
-    >['userHasAccessToAllTenants'] =
+    const userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants'] =
       typeof pluginConfig.userHasAccessToAllTenants === 'function'
         ? pluginConfig.userHasAccessToAllTenants
         : () => false
@@ -118,7 +116,7 @@ export const multiTenantPlugin =
       adminUsersCollection.admin.baseFilter = combineFilters({
         baseFilter,
         customFilter: (args) =>
-          filterDocumentsByTenants<ConfigType>({
+          filterDocumentsByTenants({
             filterFieldName: `${tenantsArrayFieldName}.${tenantsArrayTenantFieldName}`,
             req: args.req,
             tenantsArrayFieldName,
@@ -443,4 +441,5 @@ export const multiTenantPlugin =
     })
 
     return incomingConfig
-  }
+  },
+})

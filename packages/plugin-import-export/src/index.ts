@@ -1,6 +1,4 @@
-import type { Config } from 'payload'
-
-import { deepMergeSimple } from 'payload'
+import { deepMergeSimple, definePlugin } from 'payload'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type {
@@ -31,9 +29,9 @@ import { getPluginCollections } from './utilities/getPluginCollections.js'
  *
  * @see https://payloadcms.com/docs/plugins/import-export
  */
-export const importExportPlugin =
-  (pluginConfig: ImportExportPluginConfig) =>
-  async (config: Config): Promise<Config> => {
+export const importExportPlugin = definePlugin<ImportExportPluginConfig>({
+  slug: '@payloadcms/plugin-import-export',
+  plugin: async ({ config, options: pluginConfig }) => {
     // Get all export/import collections and the mappings from target collections to custom collections
     const { customExportSlugMap, customImportSlugMap, exportCollections, importCollections } =
       await getPluginCollections({
@@ -231,7 +229,8 @@ export const importExportPlugin =
     }
 
     return config
-  }
+  },
+})
 
 declare module 'payload' {
   export interface FieldCustom {
