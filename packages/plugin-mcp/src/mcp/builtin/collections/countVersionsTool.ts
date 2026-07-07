@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { whereSchema } from '../../../utils/whereSchema.js'
 
 const DEFAULT_DESCRIPTION =
@@ -22,10 +21,7 @@ export const countVersionsTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
-    locale: z
-      .string()
-      .describe('Optional: locale code to count versions in')
-      .optional(),
+    locale: z.string().describe('Optional: locale code to count versions in').optional(),
     where: whereSchema
       .describe(
         'Optional: where clause for filtering versions. Version document fields are usually under "version". Example: {"version.title":{"contains":"test"}}',
@@ -42,8 +38,8 @@ export const countVersionsTool = defineCollectionTool({
   try {
     const result = await payload.countVersions({
       collection: collectionSlug,
+      overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(locale ? { locale } : {}),
       ...(where ? { where } : {}),
     })

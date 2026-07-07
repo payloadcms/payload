@@ -264,43 +264,46 @@ development.
 
 ### Custom auth
 
-For custom auth, provide an `AuthorizedMCP` from `overrideGetAuthorizedMCP`.
-Return the authenticated user, whether MCP handlers should call Payload local
-APIs with `overrideAccess`, and the MCP items available to the caller.
-`overrideAccess` follows Payload core semantics: when true, MCP skips item access
-callbacks and built-in permission checks.
+Use `overrideGetAuthorizedMCP` to replace the default Payload authentication and
+MCP authorization flow. The custom resolver must:
 
-This hook replaces the default resolver, so it is responsible for returning only
-the `items` that caller should see.
+1. Authenticate the caller and assign the matching Payload user to `req.user`.
+   Assign `null` when the caller is anonymous.
+2. Return only the MCP `items` that caller may use.
+3. Return the `overrideAccess` value that handlers should pass to Payload's local
+   API.
+
+`req.user` is the single source of truth for the caller's identity. Payload
+access control, MCP access callbacks, and local API calls that receive `req` all
+use it.
+
+<Banner type="warning">
+  Always assign `req.user`, including `req.user = null` for an anonymous caller.
+  The hook replaces the default resolver, so the plugin does not authenticate or
+  clear the request user for you.
+</Banner>
 
 ```ts
-import { type AuthorizedMCP, mcpPlugin } from '@payloadcms/plugin-mcp'
+import { mcpPlugin } from '@payloadcms/plugin-mcp'
 
 mcpPlugin({
-  overrideGetAuthorizedMCP: async ({ pluginConfig, req }) => {
-    const userId = req.headers.get('X-User-Id')
-    if (userId) {
-      const user = await req.payload.findByID({
-        id: userId,
-        collection: 'users',
-        disableErrors: true,
-      })
-
-      return {
-        items: pluginConfig.items,
-        overrideAccess: false,
-        user,
-      }
-    }
+  overrideGetAuthorizedMCP: async ({ overrideAccess, pluginConfig, req }) => {
+    // Your application verifies the external credentials and returns the
+    // matching Payload user, or null when the caller is anonymous.
+    const user = await authenticateAndResolvePayloadUser(req)
+    req.user = user ?? null
 
     return {
-      items: [],
-      overrideAccess: false,
-      user: null,
+      items: req.user ? pluginConfig.items : [],
+      overrideAccess,
     }
   },
 })
 ```
+
+This example allows every configured MCP item for any resolved user. Filter
+`pluginConfig.items` before returning when different users should see different
+items.
 
 The handler receives:
 
@@ -456,7 +459,6 @@ A "top-level" tool isn't scoped to a collection or global. Its wire name is exac
 
 ```ts
 import { defineTool, mcpPlugin } from '@payloadcms/plugin-mcp'
-import { localAPIDefaults } from '@payloadcms/plugin-mcp'
 import * as z from 'zod'
 
 mcpPlugin({
@@ -466,14 +468,14 @@ mcpPlugin({
       input: z.object({
         sides: z.number().int().min(2).max(1000).default(6),
       }),
-    }).handler(async ({ input, authorizedMCP, req }) => {
+    }).handler(async ({ authorizedMCP, input, req }) => {
       const result = Math.floor(Math.random() * input.sides) + 1
 
       await req.payload.create({
         collection: 'rolls',
         data: { sides: input.sides, result, user: req.user?.id },
+        overrideAccess: authorizedMCP.overrideAccess,
         req,
-        ...localAPIDefaults(authorizedMCP),
       })
 
       return {
@@ -490,7 +492,6 @@ A collection tool's wire name is exactly its key. Payload adds a `collectionSlug
 
 ```ts
 import { defineCollectionTool, mcpPlugin } from '@payloadcms/plugin-mcp'
-import { localAPIDefaults } from '@payloadcms/plugin-mcp'
 import * as z from 'zod'
 
 mcpPlugin({
@@ -507,8 +508,8 @@ mcpPlugin({
             id: input.id,
             collection: collectionSlug,
             data: { _status: 'published' },
+            overrideAccess: authorizedMCP.overrideAccess,
             req,
-            ...localAPIDefaults(authorizedMCP),
           })
           return {
             content: [
@@ -531,7 +532,6 @@ mcpPlugin({
 
 ```ts
 import { defineGlobalTool, mcpPlugin } from '@payloadcms/plugin-mcp'
-import { localAPIDefaults } from '@payloadcms/plugin-mcp'
 import * as z from 'zod'
 
 mcpPlugin({
@@ -547,8 +547,8 @@ mcpPlugin({
           const result = await req.payload.updateGlobal({
             slug: globalSlug,
             data: { maintenanceMode: input.enabled },
+            overrideAccess: authorizedMCP.overrideAccess,
             req,
-            ...localAPIDefaults(authorizedMCP),
           })
 
           return {
@@ -671,32 +671,32 @@ mcpPlugin({
 })
 ```
 
-## `AuthorizedMCP` and `localAPIDefaults`
+## Request identity and `AuthorizedMCP`
 
-Tool handlers receive an `authorizedMCP` object describing the caller:
+The authenticated user is available as `req.user`. Tool handlers also receive
+an `authorizedMCP` object describing the MCP authorization result:
 
 ```ts
 type AuthorizedMCP = {
   items: MCPItem[] // the items this caller may use
   overrideAccess: boolean // whether handlers should bypass Payload access control
-  user: User | null // the resolved user
 }
 ```
 
-When calling Payload's local API from a handler, spread `localAPIDefaults(authorizedMCP)` to forward `user` and `overrideAccess` together - this keeps the two pieces of caller state from drifting apart:
+When calling Payload's local API from a tool handler, pass `req` and
+`authorizedMCP.overrideAccess`. The local API reads the user from `req.user`:
 
 ```ts
-import { localAPIDefaults } from '@payloadcms/plugin-mcp'
-
 await req.payload.create({
   collection: 'posts',
   data,
+  overrideAccess: authorizedMCP.overrideAccess,
   req,
-  ...localAPIDefaults(authorizedMCP),
 })
 ```
 
-Built-in CRUD tools already use this pattern, so they automatically run under the resolved user unless `overrideAccess` is true.
+Built-in CRUD tools already use this pattern. They run as `req.user` unless
+`overrideAccess` is true.
 
 Prompt and resource handlers receive `req`, but not `authorizedMCP`.
 
