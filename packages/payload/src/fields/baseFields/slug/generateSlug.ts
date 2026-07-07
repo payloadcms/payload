@@ -40,7 +40,7 @@ export const generateSlug =
         return value || null
       }
       // Keep an explicitly provided slug; otherwise generate from the source.
-      return await run(value || source)
+      return await slugify(value || source)
     }
 
     const originalSlug = originalDoc?.[name]
