@@ -10,6 +10,7 @@ const SlugFields: CollectionConfig = {
       name: 'slug',
       type: 'slug',
       label: 'Default Slug',
+      useAsSlug: 'title',
       admin: { description: 'This is the default slug field' },
     },
     {

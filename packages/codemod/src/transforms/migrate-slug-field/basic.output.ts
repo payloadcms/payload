@@ -9,6 +9,7 @@ export const Posts: CollectionConfig = {
     {
       name: 'slug',
       type: 'slug',
+      useAsSlug: 'title',
     },
     {
       name: 'requiredSlug',

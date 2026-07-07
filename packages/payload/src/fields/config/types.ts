@@ -681,10 +681,10 @@ export type SlugField = {
   slugify?: Slugify
   type: 'slug'
   /**
-   * Name of the sibling field whose value the slug is generated from.
-   * @default 'title'
+   * Name of the sibling field whose value the slug is generated from, e.g. `'title'`.
+   * Required — there is no default, since a collection may not have a `title` field.
    */
-  useAsSlug?: string
+  useAsSlug: string
   validate?: TextFieldSingleValidation
 } & Omit<FieldBase, 'validate'>
 

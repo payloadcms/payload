@@ -277,8 +277,13 @@ export const sanitizeField = async ({
 
   // Slug field: apply defaults, attach generation hook, expose slugify to the server fn.
   if (field.type === 'slug') {
-    const useAsSlug = field.useAsSlug || 'title'
-    field.useAsSlug = useAsSlug
+    const useAsSlug = field.useAsSlug
+
+    if (!useAsSlug) {
+      throw new InvalidConfiguration(
+        `The slug field "${field.name}" is missing the required "useAsSlug" property, which must name the field to generate the slug from.`,
+      )
+    }
 
     if (typeof field.required === 'undefined') {
       field.required = true

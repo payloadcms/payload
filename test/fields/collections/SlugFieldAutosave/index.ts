@@ -7,7 +7,7 @@ export const SlugFieldAutosave: CollectionConfig = {
   admin: { useAsTitle: 'title' },
   fields: [
     { name: 'title', type: 'text' },
-    { name: 'slug', type: 'slug' },
+    { name: 'slug', type: 'slug', useAsSlug: 'title' },
   ],
   versions: {
     drafts: { autosave: true },

@@ -54,7 +54,9 @@ const replaceCallWithSlugField = (
 
   // Extract every value before mutating — replacing the call forgets `arg`.
   const name = getInit('name') ?? "'slug'"
-  const useAsSlug = getInit('useAsSlug') ?? getInit('fieldToUse')
+  // `useAsSlug` is required on the native field. The old helper defaulted to
+  // 'title', so preserve that when the call didn't specify a source field.
+  const useAsSlug = getInit('useAsSlug') ?? getInit('fieldToUse') ?? "'title'"
   const slugify = getInit('slugify')
   const required = getInit('required')
   const localized = getInit('localized')
@@ -73,9 +75,7 @@ const replaceCallWithSlugField = (
 
   obj.addPropertyAssignment({ name: 'name', initializer: name })
   obj.addPropertyAssignment({ name: 'type', initializer: "'slug'" })
-  if (useAsSlug !== undefined) {
-    obj.addPropertyAssignment({ name: 'useAsSlug', initializer: useAsSlug })
-  }
+  obj.addPropertyAssignment({ name: 'useAsSlug', initializer: useAsSlug })
   if (slugify !== undefined) {
     obj.addPropertyAssignment({ name: 'slugify', initializer: slugify })
   }

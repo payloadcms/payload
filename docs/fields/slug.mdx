@@ -35,10 +35,10 @@ export const ExampleCollection: CollectionConfig = {
 
 The Slug Field defaults `required`, `unique`, and `index` to `true`, and renders in the `sidebar`. In addition to the standard [field options](./overview#field-options), it exposes:
 
-| Option      | Description                                                                                                                   |
-| ----------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| `useAsSlug` | The name of the top-level field to generate the slug from. This field must exist in the same collection. Defaults to `title`. |
-| `slugify`   | Override the default slugify function. [More details](#custom-slugify-function).                                              |
+| Option         | Description                                                                                                                             |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `useAsSlug` \* | **Required.** The name of the top-level field to generate the slug from (e.g. `'title'`). This field must exist in the same collection. |
+| `slugify`      | Override the default slugify function. [More details](#custom-slugify-function).                                                        |
 
 Because `slug` is a standard named field, customize it with the usual field properties directly — `label`, `localized`, `required`, `unique` (set `false` to drop the unique index, e.g. for a per-tenant compound index), `index`, `defaultValue`, and `admin` (including `admin.position`).
 
@@ -71,6 +71,7 @@ export const MyCollection: CollectionConfig = {
     {
       name: 'slug',
       type: 'slug',
+      useAsSlug: 'title',
       slugify: ({ valueToSlugify }) =>
         slugify(valueToSlugify, {
           // ...additional `slugify` options here

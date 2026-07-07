@@ -13,7 +13,7 @@ const SlugField: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    { name: 'slug', type: 'slug' },
+    { name: 'slug', type: 'slug', useAsSlug: 'title' },
     {
       name: 'localizedTitle',
       type: 'text',
@@ -36,6 +36,7 @@ const SlugField: CollectionConfig = {
     {
       name: 'readOnlySlug',
       type: 'slug',
+      useAsSlug: 'title',
       required: false,
       admin: {
         readOnly: true,
