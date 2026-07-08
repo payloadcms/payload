@@ -1,4 +1,4 @@
-# Payload CMS Collections Reference
+# Payload Collections Reference
 
 Complete reference for collection configurations and patterns.
 

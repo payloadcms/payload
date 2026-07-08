@@ -1,4 +1,4 @@
-# Payload CMS Field Types Reference
+# Payload Field Types Reference
 
 Complete reference for all Payload field types with examples.
 

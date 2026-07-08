@@ -1,12 +1,7 @@
 import type { GlobalConfig } from 'payload'
 
-import { limitedMCPUserEmail } from '../limitedAccess.js'
-
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
-  access: {
-    update: ({ req }) => req.user?.email !== limitedMCPUserEmail,
-  },
   fields: [
     {
       name: 'siteName',

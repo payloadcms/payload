@@ -9,7 +9,6 @@ import {
   getCollectionVirtualFieldNames,
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { formatCollectionError } from './formatCollectionError.js'
 
@@ -105,8 +104,8 @@ export const duplicateDocumentTool = defineCollectionTool({
       collection: collectionSlug,
       depth,
       draft,
+      overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(parsedData ? { data: parsedData } : {}),
       ...(locale ? { locale } : {}),
       ...(fallbackLocale ? { fallbackLocale } : {}),
