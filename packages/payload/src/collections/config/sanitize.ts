@@ -11,6 +11,10 @@ import type {
 import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
+import {
+  getAuthorshipFields,
+  sanitizeAuthorship,
+} from '../../fields/baseFields/authorship/index.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
@@ -142,6 +146,44 @@ export const sanitizeCollection = async (
   const joins: SanitizedJoins = {}
 
   const polymorphicJoins: SanitizedJoin[] = []
+
+  // Resolve authorship config to its canonical form and inject the
+  // createdBy / updatedBy relationship fields before sanitizing fields.
+  const authorship = sanitizeAuthorship(sanitized.authorship)
+  sanitized.authorship = authorship
+
+  if (authorship.createdBy || authorship.updatedBy) {
+    const authCollections = config
+      .collections!.filter((collectionConfig) => collectionConfig.auth)
+      .map((collectionConfig) => collectionConfig.slug)
+
+    let hasCreatedBy = false
+    let hasUpdatedBy = false
+
+    sanitized.fields.some((field) => {
+      if (fieldAffectsData(field)) {
+        if (field.name === 'createdBy') {
+          hasCreatedBy = true
+        }
+
+        if (field.name === 'updatedBy') {
+          hasUpdatedBy = true
+        }
+      }
+
+      return hasCreatedBy && hasUpdatedBy
+    })
+
+    sanitized.fields.push(
+      ...getAuthorshipFields({
+        authCollections,
+        authorship: {
+          createdBy: authorship.createdBy && !hasCreatedBy,
+          updatedBy: authorship.updatedBy && !hasUpdatedBy,
+        },
+      }),
+    )
+  }
 
   sanitized.fields = await sanitizeFields({
     collectionConfig: sanitized,

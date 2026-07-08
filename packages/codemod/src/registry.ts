@@ -4,6 +4,7 @@ import { exampleNoop } from './transforms/example-noop/index.js'
 import { globalsComponentsEdit } from './transforms/globals-components-edit/index.js'
 import { migrateAfterOperationRead } from './transforms/migrate-after-operation-read/index.js'
 import { migrateAliasedExports } from './transforms/migrate-aliased-exports/index.js'
+import { migrateAuthorshipDefault } from './transforms/migrate-authorship-default/index.js'
 import { migrateBlockReferencesToBlocks } from './transforms/migrate-block-references-to-blocks/index.js'
 import { migrateBuildScript } from './transforms/migrate-build-script/index.js'
 import { migrateDbTypesSubpath } from './transforms/migrate-db-types-subpath/index.js'
@@ -43,6 +44,7 @@ export const transforms: Transform[] = [
   migrateNextSubpathExports,
   migrateSlugField,
   migrateVersionsDefault,
+  migrateAuthorshipDefault,
   removeGroupByTrue,
   removeLocalizeStatusConfig,
   removeVersionsTrue,
