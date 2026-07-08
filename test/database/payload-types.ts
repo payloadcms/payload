@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_56C44267".
+ * via the `definition` "LexicalNodes_705E38A5".
  */
-export type LexicalNodes_56C44267 =
+export type LexicalNodes_705E38A5 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_56C44267>
+  | SerializedParagraphNode<LexicalNodes_705E38A5>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_56C44267>
+  | SerializedHeadingNode<LexicalNodes_705E38A5>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_56C44267 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_56C44267>
-  | SerializedListNode<LexicalNodes_56C44267>
-  | SerializedListItemNode<LexicalNodes_56C44267>
-  | SerializedAutoLinkNode<LexicalNodes_56C44267, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_56C44267, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_705E38A5>
+  | SerializedListNode<LexicalNodes_705E38A5>
+  | SerializedListItemNode<LexicalNodes_705E38A5>
+  | SerializedAutoLinkNode<LexicalNodes_705E38A5, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_705E38A5, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'noTimeStamps'
       | 'categories'
@@ -108,6 +108,7 @@ export type LexicalNodes_56C44267 =
       | 'blocks-docs'
       | 'unique-fields'
       | 'select-has-many'
+      | 'reserved-field-names'
       | 'virtual-linked-tenants'
       | 'virtual-linked-roles'
       | 'virtual-linked-projects'
@@ -147,6 +148,7 @@ export interface Config {
     'blocks-docs': BlocksDoc;
     'unique-fields': UniqueField;
     'select-has-many': SelectHasMany;
+    'reserved-field-names': ReservedFieldName;
     'virtual-linked-tenants': VirtualLinkedTenant;
     'virtual-linked-roles': VirtualLinkedRole;
     'virtual-linked-projects': VirtualLinkedProject;
@@ -185,6 +187,7 @@ export interface Config {
     'blocks-docs': BlocksDocsSelect<false> | BlocksDocsSelect<true>;
     'unique-fields': UniqueFieldsSelect<false> | UniqueFieldsSelect<true>;
     'select-has-many': SelectHasManySelect<false> | SelectHasManySelect<true>;
+    'reserved-field-names': ReservedFieldNamesSelect<false> | ReservedFieldNamesSelect<true>;
     'virtual-linked-tenants': VirtualLinkedTenantsSelect<false> | VirtualLinkedTenantsSelect<true>;
     'virtual-linked-roles': VirtualLinkedRolesSelect<false> | VirtualLinkedRolesSelect<true>;
     'virtual-linked-projects': VirtualLinkedProjectsSelect<false> | VirtualLinkedProjectsSelect<true>;
@@ -215,6 +218,8 @@ export interface Config {
   locale: 'en' | 'es' | 'uk';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -485,7 +490,7 @@ export interface DefaultValue {
 export interface RelationA {
   id: string;
   title?: string | null;
-  richText?: LexicalRichText<LexicalNodes_56C44267> | null;
+  richText?: LexicalRichText<LexicalNodes_705E38A5> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -497,7 +502,7 @@ export interface RelationB {
   id: string;
   title?: string | null;
   relationship?: (string | null) | RelationA;
-  richText?: LexicalRichText<LexicalNodes_56C44267> | null;
+  richText?: LexicalRichText<LexicalNodes_705E38A5> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -775,6 +780,33 @@ export interface SelectHasMany {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reserved-field-names".
+ */
+export interface ReservedFieldName {
+  id: string;
+  numbers?:
+    | {
+        drawPosition?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  texts?:
+    | {
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  rels?:
+    | {
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "virtual-linked-tenants".
  */
 export interface VirtualLinkedTenant {
@@ -949,6 +981,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'select-has-many';
         value: string | SelectHasMany;
+      } | null)
+    | ({
+        relationTo: 'reserved-field-names';
+        value: string | ReservedFieldName;
       } | null)
     | ({
         relationTo: 'virtual-linked-tenants';
@@ -1486,6 +1522,32 @@ export interface SelectHasManySelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reserved-field-names_select".
+ */
+export interface ReservedFieldNamesSelect<T extends boolean = true> {
+  numbers?:
+    | T
+    | {
+        drawPosition?: T;
+        id?: T;
+      };
+  texts?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  rels?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "virtual-linked-tenants_select".
  */
 export interface VirtualLinkedTenantsSelect<T extends boolean = true> {
@@ -1732,6 +1794,98 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'noTimeStamps'
+      | 'categories'
+      | 'simple'
+      | 'simple-localized'
+      | 'categories-custom-id'
+      | 'posts'
+      | 'error-on-unnamed-fields'
+      | 'default-values'
+      | 'relation-a'
+      | 'relation-b'
+      | 'pg-migrations'
+      | 'custom-schema'
+      | 'places'
+      | 'virtual-relations'
+      | 'fields-persistance'
+      | 'custom-ids'
+      | 'fake-custom-ids'
+      | 'relationships-migration'
+      | 'compound-indexes'
+      | 'aliases'
+      | 'blocks-docs'
+      | 'unique-fields'
+      | 'select-has-many'
+      | 'reserved-field-names'
+      | 'virtual-linked-tenants'
+      | 'virtual-linked-roles'
+      | 'virtual-linked-projects'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'noTimeStamps'
+          | 'categories'
+          | 'simple'
+          | 'simple-localized'
+          | 'categories-custom-id'
+          | 'posts'
+          | 'error-on-unnamed-fields'
+          | 'default-values'
+          | 'relation-a'
+          | 'relation-b'
+          | 'pg-migrations'
+          | 'custom-schema'
+          | 'places'
+          | 'virtual-relations'
+          | 'fields-persistance'
+          | 'custom-ids'
+          | 'fake-custom-ids'
+          | 'relationships-migration'
+          | 'compound-indexes'
+          | 'aliases'
+          | 'blocks-docs'
+          | 'unique-fields'
+          | 'select-has-many'
+          | 'reserved-field-names'
+          | 'virtual-linked-tenants'
+          | 'virtual-linked-roles'
+          | 'virtual-linked-projects'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
