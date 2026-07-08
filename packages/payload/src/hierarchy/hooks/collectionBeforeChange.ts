@@ -11,16 +11,39 @@ import type {
   PayloadRequest,
 } from '../../index.js'
 
+import { collectionBeforeChangeStored } from './stored/collectionBeforeChange.js'
+
 type Args = {
   /**
    * The name of the field that contains the parent document ID
    */
   parentFieldName: string
+  pathStrategy: 'stored' | 'virtual'
+  slugPathFieldName: string
+  titleFieldName: string
+  titlePathFieldName: string
 }
 
-export const collectionBeforeChange =
-  ({ parentFieldName }: Args): CollectionBeforeChangeHook =>
-  async ({ collection, data, operation, originalDoc, req }) => {
+export const collectionBeforeChange = ({
+  parentFieldName,
+  pathStrategy,
+  slugPathFieldName,
+  titleFieldName,
+  titlePathFieldName,
+}: Args): CollectionBeforeChangeHook => {
+  const storedBeforeChangeHook =
+    pathStrategy === 'stored'
+      ? collectionBeforeChangeStored({
+          parentFieldName,
+          slugPathFieldName,
+          titleFieldName,
+          titlePathFieldName,
+        })
+      : undefined
+
+  return async (args) => {
+    const { collection, data, operation, originalDoc, req } = args
+
     // Determine the new parent ID
     const newParentID =
       data[parentFieldName] !== undefined ? data[parentFieldName] : originalDoc?.[parentFieldName]
@@ -51,8 +74,9 @@ export const collectionBeforeChange =
       })
     }
 
-    return data
+    return storedBeforeChangeHook ? await storedBeforeChangeHook(args) : data
   }
+}
 
 /**
  * Walks up the parent chain to detect cycles.

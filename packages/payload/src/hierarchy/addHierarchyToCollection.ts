@@ -3,7 +3,6 @@ import type { CollectionConfig } from '../collections/config/types.js'
 import { collectionBeforeChange } from './hooks/collectionBeforeChange.js'
 import { collectionBeforeDelete } from './hooks/collectionBeforeDelete.js'
 import { collectionAfterChangeStored } from './hooks/stored/collectionAfterChange.js'
-import { collectionBeforeChangeStored } from './hooks/stored/collectionBeforeChange.js'
 import { collectionAfterReadVirtual } from './hooks/virtual/collectionAfterRead.js'
 import { collectionBeforeOperationVirtual } from './hooks/virtual/collectionBeforeOperation.js'
 
@@ -67,15 +66,17 @@ export const addHierarchyToCollection = ({
 
   collectionConfig.hooks = {
     ...(collectionConfig.hooks || {}),
-    afterChange: [
-      ...(collectionConfig.hooks?.afterChange || []),
-      collectionAfterChangeStored({
-        parentFieldName,
-        pathStrategy,
-        slugPathFieldName,
-        titlePathFieldName,
-      }),
-    ],
+    afterChange:
+      pathStrategy === 'stored'
+        ? [
+            ...(collectionConfig.hooks?.afterChange || []),
+            collectionAfterChangeStored({
+              parentFieldName,
+              slugPathFieldName,
+              titlePathFieldName,
+            }),
+          ]
+        : collectionConfig.hooks?.afterChange || [],
     afterRead:
       pathStrategy === 'virtual'
         ? [
@@ -89,17 +90,13 @@ export const addHierarchyToCollection = ({
         : collectionConfig.hooks?.afterRead || [],
     beforeChange: [
       ...(collectionConfig.hooks?.beforeChange || []),
-      collectionBeforeChange({ parentFieldName }),
-      ...(pathStrategy === 'stored'
-        ? [
-            collectionBeforeChangeStored({
-              parentFieldName,
-              slugPathFieldName,
-              titleFieldName,
-              titlePathFieldName,
-            }),
-          ]
-        : []),
+      collectionBeforeChange({
+        parentFieldName,
+        pathStrategy,
+        slugPathFieldName,
+        titleFieldName,
+        titlePathFieldName,
+      }),
     ],
     beforeDelete: [
       ...(collectionConfig.hooks?.beforeDelete || []),

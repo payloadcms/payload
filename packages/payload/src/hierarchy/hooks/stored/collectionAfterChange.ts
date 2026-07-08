@@ -11,20 +11,14 @@ import { syncCurrentDocumentLocale } from './utils/syncCurrentDocumentLocale.js'
 
 type Args = {
   parentFieldName: string
-  pathStrategy: 'stored' | 'virtual'
   slugPathFieldName: string
   titlePathFieldName: string
 }
 
 export const collectionAfterChangeStored =
-  ({
-    parentFieldName,
-    pathStrategy,
-    slugPathFieldName,
-    titlePathFieldName,
-  }: Args): CollectionAfterChangeHook =>
+  ({ parentFieldName, slugPathFieldName, titlePathFieldName }: Args): CollectionAfterChangeHook =>
   async ({ collection, context, doc, previousDoc, req }) => {
-    if (pathStrategy !== 'stored' || context?.skipHierarchyStoredPathSync === true) {
+    if (context?.skipHierarchyStoredPathSync === true) {
       return doc
     }
 

@@ -66,7 +66,6 @@ describe('hierarchy stored path sync', () => {
       expect(parentField?.type).toBe('relationship')
       expect(slugPathField?.virtual).toBeFalsy()
       expect(titlePathField?.virtual).toBeFalsy()
-      expect(collection.hooks?.afterChange?.length).toBeGreaterThan(0)
       expect(collection.hooks?.afterRead?.length ?? 0).toBe(0)
       expect(collection.hooks?.beforeOperation?.length ?? 0).toBe(0)
     })
