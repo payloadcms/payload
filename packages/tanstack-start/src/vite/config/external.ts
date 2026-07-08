@@ -32,11 +32,9 @@ export const ssrExternalPackages: string[] = [
   'pg',
   'pg-native',
   'pg-cloudflare',
-  '@neondatabase/serverless',
   // SQLite (`@payloadcms/db-sqlite`)
   'better-sqlite3',
   'libsql',
-  '@libsql/client',
   // Mongo (`@payloadcms/db-mongodb`)
   'mongodb',
   'mongoose',

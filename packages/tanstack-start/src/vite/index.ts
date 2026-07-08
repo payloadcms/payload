@@ -117,6 +117,9 @@ export function withPayload(options: WithPayloadOptions): UserConfigFnObject {
 
   return (_env) => {
     const base: UserConfig = {
+      build: {
+        cssMinify: 'esbuild',
+      },
       css: {
         preprocessorOptions: {
           scss: {
