@@ -32,52 +32,18 @@ const textField: TextField = {
 > description, rich text content, or long text — those belong in the main document
 > area. (`title` above is shown in the sidebar only to demonstrate the option.)
 
-### Slug Field Helper
+### Slug Field
 
-Built-in helper for auto-generating slugs. **Use this for all slugs** instead of
-hand-rolling a `{ name: 'slug', type: 'text', unique: true }` field — it
-auto-generates the slug from the title, adds a regenerate toggle, and handles
-uniqueness and indexing. Call it with no args when the collection has a `title`
-field — the slug is generated from `title` by default:
-
-```ts
-import { slugField } from 'payload'
-import type { CollectionConfig } from 'payload'
-
-export const Pages: CollectionConfig = {
-  slug: 'pages',
-  fields: [
-    { name: 'title', type: 'text', required: true },
-    slugField(), // name: 'slug', useAsSlug: 'title', required, unique, position: 'sidebar'
-  ],
-}
-```
-
-`useAsSlug` defaults to `'title'`, so if the collection has **no `title` field**,
-you must pass the source field explicitly — otherwise the slug generates from a
-field that doesn't exist:
+Use the native `slug` field type for slugs — never hand-roll a
+`{ type: 'text', unique: true }` field. `useAsSlug` is **required** (names the
+source field; there is no `'title'` default). Defaults to `required`, `unique`,
+`index`, `position: 'sidebar'`. Optional server-side `slugify` fn.
 
 ```ts
-// Collection keyed on `name` instead of `title`
-fields: [{ name: 'name', type: 'text', required: true }, slugField({ useAsSlug: 'name' })]
+{ name: 'slug', type: 'slug', useAsSlug: 'title' }
 ```
 
-Override defaults when needed (`overrides` receives the generated `RowField`):
-
-```ts
-slugField({
-  name: 'slug', // defaults to 'slug'
-  useAsSlug: 'title', // defaults to 'title'
-  checkboxName: 'generateSlug', // defaults to 'generateSlug'
-  localized: true,
-  required: true, // defaults to true
-  position: 'sidebar', // default; the slug is a short field well-suited to the sidebar
-  overrides: (field) => {
-    field.fields[1].label = 'Custom Slug Label'
-    return field
-  },
-})
-```
+Full prop reference: <https://payloadcms.com/docs/fields/slug>
 
 ## Rich Text (Lexical)
 
