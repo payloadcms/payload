@@ -189,7 +189,8 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
   // - presentational containers (row, collapsible, unnamed group): they hold no value, so
   //   returning here drops their nested fields' values. They fall through to the
   //   `fieldHasSubFields` branch, which recurses to preserve child values without rendering.
-  const isPresentationalWithSubFields = fieldHasSubFields(field) && !fieldAffectsData(field)
+  const isPresentationalWithSubFields =
+    fieldHasSubFields(field as Field) && !fieldAffectsData(field as Field)
 
   if (passesCondition === false && field.type !== 'tab' && !isPresentationalWithSubFields) {
     if (fieldAffectsData(field) && data?.[field.name] !== undefined) {
