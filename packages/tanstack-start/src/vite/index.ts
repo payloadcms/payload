@@ -129,8 +129,14 @@ export function withPayload(options: WithPayloadOptions): UserConfigFnObject {
         global: 'globalThis',
       },
       environments: {
-        rsc: { resolve: { noExternal: payloadNoExternalPatterns } },
-        ssr: { resolve: { noExternal: payloadNoExternalPatterns } },
+        rsc: {
+          build: { rollupOptions: { external: ssrExternalPackages } },
+          resolve: { noExternal: payloadNoExternalPatterns },
+        },
+        ssr: {
+          build: { rollupOptions: { external: ssrExternalPackages } },
+          resolve: { noExternal: payloadNoExternalPatterns },
+        },
       } as any,
       optimizeDeps: {
         exclude: optimizeDepsExcludeDefaults,

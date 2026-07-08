@@ -14,17 +14,11 @@ export const ssrExternalPackages: string[] = [
   'drizzle-kit/api',
   'drizzle-orm',
   'sharp',
-  'libsql',
   'require-in-the-middle',
   'json-schema-to-typescript',
   'pino',
   'pino-pretty',
   'graphql',
-  'mongodb',
-  'mongoose',
-  'better-sqlite3',
-  'pg',
-  'pg-native',
   'nodemailer',
   'aws4',
   'pluralize',
@@ -33,23 +27,21 @@ export const ssrExternalPackages: string[] = [
   '@aws-sdk/client-s3',
   '@aws-sdk/s3-request-presigner',
   '@google-cloud/storage',
+  // Database drivers + their lazily-required companions, one group per adapter.
+  // Postgres (`@payloadcms/db-postgres`, `@payloadcms/db-vercel-postgres`)
+  'pg',
+  'pg-native',
+  'pg-cloudflare',
+  '@neondatabase/serverless',
+  // SQLite (`@payloadcms/db-sqlite`)
+  'better-sqlite3',
+  'libsql',
+  '@libsql/client',
+  // Mongo (`@payloadcms/db-mongodb`)
+  'mongodb',
+  'mongoose',
 ]
 
-/**
- * Payload packages whose source must be processed by Vite even on the server
- * (because they are workspace `.ts` files in dev). Server-only adapters
- * (`@payloadcms/db-*`, `@payloadcms/email-*`, `@payloadcms/next`, etc.) are
- * intentionally not included — those should stay external on the SSR side.
- *
- * The same set is applied to BOTH the `ssr` and `rsc` environments. Plugins and
- * storage adapters must be included in RSC too: they register custom
- * providers/components (e.g. `plugin-multi-tenant`'s `'use client'`
- * `TenantSelectionProvider`) that render in the RSC graph via
- * `RenderServerComponent`. If the package stayed external to RSC, `plugin-rsc`
- * would never transform its `'use client'` modules into client references, so
- * the component would execute server-side and crash on the first hook
- * (`Cannot read properties of null (reading 'useState')`).
- */
 export const payloadNoExternalPatterns: Array<RegExp | string> = [
   '@payloadcms/ui',
   '@payloadcms/translations',
