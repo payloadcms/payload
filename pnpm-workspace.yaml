@@ -53,4 +53,4 @@ allowBuilds:
   workerd: true
 
 minimumReleaseAgeExclude:
-  - '@faceless-ui/modal@3.0.1-canary.0'
+  - '@faceless-ui/modal@3.0.1'

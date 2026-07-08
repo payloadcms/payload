@@ -412,7 +412,7 @@
     "swc-plugin-transform-remove-imports": "8.3.0"
   },
   "peerDependencies": {
-    "@faceless-ui/modal": "3.0.1-canary.0",
+    "@faceless-ui/modal": "3.0.1",
     "@faceless-ui/scroll-info": "2.0.0",
     "@payloadcms/next": "workspace:*",
     "payload": "workspace:*",
