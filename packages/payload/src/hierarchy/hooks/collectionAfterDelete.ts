@@ -12,7 +12,7 @@ type Args = {
   relatedCollections: Record<string, string>
 }
 
-export const hierarchyCollectionAfterDelete =
+export const collectionAfterDelete =
   ({ relatedCollections }: Args): CollectionAfterDeleteHook =>
   async ({ id, req }) => {
     for (const [collectionSlug, fieldName] of Object.entries(relatedCollections)) {

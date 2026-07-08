@@ -1,11 +1,7 @@
 /**
- * beforeChange Hook Responsibilities:
+ * General hierarchy beforeChange hook responsibilities:
  * - Validate circular references when parent changes
- * - Prevent moving a folder into its own subfolder
- *
- * Does NOT handle:
- * - Tree structure (no stored tree anymore)
- * - Path computation (done in afterRead)
+ * - Prevent moving a document into its own descendant chain
  */
 
 import type {
@@ -22,7 +18,7 @@ type Args = {
   parentFieldName: string
 }
 
-export const hierarchyCollectionBeforeChange =
+export const collectionBeforeChange =
   ({ parentFieldName }: Args): CollectionBeforeChangeHook =>
   async ({ collection, data, operation, originalDoc, req }) => {
     // Determine the new parent ID
@@ -49,6 +45,7 @@ export const hierarchyCollectionBeforeChange =
       await validateNoCircularReference({
         collection,
         currentDocId: originalDoc?.id,
+        parentFieldName,
         parentId,
         req,
       })
@@ -58,30 +55,21 @@ export const hierarchyCollectionBeforeChange =
   }
 
 /**
- * Walks up the parent chain to detect true circular references (loops).
- * Does NOT throw when moving into a child - that case is handled by afterChange
- * which will automatically reparent the child.
+ * Walks up the parent chain to detect cycles.
  */
 async function validateNoCircularReference({
   collection,
   currentDocId,
+  parentFieldName,
   parentId,
   req,
 }: {
   collection: CollectionConfig
   currentDocId: number | string
+  parentFieldName: string
   parentId: number | string
   req: PayloadRequest
 }) {
-  const parentFieldName =
-    collection.hierarchy && collection.hierarchy !== true
-      ? collection.hierarchy.parentFieldName
-      : undefined
-
-  if (!parentFieldName) {
-    return
-  }
-
   const fieldName = parentFieldName
 
   async function checkAncestor(

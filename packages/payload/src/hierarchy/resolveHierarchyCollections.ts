@@ -19,7 +19,7 @@ import { fieldAffectsData } from '../fields/config/types.js'
 import { extractID } from '../utilities/extractID.js'
 import { flattenAllFields } from '../utilities/flattenAllFields.js'
 import { getHierarchyFieldName } from './constants.js'
-import { hierarchyCollectionAfterDelete } from './hooks/collectionAfterDelete.js'
+import { collectionAfterDelete } from './hooks/collectionAfterDelete.js'
 import { injectHierarchyButton } from './injectHierarchyButton.js'
 
 /**
@@ -399,7 +399,7 @@ function injectAfterDeleteHook({
   hierarchyCollection.hooks = hierarchyCollection.hooks || {}
   hierarchyCollection.hooks.afterDelete = [
     ...(hierarchyCollection.hooks.afterDelete || []),
-    hierarchyCollectionAfterDelete({ relatedCollections: relatedCollectionFieldMap }),
+    collectionAfterDelete({ relatedCollections: relatedCollectionFieldMap }),
   ]
 }
 

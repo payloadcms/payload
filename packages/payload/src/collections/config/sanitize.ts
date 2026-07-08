@@ -14,7 +14,12 @@ import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
-import { buildFoldersHierarchy, buildTagsHierarchy } from '../../hierarchy/presets.js'
+import { HIERARCHY_TITLE_PATH_FIELD } from '../../hierarchy/constants.js'
+import {
+  buildFoldersHierarchy,
+  buildNestedDocsHierarchy,
+  buildTagsHierarchy,
+} from '../../hierarchy/presets.js'
 import { sanitizeHierarchyCollection } from '../../hierarchy/sanitizeHierarchyCollection.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
@@ -87,18 +92,22 @@ export const sanitizeCollection = async (
   // Make copy of collection config
   // /////////////////////////////////
 
+  const hasExplicitUseAsTitle = collection.admin?.useAsTitle !== undefined
   const sanitized: CollectionConfig = addDefaultsToCollectionConfig(collection)
 
   // /////////////////////////////////
-  // Convert folders/tags to hierarchy
+  // Convert folders/tags/nestedDocs to hierarchy
   // /////////////////////////////////
 
-  const presetCount = [sanitized.folders, sanitized.tags, sanitized.hierarchy].filter(
-    Boolean,
-  ).length
+  const presetCount = [
+    sanitized.folders,
+    sanitized.tags,
+    sanitized.nestedDocs,
+    sanitized.hierarchy,
+  ].filter(Boolean).length
   if (presetCount > 1) {
     throw new Error(
-      `Collection "${sanitized.slug}": Only one of 'folders', 'tags', or 'hierarchy' can be specified`,
+      `Collection "${sanitized.slug}": Only one of 'folders', 'tags', 'nestedDocs', or 'hierarchy' can be specified`,
     )
   }
 
@@ -131,6 +140,16 @@ export const sanitizeCollection = async (
       sanitized.admin!.group = false
     }
     delete sanitized.tags
+  }
+
+  if (sanitized.nestedDocs) {
+    sanitized.hierarchy = buildNestedDocsHierarchy(sanitized.nestedDocs, sanitized)
+
+    if (!hasExplicitUseAsTitle) {
+      sanitized.admin!.useAsTitle = HIERARCHY_TITLE_PATH_FIELD
+    }
+
+    delete sanitized.nestedDocs
   }
 
   // /////////////////////////////////

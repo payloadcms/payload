@@ -37,6 +37,7 @@ import type {
 import type {
   HierarchyConfig,
   HierarchyJoinFieldConfig,
+  NestedDocsConfig,
   SanitizedHierarchyConfig,
 } from '../../hierarchy/types.js'
 import type {
@@ -78,7 +79,8 @@ export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollecti
  * Use this instead of the project-wide {@link DefaultDocumentIDType} when the collection slug is
  * known, since each collection can have its own ID type.
  */
-export type IDTypeForCollectionSlug<TSlug extends CollectionSlug> = DataFromCollectionSlug<TSlug>['id']
+export type IDTypeForCollectionSlug<TSlug extends CollectionSlug> =
+  DataFromCollectionSlug<TSlug>['id']
 
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
 
@@ -695,6 +697,15 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
         duration: number
       }
     | false
+  /**
+   * Enable nested docs hierarchy preset for this collection.
+   * Sets hierarchy with page-tree defaults: parent field, stored paths, hidden sidebar tab,
+   * and `_h_titlePath` as the admin title when no admin title is configured.
+   *
+   * Use `true` for defaults, or object for customization.
+   * Cannot be used together with `folders`, `tags`, or `hierarchy`.
+   */
+  nestedDocs?: boolean | NestedDocsConfig
   /**
    * If true, enables custom ordering for the collection, and documents in the listView can be reordered via drag and drop.
    * New documents are inserted at the end of the list according to this parameter.

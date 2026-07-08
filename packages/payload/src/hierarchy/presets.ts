@@ -1,6 +1,7 @@
-import type { FoldersConfig, TagsConfig } from '../collections/config/types.js'
-import type { HierarchyConfig } from './types.js'
+import type { CollectionConfig, FoldersConfig, TagsConfig } from '../collections/config/types.js'
+import type { HierarchyConfig, NestedDocsConfig } from './types.js'
 
+import { fieldAffectsData } from '../fields/config/types.js'
 import { getHierarchyFieldName } from './constants.js'
 
 /**
@@ -27,6 +28,7 @@ export function buildFoldersHierarchy(config: FoldersConfig | true, slug: string
     },
     allowHasMany: false, // Enforced for folders
     parentFieldName,
+    pathStrategy: options.pathStrategy ?? 'virtual',
   }
 }
 
@@ -53,5 +55,50 @@ export function buildTagsHierarchy(config: TagsConfig | true, slug: string): Hie
     },
     allowHasMany: options.allowHasMany ?? true, // Default true, can override
     parentFieldName,
+    pathStrategy: options.pathStrategy ?? 'virtual',
+  }
+}
+
+/**
+ * Builds hierarchy config from nested docs preset.
+ * Applies page-tree defaults: parent field, stored paths, hidden sidebar tab, header parent picker.
+ */
+export function buildNestedDocsHierarchy(
+  config: NestedDocsConfig | true,
+  collection: CollectionConfig,
+): HierarchyConfig {
+  const options = config === true ? {} : config
+  const hasSlugField = collection.fields.some(
+    (field) => fieldAffectsData(field) && field.name === 'slug',
+  )
+  const hasTitleField = collection.fields.some(
+    (field) => fieldAffectsData(field) && field.name === 'title',
+  )
+  const slugFieldName = options.slugField ?? (hasSlugField ? 'slug' : undefined)
+
+  if (slugFieldName) {
+    const slugField = collection.fields.find(
+      (field) => fieldAffectsData(field) && field.name === slugFieldName,
+    )
+
+    if (slugField && slugField.admin?.position === undefined) {
+      slugField.admin = {
+        ...slugField.admin,
+        position: 'sidebar',
+      }
+    }
+  }
+
+  return {
+    ...options,
+    admin: {
+      ...options.admin,
+      injectSidebarTab: options.admin?.injectSidebarTab ?? false,
+      useHeaderButton: options.admin?.useHeaderButton ?? true,
+    },
+    parentFieldName: options.parentFieldName ?? 'parent',
+    pathStrategy: options.pathStrategy ?? 'stored',
+    slugField: slugFieldName,
+    titleField: options.titleField ?? (hasTitleField ? 'title' : 'id'),
   }
 }
