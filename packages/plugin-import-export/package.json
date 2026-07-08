@@ -70,7 +70,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "@faceless-ui/modal": "3.0.0",
+    "@faceless-ui/modal": "3.0.1-canary.0",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "csv-parse": "5.6.0",

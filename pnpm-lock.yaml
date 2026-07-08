@@ -1192,8 +1192,8 @@ importers:
   packages/plugin-import-export:
     dependencies:
       '@faceless-ui/modal':
-        specifier: 3.0.0
-        version: 3.0.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 3.0.1-canary.0
+        version: 3.0.1-canary.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
@@ -1400,8 +1400,8 @@ importers:
   packages/richtext-lexical:
     dependencies:
       '@faceless-ui/modal':
-        specifier: 3.0.0
-        version: 3.0.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 3.0.1-canary.0
+        version: 3.0.1-canary.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@faceless-ui/scroll-info':
         specifier: 2.0.0
         version: 2.0.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -1749,8 +1749,8 @@ importers:
         specifier: 3.2.2
         version: 3.2.2(react@19.2.6)
       '@faceless-ui/modal':
-        specifier: 3.0.0
-        version: 3.0.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+        specifier: 3.0.1-canary.0
+        version: 3.0.1-canary.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@faceless-ui/scroll-info':
         specifier: 2.0.0
         version: 2.0.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -5040,8 +5040,8 @@ packages:
       '@noble/hashes':
         optional: true
 
-  '@faceless-ui/modal@3.0.0':
-    resolution: {integrity: sha512-o3oEFsot99EQ8RJc1kL3s/nNMHX+y+WMXVzSSmca9L0l2MR6ez2QM1z1yIelJX93jqkLXQ9tW+R9tmsYa+O4Qg==}
+  '@faceless-ui/modal@3.0.1-canary.0':
+    resolution: {integrity: sha512-W25LuD1EtfGLQJ57VpR2DI14hWOHFJ1DbQjZukVwTCYS3k/iRGCm9YiQBMYvwt56UvJpLvtXeQ+eVhVteIvyDA==}
     peerDependencies:
       react: 19.2.6
       react-dom: 19.2.6
@@ -18410,7 +18410,7 @@ snapshots:
     optionalDependencies:
       '@noble/hashes': 1.8.0
 
-  '@faceless-ui/modal@3.0.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
+  '@faceless-ui/modal@3.0.1-canary.0(react-dom@19.2.6(react@19.2.6))(react@19.2.6)':
     dependencies:
       body-scroll-lock: 4.0.0-beta.0
       focus-trap: 7.5.4

@@ -51,3 +51,6 @@ allowBuilds:
   unrs-resolver: true
   utf-8-validate: true
   workerd: true
+
+minimumReleaseAgeExclude:
+  - '@faceless-ui/modal@3.0.1-canary.0'
