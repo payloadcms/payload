@@ -299,6 +299,79 @@ describe('Form State', () => {
     await payload.delete({ collection: conditionsSlug, id: visibleDoc.id })
   })
 
+  it('should preserve values of fields nested inside a row hidden by admin.condition', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const hiddenDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: false,
+        conditionalRowField: 'value in db',
+      },
+    })
+
+    const { state: stateHidden } = await buildFormState({
+      mockRSCs: true,
+      id: hiddenDoc.id,
+      collectionSlug: conditionsSlug,
+      data: hiddenDoc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    // The field is nested inside a `row` whose condition is false. Its value exists in
+    // the DB and must survive in client form state (only its rendering should be skipped).
+    expect(stateHidden?.conditionalRowField).toBeDefined()
+    expect(stateHidden?.conditionalRowField?.value).toBe('value in db')
+
+    // The row itself must still carry `passesCondition: false` so the client hides it via
+    // `withCondition` (rather than rendering an empty, visible row).
+    expect(stateHidden?.['_index-2']?.passesCondition).toBe(false)
+
+    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+  })
+
+  it('should preserve values of fields nested inside a collapsible hidden by admin.condition', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const hiddenDoc = await payload.create({
+      collection: conditionsSlug,
+      data: {
+        showField: false,
+        conditionalCollapsibleField: 'collapsible db value',
+      },
+    })
+
+    const { state: stateHidden } = await buildFormState({
+      mockRSCs: true,
+      id: hiddenDoc.id,
+      collectionSlug: conditionsSlug,
+      data: hiddenDoc,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: conditionsSlug,
+    })
+
+    // Same regression class as `row`: a collapsible is a presentational container, so its
+    // nested field's value must survive even though the collapsible is hidden.
+    expect(stateHidden?.conditionalCollapsibleField?.value).toBe('collapsible db value')
+
+    await payload.delete({ collection: conditionsSlug, id: hiddenDoc.id })
+  })
+
   it('should render custom Field component when admin.condition flips from false to true via onChange', async () => {
     const req = await createLocalReq({ user }, payload)
 

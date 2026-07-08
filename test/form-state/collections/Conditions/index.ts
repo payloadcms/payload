@@ -19,5 +19,30 @@ export const ConditionsCollection: CollectionConfig = {
         },
       },
     },
+    {
+      type: 'row',
+      admin: {
+        condition: (data) => data?.showField === true,
+      },
+      fields: [
+        {
+          name: 'conditionalRowField',
+          type: 'text',
+        },
+      ],
+    },
+    {
+      type: 'collapsible',
+      label: 'Conditional Collapsible',
+      admin: {
+        condition: (data) => data?.showField === true,
+      },
+      fields: [
+        {
+          name: 'conditionalCollapsibleField',
+          type: 'text',
+        },
+      ],
+    },
   ],
 }
