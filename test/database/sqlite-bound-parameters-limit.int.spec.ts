@@ -4,8 +4,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, expect, it } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { describe } from '../__helpers/int/vitest.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -96,6 +96,48 @@ describe(
       for (const docInRes of res.docs) {
         expect(docs.some((doc) => doc.id === docInRes.id)).toBeTruthy()
       }
+    })
+
+    it('should size batch inserts by the widest row when limitedBoundParameters: true', async () => {
+      // Repro for https://github.com/payloadcms/payload/issues/16964
+      const originalExecute = payload.db.drizzle.$client.execute.bind(payload.db.drizzle.$client)
+
+      payload.db.drizzle.$client.execute = async function execute(...args) {
+        const [{ args: boundParameters }] = args as [{ args: any[] }]
+
+        if (Array.isArray(boundParameters) && boundParameters.length > 100) {
+          throw new Error('Exceeded limit of bound parameters!')
+        }
+
+        return await originalExecute(...args)
+      }
+
+      payload.db.limitedBoundParameters = true
+
+      const items = Array.from({ length: 20 }, (_, i) =>
+        i === 0
+          ? { text1: 'only-first' }
+          : Object.fromEntries(Array.from({ length: 8 }, (_, j) => [`text${j + 1}`, `r${i}-${j}`])),
+      )
+
+      let created: Awaited<ReturnType<typeof payload.create>> | undefined
+
+      await expect(
+        (async () => {
+          created = await payload.create({
+            collection: 'draft-with-array',
+            data: { items },
+          })
+        })(),
+      ).resolves.toBeUndefined()
+
+      payload.db.drizzle.$client.execute = originalExecute
+
+      expect(created!.items).toHaveLength(20)
+      expect(created!.items[0].text1).toBe('only-first')
+      expect(created!.items[19].text8).toBe('r19-7')
+
+      await payload.delete({ collection: 'draft-with-array', id: created!.id })
     })
 
     it('should avoid ambiguous column name errors when limitedBoundParameters: true and multiple joins are present', async () => {
