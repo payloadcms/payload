@@ -90,6 +90,7 @@ export interface Config {
     'blocks-docs': BlocksDoc;
     'unique-fields': UniqueField;
     'select-has-many': SelectHasMany;
+    'reserved-field-names': ReservedFieldName;
     'virtual-linked-tenants': VirtualLinkedTenant;
     'virtual-linked-roles': VirtualLinkedRole;
     'virtual-linked-projects': VirtualLinkedProject;
@@ -128,6 +129,7 @@ export interface Config {
     'blocks-docs': BlocksDocsSelect<false> | BlocksDocsSelect<true>;
     'unique-fields': UniqueFieldsSelect<false> | UniqueFieldsSelect<true>;
     'select-has-many': SelectHasManySelect<false> | SelectHasManySelect<true>;
+    'reserved-field-names': ReservedFieldNamesSelect<false> | ReservedFieldNamesSelect<true>;
     'virtual-linked-tenants': VirtualLinkedTenantsSelect<false> | VirtualLinkedTenantsSelect<true>;
     'virtual-linked-roles': VirtualLinkedRolesSelect<false> | VirtualLinkedRolesSelect<true>;
     'virtual-linked-projects': VirtualLinkedProjectsSelect<false> | VirtualLinkedProjectsSelect<true>;
@@ -730,6 +732,33 @@ export interface SelectHasMany {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reserved-field-names".
+ */
+export interface ReservedFieldName {
+  id: string;
+  numbers?:
+    | {
+        drawPosition?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  texts?:
+    | {
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  rels?:
+    | {
+        value?: string | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "virtual-linked-tenants".
  */
 export interface VirtualLinkedTenant {
@@ -904,6 +933,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'select-has-many';
         value: string | SelectHasMany;
+      } | null)
+    | ({
+        relationTo: 'reserved-field-names';
+        value: string | ReservedFieldName;
       } | null)
     | ({
         relationTo: 'virtual-linked-tenants';
@@ -1436,6 +1469,32 @@ export interface UniqueFieldsSelect<T extends boolean = true> {
 export interface SelectHasManySelect<T extends boolean = true> {
   roles?: T;
   food?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "reserved-field-names_select".
+ */
+export interface ReservedFieldNamesSelect<T extends boolean = true> {
+  numbers?:
+    | T
+    | {
+        drawPosition?: T;
+        id?: T;
+      };
+  texts?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
+  rels?:
+    | T
+    | {
+        value?: T;
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
