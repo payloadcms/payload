@@ -36,8 +36,12 @@ export const openListFilters = async (
       await toggler.click()
     }
 
-    await expect(toggler).toHaveAttribute('aria-expanded', 'true')
-  }).toPass({ timeout: 18000 })
+    // Use a short, explicit inner timeout. The global `EXPECT_TIMEOUT` is 18s on CI, so without
+    // this a single (lost, pre-hydration) click would consume the entire `toPass` budget and defeat
+    // the retry — the exact failure this helper exists to prevent. A short inner timeout lets
+    // `toPass` re-click until the button has hydrated and the drawer actually opens.
+    await expect(toggler).toHaveAttribute('aria-expanded', 'true', { timeout: 3000 })
+  }).toPass({ timeout: 30000 })
 
   const openContainer = page.locator(filterContainerSelector).first()
   await expect(openContainer).toBeVisible()
