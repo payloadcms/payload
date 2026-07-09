@@ -31,8 +31,8 @@ import {
   draftWithUploadCloudStorageCollectionSlug,
   draftWithUploadCollectionSlug,
   localizedCollectionSlug,
-  nestedArraySelectCollectionSlug,
   localizedGlobalSlug,
+  nestedArraySelectCollectionSlug,
   versionCollectionSlug,
 } from './slugs.js'
 
@@ -1293,6 +1293,34 @@ describe('Versions', () => {
         })
 
         expect(updated.outer?.[0]?.inner?.[0]?.days).toEqual(['monday'])
+
+        await cleanupDocuments({
+          collectionSlugs: [nestedArraySelectCollectionSlug],
+          payload,
+        })
+      })
+
+      it('should save draft with hasMany select nested in blocks three levels deep', async () => {
+        const doc = await payload.create({
+          collection: nestedArraySelectCollectionSlug,
+          data: {},
+        })
+
+        const updated = await payload.update({
+          id: doc.id,
+          collection: nestedArraySelectCollectionSlug,
+          data: {
+            layout: [
+              {
+                blockType: 'heroCarousel',
+                slides: [{ actions: [{ days: ['monday'] }] }],
+              },
+            ],
+          },
+          draft: true,
+        })
+
+        expect(updated.layout?.[0]?.slides?.[0]?.actions?.[0]?.days).toEqual(['monday'])
 
         await cleanupDocuments({
           collectionSlugs: [nestedArraySelectCollectionSlug],

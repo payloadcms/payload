@@ -23,6 +23,38 @@ const NestedArraySelect: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'layout',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'heroCarousel',
+          dbName: 'hero',
+          fields: [
+            {
+              name: 'slides',
+              type: 'array',
+              dbName: 'sl',
+              fields: [
+                {
+                  name: 'actions',
+                  type: 'array',
+                  dbName: 'ac',
+                  fields: [
+                    {
+                      name: 'days',
+                      type: 'select',
+                      hasMany: true,
+                      options: ['monday', 'tuesday', 'wednesday'],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   versions: {
     drafts: true,
