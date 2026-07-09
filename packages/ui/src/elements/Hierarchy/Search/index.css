@@ -7,96 +7,19 @@
 
   .hierarchy-search__controls {
     display: flex;
-    align-items: center;
     gap: var(--spacer-2);
+
+    .search-input {
+      flex: 1;
+    }
   }
 
   .hierarchy-search__filter {
     flex-shrink: 0;
-    width: var(--spacer-4);
-    height: var(--spacer-4);
-    background: var(--color-bg-secondary);
   }
 
   .hierarchy-search__filter:hover:not(.btn--selected) {
     background: var(--color-bg-tertiary);
-  }
-
-  .hierarchy-search-input {
-    display: flex;
-    align-items: center;
-    flex: 1;
-    height: var(--spacer-4);
-    background: var(--color-bg-secondary);
-    border-radius: var(--radius-medium);
-    border: var(--stroke-width-small) solid transparent;
-    padding-inline-end: var(--spacer-2);
-
-    &:has(input:focus-visible) {
-      outline: var(--accessibility-outline);
-      outline-offset: var(--accessibility-outline-offset);
-    }
-
-    .icon--search {
-      width: var(--spacer-3);
-      height: var(--spacer-3);
-    }
-  }
-
-  .hierarchy-search-input__icon-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: var(--spacer-4);
-    height: var(--spacer-4);
-    color: var(--color-icon-secondary);
-  }
-
-  .hierarchy-search-input__input {
-    flex: 1;
-    min-width: 0;
-    background: transparent;
-    font-family: var(--text-body-medium-font-family);
-    font-size: var(--text-body-medium-font-size);
-    font-weight: var(--text-body-medium-font-weight);
-    line-height: var(--text-body-medium-line-height);
-    color: var(--color-text);
-    outline: none;
-    border: none;
-    padding: 0;
-    &:focus-visible {
-      outline: none;
-    }
-
-    &::placeholder {
-      color: var(--color-text-tertiary);
-    }
-  }
-
-  .hierarchy-search-input__clear {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    color: var(--color-icon-secondary);
-    padding: 0;
-    width: var(--spacer-3);
-    height: var(--spacer-3);
-    border-radius: var(--radius-small);
-    margin-inline-start: var(--spacer-1);
-
-    &:hover,
-    &:focus-visible {
-      color: var(--color-icon);
-    }
-  }
-
-  .hierarchy-search-input__clear .icon--x {
-    width: var(--spacer-3);
-    height: var(--spacer-3);
   }
 
   .hierarchy-search-results {

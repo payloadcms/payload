@@ -7,7 +7,7 @@ import React from 'react'
 import { ChevronIcon } from '../../../../icons/Chevron/index.js'
 import { CollapseIcon } from '../../../../icons/Collapse/index.js'
 import { ExpandIcon } from '../../../../icons/Expand/index.js'
-import { ExternalLinkIcon } from '../../../../icons/ExternalLink/index.js'
+import { NewTabIcon } from '../../../../icons/NewTab/index.js'
 import { useLivePreviewContext } from '../../../../providers/LivePreview/context.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import { Button } from '../../../Button/index.js'
@@ -135,7 +135,7 @@ export const ToolbarControls: React.FC<EditViewProps> = () => {
           aria-label={t('general:openInNewWindow')}
           buttonStyle="ghost"
           className={`${baseClass}__external`}
-          icon={<ExternalLinkIcon size={16} />}
+          icon={<NewTabIcon size={16} />}
           onClick={(e) => {
             e.preventDefault()
             openPopupWindow()

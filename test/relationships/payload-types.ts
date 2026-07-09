@@ -87,7 +87,7 @@ export interface Config {
     'deep-nested': DeepNested;
     relations: Relation1;
     items: Item;
-    blocks: Block;
+    blocks: Block1;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -134,6 +134,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: 'en' | 'de';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -168,14 +171,7 @@ export interface Post {
   description?: string | null;
   number?: number | null;
   relationField?: (string | null) | Relation;
-  blocks?:
-    | {
-        relationField?: (string | null) | Relation;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  blocks?: Block[] | null;
   defaultAccessRelation?: (string | null) | StrictAccess;
   chainedRelation?: (string | null) | Chained;
   maxDepthRelation?: (string | null) | Relation;
@@ -195,6 +191,16 @@ export interface Relation {
   disableRelation: boolean;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block".
+ */
+export interface Block {
+  relationField?: (string | null) | Relation;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -449,19 +455,22 @@ export interface ObjectWrite {
 export interface DeepNested {
   id: string;
   content?: {
-    blocks?:
-      | {
-          meta?: {
-            movie?: (string | null) | Movie;
-          };
-          id?: string | null;
-          blockName?: string | null;
-          blockType: 'testBlock';
-        }[]
-      | null;
+    blocks?: TestBlock[] | null;
   };
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TestBlock".
+ */
+export interface TestBlock {
+  meta?: {
+    movie?: (string | null) | Movie;
+  };
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'testBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -495,19 +504,22 @@ export interface Item {
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "blocks".
  */
-export interface Block {
+export interface Block1 {
   id: string;
-  blocks?:
-    | {
-        director?: (string | null) | Director;
-        directors?: (string | Director)[] | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'some';
-      }[]
-    | null;
+  blocks?: Some[] | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Some".
+ */
+export interface Some {
+  director?: (string | null) | Director;
+  directors?: (string | Director)[] | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'some';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -615,7 +627,7 @@ export interface PayloadLockedDocument {
       } | null)
     | ({
         relationTo: 'blocks';
-        value: string | Block;
+        value: string | Block1;
       } | null)
     | ({
         relationTo: 'users';
@@ -998,6 +1010,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

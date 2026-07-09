@@ -4,7 +4,7 @@ import React, { Fragment } from 'react'
 import { GearIcon } from '../../../icons/Gear/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Popup } from '../../Popup/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'settings-menu-button'
 

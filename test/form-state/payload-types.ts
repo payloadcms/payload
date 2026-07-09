@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     posts: Post;
     'autosave-posts': AutosavePost;
+    conditions: Condition;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,6 +80,7 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
+    conditions: ConditionsSelect<false> | ConditionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -92,6 +94,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -129,22 +134,7 @@ export interface Post {
    * This field should only validate on submit. Try typing "Not allowed" and submitting the form.
    */
   validateUsingEvent?: string | null;
-  blocks?:
-    | (
-        | {
-            text?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'text';
-          }
-        | {
-            number?: number | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'number';
-          }
-      )[]
-    | null;
+  blocks?: (Text | Number)[] | null;
   array?:
     | {
         customTextField?: string | null;
@@ -174,6 +164,26 @@ export interface Post {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Text".
+ */
+export interface Text {
+  text?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'text';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Number".
+ */
+export interface Number {
+  number?: number | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'number';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "autosave-posts".
  */
 export interface AutosavePost {
@@ -183,6 +193,17 @@ export interface AutosavePost {
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditions".
+ */
+export interface Condition {
+  id: string;
+  showField?: boolean | null;
+  conditionalCustomField?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -240,6 +261,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'autosave-posts';
         value: string | AutosavePost;
+      } | null)
+    | ({
+        relationTo: 'conditions';
+        value: string | Condition;
       } | null)
     | ({
         relationTo: 'users';
@@ -353,6 +378,16 @@ export interface AutosavePostsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "conditions_select".
+ */
+export interface ConditionsSelect<T extends boolean = true> {
+  showField?: T;
+  conditionalCustomField?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -412,6 +447,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

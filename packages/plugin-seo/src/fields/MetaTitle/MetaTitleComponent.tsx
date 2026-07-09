@@ -23,7 +23,7 @@ import type { GenerateTitle } from '../../types.js'
 
 import { defaults } from '../../defaults.js'
 import { LengthIndicator } from '../../ui/LengthIndicator.js'
-import '../index.scss'
+import '../index.css'
 
 const { maxLength: maxLengthDefault, minLength: minLengthDefault } = defaults.title
 

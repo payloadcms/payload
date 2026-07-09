@@ -1,12 +1,54 @@
 import type { Payload } from 'payload'
 
-import { departmentsSlug, foldersSlug, organizationsSlug, productsSlug } from './shared.js'
+import {
+  departmentsSlug,
+  divisionsSlug,
+  foldersSlug,
+  organizationsSlug,
+  productsSlug,
+} from './shared.js'
 
 export async function seed(payload: Payload): Promise<void> {
+  // Create divisions hierarchy (dedicated to tree-limit / load-more keyboard tests)
+  const alphaDivision = await payload.create({
+    collection: divisionsSlug,
+    data: { title: 'Alpha Division' },
+  })
+
+  await payload.create({
+    collection: divisionsSlug,
+    data: { parent: alphaDivision.id, title: 'Alpha Child 1' },
+  })
+  await payload.create({
+    collection: divisionsSlug,
+    data: { parent: alphaDivision.id, title: 'Alpha Child 2' },
+  })
+  await payload.create({
+    collection: divisionsSlug,
+    data: { parent: alphaDivision.id, title: 'Alpha Child 3' },
+  })
+  await payload.create({
+    collection: divisionsSlug,
+    data: { parent: alphaDivision.id, title: 'Alpha Child 4' },
+  })
+
+  await payload.create({ collection: divisionsSlug, data: { title: 'Beta Division' } })
+  await payload.create({ collection: divisionsSlug, data: { title: 'Gamma Division' } })
+
   // Create organization hierarchy
   const acmeCorp = await payload.create({
     collection: organizationsSlug,
     data: { title: 'Acme Corp' },
+  })
+
+  await payload.create({
+    collection: organizationsSlug,
+    data: { title: 'Beta Corp' },
+  })
+
+  await payload.create({
+    collection: organizationsSlug,
+    data: { title: 'Gamma Corp' },
   })
 
   const engineeringDiv = await payload.create({
@@ -27,6 +69,11 @@ export async function seed(payload: Payload): Promise<void> {
   await payload.create({
     collection: organizationsSlug,
     data: { parent: acmeCorp.id, title: 'Marketing Division' },
+  })
+
+  await payload.create({
+    collection: organizationsSlug,
+    data: { parent: acmeCorp.id, title: 'Zeta Division' },
   })
 
   // Create department hierarchy (tests custom field names)

@@ -16,8 +16,13 @@ import type {
 
 import { tryInitRepoAndCommit } from '../utils/git.js'
 import { debug, error, info, warning } from '../utils/log.js'
+import {
+  DEFAULT_PAYLOAD_VERSION_TAG,
+  resolvePackageVersion,
+} from '../utils/resolvePackageVersion.js'
 import { configurePayloadConfig } from './configure-payload-config.js'
 import { configurePluginProject } from './configure-plugin-project.js'
+import { ensurePnpmBuildApprovals } from './configure-pnpm-builds.js'
 import { downloadExample } from './download-example.js'
 import { downloadSkill } from './download-skill.js'
 import { downloadTemplate } from './download-template.js'
@@ -53,6 +58,8 @@ async function installDeps(args: {
   } else if (packageManager === 'bun') {
     installCmd = 'bun install'
   }
+
+  await ensurePnpmBuildApprovals({ packageManager, projectDir })
 
   try {
     await execa.command(installCmd, {
@@ -130,25 +137,17 @@ export async function createProject(
     })
   }
 
+  const versionOrTag = cliArgs['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG
+
   const spinner = p.spinner()
-  spinner.start('Checking latest Payload version...')
+  spinner.start(`Resolving Payload version (${versionOrTag})...`)
 
-  // Allows overriding the installed Payload version instead of installing the latest
-  const versionFromCli = cliArgs['--version']
+  const payloadVersion = await resolvePackageVersion({
+    packageName: 'payload',
+    versionOrTag,
+  })
 
-  let payloadVersion: string
-
-  if (versionFromCli) {
-    await verifyVersionForPackage({ version: versionFromCli })
-
-    payloadVersion = versionFromCli
-
-    spinner.stop(`Using provided version of Payload ${payloadVersion}`)
-  } else {
-    payloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
-
-    spinner.stop(`Found latest version of Payload ${payloadVersion}`)
-  }
+  spinner.stop(`Using Payload version ${payloadVersion}`)
 
   await updatePackageJSON({ latestVersion: payloadVersion, projectDir, projectName })
 
@@ -276,77 +275,4 @@ export function updatePackageJSONDependencies(args: {
     {} as Record<string, string>,
   )
   packageJson.dependencies = updatedDependencies
-}
-
-/**
- * Fetches the latest version of a package from the NPM registry.
- *
- * Used in determining the latest version of Payload to use in the generated templates.
- */
-async function getLatestPackageVersion({
-  packageName = 'payload',
-}: {
-  /**
-   * Package name to fetch the latest version for based on the NPM registry URL
-   *
-   * Eg. for `'payload'`, it will fetch the version from `https://registry.npmjs.org/payload`
-   *
-   * @default 'payload'
-   */
-  packageName?: string
-}): Promise<string> {
-  try {
-    const response = await fetch(`https://registry.npmjs.org/-/package/${packageName}/dist-tags`)
-    const data = await response.json()
-
-    // Monster chaining for type safety just checking for data.latest
-    const latestVersion =
-      data &&
-      typeof data === 'object' &&
-      'latest' in data &&
-      data.latest &&
-      typeof data.latest === 'string'
-        ? data.latest
-        : null
-
-    if (!latestVersion) {
-      throw new Error(`No latest version found for package: ${packageName}`)
-    }
-
-    return latestVersion
-  } catch (error) {
-    console.error('Error fetching Payload version:', error)
-    throw error
-  }
-}
-
-/**
- * Verifies that the specified version of a package exists on the NPM registry.
- *
- * Throws an error if the version does not exist.
- */
-async function verifyVersionForPackage({
-  packageName = 'payload',
-  version,
-}: {
-  /**
-   * Package name to fetch the latest version for based on the NPM registry URL
-   *
-   * Eg. for `'payload'`, it will fetch the version from `https://registry.npmjs.org/payload`
-   *
-   * @default 'payload'
-   */
-  packageName?: string
-  version: string
-}): Promise<void> {
-  try {
-    const response = await fetch(`https://registry.npmjs.org/${packageName}/${version}`)
-
-    if (response.status !== 200) {
-      throw new Error(`No ${version} version found for package: ${packageName}`)
-    }
-  } catch (error) {
-    console.error('Error verifying Payload version:', error)
-    throw error
-  }
 }

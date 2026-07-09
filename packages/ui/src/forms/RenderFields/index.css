@@ -11,8 +11,6 @@
   }
 
   .render-fields {
-    --spacing-field: var(--spacer-3);
-
     & > .field-type {
       margin-bottom: var(--spacing-field);
       position: relative;
@@ -40,27 +38,23 @@
           margin-top: 0;
         }
 
-        &:last-child {
+        &:last-of-type {
           margin-bottom: 0;
         }
       }
 
       &.group-field {
-        margin-top: calc(var(--spacing-field) * 2);
-        margin-bottom: calc(var(--spacing-field) * 3);
+        margin-top: calc(var(--gutter-h) * 2);
+        margin-bottom: calc(var(--gutter-h) * 3);
 
         &:first-child {
           margin-top: 0;
         }
 
-        &:last-child {
+        &:last-of-type {
           margin-bottom: 0;
         }
       }
-    }
-
-    @media (max-width: 768px) {
-      --spacing-field: var(--spacer-2-5);
     }
   }
 }

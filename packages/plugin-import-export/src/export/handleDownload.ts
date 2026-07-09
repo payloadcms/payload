@@ -44,8 +44,8 @@ export const handleDownload = async (req: PayloadRequest, debug = false) => {
 
     const { user } = req
 
-    body.data.userID = user?.id || user?.user?.id
-    body.data.userCollection = user?.collection || user?.user?.collection
+    body.data.userID = user?.id
+    body.data.userCollection = user?.collection
 
     const res = await createExport({
       ...body.data,

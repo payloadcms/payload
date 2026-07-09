@@ -1,7 +1,6 @@
 @layer payload-default, payload;
 
 @import 'styles';
-@import './toasts.scss';
 @import './colors.scss';
 @import '../styles.css';
 
@@ -39,7 +38,9 @@
 
     --gutter-h: var(--spacer-5);
     --spacing-view-bottom: var(--gutter-h);
-    --doc-controls-height: calc(var(--text-body-large-line-height) + var(--spacer-4));
+    --app-header-height: 0px;
+    --doc-controls-height: 0px;
+    --doc-header-height: 0px;
     --nav-width: 275px;
 
     @include large-break {
@@ -48,7 +49,6 @@
 
     @include mid-break {
       --gutter-h: var(--spacer-3);
-      --doc-controls-height: calc(var(--base) * 2.4);
     }
 
     @include small-break {
@@ -94,6 +94,12 @@
     margin: 0;
     // this is for the nav to be able to push the document over
     overflow-x: hidden;
+  }
+
+  // Lock background scroll while a drawer is open. Backs up faceless-ui's JS
+  // body-scroll-lock, which a sibling modal can clear prematurely.
+  body:has(.drawer--is-open) {
+    overflow: hidden;
   }
 
   img {

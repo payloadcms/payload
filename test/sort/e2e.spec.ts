@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
+import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
@@ -42,25 +43,34 @@ describe('Sort functionality', () => {
 
     initPageConsoleErrorCatch(page)
 
+    // Wait for the server to be ready before the node-side REST login: on the
+    // slower TanStack prod cold-start, `client.login()` (a direct fetch, no retry)
+    // can hit the server before it accepts connections → `TypeError: fetch failed`.
+    await ensureCompilationIsDone({ page, serverURL })
+
     client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test.beforeEach(async () => {
     // await throttleTest({ page, context, delay: 'Fast 4G' })
 
-    const seedResponsePromise = page.waitForResponse(
-      (response) => response.url().includes('/api/seed') && response.status() === 200,
-    )
-
-    await page.evaluate(async () => {
-      const response = await fetch('/api/seed', { method: 'POST' })
-      return response.json()
-    })
-
-    await seedResponsePromise
+    // The prod server may still be cold-starting in CI, so the first requests can
+    // be refused (`fetch failed`). Poll the seed endpoint until it responds 200.
+    await expect
+      .poll(
+        async () =>
+          page.evaluate(async () => {
+            try {
+              const response = await fetch('/api/seed', { method: 'POST' })
+              return response.status
+            } catch {
+              return 0
+            }
+          }),
+        { timeout: TEST_TIMEOUT_LONG },
+      )
+      .toBe(200)
   })
 
   // eslint-disable-next-line playwright/expect-expect
@@ -121,11 +131,18 @@ describe('Sort functionality', () => {
 
   test('Orderable join fields', async () => {
     const url = new AdminUrlUtil(serverURL, orderableJoinSlug)
-    await page.goto(url.list)
 
-    await page.getByText('Join A').click()
+    // Navigate via the row's href + hard `page.goto` instead of a soft Next.js
+    // navigation. Under `--prod`, the edit route compiles lazily on first hit and
+    // the soft navigation's URL only updates after the RSC payload arrives, which
+    // can stall past the test timeout on a cold CI server.
+    await goToListDoc({
+      page,
+      cellClass: '.cell-title',
+      textToMatch: 'Join A',
+      urlUtil: url,
+    })
 
-    await page.waitForURL(new RegExp(`${orderableJoinSlug}/`))
     await scrollEntirePage(page)
 
     await expect(page.locator('button.sort-header')).toHaveCount(3)

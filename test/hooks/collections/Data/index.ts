@@ -108,4 +108,5 @@ export const DataHooks: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

@@ -374,14 +374,27 @@ export const promise = async ({
     if (triggerAccessControl && field.access && field.access.read) {
       const canReadField = overrideAccess
         ? true
-        : await field.access.read({
-            id: doc.id as number | string,
-            blockData,
-            data: doc,
-            doc,
-            req,
-            siblingData: siblingDoc,
-          })
+        : await field.access.read(
+            collection
+              ? {
+                  id: doc.id as number | string,
+                  blockData,
+                  collection,
+                  data: doc,
+                  doc,
+                  req,
+                  siblingData: siblingDoc,
+                }
+              : {
+                  id: doc.id as number | string,
+                  blockData,
+                  data: doc,
+                  doc,
+                  global: global!,
+                  req,
+                  siblingData: siblingDoc,
+                },
+          )
 
       if (!canReadField) {
         allowDefaultValue = false
@@ -526,7 +539,7 @@ export const promise = async ({
 
           const block: Block | undefined =
             req.payload.blocks[blockTypeToMatch] ??
-            ((field.blockReferences ?? field.blocks).find(
+            (field.blocks.find(
               (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
             ) as Block | undefined)
 
@@ -580,7 +593,7 @@ export const promise = async ({
 
               const block: Block | undefined =
                 req.payload.blocks[blockTypeToMatch] ??
-                ((field.blockReferences ?? field.blocks).find(
+                (field.blocks.find(
                   (curBlock) => typeof curBlock !== 'string' && curBlock.slug === blockTypeToMatch,
                 ) as Block | undefined)
 

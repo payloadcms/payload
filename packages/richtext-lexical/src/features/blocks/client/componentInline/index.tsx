@@ -11,7 +11,6 @@ import {
   EditDepthProvider,
   Form,
   formatDrawerSlug,
-  FormSubmit,
   RenderFields,
   ShimmerEffect,
   useConfig,
@@ -25,16 +24,21 @@ import { abortAndIgnore } from '@payloadcms/ui/shared'
 import { $getNodeByKey, SKIP_DOM_SELECTION_TAG } from 'lexical'
 
 import './index.css'
+import '../../../../utilities/fieldsDrawer/index.css'
 
 import { deepCopyObjectSimpleWithoutReactComponents, reduceFieldsToValues } from 'payload/shared'
 import React, { createContext, useCallback, useEffect, useMemo, useRef } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import type { ViewMapInlineBlockComponentProps } from '../../../../types/index.js'
-import type { InlineBlockFields } from '../../server/nodes/InlineBlocksNode.js'
+import type { InlineBlockFields } from '../../server/schema.js'
 import type { BlockComponentProps } from '../component/index.js'
 
 import { useEditorConfigContext } from '../../../../lexical/config/client/EditorConfigProvider.js'
+import {
+  RegisterFormSubmit,
+  useDrawerSubmit,
+} from '../../../../utilities/fieldsDrawer/useDrawerSubmit.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { $isInlineBlockNode } from '../nodes/InlineBlocksNode.js'
 
@@ -191,15 +195,13 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
 
   const clientSchemaMap = featureClientSchemaMap['blocks']
 
-  const blocksField: BlocksFieldClient = clientSchemaMap?.[
+  const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
     componentMapRenderedBlockPath
-  ]?.[0] as BlocksFieldClient
+  ]?.[0] as BlocksFieldClient | undefined
 
-  const clientBlock: ClientBlock | undefined = blocksField.blockReferences
-    ? typeof blocksField?.blockReferences?.[0] === 'string'
-      ? config.blocksMap[blocksField?.blockReferences?.[0]]
-      : blocksField?.blockReferences?.[0]
-    : blocksField?.blocks?.[0]
+  const blockOrSlug = blocksField?.blocks?.[0]
+  const clientBlock: ClientBlock | undefined =
+    typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
 
   const clientBlockFields = clientBlock?.fields ?? []
 
@@ -412,6 +414,8 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
     [editor, nodeKey, formData],
   )
 
+  const { headerActions, submitRef } = useDrawerSubmit()
+
   const RemoveButton = useMemo(
     () => () => (
       <Button
@@ -524,13 +528,14 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
       <EditDepthProvider>
         <Drawer
           className={''}
+          headerActions={headerActions}
           slug={drawerSlug}
           title={t(`lexical:blocks:inlineBlocks:${formData?.id ? 'edit' : 'create'}`, {
             label: blockDisplayName ?? t('lexical:blocks:inlineBlocks:label'),
           })}
         >
           {initialState ? (
-            <>
+            <div className="fields-drawer">
               <RenderFields
                 fields={clientBlock?.fields}
                 forceRender
@@ -540,8 +545,8 @@ export const InlineBlockComponent: React.FC<InlineBlockComponentProps<InlineBloc
                 permissions={true}
                 readOnly={!isEditable}
               />
-              <FormSubmit programmaticSubmit={true}>{t('fields:saveChanges')}</FormSubmit>
-            </>
+              <RegisterFormSubmit submitRef={submitRef} />
+            </div>
           ) : null}
         </Drawer>
       </EditDepthProvider>

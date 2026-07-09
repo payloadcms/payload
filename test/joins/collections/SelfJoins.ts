@@ -15,4 +15,5 @@ export const SelfJoins: CollectionConfig = {
       collection: 'self-joins',
     },
   ],
+  versions: false,
 }

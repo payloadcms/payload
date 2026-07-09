@@ -1,11 +1,11 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { login } from '../__helpers/e2e/auth/login.js'
-import { logoutViaNav } from '../__helpers/e2e/auth/logout.js'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
+import { login } from '../__helpers/e2e/auth/login.js'
+import { logoutViaNav } from '../__helpers/e2e/auth/logout.js'
 import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -27,7 +27,7 @@ test.describe('serverURL', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
   })
 
   test('can load admin panel', async () => {

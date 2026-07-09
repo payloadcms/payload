@@ -1,8 +1,30 @@
 'use client'
-import React, { useEffect } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
 import './index.css'
+
+// Breathing room (px) between a shifted tooltip and its clipping edge. Maps to `--spacer-1`.
+const EDGE_GUTTER = 4
+
+const getClipBoundary = (el: HTMLElement | null): DOMRect | null => {
+  let current = el?.parentElement || null
+
+  while (current) {
+    const { overflowX } = window.getComputedStyle(current)
+    if (
+      overflowX === 'auto' ||
+      overflowX === 'clip' ||
+      overflowX === 'hidden' ||
+      overflowX === 'scroll'
+    ) {
+      return current.getBoundingClientRect()
+    }
+    current = current.parentElement
+  }
+
+  return null
+}
 
 export type Props = {
   alignCaret?: 'center' | 'left' | 'right'
@@ -52,8 +74,10 @@ export const Tooltip: React.FC<Props> = (props) => {
 
   const [show, setShow] = React.useState(showFromProps)
   const [position, setPosition] = React.useState<'bottom' | 'left' | 'right' | 'top'>('top')
+  const [shiftX, setShiftX] = useState(0)
+  const [maxWidth, setMaxWidth] = useState<null | number>(null)
 
-  const [ref, intersectionEntry] = useIntersect(
+  const [ref, intersectionEntry, node] = useIntersect(
     {
       root: boundingRef?.current || null,
       rootMargin: '-145px 0px 0px 100px',
@@ -88,6 +112,60 @@ export const Tooltip: React.FC<Props> = (props) => {
     setPosition(intersectionEntry?.isIntersecting ? 'top' : 'bottom')
   }, [intersectionEntry, staticPositioning])
 
+  // Keep a horizontally-centered tooltip (top/bottom) inside its boundary by
+  // shifting it inward by exactly the amount it would overflow. The hidden
+  // measuring aside (`node`) provides the natural, unshifted geometry.
+  const computeShift = useCallback(() => {
+    const usesHorizontalCenter =
+      (positionFromProps || position) === 'top' || (positionFromProps || position) === 'bottom'
+
+    if (staticPositioning || !node || !usesHorizontalCenter) {
+      setShiftX(0)
+      setMaxWidth(null)
+      return
+    }
+
+    const rect = node.getBoundingClientRect()
+    const boundary =
+      boundingRef?.current?.getBoundingClientRect() ?? getClipBoundary(node) ?? undefined
+    const leftEdge = (boundary?.left ?? 0) + EDGE_GUTTER
+    const rightEdge = (boundary?.right ?? window.innerWidth) - EDGE_GUTTER
+    const available = rightEdge - leftEdge
+
+    // When the tooltip can't fit even at full boundary width, cap it so it wraps.
+    const nextMaxWidth = rect.width > available ? available : null
+    setMaxWidth(nextMaxWidth)
+
+    // Compute the shift against the clamped box, kept centered on the anchor.
+    const center = rect.left + rect.width / 2
+    const effectiveWidth = nextMaxWidth ?? rect.width
+    const effectiveLeft = center - effectiveWidth / 2
+    const effectiveRight = center + effectiveWidth / 2
+
+    let shift = 0
+    if (effectiveRight > rightEdge) {
+      shift = rightEdge - effectiveRight
+    }
+    if (effectiveLeft + shift < leftEdge) {
+      shift = leftEdge - effectiveLeft
+    }
+
+    setShiftX(shift)
+  }, [boundingRef, node, position, positionFromProps, staticPositioning])
+
+  useLayoutEffect(() => {
+    if (!show) {
+      return
+    }
+
+    computeShift()
+    window.addEventListener('resize', computeShift)
+
+    return () => {
+      window.removeEventListener('resize', computeShift)
+    }
+  }, [show, computeShift])
+
   // The first aside is always on top. The purpose of that is that it can reliably be used for the interaction observer (as it's not moving around), to calculate the position of the actual tooltip.
   return (
     <React.Fragment>
@@ -109,11 +187,23 @@ export const Tooltip: React.FC<Props> = (props) => {
           'tooltip',
           className,
           show && 'tooltip--show',
+          maxWidth && 'tooltip--wrap',
           `tooltip--caret-${alignCaret}`,
           `tooltip--position-${positionFromProps || position}`,
         ]
           .filter(Boolean)
           .join(' ')}
+        style={
+          {
+            ...(maxWidth ? { '--tooltip-max-width': `${maxWidth}px` } : {}),
+            ...(shiftX
+              ? {
+                  '--tooltip-caret-x': `${-shiftX}px`,
+                  '--tooltip-x': `calc(-50% + ${shiftX}px)`,
+                }
+              : {}),
+          } as React.CSSProperties
+        }
       >
         <TooltipCaret />
         <div className="tooltip-content">{children}</div>

@@ -160,9 +160,9 @@ const config = {
           ],
         },
         {
-          name: 'blockReferences',
+          name: 'referencedBlocks',
           type: 'blocks',
-          blockReferences: ['reference-block'],
+          blocks: ['reference-block'],
         },
         {
           name: 'group',
@@ -348,7 +348,7 @@ describe('transform', () => {
           group: { ...relsData },
         },
       ],
-      blockReferences: [
+      referencedBlocks: [
         {
           blockType: 'reference-block',
           array: [{ ...relsData }],

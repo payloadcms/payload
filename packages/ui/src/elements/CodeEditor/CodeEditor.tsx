@@ -149,6 +149,25 @@ const CodeEditor: React.FC<Props> = (props) => {
       onMount={(editor, monaco) => {
         rest.onMount?.(editor, monaco)
 
+        // Required to prevent copy/cut/paste from being hijacked by Lexical rich text editor
+        const domNode = editor.getDomNode()
+        if (domNode?.closest('[contenteditable="true"]')) {
+          editor.updateOptions({ editContext: false })
+
+          const clipboardEvents = ['copy', 'cut', 'paste']
+          const stopPropagation = (event: Event) => {
+            event.stopPropagation()
+          }
+          for (const eventName of clipboardEvents) {
+            domNode.addEventListener(eventName, stopPropagation)
+          }
+          editor.onDidDispose(() => {
+            for (const eventName of clipboardEvents) {
+              domNode.removeEventListener(eventName, stopPropagation)
+            }
+          })
+        }
+
         // Set per-model options to avoid global conflicts
         const model = editor.getModel()
         if (model) {

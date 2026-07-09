@@ -222,6 +222,7 @@ export default buildConfigWithDefaults({
           },
         },
       ],
+      versions: false,
     },
     {
       slug: partialDisableLocalStrategiesSlug,
@@ -241,6 +242,7 @@ export default buildConfigWithDefaults({
         // login_attempts
         // lock_until
       ],
+      versions: false,
     },
     {
       slug: 'disable-local-strategy-password',
@@ -252,6 +254,7 @@ export default buildConfigWithDefaults({
           required: true,
         },
       ],
+      versions: false,
     },
     {
       slug: apiKeysSlug,
@@ -279,6 +282,7 @@ export default buildConfigWithDefaults({
         plural: 'API Keys',
         singular: 'API Key',
       },
+      versions: false,
     },
     {
       slug: publicUsersSlug,
@@ -286,6 +290,7 @@ export default buildConfigWithDefaults({
         verify: true,
       },
       fields: [],
+      versions: false,
     },
     {
       slug: 'relationsCollection',
@@ -300,6 +305,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'api-keys-with-field-read-access',
@@ -327,6 +333,7 @@ export default buildConfigWithDefaults({
         plural: 'API Keys With Field Read Access',
         singular: 'API Key With Field Read Access',
       },
+      versions: false,
     },
   ],
   onInit: seed,

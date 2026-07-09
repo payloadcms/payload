@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     categories: Category;
     departments: Department;
+    divisions: Division;
     folders: Folder;
     organizations: Organization;
     pages: Page;
@@ -84,6 +85,7 @@ export interface Config {
   collectionsSelect: {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
+    divisions: DivisionsSelect<false> | DivisionsSelect<true>;
     folders: FoldersSelect<false> | FoldersSelect<true>;
     organizations: OrganizationsSelect<false> | OrganizationsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
@@ -154,6 +156,19 @@ export interface Department {
   createdAt: string;
   _breadcrumbSlug?: string | null;
   _breadcrumbTitle?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "divisions".
+ */
+export interface Division {
+  id: string;
+  parent?: (string | null) | Division;
+  title: string;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -286,6 +301,10 @@ export interface PayloadLockedDocument {
         value: string | Department;
       } | null)
     | ({
+        relationTo: 'divisions';
+        value: string | Division;
+      } | null)
+    | ({
         relationTo: 'folders';
         value: string | Folder;
       } | null)
@@ -374,6 +393,18 @@ export interface DepartmentsSelect<T extends boolean = true> {
   createdAt?: T;
   _breadcrumbSlug?: T;
   _breadcrumbTitle?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "divisions_select".
+ */
+export interface DivisionsSelect<T extends boolean = true> {
+  parent?: T;
+  title?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

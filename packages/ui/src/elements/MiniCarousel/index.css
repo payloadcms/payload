@@ -1,0 +1,94 @@
+@layer payload-default {
+  .mini-carousel {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacer-3);
+    padding: var(--spacer-2-5);
+    height: 100%;
+    flex-shrink: 0;
+    overflow-y: auto;
+    background: var(--color-bg-secondary);
+    border-right: var(--stroke-width-small) solid var(--color-border);
+    /* Honor the scroll-driven height below instead of stretching to the flex line. */
+    align-self: flex-start;
+    /* Scroll-driven: grow to fill the gap as the header scrolls away. Falls back to static height. */
+    animation: mini-carousel-fill-scrolled-chrome linear both;
+    animation-timeline: scroll(root block);
+    animation-range: 0 calc(var(--app-header-height) + var(--doc-header-height));
+  }
+
+  @keyframes mini-carousel-fill-scrolled-chrome {
+    to {
+      height: calc(100% + var(--app-header-height) + var(--doc-header-height));
+    }
+  }
+
+  .mini-carousel__item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1/1;
+    flex-shrink: 0;
+    padding: var(--spacer-1);
+    border-radius: var(--radius-medium);
+    border: var(--stroke-width-small) solid var(--color-border);
+    background: var(--color-bg-secondary);
+    cursor: pointer;
+    overflow: hidden;
+    width: 48px;
+    height: 48px;
+  }
+
+  .mini-carousel__item img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .mini-carousel__item--active {
+    border-color: var(--color-border-selected);
+  }
+
+  .mini-carousel__item:hover:not(.mini-carousel__item--active) {
+    border-color: var(--color-border-hover);
+  }
+
+  .mini-carousel__divider {
+    width: 100%;
+    height: var(--stroke-width-small);
+    background: var(--color-border);
+    flex-shrink: 0;
+  }
+
+  /* Stacked layout: disable scroll-driven growth and fill via stretch. */
+  @container edit-main (max-width: 1024px) {
+    .mini-carousel {
+      align-self: stretch;
+      height: auto;
+      animation: none;
+    }
+  }
+
+  @container edit-main (max-width: 768px) {
+    .mini-carousel {
+      flex-direction: row;
+      align-items: center;
+      width: 100%;
+      overflow-x: auto;
+      overflow-y: hidden;
+      border-right: 0;
+      border-top: var(--stroke-width-small) solid var(--color-border);
+    }
+
+    .mini-carousel__item {
+      width: 48px;
+    }
+
+    .mini-carousel__divider {
+      width: var(--stroke-width-small);
+      height: 48px;
+      margin: 0 var(--spacer-2);
+    }
+  }
+}

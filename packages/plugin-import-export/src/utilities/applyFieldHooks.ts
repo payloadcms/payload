@@ -1,4 +1,4 @@
-import type { FlattenedField, PayloadRequest } from 'payload'
+import type { FlattenedBlock, FlattenedField, PayloadRequest } from 'payload'
 
 import type {
   ExportFieldHookEntry,
@@ -123,7 +123,12 @@ const traverseFields = ({
           return item
         }
         const blockType = typeof item.blockType === 'string' ? item.blockType : undefined
-        const block = blockType ? field.blocks.find((b) => b.slug === blockType) : undefined
+        const block = blockType
+          ? (req.payload.blocks[blockType] ??
+            field.blocks.find(
+              (b): b is FlattenedBlock => typeof b !== 'string' && b.slug === blockType,
+            ))
+          : undefined
         return traverseFields({
           type,
           data,

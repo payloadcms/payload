@@ -36,6 +36,7 @@ export type ServerOnlyCollectionAdminProperties = keyof Pick<
 
 export type ServerOnlyUploadProperties = keyof Pick<
   SanitizedCollectionConfig['upload'],
+  | 'admin'
   | 'adminThumbnail'
   | 'externalFileHeaderFilter'
   | 'handlers'
@@ -90,6 +91,7 @@ const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] 
 ]
 
 const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
+  'admin',
   'adminThumbnail',
   'externalFileHeaderFilter',
   'handlers',

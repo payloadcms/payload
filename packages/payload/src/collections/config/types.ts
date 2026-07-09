@@ -73,6 +73,13 @@ import type {
 
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
 
+/**
+ * The ID type of a given collection (e.g. `string` or `number`), taken from its generated type.
+ * Use this instead of the project-wide {@link DefaultDocumentIDType} when the collection slug is
+ * known, since each collection can have its own ID type.
+ */
+export type IDTypeForCollectionSlug<TSlug extends CollectionSlug> = DataFromCollectionSlug<TSlug>['id']
+
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
 
 /**
@@ -444,6 +451,7 @@ export type CollectionAdminOptions = {
       list?: {
         actions?: CustomComponent[]
         Component?: PayloadComponent
+        NoResults?: CustomComponent
       }
     } & SharedEntityViews
   } & Omit<SharedAdminComponents, 'edit' | 'views'>
@@ -492,13 +500,6 @@ export type CollectionAdminOptions = {
    * - Set to `false` to exclude the entity from the sidebar / dashboard without disabling its routes.
    */
   group?: false | Record<string, string> | string
-  /**
-   * @description Enable grouping by a field in the list view.
-   * Uses `payload.findDistinct` under the hood to populate the group-by options.
-   *
-   * @experimental This option is currently in beta and may change in future releases. Use at your own risk.
-   */
-  groupBy?: boolean
   /**
    * Exclude the collection from the admin nav and routes
    */
@@ -574,6 +575,10 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
    * Default field to sort by in collection list view
    */
   defaultSort?: Sort
+  /**
+   * Disable the bulk delete operation for the collection in the admin panel and the API
+   */
+  disableBulkDelete?: boolean
   /**
    * Disable the bulk edit operation for the collection in the admin panel and the API
    */

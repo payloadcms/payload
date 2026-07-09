@@ -24,7 +24,6 @@ Collections and Globals both support the same options for configuring drafts. Yo
 | Draft Option      | Description                                                                                                                                                      |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `autosave`        | Enable `autosave` to automatically save progress while documents are edited. To enable, set to `true` or pass an object with [options](/docs/versions/autosave). |
-| `localizeStatus`  | **Beta**. Localizes the `_status` field when using [Localization](/docs/configuration/localization). Default is `false`.                                         |
 | `schedulePublish` | Allow for editors to schedule publish / unpublish events in the future. [More](#scheduled-publish)                                                               |
 | `validate`        | Set `validate` to `true` to validate draft documents when saved. Default is `false`.                                                                             |
 
@@ -204,13 +203,7 @@ export const Pages: CollectionConfig = {
 <Banner type="warning">
   **Note regarding adding versions to an existing collection**
 
-If you already have a collection with documents, and you _opt in_ to draft functionality
-after you have already created existing documents, all of your old documents
-_will not have a `_status` field_ until you resave them. For this reason, if you are
-_adding_ versions into an existing collection, you might want to write your Access Control
-function to allow for users to read both documents where
-**`_status` is equal to `"published"`** as well as where
-**`_status` does not exist**.
+If you already have a collection with documents, and you _opt in_ to draft functionality after you have already created existing documents, all of your old documents \_will not have a `_status` field\_ until you resave them. For this reason, if you are \_adding\_ versions into an existing collection, you might want to write your Access Control function to allow for users to read both documents where **`_status` is equal to `"published"`** as well as where **`_status` does not exist**.
 
 </Banner>
 

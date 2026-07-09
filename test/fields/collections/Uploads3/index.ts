@@ -30,6 +30,7 @@ const Uploads3: CollectionConfig = {
     //   name: 'richText',
     // },
   ],
+  versions: false,
 }
 
 export default Uploads3

@@ -1,5 +1,5 @@
 import { spawn, spawnSync } from 'node:child_process'
-import { rmSync } from 'node:fs'
+import { existsSync, mkdirSync, rmSync } from 'node:fs'
 import { copyFile, mkdtemp } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
@@ -8,7 +8,39 @@ import pLimit from 'p-limit'
 import type { CodegenRunnerResult, TokenUsage, TranscriptEvent } from '../types.js'
 import type { CodegenRunner, CodegenRunnerOptions } from './types.js'
 
-import { cleanup, gitInit, installSkill, materialize, readEntry } from './workdir.js'
+import {
+  cleanup,
+  gitInit,
+  installSkill,
+  materialize,
+  readEntry,
+  readMCPToolCalls,
+} from './workdir.js'
+
+/**
+ * Fallback login dir for the agent, used when the API key is rejected (e.g. an
+ * org login policy). Lives in your user config (not the repo) so it can't be
+ * committed or wiped with eval output; log into it once with `claude auth login`.
+ * Separate from your real ~/.claude.
+ */
+const AGENT_CONFIG_DIR = path.join(
+  process.env.XDG_CONFIG_HOME || path.join(os.homedir(), '.config'),
+  'payload-evals',
+  'claude-code',
+)
+
+/**
+ * Env for the spawned `claude`. With `stripApiKey`, drop the API-key vars so it
+ * logs in via the config dir instead (some orgs reject API keys).
+ */
+function agentEnv(configDir: string, stripApiKey: boolean): NodeJS.ProcessEnv {
+  const env: NodeJS.ProcessEnv = { ...process.env, CLAUDE_CONFIG_DIR: configDir }
+  if (stripApiKey) {
+    delete env.ANTHROPIC_API_KEY
+    delete env.ANTHROPIC_AUTH_TOKEN
+  }
+  return env
+}
 
 const DEFAULT_AGENT_MODEL = 'claude-opus-4-6'
 const DEFAULT_TIMEOUT_MS = 600_000
@@ -20,7 +52,8 @@ export const SKILL_SYSTEM_PROMPT =
 
 const limit = pLimit(Number(process.env.EVAL_AGENT_CONCURRENCY ?? '2'))
 
-let initPromise: null | Promise<{ sandboxDir: string; version: string }> = null
+let initPromise: null | Promise<{ sandboxDir: string; stripApiKey: boolean; version: string }> =
+  null
 
 export const claudeCodeRunner: CodegenRunner = {
   async run(instruction, starterConfig, options) {
@@ -33,6 +66,15 @@ export async function getAgentVersion(): Promise<string> {
   return init.version
 }
 
+/**
+ * Checks the agent can authenticate, once, before any test runs. Throws the
+ * actionable login message if not — so the run aborts up front instead of
+ * failing every case. Call from globalSetup when the runner is `claude-code`.
+ */
+export async function preflightAgentAuth(): Promise<void> {
+  await ensureInit()
+}
+
 async function runOne(
   instruction: string,
   starterConfig: string,
@@ -40,24 +82,27 @@ async function runOne(
 ): Promise<CodegenRunnerResult> {
   const {
     agentModel = DEFAULT_AGENT_MODEL,
+    configPath,
+    exposeMcpTools,
     skillInstall = 'embedded',
     timeoutMs = DEFAULT_TIMEOUT_MS,
   } = options
   const init = await ensureInit()
 
-  const workdir = await materialize({ starterConfig })
+  const workdir = await materialize({ configPath, exposeMcpTools, starterConfig })
   assertSafeWorkdir(workdir)
   try {
     gitInit(workdir)
     await installSkill({ mode: skillInstall, workdir })
 
-    const prompt = `${instruction}\n\n${PROMPT_SUFFIX}`
+    const prompt = exposeMcpTools ? instruction : `${instruction}\n\n${PROMPT_SUFFIX}`
     const appendSystemPrompt = skillInstall === 'embedded' ? SKILL_SYSTEM_PROMPT : undefined
     const { exitCode, stderr, transcript, usage } = await spawnAgent({
       agentModel,
       appendSystemPrompt,
       prompt,
       sandboxDir: init.sandboxDir,
+      stripApiKey: init.stripApiKey,
       timeoutMs,
       workdir,
     })
@@ -68,6 +113,7 @@ async function runOne(
       agentExitCode: exitCode,
       agentLog: stderr.length > 0 ? truncate(stderr, 10_000) : undefined,
       confidence: 0,
+      mcpToolCalls: exposeMcpTools ? await readMCPToolCalls({ workdir }) : undefined,
       modifiedConfig,
       transcript: capTranscript(transcript),
       usage: usage ?? zeroUsage(),
@@ -83,6 +129,7 @@ async function spawnAgent({
   appendSystemPrompt,
   prompt,
   sandboxDir,
+  stripApiKey,
   timeoutMs,
   workdir,
 }: {
@@ -90,6 +137,7 @@ async function spawnAgent({
   appendSystemPrompt?: string
   prompt: string
   sandboxDir: string
+  stripApiKey: boolean
   timeoutMs: number
   workdir: string
 }): Promise<{
@@ -110,6 +158,10 @@ async function spawnAgent({
   if (appendSystemPrompt) {
     args.push('--append-system-prompt', appendSystemPrompt)
   }
+  const mcpFile = path.join(workdir, '.mcp.json')
+  if (existsSync(mcpFile)) {
+    args.push('--mcp-config', mcpFile, '--strict-mcp-config', '--allowedTools=mcp__payload')
+  }
   args.push(prompt)
   return new Promise((resolve) => {
     const child = spawn('claude', args, {
@@ -117,7 +169,7 @@ async function spawnAgent({
       // detached so timeout can kill the whole process group via -pid;
       // otherwise grandchild processes (agent's tool subprocesses) leak.
       detached: true,
-      env: { ...process.env, CLAUDE_CONFIG_DIR: sandboxDir },
+      env: agentEnv(sandboxDir, stripApiKey),
       stdio: ['ignore', 'pipe', 'pipe'],
     })
     const transcript: TranscriptEvent[] = []
@@ -198,7 +250,11 @@ async function spawnAgent({
   })
 }
 
-async function ensureInit(): Promise<{ sandboxDir: string; version: string }> {
+async function ensureInit(): Promise<{
+  sandboxDir: string
+  stripApiKey: boolean
+  version: string
+}> {
   if (initPromise === null) {
     initPromise = initOnce().catch((err: unknown) => {
       // Reset so the next caller retries instead of seeing a cached rejection.
@@ -209,32 +265,45 @@ async function ensureInit(): Promise<{ sandboxDir: string; version: string }> {
   return initPromise
 }
 
-async function initOnce(): Promise<{ sandboxDir: string; version: string }> {
+async function initOnce(): Promise<{ sandboxDir: string; stripApiKey: boolean; version: string }> {
   const version = captureVersion()
-  const sandboxDir = await mkdtemp(path.join(os.tmpdir(), 'payload-eval-claude-config-'))
+
+  // Try the API key first (fresh temp dir), copying ~/.claude/.credentials.json if needed.
+  const tempDir = await mkdtemp(path.join(os.tmpdir(), 'payload-eval-claude-config-'))
   process.on('exit', () => {
     try {
-      rmSync(sandboxDir, { force: true, recursive: true })
+      rmSync(tempDir, { force: true, recursive: true })
     } catch {
       // best-effort
     }
   })
-
-  const probe = await authProbe(sandboxDir)
+  let probe = await authProbe(tempDir, false)
   if (!probe.ok) {
-    await copyCredentialsInto(sandboxDir)
-    const retry = await authProbe(sandboxDir)
-    if (!retry.ok) {
-      throw new Error(
-        `Claude Code authentication failed in sandbox ${sandboxDir}.\n` +
-          `Probe stderr: ${retry.stderr.trim() || '(empty)'}\n` +
-          `Probe stdout: ${retry.stdout.trim() || '(empty)'}\n` +
-          `Fix: run \`claude login\` or set ANTHROPIC_API_KEY in the test shell.`,
-      )
-    }
+    await copyCredentialsInto(tempDir)
+    probe = await authProbe(tempDir, false)
+  }
+  if (probe.ok) {
+    return { sandboxDir: tempDir, stripApiKey: false, version }
   }
 
-  return { sandboxDir, version }
+  // API key rejected (e.g. an org login policy) — retry against the dedicated isolated
+  // login dir. Still a clean sandbox (no personal CLAUDE.md/skills); only auth changes.
+  mkdirSync(AGENT_CONFIG_DIR, { recursive: true })
+  const oauth = await authProbe(AGENT_CONFIG_DIR, true)
+  if (oauth.ok) {
+    return { sandboxDir: AGENT_CONFIG_DIR, stripApiKey: true, version }
+  }
+
+  throw new Error(
+    `Claude Code authentication failed for the agent runner.\n` +
+      `API-key probe stderr: ${probe.stderr.trim() || '(empty)'}\n` +
+      `OAuth-sandbox probe stderr: ${oauth.stderr.trim() || '(empty)'}\n` +
+      `Fix (either works):\n` +
+      `  • set ANTHROPIC_API_KEY in the test shell, or\n` +
+      `  • log in once to the isolated sandbox (works under org OAuth pins):\n` +
+      `      CLAUDE_CONFIG_DIR="${AGENT_CONFIG_DIR}" claude auth login --console\n` +
+      `      (use --sso or --claudeai to match your org login)`,
+  )
 }
 
 function captureVersion(): string {
@@ -249,10 +318,11 @@ function captureVersion(): string {
 
 async function authProbe(
   sandboxDir: string,
+  stripApiKey: boolean,
 ): Promise<{ ok: boolean; stderr: string; stdout: string }> {
   return new Promise((resolve) => {
     const child = spawn('claude', ['--print', '--model', 'haiku', 'reply with the word ok'], {
-      env: { ...process.env, CLAUDE_CONFIG_DIR: sandboxDir },
+      env: agentEnv(sandboxDir, stripApiKey),
       stdio: ['ignore', 'pipe', 'pipe'],
     })
     let stdout = ''
@@ -296,7 +366,7 @@ async function copyCredentialsInto(sandboxDir: string): Promise<void> {
   try {
     await copyFile(src, dest)
   } catch {
-    // probe will throw the actionable error
+    // No creds file to copy — the auth probe handles it.
   }
 }
 

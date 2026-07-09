@@ -49,11 +49,11 @@ audit_output.json
 # Ignore test directory media folder/files
 /media
 test/media
+app-tanstack/media
 *payloadtests.db
 *payloadtests.db-journal
 *payloadtests.db-shm
 *payloadtests.db-wal
-*payload.db
 /versions
 /uploads
 no-restrict-file-*
@@ -363,6 +363,13 @@ licenses.csv
 
 # SQLite DB
 payload.db
+test/payload.db
+
+# TanStack Router auto-generated route tree
+**/app-tanstack/routeTree.gen.ts
+
+# Generated TanStack admin importMap (shippable app + per-suite standalone apps)
+**/app-tanstack/app/_payload/importMap.js
 
 # Screenshots created by Playwright MCP
 .playwright-mcp

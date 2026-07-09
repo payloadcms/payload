@@ -6,7 +6,7 @@ import type {
   SelectMode,
   SelectType,
   TabAsField,
-  TypedUser,
+  User,
 } from 'payload'
 
 import { getBlockSelect, getDefaultValue, stripUnselectedFields } from 'payload'
@@ -23,7 +23,7 @@ type Args<T> = {
   select?: SelectType
   selectMode?: SelectMode
   siblingData: Data
-  user: TypedUser
+  user: User
 }
 
 // TODO: Make this works for rich text subfields
@@ -112,7 +112,7 @@ export const defaultValuePromise = async <T>({
 
           const block =
             req.payload.blocks[blockTypeToMatch] ??
-            ((field.blockReferences ?? field.blocks).find(
+            (field.blocks.find(
               (blockType) => typeof blockType !== 'string' && blockType.slug === blockTypeToMatch,
             ) as FlattenedBlock | undefined)
 

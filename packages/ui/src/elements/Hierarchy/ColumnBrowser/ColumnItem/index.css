@@ -7,7 +7,8 @@
     transition: background-color 80ms ease;
     user-select: none;
     gap: var(--spacer-2-5);
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
+    margin-inline: var(--spacer-1);
 
     &:first-child {
       margin-top: var(--spacer-1);

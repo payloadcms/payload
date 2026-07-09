@@ -3,17 +3,32 @@
 import React, { useMemo, useState } from 'react'
 
 import type { Audience } from './audience.js'
+import type { RunGroup } from './configuration.js'
 import type { EvalEntry, RunSnapshot } from './index.js'
 import type { Variant } from './ResultsTable.js'
 
 import { AUDIENCE_CONFIG, getAudience } from './audience.js'
-import { getVariant } from './ResultsTable.js'
+import { configStats, formatLocalTimestamp, runKeyOf } from './configuration.js'
 
 type Props = {
   compareMode: 'run' | 'variant'
   entries: EvalEntry[]
   onCompareModeChange: (mode: 'run' | 'variant') => void
-  runs?: RunSnapshot[]
+  runGroups: RunGroup[]
+}
+
+/** Default A/B compares the two most recent runs (A = older, B = newer). */
+function defaultComparePair(groups: RunGroup[]): [string, string] {
+  const newer = groups[0]?.key ?? ''
+  const older = groups[1]?.key ?? newer
+  return [older, newer]
+}
+
+function runLabel(run: RunGroup | undefined, key: string): string {
+  if (!run) {
+    return key
+  }
+  return `${run.config.label} · ${formatLocalTimestamp(run.timestamp)}`
 }
 
 type ComparePair = {
@@ -182,7 +197,7 @@ function ResultCell({ borderLeft, entry }: { borderLeft?: boolean; entry?: EvalE
             <span>
               {' '}
               · {Math.round((usage.total.cachedInputTokens / usage.total.inputTokens) * 100)}%
-              cached
+              prompt-cached
             </span>
           )}
         </span>
@@ -191,7 +206,15 @@ function ResultCell({ borderLeft, entry }: { borderLeft?: boolean; entry?: EvalE
   )
 }
 
-function ExpandedCompareRow({ pair }: { pair: ComparePair }) {
+function ExpandedCompareRow({
+  labelA,
+  labelB,
+  pair,
+}: {
+  labelA: string
+  labelB: string
+  pair: ComparePair
+}) {
   return (
     <div
       style={{
@@ -205,15 +228,15 @@ function ExpandedCompareRow({ pair }: { pair: ComparePair }) {
       <AnswerColumn
         color="var(--theme-elevation-600)"
         entry={pair.baseline}
-        label="Baseline — no skill"
-        missingHint="pnpm run test:eval:baseline"
+        label={labelA}
+        missingHint="pnpm test:eval"
       />
       <AnswerColumn
         borderLeft
         color="var(--theme-success-700)"
         entry={pair.skill}
-        label="With Skill — SKILL.md injected"
-        missingHint="pnpm run test:eval"
+        label={labelB}
+        missingHint="pnpm test:eval"
       />
     </div>
   )
@@ -466,21 +489,34 @@ function variantPillStyle(variant: string): { bg: string; color: string } {
   )
 }
 
-function RunDiffView({ runs }: { runs: RunSnapshot[] }) {
-  const options = runs.map((r) => ({
-    label: `${r.variant} / run ${String(r.run).padStart(3, '0')} — ${r.generatedAt.slice(0, 10)}`,
-    value: r.filename,
-  }))
+function RunDiffView({ runGroups }: { runGroups: RunGroup[] }) {
+  // Adapt a run into the snapshot-shaped object this view renders, so the
+  // category rollup compares the same runs as the rest of the dashboard.
+  const toSnap = (run: RunGroup) => {
+    const stats = configStats(run.entries)
+    return {
+      label: `${run.config.label} · ${formatLocalTimestamp(run.timestamp)}`,
+      results: run.entries.map((e) => ({
+        type: e.type,
+        category: e.category,
+        pass: e.result.pass,
+        question: e.result.question,
+        score: e.result.score,
+      })),
+      summary: { avgScore: stats.avgScore ?? 0, passRate: stats.passRate },
+      variant: `${run.config.runner === 'claude-code' ? 'agent-' : ''}${run.config.skillOn ? 'skill' : 'baseline'}`,
+    }
+  }
 
-  const [baseFilename, setBaseFilename] = useState<string>(() =>
-    runs.length >= 2 ? (runs[runs.length - 2]?.filename ?? '') : (runs[0]?.filename ?? ''),
-  )
-  const [compareFilename, setCompareFilename] = useState<string>(() =>
-    runs.length >= 1 ? (runs[runs.length - 1]?.filename ?? '') : '',
-  )
+  const options = runGroups.map((run) => ({ label: toSnap(run).label, value: run.key }))
 
-  const baseSnap = runs.find((r) => r.filename === baseFilename)
-  const compareSnap = runs.find((r) => r.filename === compareFilename)
+  const [baseKey, setBaseKey] = useState<string>(() => runGroups[1]?.key ?? runGroups[0]?.key ?? '')
+  const [compareKey, setCompareKey] = useState<string>(() => runGroups[0]?.key ?? '')
+
+  const baseRun = runGroups.find((r) => r.key === baseKey)
+  const compareRun = runGroups.find((r) => r.key === compareKey)
+  const baseSnap = baseRun ? toSnap(baseRun) : undefined
+  const compareSnap = compareRun ? toSnap(compareRun) : undefined
 
   const rows = useMemo<RunCategoryRow[]>(() => {
     if (!baseSnap || !compareSnap) {
@@ -524,7 +560,7 @@ function RunDiffView({ runs }: { runs: RunSnapshot[] }) {
         const db = b.deltaPassRate ?? 0
         return Math.abs(db) - Math.abs(da) || a.category.localeCompare(b.category)
       })
-  }, [baseSnap, compareSnap])
+  }, [baseKey, compareKey, runGroups])
 
   const selectStyle: React.CSSProperties = {
     background: 'transparent',
@@ -549,7 +585,7 @@ function RunDiffView({ runs }: { runs: RunSnapshot[] }) {
           ? 'var(--theme-error-600)'
           : 'var(--theme-elevation-500)'
 
-  if (runs.length === 0) {
+  if (runGroups.length === 0) {
     return (
       <div
         style={{
@@ -562,9 +598,9 @@ function RunDiffView({ runs }: { runs: RunSnapshot[] }) {
           textAlign: 'center',
         }}
       >
-        <p style={{ margin: '0 0 8px' }}>No run snapshots found yet.</p>
+        <p style={{ margin: '0 0 8px' }}>Need at least one run to compare.</p>
         <p style={{ color: 'var(--theme-elevation-400)', fontSize: '0.8rem', margin: 0 }}>
-          Run the eval suite to generate snapshots: <code>pnpm run test:eval</code>
+          Run the eval suite first: <code>pnpm test:eval</code>
         </p>
       </div>
     )
@@ -593,11 +629,7 @@ function RunDiffView({ runs }: { runs: RunSnapshot[] }) {
         >
           Comparing
         </span>
-        <select
-          onChange={(e) => setBaseFilename(e.target.value)}
-          style={selectStyle}
-          value={baseFilename}
-        >
+        <select onChange={(e) => setBaseKey(e.target.value)} style={selectStyle} value={baseKey}>
           {options.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
@@ -615,9 +647,9 @@ function RunDiffView({ runs }: { runs: RunSnapshot[] }) {
           →
         </span>
         <select
-          onChange={(e) => setCompareFilename(e.target.value)}
+          onChange={(e) => setCompareKey(e.target.value)}
           style={selectStyle}
-          value={compareFilename}
+          value={compareKey}
         >
           {options.map((o) => (
             <option key={o.value} value={o.value}>
@@ -877,44 +909,53 @@ export function CompareTable({
   compareMode,
   entries,
   onCompareModeChange: _onCompareModeChange,
-  runs = [],
+  runGroups,
 }: Props) {
   const [sortKey, setSortKey] = useState<null | SortKey>('category')
   const [sortDir, setSortDir] = useState<null | SortDir>('asc')
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
   const [hoveredKey, setHoveredKey] = useState<null | string>(null)
   const [showOnlyDiffs, setShowOnlyDiffs] = useState(false)
+  const [runA, setRunA] = useState<string>(() => defaultComparePair(runGroups)[0])
+  const [runB, setRunB] = useState<string>(() => defaultComparePair(runGroups)[1])
+
+  const labelA = runLabel(
+    runGroups.find((r) => r.key === runA),
+    runA,
+  )
+  const labelB = runLabel(
+    runGroups.find((r) => r.key === runB),
+    runB,
+  )
 
   const pairs = useMemo<ComparePair[]>(() => {
     const byQuestion = new Map<string, ComparePair>()
     for (const entry of entries) {
-      const key = entry.result.question
-      if (!byQuestion.has(key)) {
-        byQuestion.set(key, {
+      const rk = runKeyOf(entry.result)
+      if (rk !== runA && rk !== runB) {
+        continue
+      }
+      const q = entry.result.question
+      if (!byQuestion.has(q)) {
+        byQuestion.set(q, {
           type: entry.type,
           audience: entry.audience ?? getAudience(entry.category),
           category: entry.category,
-          question: key,
+          question: q,
         })
       }
-      const pair = byQuestion.get(key)!
-
-      const variant = getVariant(entry)
-      // First-write-wins per lane. When the cache contains both an LLM and an
-      // agent result for the same question, iteration order decides which is
-      // shown; both rows still appear in list view distinguished by their badge.
-      if (variant === 'baseline' || variant === 'agent-baseline') {
-        if (!pair.baseline) {
-          pair.baseline = entry
-        }
-      } else if (variant === 'skill' || variant === 'agent-skill') {
-        if (!pair.skill) {
-          pair.skill = entry
-        }
+      const pair = byQuestion.get(q)!
+      // The `baseline` slot holds run A, the `skill` slot holds run B
+      // (delta is computed as B − A). First-write-wins per slot.
+      if (rk === runA && !pair.baseline) {
+        pair.baseline = entry
+      }
+      if (rk === runB && !pair.skill) {
+        pair.skill = entry
       }
     }
     return Array.from(byQuestion.values()).filter((p) => p.baseline || p.skill)
-  }, [entries])
+  }, [entries, runA, runB])
 
   const sorted = useMemo(() => {
     const filtered = showOnlyDiffs
@@ -1030,36 +1071,9 @@ export function CompareTable({
     userSelect: 'none',
   })
 
-  if (pairs.length === 0 && compareMode === 'variant') {
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--base)' }}>
-        <div
-          style={{
-            background: 'var(--theme-elevation-50)',
-            border: '1px solid var(--theme-elevation-150)',
-            borderRadius: 'var(--style-radius-m)',
-            color: 'var(--theme-elevation-500)',
-            fontSize: '0.875rem',
-            padding: 'calc(var(--base) * 3)',
-            textAlign: 'center',
-          }}
-        >
-          <p style={{ margin: '0 0 8px' }}>
-            No paired results found yet. Compare requires at least one entry tagged with{' '}
-            <code>systemPromptKey</code>.
-          </p>
-          <p style={{ color: 'var(--theme-elevation-400)', fontSize: '0.8rem', margin: 0 }}>
-            Re-run the evals to populate tags: <code>pnpm run test:eval</code> and{' '}
-            <code>pnpm run test:eval:baseline</code>
-          </p>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--base)' }}>
-      {compareMode === 'run' && <RunDiffView runs={runs} />}
+      {compareMode === 'run' && <RunDiffView runGroups={runGroups} />}
 
       {compareMode === 'variant' && (
         <>
@@ -1074,6 +1088,72 @@ export function CompareTable({
           outline-offset: 0;
         }
       `}</style>
+          {/* A vs B configuration selectors */}
+          <div style={{ alignItems: 'center', display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+            <span
+              style={{
+                color: 'var(--theme-elevation-500)',
+                fontSize: '0.75rem',
+                fontWeight: 600,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+              }}
+            >
+              Comparing
+            </span>
+            <select
+              onChange={(e) => setRunA(e.target.value)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                borderBottom: '2px solid var(--theme-elevation-300)',
+                color: 'var(--theme-elevation-900)',
+                cursor: 'pointer',
+                fontSize: '0.95rem',
+                fontWeight: 700,
+                outline: 'none',
+                padding: '2px 4px',
+              }}
+              value={runA}
+            >
+              {runGroups.map((run) => (
+                <option key={run.key} value={run.key}>
+                  {runLabel(run, run.key)}
+                </option>
+              ))}
+            </select>
+            <span
+              style={{ color: 'var(--theme-elevation-400)', fontSize: '1.1rem', padding: '0 2px' }}
+            >
+              →
+            </span>
+            <select
+              onChange={(e) => setRunB(e.target.value)}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                borderBottom: '2px solid var(--theme-success-400, var(--theme-success-500))',
+                color: 'var(--theme-elevation-900)',
+                cursor: 'pointer',
+                fontSize: '0.95rem',
+                fontWeight: 700,
+                outline: 'none',
+                padding: '2px 4px',
+              }}
+              value={runB}
+            >
+              {runGroups.map((run) => (
+                <option key={run.key} value={run.key}>
+                  {runLabel(run, run.key)}
+                </option>
+              ))}
+            </select>
+            {runA === runB && (
+              <span style={{ color: 'var(--color-warning-700, #8a5d0c)', fontSize: '0.75rem' }}>
+                pick two different runs
+              </span>
+            )}
+          </div>
           {/* Summary strip */}
           <div
             style={{
@@ -1089,13 +1169,13 @@ export function CompareTable({
               { label: 'Pairs Compared', value: `${stats.total}` },
               {
                 color: 'var(--theme-success-600)',
-                label: 'Improved w/ Skill',
+                label: 'B scored higher',
                 value: `${stats.improved}`,
               },
               { color: 'var(--theme-elevation-600)', label: 'Unchanged', value: `${stats.same}` },
               {
                 color: stats.regressed > 0 ? 'var(--theme-error-600)' : undefined,
-                label: 'Regressed',
+                label: 'A scored higher',
                 value: `${stats.regressed}`,
               },
               {
@@ -1251,8 +1331,9 @@ export function CompareTable({
                   paddingLeft: '12px',
                   textTransform: 'uppercase',
                 }}
+                title={labelA}
               >
-                Baseline
+                A
               </span>
               <span
                 style={{
@@ -1262,8 +1343,9 @@ export function CompareTable({
                   letterSpacing: '0.05em',
                   textTransform: 'uppercase',
                 }}
+                title={labelB}
               >
-                With Skill
+                B
               </span>
               <span
                 onClick={() => handleSort('delta')}
@@ -1286,7 +1368,9 @@ export function CompareTable({
                   textAlign: 'center',
                 }}
               >
-                No differences found.
+                {pairs.length === 0
+                  ? 'No cases were run in both selected configurations.'
+                  : 'No differences found.'}
               </div>
             ) : (
               sorted.map((pair, i) => {
@@ -1397,7 +1481,9 @@ export function CompareTable({
                       </span>
                     </div>
 
-                    {isExpanded && <ExpandedCompareRow pair={pair} />}
+                    {isExpanded && (
+                      <ExpandedCompareRow labelA={labelA} labelB={labelB} pair={pair} />
+                    )}
                   </div>
                 )
               })

@@ -7,6 +7,7 @@ import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../i
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
 import type {
   Config,
+  DashboardConfig,
   LocalizationConfigWithLabels,
   LocalizationConfigWithNoLabels,
   SanitizedConfig,
@@ -51,18 +52,6 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
     ValidationError: 'info',
     ...(sanitizedConfig.loggingLevels || {}),
   }
-  ;(sanitizedConfig.admin!.dashboard ??= { widgets: [] }).widgets.push({
-    slug: 'collections',
-    Component: '@payloadcms/ui/rsc#CollectionCards',
-    minWidth: 'full',
-  })
-  sanitizedConfig.admin!.dashboard.defaultLayout ??= [
-    {
-      widgetSlug: 'collections',
-      width: 'full',
-    } satisfies WidgetInstance,
-  ]
-
   // add default user collection if none provided
   if (!sanitizedConfig?.admin?.user) {
     const firstCollectionWithAuth = sanitizedConfig.collections!.find(({ auth }) => Boolean(auth))
@@ -106,6 +95,148 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   })
 
   return sanitizedConfig as unknown as Partial<SanitizedConfig>
+}
+
+const addDefaultDashboardWidgets = async ({
+  config,
+  richTextSanitizationPromises,
+  validRelationships,
+}: {
+  config: Partial<SanitizedConfig>
+  richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>>
+  validRelationships: string[]
+}) => {
+  const collectionQueryFields: NonNullable<Widget['fields']> = [
+    {
+      name: 'title',
+      type: 'text',
+      label: ({ t }) => t('dashboard:widgetTitleLabel'),
+    },
+    {
+      name: 'relatedCollection',
+      type: 'select',
+      label: ({ t }) => t('general:collection'),
+      // Only offer collections that are visible in the admin UI. Collections hidden via a function
+      // are kept since they may still be visible for some users.
+      options: (config.collections ?? [])
+        .filter((collection) => collection.admin?.hidden !== true)
+        .map((collection) => ({
+          label: collection.labels?.plural || collection.slug,
+          value: collection.slug,
+        })),
+      required: true,
+    },
+    {
+      name: 'where',
+      type: 'json',
+      admin: {
+        components: {
+          Field: '@payloadcms/ui#QueryPresetsWhereField',
+        },
+      },
+      label: ({ t }) => t('general:filters'),
+    },
+    {
+      name: 'sortField',
+      type: 'text',
+      admin: {
+        components: {
+          Field: '@payloadcms/ui#CollectionQuerySortField',
+        },
+      },
+      label: ({ t }) => t('dashboard:widgetSortFieldLabel'),
+    },
+    {
+      name: 'sortDirection',
+      type: 'select',
+      defaultValue: 'desc',
+      label: ({ t }) => t('dashboard:widgetSortDirectionLabel'),
+      options: [
+        {
+          label: ({ t }) => t('general:ascending'),
+          value: 'asc',
+        },
+        {
+          label: ({ t }) => t('general:descending'),
+          value: 'desc',
+        },
+      ],
+    },
+    {
+      name: 'limit',
+      type: 'number',
+      defaultValue: 5,
+      label: ({ t }) => t('dashboard:widgetLimitLabel'),
+      max: 25,
+      min: 1,
+    },
+  ]
+
+  const recentlyViewedFields: NonNullable<Widget['fields']> = [
+    {
+      name: 'excludedCollections',
+      type: 'select',
+      admin: {
+        components: {
+          // Presents an inclusion filter (all collections checked by default) while persisting the
+          // inverse as an exclusion list, so collections added later stay visible by default.
+          Field: '@payloadcms/ui#RecentlyViewedCollectionsField',
+        },
+      },
+      hasMany: true,
+      label: ({ t }) => t('general:collections'),
+      // Exclusion list, so an empty value shows every collection and newly added collections are
+      // included by default. Hidden collections are never offered as options.
+      options: (config.collections ?? [])
+        .filter((collection) => collection.admin?.hidden !== true)
+        .map((collection) => ({
+          label: collection.labels?.plural || collection.slug,
+          value: collection.slug,
+        })),
+    },
+  ]
+
+  const adminConfig: NonNullable<Config['admin']> = config.admin ?? { dashboard: { widgets: [] } }
+  const dashboard: DashboardConfig = (adminConfig.dashboard ??= { widgets: [] })
+
+  dashboard.widgets.push({
+    slug: 'collections',
+    Component: '@payloadcms/ui/rsc#CollectionCards',
+    minWidth: 'full',
+  })
+  dashboard.widgets.push({
+    slug: 'collection-query',
+    Component: '@payloadcms/ui/rsc#CollectionQueryWidget',
+    fields: await sanitizeFields({
+      config: config as unknown as Config,
+      existingFieldNames: new Set(),
+      fields: collectionQueryFields,
+      parentIsLocalized: false,
+      richTextSanitizationPromises,
+      validRelationships,
+    }),
+    minWidth: 'x-small',
+  })
+  dashboard.widgets.push({
+    slug: 'activity',
+    Component: '@payloadcms/ui/rsc#RecentlyViewedWidget',
+    fields: await sanitizeFields({
+      config: config as unknown as Config,
+      existingFieldNames: new Set(),
+      fields: recentlyViewedFields,
+      parentIsLocalized: false,
+      richTextSanitizationPromises,
+      validRelationships,
+    }),
+    label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
+    minWidth: 'x-small',
+  })
+  dashboard.defaultLayout ??= [
+    {
+      widgetSlug: 'collections',
+      width: 'full',
+    } satisfies WidgetInstance,
+  ]
 }
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
@@ -450,6 +581,12 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       ),
     )
   }
+
+  await addDefaultDashboardWidgets({
+    config,
+    richTextSanitizationPromises,
+    validRelationships,
+  })
 
   if (config.serverURL !== '') {
     config.csrf!.push(config.serverURL!)

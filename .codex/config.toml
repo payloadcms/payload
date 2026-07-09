@@ -1,0 +1,14 @@
+[mcp_servers.playwright]
+command = "pnpm"
+args = [
+  "dlx",
+  "@playwright/mcp@latest",
+  "--caps=vision,verify,tracing,devtools",
+  "--isolated",
+  "--headless",
+  "--browser",
+  "chromium",
+]
+
+[mcp_servers.payload]
+url = "http://localhost:3000/api/mcp"

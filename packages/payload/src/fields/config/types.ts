@@ -4,7 +4,7 @@ import type { EditorProps } from '@monaco-editor/react'
 import type { JSONSchema4 } from 'json-schema'
 import type { CSSProperties } from 'react'
 import type React from 'react'
-import type { DeepUndefinable, MarkRequired } from 'ts-essentials'
+import type { DeepUndefinable, MarkOptional, MarkRequired } from 'ts-essentials'
 
 import type {
   JoinFieldClientProps,
@@ -147,6 +147,7 @@ import type {
   PickPreserveOptional,
   Where,
 } from '../../types/index.js'
+import type { SchemaVariant } from '../../utilities/configToJSONSchema.js'
 import type { DisabledOptions } from '../isFieldDisabled.js'
 import type {
   NumberFieldManyValidation,
@@ -234,7 +235,7 @@ export type FieldHook<TData extends TypeWithID = any, TValue = any, TSiblingData
   args: FieldHookArgs<TData, TValue, TSiblingData>,
 ) => Promise<TValue> | TValue
 
-export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
+type SharedFieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
    */
@@ -258,6 +259,16 @@ export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> 
    */
   siblingData?: Partial<TSiblingData>
 }
+
+export type FieldAccessArgs<TData extends TypeWithID = any, TSiblingData = any> =
+  | ({ collection: SanitizedCollectionConfig; global?: never } & SharedFieldAccessArgs<
+      TData,
+      TSiblingData
+    >)
+  | ({ collection?: never; global: SanitizedGlobalConfig } & SharedFieldAccessArgs<
+      TData,
+      TSiblingData
+    >)
 
 export type FieldAccess<TData extends TypeWithID = any, TSiblingData = any> = (
   args: FieldAccessArgs<TData, TSiblingData>,
@@ -508,8 +519,11 @@ export interface FieldBase {
    * Allows you to modify the base JSON schema that is generated for this field.
    * This JSON schema will be used to generate the TypeScript interface of this field, and to
    * validate the field's value in the MCP plugin.
+   *
+   * `variant` is `'input'` when generating the write shape (`create`/`update`) and `'output'` when
+   * generating the read shape, so a transform can differ between the two.
    */
-  jsonSchema?: Array<(args: { jsonSchema: JSONSchema4 }) => JSONSchema4>
+  jsonSchema?: Array<(args: { jsonSchema: JSONSchema4; variant: SchemaVariant }) => JSONSchema4>
   label?: false | LabelFunction | StaticLabel
   localized?: boolean
   /**
@@ -1371,8 +1385,8 @@ export type RadioFieldClient = {
 
 type BlockFields = {
   [key: string]: any
-  blockName?: string
-  blockType?: string
+  blockName?: null | string
+  blockType: string
 }
 
 export type BlockJSX = {
@@ -1430,7 +1444,7 @@ export type BlockJSX = {
     markdownToLexical: (props: { markdown: string }) => Record<string, any>
     openMatch?: RegExpMatchArray
     props: Record<string, any>
-  }) => BlockFields | false
+  }) => false | MarkOptional<BlockFields, 'blockType'>
 }
 
 export type Block = {
@@ -1509,11 +1523,12 @@ export type Block = {
    * @deprecated Use `admin.images` instead. Preferred aspect ratio of the image is 3:2.
    */
   imageURL?: string
-  /** Customize generated GraphQL and Typescript schema names.
-   * The slug is used by default.
-   *
-   * This is useful if you would like to generate a top level type to share amongst collections/fields.
-   * **Note**: Top level types can collide, ensure they are unique amongst collections, arrays, groups, blocks, tabs.
+  /**
+   * Override the name of the top-level TypeScript interface and GraphQL
+   * type generated for this block. Blocks **always** generate a top-level
+   * interface - by default it's a PascalCase form of the slug
+   * (`'content-block'` → `ContentBlock`). Set this to take control of the
+   * generated name
    */
   interfaceName?: string
   jsx?: BlockJSX
@@ -1542,12 +1557,9 @@ export type BlocksField = {
     isSortable?: boolean
   } & FieldAdmin
   /**
-   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
-   *
-   * @todo `blockReferences` will be merged with `blocks` in 4.0
+   * Blocks to use in this field. Inline block configs and string slugs of blocks defined in `config.blocks` are both supported.
    */
-  blockReferences?: (Block | BlockSlug)[]
-  blocks: Block[]
+  blocks: (Block | BlockSlug)[]
   defaultValue?: DefaultValue
   /**
    * Blocks can be conditionally enabled using the `filterOptions` property on the blocks field.
@@ -1589,13 +1601,7 @@ export type BlocksField = {
 export type BlocksFieldClient = {
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   admin?: AdminClient & Pick<BlocksField['admin'], 'initCollapsed' | 'isSortable'>
-  /**
-   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
-   *
-   * @todo `blockReferences` will be merged with `blocks` in 4.0
-   */
-  blockReferences?: (ClientBlock | string)[]
-  blocks: ClientBlock[]
+  blocks: (ClientBlock | string)[]
   labels?: LabelsClient
 } & FieldBaseClient &
   Pick<BlocksField, 'maxRows' | 'minRows' | 'type'>
@@ -1716,14 +1722,8 @@ export type FlattenedBlock = {
 } & Block
 
 export type FlattenedBlocksField = {
-  /**
-   * Like `blocks`, but allows you to also pass strings that are slugs of blocks defined in `config.blocks`.
-   *
-   * @todo `blockReferences` will be merged with `blocks` in 4.0
-   */
-  blockReferences?: (FlattenedBlock | string)[]
-  blocks: FlattenedBlock[]
-} & Omit<BlocksField, 'blockReferences' | 'blocks'>
+  blocks: (FlattenedBlock | string)[]
+} & Omit<BlocksField, 'blocks'>
 
 export type FlattenedGroupField = {
   flattenedFields: FlattenedField[]
@@ -1951,7 +1951,7 @@ export type FieldWithMaxDepthClient = JoinFieldClient | RelationshipFieldClient 
 
 export function fieldHasSubFields<TField extends ClientField | Field | TabAsField>(
   field: TField,
-): field is TField & (TField extends ClientField ? FieldWithSubFieldsClient : FieldWithSubFields) {
+): field is Extract<TField, FieldWithSubFields | FieldWithSubFieldsClient> {
   return (
     field.type === 'group' ||
     field.type === 'array' ||
@@ -1962,19 +1962,19 @@ export function fieldHasSubFields<TField extends ClientField | Field | TabAsFiel
 
 export function fieldIsArrayType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? ArrayFieldClient : ArrayField) {
+): field is Extract<TField, ArrayField | ArrayFieldClient> {
   return field.type === 'array'
 }
 
 export function fieldIsBlockType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? BlocksFieldClient : BlocksField) {
+): field is Extract<TField, BlocksField | BlocksFieldClient> {
   return field.type === 'blocks'
 }
 
 export function fieldIsGroupType<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? GroupFieldClient : GroupField) {
+): field is Extract<TField, GroupField | GroupFieldClient> {
   return field.type === 'group'
 }
 
@@ -1992,13 +1992,13 @@ export function optionIsValue(option: Option): option is string {
 
 export function fieldSupportsMany<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? FieldWithManyClient : FieldWithMany) {
+): field is Extract<TField, FieldWithMany | FieldWithManyClient> {
   return field.type === 'select' || field.type === 'relationship' || field.type === 'upload'
 }
 
 export function fieldHasMaxDepth<TField extends ClientField | Field>(
   field: TField,
-): field is TField & (TField extends ClientField ? FieldWithMaxDepthClient : FieldWithMaxDepth) {
+): field is Extract<TField, FieldWithMaxDepth | FieldWithMaxDepthClient> {
   return (
     (field.type === 'upload' || field.type === 'relationship' || field.type === 'join') &&
     typeof field.maxDepth === 'number'
@@ -2007,9 +2007,7 @@ export function fieldHasMaxDepth<TField extends ClientField | Field>(
 
 export function fieldIsPresentationalOnly<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
->(
-  field: TField,
-): field is TField & (TField extends ClientField | TabAsFieldClient ? UIFieldClient : UIField) {
+>(field: TField): field is Extract<TField, UIField | UIFieldClient> {
   return field.type === 'ui'
 }
 
@@ -2045,8 +2043,10 @@ export function fieldAffectsData<
   TField extends ClientField | Field | TabAsField | TabAsFieldClient,
 >(
   field: TField,
-): field is TField &
-  (TField extends ClientField | TabAsFieldClient ? FieldAffectingDataClient : FieldAffectingData) {
+  // Narrows to field types that hold data (`name` fields). `Extract` keeps the
+  // existing `TField` members instead of creating intersections. Avoid `TField & (...)`
+  // here: with the large recursive `Field` union, it is much slower to typecheck.
+): field is Extract<TField, FieldAffectingData | FieldAffectingDataClient> {
   return 'name' in field && !fieldIsPresentationalOnly(field)
 }
 

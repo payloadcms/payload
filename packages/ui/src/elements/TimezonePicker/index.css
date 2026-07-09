@@ -6,6 +6,12 @@
     align-items: center;
     position: relative;
 
+    --field-min-height-large: var(--text-body-medium-line-height);
+
+    .shimmer-effect {
+      max-width: calc(2 * var(--spacer-4));
+    }
+
     .timezone-picker__label {
       color: var(--color-text-secondary);
       flex-shrink: 0;
@@ -24,29 +30,6 @@
     .timezone-picker.react-select {
       display: inline-flex;
       position: static;
-
-      .rs__menu {
-        overflow: hidden;
-        border-radius: var(--radius-large);
-        background: var(--color-bg-menu);
-        padding: var(--spacer-2);
-        min-width: 280px;
-        max-height: 280px;
-      }
-
-      .rs__menu-list {
-        max-height: calc(var(--spacer-6) * 5);
-        overflow-y: auto;
-      }
-
-      .rs__option {
-        padding: var(--spacer-1) var(--spacer-2);
-        border-radius: var(--radius-medium);
-        cursor: pointer;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
 
       .rs__option--is-focused,
       .rs__option--is-selected {
@@ -67,7 +50,7 @@
         min-height: auto !important;
         position: relative;
         box-shadow: unset;
-        border-radius: var(--radius-medium);
+        border-radius: var(--button-radius);
         gap: 0;
         flex-wrap: nowrap;
 
@@ -136,7 +119,7 @@
         background: none;
         border: none;
         cursor: pointer;
-        border-radius: var(--radius-medium);
+        border-radius: var(--button-radius);
         color: var(--color-text-secondary);
 
         &:focus-visible {
@@ -154,12 +137,64 @@
         margin-left: calc(var(--spacer-1) / 2);
         height: var(--spacer-3);
         overflow: visible;
-        border-radius: var(--radius-medium);
+        border-radius: var(--button-radius);
 
         &:focus-visible {
           outline: var(--stroke-width-small) solid var(--accessibility-focus-color);
         }
       }
     }
+  }
+
+  .timezone-picker__menu {
+    border-radius: var(--radius-large);
+    background: var(--color-bg-menu);
+    color: var(--color-text);
+    padding-top: var(--spacer-2);
+    min-width: 280px;
+
+    .rs__option {
+      padding: var(--spacer-1) var(--spacer-2);
+      border-radius: var(--button-radius);
+      cursor: pointer;
+    }
+
+    .timezone-picker__option-check {
+      opacity: 0;
+      flex-shrink: 0;
+    }
+
+    .timezone-picker__option-label {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .rs__option--is-focused {
+      background-color: var(--popup-item-bg-hover, var(--color-bg-selected-strong));
+      color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
+    }
+
+    .rs__option--is-selected {
+      background-color: transparent;
+      color: var(--popup-item-color-selected, var(--popup-item-color, var(--color-text)));
+
+      .timezone-picker__option-check {
+        opacity: 1;
+      }
+    }
+
+    .rs__option--is-selected.rs__option--is-focused {
+      background-color: var(--popup-item-bg-hover, var(--color-bg-selected-strong));
+      color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
+    }
+  }
+
+  .timezone-picker__menu-list {
+    max-height: calc(var(--spacer-6) * 5);
+    padding-inline: var(--spacer-2);
+    padding-bottom: var(--spacer-2);
   }
 }

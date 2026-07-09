@@ -8,25 +8,30 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
-import { formatAdminURL, hasAutosaveEnabled, hasDraftsEnabled } from 'payload/shared'
-import React, { Fragment, useEffect } from 'react'
+import {
+  formatAdminURL,
+  hasAutosaveEnabled,
+  hasDraftsEnabled,
+  hasScheduledPublishEnabled,
+} from 'payload/shared'
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
 
 import type { DocumentDrawerContextType } from '../DocumentDrawer/Provider.js'
 
 import { useFormInitializing, useFormProcessing } from '../../forms/Form/context.js'
+import { useElementHeightVariable } from '../../hooks/useElementHeightVariable.js'
 import { MoreIcon } from '../../icons/More/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLivePreviewContext } from '../../providers/LivePreview/context.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatDate } from '../../utilities/formatDocTitle/formatDateTitle.js'
+import { formatDate, formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { Autosave } from '../Autosave/index.js'
 import { Button } from '../Button/index.js'
 import { CopyLocaleData } from '../CopyLocaleData/index.js'
 import { DeleteDocument } from '../DeleteDocument/index.js'
 import { DuplicateDocument } from '../DuplicateDocument/index.js'
-import { Gutter } from '../Gutter/index.js'
 import { LivePreviewToggler } from '../LivePreview/Toggler/index.js'
 import { Locked } from '../Locked/index.js'
 import { PermanentlyDeleteButton } from '../PermanentlyDeleteButton/index.js'
@@ -37,6 +42,7 @@ import { RenderCustomComponent } from '../RenderCustomComponent/index.js'
 import { RestoreButton } from '../RestoreButton/index.js'
 import { SaveButton } from '../SaveButton/index.js'
 import { SaveDraftButton } from '../SaveDraftButton/index.js'
+import { SchedulePublishButton } from '../SchedulePublishButton/index.js'
 import { Status } from '../Status/index.js'
 import { UnpublishButton } from '../UnpublishButton/index.js'
 import './index.css'
@@ -80,6 +86,12 @@ export const DocumentControls: React.FC<{
   readonly redirectAfterRestore?: boolean
   readonly slug: SanitizedCollectionConfig['slug']
   readonly user?: ClientUser
+  /**
+   * Controls how the document controls render.
+   * - `default`: full controls bar (meta + actions), used on the edit page.
+   * - `drawerHeaderActions`: only the action buttons, rendered in the document drawer header.
+   */
+  readonly variant?: 'default' | 'drawerHeaderActions'
 }> = (props) => {
   const {
     id,
@@ -114,6 +126,7 @@ export const DocumentControls: React.FC<{
     redirectAfterDuplicate,
     redirectAfterRestore,
     user,
+    variant = 'default',
   } = props
 
   const { i18n, t } = useTranslation()
@@ -140,9 +153,29 @@ export const DocumentControls: React.FC<{
   // Settings these in state to avoid hydration issues if there is a mismatch between the server and client
   const [updatedAt, setUpdatedAt] = React.useState<string>('')
   const [createdAt, setCreatedAt] = React.useState<string>('')
+  const [relativeTime, setRelativeTime] = useState<string>('')
 
   const processing = useFormProcessing()
   const initializing = useFormInitializing()
+
+  const rootRef = useRef<HTMLDivElement>(null)
+  const i18nRef = useRef(i18n)
+
+  // Only the page-level controls bar feeds the sticky layout offsets. Drawer instances
+  // (variant="drawerHeaderActions") must not publish the shared var or they'd clobber it.
+  useElementHeightVariable({
+    cssVar: '--doc-controls-height',
+    isEnabled: variant === 'default',
+    ref: rootRef,
+  })
+  i18nRef.current = i18n
+
+  const updateRelativeTime = useCallback(() => {
+    const date = data?.updatedAt || data?.createdAt
+    if (date) {
+      setRelativeTime(formatTimeToNow({ date, i18n: i18nRef.current }))
+    }
+  }, [data?.updatedAt, data?.createdAt])
 
   useEffect(() => {
     if (data?.updatedAt) {
@@ -151,7 +184,13 @@ export const DocumentControls: React.FC<{
     if (data?.createdAt) {
       setCreatedAt(formatDate({ date: data.createdAt, i18n, pattern: dateFormat }))
     }
-  }, [data, i18n, dateFormat])
+    updateRelativeTime()
+  }, [data, i18n, dateFormat, updateRelativeTime])
+
+  useEffect(() => {
+    const interval = setInterval(updateRelativeTime, 60000)
+    return () => clearInterval(interval)
+  }, [updateRelativeTime])
 
   const hasCreatePermission = permissions && 'create' in permissions && permissions.create
 
@@ -169,7 +208,8 @@ export const DocumentControls: React.FC<{
 
   const showDotMenu = Boolean(
     !disableActions &&
-      ((collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
+      (EditMenuItems ||
+        (collectionConfig && id && (hasCreatePermission || hasDeletePermission)) ||
         (globalConfig && (globalHasDraftsEnabled || localization))),
   )
   const collectionAutosaveEnabled = hasAutosaveEnabled(collectionConfig)
@@ -188,93 +228,92 @@ export const DocumentControls: React.FC<{
   const showLockedMetaIcon = user && readOnlyForIncomingUser
 
   return (
-    <div className={baseClass}>
-      <div className={`${baseClass}__content`}>
-        {Boolean(showLockedMetaIcon || BeforeDocumentMeta) && (
-          <div className={`${baseClass}__before-meta`}>
-            {showLockedMetaIcon && (
-              <Locked className={`${baseClass}__locked-controls`} user={user} />
-            )}
-            {BeforeDocumentMeta}
-          </div>
-        )}
-        <ul className={`${baseClass}__meta`}>
-          {collectionConfig && !isEditing && !isAccountView && (
-            <li className={`${baseClass}__list-item`}>
-              <p className={`${baseClass}__value`}>
-                {i18n.t('general:creatingNewLabel', {
-                  label: getTranslation(
-                    collectionConfig?.labels?.singular ?? i18n.t('general:document'),
-                    i18n,
-                  ),
-                })}
-              </p>
-            </li>
-          )}
-          {(collectionHasDraftsEnabled || globalHasDraftsEnabled) && (
-            <Fragment>
-              {(globalConfig || (collectionConfig && isEditing)) && (
-                <li
-                  className={[`${baseClass}__status`, `${baseClass}__list-item`]
-                    .filter(Boolean)
-                    .join(' ')}
-                >
-                  <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
-                </li>
+    <div
+      className={[baseClass, variant !== 'default' && `${baseClass}--${variant}`]
+        .filter(Boolean)
+        .join(' ')}
+      ref={rootRef}
+    >
+      {variant === 'default' && (
+        <div className={`${baseClass}__content`}>
+          {Boolean(showLockedMetaIcon || BeforeDocumentMeta) && (
+            <div className={`${baseClass}__before-meta`}>
+              {showLockedMetaIcon && (
+                <Locked className={`${baseClass}__locked-controls`} user={user} />
               )}
-              {hasSavePermission &&
-                autosaveEnabled &&
-                !unsavedDraftWithValidations &&
-                !isTrashed && (
-                  <li className={`${baseClass}__list-item`}>
-                    <Autosave
-                      collection={collectionConfig}
-                      global={globalConfig}
-                      id={id}
-                      publishedDocUpdatedAt={data?.createdAt}
-                    />
+              {BeforeDocumentMeta}
+            </div>
+          )}
+          <ul className={`${baseClass}__meta`}>
+            {collectionConfig && !isEditing && !isAccountView && (
+              <li className={`${baseClass}__list-item`}>
+                <p className={`${baseClass}__creating-new`}>
+                  {i18n.t('general:creatingNewLabel', {
+                    label: getTranslation(
+                      collectionConfig?.labels?.singular ?? i18n.t('general:document'),
+                      i18n,
+                    ),
+                  })}
+                </p>
+              </li>
+            )}
+            {(collectionHasDraftsEnabled || globalHasDraftsEnabled) && (
+              <Fragment>
+                {(globalConfig || (collectionConfig && isEditing)) && (
+                  <li className={`${baseClass}__status ${baseClass}__list-item`}>
+                    <RenderCustomComponent CustomComponent={CustomStatus} Fallback={<Status />} />
                   </li>
                 )}
-            </Fragment>
-          )}
-          {collectionConfig?.timestamps && (isEditing || isAccountView) && (
-            <Fragment>
-              <li
-                className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
-                  .filter(Boolean)
-                  .join(' ')}
-                title={data?.updatedAt ? updatedAt : ''}
-              >
-                <p className={`${baseClass}__label`}>
-                  {i18n.t(isTrashed ? 'general:deleted' : 'general:lastModified')}:&nbsp;
-                </p>
-
-                {data?.updatedAt && <p className={`${baseClass}__value`}>{updatedAt}</p>}
-              </li>
-              <li
-                className={[`${baseClass}__list-item`, `${baseClass}__value-wrap`]
-                  .filter(Boolean)
-                  .join(' ')}
-                title={data?.createdAt ? createdAt : ''}
-              >
-                <p className={`${baseClass}__label`}>{i18n.t('general:created')}:&nbsp;</p>
-                {data?.createdAt && <p className={`${baseClass}__value`}>{createdAt}</p>}
-              </li>
-            </Fragment>
-          )}
-        </ul>
-      </div>
+                {hasSavePermission &&
+                  autosaveEnabled &&
+                  !unsavedDraftWithValidations &&
+                  !isTrashed && (
+                    <li className={`${baseClass}__list-item`}>
+                      <Autosave
+                        collection={collectionConfig}
+                        global={globalConfig}
+                        id={id}
+                        publishedDocUpdatedAt={data?.createdAt}
+                      />
+                    </li>
+                  )}
+              </Fragment>
+            )}
+            {collectionConfig?.timestamps &&
+              (isEditing || isAccountView) &&
+              (data?.updatedAt || data?.createdAt) && (
+                <li
+                  className={`${baseClass}__list-item ${baseClass}__value-wrap`}
+                  title={updatedAt || createdAt || undefined}
+                >
+                  <p className={`${baseClass}__value`}>
+                    {relativeTime
+                      ? t(isTrashed ? 'general:deletedAgo' : 'general:updatedAgo', {
+                          distance: relativeTime,
+                        })
+                      : `${t('general:loading')}...`}
+                  </p>
+                </li>
+              )}
+          </ul>
+        </div>
+      )}
       <div className={`${baseClass}__controls-wrapper`}>
         <div className={`${baseClass}__controls`}>
           {BeforeDocumentControls}
-          {isLivePreviewEnabled && !isInDrawer && <LivePreviewToggler />}
-          {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
-            <RenderCustomComponent
-              CustomComponent={CustomPreviewButton}
-              Fallback={<PreviewButton />}
-            />
-          )}
-          {hasSavePermission && !isTrashed && (
+          <div className={`${baseClass}__icon-buttons`}>
+            {isLivePreviewEnabled && !isInDrawer && <LivePreviewToggler />}
+            {(collectionConfig?.admin.preview || globalConfig?.admin.preview) && (
+              <RenderCustomComponent
+                CustomComponent={CustomPreviewButton}
+                Fallback={<PreviewButton />}
+              />
+            )}
+            {hasScheduledPublishEnabled(collectionConfig || globalConfig) && !isTrashed && (
+              <SchedulePublishButton disabled={readOnlyForIncomingUser} />
+            )}
+          </div>
+          {hasSavePermission && !isTrashed && !readOnlyForIncomingUser && (
             <Fragment>
               {collectionHasDraftsEnabled || globalHasDraftsEnabled ? (
                 <Fragment>
@@ -333,13 +372,22 @@ export const DocumentControls: React.FC<{
         </div>
         {showDotMenu && !readOnlyForIncomingUser && (
           <Popup
-            button={<MoreIcon />}
             buttonClassName={`${baseClass}__popup-button`}
             caret={false}
             className={`${baseClass}__popup`}
             disabled={initializing || processing}
             horizontalAlign="right"
-            size="medium"
+            renderButton={({ active, ...buttonProps }) => (
+              <Button
+                {...buttonProps}
+                aria-label={t('general:moreOptions')}
+                buttonStyle="ghost"
+                className={`${baseClass}__popup-button`}
+                icon={<MoreIcon />}
+                selected={active}
+                size="medium"
+              />
+            )}
             verticalAlign="bottom"
           >
             <PopupList.ButtonGroup>
@@ -388,7 +436,7 @@ export const DocumentControls: React.FC<{
                   )}
                 </React.Fragment>
               )}
-              {hasDeletePermission && (
+              {hasDeletePermission && id && (
                 <DeleteDocument
                   buttonId="action-delete"
                   collectionSlug={collectionConfig?.slug}
