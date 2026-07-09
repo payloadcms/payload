@@ -84,6 +84,18 @@
       text-align: center;
     }
 
+    /* Size the locked-row lock icon to the checkbox's 16px box (keeping the column
+     * width stable) and center it like the checkbox; the larger icon overflows. */
+    .cell-_select .locked {
+      display: flex;
+      height: var(--spacer-3);
+      width: var(--spacer-3);
+
+      svg {
+        flex-shrink: 0;
+      }
+    }
+
     #heading-_dragHandle {
       display: flex;
       align-items: center;
