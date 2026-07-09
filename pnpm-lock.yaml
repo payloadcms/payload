@@ -1118,6 +1118,9 @@ importers:
 
   packages/plugin-form-builder:
     dependencies:
+      '@payloadcms/translations':
+        specifier: workspace:*
+        version: link:../translations
       '@payloadcms/ui':
         specifier: workspace:*
         version: link:../ui
@@ -2355,7 +2358,7 @@ importers:
         version: link:../packages/eslint-plugin
       '@payloadcms/figma':
         specifier: latest
-        version: 0.0.1-alpha.68(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)
+        version: 0.0.1-alpha.74(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)
       '@payloadcms/graphql':
         specifier: workspace:*
         version: link:../packages/graphql
@@ -2654,6 +2657,9 @@ importers:
       '@payloadcms/plugin-ecommerce':
         specifier: workspace:*
         version: link:../../packages/plugin-ecommerce
+      '@payloadcms/plugin-form-builder':
+        specifier: workspace:*
+        version: link:../../packages/plugin-form-builder
       '@payloadcms/plugin-import-export':
         specifier: workspace:*
         version: link:../../packages/plugin-import-export
@@ -6454,8 +6460,8 @@ packages:
     resolution: {integrity: sha512-tmmZ3lQxAe/k/+rNnXQRawJ4NjxO2hqiOLTHvWchtGZULp4RyFeh6aU4XdOYBFe2KE1oShQTv4AblOs2iOrNnQ==}
     engines: {node: '>= 10.0.0'}
 
-  '@payloadcms/figma@0.0.1-alpha.68':
-    resolution: {integrity: sha512-uAUOY4qDibeunn32cZ5KeslQ2Co4P/Xhpe01AlzfIFd6rk0rY6fig4cMqjgZbDLzS9O/5eIQeL1lXP7jPjfN8w==}
+  '@payloadcms/figma@0.0.1-alpha.74':
+    resolution: {integrity: sha512-USR22NnmYTbxA673Uk8Ca9EbrXAnjP+aLiVNQ39N68t6nicLJvRdNMdppEz+SBDS9ICTRjQH3sWioSEp6xhfCg==}
     hasBin: true
     peerDependencies:
       '@payloadcms/plugin-cloud-storage': ^3.0.0
@@ -19154,7 +19160,7 @@ snapshots:
       '@parcel/watcher-win32-x64': 2.5.6
     optional: true
 
-  '@payloadcms/figma@0.0.1-alpha.68(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)':
+  '@payloadcms/figma@0.0.1-alpha.74(@payloadcms/plugin-cloud-storage@packages+plugin-cloud-storage)(@payloadcms/richtext-lexical@packages+richtext-lexical)(payload@packages+payload)':
     dependencies:
       '@clack/prompts': 0.11.0
       '@figma/rest-api-spec': 0.34.0
