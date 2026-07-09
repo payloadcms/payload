@@ -39,7 +39,7 @@ export const findDocumentsTool = defineCollectionTool({
     draft: z
       .boolean()
       .describe(
-        'Optional: whether the document should be queried from the versions table/collection or not.',
+        'For versioned collections, true returns the latest draft version when available. False reads the main document.',
       )
       .optional(),
     fallbackLocale: z

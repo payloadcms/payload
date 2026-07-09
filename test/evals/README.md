@@ -189,3 +189,16 @@ agent generates config
 
 Use this when a case needs both facts: "does the generated config boot and write
 the right data?" and "how complete was the result overall?"
+
+### Runtime evals
+
+Runtime cases have three phases: `setup → agent → verify`. Setup prepares the starting state, the
+agent performs the task, and verification checks the final state. Only agent activity is scored.
+
+For MCP cases, the agent phase allows only Payload MCP. One `audit.json` records Payload operation
+attempts and completed MCP calls, and non-MCP Payload attempts are blocked. Each case uses a
+temporary SQLite database shared across all three phases and removed afterward.
+
+`scoreMCPExecution` requires the expected audited operation, then reduces the score for failed MCP
+calls, calls above the case's allowance, and extra modification attempts. Claude Code cases are
+stopped after 90 seconds without an agent event.
