@@ -1394,7 +1394,9 @@ describe('@payloadcms/plugin-mcp', () => {
         })
 
         expect(callResponse).toBeDefined()
-        expect(publishedPost._status).toEqual({ en: 'published' })
+        expect(publishedPost._status).toMatchObject({ en: 'published' })
+        expect(publishedPost._status).not.toMatchObject({ es: 'published' })
+        expect(publishedPost._status).not.toMatchObject({ fr: 'published' })
         expect(spanishDraft.title).toBe('Spanish draft title')
         expect(spanishDraft._status).toBe('draft')
       } finally {
