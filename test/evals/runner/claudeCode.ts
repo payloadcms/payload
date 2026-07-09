@@ -8,14 +8,8 @@ import pLimit from 'p-limit'
 import type { CodegenRunnerResult, TokenUsage, TranscriptEvent } from '../types.js'
 import type { CodegenRunner, CodegenRunnerOptions } from './types.js'
 
-import {
-  cleanup,
-  gitInit,
-  installSkill,
-  materialize,
-  readEntry,
-  readMCPToolCalls,
-} from './workdir.js'
+import { finalizeAudit, readAudit } from '../../__helpers/plugins/audit/index.js'
+import { cleanup, getAuditPath, gitInit, installSkill, materialize, readEntry } from './workdir.js'
 
 /**
  * Fallback login dir for the agent, used when the API key is rejected (e.g. an
@@ -43,6 +37,7 @@ function agentEnv(configDir: string, stripApiKey: boolean): NodeJS.ProcessEnv {
 }
 
 const DEFAULT_AGENT_MODEL = 'claude-opus-4-6'
+const DEFAULT_AGENT_IDLE_TIMEOUT_MS = 90_000
 const DEFAULT_TIMEOUT_MS = 600_000
 const PROMPT_SUFFIX =
   'IMPORTANT: Do not run package managers (npm, pnpm, yarn) or build/test/dev commands. Modify only payload.config.ts. Just write the file.'
@@ -84,12 +79,21 @@ async function runOne(
     agentModel = DEFAULT_AGENT_MODEL,
     configPath,
     exposeMcpTools,
+    mcpConfigPath,
+    mcpDatabaseURL,
     skillInstall = 'embedded',
     timeoutMs = DEFAULT_TIMEOUT_MS,
   } = options
   const init = await ensureInit()
 
-  const workdir = await materialize({ configPath, exposeMcpTools, starterConfig })
+  const workdir = await materialize({
+    configPath,
+    exposeMcpTools,
+    mcpConfigPath,
+    mcpDatabaseURL,
+    starterConfig,
+  })
+  const auditPath = exposeMcpTools ? getAuditPath(workdir) : undefined
   assertSafeWorkdir(workdir)
   try {
     gitInit(workdir)
@@ -99,6 +103,8 @@ async function runOne(
     const appendSystemPrompt = skillInstall === 'embedded' ? SKILL_SYSTEM_PROMPT : undefined
     const { exitCode, stderr, transcript, usage } = await spawnAgent({
       agentModel,
+      allowedBuiltinTools:
+        exposeMcpTools && skillInstall === 'embedded' ? 'ToolSearch,Skill' : 'ToolSearch',
       appendSystemPrompt,
       prompt,
       sandboxDir: init.sandboxDir,
@@ -108,14 +114,19 @@ async function runOne(
     })
 
     const modifiedConfig = exitCode === 0 ? await readEntry(workdir) : starterConfig
+    const audit = auditPath ? readAudit({ path: auditPath }) : undefined
+
+    if (auditPath && process.env.EVAL_KEEP_WORKDIR === '1') {
+      finalizeAudit({ path: auditPath })
+    }
 
     const result: CodegenRunnerResult = {
       agentExitCode: exitCode,
       agentLog: stderr.length > 0 ? truncate(stderr, 10_000) : undefined,
+      audit,
       confidence: 0,
-      mcpToolCalls: exposeMcpTools ? await readMCPToolCalls({ workdir }) : undefined,
       modifiedConfig,
-      transcript: capTranscript(transcript),
+      transcript,
       usage: usage ?? zeroUsage(),
     }
     return result
@@ -126,6 +137,7 @@ async function runOne(
 
 async function spawnAgent({
   agentModel,
+  allowedBuiltinTools,
   appendSystemPrompt,
   prompt,
   sandboxDir,
@@ -134,6 +146,7 @@ async function spawnAgent({
   workdir,
 }: {
   agentModel: string
+  allowedBuiltinTools?: string
   appendSystemPrompt?: string
   prompt: string
   sandboxDir: string
@@ -160,7 +173,14 @@ async function spawnAgent({
   }
   const mcpFile = path.join(workdir, '.mcp.json')
   if (existsSync(mcpFile)) {
-    args.push('--mcp-config', mcpFile, '--strict-mcp-config', '--allowedTools=mcp__payload')
+    args.push(
+      '--tools',
+      allowedBuiltinTools ?? 'ToolSearch',
+      '--mcp-config',
+      mcpFile,
+      '--strict-mcp-config',
+      '--allowedTools=mcp__payload__*',
+    )
   }
   args.push(prompt)
   return new Promise((resolve) => {
@@ -181,6 +201,9 @@ async function spawnAgent({
         return
       }
       const { events, usage: lineUsage } = parseStreamJsonLine(line)
+      if (events.length > 0 || lineUsage) {
+        resetIdleTimer()
+      }
       for (const event of events) {
         transcript.push(event)
       }
@@ -204,6 +227,7 @@ async function spawnAgent({
       stderr += b.toString()
     })
     let resolved = false
+    let idleTimer: NodeJS.Timeout
     const finish = (result: {
       exitCode: number
       stderr: string
@@ -214,9 +238,12 @@ async function spawnAgent({
         return
       }
       resolved = true
+      clearTimeout(idleTimer)
+      clearTimeout(hardTimer)
       resolve(result)
     }
-    const timer = setTimeout(() => {
+
+    const killAgent = (message: string) => {
       try {
         if (child.pid !== undefined) {
           process.kill(-child.pid, 'SIGKILL')
@@ -231,16 +258,31 @@ async function spawnAgent({
           stderr += `\n[runner] child.kill fallback also failed: ${(childKillErr as Error).message}`
         }
       }
-      stderr += `\n[runner] killed after ${timeoutMs}ms timeout`
+      stderr += `\n${message}`
       finish({ exitCode: -1, stderr, transcript, usage })
-    }, timeoutMs)
+    }
+
+    const resetIdleTimer = () => {
+      clearTimeout(idleTimer)
+      idleTimer = setTimeout(
+        () =>
+          killAgent(
+            `[runner] killed after ${DEFAULT_AGENT_IDLE_TIMEOUT_MS}ms without an agent event`,
+          ),
+        DEFAULT_AGENT_IDLE_TIMEOUT_MS,
+      )
+    }
+
+    resetIdleTimer()
+    const hardTimer = setTimeout(
+      () => killAgent(`[runner] killed after ${timeoutMs}ms hard timeout`),
+      timeoutMs,
+    )
     child.on('error', (err) => {
-      clearTimeout(timer)
       stderr += `\n[runner] spawn error: ${err.message}`
       finish({ exitCode: -1, stderr, transcript, usage })
     })
     child.on('exit', (code) => {
-      clearTimeout(timer)
       if (stdoutBuffer.length > 0) {
         ingestLine(stdoutBuffer)
         stdoutBuffer = ''
@@ -456,11 +498,11 @@ function extractAssistantBlocks(message: unknown): TranscriptEvent[] {
       type?: unknown
     }
     if (block.type === 'text' && typeof block.text === 'string') {
-      events.push({ text: truncateText(block.text), type: 'text' })
+      events.push({ type: 'text', text: truncateText(block.text) })
       continue
     }
     if (block.type === 'thinking' && typeof block.thinking === 'string') {
-      events.push({ text: truncateText(block.thinking), type: 'thinking' })
+      events.push({ type: 'thinking', text: truncateText(block.thinking) })
       continue
     }
     if (
@@ -470,9 +512,9 @@ function extractAssistantBlocks(message: unknown): TranscriptEvent[] {
     ) {
       events.push({
         id: block.id,
-        input: normalizeToolInput(block.input),
         name: block.name,
         type: 'tool_use',
+        input: normalizeToolInput(block.input),
       })
     }
   }
@@ -496,10 +538,10 @@ function extractUserBlocks(message: unknown): TranscriptEvent[] {
       continue
     }
     events.push({
+      type: 'tool_result',
       content: normalizeToolResultContent(block.content),
       isError: block.is_error === true ? true : undefined,
       toolUseId: block.tool_use_id,
-      type: 'tool_result',
     })
   }
   return events
@@ -549,7 +591,7 @@ function truncateText(s: string): string {
   return s.length <= TEXT_TRUNCATE_LIMIT ? s : `${s.slice(0, TEXT_TRUNCATE_LIMIT)}… [truncated]`
 }
 
-function capTranscript(events: TranscriptEvent[]): TranscriptEvent[] {
+export function capTranscript(events: TranscriptEvent[]): TranscriptEvent[] {
   if (events.length <= TRANSCRIPT_EVENT_CAP) {
     return events
   }
@@ -557,8 +599,8 @@ function capTranscript(events: TranscriptEvent[]): TranscriptEvent[] {
   const tail = events.slice(events.length - 100)
   const omitted = events.length - 200
   const marker: TranscriptEvent = {
-    text: `… [transcript truncated: ${omitted} events omitted]`,
     type: 'text',
+    text: `… [transcript truncated: ${omitted} events omitted]`,
   }
   return [...head, marker, ...tail]
 }

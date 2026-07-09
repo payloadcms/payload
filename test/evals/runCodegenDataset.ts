@@ -9,6 +9,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import ts from 'typescript'
 import { expect as vitestExpect } from 'vitest'
 
+import type { MCPEvalDatabase } from './mcpDatabase.js'
 import type {
   CodegenRunnerResult,
   ConfigChangeScorerResult,
@@ -22,9 +23,10 @@ import type {
 
 import { parseConfig } from './assertions/parseConfig.js'
 import { buildEvalConfig, missingEvalConfig, unwrapEvalConfigValue } from './evalConfig.js'
+import { createMCPEvalDatabase, setMCPEvalDatabaseEnvironment } from './mcpDatabase.js'
 import { DEFAULT_RUNNER_MODEL, DEFAULT_SCORER_MODEL } from './models.js'
 import { codegenParamsHash } from './paramsHash.js'
-import { getAgentVersion } from './runner/claudeCode.js'
+import { capTranscript, getAgentVersion } from './runner/claudeCode.js'
 import { runCodegenEval } from './runner/index.js'
 import { findReusableResult, recordRunResult, shouldRerun } from './runResults.js'
 import { scoreConfigChange, scoreEvidence } from './scorer/index.js'
@@ -104,7 +106,15 @@ export async function runCodegenCase(
 
   const recordResult = (result: EvalResult): EvalResult => recordRunResult({ paramsHash, result })
 
-  let lazyPayload = testCase.bootConfig ? createLazyPayload(testCase, starterConfig) : undefined
+  if (exposeMcpTools && !testCase.bootConfig) {
+    throw new Error('MCP eval cases must enable bootConfig')
+  }
+
+  const mcpDatabase = exposeMcpTools ? createMCPEvalDatabase() : undefined
+
+  let lazyPayload = testCase.bootConfig
+    ? createLazyPayload({ mcpDatabase, modifiedConfig: starterConfig, testCase })
+    : undefined
   let runnerOutput: CodegenRunnerResult
 
   try {
@@ -117,6 +127,8 @@ export async function runCodegenCase(
       configPath: testCase.configPath,
       exposeMcpTools,
       kind,
+      mcpConfigPath: exposeMcpTools ? lazyPayload?.configFilePath : undefined,
+      mcpDatabaseURL: mcpDatabase?.url,
       model: runnerModel,
       skillInstall,
       systemPromptKey,
@@ -129,13 +141,14 @@ export async function runCodegenCase(
   const { confidence, modifiedConfig, usage: runnerUsage } = runnerOutput
   const agentLog = runnerOutput.agentLog
   const agentExitCode = runnerOutput.agentExitCode
-  const mcpToolCalls = runnerOutput.mcpToolCalls ?? []
+  const audit = runnerOutput.audit ?? []
   const transcript = runnerOutput.transcript
 
   const commonResult = {
     agentExitCode,
     agentLog,
     answer: modifiedConfig,
+    audit: audit.length > 0 ? audit : undefined,
     category: testCase.category,
     confidence,
     configPath: testCase.configPath,
@@ -145,13 +158,14 @@ export async function runCodegenCase(
     skillInstall: kind === 'claude-code' ? skillInstall : undefined,
     starterContent: starterConfig,
     systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
-    transcript,
+    transcript: transcript ? capTranscript(transcript) : undefined,
   } satisfies Partial<EvalResult>
 
-  const { errors: tscErrors, valid } = await validateConfigTypes(
-    modifiedConfig,
-    `${testCase.configPath}-${paramsHash.slice(0, 12)}`,
-  )
+  const { errors: tscErrors, valid } = await validateConfigTypes({
+    name: `${testCase.configPath}-${paramsHash.slice(0, 12)}`,
+    configContent: modifiedConfig,
+    configPath: testCase.configPath,
+  })
 
   if (!valid) {
     const result: EvalResult = {
@@ -195,7 +209,7 @@ export async function runCodegenCase(
     }
   }
 
-  lazyPayload ??= createLazyPayload(testCase, modifiedConfig)
+  lazyPayload ??= createLazyPayload({ mcpDatabase, modifiedConfig, testCase })
   let scorerResult: ConfigChangeScorerResult | undefined
 
   const score = async (expected: string, evidence?: unknown): Promise<ConfigChangeScorerResult> => {
@@ -212,12 +226,13 @@ export async function runCodegenCase(
   try {
     const verifyResult = await testCase.verify({
       ast,
+      audit,
       config: evalConfig,
       expect: createEvalExpect(),
-      mcpToolCalls,
       payload: lazyPayload.payload,
       score,
       source: modifiedConfig,
+      transcript: transcript ?? [],
     })
     const resolvedScore = verifyResult ?? scorerResult
     const result: EvalResult = resolvedScore
@@ -391,12 +406,18 @@ function isArrowOrFunctionExpression(
   return ts.isArrowFunction(node) || ts.isFunctionExpression(node)
 }
 
-function createLazyPayload(
-  testCase: EvalCase,
-  modifiedConfig: string,
-): {
+function createLazyPayload({
+  mcpDatabase,
+  modifiedConfig,
+  testCase,
+}: {
+  mcpDatabase?: MCPEvalDatabase
+  modifiedConfig: string
+  testCase: EvalCase
+}): {
   boot: () => Promise<Payload>
   cleanup: () => Promise<void>
+  configFilePath: string
   didBoot: () => boolean
   payload: Payload
 } {
@@ -411,11 +432,19 @@ function createLazyPayload(
   const getPayload = async () => {
     if (!payloadPromise) {
       payloadPromise = (async () => {
-        releaseRuntime = await acquireRuntimeVerifyLock()
+        const releaseBoot = await acquireRuntimeVerifyLock()
+        releaseRuntime = releaseBoot
+
         writeFileSync(configFilePath, modifiedConfig, 'utf-8')
 
         const previousDropDatabase = process.env.PAYLOAD_DROP_DATABASE
-        process.env.PAYLOAD_DROP_DATABASE = 'true'
+        const restoreMCPEnvironment = mcpDatabase
+          ? setMCPEvalDatabaseEnvironment({ databaseURL: mcpDatabase.url })
+          : undefined
+
+        if (!mcpDatabase) {
+          process.env.PAYLOAD_DROP_DATABASE = 'true'
+        }
 
         try {
           const { initPayloadInt } = await import('../__helpers/shared/initPayloadInt.js')
@@ -426,10 +455,17 @@ function createLazyPayload(
           ).payload
           return payload
         } finally {
-          if (previousDropDatabase === undefined) {
+          if (restoreMCPEnvironment) {
+            restoreMCPEnvironment()
+          } else if (previousDropDatabase === undefined) {
             delete process.env.PAYLOAD_DROP_DATABASE
           } else {
             process.env.PAYLOAD_DROP_DATABASE = previousDropDatabase
+          }
+
+          if (mcpDatabase) {
+            releaseRuntime()
+            releaseRuntime = undefined
           }
         }
       })()
@@ -468,10 +504,12 @@ function createLazyPayload(
         await payload?.destroy()
       } finally {
         rmSync(configFilePath, { force: true })
+        mcpDatabase?.cleanup()
         releaseRuntime?.()
         releaseRuntime = undefined
       }
     },
+    configFilePath,
     didBoot: () => Boolean(payloadPromise),
     payload: lazy,
   }
@@ -544,6 +582,9 @@ function writeFailure({
   starterConfig: string
 }) {
   writeFailedCodegenAssertion({
+    agentExitCode: result.agentExitCode,
+    agentLog: result.agentLog,
+    audit: result.audit,
     category: result.category,
     changeDescription: result.changeDescription,
     confidence: result.confidence,
@@ -554,6 +595,7 @@ function writeFailure({
     question: result.question,
     reasoning: result.reasoning,
     starterConfig,
+    transcript: result.transcript,
     tscErrors: result.tscErrors,
   })
 }

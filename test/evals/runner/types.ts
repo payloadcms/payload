@@ -24,6 +24,10 @@ export type CodegenRunnerOptions = {
   /** Expose the starter config's Payload MCP tools to the runner. */
   exposeMcpTools?: boolean
   kind?: RunnerKind
+  /** claude-code only: frozen config used by this case's parent and MCP process. */
+  mcpConfigPath?: string
+  /** claude-code only: database shared by this case's setup and MCP process. */
+  mcpDatabaseURL?: string
   /** llm only: AI SDK `LanguageModel` instance. */
   model?: LanguageModel
   /** claude-code only: how the Payload skill is installed in the workdir. */
