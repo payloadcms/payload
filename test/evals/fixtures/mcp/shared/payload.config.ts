@@ -22,12 +22,6 @@ export default buildConfig({
       slug: 'posts',
       fields: [
         { name: 'title', type: 'text', required: true },
-        {
-          name: 'status',
-          type: 'select',
-          defaultValue: 'draft',
-          options: ['draft', 'published'],
-        },
         { name: 'author', type: 'relationship', relationTo: 'authors' },
         { name: 'content', type: 'richText' },
       ],

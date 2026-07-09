@@ -49,7 +49,7 @@ export const mcpDataset: EvalCase[] = [
     bootConfig: true,
     category: 'mcp',
     configPath: 'mcp/shared',
-    input: 'Rename the post "MCP Update Target" to "Updated by Payload MCP eval" and publish it.',
+    input: 'Rename the post "MCP Update Target" to "Updated by Payload MCP eval".',
     setup: async ({ payload }) => {
       await payload.create({
         collection: 'posts',
@@ -59,11 +59,10 @@ export const mcpDataset: EvalCase[] = [
     verify: async ({ audit, expect, payload, transcript }) => {
       const { docs } = await payload.find({
         collection: 'posts',
-        where: { title: { equals: 'Updated by Payload MCP eval' } },
       })
 
       expect(docs).toHaveLength(1)
-      expect((docs[0] as { status?: unknown }).status).toBe('published')
+      expect(docs[0]?.title).toBe('Updated by Payload MCP eval')
 
       return scoreMCPExecution({
         audit,

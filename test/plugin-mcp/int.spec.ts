@@ -640,6 +640,8 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(updateToolSchema.inputSchema.properties.select.description).toContain(
         "Optional: define exactly which fields you'd like to return in the response",
       )
+      expect(updateToolSchema.inputSchema.properties.publishAllLocales).toBeDefined()
+      expect(updateToolSchema.inputSchema.properties.publishAllLocales.type).toBe('boolean')
     })
   })
 
@@ -803,6 +805,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(schema.properties?.title).toBeDefined()
       expect(schema.properties?.content).toBeDefined()
+      expect(schema.properties?._status?.enum).toEqual(['draft', 'published'])
       expect(schema.properties?.badProperty).toBeUndefined()
     })
 
@@ -861,6 +864,34 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(responseText).toContain('"title":"Test Post"')
       expect(responseText).toContain('"content":"Content for test post."')
       expect(overrideText).toContain('Override MCP response for Posts!')
+    })
+
+    it('should create a published document from data._status', async ({ mcp }) => {
+      const apiKey = await getApiKey()
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
+          collectionSlug: 'posts',
+          data: {
+            _status: 'published',
+            title: 'Published through MCP',
+          },
+          draft: false,
+          locale: 'en',
+        },
+        name: 'createDocument',
+      })
+      const createdPost = getToolDoc<{ id: number | string }>(callResponse)
+      createdPostIDs.push(createdPost.id)
+
+      const storedPost = await payload.findByID({
+        id: createdPost.id,
+        collection: 'posts',
+        draft: false,
+        locale: 'all',
+      })
+
+      expect(storedPost._status).toMatchObject({ en: 'published' })
     })
 
     it('should call createDocument with select to limit returned fields', async ({ mcp }) => {
@@ -1312,6 +1343,63 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(callResponse.content[0].text).toContain(
         '"content":"Updated content for test post to update."',
       )
+    })
+
+    it('should forward publishAllLocales when updating a document', async ({ mcp }) => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'English draft title',
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      try {
+        await payload.update({
+          id: post.id,
+          collection: 'posts',
+          data: { title: 'Spanish draft title' },
+          draft: true,
+          locale: 'es',
+        })
+
+        const apiKey = await getApiKey()
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
+            collectionSlug: 'posts',
+            id: post.id,
+            data: {
+              _status: 'published',
+              title: 'Published English title',
+            },
+            draft: false,
+            locale: 'en',
+            publishAllLocales: false,
+          },
+          name: 'updateDocument',
+        })
+        const publishedPost = await payload.findByID({
+          id: post.id,
+          collection: 'posts',
+          draft: false,
+          locale: 'all',
+        })
+        const spanishDraft = await payload.findByID({
+          id: post.id,
+          collection: 'posts',
+          draft: true,
+          locale: 'es',
+        })
+
+        expect(callResponse).toBeDefined()
+        expect(publishedPost._status).toEqual({ en: 'published' })
+        expect(spanishDraft.title).toBe('Spanish draft title')
+        expect(spanishDraft._status).toBe('draft')
+      } finally {
+        await payload.delete({ collection: 'posts', id: post.id })
+      }
     })
 
     it('should call updateDocument with nullable union type field set to null', async ({ mcp }) => {
@@ -1837,7 +1925,7 @@ describe('@payloadcms/plugin-mcp', () => {
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
       const callResponse = await client.callTool({
-        arguments: { globalSlug: 'site-settings' },
+        arguments: { depth: 9, globalSlug: 'site-settings' },
         name: 'findGlobal',
       })
 
@@ -1947,7 +2035,7 @@ describe('@payloadcms/plugin-mcp', () => {
           data: {
             maintenanceMode: false,
             siteDescription: 'A test site for MCP global operations',
-            siteName: 'MCP Test Site',
+            siteName: 'MCP payloadAPI probe',
           },
         },
         name: 'updateGlobal',
