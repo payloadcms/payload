@@ -1,6 +1,7 @@
 import { definePlugin } from 'payload'
 import { deepMergeSimple } from 'payload/shared'
 
+import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { FormBuilderPluginConfig } from './types.js'
 
 import { generateFormCollection } from './collections/Forms/index.js'
@@ -16,10 +17,6 @@ export const formBuilderPlugin = definePlugin<FormBuilderPluginConfig>({
   plugin: ({ config, options: incomingFormConfig }) => {
     if (!config.i18n) {
       config.i18n = {}
-    }
-
-    if (!config.i18n?.translations) {
-      config.i18n.translations = {}
     }
 
     const formConfig: FormBuilderPluginConfig = {
@@ -51,6 +48,21 @@ export const formBuilderPlugin = definePlugin<FormBuilderPluginConfig>({
       )
     }
 
+    /**
+     * Merge plugin translations — only for languages the user has enabled.
+     * Plugins run before sanitize, so `supportedLanguages` may be undefined; sanitize will
+     * default it to `{ en }`, so we mirror that here to avoid merging 40+ unused tables.
+     */
+    const supportedLanguageKeys = config.i18n?.supportedLanguages
+      ? Object.keys(config.i18n.supportedLanguages)
+      : ['en']
+
+    const flattenedTranslations: Record<string, PluginDefaultTranslationsObject> = {}
+    for (const lang of supportedLanguageKeys) {
+      const entry = translations[lang as keyof typeof translations] ?? translations.en!
+      flattenedTranslations[lang] = entry.translations
+    }
+
     return {
       ...config,
       collections: [
@@ -60,7 +72,7 @@ export const formBuilderPlugin = definePlugin<FormBuilderPluginConfig>({
       ],
       i18n: {
         ...config.i18n,
-        translations: deepMergeSimple(translations, config.i18n?.translations ?? {}),
+        translations: deepMergeSimple(flattenedTranslations, config.i18n?.translations ?? {}),
       },
     }
   },

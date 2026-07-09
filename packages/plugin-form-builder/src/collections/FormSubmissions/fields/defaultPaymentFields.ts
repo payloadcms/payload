@@ -54,7 +54,7 @@ export const defaultPaymentFields: Field = {
           type: 'text',
           label: ({ t }) =>
             // @ts-expect-error - translations are not typed in plugins yet
-            t('plugin-form-builder:numberLabelSingular'),
+            t('plugin-form-builder:numberSingular'),
         },
       ],
       label: ({ t }) =>

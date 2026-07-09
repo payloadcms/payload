@@ -170,7 +170,7 @@ export const generateFormCollection = (
       type: 'text',
       label: ({ t }) =>
         // @ts-expect-error - translations are not typed in plugins yet
-        t('plugin-form-builder:submitButtonLabel'),
+        t('plugin-form-builder:submitButton'),
       localized: true,
     },
     {
