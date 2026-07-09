@@ -28,6 +28,12 @@ import type { Operator } from './constants.js'
 export type { TypeWithID } from '../collections/config/types.js'
 export type { Payload } from '../index.js'
 
+export interface PayloadRequestAPI {
+  GraphQL: true
+  local: true
+  REST: true
+}
+
 export type CustomPayloadRequestProperties = {
   context: RequestContext
   /** The locale that should be used for a field when it is not translated to the requested locale */
@@ -48,7 +54,7 @@ export type CustomPayloadRequestProperties = {
   /**
    * The context in which the request is being made
    */
-  payloadAPI: 'GraphQL' | 'local' | 'REST'
+  payloadAPI: keyof PayloadRequestAPI
   /** Optimized document loader */
   payloadDataLoader: {
     /**

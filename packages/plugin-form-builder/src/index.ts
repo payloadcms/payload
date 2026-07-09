@@ -1,4 +1,4 @@
-import type { Config } from 'payload'
+import { definePlugin } from 'payload'
 
 import type { FormBuilderPluginConfig } from './types.js'
 
@@ -8,9 +8,9 @@ import { generateSubmissionCollection } from './collections/FormSubmissions/inde
 export { fields } from './collections/Forms/fields.js'
 export { getPaymentTotal } from './utilities/getPaymentTotal.js'
 
-export const formBuilderPlugin =
-  (incomingFormConfig: FormBuilderPluginConfig) =>
-  (config: Config): Config => {
+export const formBuilderPlugin = definePlugin<FormBuilderPluginConfig>({
+  slug: '@payloadcms/plugin-form-builder',
+  plugin: ({ config, options: incomingFormConfig }) => {
     const formConfig: FormBuilderPluginConfig = {
       ...incomingFormConfig,
       fields: {
@@ -48,4 +48,5 @@ export const formBuilderPlugin =
         generateSubmissionCollection(formConfig),
       ],
     }
-  }
+  },
+})

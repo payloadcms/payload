@@ -222,6 +222,13 @@ export type LivePreviewConfig = {
     width: number | string
   }[]
   /**
+   * When `true`, Live Preview opens automatically the first time a user views a document,
+   * before they have manually toggled it on. Once the user toggles Live Preview on or off,
+   * their stored preference takes precedence and this setting is ignored.
+   * @default false
+   */
+  openByDefault?: boolean
+  /**
    * The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
    * Payload will send a `window.postMessage()` to this URL with the document data in real-time.
    * The frontend application is responsible for receiving the message and updating the UI accordingly.

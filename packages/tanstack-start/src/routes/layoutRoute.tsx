@@ -60,5 +60,11 @@ export function payloadLayoutRoute({
     )
   }
 
-  return { component: PayloadLayout, loader: () => load() }
+  // `staleReloadMode` lives on the loader *object* — router-core only reads it
+  // off a non-function loader — so stale-match revalidation blocks on the fresh
+  // loader instead of flashing stale layout data via the default background SWR.
+  return {
+    component: PayloadLayout,
+    loader: { handler: () => load(), staleReloadMode: 'blocking' },
+  }
 }

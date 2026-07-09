@@ -622,6 +622,7 @@ export const traverseFields = ({
 
       case 'code':
       case 'email':
+      case 'slug':
       case 'textarea': {
         targetTable[fieldName] = withDefault(
           {

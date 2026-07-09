@@ -26,7 +26,7 @@ type Args = {
   tenantsCollectionSlug: string
   useAsTitle: string
   user?: User
-  userHasAccessToAllTenants: Required<MultiTenantPluginConfig<any>>['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
   view: ViewTypes
 }
 export async function getGlobalViewRedirect({

@@ -5,21 +5,19 @@ import type { AllAccessKeys, MultiTenantPluginConfig, UserWithTenantsField } fro
 import { combineWhereConstraints } from './combineWhereConstraints.js'
 import { getTenantAccess } from './getTenantAccess.js'
 
-type Args<ConfigType> = {
+type Args = {
   accessFunction?: Access
   accessKey: AllAccessKeys[number]
-  accessResultCallback?: MultiTenantPluginConfig<ConfigType>['usersAccessResultOverride']
+  accessResultCallback?: MultiTenantPluginConfig['usersAccessResultOverride']
   adminUsersSlug: string
   collection: CollectionConfig
   fieldName: string
   tenantsArrayFieldName?: string
   tenantsArrayTenantFieldName?: string
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }
 export const withTenantAccess =
-  <ConfigType>({
+  ({
     accessFunction,
     accessKey,
     accessResultCallback,
@@ -29,7 +27,7 @@ export const withTenantAccess =
     tenantsArrayFieldName,
     tenantsArrayTenantFieldName,
     userHasAccessToAllTenants,
-  }: Args<ConfigType>) =>
+  }: Args) =>
   async (args: AccessArgs): Promise<AccessResult> => {
     const constraints: Where[] = []
     const accessFn =
@@ -55,9 +53,7 @@ export const withTenantAccess =
     if (
       args.req.user &&
       args.req.user.collection === adminUsersSlug &&
-      !userHasAccessToAllTenants(
-        args.req.user as ConfigType extends { user: unknown } ? ConfigType['user'] : User,
-      )
+      !userHasAccessToAllTenants(args.req.user as User)
     ) {
       const tenantConstraint = getTenantAccess({
         fieldName,

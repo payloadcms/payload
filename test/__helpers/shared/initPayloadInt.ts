@@ -16,6 +16,7 @@ export async function initPayloadInt<TInitializePayload extends boolean | undefi
   testSuiteNameOverride?: string,
   initializePayload?: TInitializePayload,
   configFile?: string,
+  options?: { payloadKey?: string },
 ): Promise<
   TInitializePayload extends false
     ? { config: SanitizedConfig }
@@ -37,7 +38,7 @@ export async function initPayloadInt<TInitializePayload extends boolean | undefi
 
   console.log('starting payload')
 
-  const payload = await getPayload({ config, cron: true })
+  const payload = await getPayload({ config, cron: true, key: options?.payloadKey })
   console.log('initializing rest client')
   const restClient = new NextRESTClient(payload.config)
   console.log('initPayloadInt done')
