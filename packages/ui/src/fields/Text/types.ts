@@ -1,4 +1,4 @@
-import type { StaticDescription, StaticLabel } from 'payload'
+import type { BrowserAutoComplete, StaticDescription, StaticLabel } from 'payload'
 import type { ChangeEvent, JSX } from 'react'
 import type React from 'react'
 
@@ -23,7 +23,7 @@ export type TextInputProps = {
   readonly Error?: React.ReactNode
   readonly htmlAttributes?: {
     'aria-label'?: JSX.IntrinsicElements['input']['aria-label']
-    autoComplete?: JSX.IntrinsicElements['input']['autoComplete']
+    autoComplete?: BrowserAutoComplete
     readOnly?: JSX.IntrinsicElements['input']['readOnly']
   }
   /**

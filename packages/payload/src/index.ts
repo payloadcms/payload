@@ -1639,6 +1639,7 @@ export type {
   BlockJSX,
   BlocksField,
   BlocksFieldClient,
+  BrowserAutoComplete,
   CheckboxField,
   CheckboxFieldClient,
   ClientBlock,
