@@ -108,7 +108,6 @@
     "jwt-decode": "4.0.0",
     "mongoose": "8.22.1",
     "next": "16.2.7",
-    "nitro": "3.0.260311-beta",
     "nodemailer": "^8.0.5",
     "object-to-formdata": "4.5.1",
     "payload": "workspace:*",
