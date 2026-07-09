@@ -1,29 +1,18 @@
-import type { CollectionConfig, TextField } from 'payload'
-
-import { slugField } from 'payload'
+import type { CollectionConfig } from 'payload'
 
 import { slugFieldsSlug } from '../../slugs.js'
 
 const SlugFields: CollectionConfig = {
   slug: slugFieldsSlug,
   fields: [
+    { name: 'title', type: 'text', label: 'Title', defaultValue: 'Example Title' },
     {
-      name: 'title',
-      type: 'text',
-      label: 'Title',
-      defaultValue: 'Example Title',
+      name: 'slug',
+      type: 'slug',
+      label: 'Default Slug',
+      useAsSlug: 'title',
+      admin: { description: 'This is the default slug field' },
     },
-    slugField({
-      overrides: (field) => {
-        const textField = field.fields[1] as TextField
-        textField.label = 'Default Slug'
-        textField.admin = {
-          ...textField.admin,
-          description: 'This is the default slug field',
-        }
-        return field
-      },
-    }),
     {
       name: 'requiredTitle',
       type: 'text',
@@ -31,47 +20,32 @@ const SlugFields: CollectionConfig = {
       required: true,
       defaultValue: 'Required Example Title',
     },
-    slugField({
+    {
       name: 'requiredSlug',
-      useAsSlug: 'requiredTitle',
-      checkboxName: 'generateRequiredSlug',
+      type: 'slug',
+      label: 'Required Slug',
       required: true,
-      overrides: (field) => {
-        const textField = field.fields[1] as TextField
-        textField.label = 'Required Slug'
-        return field
-      },
-    }),
+      useAsSlug: 'requiredTitle',
+    },
     {
       name: 'readOnlyTitle',
       type: 'text',
       label: 'Read Only Title',
       defaultValue: 'Read Only Title Value',
-      admin: {
-        readOnly: true,
-      },
+      admin: { readOnly: true },
     },
-    slugField({
+    {
       name: 'readOnlySlug',
+      type: 'slug',
+      label: 'Read Only Slug',
+      defaultValue: 'read-only-slug-value',
       useAsSlug: 'readOnlyTitle',
-      checkboxName: 'generateReadOnlySlug',
-      overrides: (field) => {
-        const textField = field.fields[1] as TextField
-        textField.label = 'Read Only Slug'
-        textField.defaultValue = 'read-only-slug-value'
-        textField.admin = {
-          ...textField.admin,
-          readOnly: true,
-        }
-        return field
-      },
-    }),
+      admin: { readOnly: true },
+    },
     {
       type: 'collapsible',
       label: 'More Slug Examples',
-      admin: {
-        initCollapsed: false,
-      },
+      admin: { initCollapsed: false },
       fields: [
         {
           name: 'longTitle',
@@ -79,64 +53,44 @@ const SlugFields: CollectionConfig = {
           label: 'Long Title',
           defaultValue: 'This is a very long title that should generate a very long slug value',
         },
-        slugField({
+        {
           name: 'longSlug',
+          type: 'slug',
+          label: 'Long Slug (tests text overflow)',
           useAsSlug: 'longTitle',
-          checkboxName: 'generateLongSlug',
-          overrides: (field) => {
-            const textField = field.fields[1] as TextField
-            textField.label = 'Long Slug (tests text overflow)'
-            textField.admin = {
-              ...textField.admin,
-              description: 'This slug has a long value to test text-overflow behavior',
-            }
-            return field
-          },
-        }),
+          admin: { description: 'This slug has a long value to test text-overflow behavior' },
+        },
         {
           name: 'placeholderTitle',
           type: 'text',
           label: 'Placeholder Title',
           defaultValue: 'Placeholder Example Title',
         },
-        slugField({
+        {
           name: 'placeholderSlug',
+          type: 'slug',
+          label: 'Slug with Placeholder',
           useAsSlug: 'placeholderTitle',
-          checkboxName: 'generatePlaceholderSlug',
-          overrides: (field) => {
-            const textField = field.fields[1] as TextField
-            textField.label = 'Slug with Placeholder'
-            textField.admin = {
-              ...textField.admin,
-              placeholder: 'enter-a-slug-here',
-            }
-            return field
-          },
-        }),
+          admin: { placeholder: 'enter-a-slug-here' },
+        },
         {
           name: 'lockedTitle',
           type: 'text',
           label: 'Locked Title',
           defaultValue: 'Locked Example',
         },
-        slugField({
+        {
           name: 'lockedSlug',
+          type: 'slug',
+          label: 'Locked Slug (default state)',
+          defaultValue: 'locked-example',
           useAsSlug: 'lockedTitle',
-          checkboxName: 'generateLockedSlug',
-          overrides: (field) => {
-            const textField = field.fields[1] as TextField
-            textField.label = 'Locked Slug (default state)'
-            textField.defaultValue = 'locked-example'
-            textField.admin = {
-              ...textField.admin,
-              description: 'This slug starts with a value to show the locked state',
-            }
-            return field
-          },
-        }),
+          admin: { description: 'This slug starts with a value to show the locked state' },
+        },
       ],
     },
   ],
+  versions: false,
 }
 
 export default SlugFields

@@ -16,9 +16,10 @@ export type FailedCodegenAssertion = {
   category: string
   changeDescription?: string
   confidence: number
-  fixturePath: string
+  configPath: string
   label: string
   modifiedConfig: string
+  paramsHash: string
   question: string
   reasoning: string
   starterConfig: string
@@ -28,6 +29,6 @@ export type FailedCodegenAssertion = {
 export function writeFailedCodegenAssertion(data: FailedCodegenAssertion): void {
   const dir = path.join(evalResultsDir, labelToSlug(data.label))
   mkdirSync(dir, { recursive: true })
-  const fileName = `${path.basename(data.fixturePath)}.json`
+  const fileName = `${data.paramsHash}.json`
   writeFileSync(path.join(dir, fileName), JSON.stringify(data, null, 2), 'utf-8')
 }

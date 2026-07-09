@@ -5,6 +5,8 @@ import fs from 'fs'
 import path from 'path'
 import { wait } from 'payload/shared'
 
+import { installTanStackHydrationGotoWait } from '../../__helpers/e2e/helpers.js'
+
 export type PasteMode = 'blob' | 'html'
 
 function inferMimeFromExt(ext: string): string {
@@ -34,6 +36,7 @@ export class LexicalHelpers {
   page: Page
   constructor(page: Page) {
     this.page = page
+    installTanStackHydrationGotoWait(page)
   }
 
   async addLine(
@@ -248,6 +251,10 @@ export class LexicalHelpers {
     if (expectMenuToClose) {
       await expect(slashMenuPopover).toBeHidden()
     }
+  }
+
+  get bulkUploadDrawer() {
+    return this.page.locator('.bulk-upload--file-manager')
   }
 
   get decorator() {

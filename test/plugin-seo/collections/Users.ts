@@ -16,4 +16,5 @@ export const Users: CollectionConfig = {
       label: 'Custom Email',
     },
   ],
+  versions: false,
 }

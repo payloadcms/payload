@@ -5,27 +5,18 @@ import React, { useMemo, useState } from 'react'
 import type { TranscriptEvent } from '../../types.js'
 import type { Variant } from '../../variant.js'
 import type { RenderedCode } from './codeDiff.js'
-import type { EvalEntry, RunSnapshot } from './index.js'
+import type { RunGroup } from './configuration.js'
+import type { EvalEntry } from './index.js'
 
 import { getVariant as getVariantFromResult } from '../../variant.js'
 import { CompareTable } from './CompareTable.js'
+import { formatLocalTimestamp, getConfiguration, groupByRun, runKeyOf } from './configuration.js'
+import { RunsOverview } from './RunsOverview.js'
 
 export type { Variant }
 
 export function getVariant(entry: EvalEntry): null | Variant {
   return getVariantFromResult(entry.result)
-}
-
-type VariantFilter = 'all' | Variant
-
-function getVariantLabel(variant: Variant): string {
-  const labels: Record<Variant, string> = {
-    'agent-baseline': 'Agent Baseline',
-    'agent-skill': 'Agent Skill',
-    baseline: 'Baseline',
-    skill: 'Skill',
-  }
-  return labels[variant]
 }
 
 function VariantBadge({ variant }: { variant: null | Variant }) {
@@ -68,14 +59,33 @@ function VariantBadge({ variant }: { variant: null | Variant }) {
   )
 }
 
+function ModelBadge({ entry }: { entry: EvalEntry }) {
+  const { model } = getConfiguration(entry.result)
+  return (
+    <span
+      style={{
+        color: 'var(--theme-elevation-600)',
+        display: 'inline-block',
+        fontFamily: 'var(--font-mono, monospace)',
+        fontSize: '0.72rem',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        whiteSpace: 'nowrap',
+      }}
+      title={entry.result.modelId ?? undefined}
+    >
+      {model}
+    </span>
+  )
+}
+
 type Props = {
   adminRoute: string
   codegenHtml?: Record<string, RenderedCode>
   entries: EvalEntry[]
-  runs?: RunSnapshot[]
 }
 
-type ViewMode = 'compare' | 'list'
+type ViewMode = 'compare' | 'list' | 'overview'
 
 type FilterStatus = 'all' | 'fail' | 'pass'
 type FilterType = 'all' | 'codegen'
@@ -166,13 +176,13 @@ function TokenDisplay({
   if (!total) {
     return <span style={{ color: 'var(--theme-elevation-400)', fontSize: '0.75rem' }}>—</span>
   }
-  const cachedRatio = total.inputTokens > 0 ? total.cachedInputTokens / total.inputTokens : 0
+  const promptCacheRatio = total.inputTokens > 0 ? total.cachedInputTokens / total.inputTokens : 0
   return (
     <span
       style={{ color: 'var(--theme-elevation-600)', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
     >
       {total.totalTokens.toLocaleString()}
-      {cachedRatio > 0 && (
+      {promptCacheRatio > 0 && (
         <span
           style={{
             background: 'var(--theme-success-100)',
@@ -182,9 +192,9 @@ function TokenDisplay({
             marginLeft: '4px',
             padding: '1px 4px',
           }}
-          title={`${total.cachedInputTokens} tokens served from cache`}
+          title={`${total.cachedInputTokens} tokens served from the model prompt cache`}
         >
-          {Math.round(cachedRatio * 100)}% cached
+          {Math.round(promptCacheRatio * 100)}% prompt-cached
         </span>
       )}
     </span>
@@ -565,7 +575,7 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
               {result.usage.total.cachedInputTokens > 0 && (
                 <span style={{ color: 'var(--theme-success-600)', fontWeight: 400 }}>
                   {' '}
-                  ({result.usage.total.cachedInputTokens.toLocaleString()} from cache)
+                  ({result.usage.total.cachedInputTokens.toLocaleString()} from prompt cache)
                 </span>
               )}
             </span>
@@ -573,15 +583,16 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
         </div>
       )}
 
-      {/* Cached at */}
       <div style={{ color: 'var(--theme-elevation-400)', fontSize: '0.7rem', marginTop: '4px' }}>
-        Cached {new Date(entry.createdAt).toLocaleString()} · hash {entry.hash.slice(0, 12)}…
+        Recorded {formatLocalTimestamp(entry.createdAt)} · parameters{' '}
+        {entry.paramsHash.slice(0, 12)}…
+        {entry.reusedFromRunId && ' · skipped — identical parameters'}
       </div>
     </div>
   )
 }
 
-type SortKey = 'category' | 'question' | 'result' | 'tokens' | 'type' | 'variant'
+type SortKey = 'category' | 'model' | 'question' | 'result' | 'tokens' | 'type' | 'variant'
 type SortDir = 'asc' | 'desc'
 
 function cycleSort(current: null | SortDir): null | SortDir {
@@ -594,12 +605,12 @@ function cycleSort(current: null | SortDir): null | SortDir {
   return null
 }
 
-export function ResultsTable({ codegenHtml, entries, runs }: Props) {
-  const [viewMode, setViewMode] = useState<ViewMode>('list')
-  const [compareMode, setCompareMode] = useState<'run' | 'variant'>('variant')
+export function ResultsTable({ codegenHtml, entries }: Props) {
+  const [viewMode, setViewMode] = useState<ViewMode>('overview')
+  const [compareMode, setCompareMode] = useState<'run' | 'variant'>('run')
   const [statusFilter, setStatusFilter] = useState<FilterStatus>('all')
   const [typeFilter, setTypeFilter] = useState<FilterType>('all')
-  const [variantFilter, setVariantFilter] = useState<VariantFilter>('all')
+  const [selectedRunKey, setSelectedRunKey] = useState<string>('all')
   const [categoryFilter, setCategoryFilter] = useState<string>('all')
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set())
   const [hoveredHash, setHoveredHash] = useState<null | string>(null)
@@ -611,16 +622,20 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
     [entries],
   )
 
-  const variantOptions = useMemo<VariantFilter[]>(() => {
-    const seen = new Set<Variant>()
-    for (const e of entries) {
-      const v = getVariant(e)
-      if (v) {
-        seen.add(v)
-      }
+  const runGroups = useMemo<RunGroup[]>(() => groupByRun(entries), [entries])
+
+  const selectRun = (key: string) => {
+    setSelectedRunKey(key)
+    setViewMode('list')
+  }
+
+  const selectedRunLabel = useMemo(() => {
+    const run = runGroups.find((r) => r.key === selectedRunKey)
+    if (!run) {
+      return null
     }
-    return ['all', ...Array.from(seen).sort()]
-  }, [entries])
+    return `${run.config.label} · ${formatLocalTimestamp(run.timestamp)}`
+  }, [runGroups, selectedRunKey])
 
   const handleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -657,7 +672,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
       if (typeFilter !== 'all' && e.type !== typeFilter) {
         return false
       }
-      if (variantFilter !== 'all' && getVariant(e) !== variantFilter) {
+      if (selectedRunKey !== 'all' && runKeyOf(e.result) !== selectedRunKey) {
         return false
       }
       if (categoryFilter !== 'all' && e.category !== categoryFilter) {
@@ -686,6 +701,9 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
       } else if (sortKey === 'variant') {
         aVal = getVariant(a) ?? ''
         bVal = getVariant(b) ?? ''
+      } else if (sortKey === 'model') {
+        aVal = (a.result.modelId ?? '').toLowerCase()
+        bVal = (b.result.modelId ?? '').toLowerCase()
       } else if (sortKey === 'result') {
         aVal = a.result.pass ? 'pass' : 'fail'
         bVal = b.result.pass ? 'pass' : 'fail'
@@ -696,7 +714,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
       }
       return aVal < bVal ? -dir : aVal > bVal ? dir : 0
     })
-  }, [entries, statusFilter, typeFilter, categoryFilter, variantFilter, sortKey, sortDir])
+  }, [entries, statusFilter, typeFilter, categoryFilter, selectedRunKey, sortKey, sortDir])
 
   // Summary stats from filtered set
   const stats = useMemo(() => {
@@ -707,21 +725,21 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
         ? scored.reduce((s, e) => s + (e.result.score ?? 0), 0) / scored.length
         : null
     const totalTokens = filtered.reduce((s, e) => s + (e.result.usage?.total.totalTokens ?? 0), 0)
-    const totalCached = filtered.reduce(
+    const totalPromptCached = filtered.reduce(
       (s, e) => s + (e.result.usage?.total.cachedInputTokens ?? 0),
       0,
     )
     const totalInput = filtered.reduce((s, e) => s + (e.result.usage?.total.inputTokens ?? 0), 0)
-    return { avgScore, passed, totalCached, totalInput, totalTokens }
+    return { avgScore, passed, totalInput, totalPromptCached, totalTokens }
   }, [filtered])
 
-  const toggleExpand = (hash: string) => {
+  const toggleExpand = (id: string) => {
     setExpanded((prev) => {
       const next = new Set(prev)
-      if (next.has(hash)) {
-        next.delete(hash)
+      if (next.has(id)) {
+        next.delete(id)
       } else {
-        next.add(hash)
+        next.add(id)
       }
       return next
     })
@@ -739,8 +757,8 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
   })
 
   const passRate = filtered.length > 0 ? Math.round((stats.passed / filtered.length) * 100) : 0
-  const cachedRatio =
-    stats.totalInput > 0 ? Math.round((stats.totalCached / stats.totalInput) * 100) : 0
+  const promptCacheRatio =
+    stats.totalInput > 0 ? Math.round((stats.totalPromptCached / stats.totalInput) * 100) : 0
 
   const viewBtnStyle = (active: boolean): React.CSSProperties => ({
     background: active ? 'var(--theme-elevation-900)' : 'transparent',
@@ -759,11 +777,18 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
       <div style={{ alignItems: 'center', display: 'flex', justifyContent: 'space-between' }}>
         <div style={{ alignItems: 'center', display: 'flex', gap: '6px' }}>
           <button
+            onClick={() => setViewMode('overview')}
+            style={viewBtnStyle(viewMode === 'overview')}
+            type="button"
+          >
+            Overview
+          </button>
+          <button
             onClick={() => setViewMode('list')}
             style={viewBtnStyle(viewMode === 'list')}
             type="button"
           >
-            All Results
+            Results
           </button>
           <button
             onClick={() => setViewMode('compare')}
@@ -775,51 +800,57 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
             }}
             type="button"
           >
-            Compare Results
+            Compare
           </button>
         </div>
 
         {viewMode === 'compare' && (
           <div style={{ alignItems: 'center', display: 'flex', gap: '6px' }}>
             <button
-              onClick={() => setCompareMode('variant')}
-              style={viewBtnStyle(compareMode === 'variant')}
-              type="button"
-            >
-              Variant Comparison
-            </button>
-            <button
               onClick={() => setCompareMode('run')}
               style={viewBtnStyle(compareMode === 'run')}
               type="button"
             >
-              Run Comparison
-              {runs && runs.length > 0 && (
-                <span
-                  style={{
-                    color: 'var(--theme-elevation-400)',
-                    fontSize: '0.72rem',
-                    marginLeft: '5px',
-                  }}
-                >
-                  ({runs.length})
-                </span>
-              )}
+              By category
+            </button>
+            <button
+              onClick={() => setCompareMode('variant')}
+              style={viewBtnStyle(compareMode === 'variant')}
+              type="button"
+            >
+              By case
             </button>
           </div>
         )}
       </div>
 
+      {viewMode === 'overview' && <RunsOverview onSelect={selectRun} runs={runGroups} />}
       {viewMode === 'compare' && (
         <CompareTable
           compareMode={compareMode}
           entries={entries}
           onCompareModeChange={setCompareMode}
-          runs={runs}
+          runGroups={runGroups}
         />
       )}
       {viewMode === 'list' && (
         <>
+          {selectedRunKey === 'all' && runGroups.length > 1 && (
+            <div
+              style={{
+                background: 'rgba(232,168,56,0.12)',
+                border: '1px solid var(--color-warning-300, rgba(232,168,56,0.4))',
+                borderRadius: 'var(--style-radius-m)',
+                color: 'var(--color-warning-700, #8a5d0c)',
+                fontSize: '0.8rem',
+                padding: '8px 12px',
+              }}
+            >
+              ⚠ Showing <strong>all {runGroups.length} runs</strong> — these stats mix different
+              runs, models, and skill settings and aren&apos;t directly comparable. Pick a single
+              run above (or from the Overview tab) for meaningful numbers.
+            </div>
+          )}
           {/* Summary strip */}
           <div
             style={{
@@ -847,9 +878,9 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
                 value: stats.totalTokens > 0 ? stats.totalTokens.toLocaleString() : '—',
               },
               {
-                color: cachedRatio > 0 ? 'var(--theme-success-600)' : undefined,
-                label: 'Cache Hit',
-                value: cachedRatio > 0 ? `${cachedRatio}%` : '—',
+                color: promptCacheRatio > 0 ? 'var(--theme-success-600)' : undefined,
+                label: 'Prompt Cache',
+                value: promptCacheRatio > 0 ? `${promptCacheRatio}%` : '—',
               },
             ].map(({ color, label, value }, i, arr) => (
               <div
@@ -886,6 +917,13 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
               </div>
             ))}
           </div>
+
+          {selectedRunKey !== 'all' && selectedRunLabel && (
+            <p style={{ color: 'var(--theme-elevation-500)', fontSize: '0.78rem', margin: 0 }}>
+              Showing run <strong>{selectedRunLabel}</strong> — the exact cases from this single
+              invocation.
+            </p>
+          )}
 
           {/* Filters */}
           <div
@@ -944,21 +982,38 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
               }}
             />
 
-            <div style={{ display: 'flex', gap: '4px' }}>
-              {variantOptions.map((v) => {
-                const isActive = variantFilter === v
-                return (
-                  <button
-                    key={v}
-                    onClick={() => setVariantFilter(v)}
-                    style={filterBtnStyle(isActive)}
-                    type="button"
-                  >
-                    {v === 'all' ? 'All' : getVariantLabel(v)}
-                  </button>
-                )
-              })}
-            </div>
+            <label
+              style={{
+                alignItems: 'center',
+                color: 'var(--theme-elevation-600)',
+                display: 'flex',
+                fontSize: '0.8rem',
+                gap: '6px',
+              }}
+            >
+              Run
+              <select
+                onChange={(e) => setSelectedRunKey(e.target.value)}
+                style={{
+                  background: 'var(--theme-elevation-0)',
+                  border: '1px solid var(--theme-elevation-200)',
+                  borderRadius: '4px',
+                  color: 'var(--theme-elevation-700)',
+                  cursor: 'pointer',
+                  fontSize: '0.8rem',
+                  maxWidth: '360px',
+                  padding: '4px 10px',
+                }}
+                value={selectedRunKey}
+              >
+                <option value="all">All runs (mixed)</option>
+                {runGroups.map((run) => (
+                  <option key={run.key} value={run.key}>
+                    {run.config.label} · {formatLocalTimestamp(run.timestamp)}
+                  </option>
+                ))}
+              </select>
+            </label>
 
             <span
               aria-hidden="true"
@@ -1009,38 +1064,44 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
                 fontSize: '0.7rem',
                 fontWeight: 700,
                 gap: '0 12px',
-                gridTemplateColumns: '1fr 100px 70px 80px 100px 100px 32px',
+                gridTemplateColumns: '1fr 100px 70px 80px 120px 100px 100px 32px',
                 letterSpacing: '0.05em',
                 padding: '8px 12px',
                 textTransform: 'uppercase',
               }}
             >
-              {(['question', 'category', 'type', 'variant', 'result', 'tokens'] as SortKey[]).map(
-                (key) => (
-                  <span
-                    key={key}
-                    onClick={() => handleSort(key)}
-                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSort(key)}
-                    role="button"
-                    style={{
-                      alignItems: 'center',
-                      color:
-                        sortKey === key
-                          ? 'var(--theme-elevation-800)'
-                          : 'var(--theme-elevation-500)',
-                      cursor: 'pointer',
-                      display: 'inline-flex',
-                      userSelect: 'none',
-                    }}
-                    tabIndex={0}
-                  >
-                    {key === 'question'
-                      ? 'Question / Task'
-                      : key.charAt(0).toUpperCase() + key.slice(1)}
-                    {sortIndicator(key)}
-                  </span>
-                ),
-              )}
+              {(
+                [
+                  'question',
+                  'category',
+                  'type',
+                  'variant',
+                  'model',
+                  'result',
+                  'tokens',
+                ] as SortKey[]
+              ).map((key) => (
+                <span
+                  key={key}
+                  onClick={() => handleSort(key)}
+                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleSort(key)}
+                  role="button"
+                  style={{
+                    alignItems: 'center',
+                    color:
+                      sortKey === key ? 'var(--theme-elevation-800)' : 'var(--theme-elevation-500)',
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    userSelect: 'none',
+                  }}
+                  tabIndex={0}
+                >
+                  {key === 'question'
+                    ? 'Question / Task'
+                    : key.charAt(0).toUpperCase() + key.slice(1)}
+                  {sortIndicator(key)}
+                </span>
+              ))}
               <span />
             </div>
 
@@ -1057,7 +1118,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
               </div>
             ) : (
               filtered.map((entry, i) => {
-                const isExpanded = expanded.has(entry.hash)
+                const isExpanded = expanded.has(entry.id)
                 const isLast = i === filtered.length - 1
                 const shortQuestion =
                   entry.result.question.length > 90
@@ -1066,30 +1127,30 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
 
                 return (
                   <div
-                    key={entry.hash}
+                    key={entry.id}
                     style={{
                       borderBottom: isLast ? undefined : '1px solid var(--theme-elevation-100)',
                     }}
                   >
                     <div
-                      onClick={() => toggleExpand(entry.hash)}
+                      onClick={() => toggleExpand(entry.id)}
                       onKeyDown={(e) =>
-                        (e.key === 'Enter' || e.key === ' ') && toggleExpand(entry.hash)
+                        (e.key === 'Enter' || e.key === ' ') && toggleExpand(entry.id)
                       }
-                      onMouseEnter={() => !isExpanded && setHoveredHash(entry.hash)}
+                      onMouseEnter={() => !isExpanded && setHoveredHash(entry.id)}
                       onMouseLeave={() => setHoveredHash(null)}
                       role="button"
                       style={{
                         alignItems: 'center',
                         background: isExpanded
                           ? 'var(--theme-elevation-50)'
-                          : hoveredHash === entry.hash
+                          : hoveredHash === entry.id
                             ? 'var(--theme-elevation-100)'
                             : undefined,
                         cursor: 'pointer',
                         display: 'grid',
                         gap: '0 12px',
-                        gridTemplateColumns: '1fr 100px 70px 80px 100px 100px 32px',
+                        gridTemplateColumns: '1fr 100px 70px 80px 120px 100px 100px 32px',
                         padding: '10px 12px',
                         transition: 'background 0.1s',
                       }}
@@ -1116,6 +1177,9 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
                       <span>
                         <VariantBadge variant={getVariant(entry)} />
                       </span>
+                      <span style={{ minWidth: 0 }}>
+                        <ModelBadge entry={entry} />
+                      </span>
                       <span>
                         <ScoreBadge
                           pass={entry.result.pass}
@@ -1137,9 +1201,7 @@ export function ResultsTable({ codegenHtml, entries, runs }: Props) {
                       </span>
                     </div>
 
-                    {isExpanded && (
-                      <ExpandedRow entry={entry} rendered={codegenHtml?.[entry.hash]} />
-                    )}
+                    {isExpanded && <ExpandedRow entry={entry} rendered={codegenHtml?.[entry.id]} />}
                   </div>
                 )
               })

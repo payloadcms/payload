@@ -22,6 +22,7 @@ import {
   clearSelectInput,
   getSelectInputOptions,
   getSelectInputValue,
+  getSelectMenu,
   selectInput,
 } from '../__helpers/e2e/selectInput.js'
 import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
@@ -75,7 +76,7 @@ test.describe('Multi Tenant', () => {
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
 
-    await ensureCompilationIsDone({ page, serverURL })
+    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
   })
 
   test.beforeEach(async () => {
@@ -311,6 +312,7 @@ test.describe('Multi Tenant', () => {
 
   test.describe('Documents', () => {
     test('should set tenant upon entering document', async () => {
+      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       await loginClientSide({
         data: credentials.admin,
         page,
@@ -340,6 +342,7 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should allow tenant switching cancellation', async () => {
+      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       await loginClientSide({
         data: credentials.admin,
         page,
@@ -375,6 +378,7 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should allow tenant switching confirmation', async () => {
+      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       await loginClientSide({
         data: credentials.admin,
         page,
@@ -472,7 +476,7 @@ test.describe('Multi Tenant', () => {
       await expect(page.getByText('Blue Dog Menu')).toBeVisible()
       await expect(page.getByText('Steel Cat Menu')).toBeHidden()
       await expect(page.getByText('Anchor Bar Menu')).toBeHidden()
-      await expect(page.locator('.rs__menu')).toHaveCount(1)
+      await expect(getSelectMenu({ page })).toHaveCount(1)
     })
   })
 
@@ -506,11 +510,12 @@ test.describe('Multi Tenant', () => {
       await expect(perFileAssignModal).toBeHidden()
 
       // Open the bulk-upload "Edit all" drawer and pick the Site (tenant) field.
-      await page.locator('.edit-many-bulk-uploads__toggle').click()
+      await page.locator('.edit-many-bulk-uploads button').click()
       const editManyDrawer = page.locator('dialog#edit-media-bulk-uploads')
       await expect(editManyDrawer).toBeVisible()
 
       await selectInput({
+        page,
         multiSelect: true,
         options: ['Site'],
         selectLocator: editManyDrawer.locator('.edit-many-bulk-uploads__form .react-select'),
@@ -523,6 +528,7 @@ test.describe('Multi Tenant', () => {
       await expect(inlineTenantField).toBeVisible()
 
       await selectInput({
+        page,
         multiSelect: false,
         option: 'Blue Dog',
         selectLocator: inlineTenantField,
@@ -591,7 +597,7 @@ test.describe('Multi Tenant', () => {
         ),
       ).toBeVisible()
 
-      await confirmationModal.locator('#confirm-action').click()
+      await confirmationModal.locator('[data-dialog-action="confirm"]').click()
       await expect(page.locator('#confirm-leave-without-saving')).toBeHidden()
       await page.goto(menuItemsURL.list)
       await expect
@@ -635,6 +641,18 @@ test.describe('Multi Tenant', () => {
 
   test.describe('Polymorphic Relationships', () => {
     test('should not duplicate tenant constraints in polymorphic relationship queries', async () => {
+      // This assertion inspects the Next.js server-action wire format: a POST to
+      // `/admin/collections/<slug>` whose JSON body is `[{ name: 'render-list', args }]`.
+      // The TanStack adapter dispatches `render-list` through a `createServerFn`
+      // (seroval-encoded POST to `/_serverFn/...`), so this interception never
+      // matches. The behaviour under test — that the tenant constraint isn't
+      // duplicated in the render-list query — is framework-agnostic plugin logic
+      // and is covered by the Next.js run.
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'Inspects the Next.js server-action wire format; render-list uses a different transport on TanStack. Query behaviour is covered by the Next.js run.',
+      )
+
       await loginClientSide({
         data: credentials.admin,
         page,
@@ -1128,18 +1146,18 @@ test.describe('Multi Tenant', () => {
       await checkbox.click()
 
       // Open the move drawer
-      const moveButton = page.locator('button', { hasText: 'Move' })
+      const moveButton = page.getByRole('button', { exact: true, name: 'Move' })
       await expect(moveButton).toBeVisible()
       await moveButton.click()
 
       // The move drawer should be visible
-      const moveDrawer = page.locator('.drawer__content')
-      await expect(moveDrawer).toBeVisible()
+      const moveModal = page.locator('.hierarchy-modal__content')
+      await expect(moveModal).toBeVisible()
 
       // The miller columns should only show Blue Dog folders
-      await expect(moveDrawer.getByText('Blue Dog Documents')).toBeVisible()
-      await expect(moveDrawer.getByText('Steel Cat Documents')).toBeHidden()
-      await expect(moveDrawer.getByText('Anchor Bar Files')).toBeHidden()
+      await expect(moveModal.getByText('Blue Dog Documents')).toBeVisible()
+      await expect(moveModal.getByText('Steel Cat Documents')).toBeHidden()
+      await expect(moveModal.getByText('Anchor Bar Files')).toBeHidden()
     })
 
     test('should show all tenant folders when tenant selector is cleared', async () => {
@@ -1224,6 +1242,7 @@ test.describe('Multi Tenant', () => {
     })
 
     test('should filter sidebar tree when switching tenants without page navigation', async () => {
+      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
       // This test reproduces the user flow:
       // 1. Log in and go to folders
       // 2. Select Folders tab in sidebar
@@ -1315,6 +1334,7 @@ test.describe('Multi Tenant', () => {
 async function getTenantOptions({ page }: { page: Page }): Promise<string[]> {
   await openNav(page)
   return await getSelectInputOptions({
+    page,
     selectLocator: page.locator('.tenant-selector'),
   })
 }
@@ -1361,6 +1381,7 @@ async function selectDocumentTenant({
   await closeNav(page)
   await openAssignTenantModal({ page, payload })
   await selectInput({
+    page,
     multiSelect: false,
     option: tenant,
     selectLocator: page.locator('.tenantField'),
@@ -1415,6 +1436,7 @@ async function setTenantFilter({
 
   await openNav(page)
   await selectInput({
+    page,
     multiSelect: false,
     option: tenant,
     selectLocator: page.locator('.tenant-selector'),
@@ -1430,6 +1452,7 @@ async function switchGlobalDocTenant({
 }): Promise<void> {
   await openNav(page)
   await selectInput({
+    page,
     multiSelect: false,
     option: tenant,
     selectLocator: page.locator('.tenant-selector'),

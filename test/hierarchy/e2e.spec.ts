@@ -152,6 +152,63 @@ test.describe('Hierarchy Sidebar', () => {
       // Child should be hidden
       await expect(tree.getByText('Engineering Division')).toBeHidden()
     })
+
+    test('should navigate tree via keyboard and load more with Enter without navigation', async () => {
+      const prefs = await payload.find({
+        collection: 'payload-preferences',
+        where: { key: { equals: 'hierarchy-tree-divisions' } },
+      })
+      for (const pref of prefs.docs) {
+        await payload.delete({ collection: 'payload-preferences', id: pref.id })
+      }
+
+      await page.goto(`${serverURL}/admin`)
+      await openNav(page)
+      await page.getByRole('tab', { name: 'Divisions' }).click()
+
+      const tree = page.getByRole('tree')
+      await expect(tree).toBeVisible()
+
+      const getActiveText = async () =>
+        page.evaluate(() => (document.activeElement?.textContent || '').trim())
+
+      const getActiveClass = async () =>
+        page.evaluate(() => (document.activeElement?.className || '').toString())
+
+      // Focus the first tree node, then close/open with arrows for deterministic keyboard flow
+      const alphaNode = tree.locator('.tree-node').first()
+      await expect(alphaNode).toBeVisible()
+      await alphaNode.focus()
+      await expect.poll(getActiveText).toContain('Alpha Division')
+      await page.keyboard.press('ArrowLeft')
+      await expect(alphaNode).toHaveAttribute('aria-expanded', 'false')
+
+      // Open Alpha Division with ArrowRight, then navigate vertically through its children
+      await page.keyboard.press('ArrowRight')
+      await expect(alphaNode).toHaveAttribute('aria-expanded', 'true')
+      await expect(tree.getByText('Alpha Child 1')).toBeVisible()
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Alpha Child 1')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Alpha Child 2')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Alpha Child 3')
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveClass).toContain('tree__load-more-button')
+
+      // Enter should load more children, not navigate
+      const urlBefore = page.url()
+      await page.keyboard.press('Enter')
+      await expect(page).toHaveURL(urlBefore)
+      await expect(tree.getByText('Alpha Child 4')).toBeVisible()
+      await expect
+        .poll(() => page.evaluate(() => document.activeElement?.getAttribute('aria-level')))
+        .toBe('2')
+
+      // Continue vertical navigation to the next root sibling after the newly loaded child
+      await page.keyboard.press('ArrowDown')
+      await expect.poll(getActiveText).toContain('Beta Division')
+    })
   })
 
   test.describe('Sidebar Tab Visibility', () => {
@@ -577,7 +634,7 @@ test.describe('Hierarchy Sidebar', () => {
     })
   })
 
-  test.describe('Column Drawer', () => {
+  test.describe('Column Modal', () => {
     let productsURL: AdminUrlUtil
     let parentFolder: { id: number | string }
     let childFolder: { id: number | string }
@@ -628,7 +685,7 @@ test.describe('Hierarchy Sidebar', () => {
       }
     })
 
-    test('should expand column drawer to show currently selected folder', async () => {
+    test('should expand column modal to show currently selected folder', async () => {
       // Navigate to the product edit page
       await page.goto(productsURL.edit(String(productWithFolder.id)))
 
@@ -641,15 +698,79 @@ test.describe('Hierarchy Sidebar', () => {
       await expect(folderButton).toBeVisible()
       await folderButton.click()
 
-      // The drawer should open and show columns expanded to the current selection:
+      // The modal should open and show columns expanded to the current selection:
       // Column 1 (root): Parent folder visible
       // Column 2 (Parent's children): Child folder visible (and selected)
-      const drawer = page.locator('.hierarchy-drawer')
-      await expect(drawer).toBeVisible()
+      const modal = page.locator('.hierarchy-modal')
+      await expect(modal).toBeVisible()
 
       // Both folders should be visible in their respective columns
-      await expect(drawer.getByRole('button', { name: parentFolderName })).toBeVisible()
-      await expect(drawer.getByRole('button', { name: childFolderName })).toBeVisible()
+      await expect(modal.getByRole('button', { name: parentFolderName })).toBeVisible()
+      await expect(modal.getByRole('button', { name: childFolderName })).toBeVisible()
+    })
+
+    test('should reset transient selections after canceling and reopening the modal', async () => {
+      await page.goto(productsURL.edit(String(productWithFolder.id)))
+
+      const folderButton = page.getByRole('button', { name: childFolderName })
+      await expect(folderButton).toBeVisible()
+
+      await folderButton.click()
+      const modal = page.locator('.hierarchy-modal')
+      await expect(modal).toBeVisible()
+
+      const parentFolderItem = modal
+        .locator('.hierarchy-column-item', { hasText: parentFolderName })
+        .first()
+      await parentFolderItem.locator('.hierarchy-column-item__checkbox').click()
+
+      await expect(
+        modal.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
+          hasText: parentFolderName,
+        }),
+      ).toBeVisible()
+
+      await modal.getByRole('button', { name: 'Cancel' }).click()
+      await expect(modal).toBeHidden()
+
+      await folderButton.click()
+      await expect(modal).toBeVisible()
+
+      await expect(
+        modal.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
+          hasText: childFolderName,
+        }),
+      ).toBeVisible()
+      await expect(
+        modal.locator('.hierarchy-column-item--selected .hierarchy-column-item__title', {
+          hasText: parentFolderName,
+        }),
+      ).toBeHidden()
+    })
+
+    test('should reset transient expanded location after canceling and reopening the modal', async () => {
+      await page.goto(productsURL.edit(String(productWithFolder.id)))
+
+      const folderButton = page.getByRole('button', { name: childFolderName })
+      await expect(folderButton).toBeVisible()
+
+      await folderButton.click()
+      const modal = page.locator('.hierarchy-modal')
+      await expect(modal).toBeVisible()
+
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
+
+      await modal.locator('.hierarchy-column-item', { hasText: childFolderName }).first().click()
+
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(3)
+
+      await modal.getByRole('button', { name: 'Cancel' }).click()
+      await expect(modal).toBeHidden()
+
+      await folderButton.click()
+      await expect(modal).toBeVisible()
+
+      await expect(modal.locator('.hierarchy-column')).toHaveCount(2)
     })
   })
 })

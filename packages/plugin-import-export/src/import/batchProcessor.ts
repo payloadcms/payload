@@ -1,4 +1,4 @@
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, User } from 'payload'
 
 import { isolateObjectProperty } from 'payload'
 
@@ -63,7 +63,7 @@ export interface ImportProcessOptions {
   req: PayloadRequest
   /** Total number of batches (pre-computed for hook args) */
   totalBatches?: number
-  user?: TypedUser
+  user?: User
 }
 
 /**
@@ -136,7 +136,7 @@ type ProcessImportBatchOptions = {
   matchField: string | undefined
   options: { batchSize: number; defaultVersionStatus: 'draft' | 'published' }
   req: PayloadRequest
-  user?: TypedUser
+  user?: User
 }
 
 /**

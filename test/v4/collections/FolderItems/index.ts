@@ -18,6 +18,7 @@ const FolderItems: CollectionConfig = {
     },
     createFolderField({ relationTo: foldersSlug }),
   ],
+  versions: false,
 }
 
 export default FolderItems

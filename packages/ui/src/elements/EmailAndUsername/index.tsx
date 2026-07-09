@@ -8,8 +8,8 @@ import React from 'react'
 
 import { EmailField } from '../../fields/Email/index.js'
 import { TextField } from '../../fields/Text/index.js'
-import './index.scss'
 import { FieldPathContext } from '../../forms/RenderFields/context.js'
+import './index.css'
 
 const baseClass = 'login-fields'
 type RenderEmailAndUsernameFieldsProps = {

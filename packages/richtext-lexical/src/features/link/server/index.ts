@@ -11,17 +11,23 @@ import { sanitizeFields } from 'payload'
 
 import type { NodeWithHooks } from '../../typesServer.js'
 import type { ClientProps } from '../client/index.js'
-import type { SerializedLinkNode } from '../nodes/types.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
-import { createLinkMarkdownTransformer } from '../markdownTransformer.js'
+import { createPayloadLinkTransformer } from '../markdownTransformer.js'
 import { AutoLinkNode } from '../nodes/AutoLinkNode.js'
 import { LinkNode } from '../nodes/LinkNode.js'
 import { linkPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
+import {
+  createAutoLinkNodeJSONSchema,
+  createLinkNodeJSONSchema,
+  type SerializedLinkNode,
+} from './schema.js'
 import { transformExtraFields } from './transformExtraFields.js'
 import { linkValidation } from './validate.js'
+
+export type { LinkFields, SerializedAutoLinkNode, SerializedLinkNode } from './schema.js'
 
 export type ExclusiveLinkCollectionsProps =
   | {
@@ -164,12 +170,13 @@ export const LinkFeature = createServerFeature<
       },
       i18n,
       markdownTransformers: [
-        createLinkMarkdownTransformer({ internalDocToHref: props.internalDocToHref }),
+        createPayloadLinkTransformer({ internalDocToHref: props.internalDocToHref }),
       ],
       nodes: [
         props?.disableAutoLinks === true
           ? null
           : createNode({
+              jsonSchema: createAutoLinkNodeJSONSchema(sanitizedFieldsWithoutText),
               node: AutoLinkNode,
               // Since AutoLinkNodes are just internal links, they need no hooks or graphQL population promises
               validations: [linkValidation(props, sanitizedFieldsWithoutText)],
@@ -182,6 +189,7 @@ export const LinkFeature = createServerFeature<
             return node?.fields
           },
           graphQLPopulationPromises: [linkPopulationPromiseHOC(props)],
+          jsonSchema: createLinkNodeJSONSchema(sanitizedFieldsWithoutText),
           node: LinkNode,
           validations: [linkValidation(props, sanitizedFieldsWithoutText)],
         }),

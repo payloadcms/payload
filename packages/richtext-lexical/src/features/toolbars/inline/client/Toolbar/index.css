@@ -8,16 +8,13 @@
     vertical-align: middle;
     position: absolute;
     top: 0;
-    left: 0;
+    inset-inline-start: 0;
     z-index: 2;
     opacity: 0;
     border-radius: var(--radius-medium);
     transition: opacity 0.2s;
     will-change: transform;
-    box-shadow:
-      0px 1px 2px 1px rgba(0, 0, 0, 0.1),
-      0px 4px 16px 0px rgba(0, 0, 0, 0.2),
-      0px -4px 8px 0px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--elevation-300-tooltip);
   }
 
   .inline-toolbar-popup__group {
@@ -30,14 +27,6 @@
       width: var(--stroke-width-small);
       align-self: stretch;
       background-color: var(--lexical-border-color);
-    }
-  }
-
-  html[data-theme='light'] {
-    .inline-toolbar-popup {
-      box-shadow:
-        0px 1px 2px 1px rgba(0, 0, 0, 0.05),
-        0px 4px 8px 0px rgba(0, 0, 0, 0.1);
     }
   }
 }

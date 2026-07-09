@@ -15,6 +15,7 @@ export default buildConfig({
           localized: true,
         },
       ],
+      versions: false,
     },
   ],
 })

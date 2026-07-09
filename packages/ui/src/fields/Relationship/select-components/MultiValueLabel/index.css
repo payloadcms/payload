@@ -1,8 +1,8 @@
 @layer payload-default {
   .relationship--multi-value-label {
     display: flex;
-    padding-inline-start: 0.5rem;
-    gap: 0.25rem;
+    padding-inline-start: var(--spacer-2);
+    gap: var(--spacer-1);
   }
 
   .relationship--multi-value-label__content {
@@ -28,7 +28,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-left: 0.25rem;
+    margin-left: var(--spacer-1);
     pointer-events: all;
     border-radius: var(--radius-small);
     border: var(--stroke-width-small) solid transparent;
@@ -40,7 +40,7 @@
     &:focus-visible {
       outline: none;
       border: var(--accessibility-outline);
-      border-width: 1px;
+      border-width: var(--stroke-width-small);
     }
   }
 }

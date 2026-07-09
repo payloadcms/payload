@@ -27,6 +27,7 @@ import { RelationshipField } from '../../fields/Relationship/index.js'
 import { RichTextField } from '../../fields/RichText/index.js'
 import { RowField } from '../../fields/Row/index.js'
 import { SelectField } from '../../fields/Select/index.js'
+import { SlugField } from '../../fields/Slug/index.js'
 import { TabsField } from '../../fields/Tabs/index.js'
 import { TextField } from '../../fields/Text/index.js'
 import { TextareaField } from '../../fields/Textarea/index.js'
@@ -125,10 +126,13 @@ export function RenderField({
       return <RichTextField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'row':
-      return <RowField {...iterableFieldProps} field={clientFieldConfig} />
+      return <RowField {...iterableFieldProps} field={clientFieldConfig} path={path} />
 
     case 'select':
       return <SelectField {...baseFieldProps} field={clientFieldConfig} path={path} />
+
+    case 'slug':
+      return <SlugField {...baseFieldProps} field={clientFieldConfig} path={path} />
 
     case 'tabs':
       return <TabsField {...iterableFieldProps} field={clientFieldConfig} path={path} />

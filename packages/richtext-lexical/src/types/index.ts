@@ -48,7 +48,7 @@ import type {
  * Used as the generic constraint for node map types.
  * Extends the base SerializedLexicalNode with optional type for flexibility.
  */
-export type SerializedNodeBase = { [key: string]: unknown; type?: string }
+export type SerializedNodeBase = { type?: string }
 
 export type LexicalFieldAdminProps = {
   /**
@@ -387,31 +387,21 @@ export type LexicalEditorNodeMap<
   >
 } & {
   blocks?: {
-    [K in Extract<
-      Extract<TNodes, { type: 'block' }> extends SerializedBlockNode<infer B>
-        ? B extends { blockType: string }
-          ? B['blockType']
-          : never
-        : never,
-      string
-    >]?: NodeMapBlockValue<
-      Extract<TNodes, { type: 'block' }> extends SerializedBlockNode<infer B>
-        ? SerializedBlockNode<Extract<B, { blockType: K }>>
-        : SerializedBlockNode
+    [K in (Extract<TNodes, { type: 'block' }> &
+      SerializedBlockNode)['fields']['blockType']]?: NodeMapBlockValue<
+      Extract<
+        Extract<TNodes, { type: 'block' }> & SerializedBlockNode,
+        { fields: { blockType: K } }
+      >
     >
   }
   inlineBlocks?: {
-    [K in Extract<
-      Extract<TNodes, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
-        ? B extends { blockType: string }
-          ? B['blockType']
-          : never
-        : never,
-      string
-    >]?: NodeMapInlineBlockValue<
-      Extract<TNodes, { type: 'inlineBlock' }> extends SerializedInlineBlockNode<infer B>
-        ? SerializedInlineBlockNode<Extract<B, { blockType: K }>>
-        : SerializedInlineBlockNode
+    [K in (Extract<TNodes, { type: 'inlineBlock' }> &
+      SerializedInlineBlockNode)['fields']['blockType']]?: NodeMapInlineBlockValue<
+      Extract<
+        Extract<TNodes, { type: 'inlineBlock' }> & SerializedInlineBlockNode,
+        { fields: { blockType: K } }
+      >
     >
   }
   unknown?: NodeMapValue<SerializedLexicalNode>
@@ -525,8 +515,8 @@ export type LexicalRichTextFieldProps = {
    */
   featureClientImportMap?: Record<string, any>
   featureClientSchemaMap: FeatureClientSchemaMap
-  initialLexicalFormState: InitialLexicalFormState
-  lexicalEditorConfig: LexicalEditorConfig | undefined // Undefined if default lexical editor config should be used
+  initialLexicalFormState?: InitialLexicalFormState
+  lexicalEditorConfig?: LexicalEditorConfig // Undefined if default lexical editor config should be used
   views?: LexicalEditorViewMap
 } & Pick<ServerFieldBase, 'permissions'> &
   RichTextFieldClientProps<SerializedEditorState, AdapterProps, object>

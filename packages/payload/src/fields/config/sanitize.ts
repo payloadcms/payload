@@ -22,6 +22,7 @@ import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { validateTimezones } from '../../utilities/validateTimezones.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
+import { generateSlug } from '../baseFields/slug/generateSlug.js'
 import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
 import { defaultTimezones } from '../baseFields/timezone/defaultTimezones.js'
 import { getFieldPaths } from '../getFieldPaths.js'
@@ -274,6 +275,48 @@ export const sanitizeField = async ({
     }
   }
 
+  // Slug field: apply defaults, attach generation hook, expose slugify to the server fn.
+  if (field.type === 'slug') {
+    const useAsSlug = field.useAsSlug
+
+    if (!useAsSlug) {
+      throw new InvalidConfiguration(
+        `The slug field "${field.name}" is missing the required "useAsSlug" property, which must name the field to generate the slug from.`,
+      )
+    }
+
+    if (typeof field.required === 'undefined') {
+      field.required = true
+    }
+    if (typeof field.unique === 'undefined') {
+      field.unique = true
+    }
+    if (typeof field.index === 'undefined') {
+      field.index = true
+    }
+
+    field.admin = {
+      position: 'sidebar',
+      ...field.admin,
+    }
+
+    // The slugifyHandler server function resolves the custom slugify by field path.
+    if (field.slugify) {
+      field.custom = {
+        ...field.custom,
+        slugify: field.slugify,
+      }
+    }
+
+    if (!field.hooks) {
+      field.hooks = {}
+    }
+    field.hooks.beforeChange = [
+      generateSlug({ name: field.name, slugify: field.slugify, useAsSlug }),
+      ...(field.hooks.beforeChange || []),
+    ]
+  }
+
   // Array ID field
   if (field.type === 'array' && field.fields) {
     const hasCustomID = field.fields.some((f) => 'name' in f && f.name === 'id')
@@ -361,13 +404,9 @@ export const sanitizeField = async ({
   }
 
   if (field.type === 'blocks' && field.blocks) {
-    if (field.blockReferences && field.blocks?.length) {
-      throw new Error('You cannot have both blockReferences and blocks in the same blocks field')
-    }
-
     const blockSlugs: string[] = []
 
-    for (const block of field.blockReferences ?? field.blocks) {
+    for (const block of field.blocks) {
       const blockSlug = typeof block === 'string' ? block : block.slug
 
       if (blockSlugs.includes(blockSlug)) {

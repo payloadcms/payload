@@ -60,6 +60,52 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_E98BC274".
+ */
+export type LexicalNodes_E98BC274 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_E98BC274>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_E98BC274>
+  | SerializedUploadNode<'draft-with-upload'>
+  | SerializedUploadNode<'draft-with-upload-cloud-storage'>
+  | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
+  | SerializedUploadNode<'media2'>
+  | SerializedQuoteNode<LexicalNodes_E98BC274>
+  | SerializedListNode<LexicalNodes_E98BC274>
+  | SerializedListItemNode<LexicalNodes_E98BC274>
+  | SerializedAutoLinkNode<LexicalNodes_E98BC274, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_E98BC274, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNode<
+      | 'disable-publish'
+      | 'posts'
+      | 'autosave-posts'
+      | 'autosave-with-draft-button-posts'
+      | 'autosave-multi-select-posts'
+      | 'autosave-with-validate-posts'
+      | 'draft-posts'
+      | 'drafts-no-read-versions'
+      | 'draft-with-max-posts'
+      | 'draft-posts-with-change-hook'
+      | 'drafts-with-custom-unpublish'
+      | 'draft-with-validate-posts'
+      | 'error-on-unpublish'
+      | 'localized-posts'
+      | 'version-posts'
+      | 'custom-ids'
+      | 'diff'
+      | 'text'
+      | 'payload-kv'
+      | 'users'
+      | 'payload-jobs'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
 
 export interface Config {
   auth: {
@@ -85,6 +131,8 @@ export interface Config {
     'custom-ids': CustomId;
     diff: Diff;
     text: Text;
+    'draft-with-upload': DraftWithUpload;
+    'draft-with-upload-cloud-storage': DraftWithUploadCloudStorage;
     media: Media;
     media2: Media2;
     'payload-kv': PayloadKv;
@@ -114,6 +162,8 @@ export interface Config {
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     diff: DiffSelect<false> | DiffSelect<true>;
     text: TextSelect<false> | TextSelect<true>;
+    'draft-with-upload': DraftWithUploadSelect<false> | DraftWithUploadSelect<true>;
+    'draft-with-upload-cloud-storage': DraftWithUploadCloudStorageSelect<false> | DraftWithUploadCloudStorageSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     media2: Media2Select<false> | Media2Select<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -152,6 +202,8 @@ export interface Config {
   locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -215,21 +267,7 @@ export interface AutosavePost {
   title: string;
   relationship?: (string | null) | Post;
   computedTitle?: string | null;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_E98BC274> | null;
   json?:
     | {
         [k: string]: unknown;
@@ -271,20 +309,23 @@ export interface DraftPost {
   description: string;
   radio?: 'test' | null;
   select?: ('test1' | 'test2')[] | null;
-  blocksField?:
-    | {
-        text?: string | null;
-        localized?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  blocksField?: Block[] | null;
   relation?: (string | null) | DraftPost;
   restrictedToUpdate?: boolean | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block".
+ */
+export interface Block {
+  text?: string | null;
+  localized?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -342,15 +383,7 @@ export interface DraftWithMaxPost {
   description: string;
   radio?: 'test' | null;
   select?: ('test1' | 'test2')[] | null;
-  blocksField?:
-    | {
-        text?: string | null;
-        localized?: string | null;
-        id?: string | null;
-        blockName?: string | null;
-        blockType: 'block';
-      }[]
-    | null;
+  blocksField?: Block[] | null;
   relation?: (string | null) | DraftWithMaxPost;
   updatedAt: string;
   createdAt: string;
@@ -409,30 +442,37 @@ export interface LocalizedPost {
   id: string;
   text?: string | null;
   description?: string | null;
-  blocks?:
-    | (
-        | {
-            array?:
-              | {
-                  relationship?: (string | null) | Post;
-                  id?: string | null;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'block';
-          }
-        | {
-            blockText?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'localizedTextBlock';
-          }
-      )[]
-    | null;
+  blocks?: (Block_DBD0B346 | LocalizedTextBlock)[] | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
+}
+/**
+ * Multiple blocks resolve to the `Block` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "Block_DBD0B346".
+ */
+export interface Block_DBD0B346 {
+  array?:
+    | {
+        relationship?: (string | null) | Post;
+        id?: string | null;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LocalizedTextBlock".
+ */
+export interface LocalizedTextBlock {
+  blockText?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'localizedTextBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -462,56 +502,7 @@ export interface Diff {
         id?: string | null;
       }[]
     | null;
-  blocks?:
-    | (
-        | {
-            title?: string | null;
-            relatedItem?: {
-              relationTo: 'text';
-              value: string | Text;
-            } | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'SingleRelationshipBlock';
-          }
-        | {
-            title?: string | null;
-            relatedItem?:
-              | {
-                  relationTo: 'text';
-                  value: string | Text;
-                }[]
-              | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'ManyRelationshipBlock';
-          }
-        | {
-            textInBlock?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'TextBlock';
-          }
-        | {
-            textInCollapsibleInCollapsibleBlock?: string | null;
-            textInRowInCollapsibleBlock?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'CollapsibleBlock';
-          }
-        | {
-            namedTab1InBlock?: {
-              textInNamedTab1InBlock?: string | null;
-            };
-            textInUnnamedTab2InBlock?: string | null;
-            textInUnnamedTab2InBlockAccessFalse?: string | null;
-            textInRowInUnnamedTab2InBlock?: string | null;
-            id?: string | null;
-            blockName?: string | null;
-            blockType: 'TabsBlock';
-          }
-      )[]
-    | null;
+  blocks?: (SingleRelationshipBlock | ManyRelationshipBlock | TextBlock | CollapsibleBlock | TabsBlock)[] | null;
   checkbox?: boolean | null;
   code?: string | null;
   textInCollapsible?: string | null;
@@ -574,36 +565,8 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
-  richtext?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
-  richtextWithCustomDiff?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richtext?: LexicalRichText<LexicalNodes_E98BC274> | null;
+  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_E98BC274> | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
@@ -625,6 +588,20 @@ export interface Diff {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "SingleRelationshipBlock".
+ */
+export interface SingleRelationshipBlock {
+  title?: string | null;
+  relatedItem?: {
+    relationTo: 'text';
+    value: string | Text;
+  } | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'SingleRelationshipBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "text".
  */
 export interface Text {
@@ -632,6 +609,58 @@ export interface Text {
   text: string;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "ManyRelationshipBlock".
+ */
+export interface ManyRelationshipBlock {
+  title?: string | null;
+  relatedItem?:
+    | {
+        relationTo: 'text';
+        value: string | Text;
+      }[]
+    | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'ManyRelationshipBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextBlock".
+ */
+export interface TextBlock {
+  textInBlock?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'TextBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "CollapsibleBlock".
+ */
+export interface CollapsibleBlock {
+  textInCollapsibleInCollapsibleBlock?: string | null;
+  textInRowInCollapsibleBlock?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'CollapsibleBlock';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TabsBlock".
+ */
+export interface TabsBlock {
+  namedTab1InBlock?: {
+    textInNamedTab1InBlock?: string | null;
+  };
+  textInUnnamedTab2InBlock?: string | null;
+  textInUnnamedTab2InBlockAccessFalse?: string | null;
+  textInRowInUnnamedTab2InBlock?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'TabsBlock';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -666,6 +695,46 @@ export interface Media {
   id: string;
   updatedAt: string;
   createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-upload".
+ */
+export interface DraftWithUpload {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-upload-cloud-storage".
+ */
+export interface DraftWithUploadCloudStorage {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
   url?: string | null;
   thumbnailURL?: string | null;
   filename?: string | null;
@@ -881,6 +950,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'text';
         value: string | Text;
+      } | null)
+    | ({
+        relationTo: 'draft-with-upload';
+        value: string | DraftWithUpload;
+      } | null)
+    | ({
+        relationTo: 'draft-with-upload-cloud-storage';
+        value: string | DraftWithUploadCloudStorage;
       } | null)
     | ({
         relationTo: 'media';
@@ -1290,6 +1367,44 @@ export interface TextSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-upload_select".
+ */
+export interface DraftWithUploadSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "draft-with-upload-cloud-storage_select".
+ */
+export interface DraftWithUploadCloudStorageSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
@@ -1627,6 +1742,88 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'disable-publish'
+      | 'posts'
+      | 'autosave-posts'
+      | 'autosave-with-draft-button-posts'
+      | 'autosave-multi-select-posts'
+      | 'autosave-with-validate-posts'
+      | 'draft-posts'
+      | 'drafts-no-read-versions'
+      | 'draft-with-max-posts'
+      | 'draft-posts-with-change-hook'
+      | 'drafts-with-custom-unpublish'
+      | 'draft-with-validate-posts'
+      | 'error-on-unpublish'
+      | 'localized-posts'
+      | 'version-posts'
+      | 'custom-ids'
+      | 'diff'
+      | 'text'
+      | 'draft-with-upload'
+      | 'draft-with-upload-cloud-storage'
+      | 'media'
+      | 'media2'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'disable-publish'
+          | 'posts'
+          | 'autosave-posts'
+          | 'autosave-with-draft-button-posts'
+          | 'autosave-multi-select-posts'
+          | 'autosave-with-validate-posts'
+          | 'draft-posts'
+          | 'drafts-no-read-versions'
+          | 'draft-with-max-posts'
+          | 'draft-posts-with-change-hook'
+          | 'drafts-with-custom-unpublish'
+          | 'draft-with-validate-posts'
+          | 'error-on-unpublish'
+          | 'localized-posts'
+          | 'version-posts'
+          | 'custom-ids'
+          | 'diff'
+          | 'text'
+          | 'draft-with-upload'
+          | 'draft-with-upload-cloud-storage'
+          | 'media'
+          | 'media2'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskSchedulePublish".
  */
 export interface TaskSchedulePublish {
@@ -1653,10 +1850,190 @@ export interface TaskSchedulePublish {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock".
+ */
+export interface MyBlock {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  someTextRequired: string;
+  radios?: ('option1' | 'option2' | 'option3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalUploadFields_1AB4670B".
+ */
+export interface LexicalUploadFields_1AB4670B {
+  alt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
+ */
+export interface LexicalLinkFields_0A7E9EC0 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 

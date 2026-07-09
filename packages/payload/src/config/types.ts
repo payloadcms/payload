@@ -16,6 +16,7 @@ import type React from 'react'
 import type { default as sharp } from 'sharp'
 import type { DeepRequired } from 'ts-essentials'
 
+import type { ComponentRenderer } from '../admin/adapters/render.js'
 import type { ServerAdapter } from '../admin/adapters/server.js'
 import type { RichTextAdapterProvider } from '../admin/RichText.js'
 import type {
@@ -59,8 +60,8 @@ import type {
   RegisteredPlugins,
   RequestContext,
   SelectField,
-  TypedUser,
   TypedWidget,
+  User,
   WidgetSlug,
 } from '../index.js'
 import type { QueryPreset, QueryPresetConstraints } from '../query-presets/types.js'
@@ -220,6 +221,13 @@ export type LivePreviewConfig = {
     name: string
     width: number | string
   }[]
+  /**
+   * When `true`, Live Preview opens automatically the first time a user views a document,
+   * before they have manually toggled it on. Once the user toggles Live Preview on or off,
+   * their stored preference takes precedence and this setting is ignored.
+   * @default false
+   */
+  openByDefault?: boolean
   /**
    * The URL of the frontend application. This will be rendered within an `iframe` as its `src`.
    * Payload will send a `window.postMessage()` to this URL with the document data in real-time.
@@ -484,14 +492,22 @@ export type ServerProps = {
   readonly params?: Params
   readonly payload: Payload
   readonly permissions?: SanitizedPermissions
+  /**
+   * Adapter-injected component renderer. Server components can use this
+   * to render other import map components without importing a
+   * framework-specific renderer directly.
+   */
+  readonly renderComponent?: ComponentRenderer
   readonly searchParams?: Params
   /**
    * Framework-agnostic methods for server-side navigation, headers, cookies, and other server-only APIs.
    * Plugins should call these methods instead of importing directly from `next/navigation`, `next/headers`, etc.
    * These methods are populated by the given framework adapter, e.g. `@payloadcms/next`.
+   *
+   * Optional because non-framework contexts (jobs, scripts, tests) may not have an adapter attached.
    */
   readonly server: ServerAdapter
-  readonly user?: TypedUser
+  readonly user?: User
   readonly viewType?: ViewTypes
   readonly visibleEntities?: VisibleEntities
 }
@@ -502,6 +518,7 @@ export const serverProps: (keyof ServerProps)[] = [
   'locale',
   'params',
   'permissions',
+  'renderComponent',
   'searchParams',
   'permissions',
 ]
@@ -534,6 +551,21 @@ type SanitizedTimezoneConfig = {
 
 export type CustomComponent<TAdditionalProps extends object = Record<string, any>> =
   PayloadComponent<ServerProps & TAdditionalProps, TAdditionalProps>
+
+export type UserMenuSettingsGroup = {
+  group: LabelFunction | StaticLabel
+  items: CustomComponent[]
+}
+
+export type UserMenuSettingsItem = CustomComponent | UserMenuSettingsGroup
+
+export const isUserMenuSettingsGroup = (
+  userMenuSettingsItem: UserMenuSettingsItem,
+): userMenuSettingsItem is UserMenuSettingsGroup =>
+  typeof userMenuSettingsItem === 'object' &&
+  userMenuSettingsItem !== null &&
+  'items' in userMenuSettingsItem &&
+  Array.isArray(userMenuSettingsItem.items)
 
 export type Locale = {
   /**
@@ -1017,6 +1049,12 @@ export type Config = {
         tabs?: SidebarTab[]
       }
       /**
+       * Add custom items to the user menu popup in the admin panel header.
+       * These components will be rendered in the Settings sub-popup of the user menu.
+       * When empty or absent, the Settings sub-trigger is not shown.
+       */
+      userMenuSettingsItems?: UserMenuSettingsItem[]
+      /**
        * Replace or modify top-level admin routes, or add new ones:
        * + `Account` - `/admin/account`
        * + `Dashboard` - `/admin`
@@ -1249,22 +1287,6 @@ export type Config = {
   email?: EmailAdapter | Promise<EmailAdapter>
   /** Custom REST endpoints */
   endpoints?: Endpoint[]
-  /**
-   * Experimental features may be unstable or change in future versions.
-   */
-  experimental?: {
-    /**
-     * Enable per-locale status for documents.
-     *
-     * Requires:
-     * - `localization` enabled
-     * - `versions.drafts` enabled
-     * - `versions.drafts.localizeStatus` set at collection or global level
-     *
-     * @experimental
-     */
-    localizeStatus?: boolean
-  }
   /**
    * @see https://payloadcms.com/docs/configuration/globals#global-configs
    */
@@ -1565,6 +1587,32 @@ export type Config = {
         }
       | false
 
+    /**
+     * Also generate a write-shaped input type (e.g. `PostInput`) next to each read type, describing
+     * what `create`/`update` accept: relationships and uploads as IDs only, `id` and `defaultValue`
+     * fields optional, and `createdAt`/`updatedAt`/`_status`/virtual/join fields removed. These are
+     * exposed on `Config['collectionsInput']` and `Config['globalsInput']`. Set `true` to turn them on.
+     *
+     * @default false
+     *
+     * @remarks
+     * Off by default. The Local API's `create`/`update` still type their `data` against the read
+     * type, so these input types aren't used internally - they're here for you to opt into, e.g. to
+     * type a form payload, a seed script, or an API client. `@payloadcms/plugin-mcp` also uses the
+     * input schema, but it builds that itself at runtime, so MCP gets the accurate write schema
+     * whether or not this flag is on.
+     *
+     * @todo We'd like to turn this on by default (or have the Local API use the input type
+     * directly), but there's a catch. When you read a document with `depth > 0`, its relationships
+     * come back as full documents rather than IDs. A strict ID-only input type would reject that and
+     * break the common "read a doc, change a field, save it back" pattern. To enable it by default,
+     * the input type would first need to accept a relationship as either an ID or the full document
+     * (which is what Payload already does at runtime), while keeping `id`, `defaultValue`, and
+     * auto-managed fields optional. Until then it stays opt-in, so we don't put a type that's
+     * stricter than the runtime on the main write path.
+     */
+    generateInputTypes?: boolean
+
     /** Filename to write the generated types to */
     outputFile?: string
 
@@ -1787,7 +1835,7 @@ export type SharedEntityViews = {
    * ```
    */
   [key: string]:
-    | { actions?: CustomComponent[]; Component?: PayloadComponent }
+    | { actions?: CustomComponent[]; Component?: PayloadComponent; NoResults?: CustomComponent }
     | AdminViewConfig
     | EditConfig
     | undefined
@@ -1815,7 +1863,7 @@ export type SharedAdminComponents = {
   views?: SharedEntityViews
 }
 
-export type EntityDescriptionFunction = ({ t }: { t: TFunction }) => string
+export type EntityDescriptionFunction = ({ t }: { t: TFunction<ClientTranslationKeys> }) => string
 
 export type EntityDescription = EntityDescriptionFunction | Record<string, string> | string
 

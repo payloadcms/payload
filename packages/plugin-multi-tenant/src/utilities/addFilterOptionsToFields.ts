@@ -5,7 +5,7 @@ import type { MultiTenantPluginConfig } from '../types.js'
 import { defaults } from '../defaults.js'
 import { filterDocumentsByTenants } from '../filters/filterDocumentsByTenants.js'
 
-type AddFilterOptionsToFieldsArgs<ConfigType = unknown> = {
+type AddFilterOptionsToFieldsArgs = {
   blockReferencesWithFilters: string[]
   config: Config | SanitizedConfig
   fields: Field[]
@@ -15,12 +15,10 @@ type AddFilterOptionsToFieldsArgs<ConfigType = unknown> = {
   tenantsArrayFieldName: string
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }
 
-export function addFilterOptionsToFields<ConfigType = unknown>({
+export function addFilterOptionsToFields({
   blockReferencesWithFilters,
   config,
   fields,
@@ -31,7 +29,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   userHasAccessToAllTenants,
-}: AddFilterOptionsToFieldsArgs<ConfigType>): Field[] {
+}: AddFilterOptionsToFieldsArgs): Field[] {
   const newFields = []
   for (const field of fields) {
     let newField: Field = { ...field }
@@ -97,18 +95,17 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
     }
 
     if (newField.type === 'blocks') {
-      const newBlocks: Block[] = []
-      ;(newField.blockReferences ?? newField.blocks).forEach((_block) => {
+      const newBlocks: (Block | string)[] = []
+      newField.blocks.forEach((_block) => {
         let block: Block | undefined
         let isReference = false
 
         if (typeof _block === 'string') {
-          if (blockReferencesWithFilters.includes(_block)) {
-            return
-          }
           isReference = true
-          block = config?.blocks?.find((b) => b.slug === _block)
-          blockReferencesWithFilters.push(_block)
+          if (!blockReferencesWithFilters.includes(_block)) {
+            block = config?.blocks?.find((b) => b.slug === _block)
+            blockReferencesWithFilters.push(_block)
+          }
         } else {
           // Create a shallow copy to avoid mutating the original block reference
           block = { ..._block }
@@ -129,9 +126,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
           })
         }
 
-        if (block && !isReference) {
-          newBlocks.push(block)
-        }
+        newBlocks.push(isReference ? _block : block!)
       })
       newField.blocks = newBlocks
     }
@@ -161,18 +156,16 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
   return newFields
 }
 
-type AddFilterArgs<ConfigType = unknown> = {
+type AddFilterArgs = {
   field: RelationshipField
   tenantEnabledCollectionSlugs: string[]
   tenantFieldName: string
   tenantsArrayFieldName: string
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }
-function addRelationshipFilter<ConfigType = unknown>({
+function addRelationshipFilter({
   field,
   tenantEnabledCollectionSlugs,
   tenantFieldName,
@@ -180,7 +173,7 @@ function addRelationshipFilter<ConfigType = unknown>({
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   userHasAccessToAllTenants,
-}: AddFilterArgs<ConfigType>): Field {
+}: AddFilterArgs): Field {
   // User specified filter
   const originalFilter = field.filterOptions
   field.filterOptions = async (args) => {

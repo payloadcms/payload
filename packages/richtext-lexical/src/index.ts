@@ -23,7 +23,7 @@ import { richTextValidateHOC } from './validate/index.js'
 
 let checkedDependencies = false
 
-export const lexicalTargetVersion = '0.41.0'
+export const lexicalTargetVersion = '0.45.0'
 
 export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   if (
@@ -42,6 +42,7 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
             '@lexical/link',
             '@lexical/list',
             '@lexical/mark',
+            '@lexical/markdown',
             '@lexical/react',
             '@lexical/rich-text',
             '@lexical/selection',
@@ -110,8 +111,6 @@ export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapter
         serverProps: {
           admin: args?.admin,
           views: args?.views,
-          // SanitizedEditorConfig is manually passed by `renderField` in `fieldSchemasToFormState/renderField.tsx`
-          // in order to reduce the size of the field schema
         },
       },
       generateImportMap: getGenerateImportMap({
@@ -188,16 +187,15 @@ export type {
 export {
   $createServerBlockNode,
   $isServerBlockNode,
-  type BlockFields,
   ServerBlockNode,
 } from './features/blocks/server/nodes/BlocksNode.js'
-
 export {
   $createServerInlineBlockNode,
   $isServerInlineBlockNode,
-  type InlineBlockFields,
   ServerInlineBlockNode,
 } from './features/blocks/server/nodes/InlineBlocksNode.js'
+
+export type { BlockFields, InlineBlockFields } from './features/blocks/server/schema.js'
 
 export { convertHTMLToLexical } from './features/converters/htmlToLexical/index.js'
 
@@ -231,8 +229,8 @@ export {
 } from './features/link/nodes/AutoLinkNode.js'
 export { $createLinkNode, $isLinkNode, LinkNode } from './features/link/nodes/LinkNode.js'
 
-export type { LinkFields } from './features/link/nodes/types.js'
 export { LinkFeature, type LinkFeatureServerProps } from './features/link/server/index.js'
+export type { LinkFields } from './features/link/server/schema.js'
 
 export { ChecklistFeature } from './features/lists/checklist/server/index.js'
 export { OrderedListFeature } from './features/lists/orderedList/server/index.js'
@@ -246,10 +244,8 @@ export {
   type RelationshipFeatureProps,
 } from './features/relationship/server/index.js'
 
-export {
-  type RelationshipData,
-  RelationshipServerNode,
-} from './features/relationship/server/nodes/RelationshipNode.js'
+export { RelationshipServerNode } from './features/relationship/server/nodes/RelationshipNode.js'
+export type { RelationshipData } from './features/relationship/server/schema.js'
 export { defaultColors } from './features/textState/defaultColors.js'
 export { TextStateFeature } from './features/textState/feature.server.js'
 
@@ -298,7 +294,8 @@ export { createNode } from './features/typeUtilities.js' // Only useful in featu
 export { UploadFeature } from './features/upload/server/index.js'
 export type { UploadFeatureProps } from './features/upload/server/index.js'
 
-export { type UploadData, UploadServerNode } from './features/upload/server/nodes/UploadNode.js'
+export { UploadServerNode } from './features/upload/server/nodes/UploadNode.js'
+export type { UploadData } from './features/upload/server/schema.js'
 export type { EditorConfigContextType } from './lexical/config/client/EditorConfigProvider.js'
 
 export {
@@ -326,6 +323,8 @@ export type {
   SlashMenuGroup,
   SlashMenuItem,
 } from './lexical/plugins/SlashMenu/LexicalTypeaheadMenuPlugin/types.js'
+export { $convertFromMarkdownString } from './lexical/utils/markdown/convertFromMarkdownString.js'
+
 export {
   DETAIL_TYPE_TO_DETAIL,
   DOUBLE_LINE_BREAK,
@@ -342,8 +341,6 @@ export {
 } from './lexical/utils/nodeFormat.js'
 
 export { sanitizeUrl, validateUrl } from './lexical/utils/url.js'
-
-export { $convertFromMarkdownString } from './packages/@lexical/markdown/index.js'
 
 export { defaultRichTextValue } from './populateGraphQL/defaultValue.js'
 export { populate } from './populateGraphQL/populate.js'

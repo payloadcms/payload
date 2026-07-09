@@ -3,7 +3,7 @@ import type { DefaultCellComponentProps, RelationshipFieldClient } from 'payload
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import type { SelectionWithPath } from '../../../../Hierarchy/Drawer/types.js'
+import type { SelectionWithPath } from '../../../../Hierarchy/Modal/types.js'
 
 import { useIntersect } from '../../../../../hooks/useIntersect.js'
 import { FolderIcon } from '../../../../../icons/Folder/index.js'
@@ -13,9 +13,9 @@ import { useTranslation } from '../../../../../providers/Translation/index.js'
 import { canUseDOM } from '../../../../../utilities/canUseDOM.js'
 import { formatDocTitle } from '../../../../../utilities/formatDocTitle/index.js'
 import { Button } from '../../../../Button/index.js'
-import { useHierarchyDrawer } from '../../../../Hierarchy/Drawer/useHierarchyDrawer.js'
+import { useHierarchyModal } from '../../../../Hierarchy/Modal/useHierarchyModal.js'
 import { useListRelationships } from '../../../RelationshipProvider/index.js'
-import './index.scss'
+import './index.css'
 
 type Value = { relationTo: string; value: number | string }
 const baseClass = 'hierarchy-cell'
@@ -68,16 +68,38 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
     return <IconComponent />
   }, [hierarchyConfig, preRenderedIcon])
 
-  // Full icon for drawer subheader
+  // Full icon for modal subheader
   const drawerIcon = preRenderedIcon || fallbackIcon
   // Small icon for compact display (pill button)
   const displayIcon = preRenderedSmallIcon ?? drawerIcon
 
-  // Set up the hierarchy drawer
-  const [HierarchyDrawer, , { openDrawer }] = useHierarchyDrawer({
+  // Set up the hierarchy modal
+  const [HierarchyModal, , { openModal }] = useHierarchyModal({
     hierarchyCollectionSlug: hierarchyCollectionSlug || '',
     Icon: drawerIcon,
   })
+
+  // Lazy-mount the modal so its column browser doesn't eagerly fetch root items
+  // for every cell in the list view. Only mount once the user opens it.
+  const [hasMountedModal, setHasMountedModal] = useState(false)
+  const shouldOpenAfterMountRef = useRef(false)
+
+  const handleOpenModal = useCallback(() => {
+    if (hasMountedModal) {
+      openModal()
+      return
+    }
+    shouldOpenAfterMountRef.current = true
+    setHasMountedModal(true)
+  }, [hasMountedModal, openModal])
+
+  // Open the modal once it has mounted (state update from handleOpenModal).
+  useEffect(() => {
+    if (hasMountedModal && shouldOpenAfterMountRef.current) {
+      shouldOpenAfterMountRef.current = false
+      openModal()
+    }
+  }, [hasMountedModal, openModal])
 
   // Fetch relationship data when visible
   useEffect(() => {
@@ -116,7 +138,7 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
     }
   }, [cellDataFromProps, relationTo, isAboveViewport, getRelationships])
 
-  // Get current selection IDs for the drawer
+  // Get current selection IDs for the modal
   const initialSelections = useMemo(() => {
     if (!cellDataFromProps) {
       return []
@@ -130,13 +152,13 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
     }) as (number | string)[]
   }, [cellDataFromProps])
 
-  // Handle save from drawer
+  // Handle save from modal
   const handleSave = useCallback(
     async ({
-      closeDrawer,
+      closeModal,
       selections,
     }: {
-      closeDrawer: () => void
+      closeModal: () => void
       selections: Map<number | string, SelectionWithPath>
     }) => {
       // Get selected IDs
@@ -173,10 +195,10 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
           }
         }
       } catch (_error) {
-        // swallow error and close drawer anyway, user can try again
+        // swallow error and close modal anyway, user can try again
       }
 
-      closeDrawer()
+      closeModal()
     },
     [collectionSlug, config, field.name, hasMany, rowData, relationTo, getRelationships],
   )
@@ -210,13 +232,13 @@ export const HierarchyCell: React.FC<HierarchyCellProps> = ({
         icon={displayIcon}
         iconPosition="left"
         margin={false}
-        onClick={openDrawer}
+        onClick={handleOpenModal}
         size="medium"
       >
         {isLoading ? `${t('general:loading')}...` : displayText}
       </Button>
-      {hierarchyCollectionSlug && (
-        <HierarchyDrawer
+      {hierarchyCollectionSlug && hasMountedModal && (
+        <HierarchyModal
           hasMany={hasMany}
           initialSelections={initialSelections}
           onSave={handleSave}

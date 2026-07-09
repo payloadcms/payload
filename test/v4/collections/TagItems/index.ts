@@ -26,6 +26,7 @@ const TagItems: CollectionConfig = {
     },
     createTagField({ relationTo: tagsSlug }),
   ],
+  versions: false,
 }
 
 export default TagItems

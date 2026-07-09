@@ -10,4 +10,5 @@ export const Settings: GlobalConfig = {
       name: 'canAccessProtected',
     },
   ],
+  versions: false,
 }

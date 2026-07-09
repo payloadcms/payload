@@ -72,6 +72,7 @@ export interface Config {
     categories: Category;
     media: Media;
     relationships: Relationship;
+    'no-groupable': NoGroupable;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -86,6 +87,7 @@ export interface Config {
     categories: CategoriesSelect<false> | CategoriesSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     relationships: RelationshipsSelect<false> | RelationshipsSelect<true>;
+    'no-groupable': NoGroupableSelect<false> | NoGroupableSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -245,6 +247,22 @@ export interface Relationship {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-groupable".
+ */
+export interface NoGroupable {
+  id: string;
+  json?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -313,6 +331,10 @@ export interface PayloadLockedDocument {
         value: string | Relationship;
       } | null)
     | ({
+        relationTo: 'no-groupable';
+        value: string | NoGroupable;
+      } | null)
+    | ({
         relationTo: 'users';
         value: string | User;
       } | null);
@@ -365,6 +387,25 @@ export interface PayloadMigration {
 export interface PayloadQueryPreset {
   id: string;
   title: string;
+  groupBy?: string | null;
+  columns?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  where?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   isShared?: boolean | null;
   access?: {
     read?: {
@@ -380,25 +421,6 @@ export interface PayloadQueryPreset {
       users?: (string | User)[] | null;
     };
   };
-  where?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  columns?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  groupBy?: string | null;
   relatedCollection: 'posts';
   /**
    * This is a temporary field used to determine if updating the preset would remove the user's access to it. When `true`, this record will be deleted after running the preset's `validate` function.
@@ -509,6 +531,13 @@ export interface RelationshipsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "no-groupable_select".
+ */
+export interface NoGroupableSelect<T extends boolean = true> {
+  json?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -575,6 +604,9 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  */
 export interface PayloadQueryPresetsSelect<T extends boolean = true> {
   title?: T;
+  groupBy?: T;
+  columns?: T;
+  where?: T;
   isShared?: T;
   access?:
     | T
@@ -598,9 +630,6 @@ export interface PayloadQueryPresetsSelect<T extends boolean = true> {
               users?: T;
             };
       };
-  where?: T;
-  columns?: T;
-  groupBy?: T;
   relatedCollection?: T;
   isTemp?: T;
   updatedAt?: T;

@@ -32,6 +32,18 @@ const ConditionalLogic: CollectionConfig = {
       },
     },
     {
+      type: 'row',
+      admin: {
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+      fields: [
+        {
+          name: 'rowFieldWithCondition',
+          type: 'text',
+        },
+      ],
+    },
+    {
       name: 'fieldWithOperationCondition',
       type: 'text',
       admin: {
@@ -321,6 +333,7 @@ const ConditionalLogic: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default ConditionalLogic

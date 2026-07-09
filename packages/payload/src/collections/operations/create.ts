@@ -55,7 +55,6 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overwriteExistingFiles?: boolean
   populate?: PopulateType
   publishAllLocales?: boolean
-  publishSpecificLocale?: string
   req: PayloadRequest
   selectedLocales?: string[]
   showHiddenFields?: boolean
@@ -91,10 +90,6 @@ export const createOperation = async <
       overrideAccess: args.overrideAccess!,
     })
 
-    if (args.publishSpecificLocale) {
-      args.req.locale = args.publishSpecificLocale
-    }
-
     const {
       autosave = false,
       collection: { config: collectionConfig },
@@ -107,7 +102,6 @@ export const createOperation = async <
       overwriteExistingFiles = false,
       populate,
       publishAllLocales: publishAllLocalesArg,
-      publishSpecificLocale,
       req: {
         fallbackLocale,
         locale,
@@ -122,6 +116,7 @@ export const createOperation = async <
 
     let { data } = args
 
+    // For creates there is no existing doc — always publish all locales when not a draft.
     const publishAllLocales =
       !draft &&
       (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
@@ -164,6 +159,7 @@ export const createOperation = async <
       collection,
       config,
       data,
+      draft: isSavingDraft,
       isDuplicating: Boolean(duplicateFromID),
       operation: 'create',
       originalDoc: duplicatedFromDoc,
@@ -243,13 +239,22 @@ export const createOperation = async <
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
 
+    // When locale='all' or when beforeChange doesn't convert the string (e.g. no locale hook ran),
+    // the localized _status remains a plain string. Expand it to a per-locale object so MongoDB
+    // doesn't reject the write. This covers both draft and non-draft operations.
     if (
       config.localization &&
-      collectionConfig.versions &&
-      collectionConfig.versions.drafts &&
-      collectionConfig.versions.drafts.localizeStatus &&
-      publishAllLocales
+      hasLocalizeStatusEnabled(collectionConfig) &&
+      typeof dataWithLocales._status === 'string'
     ) {
+      const statusStr = dataWithLocales._status
+      dataWithLocales._status = {}
+      for (const localeCode of config.localization.localeCodes) {
+        ;(dataWithLocales._status as Record<string, unknown>)[localeCode] = statusStr
+      }
+    }
+
+    if (config.localization && hasLocalizeStatusEnabled(collectionConfig) && publishAllLocales) {
       let accessibleLocaleCodes = config.localization.localeCodes
 
       if (config.localization.filterAvailableLocales) {
@@ -339,7 +344,6 @@ export const createOperation = async <
         docWithLocales: resultWithLocales,
         operation: 'create',
         payload,
-        publishSpecificLocale,
         req,
         returning: false,
       })

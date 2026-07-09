@@ -4,7 +4,7 @@
   "license": "MIT",
   "main": "dist/server.js",
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=--no-deprecation next build",
+    "build": "cross-env NODE_OPTIONS=--no-deprecation payload build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",

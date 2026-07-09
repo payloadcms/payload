@@ -1,34 +1,26 @@
 import { McpServer, type ServerContext } from '@modelcontextprotocol/server'
-import { APIError, configToJSONSchema, type PayloadRequest } from 'payload'
+import { APIError, type PayloadRequest } from 'payload'
+import { z } from 'zod'
 
 import type {
   AuthorizedMCP,
+  CollectionMCPItem,
+  GlobalMCPItem,
   JsonSchemaType,
   MCPResponseOverride,
   MCPToolResponse,
   SanitizedMCPPluginConfig,
+  ToolInputSchema,
 } from '../types.js'
 
-import { toCamelCase } from '../utils/camelCase.js'
 import { getLogger } from '../utils/getLogger.js'
-import {
-  getCollectionVirtualFieldNames,
-  getGlobalVirtualFieldNames,
-} from '../utils/getVirtualFieldNames.js'
-import { removeVirtualFieldsFromSchema } from '../utils/schemaConversion/removeVirtualFieldsFromSchema.js'
 import { toStandardSchema } from '../utils/toStandardSchema.js'
 
-/** `findPosts`, `updateSiteSettings` — auto-prefixed wire name for collection/global tools. */
-const wireName = (key: string, slug: string): string => {
-  const camel = toCamelCase(slug)
-  return `${key}${camel.charAt(0).toUpperCase()}${camel.slice(1)}`
-}
-
 /**
- * Transport-agnostic core: registers every authorized MCP item onto a fresh
- * `McpServer` and returns it. The caller is responsible for picking a transport
- * (`WebStandardStreamableHTTPServerTransport`, `StdioServerTransport`, …) and
- * calling `server.connect(transport)`.
+ * Serving-entry-agnostic core: registers every authorized MCP item onto a fresh
+ * `McpServer` and returns it. The HTTP and stdio entry point callers provide fresh
+ * instances from this builder while they own the transport and protocol-era
+ * decision.
  *
  * `req` is the request context handlers see. For HTTP it's the live
  * `PayloadRequest` derived from the incoming HTTP request; for stdio it's a
@@ -55,105 +47,130 @@ export const buildMcpServer = ({
    * Wrap a tool handler's response with the tool's `overrideResponse`, then
    * strip the internal `doc` field so it doesn't leak onto the wire.
    */
-  const finalizeToolResponse = (
-    response: MCPToolResponse,
-    overrideResponse?: MCPResponseOverride,
-  ): MCPToolResponse => {
-    const overridden = overrideResponse?.(response, response.doc ?? {}, req) ?? response
+  const finalizeToolResponse = async ({
+    input,
+    overrideResponse,
+    response,
+    toolName,
+  }: {
+    input: unknown
+    overrideResponse?: MCPResponseOverride
+    response: MCPToolResponse
+    toolName: string
+  }): Promise<MCPToolResponse> => {
+    let overridden = overrideResponse?.(response, response.doc ?? {}, req) ?? response
+    for (const hook of pluginConfig.hooks?.afterToolCall ?? []) {
+      overridden = await hook({ input, req, response: overridden, toolName })
+    }
     const { doc: _doc, ...rest } = overridden
     return rest
   }
 
-  const configSchema = configToJSONSchema(
-    req.payload.config,
-    req.payload.db.defaultIDType,
-    req.i18n,
-    { forceInlineBlocks: true },
-  ) as JsonSchemaType
+  /**
+   * Runs a collection/global tool call:
+   * - reads `collectionSlug` / `globalSlug` from the input
+   * - runs access control: errors if `authorizedMCP.items` has no entry for this tool + slug
+   * - runs the tool handler and finalizes its response
+   */
+  const callEntityTool = async ({
+    input,
+    item,
+    serverContext,
+  }: {
+    input: unknown
+    item: CollectionMCPItem | GlobalMCPItem
+    serverContext: ServerContext
+  }): Promise<MCPToolResponse> => {
+    const entity = item.type === 'collectionTool' ? 'collection' : 'global'
+    const slugKey = item.type === 'collectionTool' ? 'collectionSlug' : 'globalSlug'
+    const toolInput = (input ?? {}) as Record<string, unknown>
+    const slug = toolInput[slugKey] as string | undefined
+
+    if (!slug) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error: "${item.mcpName}" requires ${slugKey}. Use getConfigInfo to inspect ${entity} slugs.`,
+          },
+        ],
+        isError: true,
+      }
+    }
+
+    const match = authorizedMCP.items.find(
+      (candidate): candidate is CollectionMCPItem | GlobalMCPItem =>
+        candidate.type === item.type &&
+        candidate.mcpName === item.mcpName &&
+        (candidate.type === 'collectionTool'
+          ? candidate.collectionSlug === slug
+          : candidate.type === 'globalTool' && candidate.globalSlug === slug),
+    )
+
+    if (!match) {
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error: MCP access to "${item.mcpName}" is not enabled for ${entity} "${slug}"`,
+          },
+        ],
+        isError: true,
+      }
+    }
+
+    const handlerArgs = {
+      authorizedMCP,
+      input: toolInput,
+      req,
+      serverContext,
+    }
+    const response = await (match.type === 'collectionTool'
+      ? match.tool.handler({ ...handlerArgs, collectionSlug: slug })
+      : match.tool.handler({ ...handlerArgs, globalSlug: slug }))
+
+    return finalizeToolResponse({
+      input: toolInput,
+      overrideResponse: match.tool.overrideResponse,
+      response,
+      toolName: match.mcpName,
+    })
+  }
 
   try {
+    const registeredEntityTools = new Set<string>()
+
     for (const item of authorizedMCP.items) {
       switch (item.type) {
-        case 'collectionTool': {
-          const tool = item.tool
-          const name = wireName(item.key, item.collectionSlug)
-          let inputSchema = tool.input
-          if (typeof inputSchema === 'function') {
-            const raw = configSchema.definitions?.[item.collectionSlug]
-            if (!raw) {
-              throw new APIError(
-                `Collection schema not found for slug: ${item.collectionSlug}`,
-                500,
-              )
-            }
-            const collectionSchema = removeVirtualFieldsFromSchema(
-              JSON.parse(JSON.stringify(raw)) as JsonSchemaType,
-              getCollectionVirtualFieldNames(req.payload.config, item.collectionSlug),
-            )
-            inputSchema = inputSchema({ collectionSchema })
-          }
-          server.registerTool(
-            name,
-            {
-              description: tool.description,
-              inputSchema: inputSchema ? toStandardSchema(inputSchema) : undefined,
-            },
-            async (input: unknown, ctx: ServerContext) =>
-              finalizeToolResponse(
-                await tool.handler({
-                  authorizedMCP,
-                  collectionSlug: item.collectionSlug,
-                  input: (input ?? {}) as Record<string, unknown>,
-                  req,
-                  serverContext: ctx,
-                }),
-                tool.overrideResponse,
-              ),
-          )
-          logger.info(`✅ Tool: ${name} Registered.`)
-          break
-        }
+        case 'collectionTool':
         case 'globalTool': {
-          const tool = item.tool
-          const name = wireName(item.key, item.globalSlug)
-          let inputSchema = tool.input
-          if (typeof inputSchema === 'function') {
-            const raw = configSchema.definitions?.[item.globalSlug]
-            if (!raw) {
-              throw new APIError(`Global schema not found for slug: ${item.globalSlug}`, 500)
-            }
-            const globalSchema = removeVirtualFieldsFromSchema(
-              JSON.parse(JSON.stringify(raw)) as JsonSchemaType,
-              getGlobalVirtualFieldNames(req.payload.config, item.globalSlug),
-            )
-
-            inputSchema = inputSchema({ globalSchema })
+          if (registeredEntityTools.has(item.mcpName)) {
+            break
           }
+          registeredEntityTools.add(item.mcpName)
+
+          const inputSchema = withSlugInput({
+            name: item.type === 'collectionTool' ? 'collectionSlug' : 'globalSlug',
+            input: item.tool.input,
+          })
+
           server.registerTool(
-            name,
+            item.mcpName,
             {
-              description: tool.description,
-              inputSchema: inputSchema ? toStandardSchema(inputSchema) : undefined,
+              annotations: item.tool.annotations,
+              description: item.tool.description,
+              inputSchema: toStandardSchema(inputSchema),
             },
             async (input: unknown, ctx: ServerContext) =>
-              finalizeToolResponse(
-                await tool.handler({
-                  authorizedMCP,
-                  globalSlug: item.globalSlug,
-                  input: (input ?? {}) as Record<string, unknown>,
-                  req,
-                  serverContext: ctx,
-                }),
-                tool.overrideResponse,
-              ),
+              callEntityTool({ input, item, serverContext: ctx }),
           )
-          logger.info(`✅ Tool: ${name} Registered.`)
+          logger.info(`✅ Tool: ${item.mcpName} Registered.`)
           break
         }
         case 'prompt': {
           const prompt = item.prompt
           server.registerPrompt(
-            item.key,
+            item.mcpName,
             {
               argsSchema: prompt.argsSchema ? toStandardSchema(prompt.argsSchema) : undefined,
               description: prompt.description,
@@ -172,7 +189,7 @@ export const buildMcpServer = ({
         case 'resource': {
           const resource = item.resource
           server.registerResource(
-            item.key,
+            item.mcpName,
             // @ts-expect-error - Overload type ambiguity (string OR ResourceTemplate is valid)
             resource.uri,
             {
@@ -195,23 +212,29 @@ export const buildMcpServer = ({
         case 'tool': {
           const tool = item.tool
           server.registerTool(
-            item.key,
+            item.mcpName,
             {
+              annotations: tool.annotations,
               description: tool.description,
               inputSchema: tool.input ? toStandardSchema(tool.input) : undefined,
             },
-            async (input: unknown, ctx: ServerContext) =>
-              finalizeToolResponse(
-                await tool.handler({
-                  authorizedMCP,
-                  input: (input ?? {}) as Record<string, unknown>,
-                  req,
-                  serverContext: ctx,
-                }),
-                tool.overrideResponse,
-              ),
+            async (input: unknown, ctx: ServerContext) => {
+              const toolInput = (input ?? {}) as Record<string, unknown>
+              const response = await tool.handler({
+                authorizedMCP,
+                input: toolInput,
+                req,
+                serverContext: ctx,
+              })
+              return finalizeToolResponse({
+                input: toolInput,
+                overrideResponse: tool.overrideResponse,
+                response,
+                toolName: item.mcpName,
+              })
+            },
           )
-          logger.info(`✅ Tool: ${item.key} Registered.`)
+          logger.info(`✅ Tool: ${item.mcpName} Registered.`)
           break
         }
       }
@@ -221,4 +244,41 @@ export const buildMcpServer = ({
   }
 
   return server
+}
+
+const withSlugInput = ({
+  name,
+  input,
+}: {
+  input?: ToolInputSchema
+  name: 'collectionSlug' | 'globalSlug'
+}): ToolInputSchema => {
+  const description = name === 'collectionSlug' ? 'The collection slug' : 'The global slug'
+  const slugSchema = z.string().describe(description)
+
+  if (!input) {
+    return z.object({ [name]: slugSchema })
+  }
+
+  if (input instanceof z.ZodObject) {
+    return input.extend({ [name]: slugSchema })
+  }
+
+  const schema = input as {
+    properties?: Record<string, JsonSchemaType>
+    required?: string[]
+  } & JsonSchemaType
+
+  return {
+    ...schema,
+    type: 'object',
+    properties: {
+      ...schema.properties,
+      [name]: {
+        type: 'string',
+        description,
+      },
+    },
+    required: Array.from(new Set([name, ...(schema.required ?? [])])),
+  }
 }

@@ -26,4 +26,5 @@ export const AdminThumbnailSize: CollectionConfig = {
     ],
   },
   fields: [],
+  versions: false,
 }

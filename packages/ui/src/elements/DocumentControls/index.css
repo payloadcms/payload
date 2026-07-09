@@ -5,7 +5,7 @@
     top: 0;
     display: flex;
     justify-content: space-between;
-    z-index: 1;
+    z-index: var(--z-nav);
     gap: var(--spacer-2);
     padding: var(--spacer-2-5) var(--gutter-h);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
@@ -37,6 +37,7 @@
     display: flex;
     list-style: none;
     padding: 0;
+    color: var(--color-text);
     gap: var(--spacer-2);
     margin: 0;
     width: 100%;
@@ -114,6 +115,10 @@
     position: relative;
   }
 
+  .doc-controls__popup-button {
+    padding-inline: 0;
+  }
+
   .doc-controls__popup-button.popup-button--active,
   .doc-controls__popup-button.popup-button--active:hover,
   .doc-controls__popup-button.popup-button--active:active {
@@ -129,16 +134,30 @@
     display: none;
   }
 
+  /* Action buttons rendered inside the document drawer header */
+  .doc-controls--drawerHeaderActions {
+    position: static;
+    width: auto;
+    padding: 0;
+    gap: 0;
+    border-bottom: 0;
+    background: transparent;
+  }
+
   @media (max-width: 1024px) {
     .doc-controls__controls-wrapper {
       margin-left: auto;
     }
 
     .doc-controls {
-      padding: var(--spacer-2) var(--spacer-3);
-      padding-right: var(--spacer-2-5);
       gap: var(--spacer-2);
       flex-wrap: wrap;
+    }
+
+    .doc-controls--drawerHeaderActions {
+      padding: 0;
+      gap: 0;
+      flex-wrap: nowrap;
     }
 
     .doc-controls__content {

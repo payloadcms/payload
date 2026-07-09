@@ -46,7 +46,7 @@ export const MyJSONField: Field = {
 | **`required`**     | Require this field to have a value.                                                                                                                                                                                                                                                                     |
 | **`admin`**        | Admin-specific configuration. [More details](#admin-options).                                                                                                                                                                                                                                           |
 | **`custom`**       | Extension point for adding custom data (e.g. for plugins)                                                                                                                                                                                                                                               |
-| **`jsonSchema`**   | Override field json schema used for type generation and mcp validation                                                                                                                                                                                                                                  |
+| **`jsonSchema`**   | Override field JSON Schema used for type generation and MCP validation                                                                                                                                                                                                                                  |
 | **`virtual`**      | Provide `true` to disable field in the database, or provide a string path to [link the field with a relationship](/docs/fields/relationship#linking-virtual-fields-with-relationships). See [Virtual Fields](https://payloadcms.com/blog/learn-how-virtual-fields-can-help-solve-common-cms-challenges) |
 
 _\* An asterisk denotes that a property is required._
@@ -69,9 +69,9 @@ export const MyJSONField: Field = {
 
 The JSON Field inherits all of the default admin options from the base [Field Admin Config](./overview#admin-options), plus the following additional options:
 
-| Option              | Description                                                                                                                                                   |
-| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`editorOptions`** | Options that can be passed to the monaco editor, [view the full list](https://microsoft.github.io/monaco-editor/typedoc/variables/editor.EditorOptions.html). |
+| Option              | Description                                                                                                                                                                       |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`editorOptions`** | Options that can be passed to the monaco editor, [view the full list](https://microsoft.github.io/monaco-editor/docs.html#variables/editor_editor_api.editor.EditorOptions.html). |
 
 ## Example
 

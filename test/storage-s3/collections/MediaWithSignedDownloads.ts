@@ -6,4 +6,5 @@ export const MediaWithSignedDownloads: CollectionConfig = {
   slug: mediaWithSignedDownloadsSlug,
   upload: true,
   fields: [],
+  versions: false,
 }

@@ -43,6 +43,7 @@ type Args = {
    */
   forceFullValue?: boolean
   fullData: Data
+  globalSlug?: string
   id?: number | string
   /**
    * Whether the field schema should be included in the state. @default false
@@ -97,6 +98,7 @@ export const iterateFields = async ({
   filter,
   forceFullValue = false,
   fullData,
+  globalSlug,
   includeSchema = false,
   mockRSCs,
   omitParents = false,
@@ -185,6 +187,7 @@ export const iterateFields = async ({
         filter,
         forceFullValue,
         fullData,
+        globalSlug,
         includeSchema,
         indexPath,
         mockRSCs,

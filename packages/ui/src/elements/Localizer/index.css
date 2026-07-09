@@ -15,7 +15,7 @@
     gap: 0;
   }
 
-  .localizer .btn__icon {
+  .localizer .btn:not(.btn--selected) .btn__icon {
     color: var(--color-icon-secondary);
   }
 }

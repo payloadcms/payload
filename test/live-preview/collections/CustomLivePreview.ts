@@ -94,4 +94,5 @@ export const CustomLivePreview: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

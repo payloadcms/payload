@@ -1,6 +1,15 @@
 'use client'
 import { Modal, useModal } from '@faceless-ui/modal'
-import React, { createContext, use, useCallback, useLayoutEffect, useState } from 'react'
+import React, {
+  createContext,
+  use,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react'
 
 import type { Props, TogglerProps } from './types.js'
 
@@ -78,8 +87,20 @@ const DrawerInner: React.FC<Props> = ({
   const { t } = useTranslation()
   const { closeModal, modalState } = useModal()
   const drawerDepth = useDrawerDepth()
+  const uid = useId()
+  const { openDrawerDepths, registerDrawer, unregisterDrawer } = useDrawerStack()
 
   const isOpen = !!modalState[slug]?.isOpen
+
+  useEffect(() => {
+    if (isOpen) {
+      registerDrawer(uid, drawerDepth)
+
+      return () => unregisterDrawer(uid)
+    }
+  }, [isOpen, uid, drawerDepth, registerDrawer, unregisterDrawer])
+
+  const layersFromTop = openDrawerDepths.filter((depth) => depth > drawerDepth).length
 
   const [animateIn, setAnimateIn] = useState(isOpen)
 
@@ -91,23 +112,20 @@ const DrawerInner: React.FC<Props> = ({
     // IMPORTANT: do not render the drawer until it is explicitly open, this is to avoid large html trees especially when nesting drawers
     return (
       <Modal
-        className={[
-          className,
-          baseClass,
-          animateIn && `${baseClass}--is-open`,
-          drawerDepth > 1 && `${baseClass}--nested`,
-        ]
+        className={[className, baseClass, animateIn && `${baseClass}--is-open`]
           .filter(Boolean)
           .join(' ')}
         // Fixes https://github.com/payloadcms/payload/issues/13778
         closeOnBlur={false}
         slug={slug}
-        style={{
-          paddingRight: drawerDepth > 1 ? `calc(${drawerDepth - 1} * var(--spacer-3))` : undefined,
-          zIndex: drawerZBase + drawerDepth,
-        }}
+        style={
+          {
+            '--drawer-layer-offset': `calc(${layersFromTop} * var(--spacer-3))`,
+            zIndex: drawerZBase + drawerDepth,
+          } as React.CSSProperties
+        }
       >
-        {drawerDepth === 1 && <div className={`${baseClass}__blur-bg`} />}
+        <div className={`${baseClass}__blur-bg`} />
         <button
           aria-label={t('general:close')}
           className={`${baseClass}__close`}
@@ -172,3 +190,64 @@ export const DrawerDepthProvider: React.FC<{ children: React.ReactNode }> = ({ c
 }
 
 export const useDrawerDepth = (): number => use(DrawerDepthContext)
+
+type DrawerStackContextType = {
+  /** Depths of every currently-open drawer, used to compute layer offsets. */
+  openDrawerDepths: number[]
+  registerDrawer: (uid: string, depth: number) => void
+  unregisterDrawer: (uid: string) => void
+}
+
+const DrawerStackContext = createContext<DrawerStackContextType>({
+  openDrawerDepths: [],
+  registerDrawer: () => {},
+  unregisterDrawer: () => {},
+})
+
+/**
+ * Tracks the depths of all currently-open drawers so each drawer can compute
+ * its leftward offset relative to the rest of the open stack.
+ *
+ * Why this is needed: drawers are anchored to the right edge and stack as real
+ * layers. When a child drawer opens on top of its parent(s), every drawer
+ * beneath it must slide left to peek out from underneath the active (topmost)
+ * drawer — and slide back when that child closes. A drawer's own depth is
+ * static, so it cannot know on its own whether something deeper is currently
+ * open; that requires shared runtime state about the whole open stack.
+ *
+ * We track real `Drawer` instances (rather than scanning modal state by slug
+ * name) so confirmation modals like `leave-without-saving-...` never count, and
+ * so stacking never depends on slug naming conventions.
+ */
+export const DrawerStackProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [openDrawers, setOpenDrawers] = useState<Record<string, number>>({})
+
+  const registerDrawer = useCallback((uid: string, depth: number) => {
+    setOpenDrawers((prev) => (prev[uid] === depth ? prev : { ...prev, [uid]: depth }))
+  }, [])
+
+  const unregisterDrawer = useCallback((uid: string) => {
+    setOpenDrawers((prev) => {
+      if (!(uid in prev)) {
+        return prev
+      }
+
+      const next = { ...prev }
+      delete next[uid]
+      return next
+    })
+  }, [])
+
+  const value = useMemo<DrawerStackContextType>(
+    () => ({
+      openDrawerDepths: Object.values(openDrawers),
+      registerDrawer,
+      unregisterDrawer,
+    }),
+    [openDrawers, registerDrawer, unregisterDrawer],
+  )
+
+  return <DrawerStackContext value={value}>{children}</DrawerStackContext>
+}
+
+export const useDrawerStack = (): DrawerStackContextType => use(DrawerStackContext)

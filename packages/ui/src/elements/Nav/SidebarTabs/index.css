@@ -11,7 +11,7 @@
     display: flex;
     gap: 0;
     background-color: var(--color-bg-secondary);
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     width: 100%;
   }
 
@@ -22,10 +22,10 @@
     flex: 1;
     align-items: center;
     justify-content: center;
-    height: var(--spacer-4);
+    height: var(--button-height);
     padding: 0 var(--spacer-1);
     cursor: pointer;
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     border: var(--stroke-width-small) solid transparent;
     background-color: transparent;
     color: var(--color-icon-secondary);
@@ -37,6 +37,12 @@
 
     &:hover {
       color: var(--color-icon);
+    }
+
+    &:focus-visible {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
+      border-radius: var(--button-radius);
     }
   }
 

@@ -9,7 +9,7 @@
       pointer-events: none;
     }
 
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
@@ -156,6 +156,14 @@
     border-color: var(--color-border-selected-strong);
   }
 
+  /* Selected state - pill buttons */
+  .btn.btn--style-pill.btn--selected,
+  .btn.btn--style-pill.btn--selected:hover,
+  .btn.btn--style-pill.btn--selected:active {
+    background-color: var(--color-bg-selected);
+    color: var(--color-text-selected);
+  }
+
   /* Icon */
 
   .btn__icon {
@@ -204,7 +212,7 @@
   /* Sizes */
 
   .btn--size-medium {
-    height: var(--spacer-4, 1.5rem);
+    height: var(--button-height);
     padding: 0 var(--spacer-2);
 
     &:not(.btn--icon-only).btn--icon-position-left {
@@ -241,7 +249,7 @@
   .btn--round {
     aspect-ratio: 1;
     padding: 0;
-    border-radius: var(--radius-medium);
+    border-radius: var(--button-radius);
     justify-content: center;
 
     &.btn--size-medium {
@@ -279,7 +287,7 @@
     display: flex;
 
     &:has(.btn--size-medium) {
-      border-radius: var(--radius-medium);
+      border-radius: var(--button-radius);
 
       .popup-button {
         height: var(--spacer-4, 1.5rem);
@@ -287,7 +295,7 @@
     }
 
     &:has(.btn--size-large) {
-      border-radius: var(--radius-medium);
+      border-radius: var(--button-radius);
 
       .popup-button {
         height: var(--spacer-5, 2rem);
@@ -297,7 +305,7 @@
     .btn {
       margin: 0;
       border-radius: inherit;
-      border-radius: var(--radius-medium) 0 0 var(--radius-medium);
+      border-radius: var(--button-radius) 0 0 var(--button-radius);
 
       html:not([dir='RTL']) & {
         border-top-right-radius: 0;
@@ -311,7 +319,7 @@
     }
 
     .popup-button {
-      border-radius: var(--radius-medium);
+      border-radius: var(--button-radius);
       align-items: center;
       justify-content: center;
 

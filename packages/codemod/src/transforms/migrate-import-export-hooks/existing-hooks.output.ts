@@ -10,7 +10,7 @@ export const Posts = {
           hooks: {
             beforeImport: ({ value }) => value,
             beforeExport: ({ value }) => String(value) + ' exported',
-          },
+          }
         },
       },
     },

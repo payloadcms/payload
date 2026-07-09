@@ -1,14 +1,23 @@
-import type { SelectType } from 'payload'
+import type { PopulateType, SelectType } from 'payload'
 
 import { z } from 'zod'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
-const DEFAULT_DESCRIPTION = 'Find a Payload global singleton configuration.'
+const DEFAULT_DESCRIPTION = 'Find any Payload global by passing the global slug.'
 
 export const findGlobalTool = defineGlobalTool({
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.globals?.[args.globalSlug]?.read),
+  annotations: {
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+    readOnlyHint: true,
+    title: 'Find Global',
+  },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     depth: z
@@ -29,10 +38,16 @@ export const findGlobalTool = defineGlobalTool({
         'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
       )
       .optional(),
-    select: z
-      .string()
+    populate: z
+      .record(z.string(), z.unknown())
       .describe(
-        "Optional: define exactly which fields you'd like to return in the response (JSON), e.g., '{\"title\": true}'",
+        'Optional: control which fields to include from populated relationship or upload documents.',
+      )
+      .optional(),
+    select: z
+      .record(z.string(), z.unknown())
+      .describe(
+        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"title": true}',
       )
       .optional(),
   }),
@@ -40,7 +55,7 @@ export const findGlobalTool = defineGlobalTool({
   const payload = req.payload
   const logger = getLogger({ payload })
 
-  const { depth, fallbackLocale, locale, select } = input
+  const { depth, fallbackLocale, locale, populate, select } = input
 
   logger.info(
     `Reading global: ${globalSlug}, depth: ${depth}${locale ? `, locale: ${locale}` : ''}`,
@@ -50,17 +65,8 @@ export const findGlobalTool = defineGlobalTool({
     const findOptions: Parameters<typeof payload.findGlobal>[0] = {
       slug: globalSlug,
       depth,
-      ...localAPIDefaults(authorizedMCP),
-    }
-
-    let selectClause: SelectType | undefined
-    if (select) {
-      try {
-        selectClause = JSON.parse(select) as SelectType
-      } catch {
-        logger.warn(`Invalid select clause JSON for global: ${select}`)
-        return { content: [{ type: 'text', text: 'Error: Invalid JSON in select clause' }] }
-      }
+      overrideAccess: authorizedMCP.overrideAccess,
+      req,
     }
 
     if (locale) {
@@ -69,8 +75,11 @@ export const findGlobalTool = defineGlobalTool({
     if (fallbackLocale) {
       findOptions.fallbackLocale = fallbackLocale
     }
-    if (selectClause) {
-      findOptions.select = selectClause
+    if (select) {
+      findOptions.select = select as SelectType
+    }
+    if (populate) {
+      findOptions.populate = populate as PopulateType
     }
 
     const result = await payload.findGlobal(findOptions)

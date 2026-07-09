@@ -39,9 +39,5 @@
     .doc-tabs__tabs-container {
       margin-right: auto;
     }
-
-    .doc-tabs::after {
-      content: none;
-    }
   }
 }
