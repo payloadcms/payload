@@ -1,4 +1,4 @@
-# Payload CMS Advanced Features
+# Payload Advanced Features
 
 Complete reference for authentication, jobs, custom endpoints, components, plugins, and localization.
 
