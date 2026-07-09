@@ -9,7 +9,6 @@ import {
   getCollectionVirtualFieldNames,
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { whereSchema } from '../../../utils/whereSchema.js'
@@ -129,9 +128,9 @@ export const updateDocumentTool = defineCollectionTool({
         data: parsedData,
         depth,
         draft,
+        overrideAccess: authorizedMCP.overrideAccess,
         overrideLock,
         req,
-        ...localAPIDefaults(authorizedMCP),
         ...(filePath ? { filePath } : {}),
         ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
         ...(locale ? { locale } : {}),
@@ -155,10 +154,10 @@ export const updateDocumentTool = defineCollectionTool({
       data: parsedData,
       depth,
       draft,
+      overrideAccess: authorizedMCP.overrideAccess,
       overrideLock,
       req,
       where: whereClause,
-      ...localAPIDefaults(authorizedMCP),
       ...(filePath ? { filePath } : {}),
       ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
       ...(locale ? { locale } : {}),

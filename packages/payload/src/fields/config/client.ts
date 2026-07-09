@@ -43,6 +43,7 @@ export type ServerOnlyFieldProperties =
   | 'graphQL'
   | 'jsonSchema'
   | 'label'
+  | 'slugify' // This is a `slug` only property — a function, cannot cross the RSC boundary
   | 'validate'
   | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks'>
 
@@ -64,6 +65,7 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   'dbName', // can be a function
   'enumName', // can be a function
   'graphQL', // client does not need graphQL
+  'slugify', // `slug` field — a function, cannot cross the RSC boundary (server resolves it via `custom.slugify`)
   // the following props are handled separately (see below):
   // `label`
   // `fields`

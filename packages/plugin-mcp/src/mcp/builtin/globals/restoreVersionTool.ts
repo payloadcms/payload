@@ -5,9 +5,9 @@ import { z } from 'zod'
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
-const DEFAULT_DESCRIPTION = 'Restore a global from a previous version in any version-enabled global.'
+const DEFAULT_DESCRIPTION =
+  'Restore a global from a previous version in any version-enabled global.'
 
 export const restoreGlobalVersionTool = defineGlobalTool({
   access: (args) =>
@@ -61,8 +61,8 @@ export const restoreGlobalVersionTool = defineGlobalTool({
       id,
       slug: globalSlug,
       depth,
+      overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(fallbackLocale ? { fallbackLocale } : {}),
       ...(locale ? { locale } : {}),
       ...(populate ? { populate: populate as PopulateType } : {}),

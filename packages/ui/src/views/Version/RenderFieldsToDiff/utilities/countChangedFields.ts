@@ -80,6 +80,7 @@ export function countChangedFields({
       case 'relationship':
       case 'richText':
       case 'select':
+      case 'slug':
       case 'text':
       case 'textarea':
       case 'upload': {
