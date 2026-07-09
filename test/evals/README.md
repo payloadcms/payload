@@ -190,35 +190,15 @@ agent generates config
 Use this when a case needs both facts: "does the generated config boot and write
 the right data?" and "how complete was the result overall?"
 
-### MCP data-operation evals
+### Runtime evals
 
-MCP cases verify outcomes without requiring a particular tool name or input shape. Think of every
-case as three distinct phases:
+Runtime cases have three phases: `setup → agent → verify`. Setup prepares the starting state, the
+agent performs the task, and verification checks the final state. Only agent activity is scored.
 
-```text
-setup (Local API allowed) -> agent (MCP only) -> verify (inspect the outcome)
-```
+For MCP cases, the agent phase allows only Payload MCP. One `audit.json` records Payload operation
+attempts and completed MCP calls, and non-MCP Payload attempts are blocked. Each case uses a
+temporary SQLite database shared across all three phases and removed afterward.
 
-| Phase         | Runs in                          | Purpose                                                                | API and auditing rules                                                                                                                                     |
-| ------------- | -------------------------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **1. Setup**  | Parent test process              | Create the exact starting state through `setup()`                      | Local API is allowed. These operations are not part of the agent audit or efficiency score.                                                                |
-| **2. Agent**  | Isolated agent and MCP processes | Let the agent perform the requested task                               | Every Payload operation and MCP tool attempt is recorded. Any Payload request whose `req.payloadAPI` is not `MCP` is blocked and makes the case score `0`. |
-| **3. Verify** | Parent test process              | Inspect database state, the final response, provenance, and efficiency | Local API reads are available again. Verification activity is not counted as agent activity.                                                               |
-
-The per-case audit environment exists only during the agent phase. Fixture `beforeOperation` hooks
-use it to activate the guard, so setup and verification cannot contaminate the agent's operation
-counts. Payload operations and completed MCP tool calls are kept in execution order in one
-`audit.json` file per case.
-
-Each MCP runtime case gets its own temporary, file-backed SQLite database. File-backed storage lets
-setup, the MCP child process, and verification share data without requiring a database server,
-while per-case directories let independent agents run concurrently. Each directory, including any
-SQLite sidecar files, is removed after verification.
-
-If Claude Code produces no agent event for 90 seconds, the runner kills the process and the case
-fails.
-
-`scoreMCPExecution` then requires an audited operation against the expected entity and scores the
-complete agent transcript. A non-MCP attempt or missing required operation scores `0`; failed tool
-calls, calls beyond the case's allowance, and excess modification attempts reduce the score. Write
-cases assert final database state, while read cases additionally assert the final assistant response.
+`scoreMCPExecution` requires the expected audited operation, then reduces the score for failed MCP
+calls, calls above the case's allowance, and extra modification attempts. Claude Code cases are
+stopped after 90 seconds without an agent event.
