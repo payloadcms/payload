@@ -29,7 +29,6 @@ export default async function ShopPage({ searchParams }: Props) {
       gallery: true,
       categories: true,
       priceInUSD: true,
-      priceInUSDEnabled: true,
     },
     ...(sort ? { sort } : { sort: 'title' }),
     ...(searchValue || category
@@ -74,12 +73,6 @@ export default async function ShopPage({ searchParams }: Props) {
       : {}),
   })
 
-  // Filter out disabled USD prices to prevent stale prices from displaying
-  const cleanProducts = products.docs.map((product) => ({
-    ...product,
-    priceInUSD: product.priceInUSDEnabled ? product.priceInUSD : undefined,
-  }))
-
   const resultsText = products.docs.length > 1 ? 'results' : 'result'
 
   return (
@@ -97,9 +90,9 @@ export default async function ShopPage({ searchParams }: Props) {
         <p className="mb-4">No products found. Please try different filters.</p>
       )}
 
-      {cleanProducts.length > 0 ? (
+      {products?.docs.length > 0 ? (
         <Grid className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cleanProducts.map((product) => {
+          {products.docs.map((product) => {
             return <ProductGridItem key={product.id} product={product} />
           })}
         </Grid>
