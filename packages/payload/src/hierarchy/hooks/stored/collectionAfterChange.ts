@@ -1,37 +1,39 @@
 import type { CollectionAfterChangeHook } from '../../../index.js'
 import type { Document } from '../../../types/index.js'
 
-import { fieldAffectsData } from '../../../fields/config/types.js'
 import { computePaths } from '../../utils/computePaths.js'
-import { findFieldByName } from '../../utils/findUseAsTitle.js'
 import { isDocumentDraft } from '../../utils/isDocumentDraft.js'
 import { hasStoredPathChanged } from './utils/hasStoredPathChanged.js'
 import { syncChildDocuments } from './utils/syncChildDocuments.js'
 import { syncCurrentDocumentLocale } from './utils/syncCurrentDocumentLocale.js'
 
 type Args = {
+  isPathLocalized: boolean
   parentFieldName: string
   slugPathFieldName: string
   titlePathFieldName: string
 }
 
 export const collectionAfterChangeStored =
-  ({ parentFieldName, slugPathFieldName, titlePathFieldName }: Args): CollectionAfterChangeHook =>
+  ({
+    isPathLocalized,
+    parentFieldName,
+    slugPathFieldName,
+    titlePathFieldName,
+  }: Args): CollectionAfterChangeHook =>
   async ({ collection, context, doc, previousDoc, req }) => {
     if (context?.skipHierarchyStoredPathSync === true) {
       return doc
     }
 
-    const storedSlugField = findFieldByName(collection, slugPathFieldName)
-    const storedTitleField = findFieldByName(collection, titlePathFieldName)
-    const shouldSyncAllLocales = Boolean(storedSlugField?.localized || storedTitleField?.localized)
-    const dataFieldNames = collection.fields
-      .filter((field) => fieldAffectsData(field))
-      .map((field) => field.name)
-    const locales = shouldSyncAllLocales
-      ? req.payload.config.localization?.localeCodes || []
+    const locales = isPathLocalized
+      ? req.payload.config.localization
+        ? req.payload.config.localization.localeCodes
+        : []
       : [req.locale || undefined]
-    const currentLocale = req.locale || req.payload.config.localization?.defaultLocale
+    const currentLocale =
+      req.locale ||
+      (req.payload.config.localization ? req.payload.config.localization.defaultLocale : undefined)
     const draft = isDocumentDraft({
       doc,
       locale: currentLocale || req.locale || undefined,
@@ -107,7 +109,7 @@ export const collectionAfterChangeStored =
       })
     }
 
-    if (shouldSyncAllLocales && currentLocale) {
+    if (isPathLocalized && currentLocale) {
       for (const locale of locales) {
         if (!locale || locale === currentLocale) {
           continue
@@ -115,7 +117,6 @@ export const collectionAfterChangeStored =
 
         const updatedLocaleDoc = await syncCurrentDocumentLocale({
           collection,
-          dataFieldNames,
           doc,
           draft: isDocumentDraft({
             doc,
@@ -142,7 +143,6 @@ export const collectionAfterChangeStored =
     for (const locale of locales) {
       await syncChildDocuments({
         collection,
-        dataFieldNames,
         docID: doc.id,
         locale,
         parentFieldName,

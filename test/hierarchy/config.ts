@@ -249,6 +249,31 @@ export const Products: CollectionConfig = {
   },
 }
 
+export const LocalizedTitleFieldPages: CollectionConfig = {
+  slug: 'localized-title-field-pages',
+  admin: {
+    useAsTitle: 'fallbackTitle',
+  },
+  fields: [
+    {
+      name: 'fallbackTitle',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'localizedTitle',
+      type: 'text',
+      localized: true,
+      required: true,
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+    titleField: 'localizedTitle',
+  },
+  versions: false,
+}
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -260,6 +285,7 @@ export default buildConfigWithDefaults({
     Departments,
     Divisions,
     Folders,
+    LocalizedTitleFieldPages,
     Organizations,
     Pages,
     Products,

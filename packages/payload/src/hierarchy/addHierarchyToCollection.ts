@@ -71,6 +71,7 @@ export const addHierarchyToCollection = ({
         ? [
             ...(collectionConfig.hooks?.afterChange || []),
             collectionAfterChangeStored({
+              isPathLocalized,
               parentFieldName,
               slugPathFieldName,
               titlePathFieldName,
@@ -82,6 +83,7 @@ export const addHierarchyToCollection = ({
         ? [
             ...(collectionConfig.hooks?.afterRead || []),
             collectionAfterReadVirtual({
+              isPathLocalized,
               parentFieldName,
               slugPathFieldName,
               titlePathFieldName,

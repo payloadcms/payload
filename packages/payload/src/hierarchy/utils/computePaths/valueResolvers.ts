@@ -52,7 +52,9 @@ export const getTitleValue = ({
     }
 
     if (typeof titleValue === 'string') {
-      const defaultLocale = req.payload.config.localization?.defaultLocale
+      const defaultLocale = req.payload.config.localization
+        ? req.payload.config.localization.defaultLocale
+        : undefined
       if (defaultLocale) {
         return { [defaultLocale]: titleValue }
       }
@@ -60,7 +62,10 @@ export const getTitleValue = ({
   }
 
   if (isTitleLocalized && typeof titleValue === 'object') {
-    const resolvedLocale = locale || req.locale || req.payload.config.localization?.defaultLocale
+    const resolvedLocale =
+      locale ||
+      req.locale ||
+      (req.payload.config.localization ? req.payload.config.localization.defaultLocale : undefined)
 
     const localizedValue = getLocalizedValue({
       fallbackLocale: req.fallbackLocale,
@@ -99,7 +104,9 @@ export const getSlugFieldValue = ({
     }
 
     if (typeof slugValue === 'string') {
-      const defaultLocale = req.payload.config.localization?.defaultLocale
+      const defaultLocale = req.payload.config.localization
+        ? req.payload.config.localization.defaultLocale
+        : undefined
       if (defaultLocale) {
         return { [defaultLocale]: slugValue }
       }
@@ -107,7 +114,10 @@ export const getSlugFieldValue = ({
   }
 
   if (isSlugLocalized && typeof slugValue === 'object') {
-    const resolvedLocale = locale || req.locale || req.payload.config.localization?.defaultLocale
+    const resolvedLocale =
+      locale ||
+      req.locale ||
+      (req.payload.config.localization ? req.payload.config.localization.defaultLocale : undefined)
 
     if (!resolvedLocale || resolvedLocale === 'all') {
       return undefined
@@ -134,6 +144,7 @@ export const buildBasePathsForDocument = ({
   slugFieldName,
   slugify,
   titleFieldName,
+  titlePathSeparator,
 }: {
   document: Document
   isSlugLocalized: boolean
@@ -143,6 +154,7 @@ export const buildBasePathsForDocument = ({
   slugFieldName?: string
   slugify: (val: string) => string
   titleFieldName: string
+  titlePathSeparator: string
 }): ComputePathsResult => {
   const titleValue = getTitleValue({
     document,
@@ -162,12 +174,19 @@ export const buildBasePathsForDocument = ({
       })
     : undefined
 
-  if (isTitleLocalized && locale === 'all') {
+  if ((isSlugLocalized || isTitleLocalized) && locale === 'all') {
+    const locales = req.payload.config.localization
+      ? req.payload.config.localization.localeCodes
+      : []
+
     return buildLocalizedHierarchyPaths({
       req,
       slugify,
       slugValue: slugValue as Record<string, string> | undefined,
-      titleValue: titleValue as Record<string, string>,
+      titlePathSeparator,
+      titleValue: isTitleLocalized
+        ? (titleValue as Record<string, string>)
+        : (toLocalizedPathMap({ locales, value: titleValue as string }) ?? {}),
     })
   }
 

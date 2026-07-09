@@ -31,7 +31,11 @@ export const collectionBeforeChangeStored =
 
     const draft = isDocumentDraft({
       doc: mergedDoc,
-      locale: req.locale || req.payload.config.localization?.defaultLocale,
+      locale:
+        req.locale ||
+        (req.payload.config.localization
+          ? req.payload.config.localization.defaultLocale
+          : undefined),
     })
 
     const { slugPath, titlePath } = await computePaths({

@@ -4,12 +4,11 @@ import type { Document } from '../../../../types/index.js'
 
 import { computePaths } from '../../../utils/computePaths.js'
 import { isDocumentDraft } from '../../../utils/isDocumentDraft.js'
-import { buildUpdateDataFromDocument } from './buildUpdateDataFromDocument.js'
+import { buildStoredPathUpdateData } from './buildStoredPathUpdateData.js'
 import { shouldSkipStoredPathSyncUpdate } from './shouldSkipStoredPathSyncUpdate.js'
 
 export const syncCurrentDocumentLocale = async ({
   collection,
-  dataFieldNames,
   doc,
   draft,
   locale,
@@ -19,7 +18,6 @@ export const syncCurrentDocumentLocale = async ({
   titlePathFieldName,
 }: {
   collection: SanitizedCollectionConfig
-  dataFieldNames: string[]
   doc: Document
   draft: boolean
   locale: string
@@ -33,9 +31,14 @@ export const syncCurrentDocumentLocale = async ({
     collection: collection.slug,
     depth: 0,
     draft,
+    fallbackLocale: false,
     locale,
     req,
   })
+
+  if (localeDoc[slugPathFieldName] === undefined && localeDoc[titlePathFieldName] === undefined) {
+    return localeDoc
+  }
 
   const localeDraft = isDocumentDraft({
     doc: localeDoc,
@@ -69,9 +72,11 @@ export const syncCurrentDocumentLocale = async ({
     }
   }
 
-  const updateData = buildUpdateDataFromDocument({
-    dataFieldNames,
-    doc: localeDoc,
+  const updateData = buildStoredPathUpdateData({
+    slugPath,
+    slugPathFieldName,
+    titlePath,
+    titlePathFieldName,
   })
 
   return await req.payload.update({
@@ -87,6 +92,7 @@ export const syncCurrentDocumentLocale = async ({
         ...req.context,
         skipHierarchyStoredPathSync: true,
       },
+      locale,
     },
   })
 }

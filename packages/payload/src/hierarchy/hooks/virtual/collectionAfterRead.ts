@@ -10,18 +10,23 @@
 import type { CollectionAfterReadHook } from '../../../index.js'
 
 import { computePaths } from '../../utils/computePaths.js'
-import { findUseAsTitleField } from '../../utils/findUseAsTitle.js'
 import { isDocumentDraft } from '../../utils/isDocumentDraft.js'
 import { isPathFieldSelectedFromRequest } from './utils/pathFieldSelection.js'
 
 type Args = {
+  isPathLocalized: boolean
   parentFieldName: string
   slugPathFieldName: string
   titlePathFieldName: string
 }
 
 export const collectionAfterReadVirtual =
-  ({ parentFieldName, slugPathFieldName, titlePathFieldName }: Args): CollectionAfterReadHook =>
+  ({
+    isPathLocalized,
+    parentFieldName,
+    slugPathFieldName,
+    titlePathFieldName,
+  }: Args): CollectionAfterReadHook =>
   async ({ collection, context, doc, req }) => {
     if (context?.isDeleting) {
       return doc
@@ -38,20 +43,24 @@ export const collectionAfterReadVirtual =
     }
 
     try {
-      const { localized: isTitleLocalized } = findUseAsTitleField(collection)
+      const hierarchyConfig = collection.hierarchy
+      if (hierarchyConfig === false) {
+        return doc
+      }
+
+      const defaultLocale = req.payload.config.localization
+        ? req.payload.config.localization.defaultLocale
+        : undefined
 
       const { slugPath, titlePath } = await computePaths({
         collection,
         doc,
         draft: isDocumentDraft({
           doc,
-          locale:
-            req.locale === 'all'
-              ? undefined
-              : req.locale || req.payload.config.localization?.defaultLocale,
+          locale: req.locale === 'all' ? undefined : req.locale || defaultLocale,
         }),
         locale:
-          isTitleLocalized && req.locale === 'all'
+          isPathLocalized && req.locale === 'all'
             ? 'all'
             : req.locale === 'all'
               ? undefined

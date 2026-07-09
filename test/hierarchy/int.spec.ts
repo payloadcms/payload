@@ -468,7 +468,7 @@ describe('Hierarchy', () => {
           collection: 'organizations',
           context: { computeHierarchyPaths: true },
           data: {
-            parent: currentParent?.id || null,
+            parent: currentParent ? currentParent.id : null,
             title: `Level ${i}`,
           },
         })
@@ -730,6 +730,64 @@ describe('Hierarchy', () => {
         de: 'Kleidung / Hemden',
         en: 'Clothing / Shirts',
         es: 'Ropa / Camisas',
+      })
+    })
+
+    it('should generate localized virtual paths when hierarchy.titleField is localized', async () => {
+      const parent = await payload.create({
+        collection: 'localized-title-field-pages',
+        data: {
+          fallbackTitle: 'Fallback Parent',
+          localizedTitle: 'Parent',
+          parent: null,
+        },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: parent.id,
+        collection: 'localized-title-field-pages',
+        data: {
+          localizedTitle: 'Padre',
+        },
+        locale: 'es',
+      })
+
+      const child = await payload.create({
+        collection: 'localized-title-field-pages',
+        data: {
+          fallbackTitle: 'Fallback Child',
+          localizedTitle: 'Child',
+          parent: parent.id,
+        },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: child.id,
+        collection: 'localized-title-field-pages',
+        data: {
+          localizedTitle: 'Hijo',
+        },
+        locale: 'es',
+      })
+
+      const childWithAllLocales = await payload.findByID({
+        collection: 'localized-title-field-pages',
+        context: { computeHierarchyPaths: true },
+        id: child.id,
+        locale: 'all',
+      })
+
+      expect(childWithAllLocales._h_slugPath).toEqual({
+        de: 'parent/child',
+        en: 'parent/child',
+        es: 'padre/hijo',
+      })
+      expect(childWithAllLocales._h_titlePath).toEqual({
+        de: 'Parent / Child',
+        en: 'Parent / Child',
+        es: 'Padre / Hijo',
       })
     })
 

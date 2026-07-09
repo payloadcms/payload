@@ -1,5 +1,6 @@
 export const explicitStoredPagesSlug = 'explicit-stored-pages'
 export const customSeparatorPagesSlug = 'custom-separator-pages'
 export const localizedTitlePagesSlug = 'localized-title-pages'
+export const localizedSlugPagesSlug = 'localized-slug-pages'
 export const nestedDocsPagesSlug = 'nested-docs-pages'
 export const usersSlug = 'users'

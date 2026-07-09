@@ -4,12 +4,11 @@ import type { Document } from '../../../../types/index.js'
 
 import { computePaths } from '../../../utils/computePaths.js'
 import { isDocumentDraft } from '../../../utils/isDocumentDraft.js'
-import { buildUpdateDataFromDocument } from './buildUpdateDataFromDocument.js'
+import { buildStoredPathUpdateData } from './buildStoredPathUpdateData.js'
 import { shouldSkipStoredPathSyncUpdate } from './shouldSkipStoredPathSyncUpdate.js'
 
 export const syncChildDocuments = async ({
   collection,
-  dataFieldNames,
   docID,
   locale,
   parentFieldName,
@@ -18,7 +17,6 @@ export const syncChildDocuments = async ({
   titlePathFieldName,
 }: {
   collection: SanitizedCollectionConfig
-  dataFieldNames: string[]
   docID: number | string
   locale: string | undefined
   parentFieldName: string
@@ -30,6 +28,7 @@ export const syncChildDocuments = async ({
     collection: collection.slug,
     depth: 0,
     draft: true,
+    fallbackLocale: false,
     limit: 0,
     locale,
     req,
@@ -48,6 +47,7 @@ export const syncChildDocuments = async ({
     collection: collection.slug,
     depth: 0,
     draft: false,
+    fallbackLocale: false,
     limit: 0,
     locale,
     req,
@@ -77,6 +77,10 @@ export const syncChildDocuments = async ({
   )
 
   for (const child of sortedChildren) {
+    if (child[slugPathFieldName] === undefined && child[titlePathFieldName] === undefined) {
+      continue
+    }
+
     const childDraft = isDocumentDraft({ doc: child, locale })
 
     const { slugPath, titlePath } = await computePaths({
@@ -99,9 +103,11 @@ export const syncChildDocuments = async ({
     })
 
     if (!shouldSkipPathSync) {
-      const updateData = buildUpdateDataFromDocument({
-        dataFieldNames,
-        doc: child,
+      const updateData = buildStoredPathUpdateData({
+        slugPath,
+        slugPathFieldName,
+        titlePath,
+        titlePathFieldName,
       })
 
       await req.payload.update({
@@ -117,13 +123,13 @@ export const syncChildDocuments = async ({
             ...req.context,
             skipHierarchyStoredPathSync: true,
           },
+          locale,
         },
       })
     }
 
     await syncChildDocuments({
       collection,
-      dataFieldNames,
       docID: child.id,
       locale,
       parentFieldName,

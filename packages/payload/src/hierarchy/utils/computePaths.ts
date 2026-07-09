@@ -155,11 +155,12 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
           parentFieldName: hierarchyConfig.parentFieldName,
           parentID,
           req,
-          slugFieldName,
+          shouldSlugifySlugSource: !slugFieldName,
           slugify,
           slugPathFieldName,
-          titleFieldName,
+          slugSourceFieldName: slugFieldName ?? titleFieldName,
           titlePathFieldName,
+          titleSourceFieldName: titleFieldName,
         })
 
         // Store in cache
@@ -182,6 +183,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
         slugFieldName,
         slugify,
         titleFieldName,
+        titlePathSeparator,
       })
     }
 
@@ -257,6 +259,7 @@ export async function computePaths(args: ComputePathsArgs): Promise<ComputePaths
       slugFieldName,
       slugify,
       titleFieldName,
+      titlePathSeparator,
     })
   }
 }

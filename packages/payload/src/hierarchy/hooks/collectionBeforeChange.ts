@@ -94,8 +94,6 @@ async function validateNoCircularReference({
   parentId: number | string
   req: PayloadRequest
 }) {
-  const fieldName = parentFieldName
-
   async function checkAncestor(
     ancestorId: number | string,
     visitedNodes: Set<string> = new Set(),
@@ -123,11 +121,11 @@ async function validateNoCircularReference({
         depth: 0,
         req,
         select: {
-          [fieldName]: true,
+          [parentFieldName]: true,
         },
       })) as JsonObject
 
-      const nextParent = ancestor?.[fieldName]
+      const nextParent = ancestor?.[parentFieldName]
 
       if (!nextParent) {
         return // No parent, end of chain

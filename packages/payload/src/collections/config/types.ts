@@ -378,6 +378,7 @@ export type FoldersConfig = {
     | boolean
   joinField?: HierarchyJoinFieldConfig
   parentFieldName?: string
+  pathStrategy?: 'stored' | 'virtual'
   slugField?: string
   slugify?: (text: string) => string
   slugPathFieldName?: string

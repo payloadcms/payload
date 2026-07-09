@@ -8,6 +8,7 @@ import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   customSeparatorPagesSlug,
   explicitStoredPagesSlug,
+  localizedSlugPagesSlug,
   localizedTitlePagesSlug,
   nestedDocsPagesSlug,
 } from './shared.js'
@@ -41,6 +42,11 @@ describe('hierarchy stored path sync', () => {
 
     await payload.delete({
       collection: customSeparatorPagesSlug,
+      where: {},
+    })
+
+    await payload.delete({
+      collection: localizedSlugPagesSlug,
       where: {},
     })
   })
@@ -92,9 +98,9 @@ describe('hierarchy stored path sync', () => {
       const root = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'home',
           _status: 'published',
           parent: null,
-          slug: 'home',
           title: 'Home',
         },
       })
@@ -102,9 +108,9 @@ describe('hierarchy stored path sync', () => {
       const child = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'services',
           _status: 'published',
           parent: root.id,
-          slug: 'services',
           title: 'Services',
         },
       })
@@ -131,8 +137,8 @@ describe('hierarchy stored path sync', () => {
       const root = await payload.create({
         collection: customSeparatorPagesSlug,
         data: {
-          parent: null,
           slug: 'home',
+          parent: null,
           title: 'Home',
         },
       })
@@ -140,8 +146,8 @@ describe('hierarchy stored path sync', () => {
       const child = await payload.create({
         collection: customSeparatorPagesSlug,
         data: {
-          parent: root.id,
           slug: 'about',
+          parent: root.id,
           title: 'About',
         },
       })
@@ -154,9 +160,9 @@ describe('hierarchy stored path sync', () => {
       const root = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'home',
           _status: 'published',
           parent: null,
-          slug: 'home',
           title: 'Home',
         },
       })
@@ -164,9 +170,9 @@ describe('hierarchy stored path sync', () => {
       const child = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'services',
           _status: 'published',
           parent: root.id,
-          slug: 'services',
           title: 'Services',
         },
       })
@@ -175,8 +181,8 @@ describe('hierarchy stored path sync', () => {
         id: root.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'published',
           slug: 'homepage',
+          _status: 'published',
         },
       })
 
@@ -194,9 +200,9 @@ describe('hierarchy stored path sync', () => {
       const root = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'home',
           _status: 'published',
           parent: null,
-          slug: 'home',
           title: 'Home',
         },
       })
@@ -204,9 +210,9 @@ describe('hierarchy stored path sync', () => {
       const child = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'services',
           _status: 'published',
           parent: root.id,
-          slug: 'services',
           title: 'Services',
         },
       })
@@ -214,9 +220,9 @@ describe('hierarchy stored path sync', () => {
       const grandchild = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'consulting',
           _status: 'published',
           parent: child.id,
-          slug: 'consulting',
           title: 'Consulting',
         },
       })
@@ -225,8 +231,8 @@ describe('hierarchy stored path sync', () => {
         id: root.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'published',
           slug: 'homepage',
+          _status: 'published',
         },
       })
 
@@ -244,9 +250,9 @@ describe('hierarchy stored path sync', () => {
       const parent = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'draft-parent',
           _status: 'draft',
           parent: null,
-          slug: 'draft-parent',
           title: 'Draft Parent',
         },
       })
@@ -254,9 +260,9 @@ describe('hierarchy stored path sync', () => {
       const child = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'child',
           _status: 'draft',
           parent: parent.id,
-          slug: 'child',
           title: 'Child',
         },
       })
@@ -277,9 +283,9 @@ describe('hierarchy stored path sync', () => {
       const parent = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'parent',
           _status: 'draft',
           parent: null,
-          slug: 'parent',
           title: 'Parent',
         },
       })
@@ -287,9 +293,9 @@ describe('hierarchy stored path sync', () => {
       const child = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'child',
           _status: 'draft',
           parent: parent.id,
-          slug: 'child',
           title: 'Child',
         },
       })
@@ -323,8 +329,8 @@ describe('hierarchy stored path sync', () => {
         id: parent.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'draft',
           slug: 'updated-parent',
+          _status: 'draft',
           title: 'Updated Parent',
         },
       })
@@ -362,9 +368,9 @@ describe('hierarchy stored path sync', () => {
       const root = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'home',
           _status: 'published',
           parent: null,
-          slug: 'home',
           title: 'Home',
         },
       })
@@ -373,8 +379,8 @@ describe('hierarchy stored path sync', () => {
         id: root.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'published',
           slug: 'inicio',
+          _status: 'published',
           title: 'Inicio',
         },
         locale: 'es',
@@ -384,8 +390,8 @@ describe('hierarchy stored path sync', () => {
         id: root.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'published',
           slug: 'startseite',
+          _status: 'published',
           title: 'Startseite',
         },
         locale: 'de',
@@ -394,9 +400,9 @@ describe('hierarchy stored path sync', () => {
       const child = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'services',
           _status: 'published',
           parent: root.id,
-          slug: 'services',
           title: 'Services',
         },
       })
@@ -405,8 +411,8 @@ describe('hierarchy stored path sync', () => {
         id: child.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'published',
           slug: 'servicios',
+          _status: 'published',
           title: 'Servicios',
         },
         locale: 'es',
@@ -416,8 +422,8 @@ describe('hierarchy stored path sync', () => {
         id: child.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'published',
           slug: 'dienstleistungen',
+          _status: 'published',
           title: 'Dienstleistungen',
         },
         locale: 'de',
@@ -434,8 +440,8 @@ describe('hierarchy stored path sync', () => {
         id: root.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'draft',
           slug: 'home-draft',
+          _status: 'draft',
         },
       })
 
@@ -463,9 +469,9 @@ describe('hierarchy stored path sync', () => {
       const root = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'parent',
           _status: 'published',
           parent: null,
-          slug: 'parent',
           title: 'Parent',
         },
         locale: 'en',
@@ -475,8 +481,8 @@ describe('hierarchy stored path sync', () => {
         id: root.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'draft',
           slug: 'padre',
+          _status: 'draft',
           title: 'Padre',
         },
         locale: 'es',
@@ -485,9 +491,9 @@ describe('hierarchy stored path sync', () => {
       const child = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'child',
           _status: 'published',
           parent: root.id,
-          slug: 'child',
           title: 'Child',
         },
         locale: 'en',
@@ -497,8 +503,8 @@ describe('hierarchy stored path sync', () => {
         id: child.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'draft',
           slug: 'hijo',
+          _status: 'draft',
           title: 'Hijo',
         },
         locale: 'es',
@@ -546,8 +552,8 @@ describe('hierarchy stored path sync', () => {
         id: root.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'draft',
           slug: 'padre-actualizado',
+          _status: 'draft',
           title: 'Padre Actualizado',
         },
         locale: 'es',
@@ -583,13 +589,106 @@ describe('hierarchy stored path sync', () => {
       expect(childAfterParentSpanishRepublish._h_titlePath).toBe('Padre Actualizado / Hijo')
     })
 
+    it('should build localized stored slug paths when the slug field is localized and title is not', async () => {
+      const root = await payload.create({
+        collection: localizedSlugPagesSlug,
+        data: {
+          slug: 'home',
+          parent: null,
+          title: 'Home',
+        },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: root.id,
+        collection: localizedSlugPagesSlug,
+        data: {
+          slug: 'inicio',
+        },
+        locale: 'es',
+      })
+
+      const child = await payload.create({
+        collection: localizedSlugPagesSlug,
+        data: {
+          slug: 'services',
+          parent: root.id,
+          title: 'Services',
+        },
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: child.id,
+        collection: localizedSlugPagesSlug,
+        data: {
+          slug: 'servicios',
+        },
+        locale: 'es',
+      })
+
+      const childWithAllLocales = await payload.findByID({
+        id: child.id,
+        collection: localizedSlugPagesSlug,
+        depth: 0,
+        locale: 'all',
+      })
+
+      expect(childWithAllLocales._h_slugPath).toEqual({
+        en: 'home/services',
+        es: 'inicio/servicios',
+      })
+      expect(childWithAllLocales._h_titlePath).toEqual({
+        en: 'Home / Services',
+        es: 'Home / Services',
+      })
+    })
+
+    it('should only write hierarchy-managed fields during internal stored path sync', async () => {
+      const root = await payload.create({
+        collection: localizedSlugPagesSlug,
+        data: {
+          slug: 'home',
+          parent: null,
+          title: 'Home',
+        },
+      })
+
+      const child = await payload.create({
+        collection: localizedSlugPagesSlug,
+        data: {
+          slug: 'services',
+          parent: root.id,
+          title: 'Services',
+        },
+      })
+
+      await payload.update({
+        id: root.id,
+        collection: localizedSlugPagesSlug,
+        data: {
+          slug: 'homepage',
+        },
+      })
+
+      const updatedChild = await payload.findByID({
+        id: child.id,
+        collection: localizedSlugPagesSlug,
+        depth: 0,
+      })
+
+      expect(updatedChild._h_slugPath).toBe('homepage/services')
+      expect(updatedChild._h_titlePath).toBe('Home / Services')
+    })
+
     it('should update localized descendant paths for all locales after parent move', async () => {
       const root = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'home',
           _status: 'published',
           parent: null,
-          slug: 'home',
           title: 'Home',
         },
         locale: 'en',
@@ -599,8 +698,8 @@ describe('hierarchy stored path sync', () => {
         id: root.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'published',
           slug: 'inicio',
+          _status: 'published',
           title: 'Inicio',
         },
         locale: 'es',
@@ -610,8 +709,8 @@ describe('hierarchy stored path sync', () => {
         id: root.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'published',
           slug: 'startseite',
+          _status: 'published',
           title: 'Startseite',
         },
         locale: 'de',
@@ -620,9 +719,9 @@ describe('hierarchy stored path sync', () => {
       const child = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'services',
           _status: 'published',
           parent: root.id,
-          slug: 'services',
           title: 'Services',
         },
         locale: 'en',
@@ -632,8 +731,8 @@ describe('hierarchy stored path sync', () => {
         id: child.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'published',
           slug: 'servicios',
+          _status: 'published',
           title: 'Servicios',
         },
         locale: 'es',
@@ -643,8 +742,8 @@ describe('hierarchy stored path sync', () => {
         id: child.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'published',
           slug: 'dienstleistungen',
+          _status: 'published',
           title: 'Dienstleistungen',
         },
         locale: 'de',
@@ -653,9 +752,9 @@ describe('hierarchy stored path sync', () => {
       const newRoot = await payload.create({
         collection: nestedDocsPagesSlug,
         data: {
+          slug: 'catalog',
           _status: 'published',
           parent: null,
-          slug: 'catalog',
           title: 'Catalog',
         },
         locale: 'en',
@@ -665,8 +764,8 @@ describe('hierarchy stored path sync', () => {
         id: newRoot.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'published',
           slug: 'catalogo',
+          _status: 'published',
           title: 'Catalogo',
         },
         locale: 'es',
@@ -676,8 +775,8 @@ describe('hierarchy stored path sync', () => {
         id: newRoot.id,
         collection: nestedDocsPagesSlug,
         data: {
-          _status: 'published',
           slug: 'katalog',
+          _status: 'published',
           title: 'Katalog',
         },
         locale: 'de',
@@ -716,9 +815,9 @@ describe('hierarchy stored path sync', () => {
       const root = await payload.create({
         collection: localizedTitlePagesSlug,
         data: {
+          slug: 'home',
           _status: 'published',
           parent: null,
-          slug: 'home',
           title: 'Home',
         },
         locale: 'en',
@@ -747,9 +846,9 @@ describe('hierarchy stored path sync', () => {
       const child = await payload.create({
         collection: localizedTitlePagesSlug,
         data: {
+          slug: 'services',
           _status: 'published',
           parent: root.id,
-          slug: 'services',
           title: 'Services',
         },
         locale: 'en',
@@ -798,9 +897,9 @@ describe('hierarchy stored path sync', () => {
       const root = await payload.create({
         collection: localizedTitlePagesSlug,
         data: {
+          slug: 'home',
           _status: 'published',
           parent: null,
-          slug: 'home',
           title: 'Home',
         },
         locale: 'en',
@@ -819,9 +918,9 @@ describe('hierarchy stored path sync', () => {
       const child = await payload.create({
         collection: localizedTitlePagesSlug,
         data: {
+          slug: 'services',
           _status: 'published',
           parent: root.id,
-          slug: 'services',
           title: 'Services',
         },
         locale: 'en',

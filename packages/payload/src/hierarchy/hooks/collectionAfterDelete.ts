@@ -15,15 +15,15 @@ type Args = {
 export const collectionAfterDelete =
   ({ relatedCollections }: Args): CollectionAfterDeleteHook =>
   async ({ id, req }) => {
-    for (const [collectionSlug, fieldName] of Object.entries(relatedCollections)) {
+    for (const [collectionSlug, parentFieldName] of Object.entries(relatedCollections)) {
       await req.payload.update({
         collection: collectionSlug,
         data: {
-          [fieldName]: null,
+          [parentFieldName]: null,
         },
         req,
         where: {
-          [fieldName]: {
+          [parentFieldName]: {
             equals: id,
           },
         },

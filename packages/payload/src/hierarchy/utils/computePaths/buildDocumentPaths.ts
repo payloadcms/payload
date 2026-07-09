@@ -7,7 +7,7 @@ import { getSlugFieldValue, getTitleValue, toLocalizedPathMap } from './valueRes
 
 type BuildDocumentPathsArgs = {
   collection: SanitizedCollectionConfig
-  context: PayloadRequest['context']
+  context: HierarchyPathContext
   currentDocCacheKey: string
   doc: Document
   draft: boolean
@@ -24,6 +24,23 @@ type BuildDocumentPathsArgs = {
   titleFieldName: string
   titlePathFieldName: string
   titlePathSeparator: string
+}
+
+type HierarchyPathContext = {
+  hierarchyAncestorCache?: Record<string, Record<string, Document>>
+} & PayloadRequest['context']
+
+const getCollectionAncestorCache = ({
+  collection,
+  context,
+}: {
+  collection: SanitizedCollectionConfig
+  context: HierarchyPathContext
+}): Record<string, Document> => {
+  context.hierarchyAncestorCache ||= {}
+  const collectionCache = (context.hierarchyAncestorCache[collection.slug] ||= {})
+
+  return collectionCache
 }
 
 const getParentPathValues = async ({
@@ -170,10 +187,10 @@ const buildLocalizedDocumentPaths = async ({
     titleValue: docTitle as Record<string, string>,
   })
 
-  context.hierarchyAncestorCache[collection.slug][currentDocCacheKey][slugPathFieldName] =
-    result.slugPath
-  context.hierarchyAncestorCache[collection.slug][currentDocCacheKey][titlePathFieldName] =
-    result.titlePath
+  const cache = getCollectionAncestorCache({ collection, context })
+  cache[currentDocCacheKey] ||= {}
+  cache[currentDocCacheKey][slugPathFieldName] = result.slugPath
+  cache[currentDocCacheKey][titlePathFieldName] = result.titlePath
 
   return result
 }
@@ -231,10 +248,10 @@ const buildSingleLocaleDocumentPaths = async ({
     titlePath: (parentTitlePath as string) + titlePathSeparator + (docTitle as string),
   }
 
-  context.hierarchyAncestorCache[collection.slug][currentDocCacheKey][slugPathFieldName] =
-    result.slugPath
-  context.hierarchyAncestorCache[collection.slug][currentDocCacheKey][titlePathFieldName] =
-    result.titlePath
+  const cache = getCollectionAncestorCache({ collection, context })
+  cache[currentDocCacheKey] ||= {}
+  cache[currentDocCacheKey][slugPathFieldName] = result.slugPath
+  cache[currentDocCacheKey][titlePathFieldName] = result.titlePath
 
   return result
 }
@@ -242,6 +259,6 @@ const buildSingleLocaleDocumentPaths = async ({
 export const buildDocumentPaths = async (
   args: BuildDocumentPathsArgs,
 ): Promise<ComputePathsResult> =>
-  args.isTitleLocalized && args.locale === 'all'
+  (args.isSlugLocalized || args.isTitleLocalized) && args.locale === 'all'
     ? await buildLocalizedDocumentPaths(args)
     : await buildSingleLocaleDocumentPaths(args)

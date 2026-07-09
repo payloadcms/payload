@@ -11,6 +11,7 @@ import { devUser } from '../credentials.js'
 import {
   customSeparatorPagesSlug,
   explicitStoredPagesSlug,
+  localizedSlugPagesSlug,
   localizedTitlePagesSlug,
   nestedDocsPagesSlug,
   usersSlug,
@@ -109,6 +110,31 @@ const LocalizedTitlePages: CollectionConfig = {
   },
 }
 
+const LocalizedSlugPages: CollectionConfig = {
+  slug: localizedSlugPagesSlug,
+  admin: {
+    useAsTitle: 'title',
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'slug',
+      type: 'text',
+      localized: true,
+      required: true,
+    },
+  ],
+  hierarchy: {
+    parentFieldName: 'parent',
+    pathStrategy: 'stored',
+    slugField: 'slug',
+  },
+}
+
 export default buildConfigWithDefaults({
   collections: [
     Users,
@@ -116,6 +142,7 @@ export default buildConfigWithDefaults({
     ExplicitStoredPages,
     CustomSeparatorPages,
     LocalizedTitlePages,
+    LocalizedSlugPages,
   ],
   localization: {
     defaultLocale: 'en',
