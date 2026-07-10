@@ -29,6 +29,7 @@ export const Locked: React.FC<{
   const { t } = useTranslation()
 
   const userToUse = isClientUserObject(user) ? (user.email ?? user.id) : t('general:anotherUser')
+  const tooltipLabel = `${userToUse} ${t('general:isEditing')}`
 
   const updateAnchorRect = useCallback(() => {
     const node = anchorRef.current
@@ -46,8 +47,6 @@ export const Locked: React.FC<{
       return
     }
 
-    updateAnchorRect()
-
     // Keep the portaled tooltip aligned to the icon as the page or an overflow
     // container scrolls.
     window.addEventListener('scroll', updateAnchorRect, true)
@@ -61,8 +60,22 @@ export const Locked: React.FC<{
 
   return (
     <div
+      aria-label={tooltipLabel}
       className={[baseClass, className].filter(Boolean).join(' ')}
-      onMouseEnter={() => setHovered(true)}
+      onBlur={() => setHovered(false)}
+      onFocus={() => {
+        updateAnchorRect()
+        setHovered(true)
+      }}
+      onKeyDown={(e) => {
+        if (e.key === ' ') {
+          e.preventDefault() // prevent page scroll when focused
+        }
+      }}
+      onMouseEnter={() => {
+        updateAnchorRect()
+        setHovered(true)
+      }}
       onMouseLeave={() => setHovered(false)}
       ref={anchorRef}
       role="button"
@@ -71,7 +84,6 @@ export const Locked: React.FC<{
       <LockIcon />
       {hovered &&
         anchorRect &&
-        typeof document !== 'undefined' &&
         createPortal(
           <div
             className={`${baseClass}__tooltip-anchor`}
@@ -82,12 +94,9 @@ export const Locked: React.FC<{
               width: anchorRect.width,
             }}
           >
-            <Tooltip
-              alignCaret="center"
-              className={`${baseClass}__tooltip`}
-              position="bottom"
-              show={hovered}
-            >{`${userToUse} ${t('general:isEditing')}`}</Tooltip>
+            <Tooltip alignCaret="center" className={`${baseClass}__tooltip`} position="bottom" show>
+              {tooltipLabel}
+            </Tooltip>
           </div>,
           document.body,
         )}
