@@ -124,6 +124,8 @@
     "test:e2e:prod:ci:noturbo": "pnpm prepare-run-test-against-prod:ci && pnpm test:e2e:prod:run:noturbo",
     "test:e2e:prod:run": "pnpm runts ./test/runE2E.ts --prod",
     "test:e2e:prod:run:noturbo": "pnpm runts ./test/runE2E.ts --prod --no-turbo",
+    "test:e2e:prod:server:run": "pnpm runts ./test/runE2E.ts --prod-server",
+    "test:e2e:prod:server:run:noturbo": "pnpm runts ./test/runE2E.ts --prod-server --no-turbo",
     "test:e2e:tanstack": "cross-env PAYLOAD_FRAMEWORK=tanstack-start pnpm runts ./test/runE2E.ts",
     "test:e2e:tanstack:headed": "cross-env PAYLOAD_FRAMEWORK=tanstack-start NODE_OPTIONS=\"--no-deprecation --no-experimental-strip-types\" NODE_NO_WARNINGS=1 DISABLE_LOGGING=true playwright test --headed",
     "test:eval": "tsx ./test/evals/cli.ts",

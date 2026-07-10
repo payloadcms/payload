@@ -66,6 +66,9 @@ export async function startTanStackStartProdServer({
     })
   })
 
+  // The build bundles Payload but leaves runtime deps (pino, mongodb, …)
+  // external; they live only in pnpm's flat virtual store. Symlink the server
+  // output's `node_modules` to it so they resolve at runtime.
   const pnpmVirtualStore = path.resolve(testDir, 'node_modules/.pnpm/node_modules')
   if (fs.existsSync(pnpmVirtualStore)) {
     const serverNodeModules = path.resolve(outDir, 'server/node_modules')

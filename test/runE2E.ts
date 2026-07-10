@@ -12,7 +12,11 @@ const dirname = path.dirname(__filename)
 
 shelljs.env.DISABLE_LOGGING = 'true'
 
-const prod = process.argv.includes('--prod')
+// --prod-server boots a real production server (next build / vite build) per
+// suite; --prod (a.k.a. --dist) runs the dev server against packed dist
+// packages. Both need the packed packages, so both set PAYLOAD_TEST_PROD.
+const prodServer = process.argv.includes('--prod-server')
+const prod = prodServer || process.argv.includes('--prod')
 if (prod) {
   process.env.PAYLOAD_TEST_PROD = 'true'
   shelljs.env.PAYLOAD_TEST_PROD = 'true'
@@ -20,7 +24,9 @@ if (prod) {
 
 const turbo = process.argv.includes('--no-turbo') ? false : true
 
-process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--no-turbo')
+process.argv = process.argv.filter(
+  (arg) => arg !== '--prod' && arg !== '--prod-server' && arg !== '--no-turbo',
+)
 
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
@@ -161,7 +167,9 @@ async function executePlaywright(
     'dev',
     suiteConfigPath ? `${baseTestFolder}#${suiteConfigPath}` : baseTestFolder,
   ]
-  if (prod) {
+  if (prodServer) {
+    spawnDevArgs.push('--prod-server')
+  } else if (prod) {
     spawnDevArgs.push('--prod')
   }
 
@@ -192,6 +200,13 @@ async function executePlaywright(
       },
       stdio: 'inherit',
     })
+  }
+
+  // A prod server only starts listening after the build/init completes, which
+  // outlasts Playwright's navigation timeout. Wait for it before running tests.
+  // (The dev server compiles routes lazily, so it needs no upfront wait.)
+  if (prodServer && !portInUse) {
+    await waitForServer(e2ePort)
   }
 
   const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
@@ -226,4 +241,27 @@ async function executePlaywright(
 function clearWebpackCache() {
   const webpackCachePath = path.resolve(dirname, '../node_modules/.cache/webpack')
   shelljs.rm('-rf', webpackCachePath)
+}
+
+/**
+ * Poll a port until the server responds, so Playwright doesn't start against a
+ * prod server that is still building. Resolves on any HTTP response (the server
+ * only binds after the build/init finishes); rejects if it never comes up.
+ */
+async function waitForServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<void> {
+  const url = `http://localhost:${port}/`
+  const start = Date.now()
+  console.log(`Waiting for prod server on ${url} …`)
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      await fetch(url)
+      console.log(`Prod server ready after ${Math.round((Date.now() - start) / 1000)}s`)
+      return
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
+  }
+
+  throw new Error(`Prod server did not start within ${timeoutMs / 1000}s`)
 }
