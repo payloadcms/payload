@@ -79,10 +79,10 @@ export async function selectDb(
 
   if (args['--db-connection-string']) {
     dbUri = args['--db-connection-string']
-  } else if (args['--yes']) {
+  } else if (args['--yes'] && dbType !== 'd1-sqlite') {
     // Non-interactive: accept the recommended connection string without prompting
+    // D1 Sqlite does not use a connection string, so it is left undefined
     dbUri = initialDbUri
-    // D1 Sqlite does not use a connection string so skip this prompt for this database
   } else if (dbType !== 'd1-sqlite') {
     dbUri = await p.text({
       initialValue: initialDbUri,

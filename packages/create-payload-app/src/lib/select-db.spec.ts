@@ -34,4 +34,13 @@ describe('selectDb', () => {
 
     expect(result.dbUri).toBe('file:./custom.db')
   })
+
+  it('should leave dbUri undefined for d1-sqlite when --yes is set', async () => {
+    const args = makeArgs({ '--db': 'd1-sqlite', '--yes': true })
+
+    const result = await selectDb(args, 'my-app')
+
+    expect(result.type).toBe('d1-sqlite')
+    expect(result.dbUri).toBeUndefined()
+  })
 })
