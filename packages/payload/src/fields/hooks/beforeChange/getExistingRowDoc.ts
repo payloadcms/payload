@@ -6,13 +6,7 @@
  */
 import type { JsonObject } from '../../../types/index.js'
 
-export const getExistingRowDoc = (
-  incomingRow: JsonObject | null,
-  existingRows?: unknown,
-): JsonObject => {
-  if (!incomingRow) {
-    return {}
-  }
+export const getExistingRowDoc = (incomingRow: JsonObject, existingRows?: unknown): JsonObject => {
   if (incomingRow.id && Array.isArray(existingRows)) {
     const matchedExistingRow = existingRows.find((existingRow) => {
       if (typeof existingRow === 'object' && 'id' in existingRow) {
