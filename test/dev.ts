@@ -16,9 +16,12 @@ import { runInit } from './runInit.js'
 import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
 
-const prod = process.argv.includes('--prod')
+// --prod-server boots a real Next production server (next build + dev: false).
+// It implies --prod (packed packages + prod rootDir).
+const prodServer = process.argv.includes('--prod-server')
+const prod = prodServer || process.argv.includes('--prod')
 if (prod) {
-  process.argv = process.argv.filter((arg) => arg !== '--prod')
+  process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--prod-server')
   process.env.PAYLOAD_TEST_PROD = 'true'
 }
 
@@ -63,7 +66,7 @@ console.log(
   `Selected test suite: ${testSuiteArg} [${framework}]${framework === 'next' && enableTurbo ? ' [Turbopack]' : framework === 'next' ? ' [Webpack]' : ''}`,
 )
 
-if (enableTurbo && framework === 'next') {
+if (enableTurbo && framework === 'next' && !prodServer) {
   process.env.TURBOPACK = '1'
 }
 
@@ -101,12 +104,20 @@ let serverResult: DevServerResult
 
 switch (framework) {
   case 'next': {
-    const { startNextDevServer } = await import('./adapters/nextDevServer.js')
-    serverResult = await startNextDevServer({
-      enableTurbo,
-      port: availablePort,
-      testSuiteArg,
-    })
+    if (prodServer) {
+      const { startNextProdServer } = await import('./adapters/nextProdServer.js')
+      serverResult = await startNextProdServer({
+        port: availablePort,
+        testSuiteArg,
+      })
+    } else {
+      const { startNextDevServer } = await import('./adapters/nextDevServer.js')
+      serverResult = await startNextDevServer({
+        enableTurbo,
+        port: availablePort,
+        testSuiteArg,
+      })
+    }
     break
   }
   case 'tanstack-start': {
