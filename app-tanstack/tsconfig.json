@@ -5,7 +5,6 @@
     "jsx": "react-jsx",
     "noEmit": true,
     "rootDir": "..",
-    "baseUrl": ".",
     "paths": {
       "@payload-config": ["../test/lexical/config.ts"]
     }
