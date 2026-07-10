@@ -1,5 +1,4 @@
 import { spawn } from 'child_process'
-import { createRequire } from 'module'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -74,12 +73,9 @@ export async function startTanStackStartProdServer({
     fs.symlinkSync(pnpmVirtualStore, serverNodeModules, 'junction')
   }
 
-  // srvx is a transitive dep (no `.bin` entry), so resolve its CLI from the
-  // pnpm virtual store, where all packages are linked.
-  const require = createRequire(path.join(pnpmVirtualStore, 'noop.js'))
-  const srvxMain = require.resolve('srvx')
-  const srvxRoot = srvxMain.slice(0, srvxMain.lastIndexOf(`${path.sep}srvx${path.sep}`) + 6)
-  const srvxBin = path.join(srvxRoot, 'bin/srvx.mjs')
+  // srvx is a transitive dep (no `.bin` entry), so point at its CLI in the pnpm
+  // virtual store, where every package is linked.
+  const srvxBin = path.join(pnpmVirtualStore, 'srvx/bin/srvx.mjs')
 
   return new Promise<DevServerResult>((resolve, reject) => {
     const server = spawn(
