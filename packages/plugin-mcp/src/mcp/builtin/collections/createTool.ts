@@ -11,6 +11,7 @@ import {
 } from '../../../utils/getVirtualFieldNames.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { validateCollectionData } from '../validateEntityData.js'
+import { fileInputSchema, resolveFileInput } from './fileInput.js'
 import { formatCollectionError } from './formatCollectionError.js'
 
 const DEFAULT_DESCRIPTION =
@@ -52,6 +53,7 @@ export const createDocumentTool = defineCollectionTool({
       .string()
       .describe('Optional: fallback locale code to use when requested locale is not available')
       .optional(),
+    file: fileInputSchema.optional(),
     locale: z
       .string()
       .describe(
@@ -69,7 +71,7 @@ export const createDocumentTool = defineCollectionTool({
   const payload = req.payload
   const logger = getLogger({ payload })
 
-  const { data, depth, draft, fallbackLocale, locale, select } = input
+  const { data, depth, draft, fallbackLocale, file: fileInput, locale, select } = input
 
   logger.info(
     `Creating document in collection: ${collectionSlug}${locale ? ` with locale: ${locale}` : ''}`,
@@ -85,6 +87,7 @@ export const createDocumentTool = defineCollectionTool({
     }
 
     const parsedData = transformPointDataToPayload(inputData)
+    const file = await resolveFileInput({ collectionSlug, input: fileInput, req })
 
     const result = await payload.create({
       collection: collectionSlug,
@@ -93,6 +96,7 @@ export const createDocumentTool = defineCollectionTool({
       draft,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
+      ...(file ? { file } : {}),
       ...(locale ? { locale } : {}),
       ...(fallbackLocale ? { fallbackLocale } : {}),
       ...(select ? { select: select as SelectType } : {}),

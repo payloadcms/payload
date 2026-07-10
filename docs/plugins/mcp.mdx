@@ -177,6 +177,42 @@ The `tools` map keys can be:
 
 `globals[slug]` accepts the same shape, but the built-in keys are limited to `getGlobalSchema`, `find`, and `update` (globals are singletons; create / delete don't apply).
 
+## Uploading files
+
+For upload-enabled collections, `getCollectionSchema` includes an `upload.sources` array. Use only the listed sources when passing `file` to `createDocument` or `updateDocument`.
+
+Use `url` when the file is already online:
+
+```json
+{
+  "collectionSlug": "media",
+  "data": { "alt": "Payload logo" },
+  "file": {
+    "source": "url",
+    "url": "https://example.com/payload-logo.png"
+  }
+}
+```
+
+The `url` source is listed only when URL uploads are enabled, and any configured `pasteURL` allow list still applies.
+
+Use `base64` for a small local file or chat attachment:
+
+```json
+{
+  "collectionSlug": "media",
+  "data": { "alt": "Payload logo" },
+  "file": {
+    "source": "base64",
+    "name": "payload-logo.png",
+    "mimeType": "image/png",
+    "data": "iVBORw0KGgo..."
+  }
+}
+```
+
+Base64 makes the tool input roughly 33% larger, so prefer `url` for larger files. MCP does not accept the Local API's `filePath` option because that would let an MCP client request arbitrary files from the Payload server's filesystem.
+
 ## Transports
 
 The plugin ships two transports. You can use either or both.

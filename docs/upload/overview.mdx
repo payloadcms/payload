@@ -713,8 +713,8 @@ export const Media: CollectionConfig = {
 <Banner type="warning">
   **Important:**
 
-Uploading files is currently only possible through the REST and Local APIs due to how GraphQL
-works. It's difficult and fairly nonsensical to support uploading files through GraphQL.
+Uploading files is supported through the REST API, Local API, and MCP. GraphQL does not support
+file uploads.
 
 </Banner>
 
@@ -757,6 +757,12 @@ fetch('api/:upload-slug', {
    */
 })
 ```
+
+### MCP uploads
+
+The MCP plugin's `createDocument` and `updateDocument` tools accept files from a URL or as base64 data. Call `getCollectionSchema` first and use only the sources listed in `upload.sources`.
+
+MCP does not expose the Local API's `filePath` option, preventing MCP clients from requesting arbitrary files from the server's filesystem. Base64 adds roughly 33% overhead, so use it for small local files and prefer a URL when the file is already online. See [MCP uploads](../plugins/mcp#uploading-files) for examples.
 
 ## Uploading Files stored locally
 
