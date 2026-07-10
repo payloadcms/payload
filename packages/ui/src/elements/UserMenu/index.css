@@ -84,7 +84,7 @@
 
 .user-menu__submenu-header-row:hover {
   outline: none;
-  background-color: var(--popup-item-bg-hover, var(--color-bg-selected-strong));
+  background-color: var(--popup-item-bg-hover, var(--color-bg-transparent-hover));
   color: var(--popup-item-color-hover, var(--color-text-onselected-strong));
 }
 
