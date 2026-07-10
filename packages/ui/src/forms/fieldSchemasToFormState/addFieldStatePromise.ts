@@ -64,6 +64,7 @@ export type AddFieldStatePromiseArgs = {
    */
   forceFullValue?: boolean
   fullData: Data
+  globalSlug?: string
   id: number | string
   /**
    * Whether the field schema should be included in the state
@@ -124,6 +125,7 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     filter,
     forceFullValue = false,
     fullData,
+    globalSlug,
     includeSchema = false,
     indexPath,
     mockRSCs,
@@ -184,10 +186,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     fieldState.fieldSchema = field
   }
 
-  // Short-circuit to prevent hidden fields from recursing and rendering.
-  // Note: `tab` is excluded bc tab visibility is keyed by `field.id` rather than `path`.
-  // The tab branch below owns that write and the skip-recursion.
-  if (passesCondition === false && field.type !== 'tab') {
+  // Short-circuit hidden fields to prevent recursing and rendering. Two exclusions:
+  // - `tab`: visibility is keyed by `field.id` (not `path`); the tab branch owns that write.
+  // - presentational containers (row, collapsible, unnamed group): they hold no value, so
+  //   returning here drops their nested fields' values.
+  const isPresentationalWithSubFields = fieldHasSubFields(field) && !fieldAffectsData(field)
+
+  if (passesCondition === false && field.type !== 'tab' && !isPresentationalWithSubFields) {
     if (fieldAffectsData(field) && data?.[field.name] !== undefined) {
       fieldState.value = data[field.name]
       fieldState.initialValue = data[field.name]
@@ -210,12 +215,20 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       fieldPermissions === true || deepCopyObjectSimple(fieldPermissions?.read)
 
     if (typeof field?.access?.read === 'function') {
+      const collection = collectionSlug
+        ? (req.payload.collections[collectionSlug]?.config ?? null)
+        : null
+      const global = globalSlug
+        ? (req.payload.globals.config.find((g) => g.slug === globalSlug) ?? null)
+        : null
+
       hasPermission = await field.access.read({
         id,
         blockData,
         data: fullData,
         req,
         siblingData: data,
+        ...(collection ? { collection } : { global }),
       })
     } else {
       hasPermission = true
@@ -823,6 +836,13 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
     if (!filter || filter(args)) {
       state[path] = {
         disableFormData: true,
+      }
+
+      // Presentational containers are hidden client-side via `withCondition`, which reads
+      // `passesCondition` from their own state entry. Must be set here since these fields
+      // are excluded from the short-circuit above (which would otherwise carry the flag).
+      if (passesCondition === false) {
+        state[path].passesCondition = false
       }
     }
 

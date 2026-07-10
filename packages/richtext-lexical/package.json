@@ -59,8 +59,8 @@
       "default": "./src/exports/plaintext/index.ts"
     },
     "./rsc": {
-      "import": "./src/exports/server/rsc.ts",
       "types": "./src/exports/server/rsc.ts",
+      "import": "./src/exports/server/rsc.ts",
       "default": "./src/exports/server/rsc.ts"
     },
     "./lexical": {
@@ -412,7 +412,7 @@
     "swc-plugin-transform-remove-imports": "8.3.0"
   },
   "peerDependencies": {
-    "@faceless-ui/modal": "3.0.0",
+    "@faceless-ui/modal": "3.0.1",
     "@faceless-ui/scroll-info": "2.0.0",
     "@payloadcms/next": "workspace:*",
     "payload": "workspace:*",
@@ -460,8 +460,8 @@
         "default": "./dist/exports/plaintext/index.js"
       },
       "./rsc": {
-        "import": "./dist/exports/server/rsc.js",
         "types": "./dist/exports/server/rsc.d.ts",
+        "import": "./dist/exports/server/rsc.js",
         "default": "./dist/exports/server/rsc.js"
       },
       "./lexical": {

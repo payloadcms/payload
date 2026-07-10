@@ -1,4 +1,4 @@
-# Payload CMS Access Control - Advanced Patterns
+# Payload Access Control - Advanced Patterns
 
 Advanced access control patterns including context-aware access, time-based restrictions, factory functions, and production templates.
 

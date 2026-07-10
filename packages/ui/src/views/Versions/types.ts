@@ -4,7 +4,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedConfig,
   SanitizedGlobalConfig,
-  TypedUser,
+  User,
 } from 'payload'
 
 export type DefaultVersionsViewProps = {
@@ -18,6 +18,6 @@ export type DefaultVersionsViewProps = {
   i18n: I18n
   id: number | string
   limit: number
-  user: TypedUser
+  user: User
   versionsData: PaginatedDocs<Document>
 }

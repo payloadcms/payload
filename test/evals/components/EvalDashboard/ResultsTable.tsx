@@ -10,7 +10,7 @@ import type { EvalEntry } from './index.js'
 
 import { getVariant as getVariantFromResult } from '../../variant.js'
 import { CompareTable } from './CompareTable.js'
-import { getConfiguration, groupByRun, runKeyOf } from './configuration.js'
+import { formatLocalTimestamp, getConfiguration, groupByRun, runKeyOf } from './configuration.js'
 import { RunsOverview } from './RunsOverview.js'
 
 export type { Variant }
@@ -176,13 +176,13 @@ function TokenDisplay({
   if (!total) {
     return <span style={{ color: 'var(--theme-elevation-400)', fontSize: '0.75rem' }}>—</span>
   }
-  const cachedRatio = total.inputTokens > 0 ? total.cachedInputTokens / total.inputTokens : 0
+  const promptCacheRatio = total.inputTokens > 0 ? total.cachedInputTokens / total.inputTokens : 0
   return (
     <span
       style={{ color: 'var(--theme-elevation-600)', fontSize: '0.75rem', whiteSpace: 'nowrap' }}
     >
       {total.totalTokens.toLocaleString()}
-      {cachedRatio > 0 && (
+      {promptCacheRatio > 0 && (
         <span
           style={{
             background: 'var(--theme-success-100)',
@@ -192,9 +192,9 @@ function TokenDisplay({
             marginLeft: '4px',
             padding: '1px 4px',
           }}
-          title={`${total.cachedInputTokens} tokens served from cache`}
+          title={`${total.cachedInputTokens} tokens served from the model prompt cache`}
         >
-          {Math.round(cachedRatio * 100)}% cached
+          {Math.round(promptCacheRatio * 100)}% prompt-cached
         </span>
       )}
     </span>
@@ -575,7 +575,7 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
               {result.usage.total.cachedInputTokens > 0 && (
                 <span style={{ color: 'var(--theme-success-600)', fontWeight: 400 }}>
                   {' '}
-                  ({result.usage.total.cachedInputTokens.toLocaleString()} from cache)
+                  ({result.usage.total.cachedInputTokens.toLocaleString()} from prompt cache)
                 </span>
               )}
             </span>
@@ -583,9 +583,10 @@ function ExpandedRow({ entry, rendered }: { entry: EvalEntry; rendered?: Rendere
         </div>
       )}
 
-      {/* Cached at */}
       <div style={{ color: 'var(--theme-elevation-400)', fontSize: '0.7rem', marginTop: '4px' }}>
-        Cached {new Date(entry.createdAt).toLocaleString()} · hash {entry.hash.slice(0, 12)}…
+        Recorded {formatLocalTimestamp(entry.createdAt)} · parameters{' '}
+        {entry.paramsHash.slice(0, 12)}…
+        {entry.reusedFromRunId && ' · skipped — identical parameters'}
       </div>
     </div>
   )
@@ -633,8 +634,7 @@ export function ResultsTable({ codegenHtml, entries }: Props) {
     if (!run) {
       return null
     }
-    const when = run.timestamp ? run.timestamp.slice(0, 16).replace('T', ' ') : 'unknown time'
-    return `${run.config.label}${run.isLegacy ? '' : ` · ${when}`}`
+    return `${run.config.label} · ${formatLocalTimestamp(run.timestamp)}`
   }, [runGroups, selectedRunKey])
 
   const handleSort = (key: SortKey) => {
@@ -725,21 +725,21 @@ export function ResultsTable({ codegenHtml, entries }: Props) {
         ? scored.reduce((s, e) => s + (e.result.score ?? 0), 0) / scored.length
         : null
     const totalTokens = filtered.reduce((s, e) => s + (e.result.usage?.total.totalTokens ?? 0), 0)
-    const totalCached = filtered.reduce(
+    const totalPromptCached = filtered.reduce(
       (s, e) => s + (e.result.usage?.total.cachedInputTokens ?? 0),
       0,
     )
     const totalInput = filtered.reduce((s, e) => s + (e.result.usage?.total.inputTokens ?? 0), 0)
-    return { avgScore, passed, totalCached, totalInput, totalTokens }
+    return { avgScore, passed, totalInput, totalPromptCached, totalTokens }
   }, [filtered])
 
-  const toggleExpand = (hash: string) => {
+  const toggleExpand = (id: string) => {
     setExpanded((prev) => {
       const next = new Set(prev)
-      if (next.has(hash)) {
-        next.delete(hash)
+      if (next.has(id)) {
+        next.delete(id)
       } else {
-        next.add(hash)
+        next.add(id)
       }
       return next
     })
@@ -757,8 +757,8 @@ export function ResultsTable({ codegenHtml, entries }: Props) {
   })
 
   const passRate = filtered.length > 0 ? Math.round((stats.passed / filtered.length) * 100) : 0
-  const cachedRatio =
-    stats.totalInput > 0 ? Math.round((stats.totalCached / stats.totalInput) * 100) : 0
+  const promptCacheRatio =
+    stats.totalInput > 0 ? Math.round((stats.totalPromptCached / stats.totalInput) * 100) : 0
 
   const viewBtnStyle = (active: boolean): React.CSSProperties => ({
     background: active ? 'var(--theme-elevation-900)' : 'transparent',
@@ -878,9 +878,9 @@ export function ResultsTable({ codegenHtml, entries }: Props) {
                 value: stats.totalTokens > 0 ? stats.totalTokens.toLocaleString() : '—',
               },
               {
-                color: cachedRatio > 0 ? 'var(--theme-success-600)' : undefined,
-                label: 'Cache Hit',
-                value: cachedRatio > 0 ? `${cachedRatio}%` : '—',
+                color: promptCacheRatio > 0 ? 'var(--theme-success-600)' : undefined,
+                label: 'Prompt Cache',
+                value: promptCacheRatio > 0 ? `${promptCacheRatio}%` : '—',
               },
             ].map(({ color, label, value }, i, arr) => (
               <div
@@ -1009,9 +1009,7 @@ export function ResultsTable({ codegenHtml, entries }: Props) {
                 <option value="all">All runs (mixed)</option>
                 {runGroups.map((run) => (
                   <option key={run.key} value={run.key}>
-                    {run.isLegacy
-                      ? `${run.config.label} · pre-tracking`
-                      : `${run.config.label} · ${run.timestamp.slice(0, 16).replace('T', ' ')}`}
+                    {run.config.label} · {formatLocalTimestamp(run.timestamp)}
                   </option>
                 ))}
               </select>
@@ -1120,7 +1118,7 @@ export function ResultsTable({ codegenHtml, entries }: Props) {
               </div>
             ) : (
               filtered.map((entry, i) => {
-                const isExpanded = expanded.has(entry.hash)
+                const isExpanded = expanded.has(entry.id)
                 const isLast = i === filtered.length - 1
                 const shortQuestion =
                   entry.result.question.length > 90
@@ -1129,24 +1127,24 @@ export function ResultsTable({ codegenHtml, entries }: Props) {
 
                 return (
                   <div
-                    key={entry.hash}
+                    key={entry.id}
                     style={{
                       borderBottom: isLast ? undefined : '1px solid var(--theme-elevation-100)',
                     }}
                   >
                     <div
-                      onClick={() => toggleExpand(entry.hash)}
+                      onClick={() => toggleExpand(entry.id)}
                       onKeyDown={(e) =>
-                        (e.key === 'Enter' || e.key === ' ') && toggleExpand(entry.hash)
+                        (e.key === 'Enter' || e.key === ' ') && toggleExpand(entry.id)
                       }
-                      onMouseEnter={() => !isExpanded && setHoveredHash(entry.hash)}
+                      onMouseEnter={() => !isExpanded && setHoveredHash(entry.id)}
                       onMouseLeave={() => setHoveredHash(null)}
                       role="button"
                       style={{
                         alignItems: 'center',
                         background: isExpanded
                           ? 'var(--theme-elevation-50)'
-                          : hoveredHash === entry.hash
+                          : hoveredHash === entry.id
                             ? 'var(--theme-elevation-100)'
                             : undefined,
                         cursor: 'pointer',
@@ -1203,9 +1201,7 @@ export function ResultsTable({ codegenHtml, entries }: Props) {
                       </span>
                     </div>
 
-                    {isExpanded && (
-                      <ExpandedRow entry={entry} rendered={codegenHtml?.[entry.hash]} />
-                    )}
+                    {isExpanded && <ExpandedRow entry={entry} rendered={codegenHtml?.[entry.id]} />}
                   </div>
                 )
               })

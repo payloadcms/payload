@@ -1,6 +1,10 @@
 import type { LanguageModel } from 'ai'
+import type { Payload } from 'payload'
+import type { ExpectStatic } from 'vitest'
 
-import type { Assertion } from './assertions/types.js'
+import type { AuditEvent } from '../__helpers/plugins/audit/index.js'
+import type { ParsedConfig } from './assertions/parseConfig.js'
+import type { EvalConfig } from './evalConfig.js'
 import type { RunnerKind, SkillInstallMode } from './runner/types.js'
 
 // Dataset
@@ -13,21 +17,74 @@ export type EvalCategory =
   | 'fields'
   | 'graphql'
   | 'local-api'
+  | 'mcp'
   | 'negative'
   | 'plugins'
   | 'rest-api'
   | 'structure'
   | 'testing'
 
-export type CodegenEvalCase = {
-  /** Optional structural assertions evaluated against the LLM output. Failing any short-circuits the case to fail before the LLM scorer runs. */
-  assertions?: Assertion[]
+export type EvalCase = {
+  /** Boot the starter config before the agent runs. */
+  bootConfig?: boolean
   category: EvalCategory
-  expected: string
-  /** Path to the starter fixture directory relative to test/evals/fixtures/ */
-  fixturePath: string
+  /**
+   * Folder under `test/evals/fixtures/` that contains the `payload.config.ts`
+   * for this case.
+   *
+   * Eval cases read it as the starter config the model edits. Runtime cases
+   * boot the generated config after TypeScript passes. Multiple cases can
+   * share the same config; their input identifies them as separate tests.
+   */
+  configPath: string
+  /** Task prompt given to the model. */
   input: string
+  /** Creates any data the case needs after Payload boots and before the agent runs. */
+  setup?: (args: { payload: Payload }) => Promise<void> | void
+  /**
+   * Checks the generated config after TypeScript passes.
+   *
+   * Use `config` for deterministic checks against the imported generated
+   * config, `ast` for source-level checks, `payload.*` when the generated
+   * config must boot and write/read real data, and `return score(...)` when
+   * the LLM scorer should judge the result.
+   */
+  verify: (args: EvalVerifyContext) => EvalVerifyResult | Promise<EvalVerifyResult>
 }
+
+export type EvalExpect = ExpectStatic
+
+export type EvalScore = (
+  expected: string,
+  evidence?: unknown,
+) => ConfigChangeScorerResult | Promise<ConfigChangeScorerResult>
+
+export type EvalVerifyContext = {
+  /** Source-level AST summary from the existing TypeScript parser. */
+  ast: ParsedConfig
+  /** Events recorded while the agent was running. */
+  audit: AuditEvent[]
+  /** Imported generated config, normalized for easy eval assertions. */
+  config: EvalConfig
+  expect: EvalExpect
+  /**
+   * Lazy Payload Local API for the generated config. The eval only boots Payload
+   * if this object is actually used.
+   */
+  payload: Payload
+  /**
+   * Runs the LLM scorer. Return this from `verify` when the scorer should decide
+   * the final score, optionally with runtime evidence to score instead of a pure
+   * config diff.
+   */
+  score: EvalScore
+  /** Complete generated `payload.config.ts` source. */
+  source: string
+  /** Structured events emitted by the agent runner. */
+  transcript: TranscriptEvent[]
+}
+
+export type EvalVerifyResult = ConfigChangeScorerResult | void
 
 // Models
 export type ModelKey = 'openai:gpt-4o-mini' | 'openai:gpt-5.2'
@@ -61,6 +118,8 @@ export type CodegenRunnerResult = {
   agentExitCode?: number
   /** For agent results: captured stderr from the CLI (fallback when stream-json parsing yields no events), truncated to ~10,000 characters. */
   agentLog?: string
+  /** Events recorded while the agent was running. */
+  audit?: AuditEvent[]
   confidence: number
   modifiedConfig: string
   /** For agent results: structured per-event transcript parsed from stream-json output. */
@@ -90,33 +149,34 @@ export type EvalResult = {
   answer: string
   /** Populated when one or more structural assertions fail */
   assertionErrors?: string[]
+  /** Events recorded while the agent was running. */
+  audit?: AuditEvent[]
   category: string
   /** Named by the scorer: the precise change made to the config */
   changeDescription?: string
   /** Scorer sub-score: fraction of key concepts present (0–1) */
   completeness?: number
   confidence: number
+  /** Folder under `test/evals/fixtures/` that contains the starter config. */
+  configPath: string
   /** Scorer sub-score: factual accuracy of the answer (0–1) */
   correctness?: number
-  /** For codegen results: the fixture directory the starter file came from, relative to test/evals/fixtures/. Used by the dashboard to render a diff. */
-  fixturePath?: string
   /** Runner model ID (e.g. "openai/gpt-5.2") — surfaced in the dashboard for cross-run comparison */
   modelId?: string
   pass: boolean
   question: string
   reasoning: string
+  /** Previous run whose identical result was reused instead of executing this case. */
+  reusedFromRunId?: string
   /**
    * Identifies the eval invocation that produced this result (ISO timestamp set
-   * once per `pnpm test:eval` run). Lets the dashboard group results into
-   * discrete runs. Absent on entries cached before run-tracking existed.
+   * once per `pnpm test:eval` run). Lets the dashboard group results into runs.
    */
   runId?: string
-  /**
-   * Which runner produced this result. Surfaced in the dashboard. Required for
-   * all entries written by this branch; old cache entries may be missing it —
-   * read sites should default-coerce to `'llm'`.
-   */
+  /** Which runner produced this result. Surfaced in the dashboard. */
   runnerKind: RunnerKind
+  /** True when `verify` booted the generated config through the lazy Payload API. */
+  runtimeUsed?: boolean
   /** Weighted score: (0.6 × correctness) + (0.4 × completeness) */
   score?: number
   /** For agent results only: how the skill was installed in the workdir. */
@@ -134,6 +194,8 @@ export type EvalResult = {
 }
 export type RunCodegenDatasetOptions = {
   agentModel?: string
+  /** Expose the starter config's Payload MCP tools to the runner. */
+  exposeMcpTools?: boolean
   kind?: RunnerKind
   runnerModel?: LanguageModel
   scorerModel?: LanguageModel

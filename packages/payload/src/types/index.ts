@@ -12,6 +12,7 @@ import type {
 } from '../collections/config/types.js'
 import type payload from '../index.js'
 import type {
+  AuthenticatedUser,
   CollectionSlug,
   DataFromGlobalSlug,
   GlobalSlug,
@@ -21,12 +22,17 @@ import type {
   TypedCollectionSelect,
   TypedFallbackLocale,
   TypedLocale,
-  TypedUser,
 } from '../index.js'
 import type { File } from '../uploads/types.js'
 import type { Operator } from './constants.js'
 export type { TypeWithID } from '../collections/config/types.js'
 export type { Payload } from '../index.js'
+
+export interface PayloadRequestAPI {
+  GraphQL: true
+  local: true
+  REST: true
+}
 
 export type CustomPayloadRequestProperties = {
   context: RequestContext
@@ -48,7 +54,7 @@ export type CustomPayloadRequestProperties = {
   /**
    * The context in which the request is being made
    */
-  payloadAPI: 'GraphQL' | 'local' | 'REST'
+  payloadAPI: keyof PayloadRequestAPI
   /** Optimized document loader */
   payloadDataLoader: {
     /**
@@ -92,7 +98,7 @@ export type CustomPayloadRequestProperties = {
    */
   transactionID?: number | Promise<number | string> | string
   /** The signed-in user */
-  user: null | TypedUser
+  user: AuthenticatedUser | null
 } & Pick<
   URL,
   'hash' | 'host' | 'href' | 'origin' | 'pathname' | 'port' | 'protocol' | 'search' | 'searchParams'

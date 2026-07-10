@@ -457,7 +457,9 @@ export const renderDocument = async ({
           breakpoints={livePreviewConfig?.breakpoints}
           isLivePreviewEnabled={isLivePreviewEnabled && operation !== 'create'}
           isLivePreviewing={Boolean(
-            entityPreferences?.value?.editViewType === 'live-preview' && livePreviewURL,
+            (entityPreferences?.value?.editViewType === undefined
+              ? livePreviewConfig?.openByDefault
+              : entityPreferences.value.editViewType === 'live-preview') && livePreviewURL,
           )}
           isPreviewEnabled={Boolean(isPreviewEnabled)}
           previewURL={previewURL}
@@ -495,6 +497,14 @@ export async function DocumentView(props: AdminViewServerProps) {
   } catch (error) {
     if (error?.message === 'NEXT_REDIRECT') {
       throw error
+    }
+
+    // The TanStack adapter's `req.server.redirect()` throws `redirect:<url>` as a
+    // control-flow signal — the target is already recorded on `req.server` and
+    // honored upstream in `loadAdminPage`. It isn't a real error, so swallow it
+    // without logging, mirroring the `NEXT_REDIRECT` guard above.
+    if (error?.message?.startsWith('redirect:')) {
+      return
     }
 
     logError({ err: error, payload: props.initPageResult.req.payload })

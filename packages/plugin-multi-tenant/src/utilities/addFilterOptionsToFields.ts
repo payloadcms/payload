@@ -5,7 +5,7 @@ import type { MultiTenantPluginConfig } from '../types.js'
 import { defaults } from '../defaults.js'
 import { filterDocumentsByTenants } from '../filters/filterDocumentsByTenants.js'
 
-type AddFilterOptionsToFieldsArgs<ConfigType = unknown> = {
+type AddFilterOptionsToFieldsArgs = {
   blockReferencesWithFilters: string[]
   config: Config | SanitizedConfig
   fields: Field[]
@@ -15,12 +15,10 @@ type AddFilterOptionsToFieldsArgs<ConfigType = unknown> = {
   tenantsArrayFieldName: string
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }
 
-export function addFilterOptionsToFields<ConfigType = unknown>({
+export function addFilterOptionsToFields({
   blockReferencesWithFilters,
   config,
   fields,
@@ -31,7 +29,7 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   userHasAccessToAllTenants,
-}: AddFilterOptionsToFieldsArgs<ConfigType>): Field[] {
+}: AddFilterOptionsToFieldsArgs): Field[] {
   const newFields = []
   for (const field of fields) {
     let newField: Field = { ...field }
@@ -158,18 +156,16 @@ export function addFilterOptionsToFields<ConfigType = unknown>({
   return newFields
 }
 
-type AddFilterArgs<ConfigType = unknown> = {
+type AddFilterArgs = {
   field: RelationshipField
   tenantEnabledCollectionSlugs: string[]
   tenantFieldName: string
   tenantsArrayFieldName: string
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }
-function addRelationshipFilter<ConfigType = unknown>({
+function addRelationshipFilter({
   field,
   tenantEnabledCollectionSlugs,
   tenantFieldName,
@@ -177,7 +173,7 @@ function addRelationshipFilter<ConfigType = unknown>({
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   userHasAccessToAllTenants,
-}: AddFilterArgs<ConfigType>): Field {
+}: AddFilterArgs): Field {
   // User specified filter
   const originalFilter = field.filterOptions
   field.filterOptions = async (args) => {

@@ -81,6 +81,7 @@ jobs:
             storage-r2
             storage-vercel-blob
             storage-s3
+            tanstack-start
             translations
             ui
             templates

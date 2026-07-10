@@ -8,6 +8,7 @@ export const packagePublishList = [
   'translations',
   'ui',
   'next',
+  'tanstack-start',
   'graphql',
   'admin-bar',
   'live-preview',
