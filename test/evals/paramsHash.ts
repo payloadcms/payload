@@ -4,7 +4,7 @@ import type { RunnerKind, SkillInstallMode } from './runner/types.js'
 import type { EvalCategory, SystemPromptKey } from './types.js'
 
 import { SKILL_SYSTEM_PROMPT } from './runner/claudeCode.js'
-import { getSkillTreeHash } from './runner/workdir.js'
+import { getMCPEvalConfigHash, getSkillTreeHash } from './runner/workdir.js'
 
 function hashParams(params: Record<string, string | undefined>): string {
   const stable = JSON.stringify(params, Object.keys(params).sort())
@@ -37,6 +37,9 @@ export function codegenParamsHash(params: {
     category: params.category,
     configPath: params.configPath,
     fixtureContent: params.fixtureContent,
+    fixtureDependencyHash: params.configPath.startsWith('mcp/')
+      ? getMCPEvalConfigHash()
+      : undefined,
     input: params.input,
     modelId: params.modelId,
     runnerKind: params.runnerKind,

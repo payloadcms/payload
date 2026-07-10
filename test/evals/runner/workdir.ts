@@ -113,6 +113,18 @@ export async function cleanup(workdir: string): Promise<void> {
 }
 
 let cachedSkillHash: null | string = null
+let cachedMCPEvalConfigHash: null | string = null
+
+export function getMCPEvalConfigHash(): string {
+  if (cachedMCPEvalConfigHash === null) {
+    cachedMCPEvalConfigHash = createHash('sha256')
+      .update(fs.readFileSync(path.join(FIXTURES_DIR, 'mcp', 'buildMCPEvalConfig.ts')))
+      .digest('hex')
+      .slice(0, 8)
+  }
+
+  return cachedMCPEvalConfigHash
+}
 
 export function getSkillTreeHash(): string {
   if (cachedSkillHash !== null) {

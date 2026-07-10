@@ -224,12 +224,17 @@ export async function runCodegenCase(
   }
 
   try {
+    const verifyPayload = await resolveVerifyPayload({
+      boot: lazyPayload.boot,
+      lazyPayload: lazyPayload.payload,
+      verify: testCase.verify,
+    })
     const verifyResult = await testCase.verify({
       ast,
       audit,
       config: evalConfig,
       expect: createEvalExpect(),
-      payload: lazyPayload.payload,
+      payload: verifyPayload,
       score,
       source: modifiedConfig,
       transcript: transcript ?? [],
@@ -284,6 +289,18 @@ export async function runCodegenCase(
   } finally {
     await lazyPayload.cleanup()
   }
+}
+
+export async function resolveVerifyPayload({
+  boot,
+  lazyPayload,
+  verify,
+}: {
+  boot: () => Promise<Payload>
+  lazyPayload: Payload
+  verify: EvalCase['verify']
+}): Promise<Payload> {
+  return verifyUsesArg(verify, 'payload') ? boot() : lazyPayload
 }
 
 function createEvalExpect(): EvalExpect {

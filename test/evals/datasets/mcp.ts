@@ -1,10 +1,16 @@
 import type { DefaultNodeTypes, DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 
 import { NodeFormat } from '@payloadcms/richtext-lexical'
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import type { EvalCase } from '../types.js'
 
 import { getFinalAgentResponse, scoreMCPExecution } from '../utils/mcpToolCalls.js'
+
+const datasetsDirectory = path.dirname(fileURLToPath(import.meta.url))
+const uploadsFixtureDirectory = path.resolve(datasetsDirectory, '../../uploads')
 
 function lexicalNodes({ nodes }: { nodes: DefaultNodeTypes[] }): DefaultNodeTypes[] {
   return nodes.flatMap((node) => [
@@ -23,6 +29,82 @@ function lexicalText({ node }: { node: DefaultNodeTypes }): string {
 }
 
 export const mcpDataset: EvalCase[] = [
+  {
+    bootConfig: true,
+    category: 'mcp',
+    configPath: 'mcp/uploads',
+    input:
+      'Add this checklist icon to the media library and use "Checklist icon" as its alt text: https://raw.githubusercontent.com/payloadcms/payload/main/test/uploads/image.jpg',
+    verify: async ({ audit, expect, payload, transcript }) => {
+      const { docs } = await payload.find({
+        collection: 'media',
+        where: { alt: { equals: 'Checklist icon' } },
+      })
+      const media = docs[0]
+
+      expect(docs).toHaveLength(1)
+      expect(media?.mimeType).toBe('image/jpeg')
+      expect(media?.filesize).toBeGreaterThan(0)
+
+      const storedFile = await readFile(
+        path.join(payload.collections.media.config.upload.staticDir, media!.filename),
+      )
+
+      expect(storedFile.subarray(0, 3)).toEqual(Buffer.from([0xff, 0xd8, 0xff]))
+
+      return scoreMCPExecution({
+        audit,
+        optimalModificationAttempts: 1,
+        optimalToolCalls: 3,
+        requiredPayloadOperation: { slug: 'media', kind: 'mutation' },
+        transcript,
+      })
+    },
+  },
+  {
+    bootConfig: true,
+    category: 'mcp',
+    configPath: 'mcp/uploads',
+    input:
+      'Replace the file for the media item "Outdated checklist icon" with this updated image, and change its alt text to "Updated checklist icon": https://raw.githubusercontent.com/payloadcms/payload/main/test/uploads/image.jpg',
+    setup: async ({ payload }) => {
+      const originalFile = await readFile(path.join(uploadsFixtureDirectory, 'image.png'))
+
+      await payload.create({
+        collection: 'media',
+        data: { alt: 'Outdated checklist icon' },
+        file: {
+          name: 'outdated-checklist-icon.png',
+          data: originalFile,
+          mimetype: 'image/png',
+          size: originalFile.length,
+        },
+      })
+    },
+    verify: async ({ audit, expect, payload, transcript }) => {
+      const { docs } = await payload.find({ collection: 'media' })
+      const media = docs[0]
+
+      expect(docs).toHaveLength(1)
+      expect(media?.alt).toBe('Updated checklist icon')
+      expect(media?.mimeType).toBe('image/jpeg')
+      expect(media?.filesize).toBeGreaterThan(0)
+
+      const storedFile = await readFile(
+        path.join(payload.collections.media.config.upload.staticDir, media!.filename),
+      )
+
+      expect(storedFile.subarray(0, 3)).toEqual(Buffer.from([0xff, 0xd8, 0xff]))
+
+      return scoreMCPExecution({
+        audit,
+        optimalModificationAttempts: 1,
+        optimalToolCalls: 4,
+        requiredPayloadOperation: { slug: 'media', kind: 'mutation' },
+        transcript,
+      })
+    },
+  },
   {
     bootConfig: true,
     category: 'mcp',
