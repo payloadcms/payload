@@ -120,6 +120,45 @@ describe('@payloadcms/plugin-mcp', () => {
     )
   })
 
+  it('should reject misleading non-JSON content types', async ({ mcp }) => {
+    const apiKey = await getApiKey()
+    const response = await mcp.rawPost({
+      apiKey,
+      body: {},
+      contentType: 'text/plain; profile=application/json',
+    })
+
+    expect(response.status).toBe(415)
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: -32_000,
+        message: 'Unsupported Media Type: Content-Type must be application/json',
+      },
+      id: null,
+      jsonrpc: '2.0',
+    })
+  })
+
+  it('should accept JSON content types case-insensitively and with parameters', async ({ mcp }) => {
+    const apiKey = await getApiKey()
+    const response = await mcp.rawPost({
+      apiKey,
+      body: {
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'initialize',
+        params: {
+          capabilities: {},
+          clientInfo: { name: 'content-type-test', version: '1.0.0' },
+          protocolVersion: '2025-11-25',
+        },
+      },
+      contentType: 'Application/JSON; charset=utf-8',
+    })
+
+    expect(response.status).toBe(200)
+  })
+
   /* eslint-disable vitest/no-standalone-expect -- itModern is a custom Vitest test registrar. */
   itModern('should reject subscription streams without opening SSE', async ({ mcp }) => {
     const apiKey = await getApiKey()
