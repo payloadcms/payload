@@ -213,8 +213,6 @@ const RichTextComponent: React.FC<
         />
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
-          {/* Wraps the toolbar and editor as a single unit so the `__wrap` flex `gap`
-          treats them as one child and does not separate them. */}
           <div className={`${baseClass}__editor-content`}>
             {/* Lexical may be in a drawer. We need to define another BulkUploadProvider to ensure that the bulk upload drawer
             is rendered in the correct depth (not displayed *behind* the current drawer).
