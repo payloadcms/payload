@@ -16,12 +16,16 @@ import { runInit } from './runInit.js'
 import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
 
+// --dist runs the dev server against packed/built dist packages instead of src.
 // --prod-server boots a real Next production server (next build + dev: false).
-// It implies --prod (packed packages + prod rootDir).
+// It implies --dist (packed packages + prod rootDir).
+// --prod is kept as a back-compat alias for --dist (used by runE2E.ts).
 const prodServer = process.argv.includes('--prod-server')
-const prod = prodServer || process.argv.includes('--prod')
-if (prod) {
-  process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--prod-server')
+const dist = prodServer || process.argv.includes('--dist') || process.argv.includes('--prod')
+if (dist) {
+  process.argv = process.argv.filter(
+    (arg) => arg !== '--dist' && arg !== '--prod' && arg !== '--prod-server',
+  )
   process.env.PAYLOAD_TEST_PROD = 'true'
 }
 
@@ -121,11 +125,19 @@ switch (framework) {
     break
   }
   case 'tanstack-start': {
-    const { startTanStackStartDevServer } = await import('./adapters/tanstackStartDevServer.js')
-    serverResult = await startTanStackStartDevServer({
-      port: availablePort,
-      testSuiteArg,
-    })
+    if (prodServer) {
+      const { startTanStackStartProdServer } = await import('./adapters/tanstackStartProdServer.js')
+      serverResult = await startTanStackStartProdServer({
+        port: availablePort,
+        testSuiteArg,
+      })
+    } else {
+      const { startTanStackStartDevServer } = await import('./adapters/tanstackStartDevServer.js')
+      serverResult = await startTanStackStartDevServer({
+        port: availablePort,
+        testSuiteArg,
+      })
+    }
     break
   }
   default: {
