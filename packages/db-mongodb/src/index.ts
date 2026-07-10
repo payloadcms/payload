@@ -142,7 +142,9 @@ export interface Args {
    */
   ensureIndexes?: boolean
   /**
-   * The type to use for IDs in MongoDB. Can be `String`, `Number`, `mongoose.Schema.Types.ObjectId`, or `mongoose.Schema.Types.BigInt`. Defaults to `String`.
+   * The Mongoose schema type used for the auto-generated `_id` of collections that don't define a custom `id` field.
+   * Can be `String`, `Number`, `mongoose.Schema.Types.ObjectId`, `mongoose.Schema.Types.BigInt`, or `mongoose.Schema.Types.UUID`.
+   * Defaults to MongoDB's native `ObjectId`.
    */
   idType?: MongooseIDType
   migrationDir?: string
