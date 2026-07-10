@@ -1,4 +1,4 @@
-const WORD_SPLIT_REGEX = /[^a-z0-9]+/i
+const WORD_SPLIT_REGEX = /[^\p{L}\p{N}]+/u
 
 /**
  * Matches a column label against a search query. Single-character queries only

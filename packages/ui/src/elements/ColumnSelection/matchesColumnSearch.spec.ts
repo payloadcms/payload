@@ -35,6 +35,10 @@ describe('matchesColumnSearch', () => {
     it('returns false when no word starts with the character', () => {
       expect(matchesColumnSearch({ labelText: 'Published Date', query: 'z' })).toBe(false)
     })
+
+    it('matches the start of a non-Latin label', () => {
+      expect(matchesColumnSearch({ labelText: 'Пользователь', query: 'п' })).toBe(true)
+    })
   })
 
   describe('multi-character queries', () => {
