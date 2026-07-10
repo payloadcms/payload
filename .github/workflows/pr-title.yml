@@ -14,7 +14,7 @@ jobs:
     name: lint-pr-title
     runs-on: ubuntu-24.04
     steps:
-      - uses: amannn/action-semantic-pull-request@v6
+      - uses: amannn/action-semantic-pull-request@48f256284bd46cdaab1048c3721360e808335d50 # v6.1.1
         id: lint_pr_title
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -36,6 +36,7 @@ jobs:
           scopes: |
             cpa
             claude
+            codemod
             db-\*
             db-d1-sqlite
             db-mongodb
@@ -48,6 +49,7 @@ jobs:
             email-nodemailer
             email-resend
             eslint
+            evals
             graphql
             kv
             kv-redis
@@ -71,8 +73,8 @@ jobs:
             plugin-stripe
             richtext-\*
             richtext-lexical
-            richtext-slate
             sdk
+            skills
             storage-\*
             storage-azure
             storage-gcs
@@ -80,6 +82,7 @@ jobs:
             storage-uploadthing
             storage-vercel-blob
             storage-s3
+            tanstack-start
             translations
             ui
             templates
@@ -93,7 +96,7 @@ jobs:
             didn't match the configured pattern. Please ensure that the subject
             doesn't start with an uppercase character.
 
-      - uses: marocchino/sticky-pull-request-comment@v2
+      - uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
         # When the previous steps fails, the workflow would stop. By adding this
         # condition you can continue the execution with the populated error message.
         if: always() && (steps.lint_pr_title.outputs.error_message != null)
@@ -114,7 +117,7 @@ jobs:
 
       # Delete a previous comment when the issue has been resolved
       - if: ${{ steps.lint_pr_title.outputs.error_message == null }}
-        uses: marocchino/sticky-pull-request-comment@v2
+        uses: marocchino/sticky-pull-request-comment@0ea0beb66eb9baf113663a64ec522f60e49231c0 # v3.0.4
         with:
           header: pr-title-lint-error
           delete: true
@@ -126,6 +129,6 @@ jobs:
     steps:
       - name: Tag with 2.x branch with v2
         if: github.event.pull_request.base.ref == '2.x'
-        uses: actions-ecosystem/action-add-labels@v1
+        uses: actions-ecosystem/action-add-labels@18f1af5e3544586314bbe15c0273249c770b2daf # v1.1.3
         with:
           labels: v2

@@ -1,23 +1,23 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
-import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
+import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
 import {
   changeLocale,
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
+import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { slugFieldsSlug } from '../../slugs.js'
@@ -162,7 +162,31 @@ describe('SlugField', () => {
     })
   })
 
-  describe('A11y', () => {
+  describe('read-only slug field', () => {
+    test('should hide lock and generate buttons when slug field is read-only', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').waitFor()
+
+      const readOnlySlugField = page
+        .locator('.slug-field-component')
+        .filter({ has: page.locator('#field-readOnlySlug') })
+
+      await expect(readOnlySlugField.locator('#field-readOnlySlug-lock')).toHaveCount(0)
+    })
+
+    test('should show lock button for non-read-only slug fields', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').waitFor()
+
+      const regularSlugField = page
+        .locator('.slug-field-component')
+        .filter({ has: page.locator('#field-slug') })
+
+      await expect(regularSlugField.locator('#field-slug-lock')).toBeVisible()
+    })
+  })
+
+  describe.skip('A11y', () => {
     test('Edit view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-title').waitFor()

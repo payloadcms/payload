@@ -1,7 +1,7 @@
 import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
 import type { PayloadHandler } from 'payload'
 
-import path from 'path'
+import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { APIError, Forbidden } from 'payload'
 
 import type { R2StorageOptions } from './index.js'
@@ -11,11 +11,12 @@ type Args = {
   access?: ClientUploadsAccess
   bucket: R2Bucket
   collections: R2StorageOptions['collections']
+  useCompositePrefixes?: boolean
 }
 
 // Adapted from https://developers.cloudflare.com/r2/api/workers/workers-multipart-usage/
 export const getHandleMultiPartUpload =
-  ({ access, bucket, collections }: Args): PayloadHandler =>
+  ({ access, bucket, collections, useCompositePrefixes = false }: Args): PayloadHandler =>
   async (req) => {
     const params = Object.fromEntries(req.searchParams) as R2StorageMultipartUploadHandlerParams
     const collectionSlug = params.collection
@@ -50,8 +51,15 @@ export const getHandleMultiPartUpload =
       }
     }
 
-    const prefix = (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
-    const fileKey = path.posix.join(prefix, params.fileName)
+    const collectionPrefix = (typeof collectionConfig === 'object' && collectionConfig.prefix) || ''
+    const { fileKey, sanitizedFilename } = await resolveSignedURLKey({
+      collectionPrefix,
+      collectionSlug,
+      docPrefix: params.docPrefix ?? undefined,
+      filename: params.fileName,
+      req,
+      useCompositePrefixes,
+    })
 
     const multipartId = params.multipartId
     const multipartKey = params.multipartKey
@@ -82,6 +90,7 @@ export const getHandleMultiPartUpload =
       })
 
       return Response.json({
+        filename: sanitizedFilename,
         key: multipartUpload.key,
         uploadId: multipartUpload.uploadId,
       })

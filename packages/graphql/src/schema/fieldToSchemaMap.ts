@@ -22,6 +22,7 @@ import type {
   RowField,
   SanitizedConfig,
   SelectField,
+  SlugField,
   TabsField,
   TextareaField,
   TextField,
@@ -105,6 +106,7 @@ type FieldToSchemaMap = {
   richText: (args: { field: RichTextField } & SharedArgs) => ObjectTypeConfig
   row: (args: { field: RowField } & SharedArgs) => ObjectTypeConfig
   select: (args: { field: SelectField } & SharedArgs) => ObjectTypeConfig
+  slug: (args: { field: SlugField } & SharedArgs) => ObjectTypeConfig
   tabs: (args: { field: TabsField } & SharedArgs) => ObjectTypeConfig
   text: (args: { field: TextField } & SharedArgs) => ObjectTypeConfig
   textarea: (args: { field: TextareaField } & SharedArgs) => ObjectTypeConfig
@@ -112,6 +114,18 @@ type FieldToSchemaMap = {
 }
 
 export const fieldToSchemaMap: FieldToSchemaMap = {
+  slug: ({ field, forceNullable, objectTypeConfig, parentIsLocalized }) => ({
+    ...objectTypeConfig,
+    [formatName(field.name)]: formattedNameResolver({
+      type: withNullableType({
+        type: GraphQLString,
+        field,
+        forceNullable,
+        parentIsLocalized,
+      }) as GraphQLOutputType,
+      field,
+    }),
+  }),
   array: ({
     config,
     field,
@@ -165,9 +179,7 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
     parentIsLocalized,
     parentName,
   }) => {
-    const blockTypes: GraphQLObjectType<any, any>[] = (
-      field.blockReferences ?? field.blocks
-    ).reduce((acc, _block) => {
+    const blockTypes: GraphQLObjectType<any, any>[] = field.blocks.reduce((acc, _block) => {
       const blockSlug = typeof _block === 'string' ? _block : _block.slug
       if (!graphqlResult.types.blockTypes[blockSlug]) {
         // TODO: iterate over blocks mapped to block slug in v4, or pass through payload.blocks
@@ -654,7 +666,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       type: withNullableType({
         type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
         field,
-        forceNullable,
+        // can be null if the related doc is deleted even if the field is required, unless hasMany
+        forceNullable: !field.hasMany,
         parentIsLocalized,
       }) as GraphQLOutputType,
       args: relationshipArgs,
@@ -1072,7 +1085,8 @@ export const fieldToSchemaMap: FieldToSchemaMap = {
       type: withNullableType({
         type: hasManyValues ? new GraphQLList(new GraphQLNonNull(type)) : type,
         field,
-        forceNullable,
+        // can be null if the related doc is deleted even if the field is required, unless hasMany
+        forceNullable: !field.hasMany,
         parentIsLocalized,
       }) as GraphQLOutputType,
       args: relationshipArgs,

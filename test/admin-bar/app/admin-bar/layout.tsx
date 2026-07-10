@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <PayloadAdminBar
           adminPath="/admin"
           apiPath="/api"
-          cmsURL="http://localhost:3000"
+          cmsURL={process.env.NEXT_PUBLIC_SERVER_URL || 'http://localhost:3000'}
           collection="pages"
           devMode
           id="1"

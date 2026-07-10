@@ -13,8 +13,8 @@ import {
 } from '@payloadcms/ui'
 import React, { useCallback, useEffect, useRef } from 'react'
 
-import type { DefaultTypedEditorState } from '../../nodeTypes.js'
-import type { LexicalRichTextField } from '../../types.js'
+import type { LexicalRichTextField } from '../../types/index.js'
+import type { DefaultTypedEditorState } from '../../types/nodeTypes.js'
 
 /**
  * Utility to render a lexical editor on the client.

@@ -4,7 +4,9 @@ import noRelativeMonorepoImports from './customRules/no-relative-monorepo-import
 import noImportsFromExportsDir from './customRules/no-imports-from-exports-dir.js'
 import noFlakyAssertions from './customRules/no-flaky-assertions.js'
 import noImportsFromSelf from './customRules/no-imports-from-self.js'
+import noConflictingLexicalMarkdownImports from './customRules/no-conflicting-lexical-markdown-imports.js'
 import properPinoLoggerErrorUsage from './customRules/proper-payload-logger-usage.js'
+import validCodeBlockLanguages from './customRules/valid-code-block-languages.js'
 
 /**
  * @type {import('eslint').ESLint.Plugin}
@@ -15,7 +17,9 @@ const index = {
     'no-relative-monorepo-imports': noRelativeMonorepoImports,
     'no-imports-from-exports-dir': noImportsFromExportsDir,
     'no-imports-from-self': noImportsFromSelf,
+    'no-conflicting-lexical-markdown-imports': noConflictingLexicalMarkdownImports,
     'proper-payload-logger-usage': properPinoLoggerErrorUsage,
+    'valid-code-block-languages': validCodeBlockLanguages,
 
     // Testing-related
     'no-non-retryable-assertions': noNonRetryableAssertions,

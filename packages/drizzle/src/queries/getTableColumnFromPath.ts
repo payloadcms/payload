@@ -19,6 +19,7 @@ import type { DrizzleAdapter, GenericColumn } from '../types.js'
 import type { BuildQueryJoinAliases } from './buildQuery.js'
 
 import { isPolymorphicRelationship } from '../utilities/isPolymorphicRelationship.js'
+import { isUUIDType } from '../utilities/isUUIDType.js'
 import { jsonBuildObject } from '../utilities/json.js'
 import { DistinctSymbol } from '../utilities/rawConstraint.js'
 import { resolveBlockTableName } from '../utilities/validateExistingBlockIsIdentical.js'
@@ -111,7 +112,7 @@ export const getTableColumnFromPath = ({
       constraints,
       field: {
         name: 'id',
-        type: adapter.idType === 'uuid' ? 'text' : 'number',
+        type: isUUIDType(adapter.idType) ? 'text' : 'number',
       } as NumberField | TextField,
       table: adapter.tables[newTableName],
     }
@@ -158,12 +159,14 @@ export const getTableColumnFromPath = ({
           }
           addJoinTable({
             condition: and(...conditions),
+            isOneToMany: true,
             joins,
             table: adapter.tables[newTableName],
           })
         } else {
           addJoinTable({
             condition: eq(arrayParentTable.id, adapter.tables[newTableName]._parentID),
+            isOneToMany: true,
             joins,
             table: adapter.tables[newTableName],
           })
@@ -201,7 +204,7 @@ export const getTableColumnFromPath = ({
           blockTypes.forEach((blockType) => {
             const block =
               adapter.payload.blocks[blockType] ??
-              ((field.blockReferences ?? field.blocks).find(
+              (field.blocks.find(
                 (block) => typeof block !== 'string' && block.slug === blockType,
               ) as FlattenedBlock | undefined)
 
@@ -219,7 +222,7 @@ export const getTableColumnFromPath = ({
             constraints.push({
               columnName: '_path',
               table: newAliasTable,
-              value: pathSegments[0],
+              value: `${constraintPath}${pathSegments[0]}`,
             })
           })
           return {
@@ -230,7 +233,7 @@ export const getTableColumnFromPath = ({
           }
         }
 
-        const hasBlockField = (field.blockReferences ?? field.blocks).some((_block) => {
+        const hasBlockField = field.blocks.some((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
 
           newTableName = resolveBlockTableName(
@@ -412,7 +415,7 @@ export const getTableColumnFromPath = ({
               constraints,
               field: {
                 name: 'id',
-                type: adapter.idType === 'uuid' ? 'text' : 'number',
+                type: isUUIDType(adapter.idType) ? 'text' : 'number',
               } as NumberField | TextField,
               table: aliasRelationshipTable,
             }
@@ -474,14 +477,53 @@ export const getTableColumnFromPath = ({
           existingTable || getTableAlias({ adapter, tableName: newTableName }).newAliasTable
 
         if (!existingTable) {
-          joins.push({
-            condition: eq(
-              newAliasTable[field.on.replaceAll('.', '_')],
-              aliasTable ? aliasTable.id : adapter.tables[tableName].id,
-            ),
-            queryPath: `${constraintPath}${field.name}`,
-            table: newAliasTable,
-          })
+          const onSegments = field.on.split('.')
+          const collectionFlattenedFields =
+            adapter.payload.collections[field.collection].config.flattenedFields
+          const firstSegField =
+            onSegments.length > 1
+              ? collectionFlattenedFields.find((f) => f.name === onSegments[0])
+              : null
+
+          const arrayTableName =
+            firstSegField?.type === 'array'
+              ? adapter.tableNameMap.get(`${newTableName}_${toSnakeCase(onSegments[0])}`)
+              : undefined
+
+          if (arrayTableName) {
+            // join from main table to array table
+            const { newAliasTable: arrayAliasTable } = getTableAlias({
+              adapter,
+              tableName: arrayTableName,
+            })
+
+            joins.push({
+              condition: eq(
+                arrayAliasTable[onSegments.slice(1).join('_')],
+                aliasTable ? aliasTable.id : adapter.tables[tableName].id,
+              ),
+              queryPath: `${constraintPath}${field.name}._array`,
+              table: arrayAliasTable,
+            })
+
+            joins.push({
+              condition: eq(
+                (newAliasTable as PgTableWithColumns<any>).id,
+                arrayAliasTable._parentID,
+              ),
+              queryPath: `${constraintPath}${field.name}`,
+              table: newAliasTable,
+            })
+          } else {
+            joins.push({
+              condition: eq(
+                newAliasTable[field.on.replaceAll('.', '_')],
+                aliasTable ? aliasTable.id : adapter.tables[tableName].id,
+              ),
+              queryPath: `${constraintPath}${field.name}`,
+              table: newAliasTable,
+            })
+          }
         }
 
         if (newCollectionPath === 'id') {
@@ -490,7 +532,7 @@ export const getTableColumnFromPath = ({
             constraints,
             field: {
               name: 'id',
-              type: adapter.idType === 'uuid' ? 'text' : 'number',
+              type: isUUIDType(adapter.idType) ? 'text' : 'number',
             } as NumberField | TextField,
             table: newAliasTable,
           }
@@ -665,8 +707,9 @@ export const getTableColumnFromPath = ({
 
             const columns: TableColumn['columns'] = field.relationTo
               .map((relationTo) => {
-                let idType: 'number' | 'text' | 'uuid' =
-                  adapter.idType === 'uuid' ? 'uuid' : 'number'
+                let idType: 'number' | 'text' | 'uuid' = isUUIDType(adapter.idType)
+                  ? 'uuid'
+                  : 'number'
 
                 const { customIDType } = adapter.payload.collections[relationTo]
 

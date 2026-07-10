@@ -1,0 +1,46 @@
+@layer payload-default {
+  .relationship--multi-value-label {
+    display: flex;
+    padding-inline-start: var(--spacer-2);
+    gap: var(--spacer-1);
+  }
+
+  .relationship--multi-value-label__content {
+    line-height: 1.375rem;
+    max-width: 150px;
+    color: currentColor;
+    display: flex;
+    align-items: center;
+  }
+
+  .relationship--multi-value-label__text {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .relationship--multi-value-label__drawer-toggler {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+    cursor: pointer;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: var(--spacer-1);
+    pointer-events: all;
+    border-radius: var(--radius-small);
+    border: var(--stroke-width-small) solid transparent;
+
+    &:hover {
+      background-color: var(--color-bg-transparent-hover);
+    }
+
+    &:focus-visible {
+      outline: none;
+      border: var(--accessibility-outline);
+      border-width: var(--stroke-width-small);
+    }
+  }
+}

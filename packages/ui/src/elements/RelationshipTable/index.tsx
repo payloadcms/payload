@@ -13,23 +13,21 @@ import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
-import { Pill } from '../../elements/Pill/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
-import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { AnimateHeight } from '../AnimateHeight/index.js'
-import { ColumnSelector } from '../ColumnSelector/index.js'
 import { useDocumentDrawer } from '../DocumentDrawer/index.js'
+import { ListColumnSelectionButton } from '../ListColumnSelectionButton/index.js'
+import { NoListResults } from '../NoListResults/index.js'
 import { RelationshipProvider } from '../Table/RelationshipProvider/index.js'
 import { AddNewButton } from './AddNewButton.js'
 import { DrawerLink } from './cells/DrawerLink/index.js'
 import { RelationshipTablePagination } from './Pagination.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'relationship-table'
 
@@ -74,7 +72,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   const { i18n, t } = useTranslation()
 
   const [query, setQuery] = useState<ListQuery>()
-  const [openColumnSelector, setOpenColumnSelector] = useState(false)
 
   const [collectionConfig] = useState(() => getEntityConfig({ collectionSlug: relationTo }))
 
@@ -137,7 +134,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       }
 
       // map columns from string[] to CollectionPreferences['columns']
-      const defaultColumns = field.admin.defaultColumns
+      const defaultColumns = field.admin?.defaultColumns
         ? field.admin.defaultColumns.map((accessor) => ({
             accessor,
             active: true,
@@ -145,7 +142,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         : undefined
 
       const renderRowTypes =
-        typeof field.admin.disableRowTypes === 'boolean'
+        typeof field.admin?.disableRowTypes === 'boolean'
           ? !field.admin.disableRowTypes
           : Array.isArray(relationTo)
 
@@ -176,8 +173,8 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [
       field.defaultLimit,
       field.defaultSort,
-      field.admin.defaultColumns,
-      field.admin.disableRowTypes,
+      field.admin?.defaultColumns,
+      field.admin?.disableRowTypes,
       field.collection,
       field.name,
       field.orderable,
@@ -293,68 +290,73 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     [columnState, field, collectionConfig],
   )
 
+  const addNewButton = (
+    <AddNewButton
+      allowCreate={allowCreate !== false}
+      baseClass={baseClass}
+      buttonStyle="ghost"
+      className={`${baseClass}__add-new${isPolymorphic ? '-polymorphic' : ''}`}
+      collections={config.collections}
+      i18n={i18n}
+      label={i18n.t('fields:addNew')}
+      onClick={isPolymorphic ? setSelectedCollection : openDrawer}
+      permissions={permissions}
+      relationTo={relationTo}
+    />
+  )
+
+  const columnsButton = <ListColumnSelectionButton collectionSlug={collectionConfig?.slug} />
+
   return (
     <div className={baseClass}>
-      <div className={`${baseClass}__header`}>
-        {Label}
-        <div className={`${baseClass}__actions`}>
-          <AddNewButton
-            allowCreate={allowCreate !== false}
-            baseClass={baseClass}
-            buttonStyle="none"
-            className={`${baseClass}__add-new${isPolymorphic ? '-polymorphic' : ' doc-drawer__toggler'}`}
-            collections={config.collections}
-            i18n={i18n}
-            icon={isPolymorphic ? 'plus' : undefined}
-            label={i18n.t('fields:addNew')}
-            onClick={isPolymorphic ? setSelectedCollection : openDrawer}
-            permissions={permissions}
-            relationTo={relationTo}
-          />
-          <Pill
-            aria-controls={`${baseClass}-columns`}
-            aria-expanded={openColumnSelector}
-            className={`${baseClass}__toggle-columns ${
-              openColumnSelector ? `${baseClass}__buttons-active` : ''
-            }`}
-            icon={<ChevronIcon direction={openColumnSelector ? 'up' : 'down'} />}
-            onClick={() => setOpenColumnSelector(!openColumnSelector)}
-            pillStyle="light"
-            size="small"
-          >
-            {t('general:columns')}
-          </Pill>
-        </div>
-      </div>
-      {BeforeInput}
       {isLoadingTable ? (
-        <p>{t('general:loading')}</p>
+        <Fragment>
+          <div className={`${baseClass}__header`}>
+            {Label}
+            <div className={`${baseClass}__actions`}>{addNewButton}</div>
+          </div>
+          {BeforeInput}
+          <p>{t('general:loading')}</p>
+        </Fragment>
       ) : (
         <Fragment>
           {data?.docs && data.docs.length === 0 && (
-            <div className={`${baseClass}__no-results`}>
-              <p>
-                {i18n.t('general:noResults', {
+            <Fragment>
+              <div className={`${baseClass}__header`}>
+                {Label}
+                <div className={`${baseClass}__actions`}>{addNewButton}</div>
+              </div>
+              {BeforeInput}
+              <NoListResults
+                Actions={
+                  canCreate
+                    ? [
+                        <AddNewButton
+                          allowCreate={canCreate}
+                          baseClass={baseClass}
+                          collections={config.collections}
+                          i18n={i18n}
+                          key="create"
+                          label={i18n.t('general:createNewLabel', {
+                            label: isPolymorphic
+                              ? i18n.t('general:document')
+                              : getTranslation(collectionConfig?.labels?.singular, i18n),
+                          })}
+                          onClick={isPolymorphic ? setSelectedCollection : openDrawer}
+                          permissions={permissions}
+                          relationTo={relationTo}
+                        />,
+                      ]
+                    : []
+                }
+                description={i18n.t('general:noResults', {
                   label: isPolymorphic
                     ? i18n.t('general:documents')
                     : getTranslation(collectionConfig?.labels?.plural, i18n),
                 })}
-              </p>
-              <AddNewButton
-                allowCreate={canCreate}
-                baseClass={baseClass}
-                collections={config.collections}
-                i18n={i18n}
-                label={i18n.t('general:createNewLabel', {
-                  label: isPolymorphic
-                    ? i18n.t('general:document')
-                    : getTranslation(collectionConfig?.labels?.singular, i18n),
-                })}
-                onClick={isPolymorphic ? setSelectedCollection : openDrawer}
-                permissions={permissions}
-                relationTo={relationTo}
+                title={i18n.t('general:noResultsFound')}
               />
-            </div>
+            </Fragment>
           )}
           {data?.docs && data.docs.length > 0 && (
             <RelationshipProvider>
@@ -376,17 +378,14 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                     <DrawerLink currentDrawerID={currentDrawerID} onDrawerOpen={onDrawerOpen} />
                   }
                 >
-                  <AnimateHeight
-                    className={`${baseClass}__columns`}
-                    height={openColumnSelector ? 'auto' : 0}
-                    id={`${baseClass}-columns`}
-                  >
-                    <div className={`${baseClass}__columns-inner`}>
-                      {collectionConfig && (
-                        <ColumnSelector collectionSlug={collectionConfig.slug} />
-                      )}
+                  <div className={`${baseClass}__header`}>
+                    {Label}
+                    <div className={`${baseClass}__actions`}>
+                      {addNewButton}
+                      {columnsButton}
                     </div>
-                  </AnimateHeight>
+                  </div>
+                  {BeforeInput}
                   {Table}
                   <RelationshipTablePagination />
                 </TableColumnsProvider>

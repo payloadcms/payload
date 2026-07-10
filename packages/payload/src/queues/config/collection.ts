@@ -276,6 +276,7 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
       ],
     },
     lockDocuments: false,
+    versions: false,
   }
 
   if (jobsConfig.stats) {
@@ -296,6 +297,5 @@ export function jobAfterRead({ config, doc }: { config: SanitizedConfig; doc: Jo
     jobLog: doc.log || [],
   })
   doc.input = doc.input || {}
-  doc.taskStatus = doc.taskStatus || {}
   return doc
 }

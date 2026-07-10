@@ -10,7 +10,7 @@ import {
   text,
   uniqueIndex,
 } from 'drizzle-orm/sqlite-core'
-import { v4 as uuidv4 } from 'uuid'
+import { v4 as uuidv4, v7 as uuidv7 } from 'uuid'
 
 import type { BuildDrizzleTable, RawColumn } from '../../types.js'
 
@@ -70,6 +70,10 @@ export const buildDrizzleTable: BuildDrizzleTable = ({ adapter, locales, rawTabl
 
         if (column.defaultRandom) {
           builder = builder.$defaultFn(() => uuidv4())
+        }
+
+        if (column.defaultV7) {
+          builder = builder.$defaultFn(() => uuidv7())
         }
 
         columns[key] = builder

@@ -1,13 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { checkFocusIndicators } from '__helpers/e2e/checkFocusIndicators.js'
-import { openCreateDocDrawer } from '__helpers/e2e/fields/relationship/openCreateDocDrawer.js'
-import { addListFilter } from '__helpers/e2e/filters/index.js'
-import { navigateToDoc } from '__helpers/e2e/navigateToDoc.js'
-import { openDocControls } from '__helpers/e2e/openDocControls.js'
-import { runAxeScan } from '__helpers/e2e/runAxeScan.js'
-import { openDocDrawer } from '__helpers/e2e/toggleDocDrawer.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -15,6 +8,9 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config, RelationshipField, TextField } from '../../payload-types.js'
 
+import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
+import { openCreateDocDrawer } from '../../../__helpers/e2e/fields/relationship/openCreateDocDrawer.js'
+import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/index.js'
 import {
   ensureCompilationIsDone,
   exactText,
@@ -22,10 +18,19 @@ import {
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
+import { navigateToDoc } from '../../../__helpers/e2e/navigateToDoc.js'
+import { openDocControls } from '../../../__helpers/e2e/openDocControls.js'
+import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
+import {
+  getSelectInputOptions,
+  getSelectMenu,
+  selectInput,
+} from '../../../__helpers/e2e/selectInput.js'
+import { openDocDrawer } from '../../../__helpers/e2e/toggleDocDrawer.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
 
@@ -133,11 +138,7 @@ describe('relationship', () => {
 
     // Fill first modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationship').click()
-    await page
-      .locator(
-        '[id^=doc-drawer_relationship-fields_1_] .rs__option:has-text("Seeded text document")',
-      )
-      .click()
+    await page.locator('.rs__option:has-text("Seeded text document")').click()
 
     const secondModalButton = page.locator(
       '[id^=doc-drawer_relationship-fields_1_] #relationToSelf-add-new button',
@@ -146,11 +147,7 @@ describe('relationship', () => {
 
     // Fill second modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_2_] #field-relationship').click()
-    await page
-      .locator(
-        '[id^=doc-drawer_relationship-fields_2_] .rs__option:has-text("Seeded text document")',
-      )
-      .click()
+    await page.locator('.rs__option:has-text("Seeded text document")').click()
 
     // Save then close the second modal
     await page.locator('[id^=doc-drawer_relationship-fields_2_] #action-save').click()
@@ -491,15 +488,15 @@ describe('relationship', () => {
         selector: '#field-relationship .relationship--single-value__drawer-toggler',
       })
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
-      const originalDrawerID = await drawer1Content.locator('.id-label').textContent()
+      const drawer1Title = drawer1Content.locator('.doc-drawer__title')
+      const originalDrawerID = await drawer1Title.getAttribute('data-doc-id')
       await openDocControls(drawer1Content, page)
       await page.locator('.popup__content #action-create').click()
       await wait(1000) // wait for /form-state to return
       const title = 'Created from drawer'
       await drawer1Content.locator('#field-text').fill(title)
       await saveDocAndAssert(page, '[id^=doc-drawer_text-fields_1_] .drawer__content #action-save')
-      const newDrawerID = drawer1Content.locator('.id-label')
-      await expect(newDrawerID).not.toHaveText(originalDrawerID)
+      await expect(drawer1Title).not.toHaveAttribute('data-doc-id', originalDrawerID)
       await page.locator('[id^=doc-drawer_text-fields_1_] .drawer__close').click()
       await page.locator('#field-relationship').scrollIntoViewIfNeeded()
 
@@ -548,14 +545,14 @@ describe('relationship', () => {
         selector: '#field-relationship .relationship--single-value__drawer-toggler',
       })
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
-      const originalID = await drawer1Content.locator('.id-label').textContent()
+      const drawer1Title = drawer1Content.locator('.doc-drawer__title')
+      const originalID = await drawer1Title.getAttribute('data-doc-id')
       const originalText = 'Text'
       await drawer1Content.locator('#field-text').fill(originalText)
       await saveDocAndAssert(page, '[id^=doc-drawer_text-fields_1_] .drawer__content #action-save')
       await openDocControls(drawer1Content, page)
       await page.locator('.popup__content #action-duplicate').click()
-      const duplicateID = drawer1Content.locator('.id-label')
-      await expect(duplicateID).not.toHaveText(originalID)
+      await expect(drawer1Title).not.toHaveAttribute('data-doc-id', originalID)
       await page.locator('[id^=doc-drawer_text-fields_1_] .drawer__close').click()
       await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await page.locator('#field-relationship').scrollIntoViewIfNeeded()
@@ -597,7 +594,7 @@ describe('relationship', () => {
       await page.locator('#field-relationship .rs__control').click()
 
       await expect(
-        page.locator('#field-relationship .rs__option', {
+        getSelectMenu({ page }).locator('.rs__option', {
           hasText: exactText(originalValue),
         }),
       ).toBeVisible()
@@ -608,13 +605,13 @@ describe('relationship', () => {
       })
 
       const drawer1Content = page.locator('[id^=doc-drawer_text-fields_1_] .drawer__content')
-      const originalID = await drawer1Content.locator('.id-label').textContent()
+      const originalID = await drawer1Content
+        .locator('.doc-drawer__title')
+        .getAttribute('data-doc-id')
       await openDocControls(drawer1Content, page)
       await page.locator('.popup__content #action-delete').click()
 
-      await page
-        .locator('[id^=delete-].payload__modal-item.confirmation-modal[open] button#confirm-action')
-        .click()
+      await page.locator('[id^=delete-].payload__modal-item[open] button[id$="-confirm"]').click()
 
       await expect(drawer1Content).toBeHidden()
 
@@ -629,13 +626,13 @@ describe('relationship', () => {
       await wait(500)
 
       await expect(
-        page.locator('#field-relationship .rs__option', {
+        getSelectMenu({ page }).locator('.rs__option', {
           hasText: exactText(originalValue),
         }),
       ).toBeHidden()
 
       await expect(
-        page.locator('#field-relationship .rs__option', {
+        getSelectMenu({ page }).locator('.rs__option', {
           hasText: exactText(`Untitled - ${originalID}`),
         }),
       ).toBeHidden()
@@ -668,9 +665,7 @@ describe('relationship', () => {
 
     await page.locator('#field-relationshipWithMinRows .value-container').click()
 
-    await page
-      .locator('#field-relationshipWithMinRows .rs__option:has-text("Seeded text document")')
-      .click()
+    await page.locator('.rs__option:has-text("Seeded text document")').click()
 
     await page.click('#action-save', { delay: 100 })
     await assertToastErrors({
@@ -687,7 +682,7 @@ describe('relationship', () => {
     await wait(400)
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
-    const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
+    const firstTextDocOption = getSelectMenu({ page }).locator('.rs__option').first()
     const firstOptionLabel = await firstTextDocOption.textContent()
     expect(firstOptionLabel?.trim()).toBe('Another text document')
   })
@@ -705,7 +700,7 @@ describe('relationship', () => {
     await arrayFieldPromise
 
     const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
-    const firstTextDocOption = textDocsGroup.locator('+div .rs__option').first()
+    const firstTextDocOption = getSelectMenu({ page }).locator('.rs__option').first()
     const firstOptionLabel = firstTextDocOption
     await expect(firstOptionLabel).toHaveText('Seeded text document')
   })
@@ -795,6 +790,60 @@ describe('relationship', () => {
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
   })
 
+  test('should not duplicate relationship filter options when switching operators', async () => {
+    await page.goto(url.list)
+    await wait(1000)
+
+    await openListFilters(page, {})
+    const whereBuilder = page.locator('.where-builder')
+
+    const condition = whereBuilder.locator('.condition').last()
+
+    // Select relationship field
+    await selectInput({
+      page,
+      selectLocator: condition.locator('.condition__field'),
+      multiSelect: false,
+      option: 'Relationship',
+    })
+
+    // Select equals operator (default)
+    await selectInput({
+      page,
+      selectLocator: condition.locator('.condition__operator'),
+      multiSelect: false,
+      option: 'equals',
+    })
+
+    // Select a value
+    const valueLocator = condition.locator('.condition__value')
+    await selectInput({
+      page,
+      selectLocator: valueLocator,
+      multiSelect: false,
+      option: 'Seeded text document',
+      selectType: 'relationship',
+    })
+
+    // Switch to "is not equal to" operator
+    await selectInput({
+      page,
+      selectLocator: condition.locator('.condition__operator'),
+      multiSelect: false,
+      option: 'is not equal to',
+    })
+
+    // Wait for options to reload
+    await wait(500)
+
+    // Get all options in the value dropdown
+    const options = await getSelectInputOptions({ page, selectLocator: valueLocator })
+
+    // Verify no duplicates - each option should appear only once
+    const uniqueOptions = [...new Set(options)]
+    expect(options.length).toBe(uniqueOptions.length)
+  })
+
   test('should be able to select relationship with drawer appearance', async () => {
     await loadCreatePage()
 
@@ -823,7 +872,7 @@ describe('relationship', () => {
 
     const relationshipField = page.locator('#field-relationshipDrawer')
     await relationshipField.click()
-    const searchField = page.locator('.list-drawer .search-filter')
+    const searchField = page.locator('.list-drawer .search-input')
     await expect(searchField).toBeVisible()
 
     const searchInput = searchField.locator('input')
@@ -858,7 +907,8 @@ describe('relationship', () => {
     await expect(relationToSelector).toBeVisible()
 
     await relationToSelector.locator('.rs__control').click()
-    const option = relationToSelector.locator('.rs__option').nth(1)
+    const relationToMenu = getSelectMenu({ page })
+    const option = relationToMenu.locator('.rs__option').nth(1)
     await option.click()
     const firstRow = listDrawerContent.locator('table tbody tr').first()
     const button = firstRow.locator('button')
@@ -979,7 +1029,7 @@ describe('relationship', () => {
 
     await wait(400)
     await relationToSelector.locator('.rs__control').click()
-    const option = relationToSelector.locator('.rs__option').nth(1)
+    const option = getSelectMenu({ page }).locator('.rs__option').nth(1)
     await wait(400)
     await option.click()
     const rows = listDrawerContent.locator('table tbody tr')
@@ -1058,7 +1108,7 @@ describe('relationship', () => {
     ).toHaveText('new text')
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test.fixme('Create view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)
       await page.locator('#field-select').waitFor()

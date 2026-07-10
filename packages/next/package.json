@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/next",
-  "version": "3.76.1",
+  "version": "4.0.0-beta.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -23,6 +23,7 @@
   "type": "module",
   "exports": {
     "./css": {
+      "types": "./src/exports/css.ts",
       "import": "./src/dummy.css",
       "default": "./src/dummy.css"
     },
@@ -50,11 +51,6 @@
       "types": "./src/exports/auth.ts",
       "default": "./src/exports/auth.ts"
     },
-    "./templates": {
-      "import": "./src/exports/templates.ts",
-      "types": "./src/exports/templates.ts",
-      "default": "./src/exports/templates.ts"
-    },
     "./utilities": {
       "import": "./src/exports/utilities.ts",
       "types": "./src/exports/utilities.ts",
@@ -64,16 +60,6 @@
       "import": "./src/exports/views.ts",
       "types": "./src/exports/views.ts",
       "default": "./src/exports/views.ts"
-    },
-    "./client": {
-      "import": "./src/exports/client.ts",
-      "types": "./src/exports/client.ts",
-      "default": "./src/exports/client.ts"
-    },
-    "./rsc": {
-      "import": "./src/exports/rsc.ts",
-      "types": "./src/exports/rsc.ts",
-      "default": "./src/exports/rsc.ts"
     }
   },
   "main": "./src/index.js",
@@ -116,14 +102,14 @@
     "@payloadcms/ui": "workspace:*",
     "busboy": "^1.6.0",
     "dequal": "2.0.3",
-    "file-type": "19.3.0",
-    "graphql-http": "^1.22.0",
+    "file-type": "22.0.1",
+    "graphql-http": "1.22.4",
     "graphql-playground-html": "1.6.30",
     "http-status": "2.1.0",
     "path-to-regexp": "6.3.0",
-    "qs-esm": "7.0.2",
+    "qs-esm": "8.0.1",
     "sass": "1.77.4",
-    "uuid": "10.0.0"
+    "uuid": "14.0.0"
   },
   "devDependencies": {
     "@babel/cli": "7.27.2",
@@ -131,12 +117,11 @@
     "@babel/preset-env": "7.27.2",
     "@babel/preset-react": "7.27.1",
     "@babel/preset-typescript": "7.27.1",
-    "@next/eslint-plugin-next": "16.2.0-canary.29",
+    "@next/eslint-plugin-next": "16.2.7",
     "@payloadcms/eslint-config": "workspace:*",
     "@types/busboy": "1.5.4",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "@types/uuid": "10.0.0",
     "babel-plugin-react-compiler": "19.1.0-rc.3",
     "esbuild": "0.27.1",
     "esbuild-sass-plugin": "3.3.1",
@@ -145,15 +130,16 @@
   },
   "peerDependencies": {
     "graphql": "^16.8.1",
-    "next": ">=15.2.9 <15.3.0 || >=15.3.9 <15.4.0 || >=15.4.11 <15.5.0 || >=16.2.0-canary.10 <17.0.0",
+    "next": ">=16.2.6 <17.0.0",
     "payload": "workspace:*"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": ">=24.15.0"
   },
   "publishConfig": {
     "exports": {
       "./css": {
+        "types": "./dist/exports/css.d.ts",
         "import": "./dist/prod/styles.css",
         "default": "./dist/prod/styles.css"
       },
@@ -172,11 +158,6 @@
         "types": "./dist/exports/routes.d.ts",
         "default": "./dist/exports/routes.js"
       },
-      "./templates": {
-        "import": "./dist/exports/templates.js",
-        "types": "./dist/exports/templates.d.ts",
-        "default": "./dist/exports/templates.js"
-      },
       "./auth": {
         "import": "./dist/exports/auth.js",
         "types": "./dist/exports/auth.d.ts",
@@ -191,16 +172,6 @@
         "import": "./dist/exports/views.js",
         "types": "./dist/exports/views.d.ts",
         "default": "./dist/exports/views.js"
-      },
-      "./client": {
-        "import": "./dist/exports/client.js",
-        "types": "./dist/exports/client.d.ts",
-        "default": "./dist/exports/client.js"
-      },
-      "./rsc": {
-        "import": "./dist/exports/rsc.js",
-        "types": "./dist/exports/rsc.d.ts",
-        "default": "./dist/exports/rsc.js"
       }
     },
     "main": "./dist/index.js",

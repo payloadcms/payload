@@ -10,6 +10,7 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
+import { createLocalReq, Forbidden, getFieldsToSign, refreshOperation } from 'payload'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
@@ -18,8 +19,8 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'v
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { ApiKey } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import {
   apiKeysSlug,
   namedSaveToJWTValue,
@@ -230,6 +231,7 @@ describe('Auth', () => {
         expect(typeof data.exp).toBe('number')
         expect(response.status).toBe(200)
         expect(data.user.email).toBeDefined()
+        expect(data.user._strategy).toBe('local-jwt')
       })
 
       it('should have fields saved to JWT', () => {
@@ -268,6 +270,39 @@ describe('Auth', () => {
         expect(unnamedTabSaveToJWTFalse).toBeUndefined()
         expect(iat).toBeDefined()
         expect(exp).toBeDefined()
+      })
+
+      it('should not crash when building JWT for user with missing group/tab fields', () => {
+        const collectionConfig = payload.collections[slug].config
+
+        // Simulate a user document that was created before group/tab fields were added.
+        // Without the fix, getFieldsToSign would crash with:
+        // "TypeError: Cannot read properties of undefined (reading 'saveToJWTString')"
+        // when trying to traverse into groupSaveToJWT.saveToJWTString
+        const userWithMissingFields = {
+          id: '123',
+          email: 'test@example.com',
+          roles: ['user'],
+          // Missing fields: group, groupSaveToJWT, saveToJWTTab, tabSaveToJWTString
+        }
+
+        expect(() => {
+          getFieldsToSign({
+            collectionConfig,
+            email: userWithMissingFields.email,
+            user: userWithMissingFields as any,
+          })
+        }).not.toThrow()
+
+        const result = getFieldsToSign({
+          collectionConfig,
+          email: userWithMissingFields.email,
+          user: userWithMissingFields as any,
+        })
+
+        expect(result.id).toBe(userWithMissingFields.id)
+        expect(result.email).toBe(userWithMissingFields.email)
+        expect(result.collection).toBe(slug)
       })
 
       it('should allow authentication with an API key with useAPIKey', async () => {
@@ -905,24 +940,25 @@ describe('Auth', () => {
             },
           })
 
-          expect(lockedUser.docs[0].loginAttempts).toBe(2)
-          expect(lockedUser.docs[0].lockUntil).toBeDefined()
+          expect(lockedUser.docs[0]!.loginAttempts).toBe(2)
+          expect(lockedUser.docs[0]!.lockUntil).toBeDefined()
 
           const manuallyReleaseLock = new Date(Date.now() - 605 * 1000).toISOString()
-          const userLockElapsed = await payload.update({
+          await payload.db.updateOne({
             collection: slug,
+            id: lockedUser.docs[0]!.id,
             data: {
               lockUntil: manuallyReleaseLock,
             },
-            showHiddenFields: true,
-            where: {
-              email: {
-                equals: userEmail,
-              },
-            },
           })
 
-          expect(userLockElapsed.docs[0].lockUntil).toEqual(manuallyReleaseLock)
+          const userAfterUpdate = await payload.findByID({
+            collection: slug,
+            id: lockedUser.docs[0]!.id,
+            showHiddenFields: true,
+          })
+
+          expect(userAfterUpdate.lockUntil).toEqual(manuallyReleaseLock)
 
           // login
           await restClient.POST(`/${slug}/login`, {
@@ -1756,6 +1792,40 @@ describe('Auth', () => {
       expect(new Date(matchedSession?.expiresAt as unknown as string).getTime()).toBeLessThan(
         new Date(matchedRefreshedSession?.expiresAt as unknown as string).getTime(),
       )
+    })
+
+    it('should reject a refresh when its session is revoked after authentication', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+      const { sid } = jwtDecode<{ sid: string }>(String(authenticated.token))
+
+      const logoutResponse = await restClient.POST(`/${slug}/logout`, {
+        headers: {
+          Authorization: `JWT ${authenticated.token}`,
+        },
+      })
+      const req = await createLocalReq(
+        {
+          user: {
+            ...authenticated.user,
+            _sid: sid,
+          },
+        },
+        payload,
+      )
+
+      expect(logoutResponse.status).toBe(200)
+      await expect(
+        refreshOperation({
+          collection: payload.collections[slug],
+          req,
+        }),
+      ).rejects.toBeInstanceOf(Forbidden)
     })
 
     it('should not authenticate a user who has a JWT but its session has been terminated', async () => {

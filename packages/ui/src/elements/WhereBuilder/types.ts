@@ -7,24 +7,31 @@ import type {
 } from 'payload'
 
 export type WhereBuilderProps = {
-  readonly collectionPluralLabel: SanitizedCollectionConfig['labels']['plural']
+  readonly collectionPluralLabel?: SanitizedCollectionConfig['labels']['plural']
   readonly collectionSlug: SanitizedCollectionConfig['slug']
-  readonly fields?: ClientField[]
+  readonly fields: ClientField[]
+  /** Called with the next `where` value whenever a condition is added, edited, or removed. */
+  readonly onChange: (where: Where) => Promise<void> | void
+  /** Called when the last condition is removed, so the parent has empty state control. */
+  readonly onEmptyRemove?: () => void
   readonly renderedFilters?: Map<string, React.ReactNode>
   readonly resolvedFilterOptions?: Map<string, ResolvedFilterOptions>
+  /** The current `where` value to render conditions from. */
+  readonly value?: Where
 }
 
 export type Value = Date | number | number[] | string | string[]
 
 export type ReducedField = {
   field: ClientField
+  /** The field path (e.g. "title" or "author.name") */
+  fieldPath: string
   label: React.ReactNode
   operators: {
     label: string
     value: Operator
   }[]
   plainTextLabel?: string
-  value: Value
 }
 
 export type Relation = 'and' | 'or'
@@ -91,5 +98,15 @@ export type RemoveCondition = ({
   orIndex,
 }: {
   andIndex: number
+  orIndex: number
+}) => Promise<void> | void
+
+export type UpdateJoin = ({
+  andIndex,
+  join,
+  orIndex,
+}: {
+  andIndex: number
+  join: Relation
   orIndex: number
 }) => Promise<void> | void

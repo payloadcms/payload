@@ -2,11 +2,8 @@
 
 import type { PayloadClientReactComponent, SanitizedConfig } from 'payload'
 
-import { useConfig } from '@payloadcms/ui'
-import LinkImport from 'next/link.js'
+import { Link, useConfig } from '@payloadcms/ui'
 import React from 'react'
-
-const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
 
 const baseClass = 'after-nav-links'
 
@@ -59,6 +56,14 @@ export const AfterNavLinks: PayloadClientReactComponent<
             style={{ color: '#1976d2', textDecoration: 'none' }}
           >
             Minimal Template
+          </Link>
+        </p>
+        <p className="nav__link" style={{ margin: 0 }}>
+          <Link
+            href={`${adminRoute}/button-styles`}
+            style={{ color: '#1976d2', textDecoration: 'none' }}
+          >
+            Button Styles
           </Link>
         </p>
         <div id="custom-css" />

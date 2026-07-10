@@ -12,13 +12,12 @@ import { ListDrawerCreateNewDocButton } from '../../../elements/ListHeader/Drawe
 import { ListHeader } from '../../../elements/ListHeader/index.js'
 import {
   ListBulkUploadButton,
-  ListCreateNewButton,
   ListEmptyTrashButton,
 } from '../../../elements/ListHeader/TitleActions/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useListQuery } from '../../../providers/ListQuery/index.js'
 import { ListSelection } from '../ListSelection/index.js'
-import './index.scss'
+import './index.css'
 
 const drawerBaseClass = 'list-drawer'
 
@@ -31,6 +30,7 @@ export type ListHeaderProps = {
   disableBulkEdit?: boolean
   hasCreatePermission: boolean
   hasDeletePermission?: boolean
+  hasTrashPermission?: boolean
   i18n: I18nClient
   isBulkUploadEnabled: boolean
   isTrashEnabled?: boolean
@@ -58,10 +58,10 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   disableBulkEdit,
   hasCreatePermission,
   hasDeletePermission,
+  hasTrashPermission,
   i18n,
   isBulkUploadEnabled,
   isTrashEnabled,
-  newDocumentURL,
   onBulkUploadSuccess,
   openBulkUpload,
   smallBreak,
@@ -75,18 +75,15 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
   if (isInDrawer) {
     return (
       <ListHeader
-        Actions={[
-          <CloseModalButton
-            className={`${drawerBaseClass}__header-close`}
-            key="close-button"
-            slug={drawerSlug}
-          />,
-        ]}
+        Actions={[]}
         AfterListHeaderContent={
           <>
             {Description}
             {<DrawerRelationshipSelect />}
           </>
+        }
+        BeforeTitle={
+          <CloseModalButton className={`${drawerBaseClass}__header-close`} slug={drawerSlug} />
         }
         className={`${drawerBaseClass}__header`}
         title={getTranslation(
@@ -111,6 +108,8 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
             collectionConfig={collectionConfig}
             disableBulkDelete={disableBulkDelete}
             disableBulkEdit={disableBulkEdit}
+            hasDeletePermission={hasDeletePermission}
+            hasTrashPermission={hasTrashPermission}
             key="list-selection"
             label={getTranslation(collectionConfig?.labels?.plural, i18n)}
             showSelectAllAcrossPages={!isGroupingBy}
@@ -128,14 +127,6 @@ export const CollectionListHeader: React.FC<ListHeaderProps> = ({
       className={className}
       title={getTranslation(collectionConfig?.labels?.plural, i18n)}
       TitleActions={[
-        hasCreatePermission && !isTrashRoute && (
-          <ListCreateNewButton
-            collectionConfig={collectionConfig}
-            hasCreatePermission={hasCreatePermission}
-            key="list-header-create-new-doc"
-            newDocumentURL={newDocumentURL}
-          />
-        ),
         hasCreatePermission && isBulkUploadEnabled && !isTrashRoute && (
           <ListBulkUploadButton
             collectionSlug={collectionConfig.slug}

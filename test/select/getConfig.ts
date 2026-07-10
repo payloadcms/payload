@@ -34,10 +34,12 @@ export const getConfig: () => Partial<Config> = () => ({
       upload: {
         staticDir: path.resolve(dirname, 'media'),
       },
+      versions: false,
     },
     {
       slug: 'rels',
       fields: [{ type: 'text', name: 'text' }],
+      versions: false,
     },
     {
       slug: 'relationships-blocks',
@@ -65,6 +67,7 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+      versions: false,
     },
     CustomID,
     UsersCollection,
@@ -82,6 +85,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'number',
         },
       ],
+      versions: false,
     },
     {
       slug: 'force-select-global',
@@ -91,21 +95,26 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
         {
-          name: 'forceSelected',
+          name: 'field1',
           type: 'text',
         },
         {
-          name: 'array',
-          type: 'array',
-          fields: [
-            {
-              name: 'forceSelected',
-              type: 'text',
-            },
-          ],
+          name: 'field2',
+          type: 'text',
         },
       ],
-      forceSelect: { array: { forceSelected: true }, forceSelected: true },
+      select: ({ select }) => {
+        if (!select) {
+          return undefined
+        }
+
+        if (select?.field1) {
+          return { field1: true, field2: true }
+        }
+
+        return select
+      },
+      versions: false,
     } satisfies GlobalConfig<'force-select-global'>,
   ],
   admin: {
@@ -120,7 +129,7 @@ export const getConfig: () => Partial<Config> = () => ({
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [...defaultFeatures],
   }),
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
+  cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

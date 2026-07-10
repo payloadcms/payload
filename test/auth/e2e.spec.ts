@@ -1,7 +1,6 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { devUser } from 'credentials.js'
 import path from 'path'
 import { formatAdminURL, wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -19,10 +18,10 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
-import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { apiKeysSlug, BASE_PATH, slug } from './shared.js'
 
@@ -311,6 +310,21 @@ describe('Auth', () => {
         await expect(page.locator('#use-auth-result')).toHaveText('Goodbye, world!')
       })
 
+      test('should keep token populated in `useAuth` after refreshing the cookie', async () => {
+        await page.goto(url.account)
+        const token = page.locator('#use-auth-token')
+        const refreshCount = page.locator('#refresh-count')
+
+        await expect(token).toHaveText(/.+/)
+        await expect(refreshCount).toHaveText('0')
+
+        await page.locator('#refresh-auth-cookie').click()
+
+        await expect(refreshCount).toHaveText('1')
+
+        await expect(token).toHaveText(/.+/)
+      })
+
       // Need to test unlocking documents on logout here as this test suite does not auto login users
       test('should unlock document on logout after editing without saving', async () => {
         await page.goto(url.list)
@@ -324,10 +338,21 @@ describe('Auth', () => {
         await expect(textInput).toBeVisible()
         const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
 
-        const lockDocRequest = page.waitForResponse(
-          (response) =>
-            response.request().method() === 'POST' && response.request().url() === url.edit(docID),
-        )
+        const isTanStack = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
+        const lockDocRequest = page.waitForResponse((response) => {
+          const method = response.request().method()
+          const reqUrl = response.request().url()
+          if (method !== 'POST') {
+            return false
+          }
+          // Next.js server actions POST to the admin page URL;
+          // TanStack Start server functions POST through `createServerFn`'s
+          // `/_serverFn/<base64-fn-id>` RPC (legacy `/api/server-function`
+          // accepted for backward compatibility with older snapshots).
+          return isTanStack
+            ? reqUrl.includes('/_serverFn/') || reqUrl.includes('/api/server-function')
+            : reqUrl === url.edit(docID)
+        })
         await textInput.fill('some text')
         await lockDocRequest
 
@@ -339,21 +364,15 @@ describe('Auth', () => {
 
         await expect.poll(() => lockedDocs.docs.length).toBe(1)
 
-        await openNav(page)
-        await page
-          .locator(
-            `.nav .nav__controls a[href="${formatAdminURL({ includeBasePath: true, path: '/logout', adminRoute: '/admin' })}"]`,
-          )
-          .click()
+        await page.locator('.user-menu__trigger').click()
+        await page.locator('a[href$="/logout"]').click()
 
         // Locate the modal container
         const modalContainer = page.locator('.payload__modal-container')
         await expect(modalContainer).toBeVisible()
 
         // Click the "Leave anyway" button
-        await page
-          .locator('#leave-without-saving .confirmation-modal__controls .btn--style-primary')
-          .click()
+        await page.locator('#leave-without-saving .dialog__footer .btn--style-primary').click()
 
         await expect(page.locator('.login')).toBeVisible()
 
@@ -558,7 +577,7 @@ describe('Auth', () => {
       // Resume clock so timers can execute
       await page.clock.resume()
 
-      await expect(page.locator('.confirmation-modal')).toBeHidden()
+      await expect(page.locator('.alert-modal')).toBeHidden()
 
       await expect(page.locator('.nav')).toBeVisible()
     })

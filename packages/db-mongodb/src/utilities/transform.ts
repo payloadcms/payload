@@ -385,26 +385,14 @@ const stripFields = ({
               if (field.type === 'array') {
                 fields = field.flattenedFields
               } else {
-                let maybeBlock: FlattenedBlock | undefined = undefined
-
-                if (field.blockReferences) {
-                  const maybeBlockReference = field.blockReferences.find((each) => {
-                    const slug = typeof each === 'string' ? each : each.slug
-                    return slug === data.blockType
-                  })
-
-                  if (maybeBlockReference) {
-                    if (typeof maybeBlockReference === 'object') {
-                      maybeBlock = maybeBlockReference
-                    } else {
-                      maybeBlock = config.blocks?.find((each) => each.slug === maybeBlockReference)
-                    }
-                  }
-                }
-
-                if (!maybeBlock) {
-                  maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
-                }
+                const blockOrSlug = field.blocks.find((each) => {
+                  const slug = typeof each === 'string' ? each : each.slug
+                  return slug === data.blockType
+                })
+                const maybeBlock: FlattenedBlock | undefined =
+                  typeof blockOrSlug === 'string'
+                    ? config.blocks?.find((each) => each.slug === blockOrSlug)
+                    : blockOrSlug
 
                 if (maybeBlock) {
                   fields = maybeBlock.flattenedFields
@@ -459,26 +447,14 @@ const stripFields = ({
           if (field.type === 'array') {
             fields = field.flattenedFields
           } else {
-            let maybeBlock: FlattenedBlock | undefined = undefined
-
-            if (field.blockReferences) {
-              const maybeBlockReference = field.blockReferences.find((each) => {
-                const slug = typeof each === 'string' ? each : each.slug
-                return slug === data.blockType
-              })
-
-              if (maybeBlockReference) {
-                if (typeof maybeBlockReference === 'object') {
-                  maybeBlock = maybeBlockReference
-                } else {
-                  maybeBlock = config.blocks?.find((each) => each.slug === maybeBlockReference)
-                }
-              }
-            }
-
-            if (!maybeBlock) {
-              maybeBlock = field.blocks.find((each) => each.slug === data.blockType)
-            }
+            const blockOrSlug = field.blocks.find((each) => {
+              const slug = typeof each === 'string' ? each : each.slug
+              return slug === data.blockType
+            })
+            const maybeBlock: FlattenedBlock | undefined =
+              typeof blockOrSlug === 'string'
+                ? config.blocks?.find((each) => each.slug === blockOrSlug)
+                : blockOrSlug
 
             if (maybeBlock) {
               fields = maybeBlock.flattenedFields

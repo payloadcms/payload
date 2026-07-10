@@ -13,3 +13,5 @@ packages/payload/*.js
 packages/payload/*.d.ts
 payload-types.ts
 tsconfig.tsbuildinfo
+packages/codemod/src/transforms/**/*.input.ts
+packages/codemod/src/transforms/**/*.output.ts

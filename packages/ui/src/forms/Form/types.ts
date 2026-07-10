@@ -4,7 +4,7 @@ import type {
   FormField,
   FormState,
   Row,
-  TypedUser,
+  User,
   ValidationFieldError,
 } from 'payload'
 import type React from 'react'
@@ -172,7 +172,7 @@ export type MODIFY_CONDITION = {
   path: string
   result: boolean
   type: 'MODIFY_CONDITION'
-  user: TypedUser
+  user: User
 }
 
 export type UPDATE = {

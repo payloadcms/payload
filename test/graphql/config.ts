@@ -38,6 +38,66 @@ export default buildConfigWithDefaults({
           blocks: [ContentBlock],
         },
       ],
+      versions: false,
+    },
+    {
+      slug: 'virtual-fields',
+      fields: [
+        {
+          type: 'relationship',
+          relationTo: 'posts',
+          name: 'post',
+        },
+        {
+          // A required field that is NOT virtual - stays non-null in the GraphQL schema
+          name: 'requiredTitle',
+          type: 'text',
+          required: true,
+        },
+        {
+          // Required + virtual (computed by a hook) - must be nullable in the GraphQL schema
+          name: 'virtualComputed',
+          type: 'text',
+          required: true,
+          virtual: true,
+          hooks: {
+            afterRead: [({ data }) => `computed-${data?.requiredTitle ?? ''}`],
+          },
+        },
+        {
+          // Required + virtual linked to a relationship path - must also be nullable
+          name: 'virtualFromRelation',
+          type: 'text',
+          required: true,
+          virtual: 'post.title',
+        },
+      ],
+      versions: false,
+    },
+  ],
+  globals: [
+    {
+      slug: 'home',
+      versions: { drafts: true },
+      fields: [
+        {
+          name: 'topPosts',
+          type: 'array',
+          required: true,
+          fields: [
+            {
+              name: 'post',
+              type: 'relationship',
+              relationTo: 'posts',
+              required: true,
+            },
+            {
+              name: 'caption',
+              type: 'text',
+            },
+          ],
+        },
+      ],
     },
   ],
   admin: {

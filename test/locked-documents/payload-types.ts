@@ -60,6 +60,44 @@ export type SupportedTimezones =
   | 'Pacific/Noumea'
   | 'Pacific/Auckland'
   | 'Pacific/Fiji';
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalNodes_15E98158".
+ */
+export type LexicalNodes_15E98158 =
+  | SerializedTextNode
+  | SerializedTabNode
+  | SerializedLineBreakNode
+  | SerializedParagraphNode<LexicalNodes_15E98158>
+  | SerializedBlockNode<MyBlock>
+  | SerializedHeadingNode<LexicalNodes_15E98158>
+  | {
+      type: 'upload';
+      /**
+       * Lexical's internal serialization version for this node type.
+       */
+      version: number;
+      [k: string]: unknown;
+    }
+  | SerializedQuoteNode<LexicalNodes_15E98158>
+  | SerializedListNode<LexicalNodes_15E98158>
+  | SerializedListItemNode<LexicalNodes_15E98158>
+  | SerializedAutoLinkNode<LexicalNodes_15E98158, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_15E98158, LexicalLinkFields_0A7E9EC0>
+  | SerializedRelationshipNode<
+      | 'autosave'
+      | 'pages'
+      | 'posts'
+      | 'server-components'
+      | 'simple'
+      | 'simple-with-versions'
+      | 'tests'
+      | 'users'
+      | 'payload-kv'
+      | 'payload-locked-documents'
+      | 'payload-preferences'
+      | 'payload-migrations'
+    >;
 
 export interface Config {
   auth: {
@@ -67,9 +105,12 @@ export interface Config {
   };
   blocks: {};
   collections: {
+    autosave: Autosave;
     pages: Page;
     posts: Post;
     'server-components': ServerComponent;
+    simple: Simple;
+    'simple-with-versions': SimpleWithVersion;
     tests: Test;
     users: User;
     'payload-kv': PayloadKv;
@@ -79,9 +120,12 @@ export interface Config {
   };
   collectionsJoins: {};
   collectionsSelect: {
+    autosave: AutosaveSelect<false> | AutosaveSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     'server-components': ServerComponentsSelect<false> | ServerComponentsSelect<true>;
+    simple: SimpleSelect<false> | SimpleSelect<true>;
+    'simple-with-versions': SimpleWithVersionsSelect<false> | SimpleWithVersionsSelect<true>;
     tests: TestsSelect<false> | TestsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -95,13 +139,20 @@ export interface Config {
   fallbackLocale: null;
   globals: {
     admin: Admin;
+    'autosave-global': AutosaveGlobal;
+    'global-with-versions': GlobalWithVersion;
     menu: Menu;
   };
   globalsSelect: {
     admin: AdminSelect<false> | AdminSelect<true>;
+    'autosave-global': AutosaveGlobalSelect<false> | AutosaveGlobalSelect<true>;
+    'global-with-versions': GlobalWithVersionsSelect<false> | GlobalWithVersionsSelect<true>;
     menu: MenuSelect<false> | MenuSelect<true>;
   };
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -128,6 +179,18 @@ export interface UserAuthOperations {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave".
+ */
+export interface Autosave {
+  id: string;
+  fieldA?: string | null;
+  fieldB?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages".
  */
 export interface Page {
@@ -144,21 +207,7 @@ export interface Page {
 export interface Post {
   id: string;
   text?: string | null;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_15E98158> | null;
   documentLoaded?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -171,23 +220,32 @@ export interface Post {
 export interface ServerComponent {
   id: string;
   customTextServer?: string | null;
-  richText?: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  } | null;
+  richText?: LexicalRichText<LexicalNodes_15E98158> | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple".
+ */
+export interface Simple {
+  id: string;
+  fieldA?: string | null;
+  fieldB?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-with-versions".
+ */
+export interface SimpleWithVersion {
+  id: string;
+  fieldA?: string | null;
+  fieldB?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -252,12 +310,24 @@ export interface PayloadLockedDocument {
   id: string;
   document?:
     | ({
+        relationTo: 'autosave';
+        value: string | Autosave;
+      } | null)
+    | ({
         relationTo: 'posts';
         value: string | Post;
       } | null)
     | ({
         relationTo: 'server-components';
         value: string | ServerComponent;
+      } | null)
+    | ({
+        relationTo: 'simple';
+        value: string | Simple;
+      } | null)
+    | ({
+        relationTo: 'simple-with-versions';
+        value: string | SimpleWithVersion;
       } | null)
     | ({
         relationTo: 'tests';
@@ -311,6 +381,17 @@ export interface PayloadMigration {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave_select".
+ */
+export interface AutosaveSelect<T extends boolean = true> {
+  fieldA?: T;
+  fieldB?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "pages_select".
  */
 export interface PagesSelect<T extends boolean = true> {
@@ -340,6 +421,27 @@ export interface ServerComponentsSelect<T extends boolean = true> {
   richText?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple_select".
+ */
+export interface SimpleSelect<T extends boolean = true> {
+  fieldA?: T;
+  fieldB?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "simple-with-versions_select".
+ */
+export interface SimpleWithVersionsSelect<T extends boolean = true> {
+  fieldA?: T;
+  fieldB?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -427,6 +529,28 @@ export interface Admin {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-global".
+ */
+export interface AutosaveGlobal {
+  id: string;
+  text?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-with-versions".
+ */
+export interface GlobalWithVersion {
+  id: string;
+  text?: string | null;
+  _status?: ('draft' | 'published') | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "menu".
  */
 export interface Menu {
@@ -447,6 +571,28 @@ export interface AdminSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "autosave-global_select".
+ */
+export interface AutosaveGlobalSelect<T extends boolean = true> {
+  text?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "global-with-versions_select".
+ */
+export interface GlobalWithVersionsSelect<T extends boolean = true> {
+  text?: T;
+  _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "menu_select".
  */
 export interface MenuSelect<T extends boolean = true> {
@@ -457,10 +603,193 @@ export interface MenuSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "MyBlock".
+ */
+export interface MyBlock {
+  id: string;
+  blockType: 'myBlock';
+  someText?: string | null;
+  someTextRequired: string;
+  radios?: ('option1' | 'option2' | 'option3') | null;
+  blockName?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "LexicalLinkFields_0A7E9EC0".
+ */
+export interface LexicalLinkFields_0A7E9EC0 {
+  linkType: 'custom' | 'internal';
+  url?: string;
+  doc?: {
+    relationTo: string;
+    value:
+      | string
+      | number
+      | {
+          id: string | number;
+          [k: string]: unknown;
+        };
+  } | null;
+  newTab: boolean;
+  description?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
   [k: string]: unknown;
+}
+
+/** @internal Core Lexical types — see @payloadcms/richtext-lexical. */
+export type LexicalElementFormat = 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+export type LexicalElementDirection = ('ltr' | 'rtl') | null;
+
+export interface SerializedLexicalElementBase<TChildren> {
+  children: TChildren[];
+  direction: LexicalElementDirection;
+  format: LexicalElementFormat;
+  indent: number;
+  textFormat?: number;
+  textStyle?: string;
+  version: number;
+}
+
+export type LexicalTextMode = 'normal' | 'token' | 'segmented';
+
+export interface SerializedTextNode {
+  type: 'text';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedTabNode {
+  type: 'tab';
+  detail: number;
+  format: number;
+  mode: LexicalTextMode;
+  style: string;
+  text: string;
+  version: number;
+}
+
+export interface SerializedLineBreakNode {
+  type: 'linebreak';
+  version: number;
+}
+
+export interface SerializedParagraphNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'paragraph';
+  textFormat: number;
+  textStyle: string;
+}
+
+export type SerializedBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'block';
+  format: LexicalElementFormat;
+  version: number;
+  fields: { id: string; blockName?: string | null } & Omit<TFields, 'id' | 'blockName'>;
+} : never;
+export type SerializedInlineBlockNode<TFields extends { blockType: string }> = TFields extends unknown ? {
+  type: 'inlineBlock';
+  version: number;
+  fields: { id: string } & Omit<TFields, 'id'>;
+} : never;
+
+export interface SerializedHeadingNode<
+  TChildren,
+  TTag extends 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6' = 'h1' | 'h2' | 'h3' | 'h4' | 'h5' | 'h6',
+> extends SerializedLexicalElementBase<TChildren> {
+  type: 'heading';
+  tag: TTag;
+}
+
+export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+export interface SerializedQuoteNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'quote';
+}
+
+export interface SerializedListNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'list';
+  checked?: boolean;
+  listType: 'number' | 'bullet' | 'check';
+  start: number;
+  tag: 'ul' | 'ol';
+}
+
+export interface SerializedListItemNode<TChildren> extends SerializedLexicalElementBase<TChildren> {
+  type: 'listitem';
+  checked?: boolean;
+  value: number;
+}
+
+export interface LexicalLinkFields {
+  [k: string]: unknown;
+  doc?: {
+    relationTo: string;
+    value: Config['db']['defaultIDType'] | { [k: string]: unknown; id: Config['db']['defaultIDType'] };
+  } | null;
+  linkType: 'custom' | 'internal';
+  newTab: boolean;
+  url?: string;
+}
+export interface SerializedLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'link';
+  fields: TFields;
+  id?: string;
+}
+export interface SerializedAutoLinkNode<TChildren, TFields = LexicalLinkFields> extends SerializedLexicalElementBase<TChildren> {
+  type: 'autolink';
+  fields: TFields;
+}
+
+export type SerializedRelationshipNode<TSlugs extends keyof Config['collections']> = {
+  type: 'relationship';
+  format: LexicalElementFormat;
+  version: number;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];
+
+/** Shape of a Lexical `richText` field. */
+export interface LexicalRichText<TNode> {
+  root: {
+    children: TNode[];
+    direction: LexicalElementDirection;
+    format: LexicalElementFormat;
+    indent: number;
+    type: 'root';
+    version: number;
+  };
 }
 
 

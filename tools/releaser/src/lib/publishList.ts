@@ -8,12 +8,12 @@ export const packagePublishList = [
   'translations',
   'ui',
   'next',
+  'tanstack-start',
   'graphql',
   'admin-bar',
   'live-preview',
   'live-preview-react',
   'live-preview-vue',
-  'richtext-slate',
   'richtext-lexical',
 
   'create-payload-app',
@@ -58,6 +58,8 @@ export const packagePublishList = [
   'plugin-sentry',
   'plugin-seo',
   'plugin-stripe',
+
+  'typescript-plugin',
 
   // Unpublished
   // 'storage-uploadthing',

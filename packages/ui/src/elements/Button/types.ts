@@ -9,16 +9,7 @@ type secondaryAction = {
 export type Props = {
   'aria-label'?: string
   buttonId?: string
-  buttonStyle?:
-    | 'error'
-    | 'icon-label'
-    | 'none'
-    | 'pill'
-    | 'primary'
-    | 'secondary'
-    | 'subtle'
-    | 'tab'
-    | 'transparent'
+  buttonStyle?: 'dashed' | 'destructive' | 'ghost' | 'pill' | 'primary' | 'secondary'
   children?: React.ReactNode
   className?: string
   disabled?: boolean
@@ -30,30 +21,28 @@ export type Props = {
   extraButtonProps?: Record<string, any>
   icon?: ['chevron' | 'edit' | 'plus' | 'x'] | React.ReactNode
   iconPosition?: 'left' | 'right'
-  iconStyle?: 'none' | 'with-border' | 'without-border'
   id?: string
   /**
-   * @deprecated
-   * This prop is deprecated and will be removed in the next major version.
-   * Components now import their own `Link` directly from `next/link`.
+   * Shows a loading spinner and hides content. Disables interactions.
    */
-  Link?: React.ElementType
+  loading?: boolean
   margin?: boolean
   newTab?: boolean
   onClick?: (event: MouseEvent) => void
   onMouseDown?: (event: MouseEvent) => void
   /**
-   * Enables form submission via an onClick handler. This is only needed if
-   * type="submit" does not trigger form submission, e.g. if the button DOM
-   * element is not a direct child of the form element.
-   *
-   * @default false
+   * Size of the chevron icon in the split-button popup trigger.
+   * @default 24
    */
-  programmaticSubmit?: boolean
+  popupIconSize?: 16 | 24
   ref?: React.RefObject<HTMLAnchorElement | HTMLButtonElement | null>
   round?: boolean
   secondaryActions?: secondaryAction | secondaryAction[]
-  size?: 'large' | 'medium' | 'small' | 'xsmall'
+  /**
+   * Applies selected/active styling (e.g., for popup triggers when popup is open)
+   */
+  selected?: boolean
+  size?: 'large' | 'medium'
   SubMenuPopupContent?: (props: { close: () => void }) => React.ReactNode
   to?: string
   tooltip?: string

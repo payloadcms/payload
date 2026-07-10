@@ -1,7 +1,7 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { Config, Endpoint } from 'payload'
+import type { Endpoint } from 'payload'
 
-import { deepMergeSimple } from 'payload/shared'
+import { definePlugin } from 'payload'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './types/index.js'
@@ -21,9 +21,9 @@ import { getCollectionSlugMap } from './utilities/getCollectionSlugMap.js'
 import { pushTypeScriptProperties } from './utilities/pushTypeScriptProperties.js'
 import { sanitizePluginConfig } from './utilities/sanitizePluginConfig.js'
 
-export const ecommercePlugin =
-  (pluginConfig?: EcommercePluginConfig) =>
-  async (incomingConfig: Config): Promise<Config> => {
+export const ecommercePlugin = definePlugin<EcommercePluginConfig | undefined>({
+  slug: '@payloadcms/plugin-ecommerce',
+  plugin: async ({ config: incomingConfig, options: pluginConfig }) => {
     if (!pluginConfig) {
       return incomingConfig
     }
@@ -311,41 +311,35 @@ export const ecommercePlugin =
       incomingConfig.i18n = {}
     }
 
-    if (!incomingConfig.i18n?.translations) {
+    if (!incomingConfig.i18n.translations) {
       incomingConfig.i18n.translations = {}
     }
 
-    incomingConfig.i18n.translations = deepMergeSimple(
-      translations,
-      incomingConfig.i18n?.translations,
-    )
-
     /**
-     * Merge plugin translations
+     * Merge plugin translations — only for languages the user has enabled.
+     * Plugins run before sanitize, so `supportedLanguages` may be undefined; sanitize will
+     * default it to `{ en }`, so we mirror that here. Plugin-ecommerce translations always
+     * win over user-provided ones for the `plugin-ecommerce` namespace.
      */
-    if (!incomingConfig.i18n) {
-      incomingConfig.i18n = {}
-    }
-    Object.entries(translations).forEach(([locale, pluginI18nObject]) => {
-      const typedLocale = locale as AcceptedLanguages
-      if (!incomingConfig.i18n!.translations) {
-        incomingConfig.i18n!.translations = {}
-      }
-      if (!(typedLocale in incomingConfig.i18n!.translations)) {
-        incomingConfig.i18n!.translations[typedLocale] = {}
-      }
-      if (!('plugin-ecommerce' in incomingConfig.i18n!.translations[typedLocale]!)) {
-        ;(incomingConfig.i18n!.translations[typedLocale] as PluginDefaultTranslationsObject)[
-          'plugin-ecommerce'
-        ] = {} as PluginDefaultTranslationsObject['plugin-ecommerce']
-      }
+    const supportedLanguageKeys = incomingConfig.i18n?.supportedLanguages
+      ? Object.keys(incomingConfig.i18n.supportedLanguages)
+      : ['en']
 
-      ;(incomingConfig.i18n!.translations[typedLocale] as PluginDefaultTranslationsObject)[
-        'plugin-ecommerce'
-      ] = {
-        ...pluginI18nObject.translations['plugin-ecommerce'],
+    for (const lang of supportedLanguageKeys) {
+      const pluginEntry = translations[lang as keyof typeof translations]
+      if (!pluginEntry) {
+        continue
       }
-    })
+      const typedLocale = lang as AcceptedLanguages
+      const existing = (incomingConfig.i18n.translations[typedLocale] ?? {}) as Record<
+        string,
+        unknown
+      >
+      incomingConfig.i18n.translations[typedLocale] = {
+        ...existing,
+        'plugin-ecommerce': pluginEntry.translations['plugin-ecommerce'],
+      } as PluginDefaultTranslationsObject
+    }
 
     if (!incomingConfig.typescript) {
       incomingConfig.typescript = {}
@@ -364,7 +358,8 @@ export const ecommercePlugin =
     )
 
     return incomingConfig
-  }
+  },
+})
 
 export {
   createAddressesCollection,

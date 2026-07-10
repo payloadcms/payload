@@ -1,9 +1,9 @@
-/* eslint-disable no-console */
 import fs from 'fs/promises'
 import process from 'node:process'
 
 import type { PayloadComponent, SanitizedConfig } from '../../config/types.js'
 
+import { getLogger } from '../../utilities/logger.js'
 import { iterateConfig } from './iterateConfig.js'
 import { addPayloadComponentToImportMap } from './utilities/addPayloadComponentToImportMap.js'
 import { getImportMapToBaseDirPath } from './utilities/getImportMapToBaseDirPath.js'
@@ -51,10 +51,11 @@ export async function generateImportMap(
     log: boolean
   },
 ): Promise<void> {
+  const logger = getLogger('payload', 'sync')
   const shouldLog = options?.log ?? true
 
   if (shouldLog) {
-    console.log('Generating import map')
+    logger.info('Generating import map')
   }
 
   const importMap: InternalImportMap = {}
@@ -90,7 +91,7 @@ export async function generateImportMap(
     }
 
     if (typeof payloadComponent !== 'object' && typeof payloadComponent !== 'string') {
-      console.error(payloadComponent)
+      logger.error(payloadComponent)
       throw new Error('addToImportMap > Payload component must be an object or a string')
     }
 
@@ -143,6 +144,7 @@ export async function writeImportMap({
   importMapFilePath: string
   log?: boolean
 }) {
+  const logger = getLogger('payload', 'sync')
   const imports: string[] = []
   for (const [identifier, { path, specifier }] of Object.entries(importMap)) {
     imports.push(`import { ${specifier} as ${identifier} } from '${path}'`)
@@ -155,6 +157,7 @@ export async function writeImportMap({
 
   const importMapOutputFile = `${imports.join('\n')}
 
+/** @type import('payload').ImportMap */
 export const importMap = {
 ${mapKeys.join(',\n')}
 }
@@ -166,14 +169,14 @@ ${mapKeys.join(',\n')}
 
     if (currentImportMap?.trim() === importMapOutputFile?.trim()) {
       if (log) {
-        console.log('No new imports found, skipping writing import map')
+        logger.info('No new imports found, skipping writing import map')
       }
       return
     }
   }
 
   if (log) {
-    console.log('Writing import map to', importMapFilePath)
+    logger.info(`Writing import map to ${importMapFilePath}`)
   }
 
   await fs.writeFile(importMapFilePath, importMapOutputFile)

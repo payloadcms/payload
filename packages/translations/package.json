@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/translations",
-  "version": "3.76.1",
+  "version": "4.0.0-beta.0",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -59,11 +59,11 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "dotenv": "16.4.7",
     "prettier": "3.5.3",
-    "typescript": "5.7.3"
+    "typescript": "6.0.3"
   },
   "publishConfig": {
     "exports": {

@@ -7,6 +7,7 @@ import type {
   Where,
 } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import { dequal } from 'dequal/lite'
 import { formatAdminURL, wordBoundariesRegex } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -38,7 +39,7 @@ import { fieldBaseClass } from '../shared/index.js'
 import { createRelationMap } from './createRelationMap.js'
 import { findOptionsByValue } from './findOptionsByValue.js'
 import { optionsReducer } from './optionsReducer.js'
-import './index.scss'
+import './index.css'
 import { MultiValueLabel } from './select-components/MultiValueLabel/index.js'
 import { SingleValue } from './select-components/SingleValue/index.js'
 
@@ -71,6 +72,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
     relationTo,
     required,
     showError,
+    size = 'large',
     sortOptions,
     style,
     value,
@@ -758,6 +760,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-size={size}
       id={`field-${path.replace(/\./g, '__')}`}
       style={style}
     >
@@ -768,140 +771,143 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
         }
       />
       <div className={`${fieldBaseClass}__wrap`}>
-        <RenderCustomComponent
-          CustomComponent={Error}
-          Fallback={<FieldError path={path} showError={showError} />}
-        />
         {BeforeInput}
         {errorLoading ? (
           <div className={`${baseClass}__error-loading`}>{errorLoading}</div>
         ) : (
           <div className={`${baseClass}__wrap`}>
-            <ReactSelect
-              backspaceRemovesValue={!(isDrawerOpen || isListDrawerOpen)}
-              components={{
-                MultiValueLabel,
-                SingleValue,
-                ...(appearance !== 'select' && { DropdownIndicator: null }),
-              }}
-              customProps={{
-                disableKeyDown: isDrawerOpen || isListDrawerOpen,
-                disableMouseDown: isDrawerOpen || isListDrawerOpen,
-                onDocumentOpen,
-              }}
-              disabled={readOnly || isDrawerOpen || isListDrawerOpen}
-              filterOption={enableWordBoundarySearch ? filterOption : undefined}
-              getOptionValue={(option: ValueWithRelation) => {
-                if (!option) {
-                  return undefined
-                }
-                return hasMany && Array.isArray(relationTo)
-                  ? `${option.relationTo}_${option.value}`
-                  : (option.value as string)
-              }}
-              isLoading={appearance === 'select' && isLoading}
-              isMulti={hasMany}
-              isSearchable={appearance === 'select'}
-              isSortable={isSortable}
-              menuIsOpen={appearance === 'select' ? menuIsOpen : false}
-              onChange={
-                !readOnly
-                  ? (selected) => {
-                      if (hasMany) {
-                        if (selected === null) {
-                          valueRef.current = []
-                          onChange([])
-                        } else {
-                          valueRef.current = selected as ValueWithRelation[]
-                          onChange(selected as ValueWithRelation[])
-                        }
-                      } else if (hasMany === false) {
-                        if (selected === null) {
-                          valueRef.current = null
-                          onChange(null)
-                        } else {
-                          valueRef.current = selected as ValueWithRelation
-                          onChange(selected as ValueWithRelation)
-                        }
-                      }
-                    }
-                  : undefined
-              }
-              onInputChange={(newSearch) =>
-                handleInputChange({
-                  search: newSearch,
-                  ...(hasMany === true
-                    ? {
-                        hasMany,
-                        value,
-                      }
-                    : {
-                        hasMany,
-                        value,
-                      }),
-                })
-              }
-              onMenuClose={() => {
-                setMenuIsOpen(false)
-              }}
-              onMenuOpen={() => {
-                if (appearance === 'drawer') {
-                  openListDrawer()
-                } else if (appearance === 'select') {
-                  setMenuIsOpen(true)
-                  if (!hasLoadedFirstPageRef.current) {
-                    setIsLoading(true)
-                    updateResultsEffectEvent({
-                      filterOptions,
-                      lastLoadedPage: {},
-                      onSuccess: () => {
-                        hasLoadedFirstPageRef.current = true
-                        setIsLoading(false)
-                      },
-                      ...(hasMany === true
-                        ? {
-                            hasMany,
-                            value,
-                          }
-                        : {
-                            hasMany,
-                            value,
-                          }),
-                    })
+            <div className={`${baseClass}__input-wrap`}>
+              <RenderCustomComponent
+                CustomComponent={Error}
+                Fallback={<FieldError path={path} showError={showError} />}
+              />
+              <ReactSelect
+                aria-label={getTranslation(label, i18n)}
+                backspaceRemovesValue={!(isDrawerOpen || isListDrawerOpen)}
+                components={{
+                  MultiValueLabel,
+                  SingleValue,
+                  ...(appearance !== 'select' && { DropdownIndicator: null }),
+                }}
+                customProps={{
+                  disableKeyDown: isDrawerOpen || isListDrawerOpen,
+                  disableMouseDown: isDrawerOpen || isListDrawerOpen,
+                  onDocumentOpen,
+                }}
+                disabled={readOnly || isDrawerOpen || isListDrawerOpen}
+                filterOption={enableWordBoundarySearch ? filterOption : undefined}
+                getOptionValue={(option: ValueWithRelation) => {
+                  if (!option) {
+                    return undefined
                   }
-                }
-              }}
-              onMenuScrollToBottom={() => {
-                setIsLoading(true)
-                updateResultsEffectEvent({
-                  filterOptions,
-                  lastFullyLoadedRelation,
-                  lastLoadedPage,
-                  onSuccess: () => {
-                    setIsLoading(false)
-                  },
-                  search,
-                  sort: false,
-                  ...(hasMany === true
-                    ? {
-                        hasMany,
-                        value: initialValue,
+                  return hasMany && Array.isArray(relationTo)
+                    ? `${option.relationTo}_${option.value}`
+                    : (option.value as string)
+                }}
+                isLoading={appearance === 'select' && isLoading}
+                isMulti={hasMany}
+                isSearchable={appearance === 'select'}
+                isSortable={isSortable}
+                menuIsOpen={appearance === 'select' ? menuIsOpen : false}
+                onChange={
+                  !readOnly
+                    ? (selected) => {
+                        if (hasMany) {
+                          if (selected === null) {
+                            valueRef.current = []
+                            onChange([])
+                          } else {
+                            valueRef.current = selected as ValueWithRelation[]
+                            onChange(selected as ValueWithRelation[])
+                          }
+                        } else if (hasMany === false) {
+                          if (selected === null) {
+                            valueRef.current = null
+                            onChange(null)
+                          } else {
+                            valueRef.current = selected as ValueWithRelation
+                            onChange(selected as ValueWithRelation)
+                          }
+                        }
                       }
-                    : {
-                        hasMany,
-                        value: initialValue,
-                      }),
-                })
-              }}
-              options={
-                typeof formatDisplayedOptions === 'function'
-                  ? formatDisplayedOptions(options)
-                  : options
-              }
-              placeholder={placeholder}
-              showError={showError}
-              value={valueToRender ?? null}
-            />
+                    : undefined
+                }
+                onInputChange={(newSearch) =>
+                  handleInputChange({
+                    search: newSearch,
+                    ...(hasMany === true
+                      ? {
+                          hasMany,
+                          value,
+                        }
+                      : {
+                          hasMany,
+                          value,
+                        }),
+                  })
+                }
+                onMenuClose={() => {
+                  setMenuIsOpen(false)
+                }}
+                onMenuOpen={() => {
+                  if (appearance === 'drawer') {
+                    openListDrawer()
+                  } else if (appearance === 'select') {
+                    setMenuIsOpen(true)
+                    if (!hasLoadedFirstPageRef.current) {
+                      setIsLoading(true)
+                      updateResultsEffectEvent({
+                        filterOptions,
+                        lastLoadedPage: {},
+                        onSuccess: () => {
+                          hasLoadedFirstPageRef.current = true
+                          setIsLoading(false)
+                        },
+                        ...(hasMany === true
+                          ? {
+                              hasMany,
+                              value,
+                            }
+                          : {
+                              hasMany,
+                              value,
+                            }),
+                      })
+                    }
+                  }
+                }}
+                onMenuScrollToBottom={() => {
+                  setIsLoading(true)
+                  updateResultsEffectEvent({
+                    filterOptions,
+                    lastFullyLoadedRelation,
+                    lastLoadedPage,
+                    onSuccess: () => {
+                      setIsLoading(false)
+                    },
+                    search,
+                    sort: false,
+                    ...(hasMany === true
+                      ? {
+                          hasMany,
+                          value: initialValue,
+                        }
+                      : {
+                          hasMany,
+                          value: initialValue,
+                        }),
+                  })
+                }}
+                options={
+                  typeof formatDisplayedOptions === 'function'
+                    ? formatDisplayedOptions(options)
+                    : options
+                }
+                placeholder={placeholder}
+                showError={showError}
+                value={valueToRender ?? null}
+              />
+            </div>
             {!readOnly && allowCreate && (
               <AddNewRelation
                 path={path}

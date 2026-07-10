@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/storage-r2",
-  "version": "3.76.1",
+  "version": "4.0.0-beta.0",
   "description": "Payload storage adapter for Cloudflare R2",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -50,13 +50,14 @@
     "@payloadcms/plugin-cloud-storage": "workspace:*"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "4.20260218.0",
     "payload": "workspace:*"
   },
   "peerDependencies": {
     "payload": "workspace:*"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0"
+    "node": ">=24.15.0"
   },
   "publishConfig": {
     "exports": {

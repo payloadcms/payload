@@ -1,8 +1,9 @@
 import type { ArrayField, Payload, RelationshipField } from 'payload'
 
 import path from 'path'
+import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { Page } from './payload-types.js'
 
@@ -189,6 +190,253 @@ describe('@payloadcms/plugin-nested-docs', () => {
       // no other data should be affected
       expect(updatedChild!.title).toEqual('child doc')
       expect(updatedChild!.slug).toEqual('child')
+    })
+  })
+
+  describe('versions', () => {
+    const createdPageIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      // Clean up in reverse order (children before parents)
+      for (const id of [...createdPageIDs].reverse()) {
+        await payload.delete({ collection: 'pages', id })
+      }
+      createdPageIDs.length = 0
+    })
+
+    it('should preserve published version of child when parent is saved and child has unpublished draft', async () => {
+      // Step 1: Create parent page and publish it
+      const parentDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Version Parent',
+          slug: 'version-parent',
+          _status: 'published',
+        },
+      })
+      createdPageIDs.push(parentDoc.id)
+
+      // Step 2: Create child page and publish it
+      const childDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Version Child',
+          slug: 'version-child',
+          parent: parentDoc.id,
+          _status: 'published',
+        },
+      })
+      createdPageIDs.push(childDoc.id)
+
+      // Verify initial published state
+      const initialPublished = await payload.findByID({
+        id: childDoc.id,
+        collection: 'pages',
+        draft: false,
+      })
+      expect(initialPublished._status).toBe('published')
+      expect(initialPublished.breadcrumbs).toHaveLength(2)
+
+      // Step 3: Make unpublished changes to child (creates a draft version)
+      await payload.update({
+        id: childDoc.id,
+        collection: 'pages',
+        data: {
+          title: 'Version Child Draft Edit',
+        },
+        draft: true,
+      })
+
+      // Step 4: Re-publish the parent (triggers resaveChildren)
+      await payload.update({
+        id: parentDoc.id,
+        collection: 'pages',
+        data: {
+          title: 'Version Parent Updated',
+          slug: 'version-parent-updated',
+          _status: 'published',
+        },
+      })
+
+      // Step 5: Verify the child's published version is still accessible
+      const publishedChild = await payload.findByID({
+        id: childDoc.id,
+        collection: 'pages',
+        draft: false,
+      })
+
+      expect(publishedChild).toBeDefined()
+      expect(publishedChild._status).toBe('published')
+      expect(publishedChild.breadcrumbs).toHaveLength(2)
+      expect(publishedChild.breadcrumbs?.[0]?.url).toBe('/version-parent-updated')
+
+      // Step 6: Verify the draft version is also still accessible
+      const draftChild = await payload.findByID({
+        id: childDoc.id,
+        collection: 'pages',
+        draft: true,
+      })
+
+      expect(draftChild).toBeDefined()
+      expect(draftChild.title).toBe('Version Child Draft Edit')
+    })
+
+    it('should update breadcrumbs for draft-only children when parent is saved', async () => {
+      const parentDoc = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Draft Parent',
+          slug: 'draft-parent',
+          _status: 'published',
+        },
+      })
+      createdPageIDs.push(parentDoc.id)
+
+      // Create a child that is never published (draft-only)
+      const draftChild = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Draft Only Child',
+          slug: 'draft-only-child',
+          parent: parentDoc.id,
+          _status: 'draft',
+        },
+      })
+      createdPageIDs.push(draftChild.id)
+
+      expect(draftChild._status).toBe('draft')
+
+      // Update the parent
+      await payload.update({
+        id: parentDoc.id,
+        collection: 'pages',
+        data: {
+          title: 'Draft Parent Updated',
+          slug: 'draft-parent-updated',
+          _status: 'published',
+        },
+      })
+
+      // Draft-only child should have updated breadcrumbs
+      const updatedDraftChild = await payload.findByID({
+        id: draftChild.id,
+        collection: 'pages',
+        draft: true,
+      })
+
+      expect(updatedDraftChild.breadcrumbs).toHaveLength(2)
+      expect(updatedDraftChild.breadcrumbs?.[0]?.url).toBe('/draft-parent-updated')
+    })
+
+    it('should update breadcrumbs for both published and draft versions when parent changes', async () => {
+      const parent = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Breadcrumb Parent',
+          slug: 'breadcrumb-parent',
+          _status: 'published',
+        },
+      })
+      createdPageIDs.push(parent.id)
+
+      const child = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Breadcrumb Child',
+          slug: 'breadcrumb-child',
+          parent: parent.id,
+          _status: 'published',
+        },
+      })
+      createdPageIDs.push(child.id)
+
+      // Create draft edit on child
+      await payload.update({
+        id: child.id,
+        collection: 'pages',
+        data: {
+          title: 'Breadcrumb Child Draft',
+        },
+        draft: true,
+      })
+
+      // Update parent slug
+      await payload.update({
+        id: parent.id,
+        collection: 'pages',
+        data: {
+          slug: 'breadcrumb-parent-updated',
+          _status: 'published',
+        },
+      })
+
+      // Published child has updated breadcrumbs and is accessible
+      const published = await payload.findByID({
+        id: child.id,
+        collection: 'pages',
+        draft: false,
+      })
+
+      expect(published._status).toBe('published')
+      expect(published.breadcrumbs?.[0]?.url).toBe('/breadcrumb-parent-updated')
+
+      // Draft child also has updated breadcrumbs
+      const draft = await payload.findByID({
+        id: child.id,
+        collection: 'pages',
+        draft: true,
+      })
+
+      expect(draft._status).toBe('draft')
+      expect(draft.title).toBe('Breadcrumb Child Draft')
+      expect(draft.breadcrumbs?.[0]?.url).toBe('/breadcrumb-parent-updated')
+    })
+  })
+
+  describe('scheduled publish', () => {
+    it('should allow scheduled publish on a collection with a nested-docs breadcrumbs field', async () => {
+      const draft = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Scheduled Page',
+          slug: 'scheduled-page',
+        },
+        draft: true,
+      })
+
+      expect(draft._status).toBe('draft')
+
+      const currentDate = new Date()
+
+      await payload.jobs.queue({
+        input: {
+          doc: {
+            relationTo: 'pages',
+            // The real schedule-publish UI always sends this as a string
+            // (it comes from client-side form/relationship-picker state),
+            // regardless of the collection's actual ID type. Cast explicitly
+            // here to reproduce that instead of relying on the incidental
+            // JS type of `draft.id` in a Local API call.
+            value: String(draft.id),
+          },
+        },
+        task: 'schedulePublish',
+        waitUntil: new Date(currentDate.getTime() + 3000),
+      })
+
+      await wait(4000)
+
+      await payload.jobs.run()
+
+      const retrieved = await payload.findByID({
+        id: draft.id,
+        collection: 'pages',
+        draft: false,
+      })
+
+      expect(retrieved._status).toBe('published')
+
+      await payload.delete({ collection: 'pages', id: draft.id })
     })
   })
 

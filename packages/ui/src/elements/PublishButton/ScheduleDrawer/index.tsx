@@ -4,7 +4,6 @@
 import type { Column, SchedulePublish, Where } from 'payload'
 
 import { TZDateMini as TZDate } from '@date-fns/tz/date/mini'
-import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
 import { endOfToday, isToday, startOfDay } from 'date-fns'
 import { transpose } from 'date-fns/transpose'
@@ -24,22 +23,23 @@ import { useServerFunctions } from '../../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { requests } from '../../../utilities/api.js'
 import { Banner } from '../../Banner/index.js'
-import { DrawerCloseButton } from '../../BulkUpload/DrawerCloseButton/index.js'
 import { Button } from '../../Button/index.js'
 import { DatePickerField } from '../../DatePicker/index.js'
 import { Drawer } from '../../Drawer/index.js'
 import { Gutter } from '../../Gutter/index.js'
-import './index.scss'
+import './index.css'
 import { ReactSelect } from '../../ReactSelect/index.js'
 import { ShimmerEffect } from '../../ShimmerEffect/index.js'
 import { Table } from '../../Table/index.js'
 import { TimezonePicker } from '../../TimezonePicker/index.js'
 import { buildUpcomingColumns } from './buildUpcomingColumns.js'
+import { buildUpcomingScheduleWhere } from './buildUpcomingScheduleWhere.js'
 
 const baseClass = 'schedule-publish'
 
 type Props = {
   defaultType?: PublishType
+  onUpcomingChange?: (hasUpcoming: boolean) => void
   schedulePublishConfig?: SchedulePublish
   slug: string
 }
@@ -49,8 +49,12 @@ const defaultLocaleOption = {
   value: 'all',
 }
 
-export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePublishConfig }) => {
-  const { toggleModal } = useModal()
+export const ScheduleDrawer: React.FC<Props> = ({
+  slug,
+  defaultType,
+  onUpcomingChange,
+  schedulePublishConfig,
+}) => {
   const {
     config: {
       admin: {
@@ -96,41 +100,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
   const fetchUpcoming = React.useCallback(async () => {
     const query: { sort: string; where: Where } = {
       sort: 'waitUntil',
-      where: {
-        and: [
-          {
-            taskSlug: {
-              equals: 'schedulePublish',
-            },
-          },
-          {
-            waitUntil: {
-              greater_than: new Date(),
-            },
-          },
-        ],
-      },
-    }
-
-    if (collectionSlug) {
-      query.where.and.push({
-        'input.doc.value': {
-          equals: String(id),
-        },
-      })
-      query.where.and.push({
-        'input.doc.relationTo': {
-          equals: collectionSlug,
-        },
-      })
-    }
-
-    if (globalSlug) {
-      query.where.and.push({
-        'input.global': {
-          equals: globalSlug,
-        },
-      })
+      where: buildUpcomingScheduleWhere({ id, collectionSlug, globalSlug }),
     }
 
     const { docs } = await requests
@@ -157,7 +127,19 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
       }),
     )
     setUpcoming(docs)
-  }, [collectionSlug, globalSlug, api, i18n, dateFormat, localization, supportedTimezones, t, id])
+    onUpcomingChange?.(docs.length > 0)
+  }, [
+    collectionSlug,
+    globalSlug,
+    api,
+    i18n,
+    dateFormat,
+    localization,
+    supportedTimezones,
+    t,
+    id,
+    onUpcomingChange,
+  ])
 
   const deleteHandler = React.useCallback(
     async (id: number | string) => {
@@ -289,74 +271,65 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
   }, [date])
 
   return (
-    <Drawer
-      className={baseClass}
-      gutter={false}
-      Header={
-        <div className={`${baseClass}__drawer-header`}>
-          <h2 title={modalTitle}>{modalTitle}</h2>
-          <DrawerCloseButton onClick={() => toggleModal(slug)} />
-        </div>
-      }
-      slug={slug}
-    >
+    <Drawer className={baseClass} slug={slug} title={modalTitle}>
       <Gutter className={`${baseClass}__scheduler`}>
-        <FieldLabel label={t('version:type')} required />
-        <ul className={`${baseClass}__type`}>
-          <li>
-            <Radio
-              id={`${slug}-type`}
-              isSelected={type === 'publish'}
-              onChange={() => setType('publish')}
-              option={{ label: t('version:publish'), value: 'publish' }}
-              path={`${slug}-type`}
-              readOnly={processing}
-            />
-          </li>
-          <li>
-            <Radio
-              id={`${slug}-type`}
-              isSelected={type === 'unpublish'}
-              onChange={() => setType('unpublish')}
-              option={{ label: t('version:unpublish'), value: 'unpublish' }}
-              path={`${slug}-type`}
-              readOnly={processing}
-            />
-          </li>
-        </ul>
-        <br />
-        <FieldLabel label={t('general:time')} path={'time'} required />
-        <DatePickerField
-          id="time"
-          maxTime={endOfToday()}
-          minDate={new Date()}
-          minTime={minTime}
-          onChange={(e) => onChangeDate(e)}
-          pickerAppearance="dayAndTime"
-          readOnly={processing}
-          timeFormat={schedulePublishConfig?.timeFormat}
-          timeIntervals={schedulePublishConfig?.timeIntervals ?? 5}
-          value={displayedValue}
-        />
-        {supportedTimezones.length > 0 && (
-          <TimezonePicker
-            id={`timezone-picker`}
-            onChange={setTimezone}
-            options={supportedTimezones}
-            selectedTimezone={timezone}
+        <div className={`${baseClass}__section`}>
+          <FieldLabel label={t('version:type')} required />
+          <ul className={`${baseClass}__type`}>
+            <li>
+              <Radio
+                id={`${slug}-type`}
+                isSelected={type === 'publish'}
+                onChange={() => setType('publish')}
+                option={{ label: t('version:publish'), value: 'publish' }}
+                path={`${slug}-type`}
+                readOnly={processing}
+              />
+            </li>
+            <li>
+              <Radio
+                id={`${slug}-type`}
+                isSelected={type === 'unpublish'}
+                onChange={() => setType('unpublish')}
+                option={{ label: t('version:unpublish'), value: 'unpublish' }}
+                path={`${slug}-type`}
+                readOnly={processing}
+              />
+            </li>
+          </ul>
+        </div>
+        <div className={`${baseClass}__section`}>
+          <FieldLabel label={t('general:time')} path={'time'} required />
+          <DatePickerField
+            id="time"
+            maxTime={endOfToday()}
+            minDate={new Date()}
+            minTime={minTime}
+            onChange={(e) => onChangeDate(e)}
+            pickerAppearance="dayAndTime"
+            readOnly={processing}
+            timeFormat={schedulePublishConfig?.timeFormat}
+            timeIntervals={schedulePublishConfig?.timeIntervals ?? 5}
+            value={displayedValue}
           />
-        )}
-        <br />
+          {supportedTimezones.length > 0 && (
+            <TimezonePicker
+              id={`timezone-picker`}
+              onChange={setTimezone}
+              options={supportedTimezones}
+              selectedTimezone={timezone}
+            />
+          )}
+        </div>
         {localeOptions.length > 0 && type === 'publish' && (
-          <React.Fragment>
+          <div className={`${baseClass}__section`}>
             <FieldLabel label={t('localization:localeToPublish')} />
             <ReactSelect
               onChange={(e) => setLocale(e as { label: string; value: string })}
               options={localeOptions}
               value={locale}
             />
-            <br />
-          </React.Fragment>
+          </div>
         )}
         <div className={`${baseClass}__actions`}>
           <Button
@@ -374,9 +347,7 @@ export const ScheduleDrawer: React.FC<Props> = ({ slug, defaultType, schedulePub
       <Gutter className={`${baseClass}__upcoming`}>
         <h4>{t('general:upcomingEvents')}</h4>
         {!upcoming && <ShimmerEffect />}
-        {upcoming?.length === 0 && (
-          <Banner type="info">{t('general:noUpcomingEventsScheduled')}</Banner>
-        )}
+        {upcoming?.length === 0 && <Banner>{t('general:noUpcomingEventsScheduled')}</Banner>}
         {upcoming?.length > 0 && (
           <Table appearance="condensed" columns={upcomingColumns} data={upcoming} />
         )}

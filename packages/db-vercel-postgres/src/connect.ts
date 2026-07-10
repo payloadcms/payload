@@ -1,4 +1,4 @@
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { Connect, Migration } from 'payload'
 
 import { pushDevSchema } from '@payloadcms/drizzle'
@@ -42,19 +42,20 @@ export const connect: Connect = async function connect(
     // Passed the poolOptions if provided,
     // else have vercel/postgres detect the connection string from the environment
     this.drizzle = drizzle({
-      client,
+      client: client as pg.Pool,
       logger,
       schema: this.schema,
     })
 
     if (this.readReplicaOptions) {
+      this.primaryDrizzle = this.drizzle as any
       const readReplicas = this.readReplicaOptions.map((connectionString) => {
         const options = {
           ...this.poolOptions,
           connectionString,
         }
         const pool = new VercelPool(options)
-        return drizzle({ client: pool, logger, schema: this.schema })
+        return drizzle({ client: pool as unknown as pg.Pool, logger, schema: this.schema })
       })
       const myReplicas = withReplicas(this.drizzle, readReplicas as any)
       this.drizzle = myReplicas

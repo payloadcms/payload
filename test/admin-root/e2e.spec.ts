@@ -2,9 +2,9 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import * as path from 'path'
-import { adminRoute } from 'shared.js'
 import { fileURLToPath } from 'url'
 
+import { login } from '../__helpers/e2e/auth/login.js'
 import {
   ensureCompilationIsDone,
   initPageConsoleErrorCatch,
@@ -12,15 +12,25 @@ import {
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
-import { login } from '../__helpers/e2e/auth/login.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
+import { adminRoute } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 let context: BrowserContext
 
 test.describe('Admin Panel (Root)', () => {
+  // The tanstack-start adapter's file-based router currently mounts the admin
+  // under a fixed `/admin/*` route, so configs that move the admin to the
+  // site root (`admin: '/'`) cannot be served by `app-tanstack`. Skip the
+  // entire suite for tanstack-start until the router supports a configurable
+  // admin mount point.
+  test.skip(
+    process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+    'tanstack-start does not yet support a custom admin route at the site root',
+  )
+
   let page: Page
   let url: AdminUrlUtil
 
@@ -55,14 +65,6 @@ test.describe('Admin Panel (Root)', () => {
       serverURL,
     })
   })
-
-  // test.beforeEach(async () => {
-  //   await throttleTest({
-  //     page,
-  //     context,
-  //     delay: 'Fast 4G',
-  //   })
-  // })
 
   test('should redirect `${adminRoute}/collections` to `${adminRoute}', async () => {
     const collectionsURL = `${url.admin}/collections`
@@ -102,7 +104,7 @@ test.describe('Admin Panel (Root)', () => {
     const textField = page.locator('#field-text')
     await textField.fill('test')
     await saveDocAndAssert(page)
-    await page.locator('.doc-controls__popup >> .popup-button').click()
+    await page.locator('.doc-controls__popup .popup__trigger-wrap button').click()
     await expect(page.locator('#copy-locale-data__button')).toBeHidden()
   })
 
@@ -131,7 +133,7 @@ test.describe('Admin Panel (Root)', () => {
     await expect(favicons.nth(0)).toHaveAttribute('sizes', '32x32')
     await expect(favicons.nth(1)).toHaveAttribute('sizes', '32x32')
     await expect(favicons.nth(1)).toHaveAttribute('media', '(prefers-color-scheme: dark)')
-    await expect(favicons.nth(1)).toHaveAttribute('href', /\/payload-favicon-light\.[a-z\d]+\.png/)
+    await expect(favicons.nth(1)).toHaveAttribute('href', /\/payload-favicon-light\.[a-z\d_]+\.png/)
   })
 
   test('config.admin.theme should restrict the theme', async () => {
@@ -150,7 +152,10 @@ test.describe('Admin Panel (Root)', () => {
     await page.goto(url.create)
     const textField = page.locator('#field-text')
     await textField.fill('updated')
-    await page.click('a[aria-label="Account"]')
+    await page.click('button[aria-label="Account"]')
+    const profileLink = page.locator('a.user-menu__profile')
+    await expect(profileLink).toBeVisible()
+    await profileLink.click()
     const modal = page.locator('div.payload__modal-container')
     await expect(modal).toBeVisible()
 

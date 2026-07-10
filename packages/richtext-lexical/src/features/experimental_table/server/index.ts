@@ -1,20 +1,18 @@
-import type {
-  SerializedTableCellNode as _SerializedTableCellNode,
-  SerializedTableNode as _SerializedTableNode,
-  SerializedTableRowNode as _SerializedTableRowNode,
-} from '@lexical/table'
-import type { SerializedLexicalNode } from 'lexical'
 import type { Config, Field, FieldSchemaMap } from 'payload'
 
 import { TableCellNode, TableNode, TableRowNode } from '@lexical/table'
 import { sanitizeFields } from 'payload'
 
-import type { StronglyTypedElementNode } from '../../../nodeTypes.js'
-
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
-import { convertLexicalNodesToHTML } from '../../converters/lexicalToHtml_deprecated/converter/index.js'
 import { createNode } from '../../typeUtilities.js'
-import { TableMarkdownTransformer } from '../markdownTransformer.js'
+import { PAYLOAD_TABLE } from '../markdownTransformer.js'
+import { tableCellNodeJSONSchema, tableNodeJSONSchema, tableRowNodeJSONSchema } from './schema.js'
+
+export type {
+  SerializedTableCellNode,
+  SerializedTableNode,
+  SerializedTableRowNode,
+} from './schema.js'
 
 const fields: Field[] = [
   {
@@ -31,14 +29,6 @@ const fields: Field[] = [
   },
 ]
 
-export type SerializedTableCellNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  StronglyTypedElementNode<_SerializedTableCellNode, 'tablecell', T>
-
-export type SerializedTableNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  StronglyTypedElementNode<_SerializedTableNode, 'table', T>
-
-export type SerializedTableRowNode<T extends SerializedLexicalNode = SerializedLexicalNode> =
-  StronglyTypedElementNode<_SerializedTableRowNode, 'tablerow', T>
 export const EXPERIMENTAL_TableFeature = createServerFeature({
   feature: async ({ config, isRoot, parentIsLocalized }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []
@@ -61,120 +51,18 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
 
         return schemaMap
       },
-      markdownTransformers: [TableMarkdownTransformer],
+      markdownTransformers: [PAYLOAD_TABLE],
       nodes: [
         createNode({
-          converters: {
-            html: {
-              converter: async ({
-                converters,
-                currentDepth,
-                depth,
-                draft,
-                node,
-                overrideAccess,
-                parent,
-                req,
-                showHiddenFields,
-              }) => {
-                const childrenText = await convertLexicalNodesToHTML({
-                  converters,
-                  currentDepth,
-                  depth,
-                  draft,
-                  lexicalNodes: node.children,
-                  overrideAccess,
-                  parent: {
-                    ...node,
-                    parent,
-                  },
-                  req,
-                  showHiddenFields,
-                })
-                return `<div class="lexical-table-container"><table class="lexical-table" style="border-collapse: collapse;">${childrenText}</table></div>`
-              },
-              nodeTypes: [TableNode.getType()],
-            },
-          },
+          jsonSchema: tableNodeJSONSchema,
           node: TableNode,
         }),
         createNode({
-          converters: {
-            html: {
-              converter: async ({
-                converters,
-                currentDepth,
-                depth,
-                draft,
-                node,
-                overrideAccess,
-                parent,
-                req,
-                showHiddenFields,
-              }) => {
-                const childrenText = await convertLexicalNodesToHTML({
-                  converters,
-                  currentDepth,
-                  depth,
-                  draft,
-                  lexicalNodes: node.children,
-                  overrideAccess,
-                  parent: {
-                    ...node,
-                    parent,
-                  },
-                  req,
-                  showHiddenFields,
-                })
-
-                const tagName = node.headerState > 0 ? 'th' : 'td'
-                const headerStateClass = `lexical-table-cell-header-${node.headerState}`
-                const backgroundColor = node.backgroundColor
-                  ? `background-color: ${node.backgroundColor};`
-                  : ''
-                const colSpan = node.colSpan && node.colSpan > 1 ? `colspan="${node.colSpan}"` : ''
-                const rowSpan = node.rowSpan && node.rowSpan > 1 ? `rowspan="${node.rowSpan}"` : ''
-
-                return `<${tagName} class="lexical-table-cell ${headerStateClass}" style="border: 1px solid #ccc; padding: 8px; ${backgroundColor}" ${colSpan} ${rowSpan}>${childrenText}</${tagName}>`
-              },
-              nodeTypes: [TableCellNode.getType()],
-            },
-          },
+          jsonSchema: tableCellNodeJSONSchema,
           node: TableCellNode,
         }),
         createNode({
-          converters: {
-            html: {
-              converter: async ({
-                converters,
-                currentDepth,
-                depth,
-                draft,
-                node,
-                overrideAccess,
-                parent,
-                req,
-                showHiddenFields,
-              }) => {
-                const childrenText = await convertLexicalNodesToHTML({
-                  converters,
-                  currentDepth,
-                  depth,
-                  draft,
-                  lexicalNodes: node.children,
-                  overrideAccess,
-                  parent: {
-                    ...node,
-                    parent,
-                  },
-                  req,
-                  showHiddenFields,
-                })
-                return `<tr class="lexical-table-row">${childrenText}</tr>`
-              },
-              nodeTypes: [TableRowNode.getType()],
-            },
-          },
+          jsonSchema: tableRowNodeJSONSchema,
           node: TableRowNode,
         }),
       ],

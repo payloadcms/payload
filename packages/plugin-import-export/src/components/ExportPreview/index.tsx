@@ -1,6 +1,5 @@
 'use client'
-import type { Column } from '@payloadcms/ui'
-import type { ClientField, PaginatedDocs, Where } from 'payload'
+import type { ClientField, Column, PaginatedDocs, Where } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -24,8 +23,8 @@ import type {
 import type { ExportPreviewResponse } from '../../types.js'
 
 import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
-import './index.scss'
 import { useImportExport } from '../ImportExportProvider/index.js'
+import './index.css'
 
 const baseClass = 'export-preview'
 

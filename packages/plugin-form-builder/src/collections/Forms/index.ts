@@ -1,4 +1,4 @@
-import type { Block, CollectionConfig, Field } from 'payload'
+import type { Block, CollectionConfig, Config, Field } from 'payload'
 
 import { deepMergeWithSourceArrays } from 'payload'
 
@@ -6,8 +6,37 @@ import type { FormBuilderPluginConfig } from '../../types.js'
 
 import { fields } from './fields.js'
 
+const applyUploadCollectionLabels = (args: {
+  block: Block
+  collections: Config['collections']
+  uploadCollections: FormBuilderPluginConfig['uploadCollections']
+}): Block => {
+  const { block, collections, uploadCollections } = args
+  const collectionsBySlug = new Map(
+    (collections || []).map((collection) => [collection.slug, collection]),
+  )
+
+  for (const field of block.fields) {
+    if ('name' in field && field.name === 'uploadCollection' && field.type === 'select') {
+      // Replace the default slug labels with the source collection's labels.singular.
+      // Select option labels accept strings, locale records and label functions —
+      // Payload's admin resolves them at render time via getTranslation.
+      field.options = (uploadCollections || []).map((slug) => {
+        const singular = collectionsBySlug.get(slug)?.labels?.singular
+        return { label: singular ?? slug, value: slug }
+      })
+      break
+    }
+  }
+
+  return block
+}
+
 // all settings can be overridden by the config
-export const generateFormCollection = (formConfig: FormBuilderPluginConfig): CollectionConfig => {
+export const generateFormCollection = (
+  formConfig: FormBuilderPluginConfig,
+  collections?: Config['collections'],
+): CollectionConfig => {
   const redirect: Field = {
     name: 'redirect',
     type: 'group',
@@ -19,10 +48,15 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
       {
         name: 'url',
         type: 'text',
-        label: 'URL to redirect to',
+        label: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:urlToRedirectTo'),
         required: true,
       },
     ],
+    label: ({ t }) =>
+      // @ts-expect-error - translations are not typed in plugins yet
+      t('plugin-form-builder:redirect'),
   }
 
   if (formConfig.redirectRelationships) {
@@ -32,7 +66,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
       admin: {
         condition: (_, siblingData) => siblingData?.type === 'reference',
       },
-      label: 'Document to link to',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:documentToLinkTo'),
       maxDepth: 2,
       relationTo: formConfig.redirectRelationships,
       required: true,
@@ -47,18 +83,24 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
       defaultValue: 'reference',
       options: [
         {
-          label: 'Internal link',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:internalLink'),
           value: 'reference',
         },
         {
-          label: 'Custom URL',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:customURL'),
           value: 'custom',
         },
       ],
     })
 
     if (redirect.fields[2]!.type !== 'row') {
-      redirect.fields[2]!.label = 'Custom URL'
+      redirect.fields[2]!.label = ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:customURL')
     }
 
     redirect.fields[2]!.admin = {
@@ -70,6 +112,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
     {
       name: 'title',
       type: 'text',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:title'),
       required: true,
     },
     {
@@ -90,6 +135,15 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
             }
 
             if (typeof block === 'function') {
+              // Special handling for upload field - factory takes slug list; after it runs,
+              // inject resolved collection labels into the uploadCollection select.
+              if (fieldKey === 'upload') {
+                return applyUploadCollectionLabels({
+                  block: block(formConfig.uploadCollections || []),
+                  collections,
+                  uploadCollections: formConfig.uploadCollections,
+                })
+              }
               return block(fieldConfig)
             }
 
@@ -99,28 +153,50 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
           return null
         })
         .filter(Boolean) as Block[],
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:fields'),
+      labels: {
+        plural: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:fields'),
+        singular: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:field'),
+      },
     },
     {
       name: 'submitButtonLabel',
       type: 'text',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:submitButton'),
       localized: true,
     },
     {
       name: 'confirmationType',
       type: 'radio',
       admin: {
-        description:
-          'Choose whether to display an on-page message or redirect to a different page after they submit the form.',
+        description: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:chooseConfirmationType'),
         layout: 'horizontal',
       },
       defaultValue: 'message',
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:confirmationType'),
       options: [
         {
-          label: 'Message',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:message'),
           value: 'message',
         },
         {
-          label: 'Redirect',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:redirect'),
           value: 'redirect',
         },
       ],
@@ -131,6 +207,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
       admin: {
         condition: (_, siblingData) => siblingData?.confirmationType === 'message',
       },
+      label: ({ t }) =>
+        // @ts-expect-error - translations are not typed in plugins yet
+        t('plugin-form-builder:confirmationMessage'),
       localized: true,
       required: true,
     },
@@ -142,8 +221,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
         read: ({ req: { user } }) => !!user,
       },
       admin: {
-        description:
-          "Send custom emails when the form submits. Use comma separated lists to send the same email to multiple recipients. To reference a value from this form, wrap that field's name with double curly brackets, i.e. {{firstName}}. You can use a wildcard {{*}} to output all data and {{*:table}} to format it as an HTML table in the email.",
+        description: ({ t }) =>
+          // @ts-expect-error - translations are not typed in plugins yet
+          t('plugin-form-builder:emailsDescription'),
       },
       fields: [
         {
@@ -156,7 +236,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
                 placeholder: '"Email Sender" <sender@email.com>',
                 width: '100%',
               },
-              label: 'Email To',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:emailTo'),
             },
             {
               name: 'cc',
@@ -166,7 +248,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
                   maxWidth: '50%',
                 },
               },
-              label: 'CC',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:cc'),
             },
             {
               name: 'bcc',
@@ -176,7 +260,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
                   maxWidth: '50%',
                 },
               },
-              label: 'BCC',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:bcc'),
             },
           ],
         },
@@ -190,7 +276,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
                 placeholder: '"Reply To" <reply-to@email.com>',
                 width: '50%',
               },
-              label: 'Reply To',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:replyTo'),
             },
             {
               name: 'emailFrom',
@@ -199,7 +287,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
                 placeholder: '"Email From" <email-from@email.com>',
                 width: '50%',
               },
-              label: 'Email From',
+              label: ({ t }) =>
+                // @ts-expect-error - translations are not typed in plugins yet
+                t('plugin-form-builder:emailFrom'),
             },
           ],
         },
@@ -207,7 +297,9 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
           name: 'subject',
           type: 'text',
           defaultValue: "You've received a new message.",
-          label: 'Subject',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:subject'),
           localized: true,
           required: true,
         },
@@ -215,9 +307,13 @@ export const generateFormCollection = (formConfig: FormBuilderPluginConfig): Col
           name: 'message',
           type: 'richText',
           admin: {
-            description: 'Enter the message that should be sent in this email.',
+            description: ({ t }) =>
+              // @ts-expect-error - translations are not typed in plugins yet
+              t('plugin-form-builder:messageDescription'),
           },
-          label: 'Message',
+          label: ({ t }) =>
+            // @ts-expect-error - translations are not typed in plugins yet
+            t('plugin-form-builder:message'),
           localized: true,
         },
       ],

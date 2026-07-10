@@ -9,7 +9,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
-  serverURL: 'http://localhost:3000',
+  serverURL: `http://localhost:${process.env.PORT || 3000}`,
   admin: {
     autoLogin: false,
     importMap: {

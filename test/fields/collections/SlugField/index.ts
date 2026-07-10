@@ -1,7 +1,5 @@
 import type { CollectionConfig } from 'payload'
 
-import { slugField } from 'payload'
-
 import { slugFieldSlug } from './shared.js'
 
 const SlugField: CollectionConfig = {
@@ -15,25 +13,44 @@ const SlugField: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    slugField(),
+    { name: 'slug', type: 'slug', useAsSlug: 'title' },
     {
       name: 'localizedTitle',
       type: 'text',
       localized: true,
     },
-    slugField({
-      slugify: ({ valueToSlugify }) => valueToSlugify?.toUpperCase(),
+    {
       name: 'customSlugify',
-      checkboxName: 'generateCustomSlug',
-    }),
-    slugField({
-      useAsSlug: 'localizedTitle',
+      type: 'slug',
+      slugify: ({ valueToSlugify }) => valueToSlugify?.toUpperCase(),
+      useAsSlug: 'title',
+      required: true,
+    },
+    {
       name: 'localizedSlug',
+      type: 'slug',
+      useAsSlug: 'localizedTitle',
       localized: true,
       required: false,
-      checkboxName: 'generateLocalizedSlug',
-    }),
+    },
+    {
+      name: 'readOnlySlug',
+      type: 'slug',
+      useAsSlug: 'title',
+      required: false,
+      admin: {
+        readOnly: true,
+      },
+    },
+    {
+      type: 'text',
+      name: 'test',
+      admin: {
+        readOnly: true,
+      },
+    },
   ],
+  versions: false,
 }
 
 export default SlugField

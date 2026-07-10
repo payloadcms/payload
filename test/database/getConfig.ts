@@ -39,6 +39,7 @@ export const getConfig: () => Partial<Config> = () => ({
     {
       slug: 'noTimeStamps',
       timestamps: false,
+      versions: false,
       fields: [
         {
           type: 'text',
@@ -106,6 +107,7 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'number',
         },
       ],
+      versions: false,
     },
     {
       slug: 'simple-localized',
@@ -120,6 +122,7 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'number',
         },
       ],
+      versions: false,
     },
     {
       slug: 'categories-custom-id',
@@ -435,6 +438,7 @@ export const getConfig: () => Partial<Config> = () => ({
           },
         ],
       },
+      versions: false,
     },
     {
       slug: errorOnUnnamedFieldsSlug,
@@ -461,6 +465,7 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: defaultValuesSlug,
@@ -505,6 +510,7 @@ export const getConfig: () => Partial<Config> = () => ({
           defaultValue: "Thanks, we're excited for you to join us.",
         },
       ],
+      versions: false,
     },
     {
       slug: relationASlug,
@@ -522,6 +528,7 @@ export const getConfig: () => Partial<Config> = () => ({
         plural: 'Relation As',
         singular: 'Relation A',
       },
+      versions: false,
     },
     {
       slug: relationBSlug,
@@ -544,6 +551,7 @@ export const getConfig: () => Partial<Config> = () => ({
         plural: 'Relation Bs',
         singular: 'Relation B',
       },
+      versions: false,
     },
     {
       slug: pgMigrationSlug,
@@ -700,6 +708,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'virtual-relations',
@@ -832,7 +841,28 @@ export const getConfig: () => Partial<Config> = () => ({
             },
           ],
         },
+        {
+          name: 'blockWithVirtual',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'blockWithVirtual',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+                {
+                  name: 'virtualField',
+                  type: 'text',
+                  virtual: true,
+                },
+              ],
+            },
+          ],
+        },
       ],
+      versions: false,
     },
     {
       slug: customIDsSlug,
@@ -893,6 +923,7 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: relationshipsMigrationSlug,
@@ -946,6 +977,7 @@ export const getConfig: () => Partial<Config> = () => ({
           unique: true,
         },
       ],
+      versions: false,
     },
     {
       slug: 'aliases',
@@ -969,6 +1001,7 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: 'blocks-docs',
@@ -1005,6 +1038,7 @@ export const getConfig: () => Partial<Config> = () => ({
           name: 'testBlocks',
         },
       ],
+      versions: false,
     },
     {
       slug: 'unique-fields',
@@ -1015,6 +1049,81 @@ export const getConfig: () => Partial<Config> = () => ({
           unique: true,
         },
       ],
+      versions: false,
+    },
+    {
+      slug: 'select-has-many',
+      fields: [
+        {
+          name: 'roles',
+          type: 'select',
+          hasMany: true,
+          options: ['user', 'admin', 'editor'],
+        },
+        {
+          name: 'food',
+          type: 'select',
+          hasMany: true,
+          options: ['apple', 'bananabread', 'banana'],
+        },
+      ],
+      versions: false,
+    },
+    {
+      slug: 'virtual-linked-tenants',
+      fields: [
+        {
+          name: 'slug',
+          type: 'text',
+          required: true,
+        },
+      ],
+      versions: false,
+    },
+    {
+      slug: 'virtual-linked-roles',
+      access: {
+        read: () => ({
+          tenantSlug: {
+            exists: true,
+          },
+        }),
+      },
+      fields: [
+        {
+          name: 'project',
+          type: 'relationship',
+          relationTo: 'virtual-linked-projects',
+          required: true,
+        },
+        {
+          name: 'tenant',
+          type: 'relationship',
+          relationTo: 'virtual-linked-tenants',
+          required: true,
+        },
+        {
+          name: 'tenantSlug',
+          type: 'text',
+          virtual: 'tenant.slug',
+        },
+      ],
+      versions: false,
+    },
+    {
+      slug: 'virtual-linked-projects',
+      access: {
+        read: () => true,
+      },
+      fields: [
+        {
+          name: 'roles',
+          type: 'join',
+          collection: 'virtual-linked-roles',
+          on: 'project',
+        },
+      ],
+      versions: false,
     },
   ],
   globals: [
@@ -1066,6 +1175,7 @@ export const getConfig: () => Partial<Config> = () => ({
           ],
         },
       ],
+      versions: false,
     },
     {
       slug: 'global',
@@ -1086,6 +1196,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'global-3',
@@ -1095,6 +1206,7 @@ export const getConfig: () => Partial<Config> = () => ({
           type: 'text',
         },
       ],
+      versions: false,
     },
     {
       slug: 'virtual-relation-global',
@@ -1110,6 +1222,7 @@ export const getConfig: () => Partial<Config> = () => ({
           relationTo: 'posts',
         },
       ],
+      versions: false,
     },
   ],
   localization: {

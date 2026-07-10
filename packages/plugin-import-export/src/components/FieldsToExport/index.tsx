@@ -16,7 +16,7 @@ import React, { useEffect } from 'react'
 import { useImportExport } from '../ImportExportProvider/index.js'
 import { reduceFields } from './reduceFields.js'
 
-const baseClass = 'fields-to-export'
+const baseClass = 'field-type fields-to-export'
 
 export const FieldsToExport: SelectFieldClientComponent = (props) => {
   const { id } = useDocumentInfo()

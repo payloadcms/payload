@@ -1,0 +1,41 @@
+@layer payload-default {
+  .dropzone {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    background-color: var(--color-bg-secondary);
+    border: var(--stroke-width-small) dashed var(--special-border-translucent);
+    border-radius: var(--field-border-radius);
+    overflow: clip;
+    width: 100%;
+
+    .btn {
+      margin: 0;
+    }
+
+    &:hover {
+      background: var(--color-bg-hover);
+    }
+
+    &.dragging {
+      background: var(--color-bg-brand-tertiary);
+
+      * {
+        pointer-events: none;
+      }
+    }
+
+    @media (max-width: 768px) {
+      display: block;
+      text-align: center;
+    }
+
+    &.dropzone--style-default {
+      padding-block: var(--spacer-3);
+    }
+
+    &.dropzone--style-none {
+      all: unset;
+    }
+  }
+}

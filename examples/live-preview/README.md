@@ -11,11 +11,12 @@ The [Payload Live Preview Example](https://github.com/payloadcms/payload/tree/ma
 - `npx create-payload-app --example live-preview`
 
 2. `cp .env.example .env` to copy the example environment variables
+3. Ensure MongoDB is running and `DATABASE_URL` points to it (for example `mongodb://127.0.0.1/payload-example-live-preview`)
 
-3. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
+4. `pnpm dev`, `yarn dev` or `npm run dev` to start the server
    - Press `y` when prompted to seed the database
-4. `open http://localhost:3000` to access the home page
-5. `open http://localhost:3000/admin` to access the admin panel
+5. `open http://localhost:3000` to access the home page
+6. `open http://localhost:3000/admin` to access the admin panel
    - Login with email `demo@payloadcms.com` and password `demo`
 
 That's it! Changes made in `./src` will be reflected in your app. See the [Development](#development) section for more details.

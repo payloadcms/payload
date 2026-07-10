@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react'
 
 import { useRouteTransition } from '../index.js'
-import './index.scss'
+import './index.css'
 
 const transitionDuration = 200
 const baseClass = 'progress-bar'

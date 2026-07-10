@@ -1,12 +1,18 @@
 'use client'
-import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
+import { createClientUploadHandler, getFileKey } from '@payloadcms/plugin-cloud-storage/client'
 import { upload } from '@vercel/blob/client'
 import { formatAdminURL } from 'payload/shared'
 
 export type VercelBlobClientUploadHandlerExtra = {
   addRandomSuffix: boolean
-  baseURL: string
-  prefix: string
+  useCompositePrefixes: boolean
+}
+
+/** Last path segment only (POSIX), for keys like `folder/sub/file.png`. */
+function posixBasename(key: string): string {
+  const normalized = key.replace(/^\/+/, '')
+  const lastSlash = normalized.lastIndexOf('/')
+  return lastSlash === -1 ? normalized : normalized.slice(lastSlash + 1)
 }
 
 export const VercelBlobClientUploadHandler =
@@ -14,8 +20,10 @@ export const VercelBlobClientUploadHandler =
     handler: async ({
       apiRoute,
       collectionSlug,
-      extra: { addRandomSuffix, baseURL, prefix = '' },
+      docPrefix,
+      extra: { addRandomSuffix, useCompositePrefixes = false },
       file,
+      prefix,
       serverHandlerPath,
       serverURL,
       updateFilename,
@@ -25,18 +33,27 @@ export const VercelBlobClientUploadHandler =
         path: serverHandlerPath,
         serverURL,
       })
-      const result = await upload(`${prefix}${file.name}`, file, {
+      const { fileKey: pathname, sanitizedDocPrefix } = getFileKey({
+        collectionPrefix: prefix,
+        docPrefix,
+        filename: file.name,
+        useCompositePrefixes,
+      })
+
+      // upload the file directly to Vercel Blob using the signed URL
+      const result = await upload(pathname, file, {
         access: 'public',
         clientPayload: collectionSlug,
         contentType: file.type,
         handleUploadUrl: endpointRoute,
       })
 
-      // Update filename with suffix from returned url
+      // Match server uploadFile: document `filename` is basename only; prefixes are separate.
       if (addRandomSuffix) {
-        updateFilename(result.url.replace(`${baseURL}/`, ''))
+        const pathname = result.pathname.replace(/^\/+/, '')
+        updateFilename(decodeURIComponent(posixBasename(pathname)))
       }
 
-      return { prefix }
+      return { prefix: sanitizedDocPrefix }
     },
   })

@@ -8,6 +8,7 @@ import type { DrizzleAdapter } from './types.js'
 import { buildQuery } from './queries/buildQuery.js'
 import { selectDistinct } from './queries/selectDistinct.js'
 import { upsertRow } from './upsertRow/index.js'
+import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 
 export const updateOne: UpdateOne = async function updateOne(
@@ -29,7 +30,7 @@ export const updateOne: UpdateOne = async function updateOne(
   const tableName = this.tableNameMap.get(toSnakeCase(collection.slug))
   let idToUpdate = id
 
-  const db = await getTransaction(this, req)
+  const db = getPrimaryDb(this, await getTransaction(this, req))
 
   if (!idToUpdate) {
     const { joins, selectFields, where } = buildQuery({

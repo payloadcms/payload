@@ -1,19 +1,8 @@
-import LinkImport from 'next/link.js'
-import React from 'react'
-
-// As this is the demo project, we import our dependencies from the `src` directory.
-
-const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
-
-// In your projects, you can import as follows:
-// import { MinimalTemplate } from 'payload/components/templates';
-// import { Button } from 'payload/components/elements';
-// import { useConfig } from 'payload/components/utilities';
-
 import type { AdminViewServerProps } from 'payload'
 
-import { MinimalTemplate } from '@payloadcms/next/templates'
 import { Button } from '@payloadcms/ui'
+import { MinimalTemplate } from '@payloadcms/ui/rsc'
+import React from 'react'
 
 import { customViewPath } from '../../../shared.js'
 import './index.scss'
@@ -38,16 +27,11 @@ export function CustomMinimalView({ initPageResult }: AdminViewServerProps) {
         <p>Here is a custom admin view that was added in the Payload config.</p>
         <div className={`${baseClass}__controls`}>
           <div className="custom-view__controls">
-            <Button buttonStyle="secondary" el="link" Link={Link} to={`${adminRoute}`}>
+            <Button buttonStyle="secondary" el="link" to={`${adminRoute}`}>
               Go to Dashboard
             </Button>
             &nbsp; &nbsp; &nbsp;
-            <Button
-              buttonStyle="secondary"
-              el="link"
-              Link={Link}
-              to={`${adminRoute}/${customViewPath}`}
-            >
+            <Button buttonStyle="secondary" el="link" to={`${adminRoute}/${customViewPath}`}>
               Go to Custom View
             </Button>
           </div>

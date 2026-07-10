@@ -4,13 +4,11 @@ import type {
   Payload,
   RequestContext,
   TypedLocale,
+  User,
 } from '../../../index.js'
-import type { Document, PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
+import type { PayloadRequest, PopulateType, SelectType } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
-import type {
-  DataFromCollectionSlug,
-  DraftFlagFromCollectionSlug,
-} from '../../config/types.js'
+import type { DataFromCollectionSlug, DraftFlagFromCollectionSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
@@ -64,15 +62,14 @@ type BaseOptions<TSlug extends CollectionSlug> = {
    * @default false
    */
   showHiddenFields?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
-export type Options<TSlug extends CollectionSlug> =
-  BaseOptions<TSlug> & DraftFlagFromCollectionSlug<TSlug>
+export type Options<TSlug extends CollectionSlug> = BaseOptions<TSlug> &
+  DraftFlagFromCollectionSlug<TSlug>
 
 export async function restoreVersionLocal<TSlug extends CollectionSlug>(
   payload: Payload,

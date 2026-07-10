@@ -24,7 +24,6 @@ Collections and Globals both support the same options for configuring drafts. Yo
 | Draft Option      | Description                                                                                                                                                      |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `autosave`        | Enable `autosave` to automatically save progress while documents are edited. To enable, set to `true` or pass an object with [options](/docs/versions/autosave). |
-| `localizeStatus`  | **Beta**. Localizes the `_status` field when using [Localization](/docs/configuration/localization). Default is `false`.                                         |
 | `schedulePublish` | Allow for editors to schedule publish / unpublish events in the future. [More](#scheduled-publish)                                                               |
 | `validate`        | Set `validate` to `true` to validate draft documents when saved. Default is `false`.                                                                             |
 
@@ -204,13 +203,7 @@ export const Pages: CollectionConfig = {
 <Banner type="warning">
   **Note regarding adding versions to an existing collection**
 
-If you already have a collection with documents, and you _opt in_ to draft functionality
-after you have already created existing documents, all of your old documents
-_will not have a `_status` field_ until you resave them. For this reason, if you are
-_adding_ versions into an existing collection, you might want to write your Access Control
-function to allow for users to read both documents where
-**`_status` is equal to `"published"`** as well as where
-**`_status` does not exist**.
+If you already have a collection with documents, and you _opt in_ to draft functionality after you have already created existing documents, all of your old documents \_will not have a `_status` field\_ until you resave them. For this reason, if you are \_adding\_ versions into an existing collection, you might want to write your Access Control function to allow for users to read both documents where **`_status` is equal to `"published"`** as well as where **`_status` does not exist**.
 
 </Banner>
 
@@ -253,6 +246,45 @@ export const Pages: CollectionConfig = {
   //.. the rest of the Pages config here
 }
 ```
+
+## Controlling who can publish
+
+You can use `update` [Access Control](../access-control/collections#update) to restrict who can publish documents by returning a [query constraint](/docs/queries/overview) on the `_status` field. When this constraint prevents publishing, the Admin UI automatically hides the Publish and Unpublish buttons.
+
+Here is an example where admins can publish, but editors can only save drafts:
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  access: {
+    update: ({ req: { user } }) => {
+      if (!user) {
+        // If there is no user, they can't update anything
+        return false
+      }
+
+      // Admins can update any document, including publishing
+      if (user?.role === 'admin') return true
+
+      // Editors can only update documents that are not published.
+      return {
+        _status: {
+          equals: 'draft',
+        },
+      }
+    },
+  },
+  versions: {
+    drafts: true,
+  },
+}
+```
+
+The `update` function returns a query constraint instead of a boolean. Payload appends this constraint to the update query, so only documents where `_status` is not `published` can be updated by editors. This also blocks scheduled publish jobs from executing for those users.
+
+The `create` function uses a `data` check instead since there is no existing document to query against.
 
 ## Scheduled publish
 

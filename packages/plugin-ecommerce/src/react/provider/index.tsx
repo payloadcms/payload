@@ -1,5 +1,5 @@
 'use client'
-import type { DefaultDocumentIDType, TypedUser } from 'payload'
+import type { DefaultDocumentIDType } from 'payload'
 
 import { deepMergeSimple, formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -8,6 +8,7 @@ import React, { createContext, use, useCallback, useEffect, useMemo, useRef, use
 import type {
   AddressesCollection,
   CartsCollection,
+  ClientUserWithCart,
   ContextProps,
   Currency,
   EcommerceConfig,
@@ -115,7 +116,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
   const [isLoading, setIsLoading] = useState(false)
 
-  const [user, setUser] = useState<null | TypedUser>(null)
+  const [user, setUser] = useState<ClientUserWithCart | null>(null)
 
   const [addresses, setAddresses] = useState<AddressesCollection[]>()
 
@@ -657,15 +658,18 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
         throw new Error(`Failed to fetch user: ${errorText}`)
       }
 
-      const userData = await response.json()
+      const userData: {
+        error?: string
+        user?: ClientUserWithCart
+      } = await response.json()
 
       if (userData.error) {
         throw new Error(`User fetch error: ${userData.error}`)
       }
 
       if (userData.user) {
-        setUser(userData.user as TypedUser)
-        return userData.user as TypedUser
+        setUser(userData.user)
+        return userData.user
       }
     } catch (error) {
       if (debug) {
@@ -1116,26 +1120,27 @@ export const useCurrency = () => {
   const { currenciesConfig, currency, setCurrency } = useEcommerce()
 
   const formatCurrency = useCallback(
-    (value?: null | number, options?: { currency?: Currency }): string => {
+    (value?: null | number, options?: { currency?: Currency; locale?: string }): string => {
       if (value === undefined || value === null) {
         return ''
       }
 
       const currencyToUse = options?.currency || currency
-
       if (!currencyToUse) {
         return value.toString()
       }
 
-      if (value === 0) {
-        return `${currencyToUse.symbol}0.${'0'.repeat(currencyToUse.decimals)}`
-      }
+      const { code, decimals, symbolDisplay } = currencyToUse
 
-      // Convert from base value (e.g., cents) to decimal value (e.g., dollars)
-      const decimalValue = value / Math.pow(10, currencyToUse.decimals)
+      const locale = options?.locale || 'en'
 
-      // Format with the correct number of decimal places
-      return `${currencyToUse.symbol}${decimalValue.toFixed(currencyToUse.decimals)}`
+      return new Intl.NumberFormat(locale, {
+        currency: code,
+        currencyDisplay: symbolDisplay || 'symbol',
+        maximumFractionDigits: decimals,
+        minimumFractionDigits: decimals,
+        style: 'currency',
+      }).format(value / Math.pow(10, decimals))
     },
     [currency],
   )

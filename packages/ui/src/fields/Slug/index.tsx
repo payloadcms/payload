@@ -1,37 +1,51 @@
 'use client'
 
-import type { SlugFieldClientProps } from 'payload'
+import type { SlugFieldClient } from 'payload'
 
+import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
 
 import { Button } from '../../elements/Button/index.js'
+import { FieldDescription } from '../../fields/FieldDescription/index.js'
+import { FieldError } from '../../fields/FieldError/index.js'
+import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { withCondition } from '../../forms/withCondition/index.js'
+import { LockIcon } from '../../icons/Lock/index.js'
+import { LockOpenIcon } from '../../icons/LockOpen/index.js'
+import { RefreshIcon } from '../../icons/Refresh/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { FieldLabel } from '../FieldLabel/index.js'
-import { TextInput } from '../Text/index.js'
-import './index.scss'
+import './index.css'
+
+const baseClass = 'slug-field-component'
+
+type SlugFieldProps = {
+  readonly field: SlugFieldClient
+  readonly path?: string
+}
 
 /**
  * @experimental This component is experimental and may change or be removed in the future. Use at your own risk.
  */
-export const SlugField: React.FC<SlugFieldClientProps> = ({
-  field,
-  path,
-  readOnly: readOnlyFromProps,
-  useAsSlug,
-}) => {
-  const { label } = field
+const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
+  const { admin, label, required, useAsSlug } = field
+  const { description, placeholder, readOnly: readOnlyFromProps } = admin || {}
 
-  const { t } = useTranslation()
+  const { i18n, t } = useTranslation()
 
   const { collectionSlug, globalSlug } = useDocumentInfo()
 
   const { slugify } = useServerFunctions()
 
-  const { setValue, value } = useField<string>({ path: path || field.name })
+  const {
+    path: fieldPath,
+    setValue,
+    showError,
+    value,
+  } = useField<string>({ path: path || field.name })
 
   const { getData, getDataByPath } = useForm()
 
@@ -51,7 +65,7 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({
         collectionSlug,
         data: getData(),
         globalSlug,
-        path,
+        path: fieldPath,
         valueToSlugify,
       })
 
@@ -67,7 +81,17 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({
         setValue(formattedSlug)
       }
     },
-    [setValue, value, useAsSlug, getData, slugify, getDataByPath, collectionSlug, globalSlug, path],
+    [
+      setValue,
+      value,
+      useAsSlug,
+      getData,
+      slugify,
+      getDataByPath,
+      collectionSlug,
+      globalSlug,
+      fieldPath,
+    ],
   )
 
   const toggleLock = useCallback((e: React.MouseEvent<Element>) => {
@@ -75,25 +99,82 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({
     setIsLocked((prev) => !prev)
   }, [])
 
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setValue(e.target.value)
+    },
+    [setValue],
+  )
+
+  const isReadOnly = Boolean(readOnlyFromProps || isLocked)
+
   return (
-    <div className="field-type slug-field-component">
-      <div className="label-wrapper">
-        <FieldLabel htmlFor={`field-${path}`} label={label} />
-        {!isLocked && (
-          <Button buttonStyle="none" className="lock-button" onClick={handleGenerate}>
-            {t('authentication:generate')}
-          </Button>
-        )}
-        <Button buttonStyle="none" className="lock-button" onClick={toggleLock}>
-          {isLocked ? t('general:unlock') : t('general:lock')}
-        </Button>
+    <div
+      className={[
+        'field-type',
+        baseClass,
+        showError && `${baseClass}--error`,
+        isLocked && `${baseClass}--locked`,
+        readOnlyFromProps && `${baseClass}--read-only`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
+      <FieldLabel htmlFor={`field-${fieldPath}`} label={label} required={required} />
+      <div className={`${baseClass}__wrap`}>
+        <FieldError path={fieldPath} showError={showError} />
+
+        <div
+          className={[
+            'form-input-group',
+            `${baseClass}__input-container`,
+            showError && 'form-input-group-error',
+          ]
+            .filter(Boolean)
+            .join(' ')}
+        >
+          <input
+            aria-label={getTranslation(label, i18n) || path}
+            className={`form-input ${baseClass}__input`}
+            disabled={isReadOnly}
+            id={`field-${fieldPath?.replace(/\./g, '__')}`}
+            name={fieldPath}
+            onChange={handleChange}
+            placeholder={getTranslation(placeholder, i18n)}
+            type="text"
+            value={value || ''}
+          />
+
+          {!readOnlyFromProps && (
+            <div className={`${baseClass}__actions`}>
+              {!isLocked && (
+                <Button
+                  aria-label={t('authentication:generate')}
+                  buttonStyle="ghost"
+                  className={`${baseClass}__action-btn`}
+                  icon={<RefreshIcon />}
+                  id={`field-${fieldPath?.replace(/\./g, '__')}-generate`}
+                  margin={false}
+                  onClick={handleGenerate}
+                />
+              )}
+              <Button
+                aria-label={isLocked ? t('general:unlock') : t('general:lock')}
+                buttonStyle="ghost"
+                className={`${baseClass}__action-btn`}
+                icon={isLocked ? <LockIcon size={16} /> : <LockOpenIcon size={16} />}
+                id={`field-${fieldPath?.replace(/\./g, '__')}-lock`}
+                margin={false}
+                onClick={toggleLock}
+              />
+            </div>
+          )}
+        </div>
+
+        <FieldDescription description={description} path={fieldPath} />
       </div>
-      <TextInput
-        onChange={setValue}
-        path={path || field.name}
-        readOnly={Boolean(readOnlyFromProps || isLocked)}
-        value={value}
-      />
     </div>
   )
 }
+
+export const SlugField = withCondition(SlugFieldComponent)

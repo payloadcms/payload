@@ -5,12 +5,12 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" next build",
+    "build": "cross-env NODE_OPTIONS=\"--no-deprecation --max-old-space-size=8000\" payload build",
     "dev": "cross-env NODE_OPTIONS=--no-deprecation next dev",
     "devsafe": "rm -rf .next && cross-env NODE_OPTIONS=--no-deprecation next dev",
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
-    "lint": "cross-env NODE_OPTIONS=--no-deprecation next lint",
+    "lint": "cross-env NODE_OPTIONS=--no-deprecation eslint .",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
     "test": "pnpm run test:int && pnpm run test:e2e",
@@ -20,36 +20,37 @@
   "dependencies": {
     "@payloadcms/db-mongodb": "workspace:*",
     "@payloadcms/next": "workspace:*",
+    "@payloadcms/plugin-mcp": "workspace:*",
     "@payloadcms/richtext-lexical": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "cross-env": "^7.0.3",
+    "cross-env": "10.1.0",
     "dotenv": "16.4.7",
     "graphql": "^16.8.1",
-    "next": "15.4.11",
+    "next": "16.2.7",
     "payload": "workspace:*",
-    "react": "19.2.1",
-    "react-dom": "19.2.1",
+    "react": "19.2.6",
+    "react-dom": "19.2.6",
     "sharp": "0.34.2"
   },
   "devDependencies": {
-    "@playwright/test": "1.58.2",
+    "@playwright/test": "1.59.1",
     "@testing-library/react": "16.3.0",
-    "@types/node": "22.19.9",
-    "@types/react": "19.2.9",
+    "@types/node": "24.12.3",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "4.5.2",
     "eslint": "^9.16.0",
-    "eslint-config-next": "15.4.11",
+    "eslint-config-next": "16.2.7",
     "jsdom": "28.0.0",
     "prettier": "^3.4.2",
-    "tsx": "4.21.0",
-    "typescript": "5.7.3",
+    "tsx": "4.22.4",
+    "typescript": "6.0.3",
     "vite-tsconfig-paths": "6.0.5",
-    "vitest": "4.0.18"
+    "vitest": "4.1.6"
   },
   "engines": {
-    "node": "^18.20.2 || >=20.9.0",
-    "pnpm": "^9 || ^10"
+    "node": ">=24.15.0",
+    "pnpm": "^9 || ^10 || ^11"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

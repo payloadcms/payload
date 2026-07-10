@@ -1,0 +1,124 @@
+@layer payload-default {
+  .hierarchy-tables__name-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+  }
+
+  .hierarchy-tables__edit-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text);
+    flex-shrink: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: var(--radius-small);
+    border: var(--stroke-width-small) solid transparent;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--color-text);
+      background-color: var(--color-bg-hover);
+      border-color: var(--color-border);
+    }
+  }
+
+  .hierarchy-tables__name-link {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+    color: var(--color-text);
+    text-decoration: none;
+    background: none;
+    border: none;
+    padding: var(--spacer-2) 0;
+    padding-inline-start: var(--spacer-2);
+    font: inherit;
+    cursor: pointer;
+    text-align: left;
+    min-height: calc(var(--spacer-4) * 2);
+
+    &:hover {
+      color: var(--color-text);
+      text-decoration: underline;
+    }
+  }
+
+  .hierarchy-tables__thumbnail {
+    display: inline-block;
+    max-width: var(--spacer-3);
+    height: var(--spacer-3);
+    border-radius: var(--radius-small);
+    flex-shrink: 0;
+  }
+
+  .hierarchy-tables__name-icon {
+    display: flex;
+    flex-shrink: 0;
+  }
+
+  .hierarchy-tables__name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: var(--spacer-3);
+  }
+
+  .hierarchy-tables__chevron {
+    margin-inline-start: auto;
+    padding-inline-start: var(--spacer-2);
+
+    svg {
+      width: var(--spacer-2-5);
+      height: var(--spacer-2-5);
+      color: var(--color-icon-tertiary);
+    }
+  }
+
+  .hierarchy-tables__col-name {
+    width: auto;
+    min-width: 200px;
+
+    /* Move padding to link for full-cell clickability */
+    &:has(.hierarchy-tables__name-link) {
+      padding: 0;
+    }
+  }
+
+  .hierarchy-tables__col-collection {
+    width: 140px;
+    min-width: 100px;
+  }
+
+  .hierarchy-tables__col-date {
+    width: 150px;
+    min-width: 120px;
+  }
+
+  .hierarchy-tables__col-type {
+    width: 120px;
+    min-width: 100px;
+
+    &:not(.slot-table__th) {
+      color: var(--color-text-secondary);
+    }
+  }
+
+  .hierarchy-tables__section-title {
+    margin: 0;
+    font-weight: var(--text-body-medium-strong-font-weight);
+    color: var(--color-text);
+  }
+
+  .hierarchy-tables__group-label {
+    color: var(--color-text);
+    letter-spacing: var(--text-body-large-letter-spacing);
+    font-family: var(--text-body-large-strong-font-family);
+    font-size: var(--text-body-large-strong-font-size);
+    font-weight: var(--text-body-large-strong-font-weight);
+    line-height: var(--text-body-large-strong-line-height);
+  }
+}

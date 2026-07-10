@@ -8,7 +8,6 @@ export const PostsCollection: CollectionConfig = {
   slug: postsSlug,
   admin: {
     useAsTitle: 'title',
-    enableListViewSelectAPI: true,
   },
   fields: [
     {
@@ -23,4 +22,5 @@ export const PostsCollection: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }

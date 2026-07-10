@@ -1,0 +1,11 @@
+.TableCellResizer__resizer {
+  position: absolute;
+  touch-action: none;
+}
+
+@media (pointer: coarse) {
+  .TableCellResizer__resizer {
+    background-color: var(--color-bg-selected);
+    mix-blend-mode: color;
+  }
+}

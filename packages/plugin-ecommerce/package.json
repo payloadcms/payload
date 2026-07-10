@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-ecommerce",
-  "version": "3.76.1",
+  "version": "4.0.0-beta.0",
   "description": "Ecommerce plugin for Payload",
   "keywords": [
     "payload",
@@ -85,14 +85,14 @@
   "dependencies": {
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
-    "qs-esm": "7.0.2"
+    "qs-esm": "8.0.1"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@types/json-schema": "7.0.15",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "payload": "workspace:*",
     "stripe": "18.3.0"

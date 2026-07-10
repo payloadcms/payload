@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
-import { slateEditor } from '@payloadcms/richtext-slate'
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
 
 import type { Post } from './payload-types.js'
 
@@ -33,6 +33,7 @@ export default buildConfigWithDefaults({
           relationTo: 'users',
         },
       ],
+      versions: false,
     },
     {
       slug: 'relation-a',
@@ -45,13 +46,14 @@ export default buildConfigWithDefaults({
         {
           name: 'richText',
           type: 'richText',
-          editor: slateEditor({}),
+          editor: lexicalEditor({}),
         },
       ],
       labels: {
         plural: 'Relation As',
         singular: 'Relation A',
       },
+      versions: false,
     },
     {
       slug: 'relation-b',
@@ -64,13 +66,14 @@ export default buildConfigWithDefaults({
         {
           name: 'richText',
           type: 'richText',
-          editor: slateEditor({}),
+          editor: lexicalEditor({}),
         },
       ],
       labels: {
         plural: 'Relation Bs',
         singular: 'Relation B',
       },
+      versions: false,
     },
     {
       slug: 'shops',
@@ -87,6 +90,7 @@ export default buildConfigWithDefaults({
           relationTo: 'items',
         },
       ],
+      versions: false,
     },
     {
       slug: 'items',
@@ -103,6 +107,7 @@ export default buildConfigWithDefaults({
           relationTo: 'itemTags',
         },
       ],
+      versions: false,
     },
     {
       slug: 'itemTags',
@@ -113,6 +118,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
   ],
   onInit: async (payload) => {

@@ -36,6 +36,8 @@ export type IListQueryContext = {
   data: ListQueryProps['data']
   defaultLimit?: number
   defaultSort?: Sort
+  /** True when the where query contains at least one condition with a value. */
+  hasActiveFilters: boolean
   /**
    * @experimental This prop is subject to change. Use at your own risk.
    */

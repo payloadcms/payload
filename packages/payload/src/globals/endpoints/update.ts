@@ -15,7 +15,6 @@ export const updateHandler: PayloadHandler = async (req) => {
   const depth = searchParams.get('depth')
   const draft = searchParams.get('draft') === 'true'
   const autosave = searchParams.get('autosave') === 'true'
-  const publishSpecificLocale = req.query.publishSpecificLocale as string | undefined
   const publishAllLocales = searchParams.get('publishAllLocales') === 'true'
   const unpublishAllLocales = searchParams.get('unpublishAllLocales') === 'true'
 
@@ -28,7 +27,6 @@ export const updateHandler: PayloadHandler = async (req) => {
     globalConfig,
     populate: sanitizePopulateParam(req.query.populate),
     publishAllLocales,
-    publishSpecificLocale,
     req,
     select: sanitizeSelectParam(req.query.select),
     unpublishAllLocales,

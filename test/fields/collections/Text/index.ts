@@ -53,6 +53,13 @@ const TextFields: CollectionConfig = {
       localized: true,
     },
     {
+      name: 'localizedRequiredText',
+      type: 'text',
+      localized: true,
+      required: true,
+      defaultValue: 'default',
+    },
+    {
       name: 'i18nText',
       type: 'text',
       admin: {
@@ -200,6 +207,7 @@ const TextFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default TextFields

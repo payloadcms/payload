@@ -3,9 +3,10 @@ import type { MarkOptional } from 'ts-essentials'
 
 import type { SanitizedFieldPermissions } from '../../auth/types.js'
 import type { ClientBlock, ClientField, Field } from '../../fields/config/types.js'
-import type { TypedUser } from '../../index.js'
+import type { User } from '../../index.js'
 import type { DocumentPreferences } from '../../preferences/types.js'
 import type { Operation, Payload, PayloadRequest } from '../../types/index.js'
+import type { ComponentRenderer } from '../adapters/render.js'
 import type {
   ClientFieldSchemaMap,
   ClientTab,
@@ -63,10 +64,8 @@ export type FieldPaths = {
    * Nested fields will have a path that includes the parent field names
    * if they are nested within a group, array, block or named tab.
    *
-   * Collapsibles and unnamed tabs will have arbitrary paths
+   * Collapsibles, rows and unnamed tabs will have arbitrary paths
    * that look like _index-0, _index-1, etc.
-   *
-   * Row fields will not have a path.
    *
    * @example 'parentGroupField.childTextField'
    *
@@ -99,9 +98,15 @@ export type ServerComponentProps = {
   payload: Payload
   permissions: SanitizedFieldPermissions
   preferences: DocumentPreferences
+  /**
+   * Adapter-injected component renderer. Server components can use this
+   * to render other import map components without importing a
+   * framework-specific renderer directly.
+   */
+  renderComponent?: ComponentRenderer
   req: PayloadRequest
   siblingData: Data
-  user: TypedUser
+  user: User
   value?: unknown
 }
 

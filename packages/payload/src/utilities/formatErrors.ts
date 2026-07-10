@@ -1,33 +1,37 @@
 import type { ErrorResult } from '../config/types.js'
-import type { APIError } from '../errors/APIError.js'
 
-import { APIErrorName } from '../errors/APIError.js'
-import { ValidationErrorName } from '../errors/ValidationError.js'
+import { APIError } from '../errors/APIError.js'
+import { ValidationError } from '../errors/ValidationError.js'
 
 export const formatErrors = (incoming: { [key: string]: unknown } | APIError): ErrorResult => {
   if (incoming) {
-    // Cannot use `instanceof` to check error type: https://github.com/microsoft/TypeScript/issues/13965
-    // Instead, get the prototype of the incoming error and check its constructor name
-    const proto = Object.getPrototypeOf(incoming)
-
     // Payload 'ValidationError' and 'APIError'
+    // Use duck-typing fallback alongside instanceof to handle bundlers (e.g. Vite)
+    // that may load duplicate module instances, causing instanceof to fail.
     if (
-      (proto.constructor.name === ValidationErrorName || proto.constructor.name === APIErrorName) &&
+      (incoming instanceof ValidationError ||
+        incoming instanceof APIError ||
+        ('isOperational' in incoming && incoming.isOperational === true)) &&
       incoming.data
     ) {
       return {
         errors: [
           {
-            name: incoming.name as string,
+            name: incoming.name as string | undefined,
             data: incoming.data as Record<string, unknown>,
-            message: incoming.message as string,
+            message: incoming.message as string | undefined,
           },
         ],
       }
     }
 
     // Mongoose 'ValidationError': https://mongoosejs.com/docs/api/error.html#Error.ValidationError
-    if (proto.constructor.name === ValidationErrorName && 'errors' in incoming && incoming.errors) {
+    if (
+      'name' in incoming &&
+      incoming.name === 'ValidationError' &&
+      'errors' in incoming &&
+      incoming.errors
+    ) {
       return {
         errors: Object.keys(incoming.errors).reduce(
           (acc, key) => {

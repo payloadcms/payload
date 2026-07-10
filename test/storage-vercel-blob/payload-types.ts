@@ -68,6 +68,9 @@ export interface Config {
   blocks: {};
   collections: {
     media: Media;
+    'media-with-always-insert-fields': MediaWithAlwaysInsertField;
+    'media-with-direct-access': MediaWithDirectAccess;
+    'media-with-dynamic-prefix': MediaWithDynamicPrefix;
     'media-with-prefix': MediaWithPrefix;
     users: User;
     'payload-kv': PayloadKv;
@@ -78,6 +81,9 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
+    'media-with-always-insert-fields': MediaWithAlwaysInsertFieldsSelect<false> | MediaWithAlwaysInsertFieldsSelect<true>;
+    'media-with-direct-access': MediaWithDirectAccessSelect<false> | MediaWithDirectAccessSelect<true>;
+    'media-with-dynamic-prefix': MediaWithDynamicPrefixSelect<false> | MediaWithDynamicPrefixSelect<true>;
     'media-with-prefix': MediaWithPrefixSelect<false> | MediaWithPrefixSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -92,6 +98,9 @@ export interface Config {
   globals: {};
   globalsSelect: {};
   locale: null;
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -155,10 +164,80 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-always-insert-fields".
+ */
+export interface MediaWithAlwaysInsertField {
+  id: string;
+  alt?: string | null;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-direct-access".
+ */
+export interface MediaWithDirectAccess {
+  id: string;
+  alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+  sizes?: {
+    thumbnail?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+  };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-dynamic-prefix".
+ */
+export interface MediaWithDynamicPrefix {
+  id: string;
+  tenant: string;
+  prefix?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-prefix".
  */
 export interface MediaWithPrefix {
   id: string;
+  prefix?: string | null;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -223,6 +302,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'media';
         value: string | Media;
+      } | null)
+    | ({
+        relationTo: 'media-with-always-insert-fields';
+        value: string | MediaWithAlwaysInsertField;
+      } | null)
+    | ({
+        relationTo: 'media-with-direct-access';
+        value: string | MediaWithDirectAccess;
+      } | null)
+    | ({
+        relationTo: 'media-with-dynamic-prefix';
+        value: string | MediaWithDynamicPrefix;
       } | null)
     | ({
         relationTo: 'media-with-prefix';
@@ -318,9 +409,80 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-always-insert-fields_select".
+ */
+export interface MediaWithAlwaysInsertFieldsSelect<T extends boolean = true> {
+  alt?: T;
+  prefix?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-direct-access_select".
+ */
+export interface MediaWithDirectAccessSelect<T extends boolean = true> {
+  alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+  sizes?:
+    | T
+    | {
+        thumbnail?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+      };
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "media-with-dynamic-prefix_select".
+ */
+export interface MediaWithDynamicPrefixSelect<T extends boolean = true> {
+  tenant?: T;
+  prefix?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "media-with-prefix_select".
  */
 export interface MediaWithPrefixSelect<T extends boolean = true> {
+  prefix?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -394,6 +556,16 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

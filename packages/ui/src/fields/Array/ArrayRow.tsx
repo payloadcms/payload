@@ -21,7 +21,7 @@ import { RenderFields } from '../../forms/RenderFields/index.js'
 import { RowLabel } from '../../forms/RowLabel/index.js'
 import { useThrottledValue } from '../../hooks/useThrottledValue.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'array-field'
 
@@ -99,6 +99,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   const classNames = [
     `${baseClass}__row`,
     fieldHasErrors ? `${baseClass}__row--has-errors` : `${baseClass}__row--no-errors`,
+    isDragging && `${baseClass}__row--is-dragging`,
   ]
     .filter(Boolean)
     .join(' ')
@@ -143,10 +144,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             : undefined
         }
         header={
-          <div
-            className={`${baseClass}__row-header`}
-            id={`${scrollIdPrefix}-row-${rowIndex}`}
-          >
+          <div className={`${baseClass}__row-header`} id={`${scrollIdPrefix}-row-${rowIndex}`}>
             {isLoading ? (
               <ShimmerEffect height="1rem" width="8rem" />
             ) : (
@@ -170,7 +168,6 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
             className={`${baseClass}__fields`}
             fields={fields}
             forceRender={forceRender}
-            margins="small"
             parentIndexPath=""
             parentPath={path}
             parentSchemaPath={schemaPath}

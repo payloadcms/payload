@@ -11,15 +11,17 @@ import { useControllableState } from '../../../hooks/useControllableState.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { BlockSearch } from './BlockSearch/index.js'
-import './index.scss'
+import './index.css'
 
 export type Props = {
   readonly blocks: (ClientBlock | string)[]
+  readonly onDoubleClick?: (blockType: string) => void
   readonly onSelect?: (blockType: string) => void
   /**
    * Control the search term state externally
    */
   searchTerm?: string
+  readonly selectedBlock?: null | string
 }
 
 const baseClass = 'blocks-drawer'
@@ -35,7 +37,7 @@ const getBlockLabel = (block: ClientBlock, i18n: I18nClient) => {
 }
 
 export const BlockSelector: React.FC<Props> = (props) => {
-  const { blocks, onSelect, searchTerm: searchTermFromProps } = props
+  const { blocks, onDoubleClick, onSelect, searchTerm: searchTermFromProps, selectedBlock } = props
 
   const [searchTerm, setSearchTerm] = useControllableState(searchTermFromProps ?? '')
 
@@ -104,22 +106,38 @@ export const BlockSelector: React.FC<Props> = (props) => {
                   {groupBlocks.map((_block, index) => {
                     const block = typeof _block === 'string' ? config.blocksMap[_block] : _block
 
-                    const { slug, imageAltText, imageURL, labels: blockLabels } = block
+                    const { slug, admin, imageAltText, imageURL, labels: blockLabels } = block
+
+                    const thumbnailURL = admin?.images?.thumbnail
+                      ? typeof admin.images.thumbnail === 'string'
+                        ? admin.images.thumbnail
+                        : admin.images.thumbnail.url
+                      : imageURL
+                    const thumbnailAlt =
+                      admin?.images?.thumbnail && typeof admin.images.thumbnail !== 'string'
+                        ? admin.images.thumbnail.alt
+                        : imageAltText
 
                     return (
                       <li className={`${baseClass}__block`} key={index}>
                         <ThumbnailCard
-                          alignLabel="center"
+                          alignLabel="left"
+                          isSelected={selectedBlock === slug}
                           label={getTranslation(blockLabels?.singular, i18n)}
                           onClick={() => {
                             if (typeof onSelect === 'function') {
                               onSelect(slug)
                             }
                           }}
+                          onDoubleClick={() => {
+                            if (typeof onDoubleClick === 'function') {
+                              onDoubleClick(slug)
+                            }
+                          }}
                           thumbnail={
                             <div className={`${baseClass}__default-image`}>
-                              {imageURL ? (
-                                <img alt={imageAltText} src={imageURL} />
+                              {thumbnailURL ? (
+                                <img alt={thumbnailAlt} src={thumbnailURL} />
                               ) : (
                                 <DefaultBlockImage />
                               )}

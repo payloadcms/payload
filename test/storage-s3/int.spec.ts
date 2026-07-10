@@ -78,7 +78,9 @@ describe('@payloadcms/storage-s3', () => {
       prefix,
       payload,
     })
-    expect(upload.url).toEqual(`/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}`)
+    expect(upload.url).toEqual(
+      `/api/${mediaWithPrefixSlug}/file/${String(upload.filename)}?prefix=${prefix}`,
+    )
   })
 
   it('has prefix field with alwaysInsertFields even when plugin is disabled', async () => {
@@ -131,6 +133,36 @@ describe('@payloadcms/storage-s3', () => {
   it('should return 404 when the file is not found', async () => {
     const response = await restClient.GET(`/${mediaSlug}/file/missing.png`)
     expect(response.status).toBe(404)
+  })
+
+  it('should return 304 with empty body when the ETag matches', async () => {
+    await payload.create({
+      collection: mediaWithSignedDownloadsSlug,
+      data: {},
+      filePath: path.resolve(dirname, '../uploads/temp.png'),
+    })
+
+    const response = await restClient.GET(`/${mediaWithSignedDownloadsSlug}/file/temp.png`, {
+      headers: { 'X-Disable-Signed-URL': 'true', 'If-None-Match': 'invalid-etag-1234' },
+    })
+    expect(response.status).toBe(200)
+    expect(response.headers.get('Content-Type')).toBe('image/png')
+
+    const etag = response.headers.get('ETag')
+    expect(etag).toBeDefined()
+
+    const responseNotModified = await restClient.GET(
+      `/${mediaWithSignedDownloadsSlug}/file/temp.png`,
+      {
+        headers: {
+          'X-Disable-Signed-URL': 'true',
+          'If-None-Match': etag!,
+        },
+      },
+    )
+    expect(responseNotModified.status).toBe(304)
+    const body = await responseNotModified.text()
+    expect(body).toBe('')
   })
 
   describe('disablePayloadAccessControl', () => {
@@ -222,6 +254,25 @@ describe('@payloadcms/storage-s3', () => {
       // Verify the file can be fetched
       const response = await fetch(upload.url)
       expect(response.status).toBe(200)
+    })
+  })
+
+  describe('storage config', () => {
+    it('should default storage to an empty array when the key is omitted', () => {
+      // sanitize.ts sets storage = [] when the key is absent from the raw config
+      // (packages/payload/src/config/sanitize.ts). Verified here because the sanitized
+      // config must always expose a defined array regardless of what the user configured.
+      expect(payload.config.storage).toBeDefined()
+      expect(Array.isArray(payload.config.storage)).toBe(true)
+    })
+
+    it('should expose adapter name and collections on each storage adapter', () => {
+      const s3Adapter = payload.config.storage.find((a) => a.name === 's3')
+
+      expect(s3Adapter).toBeDefined()
+      expect(s3Adapter!.name).toBe('s3')
+      expect(Array.isArray(s3Adapter!.collections)).toBe(true)
+      expect(s3Adapter!.collections).toContain(mediaSlug)
     })
   })
 

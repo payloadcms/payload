@@ -5,7 +5,7 @@ import { localizedCollectionSlug } from '../slugs.js'
 const LocalizedPosts: CollectionConfig = {
   slug: localizedCollectionSlug,
   versions: {
-    drafts: true,
+    drafts: {},
   },
   fields: [
     {
@@ -37,6 +37,16 @@ const LocalizedPosts: CollectionConfig = {
                   localized: true,
                 },
               ],
+            },
+          ],
+        },
+        {
+          slug: 'localizedTextBlock',
+          fields: [
+            {
+              name: 'blockText',
+              type: 'text',
+              localized: true,
             },
           ],
         },

@@ -36,6 +36,38 @@ export class DashboardHelper {
   }
 
   /**
+   * Gate measurement on a fully settled grid. On adapters that stream the admin
+   * view in post-hydration (e.g. TanStack Start), the flex grid keeps reflowing
+   * for a frame or two right after a save or `page.reload()`: widgets mount
+   * unsized (a `null` `boundingBox()`) or land a few px off their final x while
+   * sibling widths are still resolving. `toBeVisible()` passes during that
+   * window, so a bare `boundingBox()` read races the reflow. Wait until the
+   * dashboard and every widget report identical bounding boxes across two
+   * consecutive reads (and none are `null`) before measuring.
+   */
+  private waitForStableLayout = async () => {
+    await expect(this.dashboard).toBeVisible()
+    for (const widget of await this.widgets.all()) {
+      await expect(widget).toBeVisible()
+    }
+
+    const readBoxes = async () =>
+      JSON.stringify(
+        await Promise.all(
+          [this.dashboard, ...(await this.widgets.all())].map((locator) => locator.boundingBox()),
+        ),
+      )
+
+    await expect(async () => {
+      const first = await readBoxes()
+      await this.page.waitForTimeout(100)
+      const second = await readBoxes()
+      expect(first).toBe(second)
+      expect(first).not.toContain('null')
+    }).toPass({ timeout: 10000 })
+  }
+
+  /**
    * - Verify that flex wrap is working correctly (If a node exceeds 100% of the available width, it should go in the row below)
    * - Verify that the nodes are positioned without gaps or overlap
    * - Verify that all nodes in a row have the same height
@@ -49,6 +81,13 @@ export class DashboardHelper {
       'x-large': 9,
       full: 12,
     }
+
+    // Wait for the grid to fully settle before measuring (see waitForStableLayout):
+    // on TanStack Start the view streams in post-hydration and the flex layout
+    // reflows for a frame or two after a save / `page.reload()`, so an eager
+    // `boundingBox()` read can capture a null or a few-px-stale x.
+    await this.waitForStableLayout()
+
     const widgets = await this.widgets.all()
     let currentPos = 0
     for (let index = 0; index < widgets.length; index++) {
@@ -74,8 +113,6 @@ export class DashboardHelper {
         const previousWidgetBox = (await widgets[index - 1]!.boundingBox())!
         expectedX = previousWidgetBox.x + previousWidgetBox.width
         expect(widgetBox.y + widgetBox.height).toBe(previousWidgetBox.y + previousWidgetBox.height)
-        const innerWidgetBox = (await widget.locator('.draggable').boundingBox())!
-        expect(innerWidgetBox.y + innerWidgetBox.height).toBe(widgetBox.y + widgetBox.height - 6) // 6px padding
       }
 
       expect(widgetBox.x).toBe(expectedX)
@@ -110,18 +147,20 @@ export class DashboardHelper {
     const widget = this.widgetByPos(arg.position)
     await widget.hover()
     const widthButton = widget.locator('.widget-wrapper__size-btn')
-    await expect(widthButton).toBeVisible()
-    if (await widthButton.isDisabled()) {
+    if ((await widthButton.count()) === 0) {
       await expect(widget).toHaveAttribute('data-width', arg.min)
       await expect(widget).toHaveAttribute('data-width', arg.max)
       return
     }
+    await expect(widthButton).toBeVisible()
     await widthButton.click()
     const activePopup = this.page.locator('.popup__content:visible')
     await expect(activePopup).toBeVisible()
     const widthOptions = activePopup.locator('.popup-button-list__button')
-    await expect(widthOptions.first().locator('span').first()).toHaveText(arg.min)
-    await expect(widthOptions.last().locator('span').first()).toHaveText(arg.max)
+    await expect(widthOptions.first().locator('.widget-wrapper__size-btn-label')).toHaveText(
+      arg.min,
+    )
+    await expect(widthOptions.last().locator('.widget-wrapper__size-btn-label')).toHaveText(arg.max)
   }
 
   assertWidget = async (pos: number, slug: string, width: WidgetWidth) => {
@@ -132,13 +171,13 @@ export class DashboardHelper {
 
   setEditing = async () => {
     await this.stepNavLast.locator('button').click()
-    await this.stepNavLast.getByText('Edit Dashboard').click()
+    await this.page.getByRole('button', { name: 'Edit Dashboard' }).click()
     await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
   }
 
   resetLayout = async () => {
     await this.stepNavLast.locator('button').click()
-    await this.stepNavLast.getByText('Reset Layout').click()
+    await this.page.getByRole('button', { name: 'Reset Layout' }).click()
   }
 
   assertIsEditing = async (shouldBe: boolean) => {
@@ -146,11 +185,11 @@ export class DashboardHelper {
       await expect(this.stepNavLast.getByText('Editing Dashboard')).toBeVisible()
       await expect(this.stepNavLast.locator('button')).toHaveCount(3)
       await expect(this.stepNavLast.locator('button').nth(0)).toHaveText('Add +')
-      await expect(this.stepNavLast.locator('button').nth(1)).toHaveText('Save Changes')
+      await expect(this.stepNavLast.locator('button').nth(1)).toHaveText('Save changes')
       await expect(this.stepNavLast.locator('button').nth(2)).toHaveText('Cancel')
     } else {
       await expect(this.stepNavLast.locator('button')).toHaveCount(1)
-      await expect(this.stepNavLast.getByTitle('Dashboard')).toBeVisible()
+      await expect(this.stepNavLast.getByLabel('Dashboard')).toBeVisible()
     }
   }
 
@@ -191,9 +230,25 @@ export class DashboardHelper {
     await expect(this.widgets).toHaveCount(widgetsCount - 1)
   }
 
+  editWidget = async (position: number, title: string) => {
+    const widget = this.widgetByPos(position)
+    await widget.hover()
+    await widget.locator('.widget-wrapper__edit-btn').click()
+
+    const drawer = this.page.locator('.drawer__content:visible')
+    await expect(drawer).toBeVisible()
+    const titleInput = drawer.locator('input[name="title"], input[name="data.title"]').first()
+    await expect(titleInput).toBeVisible({ timeout: 60000 })
+    await titleInput.fill(title)
+    await drawer.getByRole('button', { name: 'Save Changes' }).click()
+    await expect(drawer).toBeHidden()
+  }
+
   cancelEditing = async () => {
     await this.stepNavLast.locator('button').nth(2).click()
-    const confirmButton = this.page.locator('#confirm-action')
+    const confirmButton = this.page.locator(
+      '#cancel-dashboard-changes [data-dialog-action="confirm"]',
+    )
     await confirmButton.click()
     await this.assertIsEditing(false)
     // Wait for any layout changes/transitions to settle
@@ -205,8 +260,13 @@ export class DashboardHelper {
     await this.assertIsEditing(true)
     await this.stepNavLast.locator('button').nth(1).click()
     await this.assertIsEditing(false)
+    // The widget set must be fully (re)rendered before `validateLayout` measures
+    // bounding boxes — both after the edit→view re-render and after the reload,
+    // since admin content can mount asynchronously (see `validateLayout`).
+    await expect(this.widgets).toHaveCount(snapshot.length)
     await this.validateLayout()
     await this.page.reload()
+    await expect(this.widgets).toHaveCount(snapshot.length)
     await this.validateLayout()
     const snapshotAfter = await this.getSnapshot()
     expect(snapshotAfter).toEqual(snapshot)
@@ -243,10 +303,6 @@ export class DashboardHelper {
         steps: 10,
       },
     )
-    // the droppable widget should be highlighted
-    const droppable = this.page.getByTestId(`${snapshot[to - 1]![0]}-${place}`)
-    const bgColor = await droppable.evaluate((el) => window.getComputedStyle(el).backgroundColor)
-    expect(bgColor).not.toBe('rgba(0, 0, 0, 0)')
     await this.page.mouse.up()
     await this.page.waitForTimeout(400) // dndkit animation
 

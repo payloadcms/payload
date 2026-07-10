@@ -5,13 +5,12 @@ import { EntityType, getAccessResults } from 'payload'
 import { formatAdminURL } from 'payload/shared'
 import React from 'react'
 
-import { Button } from '../../elements/Button/index.js'
-import { Card } from '../../elements/Card/index.js'
-import { Locked } from '../../elements/Locked/index.js'
+// eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
+import { Button, Card, Locked } from '../../exports/client/index.js'
 import { getGlobalData } from '../../utilities/getGlobalData.js'
 import { getNavGroups } from '../../utilities/getNavGroups.js'
 import { getVisibleEntities } from '../../utilities/getVisibleEntities.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'collections'
 
@@ -45,7 +44,6 @@ export async function CollectionCards(props: WidgetServerProps) {
                     let isLocked = null
                     let userEditing = null
 
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                     if (type === EntityType.collection) {
                       title = getTranslation(label, i18n)
 
@@ -64,7 +62,6 @@ export async function CollectionCards(props: WidgetServerProps) {
                       hasCreatePermission = permissions?.collections?.[slug]?.create
                     }
 
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
                     if (type === EntityType.global) {
                       title = getTranslation(label, i18n)
 
@@ -103,16 +100,14 @@ export async function CollectionCards(props: WidgetServerProps) {
                           actions={
                             isLocked && user?.id !== userEditing?.id ? (
                               <Locked className={`${baseClass}__locked`} user={userEditing} />
-                            ) : // eslint-disable-next-line @typescript-eslint/no-unsafe-enum-comparison
-                            hasCreatePermission && type === EntityType.collection ? (
+                            ) : hasCreatePermission && type === EntityType.collection ? (
                               <Button
                                 aria-label={t('general:createNewLabel', {
                                   label,
                                 })}
-                                buttonStyle="icon-label"
+                                buttonStyle="ghost"
                                 el="link"
                                 icon="plus"
-                                iconStyle="with-border"
                                 round
                                 to={createHREF}
                               />

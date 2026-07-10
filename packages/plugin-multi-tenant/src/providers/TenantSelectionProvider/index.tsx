@@ -1,35 +1,38 @@
-import type { Payload, TypedUser } from 'payload'
-
-import { cookies as getCookies } from 'next/headers.js'
+import type { Payload, ServerAdapter, User } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../../types.js'
 
 import { getTenantOptions } from '../../utilities/getTenantOptions.js'
 import { TenantSelectionProviderClient } from './index.client.js'
 
-type Args<ConfigType> = {
+type Args = {
   children: React.ReactNode
   payload: Payload
+  server?: ServerAdapter
   tenantsArrayFieldName: string
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
-  user: TypedUser
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  user: User
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }
 
 export const TenantSelectionProvider = async ({
   children,
   payload,
+  server,
   tenantsArrayFieldName,
   tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   useAsTitle,
   user,
   userHasAccessToAllTenants,
-}: Args<any>) => {
+}: Args) => {
+  if (!server) {
+    throw new Error(
+      'TenantSelectionProvider requires `server` in ServerProps. Ensure your framework adapter (e.g. @payloadcms/next) populates ServerProps.server.',
+    )
+  }
   const tenantOptions = await getTenantOptions({
     payload,
     tenantsArrayFieldName,
@@ -40,7 +43,7 @@ export const TenantSelectionProvider = async ({
     userHasAccessToAllTenants,
   })
 
-  const cookies = await getCookies()
+  const cookies = await server.getCookies()
   const tenantCookie = cookies.get('payload-tenant')?.value
   let initialValue = undefined
 

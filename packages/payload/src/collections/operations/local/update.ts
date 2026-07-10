@@ -6,9 +6,9 @@ import type {
   Payload,
   RequestContext,
   TypedLocale,
+  User,
 } from '../../../index.js'
 import type {
-  Document,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -99,17 +99,12 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   populate?: PopulateType
   /**
-   * Publish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   * Publish the document / documents in all locales. Only applies when localization is enabled
+   * and the collection has localized fields.
    *
    * @default undefined
    */
   publishAllLocales?: boolean
-  /**
-   * Publish the document / documents with a specific locale.
-   *
-   * @default undefined
-   */
-  publishSpecificLocale?: string
   /**
    * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
    * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
@@ -129,14 +124,14 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    */
   trash?: boolean
   /**
-   * Unpublish the document / documents in all locales. Requires `versions.drafts.localizeStatus` to be enabled.
+   * Unpublish the document / documents in all locales. Only applies when localization is enabled
+   * and the collection has localized fields.
    */
   unpublishAllLocales?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
 } & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export type ByIDOptions<
@@ -238,7 +233,6 @@ async function updateLocal<
     overwriteExistingFiles = false,
     populate,
     publishAllLocales,
-    publishSpecificLocale,
     select,
     showHiddenFields,
     sort,
@@ -273,7 +267,6 @@ async function updateLocal<
     payload,
     populate,
     publishAllLocales,
-    publishSpecificLocale,
     req,
     select,
     showHiddenFields,

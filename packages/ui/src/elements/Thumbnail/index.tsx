@@ -1,13 +1,14 @@
 'use client'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 const baseClass = 'thumbnail'
 
 import type { SanitizedCollectionConfig } from 'payload'
 
 import { File } from '../../graphics/File/index.js'
+import { appendCacheTag } from '../../utilities/appendCacheTag.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 
 export type ThumbnailProps = {
@@ -16,7 +17,7 @@ export type ThumbnailProps = {
   doc?: Record<string, unknown>
   fileSrc?: string
   height?: number
-  imageCacheTag?: string
+  imageCacheTag?: false | string
   size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
   uploadConfig?: SanitizedCollectionConfig['upload']
   width?: number
@@ -36,33 +37,27 @@ export const Thumbnail: React.FC<ThumbnailProps> = (props) => {
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
+  const src = React.useMemo(
+    () => (fileSrc ? appendCacheTag(fileSrc, imageCacheTag) : null),
+    [fileSrc, imageCacheTag],
+  )
+
   React.useEffect(() => {
-    if (!fileSrc) {
+    if (!src) {
       setFileExists(false)
       return
     }
     setFileExists(undefined)
 
     const img = new Image()
-    img.src = fileSrc
+    img.src = src
     img.onload = () => {
       setFileExists(true)
     }
     img.onerror = () => {
       setFileExists(false)
     }
-  }, [fileSrc])
-
-  let src: null | string = null
-
-  /**
-   * If an imageCacheTag is provided, append it to the fileSrc
-   * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
-   */
-  if (fileSrc) {
-    const queryChar = fileSrc?.includes('?') ? '&' : '?'
-    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
-  }
+  }, [src])
 
   return (
     <div className={classNames}>
@@ -78,7 +73,7 @@ type ThumbnailComponentProps = {
   readonly className?: string
   readonly filename: string
   readonly fileSrc: string
-  readonly imageCacheTag?: string
+  readonly imageCacheTag?: false | string
   readonly size?: 'expand' | 'large' | 'medium' | 'none' | 'small'
 }
 export function ThumbnailComponent(props: ThumbnailComponentProps) {
@@ -87,33 +82,27 @@ export function ThumbnailComponent(props: ThumbnailComponentProps) {
 
   const classNames = [baseClass, `${baseClass}--size-${size || 'medium'}`, className].join(' ')
 
+  const src = React.useMemo(
+    () => (fileSrc ? appendCacheTag(fileSrc, imageCacheTag) : null),
+    [fileSrc, imageCacheTag],
+  )
+
   React.useEffect(() => {
-    if (!fileSrc) {
+    if (!src) {
       setFileExists(false)
       return
     }
     setFileExists(undefined)
 
     const img = new Image()
-    img.src = fileSrc
+    img.src = src
     img.onload = () => {
       setFileExists(true)
     }
     img.onerror = () => {
       setFileExists(false)
     }
-  }, [fileSrc])
-
-  let src: string = ''
-
-  /**
-   * If an imageCacheTag is provided, append it to the fileSrc
-   * Check if the fileSrc already has a query string, if it does, append the imageCacheTag with an ampersand
-   */
-  if (fileSrc) {
-    const queryChar = fileSrc?.includes('?') ? '&' : '?'
-    src = imageCacheTag ? `${fileSrc}${queryChar}${encodeURIComponent(imageCacheTag)}` : fileSrc
-  }
+  }, [src])
 
   return (
     <div className={classNames}>

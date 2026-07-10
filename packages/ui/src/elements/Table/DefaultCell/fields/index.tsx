@@ -8,6 +8,7 @@ import { FileCell } from './File/index.js'
 import { JSONCell } from './JSON/index.js'
 import { RelationshipCell } from './Relationship/index.js'
 import { SelectCell } from './Select/index.js'
+import { StatusCell } from './Status/index.js'
 import { TextareaCell } from './Textarea/index.js'
 
 export const cellComponents = {
@@ -22,6 +23,7 @@ export const cellComponents = {
   radio: SelectCell,
   relationship: RelationshipCell,
   select: SelectCell,
+  status: StatusCell,
   textarea: TextareaCell,
   upload: RelationshipCell,
 }

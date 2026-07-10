@@ -92,6 +92,8 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
       req,
     })
 
+    req.context.isRestoringVersion = true
+
     // /////////////////////////////////////
     // Update global
     // /////////////////////////////////////

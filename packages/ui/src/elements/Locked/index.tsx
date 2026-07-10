@@ -7,7 +7,7 @@ import { LockIcon } from '../../icons/Lock/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { isClientUserObject } from '../../utilities/isClientUserObject.js'
 import { Tooltip } from '../Tooltip/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'locked'
 
@@ -31,8 +31,9 @@ export const Locked: React.FC<{
       <Tooltip
         alignCaret="left"
         className={`${baseClass}__tooltip`}
-        position="top"
+        position="bottom"
         show={hovered}
+        staticPositioning
       >{`${userToUse} ${t('general:isEditing')}`}</Tooltip>
       <LockIcon />
     </div>

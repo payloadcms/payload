@@ -12,7 +12,7 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { fieldBaseClass } from '../shared/index.js'
-import './index.scss'
+import './index.css'
 
 export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
   const {
@@ -33,6 +33,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
     rows,
     rtl,
     showError,
+    size = 'large',
     style,
     value,
   } = props
@@ -50,6 +51,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
       ]
         .filter(Boolean)
         .join(' ')}
+      data-size={size}
       style={style}
     >
       <RenderCustomComponent
@@ -72,6 +74,7 @@ export const TextareaInput: React.FC<TextAreaInputProps> = (props) => {
         {BeforeInput}
         <div className="textarea-outer">
           <textarea
+            className="form-input"
             data-rtl={rtl}
             disabled={readOnly}
             id={`field-${path.replace(/\./g, '__')}`}

@@ -24,7 +24,7 @@ import { createPortal } from 'react-dom'
 
 import type { PluginComponent } from '../../../../typesClient.js'
 
-import './index.scss'
+import './index.css'
 import { useEditorConfigContext } from '../../../../../lexical/config/client/EditorConfigProvider.js'
 
 type MousePosition = {

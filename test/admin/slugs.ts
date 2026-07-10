@@ -1,6 +1,7 @@
 export const usersCollectionSlug = 'users'
 export const customViews1CollectionSlug = 'custom-views-one'
 export const customViews2CollectionSlug = 'custom-views-two'
+export const customCollectionViewSlug = 'custom-collection-view'
 export const reorderTabsSlug = 'reorder-tabs'
 export const geoCollectionSlug = 'geo'
 export const arrayCollectionSlug = 'array'
@@ -28,10 +29,12 @@ export const customFieldsSlug = 'custom-fields'
 export const listDrawerSlug = 'with-list-drawer'
 export const virtualsSlug = 'virtuals'
 export const formatDocURLCollectionSlug = 'format-doc-url'
+export const fullyFeaturedCollectionSlug = 'fully-featured'
 export const collectionSlugs = [
   usersCollectionSlug,
   customViews1CollectionSlug,
   customViews2CollectionSlug,
+  customCollectionViewSlug,
   geoCollectionSlug,
   arrayCollectionSlug,
   postsCollectionSlug,
@@ -48,6 +51,7 @@ export const collectionSlugs = [
   virtualsSlug,
   formatDocURLCollectionSlug,
   localizedCollectionSlug,
+  fullyFeaturedCollectionSlug,
 ]
 
 export const customGlobalDocumentControlsSlug = 'custom-global-document-controls'

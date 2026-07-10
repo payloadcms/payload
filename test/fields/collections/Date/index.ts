@@ -231,6 +231,22 @@ const DateFields: CollectionConfig = {
       },
     },
     {
+      name: 'dateWithTimezoneNoDefault',
+      type: 'date',
+      admin: {
+        date: {
+          pickerAppearance: 'dayAndTime',
+        },
+      },
+      timezone: {
+        supportedTimezones: [
+          { label: 'New York', value: 'America/New_York' },
+          { label: 'London', value: 'Europe/London' },
+          { label: 'UTC', value: 'UTC' },
+        ],
+      },
+    },
+    {
       name: 'dateWithTimezoneWithDisabledColumns',
       type: 'date',
       timezone: {
@@ -238,7 +254,7 @@ const DateFields: CollectionConfig = {
           ...baseField,
           admin: {
             ...baseField.admin,
-            disableListColumn: true,
+            disabled: { column: true },
             description: 'This timezone field was customized via override',
           },
         }),
@@ -250,6 +266,7 @@ const DateFields: CollectionConfig = {
       },
     },
   ],
+  versions: false,
 }
 
 export default DateFields

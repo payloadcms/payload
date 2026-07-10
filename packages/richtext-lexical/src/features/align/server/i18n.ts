@@ -177,9 +177,9 @@ export const i18n: Partial<GenericLanguages> = {
   },
   sv: {
     alignCenterLabel: 'Centrera',
-    alignJustifyLabel: 'Justera Justify',
-    alignLeftLabel: 'Justera till vänster',
-    alignRightLabel: 'Justera till höger',
+    alignJustifyLabel: 'Marginaljustera',
+    alignLeftLabel: 'Vänsterjustera',
+    alignRightLabel: 'Högerjustera',
   },
   ta: {
     alignCenterLabel: 'மையத்தில் ஒழுங்குபடுத்து',

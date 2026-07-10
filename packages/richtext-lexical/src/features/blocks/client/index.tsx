@@ -48,21 +48,15 @@ export const BlocksFeatureClient = createClientFeature(
 
     const clientBlocks: ClientBlock[] = blocksFields
       .map((field) => {
-        return field.blockReferences
-          ? typeof field.blockReferences[0] === 'string'
-            ? config.blocksMap[field.blockReferences[0]]
-            : field.blockReferences[0]
-          : field.blocks[0]
+        const blockOrSlug = field.blocks[0]
+        return typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
       })
       .filter((block) => block !== undefined)
 
     const clientInlineBlocks: ClientBlock[] = inlineBlocksFields
       .map((field) => {
-        return field.blockReferences
-          ? typeof field.blockReferences[0] === 'string'
-            ? config.blocksMap[field.blockReferences[0]]
-            : field.blockReferences[0]
-          : field.blocks[0]
+        const blockOrSlug = field.blocks[0]
+        return typeof blockOrSlug === 'string' ? config.blocksMap[blockOrSlug] : blockOrSlug
       })
       .filter((block) => block !== undefined)
 
@@ -85,7 +79,7 @@ export const BlocksFeatureClient = createClientFeature(
             ? {
                 items: clientBlocks.map((block) => {
                   return {
-                    Icon: getBlockImageComponent(block.imageURL, block.imageAltText),
+                    Icon: getBlockImageComponent(block, BlockIcon),
                     key: 'block-' + block.slug,
                     keywords: ['block', 'blocks', block.slug],
                     label: ({ i18n }) => {
@@ -151,7 +145,6 @@ export const BlocksFeatureClient = createClientFeature(
                 ChildComponent: BlockIcon,
                 items: clientBlocks.map((block, index) => {
                   return {
-                    ChildComponent: getBlockImageComponent(block.imageURL, block.imageAltText),
                     isActive: undefined, // At this point, we would be inside a sub-richtext-editor. And at this point this will be run against the focused sub-editor, not the parent editor which has the actual block. Thus, no point in running this
                     key: 'block-' + block.slug,
                     label: ({ i18n }) => {
@@ -180,9 +173,6 @@ export const BlocksFeatureClient = createClientFeature(
                 ChildComponent: InlineBlocksIcon,
                 items: clientInlineBlocks.map((inlineBlock, index) => {
                   return {
-                    ChildComponent: inlineBlock.imageURL
-                      ? getBlockImageComponent(inlineBlock.imageURL, inlineBlock.imageAltText)
-                      : InlineBlocksIcon,
                     isActive: undefined,
                     key: 'inlineBlock-' + inlineBlock.slug,
                     label: ({ i18n }) => {

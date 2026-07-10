@@ -1,14 +1,16 @@
-import type { Config } from 'payload'
-
-import { deepMergeSimple } from 'payload'
+import { deepMergeSimple, definePlugin } from 'payload'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type {
-  FromCSVFunction,
+  ExportAfterHook,
+  ExportBeforeHook,
+  FieldBeforeExportHook,
+  FieldBeforeImportHook,
+  ImportAfterHook,
+  ImportBeforeHook,
   ImportExportPluginConfig,
   Limit,
   PluginCollectionConfig,
-  ToCSVFunction,
 } from './types.js'
 
 import { getCreateCollectionExportTask } from './export/getCreateExportCollectionTask.js'
@@ -17,9 +19,19 @@ import { translations } from './translations/index.js'
 import { collectDisabledFieldPaths } from './utilities/collectDisabledFieldPaths.js'
 import { getPluginCollections } from './utilities/getPluginCollections.js'
 
-export const importExportPlugin =
-  (pluginConfig: ImportExportPluginConfig) =>
-  async (config: Config): Promise<Config> => {
+/**
+ * Adds CSV/JSON import and export functionality to selected collections.
+ *
+ * Registers two upload collections (`exports`, `imports`) that drive the admin
+ * UI flow, plus the `createCollectionExport` and `createCollectionImport` jobs
+ * that run the work asynchronously. Per-collection settings (batch size, limits,
+ * format, lifecycle hooks, override) live on each entry of `collections`.
+ *
+ * @see https://payloadcms.com/docs/plugins/import-export
+ */
+export const importExportPlugin = definePlugin<ImportExportPluginConfig>({
+  slug: '@payloadcms/plugin-import-export',
+  plugin: async ({ config, options: pluginConfig }) => {
     // Get all export/import collections and the mappings from target collections to custom collections
     const { customExportSlugMap, customImportSlugMap, exportCollections, importCollections } =
       await getPluginCollections({
@@ -109,6 +121,7 @@ export const importExportPlugin =
       if (!exportDisabled) {
         components.listMenuItems.push({
           clientProps: {
+            collectionSlug: collection.slug,
             exportCollectionSlug: exportSlugForCollection,
           },
           path: '@payloadcms/plugin-import-export/rsc#ExportListMenuItem',
@@ -119,6 +132,7 @@ export const importExportPlugin =
       if (!importDisabled) {
         components.listMenuItems.push({
           clientProps: {
+            collectionSlug: collection.slug,
             importCollectionSlug: importSlugForCollection,
           },
           path: '@payloadcms/plugin-import-export/rsc#ImportListMenuItem',
@@ -133,37 +147,56 @@ export const importExportPlugin =
           ? collectionPluginConfig.export
           : undefined
       const exportFormat = exportConfig?.format
+      const exportDisableJobsQueue = exportConfig?.disableJobsQueue
+      const exportBatchSize = exportConfig?.batchSize
+      const exportDisableSave = exportConfig?.disableSave
+      const exportDisableDownload = exportConfig?.disableDownload
 
       const importConfig =
         typeof collectionPluginConfig?.import === 'object'
           ? collectionPluginConfig.import
           : undefined
+      const importDisableJobsQueue = importConfig?.disableJobsQueue
+      const importBatchSize = importConfig?.batchSize
 
       const exportLimit = exportConfig?.limit ?? pluginConfig.exportLimit
+      const exportHooks = exportConfig?.hooks
 
       const importLimit = importConfig?.limit ?? pluginConfig.importLimit
+      const importDefaultVersionStatus = importConfig?.defaultVersionStatus
+      const importHooks = importConfig?.hooks
 
-      // Store disabled field accessors and export format in the admin config for use in the UI
-      // Note: limits are stored in collection.custom (server-only) because they can be functions
       collection.admin.custom = {
         ...(collection.admin.custom || {}),
         'plugin-import-export': {
           ...(collection.admin.custom?.['plugin-import-export'] || {}),
           disabledFields: disabledFieldAccessors,
           ...(exportFormat !== undefined && { exportFormat }),
+          ...(exportDisableSave !== undefined && { disableSave: exportDisableSave }),
+          ...(exportDisableDownload !== undefined && { disableDownload: exportDisableDownload }),
         },
       }
 
-      // Store limits in collection.custom (server-only) since they can be functions
-      if (exportLimit !== undefined || importLimit !== undefined) {
-        collection.custom = {
-          ...(collection.custom || {}),
-          'plugin-import-export': {
-            ...(collection.custom?.['plugin-import-export'] || {}),
-            ...(exportLimit !== undefined && { exportLimit }),
-            ...(importLimit !== undefined && { importLimit }),
-          },
-        }
+      collection.custom = {
+        ...(collection.custom || {}),
+        'plugin-import-export': {
+          ...(collection.custom?.['plugin-import-export'] || {}),
+          ...(exportLimit !== undefined && { exportLimit }),
+          ...(exportDisableJobsQueue !== undefined && {
+            exportDisableJobsQueue,
+          }),
+          ...(exportBatchSize !== undefined && { exportBatchSize }),
+          ...(importLimit !== undefined && { importLimit }),
+          ...(importDisableJobsQueue !== undefined && {
+            importDisableJobsQueue,
+          }),
+          ...(importBatchSize !== undefined && { importBatchSize }),
+          ...(importDefaultVersionStatus !== undefined && {
+            defaultVersionStatus: importDefaultVersionStatus,
+          }),
+          ...(exportHooks !== undefined && { exportHooks }),
+          ...(importHooks !== undefined && { importHooks }),
+        },
       }
 
       collection.admin.components = components
@@ -174,15 +207,21 @@ export const importExportPlugin =
     }
 
     /**
-     * Merge plugin translations
+     * Merge plugin translations — only for languages the user has enabled.
+     * Plugins run before sanitize, so `supportedLanguages` may be undefined; sanitize will
+     * default it to `{ en }`, so we mirror that here to avoid merging 30+ unused tables.
      */
-    const simplifiedTranslations = Object.entries(translations).reduce(
-      (acc, [key, value]) => {
-        acc[key] = value.translations
-        return acc
-      },
-      {} as Record<string, PluginDefaultTranslationsObject>,
-    )
+    const supportedLanguageKeys = config.i18n?.supportedLanguages
+      ? Object.keys(config.i18n.supportedLanguages)
+      : ['en']
+
+    const simplifiedTranslations: Record<string, PluginDefaultTranslationsObject> = {}
+    for (const lang of supportedLanguageKeys) {
+      const entry = translations[lang as keyof typeof translations]
+      if (entry) {
+        simplifiedTranslations[lang] = entry.translations
+      }
+    }
 
     config.i18n = {
       ...config.i18n,
@@ -190,7 +229,8 @@ export const importExportPlugin =
     }
 
     return config
-  }
+  },
+})
 
 declare module 'payload' {
   export interface FieldCustom {
@@ -203,21 +243,45 @@ declare module 'payload' {
        * @default false
        */
       disabled?: boolean
-      fromCSV?: FromCSVFunction
       /**
-       * Custom function used to modify the outgoing csv data by manipulating the data, siblingData or by returning the desired value
+       * Field-level lifecycle hooks for import/export transformations.
+       * Works for both CSV and JSON formats.
        */
-      toCSV?: ToCSVFunction
+      hooks?: {
+        /**
+         * Runs before a field value is exported. Return a transformed value,
+         * `undefined` to use default behavior, or mutate `siblingData` to add
+         * extra columns at the same level.
+         */
+        beforeExport?: FieldBeforeExportHook
+        /**
+         * Runs before a field value is imported. Return the transformed value.
+         */
+        beforeImport?: FieldBeforeImportHook
+      }
     }
   }
 
   export interface CollectionAdminCustom {
     'plugin-import-export'?: {
       /**
+       * Array of collection slugs that this export/import collection can target.
+       * Used by CollectionField to populate the dropdown options.
+       */
+      collectionSlugs?: string[]
+      /**
        * Array of field paths that are disabled for import/export.
        * These paths are collected from fields marked with `custom['plugin-import-export'].disabled = true`.
        */
       disabledFields?: string[]
+      /**
+       * If true, disables the download button in the export preview UI.
+       */
+      disableDownload?: boolean
+      /**
+       * If true, disables the save button in the export preview UI.
+       */
+      disableSave?: boolean
       /**
        * When set, forces exports from this collection to use this format.
        * This value is read from the plugin config's `export.format` option.
@@ -227,13 +291,57 @@ declare module 'payload' {
   }
 
   export interface CollectionCustom {
+    /**
+     * @internal
+     * Server-side storage for resolved plugin config. Users should configure
+     * import/export via `importExportPlugin({ collections: [{ slug, export: { ... }, import: { ... } }] })`.
+     * These fields are populated automatically and are not part of the public
+     * API — the names here intentionally diverge from the user-facing nested
+     * `export.hooks` / `import.hooks` config and may change without notice.
+     */
     'plugin-import-export'?: {
+      /**
+       * @internal Default version status for imported documents when _status field is not provided.
+       * Only applies to collections with versions enabled.
+       * @default 'published'
+       */
+      defaultVersionStatus?: 'draft' | 'published'
+      /**
+       * Number of documents to process in each batch during export.
+       * @default 100
+       */
+      exportBatchSize?: number
+      /**
+       * If true, disables the jobs queue for exports and runs them synchronously.
+       * @default false
+       */
+      exportDisableJobsQueue?: boolean
+      /**
+       * Lifecycle hooks for export operations. Stored server-side since functions
+       * cannot be serialized to the client.
+       */
+      exportHooks?: { after?: ExportAfterHook; before?: ExportBeforeHook }
       /**
        * Maximum number of documents that can be exported from this collection.
        * Set to 0 for unlimited (default). Can be a number or function.
        * Stored in collection.custom (server-only) since functions cannot be serialized to client.
        */
       exportLimit?: Limit
+      /**
+       * Number of documents to process in each batch during import.
+       * @default 100
+       */
+      importBatchSize?: number
+      /**
+       * If true, disables the jobs queue for imports and runs them synchronously.
+       * @default false
+       */
+      importDisableJobsQueue?: boolean
+      /**
+       * Lifecycle hooks for import operations. Stored server-side since functions
+       * cannot be serialized to the client.
+       */
+      importHooks?: { after?: ImportAfterHook; before?: ImportBeforeHook }
       /**
        * Maximum number of documents that can be imported to this collection.
        * Set to 0 for unlimited (default). Can be a number or function.

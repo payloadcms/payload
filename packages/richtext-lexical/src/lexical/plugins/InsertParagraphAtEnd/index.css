@@ -1,0 +1,52 @@
+@layer payload-default {
+  .rich-text-lexical--show-gutter {
+    .insert-paragraph-at-end {
+      padding: var(--spacer-1) 0 calc(var(--spacer-1) / 2) var(--spacer-6);
+    }
+  }
+  .insert-paragraph-at-end {
+    height: var(--spacer-4);
+    margin-top: calc(var(--spacer-4) * -1);
+    width: 100%;
+    z-index: 0;
+    position: relative;
+    padding: var(--spacer-1) 0 calc(var(--spacer-1) / 2) 0;
+
+    &:hover {
+      cursor: pointer;
+
+      .insert-paragraph-at-end-inside {
+        background-color: var(--color-bg-hover);
+
+        span {
+          display: flex;
+        }
+      }
+    }
+  }
+
+  .insert-paragraph-at-end-inside {
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    transition: background-color 0.1s ease-in-out;
+    display: flex;
+    justify-content: center;
+    border-radius: var(--radius-medium);
+    color: var(--color-text-secondary);
+
+    span {
+      display: none;
+      justify-content: center;
+      align-items: center;
+    }
+  }
+
+  html[data-theme='dark'] {
+    .insert-paragraph-at-end:hover {
+      .insert-paragraph-at-end-inside {
+        background-color: var(--color-bg-secondary);
+      }
+    }
+  }
+}

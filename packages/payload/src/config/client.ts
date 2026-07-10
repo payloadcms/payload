@@ -3,11 +3,11 @@ import type { DeepPartial } from 'ts-essentials'
 
 import type { ImportMap } from '../bin/generateImportMap/index.js'
 import type { ClientBlock } from '../fields/config/types.js'
-import type { BlockSlug, TypedUser } from '../index.js'
+import type { BlockSlug, User } from '../index.js'
 import type {
+  ClientWidget,
   RootLivePreviewConfig,
   SanitizedConfig,
-  SanitizedDashboardConfig,
   ServerOnlyLivePreviewProperties,
 } from './types.js'
 
@@ -15,7 +15,7 @@ import {
   type ClientCollectionConfig,
   createClientCollectionConfigs,
 } from '../collections/config/client.js'
-import { createClientBlocks } from '../fields/config/client.js'
+import { createClientBlocks, createClientFields } from '../fields/config/client.js'
 import { type ClientGlobalConfig, createClientGlobalConfigs } from '../globals/config/client.js'
 
 export type ServerOnlyRootProperties = keyof Pick<
@@ -39,6 +39,7 @@ export type ServerOnlyRootProperties = keyof Pick<
   | 'queryPresets'
   | 'secret'
   | 'sharp'
+  | 'storage'
   | 'typescript'
 >
 
@@ -46,7 +47,9 @@ export type ServerOnlyRootAdminProperties = keyof Pick<SanitizedConfig['admin'],
 
 export type ClientConfig = {
   admin: {
-    dashboard?: SanitizedDashboardConfig
+    dashboard?: {
+      widgets: ClientWidget[]
+    }
     livePreview?: Omit<RootLivePreviewConfig, ServerOnlyLivePreviewProperties>
   } & Omit<SanitizedConfig['admin'], 'components' | 'dashboard' | 'dependencies' | 'livePreview'>
   blocks: ClientBlock[]
@@ -97,6 +100,7 @@ export const serverOnlyConfigProperties: readonly Partial<ServerOnlyRootProperti
   'logger',
   'kv',
   'queryPresets',
+  'storage',
   // `admin`, `onInit`, `localization`, `collections`, and `globals` are all handled separately
 ]
 
@@ -112,7 +116,7 @@ export type CreateClientConfigArgs = {
    * For example, allow `true` to generate a client config for the "create first user" page
    * where there is no user yet, but the config should still be complete.
    */
-  user: true | TypedUser
+  user: true | User
 }
 
 export const createUnauthenticatedClientConfig = ({
@@ -181,9 +185,19 @@ export const createClientConfig = ({
         if (config.admin.dashboard?.widgets) {
           ;(clientConfig.admin.dashboard ??= {}).widgets = config.admin.dashboard.widgets.map(
             (widget) => {
-              const { ComponentPath: _, label, ...rest } = widget
+              const { Component: _, fields, label, ...rest } = widget
               return {
                 ...rest,
+                ...(fields?.length
+                  ? {
+                      fields: createClientFields({
+                        defaultIDType: config.db.defaultIDType,
+                        fields,
+                        i18n,
+                        importMap,
+                      }),
+                    }
+                  : {}),
                 // Resolve label function to string for client
                 label:
                   typeof label === 'function' ? label({ i18n, t: i18n.t as TFunction }) : label,
@@ -216,7 +230,7 @@ export const createClientConfig = ({
           defaultIDType: config.db.defaultIDType,
           i18n,
           importMap,
-        }).filter((block) => typeof block !== 'string') as ClientBlock[]
+        }).filter((block) => typeof block !== 'string')
 
         clientConfig.blocksMap = {}
         if (clientConfig.blocks?.length) {
@@ -239,18 +253,6 @@ export const createClientConfig = ({
           i18n,
           importMap,
         })
-
-        break
-
-      case 'folders':
-        if (config.folders) {
-          clientConfig.folders = {
-            slug: config.folders.slug,
-            browseByFolder: config.folders.browseByFolder,
-            debug: config.folders.debug,
-            fieldName: config.folders.fieldName,
-          }
-        }
 
         break
 

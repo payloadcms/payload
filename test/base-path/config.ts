@@ -6,16 +6,20 @@ import { BASE_PATH } from './shared.js'
 process.env.NEXT_BASE_PATH = BASE_PATH
 
 export default buildConfigWithDefaults({
+  admin: {
+    autoLogin: false,
+  },
   collections: [
     Posts,
     {
       slug: 'media',
       upload: true,
       fields: [],
+      versions: false,
     },
   ],
   onInit: seed,
-  serverURL: 'http://localhost:3000',
+  serverURL: `http://localhost:${process.env.PORT || 3000}`,
   endpoints: [
     {
       handler: () => {

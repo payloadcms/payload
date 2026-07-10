@@ -47,10 +47,6 @@ type TemplateVariation = {
    * @default false
    */
   skipReadme?: boolean
-  /**
-   * @default false
-   */
-  skipAgents?: boolean
   storage: StorageAdapterType
   vercelDeployButtonLink?: string
   /**
@@ -87,7 +83,6 @@ async function main() {
       sharp: false,
       skipDockerCompose: true,
       skipReadme: true,
-      skipAgents: false,
       storage: 'vercelBlobStorage',
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
@@ -112,7 +107,6 @@ async function main() {
       sharp: true,
       skipDockerCompose: true,
       skipReadme: true,
-      skipAgents: false,
       storage: 'vercelBlobStorage',
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
@@ -131,7 +125,6 @@ async function main() {
       dirname: 'with-postgres',
       sharp: true,
       skipDockerCompose: true,
-      skipAgents: false,
       storage: 'localDisk',
     },
     {
@@ -144,7 +137,6 @@ async function main() {
       sharp: false,
       storage: 'vercelBlobStorage',
       skipReadme: true,
-      skipAgents: false,
       targetDeployment: 'vercel',
       vercelDeployButtonLink:
         `https://vercel.com/new/clone?repository-url=` +
@@ -164,7 +156,6 @@ async function main() {
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
       skipReadme: true, // Do not copy the README.md file from the base template
-      skipAgents: false,
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -178,7 +169,6 @@ async function main() {
       dirname: 'website',
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
-      skipAgents: false,
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -194,7 +184,6 @@ async function main() {
       dirname: 'ecommerce',
       sharp: true,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
-      skipAgents: false,
       storage: 'localDisk',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -210,7 +199,6 @@ async function main() {
       dirname: 'with-cloudflare-d1',
       sharp: false,
       skipConfig: true, // Do not copy the payload.config.ts file from the base template
-      skipAgents: false,
       storage: 'r2Storage',
       // The blank template is used as a base for create-payload-app functionality,
       // so we do not configure the payload.config.ts file, which leaves the placeholder comments.
@@ -223,13 +211,17 @@ async function main() {
     },
   ]
 
-  // If template is set, only generate that template
-  if (template) {
+  // If template is set, only generate that template. The plugin template is not a
+  // standard variation (see `bumpPluginTemplate` below), so allow it through without
+  // matching a variation entry.
+  if (template && template !== 'plugin') {
     const variation = variations.find((v) => v.dirname === template)
     if (!variation) {
       throw new Error(`Variation not found: ${template}`)
     }
     variations = [variation]
+  } else if (template === 'plugin') {
+    variations = []
   }
 
   for (const variation of variations) {
@@ -245,7 +237,6 @@ async function main() {
       skipConfig = false,
       skipDockerCompose = false,
       skipReadme = false,
-      skipAgents = false,
       storage,
       vercelDeployButtonLink,
       targetDeployment = 'default',
@@ -268,11 +259,6 @@ async function main() {
     }
 
     log(`Copied to ${destDir}`)
-
-    // Copy _agents files
-    if (!skipAgents) {
-      await copyAgentsFiles({ destDir })
-    }
 
     if (configureConfig !== false) {
       log('Configuring payload.config.ts')
@@ -320,11 +306,30 @@ async function main() {
       })
     }
 
+    /*
+     * Non-workspace variants must install in isolation from the monorepo. `--ignore-workspace`
+     * can't do this under pnpm v11 (it reads the flag as "skip pnpm-workspace.yaml entirely",
+     * dropping build approvals -> ERR_PNPM_IGNORED_BUILDS). Instead drop a transient standalone
+     * workspace root; it's removed before commit so the generated template ships unchanged.
+     * dangerouslyAllowAllBuilds runs every dependency's build script: this is throwaway generation
+     * tooling, not a shipped config, so there's no allowlist to drift out of sync with the templates'
+     * deps (e.g. the d1 variant's `workerd`). The install always runs under v11 here — the vercel
+     * variants' pnpm@10 packageManager pin is added after install — so package.json#pnpm is ignored
+     * and dangerouslyAllowAllBuilds can't conflict with its onlyBuiltDependencies. verifyDepsBeforeRun
+     * stops v11 re-installing before the later `pnpm generate:*`/`build` runs.
+     */
+    if (!workspace) {
+      await fs.writeFile(
+        path.join(destDir, 'pnpm-workspace.yaml'),
+        `verifyDepsBeforeRun: false\ndangerouslyAllowAllBuilds: true\n`,
+      )
+    }
+
     // Install packages BEFORE running any commands that load the config
     // This ensures all imports in payload.config.ts can be resolved
     log('Installing dependencies...')
 
-    execSyncSafe(`pnpm install ${workspace ? '' : '--ignore-workspace'} --no-frozen-lockfile`, {
+    execSyncSafe(`pnpm install --no-frozen-lockfile`, {
       cwd: destDir,
     })
 
@@ -370,19 +375,24 @@ async function main() {
 
     // Generate importmap
     log('Generating import map')
-    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:importmap`, {
+    execSyncSafe(`pnpm generate:importmap`, {
       cwd: destDir,
     })
 
     // Generate types
     log('Generating types')
-    execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}generate:types`, {
+    execSyncSafe(`pnpm generate:types`, {
       cwd: destDir,
     })
 
     if (shouldBuild) {
       log('Building...')
-      execSyncSafe(`pnpm ${workspace ? '' : '--ignore-workspace '}build`, { cwd: destDir })
+      execSyncSafe(`pnpm build`, { cwd: destDir })
+    }
+
+    // Remove the transient workspace root so it isn't committed into the generated template.
+    if (!workspace) {
+      await fs.rm(path.join(destDir, 'pnpm-workspace.yaml'), { force: true })
     }
 
     // TODO: Email?
@@ -391,6 +401,11 @@ async function main() {
 
     log(`Done configuring payload config for ${destDir}/src/payload.config.ts`)
   }
+
+  if (!template || template === 'plugin') {
+    await bumpPluginTemplate()
+  }
+
   log('Running prettier on generated files...')
   execSyncSafe(`pnpm prettier --write templates "*.{js,jsx,ts,tsx}"`, { cwd: PROJECT_ROOT })
 
@@ -427,34 +442,6 @@ ${description}
   const readmePath = path.join(destDir, 'README.md')
   await fs.writeFile(readmePath, readmeContent)
   log('Generated README.md')
-}
-
-async function copyAgentsFiles({ destDir }: { destDir: string }) {
-  const agentsSourceDir = path.join(TEMPLATES_DIR, '_agents')
-
-  if (!(await fs.stat(agentsSourceDir).catch(() => null))) {
-    log(`Skipping agents copy: ${agentsSourceDir} does not exist`)
-    return
-  }
-
-  log('Copying agents files')
-
-  // Copy AGENTS.md
-  const agentsMdSource = path.join(agentsSourceDir, 'AGENTS.md')
-  const agentsMdDest = path.join(destDir, 'AGENTS.md')
-  if (await fs.stat(agentsMdSource).catch(() => null)) {
-    await fs.copyFile(agentsMdSource, agentsMdDest)
-    log('Copied AGENTS.md')
-  }
-
-  // Copy .cursor directory
-  const cursorSourceDir = path.join(agentsSourceDir, 'rules')
-  const cursorDestDir = path.join(destDir, '.cursor', 'rules')
-  if (await fs.stat(cursorSourceDir).catch(() => null)) {
-    await fs.mkdir(path.dirname(cursorDestDir), { recursive: true })
-    await fs.cp(cursorSourceDir, cursorDestDir, { recursive: true })
-    log('Copied .cursor/rules/')
-  }
 }
 
 async function handleDeploymentTarget({
@@ -588,11 +575,43 @@ async function bumpPackageJson({
     }
   }
 
+  // Peer deps use a caret range so consumers can install patch/minor updates.
+  const peerDependencies = packageJson.peerDependencies
+  if (peerDependencies) {
+    for (const packageName of Object.keys(peerDependencies)) {
+      if (
+        (packageName === 'payload' || packageName.startsWith('@payloadcms')) &&
+        !DO_NOT_BUMP.includes(packageName)
+      ) {
+        peerDependencies[packageName] = `^${latestVersion}`
+      }
+    }
+  }
+
   // write it out
   await fs.writeFile(
     path.resolve(templateDir, 'package.json'),
     JSON.stringify(packageJson, null, 2),
   )
+}
+
+/**
+ * The plugin template is not a standard app-template variation (no payload.config.ts,
+ * no migrations, no importmap) but its pinned Payload versions still need to be bumped
+ * on each release. Unlike `blank`/`website`/`ecommerce`, it is not part of the pnpm
+ * workspace, so its versions drift unless we bump them explicitly.
+ */
+async function bumpPluginTemplate() {
+  header('Bumping plugin template...')
+  const pluginDir = path.join(TEMPLATES_DIR, 'plugin')
+  const payloadVersion = await getLatestPackageVersion({ packageName: 'payload' })
+  if (!payloadVersion) {
+    throw new Error('Could not resolve latest payload version')
+  }
+  await bumpPackageJson({
+    templateDir: pluginDir,
+    latestVersion: payloadVersion,
+  })
 }
 
 /**

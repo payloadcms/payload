@@ -1,6 +1,5 @@
 'use client'
 import { dequal } from 'dequal/lite' // lite: no need for Map and Set support
-import { useRouter } from 'next/navigation.js'
 import { serialize } from 'object-to-formdata'
 import { type FormState, type PayloadRequest } from 'payload'
 import {
@@ -33,6 +32,7 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
+import { useRouter } from '../../providers/RouterAdapter/index.js'
 import { useRouteTransition } from '../../providers/RouteTransition/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -584,6 +584,7 @@ export const Form: React.FC<FormProps> = (props) => {
         if (typeof handler === 'function') {
           let filename = file.name
           const clientUploadContext = await handler({
+            docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
             file,
             updateFilename: (value) => {
               filename = value

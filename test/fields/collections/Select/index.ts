@@ -5,7 +5,6 @@ import { CustomJSXLabel } from './CustomJSXLabel.js'
 
 const SelectFields: CollectionConfig = {
   slug: selectFieldsSlug,
-  versions: true,
   fields: [
     {
       name: 'select',

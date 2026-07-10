@@ -10,13 +10,23 @@ const dirname = path.dirname(filename)
 import type { Config as ConfigType } from './payload-types.js'
 
 import { AutosaveGlobal } from './collections/AutosaveGlobal.js'
+import { Media } from './collections/Media.js'
 import { Menu } from './collections/Menu.js'
 import { MenuItems } from './collections/MenuItems.js'
+import { MultiTenantPosts } from './collections/MultiTenantPosts.js'
 import { Relationships } from './collections/Relationships.js'
 import { Tenants } from './collections/Tenants.js'
 import { Users } from './collections/Users/index.js'
 import { seed } from './seed/index.js'
-import { autosaveGlobalSlug, menuItemsSlug, menuSlug, notTenantedSlug } from './shared.js'
+import {
+  autosaveGlobalSlug,
+  foldersSlug,
+  mediaSlug,
+  menuItemsSlug,
+  menuSlug,
+  multiTenantPostsSlug,
+  notTenantedSlug,
+} from './shared.js'
 
 export const baseConfig: Partial<Config> = {
   collections: [
@@ -26,6 +36,8 @@ export const baseConfig: Partial<Config> = {
     Menu,
     AutosaveGlobal,
     Relationships,
+    MultiTenantPosts,
+    Media,
     {
       slug: notTenantedSlug,
       admin: {
@@ -37,6 +49,24 @@ export const baseConfig: Partial<Config> = {
           type: 'text',
         },
       ],
+      versions: false,
+    },
+    {
+      slug: foldersSlug,
+      hierarchy: {
+        parentFieldName: 'folder',
+      },
+      admin: {
+        useAsTitle: 'name',
+      },
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+          required: true,
+        },
+      ],
+      versions: false,
     },
   ],
   admin: {
@@ -48,7 +78,6 @@ export const baseConfig: Partial<Config> = {
       beforeLogin: ['/components/BeforeLogin/index.js#BeforeLogin'],
       graphics: {
         Logo: '/components/Logo/index.js#Logo',
-        Icon: '/components/Icon/index.js#Icon',
       },
     },
   },
@@ -60,13 +89,33 @@ export const baseConfig: Partial<Config> = {
   },
   plugins: [
     multiTenantPlugin<ConfigType>({
-      // debug: true,
       userHasAccessToAllTenants: (user) => Boolean(user.roles?.includes('admin')),
       useTenantsCollectionAccess: false,
       tenantField: {
         access: {},
       },
+      tenantsArrayField: {
+        rowFields: [
+          {
+            name: 'tenantRole',
+            type: 'select',
+            defaultValue: 'admin',
+            options: [
+              {
+                label: 'Admin',
+                value: 'admin',
+              },
+              {
+                label: 'Member',
+                value: 'member',
+              },
+            ],
+            saveToJWT: true,
+          },
+        ],
+      },
       collections: {
+        [foldersSlug]: {},
         [menuItemsSlug]: {
           useTenantAccess: false,
         },
@@ -76,8 +125,13 @@ export const baseConfig: Partial<Config> = {
         [autosaveGlobalSlug]: {
           isGlobal: true,
         },
-
         ['relationships']: {},
+        [multiTenantPostsSlug]: {
+          tenantFieldOverrides: {
+            hasMany: true,
+          },
+        },
+        [mediaSlug]: {},
       },
       i18n: {
         translations: {
@@ -108,7 +162,9 @@ export const baseConfig: Partial<Config> = {
           if (fullTenant.selectedLocales.includes('allLocales')) {
             return locales
           }
-          return locales.filter((locale) => fullTenant.selectedLocales?.includes(locale.code))
+          return locales.filter((locale) =>
+            fullTenant.selectedLocales?.includes(locale.code as any),
+          )
         }
       }
       return locales

@@ -1,3 +1,7 @@
+import type { DefaultNodeTypes } from '@payloadcms/richtext-lexical'
+
+import { buildEditorState } from '@payloadcms/richtext-lexical'
+
 import type { Post } from '../payload-types.js'
 
 export const trashedPost: Omit<Post, 'createdAt' | 'id' | 'updatedAt'> = {
@@ -11,16 +15,29 @@ export const trashedPost: Omit<Post, 'createdAt' | 'id' | 'updatedAt'> = {
   tenant: '{{TENANT_1_ID}}',
   hero: {
     type: 'lowImpact',
-    richText: [
-      {
-        children: [
-          {
-            text: 'Trashed Post',
-          },
-        ],
-        type: 'h1',
-      },
-    ],
+    richText: buildEditorState<DefaultNodeTypes>({
+      nodes: [
+        {
+          type: 'heading',
+          tag: 'h1',
+          children: [
+            {
+              type: 'text',
+              detail: 0,
+              format: 0,
+              mode: 'normal',
+              style: '',
+              text: 'Trashed Post',
+              version: 1,
+            },
+          ],
+          direction: 'ltr',
+          format: '',
+          indent: 0,
+          version: 1,
+        },
+      ],
+    }),
     media: null,
   },
   layout: [
@@ -29,15 +46,9 @@ export const trashedPost: Omit<Post, 'createdAt' | 'id' | 'updatedAt'> = {
       columns: [
         {
           size: 'twoThirds',
-          richText: [
-            {
-              children: [
-                {
-                  text: "This content is completely dynamic using custom layout building blocks configured in the CMS. This can be anything you'd like from rich text and images, to highly designed, complex components.",
-                },
-              ],
-            },
-          ],
+          richText: buildEditorState<DefaultNodeTypes>({
+            text: "This content is completely dynamic using custom layout building blocks configured in the CMS. This can be anything you'd like from rich text and images, to highly designed, complex components.",
+          }),
           link: {
             type: 'custom',
             url: '',

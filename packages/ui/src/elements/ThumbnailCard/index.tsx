@@ -6,15 +6,17 @@ import React from 'react'
 import { useConfig } from '../../providers/Config/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
-import './index.scss'
+import './index.css'
 
 export type ThumbnailCardProps = {
   alignLabel?: 'center' | 'left'
   className?: string
   collection?: ClientCollectionConfig
   doc?: { filename?: string } & TypeWithID
+  isSelected?: boolean
   label?: string
   onClick?: () => void
+  onDoubleClick?: () => void
   onKeyDown?: () => void
   thumbnail: React.ReactNode
 }
@@ -27,8 +29,10 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
     className,
     collection,
     doc,
+    isSelected,
     label: labelFromProps,
     onClick,
+    onDoubleClick,
     thumbnail,
   } = props
 
@@ -40,6 +44,7 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
     baseClass,
     className,
     typeof onClick === 'function' && `${baseClass}--has-on-click`,
+    isSelected && `${baseClass}--selected`,
     alignLabel && `${baseClass}--align-label-${alignLabel}`,
   ]
     .filter(Boolean)
@@ -58,7 +63,13 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = (props) => {
   }
 
   return (
-    <button className={classes} onClick={onClick} title={title} type="button">
+    <button
+      className={classes}
+      onClick={onClick}
+      onDoubleClick={onDoubleClick}
+      title={title}
+      type="button"
+    >
       <div className={`${baseClass}__thumbnail`}>{thumbnail}</div>
       <div className={`${baseClass}__label`}>{title}</div>
     </button>

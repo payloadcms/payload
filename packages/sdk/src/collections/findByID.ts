@@ -59,6 +59,11 @@ export type FindByIDOptions<
    * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
    */
   populate?: PopulateType<T>
+  /**
+   * When `true`, returns the document even if it is trashed. No effect unless the collection has `trash` enabled.
+   * @default false
+   */
+  trash?: boolean
 } & Pick<FindOptions<TSlug, SelectType & TSelect>, 'select'>
 
 export async function findByID<

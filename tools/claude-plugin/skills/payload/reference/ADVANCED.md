@@ -1,4 +1,4 @@
-# Payload CMS Advanced Features
+# Payload Advanced Features
 
 Complete reference for authentication, jobs, custom endpoints, components, plugins, and localization.
 
@@ -236,7 +236,7 @@ export const CustomField: TextFieldClientComponent = () => {
 
 ```tsx
 'use client'
-import { DefaultTemplate } from '@payloadcms/next/templates'
+import { DefaultTemplate } from '@payloadcms/ui/rsc'
 
 export const CustomView = () => {
   return (

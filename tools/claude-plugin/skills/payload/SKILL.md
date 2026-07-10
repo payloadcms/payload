@@ -1,43 +1,43 @@
 ---
 name: payload
-description: Use when working with Payload CMS projects (payload.config.ts, collections, fields, hooks, access control, Payload API). Use when debugging validation errors, security issues, relationship queries, transactions, or hook behavior.
+description: Use when working with Payload projects (payload.config.ts, collections, fields, hooks, access control, Payload API). Use when debugging validation errors, security issues, relationship queries, transactions, or hook behavior.
 ---
 
-# Payload CMS Application Development
+# Payload Application Development
 
 Payload is a Next.js native CMS with TypeScript-first architecture, providing admin panel, database management, REST/GraphQL APIs, authentication, and file storage.
 
 ## Quick Reference
 
-| Task                     | Solution                                  | Details                                                                                                                          |
-| ------------------------ | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Auto-generate slugs      | `slugField()`                             | [FIELDS.md#slug-field-helper](reference/FIELDS.md#slug-field-helper)                                                             |
-| Restrict content by user | Access control with query                 | [ACCESS-CONTROL.md#row-level-security-with-complex-queries](reference/ACCESS-CONTROL.md#row-level-security-with-complex-queries) |
-| Local API user ops       | `user` + `overrideAccess: false`          | [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control-in-local-api)                                       |
-| Draft/publish workflow   | `versions: { drafts: true }`              | [COLLECTIONS.md#versioning--drafts](reference/COLLECTIONS.md#versioning--drafts)                                                 |
-| Computed fields          | `virtual: true` with afterRead            | [FIELDS.md#virtual-fields](reference/FIELDS.md#virtual-fields)                                                                   |
-| Conditional fields       | `admin.condition`                         | [FIELDS.md#conditional-fields](reference/FIELDS.md#conditional-fields)                                                           |
-| Custom field validation  | `validate` function                       | [FIELDS.md#validation](reference/FIELDS.md#validation)                                                                           |
-| Filter relationship list | `filterOptions` on field                  | [FIELDS.md#relationship](reference/FIELDS.md#relationship)                                                                       |
-| Select specific fields   | `select` parameter                        | [QUERIES.md#field-selection](reference/QUERIES.md#field-selection)                                                               |
-| Auto-set author/dates    | beforeChange hook                         | [HOOKS.md#collection-hooks](reference/HOOKS.md#collection-hooks)                                                                 |
-| Prevent hook loops       | `req.context` check                       | [HOOKS.md#context](reference/HOOKS.md#context)                                                                                   |
-| Cascading deletes        | beforeDelete hook                         | [HOOKS.md#collection-hooks](reference/HOOKS.md#collection-hooks)                                                                 |
-| Geospatial queries       | `point` field with `near`/`within`        | [FIELDS.md#point-geolocation](reference/FIELDS.md#point-geolocation)                                                             |
-| Reverse relationships    | `join` field type                         | [FIELDS.md#join-fields](reference/FIELDS.md#join-fields)                                                                         |
-| Next.js revalidation     | Context control in afterChange            | [HOOKS.md#nextjs-revalidation-with-context-control](reference/HOOKS.md#nextjs-revalidation-with-context-control)                 |
-| Query by relationship    | Nested property syntax                    | [QUERIES.md#nested-properties](reference/QUERIES.md#nested-properties)                                                           |
-| Complex queries          | AND/OR logic                              | [QUERIES.md#andor-logic](reference/QUERIES.md#andor-logic)                                                                       |
-| Transactions             | Pass `req` to operations                  | [ADAPTERS.md#threading-req-through-operations](reference/ADAPTERS.md#threading-req-through-operations)                           |
-| Background jobs          | Jobs queue with tasks                     | [ADVANCED.md#jobs-queue](reference/ADVANCED.md#jobs-queue)                                                                       |
-| Custom API routes        | Collection custom endpoints               | [ADVANCED.md#custom-endpoints](reference/ADVANCED.md#custom-endpoints)                                                           |
-| Cloud storage            | Storage adapter plugins                   | [ADAPTERS.md#storage-adapters](reference/ADAPTERS.md#storage-adapters)                                                           |
-| Multi-language           | `localization` config + `localized: true` | [ADVANCED.md#localization](reference/ADVANCED.md#localization)                                                                   |
-| Create plugin            | `(options) => (config) => Config`         | [PLUGIN-DEVELOPMENT.md#plugin-architecture](reference/PLUGIN-DEVELOPMENT.md#plugin-architecture)                                 |
-| Plugin package setup     | Package structure with SWC                | [PLUGIN-DEVELOPMENT.md#plugin-package-structure](reference/PLUGIN-DEVELOPMENT.md#plugin-package-structure)                       |
-| Add fields to collection | Map collections, spread fields            | [PLUGIN-DEVELOPMENT.md#adding-fields-to-collections](reference/PLUGIN-DEVELOPMENT.md#adding-fields-to-collections)               |
-| Plugin hooks             | Preserve existing hooks in array          | [PLUGIN-DEVELOPMENT.md#adding-hooks](reference/PLUGIN-DEVELOPMENT.md#adding-hooks)                                               |
-| Check field type         | Type guard functions                      | [FIELD-TYPE-GUARDS.md](reference/FIELD-TYPE-GUARDS.md)                                                                           |
+| Task                     | Solution                                                                   | Details                                                                                                                          |
+| ------------------------ | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Auto-generate slugs      | `{ type: 'slug', useAsSlug: 'title' }`                                     | [FIELDS.md#slug-field](reference/FIELDS.md#slug-field)                                                                           |
+| Restrict content by user | Access control with query                                                  | [ACCESS-CONTROL.md#row-level-security-with-complex-queries](reference/ACCESS-CONTROL.md#row-level-security-with-complex-queries) |
+| Local API user ops       | `user` + `overrideAccess: false`                                           | [QUERIES.md#access-control-in-local-api](reference/QUERIES.md#access-control-in-local-api)                                       |
+| Draft/publish workflow   | `versions: { drafts: true }`                                               | [COLLECTIONS.md#versioning--drafts](reference/COLLECTIONS.md#versioning--drafts)                                                 |
+| Computed fields          | `virtual: true` with **field-level** `hooks.afterRead` returning the value | [FIELDS.md#virtual-fields](reference/FIELDS.md#virtual-fields)                                                                   |
+| Conditional fields       | `admin.condition`                                                          | [FIELDS.md#conditional-fields](reference/FIELDS.md#conditional-fields)                                                           |
+| Custom field validation  | `validate` function                                                        | [FIELDS.md#validation](reference/FIELDS.md#validation)                                                                           |
+| Filter relationship list | `filterOptions` on field                                                   | [FIELDS.md#relationship](reference/FIELDS.md#relationship)                                                                       |
+| Select specific fields   | `select` parameter                                                         | [QUERIES.md#field-selection](reference/QUERIES.md#field-selection)                                                               |
+| Auto-set author/dates    | beforeChange hook                                                          | [HOOKS.md#collection-hooks](reference/HOOKS.md#collection-hooks)                                                                 |
+| Prevent hook loops       | `req.context` check                                                        | [HOOKS.md#context](reference/HOOKS.md#context)                                                                                   |
+| Cascading deletes        | beforeDelete hook                                                          | [HOOKS.md#collection-hooks](reference/HOOKS.md#collection-hooks)                                                                 |
+| Geospatial queries       | `point` field with `near`/`within`                                         | [FIELDS.md#point-geolocation](reference/FIELDS.md#point-geolocation)                                                             |
+| Reverse relationships    | `join` field type                                                          | [FIELDS.md#join-fields](reference/FIELDS.md#join-fields)                                                                         |
+| Next.js revalidation     | Context control in afterChange                                             | [HOOKS.md#nextjs-revalidation-with-context-control](reference/HOOKS.md#nextjs-revalidation-with-context-control)                 |
+| Query by relationship    | Nested property syntax                                                     | [QUERIES.md#nested-properties](reference/QUERIES.md#nested-properties)                                                           |
+| Complex queries          | AND/OR logic                                                               | [QUERIES.md#andor-logic](reference/QUERIES.md#andor-logic)                                                                       |
+| Transactions             | Pass `req` to operations                                                   | [ADAPTERS.md#threading-req-through-operations](reference/ADAPTERS.md#threading-req-through-operations)                           |
+| Background jobs          | Jobs queue with tasks                                                      | [ADVANCED.md#jobs-queue](reference/ADVANCED.md#jobs-queue)                                                                       |
+| Custom API routes        | Collection custom endpoints                                                | [ADVANCED.md#custom-endpoints](reference/ADVANCED.md#custom-endpoints)                                                           |
+| Cloud storage            | Storage adapter plugins                                                    | [ADAPTERS.md#storage-adapters](reference/ADAPTERS.md#storage-adapters)                                                           |
+| Multi-language           | `localization` config + `localized: true`                                  | [ADVANCED.md#localization](reference/ADVANCED.md#localization)                                                                   |
+| Create plugin            | `(options) => (config) => Config`                                          | [PLUGIN-DEVELOPMENT.md#plugin-architecture](reference/PLUGIN-DEVELOPMENT.md#plugin-architecture)                                 |
+| Plugin package setup     | Package structure with SWC                                                 | [PLUGIN-DEVELOPMENT.md#plugin-package-structure](reference/PLUGIN-DEVELOPMENT.md#plugin-package-structure)                       |
+| Add fields to collection | Map collections, spread fields                                             | [PLUGIN-DEVELOPMENT.md#adding-fields-to-collections](reference/PLUGIN-DEVELOPMENT.md#adding-fields-to-collections)               |
+| Plugin hooks             | Preserve existing hooks in array                                           | [PLUGIN-DEVELOPMENT.md#adding-hooks](reference/PLUGIN-DEVELOPMENT.md#adding-hooks)                                               |
+| Check field type         | Type guard functions                                                       | [FIELD-TYPE-GUARDS.md](reference/FIELD-TYPE-GUARDS.md)                                                                           |
 
 ## Quick Start
 
@@ -80,6 +80,25 @@ export default buildConfig({
 
 ## Essential Patterns
 
+### Defaults & Conventions
+
+Apply these defaults when modeling content unless there's a clear reason not to:
+
+- **Enable drafts/versions by default:** `versions: { drafts: true }`. This is the
+  recommended starting point for any content collection. It auto-injects a
+  `_status` field (`draft` / `published` / `changed`) — **don't add your own
+  `status` field**, it's redundant. Only skip versions for collections that have
+  no publish/draft lifecycle (e.g. internal join tables, settings).
+- **Use the native `slug` field type for all slugs** instead of hand-rolling
+  `{ name: 'slug', type: 'text', unique: true }`. It auto-generates the slug from
+  a source field, adds a regenerate toggle, and defaults to `required`, `unique`,
+  `index`, and `position: 'sidebar'`. `useAsSlug` is **required** — name the
+  source field to generate from: `{ name: 'slug', type: 'slug', useAsSlug: 'title' }`.
+- **`position: 'sidebar'` is for short, at-a-glance fields** — status, category,
+  author, publish date. Avoid it for long fields that need horizontal space to be
+  usable (description, rich text content, long text). Those belong in the main
+  document area.
+
 ### Basic Collection
 
 ```ts
@@ -89,13 +108,18 @@ export const Posts: CollectionConfig = {
   slug: 'posts',
   admin: {
     useAsTitle: 'title',
-    defaultColumns: ['title', 'author', 'status', 'createdAt'],
+    // _status (from versions.drafts) shows the draft/published state — no custom status field needed
+    defaultColumns: ['title', 'author', '_status', 'createdAt'],
+  },
+  versions: {
+    drafts: true,
   },
   fields: [
     { name: 'title', type: 'text', required: true },
-    { name: 'slug', type: 'text', unique: true, index: true },
-    { name: 'content', type: 'richText' },
-    { name: 'author', type: 'relationship', relationTo: 'users' },
+    { name: 'slug', type: 'slug', useAsSlug: 'title' }, // auto-generates from `title`, unique + indexed, sidebar position
+    { name: 'content', type: 'richText' }, // long field — stays in the main area, not the sidebar
+    // short, at-a-glance field — good sidebar candidate
+    { name: 'author', type: 'relationship', relationTo: 'users', admin: { position: 'sidebar' } },
   ],
   timestamps: true,
 }
@@ -115,8 +139,11 @@ For more collection patterns (auth, upload, drafts, live preview), see [COLLECTI
 // Rich text
 { name: 'content', type: 'richText', required: true }
 
-// Select
-{ name: 'status', type: 'select', options: ['draft', 'published'], defaultValue: 'draft' }
+// Slug — use the native field type instead of a hand-rolled text field
+{ name: 'slug', type: 'slug', useAsSlug: 'title' }
+
+// Select (for genuine taxonomy — NOT publish state; use versions.drafts + _status for that)
+{ name: 'category', type: 'select', options: ['news', 'tutorial', 'opinion'] }
 
 // Upload
 { name: 'image', type: 'upload', relationTo: 'media' }
@@ -126,7 +153,10 @@ For all field types (array, blocks, point, join, virtual, conditional, etc.), se
 
 ### Hook Example
 
+Hooks live at one of two levels and they are not interchangeable. **Collection hooks** receive `{ doc, data, req, operation, ... }` and act on the whole document. **Field hooks** live inside an individual field's `hooks` object, receive `{ value, siblingData, ... }`, and **return the new value** for that field. Computed/virtual fields, per-field formatters, and per-field access masking are field hooks; cross-field business logic is a collection hook.
+
 ```ts
+// Collection-level: business logic across the document
 export const Posts: CollectionConfig = {
   slug: 'posts',
   hooks: {
@@ -141,7 +171,26 @@ export const Posts: CollectionConfig = {
   },
   fields: [{ name: 'title', type: 'text' }],
 }
+
+// Field-level: compute / format a single field's value (virtual fields use this)
+export const Users: CollectionConfig = {
+  slug: 'users',
+  fields: [
+    { name: 'firstName', type: 'text' },
+    { name: 'lastName', type: 'text' },
+    {
+      name: 'fullName',
+      type: 'text',
+      virtual: true,
+      hooks: {
+        afterRead: [({ siblingData }) => `${siblingData.firstName} ${siblingData.lastName}`],
+      },
+    },
+  ],
+}
 ```
+
+When asked to "compute a field" or "populate a field's value in a hook", use a **field-level** hook on that field — never a collection-level `afterRead` that mutates `doc`.
 
 For all hook patterns, see [HOOKS.md](reference/HOOKS.md). For access control, see [ACCESS-CONTROL.md](reference/ACCESS-CONTROL.md).
 
@@ -355,20 +404,95 @@ src/
 └── payload.config.ts
 ```
 
-## Type Generation
+## Building & Type Generation
+
+Payload generates `payload-types.ts` for you — you rarely need to run `generate:types` by hand.
+
+- **During development:** `typescript.autoGenerate` defaults to `true`, so the dev
+  server regenerates types automatically whenever your config changes. Don't run
+  `generate:types` manually while the dev server is running — it's redundant.
+- **During builds:** `payload build` generates the import map and types before
+  running `next build`. Prefer it over calling `next build` directly so neither is
+  ever stale. Pass `--no-types` to skip type generation.
+- **Manual generation** (`payload generate:types`) is an escape hatch — only when
+  neither the dev server nor a build is in the loop (e.g. a one-off script, or CI
+  before a step that doesn't run `payload build`).
 
 ```ts
 // payload.config.ts
 export default buildConfig({
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
+    // autoGenerate defaults to true — types regenerate in dev automatically
   },
-  // ...
 })
 
 // Usage
 import type { Post, User } from '@/payload-types'
 ```
+
+## Common Gotchas
+
+1. **Local API bypasses access control** unless you pass `overrideAccess: false`
+2. **Missing `req` in nested operations** breaks transaction atomicity
+3. **Hook loops** — operations in hooks can re-trigger the same hooks; use `req.context` flags
+4. **Field-level access** returns boolean only, no query constraints
+5. **Relationship depth** defaults to 2; set `depth: 0` for IDs only
+6. **Draft status** — `_status` field is auto-injected when drafts are enabled
+7. **Types regenerate automatically** in dev (`autoGenerate`) and during `payload build` — avoid running `generate:types` manually
+8. **MongoDB transactions** require replica set configuration
+9. **SQLite transactions** are disabled by default; enable with `transactionOptions: {}`
+10. **Point fields** are not supported in SQLite
+
+## Best Practices
+
+### Content Modeling
+
+- Enable `versions: { drafts: true }` by default on content collections; rely on the
+  auto-injected `_status` field rather than adding a custom `status` field
+- Use the native `slug` field type for slugs instead of hand-rolling a unique text field
+- Reserve `position: 'sidebar'` for short, at-a-glance fields (status, category,
+  author, date); keep long fields (description, rich text) in the main area
+
+### Security
+
+- Default to restrictive access, gradually add permissions
+- Use `overrideAccess: false` when passing `user` to Local API
+- Field-level access only returns boolean (no query constraints)
+- Never trust client-provided data
+- Use `saveToJWT: true` for roles to avoid database lookups
+
+### Performance
+
+- Index frequently queried fields
+- Use `select` to limit returned fields
+- Set `maxDepth` on relationships to prevent over-fetching
+- Prefer query constraints over async operations in access control
+- Cache expensive operations in `req.context`
+
+### Data Integrity
+
+- Always pass `req` to nested operations in hooks
+- Use context flags to prevent infinite hook loops
+- Enable transactions for MongoDB (requires replica set) and Postgres
+- Use `beforeValidate` for data formatting
+- Use `beforeChange` for business logic
+
+### Type Safety
+
+- Let dev (`autoGenerate`) and `payload build` generate types; run `generate:types` manually only when neither is running
+- Import types from generated `payload-types.ts`
+- Type your user object: `import type { User } from '@/payload-types'`
+- Use field type guards for runtime type checking
+- When extracting any Payload value into a named constant — a collection, field, hook, access function, plugin, etc. — annotate it with the matching Payload type (`CollectionConfig`, `Field`, `CollectionBeforeChangeHook`, `Access`, `Plugin`, …) or use `satisfies <Type>`. Without an annotation, string properties like `type: 'text'` widen to `string` and discriminated unions (`Field`, `CollectionConfig`) fail to resolve. Inline literals get this for free via contextual typing; extracted constants do not.
+
+### Organization
+
+- Keep collections in separate files
+- Extract access control to `access/` directory
+- Extract hooks to `hooks/` directory
+- Use reusable field factories for common patterns
+- Document complex access control with comments
 
 ## Reference Documentation
 

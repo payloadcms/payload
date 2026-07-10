@@ -21,7 +21,7 @@ export async function navigateToDiffVersionView({
   /**
    * If not provided, will attempt to navigate to the latest version's diff view
    */
-  versionID?: string
+  versionID?: number | string
 }) {
   if (versionID) {
     const versionURL = formatAdminURL({

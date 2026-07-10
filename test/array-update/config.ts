@@ -4,7 +4,7 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { arraySlug } from './shared.js'
+import { arraySlug, complexSlug } from './shared.js'
 
 export default buildConfigWithDefaults({
   admin: {
@@ -50,8 +50,88 @@ export default buildConfigWithDefaults({
           ],
         },
       ],
+      versions: false,
+    },
+    {
+      slug: complexSlug,
+      fields: [
+        {
+          name: 'localizedArray',
+          type: 'array',
+          localized: true,
+          fields: [
+            {
+              name: 'text',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          name: 'group',
+          type: 'group',
+          fields: [
+            {
+              name: 'groupArray',
+              type: 'array',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'localizedGroup',
+          type: 'group',
+          localized: true,
+          fields: [
+            {
+              name: 'localizedGroupArray',
+              type: 'array',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'blocks',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'content',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+                {
+                  name: 'innerArray',
+                  type: 'array',
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      versions: false,
     },
   ],
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
+  },
   onInit: async (payload) => {
     await payload.create({
       collection: 'users',

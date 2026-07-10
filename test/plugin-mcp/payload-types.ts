@@ -64,7 +64,6 @@ export type SupportedTimezones =
 export interface Config {
   auth: {
     users: UserAuthOperations;
-    'payload-mcp-api-keys': PayloadMcpApiKeyAuthOperations;
   };
   blocks: {};
   collections: {
@@ -75,7 +74,8 @@ export interface Config {
     rolls: Roll;
     'modified-prompts': ModifiedPrompt;
     'returned-resources': ReturnedResource;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
+    pages: Page;
+    'field-types': FieldType;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -90,7 +90,8 @@ export interface Config {
     rolls: RollsSelect<false> | RollsSelect<true>;
     'modified-prompts': ModifiedPromptsSelect<false> | ModifiedPromptsSelect<true>;
     'returned-resources': ReturnedResourcesSelect<false> | ReturnedResourcesSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
+    pages: PagesSelect<false> | PagesSelect<true>;
+    'field-types': FieldTypesSelect<false> | FieldTypesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -107,7 +108,10 @@ export interface Config {
     'site-settings': SiteSettingsSelect<false> | SiteSettingsSelect<true>;
   };
   locale: 'en' | 'es' | 'fr';
-  user: User | PayloadMcpApiKey;
+  widgets: {
+    collections: CollectionsWidget;
+  };
+  user: User;
   jobs: {
     tasks: unknown;
     workflows: unknown;
@@ -131,30 +135,21 @@ export interface UserAuthOperations {
     password: string;
   };
 }
-export interface PayloadMcpApiKeyAuthOperations {
-  forgotPassword: {
-    email: string;
-    password: string;
-  };
-  login: {
-    email: string;
-    password: string;
-  };
-  registerFirstUser: {
-    email: string;
-    password: string;
-  };
-  unlock: {
-    email: string;
-    password: string;
-  };
-}
 /**
  * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users".
  */
 export interface User {
   id: string;
+  rbac?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -221,6 +216,10 @@ export interface Post {
    * @maxItems 2
    */
   location?: [number, number] | null;
+  /**
+   * A virtual field that is computed and not stored in the database
+   */
+  computedTitle?: string | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -301,113 +300,132 @@ export interface ReturnedResource {
   createdAt: string;
 }
 /**
- * API keys control which collections, resources, tools, and prompts MCP clients can access
- *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
+ * via the `definition` "pages".
  */
-export interface PayloadMcpApiKey {
+export interface Page {
   id: string;
-  /**
-   * The user that the API key is associated with.
-   */
-  user: string | User;
-  /**
-   * A useful label for the API key.
-   */
-  label?: string | null;
-  /**
-   * The purpose of the API key.
-   */
-  description?: string | null;
-  products?: {
-    /**
-     * Allow clients to find products.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create products.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update products.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete products.
-     */
-    delete?: boolean | null;
-  };
-  posts?: {
-    /**
-     * Allow clients to find posts.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to create posts.
-     */
-    create?: boolean | null;
-    /**
-     * Allow clients to update posts.
-     */
-    update?: boolean | null;
-    /**
-     * Allow clients to delete posts.
-     */
-    delete?: boolean | null;
-  };
-  media?: {
-    /**
-     * Allow clients to find media.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to update media.
-     */
-    update?: boolean | null;
-  };
-  siteSettings?: {
-    /**
-     * Allow clients to find site-settings global.
-     */
-    find?: boolean | null;
-    /**
-     * Allow clients to update site-settings global.
-     */
-    update?: boolean | null;
-  };
-  'payload-mcp-tool'?: {
-    /**
-     * Rolls a virtual dice with a specified number of sides
-     */
-    diceRoll?: boolean | null;
-  };
-  'payload-mcp-resource'?: {
-    /**
-     * Data is a resource that contains special data.
-     */
-    data?: boolean | null;
-    /**
-     * Data is a resource that contains special data.
-     */
-    dataByID?: boolean | null;
-  };
-  'payload-mcp-prompt'?: {
-    /**
-     * Creates a prompt to process a message
-     */
-    echo?: boolean | null;
-  };
-  /**
-   * This field added by overrideApiKeyCollection
-   */
-  override?: string | null;
+  title: string;
+  layout?: (HeroBlock | TextContent)[] | null;
   updatedAt: string;
   createdAt: string;
-  enableAPIKey?: boolean | null;
-  apiKey?: string | null;
-  apiKeyIndex?: string | null;
-  collection: 'payload-mcp-api-keys';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBlock".
+ */
+export interface HeroBlock {
+  heading: string;
+  subheading?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'hero';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "TextContent".
+ */
+export interface TextContent {
+  body?: string | null;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'textContent';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-types".
+ */
+export interface FieldType {
+  id: string;
+  /**
+   * A simple text field
+   */
+  textField?: string | null;
+  /**
+   * A textarea field
+   */
+  textareaField?: string | null;
+  /**
+   * A number field
+   */
+  numberField?: number | null;
+  /**
+   * An email field
+   */
+  emailField?: string | null;
+  /**
+   * A checkbox field
+   */
+  checkboxField?: boolean | null;
+  /**
+   * A date field
+   */
+  dateField?: string | null;
+  /**
+   * A code field
+   */
+  codeField?: string | null;
+  /**
+   * A JSON field
+   */
+  jsonField?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
+  /**
+   * A select field
+   */
+  selectField?: ('option1' | 'option2' | 'option3') | null;
+  /**
+   * A radio field
+   */
+  radioField?: ('radio1' | 'radio2' | 'radio3') | null;
+  /**
+   * An array field with nested items
+   */
+  arrayField?:
+    | {
+        item?: string | null;
+        itemNumber?: number | null;
+        id?: string | null;
+      }[]
+    | null;
+  /**
+   * A group field with nested properties
+   */
+  groupField?: {
+    groupText?: string | null;
+    groupNumber?: number | null;
+  };
+  /**
+   * An upload field
+   */
+  uploadField?: (string | null) | Media;
+  /**
+   * Text field inside a collapsible container
+   */
+  collapsibleText?: string | null;
+  /**
+   * Text field inside a row container
+   */
+  rowText?: string | null;
+  namedTab?: {
+    /**
+     * Text field inside a named tab
+     */
+    namedTabText?: string | null;
+  };
+  /**
+   * Text field inside an unnamed tab
+   */
+  unnamedTabText?: string | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -462,19 +480,18 @@ export interface PayloadLockedDocument {
         value: string | ReturnedResource;
       } | null)
     | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
+        relationTo: 'pages';
+        value: string | Page;
+      } | null)
+    | ({
+        relationTo: 'field-types';
+        value: string | FieldType;
       } | null);
   globalSlug?: string | null;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -484,15 +501,10 @@ export interface PayloadLockedDocument {
  */
 export interface PayloadPreference {
   id: string;
-  user:
-    | {
-        relationTo: 'users';
-        value: string | User;
-      }
-    | {
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
-      };
+  user: {
+    relationTo: 'users';
+    value: string | User;
+  };
   key?: string | null;
   value?:
     | {
@@ -522,6 +534,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  rbac?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
@@ -569,6 +582,7 @@ export interface PostsSelect<T extends boolean = true> {
   content?: T;
   author?: T;
   location?: T;
+  computedTitle?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -619,62 +633,74 @@ export interface ReturnedResourcesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
+ * via the `definition` "pages_select".
  */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  user?: T;
-  label?: T;
-  description?: T;
-  products?:
+export interface PagesSelect<T extends boolean = true> {
+  title?: T;
+  layout?:
     | T
     | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
+        hero?: T | HeroBlockSelect<T>;
+        textContent?:
+          | T
+          | {
+              body?: T;
+              id?: T;
+              blockName?: T;
+            };
       };
-  posts?:
-    | T
-    | {
-        find?: T;
-        create?: T;
-        update?: T;
-        delete?: T;
-      };
-  media?:
-    | T
-    | {
-        find?: T;
-        update?: T;
-      };
-  siteSettings?:
-    | T
-    | {
-        find?: T;
-        update?: T;
-      };
-  'payload-mcp-tool'?:
-    | T
-    | {
-        diceRoll?: T;
-      };
-  'payload-mcp-resource'?:
-    | T
-    | {
-        data?: T;
-        dataByID?: T;
-      };
-  'payload-mcp-prompt'?:
-    | T
-    | {
-        echo?: T;
-      };
-  override?: T;
   updatedAt?: T;
   createdAt?: T;
-  enableAPIKey?: T;
-  apiKey?: T;
-  apiKeyIndex?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "HeroBlock_select".
+ */
+export interface HeroBlockSelect<T extends boolean = true> {
+  heading?: T;
+  subheading?: T;
+  id?: T;
+  blockName?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "field-types_select".
+ */
+export interface FieldTypesSelect<T extends boolean = true> {
+  textField?: T;
+  textareaField?: T;
+  numberField?: T;
+  emailField?: T;
+  checkboxField?: T;
+  dateField?: T;
+  codeField?: T;
+  jsonField?: T;
+  selectField?: T;
+  radioField?: T;
+  arrayField?:
+    | T
+    | {
+        item?: T;
+        itemNumber?: T;
+        id?: T;
+      };
+  groupField?:
+    | T
+    | {
+        groupText?: T;
+        groupNumber?: T;
+      };
+  uploadField?: T;
+  collapsibleText?: T;
+  rowText?: T;
+  namedTab?:
+    | T
+    | {
+        namedTabText?: T;
+      };
+  unnamedTabText?: T;
+  updatedAt?: T;
+  createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -753,6 +779,16 @@ export interface SiteSettingsSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

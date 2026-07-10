@@ -7,6 +7,7 @@ const typeMap: Record<string, 'number' | 'text'> = {
   serial: 'number',
   text: 'text',
   uuid: 'text',
+  uuidv7: 'text',
 }
 
 export const getCollectionIdType = ({

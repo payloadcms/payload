@@ -19,7 +19,7 @@ export const dynamic = 'force-dynamic'
 
 type PageProps = {
   params: Promise<{ id: string }>
-  searchParams: Promise<{ email?: string }>
+  searchParams: Promise<{ email?: string; accessToken?: string }>
 }
 
 export default async function Order({ params, searchParams }: PageProps) {
@@ -28,7 +28,7 @@ export default async function Order({ params, searchParams }: PageProps) {
   const { user } = await payload.auth({ headers })
 
   const { id } = await params
-  const { email = '' } = await searchParams
+  const { email = '', accessToken = '' } = await searchParams
 
   let order: Order | null = null
 
@@ -55,16 +55,22 @@ export default async function Order({ params, searchParams }: PageProps) {
                   },
                 },
               ]
-            : []),
-          ...(email
-            ? [
+            : [
                 {
-                  customerEmail: {
-                    equals: email,
+                  accessToken: {
+                    equals: accessToken,
                   },
                 },
-              ]
-            : []),
+                ...(email
+                  ? [
+                      {
+                        customerEmail: {
+                          equals: email,
+                        },
+                      },
+                    ]
+                  : []),
+              ]),
         ],
       },
       select: {
@@ -83,6 +89,7 @@ export default async function Order({ params, searchParams }: PageProps) {
     const canAccessAsGuest =
       !user &&
       email &&
+      accessToken &&
       orderResult &&
       orderResult.customerEmail &&
       orderResult.customerEmail === email

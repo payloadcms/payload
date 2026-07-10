@@ -9,6 +9,7 @@ import { CollectionLevelConfig } from './collections/CollectionLevelConfig.js'
 import { ConditionalURL } from './collections/ConditionalURL.js'
 import { CustomLivePreview } from './collections/CustomLivePreview.js'
 import { Media } from './collections/Media.js'
+import { OpenByDefault } from './collections/OpenByDefault.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
 import { SSR } from './collections/SSR.js'
@@ -54,8 +55,8 @@ export default buildConfigWithDefaults({
       globals: ['header', 'footer'],
     },
   },
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
-  csrf: ['http://localhost:3000', 'http://localhost:3001'],
+  cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
+  csrf: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
   collections: [
     Users,
     Pages,
@@ -66,6 +67,7 @@ export default buildConfigWithDefaults({
     Categories,
     Media,
     CollectionLevelConfig,
+    OpenByDefault,
     StaticURLCollection,
     CustomLivePreview,
     ConditionalURL,

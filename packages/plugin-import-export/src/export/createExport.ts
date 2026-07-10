@@ -1,10 +1,11 @@
 /* eslint-disable perfectionist/sort-objects */
-import type { PayloadRequest, Sort, TypedUser, Where } from 'payload'
+import type { PayloadRequest, Sort, User, Where } from 'payload'
 
 import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
 import { Readable } from 'stream'
 
+import { applyFieldHooks } from '../utilities/applyFieldHooks.js'
 import { buildDisabledFieldRegex } from '../utilities/buildDisabledFieldRegex.js'
 import { flattenObject } from '../utilities/flattenObject.js'
 import { getExportFieldFunctions } from '../utilities/getExportFieldFunctions.js'
@@ -40,10 +41,9 @@ export type Export = {
   maxLimit?: number
   name: string
   page?: number
-  slug: string
-  sort: Sort
-  userCollection: string
-  userID: number | string
+  sort?: Sort
+  userCollection?: string
+  userID?: number | string
   where?: Where
 }
 
@@ -81,8 +81,11 @@ export const createExport = async (args: CreateExportArgs) => {
 
   if (debug) {
     req.payload.logger.debug({
-      message: 'Starting export process with args:',
+      msg: '[createExport] Starting export process',
+      exportDocId: id,
+      exportName: nameArg,
       collectionSlug,
+      exportCollection,
       draft: draftsFromInput,
       fields,
       format,
@@ -96,18 +99,18 @@ export const createExport = async (args: CreateExportArgs) => {
     throw new APIError(`Collection with slug ${collectionSlug} not found.`)
   }
 
-  let user: TypedUser | undefined
+  let user: undefined | User
 
   if (userCollection && userID) {
     user = (await req.payload.findByID({
       id: userID,
       collection: userCollection,
       overrideAccess: true,
-    })) as TypedUser
+    })) as User
   }
 
   if (!user && req.user) {
-    user = req?.user?.id ? req.user : req?.user?.user
+    user = req.user
   }
 
   if (!user) {
@@ -124,12 +127,13 @@ export const createExport = async (args: CreateExportArgs) => {
     and: [whereFromInput, draft ? {} : publishedWhere],
   }
 
-  const name = `${nameArg ?? `${getFilename()}-${collectionSlug}`}.${format}`
+  const baseName = nameArg ?? getFilename()
+  const name = `${baseName}-${collectionSlug}.${format}`
   const isCSV = format === 'csv'
   const select = Array.isArray(fields) && fields.length > 0 ? getSelect(fields) : undefined
 
   if (debug) {
-    req.payload.logger.debug({ message: 'Export configuration:', name, isCSV, locale })
+    req.payload.logger.debug({ isCSV, locale, msg: 'Export configuration:', name })
   }
 
   // Determine maximum export documents:
@@ -168,8 +172,8 @@ export const createExport = async (args: CreateExportArgs) => {
     accessDenied = true
     if (debug) {
       req.payload.logger.debug({
-        message: 'Access denied for collection, creating empty export',
         collectionSlug,
+        msg: 'Access denied for collection, creating empty export',
       })
     }
   }
@@ -193,12 +197,14 @@ export const createExport = async (args: CreateExportArgs) => {
   }
 
   if (debug) {
-    req.payload.logger.debug({ message: 'Find arguments:', findArgs })
+    req.payload.logger.debug({ findArgs, msg: 'Find arguments:' })
   }
 
-  const toCSVFunctions = getExportFieldFunctions({
+  const exportFieldHooks = getExportFieldFunctions({
     fields: collectionConfig.flattenedFields,
   })
+
+  const exportHooks = collectionConfig.custom?.['plugin-import-export']?.exportHooks
 
   const disabledFields =
     collectionConfig.admin?.custom?.['plugin-import-export']?.disabledFields ?? []
@@ -218,7 +224,7 @@ export const createExport = async (args: CreateExportArgs) => {
     return filtered
   }
 
-  const filterDisabledJSON = (doc: any, parentPath = ''): any => {
+  const filterDisabledJSON = (doc: unknown, parentPath = ''): unknown => {
     if (Array.isArray(doc)) {
       return doc.map((item) => filterDisabledJSON(item, parentPath))
     }
@@ -227,8 +233,8 @@ export const createExport = async (args: CreateExportArgs) => {
       return doc
     }
 
-    const filtered: Record<string, any> = {}
-    for (const [key, value] of Object.entries(doc)) {
+    const filtered: Record<string, unknown> = {}
+    for (const [key, value] of Object.entries(doc as Record<string, unknown>)) {
       const currentPath = parentPath ? `${parentPath}.${key}` : key
 
       // Only remove if this exact path is disabled
@@ -283,6 +289,11 @@ export const createExport = async (args: CreateExportArgs) => {
     const maxDocs =
       typeof maxExportDocuments === 'number' ? maxExportDocuments : Number.POSITIVE_INFINITY
 
+    const effectiveStreamDocs =
+      typeof maxExportDocuments === 'number' ? Math.min(totalDocs, maxExportDocuments) : totalDocs
+    const totalBatches = effectiveStreamDocs > 0 ? Math.ceil(effectiveStreamDocs / batchSize) : 1
+    let streamBatchNumber = 0
+
     const stream = new Readable({
       async read() {
         const remaining = Math.max(0, maxDocs - fetched)
@@ -318,23 +329,40 @@ export const createExport = async (args: CreateExportArgs) => {
           return
         }
 
+        streamBatchNumber++
+
         if (isCSV) {
           // --- CSV Streaming ---
           const batchRows = result.docs.map((doc) =>
             filterDisabledCSV(
               flattenObject({
-                doc,
+                data: doc as Record<string, unknown>,
                 fields,
-                toCSVFunctions,
+                format,
+                exportFieldHooks,
+                req,
               }),
             ),
           )
+
+          const originalDocs = result.docs as Record<string, unknown>[]
+          let batchRowsToWrite = batchRows
+          if (exportHooks?.before && batchRows.length > 0) {
+            batchRowsToWrite = await exportHooks.before({
+              batchNumber: streamBatchNumber,
+              data: batchRows,
+              format,
+              originalData: originalDocs,
+              req,
+              totalBatches,
+            })
+          }
 
           // On first batch, discover additional columns from data and merge with schema
           if (!columnsFinalized) {
             const dataColumns: string[] = []
             const seenCols = new Set<string>()
-            for (const row of batchRows) {
+            for (const row of batchRowsToWrite) {
               for (const key of Object.keys(row)) {
                 if (!seenCols.has(key)) {
                   seenCols.add(key)
@@ -342,8 +370,14 @@ export const createExport = async (args: CreateExportArgs) => {
                 }
               }
             }
-            // Merge schema columns with data-discovered columns
-            allColumns = mergeColumns(schemaColumns, dataColumns)
+            // Merge schema columns with data-discovered columns.
+            // When a before hook is active and rows exist, restrict to columns actually present
+            // in the data so that the hook can remove fields by not returning them.
+            const mergedColumns = mergeColumns(schemaColumns, dataColumns)
+            allColumns =
+              Boolean(exportHooks?.before) && batchRowsToWrite.length > 0
+                ? mergedColumns.filter((col) => dataColumns.includes(col))
+                : mergedColumns
             columnsFinalized = true
 
             if (debug) {
@@ -355,7 +389,7 @@ export const createExport = async (args: CreateExportArgs) => {
             }
           }
 
-          const paddedRows = batchRows.map((row) => {
+          const paddedRows = batchRowsToWrite.map((row) => {
             const fullRow: Record<string, unknown> = {}
             for (const col of allColumns) {
               fullRow[col] = row[col] ?? ''
@@ -370,17 +404,65 @@ export const createExport = async (args: CreateExportArgs) => {
           })
 
           this.push(encoder.encode(csvString))
+
+          if (exportHooks?.after && batchRowsToWrite.length > 0) {
+            await exportHooks.after({
+              batchNumber: streamBatchNumber,
+              data: batchRowsToWrite,
+              format,
+              originalData: originalDocs,
+              req,
+              totalBatches,
+            })
+          }
         } else {
           // --- JSON Streaming ---
-          const batchRows = result.docs.map((doc) => filterDisabledJSON(doc))
+          const batchRows = result.docs.map(
+            (doc) =>
+              filterDisabledJSON(
+                applyFieldHooks({
+                  data: doc as Record<string, unknown>,
+                  fieldHooks: exportFieldHooks,
+                  fields: collectionConfig.flattenedFields,
+                  format,
+                  operation: 'export',
+                  req,
+                  type: 'beforeExport',
+                }),
+              ) as Record<string, unknown>,
+          )
+
+          const originalDocs = result.docs as Record<string, unknown>[]
+          let batchRowsToWrite = batchRows
+          if (exportHooks?.before && batchRows.length > 0) {
+            batchRowsToWrite = await exportHooks.before({
+              batchNumber: streamBatchNumber,
+              data: batchRows,
+              format,
+              originalData: originalDocs,
+              req,
+              totalBatches,
+            })
+          }
 
           // Convert each filtered/flattened row into JSON string
-          const batchJSON = batchRows.map((row) => JSON.stringify(row)).join(',')
+          const batchJSON = batchRowsToWrite.map((row) => JSON.stringify(row)).join(',')
 
           if (isFirstBatch) {
             this.push(encoder.encode('[' + batchJSON))
           } else {
             this.push(encoder.encode(',' + batchJSON))
+          }
+
+          if (exportHooks?.after && batchRowsToWrite.length > 0) {
+            await exportHooks.after({
+              batchNumber: streamBatchNumber,
+              data: batchRowsToWrite,
+              format,
+              originalData: originalDocs,
+              req,
+              totalBatches,
+            })
           }
         }
 
@@ -403,7 +485,7 @@ export const createExport = async (args: CreateExportArgs) => {
     return new Response(Readable.toWeb(stream) as ReadableStream, {
       headers: {
         'Content-Disposition': `attachment; filename="${name}"`,
-        'Content-Type': isCSV ? 'text/csv' : 'application/json',
+        'Content-Type': isCSV ? 'text/csv; charset=utf-8' : 'application/json',
       },
     })
   }
@@ -421,12 +503,24 @@ export const createExport = async (args: CreateExportArgs) => {
     isCSV
       ? filterDisabledCSV(
           flattenObject({
-            doc,
+            data: doc as Record<string, unknown>,
             fields,
-            toCSVFunctions,
+            format,
+            exportFieldHooks,
+            req,
           }),
         )
-      : filterDisabledJSON(doc)
+      : (filterDisabledJSON(
+          applyFieldHooks({
+            data: doc as Record<string, unknown>,
+            fieldHooks: exportFieldHooks,
+            fields: collectionConfig.flattenedFields,
+            format,
+            operation: 'export',
+            req,
+            type: 'beforeExport',
+          }),
+        ) as Record<string, unknown>)
 
   // Skip fetching if access was denied - we'll create an empty export
   let exportResult = {
@@ -440,10 +534,12 @@ export const createExport = async (args: CreateExportArgs) => {
       collectionSlug,
       findArgs: findArgs as ExportFindArgs,
       format,
+      hooks: exportHooks,
       maxDocs:
         typeof maxExportDocuments === 'number' ? maxExportDocuments : Number.POSITIVE_INFINITY,
       req,
       startPage: adjustedPage,
+      totalDocs,
       transformDoc,
     })
   }
@@ -469,7 +565,13 @@ export const createExport = async (args: CreateExportArgs) => {
 
     // Merge schema columns with data-discovered columns
     // Schema provides ordering, data provides additional columns (e.g., array indices > 0)
-    const finalColumns = mergeColumns(schemaColumns, dataColumns)
+    // When a before hook is active and rows exist, restrict to columns actually present in the data
+    // so that the hook can remove fields by not returning them
+    const mergedColumns = mergeColumns(schemaColumns, dataColumns)
+    const finalColumns =
+      Boolean(exportHooks?.before) && rows.length > 0
+        ? mergedColumns.filter((col) => dataColumns.includes(col))
+        : mergedColumns
 
     const paddedRows = rows.map((row) => {
       const fullRow: Record<string, unknown> = {}
@@ -508,27 +610,55 @@ export const createExport = async (args: CreateExportArgs) => {
     req.file = {
       name,
       data: buffer,
-      mimetype: isCSV ? 'text/csv' : 'application/json',
+      mimetype: isCSV ? 'text/csv; charset=utf-8' : 'application/json',
       size: buffer.length,
     }
   } else {
     if (debug) {
-      req.payload.logger.debug(`Updating existing export with id: ${id}`)
+      req.payload.logger.debug({
+        msg: '[createExport] Updating export document with file',
+        exportDocId: id,
+        exportCollection,
+        fileName: name,
+        fileSize: buffer.length,
+        mimeType: isCSV ? 'text/csv; charset=utf-8' : 'application/json',
+      })
     }
-    await req.payload.update({
-      id,
-      collection: exportCollection,
-      data: {},
-      file: {
-        name,
-        data: buffer,
-        mimetype: isCSV ? 'text/csv' : 'application/json',
-        size: buffer.length,
-      },
-      // Override access only here so that we can be sure the export collection itself is updated as expected
-      overrideAccess: true,
-      req,
-    })
+    try {
+      await req.payload.update({
+        id,
+        collection: exportCollection,
+        data: {},
+        file: {
+          name,
+          data: buffer,
+          mimetype: isCSV ? 'text/csv; charset=utf-8' : 'application/json',
+          size: buffer.length,
+        },
+        // Override access only here so that we can be sure the export collection itself is updated as expected
+        overrideAccess: true,
+        req,
+      })
+    } catch (error) {
+      const errorDetails =
+        error instanceof Error
+          ? {
+              message: error.message,
+              name: error.name,
+              stack: error.stack,
+              // @ts-expect-error - data might exist on Payload errors
+              data: error.data,
+            }
+          : error
+      req.payload.logger.error({
+        msg: '[createExport] Failed to update export document with file',
+        err: errorDetails,
+        exportDocId: id,
+        exportCollection,
+        fileName: name,
+      })
+      throw error
+    }
   }
   if (debug) {
     req.payload.logger.debug('Export process completed successfully')

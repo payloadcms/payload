@@ -21,7 +21,7 @@ export const getSDK = (config: SanitizedConfig) => {
     baseURL: ``,
     fetch: (path: string, init: RequestInit) => {
       const [slugs, search] = path.slice(1).split('?')
-      const url = `${config.serverURL || 'http://localhost:3000'}${config.routes.api}/${slugs}${search ? `?${search}` : ''}`
+      const url = `${config.serverURL || `http://localhost:${process.env.PORT || 3000}`}${config.routes.api}/${slugs}${search ? `?${search}` : ''}`
 
       if (init.body instanceof FormData) {
         const file = init.body.get('file') as Blob

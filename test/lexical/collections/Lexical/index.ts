@@ -124,7 +124,7 @@ export const lexicalBlocks: (Block | BlockSlug)[] = [
         options: ['value1', 'value2', 'value3'],
       },
     ],
-  },
+  } satisfies Block,
   {
     slug: 'myBlockWithBlockAndLabel',
     admin: {
@@ -248,7 +248,6 @@ export const getLexicalFieldsCollection: (args: {
       ...defaultEditorFeatures,
       //TestRecorderFeature(),
       TreeViewFeature(),
-      //HTMLConverterFeature(),
       FixedToolbarFeature(),
       LinkFeature({
         fields: ({ defaultFields }) => [
@@ -415,5 +414,6 @@ export const getLexicalFieldsCollection: (args: {
         },
       },
     ],
+    versions: false,
   }
 }

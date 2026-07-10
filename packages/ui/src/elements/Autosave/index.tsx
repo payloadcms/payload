@@ -1,5 +1,4 @@
 'use client'
-// TODO: abstract the `next/navigation` dependency out from this component
 import type { ClientCollectionConfig, ClientGlobalConfig } from 'payload'
 
 import { dequal } from 'dequal/lite'
@@ -27,10 +26,9 @@ import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { formatTimeToNow } from '../../utilities/formatDocTitle/formatDateTitle.js'
 import { reduceFieldsToValuesWithValidation } from '../../utilities/reduceFieldsToValuesWithValidation.js'
 import { LeaveWithoutSaving } from '../LeaveWithoutSaving/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'autosave'
 // The minimum time the saving state should be shown
@@ -52,7 +50,6 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
 
   const {
     docConfig,
-    lastUpdateTime,
     mostRecentVersionIsAutosaved,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
@@ -65,7 +62,7 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   const submitted = useFormSubmitted()
 
   const { code: locale } = useLocale()
-  const { i18n, t } = useTranslation()
+  const { t } = useTranslation()
 
   const interval = getAutosaveInterval(docConfig)
   const validateOnDraft = hasDraftValidationEnabled(docConfig)
@@ -236,16 +233,9 @@ export const Autosave: React.FC<Props> = ({ id, collection, global: globalDoc })
   })
 
   return (
-    <div className={baseClass}>
+    <React.Fragment>
       {validateOnDraft && !isValid && <LeaveWithoutSaving />}
-      {saving && t('general:saving')}
-      {!saving && Boolean(lastUpdateTime) && (
-        <React.Fragment>
-          {t('version:lastSavedAgo', {
-            distance: formatTimeToNow({ date: lastUpdateTime, i18n }),
-          })}
-        </React.Fragment>
-      )}
-    </div>
+      {saving && <div className={baseClass}>{t('general:saving')}</div>}
+    </React.Fragment>
   )
 }

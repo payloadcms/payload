@@ -18,7 +18,7 @@ import {
   AssignTenantFieldModal,
   assignTenantModalSlug,
 } from '../AssignTenantFieldModal/index.client.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'tenantField'
 
@@ -34,7 +34,9 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   const { isValid: isFormValid, setModified } = useForm()
   const { id: docID, collectionSlug } = useDocumentInfo()
   const { isModalOpen, openModal } = useModal()
-  const isEditManyModalOpen = collectionSlug ? isModalOpen(`edit-${collectionSlug}`) : false
+  const isEditManyModalOpen = collectionSlug
+    ? isModalOpen(`edit-${collectionSlug}`) || isModalOpen(`edit-${collectionSlug}-bulk-uploads`)
+    : false
   const isConfirmingRef = React.useRef<boolean>(false)
   const prevModified = React.useRef(modified)
   const prevValue = React.useRef<typeof value>(value)
@@ -109,13 +111,24 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
   }, [unique, options, selectedTenantID, setTenant, value, setEntityType, entityType])
 
   React.useEffect(() => {
-    if (unique) {
+    if (unique || debug || isEditManyModalOpen) {
       return
     }
-    if ((!isFormValid && showError && showField) || (!value && !selectedTenantID)) {
+    if (showField && ((!isFormValid && showError) || (!value && !selectedTenantID))) {
       openModal(assignTenantModalSlug)
     }
-  }, [isFormValid, showError, showField, openModal, value, docID, selectedTenantID, unique])
+  }, [
+    debug,
+    isEditManyModalOpen,
+    isFormValid,
+    showError,
+    showField,
+    openModal,
+    value,
+    docID,
+    selectedTenantID,
+    unique,
+  ])
 
   if (showField) {
     if (debug || isEditManyModalOpen) {

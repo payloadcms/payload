@@ -23,6 +23,7 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      versions: false,
     },
     MediaCollection,
   ],
@@ -32,7 +33,7 @@ export default buildConfigWithDefaults({
     },
   },
   editor: lexicalEditor({}),
-  cors: ['http://localhost:3000', 'http://localhost:3001'],
+  cors: [`http://localhost:${process.env.PORT || 3000}`, 'http://localhost:3001'],
   globals: [],
   onInit: async (payload) => {
     await payload.create({

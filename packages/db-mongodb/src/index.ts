@@ -126,13 +126,7 @@ export interface Args {
 
   collectionsSchemaOptions?: Partial<Record<CollectionSlug, SchemaOptions>>
   /** Extra configuration options */
-  connectOptions?: {
-    /**
-     * Set false to disable $facet aggregation in non-supporting databases, Defaults to true
-     * @deprecated Payload doesn't use `$facet` anymore anywhere.
-     */
-    useFacet?: boolean
-  } & ConnectOptions
+  connectOptions?: ConnectOptions
   /**
    * We add a secondary sort based on `createdAt` to ensure that results are always returned in the same order when sorting by a non-unique field.
    * This is because MongoDB does not guarantee the order of results, however in very large datasets this could affect performance.

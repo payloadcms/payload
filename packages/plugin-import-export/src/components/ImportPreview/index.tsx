@@ -1,6 +1,5 @@
 'use client'
-import type { Column } from '@payloadcms/ui'
-import type { ClientField, ConditionalDateProps, PaginatedDocs } from 'payload'
+import type { ClientField, Column, PaginatedDocs } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import {
@@ -26,9 +25,25 @@ import type {
 import type { ImportPreviewResponse } from '../../types.js'
 
 import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'import-preview'
+
+/**
+ * Browser-native ArrayBuffer → base64. Avoids Node's `Buffer`, which is not
+ * available in the browser under bundlers that don't polyfill it (e.g. Vite),
+ * unlike Next's webpack build. Chunked to stay under `String.fromCharCode`'s
+ * argument-count limit for large files.
+ */
+const arrayBufferToBase64 = (arrayBuffer: ArrayBuffer): string => {
+  const bytes = new Uint8Array(arrayBuffer)
+  const chunkSize = 0x8000
+  let binary = ''
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize))
+  }
+  return btoa(binary)
+}
 
 export const ImportPreview: React.FC = () => {
   const [isPending, startTransition] = useTransition()
@@ -115,7 +130,7 @@ export const ImportPreview: React.FC = () => {
           if (fileField?.value && fileField.value instanceof File) {
             // File is being uploaded, read its contents
             const arrayBuffer = await fileField.value.arrayBuffer()
-            const base64 = Buffer.from(arrayBuffer).toString('base64')
+            const base64 = arrayBufferToBase64(arrayBuffer)
             fileData = base64
           } else if (url) {
             // File has been saved, fetch from URL
@@ -124,7 +139,7 @@ export const ImportPreview: React.FC = () => {
               throw new Error('Failed to fetch file')
             }
             const arrayBuffer = await response.arrayBuffer()
-            const base64 = Buffer.from(arrayBuffer).toString('base64')
+            const base64 = arrayBufferToBase64(arrayBuffer)
             fileData = base64
           }
 
@@ -290,17 +305,8 @@ export const ImportPreview: React.FC = () => {
                     // Just an ID
                     return String(value)
                   } else if (field.type === 'date') {
-                    // Format dates
-                    const dateFormat =
-                      (field.admin &&
-                        'date' in field.admin &&
-                        (field.admin.date as ConditionalDateProps)?.displayFormat) ||
-                      config.admin.dateFormat
-
-                    return new Date(value as string).toLocaleString(i18n.language, {
-                      dateStyle: 'medium',
-                      timeStyle: 'short',
-                    })
+                    // Display date as string to avoid wrong locale/timezone conversion
+                    return String(value)
                   } else if (field.type === 'checkbox') {
                     return value ? '✓' : '✗'
                   } else if (field.type === 'select' || field.type === 'radio') {
@@ -387,40 +393,73 @@ export const ImportPreview: React.FC = () => {
             return cols
           }
 
-          // Add default meta fields at the end
           const fieldColumns = buildColumnsFromFields(collectionConfig.fields)
-          const metaFields = ['id', 'createdAt', 'updatedAt', '_status']
 
-          metaFields.forEach((metaField) => {
-            const hasData = docs.some((doc) => doc[metaField] !== undefined)
-            if (!hasData) {
-              return
-            }
+          const existingAccessors = new Set(fieldColumns.map((column) => column.accessor))
 
-            fieldColumns.push({
-              accessor: metaField,
-              active: true,
-              field: { name: metaField } as ClientField,
-              Heading: getTranslation(metaField, i18n),
-              renderedCells: docs.map((doc) => {
-                const value = doc[metaField]
-                if (value === undefined || value === null) {
-                  return null
-                }
+          // Discover all fields from document data to determine column order
+          // Respect the order fields appear in the data (e.g., CSV column order)
+          const dataFieldOrder: string[] = []
+          const dataFieldsSet = new Set<string>()
 
-                if (metaField === 'createdAt' || metaField === 'updatedAt') {
-                  return new Date(value as string).toLocaleString(i18n.language, {
-                    dateStyle: 'medium',
-                    timeStyle: 'short',
-                  })
-                }
-
-                return String(value)
-              }),
+          // Collect all fields from all docs to get comprehensive field list
+          docs.forEach((doc) => {
+            Object.keys(doc).forEach((key) => {
+              if (!dataFieldsSet.has(key) && doc[key] !== undefined && doc[key] !== null) {
+                dataFieldsSet.add(key)
+                dataFieldOrder.push(key)
+              }
             })
           })
 
-          setColumns(fieldColumns)
+          // Helper to create a column for a field
+          const createColumnForField = (fieldName: string): Column => ({
+            accessor: fieldName,
+            active: true,
+            field: { name: fieldName } as ClientField,
+            Heading: getTranslation(fieldName, i18n),
+            renderedCells: docs.map((doc) => {
+              const value = doc[fieldName]
+              if (value === undefined || value === null) {
+                return null
+              }
+
+              return String(value)
+            }),
+          })
+
+          // Build columns respecting data order for fields not in config
+          // For fields in config, use their natural order from fieldColumns
+          const finalColumns: Column[] = []
+          const addedAccessors = new Set<string>()
+
+          // Process fields in the order they appear in the data
+          dataFieldOrder.forEach((fieldName) => {
+            if (existingAccessors.has(fieldName)) {
+              // This field is from the collection config
+              const configColumn = fieldColumns.find((col) => col.accessor === fieldName)
+              if (configColumn && !addedAccessors.has(fieldName)) {
+                finalColumns.push(configColumn)
+                addedAccessors.add(fieldName)
+              }
+            } else {
+              // This is an additional field (system field or extra data field)
+              if (!addedAccessors.has(fieldName)) {
+                finalColumns.push(createColumnForField(fieldName))
+                addedAccessors.add(fieldName)
+              }
+            }
+          })
+
+          // Add any remaining config fields that weren't in the data
+          fieldColumns.forEach((col) => {
+            if (!addedAccessors.has(col.accessor)) {
+              finalColumns.push(col)
+              addedAccessors.add(col.accessor)
+            }
+          })
+
+          setColumns(finalColumns)
           setDataToRender(docs)
         } catch (err) {
           console.error('Error processing file data:', err)

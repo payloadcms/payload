@@ -1,4 +1,4 @@
-import type { PayloadRequest, TypedUser, Where } from 'payload'
+import type { PayloadRequest, User, Where } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../types.js'
 
@@ -7,22 +7,21 @@ import { getCollectionIDType } from '../utilities/getCollectionIDType.js'
 import { getTenantFromCookie } from '../utilities/getTenantFromCookie.js'
 import { getUserTenantIDs } from '../utilities/getUserTenantIDs.js'
 
-type Args<ConfigType = unknown> = {
+type Args = {
   /**
    * If the document this filter is run belongs to a tenant, the tenant ID should be passed here.
    * If set, this will be used instead of the tenant cookie
+   * Can be an array when hasMany is true
    */
-  docTenantID?: number | string
+  docTenantID?: number | number[] | string | string[]
   filterFieldName: string
   req: PayloadRequest
   tenantsArrayFieldName?: string
   tenantsArrayTenantFieldName?: string
   tenantsCollectionSlug: string
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }
-export const filterDocumentsByTenants = <ConfigType = unknown>({
+export const filterDocumentsByTenants = ({
   docTenantID,
   filterFieldName,
   req,
@@ -30,7 +29,7 @@ export const filterDocumentsByTenants = <ConfigType = unknown>({
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   userHasAccessToAllTenants,
-}: Args<ConfigType>): null | Where => {
+}: Args): null | Where => {
   const idType = getCollectionIDType({
     collectionSlug: tenantsCollectionSlug,
     payload: req.payload,
@@ -41,17 +40,12 @@ export const filterDocumentsByTenants = <ConfigType = unknown>({
   if (selectedTenant) {
     return {
       [filterFieldName]: {
-        in: [selectedTenant],
+        in: Array.isArray(selectedTenant) ? selectedTenant : [selectedTenant],
       },
     }
   }
 
-  if (
-    req.user &&
-    userHasAccessToAllTenants(
-      req?.user as ConfigType extends { user: unknown } ? ConfigType['user'] : TypedUser,
-    )
-  ) {
+  if (req.user && userHasAccessToAllTenants(req?.user as User)) {
     return null
   }
 

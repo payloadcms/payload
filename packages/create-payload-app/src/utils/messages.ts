@@ -38,11 +38,17 @@ export function helpMessage(): void {
 
         {dim Available templates: ${formatTemplates(validTemplates)}}
 
+      -a     {underline agent_name}             Set coding agent (claude, codex, cursor)
+
+        {dim Installs the Payload skill for the selected agent}
+
+      --no-agent                    Skip agent skill installation
       --use-npm                     Use npm to install dependencies
       --use-yarn                    Use yarn to install dependencies
       --use-pnpm                    Use pnpm to install dependencies
       --use-bun                     Use bun to install dependencies (experimental)
       --no-deps                     Do not install any dependencies
+      --payload-version {underline value}       Install a specific Payload version or npm dist-tag (default: canary)
       -h                            Show help
 `)
 }

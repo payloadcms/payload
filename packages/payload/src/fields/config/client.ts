@@ -1,8 +1,10 @@
 // @ts-strict-ignore
 /* eslint-disable perfectionist/sort-switch-case */
 // Keep perfectionist/sort-switch-case disabled - it incorrectly messes up the ordering of the switch cases, causing it to break
-import type { I18nClient, TFunction } from '@payloadcms/translations'
+import type { ClientTranslationKeys, I18nClient, TFunction } from '@payloadcms/translations'
 
+import type { ImportMap } from '../../bin/generateImportMap/index.js'
+import type { LabelFunction } from '../../config/types.js'
 import type {
   AdminClient,
   ArrayFieldClient,
@@ -26,7 +28,7 @@ import type { Payload } from '../../types/index.js'
 import { getFromImportMap } from '../../bin/generateImportMap/utilities/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import { flattenTopLevelFields, type ImportMap } from '../../index.js'
+import { flattenTopLevelFields } from '../../utilities/flattenTopLevelFields.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused
@@ -39,8 +41,9 @@ export type ServerOnlyFieldProperties =
   | 'enumName' // can be a function
   | 'filterOptions' // This is a `relationship`, `upload`, and `select` only property
   | 'graphQL'
+  | 'jsonSchema'
   | 'label'
-  | 'typescriptSchema'
+  | 'slugify' // This is a `slug` only property — a function, cannot cross the RSC boundary
   | 'validate'
   | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks'>
 
@@ -58,10 +61,11 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   'filterOptions', // This is a `relationship`, `upload`, and `select` only property
   'editor', // This is a `richText` only property
   'custom',
-  'typescriptSchema',
+  'jsonSchema',
   'dbName', // can be a function
   'enumName', // can be a function
   'graphQL', // client does not need graphQL
+  'slugify', // `slug` field — a function, cannot cross the RSC boundary (server resolves it via `custom.slugify`)
   // the following props are handled separately (see below):
   // `label`
   // `fields`
@@ -89,7 +93,7 @@ export const createClientBlocks = ({
   defaultIDType: Payload['config']['db']['defaultIDType']
   i18n: I18nClient
   importMap: ImportMap
-}): (ClientBlock | string)[] | ClientBlock[] => {
+}): (ClientBlock | string)[] => {
   const clientBlocks: (ClientBlock | string)[] = []
   for (let i = 0; i < blocks.length; i++) {
     const block = blocks[i]!
@@ -111,14 +115,16 @@ export const createClientBlocks = ({
       clientBlock.imageURL = block.imageURL
     }
 
-    if (block.admin?.custom || block.admin?.group) {
-      // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+    if (block.admin?.custom || block.admin?.group || block.admin?.images) {
       clientBlock.admin = {}
       if (block.admin.custom) {
-        clientBlock.admin!.custom = block.admin.custom
+        clientBlock.admin.custom = block.admin.custom
       }
       if (block.admin.group) {
-        clientBlock.admin!.group = block.admin.group
+        clientBlock.admin.group = block.admin.group
+      }
+      if (block.admin.images) {
+        clientBlock.admin.images = block.admin.images
       }
     }
 
@@ -136,7 +142,6 @@ export const createClientBlocks = ({
       if (clientBlock.admin) {
         clientBlock.admin.disableBlockName = block.admin.disableBlockName
       } else {
-        // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
         clientBlock.admin = { disableBlockName: block.admin.disableBlockName }
       }
     }
@@ -310,22 +315,13 @@ export const createClientField = ({
         }
       }
 
-      if (incomingField.blockReferences?.length) {
-        field.blockReferences = createClientBlocks({
-          blocks: incomingField.blockReferences,
-          defaultIDType,
-          i18n,
-          importMap,
-        })
-      }
-
       if (incomingField.blocks?.length) {
         field.blocks = createClientBlocks({
           blocks: incomingField.blocks,
           defaultIDType,
           i18n,
           importMap,
-        }) as ClientBlock[]
+        })
       }
 
       break
@@ -423,12 +419,20 @@ export const createClientField = ({
                 i18n,
                 importMap,
               })
-            } else if (
-              (key === 'label' || key === 'description') &&
-              typeof tabProp === 'function'
-            ) {
-              // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
-              clientTab[key] = tabProp({ t: i18n.t })
+            } else if (key === 'label' && typeof tabProp === 'function') {
+              const label = tabProp as LabelFunction
+
+              clientTab.label = label({
+                i18n,
+                t: i18n.t,
+              })
+            } else if (key === 'description' && typeof tabProp === 'function') {
+              const description = tabProp as LabelFunction
+
+              clientTab.description = description({
+                i18n,
+                t: i18n.t,
+              })
             } else if (key === 'admin') {
               clientTab.admin = {} as AdminClient
 
@@ -443,7 +447,7 @@ export const createClientField = ({
                       if (typeof tab.admin?.description === 'function') {
                         clientTab.admin.description = tab.admin.description({
                           i18n,
-                          t: i18n.t as TFunction,
+                          t: i18n.t,
                         })
                       } else {
                         clientTab.admin.description = tab.admin.description
@@ -511,8 +515,7 @@ export const createClientFields = ({
       type: defaultIDType,
       admin: {
         description: 'The unique identifier for this document',
-        disableBulkEdit: true,
-        disabled: true,
+        disabled: { bulkEdit: true },
         hidden: true,
       },
       hidden: true,

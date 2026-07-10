@@ -1,8 +1,7 @@
 'use client'
-import type { ClientUser, SanitizedPermissions, TypedUser } from 'payload'
+import type { ClientUser, SanitizedPermissions } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { usePathname, useRouter } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
@@ -13,17 +12,19 @@ import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
+import { usePathname, useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 
 export type UserWithToken<T = ClientUser> = {
   /** seconds until expiration */
   exp: number
-  token: string
+  refreshedToken?: string
+  token?: string
   user: T
 }
 
 export type AuthContext<T = ClientUser> = {
-  fetchFullUser: () => Promise<null | TypedUser>
+  fetchFullUser: () => Promise<null | T>
   logOut: () => Promise<boolean>
   /**
    * These are the permissions for the current user from a global scope.
@@ -155,7 +156,7 @@ export function AuthProvider({
 
       if (userResponse?.user) {
         setUserInMemory(userResponse.user)
-        setTokenInMemory(userResponse.token)
+        setTokenInMemory(userResponse.token ?? userResponse.refreshedToken)
         setTokenExpirationMs(userResponse.exp * 1000)
 
         const expiresInMs = Math.max(

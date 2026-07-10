@@ -2,6 +2,9 @@
 
 import React from 'react'
 
+import { WarningIcon } from '../../icons/Warning/index.js'
+import './index.css'
+
 function groupSimilarErrors(items: string[]): string[] {
   const result: string[] = []
 
@@ -29,11 +32,13 @@ function groupSimilarErrors(items: string[]): string[] {
   return result
 }
 
-function createErrorsFromMessage(message: string): {
+export function createErrorsFromMessage(message: string): {
   errors?: string[]
   message: string
 } {
-  const [intro, errorsString] = message.split(':')
+  const colonIndex = message.indexOf(':')
+  const intro = colonIndex >= 0 ? message.slice(0, colonIndex) : message
+  const errorsString = colonIndex >= 0 ? message.slice(colonIndex + 1) : undefined
 
   if (!errorsString) {
     return {
@@ -60,19 +65,28 @@ export function FieldErrorsToast({ errorMessage }) {
   const [{ errors, message }] = React.useState(() => createErrorsFromMessage(errorMessage))
 
   return (
-    <div>
-      {message}
-      {Array.isArray(errors) && errors.length > 0 ? (
-        errors.length === 1 ? (
-          <span data-testid="field-error">{errors[0]}</span>
-        ) : (
-          <ul data-testid="field-errors">
-            {errors.map((error, index) => {
-              return <li key={index}>{error}</li>
-            })}
-          </ul>
-        )
-      ) : null}
-    </div>
+    <>
+      <div className="toast-icon">
+        <WarningIcon size={24} />
+      </div>
+      <div className="toast-content" data-testid="field-errors-toast">
+        <div className="toast-title">
+          {message}
+          {Array.isArray(errors) && errors.length > 0 ? (
+            errors.length === 1 ? (
+              <span className="field-error" data-testid="field-error">
+                {errors[0]}
+              </span>
+            ) : (
+              <ul className="field-errors" data-testid="field-errors">
+                {errors.map((error, index) => {
+                  return <li key={index}>{error}</li>
+                })}
+              </ul>
+            )
+          ) : null}
+        </div>
+      </div>
+    </>
   )
 }

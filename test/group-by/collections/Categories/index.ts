@@ -13,4 +13,5 @@ export const CategoriesCollection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

@@ -84,7 +84,7 @@ function iterateFields(
             toLocaleData[field.name].map((blockData: Data, index: number) => {
               const block =
                 req.payload.blocks[blockData.blockType] ??
-                ((field.blockReferences ?? field.blocks).find(
+                (field.blocks.find(
                   (block) => typeof block !== 'string' && block.slug === blockData.blockType,
                 ) as FlattenedBlock | undefined)
 
@@ -118,6 +118,7 @@ function iterateFields(
         case 'relationship':
         case 'richText':
         case 'select':
+        case 'slug':
         case 'text':
         case 'textarea':
         case 'upload':
@@ -249,6 +250,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       ? payload.findGlobal({
           slug: globalSlug,
           depth: 0,
+          draft: true,
           locale: fromLocale,
           overrideAccess: false,
           user,
@@ -258,6 +260,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           id: docID,
           collection: collectionSlug,
           depth: 0,
+          draft: true,
           joins: false,
           locale: fromLocale,
           overrideAccess: false,
@@ -268,6 +271,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
       ? payload.findGlobal({
           slug: globalSlug,
           depth: 0,
+          draft: true,
           locale: toLocale,
           overrideAccess: false,
           user,
@@ -277,6 +281,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
           id: docID,
           collection: collectionSlug,
           depth: 0,
+          draft: true,
           joins: false,
           locale: toLocale,
           overrideAccess: false,
@@ -310,6 +315,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
     ? await payload.updateGlobal({
         slug: globalSlug,
         data,
+        draft: true,
         locale: toLocale,
         overrideAccess: false,
         req,
@@ -319,6 +325,7 @@ export const copyDataFromLocale = async (args: CopyDataFromLocaleArgs) => {
         id: docID,
         collection: collectionSlug,
         data,
+        draft: true,
         locale: toLocale,
         overrideAccess: false,
         req,

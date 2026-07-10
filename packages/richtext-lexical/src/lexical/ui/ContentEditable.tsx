@@ -5,7 +5,7 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { ContentEditable } from '@lexical/react/LexicalContentEditable.js'
 import { useTranslation } from '@payloadcms/ui'
 
-import './ContentEditable.scss'
+import './ContentEditable.css'
 
 import * as React from 'react'
 

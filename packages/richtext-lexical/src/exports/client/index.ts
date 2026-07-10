@@ -28,8 +28,6 @@ export { LinkFeatureClient } from '../../features/link/client/index.js'
 export { ChecklistFeatureClient } from '../../features/lists/checklist/client/index.js'
 export { OrderedListFeatureClient } from '../../features/lists/orderedList/client/index.js'
 export { UnorderedListFeatureClient } from '../../features/lists/unorderedList/client/index.js'
-export { LexicalPluginToLexicalFeatureClient } from '../../features/migrations/lexicalPluginToLexical/feature.client.js'
-export { SlateToLexicalFeatureClient } from '../../features/migrations/slateToLexical/feature.client.js'
 export { ParagraphFeatureClient } from '../../features/paragraph/client/index.js'
 export { DebugJsxConverterFeatureClient } from '../../features/debug/jsxConverter/client/index.js'
 export { defaultColors } from '../../features/textState/defaultColors.js'
@@ -62,7 +60,6 @@ export {
 export { CAN_USE_DOM } from '../../lexical/utils/canUseDOM.js'
 export { getDOMRangeRect } from '../../lexical/utils/getDOMRangeRect.js'
 export { getSelectedNode } from '../../lexical/utils/getSelectedNode.js'
-export { isHTMLElement } from '../../lexical/utils/guard.js'
 export { joinClasses } from '../../lexical/utils/joinClasses.js'
 
 export { createBlockNode } from '../../lexical/utils/markdown/createBlockNode.js'
@@ -162,3 +159,4 @@ export { CodeBlockBlockComponent } from '../../features/blocks/premade/CodeBlock
 
 export { RenderLexical } from '../../field/RenderLexical/index.js'
 export { buildDefaultEditorState, buildEditorState } from '../../utilities/buildEditorState.js'
+export { RichTextViewProvider, useRichTextView } from '../../field/RichTextViewProvider.js'

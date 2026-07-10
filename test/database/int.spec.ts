@@ -1,3 +1,4 @@
+/* eslint-disable vitest/no-conditional-expect */
 import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { Table } from 'drizzle-orm'
@@ -28,7 +29,7 @@ import {
 } from 'payload'
 import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, expect } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Global2, Post } from './payload-types.js'
@@ -40,10 +41,13 @@ import { removeFiles } from '../__helpers/shared/removeFiles.js'
 import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
 import {
+  customIDsSlug,
   defaultValuesSlug,
   errorOnUnnamedFieldsSlug,
   fieldsPersistanceSlug,
   postsSlug,
+  relationASlug,
+  relationBSlug,
 } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -235,6 +239,155 @@ describe('database', () => {
       expect(res.categoriesCustomID[0]).toBe(9999)
       const resFind = await payload.findByID({ id: res.id, collection: 'posts', depth: 0 })
       expect(resFind.categoriesCustomID[0]).toBe(9999)
+    })
+
+    const describeUuidV7Adapter =
+      process.env.PAYLOAD_DATABASE === 'postgres-uuidv7' ||
+      process.env.PAYLOAD_DATABASE === 'sqlite-uuidv7'
+        ? describe
+        : describe.skip
+
+    describeUuidV7Adapter('uuidv7', () => {
+      const createdRows: { collection: string; id: number | string }[] = []
+
+      const track = (collection: string, id: number | string) => {
+        createdRows.push({ collection, id })
+      }
+
+      afterEach(async () => {
+        for (const { collection, id } of [...createdRows].reverse()) {
+          try {
+            await payload.delete({
+              collection: collection as
+                | typeof customIDsSlug
+                | typeof postsSlug
+                | typeof relationASlug
+                | typeof relationBSlug,
+              id,
+            })
+          } catch {
+            // ignore: concurrent cleanup or FK already removed
+          }
+        }
+
+        createdRows.length = 0
+      })
+
+      it('should generate valid UUID with version 7', async () => {
+        const doc = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 test' },
+        })
+
+        track(postsSlug, doc.id)
+
+        expect(doc.id).toMatch(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-7[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+        )
+
+        expect(String(doc.id).charAt(14)).toBe('7')
+      })
+
+      it('should generate chronologically ordered IDs', async () => {
+        const doc1 = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 first' },
+        })
+        const doc2 = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 second' },
+        })
+
+        track(postsSlug, doc1.id)
+        track(postsSlug, doc2.id)
+
+        expect(doc2.id > doc1.id).toBe(true)
+      })
+
+      it('should findByID with uuidv7', async () => {
+        const created = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 findable' },
+        })
+
+        track(postsSlug, created.id)
+
+        const found = await payload.findByID({
+          collection: postsSlug,
+          id: created.id,
+        })
+
+        expect(found.id).toBe(created.id)
+        expect(found.title).toBe('uuidv7 findable')
+      })
+
+      it('should query with where clause on uuidv7 id', async () => {
+        const created = await payload.create({
+          collection: postsSlug,
+          data: { title: 'uuidv7 queryable' },
+        })
+
+        track(postsSlug, created.id)
+
+        const result = await payload.find({
+          collection: postsSlug,
+          where: { id: { equals: created.id } },
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]!.id).toBe(created.id)
+      })
+
+      it('should handle relationships with uuidv7 IDs', async () => {
+        const relA = await payload.create({
+          collection: relationASlug,
+          data: { title: 'uuidv7 rel A' },
+        })
+        const relB = await payload.create({
+          collection: relationBSlug,
+          data: {
+            title: 'uuidv7 rel B',
+            relationship: relA.id,
+          },
+        })
+
+        track(relationBSlug, relB.id)
+        track(relationASlug, relA.id)
+
+        const found = await payload.findByID({
+          collection: relationBSlug,
+          id: relB.id,
+          depth: 1,
+        })
+
+        expect(found.relationship).toBeDefined()
+      })
+
+      it('should work with versions and uuidv7 adapter', async () => {
+        const doc = await payload.create({
+          collection: customIDsSlug,
+          data: { title: 'v7 versioned' },
+        })
+
+        track(customIDsSlug, doc.id)
+
+        await payload.update({
+          collection: customIDsSlug,
+          id: doc.id,
+          data: { title: 'v7 versioned updated' },
+        })
+
+        const versions = await payload.findVersions({
+          collection: customIDsSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        expect(versions.totalDocs).toBeGreaterThanOrEqual(1)
+      })
+
+      it('defaultIDType should be text for uuidv7', () => {
+        expect(payload.db.defaultIDType).toBe('text')
+      })
     })
   })
 
@@ -610,14 +763,17 @@ describe('database', () => {
       expect(updatedDocWithTimestamps.updatedAt).toBeUndefined()
     }
 
+    // eslint-disable-next-line vitest/expect-expect
     it('ensure timestamps are not created in update or create when timestamps are disabled', async () => {
       await noTimestampsTestLocalAPI()
     })
 
+    // eslint-disable-next-line vitest/expect-expect
     it('ensure timestamps are not created in db adapter update or create when timestamps are disabled', async () => {
       await noTimestampsTestDB(true)
     })
 
+    // eslint-disable-next-line vitest/expect-expect
     it(
       'ensure timestamps are not created in update or create when timestamps are disabled even with allowAdditionalKeys true',
       { db: 'mongo' },
@@ -629,6 +785,7 @@ describe('database', () => {
       },
     )
 
+    // eslint-disable-next-line vitest/expect-expect
     it(
       'ensure timestamps are not created in db adapter update or create when timestamps are disabled even with allowAdditionalKeys true',
       { db: 'mongo' },
@@ -693,6 +850,50 @@ describe('database', () => {
     })
   })
 
+  it('should query hasMany select field with contains operator', async () => {
+    const { id } = await payload.create({
+      collection: 'select-has-many',
+      data: {
+        roles: ['admin'],
+      },
+    })
+
+    const result = await payload.find({
+      collection: 'select-has-many',
+      where: {
+        roles: {
+          contains: 'admin',
+        },
+      },
+    })
+    expect(result.docs).toHaveLength(1)
+
+    expect(result.docs.some((doc) => doc.id === id)).toBe(true)
+
+    await payload.delete({ collection: 'select-has-many', id })
+  })
+
+  it('ensure querying hasMany select field with contains operator does not do partial matching', async () => {
+    const { id } = await payload.create({
+      collection: 'select-has-many',
+      data: {
+        food: ['bananabread'],
+      },
+    })
+
+    const result = await payload.find({
+      collection: 'select-has-many',
+      where: {
+        food: {
+          contains: 'banana',
+        },
+      },
+    })
+    expect(result.docs).toHaveLength(0)
+
+    await payload.delete({ collection: 'select-has-many', id })
+  })
+
   describe('allow ID on create', () => {
     beforeAll(() => {
       payload.db.allowIDOnCreate = true
@@ -710,7 +911,7 @@ describe('database', () => {
         id = randomUUID()
       } else if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
-      } else if (payload.db.idType === 'uuid') {
+      } else if (payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7') {
         id = randomUUID()
       } else {
         id = 9999
@@ -727,7 +928,7 @@ describe('database', () => {
         id = randomUUID()
       } else if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
-      } else if (payload.db.idType === 'uuid') {
+      } else if (payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7') {
         id = randomUUID()
       } else {
         id = 99999
@@ -751,7 +952,7 @@ describe('database', () => {
         id = randomUUID()
       } else if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
-      } else if (payload.db.idType === 'uuid') {
+      } else if (payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7') {
         id = randomUUID()
       } else {
         id = 999999
@@ -1481,6 +1682,80 @@ describe('database', () => {
     })
   })
 
+  it('should return the correct number of docs per page when sorting on an array sub-field', async () => {
+    const createdIds: string[] = []
+    const TOTAL = 10
+    const ITEMS_PER_DOC = 3
+    const LIMIT = 5
+
+    const testPrefix = `SortArraySubField-${Date.now()}`
+
+    // Each post has ITEMS_PER_DOC array items with distinct text values so the JOIN
+    // produces TOTAL * ITEMS_PER_DOC rows — enough to expose the LIMIT-before-dedup bug.
+    for (let i = 0; i < TOTAL; i++) {
+      const doc = await payload.create({
+        collection: postsSlug,
+        data: {
+          arrayWithIDs: Array.from({ length: ITEMS_PER_DOC }, (_, j) => ({
+            text: `${testPrefix}-doc${String(i).padStart(2, '0')}-item${j}`,
+          })),
+          title: `${testPrefix}-${i}`,
+        },
+      })
+
+      createdIds.push(String(doc.id))
+    }
+
+    const page1 = await payload.find({
+      collection: postsSlug,
+      limit: LIMIT,
+      page: 1,
+      sort: 'arrayWithIDs.text',
+      where: { title: { contains: testPrefix } },
+    })
+
+    const page2 = await payload.find({
+      collection: postsSlug,
+      limit: LIMIT,
+      page: 2,
+      sort: 'arrayWithIDs.text',
+      where: { title: { contains: testPrefix } },
+    })
+
+    expect(page1.totalDocs).toBe(TOTAL)
+    expect(page1.totalPages).toBe(TOTAL / LIMIT)
+    expect(page1.docs).toHaveLength(LIMIT)
+    expect(page2.docs).toHaveLength(LIMIT)
+
+    // No document should appear in both pages
+    const page1Ids = new Set(page1.docs.map((d) => d.id))
+    const duplicates = page2.docs.filter((d) => page1Ids.has(d.id))
+    expect(duplicates).toHaveLength(0)
+
+    // Verify sort order: each doc's minimum array text is `${testPrefix}-docXX-item0`,
+    // so ascending sort should place doc-00 first and doc-09 last.
+    // Collect all docs across pages and verify they are in non-decreasing text order.
+    const allDocs = [...page1.docs, ...page2.docs]
+    const minTexts = allDocs.map((d) => {
+      const texts = (d.arrayWithIDs ?? []).map((item) => item.text).filter(Boolean)
+      return texts.length > 0 ? texts.sort()[0] : ''
+    })
+
+    for (let i = 1; i < minTexts.length; i++) {
+      expect(minTexts[i - 1]! <= minTexts[i]!).toBe(true)
+    }
+
+    // Page 1 docs should all have smaller sort keys than page 2 docs
+    const page1MaxText = minTexts.slice(0, LIMIT).at(-1)!
+    const page2MinText = minTexts.slice(LIMIT)[0]!
+    expect(page1MaxText <= page2MinText).toBe(true)
+
+    await payload.delete({
+      collection: postsSlug,
+      where: { id: { in: createdIds } },
+    })
+  })
+
   describe('Compound Indexes', () => {
     beforeEach(async () => {
       await payload.delete({ collection: 'compound-indexes', where: {} })
@@ -1916,7 +2191,9 @@ describe('database', () => {
     describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
       if (
-        !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid'].includes(process.env.PAYLOAD_DATABASE)
+        !['cosmosdb', 'firestore', 'sqlite', 'sqlite-uuid', 'sqlite-uuidv7'].includes(
+          process.env.PAYLOAD_DATABASE || '',
+        )
       ) {
         it('should commit multiple operations in isolation', async () => {
           const req = {
@@ -2061,6 +2338,49 @@ describe('database', () => {
           ).rejects.toThrow('Not Found')
         })
       }
+
+      it(
+        'should throw error when beginTransaction fails to connect (drizzle)',
+        { db: (adapter) => adapter.startsWith('postgres') || adapter === 'supabase' },
+        async () => {
+          const db = payload.db as unknown as Record<string, unknown>
+          const originalDrizzle = db.drizzle
+          try {
+            db.drizzle = {
+              transaction: () => Promise.reject(new Error('connection refused')),
+            }
+
+            await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
+          } finally {
+            db.drizzle = originalDrizzle
+          }
+        },
+      )
+
+      it(
+        'should throw error when beginTransaction fails to connect (mongo)',
+        {
+          db: (adapter) =>
+            adapter === 'mongodb' || adapter === 'mongodb-atlas' || adapter === 'documentdb',
+        },
+        async () => {
+          const db = payload.db as unknown as Record<string, unknown>
+          const originalConnection = db.connection
+          try {
+            db.connection = {
+              getClient: () => ({
+                startSession: () => {
+                  throw new Error('connection refused')
+                },
+              }),
+            }
+
+            await expect(() => payload.db.beginTransaction()).rejects.toThrow(/connection refused/)
+          } finally {
+            db.connection = originalConnection
+          }
+        },
+      )
 
       describe('disableTransaction', () => {
         let disabledTransactionPost
@@ -3185,6 +3505,32 @@ describe('database', () => {
       expect(res.textWithinTabs).toBeUndefined()
     })
 
+    it('should not save a virtual field inside a block to the db', async () => {
+      const created = await payload.create({
+        collection: fieldsPersistanceSlug,
+        data: {
+          blockWithVirtual: [
+            {
+              blockType: 'blockWithVirtual',
+              text: 'some text',
+              virtualField: 'should not be saved',
+            },
+          ],
+        },
+      })
+
+      const resDb = (await payload.db.findOne({
+        collection: fieldsPersistanceSlug,
+        req: {} as PayloadRequest,
+        where: { id: { equals: created.id } },
+      })) as Record<string, unknown>
+
+      const block = (resDb.blockWithVirtual as Record<string, unknown>[])?.[0]
+
+      expect(block?.virtualField).toBeUndefined()
+      expect(block?.text).toBe('some text')
+    })
+
     it('should allow virtual field with reference', async () => {
       const post = await payload.create({ collection: 'posts', data: { title: 'my-title' } })
       const { id } = await payload.create({
@@ -3438,6 +3784,24 @@ describe('database', () => {
       expect(globalData.postTitle).toBe('post')
     })
 
+    it('should allow referenced virtual field in collection update response', async () => {
+      const post = await payload.create({ collection: 'posts', data: { title: 'post-updated' } })
+      const doc = await payload.create({
+        collection: 'virtual-relations',
+        data: {},
+        depth: 0,
+      })
+
+      const updated = await payload.update({
+        collection: 'virtual-relations',
+        id: doc.id,
+        data: { post: post.id },
+        depth: 0,
+      })
+
+      expect(updated.postTitle).toBe('post-updated')
+    })
+
     it('should allow to sort by a virtual field with a reference to an ID', async () => {
       await payload.delete({ collection: 'virtual-relations', where: {} })
       const category_1 = await payload.create({
@@ -3616,6 +3980,31 @@ describe('database', () => {
         depth: 0,
       })
       expect(res.postCategoriesTitles).toEqual(['category 1', 'category 2'])
+    })
+
+    it('should not error when using a virtual linked field in access control of a join target collection', async () => {
+      const tenant = await payload.create({
+        collection: 'virtual-linked-tenants',
+        data: { slug: 'my-tenant' },
+      })
+
+      const project = await payload.create({
+        collection: 'virtual-linked-projects',
+        data: {},
+      })
+
+      await payload.create({
+        collection: 'virtual-linked-roles',
+        data: { project: project.id, tenant: tenant.id },
+      })
+
+      const result = await payload.find({
+        collection: 'virtual-linked-projects',
+        overrideAccess: false,
+      })
+
+      expect(result.docs).toHaveLength(1)
+      expect(result.docs[0]?.id).toBe(project.id)
     })
   })
 
@@ -4228,6 +4617,34 @@ describe('database', () => {
       expect(post.tab?.text).toBe('in tab updated')
       expect(post.arrayWithIDs).toHaveLength(1)
       expect(post.arrayWithIDs?.[0]?.text).toBe('some text')
+    }
+  })
+
+  it('should allow creating docs with payload.db.create with custom ID', async () => {
+    if (payload.db.name === 'mongoose') {
+      const customId = isMongooseUUIDIDType()
+        ? randomUUID()
+        : new mongoose.Types.ObjectId().toHexString()
+      const res = await payload.db.create({
+        collection: 'simple',
+        customID: customId,
+        data: {
+          text: 'Test with custom ID',
+        },
+      })
+
+      expect(res.id).toBe(customId)
+    } else {
+      const id = payload.db.defaultIDType === 'text' ? randomUUID() : 95231
+      const res = await payload.db.create({
+        collection: 'simple',
+        customID: id,
+        data: {
+          text: 'Test with custom ID',
+        },
+      })
+
+      expect(res.id).toBe(id)
     }
   })
 
@@ -5543,6 +5960,58 @@ describe('database', () => {
       console.log({ docs: JSON.stringify(collatedMappedResults) })
 
       expect(collatedMappedResults).toEqual(expectedSortedItems)
+    },
+  )
+
+  it(
+    'ensure mongodb collation works with draft pagination without sort',
+    { db: 'mongo' },
+    async () => {
+      // Clear any existing documents
+      await payload.delete({ collection: 'categories', where: {} })
+
+      // Create 15 draft documents
+      const createdIds: (number | string)[] = []
+      for (let i = 0; i < 15; i++) {
+        const doc = await payload.create({
+          collection: 'categories',
+          data: { name: `Category ${i}` },
+          draft: true,
+        })
+        createdIds.push(doc.id)
+      }
+
+      // Enable collation
+      payload.db.collation = { strength: 2 }
+
+      // Query drafts WITHOUT sort - this is the scenario that breaks
+      const resultsNoSort = await payload.find({
+        collection: 'categories',
+        limit: 10,
+        draft: true,
+        // No sort parameter
+      })
+
+      console.log({
+        totalDocs: resultsNoSort.totalDocs,
+        totalPages: resultsNoSort.totalPages,
+        docsLength: resultsNoSort.docs.length,
+        hasNextPage: resultsNoSort.hasNextPage,
+      })
+
+      // The bug: totalDocs returns 10 (same as limit) instead of 15
+      expect(resultsNoSort.totalDocs).toBe(15)
+      expect(resultsNoSort.totalPages).toBe(2)
+      expect(resultsNoSort.hasNextPage).toBe(true)
+      expect(resultsNoSort.docs.length).toBe(10)
+
+      // Clean up
+      for (const id of createdIds) {
+        await payload.delete({ collection: 'categories', id })
+      }
+
+      // Reset collation
+      payload.db.collation = undefined
     },
   )
 })

@@ -5,14 +5,20 @@ export const lexicalFieldsSlug = 'lexical-fields'
 export const lexicalJSXConverterSlug = 'lexical-jsx-converter'
 export const lexicalHeadingFeatureSlug = 'lexical-heading-feature'
 export const lexicalListsFeatureSlug = 'lexical-lists-features'
-
+export const lexicalViewsSlug = 'lexical-views'
+export const lexicalViewsFrontendSlug = 'lexical-views-frontend'
+export const lexicalViewsProviderSlug = 'lexical-views-provider'
+export const lexicalViewsProviderDefaultSlug = 'lexical-views-provider-default'
+export const lexicalViewsProviderFallbackSlug = 'lexical-views-provider-fallback'
+export const lexicalViewsNestedSlug = 'lexical-views-nested'
 export const lexicalLinkFeatureSlug = 'lexical-link-feature'
 export const lexicalLocalizedFieldsSlug = 'lexical-localized-fields'
-export const lexicalMigrateFieldsSlug = 'lexical-migrate-fields'
 export const lexicalRelationshipFieldsSlug = 'lexical-relationship-fields'
 export const lexicalAccessControlSlug = 'lexical-access-control'
 export const lexicalAutosaveSlug = 'lexical-autosave'
+export const lexicalAutosaveBlockSlug = 'lexical-autosave-block'
 export const richTextFieldsSlug = 'rich-text-fields'
+export const lexicalSlugFieldNameCollisionSlug = 'collision'
 
 // Auxiliary slugs
 export const textFieldsSlug = 'text-fields'
@@ -21,14 +27,26 @@ export const uploads2Slug = 'uploads2'
 
 export const arrayFieldsSlug = 'array-fields'
 
+export const lexicalCustomCellSlug = 'lexical-custom-cell'
+export const lexicalNestedBlocksSlug = 'lexical-nested-blocks'
+export const lexicalBenchmarkSlug = 'lexical-benchmark'
+
 export const collectionSlugs = [
   lexicalFieldsSlug,
   lexicalLocalizedFieldsSlug,
-  lexicalMigrateFieldsSlug,
   lexicalRelationshipFieldsSlug,
   lexicalAccessControlSlug,
+  lexicalBenchmarkSlug,
   richTextFieldsSlug,
   textFieldsSlug,
   uploadsSlug,
   lexicalListsFeatureSlug,
+  lexicalViewsSlug,
+  lexicalViewsFrontendSlug,
+  lexicalViewsProviderSlug,
+  lexicalViewsProviderDefaultSlug,
+  lexicalViewsProviderFallbackSlug,
+  lexicalViewsNestedSlug,
+  lexicalCustomCellSlug,
+  lexicalNestedBlocksSlug,
 ]

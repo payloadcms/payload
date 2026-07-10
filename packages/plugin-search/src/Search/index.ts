@@ -110,6 +110,7 @@ export const generateSearchCollection = (
         singular: 'Search Result',
       }),
     },
+    versions: pluginConfig?.searchOverrides?.versions ?? false,
   }
 
   return newConfig

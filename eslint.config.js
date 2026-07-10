@@ -1,5 +1,6 @@
 import payloadEsLintConfig from '@payloadcms/eslint-config'
 import payloadPlugin from '@payloadcms/eslint-plugin'
+import mdxTextParser from '@payloadcms/eslint-plugin/customRules/mdx-text-parser.js'
 
 export const defaultESLintIgnores = [
   '**/.temp',
@@ -9,6 +10,7 @@ export const defaultESLintIgnores = [
   '**/.pnp.*',
   '**/.svn',
   '**/playwright.config.ts',
+  '**/vite.tanstack.config.ts',
   '**/vitest.config.ts',
   '**/vitest.setup.ts',
   '**/tsconfig.tsbuildinfo',
@@ -23,8 +25,16 @@ export const defaultESLintIgnores = [
   'packages/**/*.spec.ts',
   'next-env.d.ts',
   '**/app',
+  // The TanStack app dirs (shippable `app-tanstack` + its test duplicates) are
+  // thin app wiring; their `app/` routes are already ignored above, and these
+  // dirs carry no tsconfig of their own. The adapter logic lives in
+  // `packages/tanstack-start` and is linted there.
+  '**/app-tanstack/components/**',
+  '**/app-tanstack/router.tsx',
   'src/**/*.spec.ts',
   'packages/payload/rollup.dts.config.mjs',
+  'scripts/**/*.js',
+  'packages/plugin-mcp/bin.js',
 ]
 
 /** @typedef {import('eslint').Linter.Config} Config */
@@ -46,6 +56,13 @@ export const rootEslintConfig = [
       'packages/**/*.spec.ts',
       'templates/**',
       'examples/**',
+      'packages/drizzle/src/postgres/predefinedMigrations/v2-v3/**',
+      'packages/drizzle/src/postgres/predefinedMigrations/localize-status/**',
+      'packages/drizzle/src/sqlite/predefinedMigrations/localize-status/**',
+      'packages/codemod/src/transforms/**/*.input.ts',
+      'packages/codemod/src/transforms/**/*.output.ts',
+      'packages/tanstack-start/scripts/**',
+      'packages/tanstack-start/test/**',
     ],
   },
   {
@@ -98,6 +115,19 @@ export default [
     files: ['templates/vercel-postgres/**'],
     rules: {
       'no-restricted-exports': 'off',
+    },
+  },
+  // MDX/Markdown documentation linting for code block languages
+  {
+    files: ['docs/**/*.mdx', 'docs/**/*.md'],
+    plugins: {
+      payload: payloadPlugin,
+    },
+    languageOptions: {
+      parser: mdxTextParser,
+    },
+    rules: {
+      'payload/valid-code-block-languages': 'error',
     },
   },
 ]

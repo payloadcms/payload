@@ -20,6 +20,7 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
   handler: (args: {
     apiRoute: string
     collectionSlug: UploadCollectionSlug
+    docPrefix?: string
     extra: T
     file: File
     prefix?: string
@@ -48,10 +49,11 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
       if (enabled) {
         setUploadHandler({
           collectionSlug,
-          handler: ({ file, updateFilename }) => {
+          handler: ({ docPrefix, file, updateFilename }) => {
             return handler({
               apiRoute,
               collectionSlug,
+              docPrefix,
               extra,
               file,
               prefix,

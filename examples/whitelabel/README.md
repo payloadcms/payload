@@ -11,9 +11,10 @@ To spin up this example locally, follow these steps:
 - `npx create-payload-app --example whitelabel`
 
 2. `cp .env.example .env` to copy the example environment variables
-3. `pnpm install && pnpm dev` to install dependencies and start the dev server
-4. `open http://localhost:3000/admin` to access the admin panel
-5. Login with email `dev@payloadcms.com` and password `test`
+3. Ensure MongoDB is running and `DATABASE_URL` points to it (for example `mongodb://127.0.0.1/payload-example-whitelabel`)
+4. `pnpm install && pnpm dev` to install dependencies and start the dev server
+5. `open http://localhost:3000/admin` to access the admin panel
+6. Login with email `dev@payloadcms.com` and password `test`
 
 ## Re-branding walkthrough
 

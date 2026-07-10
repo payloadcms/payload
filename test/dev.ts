@@ -1,22 +1,20 @@
-import nextEnvImport from '@next/env'
 import chalk from 'chalk'
 import { createServer } from 'http'
 import minimist from 'minimist'
-import nextImport from 'next'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import open from 'open'
 import { loadEnv } from 'payload/node'
-import { parse } from 'url'
 
+import type { DevServerResult } from './adapters/nextDevServer.js'
+
+import { assertDbReachable } from './__helpers/shared/assertDbReachable.js'
 import { getNextRootDir } from './__helpers/shared/getNextRootDir.js'
+import { getCurrentDatabaseAdapter } from './dbAdapters.js'
 import { runInit } from './runInit.js'
 import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
-
-// @todo remove in 4.0 - will behave like this by default in 4.0
-process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
 
 const prod = process.argv.includes('--prod')
 if (prod) {
@@ -59,27 +57,23 @@ if (['admin-root'].includes(testSuiteArg)) {
   enableTurbo = false
 }
 
-console.log(`Selected test suite: ${testSuiteArg}${enableTurbo ? ' [Turbopack]' : ' [Webpack]'}`)
+const framework = process.env.PAYLOAD_FRAMEWORK || 'next'
 
-if (enableTurbo) {
+console.log(
+  `Selected test suite: ${testSuiteArg} [${framework}]${framework === 'next' && enableTurbo ? ' [Turbopack]' : framework === 'next' ? ' [Webpack]' : ''}`,
+)
+
+if (enableTurbo && framework === 'next') {
   process.env.TURBOPACK = '1'
 }
 
+await assertDbReachable(getCurrentDatabaseAdapter())
+
+// eslint-disable-next-line @typescript-eslint/await-thenable
 const { beforeTest } = await createTestHooks(testSuiteArg, testSuiteConfigOverride)
 await beforeTest()
 
-const { rootDir, adminRoute } = getNextRootDir(testSuiteArg)
-
 await runInit(testSuiteArg, true, false, testSuiteConfigOverride)
-
-// This is needed to forward the environment variables to the next process that were created after loadEnv()
-// for example process.env.DATABASE_URL otherwise app.prepare() will clear them
-nextEnvImport.updateInitialEnv(process.env)
-
-// Open the admin if the -o flag is passed
-if (args.o) {
-  await open(`http://localhost:3000${adminRoute}`)
-}
 
 const findOpenPort = (startPort: number): Promise<number> => {
   return new Promise((resolve, reject) => {
@@ -98,44 +92,49 @@ const findOpenPort = (startPort: number): Promise<number> => {
 }
 
 const port = process.env.PORT ? Number(process.env.PORT) : 3000
-
 const availablePort = await findOpenPort(port)
 
-// Assign the available port to process.env.PORT so that the next and our HMR server uses it
 // @ts-expect-error - PORT is a string from somewhere
 process.env.PORT = availablePort
 
-// @ts-expect-error the same as in test/__helpers/initPayloadE2E.ts
-const app = nextImport({
-  dev: true,
-  hostname: 'localhost',
-  port: availablePort,
-  dir: rootDir,
-  turbopack: enableTurbo,
-})
+let serverResult: DevServerResult
 
-const handle = app.getRequestHandler()
+switch (framework) {
+  case 'next': {
+    const { startNextDevServer } = await import('./adapters/nextDevServer.js')
+    serverResult = await startNextDevServer({
+      enableTurbo,
+      port: availablePort,
+      testSuiteArg,
+    })
+    break
+  }
+  case 'tanstack-start': {
+    const { startTanStackStartDevServer } = await import('./adapters/tanstackStartDevServer.js')
+    serverResult = await startTanStackStartDevServer({
+      port: availablePort,
+      testSuiteArg,
+    })
+    break
+  }
+  default: {
+    console.log(
+      chalk.red(`ERROR: Unknown framework adapter "${framework}". Supported: next, tanstack-start`),
+    )
+    process.exit(1)
+  }
+}
 
-let resolveServer: () => void
+// Open the admin if the -o flag is passed
+if (args.o) {
+  await open(`http://localhost:${serverResult.port}${serverResult.adminRoute}`)
+}
 
-const serverPromise = new Promise<void>((res) => (resolveServer = res))
-
-void app.prepare().then(() => {
-  createServer(async (req, res) => {
-    const parsedUrl = parse(req.url || '', true)
-    await handle(req, res, parsedUrl)
-  }).listen(availablePort, () => {
-    resolveServer()
-  })
-})
-
-await serverPromise
 process.env.PAYLOAD_DROP_DATABASE = process.env.PAYLOAD_DROP_DATABASE === 'false' ? 'false' : 'true'
 
-// fetch the admin url to force a render
-void fetch(`http://localhost:${availablePort}${adminRoute}`)
-void fetch(`http://localhost:${availablePort}/api/access`)
-// This ensures that the next-server process is killed when this process is killed and doesn't linger around.
+void fetch(`http://localhost:${serverResult.port}${serverResult.adminRoute}`).catch(() => {})
+void fetch(`http://localhost:${serverResult.port}/api/access`).catch(() => {})
+
 process.on('SIGINT', () => {
   if (child) {
     child.kill('SIGINT')
@@ -146,5 +145,5 @@ process.on('SIGTERM', () => {
   if (child) {
     child.kill('SIGINT')
   }
-  process.exit(0) // Exit the parent process
+  process.exit(0)
 })

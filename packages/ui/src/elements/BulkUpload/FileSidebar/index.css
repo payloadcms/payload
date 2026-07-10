@@ -1,0 +1,265 @@
+@layer payload-default {
+  .file-selections {
+    --file-gutter-h: var(--spacer-2);
+    border-right: var(--stroke-width-small) solid var(--color-border);
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    /* File tree takes 3fr of the 3fr : 4fr : 5fr file-manager layout (≈236px). */
+    flex: 3 1 0;
+    min-width: 0;
+    overflow: visible;
+    max-height: 100dvh;
+  }
+
+  .file-selections__header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    background: var(--color-bg);
+    flex-wrap: wrap;
+
+    p {
+      margin: 0;
+    }
+  }
+
+  .file-selections__collectionSelect {
+    width: 100%;
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+
+    .react-select {
+      width: 100%;
+    }
+
+    .field-type__wrap {
+      width: 100%;
+      padding-block: var(--spacer-2-5);
+      padding-inline: var(--file-gutter-h);
+    }
+  }
+
+  .file-selections__filesContainer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    margin-top: var(--spacer-2);
+    width: 100%;
+    padding-inline: var(--file-gutter-h);
+
+    .shimmer-effect {
+      border-radius: var(--radius-medium);
+    }
+  }
+
+  .file-selections__fileRowContainer {
+    --rowPadding: var(--spacer-2);
+    position: relative;
+
+    &:last-child {
+      margin-bottom: var(--spacer-2);
+    }
+  }
+
+  .file-selections__fileRow {
+    display: flex;
+    padding: var(--rowPadding);
+    align-items: center;
+    gap: var(--spacer-2-5);
+    border-radius: var(--radius-medium);
+    max-width: 100%;
+    cursor: pointer;
+    width: 100%;
+
+    &:hover {
+      background-color: var(--color-bg-hover);
+    }
+
+    .file-selections__thumbnail,
+    .file-selections__thumbnail-shimmer {
+      width: var(--spacer-4);
+      height: var(--spacer-4);
+      border-radius: var(--radius-small);
+      flex-shrink: 0;
+      object-fit: cover;
+    }
+
+    p {
+      margin: 0;
+    }
+  }
+
+  .file-selections__fileRowContainer:has(.file-selections__remove--overlay:hover)
+    .file-selections__fileRow {
+    background-color: var(--color-bg-hover);
+  }
+
+  .file-selections__fileDetails {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .file-selections__fileRowContainer--active {
+    .file-selections__fileRow {
+      background-color: var(--color-bg-hover);
+    }
+
+    .file-selections__remove {
+      .icon--x {
+        opacity: 1;
+      }
+    }
+  }
+
+  .file-selections__errorCount {
+    margin-left: auto;
+    position: absolute;
+    transform: translate(50%, -50%);
+    top: 0;
+    right: 0;
+  }
+
+  .file-selections__fileName {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .file-selections__fileSize {
+    font-family: var(--text-body-small-font-family);
+    font-size: var(--text-body-small-font-size);
+    font-weight: var(--text-body-small-font-weight);
+    line-height: var(--text-body-small-line-height);
+    color: var(--color-text-tertiary);
+    flex-shrink: 0;
+  }
+
+  .file-selections__remove {
+    margin: 0;
+    margin-left: auto;
+
+    .icon--x {
+      opacity: 0.75;
+    }
+  }
+
+  .file-selections__remove--underlay {
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .file-selections__remove--overlay {
+    position: absolute;
+    top: 50%;
+    right: var(--rowPadding);
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: var(--radius-medium);
+    cursor: pointer;
+
+    &:hover {
+      background-color: var(--color-bg-tertiary);
+
+      .icon--x {
+        opacity: 1;
+      }
+    }
+  }
+
+  .file-selections__animateWrapper {
+    overflow: auto;
+  }
+
+  @media (max-width: 1024px) {
+    .file-selections {
+      --file-gutter-h: var(--gutter-h);
+      flex-direction: column-reverse;
+      width: 100%;
+      position: sticky;
+      bottom: 0;
+      flex-shrink: 0;
+      border-right: 0;
+      border-top: var(--stroke-width-small) solid var(--color-border);
+      background: var(--color-bg);
+      flex: 1;
+    }
+
+    /* The file list becomes a horizontal thumbnail carousel that scrolls sideways along the bottom
+       of the body instead of stacking vertically. */
+    .file-selections__animateWrapper {
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .file-selections__filesContainer {
+      flex-direction: row;
+      margin-top: 0;
+      padding-block: var(--spacer-2);
+      width: max-content;
+      min-width: 100%;
+    }
+
+    .file-selections__fileRowContainer {
+      z-index: 1;
+      flex: 0 0 auto;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    /* Each carousel item is a compact thumbnail; the file name, size and the desktop remove-button
+       spacer are hidden to keep the strip tight (the active file's name shows in the preview area). */
+    .file-selections__fileRow {
+      gap: 0;
+      padding: var(--spacer-1);
+
+      .file-selections__thumbnail,
+      .file-selections__thumbnail-shimmer {
+        width: var(--spacer-6);
+        height: var(--spacer-6);
+      }
+    }
+
+    .file-selections__fileDetails,
+    .file-selections__fileSize,
+    .file-selections__remove--underlay {
+      display: none;
+    }
+
+    .file-selections__fileRowContainer--active .file-selections__thumbnail {
+      outline: var(--stroke-width-small) solid var(--color-text);
+      outline-offset: 2px;
+    }
+
+    .file-selections__remove--overlay {
+      top: var(--spacer-1);
+      right: var(--spacer-1);
+      transform: none;
+      width: 20px;
+      height: 20px;
+      background: var(--color-bg);
+    }
+
+    .file-selections__header {
+      margin-top: 0;
+      border-top: var(--stroke-width-small) solid var(--color-border);
+      gap: var(--spacer-2-5);
+      padding-block: var(--spacer-2-5);
+      padding-inline: var(--file-gutter-h);
+    }
+
+    .file-selections__header__error {
+      padding-inline: 0;
+    }
+  }
+}

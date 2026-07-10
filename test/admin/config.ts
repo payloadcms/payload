@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
+import { CustomCollectionView } from './collections/CustomCollectionView.js'
 import { CollectionCustomDocumentControls } from './collections/CustomDocumentControls.js'
 import { CustomFields } from './collections/CustomFields/index.js'
 import { CustomListDrawer } from './collections/CustomListDrawer/index.js'
@@ -14,6 +15,7 @@ import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { EditMenuItems } from './collections/editMenuItems.js'
 import { FormatDocURL } from './collections/FormatDocURL/index.js'
+import { FullyFeatured } from './collections/FullyFeatured.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
 import { CollectionGroup1B } from './collections/Group1B.js'
@@ -134,6 +136,47 @@ export default buildConfigWithDefaults({
           path: publicCustomViewPath,
           strict: true,
         },
+        ButtonShowcase: {
+          Component: '/components/views/ButtonStyles/index.js#ButtonStyles',
+          path: '/button-styles',
+        },
+      },
+      sidebar: {
+        tabs: [
+          {
+            slug: 'custom-tab',
+            label: 'Folders',
+            components: {
+              Icon: '@payloadcms/ui#FolderIcon',
+              Content: {
+                path: '/components/CustomTab.js#CustomTab',
+                clientProps: {
+                  heading: 'Folders',
+                  content: 'Example folders tab content.',
+                },
+              },
+            },
+          },
+          {
+            slug: 'custom-tab-2',
+            label: 'Settings',
+            components: {
+              Icon: {
+                path: '@payloadcms/ui#GearIcon',
+                clientProps: {
+                  size: 24,
+                },
+              },
+              Content: {
+                path: '/components/CustomTab.js#CustomTab',
+                clientProps: {
+                  heading: 'Settings',
+                  content: 'Example settings tab content.',
+                },
+              },
+            },
+          },
+        ],
       },
     },
     dependencies: {
@@ -150,7 +193,7 @@ export default buildConfigWithDefaults({
     },
     livePreview: {
       collections: [reorderTabsSlug, editMenuItemsSlug],
-      url: 'http://localhost:3000',
+      url: `http://localhost:${process.env.PORT || 3000}`,
     },
     meta: {
       description: 'This is a custom meta description',
@@ -186,6 +229,7 @@ export default buildConfigWithDefaults({
     CollectionCustomDocumentControls,
     CustomViews1,
     CustomViews2,
+    CustomCollectionView,
     ReorderTabs,
     CustomFields,
     CollectionGroup1A,
@@ -209,6 +253,7 @@ export default buildConfigWithDefaults({
     Virtuals,
     NoTimestampsCollection,
     Localized,
+    FullyFeatured,
   ],
   globals: [
     GlobalHidden,

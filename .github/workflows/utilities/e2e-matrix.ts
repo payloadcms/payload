@@ -8,17 +8,28 @@
 export interface TestConfig {
   /** Test file name (relative to tests/e2e/) */
   file: string
+  /** Framework adapter to run the suite against */
+  framework?: 'next' | 'tanstack-start'
   /** Number of shards to split this test file into */
   shards: number
   /** Whether tests can run in parallel (default: false) */
   parallel?: boolean
+  /** Whether to enable cacheComponents for this test run */
+  cacheComponents?: boolean
 }
 
 interface MatrixEntry {
   suite: string
+  framework: 'next' | 'tanstack-start'
   shard: number
   'total-shards': number
   parallel: boolean
+  cacheComponents: boolean
+  /**
+   * When true, the matrix job runs with `continue-on-error`, so its failures do
+   * not block the `all-green` gate. TanStack Start suites are optional for now.
+   */
+  optional: boolean
 }
 
 interface Matrix {
@@ -28,13 +39,22 @@ interface Matrix {
 function generateMatrix(testConfigs: TestConfig[]): Matrix {
   const include: MatrixEntry[] = []
 
-  for (const { file, shards, parallel = false } of testConfigs) {
+  for (const {
+    file,
+    framework = 'next',
+    shards,
+    parallel = false,
+    cacheComponents = false,
+  } of testConfigs) {
     for (let shard = 1; shard <= shards; shard++) {
       include.push({
         suite: file,
+        framework,
         shard,
         'total-shards': shards,
         parallel,
+        cacheComponents,
+        optional: framework === 'tanstack-start',
       })
     }
   }

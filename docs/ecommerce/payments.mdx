@@ -114,9 +114,49 @@ export default buildConfig({
 })
 ```
 
-To use webhooks you also need to have them configured in your Stripe Dashboard.
+To use webhooks you also need to have them configured in your Stripe Dashboard or use the Stripe CLI for local development.
 
-You can use the [Stripe CLI](https://stripe.com/docs/stripe-cli) to forward webhooks to your local development environment.
+#### Local Development with Stripe CLI
+
+You can use the [Stripe CLI](https://stripe.com/docs/stripe-cli) to forward webhooks to your local development environment:
+
+1. **Install and authenticate the Stripe CLI:**
+
+```bash
+stripe login
+```
+
+2. **Start listening for webhooks** (note the correct endpoint path):
+
+```bash
+stripe listen --forward-to localhost:3000/api/payments/stripe/webhooks
+```
+
+3. **Copy the webhook signing secret** that is displayed when you start listening. It will look like:
+
+```
+Ready! Your webhook signing secret is whsec_abc123xyz...
+```
+
+4. **Add the secret to your `.env` file** - copy the secret exactly as shown (do not add an extra `whsec_` prefix):
+
+```bash
+STRIPE_WEBHOOKS_SIGNING_SECRET=whsec_abc123xyz...
+```
+
+5. **Restart your Next.js dev server** to pick up the new environment variable.
+
+6. **Trigger a test webhook** to verify your setup:
+
+```bash
+stripe trigger payment_intent.succeeded
+```
+
+<Banner type="warning">
+  The webhook signing secret from `stripe listen` is ephemeral and can change
+  each time you restart the CLI. Make sure to update your `.env` file and
+  restart your dev server when you restart `stripe listen`.
+</Banner>
 
 ### Frontend usage
 
@@ -405,8 +445,8 @@ The client side adapter should implement the `PaymentAdapterClient` interface:
 
 And for the args use the `PaymentAdapterClientArgs` type:
 
-| Property | Type     | Description                                                       |
-| -------- | -------- | ----------------------------------------------------------------- |
+| Property | Type     | Description                                                        |
+| -------- | -------- | ------------------------------------------------------------------ |
 | `label`  | `string` | (Optional) Allow overriding the default UI label for this adapter. |
 
 ## Best Practices

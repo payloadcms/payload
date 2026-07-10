@@ -1,4 +1,6 @@
 import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { OrderableJoinInfo } from '../../fields/config/sanitizeJoinField.js'
+import type { SanitizedDrafts } from '../../versions/types.js'
 import type {
   CollectionConfig,
   SanitizedCollectionConfig,
@@ -12,11 +14,12 @@ import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
+import { buildFoldersHierarchy, buildTagsHierarchy } from '../../hierarchy/presets.js'
+import { sanitizeHierarchyCollection } from '../../hierarchy/sanitizeHierarchyCollection.js'
 import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
-import { miniChalk } from '../../utilities/miniChalk.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
@@ -29,6 +32,35 @@ import {
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
+/**
+ * Warns at startup when custom collection views are misconfigured with a missing `path`.
+ * Views without `path` will never be matched by the router and are silently ignored.
+ */
+export const warnOnInvalidCustomViews = (collection: CollectionConfig): void => {
+  const views = collection.admin?.components?.views
+  if (!views || typeof views !== 'object') {
+    return
+  }
+
+  for (const [key, view] of Object.entries(views)) {
+    if (key === 'edit' || key === 'list') {
+      continue
+    }
+
+    if (view && typeof view === 'object' && 'Component' in view && !('path' in view)) {
+      console.warn(
+        `[Payload] Custom collection view "${key}" in collection "${collection.slug}" is missing a "path" property. The view will never be rendered.`,
+      )
+    }
+
+    if (view && typeof view === 'object' && 'path' in view && !('Component' in view)) {
+      console.warn(
+        `[Payload] Custom collection view "${key}" in collection "${collection.slug}" has a "path" but is missing a "Component". The view will never be rendered.`,
+      )
+    }
+  }
+}
+
 export const sanitizeCollection = async (
   config: Config,
   collection: CollectionConfig,
@@ -38,6 +70,10 @@ export const sanitizeCollection = async (
    */
   richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
   _validRelationships?: string[],
+  /**
+   * Tracker for orderable join fields - populated during sanitization
+   */
+  orderableJoins?: OrderableJoinInfo[],
 ): Promise<SanitizedCollectionConfig> => {
   if (collection._sanitized) {
     return collection as SanitizedCollectionConfig
@@ -45,11 +81,57 @@ export const sanitizeCollection = async (
 
   collection._sanitized = true
 
+  warnOnInvalidCustomViews(collection)
+
   // /////////////////////////////////
   // Make copy of collection config
   // /////////////////////////////////
 
   const sanitized: CollectionConfig = addDefaultsToCollectionConfig(collection)
+
+  // /////////////////////////////////
+  // Convert folders/tags to hierarchy
+  // /////////////////////////////////
+
+  const presetCount = [sanitized.folders, sanitized.tags, sanitized.hierarchy].filter(
+    Boolean,
+  ).length
+  if (presetCount > 1) {
+    throw new Error(
+      `Collection "${sanitized.slug}": Only one of 'folders', 'tags', or 'hierarchy' can be specified`,
+    )
+  }
+
+  if (sanitized.folders) {
+    sanitized.labels = {
+      plural: 'Folders',
+      singular: 'Folder',
+      ...sanitized.labels,
+    }
+    sanitized.hierarchy = buildFoldersHierarchy(sanitized.folders, sanitized.slug)
+    // Set admin.group: false when sidebar tab enabled (folders accessed via tab)
+    const sidebarTabEnabled =
+      typeof sanitized.hierarchy === 'object' &&
+      sanitized.hierarchy.admin?.injectSidebarTab !== false
+    if (sidebarTabEnabled && sanitized.admin!.group === undefined) {
+      sanitized.admin!.group = false
+    }
+    delete sanitized.folders
+  }
+
+  if (sanitized.tags) {
+    sanitized.labels = {
+      plural: 'Tags',
+      singular: 'Tag',
+      ...sanitized.labels,
+    }
+    sanitized.hierarchy = buildTagsHierarchy(sanitized.tags, sanitized.slug)
+    // Tags also hidden from nav by default
+    if (sanitized.admin!.group === undefined) {
+      sanitized.admin!.group = false
+    }
+    delete sanitized.tags
+  }
 
   // /////////////////////////////////
   // Sanitize fields
@@ -67,6 +149,7 @@ export const sanitizeCollection = async (
     fields: sanitized.fields,
     joinPath: '',
     joins,
+    orderableJoins,
     parentIsLocalized: false,
     polymorphicJoins,
     richTextSanitizationPromises,
@@ -124,7 +207,7 @@ export const sanitizeCollection = async (
         name: 'updatedAt',
         type: 'date',
         admin: {
-          disableBulkEdit: true,
+          disabled: { bulkEdit: true },
           hidden: true,
         },
         index: true,
@@ -136,7 +219,7 @@ export const sanitizeCollection = async (
       sanitized.fields.push({
         name: 'createdAt',
         admin: {
-          disableBulkEdit: true,
+          disabled: { bulkEdit: true },
           hidden: true,
         },
         // The default sort for list view is createdAt. Thus, enabling indexing by default, is a major performance improvement, especially for large or a large amount of collections.
@@ -151,7 +234,7 @@ export const sanitizeCollection = async (
         name: 'deletedAt',
         type: 'date',
         admin: {
-          disableBulkEdit: true,
+          disabled: { bulkEdit: true },
           hidden: true,
         },
         index: true,
@@ -192,21 +275,10 @@ export const sanitizeCollection = async (
 
       const hasLocalizedFields = traverseForLocalizedFields(sanitized.fields)
 
-      if (config.localization) {
-        if (hasLocalizedFields && sanitized.versions.drafts.localizeStatus === undefined) {
-          sanitized.versions.drafts.localizeStatus = false
-        }
-      }
-
-      // TODO v4: remove this sanitization check, should not need to enable the experimental flag
-      if (sanitized.versions.drafts.localizeStatus && !config.experimental?.localizeStatus) {
-        sanitized.versions.drafts.localizeStatus = false
-        console.log(
-          miniChalk.yellowBold(
-            `Warning: "localizeStatus" for drafts is an experimental feature. To enable, set "experimental.localizeStatus" to true in your Payload config.`,
-          ),
-        )
-      }
+      // Auto-enable per-locale status when localization is configured and the collection has localized fields.
+      ;(sanitized.versions.drafts as SanitizedDrafts).localizeStatus = !!(
+        config.localization && hasLocalizedFields
+      )
 
       if (sanitized.versions.drafts.autosave === true) {
         sanitized.versions.drafts.autosave = {
@@ -221,7 +293,7 @@ export const sanitizeCollection = async (
       sanitized.fields = mergeBaseFields(
         sanitized.fields,
         baseVersionFields({
-          localized: sanitized.versions.drafts.localizeStatus ?? false,
+          localized: (sanitized.versions.drafts as SanitizedDrafts).localizeStatus ?? false,
         }),
       )
     }
@@ -229,13 +301,8 @@ export const sanitizeCollection = async (
     delete sanitized.versions
   }
 
-  if (sanitized.folders === true) {
-    sanitized.folders = {
-      browseByFolder: true,
-    }
-  } else if (sanitized.folders) {
-    sanitized.folders.browseByFolder = sanitized.folders.browseByFolder ?? true
-  }
+  // Sanitize hierarchy configuration (phase 1 - per collection)
+  sanitizeHierarchyCollection(sanitized, config)
 
   if (sanitized.upload) {
     if (sanitized.upload === true) {

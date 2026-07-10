@@ -40,20 +40,21 @@
       "@payloadcms/ui": ["./packages/ui/src/exports/client/index.ts"],
       "@payloadcms/ui/shared": ["./packages/ui/src/exports/shared/index.ts"],
       "@payloadcms/ui/rsc": ["./packages/ui/src/exports/rsc/index.ts"],
+      "@payloadcms/ui/server": ["./packages/ui/src/exports/server.ts"],
+      "@payloadcms/ui/views/*/metadata": ["./packages/ui/src/views/*/metadata.ts"],
+      "@payloadcms/ui/views/*": ["./packages/ui/src/views/*/index.tsx"],
       "@payloadcms/ui/scss": ["./packages/ui/src/scss.scss"],
       "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
       "@payloadcms/next/*": ["./packages/next/src/exports/*.ts"],
+      "@payloadcms/tanstack-start": ["./packages/tanstack-start/src/index.ts"],
+      "@payloadcms/tanstack-start/*": ["./packages/tanstack-start/src/exports/*.ts"],
       "@payloadcms/richtext-lexical/client": [
         "./packages/richtext-lexical/src/exports/client/index.ts"
       ],
       "@payloadcms/richtext-lexical/rsc": ["./packages/richtext-lexical/src/exports/server/rsc.ts"],
-      "@payloadcms/richtext-slate/rsc": ["./packages/richtext-slate/src/exports/server/rsc.ts"],
       "@payloadcms/plugin-ecommerce/ui": ["./packages/plugin-ecommerce/src/exports/ui.ts"],
       "@payloadcms/plugin-ecommerce/react": ["./packages/plugin-ecommerce/src/exports/react.ts"],
       "@payloadcms/plugin-ecommerce/types": ["./packages/plugin-ecommerce/src/exports/types.ts"],
-      "@payloadcms/richtext-slate/client": [
-        "./packages/richtext-slate/src/exports/client/index.ts"
-      ],
       "@payloadcms/plugin-seo/client": ["./packages/plugin-seo/src/exports/client.ts"],
       "@payloadcms/plugin-sentry/client": ["./packages/plugin-sentry/src/exports/client.ts"],
       "@payloadcms/plugin-stripe/client": ["./packages/plugin-stripe/src/exports/client.ts"],
@@ -61,10 +62,17 @@
       "@payloadcms/plugin-form-builder/client": [
         "./packages/plugin-form-builder/src/exports/client.ts"
       ],
+      "@payloadcms/plugin-form-builder/translations/languages/all": [
+        "./packages/plugin-form-builder/src/translations/index.ts"
+      ],
+      "@payloadcms/plugin-form-builder/translations/languages/*": [
+        "./packages/plugin-form-builder/src/translations/languages/*.ts"
+      ],
       "@payloadcms/plugin-import-export/rsc": [
         "./packages/plugin-import-export/src/exports/rsc.ts"
       ],
       "@payloadcms/plugin-mcp": ["./packages/plugin-mcp/src/index.ts"],
+      "@payloadcms/plugin-mcp/client": ["./packages/plugin-mcp/src/exports/client.ts"],
       "@payloadcms/plugin-multi-tenant/rsc": ["./packages/plugin-multi-tenant/src/exports/rsc.ts"],
       "@payloadcms/plugin-multi-tenant/utilities": [
         "./packages/plugin-multi-tenant/src/exports/utilities.ts"
@@ -95,6 +103,6 @@
       "@payloadcms/storage-r2/client": ["./packages/storage-r2/src/exports/client.ts"]
     }
   },
-  "include": ["${configDir}/src"],
+  "include": ["${configDir}/src", "tools/assets.d.ts"],
   "exclude": ["${configDir}/dist", "${configDir}/build", "${configDir}/temp", "**/*.spec.ts"]
 }

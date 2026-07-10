@@ -1,13 +1,12 @@
 import type { Payload } from 'payload'
 
+import { buildEditorState } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { getFileByPath } from 'payload'
 import { fileURLToPath } from 'url'
 
-import { devUser } from '../credentials.js'
 import { seedDB } from '../__helpers/shared/clearAndSeed/seed.js'
-// TODO: decouple blocks from both test suites
-import { richTextDocData } from '../lexical/collections/RichText/data.js'
+import { devUser } from '../credentials.js'
 import { arrayDoc } from './collections/Array/shared.js'
 import { blocksDoc } from './collections/Blocks/shared.js'
 import { codeDoc } from './collections/Code/shared.js'
@@ -65,12 +64,13 @@ export const seed = async (_payload: Payload) => {
   const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
   const jpg480x320Path = path.resolve(dirname, './collections/Upload/payload480x320.jpg')
   const pngPath = path.resolve(dirname, './uploads/payload.png')
+  const png20x20Path = path.resolve(dirname, './collections/Upload/payload20x20.png')
 
-  // Get both files in parallel
-  const [jpgFile, jpg480x320File, pngFile] = await Promise.all([
+  const [jpgFile, jpg480x320File, pngFile, png20x20File] = await Promise.all([
     getFileByPath(jpgPath),
     getFileByPath(jpg480x320Path),
     getFileByPath(pngPath),
+    getFileByPath(png20x20Path),
   ])
 
   const createdArrayDoc = await _payload.create({
@@ -142,6 +142,14 @@ export const seed = async (_payload: Payload) => {
     overrideAccess: true,
   })
 
+  await _payload.create({
+    collection: uploadsSlug,
+    data: {},
+    file: png20x20File,
+    depth: 0,
+    overrideAccess: true,
+  })
+
   // const createdJPGDocSlug2 = await _payload.create({
   //   collection: uploads2Slug,
   //   data: {
@@ -185,28 +193,14 @@ export const seed = async (_payload: Payload) => {
   //     media: { value: createdJPGDocSlug2.id, relationTo: uploads2Slug },
   //   },
   // })
-  const formattedID =
-    _payload.db.defaultIDType === 'number' ? createdArrayDoc.id : `"${createdArrayDoc.id}"`
-
-  const formattedJPGID =
-    _payload.db.defaultIDType === 'number' ? createdJPGDoc.id : `"${createdJPGDoc.id}"`
-
-  const formattedTextID =
-    _payload.db.defaultIDType === 'number' ? createdTextDoc.id : `"${createdTextDoc.id}"`
-
-  const richTextDocWithRelId = JSON.parse(
-    JSON.stringify(richTextDocData)
-      .replace(/"\{\{ARRAY_DOC_ID\}\}"/g, `${formattedID}`)
-      .replace(/"\{\{UPLOAD_DOC_ID\}\}"/g, `${formattedJPGID}`)
-      .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`),
-  )
   const blocksDocWithRichText = {
     ...(blocksDoc as any),
   }
-  const richTextDocWithRelationship = { ...richTextDocWithRelId }
 
-  blocksDocWithRichText.blocks[0].richText = richTextDocWithRelationship.richText
-  blocksDocWithRichText.localizedBlocks[0].richText = richTextDocWithRelationship.richText
+  const blockRichText = buildEditorState({ text: 'I can do all kinds of fun stuff' })
+
+  blocksDocWithRichText.blocks[0].richText = blockRichText
+  blocksDocWithRichText.localizedBlocks[0].richText = blockRichText
 
   await _payload.create({
     collection: emailFieldsSlug,

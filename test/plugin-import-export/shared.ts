@@ -17,3 +17,15 @@ export const postsWithS3ImportSlug = 'posts-with-s3-import'
 export const postsWithS3ExportSlug = 'posts-with-s3-export'
 
 export const mediaSlug = 'media'
+
+export const customIdPagesSlug = 'custom-id-pages'
+
+export const postsWithHooksSlug = 'posts-with-hooks'
+
+export const postsWithHooksExportSlug = 'posts-with-hooks-export'
+
+export const postsWithHooksImportSlug = 'posts-with-hooks-import'
+
+export const postsWithFieldHooksSlug = 'posts-with-field-hooks'
+
+export const postsWithColumnMapSlug = 'posts-with-column-map'

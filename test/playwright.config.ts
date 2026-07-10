@@ -7,13 +7,15 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 dotenv.config({ path: path.resolve(dirname, 'test.env') })
+dotenv.config({ path: path.resolve(dirname, '..', '.env') })
 
 const CI = process.env.CI === 'true'
+const isTanStack = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
 
 let multiplier = CI ? 4 : 1
 let smallMultiplier = CI ? 3 : 1
 
-export const TEST_TIMEOUT_LONG = 320000 * multiplier // 4*8 minutes - used as timeOut for the beforeAll
+export const TEST_TIMEOUT_LONG = 60000 * multiplier // used as timeOut for the beforeAll
 export const TEST_TIMEOUT = 20000 * smallMultiplier
 export const EXPECT_TIMEOUT = 6000 * smallMultiplier
 export const POLL_TOPASS_TIMEOUT = EXPECT_TIMEOUT * 4 // That way expect.poll() or expect().toPass can retry 4 times. 4x higher than default expect timeout => can retry 4 times if retryable expects are used inside
@@ -21,7 +23,7 @@ export const POLL_TOPASS_TIMEOUT = EXPECT_TIMEOUT * 4 // That way expect.poll() 
 export default defineConfig({
   // Look for test files in the "test" directory, relative to this configuration file
   testDir: '',
-  testMatch: '*e2e.spec.ts',
+  testMatch: ['*e2e.spec.ts', '*perf.spec.ts'],
   timeout: TEST_TIMEOUT, // 1 minute
   use: {
     screenshot: 'off',
@@ -31,14 +33,14 @@ export default defineConfig({
      */
     trace: CI ? 'on-first-retry' : 'retain-on-failure',
     video: 'off',
-    navigationTimeout: TEST_TIMEOUT/2
+    navigationTimeout: TEST_TIMEOUT / 2,
   },
   expect: {
     timeout: EXPECT_TIMEOUT,
   },
   workers: 16,
-  maxFailures: CI ? undefined : undefined,
-  retries: CI ? 5 : undefined,
+  maxFailures: CI && isTanStack ? 30 : undefined,
+  retries: CI ? (isTanStack ? 2 : 5) : undefined,
   reporter: CI ? [['list', { printSteps: true }], ['json']] : [['list', { printSteps: true }]],
   projects: [
     {

@@ -3,7 +3,15 @@ import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/clie
 import { formatAdminURL } from 'payload/shared'
 
 export const GcsClientUploadHandler = createClientUploadHandler({
-  handler: async ({ apiRoute, collectionSlug, file, prefix, serverHandlerPath, serverURL }) => {
+  handler: async ({
+    apiRoute,
+    collectionSlug,
+    docPrefix,
+    file,
+    serverHandlerPath,
+    serverURL,
+    updateFilename,
+  }) => {
     const endpointRoute = formatAdminURL({
       apiRoute,
       path: serverHandlerPath,
@@ -12,6 +20,7 @@ export const GcsClientUploadHandler = createClientUploadHandler({
     const response = await fetch(endpointRoute, {
       body: JSON.stringify({
         collectionSlug,
+        docPrefix,
         filename: file.name,
         mimeType: file.type,
       }),
@@ -19,7 +28,19 @@ export const GcsClientUploadHandler = createClientUploadHandler({
       method: 'POST',
     })
 
-    const { url } = (await response.json()) as { url: string }
+    const {
+      docPrefix: sanitizedDocPrefix,
+      filename: sanitizedFilename,
+      url,
+    } = (await response.json()) as {
+      docPrefix: string
+      filename?: string
+      url: string
+    }
+
+    if (sanitizedFilename && sanitizedFilename !== file.name) {
+      updateFilename(sanitizedFilename)
+    }
 
     await fetch(url, {
       body: file,
@@ -28,7 +49,7 @@ export const GcsClientUploadHandler = createClientUploadHandler({
     })
 
     return {
-      prefix,
+      prefix: sanitizedDocPrefix,
     }
   },
 })

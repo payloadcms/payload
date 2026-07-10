@@ -77,6 +77,13 @@ export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promis
         const location = res.headers.get('location')
         if (location) {
           fileURL = new URL(location, fileURL).toString()
+          if (
+            uploadConfig.pasteURL &&
+            uploadConfig.pasteURL.allowList &&
+            !isURLAllowed(fileURL, uploadConfig.pasteURL.allowList)
+          ) {
+            throw new APIError('Redirect target is not allowed.', 400)
+          }
           continue
         }
       }

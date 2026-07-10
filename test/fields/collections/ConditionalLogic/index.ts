@@ -32,6 +32,18 @@ const ConditionalLogic: CollectionConfig = {
       },
     },
     {
+      type: 'row',
+      admin: {
+        condition: ({ toggleField }) => Boolean(toggleField),
+      },
+      fields: [
+        {
+          name: 'rowFieldWithCondition',
+          type: 'text',
+        },
+      ],
+    },
+    {
       name: 'fieldWithOperationCondition',
       type: 'text',
       admin: {
@@ -203,6 +215,67 @@ const ConditionalLogic: CollectionConfig = {
       ],
     },
     {
+      name: 'blocksWithRadioCondition',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'blockWithRadioCondition',
+          dbName: 'bRadioCon',
+          fields: [
+            {
+              dbName: 'rTrig',
+              name: 'radioTrigger',
+              type: 'radio',
+              defaultValue: 'hide',
+              options: [
+                { label: 'Show', value: 'show' },
+                { label: 'Hide', value: 'hide' },
+              ],
+            },
+            {
+              name: 'conditionalTextField',
+              type: 'text',
+              admin: {
+                condition: (_data, siblingData) => siblingData?.radioTrigger === 'show',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'enableTabs',
+      type: 'checkbox',
+    },
+    {
+      type: 'tabs',
+      admin: {
+        condition: ({ enableTabs }) => Boolean(enableTabs),
+      },
+      tabs: [
+        {
+          label: 'Tab With Condition 1',
+          description: 'Description for conditional tab 1',
+          fields: [
+            {
+              name: 'conditionalTabsField1',
+              type: 'text',
+            },
+          ],
+        },
+        {
+          label: 'Tab With Condition 2',
+          description: 'Description for conditional tab 2',
+          fields: [
+            {
+              name: 'conditionalTabsField2',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+    },
+    {
       name: 'arrayOne',
       type: 'array',
       fields: [
@@ -260,6 +333,7 @@ const ConditionalLogic: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default ConditionalLogic

@@ -9,28 +9,31 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, ReadOnlyCollection, RestrictedVersion } from './payload-types.js'
 
-import { devUser } from '../credentials.js'
+import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
+import { login } from '../__helpers/e2e/auth/login.js'
+import { getColumnSelectorItem, openListColumns } from '../__helpers/e2e/columns/index.js'
+import { openListFilters } from '../__helpers/e2e/filters/index.js'
+import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import {
   ensureCompilationIsDone,
   exactText,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
-import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
-import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
-import { login } from '../__helpers/e2e/auth/login.js'
-import { openListFilters } from '../__helpers/e2e/filters/index.js'
-import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
+import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { readRestrictedSlug } from './collections/ReadRestricted/index.js'
 import {
   authSlug,
   blocksFieldAccessSlug,
   createNotUpdateCollectionSlug,
+  differentiatedTrashSlug,
   disabledSlug,
   docLevelAccessSlug,
   fullyRestrictedSlug,
@@ -40,6 +43,8 @@ import {
   readNotUpdateGlobalSlug,
   readOnlyGlobalSlug,
   readOnlySlug,
+  regularUserEmail,
+  restrictedTrashSlug,
   restrictedVersionsAdminPanelSlug,
   restrictedVersionsSlug,
   slug,
@@ -59,7 +64,8 @@ const dirname = path.dirname(filename)
  * Repeat all above for globals
  */
 
-const { beforeAll, beforeEach, describe } = test
+const { beforeAll, beforeEach, describe, afterEach, afterAll } = test
+
 let payload: PayloadTestSDK<Config>
 describe('Access Control', () => {
   let page: Page
@@ -79,6 +85,8 @@ describe('Access Control', () => {
   let context: BrowserContext
   let authFields: AdminUrlUtil
   let blocksFieldAccessUrl: AdminUrlUtil
+  let differentiatedTrashUrl: AdminUrlUtil
+  let restrictedTrashUrl: AdminUrlUtil
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -98,6 +106,8 @@ describe('Access Control', () => {
     disabledFields = new AdminUrlUtil(serverURL, disabledSlug)
     authFields = new AdminUrlUtil(serverURL, authSlug)
     blocksFieldAccessUrl = new AdminUrlUtil(serverURL, blocksFieldAccessSlug)
+    differentiatedTrashUrl = new AdminUrlUtil(serverURL, differentiatedTrashSlug)
+    restrictedTrashUrl = new AdminUrlUtil(serverURL, restrictedTrashSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -147,22 +157,36 @@ describe('Access Control', () => {
     })
 
     test('ensure field with update access control is readOnly during both initial load and after saving', async () => {
+      test.setTimeout(TEST_TIMEOUT_LONG)
+
+      const isTanStack = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
+
       async function waitForFormState(action: 'reload' | 'save') {
-        await assertNetworkRequests(
-          page,
-          '/admin/collections/field-restricted-update-based-on-data',
-          async () => {
-            if (action === 'save') {
-              await saveDocAndAssert(page)
-            } else {
-              await page.reload()
-            }
-          },
-          {
-            allowedNumberOfRequests: action === 'save' ? 2 : 1,
-            minimumNumberOfRequests: action === 'save' ? 2 : 1,
-          },
-        )
+        if (isTanStack) {
+          if (action === 'save') {
+            await saveDocAndAssert(page)
+          } else {
+            await page.reload()
+          }
+          // eslint-disable-next-line playwright/no-networkidle
+          await page.waitForLoadState('networkidle')
+        } else {
+          await assertNetworkRequests(
+            page,
+            '/admin/collections/field-restricted-update-based-on-data',
+            async () => {
+              if (action === 'save') {
+                await saveDocAndAssert(page)
+              } else {
+                await page.reload()
+              }
+            },
+            {
+              allowedNumberOfRequests: action === 'save' ? 2 : 1,
+              minimumNumberOfRequests: action === 'save' ? 2 : 1,
+            },
+          )
+        }
       }
       // Reproduces a bug where the shape of the `data` object passed to the field update access control function is incorrect
       // after saving the document, and correct on initial load.
@@ -233,7 +257,7 @@ describe('Access Control', () => {
       await page.goto(richTextUrl.create)
 
       await page.locator('.blocks-field__drawer-toggler').click()
-      await page.locator('.thumbnail-card').click()
+      await page.locator('.thumbnail-card').dblclick()
       const richTextField = page.locator('.rich-text-lexical')
       const contentEditable = richTextField.locator('.ContentEditable__root').first()
       await expect(contentEditable).toBeVisible()
@@ -314,8 +338,8 @@ describe('Access Control', () => {
       const regression1URL = new AdminUrlUtil(serverURL, 'regression1')
       await page.goto(regression1URL.list)
 
-      await page.locator('.cell-id a').first().click()
-      await page.waitForURL(`**/collections/regression1/**`)
+      const href = await page.locator('.cell-id a').first().getAttribute('href')
+      await page.goto(`${serverURL}${href}`)
 
       await ensureRegression1FieldsHaveCorrectAccess()
 
@@ -358,8 +382,9 @@ describe('Access Control', () => {
       const regression2URL = new AdminUrlUtil(serverURL, 'regression2')
       await page.goto(regression2URL.list)
 
-      await page.locator('.cell-id a').first().click()
-      await page.waitForURL(`**/collections/regression2/**`)
+      const href = await page.locator('.cell-id a').first().getAttribute('href')
+      await page.goto(`${serverURL}${href}`)
+      await wait(500)
 
       await ensureRegression2FieldsHaveCorrectAccess()
 
@@ -707,8 +732,8 @@ describe('Access Control', () => {
       await wait(1000)
 
       // Ensure admin user cannot unlock other users
-      await adminUserRow.locator('.cell-id a').click()
-      await page.waitForURL(`**/collections/users/**`)
+      const adminUserHref = await adminUserRow.locator('.cell-id a').getAttribute('href')
+      await page.goto(`${serverURL}${adminUserHref}`)
 
       const unlockButton = page.locator('#force-unlock')
       await expect(unlockButton).toBeVisible()
@@ -721,8 +746,8 @@ describe('Access Control', () => {
       await wait(1000)
 
       // Ensure non-admin user cannot see unlock button
-      await nonAdminUserRow.locator('.cell-id a').click()
-      await page.waitForURL(`**/collections/users/**`)
+      const nonAdminUserHref = await nonAdminUserRow.locator('.cell-id a').getAttribute('href')
+      await page.goto(`${serverURL}${nonAdminUserHref}`)
       await expect(page.locator('#force-unlock')).toBeHidden()
     })
   })
@@ -757,9 +782,7 @@ describe('Access Control', () => {
         serverURL,
       })
 
-      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
-        'Unauthorized, this user does not have access to the admin panel.',
-      )
+      await expect(page.locator('.unauthorized__content h1')).toHaveText('Unauthorized')
 
       await page.goto(url.logout)
 
@@ -768,6 +791,28 @@ describe('Access Control', () => {
       )
 
       await expect(page.locator('form.login__form')).toBeVisible()
+    })
+
+    test('non-admin users should not be able to bypass admin access by navigating directly to a collection with a custom dashboard view set', async () => {
+      await page.goto(url.logout)
+
+      await login({
+        data: {
+          email: nonAdminEmail,
+          password: 'test',
+        },
+        page,
+        serverURL,
+      })
+
+      // Navigate directly to a collection URL, bypassing the dashboard
+      await page.goto(new AdminUrlUtil(serverURL, readOnlySlug).list)
+
+      // Should be redirected to unauthorized, not the collection list
+      await page.waitForURL(/\/unauthorized/)
+      await expect(page.locator('.unauthorized__content h1')).toHaveText('Unauthorized')
+
+      await page.goto(url.logout)
     })
 
     test('public users should not have access to access admin', async () => {
@@ -800,9 +845,7 @@ describe('Access Control', () => {
       // await for redirect to unauthorized
       await page.waitForURL(/unauthorized$/)
 
-      await expect(page.locator('.unauthorized .form-header h1')).toHaveText(
-        'Unauthorized, this user does not have access to the admin panel.',
-      )
+      await expect(page.locator('.unauthorized__content h1')).toHaveText('Unauthorized')
 
       await page.goto(url.logout)
 
@@ -856,6 +899,15 @@ describe('Access Control', () => {
   describe('restricting update access to auth fields', () => {
     let existingDoc: ReadOnlyCollection
     beforeAll(async () => {
+      const existing = await payload.find({
+        collection: authSlug,
+        where: { email: { equals: 'test@payloadcms.com' } },
+        limit: 1,
+      })
+      for (const doc of existing.docs) {
+        await payload.delete({ collection: authSlug, id: doc.id })
+      }
+
       existingDoc = await payload.create({
         collection: authSlug,
         data: {
@@ -863,6 +915,12 @@ describe('Access Control', () => {
           password: 'test',
         },
       })
+    })
+
+    afterAll(async () => {
+      if (existingDoc?.id) {
+        await payload.delete({ collection: authSlug, id: existingDoc.id })
+      }
     })
     test('should show email as readonly when user does not have update permission', async () => {
       await page.goto(authFields.edit(existingDoc.id))
@@ -890,189 +948,162 @@ describe('Access Control', () => {
     describe('column selector', () => {
       test('should hide top-level field with read: false in column selector', async () => {
         await page.goto(readRestrictedUrl.list)
-        await page.locator('.list-controls__toggle-columns').click()
-
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        const { columnContainer } = await openListColumns(page)
 
         // Should hide restrictedTopLevel field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Restricted Top Level'),
-          }),
+          getColumnSelectorItem({ container: columnContainer, label: 'Restricted Top Level' }),
         ).toBeHidden()
 
         // Should show visibleTopLevel field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Visible Top Level'),
-          }),
+          getColumnSelectorItem({ container: columnContainer, label: 'Visible Top Level' }),
         ).toBeVisible()
       })
 
       test('should hide nested field with read: false inside group in column selector', async () => {
         await page.goto(readRestrictedUrl.list)
-        await page.locator('.list-controls__toggle-columns').click()
-
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        const { columnContainer } = await openListColumns(page)
 
         // Should hide secretPhone field inside contactInfo group
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Contact Info > Secret Phone'),
+          getColumnSelectorItem({
+            container: columnContainer,
+            label: 'Contact Info > Secret Phone',
           }),
         ).toBeHidden()
 
         // Should show publicPhone field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Contact Info > Public Phone'),
+          getColumnSelectorItem({
+            container: columnContainer,
+            label: 'Contact Info > Public Phone',
           }),
         ).toBeVisible()
       })
 
       test('should hide field with read: false inside row in column selector', async () => {
         await page.goto(readRestrictedUrl.list)
-        await page.locator('.list-controls__toggle-columns').click()
-
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        const { columnContainer } = await openListColumns(page)
 
         // Should hide restrictedInRow field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Restricted In Row'),
-          }),
+          getColumnSelectorItem({ container: columnContainer, label: 'Restricted In Row' }),
         ).toBeHidden()
 
         // Should show visibleInRow field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Visible In Row'),
-          }),
+          getColumnSelectorItem({ container: columnContainer, label: 'Visible In Row' }),
         ).toBeVisible()
       })
 
       test('should hide field with read: false inside collapsible in column selector', async () => {
         await page.goto(readRestrictedUrl.list)
-        await page.locator('.list-controls__toggle-columns').click()
-
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        const { columnContainer } = await openListColumns(page)
 
         // Should hide restrictedInCollapsible field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Restricted In Collapsible'),
-          }),
+          getColumnSelectorItem({ container: columnContainer, label: 'Restricted In Collapsible' }),
         ).toBeHidden()
 
         // Should show visibleInCollapsible field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Visible In Collapsible'),
-          }),
+          getColumnSelectorItem({ container: columnContainer, label: 'Visible In Collapsible' }),
         ).toBeVisible()
       })
 
       test('should hide deeply nested field with read: false in column selector', async () => {
         await page.goto(readRestrictedUrl.list)
-        await page.locator('.list-controls__toggle-columns').click()
-
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        const { columnContainer } = await openListColumns(page)
 
         // Should hide metadata.analytics.restrictedMetric field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Metadata > Analytics > Restricted Metric'),
+          getColumnSelectorItem({
+            container: columnContainer,
+            label: 'Metadata > Analytics > Restricted Metric',
           }),
         ).toBeHidden()
 
         // Should show metadata.analytics.visibleMetric field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Metadata > Analytics > Visible Metric'),
+          getColumnSelectorItem({
+            container: columnContainer,
+            label: 'Metadata > Analytics > Visible Metric',
           }),
         ).toBeVisible()
       })
 
       test('should hide field with read: false inside unnamed tab in column selector', async () => {
         await page.goto(readRestrictedUrl.list)
-        await page.locator('.list-controls__toggle-columns').click()
-
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        const { columnContainer } = await openListColumns(page)
 
         // Should hide secretInPublicTab field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Secret In Public Tab'),
-          }),
+          getColumnSelectorItem({ container: columnContainer, label: 'Secret In Public Tab' }),
         ).toBeHidden()
 
         // Should show publicData field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Public Data'),
-          }),
+          getColumnSelectorItem({ container: columnContainer, label: 'Public Data' }),
         ).toBeVisible()
       })
 
       test('should hide field with read: false inside named tab in column selector', async () => {
         await page.goto(readRestrictedUrl.list)
-        await page.locator('.list-controls__toggle-columns').click()
-
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        const { columnContainer } = await openListColumns(page)
 
         // Should hide restrictedSetting field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Settings > Restricted Setting'),
+          getColumnSelectorItem({
+            container: columnContainer,
+            label: 'Settings > Restricted Setting',
           }),
         ).toBeHidden()
 
         // Should show visibleSetting field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Settings > Visible Setting'),
+          getColumnSelectorItem({
+            container: columnContainer,
+            label: 'Settings > Visible Setting',
           }),
         ).toBeVisible()
       })
 
       test('should hide field with read: false inside row within group in column selector', async () => {
         await page.goto(readRestrictedUrl.list)
-        await page.locator('.list-controls__toggle-columns').click()
-
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        const { columnContainer } = await openListColumns(page)
 
         // Should hide secretPostalCode field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Address > Secret Postal Code'),
+          getColumnSelectorItem({
+            container: columnContainer,
+            label: 'Address > Secret Postal Code',
           }),
         ).toBeHidden()
 
         // Should show city field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Address > City'),
-          }),
+          getColumnSelectorItem({ container: columnContainer, label: 'Address > City' }),
         ).toBeVisible()
       })
 
       test('should hide field with read: false inside group within collapsible in column selector', async () => {
         await page.goto(readRestrictedUrl.list)
-        await page.locator('.list-controls__toggle-columns').click()
-
-        await expect(page.locator('.pill-selector')).toBeVisible()
+        const { columnContainer } = await openListColumns(page)
 
         // Should hide restrictedAdvanced field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Advanced > Restricted Advanced'),
+          getColumnSelectorItem({
+            container: columnContainer,
+            label: 'Advanced > Restricted Advanced',
           }),
         ).toBeHidden()
 
         // Should show visibleAdvanced field
         await expect(
-          page.locator(`.pill-selector .pill-selector__pill`, {
-            hasText: exactText('Advanced > Visible Advanced'),
+          getColumnSelectorItem({
+            container: columnContainer,
+            label: 'Advanced > Visible Advanced',
           }),
         ).toBeVisible()
       })
@@ -1082,178 +1113,170 @@ describe('Access Control', () => {
       test('should hide top-level field with read: false in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedTopLevel field
-        await expect(
-          initialField.locator('.rs__option', { hasText: 'Restricted Top Level' }),
-        ).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Restricted Top Level' })).toBeHidden()
       })
 
       test('should hide nested field with read: false inside group in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Public Phone',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretPhone field
-        await expect(initialField.locator('.rs__option', { hasText: 'Secret Phone' })).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Secret Phone' })).toBeHidden()
       })
 
       test('should hide field with read: false inside row in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible In Row',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedInRow field
-        await expect(
-          initialField.locator('.rs__option', { hasText: 'Restricted In Row' }),
-        ).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Restricted In Row' })).toBeHidden()
       })
 
       test('should hide field with read: false inside collapsible in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible In Collapsible',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedInCollapsible field
         await expect(
-          initialField.locator('.rs__option', { hasText: 'Restricted In Collapsible' }),
+          menu.locator('.rs__option', { hasText: 'Restricted In Collapsible' }),
         ).toBeHidden()
       })
 
       test('should hide deeply nested field with read: false in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Metric',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide metadata.analytics.restrictedMetric field
-        await expect(
-          initialField.locator('.rs__option', { hasText: 'Restricted Metric' }),
-        ).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Restricted Metric' })).toBeHidden()
       })
 
       test('should hide field with read: false inside unnamed tab in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
-          hasText: 'Public Tab > Public Data',
+        const visibleOption = menu.locator('.rs__option', {
+          hasText: 'Public Data',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretInPublicTab field
-        await expect(
-          initialField.locator('.rs__option', { hasText: 'Public Tab > Secret In Public Tab' }),
-        ).toBeHidden()
+        await expect(menu.locator('.rs__option', { hasText: 'Secret In Public Tab' })).toBeHidden()
       })
 
       test('should hide field with read: false inside named tab in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Settings > Visible Setting',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedSetting field
         await expect(
-          initialField.locator('.rs__option', { hasText: 'Settings > Restricted Setting' }),
+          menu.locator('.rs__option', { hasText: 'Settings > Restricted Setting' }),
         ).toBeHidden()
       })
 
       test('should hide field with read: false inside row within group in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Address > City',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretPostalCode field
         await expect(
-          initialField.locator('.rs__option', { hasText: 'Address > Secret Postal Code' }),
+          menu.locator('.rs__option', { hasText: 'Address > Secret Postal Code' }),
         ).toBeHidden()
       })
 
       test('should hide field with read: false inside group within collapsible in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Advanced Settings > Advanced > Visible Advanced',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedAdvanced field
         await expect(
-          initialField.locator('.rs__option', {
+          menu.locator('.rs__option', {
             hasText: 'Advanced Settings > Advanced > Restricted Advanced',
           }),
         ).toBeHidden()
@@ -1263,167 +1286,175 @@ describe('Access Control', () => {
     describe('groupBy dropdown', () => {
       test('should hide top-level field with read: false in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedTopLevel field
-        await expect(field.locator('.rs__option', { hasText: 'Restricted Top Level' })).toBeHidden()
+        await expect(
+          page.locator('.popup-button-list__button', { hasText: 'Restricted Top Level' }),
+        ).toHaveCount(0)
       })
 
       test('should hide nested field with read: false inside group in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Public Phone',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretPhone field
-        await expect(field.locator('.rs__option', { hasText: 'Secret Phone' })).toBeHidden()
+        await expect(
+          page.locator('.popup-button-list__button', { hasText: 'Secret Phone' }),
+        ).toHaveCount(0)
       })
 
       test('should hide field with read: false inside row in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible In Row',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedInRow field
-        await expect(field.locator('.rs__option', { hasText: 'Restricted In Row' })).toBeHidden()
+        await expect(
+          page.locator('.popup-button-list__button', { hasText: 'Restricted In Row' }),
+        ).toHaveCount(0)
       })
 
       test('should hide field with read: false inside collapsible in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible In Collapsible',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedInCollapsible field
         await expect(
-          field.locator('.rs__option', { hasText: 'Restricted In Collapsible' }),
-        ).toBeHidden()
+          page.locator('.popup-button-list__button', { hasText: 'Restricted In Collapsible' }),
+        ).toHaveCount(0)
       })
 
       test('should hide deeply nested field with read: false in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Metric',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide metadata.analytics.restrictedMetric field
-        await expect(field.locator('.rs__option', { hasText: 'Restricted Metric' })).toBeHidden()
+        await expect(
+          page.locator('.popup-button-list__button', { hasText: 'Restricted Metric' }),
+        ).toHaveCount(0)
       })
 
       test('should hide field with read: false inside unnamed tab in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
-          hasText: 'Public Tab > Public Data',
+        const visibleOption = page.locator('.popup-button-list__button', {
+          hasText: 'Public Data',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretInPublicTab field
         await expect(
-          field.locator('.rs__option', { hasText: 'Public Tab > Secret In Public Tab' }),
-        ).toBeHidden()
+          page.locator('.popup-button-list__button', { hasText: 'Secret In Public Tab' }),
+        ).toHaveCount(0)
       })
 
       test('should hide field with read: false inside named tab in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Settings > Visible Setting',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedSetting field
         await expect(
-          field.locator('.rs__option', { hasText: 'Settings > Restricted Setting' }),
-        ).toBeHidden()
+          page.locator('.popup-button-list__button', { hasText: 'Settings > Restricted Setting' }),
+        ).toHaveCount(0)
       })
 
       test('should hide field with read: false inside row within group in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Address > City',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide secretPostalCode field
         await expect(
-          field.locator('.rs__option', { hasText: 'Address > Secret Postal Code' }),
-        ).toBeHidden()
+          page.locator('.popup-button-list__button', { hasText: 'Address > Secret Postal Code' }),
+        ).toHaveCount(0)
       })
 
       test('should hide field with read: false inside group within collapsible in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load by waiting for the visible field
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Advanced Settings > Advanced > Visible Advanced',
         })
         await expect(visibleOption).toBeVisible()
 
         // Should hide restrictedAdvanced field
         await expect(
-          field.locator('.rs__option', {
+          page.locator('.popup-button-list__button', {
             hasText: 'Advanced Settings > Advanced > Restricted Advanced',
           }),
-        ).toBeHidden()
+        ).toHaveCount(0)
       })
     })
 
@@ -1431,19 +1462,19 @@ describe('Access Control', () => {
       test('should show virtual field in filter dropdown when collection has field with access control', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Virtual field should be visible in the filter dropdown
-        const virtualFieldOption = initialField.locator('.rs__option', {
+        const virtualFieldOption = menu.locator('.rs__option', {
           hasText: 'Unrestricted Virtual Field Name',
         })
         await expect(virtualFieldOption).toBeVisible()
@@ -1451,19 +1482,19 @@ describe('Access Control', () => {
 
       test('should show virtual field in groupBy dropdown when collection has field with access control', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Virtual field should be visible in the groupBy dropdown
-        const virtualFieldOption = field.locator('.rs__option', {
+        const virtualFieldOption = page.locator('.popup-button-list__button', {
           hasText: 'Unrestricted Virtual Field Name',
         })
         await expect(virtualFieldOption).toBeVisible()
@@ -1472,24 +1503,24 @@ describe('Access Control', () => {
       test('should show nested fields within virtual group field in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Nested fields within the virtual group should be visible
-        const virtualGroupTitleOption = initialField.locator('.rs__option', {
+        const virtualGroupTitleOption = menu.locator('.rs__option', {
           hasText: 'Unrestricted Virtual Group Info > Title',
         })
         await expect(virtualGroupTitleOption).toBeVisible()
 
-        const virtualGroupDescriptionOption = initialField.locator('.rs__option', {
+        const virtualGroupDescriptionOption = menu.locator('.rs__option', {
           hasText: 'Unrestricted Virtual Group Info > Description',
         })
         await expect(virtualGroupDescriptionOption).toBeVisible()
@@ -1497,24 +1528,24 @@ describe('Access Control', () => {
 
       test('should show nested fields within virtual group field in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Nested fields within the virtual group should be visible
-        const virtualGroupTitleOption = field.locator('.rs__option', {
+        const virtualGroupTitleOption = page.locator('.popup-button-list__button', {
           hasText: 'Unrestricted Virtual Group Info > Title',
         })
         await expect(virtualGroupTitleOption).toBeVisible()
 
-        const virtualGroupDescriptionOption = field.locator('.rs__option', {
+        const virtualGroupDescriptionOption = page.locator('.popup-button-list__button', {
           hasText: 'Unrestricted Virtual Group Info > Description',
         })
         await expect(virtualGroupDescriptionOption).toBeVisible()
@@ -1523,19 +1554,19 @@ describe('Access Control', () => {
       test('should show virtual field nested inside group in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Virtual field nested inside contactInfo group should be visible
-        const nestedVirtualFieldOption = initialField.locator('.rs__option', {
+        const nestedVirtualFieldOption = menu.locator('.rs__option', {
           hasText: 'Contact Info > Virtual Contact Name',
         })
         await expect(nestedVirtualFieldOption).toBeVisible()
@@ -1543,19 +1574,19 @@ describe('Access Control', () => {
 
       test('should show virtual field nested inside group in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Virtual field nested inside contactInfo group should be visible
-        const nestedVirtualFieldOption = field.locator('.rs__option', {
+        const nestedVirtualFieldOption = page.locator('.popup-button-list__button', {
           hasText: 'Contact Info > Virtual Contact Name',
         })
         await expect(nestedVirtualFieldOption).toBeVisible()
@@ -1564,59 +1595,61 @@ describe('Access Control', () => {
       test('should hide top-level virtual field with read: false in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Restricted virtual field should be hidden (use exactText to avoid matching "Unrestricted...")
         await expect(
-          initialField.locator('.rs__option', { hasText: exactText('Restricted Virtual Field') }),
+          menu.locator('.rs__option', { hasText: exactText('Restricted Virtual Field') }),
         ).toBeHidden()
       })
 
       test('should hide top-level virtual field with read: false in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Restricted virtual field should be hidden (use exactText to avoid matching "Unrestricted...")
         await expect(
-          field.locator('.rs__option', { hasText: exactText('Restricted Virtual Field') }),
-        ).toBeHidden()
+          page.locator('.popup-button-list__button', {
+            hasText: exactText('Restricted Virtual Field'),
+          }),
+        ).toHaveCount(0)
       })
 
       test('should hide nested virtual field with read: false in filter dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
         await openListFilters(page, {})
-        await page.locator('.where-builder__add-first-filter').click()
 
         const initialField = page.locator('.condition__field')
         await initialField.click()
+        const menu = getSelectMenu({ page })
 
         // Wait for dropdown options to load
-        const visibleOption = initialField.locator('.rs__option', {
+        const visibleOption = menu.locator('.rs__option', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Restricted virtual field nested in contactInfo should be hidden
         await expect(
-          initialField.locator('.rs__option', {
+          menu.locator('.rs__option', {
             hasText: 'Contact Info > Restricted Virtual Contact Info',
           }),
         ).toBeHidden()
@@ -1624,23 +1657,23 @@ describe('Access Control', () => {
 
       test('should hide nested virtual field with read: false in groupBy dropdown', async () => {
         await page.goto(readRestrictedUrl.list)
-        const { groupByContainer } = await openGroupBy(page)
+        const { groupByContent } = await openGroupBy(page)
 
-        const field = groupByContainer.locator('#group-by--field-select')
-        await field.click()
+        const fieldTrigger = groupByContent.locator('.group-by-control__select-trigger').first()
+        await fieldTrigger.click()
 
         // Wait for dropdown options to load
-        const visibleOption = field.locator('.rs__option', {
+        const visibleOption = page.locator('.popup-button-list__button', {
           hasText: 'Visible Top Level',
         })
         await expect(visibleOption).toBeVisible()
 
         // Restricted virtual field nested in contactInfo should be hidden
         await expect(
-          field.locator('.rs__option', {
+          page.locator('.popup-button-list__button', {
             hasText: 'Contact Info > Restricted Virtual Contact Info',
           }),
-        ).toBeHidden()
+        ).toHaveCount(0)
       })
     })
 
@@ -1776,7 +1809,7 @@ describe('Access Control', () => {
       })
 
       await page.goto(blocksFieldAccessUrl.edit(doc.id))
-      await expect(page.locator('.doc-header__title')).toContainText('ID: ')
+      await expect(page.locator('.doc-header__title .id-label')).toBeVisible()
 
       // Editable blocks - fields should be editable
       await expect(page.locator('#field-editableBlocks__0__title')).toBeEnabled()
@@ -1804,6 +1837,689 @@ describe('Access Control', () => {
       await expect(
         page.locator('#field-tabReadOnlyTest__tabReadOnlyBlockRefs__0__title'),
       ).toBeDisabled()
+    })
+  })
+
+  describe('trash access control', () => {
+    describe('differentiated trash collection - regular users can trash but not permanently delete', () => {
+      const createdDocIds: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdDocIds) {
+          await payload.delete({
+            collection: differentiatedTrashSlug,
+            id,
+            trash: true,
+          })
+        }
+        createdDocIds.length = 0
+      })
+
+      describe('as admin user', () => {
+        beforeAll(async () => {
+          await login({
+            data: {
+              email: devUser.email,
+              password: devUser.password,
+            },
+            page,
+            serverURL,
+          })
+        })
+
+        test('should show delete button in doc controls dropdown', async () => {
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(differentiatedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await expect(page.locator('.popup__content #action-delete')).toBeVisible()
+        })
+
+        test('should show delete forever checkbox in delete modal', async () => {
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(differentiatedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          await expect(page.locator('#delete-forever')).toBeVisible()
+        })
+
+        test('should allow permanently deleting a doc', async () => {
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: { title: 'Test Doc For Perma Delete', _status: 'published' },
+          })
+          // Don't add to createdDocIds since we're permanently deleting it
+
+          await page.goto(differentiatedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          await page.locator('#delete-forever').check()
+          await page.locator('.delete-document [data-dialog-action="confirm"]').click()
+
+          await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+            `Differentiated Trash "Test Doc For Perma Delete" successfully deleted.`,
+          )
+        })
+
+        test('should show permanently delete button and allow permanently deleting when viewing trashed doc', async () => {
+          // Create a trashed document
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: {
+              title: 'Admin Trashed Doc View Test',
+              _status: 'published',
+              deletedAt: new Date().toISOString(),
+            },
+          })
+          // Don't add to createdDocIds since we're permanently deleting it
+
+          // Navigate to the trashed document edit view
+          await page.goto(differentiatedTrashUrl.trashEdit(doc.id))
+
+          // Admin should see the permanently delete button
+          const permanentlyDeleteButton = page.locator('#action-permanently-delete')
+          await expect(permanentlyDeleteButton).toBeVisible()
+
+          // Restore button should also be visible
+          const restoreButton = page.locator('#action-restore')
+          await expect(restoreButton).toBeVisible()
+
+          // Click permanently delete and confirm
+          await permanentlyDeleteButton.click()
+          await expect(page.locator(`#perma-delete-${doc.id}`)).toBeVisible()
+          await page.locator(`#perma-delete-${doc.id} [data-dialog-action="confirm"]`).click()
+
+          // Verify success toast
+          await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+            `Differentiated Trash "Admin Trashed Doc View Test" successfully deleted.`,
+          )
+
+          // Verify URL changed to trash list view
+          await expect(page).toHaveURL(new RegExp(`${differentiatedTrashUrl.trash}(\\?|$)`))
+        })
+      })
+
+      describe('as regular user', () => {
+        beforeAll(async () => {
+          await login({
+            page,
+            serverURL,
+            data: {
+              email: regularUserEmail,
+              password: 'test',
+            },
+          })
+        })
+
+        afterAll(async () => {
+          // Log back in as admin for other tests
+          await login({ page, serverURL })
+        })
+
+        test('should show delete button in doc controls dropdown', async () => {
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(differentiatedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await expect(page.locator('.popup__content #action-delete')).toBeVisible()
+        })
+
+        test('should hide delete forever checkbox in delete modal since user cannot permanently delete', async () => {
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(differentiatedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          // The checkbox should be hidden for regular users
+          // because they can trash but not permanently delete
+          await expect(page.locator('#delete-forever')).toBeHidden()
+        })
+
+        test('should allow trashing a doc', async () => {
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: { title: 'Test Doc For Trash', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(differentiatedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          await page.locator('.delete-document [data-dialog-action="confirm"]').click()
+
+          await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+            `Differentiated Trash "Test Doc For Trash" moved to trash.`,
+          )
+        })
+
+        test('should hide permanently delete button but show restore button when viewing trashed doc', async () => {
+          // Create a trashed document
+          const doc = await payload.create({
+            collection: differentiatedTrashSlug,
+            data: {
+              title: 'Trashed Doc View Test',
+              _status: 'published',
+              deletedAt: new Date().toISOString(),
+            },
+          })
+          createdDocIds.push(doc.id)
+
+          // Navigate to the trashed document edit view
+          await page.goto(differentiatedTrashUrl.trashEdit(doc.id))
+
+          // Permanently delete button should NOT be visible (user can only trash, not permanently delete)
+          const permanentlyDeleteButton = page.locator('#action-permanently-delete')
+          await expect(permanentlyDeleteButton).toBeHidden()
+
+          // Restore button SHOULD be visible (user has save/update permission)
+          const restoreButton = page.locator('#action-restore')
+          await expect(restoreButton).toBeVisible()
+
+          // Click restore and confirm
+          await restoreButton.click()
+          await expect(page.locator(`#restore-${doc.id}`)).toBeVisible()
+          await page.locator(`#restore-${doc.id} [data-dialog-action="confirm"]`).click()
+
+          // Verify success toast
+          await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+            `Differentiated Trash "Trashed Doc View Test" successfully restored.`,
+          )
+
+          // Verify URL changed to regular edit view (not trash view)
+          await expect(page).toHaveURL(differentiatedTrashUrl.edit(doc.id))
+        })
+      })
+    })
+
+    describe('restricted trash collection - only admins can delete', () => {
+      const createdDocIds: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdDocIds) {
+          await payload.delete({
+            collection: restrictedTrashSlug,
+            id,
+            trash: true,
+          })
+        }
+        createdDocIds.length = 0
+      })
+
+      describe('as admin user', () => {
+        beforeAll(async () => {
+          await login({ page, serverURL })
+        })
+
+        test('should show delete button in doc controls dropdown', async () => {
+          const doc = await payload.create({
+            collection: restrictedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(restrictedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await expect(page.locator('.popup__content #action-delete')).toBeVisible()
+        })
+
+        test('should show delete forever checkbox in delete modal', async () => {
+          const doc = await payload.create({
+            collection: restrictedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(restrictedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          await expect(page.locator('#delete-forever')).toBeVisible()
+        })
+
+        test('should allow trashing a doc', async () => {
+          const doc = await payload.create({
+            collection: restrictedTrashSlug,
+            data: { title: 'Test Doc For Trash', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(restrictedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          await page.locator('.delete-document [data-dialog-action="confirm"]').click()
+
+          await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+            `Restricted Trash "Test Doc For Trash" moved to trash.`,
+          )
+        })
+
+        test('should allow permanently deleting a doc', async () => {
+          const doc = await payload.create({
+            collection: restrictedTrashSlug,
+            data: { title: 'Test Doc For Perma Delete', _status: 'published' },
+          })
+          // Don't add to createdDocIds since we're permanently deleting it
+
+          await page.goto(restrictedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          await page.locator('.popup__content #action-delete').click()
+          await page.locator('#delete-forever').check()
+          await page.locator('.delete-document [data-dialog-action="confirm"]').click()
+
+          await expect(page.locator('.payload-toast-container .toast-success')).toHaveText(
+            `Restricted Trash "Test Doc For Perma Delete" successfully deleted.`,
+          )
+        })
+      })
+
+      describe('as regular user', () => {
+        beforeAll(async () => {
+          await login({
+            page,
+            serverURL,
+            data: {
+              email: regularUserEmail,
+              password: 'test',
+            },
+          })
+        })
+
+        afterAll(async () => {
+          // Log back in as admin for other tests
+          await login({ page, serverURL })
+        })
+
+        test('should not show doc controls popup when user has no delete access', async () => {
+          const doc = await payload.create({
+            collection: restrictedTrashSlug,
+            data: { title: 'Test Doc', _status: 'published' },
+          })
+          createdDocIds.push(doc.id)
+
+          await page.goto(restrictedTrashUrl.edit(doc.id))
+
+          const threeDotMenu = page.locator('.doc-controls__popup')
+          await expect(threeDotMenu).toBeVisible()
+          await threeDotMenu.click()
+
+          const deleteButton = page.locator('.popup__content #action-delete')
+          await expect(deleteButton).toBeHidden()
+        })
+      })
+    })
+
+    describe('list view bulk delete', () => {
+      describe('differentiated trash collection', () => {
+        const createdDocIds: (number | string)[] = []
+
+        afterEach(async () => {
+          for (const id of createdDocIds) {
+            await payload.delete({
+              collection: differentiatedTrashSlug,
+              id,
+              trash: true,
+            })
+          }
+          createdDocIds.length = 0
+        })
+
+        describe('as admin user', () => {
+          beforeAll(async () => {
+            await login({ page, serverURL })
+          })
+
+          test('should show delete button when selecting docs in list view', async () => {
+            const doc = await payload.create({
+              collection: differentiatedTrashSlug,
+              data: { title: 'Bulk Test Doc 1', _status: 'published' },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(differentiatedTrashUrl.list)
+
+            // Wait for table to load
+            await expect(page.locator('.table tbody tr').first()).toBeVisible()
+
+            // Select a row
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
+
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
+
+            // Delete button should be visible in bulk actions
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
+            await expect(deleteButton).toBeVisible()
+          })
+        })
+
+        describe('as regular user', () => {
+          beforeAll(async () => {
+            await login({
+              page,
+              serverURL,
+              data: {
+                email: regularUserEmail,
+                password: 'test',
+              },
+            })
+          })
+
+          afterAll(async () => {
+            await login({ page, serverURL })
+          })
+
+          test('should show delete button when selecting docs in list view (user can trash)', async () => {
+            const doc = await payload.create({
+              collection: differentiatedTrashSlug,
+              data: { title: 'Bulk Test Doc Regular User', _status: 'published' },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(differentiatedTrashUrl.list)
+
+            // Wait for table to load
+            await expect(page.locator('.table tbody tr').first()).toBeVisible()
+
+            // Select a row
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
+
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
+
+            // Delete button should be visible because user can trash (even if they can't permanently delete)
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
+            await expect(deleteButton).toBeVisible()
+          })
+
+          test('should hide delete permanently checkbox in bulk delete modal', async () => {
+            const doc = await payload.create({
+              collection: differentiatedTrashSlug,
+              data: { title: 'Bulk Test Doc Regular User 2', _status: 'published' },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(differentiatedTrashUrl.list)
+
+            // Wait for table to load
+            await expect(page.locator('.table tbody tr').first()).toBeVisible()
+
+            // Select a row
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
+
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
+
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
+            await expect(deleteButton).toBeVisible()
+            await deleteButton.click()
+
+            // The delete permanently checkbox should be hidden for regular users
+            await expect(page.locator('#delete-forever')).toBeHidden()
+          })
+        })
+      })
+
+      describe('restricted trash collection', () => {
+        const createdDocIds: (number | string)[] = []
+
+        afterEach(async () => {
+          for (const id of createdDocIds) {
+            await payload.delete({
+              collection: restrictedTrashSlug,
+              id,
+              trash: true,
+            })
+          }
+          createdDocIds.length = 0
+        })
+
+        describe('as admin user', () => {
+          beforeAll(async () => {
+            await login({ page, serverURL })
+          })
+
+          test('should show delete button when selecting docs in list view', async () => {
+            const doc = await payload.create({
+              collection: restrictedTrashSlug,
+              data: { title: 'Restricted Bulk Test Doc', _status: 'published' },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(restrictedTrashUrl.list)
+
+            // Wait for table to load
+            await expect(page.locator('.table tbody tr').first()).toBeVisible()
+
+            // Select a row
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
+
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
+
+            // Delete button should be visible for admin
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
+            await expect(deleteButton).toBeVisible()
+          })
+        })
+
+        describe('as regular user', () => {
+          beforeAll(async () => {
+            await login({
+              page,
+              serverURL,
+              data: {
+                email: regularUserEmail,
+                password: 'test',
+              },
+            })
+          })
+
+          afterAll(async () => {
+            await login({ page, serverURL })
+          })
+
+          test('should not show delete button when selecting docs in list view (user cannot trash or delete)', async () => {
+            const doc = await payload.create({
+              collection: restrictedTrashSlug,
+              data: { title: 'Restricted Bulk Test Doc Regular User', _status: 'published' },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(restrictedTrashUrl.list)
+
+            // Wait for table to load
+            await expect(page.locator('.table tbody tr').first()).toBeVisible()
+
+            // Select a row
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
+
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
+
+            // Delete button should NOT be visible because user cannot trash or permanently delete
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
+            await expect(deleteButton).toBeHidden()
+          })
+        })
+      })
+    })
+
+    describe('trash view bulk delete (permanent delete only)', () => {
+      describe('differentiated trash collection', () => {
+        const createdDocIds: (number | string)[] = []
+
+        afterEach(async () => {
+          for (const id of createdDocIds) {
+            try {
+              await payload.delete({
+                collection: differentiatedTrashSlug,
+                id,
+                trash: true,
+              })
+            } catch (_e) {
+              // Document may already be deleted
+            }
+          }
+          createdDocIds.length = 0
+        })
+
+        describe('as admin user', () => {
+          beforeAll(async () => {
+            await login({ page, serverURL })
+          })
+
+          test('should show delete button when selecting docs in trash view', async () => {
+            // Create a trashed document
+            const doc = await payload.create({
+              collection: differentiatedTrashSlug,
+              data: {
+                title: 'Trash View Bulk Test Admin',
+                _status: 'published',
+                deletedAt: new Date().toISOString(),
+              },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(`${differentiatedTrashUrl.list}/trash`)
+
+            // Wait for table to load
+            await expect(page.locator('.table tbody tr').first()).toBeVisible()
+
+            // Select a row
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
+
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
+
+            // Delete button should be visible for admin (they can permanently delete)
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
+            await expect(deleteButton).toBeVisible()
+          })
+        })
+
+        describe('as regular user', () => {
+          beforeAll(async () => {
+            await login({
+              page,
+              serverURL,
+              data: {
+                email: regularUserEmail,
+                password: 'test',
+              },
+            })
+          })
+
+          afterAll(async () => {
+            await login({ page, serverURL })
+          })
+
+          test('should NOT show delete button when selecting docs in trash view (user can only trash, not permanently delete)', async () => {
+            // Create a trashed document
+            const doc = await payload.create({
+              collection: differentiatedTrashSlug,
+              data: {
+                title: 'Trash View Bulk Test Regular',
+                _status: 'published',
+                deletedAt: new Date().toISOString(),
+              },
+            })
+            createdDocIds.push(doc.id)
+
+            await page.goto(`${differentiatedTrashUrl.list}/trash`)
+
+            // Wait for table to load
+            await expect(page.locator('.table tbody tr').first()).toBeVisible()
+
+            // Select a row
+            const checkbox = page
+              .locator('.table tbody tr .select-row__checkbox input[type=checkbox]')
+              .first()
+            await checkbox.check()
+            await expect(checkbox).toBeChecked()
+
+            await expect(page.locator('.list-selection')).toContainText('1 selected')
+
+            // Delete button should NOT be visible in trash view because
+            // regular users can only trash (soft delete), not permanently delete
+            const deleteButton = page.locator('.list-selection__button[aria-label="Delete"]')
+            await expect(deleteButton).toBeHidden()
+          })
+        })
+      })
     })
   })
 })

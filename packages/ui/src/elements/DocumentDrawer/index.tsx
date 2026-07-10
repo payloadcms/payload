@@ -1,6 +1,6 @@
 'use client'
 import { useModal } from '@faceless-ui/modal'
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import React, { useCallback, useId, useMemo, useRef } from 'react'
 
 import type {
   DocumentDrawerProps,
@@ -14,7 +14,6 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Drawer, DrawerToggler } from '../Drawer/index.js'
 import { DocumentDrawerContent } from './DrawerContent.js'
-import './index.scss'
 
 export const documentDrawerBaseClass = 'doc-drawer'
 
@@ -31,6 +30,7 @@ const formatDocumentDrawerSlug = ({
 }) => `doc-drawer_${collectionSlug}_${depth}${id ? `_${id}` : ''}_${uuid}`
 
 export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
+  buttonStyle,
   children,
   className,
   collectionSlug,
@@ -48,6 +48,7 @@ export const DocumentDrawerToggler: React.FC<DocumentTogglerProps> = ({
       aria-label={t(operation === 'create' ? 'fields:addNewLabel' : 'general:editLabel', {
         label: collectionConfig?.labels.singular,
       })}
+      buttonStyle={buttonStyle}
       className={[className, `${documentDrawerBaseClass}__toggler`].filter(Boolean).join(' ')}
       disabled={disabled}
       onClick={onClick}
@@ -63,7 +64,7 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
   const { drawerSlug } = props
 
   return (
-    <Drawer className={documentDrawerBaseClass} gutter={false} Header={null} slug={drawerSlug}>
+    <Drawer className={documentDrawerBaseClass} Header={null} slug={drawerSlug}>
       <DocumentDrawerContent {...props} />
     </Drawer>
   )
@@ -91,44 +92,52 @@ export const DocumentDrawer: React.FC<DocumentDrawerProps> = (props) => {
 export const useDocumentDrawer: UseDocumentDrawer = ({
   id,
   collectionSlug,
+  drawerSlug: drawerSlugFromProps,
   overrideEntityVisibility,
 }) => {
   const editDepth = useEditDepth()
   const uuid = useId()
-  const { closeModal, modalState, openModal, toggleModal } = useModal()
-  const [isOpen, setIsOpen] = useState(false)
+  const { closeModal, openModal, toggleModal } = useModal()
 
-  const drawerSlug = formatDocumentDrawerSlug({
-    id,
-    collectionSlug,
-    depth: editDepth,
-    uuid,
-  })
+  // Use provided slug or generate one
+  const drawerSlug =
+    drawerSlugFromProps ||
+    formatDocumentDrawerSlug({
+      id,
+      collectionSlug,
+      depth: editDepth,
+      uuid,
+    })
 
-  useEffect(() => {
-    setIsOpen(Boolean(modalState[drawerSlug]?.isOpen))
-  }, [modalState, drawerSlug])
+  // Store modal functions in refs to ensure stable callbacks
+  // This prevents re-renders when other modals change state
+  const closeModalRef = useRef(closeModal)
+  const openModalRef = useRef(openModal)
+  const toggleModalRef = useRef(toggleModal)
+  closeModalRef.current = closeModal
+  openModalRef.current = openModal
+  toggleModalRef.current = toggleModal
 
   const toggleDrawer = useCallback(() => {
-    toggleModal(drawerSlug)
-  }, [toggleModal, drawerSlug])
+    toggleModalRef.current(drawerSlug)
+  }, [drawerSlug])
 
   const closeDrawer = useCallback(() => {
-    closeModal(drawerSlug)
-  }, [closeModal, drawerSlug])
+    closeModalRef.current(drawerSlug)
+  }, [drawerSlug])
 
   const openDrawer = useCallback(() => {
-    openModal(drawerSlug)
-  }, [openModal, drawerSlug])
+    openModalRef.current(drawerSlug)
+  }, [drawerSlug])
 
   const MemoizedDrawer = useMemo<React.FC<DocumentDrawerProps>>(() => {
     return (props) => (
       <DocumentDrawer
+        key={drawerSlug}
         {...props}
         collectionSlug={collectionSlug}
         drawerSlug={drawerSlug}
         id={id}
-        key={drawerSlug}
         overrideEntityVisibility={overrideEntityVisibility}
       />
     )
@@ -150,11 +159,12 @@ export const useDocumentDrawer: UseDocumentDrawer = ({
       closeDrawer,
       drawerDepth: editDepth,
       drawerSlug,
-      isDrawerOpen: isOpen,
+      // Note: Not tracking isDrawerOpen to prevent re-renders when modals change state
+      isDrawerOpen: false,
       openDrawer,
       toggleDrawer,
     }),
-    [editDepth, drawerSlug, isOpen, toggleDrawer, closeDrawer, openDrawer],
+    [editDepth, drawerSlug, toggleDrawer, closeDrawer, openDrawer],
   )
 
   return [MemoizedDrawer, MemoizedDrawerToggler, MemoizedDrawerState]

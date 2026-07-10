@@ -90,10 +90,20 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
-  fallbackLocale: null;
+  fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es') | ('en' | 'es')[];
   globals: {};
   globalsSelect: {};
-  locale: null;
+  locale: 'en' | 'es';
+  widgets: {
+    count: CountWidget;
+    private: PrivateWidget;
+    revenue: RevenueWidget;
+    'page-query': PageQueryWidget;
+    configurable: ConfigurableWidget;
+    collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: RecentlyViewedWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -185,6 +195,10 @@ export interface Event {
   type: 'meeting' | 'conference' | 'workshop' | 'webinar' | 'other';
   organizer?: (string | null) | User;
   status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  details?: {
+    priority?: number | null;
+    room?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -309,6 +323,12 @@ export interface EventsSelect<T extends boolean = true> {
   type?: T;
   organizer?: T;
   status?: T;
+  details?:
+    | T
+    | {
+        priority?: T;
+        room?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -373,6 +393,105 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "count_widget".
+ */
+export interface CountWidget {
+  data?: {
+    title: string;
+    collection?: ('tickets' | 'events') | null;
+  };
+  width: 'x-small' | 'small' | 'medium';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "private_widget".
+ */
+export interface PrivateWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "revenue_widget".
+ */
+export interface RevenueWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "page-query_widget".
+ */
+export interface PageQueryWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "configurable_widget".
+ */
+export interface ConfigurableWidget {
+  data?: {
+    title: string;
+    description?: string | null;
+    relatedTicket?: (string | null) | Ticket;
+    nestedGroup?: {
+      nestedText?: string | null;
+    };
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection: 'tickets' | 'revenue' | 'events' | 'payload-kv';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface RecentlyViewedWidget {
+  data?: {
+    excludedCollections?: ('tickets' | 'revenue' | 'events' | 'payload-kv')[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
