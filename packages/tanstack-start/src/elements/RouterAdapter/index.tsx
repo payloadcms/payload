@@ -112,9 +112,28 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
     [router, toNavOptions],
   )
 
+  // Sync client state (e.g. server-resolved query defaults) to the URL without
+  // re-running the route loader. TanStack's browser history monkeypatches
+  // `window.history.replaceState` and notifies `router.load` on every call, so a
+  // raw `replaceState` would change `loaderDeps` and trigger a redundant second
+  // server load. `_ignoreSubscribers` suppresses that notification — the same
+  // flag TanStack uses internally when flushing history.
+  const replaceState = useCallback(
+    (url: string) => {
+      const { history } = router
+      history._ignoreSubscribers = true
+      try {
+        window.history.replaceState(null, '', url)
+      } finally {
+        history._ignoreSubscribers = false
+      }
+    },
+    [router],
+  )
+
   const adaptedRouter = useMemo(
-    () => ({ back, push, refresh, replace }),
-    [back, push, refresh, replace],
+    () => ({ back, push, refresh, replace, replaceState }),
+    [back, push, refresh, replace, replaceState],
   )
 
   // `location.searchStr` is the serialized query string; `location.search` is
