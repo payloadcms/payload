@@ -71,7 +71,6 @@
     "@payloadcms/storage-gcs": "workspace:*",
     "@payloadcms/storage-r2": "workspace:*",
     "@payloadcms/storage-s3": "workspace:*",
-    "@payloadcms/storage-uploadthing": "workspace:*",
     "@payloadcms/storage-vercel-blob": "workspace:*",
     "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",

@@ -88,9 +88,6 @@
         "./packages/storage-vercel-blob/src/exports/client.ts"
       ],
       "@payloadcms/storage-gcs/client": ["./packages/storage-gcs/src/exports/client.ts"],
-      "@payloadcms/storage-uploadthing/client": [
-        "./packages/storage-uploadthing/src/exports/client.ts"
-      ],
       "@payloadcms/storage-r2/client": ["./packages/storage-r2/src/exports/client.ts"]
     }
   },
