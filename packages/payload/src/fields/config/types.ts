@@ -164,6 +164,11 @@ import type {
   UploadFieldSingleValidation,
 } from '../validations.js'
 
+export type BrowserAutoComplete = Extract<
+  React.InputHTMLAttributes<HTMLInputElement>['autoComplete'],
+  string
+>
+
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
   /**
    * The data of the nearest parent block. If the field is not within a block, `blockData` will be equal to `undefined`.
@@ -558,7 +563,7 @@ export interface FieldBaseClient
 export type NumberField = {
   admin?: {
     /** Set this property to a string that will be used for browser autocomplete. */
-    autoComplete?: string
+    autoComplete?: BrowserAutoComplete
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
@@ -605,7 +610,7 @@ export type NumberFieldClient = {
 
 export type TextField = {
   admin?: {
-    autoComplete?: string
+    autoComplete?: BrowserAutoComplete
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
@@ -648,7 +653,7 @@ export type TextFieldClient = {
 
 export type EmailField = {
   admin?: {
-    autoComplete?: string
+    autoComplete?: BrowserAutoComplete
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
