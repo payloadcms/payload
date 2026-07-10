@@ -18,9 +18,8 @@ const READY_SENTINEL = 'Listening on'
  * `vite preview` cannot be used here — it only serves the static client build,
  * but this app has no `index.html`; all HTML is streamed by the server handler.
  *
- * The build bundles Payload from source but leaves its runtime deps (`pino`, `mongodb`, …) external.
- * Those live only in pnpm's flat virtual store, which Node can't reach walking up from `dist/`,
- * so we symlink the server output's `node_modules` to that store before serving.
+ * The build bundles Payload's own code but leaves its packages external, and Node can't reach them walking up from `dist/`.
+ * Before serving we link them onto the output's resolution chain — direct deps from `test/node_modules`, transitive deps from pnpm's flat virtual store.
  */
 export async function startTanStackStartProdServer({
   port,
@@ -65,14 +64,23 @@ export async function startTanStackStartProdServer({
     })
   })
 
-  // The build bundles Payload but leaves runtime deps (pino, mongodb, …) external;
-  // they live only in pnpm's flat virtual store.
-  // Symlink the server output's `node_modules` to it so they resolve at runtime.
-  const pnpmVirtualStore = path.resolve(testDir, 'node_modules/.pnpm/node_modules')
-  if (fs.existsSync(pnpmVirtualStore)) {
-    const serverNodeModules = path.resolve(outDir, 'server/node_modules')
-    fs.rmSync(serverNodeModules, { force: true, recursive: true })
-    fs.symlinkSync(pnpmVirtualStore, serverNodeModules, 'junction')
+  // The build bundles Payload's own code but leaves its packages external, and
+  // Node can't reach them walking up from `dist/`. They live in two places:
+  // direct deps (`payload`, `@payloadcms/*`) at the top level of `test/node_modules`,
+  // transitive deps (`pino`, `mongodb`, …) only in pnpm's flat virtual store.
+  // Link both onto the output's resolution chain so every external resolves:
+  // `server/node_modules` covers direct deps, `node_modules` (a level up) the store.
+  const testNodeModules = path.resolve(testDir, 'node_modules')
+  const pnpmVirtualStore = path.resolve(testNodeModules, '.pnpm/node_modules')
+  const nodeModulesLinks: [string, string][] = [
+    [testNodeModules, path.resolve(outDir, 'server/node_modules')],
+    [pnpmVirtualStore, path.resolve(outDir, 'node_modules')],
+  ]
+  for (const [target, linkPath] of nodeModulesLinks) {
+    if (fs.existsSync(target)) {
+      fs.rmSync(linkPath, { force: true, recursive: true })
+      fs.symlinkSync(target, linkPath, 'junction')
+    }
   }
 
   // srvx is a transitive dep (no `.bin` entry),
