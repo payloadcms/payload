@@ -12,20 +12,13 @@ import './index.css'
 
 const baseClass = 'locked'
 
-type AnchorRect = {
-  height: number
-  left: number
-  top: number
-  width: number
-}
-
 export const Locked: React.FC<{
   className?: string
   user: ClientUser
 }> = ({ className, user }) => {
   const anchorRef = useRef<HTMLDivElement>(null)
   const [hovered, setHovered] = useState(false)
-  const [anchorRect, setAnchorRect] = useState<AnchorRect | null>(null)
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null)
   const { t } = useTranslation()
 
   const userToUse = isClientUserObject(user) ? (user.email ?? user.id) : t('general:anotherUser')
@@ -38,8 +31,7 @@ export const Locked: React.FC<{
       return
     }
 
-    const { height, left, top, width } = node.getBoundingClientRect()
-    setAnchorRect({ height, left, top, width })
+    setAnchorRect(node.getBoundingClientRect())
   }, [])
 
   useEffect(() => {
