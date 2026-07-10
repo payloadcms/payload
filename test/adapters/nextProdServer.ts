@@ -21,7 +21,7 @@ export async function startNextProdServer({
   ;(process.env as Record<string, string>).NODE_ENV = 'production'
 
   // Produce a real production build (.next) before booting the server.
-  // Mirrors the compile-mode build used by test/__helpers/shared/build.js.
+  // Mirrors the compile-mode build used by `test/__helpers/shared/build.js`.
   await nextBuild.default(
     rootDir,
     false,

@@ -12,9 +12,9 @@ const dirname = path.dirname(__filename)
 
 shelljs.env.DISABLE_LOGGING = 'true'
 
-// --prod-server boots a real production server (next build / vite build) per
-// suite; --prod (a.k.a. --dist) runs the dev server against packed dist
-// packages. Both need the packed packages, so both set PAYLOAD_TEST_PROD.
+// --prod-server boots a real production server (next build / vite build) per suite;
+// --prod (a.k.a. --dist) runs the dev server against packed dist packages.
+// Both need the packed packages, so both set PAYLOAD_TEST_PROD.
 const prodServer = process.argv.includes('--prod-server')
 const prod = prodServer || process.argv.includes('--prod')
 if (prod) {
@@ -202,8 +202,8 @@ async function executePlaywright(
     })
   }
 
-  // A prod server only starts listening after the build/init completes, which
-  // outlasts Playwright's navigation timeout. Wait for it before running tests.
+  // A prod server only starts listening after the build/init completes, which outlasts Playwright's navigation timeout.
+  // Wait for it before running tests.
   // (The dev server compiles routes lazily, so it needs no upfront wait.)
   if (prodServer && !portInUse) {
     await waitForServer(e2ePort)
@@ -244,9 +244,9 @@ function clearWebpackCache() {
 }
 
 /**
- * Poll a port until the server responds, so Playwright doesn't start against a
- * prod server that is still building. Resolves on any HTTP response (the server
- * only binds after the build/init finishes); rejects if it never comes up.
+ * Poll a port until the server responds, so Playwright doesn't start against a prod server that is still building.
+ * Resolves on any HTTP response (the server only binds after the build/init finishes);
+ * rejects if it never comes up.
  */
 async function waitForServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<void> {
   const url = `http://localhost:${port}/`

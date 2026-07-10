@@ -10,18 +10,17 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const READY_SENTINEL = 'Listening on'
 
 /**
- * Boot a real production TanStack Start server: run `vite build` to produce the
- * `dist/app-tanstack` output, then serve it with `srvx` — TanStack's
- * recommended Node host, which serves the built `{ fetch }` handler and the
- * static client assets in one process.
+ * Boot a real production TanStack Start server.
+ * Runs `vite build` to produce the `dist/app-tanstack` output,
+ * then serves it with `srvx` — TanStack's recommended Node host,
+ * which serves the built `{ fetch }` handler and the static client assets in one process.
  *
  * `vite preview` cannot be used here — it only serves the static client build,
  * but this app has no `index.html`; all HTML is streamed by the server handler.
  *
- * The build bundles Payload from source but leaves its runtime deps (`pino`,
- * `mongodb`, …) external. Those live only in pnpm's flat virtual store, which
- * Node can't reach walking up from `dist/`, so we symlink the server output's
- * `node_modules` to that store before serving.
+ * The build bundles Payload from source but leaves its runtime deps (`pino`, `mongodb`, …) external.
+ * Those live only in pnpm's flat virtual store, which Node can't reach walking up from `dist/`,
+ * so we symlink the server output's `node_modules` to that store before serving.
  */
 export async function startTanStackStartProdServer({
   port,
@@ -66,9 +65,9 @@ export async function startTanStackStartProdServer({
     })
   })
 
-  // The build bundles Payload but leaves runtime deps (pino, mongodb, …)
-  // external; they live only in pnpm's flat virtual store. Symlink the server
-  // output's `node_modules` to it so they resolve at runtime.
+  // The build bundles Payload but leaves runtime deps (pino, mongodb, …) external;
+  // they live only in pnpm's flat virtual store.
+  // Symlink the server output's `node_modules` to it so they resolve at runtime.
   const pnpmVirtualStore = path.resolve(testDir, 'node_modules/.pnpm/node_modules')
   if (fs.existsSync(pnpmVirtualStore)) {
     const serverNodeModules = path.resolve(outDir, 'server/node_modules')
@@ -76,8 +75,8 @@ export async function startTanStackStartProdServer({
     fs.symlinkSync(pnpmVirtualStore, serverNodeModules, 'junction')
   }
 
-  // srvx is a transitive dep (no `.bin` entry), so point at its CLI in the pnpm
-  // virtual store, where every package is linked.
+  // srvx is a transitive dep (no `.bin` entry),
+  // so point at its CLI in the pnpm virtual store, where every package is linked.
   const srvxBin = path.join(pnpmVirtualStore, 'srvx/bin/srvx.mjs')
 
   return new Promise<DevServerResult>((resolve, reject) => {
