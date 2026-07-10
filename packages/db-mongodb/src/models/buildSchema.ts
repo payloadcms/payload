@@ -40,12 +40,38 @@ import {
   tabHasName,
 } from 'payload/shared'
 
-export type MongooseIDType =
+/**
+ * The Mongoose schema types that back each {@link MongooseIDType}.
+ */
+export type MongooseSchemaIDType =
   | typeof mongoose.Schema.Types.BigInt
   | typeof mongoose.Schema.Types.ObjectId
   | typeof mongoose.Schema.Types.UUID
   | typeof Number
   | typeof String
+
+/**
+ * String values for the `idType` option, so consumers don't need to import `mongoose`.
+ */
+export type MongooseIDType = 'bigint' | 'number' | 'objectId' | 'text' | 'uuid'
+
+const idTypeSchemaMap: Record<MongooseIDType, MongooseSchemaIDType> = {
+  bigint: mongoose.Schema.Types.BigInt,
+  number: Number,
+  objectId: mongoose.Schema.Types.ObjectId,
+  text: String,
+  uuid: mongoose.Schema.Types.UUID,
+}
+
+/**
+ * Resolves an `idType` string (e.g. `'uuid'`) to its Mongoose schema type.
+ * Returns `undefined` for an unknown/empty value.
+ */
+export const resolveMongooseIDType = (
+  idType: MongooseIDType | undefined,
+): MongooseSchemaIDType | undefined => {
+  return idType ? idTypeSchemaMap[idType] : undefined
+}
 
 export type BuildSchemaOptions = {
   allowIDField?: boolean
@@ -73,7 +99,7 @@ const formatDefaultValue = (field: FieldAffectingData) =>
     ? field.defaultValue
     : undefined
 
-const getIdFieldSchema = (idType: MongooseIDType): SchemaTypeOptions<unknown> => {
+const getIdFieldSchema = (idType: MongooseSchemaIDType): SchemaTypeOptions<unknown> => {
   const baseSchema: SchemaTypeOptions<unknown> = {
     type: idType,
     required: true,
@@ -189,9 +215,12 @@ export const buildSchema = (args: {
       schemaFields = schemaFields.filter(
         (field) => !(fieldAffectsData(field) && field.name === 'id'),
       )
-    } else if (buildSchemaOptions.idType) {
-      fields = {
-        _id: getIdFieldSchema(buildSchemaOptions.idType),
+    } else {
+      const resolvedIDType = resolveMongooseIDType(buildSchemaOptions.idType)
+      if (resolvedIDType) {
+        fields = {
+          _id: getIdFieldSchema(resolvedIDType),
+        }
       }
     }
   }
@@ -960,9 +989,9 @@ const fieldToSchemaMap = {
 }
 
 const getRelationshipValueType = (field: RelationshipField | UploadField, payload: Payload) => {
-  // Adapter-wide custom ID type (e.g. `idType: mongoose.Schema.Types.UUID`) applies to
+  // Adapter-wide custom ID type (e.g. `idType: 'uuid'`) applies to
   // every collection's `_id` that doesn't define its own custom `id` field.
-  const adapterIDType = payload.db.idType
+  const adapterIDType = resolveMongooseIDType(payload.db.idType)
 
   if (typeof field.relationTo === 'string') {
     const customIDType = payload.collections[field.relationTo]?.customIDType

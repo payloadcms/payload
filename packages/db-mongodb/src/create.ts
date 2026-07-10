@@ -1,6 +1,6 @@
 import type { Create } from 'payload'
 
-import { type CreateOptions, Schema, Types } from 'mongoose'
+import { type CreateOptions, Types } from 'mongoose'
 
 import type { MongooseAdapter } from './index.js'
 
@@ -39,7 +39,7 @@ export const create: Create = async function create(
   } else if (this.allowIDOnCreate && data.id) {
     // With a non-ObjectId adapter-wide `idType` (e.g. UUID), pass the value through and
     // let Mongoose cast it to the schema's `_id` type.
-    if (this.idType && this.idType !== Schema.Types.ObjectId) {
+    if (this.idType && this.idType !== 'objectId') {
       data._id = data.id
     } else {
       try {

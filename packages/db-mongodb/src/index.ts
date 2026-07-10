@@ -142,9 +142,8 @@ export interface Args {
    */
   ensureIndexes?: boolean
   /**
-   * The Mongoose schema type used for the auto-generated `_id` of collections that don't define a custom `id` field.
-   * Can be `String`, `Number`, `mongoose.Schema.Types.ObjectId`, `mongoose.Schema.Types.BigInt`, or `mongoose.Schema.Types.UUID`.
-   * Defaults to MongoDB's native `ObjectId`.
+   * The ID type used for the auto-generated `_id` of collections that don't define a custom `id` field.
+   * One of `'objectId'`, `'uuid'`, `'text'`, `'number'`, or `'bigint'`. Defaults to `'objectId'` (MongoDB's native `ObjectId`).
    */
   idType?: MongooseIDType
   migrationDir?: string
@@ -263,7 +262,7 @@ export function mongooseAdapter({
   disableFallbackSort = false,
   disableIndexHints = false,
   ensureIndexes = false,
-  idType: mongooseIDType,
+  idType,
   migrationDir: migrationDirArg,
   mongoMemoryServer,
   prodMigrations,
@@ -330,7 +329,7 @@ export function mongooseAdapter({
       findGlobalVersions,
       findOne,
       findVersions,
-      idType: mongooseIDType,
+      idType,
       init,
       migrateFresh,
       migrationDir,

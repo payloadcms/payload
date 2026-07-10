@@ -61,11 +61,10 @@ const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
-// The mongoose adapter can be configured with `idType: mongoose.Schema.Types.UUID`,
-// in which case default `_id`s are UUIDs rather than ObjectIds (see PAYLOAD_DATABASE=mongodb-uuid).
+// The mongoose adapter can be configured with `idType: 'uuid'`, in which case default
+// `_id`s are UUIDs rather than ObjectIds (see PAYLOAD_DATABASE=mongodb-uuid).
 const isMongooseUUIDIDType = () =>
-  payload.db.name === 'mongoose' &&
-  (payload.db as MongooseAdapter).idType === mongoose.Schema.Types.UUID
+  payload.db.name === 'mongoose' && (payload.db as MongooseAdapter).idType === 'uuid'
 
 describe('database', () => {
   beforeAll(async () => {

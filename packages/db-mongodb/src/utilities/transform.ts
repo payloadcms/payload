@@ -11,7 +11,7 @@ import type {
   UploadField,
 } from 'payload'
 
-import { Schema, Types } from 'mongoose'
+import { Types } from 'mongoose'
 import { flattenAllFields, traverseFields } from 'payload'
 import { fieldAffectsData, fieldShouldBeLocalized } from 'payload/shared'
 
@@ -122,7 +122,7 @@ const convertRelationshipValue = ({
   if (typeof value === 'string') {
     // With a UUID adapter `idType`, convert to a BSON UUID. This can't rely on Mongoose
     // casting because polymorphic relationships store the value in a `Mixed` schema path.
-    if (adapter.idType === Schema.Types.UUID) {
+    if (adapter.idType === 'uuid') {
       try {
         return new Types.UUID(value)
       } catch (e) {
@@ -133,8 +133,8 @@ const convertRelationshipValue = ({
       }
     }
 
-    // A String `idType` stores relationship ids as-is.
-    if (adapter.idType === String) {
+    // A `text` `idType` stores relationship ids as-is.
+    if (adapter.idType === 'text') {
       return value
     }
 

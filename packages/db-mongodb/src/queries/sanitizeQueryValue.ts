@@ -1,6 +1,6 @@
 import type { FlattenedBlock, FlattenedField, Operator, Payload, RelationshipField } from 'payload'
 
-import { Schema, Types } from 'mongoose'
+import { Types } from 'mongoose'
 import { createArrayFromCommaDelineated, escapeRegExp } from 'payload'
 import { fieldShouldBeLocalized } from 'payload/shared'
 
@@ -9,11 +9,10 @@ const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}
 const isValidUUID = (val: unknown): boolean => typeof val === 'string' && uuidRegex.test(val)
 
 /**
- * Whether the adapter is configured to use UUID (`mongoose.Schema.Types.UUID`) for the
- * default `_id` of collections that don't declare their own custom `id` field.
+ * Whether the adapter is configured to use UUIDs for the default `_id` of collections
+ * that don't declare their own custom `id` field.
  */
-const usesUUIDDefaultID = (payload: Payload): boolean =>
-  payload.db.idType === Schema.Types.UUID
+const usesUUIDDefaultID = (payload: Payload): boolean => payload.db.idType === 'uuid'
 
 /**
  * Casts a query value to the ID type of the related collection. Handles the adapter-wide

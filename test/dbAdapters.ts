@@ -71,11 +71,10 @@ export const dbAdapters = {
   'mongodb-uuid': {
     ...MONGO,
     source: `
-  import mongoose from 'mongoose'
   import { mongooseAdapter } from '@payloadcms/db-mongodb'
 
   export const databaseAdapter = mongooseAdapter({
-    idType: mongoose.Schema.Types.UUID,
+    idType: 'uuid',
     ${mongoUrlBlock(MONGO)}
   })`,
   },
