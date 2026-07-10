@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { whereSchema } from '../../../utils/whereSchema.js'
 
 const DEFAULT_DESCRIPTION =
@@ -21,10 +20,7 @@ export const countGlobalVersionsTool = defineGlobalTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
-    locale: z
-      .string()
-      .describe('Optional: locale code to count versions in')
-      .optional(),
+    locale: z.string().describe('Optional: locale code to count versions in').optional(),
     where: whereSchema
       .describe(
         'Optional: where clause for filtering versions. Version document fields are usually under "version". Example: {"version.siteName":{"contains":"test"}}',
@@ -41,8 +37,8 @@ export const countGlobalVersionsTool = defineGlobalTool({
   try {
     const result = await payload.countGlobalVersions({
       global: globalSlug,
+      overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(locale ? { locale } : {}),
       ...(where ? { where } : {}),
     })

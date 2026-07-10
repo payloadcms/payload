@@ -1,114 +1,88 @@
-import type { PayloadRequest } from '../../../types/index.js'
+import type { TypeWithID } from '../../../collections/config/types.js'
 import type { FieldHook } from '../../config/types.js'
-import type { SlugFieldArgs, Slugify } from './index.js'
+import type { Slugify } from './types.js'
 
 import { hasAutosaveEnabled } from '../../../utilities/getVersionsConfig.js'
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
 import { countVersions } from './countVersions.js'
 
-type HookArgs = {
-  slugFieldName: NonNullable<SlugFieldArgs['name']>
-} & Pick<SlugFieldArgs, 'slugify'> &
-  Required<Pick<SlugFieldArgs, 'useAsSlug'>>
-
-const slugify = ({
-  customSlugify,
-  data,
-  req,
-  valueToSlugify,
-}: {
-  customSlugify?: Slugify
-  data: Record<string, unknown>
-  req: PayloadRequest
-  valueToSlugify?: string
-}) => {
-  if (customSlugify) {
-    return customSlugify({ data, req, valueToSlugify })
-  }
-
-  return defaultSlugify(valueToSlugify)
+type Args = {
+  name: string
+  slugify?: Slugify
+  useAsSlug: string
 }
 
 /**
- * This is a `BeforeChange` field hook used to auto-generate the `slug` field.
- * See `slugField` for more details.
+ * Field `beforeChange` hook for the native `slug` field. Returns the slug value.
+ *
+ * Auto-tracking is derived statelessly: the slug follows its source while it is
+ * empty or still equals `slugify(storedSource)`. Once it diverges (the admin
+ * overwrites it), it freezes — and stays frozen, because the stored value keeps
+ * differing from `slugify(source)`. Re-aligning (the UI generate button) resumes
+ * tracking.
  */
 export const generateSlug =
-  ({ slugFieldName, slugify: customSlugify, useAsSlug }: HookArgs): FieldHook =>
-  async ({ collection, data, global, operation, originalDoc, req, value: isChecked }) => {
+  ({ name, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
+  async ({ collection, data, global, operation, originalDoc, req, value }) => {
+    const source = data?.[useAsSlug]
+
+    const slugify = (valueToSlugify: unknown) =>
+      customSlugify
+        ? customSlugify({ data: (data ?? {}) as TypeWithID, req, valueToSlugify })
+        : defaultSlugify(valueToSlugify as string)
+
+    const entity = collection || global!
+
     if (operation === 'create') {
-      if (data) {
-        data[slugFieldName] = slugify({
-          customSlugify,
-          data,
-          req,
-          // Ensure user-defined slugs are not overwritten during create
-          // Use a generic falsy check here to include empty strings
-          valueToSlugify: data?.[slugFieldName] || data?.[useAsSlug],
-        })
+      // Autosave drafts: do not auto-generate on the initial draft — the user is still entering content.
+      // Keep the explicit non-slugified value (if any); generation begins on a later autosave.
+      if (hasAutosaveEnabled(entity) && data?._status === 'draft') {
+        return value || null
       }
 
-      return Boolean(!data?.[slugFieldName])
+      // Keep an explicitly provided slug; otherwise generate from the source.
+      return await slugify(value || source)
     }
 
-    if (operation === 'update') {
-      // Early return to avoid additional processing
-      if (!isChecked) {
-        return false
-      }
+    const storedSlug = originalDoc?.[name]
+    const originalSource = originalDoc?.[useAsSlug]
 
-      if (!hasAutosaveEnabled(collection || global!)) {
-        // We can generate the slug at this point
-        if (data) {
-          data[slugFieldName] = slugify({
-            customSlugify,
-            data,
-            req,
-            valueToSlugify: data?.[useAsSlug],
-          })
-        }
-
-        return Boolean(!data?.[slugFieldName])
-      } else {
-        // If we're publishing, we can avoid querying as we can safely assume we've exceeded the version threshold (2)
-        const isPublishing = data?._status === 'published'
-
-        // Ensure the user can take over the generated slug themselves without it ever being overridden back
-        const userOverride = data?.[slugFieldName] !== originalDoc?.[slugFieldName]
-
-        if (!userOverride) {
-          if (data) {
-            // If the fallback is an empty string, we want the slug to return to `null`
-            // This will ensure that live preview conditions continue to run as expected
-            data[slugFieldName] = data?.[useAsSlug]
-              ? slugify({
-                  customSlugify,
-                  data,
-                  req,
-                  valueToSlugify: data?.[useAsSlug],
-                })
-              : null
-          }
-        }
-
-        if (isPublishing || userOverride) {
-          return false
-        }
-
-        // Important: ensure `countVersions` is not called unnecessarily often
-        // That is why this is buried beneath all these conditions
-        const versionCount = await countVersions({
-          collectionSlug: collection?.slug,
-          globalSlug: global?.slug,
-          parentID: originalDoc?.id,
-          req,
-        })
-
-        if (versionCount <= 2) {
-          return true
-        } else {
-          return false
-        }
-      }
+    // User explicitly edited the slug (or cleared the value): respect it.
+    if (value !== undefined && value !== storedSlug) {
+      return value
     }
+
+    // No explicit edit this save. If the stored slug doesn't match what its source
+    // would generate, it was customized on an earlier save — keep it frozen.
+    const storedSlugIsCustom = storedSlug && storedSlug !== (await slugify(originalSource))
+
+    if (storedSlugIsCustom) {
+      return storedSlug
+    }
+
+    if (!hasAutosaveEnabled(entity)) {
+      // Non-autosave: generate once while empty, then freeze.
+      return storedSlug || (await slugify(source))
+    }
+
+    // Autosave / drafts
+    const priorVersions = await countVersions({
+      collectionSlug: collection?.slug,
+      globalSlug: global?.slug,
+      parentID: originalDoc?.id,
+      req,
+    })
+
+    // Do not generate on the very first draft (no prior version yet).
+    if (priorVersions === 0) {
+      return storedSlug ?? null
+    }
+
+    // Stabilize after publish to protect live URLs.
+    if (data?._status === 'published' || originalDoc?._status === 'published') {
+      return storedSlug
+    }
+
+    // Still auto-tracking an unpublished draft with content.
+    return source ? await slugify(source) : null
   }

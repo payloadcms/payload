@@ -304,10 +304,13 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
   const hasMaxRows = maxRows && rows.length >= maxRows
 
   const fieldErrorCount = errorPaths.length
-  const fieldHasErrors = submitted && errorPaths.length > 0
+  const fieldHasErrors = submitted && (fieldErrorCount > 0 || !valid)
+  const displayedErrorCount = fieldErrorCount > 0 ? fieldErrorCount : fieldHasErrors ? 1 : 0
 
   const showRequired = (readOnly || disabled) && rows.length === 0
   const showMinRows = (rows.length && rows.length < minRows) || (required && rows.length === 0)
+  const shouldShowSummaryBanner = !valid && (showRequired || showMinRows)
+  const shouldShowFieldError = showError && !shouldShowSummaryBanner
 
   const styles = useMemo(() => mergeFieldStyles(field), [field])
 
@@ -347,7 +350,7 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
       id={`field-${path.replace(/\./g, '__')}`}
       style={styles}
     >
-      {showError && (
+      {shouldShowFieldError && (
         <RenderCustomComponent
           CustomComponent={Error}
           Fallback={<FieldError path={path} showError={showError} />}
@@ -370,8 +373,8 @@ export const ArrayFieldComponent: ArrayFieldClientComponent = (props) => {
                 }
               />
             </h3>
-            {fieldHasErrors && fieldErrorCount > 0 && (
-              <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />
+            {displayedErrorCount > 0 && (
+              <ErrorPill count={displayedErrorCount} i18n={i18n} withMessage />
             )}
           </div>
           <ul className={`${baseClass}__header-actions`}>

@@ -1,5 +1,7 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { Config, Endpoint } from 'payload'
+import type { Endpoint } from 'payload'
+
+import { definePlugin } from 'payload'
 
 import type { PluginDefaultTranslationsObject } from './translations/types.js'
 import type { EcommercePluginConfig, SanitizedEcommercePluginConfig } from './types/index.js'
@@ -19,9 +21,9 @@ import { getCollectionSlugMap } from './utilities/getCollectionSlugMap.js'
 import { pushTypeScriptProperties } from './utilities/pushTypeScriptProperties.js'
 import { sanitizePluginConfig } from './utilities/sanitizePluginConfig.js'
 
-export const ecommercePlugin =
-  (pluginConfig?: EcommercePluginConfig) =>
-  async (incomingConfig: Config): Promise<Config> => {
+export const ecommercePlugin = definePlugin<EcommercePluginConfig | undefined>({
+  slug: '@payloadcms/plugin-ecommerce',
+  plugin: async ({ config: incomingConfig, options: pluginConfig }) => {
     if (!pluginConfig) {
       return incomingConfig
     }
@@ -356,7 +358,8 @@ export const ecommercePlugin =
     )
 
     return incomingConfig
-  }
+  },
+})
 
 export {
   createAddressesCollection,

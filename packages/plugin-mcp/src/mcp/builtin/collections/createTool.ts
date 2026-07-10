@@ -9,7 +9,6 @@ import {
   getCollectionVirtualFieldNames,
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { validateCollectionData } from '../validateEntityData.js'
 import { formatCollectionError } from './formatCollectionError.js'
@@ -29,7 +28,11 @@ export const createDocumentTool = defineCollectionTool({
   },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
-    data: z.record(z.string(), z.unknown()).describe('The document fields to create'),
+    data: z
+      .record(z.string(), z.unknown())
+      .describe(
+        'The document fields to create. Only include fields permitted by the schema returned by getCollectionSchema.',
+      ),
     depth: z
       .number()
       .int()
@@ -40,7 +43,9 @@ export const createDocumentTool = defineCollectionTool({
       .default(0),
     draft: z
       .boolean()
-      .describe('Whether to create the document as a draft')
+      .describe(
+        'Only if getCollectionSchema includes _status; otherwise _status does not exist. true forces data._status to "draft"; with false, data._status controls draft or published.',
+      )
       .optional()
       .default(false),
     fallbackLocale: z
@@ -86,8 +91,8 @@ export const createDocumentTool = defineCollectionTool({
       data: parsedData,
       depth,
       draft,
+      overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(locale ? { locale } : {}),
       ...(fallbackLocale ? { fallbackLocale } : {}),
       ...(select ? { select: select as SelectType } : {}),

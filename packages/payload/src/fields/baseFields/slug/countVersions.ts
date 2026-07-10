@@ -3,7 +3,6 @@ import type {
   DefaultDocumentIDType,
   GlobalSlug,
   PayloadRequest,
-  Where,
 } from '../../../index.js'
 
 /**
@@ -21,17 +20,15 @@ export const countVersions = async (args: {
 
   let countFn
 
-  const where: Where = {
-    parent: {
-      equals: parentID,
-    },
-  }
-
   if (collectionSlug) {
     countFn = () =>
       req.payload.countVersions({
         collection: collectionSlug,
-        where,
+        where: {
+          parent: {
+            equals: parentID,
+          },
+        },
       })
   }
 
@@ -39,7 +36,6 @@ export const countVersions = async (args: {
     countFn = () =>
       req.payload.countGlobalVersions({
         global: globalSlug,
-        where,
       })
   }
 

@@ -9,7 +9,6 @@ import {
   getGlobalVirtualFieldNames,
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { validateGlobalData } from '../validateEntityData.js'
 
@@ -81,7 +80,8 @@ export const updateGlobalTool = defineGlobalTool({
       data: parsedData,
       depth,
       draft,
-      ...localAPIDefaults(authorizedMCP),
+      overrideAccess: authorizedMCP.overrideAccess,
+      req,
     }
 
     if (locale) {

@@ -12,13 +12,8 @@ export type GetAuthorizedMCPArgs = {
 }
 
 /**
- * Resolves the MCP caller and returns the MCP surface authorized for that request.
- *
- * Authorization has two layers:
- * 1. Payload collection/global permissions determine whether built-in operation tools are shown.
- * 2. MCP `access` callbacks can further hide any configured tool, prompt, or resource.
- *
- * Like Payload core operations, `overrideAccess` skips both layers.
+ * Authenticates an MCP request and removes items the user cannot access.
+ * `overrideAccess` skips Payload and MCP item access checks.
  */
 export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<AuthorizedMCP> = async ({
   overrideAccess,
@@ -53,7 +48,6 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
       req,
     }),
     overrideAccess,
-    user: req.user,
   }
 }
 
@@ -66,8 +60,7 @@ export const filterMCPItems = async ({
   overrideAccess: boolean
   req: PayloadRequest
 }): Promise<MCPItem[]> => {
-  // Match Payload core: overrideAccess bypasses access evaluation instead of
-  // forcing each access function to return true.
+  // Match Payload core: overrideAccess bypasses access evaluation
   if (overrideAccess) {
     return items
   }

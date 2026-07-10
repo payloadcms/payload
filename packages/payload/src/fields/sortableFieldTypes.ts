@@ -5,6 +5,7 @@ export const sortableFieldTypes = [
   'json',
   'number',
   'email',
+  'slug',
   'radio',
   'select',
   'date',

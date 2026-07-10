@@ -104,7 +104,7 @@ export const ListControls: React.FC<ListControlsProps> = (props) => {
               className={`${baseClass}__toggle-where`}
               extraButtonProps={{
                 'aria-controls': `${baseClass}-where`,
-                'aria-expanded': visibleDrawer === 'where',
+                'aria-expanded': isWhereOpen,
               }}
               icon={<ChevronIcon direction={isWhereOpen ? 'up' : 'down'} size={16} />}
               id="toggle-list-filters"

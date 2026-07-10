@@ -75,6 +75,194 @@ describe('Fields', () => {
     await payload.destroy()
   })
 
+  describe('slug field', () => {
+    const created: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of created) {
+        await payload.delete({ collection: 'slug-fields', id })
+      }
+      created.length = 0
+    })
+
+    it('should generate a slug from the source field on create', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'My First Post' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('my-first-post')
+    })
+
+    it('should keep a user-provided slug on create', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'My First Post', slug: 'custom-slug' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('custom-slug')
+    })
+
+    it('should freeze a diverged slug on update', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Original Title' },
+      })
+      created.push(doc.id)
+
+      const updated = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { title: 'Changed Title', slug: 'manual-value' },
+      })
+      expect(updated.slug).toBe('manual-value')
+
+      const again = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { title: 'Changed Title Again' },
+      })
+      expect(again.slug).toBe('manual-value')
+    })
+
+    it('should generate localized slugs independently per locale', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Title', localizedTitle: 'English Title' },
+        locale: 'en',
+      })
+      created.push(doc.id)
+      expect(doc.localizedSlug).toBe('english-title')
+
+      const es = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { localizedTitle: 'Titulo Espanol' },
+        locale: 'es',
+      })
+      expect(es.localizedSlug).toBe('titulo-espanol')
+
+      const allLocales = await payload.findByID({
+        collection: 'slug-fields',
+        id: doc.id,
+        locale: 'all',
+      })
+      const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
+      expect(localizedSlug.en).toBe('english-title')
+      expect(localizedSlug.es).toBe('titulo-espanol')
+    })
+
+    describe('autosave drafts', () => {
+      const created: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of created) {
+          await payload.delete({ collection: 'slug-autosave', id })
+        }
+        created.length = 0
+      })
+
+      it('should NOT generate a slug on the initial draft (req 1)', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+        created.push(draft.id)
+        expect(draft.slug == null || draft.slug === '').toBe(true)
+      })
+
+      it('should keep an explicit slug the user typed on the initial draft', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One', slug: 'user-typed' },
+        })
+        created.push(draft.id)
+        expect(draft.slug).toBe('user-typed')
+      })
+
+      it('should generate once content exists on a subsequent autosave', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+        created.push(draft.id)
+
+        const updated = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Draft One Updated' },
+        })
+        expect(updated.slug).toBe('draft-one-updated')
+      })
+
+      it('should keep an admin overwrite across subsequent autosaves (req 2)', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+        created.push(draft.id)
+
+        await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Draft Two' },
+        })
+
+        const overwritten = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { slug: 'human-chosen-slug' },
+        })
+        expect(overwritten.slug).toBe('human-chosen-slug')
+
+        const afterMoreEdits = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Draft Three' },
+        })
+        expect(afterMoreEdits.slug).toBe('human-chosen-slug')
+      })
+
+      it('should stabilize the slug after publish', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+        created.push(draft.id)
+
+        await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Publishable Title' },
+        })
+
+        const published = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          data: { _status: 'published', title: 'Publishable Title' },
+        })
+        expect(published.slug).toBe('publishable-title')
+
+        const afterPublish = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          data: { _status: 'published', title: 'Title Changed After Publish' },
+        })
+        expect(afterPublish.slug).toBe('publishable-title')
+      })
+    })
+  })
+
   describe('text', () => {
     let doc
     const text = 'text field'

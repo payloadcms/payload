@@ -14,7 +14,6 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Localizer } from '../Localizer/index.js'
 import { useNav } from '../Nav/context.js'
-import { NavToggler } from '../Nav/NavToggler/index.js'
 import { StepNav } from '../StepNav/index.js'
 import { UserMenu } from '../UserMenu/index.js'
 import './index.css'
@@ -70,7 +69,6 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
     >
       <div className={`${baseClass}__content`}>
         <div className={`${baseClass}__wrapper`}>
-          <NavToggler className={`${baseClass}__mobile-nav-toggler`} tabIndex={-1} />
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
               <Button
@@ -124,12 +122,12 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
                 )}
               />
             )}
-            <UserMenu
-              CustomAvatar={CustomAvatar}
-              CustomLogoutButton={CustomLogoutButton}
-              settingsItemGroups={settingsItemGroups}
-            />
           </div>
+          <UserMenu
+            CustomAvatar={CustomAvatar}
+            CustomLogoutButton={CustomLogoutButton}
+            settingsItemGroups={settingsItemGroups}
+          />
         </div>
       </div>
     </header>

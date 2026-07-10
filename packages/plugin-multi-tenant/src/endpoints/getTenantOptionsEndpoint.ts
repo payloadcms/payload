@@ -6,7 +6,7 @@ import type { MultiTenantPluginConfig } from '../types.js'
 
 import { getTenantOptions } from '../utilities/getTenantOptions.js'
 
-export const getTenantOptionsEndpoint = <ConfigType>({
+export const getTenantOptionsEndpoint = ({
   tenantsArrayFieldName,
   tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
@@ -17,9 +17,7 @@ export const getTenantOptionsEndpoint = <ConfigType>({
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }): Endpoint => ({
   handler: async (req) => {
     const { payload, user } = req

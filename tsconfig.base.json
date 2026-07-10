@@ -62,6 +62,12 @@
       "@payloadcms/plugin-form-builder/client": [
         "./packages/plugin-form-builder/src/exports/client.ts"
       ],
+      "@payloadcms/plugin-form-builder/translations/languages/all": [
+        "./packages/plugin-form-builder/src/translations/index.ts"
+      ],
+      "@payloadcms/plugin-form-builder/translations/languages/*": [
+        "./packages/plugin-form-builder/src/translations/languages/*.ts"
+      ],
       "@payloadcms/plugin-import-export/rsc": [
         "./packages/plugin-import-export/src/exports/rsc.ts"
       ],

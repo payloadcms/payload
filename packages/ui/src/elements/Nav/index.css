@@ -119,11 +119,6 @@
       --nav-padding-inline-end: var(--gutter-h);
     }
 
-    .nav__link {
-      font-size: var(--text-body-small-font-size);
-      line-height: var(--spacer-4);
-    }
-
     .nav__mobile-close {
       display: flex;
       align-items: center;

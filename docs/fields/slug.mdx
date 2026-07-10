@@ -1,0 +1,90 @@
+---
+title: Slug Field
+label: Slug
+order: 165
+desc: The Slug field auto-generates a unique, URL-friendly string from another field. Learn how to use Slug fields, see examples and options.
+keywords: slug, fields, config, configuration, documentation, Content Management System, cms, headless, javascript, node, react, nextjs
+---
+
+<Banner type="warning">
+  The slug field is experimental and may change, or even be removed, in future
+  releases. Use at your own risk.
+</Banner>
+
+A slug is a unique, indexed, URL-friendly string that identifies a particular document, often used to construct the URL of a webpage.
+
+The Slug Field auto-generates its value from another field, such as a title or name field, and provides UI to lock and unlock the field to protect its value, as well as to re-generate the slug on-demand.
+
+To create a Slug Field, set the `type` to `slug` in your [Field Config](./overview):
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const ExampleCollection: CollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    // highlight-line
+    { name: 'slug', type: 'slug', useAsSlug: 'title' },
+    // highlight-line
+  ],
+}
+```
+
+## Config Options
+
+The Slug Field defaults `required`, `unique`, and `index` to `true`, and renders in the `sidebar`. In addition to the standard [field options](./overview#field-options), it exposes:
+
+| Option         | Description                                                                                                                             |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `useAsSlug` \* | **Required.** The name of the top-level field to generate the slug from (e.g. `'title'`). This field must exist in the same collection. |
+| `slugify`      | Override the default slugify function. [More details](#custom-slugify-function).                                                        |
+
+Because `slug` is a standard named field, customize it with the usual field properties directly — `label`, `localized`, `required`, `unique` (set `false` to drop the unique index, e.g. for a per-tenant compound index), `index`, `defaultValue`, and `admin` (including `admin.position`).
+
+## Generation
+
+The slug auto-generates from the `useAsSlug` field and tracks it until an editor takes over:
+
+- On create, the slug generates from the source field unless a value is provided explicitly.
+- The slug continues to track the source field on save as long as it has not been manually changed. Once an editor unlocks and edits the slug, it is frozen and no longer regenerates — this protects live URLs from changing unexpectedly.
+- Editors can re-generate the slug on-demand from the Admin Panel, which re-aligns it with the source field.
+
+For [autosave-enabled](../versions/autosave) documents, the slug does not generate on the initial draft (so it does not lock to empty or partial content while the document is being written), begins generating on subsequent autosaves, and stabilizes once the document is published.
+
+## Custom Slugify Function
+
+You can override the default slugify function of the Slug Field. This is necessary if the slug requires special treatment, such as character encoding, additional language support, etc.
+
+This function receives the value of the `useAsSlug` field as `valueToSlugify` and must return a string.
+
+For example, if you wanted to use the [`slugify`](https://www.npmjs.com/package/slugify) package, you could do something like this:
+
+```ts
+import type { CollectionConfig } from 'payload'
+import slugify from 'slugify'
+
+export const MyCollection: CollectionConfig = {
+  // ...
+  fields: [
+    // ...
+    {
+      name: 'slug',
+      type: 'slug',
+      useAsSlug: 'title',
+      slugify: ({ valueToSlugify }) =>
+        slugify(valueToSlugify, {
+          // ...additional `slugify` options here
+        }),
+    },
+  ],
+}
+```
+
+The following args are provided to the custom `slugify` function:
+
+| Argument         | Type             | Description                                      |
+| ---------------- | ---------------- | ------------------------------------------------ |
+| `valueToSlugify` | `string`         | The value of the field specified in `useAsSlug`. |
+| `data`           | `object`         | The full document data being saved.              |
+| `req`            | `PayloadRequest` | The Payload request object.                      |

@@ -1,18 +1,16 @@
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { sqliteAdapter } from '@payloadcms/db-sqlite'
 import { mcpPlugin } from '@payloadcms/plugin-mcp'
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { buildConfig } from 'payload'
 
-const databaseURL = new URL(
-  process.env.MONGODB_URL ||
-    process.env.DATABASE_URL ||
-    'mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0',
-)
+import { AUDIT_LOG_PATH_ENV, auditPlugin } from '../../../../__helpers/plugins/audit/index.js'
 
-databaseURL.pathname = '/payload-eval-mcp'
+const auditPath = process.env[AUDIT_LOG_PATH_ENV]
+const databaseURL = process.env.PAYLOAD_MCP_EVAL_DATABASE_URL
 
-const mcpLogPath = process.env.PAYLOAD_MCP_EVAL_LOG_PATH
+if (!databaseURL) {
+  throw new Error('PAYLOAD_MCP_EVAL_DATABASE_URL is required for MCP evals')
+}
 
 export default buildConfig({
   collections: [
@@ -24,18 +22,21 @@ export default buildConfig({
       slug: 'posts',
       fields: [
         { name: 'title', type: 'text', required: true },
-        {
-          name: 'status',
-          type: 'select',
-          defaultValue: 'draft',
-          options: ['draft', 'published'],
-        },
         { name: 'author', type: 'relationship', relationTo: 'authors' },
         { name: 'content', type: 'richText' },
       ],
     },
+    {
+      slug: 'articles',
+      fields: [{ name: 'title', type: 'text', localized: true, required: true }],
+      versions: { drafts: true },
+    },
   ],
-  db: mongooseAdapter({ url: databaseURL.toString() }),
+  db: sqliteAdapter({
+    busyTimeout: 5000,
+    client: { url: databaseURL },
+    wal: true,
+  }),
   editor: lexicalEditor({}),
   globals: [
     {
@@ -43,32 +44,31 @@ export default buildConfig({
       fields: [{ name: 'tagline', type: 'text', defaultValue: 'Original tagline' }],
     },
   ],
+  localization: {
+    defaultLocale: 'en',
+    fallback: true,
+    locales: ['en', 'es'],
+  },
   plugins: [
     mcpPlugin({
       collections: {
+        articles: {},
         authors: {},
         posts: {},
       },
       globals: {
         'site-settings': {},
       },
-      hooks: {
-        afterToolCall: [
-          ({ input, response, toolName }) => {
-            if (!mcpLogPath) {
-              return response
-            }
-
-            const toolCalls = existsSync(mcpLogPath)
-              ? (JSON.parse(readFileSync(mcpLogPath, 'utf8')) as unknown[])
-              : []
-            toolCalls.push({ name: toolName, input, response })
-            writeFileSync(mcpLogPath, JSON.stringify(toolCalls), 'utf8')
-
-            return response
-          },
-        ],
+    }),
+    auditPlugin({
+      beforeOperation: ({ slug, entityType, operation, payloadAPI }) => {
+        if (payloadAPI !== 'MCP') {
+          throw new Error(
+            `MCP eval blocked ${payloadAPI} ${operation} operation on ${entityType} "${slug}"`,
+          )
+        }
       },
+      path: auditPath,
     }),
   ],
   secret: 'payload-eval-mcp',

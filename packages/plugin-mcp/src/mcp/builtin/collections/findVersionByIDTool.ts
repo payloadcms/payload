@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
 const DEFAULT_DESCRIPTION =
   'Find a specific document version in any version-enabled collection by passing the collection slug and version ID.'
@@ -75,8 +74,8 @@ export const findVersionByIDTool = defineCollectionTool({
       id,
       collection: collectionSlug,
       depth,
+      overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(fallbackLocale ? { fallbackLocale } : {}),
       ...(locale ? { locale } : {}),
       ...(populate ? { populate: populate as PopulateType } : {}),

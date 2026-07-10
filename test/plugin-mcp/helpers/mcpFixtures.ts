@@ -6,20 +6,20 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { test as base, onTestFinished } from 'vitest'
 
+import type { TestRBAC } from '../../__helpers/plugins/rbac/index.js'
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 import type { McpClient } from './mcpClient.js'
 
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../../credentials.js'
-import { limitedMCPUserEmail } from '../limitedAccess.js'
 import { createMcpClient } from './mcpClient.js'
 
 export let payload: Payload
 export let restClient: NextRESTClient
-export let limitedUserId: number | string
+export let limitedUserId: string
 export let userId: string
 
-export async function getApiKey(): Promise<string> {
+export async function getApiKey(rbac: TestRBAC = {}): Promise<string> {
   const apiKey = randomUUID()
 
   await payload.update({
@@ -28,6 +28,7 @@ export async function getApiKey(): Promise<string> {
     data: {
       apiKey,
       enableAPIKey: true,
+      rbac,
     },
     overrideAccess: true,
   })
@@ -83,8 +84,15 @@ const payloadTest = base.extend<ScopedFixtures>({
       const limitedUser = await payload.create({
         collection: 'users',
         data: {
-          email: limitedMCPUserEmail,
+          email: 'limited-mcp-user@payloadcms.com',
           password: randomUUID(),
+          rbac: {
+            globals: {
+              'site-settings': {
+                update: false,
+              },
+            },
+          } satisfies TestRBAC,
         },
         overrideAccess: true,
       })
@@ -92,6 +100,11 @@ const payloadTest = base.extend<ScopedFixtures>({
 
       await use()
 
+      await payload.delete({
+        id: limitedUserId,
+        collection: 'users',
+        overrideAccess: true,
+      })
       await payload.destroy()
     },
     { auto: true, scope: 'worker' },
@@ -106,18 +119,18 @@ const protocolEras: Array<{ label: string; protocolEra: ProtocolEra }> = [
 /** Registers every MCP integration test independently against both protocol eras. */
 export function it(name: string, test: McpTestFunction, timeout?: number): void {
   for (const { label, protocolEra } of protocolEras) {
-    registerMcpTest({ label, name, protocolEra, test, timeout })
+    registerMcpTest({ name, label, protocolEra, test, timeout })
   }
 }
 
 /** Registers an integration test for behavior that exists only in the modern era. */
 export function itModern(name: string, test: McpTestFunction, timeout?: number): void {
-  registerMcpTest({ label: '2026 modern', name, protocolEra: 'modern', test, timeout })
+  registerMcpTest({ name, label: '2026 modern', protocolEra: 'modern', test, timeout })
 }
 
 const registerMcpTest = ({
-  label,
   name,
+  label,
   protocolEra,
   test,
   timeout,

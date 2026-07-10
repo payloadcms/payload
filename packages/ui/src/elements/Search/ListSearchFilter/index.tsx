@@ -51,6 +51,7 @@ export function ListSearchFilter({
 
   return (
     <SearchInput
+      autoComplete="off"
       className={className}
       disabled={disabled}
       id="search-filter-input"

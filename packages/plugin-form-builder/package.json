@@ -44,6 +44,16 @@
       "import": "./src/exports/client.ts",
       "types": "./src/exports/client.ts",
       "default": "./src/exports/client.ts"
+    },
+    "./translations/languages/all": {
+      "import": "./src/translations/index.ts",
+      "types": "./src/translations/index.ts",
+      "default": "./src/translations/index.ts"
+    },
+    "./translations/languages/*": {
+      "import": "./src/translations/languages/*.ts",
+      "types": "./src/translations/languages/*.ts",
+      "default": "./src/translations/languages/*.ts"
     }
   },
   "main": "./src/index.ts",
@@ -62,6 +72,7 @@
     "test": "echo \"No tests available.\""
   },
   "dependencies": {
+    "@payloadcms/translations": "workspace:*",
     "@payloadcms/ui": "workspace:*",
     "escape-html": "^1.0.3"
   },
@@ -95,6 +106,16 @@
         "import": "./dist/exports/client.js",
         "types": "./dist/exports/client.d.ts",
         "default": "./dist/exports/client.js"
+      },
+      "./translations/languages/all": {
+        "import": "./dist/translations/index.js",
+        "types": "./dist/translations/index.d.ts",
+        "default": "./dist/translations/index.js"
+      },
+      "./translations/languages/*": {
+        "import": "./dist/translations/languages/*.js",
+        "types": "./dist/translations/languages/*.d.ts",
+        "default": "./dist/translations/languages/*.js"
       }
     },
     "main": "./dist/index.js",

@@ -1,4 +1,6 @@
-import type { CollectionAfterChangeHook, Config } from 'payload'
+import type { CollectionAfterChangeHook } from 'payload'
+
+import { definePlugin } from 'payload'
 
 import type { SanitizedSearchPluginConfig, SearchPluginConfig } from './types.js'
 
@@ -8,9 +10,9 @@ import { generateSearchCollection } from './Search/index.js'
 
 type CollectionAfterChangeHookArgs = Parameters<CollectionAfterChangeHook>[0]
 
-export const searchPlugin =
-  <ConfigTypes = unknown>(incomingPluginConfig: SearchPluginConfig<ConfigTypes>) =>
-  (config: Config): Config => {
+export const searchPlugin = definePlugin<SearchPluginConfig>({
+  slug: '@payloadcms/plugin-search',
+  plugin: ({ config, options: incomingPluginConfig }) => {
     const { collections } = config
 
     // If the user defines `localize` to either true or false, use that
@@ -33,7 +35,7 @@ export const searchPlugin =
         }
       }
 
-      const pluginConfig: SanitizedSearchPluginConfig<ConfigTypes> = {
+      const pluginConfig: SanitizedSearchPluginConfig = {
         // write any config defaults here
         deleteDrafts: true,
         labels,
@@ -85,4 +87,5 @@ export const searchPlugin =
     }
 
     return config
-  }
+  },
+})

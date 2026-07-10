@@ -362,7 +362,7 @@
     "@dnd-kit/modifiers": "9.0.0",
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
-    "@faceless-ui/modal": "3.0.0",
+    "@faceless-ui/modal": "3.0.1",
     "@faceless-ui/scroll-info": "2.0.0",
     "@faceless-ui/window-info": "3.0.1",
     "@monaco-editor/react": "4.7.0",

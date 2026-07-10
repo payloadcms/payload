@@ -1393,9 +1393,10 @@ describe('Types testing', () => {
       expect<InputTypeInput>().type.not.toHaveProperty('updatedAt')
     })
 
-    test('_status is not part of write data', () => {
+    test('_status is part of write data for draft-enabled entities', () => {
       expect<DraftPost>().type.toHaveProperty('_status')
-      expect<DraftPostInput>().type.not.toHaveProperty('_status')
+      expect<DraftPostInput>().type.toHaveProperty('_status')
+      expect<DraftPostInput['_status']>().type.toBe<DraftPost['_status']>()
     })
 
     test('fields with a defaultValue are optional in write data', () => {

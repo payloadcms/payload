@@ -141,6 +141,15 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  rbac?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -525,6 +534,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  rbac?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;

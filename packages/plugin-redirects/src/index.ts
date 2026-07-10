@@ -1,5 +1,6 @@
-import type { CollectionConfig, Config, Field, SelectField } from 'payload'
+import type { CollectionConfig, Field, SelectField } from 'payload'
 
+import { definePlugin } from 'payload'
 import { deepMergeSimple } from 'payload/shared'
 
 import type { RedirectsPluginConfig } from './types.js'
@@ -9,9 +10,9 @@ import { translations } from './translations/index.js'
 
 export { redirectOptions, redirectTypes } from './redirectTypes.js'
 export { translations as redirectsTranslations } from './translations/index.js'
-export const redirectsPlugin =
-  (pluginConfig: RedirectsPluginConfig) =>
-  (incomingConfig: Config): Config => {
+export const redirectsPlugin = definePlugin<RedirectsPluginConfig>({
+  slug: '@payloadcms/plugin-redirects',
+  plugin: ({ config: incomingConfig, options: pluginConfig }) => {
     // Merge translations FIRST (before building fields)
     if (!incomingConfig.i18n) {
       incomingConfig.i18n = {}
@@ -124,4 +125,5 @@ export const redirectsPlugin =
       ...incomingConfig,
       collections: [...(incomingConfig?.collections || []), redirectsCollection],
     }
-  }
+  },
+})

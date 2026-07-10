@@ -15,11 +15,13 @@ import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 export async function connectMcpClient({
   apiKey,
   onResponse,
+  overrideAccess = false,
   protocolEra,
   restClient,
 }: {
   apiKey: string
   onResponse?: (response: McpHTTPResponse) => void
+  overrideAccess?: boolean
   protocolEra: ProtocolEra
   restClient: NextRESTClient
 }): Promise<Client> {
@@ -37,9 +39,11 @@ export async function connectMcpClient({
       headers.set('Authorization', `users API-Key ${apiKey}`)
       const method = (init?.method ?? 'GET').toUpperCase()
 
+      const path = overrideAccess ? '/mcp?overrideAccess=true' : '/mcp'
+
       const response = await (method === 'POST'
-        ? restClient.POST('/mcp', { body: init?.body as string, headers })
-        : restClient.GET('/mcp', { headers }))
+        ? restClient.POST(path, { body: init?.body as string, headers })
+        : restClient.GET(path, { headers }))
 
       onResponse?.({
         contentType: response.headers.get('content-type'),

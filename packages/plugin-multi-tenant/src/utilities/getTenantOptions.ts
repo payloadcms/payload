@@ -17,7 +17,7 @@ export const getTenantOptions = async ({
   tenantsCollectionSlug: string
   useAsTitle: string
   user: User
-  userHasAccessToAllTenants: Required<MultiTenantPluginConfig<any>>['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }): Promise<OptionObject[]> => {
   let tenantOptions: OptionObject[] = []
 

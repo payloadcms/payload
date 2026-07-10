@@ -1,4 +1,4 @@
-# Payload CMS Hooks Reference
+# Payload Hooks Reference
 
 Complete reference for collection hooks, field hooks, and hook context patterns.
 

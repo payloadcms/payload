@@ -148,6 +148,7 @@ import type {
   Where,
 } from '../../types/index.js'
 import type { SchemaVariant } from '../../utilities/configToJSONSchema.js'
+import type { Slugify } from '../baseFields/slug/types.js'
 import type { DisabledOptions } from '../isFieldDisabled.js'
 import type {
   NumberFieldManyValidation,
@@ -162,6 +163,11 @@ import type {
   UploadFieldManyValidation,
   UploadFieldSingleValidation,
 } from '../validations.js'
+
+export type BrowserAutoComplete = Extract<
+  React.InputHTMLAttributes<HTMLInputElement>['autoComplete'],
+  string
+>
 
 export type FieldHookArgs<TData extends TypeWithID = any, TValue = any, TSiblingData = any> = {
   /**
@@ -557,7 +563,7 @@ export interface FieldBaseClient
 export type NumberField = {
   admin?: {
     /** Set this property to a string that will be used for browser autocomplete. */
-    autoComplete?: string
+    autoComplete?: BrowserAutoComplete
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
@@ -604,7 +610,7 @@ export type NumberFieldClient = {
 
 export type TextField = {
   admin?: {
-    autoComplete?: string
+    autoComplete?: BrowserAutoComplete
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
@@ -647,7 +653,7 @@ export type TextFieldClient = {
 
 export type EmailField = {
   admin?: {
-    autoComplete?: string
+    autoComplete?: BrowserAutoComplete
     components?: {
       afterInput?: CustomComponent[]
       beforeInput?: CustomComponent[]
@@ -665,6 +671,32 @@ export type EmailFieldClient = {
     PickPreserveOptional<NonNullable<EmailField['admin']>, 'autoComplete' | 'placeholder'>
 } & FieldBaseClient &
   Pick<EmailField, 'type'>
+
+export type SlugField = {
+  admin?: {
+    components?: {
+      afterInput?: CustomComponent[]
+      beforeInput?: CustomComponent[]
+      Error?: CustomComponent<TextFieldErrorClientComponent | TextFieldErrorServerComponent>
+      Label?: CustomComponent<TextFieldLabelClientComponent | TextFieldLabelServerComponent>
+    } & FieldAdmin['components']
+    placeholder?: Record<string, string> | string
+  } & FieldAdmin
+  /** Provide a custom slugify function. Runs on the server. */
+  slugify?: Slugify
+  type: 'slug'
+  /**
+   * Name of the sibling field whose value the slug is generated from, e.g. `'title'`.
+   * Required — there is no default, since a collection may not have a `title` field.
+   */
+  useAsSlug: string
+  validate?: TextFieldSingleValidation
+} & Omit<FieldBase, 'validate'>
+
+export type SlugFieldClient = {
+  admin?: AdminClient & PickPreserveOptional<NonNullable<SlugField['admin']>, 'placeholder'>
+} & FieldBaseClient &
+  Pick<SlugField, 'type' | 'useAsSlug'>
 
 export type TextareaField = {
   admin?: {
@@ -1759,6 +1791,7 @@ export type FlattenedField =
   | RelationshipField
   | RichTextField
   | SelectField
+  | SlugField
   | TextareaField
   | TextField
   | UploadField
@@ -1780,6 +1813,7 @@ export type Field =
   | RichTextField
   | RowField
   | SelectField
+  | SlugField
   | TabsField
   | TextareaField
   | TextField
@@ -1804,6 +1838,7 @@ export type ClientField =
   | RichTextFieldClient
   | RowFieldClient
   | SelectFieldClient
+  | SlugFieldClient
   | TabsFieldClient
   | TextareaFieldClient
   | TextFieldClient
@@ -1854,6 +1889,7 @@ export type FieldAffectingData =
   | RelationshipField
   | RichTextField
   | SelectField
+  | SlugField
   | TabAsField
   | TextareaField
   | TextField
@@ -1875,6 +1911,7 @@ export type FieldAffectingDataClient =
   | RelationshipFieldClient
   | RichTextFieldClient
   | SelectFieldClient
+  | SlugFieldClient
   | TabAsFieldClient
   | TextareaFieldClient
   | TextFieldClient
@@ -1897,6 +1934,7 @@ export type NonPresentationalField =
   | RichTextField
   | RowField
   | SelectField
+  | SlugField
   | TabsField
   | TextareaField
   | TextField
@@ -1919,6 +1957,7 @@ export type NonPresentationalFieldClient =
   | RichTextFieldClient
   | RowFieldClient
   | SelectFieldClient
+  | SlugFieldClient
   | TabsFieldClient
   | TextareaFieldClient
   | TextFieldClient

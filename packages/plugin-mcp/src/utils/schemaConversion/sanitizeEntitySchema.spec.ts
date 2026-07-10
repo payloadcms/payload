@@ -76,8 +76,8 @@ describe('sanitizeEntitySchema', () => {
         },
       },
       properties: {
-        // Managed fields (createdAt/updatedAt/_status) are excluded upstream by the `input` variant;
-        // `id` stays because it's a valid optional input (a client may supply a custom ID).
+        // Managed timestamps are excluded upstream by the `input` variant. `id` stays because it's
+        // a valid optional input (a client may supply a custom ID).
         id: { type: 'string' },
         content: {
           type: 'object',

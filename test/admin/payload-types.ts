@@ -62,13 +62,13 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_A6C43894".
+ * via the `definition` "LexicalNodes_EC517269".
  */
-export type LexicalNodes_A6C43894 =
+export type LexicalNodes_EC517269 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_A6C43894>
+  | SerializedParagraphNode<LexicalNodes_EC517269>
   | SerializedRelationshipNode<
       | 'posts'
       | 'users'
@@ -285,6 +285,8 @@ export interface Config {
   locale: 'es' | 'en';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -369,7 +371,7 @@ export interface Post {
   title?: string | null;
   description?: string | null;
   number?: number | null;
-  richText?: LexicalRichText<LexicalNodes_A6C43894> | null;
+  richText?: LexicalRichText<LexicalNodes_EC517269> | null;
   someTextField?: string | null;
   namedGroup?: {
     someTextField?: string | null;
@@ -1892,6 +1894,112 @@ export interface CollectionsWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'uploads'
+      | 'uploads-two'
+      | 'posts'
+      | 'users'
+      | 'hidden-collection'
+      | 'not-in-view-collection'
+      | 'collection-no-api-view'
+      | 'custom-document-controls'
+      | 'custom-views-one'
+      | 'custom-views-two'
+      | 'custom-collection-view'
+      | 'reorder-tabs'
+      | 'custom-fields'
+      | 'group-one-collection-ones'
+      | 'group-one-collection-twos'
+      | 'group-two-collection-ones'
+      | 'group-two-collection-twos'
+      | 'geo'
+      | 'array'
+      | 'disable-duplicate'
+      | 'disable-copy-to-locale'
+      | 'edit-menu-items'
+      | 'format-doc-url'
+      | 'base-list-filters'
+      | 'with300documents'
+      | 'with-list-drawer'
+      | 'placeholder'
+      | 'use-as-title-group-field'
+      | 'disable-bulk-edit'
+      | 'custom-list-drawer'
+      | 'list-view-select-api'
+      | 'virtuals'
+      | 'no-timestamps'
+      | 'localized'
+      | 'fully-featured';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'uploads'
+          | 'uploads-two'
+          | 'posts'
+          | 'users'
+          | 'hidden-collection'
+          | 'not-in-view-collection'
+          | 'collection-no-api-view'
+          | 'custom-document-controls'
+          | 'custom-views-one'
+          | 'custom-views-two'
+          | 'custom-collection-view'
+          | 'reorder-tabs'
+          | 'custom-fields'
+          | 'group-one-collection-ones'
+          | 'group-one-collection-twos'
+          | 'group-two-collection-ones'
+          | 'group-two-collection-twos'
+          | 'geo'
+          | 'array'
+          | 'disable-duplicate'
+          | 'disable-copy-to-locale'
+          | 'edit-menu-items'
+          | 'format-doc-url'
+          | 'base-list-filters'
+          | 'with300documents'
+          | 'with-list-drawer'
+          | 'placeholder'
+          | 'use-as-title-group-field'
+          | 'disable-bulk-edit'
+          | 'custom-list-drawer'
+          | 'list-view-select-api'
+          | 'virtuals'
+          | 'no-timestamps'
+          | 'localized'
+          | 'fully-featured'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "auth".
  */
 export interface Auth {
@@ -1982,7 +2090,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

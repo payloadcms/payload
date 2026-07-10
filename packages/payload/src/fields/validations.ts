@@ -25,6 +25,7 @@ import type {
   RelationshipValueSingle,
   RichTextField,
   SelectField,
+  SlugField,
   TextareaField,
   TextField,
   UploadField,
@@ -96,6 +97,16 @@ export const text: TextFieldValidation = (
     if (!value || ((typeof value === 'string' || Array.isArray(value)) && value.length === 0)) {
       return t('validation:required')
     }
+  }
+
+  return true
+}
+
+export type SlugFieldValidation = Validate<string, unknown, unknown, SlugField>
+
+export const slug: SlugFieldValidation = (value, { req: { t }, required }) => {
+  if (required && !value) {
+    return t('validation:required')
   }
 
   return true
@@ -1097,6 +1108,7 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
  * These can be re-used in custom validations
  */
 export const validations = {
+  slug,
   array,
   blocks,
   checkbox,

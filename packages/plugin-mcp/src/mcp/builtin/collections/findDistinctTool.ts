@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { whereSchema } from '../../../utils/whereSchema.js'
 
 const DEFAULT_DESCRIPTION =
@@ -73,7 +72,8 @@ export const findDistinctTool = defineCollectionTool({
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
-  const { depth, field, limit, locale, page, populate, showHiddenFields, sort, trash, where } = input
+  const { depth, field, limit, locale, page, populate, showHiddenFields, sort, trash, where } =
+    input
 
   logger.info(`Finding distinct values in collection: ${collectionSlug}, field: ${field}`)
 
@@ -82,8 +82,8 @@ export const findDistinctTool = defineCollectionTool({
       collection: collectionSlug,
       depth,
       field,
+      overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(limit ? { limit } : {}),
       ...(locale ? { locale } : {}),
       ...(page ? { page } : {}),

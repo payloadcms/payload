@@ -11,7 +11,7 @@ import type {
   User,
 } from 'payload'
 
-export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
+export type MultiTenantPluginConfig = {
   /**
    * After a tenant is deleted, the plugin will attempt to clean up related documents
    * - removing documents with the tenant ID
@@ -197,9 +197,7 @@ export type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    *
    * Useful for super-admin type users
    */
-  userHasAccessToAllTenants?: (
-    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
-  ) => boolean
+  userHasAccessToAllTenants?: (user: User) => boolean
   /**
    * Override the access result on the users collection access control functions
    *

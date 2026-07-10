@@ -1,4 +1,5 @@
 import type {
+  BrowserAutoComplete,
   FieldBaseClient,
   PasswordFieldValidation,
   StaticDescription,
@@ -9,7 +10,7 @@ import type React from 'react'
 import type { MarkOptional } from 'ts-essentials'
 
 export type PasswordFieldProps = {
-  readonly autoComplete?: string
+  readonly autoComplete?: BrowserAutoComplete
   readonly field: MarkOptional<TextFieldClient, 'type'>
   /**
    * @default ''
@@ -37,7 +38,7 @@ export type PasswordFieldProps = {
 
 export type PasswordInputProps = {
   readonly AfterInput?: React.ReactNode
-  readonly autoComplete?: string
+  readonly autoComplete?: BrowserAutoComplete
   readonly BeforeInput?: React.ReactNode
   readonly className?: string
   readonly description?: StaticDescription

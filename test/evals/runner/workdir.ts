@@ -6,7 +6,8 @@ import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import type { MCPToolCall } from '../types.js'
+import { AUDIT_LOG_PATH_ENV } from '../../__helpers/plugins/audit/index.js'
+import { MCP_EVAL_DATABASE_URL_ENV } from '../mcpDatabase.js'
 
 // Resolve the skill source relative to this file so behavior is independent of cwd.
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -14,25 +15,41 @@ const FIXTURES_DIR = path.resolve(__dirname, '../fixtures')
 const SKILL_SRC = path.resolve(__dirname, '../../../tools/claude-plugin/skills/payload')
 const MCP_BIN = path.resolve(__dirname, '../../../packages/plugin-mcp/bin.js')
 
+export function getAuditPath(workdir: string): string {
+  return path.join(workdir, 'audit.json')
+}
+
 export async function materialize({
   configPath,
   exposeMcpTools,
+  mcpConfigPath,
+  mcpDatabaseURL,
   starterConfig,
 }: {
   configPath?: string
   /** Write agent configuration that exposes the starter config's Payload MCP tools. */
   exposeMcpTools?: boolean
+  /** Absolute path to the frozen config booted by the parent eval process. */
+  mcpConfigPath?: string
+  mcpDatabaseURL?: string
   starterConfig: string
 }): Promise<string> {
+  if (exposeMcpTools && configPath && !mcpDatabaseURL) {
+    throw new Error('MCP eval workdirs require a per-case database URL')
+  }
+
   const workdir = await mkdtemp(path.join(os.tmpdir(), 'payload-eval-'))
   await writeFile(path.join(workdir, 'payload.config.ts'), starterConfig, 'utf-8')
 
   if (exposeMcpTools && configPath) {
     const env = {
+      [AUDIT_LOG_PATH_ENV]: getAuditPath(workdir),
+      ...(mcpDatabaseURL ? { [MCP_EVAL_DATABASE_URL_ENV]: mcpDatabaseURL } : {}),
       NODE_ENV: 'development',
-      PAYLOAD_CONFIG_PATH: path.join(FIXTURES_DIR, configPath, 'payload.config.ts'),
+      PAYLOAD_CONFIG_PATH:
+        mcpConfigPath ?? path.join(FIXTURES_DIR, configPath, 'payload.config.ts'),
       PAYLOAD_DROP_DATABASE: 'false',
-      PAYLOAD_MCP_EVAL_LOG_PATH: getMCPAuditPath(workdir),
+      PAYLOAD_FORCE_DRIZZLE_PUSH: 'true',
       PAYLOAD_MCP_OVERRIDE_ACCESS: 'true',
     }
     const codexDir = path.join(workdir, '.codex')
@@ -88,25 +105,11 @@ export async function readEntry(workdir: string): Promise<string> {
   return readFile(path.join(workdir, 'payload.config.ts'), 'utf-8')
 }
 
-export async function readMCPToolCalls({ workdir }: { workdir: string }): Promise<MCPToolCall[]> {
-  try {
-    return JSON.parse(await readFile(getMCPAuditPath(workdir), 'utf8')) as MCPToolCall[]
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return []
-    }
-    throw error
-  }
-}
-
 export async function cleanup(workdir: string): Promise<void> {
   if (process.env.EVAL_KEEP_WORKDIR === '1') {
     return
   }
-  await Promise.all([
-    rm(workdir, { force: true, recursive: true }),
-    rm(getMCPAuditPath(workdir), { force: true }),
-  ])
+  await rm(workdir, { force: true, recursive: true })
 }
 
 let cachedSkillHash: null | string = null
@@ -131,10 +134,6 @@ function run(cmd: string, args: string[], cwd: string): void {
   if (result.status !== 0) {
     throw new Error(`${cmd} ${args.join(' ')} failed in ${cwd}: ${result.stderr.toString()}`)
   }
-}
-
-function getMCPAuditPath(workdir: string): string {
-  return `${workdir}.mcp-audit.json`
 }
 
 function walkSync(dir: string, prefix = ''): string[] {

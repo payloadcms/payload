@@ -22,8 +22,8 @@ export { defineCollectionTool, defineGlobalTool, definePrompt, defineTool } from
 export const mcpPlugin = definePlugin<MCPPluginConfig>({
   slug: '@payloadcms/plugin-mcp',
   order: 10,
-  plugin: ({ config, plugins, ...rawConfig }) => {
-    const pluginConfig = sanitizeMCPConfig({ config, pluginConfig: rawConfig })
+  plugin: ({ config, options, plugins }) => {
+    const pluginConfig = sanitizeMCPConfig({ config, pluginConfig: options })
 
     // Stash the sanitized config on plugin options so `getPluginConfig()` reads it.
     const registered = plugins['@payloadcms/plugin-mcp']

@@ -192,6 +192,7 @@ export const promise = async ({
 
       if (fallbackValue) {
         switch (field.type) {
+          case 'slug':
           case 'text':
           case 'textarea': {
             if (value === '' || isNullOrUndefined) {

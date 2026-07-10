@@ -45,6 +45,7 @@ The tool loads your project via [ts-morph](https://ts-morph.com/), using your `t
 - `remove-group-by-true` — removes `admin.groupBy` from `CollectionConfig` objects. The experimental `groupBy` flag has been removed; groupBy is now an always-available per-user UI preference.
 - `rename-typescript-schema-to-json-schema` — renames the `typescriptSchema` field-config property to `jsonSchema` (it always accepted JSON Schema, not TypeScript). Skips any object that already defines a `jsonSchema` sibling and surfaces it as a note for manual review.
 - `migrate-build-script` — rewrites the `build` npm script in `package.json` from `next build` to `payload build`, so the Import Map (and types) are generated before the Next.js build. Matches the `next build` invocation only (leaves `next build-storybook` and the like untouched) and is a no-op when `build` is already `payload build`.
+- `migrate-slug-field` — converts the removed experimental `slugField()` helper (imported from `payload`) into the native `{ type: 'slug' }` field, mapping `useAsSlug`/`fieldToUse`, `slugify`, `required`, `localized`, `disableUnique` (→ `unique: false`), and `position` (→ `admin.position`), and dropping the obsolete `checkboxName`. Removes the now-unused `slugField` import. Calls using `overrides` (or other unrecognized options) are left in place with a note for manual migration.
 
 ## Contributing
 

@@ -3,7 +3,6 @@ import { z } from 'zod'
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { whereSchema } from '../../../utils/whereSchema.js'
 
 const DEFAULT_DESCRIPTION =
@@ -42,8 +41,8 @@ export const countDocumentsTool = defineCollectionTool({
   try {
     const result = await payload.count({
       collection: collectionSlug,
+      overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(locale ? { locale } : {}),
       ...(trash !== undefined ? { trash } : {}),
       ...(where ? { where } : {}),

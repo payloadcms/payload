@@ -7,7 +7,7 @@ import { getCollectionIDType } from '../utilities/getCollectionIDType.js'
 import { getTenantFromCookie } from '../utilities/getTenantFromCookie.js'
 import { getUserTenantIDs } from '../utilities/getUserTenantIDs.js'
 
-type Args<ConfigType = unknown> = {
+type Args = {
   /**
    * If the document this filter is run belongs to a tenant, the tenant ID should be passed here.
    * If set, this will be used instead of the tenant cookie
@@ -19,11 +19,9 @@ type Args<ConfigType = unknown> = {
   tenantsArrayFieldName?: string
   tenantsArrayTenantFieldName?: string
   tenantsCollectionSlug: string
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }
-export const filterDocumentsByTenants = <ConfigType = unknown>({
+export const filterDocumentsByTenants = ({
   docTenantID,
   filterFieldName,
   req,
@@ -31,7 +29,7 @@ export const filterDocumentsByTenants = <ConfigType = unknown>({
   tenantsArrayTenantFieldName = defaults.tenantsArrayTenantFieldName,
   tenantsCollectionSlug,
   userHasAccessToAllTenants,
-}: Args<ConfigType>): null | Where => {
+}: Args): null | Where => {
   const idType = getCollectionIDType({
     collectionSlug: tenantsCollectionSlug,
     payload: req.payload,
@@ -47,12 +45,7 @@ export const filterDocumentsByTenants = <ConfigType = unknown>({
     }
   }
 
-  if (
-    req.user &&
-    userHasAccessToAllTenants(
-      req?.user as ConfigType extends { user: unknown } ? ConfigType['user'] : User,
-    )
-  ) {
+  if (req.user && userHasAccessToAllTenants(req?.user as User)) {
     return null
   }
 

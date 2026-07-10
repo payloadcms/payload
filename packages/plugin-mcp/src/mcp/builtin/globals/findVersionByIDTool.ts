@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
 const DEFAULT_DESCRIPTION =
   'Find a specific global version in any version-enabled global by passing the global slug and version ID.'
@@ -70,8 +69,8 @@ export const findGlobalVersionByIDTool = defineGlobalTool({
       id,
       slug: globalSlug,
       depth,
+      overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(fallbackLocale ? { fallbackLocale } : {}),
       ...(locale ? { locale } : {}),
       ...(populate ? { populate: populate as PopulateType } : {}),

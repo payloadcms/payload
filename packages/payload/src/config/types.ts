@@ -1590,8 +1590,9 @@ export type Config = {
     /**
      * Also generate a write-shaped input type (e.g. `PostInput`) next to each read type, describing
      * what `create`/`update` accept: relationships and uploads as IDs only, `id` and `defaultValue`
-     * fields optional, and `createdAt`/`updatedAt`/`_status`/virtual/join fields removed. These are
+     * fields optional, and `createdAt`/`updatedAt`/virtual/join fields removed. These are
      * exposed on `Config['collectionsInput']` and `Config['globalsInput']`. Set `true` to turn them on.
+     * Draft-enabled entities retain `_status` because it is a writable create/update field.
      *
      * @default false
      *

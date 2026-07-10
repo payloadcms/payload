@@ -10,7 +10,7 @@ import {
 import { slugify as defaultSlugify } from 'payload/shared'
 
 /**
- * This server function is directly related to the {@link https://payloadcms.com/docs/fields/text#slug-field | Slug Field}.
+ * This server function is directly related to the {@link https://payloadcms.com/docs/fields/slug | Slug Field}.
  * This is a server function that is used to invoke the user's custom slugify function from the client.
  * This pattern is required, as there is no other way for us to pass their function across the client-server boundary.
  *   - Not through props
