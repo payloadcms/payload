@@ -77,10 +77,11 @@ export async function selectDb(
     projectName === '.' ? `payload-${getRandomDigitSuffix()}` : slugify(projectName)
   }${dbChoice.dbConnectionSuffix || ''}`
 
-  if (args['--db-accept-recommended']) {
-    dbUri = initialDbUri
-  } else if (args['--db-connection-string']) {
+  if (args['--db-connection-string']) {
     dbUri = args['--db-connection-string']
+  } else if (args['--yes']) {
+    // Non-interactive: accept the recommended connection string without prompting
+    dbUri = initialDbUri
     // D1 Sqlite does not use a connection string so skip this prompt for this database
   } else if (dbType !== 'd1-sqlite') {
     dbUri = await p.text({

@@ -43,7 +43,6 @@ export class Main {
         '--agent': String,
         '--branch': String,
         '--db': String,
-        '--db-accept-recommended': Boolean,
         '--db-connection-string': String,
         '--example': String,
         '--help': Boolean,
@@ -73,6 +72,7 @@ export class Main {
         '--beta': Boolean,
         '--debug': Boolean,
         '--dry-run': Boolean,
+        '--yes': Boolean,
 
         // Aliases
         '-a': '--agent',
@@ -81,6 +81,7 @@ export class Main {
         '-h': '--help',
         '-n': '--name',
         '-t': '--template',
+        '-y': '--yes',
       },
       { permissive: true },
     )
