@@ -3,7 +3,7 @@ description: Starts the required database for tests
 
 inputs:
   database:
-    description: 'Database type: mongodb, mongodb-atlas, cosmosdb, documentdb, firestore, postgres, postgres-custom-schema, postgres-uuid, postgres-read-replica, vercel-postgres-read-replica, sqlite, sqlite-uuid, supabase, d1'
+    description: 'Database type: mongodb, mongodb-uuid, mongodb-atlas, cosmosdb, documentdb, firestore, postgres, postgres-custom-schema, postgres-uuid, postgres-read-replica, vercel-postgres-read-replica, sqlite, sqlite-uuid, supabase, d1'
     required: true
 
 outputs:
@@ -22,7 +22,7 @@ runs:
   steps:
     - name: Start MongoDB
       id: mongodb
-      if: contains(fromJSON('["mongodb", "cosmosdb", "documentdb", "firestore"]'), inputs.database)
+      if: contains(fromJSON('["mongodb", "mongodb-uuid", "cosmosdb", "documentdb", "firestore"]'), inputs.database)
       shell: bash
       run: |
         docker compose -f test/__helpers/shared/db/mongodb/docker-compose.yml up -d --wait

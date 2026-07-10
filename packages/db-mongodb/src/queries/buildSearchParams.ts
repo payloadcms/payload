@@ -10,6 +10,7 @@ import type { OperatorMapKey } from './operatorMap.js'
 
 import { getCollection } from '../utilities/getEntity.js'
 import { isObjectID } from '../utilities/isObjectID.js'
+import { isUUID } from '../utilities/isUUID.js'
 import { operatorMap } from './operatorMap.js'
 import { sanitizeQueryValue } from './sanitizeQueryValue.js'
 
@@ -200,18 +201,18 @@ export async function buildSearchParam({
 
               if (Array.isArray(ref)) {
                 for (const item of ref) {
-                  if (isObjectID(item)) {
+                  if (isObjectID(item) || isUUID(item)) {
                     $in.push(item)
                   }
                 }
-              } else if (isObjectID(ref)) {
+              } else if (isObjectID(ref) || isUUID(ref)) {
                 $in.push(ref)
               }
             } else {
               const stringID = doc._id.toString()
               $in.push(stringID)
 
-              if (Types.ObjectId.isValid(stringID)) {
+              if (Types.ObjectId.isValid(stringID) || isUUID(doc._id)) {
                 $in.push(doc._id)
               }
             }

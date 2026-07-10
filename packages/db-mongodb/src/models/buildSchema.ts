@@ -174,14 +174,14 @@ export const buildSchema = (args: {
     const fieldsToSearch = flattenedFields || schemaFields
     const idField = fieldsToSearch.find((field) => fieldAffectsData(field) && field.name === 'id')
     if (idField) {
+      // A user-defined custom `id` field always maps to its declared type. The
+      // adapter-wide `idType` only applies to auto-generated ids (see the `else if` below).
       const idType =
         idField.type === 'number'
           ? payload.db.useBigIntForNumberIDs
             ? mongoose.Schema.Types.BigInt
             : Number
-          : buildSchemaOptions.idType
-            ? buildSchemaOptions.idType
-            : String
+          : String
       fields = {
         _id: getIdFieldSchema(idType),
       }
@@ -937,11 +937,15 @@ const fieldToSchemaMap = {
 }
 
 const getRelationshipValueType = (field: RelationshipField | UploadField, payload: Payload) => {
+  // Adapter-wide custom ID type (e.g. `idType: mongoose.Schema.Types.UUID`) applies to
+  // every collection's `_id` that doesn't define its own custom `id` field.
+  const adapterIDType = payload.db.idType
+
   if (typeof field.relationTo === 'string') {
     const customIDType = payload.collections[field.relationTo]?.customIDType
 
     if (!customIDType) {
-      return mongoose.Schema.Types.ObjectId
+      return adapterIDType ?? mongoose.Schema.Types.ObjectId
     }
 
     if (customIDType === 'number') {
@@ -964,5 +968,5 @@ const getRelationshipValueType = (field: RelationshipField | UploadField, payloa
     return mongoose.Schema.Types.Mixed
   }
 
-  return mongoose.Schema.Types.ObjectId
+  return adapterIDType ?? mongoose.Schema.Types.ObjectId
 }

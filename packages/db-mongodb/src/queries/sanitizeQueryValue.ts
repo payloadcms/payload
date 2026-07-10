@@ -7,9 +7,47 @@ import type {
   RelationshipField,
 } from 'payload'
 
-import { Types } from 'mongoose'
+import { Schema, Types } from 'mongoose'
 import { createArrayFromCommaDelineated } from 'payload'
 import { fieldShouldBeLocalized } from 'payload/shared'
+
+const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+const isValidUUID = (val: unknown): boolean => typeof val === 'string' && uuidRegex.test(val)
+
+/**
+ * Whether the adapter is configured to use UUID (`mongoose.Schema.Types.UUID`) for the
+ * default `_id` of collections that don't declare their own custom `id` field.
+ */
+const usesUUIDDefaultID = (payload: Payload): boolean =>
+  payload.db.idType === Schema.Types.UUID
+
+/**
+ * Casts a query value to the ID type of the related collection. Handles the adapter-wide
+ * UUID `idType` in addition to the default ObjectId. Returns `undefined` when the value
+ * can't be cast (so the caller can disregard it).
+ */
+const castRelationIDValue = ({
+  payload,
+  relationTo,
+  val,
+}: {
+  payload: Payload
+  relationTo: string
+  val: unknown
+}): unknown => {
+  const customIDType = payload.collections[relationTo]?.customIDType
+
+  if (!customIDType && usesUUIDDefaultID(payload)) {
+    return isValidUUID(val) ? new Types.UUID(val as string) : undefined
+  }
+
+  if (!customIDType) {
+    return Types.ObjectId.isValid(val as string) ? new Types.ObjectId(val as string) : undefined
+  }
+
+  return undefined
+}
 
 type SanitizeQueryValueArgs = {
   field: FlattenedField
@@ -117,10 +155,24 @@ export const sanitizeQueryValue = ({
     }
   }
 
+  const useUUIDForDefaultID = usesUUIDDefaultID(payload)
+
   // Disregard invalid _ids
   if (path === '_id') {
     if (typeof val === 'string' && val.split(',').length === 1) {
-      if (!hasCustomID) {
+      if (!hasCustomID && useUUIDForDefaultID) {
+        if (!isValidUUID(val)) {
+          return { operator: formattedOperator, val: undefined }
+        }
+
+        if (['in', 'not_in'].includes(operator)) {
+          formattedValue = createArrayFromCommaDelineated(formattedValue).map(
+            (id) => new Types.UUID(id),
+          )
+        } else {
+          formattedValue = new Types.UUID(val)
+        }
+      } else if (!hasCustomID) {
         const isValid = Types.ObjectId.isValid(val)
 
         if (!isValid) {
@@ -150,6 +202,14 @@ export const sanitizeQueryValue = ({
 
       if (Array.isArray(formattedValue)) {
         formattedValue = formattedValue.reduce<unknown[]>((formattedValues, inVal) => {
+          if (!hasCustomID && useUUIDForDefaultID) {
+            if (isValidUUID(inVal)) {
+              formattedValues.push(new Types.UUID(inVal))
+            }
+
+            return formattedValues
+          }
+
           if (!hasCustomID) {
             if (Types.ObjectId.isValid(inVal)) {
               formattedValues.push(new Types.ObjectId(inVal))
@@ -223,10 +283,14 @@ export const sanitizeQueryValue = ({
       formattedValue.relationTo
     ) {
       const { value } = formattedValue
-      const isValid = Types.ObjectId.isValid(value)
+      const castValue = castRelationIDValue({
+        payload,
+        relationTo: formattedValue.relationTo,
+        val: value,
+      })
 
-      if (isValid) {
-        formattedValue.value = new Types.ObjectId(value)
+      if (castValue !== undefined) {
+        formattedValue.value = castValue
       }
 
       let localizedPath = path
@@ -287,6 +351,14 @@ export const sanitizeQueryValue = ({
           return formattedValues
         }
 
+        if (typeof relationTo === 'string') {
+          const cast = castRelationIDValue({ payload, relationTo, val: inVal })
+          if (cast !== undefined) {
+            formattedValues.push(cast)
+          }
+          return formattedValues
+        }
+
         if (
           Array.isArray(relationTo) &&
           relationTo.some((relationTo) => !!payload.collections[relationTo]?.customIDType)
@@ -294,7 +366,18 @@ export const sanitizeQueryValue = ({
           if (Types.ObjectId.isValid(inVal.toString())) {
             formattedValues.push(new Types.ObjectId(inVal))
           } else {
+            // Mixed polymorphic: the value may target a collection using the UUID default id.
+            if (useUUIDForDefaultID && isValidUUID(inVal.toString())) {
+              formattedValues.push(new Types.UUID(inVal.toString()))
+            }
             formattedValues.push(inVal)
+          }
+          return formattedValues
+        }
+
+        if (useUUIDForDefaultID) {
+          if (isValidUUID(inVal.toString())) {
+            formattedValues.push(new Types.UUID(inVal.toString()))
           }
           return formattedValues
         }
@@ -318,11 +401,14 @@ export const sanitizeQueryValue = ({
       if (typeof relationTo === 'string') {
         const customIDType = payload.collections[relationTo]?.customIDType
 
-        // Convert array values to proper types (ObjectId or custom ID type)
+        // Convert array values to proper types (ObjectId, UUID, or custom ID type)
         formattedValue = formattedValue.map((v) => {
           if (customIDType === 'number') {
             const parsed = parseFloat(v)
             return Number.isNaN(parsed) ? v : parsed
+          }
+          if (!customIDType && useUUIDForDefaultID) {
+            return isValidUUID(v) ? new Types.UUID(v) : v
           }
           if (!Types.ObjectId.isValid(v)) {
             return v
@@ -339,12 +425,16 @@ export const sanitizeQueryValue = ({
               const parsed = parseFloat(item.value)
               return { relationTo: relTo, value: Number.isNaN(parsed) ? item.value : parsed }
             }
-            if (Types.ObjectId.isValid(item.value)) {
-              return { relationTo: relTo, value: new Types.ObjectId(item.value) }
+            const cast = castRelationIDValue({ payload, relationTo: relTo, val: item.value })
+            if (cast !== undefined) {
+              return { relationTo: relTo, value: cast }
             }
             return item
           }
           // Non-polymorphic format - just IDs
+          if (useUUIDForDefaultID) {
+            return isValidUUID(item) ? new Types.UUID(item) : item
+          }
           if (Types.ObjectId.isValid(item)) {
             return new Types.ObjectId(item)
           }
@@ -366,6 +456,11 @@ export const sanitizeQueryValue = ({
               return { operator: formattedOperator, val: undefined }
             }
           }
+        } else if (useUUIDForDefaultID) {
+          if (!isValidUUID(formattedValue)) {
+            return { operator: formattedOperator, val: undefined }
+          }
+          formattedValue = new Types.UUID(formattedValue)
         } else {
           if (!Types.ObjectId.isValid(formattedValue)) {
             return { operator: formattedOperator, val: undefined }
@@ -385,7 +480,16 @@ export const sanitizeQueryValue = ({
             if (!Number.isNaN(formattedNumber)) {
               formattedValue.push(formattedNumber)
             }
+            // The value may target a collection using the adapter-wide UUID default id.
+            if (useUUIDForDefaultID && isValidUUID(val)) {
+              formattedValue.push(new Types.UUID(val))
+            }
           }
+        } else if (useUUIDForDefaultID) {
+          if (!isValidUUID(formattedValue)) {
+            return { operator: formattedOperator, val: undefined }
+          }
+          formattedValue = new Types.UUID(formattedValue)
         } else {
           if (!Types.ObjectId.isValid(formattedValue)) {
             return { operator: formattedOperator, val: undefined }
@@ -402,7 +506,9 @@ export const sanitizeQueryValue = ({
       Array.isArray(formattedValue)
     ) {
       formattedValue.forEach((v, i) => {
-        if (Types.ObjectId.isValid(v)) {
+        if (useUUIDForDefaultID && isValidUUID(v)) {
+          formattedValue[i] = new Types.UUID(v)
+        } else if (Types.ObjectId.isValid(v)) {
           formattedValue[i] = new Types.ObjectId(v)
         }
       })
@@ -449,7 +555,11 @@ export const sanitizeQueryValue = ({
   }
 
   if (path !== '_id' || (path === '_id' && hasCustomID && field.type === 'text')) {
-    if (operator === 'contains' && !Types.ObjectId.isValid(formattedValue)) {
+    if (
+      operator === 'contains' &&
+      typeof formattedValue === 'string' &&
+      !Types.ObjectId.isValid(formattedValue)
+    ) {
       formattedValue = {
         $options: 'i',
         $regex: formattedValue.replace(/[\\^$*+?.()|[\]{}]/g, '\\$&'),

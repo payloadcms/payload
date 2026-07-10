@@ -22,6 +22,14 @@ export const allDatabaseAdapters = {
   export const databaseAdapter = mongooseAdapter({
     ${mongooseAdapterArgs}
   })`,
+  'mongodb-uuid': `
+  import mongoose from 'mongoose'
+  import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+  export const databaseAdapter = mongooseAdapter({
+    idType: mongoose.Schema.Types.UUID,
+    ${mongooseAdapterArgs}
+  })`,
   // mongodb-atlas uses Docker-based MongoDB Atlas Local (all-in-one with search)
   // Start with: pnpm docker:mongodb-atlas:start
   // Runs on port 27019 to avoid conflicts with mongodb

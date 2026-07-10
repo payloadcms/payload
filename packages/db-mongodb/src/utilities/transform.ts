@@ -11,13 +11,14 @@ import type {
   UploadField,
 } from 'payload'
 
-import { Types } from 'mongoose'
+import { Schema, Types } from 'mongoose'
 import { flattenAllFields, traverseFields } from 'payload'
 import { fieldAffectsData, fieldShouldBeLocalized } from 'payload/shared'
 
 import type { MongooseAdapter } from '../index.js'
 
 import { isObjectID } from './isObjectID.js'
+import { isUUID, uuidToString } from './isUUID.js'
 
 interface RelationObject {
   relationTo: string
@@ -99,6 +100,10 @@ const convertRelationshipValue = ({
       return value.toHexString()
     }
 
+    if (isUUID(value)) {
+      return uuidToString(value)
+    }
+
     if (
       customIDField?.type === 'number' &&
       typeof value === 'bigint' &&
@@ -115,6 +120,24 @@ const convertRelationshipValue = ({
   }
 
   if (typeof value === 'string') {
+    // With a UUID adapter `idType`, convert to a BSON UUID. This can't rely on Mongoose
+    // casting because polymorphic relationships store the value in a `Mixed` schema path.
+    if (adapter.idType === Schema.Types.UUID) {
+      try {
+        return new Types.UUID(value)
+      } catch (e) {
+        if (validateRelationships) {
+          throw e
+        }
+        return value
+      }
+    }
+
+    // A String `idType` stores relationship ids as-is.
+    if (adapter.idType === String) {
+      return value
+    }
+
     try {
       return new Types.ObjectId(value)
     } catch (e) {
@@ -160,6 +183,8 @@ const sanitizeRelationship = ({
 
         if (isObjectID(item)) {
           value.docs[i] = item.toHexString()
+        } else if (isUUID(item)) {
+          value.docs[i] = uuidToString(item)
         } else if (Array.isArray(field.collection) && item) {
           // Fields here for polymorphic joins cannot be determinted, JSON.parse needed
           value.docs[i] = JSON.parse(JSON.stringify(value.docs[i]))
@@ -544,6 +569,8 @@ export const transform = ({
 
     if (isObjectID(data.id)) {
       data.id = data.id.toHexString()
+    } else if (isUUID(data.id)) {
+      data.id = uuidToString(data.id)
     }
 
     // Handle BigInt conversion for custom ID fields of type 'number'
