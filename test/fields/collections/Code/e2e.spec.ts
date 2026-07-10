@@ -93,4 +93,51 @@ test.describe('Code', () => {
 
     expect(isSuggestionHitTestable).toBe(true)
   })
+
+  test('should keep the Monaco find widget close button clickable when its tooltip is visible', async () => {
+    await page.goto(url.create)
+
+    const htmlCodeEditor = page.locator('#field-html')
+    const monacoEditor = htmlCodeEditor.locator('.monaco-editor')
+
+    await expect(htmlCodeEditor).toBeVisible()
+    await expect(monacoEditor).toBeVisible()
+
+    await monacoEditor.click({ position: { x: 80, y: 12 } })
+    await expect(monacoEditor).toHaveClass(/focused/)
+    await page.evaluate(() => {
+      const editorElement = document.querySelector('#field-html .monaco-editor')
+      const editor = window.monaco?.editor
+        .getEditors()
+        .find((editor) => editor.getDomNode() === editorElement)
+
+      editor?.getAction('actions.find')?.run()
+    })
+
+    const closeButton = page.locator('.find-widget.visible [aria-label="Close (Escape)"]')
+    await expect(closeButton).toBeVisible()
+    await page.waitForTimeout(500)
+
+    const closeButtonBox = await closeButton.boundingBox()
+
+    expect(closeButtonBox).not.toBeNull()
+
+    await page.mouse.move(
+      closeButtonBox!.x + closeButtonBox!.width / 2,
+      closeButtonBox!.y + closeButtonBox!.height / 2,
+    )
+
+    await expect(page.locator('.monaco-hover.workbench-hover.compact')).toContainText(
+      'Close (Escape)',
+    )
+
+    const isCloseButtonHitTestable = await closeButton.evaluate((element) => {
+      const { height, left, top, width } = element.getBoundingClientRect()
+      const hitElement = document.elementFromPoint(left + width / 2, top + height / 2)
+
+      return Boolean(hitElement && element.contains(hitElement))
+    })
+
+    expect(isCloseButtonHitTestable).toBe(true)
+  })
 })
