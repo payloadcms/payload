@@ -82,6 +82,7 @@ export async function runCodegenCase(
   )
 
   const paramsHash = codegenParamsHash({
+    additionalAllowedTools: testCase.additionalAllowedTools,
     category: testCase.category,
     configPath: testCase.configPath,
     fixtureContent: starterConfig,
@@ -90,6 +91,7 @@ export async function runCodegenCase(
     runnerKind: kind,
     skillInstall: kind === 'claude-code' ? skillInstall : undefined,
     systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
+    workspaceFiles: testCase.workspaceFiles,
   })
 
   const reusable = !shouldRerun() ? findReusableResult({ paramsHash }) : undefined
@@ -123,6 +125,7 @@ export async function runCodegenCase(
       await testCase.setup({ payload })
     }
     runnerOutput = await runCodegenEval(testCase.input, starterConfig, {
+      additionalAllowedTools: testCase.additionalAllowedTools,
       agentModel,
       configPath: testCase.configPath,
       exposeMcpTools,
@@ -132,6 +135,7 @@ export async function runCodegenCase(
       model: runnerModel,
       skillInstall,
       systemPromptKey,
+      workspaceFiles: testCase.workspaceFiles,
     })
   } catch (error) {
     await lazyPayload?.cleanup()

@@ -1,10 +1,15 @@
 import { createHash } from 'node:crypto'
 
-import type { RunnerKind, SkillInstallMode } from './runner/types.js'
+import type {
+  AgentBuiltinTool,
+  AgentWorkspaceFile,
+  RunnerKind,
+  SkillInstallMode,
+} from './runner/types.js'
 import type { EvalCategory, SystemPromptKey } from './types.js'
 
 import { SKILL_SYSTEM_PROMPT } from './runner/claudeCode.js'
-import { getMCPEvalConfigHash, getSkillTreeHash } from './runner/workdir.js'
+import { getMCPEvalConfigHash, getSkillTreeHash, getWorkspaceFilesHash } from './runner/workdir.js'
 
 function hashParams(params: Record<string, string | undefined>): string {
   const stable = JSON.stringify(params, Object.keys(params).sort())
@@ -13,6 +18,7 @@ function hashParams(params: Record<string, string | undefined>): string {
 
 /** Hashes the stable inputs used to identify a reusable codegen result. */
 export function codegenParamsHash(params: {
+  additionalAllowedTools?: AgentBuiltinTool[]
   category: EvalCategory
   configPath: string
   fixtureContent: string
@@ -21,6 +27,7 @@ export function codegenParamsHash(params: {
   runnerKind: RunnerKind
   skillInstall?: SkillInstallMode
   systemPromptKey?: SystemPromptKey
+  workspaceFiles?: AgentWorkspaceFile[]
 }): string {
   const skillIncluded =
     (params.runnerKind === 'llm' && params.systemPromptKey === 'codegenWithSkill') ||
@@ -33,6 +40,7 @@ export function codegenParamsHash(params: {
 
   return hashParams({
     type: 'codegen',
+    additionalAllowedTools: params.additionalAllowedTools?.slice().sort().join(','),
     agentSystemPrompt,
     category: params.category,
     configPath: params.configPath,
@@ -46,5 +54,6 @@ export function codegenParamsHash(params: {
     skillHash: skillIncluded ? getSkillTreeHash() : undefined,
     skillInstall: params.skillInstall,
     systemPromptKey: params.systemPromptKey,
+    workspaceFilesHash: getWorkspaceFilesHash(params.workspaceFiles),
   })
 }

@@ -76,6 +76,7 @@ async function runOne(
   options: CodegenRunnerOptions,
 ): Promise<CodegenRunnerResult> {
   const {
+    additionalAllowedTools = [],
     agentModel = DEFAULT_AGENT_MODEL,
     configPath,
     exposeMcpTools,
@@ -83,6 +84,7 @@ async function runOne(
     mcpDatabaseURL,
     skillInstall = 'embedded',
     timeoutMs = DEFAULT_TIMEOUT_MS,
+    workspaceFiles,
   } = options
   const init = await ensureInit()
 
@@ -92,6 +94,7 @@ async function runOne(
     mcpConfigPath,
     mcpDatabaseURL,
     starterConfig,
+    workspaceFiles,
   })
   const auditPath = exposeMcpTools ? getAuditPath(workdir) : undefined
   assertSafeWorkdir(workdir)
@@ -103,8 +106,11 @@ async function runOne(
     const appendSystemPrompt = skillInstall === 'embedded' ? SKILL_SYSTEM_PROMPT : undefined
     const { exitCode, stderr, transcript, usage } = await spawnAgent({
       agentModel,
-      allowedBuiltinTools:
-        exposeMcpTools && skillInstall === 'embedded' ? 'ToolSearch,Skill' : 'ToolSearch',
+      allowedBuiltinTools: [
+        'ToolSearch',
+        ...(exposeMcpTools && skillInstall === 'embedded' ? ['Skill'] : []),
+        ...additionalAllowedTools,
+      ].join(','),
       appendSystemPrompt,
       prompt,
       sandboxDir: init.sandboxDir,

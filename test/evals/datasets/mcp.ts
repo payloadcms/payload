@@ -30,6 +30,60 @@ function lexicalText({ node }: { node: DefaultNodeTypes }): string {
 
 export const mcpDataset: EvalCase[] = [
   {
+    /** Allows the agent to read and base64-encode the local file before passing it to MCP. */
+    additionalAllowedTools: ['Bash'],
+    bootConfig: true,
+    category: 'mcp',
+    configPath: 'mcp/uploads',
+    input:
+      'Upload the local file "checklist.jpg" to the media library and use "Local checklist icon" as its alt text.',
+    verify: async ({ audit, expect, payload, transcript }) => {
+      const { docs } = await payload.find({
+        collection: 'media',
+        where: { alt: { equals: 'Local checklist icon' } },
+      })
+      const media = docs[0]
+
+      expect(docs).toHaveLength(1)
+      expect(media?.mimeType).toBe('image/jpeg')
+      expect(media?.filesize).toBeGreaterThan(0)
+
+      const storedFile = await readFile(
+        path.join(payload.collections.media.config.upload.staticDir, media!.filename),
+      )
+      const sourceFile = await readFile(
+        path.join(uploadsFixtureDirectory, 'horizontal-squares.jpg'),
+      )
+
+      expect(storedFile).toEqual(sourceFile)
+      const createCalls = audit.filter(
+        (event) => event.type === 'mcp-tool-call' && event.name === 'createDocument',
+      )
+      const createCall = createCalls[0]
+
+      expect(createCalls).toHaveLength(1)
+      expect(createCall?.input).toMatchObject({
+        collectionSlug: 'media',
+        file: { source: 'base64' },
+      })
+      expect(createCall?.response.doc?.id).toBe(media!.id)
+
+      return scoreMCPExecution({
+        audit,
+        optimalModificationAttempts: 1,
+        optimalToolCalls: 3,
+        requiredPayloadOperation: { slug: 'media', kind: 'mutation' },
+        transcript,
+      })
+    },
+    workspaceFiles: [
+      {
+        sourcePath: path.join(uploadsFixtureDirectory, 'horizontal-squares.jpg'),
+        targetPath: 'checklist.jpg',
+      },
+    ],
+  },
+  {
     bootConfig: true,
     category: 'mcp',
     configPath: 'mcp/uploads',
