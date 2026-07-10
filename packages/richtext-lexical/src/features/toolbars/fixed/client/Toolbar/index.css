@@ -43,6 +43,7 @@
     }
 
     + .editor-container {
+      margin-top: calc(var(--spacer-2) * -1);
       border-radius: 0 0 var(--radius-medium) var(--radius-medium) !important;
 
       > .editor-scroller > .editor {
