@@ -250,10 +250,8 @@ export const APIViewClient: React.FC = () => {
               defaultLanguage="json"
               height="100%"
               options={{
-                fixedOverflowWidgets: true,
                 folding: true,
                 lineNumbers: 'on',
-                stickyScroll: { enabled: false },
                 wordWrap: 'off',
               }}
               readOnly

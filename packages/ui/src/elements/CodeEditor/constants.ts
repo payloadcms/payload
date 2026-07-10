@@ -13,6 +13,7 @@ export const defaultGlobalEditorOptions: Omit<
   EditorProps['options'],
   'detectIndentation' | 'insertSpaces' | 'tabSize' | 'trimAutoWhitespace'
 > = {
+  fixedOverflowWidgets: true,
   fontSize: 11,
   hideCursorInOverviewRuler: true,
   lineDecorationsWidth: 12, // gap between line numbers and code
@@ -27,5 +28,6 @@ export const defaultGlobalEditorOptions: Omit<
     alwaysConsumeMouseWheel: false,
   },
   scrollBeyondLastLine: false,
+  stickyScroll: { enabled: false },
   wordWrap: 'on',
 }
