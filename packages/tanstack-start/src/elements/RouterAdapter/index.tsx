@@ -122,10 +122,8 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
   )
 
   // Mirror Next.js' router behavior to allow syncing client state to the URL without triggering a second server load.
-  // Sync client state (e.g. server-resolved query defaults) to the URL without re-running the route loader.
-  // TanStack's browser history monkeypatches `window.history.replaceState` and notifies `router.load` on every call,
-  // so a raw `replaceState` would change `loaderDeps` and trigger a redundant second server load.
-  // `_ignoreSubscribers` suppresses that notification — the same flag TanStack uses internally when flushing history.
+  // TanStack's browser history monkeypatches `window.history.replaceState` and notifies `router.load` on every call.
+  // Use `_ignoreSubscribers` to suppresses that notification — the same flag TanStack uses internally when flushing history.
   const replaceState = useCallback(
     (url: string) => {
       const { history } = router

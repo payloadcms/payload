@@ -42,13 +42,10 @@ export type RouterAdapterRouter = {
   replace: (path: string, options?: { scroll?: boolean }) => void
   /**
    * Use this property to standardize behaviors across different router implementations.
-   *
-   * It allows the browser URL to reflect client state WITHOUT triggering a router navigation event.
-   * This is useful in scenarios where you want to update the URL to reflect client state (e.g. query params)
-   * without causing a full page reload or re-running route loaders.
+   * Set it up to sync client state to the URL without triggering a second server load.
    *
    * In Next.js, calling `window.history.replaceState` directly is sufficient, as Next.js does not observe history mutations.
-   * In TanStack Router, they've monkeypatched `history.replaceState` to notify the router of changes.
+   * In TanStack Router, however, `history.replaceState` is monkeypatched to notify the router of changes.
    */
   replaceState?: (url: string) => void
 }
