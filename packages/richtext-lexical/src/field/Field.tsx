@@ -213,22 +213,26 @@ const RichTextComponent: React.FC<
         />
         <ErrorBoundary fallbackRender={fallbackRender} onReset={() => {}}>
           {BeforeInput}
-          {/* Lexical may be in a drawer. We need to define another BulkUploadProvider to ensure that the bulk upload drawer
-          is rendered in the correct depth (not displayed *behind* the current drawer).
-          The `lexical-` prefix prevents drawer-slug collisions with non-lexical `BulkUploadProvider`s up the tree. */}
-          <BulkUploadProvider modalSlugPrefix={`lexical-${path}`}>
-            <LexicalProvider
-              composerKey={pathWithEditDepth}
-              editorConfig={editorConfig}
-              fieldProps={props}
-              isSmallWidthViewport={isSmallWidthViewport}
-              key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
-              onChange={handleChange}
-              readOnly={disabled}
-              rtl={rtl}
-              value={value}
-            />
-          </BulkUploadProvider>
+          {/* Wraps the toolbar and editor as a single unit so the `__wrap` flex `gap`
+          treats them as one child and does not separate them. */}
+          <div className={`${baseClass}__editor-content`}>
+            {/* Lexical may be in a drawer. We need to define another BulkUploadProvider to ensure that the bulk upload drawer
+            is rendered in the correct depth (not displayed *behind* the current drawer).
+            The `lexical-` prefix prevents drawer-slug collisions with non-lexical `BulkUploadProvider`s up the tree. */}
+            <BulkUploadProvider modalSlugPrefix={`lexical-${path}`}>
+              <LexicalProvider
+                composerKey={pathWithEditDepth}
+                editorConfig={editorConfig}
+                fieldProps={props}
+                isSmallWidthViewport={isSmallWidthViewport}
+                key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
+                onChange={handleChange}
+                readOnly={disabled}
+                rtl={rtl}
+                value={value}
+              />
+            </BulkUploadProvider>
+          </div>
           {AfterInput}
         </ErrorBoundary>
         <RenderCustomComponent

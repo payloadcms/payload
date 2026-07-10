@@ -21,6 +21,7 @@
 
   .rich-text-lexical--show-gutter
     > .rich-text-lexical__wrap
+    > .rich-text-lexical__editor-content
     > .editor-container
     > .editor-scroller
     > .editor {
@@ -33,6 +34,7 @@
     .rich-text-lexical.rich-text-lexical--show-gutter {
       &.error:not(:hover) {
         > .rich-text-lexical__wrap
+          > .rich-text-lexical__editor-content
           > .editor-container
           > .editor-scroller
           > .editor
@@ -43,6 +45,7 @@
 
       &.error:hover {
         > .rich-text-lexical__wrap
+          > .rich-text-lexical__editor-content
           > .editor-container
           > .editor-scroller
           > .editor
@@ -68,6 +71,7 @@
     .rich-text-lexical.rich-text-lexical--show-gutter {
       &.error {
         > .rich-text-lexical__wrap
+          > .rich-text-lexical__editor-content
           > .editor-container
           > .editor-scroller
           > .editor
