@@ -48,6 +48,7 @@
     }
 
     .context-view:has(.monaco-hover.workbench-hover.compact) {
+      display: none;
       pointer-events: none;
     }
   }

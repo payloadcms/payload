@@ -94,7 +94,7 @@ test.describe('Code', () => {
     expect(isSuggestionHitTestable).toBe(true)
   })
 
-  test('should keep the Monaco find widget close button clickable when its tooltip is visible', async () => {
+  test('should keep the Monaco find widget close button clickable without showing its compact tooltip', async () => {
     await page.goto(url.create)
 
     const htmlCodeEditor = page.locator('#field-html')
@@ -126,10 +126,9 @@ test.describe('Code', () => {
       closeButtonBox!.x + closeButtonBox!.width / 2,
       closeButtonBox!.y + closeButtonBox!.height / 2,
     )
+    await page.mouse.wheel(0, 120)
 
-    await expect(page.locator('.monaco-hover.workbench-hover.compact')).toContainText(
-      'Close (Escape)',
-    )
+    await expect(page.locator('.monaco-hover.workbench-hover.compact')).toBeHidden()
 
     const isCloseButtonHitTestable = await closeButton.evaluate((element) => {
       const { height, left, top, width } = element.getBoundingClientRect()
