@@ -832,7 +832,7 @@ The same change applies to `upload` fields with `hasMany: true`.
 
 ### Storage adapters must be declared under `storage`, not `plugins` ([#16596](https://github.com/payloadcms/payload/pull/16596))
 
-Storage adapter packages (`@payloadcms/storage-s3`, `-azure`, `-gcs`, `-r2`, `-vercel-blob`, `-uploadthing`) must now be placed under the top-level `storage` key in your Payload config instead of inside `plugins`.
+Storage adapter packages (`@payloadcms/storage-s3`, `-azure`, `-gcs`, `-r2`, `-vercel-blob`) must now be placed under the top-level `storage` key in your Payload config instead of inside `plugins`.
 
 Declaring adapters inside `plugins` no longer works. The `storage` key ensures upload hooks, static file handlers, and presigned-URL endpoints are wired up before any plugin runs.
 
@@ -853,6 +853,31 @@ export default buildConfig({
 ```
 
 Run `npx @payloadcms/codemod --transform migrate-storage-adapters-to-config` to migrate automatically.
+
+### `@payloadcms/storage-uploadthing` has been removed
+
+The Uploadthing storage adapter, deprecated in a previous release, has been deleted and will no longer be published. Migrate to another storage adapter such as `@payloadcms/storage-s3` before upgrading to 4.0.
+
+```diff
+- import { uploadthingStorage } from '@payloadcms/storage-uploadthing'
++ import { s3Storage } from '@payloadcms/storage-s3'
+
+  export default buildConfig({
+    storage: [
+-     uploadthingStorage({
+-       collections: { media: true },
+-       options: { token: process.env.UPLOADTHING_TOKEN },
+-     }),
++     s3Storage({
++       collections: { media: true },
++       bucket: process.env.S3_BUCKET,
++       config: { region: process.env.S3_REGION },
++     }),
+    ],
+  })
+```
+
+The `migrate-storage-adapters-to-config` codemod no longer recognizes `uploadthingStorage` — migrate uploadthing configs to another adapter manually.
 
 ### `FileSizeImproved` removed — use `FileSize` ([#16593](https://github.com/payloadcms/payload/pull/16593))
 

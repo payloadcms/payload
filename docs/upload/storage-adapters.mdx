@@ -2,20 +2,19 @@
 title: Storage Adapters
 label: Storage Adapters
 order: 20
-desc: Payload provides additional storage adapters to handle file uploads. These adapters allow you to store files in different locations, such as Amazon S3, Vercel Blob Storage, Google Cloud Storage, Uploadthing, and more.
+desc: Payload provides additional storage adapters to handle file uploads. These adapters allow you to store files in different locations, such as Amazon S3, Vercel Blob Storage, Google Cloud Storage, and more.
 keywords: uploads, images, media, storage, adapters, s3, vercel, google cloud, azure
 ---
 
 Payload offers additional storage adapters to handle file uploads. These adapters allow you to store files in different locations, such as Amazon S3, Vercel Blob Storage, Google Cloud Storage, and more.
 
-| Service                                   | Package                                                                                                           |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Vercel Blob                               | [`@payloadcms/storage-vercel-blob`](https://github.com/payloadcms/payload/tree/main/packages/storage-vercel-blob) |
-| AWS S3                                    | [`@payloadcms/storage-s3`](https://github.com/payloadcms/payload/tree/main/packages/storage-s3)                   |
-| Azure                                     | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/main/packages/storage-azure)             |
-| Google Cloud Storage                      | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/main/packages/storage-gcs)                 |
-| Uploadthing _(deprecated, removed in v5)_ | [`@payloadcms/storage-uploadthing`](https://github.com/payloadcms/payload/tree/main/packages/storage-uploadthing) |
-| R2                                        | [`@payloadcms/storage-r2`](https://github.com/payloadcms/payload/tree/main/packages/storage-r2)                   |
+| Service              | Package                                                                                                           |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Vercel Blob          | [`@payloadcms/storage-vercel-blob`](https://github.com/payloadcms/payload/tree/main/packages/storage-vercel-blob) |
+| AWS S3               | [`@payloadcms/storage-s3`](https://github.com/payloadcms/payload/tree/main/packages/storage-s3)                   |
+| Azure                | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/main/packages/storage-azure)             |
+| Google Cloud Storage | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/main/packages/storage-gcs)                 |
+| R2                   | [`@payloadcms/storage-r2`](https://github.com/payloadcms/payload/tree/main/packages/storage-r2)                   |
 
 ## Configuration
 
@@ -338,57 +337,6 @@ export default buildConfig({
 | `acl`                  | Access control list for files that are uploaded                                                     | `Private` |
 | `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.                                       |           |
 | `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it.            | `false`   |
-
-## Uploadthing Storage
-
-<Banner type="warning">
-  **Deprecated**: The Uploadthing storage adapter is deprecated and will be
-  removed in Payload v5. Migrate to another storage adapter such as
-  [S3](#s3-storage) before upgrading.
-</Banner>
-
-[`@payloadcms/storage-uploadthing`](https://www.npmjs.com/package/@payloadcms/storage-uploadthing)
-
-### Installation#uploadthing-installation
-
-```sh
-pnpm add @payloadcms/storage-uploadthing
-```
-
-### Usage#uploadthing-usage
-
-- Configure the `collections` object to specify which collections should use uploadthing. The slug _must_ match one of your existing collection slugs and be an `upload` type.
-- Get a token from Uploadthing and set it as `token` in the `options` object.
-- `acl` is optional and defaults to `public-read`.
-- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client.
-
-```ts
-export default buildConfig({
-  collections: [Media],
-  storage: [
-    uploadthingStorage({
-      collections: {
-        media: true,
-      },
-      options: {
-        token: process.env.UPLOADTHING_TOKEN,
-        acl: 'public-read',
-      },
-    }),
-  ],
-})
-```
-
-### Configuration Options#uploadthing-configuration
-
-| Option           | Description                                                   | Default       |
-| ---------------- | ------------------------------------------------------------- | ------------- |
-| `token`          | Token from Uploadthing. Required.                             |               |
-| `acl`            | Access control list for files that are uploaded               | `public-read` |
-| `logLevel`       | Log level for Uploadthing                                     | `info`        |
-| `fetch`          | Custom fetch function                                         | `fetch`       |
-| `defaultKeyType` | Default key type for file operations                          | `fileKey`     |
-| `clientUploads`  | Do uploads directly on the client to bypass limits on Vercel. |               |
 
 ## R2 Storage
 
