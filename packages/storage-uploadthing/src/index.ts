@@ -70,6 +70,27 @@ type UploadthingStorageFactory = (
 /** NOTE: not synced with uploadthing's internal types. Need to modify if more options added */
 export type ACL = 'private' | 'public-read'
 
+const deprecationWarning =
+  'The `@payloadcms/storage-uploadthing` adapter is deprecated and will be removed in Payload v5. ' +
+  'Migrate to another storage adapter such as `@payloadcms/storage-s3`. ' +
+  'See https://payloadcms.com/docs/upload/storage-adapters for available adapters.'
+
+const withDeprecationWarning = (config: Config): Config => ({
+  ...config,
+  onInit: async (payload) => {
+    payload.logger.warn(deprecationWarning)
+
+    if (config.onInit) {
+      await config.onInit(payload)
+    }
+  },
+})
+
+/**
+ * @deprecated The `@payloadcms/storage-uploadthing` adapter is deprecated and will be removed in
+ * Payload v5. Migrate to another storage adapter such as `@payloadcms/storage-s3`. See
+ * https://payloadcms.com/docs/upload/storage-adapters for available adapters.
+ */
 export const uploadthingStorage: UploadthingStorageFactory = (
   uploadthingStorageOptions: UploadthingStorageOptions,
 ): StorageAdapter => ({
@@ -99,7 +120,7 @@ export const uploadthingStorage: UploadthingStorageFactory = (
     })
 
     if (isPluginDisabled) {
-      return incomingConfig
+      return withDeprecationWarning(incomingConfig)
     }
 
     const { acl = 'public-read', ...utOptions } = uploadthingStorageOptions.options
@@ -145,10 +166,12 @@ export const uploadthingStorage: UploadthingStorageFactory = (
       }),
     }
 
-    return cloudStoragePlugin({
-      alwaysInsertFields: uploadthingStorageOptions.alwaysInsertFields,
-      collections: collectionsWithAdapter,
-      useCompositePrefixes: false, // uploadthing does not support prefixes
-    })(config)
+    return withDeprecationWarning(
+      cloudStoragePlugin({
+        alwaysInsertFields: uploadthingStorageOptions.alwaysInsertFields,
+        collections: collectionsWithAdapter,
+        useCompositePrefixes: false, // uploadthing does not support prefixes
+      })(config),
+    )
   },
 })

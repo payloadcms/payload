@@ -8,14 +8,14 @@ keywords: uploads, images, media, storage, adapters, s3, vercel, google cloud, a
 
 Payload offers additional storage adapters to handle file uploads. These adapters allow you to store files in different locations, such as Amazon S3, Vercel Blob Storage, Google Cloud Storage, and more.
 
-| Service              | Package                                                                                                           |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Vercel Blob          | [`@payloadcms/storage-vercel-blob`](https://github.com/payloadcms/payload/tree/main/packages/storage-vercel-blob) |
-| AWS S3               | [`@payloadcms/storage-s3`](https://github.com/payloadcms/payload/tree/main/packages/storage-s3)                   |
-| Azure                | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/main/packages/storage-azure)             |
-| Google Cloud Storage | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/main/packages/storage-gcs)                 |
-| Uploadthing          | [`@payloadcms/storage-uploadthing`](https://github.com/payloadcms/payload/tree/main/packages/storage-uploadthing) |
-| R2                   | [`@payloadcms/storage-r2`](https://github.com/payloadcms/payload/tree/main/packages/storage-r2)                   |
+| Service                                   | Package                                                                                                           |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Vercel Blob                               | [`@payloadcms/storage-vercel-blob`](https://github.com/payloadcms/payload/tree/main/packages/storage-vercel-blob) |
+| AWS S3                                    | [`@payloadcms/storage-s3`](https://github.com/payloadcms/payload/tree/main/packages/storage-s3)                   |
+| Azure                                     | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/main/packages/storage-azure)             |
+| Google Cloud Storage                      | [`@payloadcms/storage-gcs`](https://github.com/payloadcms/payload/tree/main/packages/storage-gcs)                 |
+| Uploadthing _(deprecated, removed in v5)_ | [`@payloadcms/storage-uploadthing`](https://github.com/payloadcms/payload/tree/main/packages/storage-uploadthing) |
+| R2                                        | [`@payloadcms/storage-r2`](https://github.com/payloadcms/payload/tree/main/packages/storage-r2)                   |
 
 ## Configuration
 
@@ -340,6 +340,12 @@ export default buildConfig({
 | `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it.            | `false`   |
 
 ## Uploadthing Storage
+
+<Banner type="warning">
+  **Deprecated**: The Uploadthing storage adapter is deprecated and will be
+  removed in Payload v5. Migrate to another storage adapter such as
+  [S3](#s3-storage) before upgrading.
+</Banner>
 
 [`@payloadcms/storage-uploadthing`](https://www.npmjs.com/package/@payloadcms/storage-uploadthing)
 

@@ -1,4 +1,6 @@
-# Uploadthing Storage for Payload (beta)
+# Uploadthing Storage for Payload
+
+> [!WARNING] > **Deprecated:** This adapter is deprecated and will be removed in Payload v5. Migrate to another storage adapter such as [`@payloadcms/storage-s3`](https://www.npmjs.com/package/@payloadcms/storage-s3) (which also works with Cloudflare R2) before upgrading. See the [storage adapters docs](https://payloadcms.com/docs/upload/storage-adapters) for available adapters.
 
 This package provides a way to use [uploadthing](https://uploadthing.com) with Payload.
 
