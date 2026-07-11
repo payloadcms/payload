@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser } from 'payload'
+import type { User } from 'payload'
 
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -14,7 +14,7 @@ const baseClass = 'locked'
 
 export const Locked: React.FC<{
   className?: string
-  user: ClientUser
+  user: User
 }> = ({ className, user }) => {
   const anchorRef = useRef<HTMLDivElement>(null)
   const [hovered, setHovered] = useState(false)

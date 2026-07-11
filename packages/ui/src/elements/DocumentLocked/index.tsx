@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser } from 'payload'
+import type { User } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import React, { useEffect } from 'react'
@@ -41,7 +41,7 @@ export const DocumentLocked: React.FC<{
   onReadOnly: () => void
   onTakeOver: () => void
   updatedAt?: null | number
-  user?: ClientUser | number | string
+  user?: number | string | User
 }> = ({ handleGoBack, isActive, onReadOnly, onTakeOver, updatedAt, user }) => {
   const { closeModal, openModal } = useModal()
   const { t } = useTranslation()

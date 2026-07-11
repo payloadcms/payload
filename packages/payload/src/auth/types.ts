@@ -125,7 +125,8 @@ export type SanitizedPermissions = {
  */
 export type AuthRuntimeFields = {
   /**
-   * The session ID of the current request. Present only when sessions are enabled.
+   * The session ID of the current request. May be present on request-authenticated users when
+   * sessions are enabled.
    */
   _sid?: string
   /**
@@ -135,21 +136,18 @@ export type AuthRuntimeFields = {
 }
 
 /**
- * Note: AuthenticatedUser still carries the write-only `password` from `User` (always `undefined` at runtime).
- * Stripping it cleanly isn't possible, because auth operations build the authenticated user
- * from a read `User` doc, so a `never`-typed `password` would break those assignments
- */
-/**
  * The signed-in user: the read user plus the runtime auth markers (`_strategy`, `_sid`). This is
- * what `req.user`, `payload.auth()`, the `me` operation, and auth strategies return.
+ * what `req.user`, `payload.auth()`, the `me` operation, auth strategies, and `useAuth().user`
+ * return.
+ *
+ * This type describes the authenticated identity, not an exact serialization contract. Runtime,
+ * hidden, access-controlled, or unselected fields can be absent from individual responses.
+ *
+ * `AuthenticatedUser` still carries the write-only `password` from `User` (always `undefined` at
+ * runtime). Stripping it cleanly is not possible because auth operations build the authenticated
+ * user from a read `User` document, so a `never`-typed `password` would break those assignments.
  */
 export type AuthenticatedUser = AuthRuntimeFields & User
-
-/**
- * The user as available on the client (`useAuth().user`). It is the authenticated user as
- * serialized to the browser: `collection` and `_strategy` are present, `_sid` is not sent.
- */
-export type ClientUser = AuthenticatedUser
 
 export type UserSession = {
   createdAt?: Date | null | string
