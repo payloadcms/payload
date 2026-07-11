@@ -136,16 +136,14 @@ export type AuthRuntimeFields = {
 }
 
 /**
+ * Note: AuthenticatedUser still carries the write-only `password` from `User` (always `undefined` at runtime).
+ * Stripping it cleanly isn't possible, because auth operations build the authenticated user
+ * from a read `User` doc, so a `never`-typed `password` would break those assignments
+ */
+/**
  * The signed-in user: the read user plus the runtime auth markers (`_strategy`, `_sid`). This is
  * what `req.user`, `payload.auth()`, the `me` operation, auth strategies, and `useAuth().user`
  * return.
- *
- * This type describes the authenticated identity, not an exact serialization contract. Runtime,
- * hidden, access-controlled, or unselected fields can be absent from individual responses.
- *
- * `AuthenticatedUser` still carries the write-only `password` from `User` (always `undefined` at
- * runtime). Stripping it cleanly is not possible because auth operations build the authenticated
- * user from a read `User` document, so a `never`-typed `password` would break those assignments.
  */
 export type AuthenticatedUser = AuthRuntimeFields & User
 
