@@ -13,23 +13,30 @@ type Args = {
 export const getExternalFile = async ({ data, req, uploadConfig }: Args): Promise<File> => {
   const { filename, url } = data
 
-  let trimAuthCookies = true
   if (typeof url === 'string') {
     let fileURL = url
     if (!url.startsWith('http')) {
-      // URL points to the same server - we can send any cookies safely to our server.
-      trimAuthCookies = false
-      const baseUrl = req.headers.get('origin') || `${req.protocol}://${req.headers.get('host')}`
+      // URL is relative - resolve against the trusted, server-configured serverURL.
+      // Do NOT trust client-supplied Origin/Host headers here, as they can be
+      // spoofed to point at attacker-controlled hosts (SSRF, CWE-918).
+      const baseUrl = req.payload.config.serverURL
+      if (!baseUrl) {
+        throw new APIError(
+          'Cannot fetch relative file URL: `serverURL` is not configured.',
+          400,
+        )
+      }
       fileURL = `${baseUrl}${url}`
     }
 
-    let cookies = (req.headers.get('cookie') ?? '').split(';')
-
-    if (trimAuthCookies) {
-      cookies = cookies.filter(
-        (cookie) => !cookie.trim().startsWith(req.payload.config.cookiePrefix),
-      )
-    }
+    // Strip auth cookies from any forwarded cookie header. We never want to
+    // forward the caller's session cookies to an outbound fetch — even for
+    // same-origin requests — because the resulting response bytes are stored
+    // as an upload and could leak authenticated content (e.g. admin API
+    // responses) back to the uploading user.
+    const cookies = (req.headers.get('cookie') ?? '')
+      .split(';')
+      .filter((cookie) => !cookie.trim().startsWith(req.payload.config.cookiePrefix))
 
     const headers = uploadConfig.externalFileHeaderFilter
       ? uploadConfig.externalFileHeaderFilter(Object.fromEntries(new Headers(req.headers)))
