@@ -101,6 +101,36 @@ export class DatabaseKVAdapter implements KVAdapter {
     return result.docs.map((each) => each.key)
   }
 
+  async mget<T extends KVStoreValue>(keys: readonly string[]): Promise<Array<null | T>> {
+    if (keys.length === 0) {
+      return []
+    }
+
+    const result = await this.payload.db.find<{
+      data: T
+      key: string
+    }>({
+      collection: this.collectionSlug,
+      joins: false,
+      limit: 0,
+      pagination: false,
+      req,
+      select: {
+        data: true,
+        key: true,
+      },
+      where: {
+        key: {
+          in: keys,
+        },
+      },
+    })
+
+    const map = new Map<string, T>(result.docs.map((doc) => [doc.key, doc.data]))
+
+    return keys.map((key) => map.get(key) ?? null)
+  }
+
   async set(key: string, data: KVStoreValue): Promise<void> {
     await this.payload.db.upsert({
       collection: this.collectionSlug,
@@ -152,7 +182,6 @@ export const databaseKVAdapter = (options: DatabaseKVAdapterOptions = {}): KVAda
       ],
       lockDocuments: false,
       timestamps: false,
-      versions: false,
       ...options.kvCollectionOverrides,
     },
   }
