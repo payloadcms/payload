@@ -29,7 +29,7 @@ export type TTLConfig = TTLRule[]
 
 export class RedisKVAdapter implements KVAdapter {
   redisClient: Redis
-  resolveTTL?: (redisKey: string) => number | undefined
+  resolveTTL?: (key: string) => number | undefined
 
   constructor(
     readonly keyPrefix: string,
@@ -39,9 +39,9 @@ export class RedisKVAdapter implements KVAdapter {
     this.redisClient = new Redis(redisURL)
 
     if (ttlConfig) {
-      this.resolveTTL = (redisKey: string) => {
+      this.resolveTTL = (key: string) => {
         for (const rule of ttlConfig) {
-          if (redisKey.startsWith(rule.prefix)) {
+          if (key.startsWith(rule.prefix)) {
             return rule.ttl
           }
         }
