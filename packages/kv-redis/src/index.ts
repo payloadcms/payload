@@ -72,6 +72,16 @@ export class RedisKVAdapter implements KVAdapter {
     return JSON.parse(data)
   }
 
+  async getdel<T extends KVStoreValue>(key: string): Promise<null | T> {
+    const data = await this.redisClient.getdel(`${this.keyPrefix}${key}`)
+
+    if (data === null) {
+      return null
+    }
+
+    return JSON.parse(data)
+  }
+
   async has(key: string): Promise<boolean> {
     const exists = await this.redisClient.exists(`${this.keyPrefix}${key}`)
     return exists === 1
@@ -107,7 +117,7 @@ export class RedisKVAdapter implements KVAdapter {
   async set(key: string, data: KVStoreValue): Promise<void> {
     const redisKey = `${this.keyPrefix}${key}`
     const value = JSON.stringify(data)
-    const ttl = this.resolveTTL?.(redisKey)
+    const ttl = this.resolveTTL?.(key)
 
     if (ttl && ttl > 0) {
       await this.redisClient.set(redisKey, value, 'EX', ttl)
