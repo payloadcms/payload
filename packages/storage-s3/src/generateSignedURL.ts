@@ -34,7 +34,12 @@ export const getGenerateSignedURLHandler = ({
 }: Args): PayloadHandler => {
   return async (req) => {
     if (!req.json) {
-      throw new APIError('Content-Type expected to be application/json', 400)
+      throw new APIError(
+        req.t
+          ? req.t('error:contentTypeExpectedJSON')
+          : 'Content-Type expected to be application/json',
+        400,
+      )
     }
 
     let filesizeLimit = req.payload.config.upload.limits?.fileSize

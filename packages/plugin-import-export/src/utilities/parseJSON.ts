@@ -26,6 +26,6 @@ export const parseJSON = ({ data, req }: ParseJSONArgs): Record<string, unknown>
     if (err instanceof APIError) {
       throw err
     }
-    throw new APIError('Invalid JSON format')
+    throw new APIError(req.t ? req.t('error:invalidJSONFormat') : 'Invalid JSON format')
   }
 }

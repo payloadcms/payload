@@ -70,7 +70,9 @@ export const routeError = async ({
   // Internal server errors can contain anything, including potentially sensitive data.
   // Therefore, error details will be hidden from the response unless `config.debug` is `true`
   if (!isErrorPublic(err, config)) {
-    response = formatErrors(new APIError('Something went wrong.'))
+    response = formatErrors(
+      new APIError(req.t ? req.t('error:somethingWentWrong') : 'Something went wrong.'),
+    )
   }
 
   if (config.debug && config.debug === true) {
