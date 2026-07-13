@@ -101,6 +101,14 @@ export const handleEndpoints = async ({
       url = `${request.url}?${search}`
     } else if (request.headers.get('Content-Type') === 'application/json') {
       // May not be supported by every endpoint
+      // Enforce request body size limit to prevent resource exhaustion
+      const contentLength = request.headers.get('content-length')
+      if (contentLength && parseInt(contentLength, 10) > 10 * 1024 * 1024) {
+        return new Response(JSON.stringify({ message: 'Request entity too large' }), {
+          headers: { 'Content-Type': 'application/json' },
+          status: 413,
+        })
+      }
       data = await request.json()
 
       // locale and fallbackLocale is read by createPayloadRequest to populate req.locale and req.fallbackLocale
