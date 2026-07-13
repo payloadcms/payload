@@ -135,6 +135,12 @@
     color: var(--color-text-tertiary);
   }
 
+  @media (max-width: 768px) {
+    .file-manager__drag-text {
+      display: none;
+    }
+  }
+
   @container edit-main (max-width: 1024px) {
     .file-manager {
       min-height: 400px;

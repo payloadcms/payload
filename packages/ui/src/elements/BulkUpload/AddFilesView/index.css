@@ -31,8 +31,20 @@
   }
 
   .bulk-upload--add-files__dragAndDropText {
+    display: none;
     margin: 0;
     text-transform: lowercase;
     align-self: center;
+  }
+
+  .bulk-upload--add-files__orText {
+    color: var(--color-text-tertiary);
+    text-transform: lowercase;
+  }
+
+  @media (min-width: 769px) {
+    .bulk-upload--add-files__dragAndDropText {
+      display: block;
+    }
   }
 }

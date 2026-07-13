@@ -17,6 +17,7 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { getFilesFromClipboard } from '../../utilities/getFilesFromClipboard.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -180,6 +181,19 @@ export const FileManager: React.FC<FileManagerProps> = ({
     (files: FileList) => handleFileChange({ file: files?.[0] }),
     [handleFileChange],
   )
+
+  const handlePasteFromClipboard = useCallback(async () => {
+    try {
+      const files = await getFilesFromClipboard()
+      if (!files) {
+        toast.error('No file found in clipboard.')
+        return
+      }
+      handleFileSelection(files)
+    } catch (_err) {
+      toast.error('Unable to read from clipboard.')
+    }
+  }, [handleFileSelection])
 
   const isValidUrl = Boolean(fileUrl && URL.canParse(fileUrl))
 
@@ -435,6 +449,14 @@ export const FileManager: React.FC<FileManagerProps> = ({
                           </Button>
                         </Fragment>
                       )}
+                      <span className={`${baseClass}__or-text`}>{t('general:or')}</span>
+                      <Button
+                        buttonStyle="secondary"
+                        icon="clipboard"
+                        onClick={handlePasteFromClipboard}
+                        size="medium"
+                        tooltip={t('upload:pasteFromClipboard')}
+                      />
                       {UploadControls ?? null}
                     </div>
                     <p className={`${baseClass}__drag-text`}>

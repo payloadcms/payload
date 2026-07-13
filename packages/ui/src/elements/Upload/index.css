@@ -252,5 +252,9 @@
     .file-field__edit {
       display: none;
     }
+
+    .file-field__dragAndDropText {
+      display: none;
+    }
   }
 }

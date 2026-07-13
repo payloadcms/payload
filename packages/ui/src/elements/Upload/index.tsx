@@ -17,11 +17,12 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { UploadControlsProvider, useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
+import { getFilesFromClipboard } from '../../utilities/getFilesFromClipboard.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
-import { EditUpload } from '../EditUpload/index.js'
 import './index.css'
+import { EditUpload } from '../EditUpload/index.js'
 import { FileDetails } from '../FileDetails/index.js'
 import { PreviewSizes } from '../PreviewSizes/index.js'
 import { Thumbnail } from '../Thumbnail/index.js'
@@ -232,6 +233,19 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
     },
     [handleFileChange],
   )
+
+  const handlePasteFromClipboard = useCallback(async () => {
+    try {
+      const files = await getFilesFromClipboard()
+      if (!files) {
+        toast.error('No file found in clipboard.')
+        return
+      }
+      handleFileSelection(files)
+    } catch (_err) {
+      toast.error('Unable to read from clipboard.')
+    }
+  }, [handleFileSelection])
 
   const handleFileRemoval = useCallback(() => {
     setRemovedFile(true)
@@ -493,6 +507,15 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
                       </Button>
                     </Fragment>
                   )}
+
+                  <span className={`${baseClass}__orText`}>{t('general:or')}</span>
+                  <Button
+                    buttonStyle="pill"
+                    icon="clipboard"
+                    onClick={handlePasteFromClipboard}
+                    size="medium"
+                    tooltip={t('upload:pasteFromClipboard')}
+                  />
 
                   {UploadControls ? UploadControls : null}
                 </div>

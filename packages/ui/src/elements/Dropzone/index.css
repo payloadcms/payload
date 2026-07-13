@@ -1,12 +1,15 @@
 @layer payload-default {
   .dropzone {
+    --accessibility-outline-offset: -2px;
+
     position: relative;
     display: flex;
     align-items: flex-start;
     background-color: var(--color-bg-secondary);
     border: var(--stroke-width-small) dashed var(--special-border-translucent);
     border-radius: var(--field-border-radius);
-    overflow: clip;
+    /* visible, not clip/hidden, so Button tooltips (not portaled) inside the dropzone aren't cut off */
+    overflow: visible;
     width: 100%;
 
     .btn {
@@ -15,6 +18,11 @@
 
     &:hover {
       background: var(--color-bg-hover);
+    }
+
+    &:focus {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
     }
 
     &.dragging {
