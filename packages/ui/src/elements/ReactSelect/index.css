@@ -91,7 +91,7 @@
     border-radius: var(--radius-medium);
     box-shadow: var(--elevation-400-menu-panel);
     background: var(--color-bg);
-    /* overflow: clip; */
+    overflow: hidden;
   }
 
   .rs__menu--placement-bottom {
