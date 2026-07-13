@@ -135,7 +135,7 @@ export function detectFramework(cwd: string = process.cwd()): Framework {
  * PATH) works whether `payload build` runs via an npm script or `npx`.
  */
 export function resolveNextBin(cwd: string = process.cwd()): string {
-  return resolveBin({ cwd, packageName: 'next' })
+  return resolveBin({ cwd, displayName: 'Next.js', packageName: 'next' })
 }
 
 /**
@@ -144,7 +144,7 @@ export function resolveNextBin(cwd: string = process.cwd()): string {
  * runs via an npm script or `npx`.
  */
 export function resolveViteBin(cwd: string = process.cwd()): string {
-  return resolveBin({ cwd, packageName: 'vite' })
+  return resolveBin({ cwd, displayName: 'Vite', packageName: 'vite' })
 }
 
 /**
@@ -229,7 +229,15 @@ function buildDetectionError(signals: {
  * future `exports` field and to internal layout changes. Resolving from `cwd`
  * (not PATH) works whether `payload build` runs via an npm script or `npx`.
  */
-function resolveBin({ cwd, packageName }: { cwd: string; packageName: string }): string {
+function resolveBin({
+  cwd,
+  displayName,
+  packageName,
+}: {
+  cwd: string
+  displayName: string
+  packageName: string
+}): string {
   const require = createRequire(path.join(cwd, 'package.json'))
 
   let pkgPath: string
@@ -237,7 +245,7 @@ function resolveBin({ cwd, packageName }: { cwd: string; packageName: string }):
     pkgPath = require.resolve(`${packageName}/package.json`)
   } catch {
     throw new Error(
-      `Could not resolve "${packageName}" from the current project. Is ${packageName} installed?`,
+      `Could not resolve "${packageName}" from the current project. Is ${displayName} installed?`,
     )
   }
 
