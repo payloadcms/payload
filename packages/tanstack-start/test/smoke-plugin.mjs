@@ -5,7 +5,16 @@
 // The React, RSC, and TanStack Start plugins are now instantiated internally, so
 // this test no longer injects mocks for them — it validates the parts of the
 // config `withPayload` owns directly.
-import { withPayload } from '../dist/exports/vite.js'
+import viteReact from '@vitejs/plugin-react'
+import rsc from '@vitejs/plugin-rsc'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+
+import {
+  payloadReactOptions,
+  payloadRscOptions,
+  payloadTanstackStartOptions,
+  withPayload,
+} from '../dist/exports/vite.js'
 
 const factory = withPayload({
   payloadConfigPath: '/tmp/fake-payload.config.ts',
@@ -88,6 +97,74 @@ if (!merged.optimizeDeps.include.includes('recharts')) {
 }
 if (!merged.optimizeDeps.include.includes('react-dom > scheduler')) {
   errors.push('vite override clobbered base: optimizeDeps.include lost defaults')
+}
+
+// Payload's required plugin options are exposed so the consumer can call the
+// plugin factories themselves. They must carry the admin's required settings.
+const rscOptions = payloadRscOptions()
+if (rscOptions.serverHandler !== false) {
+  errors.push('payloadRscOptions missing serverHandler: false')
+}
+
+const tsOptions = payloadTanstackStartOptions()
+if (tsOptions.rsc?.enabled !== true) {
+  errors.push('payloadTanstackStartOptions missing rsc.enabled')
+}
+if (tsOptions.router?.autoCodeSplitting !== false) {
+  errors.push('payloadTanstackStartOptions missing router.autoCodeSplitting: false')
+}
+// The blanket `.client.*` SSR denial disable must be gone — host `.client.*`
+// files keep TanStack's default protection; Payload is exempted in onViolation.
+if (tsOptions.importProtection?.server) {
+  errors.push('payloadTanstackStartOptions should not override importProtection.server (blanket disable)')
+}
+if (typeof payloadReactOptions().include === 'undefined') {
+  errors.push('payloadReactOptions missing include')
+}
+
+// Guest/builder form: the consumer instantiates viteReact/rsc/tanstackStart
+// themselves and assembles the final config. `withPayload` returns whatever the
+// builder returns (after warning suppression), and hands the builder its base
+// config (workaround plugins only) plus the required plugin options.
+let builderContext
+const builtConfig = withPayload(
+  { payloadConfigPath: '/tmp/fake-payload.config.ts' },
+  (context) => {
+    builderContext = context
+    return {
+      ...context.config,
+      plugins: [
+        ...context.config.plugins,
+        rsc(context.pluginOptions.rsc),
+        tanstackStart(context.pluginOptions.tanstackStart),
+        viteReact(context.pluginOptions.react),
+      ],
+      server: { port: 4000 },
+    }
+  },
+)({ command: 'serve', mode: 'development' })
+
+if (!builderContext) {
+  errors.push('builder callback was not invoked')
+}
+if (builderContext && !builderContext.env) {
+  errors.push('builder context missing env')
+}
+if (builderContext && !builderContext.pluginOptions?.rsc) {
+  errors.push('builder context missing pluginOptions.rsc')
+}
+// The base config handed to the builder must only carry Payload's workaround
+// plugins — the three third-party plugins are the consumer's to add.
+if (builderContext && builderContext.config.plugins.length !== 6) {
+  errors.push(
+    `builder base config should carry 6 workaround plugins, got ${builderContext.config.plugins?.length}`,
+  )
+}
+if (builtConfig.server?.port !== 4000) {
+  errors.push('builder return value not used')
+}
+if (!builtConfig.customLogger) {
+  errors.push('warning suppression not applied to builder result')
 }
 
 if (errors.length) {

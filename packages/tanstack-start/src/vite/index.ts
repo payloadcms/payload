@@ -1,4 +1,4 @@
-import type { Logger, UserConfig, UserConfigFnObject } from 'vite'
+import type { ConfigEnv, Logger, PluginOption, UserConfig, UserConfigFnObject } from 'vite'
 
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
@@ -52,60 +52,79 @@ function withQuietedDependencyWarnings(existing?: Logger): Logger {
   return logger
 }
 
+/** Applies dependency-warning suppression to a config in place when enabled. */
+function applyDependencyWarningSuppression(config: UserConfig, enabled: boolean): UserConfig {
+  if (enabled) {
+    config.customLogger = withQuietedDependencyWarnings(config.customLogger)
+  }
+  return config
+}
+
 export type WithPayloadOptions = {
-  /**
-   * Additional import-protection `ignoreImporters` patterns. This is a
-   * Payload-specific knob on the TanStack Start plugin, so it cannot be
-   * expressed through `vite` — pass it here.
-   */
+  /** Extra import-protection `ignoreImporters` patterns for the TanStack Start plugin. */
   additionalIgnoreImporters?: RegExp[]
   /** Path to the user's `payload.config.ts` (required) */
   payloadConfigPath: string
   /** TanStack router routes directory relative to `srcDirectory`. Defaults to `'app'` */
   routesDirectory?: string
-  /**
-   * Silence Vite warnings about third-party dependency sourcemaps pointing to
-   * missing source files — noise Payload consumers can't act on. Defaults to
-   * `true`; set `false` to see them. Composes with a `vite.customLogger`.
-   */
+  /** Silence Vite warnings about third-party dependency sourcemaps. Defaults to `true`. */
   silenceDependencyWarnings?: boolean
   /** TanStack source directory. Defaults to `'src'` */
   srcDirectory?: string
-  /**
-   * Extra Vite config merged on top of the Payload defaults via Vite's own
-   * `mergeConfig`. Objects are deep-merged and arrays are appended, so this is
-   * the single hook for everything a consumer used to reach through separate
-   * options: extra `plugins`, `resolve.alias` entries, `optimizeDeps.include`,
-   * `ssr.external`, `server`, `build`, and so on.
-   *
-   * @example
-   * withPayload({
-   *   payloadConfigPath: './src/payload.config.ts',
-   *   vite: { server: { port: 4000 } },
-   * })
-   */
+  /** Extra Vite config deep-merged over the Payload defaults. Ignored in `build` mode. */
   vite?: UserConfig
 }
 
+/** The options Payload's admin requires for each third-party plugin. */
+export type PayloadPluginOptions = {
+  react: NonNullable<Parameters<typeof viteReact>[0]>
+  rsc: NonNullable<Parameters<typeof rsc>[0]>
+  tanstackStart: NonNullable<Parameters<typeof tanstackStart>[0]>
+}
+
+export type WithPayloadBuilderContext = {
+  /** Payload's base Vite config; `plugins` holds Payload's workaround plugins only. */
+  config: UserConfig
+  env: ConfigEnv
+  /** Options to pass to the `viteReact`/`rsc`/`tanstackStart` factories you import. */
+  pluginOptions: PayloadPluginOptions
+}
+
+/** Assembles the final Vite config from Payload's base config and plugin options. */
+export type WithPayloadBuilder = (context: WithPayloadBuilderContext) => UserConfig
+
 /**
- * Vite config helper for Payload + TanStack Start. The Vite-side counterpart to
- * `withPayload` for Next.js: it owns the whole Vite setup needed to run the
- * Payload admin — the RSC, React, and TanStack Start plugins plus a small set of
- * Payload-specific workarounds — so a consumer's `vite.config.ts` collapses to:
+ * Vite config helper for Payload + TanStack Start; the counterpart to Next.js'
+ * `withPayload`.
+ *
+ * Zero-config — Payload instantiates the RSC, React, and TanStack Start plugins:
  *
  * ```ts
- * import { withPayload } from '@payloadcms/tanstack-start/vite'
- *
  * export default withPayload({ payloadConfigPath: './src/payload.config.ts' })
  * ```
  *
- * The React (`@vitejs/plugin-react`), RSC (`@vitejs/plugin-rsc`), and TanStack
- * Start plugins are instantiated internally with the settings the admin
- * requires — consumers no longer pass them in. Each remaining Payload
- * workaround lives in its own file under `./workarounds/` so it can be deleted
- * individually once the corresponding upstream fix lands.
+ * Guest mode — pass a `build` callback to instantiate them yourself (one copy of
+ * each; `@vitejs/plugin-rsc` is a hard singleton):
+ *
+ * ```ts
+ * export default withPayload(
+ *   { payloadConfigPath: './src/payload.config.ts' },
+ *   ({ config, pluginOptions }) => ({
+ *     ...config,
+ *     plugins: [
+ *       ...config.plugins,
+ *       rsc(pluginOptions.rsc),
+ *       tanstackStart(pluginOptions.tanstackStart),
+ *       viteReact(pluginOptions.react),
+ *     ],
+ *   }),
+ * )
+ * ```
  */
-export function withPayload(options: WithPayloadOptions): UserConfigFnObject {
+export function withPayload(
+  options: WithPayloadOptions,
+  build?: WithPayloadBuilder,
+): UserConfigFnObject {
   const {
     additionalIgnoreImporters = [],
     payloadConfigPath,
@@ -115,7 +134,7 @@ export function withPayload(options: WithPayloadOptions): UserConfigFnObject {
     vite,
   } = options
 
-  return (_env) => {
+  return (env) => {
     const base: UserConfig = {
       build: {
         cssMinify: 'esbuild',
@@ -145,6 +164,9 @@ export function withPayload(options: WithPayloadOptions): UserConfigFnObject {
         exclude: optimizeDepsExcludeDefaults,
         include: optimizeDepsIncludeDefaults,
       },
+      // Payload's internal workaround plugins only. The RSC, TanStack Start, and
+      // React plugins are appended below (default form) or by the consumer's
+      // `build` callback (guest form).
       plugins: [
         clientModuleResolution(),
         wrapCjsForClient(),
@@ -152,77 +174,6 @@ export function withPayload(options: WithPayloadOptions): UserConfigFnObject {
         reactDomServerInRsc(),
         stubPrettierInClient(),
         payloadDevTransforms(),
-        rsc({ serverHandler: false }),
-        tanstackStart({
-          importProtection: {
-            client: { excludeFiles: [], specifiers: serverOnlyClientSpecifiers },
-            ignoreImporters: [
-              ...defaultImportProtectionIgnoreImporters,
-              ...additionalIgnoreImporters,
-            ],
-            include: ['**/*'],
-            mockAccess: 'warn',
-            onViolation: onImportProtectionViolation,
-            // Disable TanStack Start's default `**/*.client.*` file-based denial in
-            // the SSR environment. Payload uses the `.client.tsx` filename suffix
-            // for React Client Components (with a `'use client'` directive) that
-            // MUST be server-rendered to HTML during SSR. The default rule would
-            // otherwise replace those files with an `import-protection mock` Proxy
-            // during SSR, which crashes React (TypeError: Cannot convert object to
-            // primitive value) the moment React tries to format a warning that
-            // mentions one of these components.
-            server: { files: [] },
-          },
-          // Disable TanStack Router's automatic per-route code-splitting.
-          //
-          // With splitting enabled each route's `component` is fetched lazily
-          // via `?tsr-split=component` after the initial SSR HTML is streamed.
-          // Until that lazy chunk lands the rendered admin tree has no client
-          // React attached, so any button clicks (e.g. the
-          // `#toggle-list-filters` chevron in `<ListControls />`) hit a static
-          // DOM, the click is dropped, and once the chunk finally loads the
-          // component re-mounts with its initial `useState` instead of the
-          // toggled value. That single behaviour was the root cause of the
-          // "page renders but nothing is interactive" tanstack-start E2E
-          // failures (`#list-controls-where`, `[data-lexical-editor]`, etc.) -
-          // playwright traces show "Download the React DevTools" landing
-          // *after* the playwright click, confirming late hydration.
-          //
-          // We pass BOTH knobs because `tanstackStart`'s schema silently
-          // strips the user-supplied `autoCodeSplitting` (its `tsrConfig`
-          // does `configSchema.omit({ autoCodeSplitting: true, target: true
-          // })`) and then leaves the value `undefined` — which is fine for
-          // the conditional inside `unpluginRouterComposedFactory`, but the
-          // TanStack Start vite plugin *unconditionally* installs the router
-          // code-splitter via `tanStackRouterCodeSplitter(...)` regardless.
-          // The only knob that survives all of that and is honoured by the
-          // splitter is `router.codeSplittingOptions.defaultBehavior` — set
-          // to an empty array, the splitter still walks each `createFileRoute`
-          // file but produces no virtual `?tsr-split=...` modules, so every
-          // route component ships in the initial bundle and hydration starts
-          // immediately on first paint. We keep `autoCodeSplitting: false` as
-          // a belt-and-braces signal in case the start plugin ever stops
-          // dropping it.
-          //
-          // Eager-loading routes ships a slightly larger initial bundle but
-          // makes the admin actually interactive on first paint.
-          router: {
-            autoCodeSplitting: false,
-            codeSplittingOptions: { defaultBehavior: [] },
-            // Exclude generated importMap files and colocated server-function
-            // modules (`*.functions.ts`). Admin form saves are dispatched via
-            // `runPayloadServerFn` (a TanStack Start `createServerFn`) rather than
-            // a hand-rolled route, so there is no longer an `api.server-function.ts`
-            // to special-case here. The `*.functions.ts` shims live next to the
-            // routes that use them (e.g. `app/_payload/*.functions.ts`); they
-            // define `createServerFn`s, not routes, so they must not be scanned.
-            routeFileIgnorePattern: 'importMap\\.(?:js|server\\.ts)$|\\.functions\\.',
-            routesDirectory,
-          } as any,
-          rsc: { enabled: true },
-          srcDirectory,
-        }),
-        viteReact({ exclude: [], include: /\.[jt]sx?$/ }),
       ],
       resolve: {
         alias: [{ find: '@payload-config', replacement: path.resolve(payloadConfigPath) }],
@@ -242,12 +193,90 @@ export function withPayload(options: WithPayloadOptions): UserConfigFnObject {
       },
     }
 
-    const merged = vite ? mergeConfig(base, vite) : base
-
-    if (silenceDependencyWarnings) {
-      merged.customLogger = withQuietedDependencyWarnings(merged.customLogger)
+    const pluginOptions: PayloadPluginOptions = {
+      react: payloadReactOptions(),
+      rsc: payloadRscOptions(),
+      tanstackStart: payloadTanstackStartOptions({
+        additionalIgnoreImporters,
+        routesDirectory,
+        srcDirectory,
+      }),
     }
 
-    return merged
+    if (build) {
+      return applyDependencyWarningSuppression(
+        build({ config: base, env, pluginOptions }),
+        silenceDependencyWarnings,
+      )
+    }
+
+    base.plugins = [
+      ...(base.plugins as PluginOption[]),
+      rsc(pluginOptions.rsc),
+      tanstackStart(pluginOptions.tanstackStart),
+      viteReact(pluginOptions.react),
+    ]
+
+    const merged = vite ? mergeConfig(base, vite) : base
+
+    return applyDependencyWarningSuppression(merged, silenceDependencyWarnings)
+  }
+}
+
+/** `@vitejs/plugin-rsc` options for Payload: `serverHandler: false` (TanStack owns the handler). */
+export function payloadRscOptions(): NonNullable<Parameters<typeof rsc>[0]> {
+  return { serverHandler: false }
+}
+
+/** `@vitejs/plugin-react` options for Payload: transform every `.[jt]sx?` file. */
+export function payloadReactOptions(): NonNullable<Parameters<typeof viteReact>[0]> {
+  return { exclude: [], include: /\.[jt]sx?$/ }
+}
+
+export type PayloadTanstackStartOptionsArgs = {
+  /** Additional import-protection `ignoreImporters` patterns. */
+  additionalIgnoreImporters?: RegExp[]
+  /** TanStack router routes directory relative to `srcDirectory`. Defaults to `'app'`. */
+  routesDirectory?: string
+  /** TanStack source directory. Defaults to `'src'`. */
+  srcDirectory?: string
+}
+
+/**
+ * The `tanstackStart` options Payload's admin requires (import-protection and
+ * code-splitting). TanStack Start is one-per-app, so a host that already runs it
+ * should merge these into its single `tanstackStart` call.
+ */
+export function payloadTanstackStartOptions(
+  args: PayloadTanstackStartOptionsArgs = {},
+): NonNullable<Parameters<typeof tanstackStart>[0]> {
+  const { additionalIgnoreImporters = [], routesDirectory = 'app', srcDirectory = 'src' } = args
+
+  return {
+    // No `server` rule: keep TanStack's default `.client.*` SSR protection for
+    // host files. Payload's own `.client.*` are exempted in
+    // `onImportProtectionViolation`.
+    importProtection: {
+      client: { excludeFiles: [], specifiers: serverOnlyClientSpecifiers },
+      ignoreImporters: [...defaultImportProtectionIgnoreImporters, ...additionalIgnoreImporters],
+      include: ['**/*'],
+      mockAccess: 'warn',
+      onViolation: onImportProtectionViolation,
+    },
+    // Disable per-route code-splitting so route components ship in the initial
+    // bundle and hydrate on first paint — otherwise the admin renders but isn't
+    // interactive until each lazy `?tsr-split=` chunk lands. `defaultBehavior:
+    // []` is the knob the splitter actually honours; `autoCodeSplitting: false`
+    // is a belt-and-braces signal (the plugin's schema strips it).
+    router: {
+      autoCodeSplitting: false,
+      codeSplittingOptions: { defaultBehavior: [] },
+      // Ignore generated importMap files and colocated `*.functions.ts` modules
+      // (they define `createServerFn`s, not routes).
+      routeFileIgnorePattern: 'importMap\\.(?:js|server\\.ts)$|\\.functions\\.',
+      routesDirectory,
+    } as any,
+    rsc: { enabled: true },
+    srcDirectory,
   }
 }
