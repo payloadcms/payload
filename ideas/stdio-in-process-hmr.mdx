@@ -1,0 +1,236 @@
+# In-process HMR with a managed module graph
+
+## Status
+
+This is the selected standalone direction. The minimal implementation uses Vite's server module
+runner, with `vite` exposed as an optional peer dependency so normal plugin and HTTP consumers do
+not install the HMR runtime. Vite's built-in resolver handles TypeScript path aliases.
+
+It gives the existing stdio process its own development HMR runtime. The MCP connection stays alive,
+while a module runner tracks the Payload config's dependency graph, invalidates affected modules,
+evaluates a candidate config, and passes it to Payload's existing reload lifecycle. The broader MCP
+registry mechanics discussed below are possible extensions, not part of the minimal implementation.
+
+This is potentially the best local-development experience because it avoids both a second HTTP
+server and a child Payload process. It is also the option with the highest module-system correctness
+risk.
+
+## Why this option remains
+
+This design can satisfy the narrowed requirements:
+
+- The stdio connection and public MCP registrations remain stable, so no harness restart is needed.
+- It does not depend on `notifications/tools/list_changed`, prompt-list changes, or resource-list
+  changes.
+- A real module runner can refresh transitive config dependencies, not only `payload.config.ts`.
+- It can use Payload's existing development `reload` lifecycle, matching the current HTTP HMR model.
+- It remains standalone and does not require Next.js or the HTTP MCP endpoint to be running.
+
+The qualification is important: this option is viable only with a module runtime that owns the
+editable graph. Adding a watcher around the current native import is not sufficient.
+
+## Architecture
+
+```text
+MCP harness
+    │ one long-lived stdin/stdout connection
+    ▼
+stdio MCP process
+    ├── fixed MCP registrations
+    ├── Payload singleton
+    ├── HMR coordinator
+    └── graph-owning module runner
+             ├── transforms TypeScript
+             ├── records import relationships
+             ├── watches editable dependencies
+             ├── invalidates affected subgraphs
+             └── evaluates the next config
+                         │
+                         ▼
+                  Payload reload lifecycle
+```
+
+The MCP transport is deliberately outside the hot graph. The minimal implementation reloads the
+Payload singleton without replacing the object that owns stdin/stdout. Refreshing config-derived
+MCP registrations and handlers is a possible extension.
+
+## What “adding HMR” means here
+
+The current stdio implementation imports the config once:
+
+```ts
+const configModule = await import(pathToFileURL(configPath).toString())
+const config = configModule.default ?? configModule
+```
+
+Payload's `getPayload` already contains a reload lifecycle and accepts a `devReloadStrategy`, but the
+stdio process currently gives it one settled config object. A watcher can mark that object stale; it
+cannot make `await options.config` evaluate to a newly compiled transitive graph.
+
+The stdio implementation therefore needs both:
+
+1. a development reload signal; and
+2. a config loader backed by a module runner that can return the newly evaluated config.
+
+This likely requires a small Payload-core API change: accept a development config loader or reload
+callback in addition to the initial `config`, then pass the newly evaluated sanitized config to the
+existing `reload` function. Calling `reload` directly from the stdio package is possible, but a
+public core lifecycle is preferable to duplicating Payload's database and config mutation logic in
+the plugin.
+
+## Module runner requirements
+
+The module runner must provide more than TypeScript transpilation. It needs to:
+
+- own resolution and evaluation for the config entry and all editable transitive imports;
+- record importer/dependency edges;
+- invalidate the changed module and every affected importer up to the config entry;
+- preserve normal ESM semantics, TS path aliases, package exports, JSON imports, dynamic imports,
+  CommonJS interop, and source maps;
+- expose load and evaluation errors without corrupting the active runtime;
+- support explicit disposal of resources created by hot modules;
+- define which dependencies are external and therefore outside the hot graph.
+
+A Vite SSR `ModuleRunner` or an equivalent embedded module runtime is the clearest existing model.
+If it externalizes Payload workspace packages, project-local packages, or config helpers that users
+expect to edit, those packages remain stale. The `noExternal` boundary must therefore include the
+same editable project graph that the HTTP development runtime hot reloads.
+
+Using a large compiler dependency in `@payloadcms/plugin-mcp` only for development is a meaningful
+cost. The runner could instead live in a Payload development package or be exposed by a small
+optional package so production/plugin consumers do not pay for it.
+
+## Why root cache busting is not HMR
+
+These approaches do not meet the requirement:
+
+```ts
+await import(`${configURL}?t=${Date.now()}`)
+```
+
+```ts
+delete require.cache[configPath]
+```
+
+```ts
+watch(configPath, () => import(configURL))
+```
+
+A unique root URL only creates a new config module. Its unchanged import specifiers can still resolve
+to cached collection definitions, hooks, plugins, adapters, and helpers. `require.cache` does not
+evict ESM modules or loader-owned state. Watching only the config also misses edits to transitive
+dependencies.
+
+`tsx` supports namespaced imports that propagate identity through more of the graph, so it is useful
+for a prototype and for dependency discovery through `onImport`. It is not by itself a complete HMR
+lifecycle:
+
+- old ESM namespaces cannot be evicted and accumulate across reloads;
+- `globalThis` and process-level state are still shared;
+- disposal and hot acceptance are application concerns;
+- CommonJS, native modules, and externalized packages need explicit validation;
+- this repository already works around a `tsx` synchronous-loader namespace leak on newer Node
+  versions, so only the stable asynchronous path can be considered.
+
+If a `tsx`-namespace implementation cannot prove bounded memory, complete graph coverage, and clean
+disposal in long-running tests, it should be treated as a stepping stone to the supervisor/worker
+design rather than the final HMR solution.
+
+## Future: fixed external MCP surface
+
+HMR solves server-side code freshness, not client discovery. A harness that listed tools once still
+will not learn a newly registered config-defined name.
+
+The public MCP server must therefore retain fixed names and schemas across reloads:
+
+- generic collection and global operations using slugs;
+- current config and schema inspection;
+- `listCustomTools` and `callCustomTool`;
+- `listPrompts` and `getPrompt`;
+- `listResources` and `readResource`.
+
+Each handler reads the active-runtime pointer when the call begins. The selected runtime is pinned
+for that call so a reload cannot switch its request, access state, or handler halfway through.
+
+Native config-defined registrations can still be reconciled and list-change notifications can still
+be emitted as an optimization for capable harnesses. Neither may be required for correctness.
+
+## Future: full-registry reload lifecycle
+
+On an editable dependency change:
+
+1. Debounce and coalesce filesystem events.
+2. Invalidate the affected module-runner subgraph.
+3. Evaluate and sanitize a candidate config.
+4. Validate the candidate far enough to reject syntax, import, and config errors before mutating the
+   active Payload instance.
+5. Run Payload's development reload lifecycle with the candidate config.
+6. rebuild the MCP runtime context: plugin options, authorization, request, schemas, and handlers.
+7. Atomically replace the active-runtime pointer.
+8. Dispose invalidated module state after calls pinned to the old context finish.
+
+Only one reload may commit at a time. If another change occurs during evaluation, the candidate is
+stale and must not overwrite a newer generation.
+
+Payload's current `reload` destroys and reconnects the database adapter and mutates an existing
+Payload singleton. That is the same broad model used by HTTP HMR, but it is not transactional. The
+implementation should validate before mutation and explicitly test failures during database reload.
+If preserving the old runtime through every initialization failure becomes a hard requirement, the
+isolated supervisor/worker option is safer.
+
+## Future: full-registry runtime state
+
+Refreshing `payload.config` alone is insufficient. The active MCP context also contains values
+derived from the previous config:
+
+- `pluginConfig` and its sanitized items;
+- `authorizedMCP.items` and user/access results;
+- the local `PayloadRequest` and its Payload reference;
+- custom tool, prompt, and resource handler closures;
+- generated input/schema information;
+- collection/global lookup structures maintained by Payload;
+- database adapter schema state.
+
+The HMR coordinator must reconstruct or update all of these before publishing a generation. The
+fixed MCP callbacks should not close over the initial values as `runMcpStdio` does today.
+
+## Failure behavior
+
+Compile, import, and config-validation failures should leave the previous runtime active and report
+diagnostics on stderr. The next successful edit retries on the same stdio connection.
+
+Failures after Payload begins mutating the active singleton are harder. The implementation needs a
+defined recovery policy:
+
+- restore the previous config/runtime if the core reload lifecycle can support rollback; or
+- keep the MCP process alive but return a temporary-unavailable result until a clean reload succeeds.
+
+It must not exit and assume the harness will restart it.
+
+## Verification
+
+- initialize once and edit an imported collection without reconnecting;
+- change a transitive hook/helper and observe the new behavior;
+- add and remove collections through the fixed generic operations;
+- add a custom tool and invoke it through the generic dispatcher;
+- change a tool schema and implementation without requiring a list-change event;
+- introduce a syntax/config error and verify the previous runtime remains usable;
+- fail database reconnection and verify the documented recovery behavior;
+- edit repeatedly during a slow reload and ensure the newest generation wins;
+- keep calls in flight during a reload and verify each uses exactly one runtime generation;
+- edit a local workspace package that is expected to be in the hot graph;
+- exercise ESM, CommonJS, dynamic imports, TS paths, and JSON imports;
+- run hundreds of reloads and assert memory and listener counts remain bounded;
+- test supported Node versions, especially the asynchronous `tsx` loader path;
+- verify stdout always contains only MCP protocol messages.
+
+## Tradeoffs
+
+This preserves the strongest part of stdio local development: one process, no port, no separately
+managed server, and fast reloads. It can reuse Payload's existing reload behavior and avoid repeated
+full Payload boots.
+
+In exchange, Payload gains another HMR/compiler integration to maintain. Module invalidation,
+externalization boundaries, cleanup, singleton mutation, and failed-reload recovery all need
+production-quality handling. It can match HTTP HMR, but it has a weaker isolation story than
+replacing a child process generation.

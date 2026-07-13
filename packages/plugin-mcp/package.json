@@ -28,6 +28,11 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./bin": {
+      "import": "./src/bin/index.ts",
+      "types": "./src/bin/index.ts",
+      "default": "./src/bin/index.ts"
+    },
     "./client": {
       "import": "./src/exports/client.ts",
       "types": "./src/exports/client.ts",
@@ -72,10 +77,17 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
-    "payload": "workspace:*"
+    "payload": "workspace:*",
+    "vite": "~8.1.4"
   },
   "peerDependencies": {
-    "payload": "workspace:*"
+    "payload": "workspace:*",
+    "vite": "~8.1.4"
+  },
+  "peerDependenciesMeta": {
+    "vite": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "exports": {
@@ -83,6 +95,11 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./bin": {
+        "import": "./dist/bin/index.js",
+        "types": "./dist/bin/index.d.ts",
+        "default": "./dist/bin/index.js"
       },
       "./client": {
         "import": "./dist/exports/client.js",
@@ -105,7 +122,8 @@
   },
   "//deps_notes": {
     "zod": "zod is a hard dependency of @modelcontextprotocol/server, thus we can safely use it without it impacting bundle size. Make extra sure the zod version here matches exactly what's defined in the dependencies of @modelcontextprotocol/server to avoid duplicate versions being installed.",
-    "tsx": "Required by the `bin.js` stdio mcp. Keep the version pinned to whatever `payload` ships to avoid duplicate installs."
+    "tsx": "Required by the `bin.js` stdio mcp. Keep the version pinned to whatever `payload` ships to avoid duplicate installs.",
+    "vite": "Vite is an optional peer used by stdio development HMR and duplicated in devDependencies for this package's build and tests. Keep the Vite minor pinned while its server module runner API is experimental."
   },
   "homepage:": "https://payloadcms.com"
 }

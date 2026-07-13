@@ -20,7 +20,7 @@ import { resolveProjectRoot } from './utils/resolveProjectRoot.js'
  * Set `PAYLOAD_MCP_AUTHORIZATION` to authenticate. In development,
  * `PAYLOAD_MCP_OVERRIDE_ACCESS=true` skips access checks.
  */
-export const runMcpStdio = async (): Promise<void> => {
+export const runMcpStdio = async (configOverride?: SanitizedConfig): Promise<void> => {
   // MCP clients may start this command from another folder. Move to the Payload
   // project so findConfig() can find the config.
   const projectRoot = resolveProjectRoot(fileURLToPath(import.meta.url))
@@ -29,8 +29,9 @@ export const runMcpStdio = async (): Promise<void> => {
   }
 
   const configPath = findConfig()
-  const configModule = await import(pathToFileURL(configPath).toString())
-  const config = (await (configModule.default ?? configModule)) as SanitizedConfig
+  const configURL = pathToFileURL(configPath).href
+  const configModule = configOverride ? undefined : await import(configURL)
+  const config: SanitizedConfig = configOverride ?? (await (configModule?.default ?? configModule))
 
   /**
    * stdout is only for MCP messages. The spec says the server must not write

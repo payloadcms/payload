@@ -1238,6 +1238,9 @@ importers:
       payload:
         specifier: workspace:*
         version: link:../payload
+      vite:
+        specifier: ~8.1.4
+        version: 8.1.4(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0)
 
   packages/plugin-multi-tenant:
     devDependencies:
@@ -15022,6 +15025,49 @@ packages:
 
   vite@8.1.0:
     resolution: {integrity: sha512-BuJcQK/56NQTWDGn4ABea3q4SSBdNPWwNZKTkkUpcMPnLoquSYH8llRtSUIgoL1KSCpHt5eghLShn50mH36y7Q==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    hasBin: true
+    peerDependencies:
+      '@types/node': ^20.19.0 || >=22.12.0
+      '@vitejs/devtools': ^0.3.0
+      esbuild: ^0.27.0 || ^0.28.0
+      jiti: '>=1.21.0'
+      less: ^4.0.0
+      sass: ^1.70.0
+      sass-embedded: ^1.70.0
+      stylus: '>=0.54.8'
+      sugarss: ^5.0.0
+      terser: ^5.16.0
+      tsx: ^4.8.1
+      yaml: ^2.4.2
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      '@vitejs/devtools':
+        optional: true
+      esbuild:
+        optional: true
+      jiti:
+        optional: true
+      less:
+        optional: true
+      sass:
+        optional: true
+      sass-embedded:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      terser:
+        optional: true
+      tsx:
+        optional: true
+      yaml:
+        optional: true
+
+  vite@8.1.4:
+    resolution: {integrity: sha512-bTT9PsdWO+MQMNG9ZXIP/qM9wGh37DFxTV/sPq9cFpHr3w4jkgef032PkAL9jAqhk3Nz8NQw3O8n6/xFkqO4QQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
     peerDependencies:
@@ -29530,6 +29576,24 @@ snapshots:
       fsevents: 2.3.3
       jiti: 2.7.0
       sass: 1.77.4
+      sass-embedded: 1.100.0
+      terser: 5.48.0
+      tsx: 4.22.4
+      yaml: 2.9.0
+
+  vite@8.1.4(@types/node@24.12.3)(esbuild@0.28.1)(jiti@2.7.0)(sass-embedded@1.100.0)(sass@1.100.0)(terser@5.48.0)(tsx@4.22.4)(yaml@2.9.0):
+    dependencies:
+      lightningcss: 1.32.0
+      picomatch: 4.0.5
+      postcss: 8.5.16
+      rolldown: 1.1.4
+      tinyglobby: 0.2.17
+    optionalDependencies:
+      '@types/node': 24.12.3
+      esbuild: 0.28.1
+      fsevents: 2.3.3
+      jiti: 2.7.0
+      sass: 1.100.0
       sass-embedded: 1.100.0
       terser: 5.48.0
       tsx: 4.22.4

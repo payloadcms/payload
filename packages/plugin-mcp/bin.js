@@ -19,12 +19,10 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const baseURL = pathToFileURL(dirname).toString() + '/'
 
-const start = async () => {
+const loadBin = async () => {
   if (disableTranspile) {
     process.argv = process.argv.filter((arg) => arg !== '--disable-transpile')
-    const { runMcpStdio } = await import('./dist/stdio.js')
-    await runMcpStdio()
-    return
+    return import('./dist/bin/index.js')
   }
 
   // tsx 4.22.4's synchronous loader leaks its namespace query onto Node built-ins on Node 23.5+.
@@ -35,8 +33,12 @@ const start = async () => {
   }
 
   const { tsImport } = await import('tsx/esm/api')
-  const { runMcpStdio } = await tsImport('./dist/stdio.js', baseURL)
-  await runMcpStdio()
+  return tsImport('@payloadcms/plugin-mcp/bin', baseURL)
+}
+
+const start = async () => {
+  const { bin } = await loadBin()
+  await bin()
 }
 
 start().catch((err) => {

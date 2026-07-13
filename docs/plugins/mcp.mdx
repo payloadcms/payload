@@ -52,7 +52,15 @@ export default buildConfig({
 })
 ```
 
-**2.** Point your MCP client (Claude Desktop, your IDE, …) at the stdio server:
+**2.** For standalone stdio HMR, install the optional peer dependency:
+
+```bash
+pnpm add -D vite@~8.1.4
+```
+
+HTTP and production stdio (`NODE_ENV=production`) do not require Vite.
+
+**3.** Point your MCP client (Claude Desktop, your IDE, …) at the stdio server:
 
 ```json
 {
@@ -61,6 +69,7 @@ export default buildConfig({
       "command": "npx",
       "args": ["payload-mcp"],
       "env": {
+        "NODE_ENV": "development",
         "PAYLOAD_MCP_OVERRIDE_ACCESS": "true"
       }
     }
@@ -206,6 +215,7 @@ npx payload-mcp
 
 Notes on stdio:
 
+- In local development, the bin uses Vite to watch the config module graph and passes successful updates to Payload's existing reload lifecycle. Vite errors are reported on stderr. Set `DISABLE_PAYLOAD_HMR=true` to disable it.
 - **You don't need `mcpPlugin` in your `plugins` array** for stdio to work. The bin auto-detects the plugin and falls back to default configuration (all collections / globals configured with default tools) when it isn't registered. Access filtering still applies. Installing the package is enough.
 - Add `mcpPlugin({ ... })` to your config when you want to customize tools, descriptions, prompts, or resources - the bin will pick up that configuration too.
 - Pass `PAYLOAD_MCP_AUTHORIZATION` when you want stdio to authenticate with Payload.
@@ -256,7 +266,7 @@ HTTP rejects the `overrideAccess` URL argument outside development.
 For stdio, set `PAYLOAD_MCP_OVERRIDE_ACCESS`:
 
 ```txt
-PAYLOAD_MCP_OVERRIDE_ACCESS=true
+NODE_ENV=development PAYLOAD_MCP_OVERRIDE_ACCESS=true
 ```
 
 Stdio defaults to `false` and rejects `PAYLOAD_MCP_OVERRIDE_ACCESS=true` outside

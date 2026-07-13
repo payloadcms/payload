@@ -1,0 +1,158 @@
+# Fresh Payload worker for every MCP operation
+
+## Status
+
+This is a viable standalone design and is the process-isolated approach prototyped in the previous
+work.
+
+The long-lived process owns the stdio MCP connection and a fixed public capability surface. It does
+not execute config-dependent operations itself. For each tool, prompt, or resource operation, it
+starts a fresh Payload MCP worker, forwards the operation, returns the result, and closes the worker.
+
+Unlike the prewarmed supervisor design, there is no reload event: every operation begins from the
+filesystem state that exists when that operation starts.
+
+## Why this option remains
+
+- The harness keeps one stable stdio connection and never needs to restart or re-list.
+- It does not depend on any MCP list-change notification.
+- Every call gets a fresh Node, `tsx`, Payload, plugin, and config module graph.
+- It cannot miss a file change because of an incomplete watcher dependency set.
+- A failed worker affects one operation rather than corrupting the long-lived MCP transport.
+- It remains standalone and does not require a Next.js/HTTP development server.
+
+Its cost is substantial startup and database overhead on every operation, so “at least as good as
+HTTP HMR” is true for freshness and recovery, not necessarily latency.
+
+## Architecture
+
+```text
+MCP harness
+    │ one long-lived stdin/stdout connection
+    ▼
+stdio supervisor
+    ├── fixed MCP surface
+    ├── operation queue / concurrency control
+    └── protocol-context proxy
+             │ spawn for one operation
+             ▼
+       fresh Payload worker
+       ├── fresh config module graph
+       ├── fresh Payload and database adapter
+       ├── execute exactly one operation
+       └── destroy and exit
+```
+
+The worker communicates over private pipes or Node IPC. It must not inherit the supervisor's stdout.
+
+## Fixed external MCP surface
+
+The supervisor cannot build its public registry from a config that may change after initialization.
+It needs the same config-independent surface as the other all-harness options:
+
+- generic collection/global operations using slugs;
+- current config and schema inspection;
+- `listCustomTools` and `callCustomTool`;
+- `listPrompts` and `getPrompt`;
+- `listResources` and `readResource`.
+
+The worker resolves the current slug, schema, access, and config-defined item by name. Native dynamic
+registrations may be exposed as a best-effort optimization, but they cannot be required.
+
+The previous prototype built the supervisor's named surface from its initial config and delegated
+tool execution to fresh workers. That refreshes implementations for existing names, but a harness
+that does not re-list still cannot discover an added name. The generic public surface closes that
+gap and is required for this option to satisfy the narrowed criteria.
+
+## Per-operation lifecycle
+
+For each public MCP operation, the supervisor:
+
+1. Captures the request metadata, cancellation signal, and negotiated client capabilities.
+2. Starts the worker with an explicit recursion guard so it does not start another supervisor.
+3. Completes a private MCP initialization or equivalent IPC handshake.
+4. asks the worker to execute the config-dependent operation.
+5. proxies progress, logs, sampling, elicitation, roots, and cancellation as supported.
+6. returns the worker result to the harness.
+7. closes the private client, runs `payload.destroy()` in the worker, and enforces an exit timeout.
+
+The worker should report which filesystem/config generation it loaded for diagnostics, but no file
+watcher is required.
+
+## Concurrency
+
+Starting workers concurrently gives better throughput but creates database hazards. Two workers may
+both decide to push the same development schema, run adapter initialization, or mutate shared local
+database files.
+
+The conservative policy is to serialize operations, as the previous prototype did. A more advanced
+implementation can allow parallel read/call workers after a schema-initialization lock, but the
+correctness rules must be adapter-independent.
+
+Serialization means a slow operation blocks every later MCP operation. That is a material UX
+difference from HTTP HMR and the prewarmed supervisor option.
+
+## Database initialization
+
+Repeated full initialization is the biggest non-module-graph problem. The previous prototype hashed
+the adapter's generated schema and passed that hash to the next worker so an unchanged relational
+schema could skip another push.
+
+Any retained optimization must be treated as a hint, not the correctness boundary:
+
+- schema hashing must be deterministic across processes;
+- the hash must include every input that affects the adapter schema;
+- changing database URL or adapter configuration invalidates it;
+- non-relational adapters and custom adapters need a safe default;
+- two processes must not race an actual schema push;
+- a worker crash must not publish a hash for an incomplete initialization.
+
+If those guarantees cannot be made adapter-independently, use a cross-process initialization lock
+and let the adapter perform its normal checks.
+
+## Module graph behavior
+
+This design avoids invalidation entirely. The worker starts after the operation arrives, and its
+first import sees a new process-level ESM cache, CommonJS cache, `tsx` loader, plugin module state,
+and Payload module state.
+
+There are no root-query cache-busting assumptions and no need to discover transitive dependencies.
+This is as strong as the prewarmed worker-generation design for module freshness.
+
+## Failure behavior
+
+If config compilation or Payload initialization fails, the supervisor remains connected and returns
+a structured error for that operation. The next call starts another clean worker, so fixing the file
+is enough to recover.
+
+The supervisor must enforce startup, operation, shutdown, and forced-termination timeouts. stderr
+should include worker diagnostics and generation identity without leaking authorization values.
+
+Because there is no last-known-good worker, an invalid current config makes config-dependent calls
+unavailable until it is fixed. The prewarmed supervisor is better here because it can continue
+serving the last valid generation.
+
+## Verification
+
+- initialize once, edit a transitive config module, and observe the next call using it;
+- add/remove collections and custom items through the fixed generic surface;
+- make the config invalid, verify one operation fails, fix it, and verify the next succeeds;
+- verify sequential changes cannot reuse a worker's module graph;
+- verify cancellation kills or cleanly closes the assigned worker;
+- proxy progress, elicitation, sampling, roots, and logging correctly;
+- exercise concurrent calls against every supported database adapter;
+- verify schema pushes neither race nor repeat unnecessarily;
+- verify worker crashes do not terminate or corrupt the public stdio process;
+- verify stdout contains only public MCP protocol messages;
+- run a long session and check for child-process, descriptor, and database-connection leaks;
+- measure cold-operation latency on representative configs.
+
+## Tradeoffs
+
+This is simpler than implementing a correct hot module graph and more change-proof than a watcher:
+freshness comes from process startup. It also has excellent fault containment.
+
+It pays for that simplicity on every operation. Payload initialization, database setup, private MCP
+handshake, and teardown add latency and resource churn; serialization may amplify the delay. It is a
+reasonable correctness-first fallback, but a prewarmed disposable generation should provide the
+same cache isolation with a much better steady-state experience if dependency watching is reliable.

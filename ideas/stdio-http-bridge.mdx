@@ -1,0 +1,172 @@
+# Stdio bridge to the live HTTP MCP endpoint
+
+## Status
+
+This is the lowest-complexity option and inherits the HMR behavior that already works through the
+HTTP endpoint. It is not a standalone stdio development mode because the Payload/Next.js
+development server must also be running.
+
+## Why this option remains
+
+The bridge satisfies the compatibility and freshness requirements by keeping stdio stable on one
+side and delegating config loading to the existing hot-reloading server on the other:
+
+- It does not require the harness to implement list-change notifications.
+- It can work with every stdio harness because the harness sees one ordinary, long-lived stdio MCP
+  process.
+- It follows the current HTTP endpoint's HMR behavior rather than building a second in-process
+  reloader.
+- It never imports the Payload config, so it does not own or invalidate a Node module graph.
+
+Its main compromise is operational: local development requires both the dev server and the bridge.
+
+## Architecture
+
+```text
+MCP harness
+    │ one long-lived stdin/stdout connection
+    ▼
+stdio bridge
+    ├── fixed MCP surface
+    ├── authorization configuration
+    ├── HTTP reconnection/retry policy
+    └── JSON-RPC adaptation
+             │ Streamable HTTP
+             ▼
+       /api/mcp on the live Payload dev server
+             │
+             ▼
+       Next.js/Payload HMR lifecycle
+```
+
+The bridge does not call `findConfig`, import project code, initialize Payload, or open a database
+connection. Its only project-specific input is the HTTP endpoint URL and optional authorization.
+
+## Fixed external MCP surface
+
+The HTTP server may have a new set of tools, prompts, and resources after HMR, but that does not
+make a harness re-list them. Therefore, transparently forwarding the server's latest native list is
+not sufficient for the all-harness requirement.
+
+The bridge must expose a stable public surface for the lifetime of the stdio session:
+
+- `getConfigInfo`
+- generic collection/global operations using slugs;
+- schema inspection operations;
+- `listCustomTools` and `callCustomTool`;
+- `listPrompts` and `getPrompt`;
+- `listResources` and `readResource`.
+
+For a generic custom call, the bridge can internally list the current HTTP server capabilities and
+issue the named MCP request without requiring the harness to know that name. This preserves dynamic
+custom items while keeping the public tool registry compatible with clients that initialize only
+once.
+
+The bridge may additionally mirror native config-defined items for clients known to refresh lists,
+but those names are best-effort and cannot replace the generic dispatch path.
+
+## HMR lifecycle
+
+There is no config watcher in the bridge. Each operation is resolved against the live HTTP server,
+whose current route handler and Payload config are managed by the existing development runtime.
+
+The bridge should avoid holding config-derived lists or schemas indefinitely. If it caches internal
+HTTP capability metadata at all, it needs a short lifetime and must invalidate it on server restart,
+transport error, or an unknown-item response. Retrying after a fresh internal list makes changes
+visible without involving the harness.
+
+Because the bridge has not imported project modules, a server rebuild or restart cannot leave stale
+config modules in the bridge's ESM, CommonJS, or `tsx` caches. The module graph remains owned by the
+HTTP development runtime where HMR already works.
+
+## Transport behavior
+
+The bridge must behave as an MCP server toward stdin/stdout and as an MCP client toward HTTP. It
+cannot blindly pipe bytes because the public fixed capability surface differs from the
+config-dependent HTTP surface.
+
+It must preserve or deliberately adapt:
+
+- initialization and negotiated protocol version;
+- request IDs and concurrent requests;
+- cancellation and progress notifications;
+- MCP errors versus tool-level `isError` responses;
+- prompt and resource response shapes;
+- server logging without writing non-protocol data to stdout;
+- HTTP connection/session replacement after HMR or a server restart;
+- orderly shutdown when stdin closes.
+
+If the HTTP endpoint negotiates a different supported protocol era, the bridge should translate
+only where the SDK provides an explicit compatibility path. It should not pass through an
+unverified mixture of protocol versions.
+
+## Configuration
+
+An invocation could look like:
+
+```sh
+payload-mcp --url 'http://localhost:3000/api/mcp?overrideAccess=true'
+```
+
+With a harness configuration such as:
+
+```json
+{
+  "mcpServers": {
+    "payload": {
+      "command": "payload-mcp",
+      "args": ["--url", "http://localhost:3000/api/mcp?overrideAccess=true"]
+    }
+  }
+}
+```
+
+Authorization should come from an environment variable such as
+`PAYLOAD_MCP_AUTHORIZATION`, not a command-line argument that may be visible in process listings.
+The bridge forwards it as the HTTP `Authorization` header. Development-only override access remains
+enforced by the Payload server.
+
+## Server availability
+
+The stdio process should remain alive when the dev server is temporarily unavailable. Exiting would
+delegate recovery to the harness, and process-restart behavior is not consistent across all
+harnesses.
+
+While disconnected, fixed tools should return a clear temporary-unavailable error. The bridge can
+retry with bounded backoff and reconnect on the next call. Once the server is ready again, the same
+stdio session resumes against the new HTTP runtime.
+
+This also allows the harness to start before `pnpm dev` has finished booting.
+
+## Multiple test suites and configs
+
+The bridge follows whichever Payload config the target development server currently runs. Switching
+from one test suite to another is therefore a server concern, not a harness reconfiguration concern,
+as long as the URL remains stable.
+
+If multiple configs run simultaneously, give each server a distinct URL/port and start one bridge
+per target. A single bridge should not silently retarget between unrelated servers because in-flight
+requests and authorization state would become ambiguous.
+
+## Verification
+
+- initialize stdio once, edit a collection, and observe the new schema without reconnecting;
+- add and remove collections and access them through the generic operations;
+- add, remove, and modify custom tools through the generic dispatcher;
+- change a transitive config dependency and verify the HTTP runtime's new behavior is visible;
+- introduce an HMR compile error and verify the bridge stays connected;
+- restart the dev server and verify the existing stdio session recovers;
+- start the harness before the dev server and verify later recovery;
+- verify concurrent requests, cancellation, progress, prompts, and resources;
+- verify authorization headers are forwarded and never logged;
+- verify stdout contains only valid MCP protocol messages;
+- run the same bridge against several test-suite configs.
+
+## Tradeoffs
+
+This has much less reload machinery than the supervisor/worker design and directly reuses the HTTP
+path already known to hot reload. It also avoids duplicate Payload and database instances.
+
+However, it requires a running dev server, adds a local HTTP hop, and makes stdio availability
+dependent on that server. It should be offered as an attach-to-dev-server mode, not presented as the
+standalone stdio implementation.
