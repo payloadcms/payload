@@ -570,9 +570,9 @@ async function submitFormWithFileIds(
 }
 ```
 
-#### Using Direct Upload Instructions for Large Files
+#### Using Upload Instructions for Large Files
 
-S3, Azure, and GCS can upload large files without including their bytes in the document request. Enable `clientUploads`, ask Payload for upload instructions, then follow the returned HTTP request:
+If your upload collection uses a storage adapter with `clientUploads` enabled (e.g., S3, Azure, GCS), you can upload files directly to cloud storage for better performance with large files. The upload instructions endpoint returns the URL and headers needed for the direct upload:
 
 ```ts
 async function uploadWithInstructions(file: File, collectionSlug: string) {
