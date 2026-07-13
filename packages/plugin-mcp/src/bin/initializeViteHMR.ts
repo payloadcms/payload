@@ -3,8 +3,7 @@ import type { SanitizedConfig } from 'payload'
 /* eslint-disable no-console */
 import { fileURLToPath } from 'node:url'
 import { getPayload, reload } from 'payload'
-import { findConfig } from 'payload/node'
-import { createServer, createServerModuleRunner, normalizePath } from 'vite'
+import { findConfig, loadEnv } from 'payload/node'
 
 import type * as ConfigBoundary from './viteConfigBoundary.js'
 
@@ -15,12 +14,29 @@ type ViteHMR = {
   connect: () => Promise<void>
 }
 
-export const initializeViteHMR = async (): Promise<ViteHMR> => {
+export const initializeViteHMR = async (): Promise<undefined | ViteHMR> => {
+  try {
+    import.meta.resolve('vite')
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code !== 'ERR_MODULE_NOT_FOUND') {
+      throw error
+    }
+
+    if (process.env.NODE_ENV === 'development') {
+      console.error(
+        '[payload-mcp] Vite is not installed, so Payload config changes will not hot reload. Install vite@~8.1.4 as a development dependency to enable HMR during local development.',
+      )
+    }
+    return
+  }
+
+  const { createServer, createServerModuleRunner, normalizePath } = await import('vite')
   const projectRoot = resolveProjectRoot(fileURLToPath(import.meta.url))
   if (projectRoot) {
     process.chdir(projectRoot)
   }
 
+  loadEnv()
   const vite = await createServer({
     clearScreen: false,
     configFile: false,
