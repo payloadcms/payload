@@ -12,21 +12,17 @@ const dirname = path.dirname(__filename)
 
 shelljs.env.DISABLE_LOGGING = 'true'
 
-// --prod-server boots a real production server (next build / vite build) per suite;
-// --prod (a.k.a. --dist) runs the dev server against packed dist packages.
-// Both need the packed packages, so both set PAYLOAD_TEST_PROD.
+// --prod-server boots a real production server (next build / vite build) per suite
+// against the packed dist packages. Without it, the dev server runs against source.
 const prodServer = process.argv.includes('--prod-server')
-const prod = prodServer || process.argv.includes('--prod')
-if (prod) {
+if (prodServer) {
   process.env.PAYLOAD_TEST_PROD = 'true'
   shelljs.env.PAYLOAD_TEST_PROD = 'true'
 }
 
 const turbo = process.argv.includes('--no-turbo') ? false : true
 
-process.argv = process.argv.filter(
-  (arg) => arg !== '--prod' && arg !== '--prod-server' && arg !== '--no-turbo',
-)
+process.argv = process.argv.filter((arg) => arg !== '--prod-server' && arg !== '--no-turbo')
 
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
@@ -169,8 +165,6 @@ async function executePlaywright(
   ]
   if (prodServer) {
     spawnDevArgs.push('--prod-server')
-  } else if (prod) {
-    spawnDevArgs.push('--prod')
   }
 
   if (!turbo) {

@@ -10,22 +10,17 @@ import { loadEnv } from 'payload/node'
 import type { DevServerResult } from './adapters/nextDevServer.js'
 
 import { assertDbReachable } from './__helpers/shared/assertDbReachable.js'
-import { getNextRootDir } from './__helpers/shared/getNextRootDir.js'
 import { getCurrentDatabaseAdapter } from './dbAdapters.js'
 import { runInit } from './runInit.js'
 import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
 
-// --dist runs the dev server against packed/built dist packages instead of src.
-// --prod-server boots a real production server (next build / vite build, then serve).
-// It implies --dist (packed packages + prod rootDir).
-// --prod is kept as a back-compat alias for --dist (used by runE2E.ts).
+// --prod-server boots a real production server (next build + dev: false) against the
+// packed dist packages. Without it, the dev server runs against source.
 const prodServer = process.argv.includes('--prod-server')
-const dist = prodServer || process.argv.includes('--dist') || process.argv.includes('--prod')
-if (dist) {
-  process.argv = process.argv.filter(
-    (arg) => arg !== '--dist' && arg !== '--prod' && arg !== '--prod-server',
-  )
+
+if (prodServer) {
+  process.argv = process.argv.filter((arg) => arg !== '--prod-server')
   process.env.PAYLOAD_TEST_PROD = 'true'
 }
 
@@ -64,7 +59,16 @@ if (['admin-root'].includes(testSuiteArg)) {
   enableTurbo = false
 }
 
-const framework = process.env.PAYLOAD_FRAMEWORK || 'next'
+// Framework is selected with a --framework-<name> flag (e.g. --framework-tanstack-start),
+// falling back to the PAYLOAD_FRAMEWORK env var, then 'next'. The flag suffix is the
+// framework name. Resolved value is written back to the env var so downstream helpers
+// and spawned child processes (which read PAYLOAD_FRAMEWORK) stay in sync.
+const frameworkFromFlag = Object.keys(args)
+  .find((arg) => arg.startsWith('framework-'))
+  ?.slice('framework-'.length)
+
+const framework = frameworkFromFlag || process.env.PAYLOAD_FRAMEWORK || 'next'
+process.env.PAYLOAD_FRAMEWORK = framework
 
 console.log(
   `Selected test suite: ${testSuiteArg} [${framework}]${framework === 'next' && enableTurbo ? ' [Turbopack]' : framework === 'next' ? ' [Webpack]' : ''}`,
