@@ -306,6 +306,8 @@ export interface Config {
   locale: 'en' | 'es' | 'fr';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -4693,6 +4695,174 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'relation'
+      | 'audio'
+      | 'gif-resize'
+      | 'filename-compound-index'
+      | 'no-image-sizes'
+      | 'object-fit'
+      | 'with-meta-data'
+      | 'without-meta-data'
+      | 'with-only-jpeg-meta-data'
+      | 'crop-only'
+      | 'focal-only'
+      | 'image-sizes-only'
+      | 'focal-no-sizes'
+      | 'media'
+      | 'allow-list-media'
+      | 'skip-safe-fetch-media'
+      | 'skip-safe-fetch-header-filter'
+      | 'skip-allow-list-safe-fetch-media'
+      | 'restrict-file-types'
+      | 'no-restrict-file-types'
+      | 'no-restrict-file-mime-types'
+      | 'pdf-only'
+      | 'restricted-mime-types'
+      | 'animated-type-media'
+      | 'enlarge'
+      | 'without-enlarge'
+      | 'reduce'
+      | 'media-trim'
+      | 'custom-file-name-media'
+      | 'unstored-media'
+      | 'externally-served-media'
+      | 'uploads-1'
+      | 'uploads-2'
+      | 'any-images'
+      | 'admin-thumbnail-function'
+      | 'admin-thumbnail-with-search-queries'
+      | 'admin-thumbnail-size'
+      | 'admin-upload-control'
+      | 'admin-upload-file-preview-single'
+      | 'admin-upload-file-preview-map'
+      | 'file-preview'
+      | 'no-files-required'
+      | 'relation-to-no-files-required'
+      | 'optional-file'
+      | 'required-file'
+      | 'versions'
+      | 'custom-upload-field'
+      | 'media-with-relation-preview'
+      | 'media-without-cache-tags'
+      | 'media-without-relation-preview'
+      | 'relation-preview'
+      | 'hide-file-input-on-create'
+      | 'best-fit'
+      | 'list-view-preview'
+      | 'three-dimensional'
+      | 'constructor-options'
+      | 'bulk-uploads'
+      | 'bulk-uploads-hook-error'
+      | 'simple-relationship'
+      | 'file-mime-type'
+      | 'svg-only'
+      | 'media-without-delete-access'
+      | 'media-with-image-size-admin-props'
+      | 'prefix-media'
+      | 'media-with-fields'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'relation'
+          | 'audio'
+          | 'gif-resize'
+          | 'filename-compound-index'
+          | 'no-image-sizes'
+          | 'object-fit'
+          | 'with-meta-data'
+          | 'without-meta-data'
+          | 'with-only-jpeg-meta-data'
+          | 'crop-only'
+          | 'focal-only'
+          | 'image-sizes-only'
+          | 'focal-no-sizes'
+          | 'media'
+          | 'allow-list-media'
+          | 'skip-safe-fetch-media'
+          | 'skip-safe-fetch-header-filter'
+          | 'skip-allow-list-safe-fetch-media'
+          | 'restrict-file-types'
+          | 'no-restrict-file-types'
+          | 'no-restrict-file-mime-types'
+          | 'pdf-only'
+          | 'restricted-mime-types'
+          | 'animated-type-media'
+          | 'enlarge'
+          | 'without-enlarge'
+          | 'reduce'
+          | 'media-trim'
+          | 'custom-file-name-media'
+          | 'unstored-media'
+          | 'externally-served-media'
+          | 'uploads-1'
+          | 'uploads-2'
+          | 'any-images'
+          | 'admin-thumbnail-function'
+          | 'admin-thumbnail-with-search-queries'
+          | 'admin-thumbnail-size'
+          | 'admin-upload-control'
+          | 'admin-upload-file-preview-single'
+          | 'admin-upload-file-preview-map'
+          | 'file-preview'
+          | 'no-files-required'
+          | 'relation-to-no-files-required'
+          | 'optional-file'
+          | 'required-file'
+          | 'versions'
+          | 'custom-upload-field'
+          | 'media-with-relation-preview'
+          | 'media-without-cache-tags'
+          | 'media-without-relation-preview'
+          | 'relation-preview'
+          | 'hide-file-input-on-create'
+          | 'best-fit'
+          | 'list-view-preview'
+          | 'three-dimensional'
+          | 'constructor-options'
+          | 'bulk-uploads'
+          | 'bulk-uploads-hook-error'
+          | 'simple-relationship'
+          | 'file-mime-type'
+          | 'svg-only'
+          | 'media-without-delete-access'
+          | 'media-with-image-size-admin-props'
+          | 'prefix-media'
+          | 'media-with-fields'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
