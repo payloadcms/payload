@@ -365,6 +365,7 @@
     "@faceless-ui/modal": "3.0.1",
     "@faceless-ui/scroll-info": "2.0.0",
     "@faceless-ui/window-info": "3.0.1",
+    "@floating-ui/dom": "1.7.6",
     "@monaco-editor/react": "4.7.0",
     "@payloadcms/translations": "workspace:*",
     "bson-objectid": "2.0.4",

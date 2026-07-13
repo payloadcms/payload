@@ -102,6 +102,13 @@
     margin-bottom: var(--spacer-1);
   }
 
+  .rs__floating-menu-portal {
+    .rs__menu--placement-bottom,
+    .rs__menu--placement-top {
+      margin-block: 0;
+    }
+  }
+
   .rs__menu-list {
     overflow-y: auto;
   }

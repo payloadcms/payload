@@ -1,35 +1,27 @@
 'use client'
-import type { JSX, KeyboardEventHandler } from 'react'
-import type { GroupBase, MenuListProps, MenuProps, StylesConfig } from 'react-select'
+import type { KeyboardEventHandler } from 'react'
+import type { GroupBase, MenuListProps, MenuProps } from 'react-select'
 
 import { arrayMove } from '@dnd-kit/sortable'
-import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
-import React, {
-  useCallback,
-  useEffect,
-  useId,
-  useLayoutEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
-import Select, { components as rsComponents } from 'react-select'
+import React, { useCallback, useEffect, useId, useMemo, useState } from 'react'
+import Select from 'react-select'
 import CreatableSelect from 'react-select/creatable'
 
 import type { Option, ReactSelectAdapterProps } from './types.js'
 export type { Option } from './types.js'
 
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
-import { useTheme } from '../../providers/Theme/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { DraggableSortable } from '../DraggableSortable/index.js'
 import { ShimmerEffect } from '../ShimmerEffect/index.js'
 import { ClearIndicator } from './ClearIndicator/index.js'
 import { Control } from './Control/index.js'
+import { DefaultMenuPortal } from './DefaultMenuPortal.js'
 import { DropdownIndicator } from './DropdownIndicator/index.js'
 import { getCaptureMenuScroll } from './getCaptureMenuScroll.js'
 import { getMenuListStyles } from './getMenuListStyles.js'
+import { getMenuStyles } from './getMenuStyles.js'
 import { Input } from './Input/index.js'
 import { generateMultiValueDraggableID, MultiValue } from './MultiValue/index.js'
 import { MultiValueLabel } from './MultiValueLabel/index.js'
@@ -38,39 +30,13 @@ import { SingleValue } from './SingleValue/index.js'
 import { ValueContainer } from './ValueContainer/index.js'
 import './index.css'
 
-// Propagates the nearest scoped theme (via ThemeProvider) into the portal div,
-// falling back to the global theme. Ensures dropdown menus portaled to
-// document.body inherit the correct theme (e.g. dark Popup).
-function ThemedMenuPortal<Opt, IsMulti extends boolean, Group extends GroupBase<Opt>>(
-  props: React.ComponentProps<typeof rsComponents.MenuPortal<Opt, IsMulti, Group>>,
-) {
-  const { theme } = useTheme()
-  const menuPortalTheme = (props.selectProps as any)?.customProps?.menuPortalTheme
-  return (
-    <rsComponents.MenuPortal
-      {...props}
-      innerProps={{ 'data-theme': menuPortalTheme ?? theme } as JSX.IntrinsicElements['div']}
-    />
-  )
-}
-
 const DEFAULT_MAX_MENU_HEIGHT = 300
-const MIN_USABLE_MENU_HEIGHT = 140
-const MENU_VIEWPORT_GAP = 16 // space between the control and the edge of the window
 
 const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   const { i18n, t } = useTranslation()
-  const {
-    breakpoints: { s: smallBreak },
-  } = useWindowInfo()
   const [inputValue, setInputValue] = useState('') // for creatable select
   const uuid = useId()
   const [hasMounted, setHasMounted] = useState(false)
-  const [internalIsMenuOpen, setIsMenuOpen] = useState(false)
-  const [maxMenuHeight, setMaxMenuHeight] = useState(DEFAULT_MAX_MENU_HEIGHT)
-  const [menuPlacement, setMenuPlacement] = useState<'auto' | 'bottom' | 'top'>('auto')
-  const containerRef = useRef<HTMLDivElement>(null)
-  const hasMobileOutsideScrollIntentRef = useRef(false)
 
   const {
     captureMenuScroll: captureMenuScrollProp,
@@ -84,7 +50,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     isCreatable,
     isLoading,
     isSearchable = true,
-    menuIsOpen: menuIsOpenProp,
     menuPortalTarget: menuPortalTargetProp,
     menuPosition: menuPositionProp,
     noOptionsMessage = () => t('general:noOptions'),
@@ -99,8 +64,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     value,
   } = props
 
-  const isMobile = Boolean(smallBreak)
-
   const menuPortalTarget =
     menuPortalTargetProp === undefined
       ? typeof document !== 'undefined'
@@ -108,92 +71,16 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         : null
       : menuPortalTargetProp
 
-  const menuPosition =
-    menuPositionProp ?? (menuPortalTarget ? (isMobile ? 'absolute' : 'fixed') : undefined)
-  const isMenuOpen = menuIsOpenProp ?? internalIsMenuOpen
+  const menuPosition = menuPositionProp ?? (menuPortalTarget ? 'fixed' : undefined)
+  const shouldUseFloatingMenuPortal = Boolean(menuPortalTarget && !components?.MenuPortal)
   const captureMenuScroll = getCaptureMenuScroll({
     captureMenuScroll: captureMenuScrollProp,
     menuPortalTarget,
   })
 
-  const updateMenuViewportSettings = useCallback(() => {
-    if (!isMenuOpen || typeof window === 'undefined') {
-      return
-    }
-
-    const controlEl = containerRef.current?.querySelector('.rs__control')
-
-    if (!controlEl) {
-      return
-    }
-
-    const controlRect = controlEl.getBoundingClientRect()
-    const availableBelow = Math.max(window.innerHeight - controlRect.bottom - MENU_VIEWPORT_GAP, 0)
-    const availableAbove = Math.max(controlRect.top - MENU_VIEWPORT_GAP, 0)
-    const shouldOpenTop = availableBelow < MIN_USABLE_MENU_HEIGHT && availableAbove > availableBelow
-    const availableHeight = shouldOpenTop ? availableAbove : availableBelow
-
-    setMenuPlacement(shouldOpenTop ? 'top' : 'bottom')
-    setMaxMenuHeight(Math.max(Math.min(Math.floor(availableHeight), DEFAULT_MAX_MENU_HEIGHT), 1))
-  }, [isMenuOpen])
-
-  const handleMenuClose = useCallback(() => {
-    setIsMenuOpen(false)
-    onMenuClose?.()
-  }, [onMenuClose])
-
-  const handleWindowScroll = useCallback(
-    (event: Event) => {
-      const scrollTarget = event.target
-      const isScrollWithinMenu =
-        scrollTarget instanceof Element && Boolean(scrollTarget.closest('.rs__menu'))
-
-      if (
-        isMobile &&
-        menuPortalTarget &&
-        !isScrollWithinMenu &&
-        hasMobileOutsideScrollIntentRef.current
-      ) {
-        handleMenuClose()
-        return
-      }
-
-      if (!isMobile) {
-        updateMenuViewportSettings()
-      }
-    },
-    [handleMenuClose, isMobile, menuPortalTarget, updateMenuViewportSettings],
-  )
-
-  const handleWindowTouchMove = useCallback((event: TouchEvent) => {
-    const touchTarget = event.target
-    hasMobileOutsideScrollIntentRef.current =
-      touchTarget instanceof Element && !touchTarget.closest('.rs__menu')
-  }, [])
-
   useEffect(() => {
     setHasMounted(true)
   }, [])
-
-  useLayoutEffect(() => {
-    if (!isMenuOpen) {
-      setMenuPlacement('auto')
-      setMaxMenuHeight(DEFAULT_MAX_MENU_HEIGHT)
-      return
-    }
-
-    updateMenuViewportSettings()
-
-    window.addEventListener('resize', updateMenuViewportSettings)
-    window.addEventListener('scroll', handleWindowScroll, { capture: true, passive: true })
-    window.addEventListener('touchmove', handleWindowTouchMove, { capture: true, passive: true })
-
-    return () => {
-      window.removeEventListener('resize', updateMenuViewportSettings)
-      window.removeEventListener('scroll', handleWindowScroll, { capture: true })
-      window.removeEventListener('touchmove', handleWindowTouchMove, { capture: true })
-    }
-  }, [handleWindowScroll, handleWindowTouchMove, isMenuOpen, updateMenuViewportSettings])
 
   // Debounce the loading state so that fast option fetches (e.g. relationship
   // fields that resolve almost instantly) don't cause the clear indicator to
@@ -208,13 +95,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     [isLoading],
     250,
   )
-
-  const handleMenuOpen = () => {
-    hasMobileOutsideScrollIntentRef.current = false
-    setIsMenuOpen(true)
-    requestAnimationFrame(updateMenuViewportSettings)
-    onMenuOpen?.()
-  }
 
   const menuClassName = useCallback(
     (state: MenuProps<Option, boolean, GroupBase<Option>>) => {
@@ -243,7 +123,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       Control,
       DropdownIndicator,
       Input,
-      MenuPortal: ThemedMenuPortal,
+      MenuPortal: DefaultMenuPortal,
       MultiValue,
       MultiValueLabel,
       MultiValueRemove,
@@ -269,26 +149,21 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     isLoading: isLoadingDebounced,
     isSearchable,
     loadingMessage: () => t('general:loading') + '...',
-    maxMenuHeight,
-    menuIsOpen: isMenuOpen,
-    menuPlacement,
+    maxMenuHeight: DEFAULT_MAX_MENU_HEIGHT,
+    menuPlacement: 'auto' as const,
     menuPortalTarget,
     menuPosition,
     menuShouldBlockScroll: false,
     noOptionsMessage,
     onChange,
-    onMenuClose: handleMenuClose,
-    onMenuOpen: handleMenuOpen,
+    onMenuClose,
+    onMenuOpen,
     options,
     placeholder: getTranslation(placeholder, i18n),
     styles: {
-      // Remove the default react-select z-index from the menu so that our custom
-      // z-index in the "payload-default" css layer can take effect, in such a way
-      // that end users can easily override it as with other styles.
-      menu: (rsStyles, state) => ({
-        ...rsStyles,
-        zIndex: undefined,
-        ...externalStyles?.menu?.(rsStyles, state),
+      menu: getMenuStyles({
+        externalStyles,
+        shouldUseFloatingMenuPortal,
       }),
       // When portaling to document.body, the portal container needs an explicit
       // z-index so the menu appears above drawers and dialogs. unstyled={true}
@@ -313,7 +188,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       }),
       // Keep react-select's computed maxHeight so the menu can fit available
       // viewport space near screen edges (instead of using a fixed class value).
-      menuList: getMenuListStyles(externalStyles),
+      menuList: getMenuListStyles(externalStyles, shouldUseFloatingMenuPortal),
     },
     unstyled: true,
   }
@@ -324,7 +199,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
 
   if (!isCreatable) {
     return (
-      <div ref={containerRef}>
+      <div>
         <Select<Option, boolean, GroupBase<Option>>
           {...props}
           {...sharedSelectProps}
@@ -386,7 +261,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   }
 
   return (
-    <div ref={containerRef}>
+    <div>
       <CreatableSelect<Option, boolean, GroupBase<Option>>
         {...props}
         {...sharedSelectProps}
