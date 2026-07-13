@@ -8,8 +8,7 @@
     background-color: var(--color-bg-secondary);
     border: var(--stroke-width-small) dashed var(--special-border-translucent);
     border-radius: var(--field-border-radius);
-    /* visible, not clip/hidden, so Button tooltips (not portaled) inside the dropzone aren't cut off */
-    overflow: visible;
+    overflow: clip;
     width: 100%;
 
     .btn {
