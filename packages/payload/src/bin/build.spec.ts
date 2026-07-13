@@ -1,3 +1,7 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest'
 
 // Default fake child auto-fires `exit(0)` synchronously so ordering/generation
@@ -19,7 +23,7 @@ vi.mock('./generateImportMap/index.js', () => ({ generateImportMap: generateImpo
 vi.mock('./generateTypes.js', () => ({ generateTypes: generateTypesMock }))
 
 // Imported after mocks are registered
-const { build, getForwardedArgs, resolveNextBin } = await import('./build.js')
+const { build, detectFramework, getForwardedArgs, resolveNextBin } = await import('./build.js')
 
 const fakeConfig = {} as never
 
@@ -154,5 +158,126 @@ describe('build', () => {
     await buildPromise
     expect(resolved).toBe(true)
     expect(exitMock).toHaveBeenCalledWith(3)
+  })
+})
+
+describe('detectFramework', () => {
+  const createdDirs: string[] = []
+  let originalFrameworkEnv: string | undefined
+
+  const makeProject = (files: { contents?: string; path: string }[]): string => {
+    const dir = mkdtempSync(path.join(os.tmpdir(), 'payload-build-'))
+    createdDirs.push(dir)
+    for (const file of files) {
+      const full = path.join(dir, file.path)
+      mkdirSync(path.dirname(full), { recursive: true })
+      writeFileSync(full, file.contents ?? '')
+    }
+    return dir
+  }
+
+  const pkg = (deps: Record<string, string>): string => JSON.stringify({ dependencies: deps })
+
+  beforeEach(() => {
+    originalFrameworkEnv = process.env.PAYLOAD_FRAMEWORK
+    delete process.env.PAYLOAD_FRAMEWORK
+  })
+
+  afterEach(() => {
+    if (originalFrameworkEnv === undefined) {
+      delete process.env.PAYLOAD_FRAMEWORK
+    } else {
+      process.env.PAYLOAD_FRAMEWORK = originalFrameworkEnv
+    }
+    for (const dir of createdDirs) {
+      rmSync(dir, { force: true, recursive: true })
+    }
+    createdDirs.length = 0
+  })
+
+  it('honors PAYLOAD_FRAMEWORK=tanstack-start over auto-detection', () => {
+    process.env.PAYLOAD_FRAMEWORK = 'tanstack-start'
+    const dir = makeProject([{ contents: pkg({ next: '15.0.0' }), path: 'package.json' }])
+    expect(detectFramework(dir)).toBe('tanstack-start')
+  })
+
+  it('honors PAYLOAD_FRAMEWORK=next over auto-detection', () => {
+    process.env.PAYLOAD_FRAMEWORK = 'next'
+    const dir = makeProject([
+      { contents: pkg({ '@tanstack/react-start': '1.168.26' }), path: 'package.json' },
+    ])
+    expect(detectFramework(dir)).toBe('next')
+  })
+
+  it('throws when PAYLOAD_FRAMEWORK is an unsupported value', () => {
+    process.env.PAYLOAD_FRAMEWORK = 'svelte'
+    const dir = makeProject([{ contents: pkg({ next: '15.0.0' }), path: 'package.json' }])
+    expect(() => detectFramework(dir)).toThrow(/PAYLOAD_FRAMEWORK/)
+  })
+
+  it('detects next from the next dependency', () => {
+    const dir = makeProject([{ contents: pkg({ next: '15.0.0' }), path: 'package.json' }])
+    expect(detectFramework(dir)).toBe('next')
+  })
+
+  it('detects tanstack-start from the @tanstack/react-start dependency', () => {
+    const dir = makeProject([
+      { contents: pkg({ '@tanstack/react-start': '1.168.26' }), path: 'package.json' },
+    ])
+    expect(detectFramework(dir)).toBe('tanstack-start')
+  })
+
+  it('falls back to next.config when deps are inconclusive', () => {
+    const dir = makeProject([
+      { contents: pkg({}), path: 'package.json' },
+      { path: 'next.config.ts' },
+    ])
+    expect(detectFramework(dir)).toBe('next')
+  })
+
+  it('falls back to vite.config when deps are inconclusive', () => {
+    const dir = makeProject([
+      { contents: pkg({}), path: 'package.json' },
+      { path: 'vite.config.ts' },
+    ])
+    expect(detectFramework(dir)).toBe('tanstack-start')
+  })
+
+  it('falls back to the (payload) folder convention', () => {
+    const dir = makeProject([{ path: 'app/(payload)/admin/page.tsx' }])
+    expect(detectFramework(dir)).toBe('next')
+  })
+
+  it('falls back to the _payload folder convention', () => {
+    const dir = makeProject([{ path: 'app/_payload/route.tsx' }])
+    expect(detectFramework(dir)).toBe('tanstack-start')
+  })
+
+  it('resolves ambiguous deps using the config-file layer', () => {
+    const dir = makeProject([
+      {
+        contents: pkg({ '@tanstack/react-start': '1.168.26', next: '15.0.0' }),
+        path: 'package.json',
+      },
+      { path: 'next.config.ts' },
+    ])
+    expect(detectFramework(dir)).toBe('next')
+  })
+
+  it('throws a no-framework error when nothing is detected', () => {
+    const dir = makeProject([{ contents: pkg({}), path: 'package.json' }])
+    expect(() => detectFramework(dir)).toThrow(/Could not determine your framework/)
+  })
+
+  it('throws a conflict error when signals stay ambiguous', () => {
+    const dir = makeProject([
+      {
+        contents: pkg({ '@tanstack/react-start': '1.168.26', next: '15.0.0' }),
+        path: 'package.json',
+      },
+      { path: 'next.config.ts' },
+      { path: 'vite.config.ts' },
+    ])
+    expect(() => detectFramework(dir)).toThrow(/conflicting signals/)
   })
 })
