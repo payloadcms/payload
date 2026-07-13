@@ -1,8 +1,8 @@
-import type { GraphQLInputObjectType } from 'graphql'
+import type { GraphQLInputObjectType, GraphQLObjectType, GraphQLUnionType } from 'graphql'
 import type { Payload } from 'payload'
 
 import { configToSchema } from '@payloadcms/graphql'
-import { GraphQLNonNull } from 'graphql'
+import { getNamedType, GraphQLNonNull } from 'graphql'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
@@ -11,6 +11,7 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { idToString } from '../__helpers/shared/idToString.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { recursiveBlockInterfaceName } from './blocks/RecursiveBlock.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -294,6 +295,89 @@ query {
         .then((res) => res.json())
 
       expect(afterDelete.errors).toBeUndefined()
+    })
+
+    describe('recursive blocks', () => {
+      it('should build a single self-referential type for recursive blocks sharing a slug', () => {
+        // Before the fix this threw at schema construction:
+        // "Schema must contain uniquely named types but contains multiple types
+        // named "RecursiveItemBlock"." — one duplicate type per nesting level.
+        const { schema } = configToSchema(payload.config)
+
+        const blockType = schema.getType(recursiveBlockInterfaceName) as GraphQLObjectType
+
+        expect(blockType).toBeDefined()
+
+        const childrenUnion = getNamedType(blockType.getFields().children!.type) as GraphQLUnionType
+
+        // The nested `children` union must reference the exact same type object,
+        // not a duplicate created while re-entering the blocks field handler.
+        expect(childrenUnion.getTypes()).toContain(blockType)
+      })
+
+      it('should query nested recursive blocks through GraphQL', async () => {
+        const post = await payload.create({
+          collection: 'posts',
+          data: {
+            recursiveBlockField: [
+              {
+                blockType: 'recursiveItem',
+                children: [
+                  {
+                    blockType: 'recursiveItem',
+                    children: [
+                      {
+                        blockType: 'recursiveItem',
+                        label: 'level-3',
+                      },
+                    ],
+                    label: 'level-2',
+                  },
+                ],
+                label: 'level-1',
+              },
+            ],
+            title: 'Post with recursive blocks',
+          },
+        })
+
+        const query = `query {
+          Post(id: ${idToString(post.id, payload)}) {
+            recursiveBlockField {
+              ... on ${recursiveBlockInterfaceName} {
+                label
+                children {
+                  ... on ${recursiveBlockInterfaceName} {
+                    label
+                    children {
+                      ... on ${recursiveBlockInterfaceName} {
+                        label
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }`
+
+        const response = await restClient
+          .GRAPHQL_POST({ body: JSON.stringify({ query }) })
+          .then((res) => res.json())
+
+        expect(response.errors).toBeFalsy()
+
+        const [root] = response.data.Post.recursiveBlockField
+
+        expect(root.label).toBe('level-1')
+        expect(root.children[0].label).toBe('level-2')
+        expect(root.children[0].children[0].label).toBe('level-3')
+
+        await payload.delete({
+          collection: 'posts',
+          id: post.id,
+        })
+      })
     })
 
     describe('nullable schema types', () => {
