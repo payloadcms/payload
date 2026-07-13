@@ -118,6 +118,8 @@ describe('build', () => {
   let exitMock: ReturnType<typeof vi.spyOn>
   let originalArgv: string[]
   let originalFrameworkEnv: string | undefined
+  let cwdSpy: ReturnType<typeof vi.spyOn> | undefined
+  const buildTempDirs: string[] = []
 
   beforeEach(() => {
     spawnMock.mockClear()
@@ -127,7 +129,9 @@ describe('build', () => {
     process.argv = ['node', 'payload', 'build']
     exitMock = vi.spyOn(process, 'exit').mockImplementation((() => undefined) as never)
     originalFrameworkEnv = process.env.PAYLOAD_FRAMEWORK
-    delete process.env.PAYLOAD_FRAMEWORK
+    // Force next for the legacy tests so they don't depend on the repo-root
+    // package.json's ambient `next` dependency for auto-detection.
+    process.env.PAYLOAD_FRAMEWORK = 'next'
   })
 
   afterEach(() => {
@@ -138,6 +142,14 @@ describe('build', () => {
     } else {
       process.env.PAYLOAD_FRAMEWORK = originalFrameworkEnv
     }
+    if (cwdSpy) {
+      cwdSpy.mockRestore()
+      cwdSpy = undefined
+    }
+    for (const dir of buildTempDirs) {
+      rmSync(dir, { force: true, recursive: true })
+    }
+    buildTempDirs.length = 0
   })
 
   it('generates the import map before spawning, and generates types by default', async () => {
@@ -231,13 +243,15 @@ describe('build', () => {
   })
 
   it('spawns vite build for a detected tanstack project', async () => {
+    delete process.env.PAYLOAD_FRAMEWORK
     process.argv = ['node', 'payload', 'build', '--mode', 'staging']
     const tanstackDir = mkdtempSync(path.join(os.tmpdir(), 'payload-build-ts-'))
+    buildTempDirs.push(tanstackDir)
     writeFileSync(
       path.join(tanstackDir, 'package.json'),
       JSON.stringify({ dependencies: { '@tanstack/react-start': '1.168.26' } }),
     )
-    const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tanstackDir)
+    cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(tanstackDir)
 
     await build({ config: fakeConfig })
 
@@ -245,23 +259,19 @@ describe('build', () => {
     const [, spawnArgs] = spawnMock.mock.calls[0]
     expect(spawnArgs[0]).toMatch(/vite[\\/].*bin[\\/]vite\.js$/)
     expect(spawnArgs.slice(1)).toEqual(['build', '--mode', 'staging'])
-
-    cwdSpy.mockRestore()
-    rmSync(tanstackDir, { force: true, recursive: true })
   })
 
   it('exits 1 and does not spawn when the framework cannot be detected', async () => {
+    delete process.env.PAYLOAD_FRAMEWORK
     const emptyDir = mkdtempSync(path.join(os.tmpdir(), 'payload-build-empty-'))
+    buildTempDirs.push(emptyDir)
     writeFileSync(path.join(emptyDir, 'package.json'), JSON.stringify({}))
-    const cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(emptyDir)
+    cwdSpy = vi.spyOn(process, 'cwd').mockReturnValue(emptyDir)
 
     await build({ config: fakeConfig })
 
     expect(exitMock).toHaveBeenCalledWith(1)
     expect(spawnMock).not.toHaveBeenCalled()
-
-    cwdSpy.mockRestore()
-    rmSync(emptyDir, { force: true, recursive: true })
   })
 })
 
