@@ -23,7 +23,14 @@ vi.mock('./generateImportMap/index.js', () => ({ generateImportMap: generateImpo
 vi.mock('./generateTypes.js', () => ({ generateTypes: generateTypesMock }))
 
 // Imported after mocks are registered
-const { build, detectFramework, getForwardedArgs, resolveNextBin } = await import('./build.js')
+const {
+  build,
+  detectFramework,
+  getForwardedArgs,
+  resolveBuildCommand,
+  resolveNextBin,
+  resolveViteBin,
+} = await import('./build.js')
 
 const fakeConfig = {} as never
 
@@ -49,6 +56,61 @@ describe('resolveNextBin', () => {
 
   it('throws a clear error when next cannot be resolved', () => {
     expect(() => resolveNextBin('/nonexistent-project-root')).toThrow(/next/i)
+  })
+})
+
+describe('resolveViteBin', () => {
+  it('resolves the vite bin from the current project', () => {
+    // vite is installed at the repo root; resolving from cwd must succeed
+    const binPath = resolveViteBin(process.cwd())
+    expect(binPath).toMatch(/vite[\\/].*bin[\\/]vite\.js$/)
+  })
+
+  it('throws a clear error when vite cannot be resolved', async () => {
+    // Vitest injects its own transitive `vite` dep onto NODE_PATH, so resolving
+    // "vite" from any cwd would otherwise succeed in this test process even
+    // when the project under test has no vite installed. Mock module
+    // resolution itself to simulate a real "vite not installed" project.
+    vi.resetModules()
+    vi.doMock('node:module', async (importOriginal) => {
+      const actual = await importOriginal<typeof import('node:module')>()
+      return {
+        ...actual,
+        createRequire: () => ({
+          resolve: () => {
+            throw new Error('Cannot find module')
+          },
+        }),
+      }
+    })
+
+    const { resolveViteBin: resolveViteBinWithoutVite } = await import('./build.js')
+    expect(() => resolveViteBinWithoutVite('/nonexistent-project-root')).toThrow(/vite/i)
+
+    vi.doUnmock('node:module')
+    vi.resetModules()
+  })
+})
+
+describe('resolveBuildCommand', () => {
+  it('maps next to the next bin and build args', () => {
+    const { args, bin } = resolveBuildCommand({
+      cwd: process.cwd(),
+      forwardedArgs: ['--turbopack'],
+      framework: 'next',
+    })
+    expect(bin).toMatch(/next[\\/].*bin[\\/]next$/)
+    expect(args).toEqual(['build', '--turbopack'])
+  })
+
+  it('maps tanstack-start to the vite bin and build args', () => {
+    const { args, bin } = resolveBuildCommand({
+      cwd: process.cwd(),
+      forwardedArgs: ['--mode', 'staging'],
+      framework: 'tanstack-start',
+    })
+    expect(bin).toMatch(/vite[\\/].*bin[\\/]vite\.js$/)
+    expect(args).toEqual(['build', '--mode', 'staging'])
   })
 })
 

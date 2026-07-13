@@ -156,6 +156,49 @@ export function resolveNextBin(cwd: string = process.cwd()): string {
 }
 
 /**
+ * Resolve the project's `vite` binary from its own manifest, mirroring
+ * `resolveNextBin`. Resolving from `cwd` (not PATH) works whether `payload build`
+ * runs via an npm script or `npx`.
+ */
+export function resolveViteBin(cwd: string = process.cwd()): string {
+  const require = createRequire(path.join(cwd, 'package.json'))
+
+  let vitePkgPath: string
+  try {
+    vitePkgPath = require.resolve('vite/package.json')
+  } catch {
+    throw new Error('Could not resolve "vite" from the current project. Is Vite installed?')
+  }
+
+  const vitePkg = JSON.parse(readFileSync(vitePkgPath, 'utf8')) as {
+    bin?: Record<string, string> | string
+  }
+  const binField = typeof vitePkg.bin === 'string' ? vitePkg.bin : vitePkg.bin?.vite
+  if (!binField) {
+    throw new Error('Could not determine the "vite" binary path from vite/package.json.')
+  }
+
+  return path.join(path.dirname(vitePkgPath), binField)
+}
+
+/**
+ * Map a detected framework to the resolved binary and argument list to spawn.
+ * Both frameworks take the `build` subcommand followed by the forwarded args.
+ */
+export function resolveBuildCommand({
+  cwd = process.cwd(),
+  forwardedArgs,
+  framework,
+}: {
+  cwd?: string
+  forwardedArgs: string[]
+  framework: Framework
+}): { args: string[]; bin: string } {
+  const bin = framework === 'next' ? resolveNextBin(cwd) : resolveViteBin(cwd)
+  return { args: ['build', ...forwardedArgs], bin }
+}
+
+/**
  * Forward the raw args that follow the `build` subcommand to `next build`,
  * dropping payload-only flags. Uses raw argv (not minimist) so flags like
  * `--turbopack` or `--experimental-build-mode` pass through verbatim.
