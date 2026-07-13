@@ -85,6 +85,18 @@ const fields = flattenAllFields({
         },
       ],
     },
+    {
+      type: 'group',
+      name: 'localizedGroup',
+      localized: true,
+      fields: [
+        {
+          name: 'textLocalized',
+          type: 'text',
+          localized: true,
+        },
+      ],
+    },
   ],
 })
 
@@ -138,5 +150,14 @@ describe('getFieldByPath', () => {
     const sourceField = (fields[4] as any).blocks?.[1].flattenedFields?.[0]
     expect(sourceField).toBeDefined()
     expect(fieldInBlock?.field).toBe(sourceField)
+  })
+
+  it('adds a <locale> placeholder for every localized segment on the path', () => {
+    // A path that traverses more than one localized field yields multiple
+    // `<locale>` placeholders, so consumers must replace all of them.
+    const result = getFieldByPath({ fields, path: 'localizedGroup.textLocalized' })
+    assert(result)
+    expect(result.pathHasLocalized).toBe(true)
+    expect(result.localizedPath).toBe('localizedGroup.<locale>.textLocalized.<locale>')
   })
 })
