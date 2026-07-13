@@ -4,11 +4,13 @@
 import type { ServerFunctionClient } from 'payload'
 
 import config from '@payload-config'
-import { handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
+import { generateViewport, handleServerFunctions, RootLayout } from '@payloadcms/next/layouts'
 import React from 'react'
 
 import { importMap } from './admin/importMap.js'
 import './custom.scss'
+
+export { generateViewport }
 
 type Args = {
   children: React.ReactNode

@@ -30,6 +30,7 @@ const nextDependencyChecks = {
   },
 }
 
+export { generateViewport } from './viewport.js'
 export { metadata } from '@payloadcms/ui/layouts'
 
 type Props = Omit<
