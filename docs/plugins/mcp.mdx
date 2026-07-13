@@ -59,8 +59,8 @@ pnpm add -D vite@~8.1.4
 ```
 
 HTTP and production stdio (`NODE_ENV=production`) do not require Vite.
-Development stdio still starts without Vite, but config HMR is disabled. When
-`NODE_ENV=development`, an actionable message is written to stderr.
+Development stdio still starts without Vite, but config HMR is disabled and an
+actionable message is written to stderr.
 
 **3.** Point your MCP client (Claude Desktop, your IDE, …) at the stdio server:
 

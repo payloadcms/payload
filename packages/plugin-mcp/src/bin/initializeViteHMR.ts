@@ -22,11 +22,9 @@ export const initializeViteHMR = async (): Promise<undefined | ViteHMR> => {
       throw error
     }
 
-    if (process.env.NODE_ENV === 'development') {
-      console.error(
-        '[payload-mcp] Vite is not installed, so Payload config changes will not hot reload. Install vite@~8.1.4 as a development dependency to enable HMR during local development.',
-      )
-    }
+    console.error(
+      '[payload-mcp] Vite is not installed, so Payload config changes will not hot reload. Install vite@~8.1.4 as a development dependency to enable HMR during local development.',
+    )
     return
   }
 
