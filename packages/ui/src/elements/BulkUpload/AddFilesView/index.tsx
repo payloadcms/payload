@@ -1,8 +1,10 @@
 'use client'
 
 import React from 'react'
+import { toast } from 'sonner'
 
 import { useTranslation } from '../../../providers/Translation/index.js'
+import { getFilesFromClipboard } from '../../../utilities/getFilesFromClipboard.js'
 import { Button } from '../../Button/index.js'
 import { DialogHeader, DialogModal } from '../../Dialog/index.js'
 import { Dropzone } from '../../Dropzone/index.js'
@@ -19,6 +21,19 @@ export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: 
   const { t } = useTranslation()
 
   const inputRef = React.useRef<HTMLInputElement>(null)
+
+  const handlePasteFromClipboard = React.useCallback(async () => {
+    try {
+      const files = await getFilesFromClipboard()
+      if (!files) {
+        toast.error('No file found in clipboard.')
+        return
+      }
+      onDrop(files)
+    } catch (_err) {
+      toast.error('Unable to read from clipboard.')
+    }
+  }, [onDrop])
 
   return (
     <DialogModal className={baseClass} size="large" slug={modalSlug}>
@@ -38,6 +53,14 @@ export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: 
             >
               {t('upload:selectFile')}
             </Button>
+            <span className={`${baseClass}__orText`}>{t('general:or')}</span>
+            <Button
+              buttonStyle="secondary"
+              icon="clipboard"
+              onClick={handlePasteFromClipboard}
+              size="medium"
+              tooltip={t('upload:pasteFromClipboard')}
+            />
             <input
               accept={acceptMimeTypes}
               aria-hidden="true"
