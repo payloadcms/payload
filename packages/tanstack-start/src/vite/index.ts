@@ -253,15 +253,19 @@ export function payloadTanstackStartOptions(
   const { additionalIgnoreImporters = [], routesDirectory = 'app', srcDirectory = 'src' } = args
 
   return {
-    // No `server` rule: keep TanStack's default `.client.*` SSR protection for
-    // host files. Payload's own `.client.*` are exempted in
-    // `onImportProtectionViolation`.
     importProtection: {
       client: { excludeFiles: [], specifiers: serverOnlyClientSpecifiers },
       ignoreImporters: [...defaultImportProtectionIgnoreImporters, ...additionalIgnoreImporters],
       include: ['**/*'],
       mockAccess: 'warn',
       onViolation: onImportProtectionViolation,
+      // Payload uses the `.client.*` suffix for React Client Components that must
+      // be server-rendered during SSR — its convention app-wide, including host
+      // code. TanStack's default rule denies `**/*.client.*` in the server
+      // environment (client-only semantics), which collides: it would mock those
+      // components and crash React. Filenames can't distinguish the two
+      // conventions, so disable the default `.client.*` denial entirely.
+      server: { files: [] },
     },
     // Disable per-route code-splitting so route components ship in the initial
     // bundle and hydrate on first paint — otherwise the admin renders but isn't

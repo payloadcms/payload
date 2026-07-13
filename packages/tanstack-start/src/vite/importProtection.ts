@@ -39,17 +39,13 @@ export function onImportProtectionViolation(violation: unknown): boolean | void 
     resolved?: string
   }
 
-  // Payload's `.client.*` components must be server-rendered, so exempt them from
-  // TanStack's default `**/*.client.*` SSR denial. Matched by resolved path
-  // (installed and linked/monorepo) so a host's own `.client.*` files stay
-  // protected.
-  const payloadClientFile =
-    /@payloadcms\/|\/packages\/(?:ui|richtext-lexical|richtext-slate|plugin-[^/]+)\//
+  const allowedClientFileImporters =
+    /\/richtext-lexical\/.*\/exports\/client\/|\/tanstack-start\/.*\/views\/AdminView|\/ui\//
 
   if (
     info.envType === 'server' &&
     info.resolved?.includes('.client.') &&
-    payloadClientFile.test(info.resolved)
+    allowedClientFileImporters.test(info.importer)
   ) {
     return false
   }

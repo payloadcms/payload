@@ -113,10 +113,10 @@ if (tsOptions.rsc?.enabled !== true) {
 if (tsOptions.router?.autoCodeSplitting !== false) {
   errors.push('payloadTanstackStartOptions missing router.autoCodeSplitting: false')
 }
-// The blanket `.client.*` SSR denial disable must be gone — host `.client.*`
-// files keep TanStack's default protection; Payload is exempted in onViolation.
-if (tsOptions.importProtection?.server) {
-  errors.push('payloadTanstackStartOptions should not override importProtection.server (blanket disable)')
+// Payload redefines `.client.*` as SSR-able client components, so TanStack's
+// default `.client.*` SSR denial must be disabled (else it mocks + crashes them).
+if (tsOptions.importProtection?.server?.files?.length !== 0) {
+  errors.push('payloadTanstackStartOptions must disable the .client.* SSR denial (server.files: [])')
 }
 if (typeof payloadReactOptions().include === 'undefined') {
   errors.push('payloadReactOptions missing include')
