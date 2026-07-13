@@ -24,11 +24,13 @@ const VITE_CONFIG_FILES = [
 
 /**
  * `payload build` — generate the import map (and types) so they are on disk
- * before `next build` statically imports them, then run the project's Next.js
- * build, forwarding any extra CLI args verbatim.
+ * before the framework build statically imports them, then detect the project's
+ * framework (Next.js or TanStack Start) and run its build, forwarding any extra
+ * CLI args verbatim.
  *
- * Owns its own process lifecycle: it exits with `next build`'s exit code, or
- * exits 1 if pre-build generation fails (never builds against a stale map).
+ * Owns its own process lifecycle: it exits with the framework build's exit code,
+ * or exits 1 if pre-build generation or framework detection fails (never builds
+ * against a stale map or the wrong bundler).
  */
 export async function build({ config }: { config: SanitizedConfig }): Promise<void> {
   const skipTypes = process.argv.includes('--no-types')
@@ -44,15 +46,22 @@ export async function build({ config }: { config: SanitizedConfig }): Promise<vo
     return process.exit(1)
   }
 
-  const nextBin = resolveNextBin()
-  const forwardedArgs = getForwardedArgs()
+  let bin: string
+  let args: string[]
+  try {
+    const framework = detectFramework()
+    ;({ args, bin } = resolveBuildCommand({ forwardedArgs: getForwardedArgs(), framework }))
+  } catch (err) {
+    console.error(err instanceof Error ? err.message : err)
+    return process.exit(1)
+  }
 
   const exitCode = await new Promise<number>((resolve) => {
-    const child = spawn(process.execPath, [nextBin, 'build', ...forwardedArgs], {
+    const child = spawn(process.execPath, [bin, ...args], {
       stdio: 'inherit',
     })
     child.on('error', (err) => {
-      console.error('Failed to run next build:')
+      console.error('Failed to run build:')
       console.error(err)
       resolve(1)
     })
