@@ -588,6 +588,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     linkToFile: 'Link ka fajlu',
     moreInfo: 'Više informacija',
     noFile: 'Nema datoteke',
+    pasteFromClipboard: 'Nalepi iz klipborda',
     pasteURL: 'Nalepi URL',
     previewSizes: 'Veličine pregleda',
     renameFile: 'Preimenujte fajl',

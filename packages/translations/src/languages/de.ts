@@ -601,6 +601,7 @@ export const deTranslations: DefaultTranslationsObject = {
     linkToFile: 'Link zur Datei',
     moreInfo: 'Mehr Info',
     noFile: 'Keine Datei',
+    pasteFromClipboard: 'Aus der Zwischenablage einfügen',
     pasteURL: 'URL einfügen',
     previewSizes: 'Bildgrößen anzeigen',
     renameFile: 'Datei umbenennen',

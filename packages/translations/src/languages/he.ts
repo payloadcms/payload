@@ -570,6 +570,7 @@ export const heTranslations: DefaultTranslationsObject = {
     linkToFile: 'קישור לקובץ',
     moreInfo: 'מידע נוסף',
     noFile: 'אין קובץ',
+    pasteFromClipboard: 'הדבק מלוח הגזירים',
     pasteURL: 'הדבק כתובת אתר',
     previewSizes: 'גדלי תצוגה מקדימה',
     renameFile: 'שנה את שם הקובץ',

@@ -588,6 +588,7 @@ export const enTranslations = {
     linkToFile: 'Link to file',
     moreInfo: 'More info',
     noFile: 'No file',
+    pasteFromClipboard: 'Paste from clipboard',
     pasteURL: 'Paste URL',
     previewSizes: 'Preview Sizes',
     renameFile: 'Rename file',

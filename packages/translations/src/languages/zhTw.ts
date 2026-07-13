@@ -560,6 +560,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     linkToFile: '連結至檔案',
     moreInfo: '顯示更多資訊',
     noFile: '無檔案',
+    pasteFromClipboard: '從剪貼簿貼上',
     pasteURL: '貼上網址',
     previewSizes: '預覽尺寸',
     renameFile: '重新命名檔案',

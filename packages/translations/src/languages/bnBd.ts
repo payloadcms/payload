@@ -596,6 +596,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     linkToFile: 'ফাইলের লিঙ্ক',
     moreInfo: 'আরও তথ্য',
     noFile: 'কোনো ফাইল নেই',
+    pasteFromClipboard: 'ক্লিপবোর্ড থেকে পেস্ট করুন',
     pasteURL: 'URL পেস্ট করুন',
     previewSizes: 'প্রিভিউ আকারগুলি',
     renameFile: 'ফাইলের নাম পরিবর্তন করুন',

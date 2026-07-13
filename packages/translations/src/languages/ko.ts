@@ -585,6 +585,7 @@ export const koTranslations: DefaultTranslationsObject = {
     linkToFile: '파일로 연결',
     moreInfo: '정보 더보기',
     noFile: '파일 없음',
+    pasteFromClipboard: '클립보드에서 붙여넣기',
     pasteURL: 'URL 붙여넣기',
     previewSizes: '미리보기 크기',
     renameFile: '파일 이름 변경',

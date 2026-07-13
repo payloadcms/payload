@@ -589,6 +589,7 @@ export const viTranslations: DefaultTranslationsObject = {
     linkToFile: 'Liên kết tới tệp',
     moreInfo: 'Xem thêm',
     noFile: 'Không có tệp',
+    pasteFromClipboard: 'Dán từ khay nhớ tạm',
     pasteURL: 'Dán URL',
     previewSizes: 'Kích cỡ xem trước',
     renameFile: 'Đổi tên tệp',

@@ -591,6 +591,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     linkToFile: 'Link para arquivo',
     moreInfo: 'Ver mais',
     noFile: 'Sem arquivo',
+    pasteFromClipboard: 'Colar da área de transferência',
     pasteURL: 'Colar URL',
     previewSizes: 'Tamanhos de Pré-visualização',
     renameFile: 'Renomear arquivo',

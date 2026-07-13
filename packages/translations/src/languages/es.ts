@@ -595,6 +595,7 @@ export const esTranslations: DefaultTranslationsObject = {
     linkToFile: 'Enlace al archivo',
     moreInfo: 'Más info',
     noFile: 'Ningún archivo',
+    pasteFromClipboard: 'Pegar desde el portapapeles',
     pasteURL: 'Pegar URL',
     previewSizes: 'Tamaños de Vista Previa',
     renameFile: 'Renombrar archivo',

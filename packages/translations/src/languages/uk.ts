@@ -584,6 +584,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     linkToFile: 'Посилання на файл',
     moreInfo: 'Більше інформації',
     noFile: 'Немає файлу',
+    pasteFromClipboard: 'Вставити з буфера обміну',
     pasteURL: 'Вставити URL',
     previewSizes: 'Попередній перегляд розмірів',
     renameFile: 'Перейменувати файл',

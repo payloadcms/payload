@@ -562,6 +562,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     linkToFile: '链接到文件',
     moreInfo: '更多信息',
     noFile: '没有文件',
+    pasteFromClipboard: '从剪贴板粘贴',
     pasteURL: '粘贴网址',
     previewSizes: '预览尺寸',
     renameFile: '重命名文件',

@@ -579,6 +579,7 @@ export const faTranslations: DefaultTranslationsObject = {
     linkToFile: 'پیوند به فایل',
     moreInfo: 'اطلاعات بیشتر',
     noFile: 'فایلی وجود ندارد',
+    pasteFromClipboard: 'جای‌گذاری از کلیپ‌بورد',
     pasteURL: 'جای‌گذاری URL',
     previewSizes: 'اندازه‌های پیش‌نمایش',
     renameFile: 'تغییر نام فایل',

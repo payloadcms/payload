@@ -584,6 +584,7 @@ export const csTranslations: DefaultTranslationsObject = {
     linkToFile: 'Odkaz na soubor',
     moreInfo: 'Více informací',
     noFile: 'Žádný soubor',
+    pasteFromClipboard: 'Vložit ze schránky',
     pasteURL: 'Vložit URL',
     previewSizes: 'Náhled velikostí',
     renameFile: 'Přejmenovat soubor',

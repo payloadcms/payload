@@ -588,6 +588,7 @@ export const daTranslations: DefaultTranslationsObject = {
     linkToFile: 'Link til fil',
     moreInfo: 'Mere info',
     noFile: 'Ingen fil',
+    pasteFromClipboard: 'Indsæt fra udklipsholder',
     pasteURL: 'Indsæt URL',
     previewSizes: 'Forhåndsvisningsstørrelser',
     renameFile: 'Omdøb fil',
