@@ -135,24 +135,7 @@ export function detectFramework(cwd: string = process.cwd()): Framework {
  * PATH) works whether `payload build` runs via an npm script or `npx`.
  */
 export function resolveNextBin(cwd: string = process.cwd()): string {
-  const require = createRequire(path.join(cwd, 'package.json'))
-
-  let nextPkgPath: string
-  try {
-    nextPkgPath = require.resolve('next/package.json')
-  } catch {
-    throw new Error('Could not resolve "next" from the current project. Is Next.js installed?')
-  }
-
-  const nextPkg = JSON.parse(readFileSync(nextPkgPath, 'utf8')) as {
-    bin?: Record<string, string> | string
-  }
-  const binField = typeof nextPkg.bin === 'string' ? nextPkg.bin : nextPkg.bin?.next
-  if (!binField) {
-    throw new Error('Could not determine the "next" binary path from next/package.json.')
-  }
-
-  return path.join(path.dirname(nextPkgPath), binField)
+  return resolveBin({ cwd, packageName: 'next' })
 }
 
 /**
@@ -161,24 +144,7 @@ export function resolveNextBin(cwd: string = process.cwd()): string {
  * runs via an npm script or `npx`.
  */
 export function resolveViteBin(cwd: string = process.cwd()): string {
-  const require = createRequire(path.join(cwd, 'package.json'))
-
-  let vitePkgPath: string
-  try {
-    vitePkgPath = require.resolve('vite/package.json')
-  } catch {
-    throw new Error('Could not resolve "vite" from the current project. Is Vite installed?')
-  }
-
-  const vitePkg = JSON.parse(readFileSync(vitePkgPath, 'utf8')) as {
-    bin?: Record<string, string> | string
-  }
-  const binField = typeof vitePkg.bin === 'string' ? vitePkg.bin : vitePkg.bin?.vite
-  if (!binField) {
-    throw new Error('Could not determine the "vite" binary path from vite/package.json.')
-  }
-
-  return path.join(path.dirname(vitePkgPath), binField)
+  return resolveBin({ cwd, packageName: 'vite' })
 }
 
 /**
@@ -256,4 +222,34 @@ function buildDetectionError(signals: {
     '  • app folders:  no app/(payload) or app/_payload',
     'Install your framework (Next.js or TanStack Start) and try again.',
   ].join('\n')
+}
+
+/**
+ * Resolve a framework's binary path from its own package manifest, robust to a
+ * future `exports` field and to internal layout changes. Resolving from `cwd`
+ * (not PATH) works whether `payload build` runs via an npm script or `npx`.
+ */
+function resolveBin({ cwd, packageName }: { cwd: string; packageName: string }): string {
+  const require = createRequire(path.join(cwd, 'package.json'))
+
+  let pkgPath: string
+  try {
+    pkgPath = require.resolve(`${packageName}/package.json`)
+  } catch {
+    throw new Error(
+      `Could not resolve "${packageName}" from the current project. Is ${packageName} installed?`,
+    )
+  }
+
+  const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as {
+    bin?: Record<string, string> | string
+  }
+  const binField = typeof pkg.bin === 'string' ? pkg.bin : pkg.bin?.[packageName]
+  if (!binField) {
+    throw new Error(
+      `Could not determine the "${packageName}" binary path from ${packageName}/package.json.`,
+    )
+  }
+
+  return path.join(path.dirname(pkgPath), binField)
 }
