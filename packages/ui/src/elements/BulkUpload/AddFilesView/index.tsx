@@ -56,6 +56,7 @@ export function AddFilesView({ acceptMimeTypes, modalSlug: modalSlug, onDrop }: 
             <span className={`${baseClass}__orText`}>{t('general:or')}</span>
             <Button
               buttonStyle="secondary"
+              className={`${baseClass}__pasteFromClipboard`}
               icon="clipboard"
               onClick={handlePasteFromClipboard}
               size="medium"
