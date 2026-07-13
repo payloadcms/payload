@@ -378,6 +378,28 @@ describe('detectFramework', () => {
     expect(detectFramework(dir)).toBe('next')
   })
 
+  it('resolves ambiguous deps to tanstack-start via the config-file layer', () => {
+    const dir = makeProject([
+      {
+        contents: pkg({ '@tanstack/react-start': '1.168.26', next: '15.0.0' }),
+        path: 'package.json',
+      },
+      { path: 'vite.config.ts' },
+    ])
+    expect(detectFramework(dir)).toBe('tanstack-start')
+  })
+
+  it('resolves ambiguous deps and configs via the folder-convention layer', () => {
+    const dir = makeProject([
+      {
+        contents: pkg({ '@tanstack/react-start': '1.168.26', next: '15.0.0' }),
+        path: 'package.json',
+      },
+      { path: 'app/_payload/route.tsx' },
+    ])
+    expect(detectFramework(dir)).toBe('tanstack-start')
+  })
+
   it('throws a no-framework error when nothing is detected', () => {
     const dir = makeProject([{ contents: pkg({}), path: 'package.json' }])
     expect(() => detectFramework(dir)).toThrow(/Could not determine your framework/)

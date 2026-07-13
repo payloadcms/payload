@@ -138,20 +138,12 @@ export function detectFramework(cwd: string = process.cwd()): Framework {
   )
 }
 
-/**
- * Resolve the project's `next` binary from its own manifest, robust to a future
- * `exports` field and to internal layout changes. Resolving from `cwd` (not
- * PATH) works whether `payload build` runs via an npm script or `npx`.
- */
+/** Resolve the project's `next` binary — see {@link resolveBin}. */
 export function resolveNextBin(cwd: string = process.cwd()): string {
   return resolveBin({ cwd, displayName: 'Next.js', packageName: 'next' })
 }
 
-/**
- * Resolve the project's `vite` binary from its own manifest, mirroring
- * `resolveNextBin`. Resolving from `cwd` (not PATH) works whether `payload build`
- * runs via an npm script or `npx`.
- */
+/** Resolve the project's `vite` binary — see {@link resolveBin}. */
 export function resolveViteBin(cwd: string = process.cwd()): string {
   return resolveBin({ cwd, displayName: 'Vite', packageName: 'vite' })
 }
@@ -174,9 +166,10 @@ export function resolveBuildCommand({
 }
 
 /**
- * Forward the raw args that follow the `build` subcommand to `next build`,
- * dropping payload-only flags. Uses raw argv (not minimist) so flags like
- * `--turbopack` or `--experimental-build-mode` pass through verbatim.
+ * Forward the raw args that follow the `build` subcommand to the framework build
+ * (`next build` / `vite build`), dropping payload-only flags. Uses raw argv (not
+ * minimist) so flags like `--turbopack` (Next) or `--mode staging` (Vite) pass
+ * through verbatim.
  */
 export function getForwardedArgs(argv: string[] = process.argv.slice(2)): string[] {
   const buildIndex = argv.indexOf('build')
