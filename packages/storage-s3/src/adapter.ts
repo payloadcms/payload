@@ -7,6 +7,7 @@ import type {
 
 import type { SignedDownloadsConfig } from './getFile.js'
 
+import { generateUploadInstructions } from './generateSignedURL.js'
 import { generateURL } from './generateURL.js'
 
 interface CreateS3AdapterArgs {
@@ -30,7 +31,6 @@ export function createS3Adapter({
 }: CreateS3AdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 's3',
-    clientUploads,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -41,6 +41,19 @@ export function createS3Adapter({
         prefix: urlPrefix,
         useCompositePrefixes,
       }),
+
+    uploadInstructions: clientUploads
+      ? {
+          access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+          generate: generateUploadInstructions({
+            acl,
+            bucket,
+            collectionPrefix: prefix,
+            getStorageClient,
+            useCompositePrefixes,
+          }),
+        }
+      : undefined,
 
     // Helpers below dynamic-import their @aws-sdk dependencies so the SDK only
     // loads on the first request that actually needs it.

@@ -9,12 +9,10 @@ import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { S3 } from '@aws-sdk/client-s3'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import type { SignedDownloadsConfig } from './getFile.js'
 
 import { createS3Adapter } from './adapter.js'
-import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 
 export type S3StorageOptions = {
   /**
@@ -50,7 +48,7 @@ export type S3StorageOptions = {
   clientCacheKey?: string
 
   /**
-   * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method for the bucket to your website.
+   * Use upload instructions to avoid including file bytes in document requests. You must allow CORS PUT requests from your website.
    */
   clientUploads?: ClientUploadsConfig
   /**
@@ -145,25 +143,6 @@ export const s3Storage: S3StorageFactory = (
 
       return s3Clients.get(cacheKey)!
     }
-
-    initClientUploads({
-      clientHandler: '@payloadcms/storage-s3/client#S3ClientUploadHandler',
-      collections: s3StorageOptions.collections,
-      config: incomingConfig,
-      enabled: !isPluginDisabled && Boolean(s3StorageOptions.clientUploads),
-      serverHandler: getGenerateSignedURLHandler({
-        access:
-          typeof s3StorageOptions.clientUploads === 'object'
-            ? s3StorageOptions.clientUploads.access
-            : undefined,
-        acl: s3StorageOptions.acl,
-        bucket: s3StorageOptions.bucket,
-        collections: s3StorageOptions.collections,
-        getStorageClient,
-        useCompositePrefixes: s3StorageOptions.useCompositePrefixes,
-      }),
-      serverHandlerPath: '/storage-s3-generate-signed-url',
-    })
 
     if (isPluginDisabled) {
       // If alwaysInsertFields is true, still call cloudStoragePlugin to insert fields

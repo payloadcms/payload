@@ -16,10 +16,10 @@ export const initClientUploads = <ExtraProps extends Record<string, unknown>, T>
   enabled: boolean
   /** extra props to pass to the client handler */
   extraClientHandlerProps?: (collection: T) => ExtraProps
-  serverHandler: PayloadHandler
+  serverHandler?: PayloadHandler
   serverHandlerPath: string
 }) => {
-  if (enabled) {
+  if (enabled && serverHandler) {
     if (!config.endpoints) {
       config.endpoints = []
     }

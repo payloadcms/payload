@@ -4,6 +4,9 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
+import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client'
+
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
@@ -30,7 +33,40 @@ export function createVercelBlobAdapter({
 }: CreateVercelBlobAdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
-    clientUploads,
+
+    uploadInstructions: clientUploads
+      ? {
+          access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+          generate: async ({ collectionSlug, docPrefix, filename, filesize, mimeType, req }) => {
+            const resolved = await resolveSignedURLKey({
+              collectionPrefix: prefix,
+              collectionSlug,
+              docPrefix,
+              filename,
+              req,
+              useCompositePrefixes,
+            })
+
+            return {
+              name: 'uploadToVercelBlob',
+              type: 'dispatch',
+              clientUploadContext: { prefix: resolved.sanitizedDocPrefix },
+              data: {
+                pathname: resolved.fileKey,
+                token: await generateClientTokenFromReadWriteToken({
+                  addRandomSuffix,
+                  allowedContentTypes: mimeType ? [mimeType] : undefined,
+                  cacheControlMaxAge,
+                  maximumSizeInBytes: filesize,
+                  pathname: resolved.fileKey,
+                  token,
+                }),
+              },
+              filename: resolved.sanitizedFilename,
+            }
+          },
+        }
+      : undefined,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({

@@ -37,8 +37,14 @@ export function createUploadthingAdapter({
 
   return (): GeneratedAdapter => ({
     name: 'uploadthing',
-    clientUploads,
     fields,
+
+    uploadInstructions: clientUploads
+      ? {
+          access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+          generate: () => ({ name: 'uploadToUploadThing', type: 'dispatch' }),
+        }
+      : undefined,
 
     generateURL,
 

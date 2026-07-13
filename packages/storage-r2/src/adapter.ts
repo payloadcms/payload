@@ -23,7 +23,13 @@ export function createR2Adapter({
 }: CreateR2AdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'r2',
-    clientUploads,
+
+    uploadInstructions: clientUploads
+      ? {
+          access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+          generate: () => ({ name: 'uploadToR2', type: 'dispatch' }),
+        }
+      : undefined,
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
       deleteFile({

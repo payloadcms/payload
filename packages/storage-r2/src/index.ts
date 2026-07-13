@@ -11,7 +11,7 @@ import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 import type { R2Bucket, R2StorageClientUploadHandlerParams } from './types.js'
 
 import { createR2Adapter } from './adapter.js'
-import { getHandleMultiPartUpload } from './handleMultiPartUpload.js'
+import { defaultR2ClientUploadsAccess, getHandleMultiPartUpload } from './handleMultiPartUpload.js'
 
 export interface R2StorageOptions {
   /**
@@ -27,7 +27,7 @@ export interface R2StorageOptions {
 
   bucket: R2Bucket
   /**
-   * Do uploads directly on the client, to bypass limits on Cloudflare/Vercel.
+   * Use upload instructions to avoid including file bytes in document requests.
    */
   clientUploads?: ClientUploadsConfig
   /**
@@ -59,9 +59,15 @@ export const r2Storage: R2StorageFactory = (
   name: 'r2',
   collections: Object.keys(r2StorageOptions.collections),
   init: (incomingConfig: Config): Config => {
+    const clientUploadsAccess =
+      typeof r2StorageOptions.clientUploads === 'object' && r2StorageOptions.clientUploads.access
+        ? r2StorageOptions.clientUploads.access
+        : defaultR2ClientUploadsAccess
+    const clientUploads = r2StorageOptions.clientUploads && { access: clientUploadsAccess }
+
     const adapter = createR2Adapter({
       bucket: r2StorageOptions.bucket,
-      clientUploads: r2StorageOptions.clientUploads,
+      clientUploads,
       useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
     })
 
@@ -76,10 +82,7 @@ export const r2Storage: R2StorageFactory = (
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(r2StorageOptions.clientUploads),
       serverHandler: getHandleMultiPartUpload({
-        access:
-          typeof r2StorageOptions.clientUploads === 'object'
-            ? r2StorageOptions.clientUploads.access
-            : undefined,
+        access: clientUploadsAccess,
         bucket: r2StorageOptions.bucket,
         collections: r2StorageOptions.collections,
         useCompositePrefixes: r2StorageOptions.useCompositePrefixes,

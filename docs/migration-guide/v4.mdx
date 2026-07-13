@@ -937,7 +937,7 @@ The same change applies to `upload` fields with `hasMany: true`.
 
 Storage adapter packages (`@payloadcms/storage-s3`, `-azure`, `-gcs`, `-r2`, `-vercel-blob`, `-uploadthing`) must now be placed under the top-level `storage` key in your Payload config instead of inside `plugins`.
 
-Declaring adapters inside `plugins` no longer works. The `storage` key ensures upload hooks, static file handlers, and presigned-URL endpoints are wired up before any plugin runs.
+Declaring adapters inside `plugins` no longer works. The `storage` key ensures upload hooks, static file handlers, and upload instructions are wired up before any plugin runs.
 
 ```diff
 import { s3Storage } from '@payloadcms/storage-s3'
@@ -956,6 +956,111 @@ export default buildConfig({
 ```
 
 Run `npx @payloadcms/codemod --transform migrate-storage-adapters-to-config` to migrate automatically.
+
+### Direct uploads now use Payload's shared upload-instructions endpoint
+
+Client uploads for S3, Azure, and GCS now start through one Payload endpoint instead of an endpoint and Admin handler registered by each adapter:
+
+```text
+POST /api/upload-instructions
+```
+
+If you only configure a storage adapter with `clientUploads: true`, no migration is needed. The Admin Panel uses the new endpoint automatically.
+
+You need to migrate if you call an adapter's signing endpoint directly, import its client component, use `ClientUploadsAccess`, or register a custom upload handler with `setUploadHandler`.
+
+#### Provider-specific signing endpoints were removed
+
+The following endpoints no longer exist:
+
+- `/api/storage-s3-generate-signed-url`
+- `/api/storage-azure-generate-signed-url`
+- `/api/storage-gcs-generate-signed-url`
+
+Call `/api/upload-instructions` with the same file metadata:
+
+```ts
+const response = await fetch('/api/upload-instructions', {
+  method: 'POST',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    collectionSlug: 'media',
+    docPrefix: 'gallery',
+    filename: file.name,
+    filesize: file.size,
+    mimeType: file.type,
+  }),
+})
+```
+
+The old endpoints returned `{ docPrefix, filename, url }`. The shared endpoint returns upload instructions. For S3, Azure, and GCS, follow the returned HTTP request exactly:
+
+```ts
+const instructions = await response.json()
+
+if (instructions.type !== 'http') {
+  throw new Error(`Unsupported upload instruction: ${instructions.type}`)
+}
+
+const { url, ...request } = instructions.request
+await fetch(url, { ...request, body: file })
+```
+
+The response also includes the sanitized `filename` and `clientUploadContext` needed by the existing document creation request.
+
+#### S3, Azure, and GCS client component exports were removed
+
+These client entry points and their exported components were removed:
+
+```text
+@payloadcms/storage-s3/client
+@payloadcms/storage-azure/client
+@payloadcms/storage-gcs/client
+```
+
+Remove manual registrations of `S3ClientUploadHandler`, `AzureClientUploadHandler`, and `GcsClientUploadHandler`. Payload's shared Admin upload handler is registered automatically when `clientUploads` is enabled.
+
+#### `ClientUploadsAccess` was replaced
+
+Use the core `UploadInstructionsAccess` type for `clientUploads.access` callbacks:
+
+```diff
+- import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
++ import type { UploadInstructionsAccess } from 'payload'
+
+- const access: ClientUploadsAccess = ({ req }) => Boolean(req.user)
++ const access: UploadInstructionsAccess = ({ req }) => Boolean(req.user)
+```
+
+#### Custom client upload handlers now use named instructions
+
+`useUploadHandlers().setUploadHandler` was removed. `createClientUploadHandler` now requires a name and listens for a matching `dispatch` instruction:
+
+```ts
+import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
+
+export const MyClientUploadHandler = createClientUploadHandler({
+  name: 'uploadToMyProvider',
+  handler: async ({ data, file }) => {
+    await uploadToMyProvider({ data, file })
+  },
+})
+```
+
+The adapter must return the same name from its `uploadInstructions` capability:
+
+```ts
+uploadInstructions: {
+  generate: () => ({
+    type: 'dispatch',
+    name: 'uploadToMyProvider',
+    data: {},
+  }),
+}
+```
+
+The `data` value is passed from the server instruction to the client handler. The names must match exactly.
 
 ### `FileSizeImproved` removed — use `FileSize` ([#16593](https://github.com/payloadcms/payload/pull/16593))
 

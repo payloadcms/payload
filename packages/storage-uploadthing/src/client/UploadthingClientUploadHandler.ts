@@ -4,6 +4,7 @@ import { formatAdminURL } from 'payload/shared'
 import { genUploader } from 'uploadthing/client'
 
 export const UploadthingClientUploadHandler = createClientUploadHandler({
+  name: 'uploadToUploadThing',
   handler: async ({ apiRoute, collectionSlug, file, serverHandlerPath, serverURL }) => {
     const endpointRoute = formatAdminURL({
       apiRoute,

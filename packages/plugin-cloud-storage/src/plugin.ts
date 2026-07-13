@@ -103,9 +103,9 @@ export const cloudStoragePlugin =
 
           if (!options.disablePayloadAccessControl) {
             handlers.push(adapter.staticHandler)
-            // Else if disablePayloadAccessControl: true and clientUploads is used
-            // Build the "proxied" handler that responses only when the file was requested by client upload in addDataAndFileToRequest
-          } else if (adapter.clientUploads) {
+            // Else if disablePayloadAccessControl: true and upload instructions are used
+            // Build the "proxied" handler that responds only when addDataAndFileToRequest fetches the uploaded file
+          } else if (adapter.uploadInstructions) {
             handlers.push((req, args) => {
               if ('clientUploadContext' in args.params) {
                 return adapter.staticHandler(req, args)
@@ -175,6 +175,9 @@ export const cloudStoragePlugin =
             upload: {
               ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
               adapter: adapter.name,
+              ...(adapter.uploadInstructions && {
+                uploadInstructions: adapter.uploadInstructions,
+              }),
               disableLocalStorage:
                 typeof options.disableLocalStorage === 'boolean'
                   ? options.disableLocalStorage

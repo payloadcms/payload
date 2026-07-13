@@ -1,7 +1,10 @@
 'use client'
-import type { UploadCollectionSlug } from 'payload'
+import type { UploadCollectionSlug, UploadInstructions } from 'payload'
 
-import React, { useState } from 'react'
+import { formatAdminURL } from 'payload/shared'
+import React from 'react'
+
+import { useConfig } from '../Config/index.js'
 
 type UploadHandler = (args: {
   docPrefix?: string
@@ -11,35 +14,82 @@ type UploadHandler = (args: {
 
 export type UploadHandlersContext = {
   getUploadHandler: (args: { collectionSlug: UploadCollectionSlug }) => null | UploadHandler
-  setUploadHandler: (args: {
-    collectionSlug: UploadCollectionSlug
-    handler: UploadHandler
-  }) => unknown
 }
 
 const Context = React.createContext<null | UploadHandlersContext>(null)
 
 export const UploadHandlersProvider = ({ children }) => {
-  const [uploadHandlers, setUploadHandlers] = useState<Map<UploadCollectionSlug, UploadHandler>>(
-    () => new Map(),
-  )
-
+  const { config, getEntityConfig } = useConfig()
+  const uploadInstructionsURL = formatAdminURL({
+    apiRoute: config.routes.api,
+    path: '/upload-instructions',
+    serverURL: config.serverURL,
+  })
   const getUploadHandler: UploadHandlersContext['getUploadHandler'] = ({ collectionSlug }) => {
-    return uploadHandlers.get(collectionSlug)
+    if (!getEntityConfig({ collectionSlug })?.upload?.uploadInstructions) {
+      return null
+    }
+
+    return async ({ docPrefix, file, updateFilename }) => {
+      const response = await fetch(uploadInstructionsURL, {
+        body: JSON.stringify({
+          collectionSlug,
+          docPrefix,
+          filename: file.name,
+          filesize: file.size,
+          mimeType: file.type,
+        }),
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        method: 'POST',
+      })
+
+      if (!response.ok) {
+        const { errors } = (await response.json()) as { errors: { message: string }[] }
+        throw new Error(errors.map(({ message }) => message).join(', '))
+      }
+
+      const instructions = (await response.json()) as UploadInstructions
+
+      if (instructions.filename && instructions.filename !== file.name) {
+        updateFilename(instructions.filename)
+      }
+
+      if (instructions.type === 'http') {
+        const { url, ...request } = instructions.request
+        const upload = await fetch(url, { body: file, ...request })
+
+        if (!upload.ok) {
+          throw new Error(`Upload failed with status ${upload.status}`)
+        }
+
+        return instructions.clientUploadContext
+      }
+
+      const result = await new Promise<unknown>((resolve, reject) => {
+        const event = new CustomEvent(`payload:upload:${instructions.name}`, {
+          cancelable: true,
+          detail: {
+            collectionSlug,
+            data: instructions.data,
+            docPrefix,
+            file,
+            reject,
+            resolve,
+            updateFilename,
+          },
+        })
+
+        if (window.dispatchEvent(event)) {
+          reject(new Error(`Unsupported upload instruction: ${instructions.name}`))
+        }
+      })
+
+      return result ?? instructions.clientUploadContext
+    }
   }
 
-  const setUploadHandler: UploadHandlersContext['setUploadHandler'] = ({
-    collectionSlug,
-    handler,
-  }) => {
-    setUploadHandlers((uploadHandlers) => {
-      const clone = new Map(uploadHandlers)
-      clone.set(collectionSlug, handler)
-      return clone
-    })
-  }
-
-  return <Context value={{ getUploadHandler, setUploadHandler }}>{children}</Context>
+  return <Context value={{ getUploadHandler }}>{children}</Context>
 }
 
 export const useUploadHandlers = (): UploadHandlersContext => {

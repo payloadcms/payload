@@ -6,6 +6,8 @@ import type {
   PayloadRequest,
   TypeWithID,
   UploadCollectionSlug,
+  UploadInstructionsAccess,
+  UploadInstructionsCapability,
 } from 'payload'
 
 export interface File {
@@ -17,14 +19,9 @@ export interface File {
   tempFilePath?: string
 }
 
-export type ClientUploadsAccess = (args: {
-  collectionSlug: UploadCollectionSlug
-  req: PayloadRequest
-}) => boolean | Promise<boolean>
-
 export type ClientUploadsConfig =
   | {
-      access?: ClientUploadsAccess
+      access?: UploadInstructionsAccess
     }
   | boolean
 
@@ -68,7 +65,6 @@ export type StaticHandler = (
 ) => Promise<Response> | Response
 
 export interface GeneratedAdapter {
-  clientUploads?: ClientUploadsConfig
   /**
    * Additional fields to be injected into the base collection and image sizes
    */
@@ -82,6 +78,8 @@ export interface GeneratedAdapter {
   name: string
   onInit?: () => void
   staticHandler: StaticHandler
+  /** Generates instructions for direct uploads when supported. */
+  uploadInstructions?: UploadInstructionsCapability
 }
 
 export type Adapter = (args: { collection: CollectionConfig; prefix?: string }) => GeneratedAdapter

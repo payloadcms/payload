@@ -1,9 +1,13 @@
 import type {
-  ClientUploadsAccess,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
+import type {
+  Config,
+  StorageAdapter,
+  UploadCollectionSlug,
+  UploadInstructionsAccess,
+} from 'payload'
 import type { createUploadthing } from 'uploadthing/server'
 import type { UTApiOptions } from 'uploadthing/types'
 
@@ -29,11 +33,11 @@ export type UploadthingStorageOptions = {
   alwaysInsertFields?: boolean
 
   /**
-   * Do uploads directly on the client, to bypass limits on Vercel.
+   * Use upload instructions to avoid including file bytes in document requests.
    */
   clientUploads?:
     | {
-        access?: ClientUploadsAccess
+        access?: UploadInstructionsAccess
         routerInputConfig?: FileRouterInputConfig
       }
     | boolean

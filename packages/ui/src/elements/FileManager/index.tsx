@@ -53,7 +53,7 @@ export type FileManagerProps = {
    */
   readonly resetUploadEdits?: () => void
   readonly updateUploadEdits?: (args: UploadEdits) => void
-  readonly uploadConfig: SanitizedCollectionConfig['upload']
+  readonly uploadConfig: Omit<SanitizedCollectionConfig['upload'], 'uploadInstructions'>
   readonly UploadControls?: React.ReactNode
   readonly uploadEdits?: UploadEdits
   readonly UploadFilePreview?: React.ReactNode

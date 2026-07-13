@@ -3,14 +3,11 @@ import {
   Forbidden,
   type PayloadHandler,
   type PayloadRequest,
-  type UploadCollectionSlug,
+  type UploadInstructionsAccess,
 } from 'payload'
 
 type Args = {
-  access?: (args: {
-    collectionSlug: UploadCollectionSlug
-    req: PayloadRequest
-  }) => boolean | Promise<boolean>
+  access?: UploadInstructionsAccess
   acl: 'private' | 'public-read'
   routerInputConfig?: FileRouterInputConfig
   token?: string

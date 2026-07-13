@@ -6,6 +6,7 @@ import type {
 } from '@payloadcms/plugin-cloud-storage/types'
 
 import { deleteFile } from './deleteFile.js'
+import { generateUploadInstructions } from './generateSignedURL.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
 import { uploadFile } from './uploadFile.js'
@@ -31,7 +32,6 @@ export function createAzureAdapter({
 }: CreateAzureAdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'azure',
-    clientUploads,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -42,6 +42,18 @@ export function createAzureAdapter({
         prefix: urlPrefix,
         useCompositePrefixes,
       }),
+
+    uploadInstructions: clientUploads
+      ? {
+          access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+          generate: generateUploadInstructions({
+            collectionPrefix: prefix,
+            containerName,
+            getStorageClient,
+            useCompositePrefixes,
+          }),
+        }
+      : undefined,
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
       deleteFile({

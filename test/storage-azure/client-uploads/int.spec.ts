@@ -1,5 +1,5 @@
 import type { ContainerClient } from '@azure/storage-blob'
-import type { Payload } from 'payload'
+import type { Payload, UploadInstructions } from 'payload'
 
 import { BlobServiceClient } from '@azure/storage-blob'
 import { readFile } from 'node:fs/promises'
@@ -66,16 +66,28 @@ describe('@payloadcms/storage-azure clientUploads', () => {
 
     expect(seedDoc.filename).toBe(dupFilename)
 
-    const signedURLRes = await restClient.POST('/storage-azure-generate-signed-url', {
+    const signedURLRes = await restClient.POST('/upload-instructions', {
       body: JSON.stringify({
         collectionSlug: mediaSlug,
         filename: dupFilename,
+        filesize: fileBuffer.length,
         mimeType: 'image/png',
       }),
     })
 
     expect(signedURLRes.status).toBe(200)
-    const { url: signedURL }: { url: string } = await signedURLRes.json()
+    const instructions = (await signedURLRes.json()) as UploadInstructions
+    expect(instructions.type).toBe('http')
+    expect(instructions.filename).toBe('duplicate-target-1.png')
+    expect(instructions.clientUploadContext).toEqual({ prefix: '' })
+
+    if (instructions.type !== 'http') {
+      throw new Error('Expected HTTP upload instructions')
+    }
+
+    expect(instructions.request.method).toBe('PUT')
+    expect(instructions.request.headers).toHaveProperty('x-ms-blob-type', 'BlockBlob')
+    const signedURL = instructions.request.url
 
     const blobKey = decodeURIComponent(
       new URL(signedURL).pathname.replace(`/devstoreaccount1/${TEST_CONTAINER}/`, ''),
@@ -83,7 +95,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
 
     expect(blobKey).toBe('duplicate-target-1.png')
 
-    await payload.delete({ collection: mediaSlug, id: seedDoc.id })
+    await payload.delete({ id: seedDoc.id, collection: mediaSlug })
   })
 
   it('preserves a user-defined prefix.defaultValue across the plugin', async () => {

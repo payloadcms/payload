@@ -2,7 +2,7 @@
 
 import type { UploadCollectionSlug } from 'payload'
 
-import { useConfig, useEffectEvent, useUploadHandlers } from '@payloadcms/ui'
+import { useConfig, useEffectEvent } from '@payloadcms/ui'
 import { Fragment, type ReactNode, useEffect } from 'react'
 
 type ClientUploadHandlerProps<T extends Record<string, unknown>> = {
@@ -15,11 +15,13 @@ type ClientUploadHandlerProps<T extends Record<string, unknown>> = {
 }
 
 export const createClientUploadHandler = <T extends Record<string, unknown>>({
+  name,
   handler,
 }: {
   handler: (args: {
     apiRoute: string
     collectionSlug: UploadCollectionSlug
+    data?: unknown
     docPrefix?: string
     extra: T
     file: File
@@ -28,6 +30,7 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
     serverURL: string
     updateFilename: (value: string) => void
   }) => Promise<unknown>
+  name: string
 }) => {
   return function ClientUploadHandler({
     children,
@@ -37,7 +40,6 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
     prefix,
     serverHandlerPath,
   }: ClientUploadHandlerProps<T>) {
-    const { setUploadHandler } = useUploadHandlers()
     const {
       config: {
         routes: { api: apiRoute },
@@ -46,28 +48,48 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
     } = useConfig()
 
     const initializeHandler = useEffectEvent(() => {
-      if (enabled) {
-        setUploadHandler({
-          collectionSlug,
-          handler: ({ docPrefix, file, updateFilename }) => {
-            return handler({
-              apiRoute,
-              collectionSlug,
-              docPrefix,
-              extra,
-              file,
-              prefix,
-              serverHandlerPath,
-              serverURL,
-              updateFilename,
-            })
-          },
-        })
+      if (!enabled) {
+        return
       }
+
+      const listener = (event: Event) => {
+        const customEvent = event as CustomEvent<{
+          collectionSlug: UploadCollectionSlug
+          data?: unknown
+          docPrefix?: string
+          file: File
+          reject: (reason?: unknown) => void
+          resolve: (value: unknown) => void
+          updateFilename: (value: string) => void
+        }>
+
+        if (customEvent.detail.collectionSlug !== collectionSlug) {
+          return
+        }
+
+        customEvent.preventDefault()
+        void handler({
+          apiRoute,
+          collectionSlug,
+          data: customEvent.detail.data,
+          docPrefix: customEvent.detail.docPrefix,
+          extra,
+          file: customEvent.detail.file,
+          prefix,
+          serverHandlerPath,
+          serverURL,
+          updateFilename: customEvent.detail.updateFilename,
+        }).then(customEvent.detail.resolve, customEvent.detail.reject)
+      }
+
+      const eventName = `payload:upload:${name}`
+      const eventTarget = globalThis as unknown as EventTarget
+      eventTarget.addEventListener(eventName, listener)
+      return () => eventTarget.removeEventListener(eventName, listener)
     })
 
     useEffect(() => {
-      initializeHandler()
+      return initializeHandler()
     }, [])
 
     return <Fragment>{children}</Fragment>
