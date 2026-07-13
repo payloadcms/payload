@@ -3,6 +3,7 @@ import type { JSX, KeyboardEventHandler } from 'react'
 import type { GroupBase, MenuListProps, MenuProps, StylesConfig } from 'react-select'
 
 import { arrayMove } from '@dnd-kit/sortable'
+import { useWindowInfo } from '@faceless-ui/window-info'
 import { getTranslation } from '@payloadcms/translations'
 import React, {
   useCallback,
@@ -59,10 +60,13 @@ const MENU_VIEWPORT_GAP = 16 // space between the control and the edge of the wi
 
 const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   const { i18n, t } = useTranslation()
+  const {
+    breakpoints: { s: smallBreak },
+  } = useWindowInfo()
   const [inputValue, setInputValue] = useState('') // for creatable select
   const uuid = useId()
   const [hasMounted, setHasMounted] = useState(false)
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [internalIsMenuOpen, setIsMenuOpen] = useState(false)
   const [maxMenuHeight, setMaxMenuHeight] = useState(DEFAULT_MAX_MENU_HEIGHT)
   const [menuPlacement, setMenuPlacement] = useState<'auto' | 'bottom' | 'top'>('auto')
   const containerRef = useRef<HTMLDivElement>(null)
@@ -79,6 +83,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     isCreatable,
     isLoading,
     isSearchable = true,
+    menuIsOpen: menuIsOpenProp,
     menuPortalTarget: menuPortalTargetProp,
     menuPosition: menuPositionProp,
     noOptionsMessage = () => t('general:noOptions'),
@@ -93,6 +98,8 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     value,
   } = props
 
+  const isMobile = Boolean(smallBreak)
+
   const menuPortalTarget =
     menuPortalTargetProp === undefined
       ? typeof document !== 'undefined'
@@ -101,6 +108,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       : menuPortalTargetProp
 
   const menuPosition = menuPositionProp ?? (menuPortalTarget ? 'fixed' : undefined)
+  const isMenuOpen = menuIsOpenProp ?? internalIsMenuOpen
   const captureMenuScroll = getCaptureMenuScroll({
     captureMenuScroll: captureMenuScrollProp,
     menuPortalTarget,
@@ -127,6 +135,29 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     setMaxMenuHeight(Math.max(Math.min(Math.floor(availableHeight), DEFAULT_MAX_MENU_HEIGHT), 1))
   }, [isMenuOpen])
 
+  const handleMenuClose = useCallback(() => {
+    setIsMenuOpen(false)
+    onMenuClose?.()
+  }, [onMenuClose])
+
+  const handleWindowScroll = useCallback(
+    (event: Event) => {
+      const scrollTarget = event.target
+      const isScrollWithinMenu =
+        scrollTarget instanceof Element && Boolean(scrollTarget.closest('.rs__menu'))
+
+      if (isMobile && menuPortalTarget && !isScrollWithinMenu) {
+        handleMenuClose()
+        return
+      }
+
+      if (!isMobile) {
+        updateMenuViewportSettings()
+      }
+    },
+    [handleMenuClose, isMobile, menuPortalTarget, updateMenuViewportSettings],
+  )
+
   useEffect(() => {
     setHasMounted(true)
   }, [])
@@ -141,13 +172,13 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     updateMenuViewportSettings()
 
     window.addEventListener('resize', updateMenuViewportSettings)
-    window.addEventListener('scroll', updateMenuViewportSettings, true)
+    window.addEventListener('scroll', handleWindowScroll, { capture: true, passive: true })
 
     return () => {
       window.removeEventListener('resize', updateMenuViewportSettings)
-      window.removeEventListener('scroll', updateMenuViewportSettings, true)
+      window.removeEventListener('scroll', handleWindowScroll, { capture: true })
     }
-  }, [isMenuOpen, updateMenuViewportSettings])
+  }, [handleWindowScroll, isMenuOpen, updateMenuViewportSettings])
 
   // Debounce the loading state so that fast option fetches (e.g. relationship
   // fields that resolve almost instantly) don't cause the clear indicator to
@@ -167,11 +198,6 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     setIsMenuOpen(true)
     requestAnimationFrame(updateMenuViewportSettings)
     onMenuOpen?.()
-  }
-
-  const handleMenuClose = () => {
-    setIsMenuOpen(false)
-    onMenuClose?.()
   }
 
   const menuClassName = useCallback(
@@ -228,6 +254,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     isSearchable,
     loadingMessage: () => t('general:loading') + '...',
     maxMenuHeight,
+    menuIsOpen: isMenuOpen,
     menuPlacement,
     menuPortalTarget,
     menuPosition,
