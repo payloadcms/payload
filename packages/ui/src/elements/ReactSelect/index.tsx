@@ -108,7 +108,8 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
         : null
       : menuPortalTargetProp
 
-  const menuPosition = menuPositionProp ?? (menuPortalTarget ? 'fixed' : undefined)
+  const menuPosition =
+    menuPositionProp ?? (menuPortalTarget ? (isMobile ? 'absolute' : 'fixed') : undefined)
   const isMenuOpen = menuIsOpenProp ?? internalIsMenuOpen
   const captureMenuScroll = getCaptureMenuScroll({
     captureMenuScroll: captureMenuScrollProp,
