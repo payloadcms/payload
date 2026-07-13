@@ -452,6 +452,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
                       <span className={`${baseClass}__or-text`}>{t('general:or')}</span>
                       <Button
                         buttonStyle="secondary"
+                        className={`${baseClass}__pasteFromClipboard`}
                         icon="clipboard"
                         onClick={handlePasteFromClipboard}
                         size="medium"

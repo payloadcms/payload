@@ -779,6 +779,7 @@ export function UploadInput(props: UploadInputProps) {
                       </span>
                       <Button
                         buttonStyle="secondary"
+                        className={`${baseClass}__pasteFromClipboard`}
                         icon="clipboard"
                         onClick={handlePasteFromClipboard}
                         size="medium"
