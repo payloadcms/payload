@@ -66,7 +66,7 @@
     "pack:plugin": "pnpm build && pnpm pack"
   },
   "dependencies": {
-    "@modelcontextprotocol/server": "2.0.0-beta.2",
+    "@modelcontextprotocol/server": "2.0.0-beta.3",
     "tsx": "4.22.4",
     "zod": "^4.2.0"
   },

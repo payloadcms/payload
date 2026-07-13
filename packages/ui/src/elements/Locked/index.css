@@ -24,10 +24,13 @@
     &:focus-visible {
       outline-color: var(--color-border-selected);
     }
+  }
 
-    .locked__tooltip {
-      left: 0;
-      transform: translate3d(0, calc(var(--caret-height) + var(--caret-offset) - 1px), 0);
-    }
+  /* Fixed-position anchor mirroring the icon's rect, so the portaled tooltip (escaping
+   * the table's `overflow` clipping) can position against it. */
+  .locked__tooltip-anchor {
+    position: fixed;
+    z-index: var(--z-popup);
+    pointer-events: none;
   }
 }

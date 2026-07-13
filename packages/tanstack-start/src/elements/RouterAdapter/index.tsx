@@ -63,9 +63,11 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
 
   const adaptedParams = useMemo(() => {
     const adapted: Record<string, string | string[]> = { ...params }
+
     if ('_splat' in params && typeof params._splat === 'string') {
       adapted.segments = params._splat.split('/').filter(Boolean)
     }
+
     return adapted
   }, [params])
 
@@ -83,28 +85,35 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
       pathname: window.location.pathname,
       search: window.location.search,
     })
+
     const queryIndex = relativePath.indexOf('?')
+
     if (queryIndex === -1) {
       return { to: relativePath }
     }
+
     const searchObject = qs.parse(relativePath.slice(queryIndex + 1), {
       depth: 10,
       ignoreQueryPrefix: true,
     })
+
     // Function form replaces the search entirely (no merge with current search).
     return { search: () => searchObject, to: relativePath.slice(0, queryIndex) }
   }, [])
 
   const back = useCallback(() => router.history.back(), [router])
+
   const push = useCallback(
     (path: string, options?: { scroll?: boolean }) => {
       void router.navigate({ ...toNavOptions(path), resetScroll: options?.scroll })
     },
     [router, toNavOptions],
   )
+
   const refresh = useCallback(() => {
     void router.invalidate()
   }, [router])
+
   const replace = useCallback(
     (path: string, options?: { scroll?: boolean }) => {
       void router.navigate({ ...toNavOptions(path), replace: true, resetScroll: options?.scroll })
@@ -112,9 +121,26 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
     [router, toNavOptions],
   )
 
+  // Mirror Next.js' router behavior to allow syncing client state to the URL without triggering a second server load.
+  // TanStack's browser history monkeypatches `window.history.replaceState` and notifies `router.load` on every call.
+  // Use `_ignoreSubscribers` to suppresses that notification — the same flag TanStack uses internally when flushing history.
+  const replaceState = useCallback(
+    (url: string) => {
+      const { history } = router
+      history._ignoreSubscribers = true
+
+      try {
+        window.history.replaceState(null, '', url)
+      } finally {
+        history._ignoreSubscribers = false
+      }
+    },
+    [router],
+  )
+
   const adaptedRouter = useMemo(
-    () => ({ back, push, refresh, replace }),
-    [back, push, refresh, replace],
+    () => ({ back, push, refresh, replace, replaceState }),
+    [back, push, refresh, replace, replaceState],
   )
 
   // `location.searchStr` is the serialized query string; `location.search` is
