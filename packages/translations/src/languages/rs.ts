@@ -587,6 +587,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     linkToFile: 'Веза до фајла',
     moreInfo: 'Више информација',
     noFile: 'Nema fajla',
+    pasteFromClipboard: 'Налепи из клипборда',
     pasteURL: 'Налепи URL',
     previewSizes: 'Величине прегледа',
     renameFile: 'Преименујте фајл',

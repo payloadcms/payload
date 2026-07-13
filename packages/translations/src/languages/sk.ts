@@ -585,6 +585,7 @@ export const skTranslations: DefaultTranslationsObject = {
     linkToFile: 'Odkaz na súbor',
     moreInfo: 'Viac informácií',
     noFile: 'Žiadny súbor',
+    pasteFromClipboard: 'Vložiť zo schránky',
     pasteURL: 'Vložiť URL',
     previewSizes: 'Náhľady veľkostí',
     renameFile: 'Premenovať súbor',

@@ -601,6 +601,7 @@ export const frTranslations: DefaultTranslationsObject = {
     linkToFile: 'Lien vers le fichier',
     moreInfo: 'Plus d’infos',
     noFile: 'Aucun fichier',
+    pasteFromClipboard: 'Coller depuis le presse-papiers',
     pasteURL: "Coller l'URL",
     previewSizes: 'Tailles d’aperçu',
     renameFile: 'Renommer le fichier',

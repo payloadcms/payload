@@ -592,6 +592,7 @@ export const caTranslations: DefaultTranslationsObject = {
     linkToFile: "Enllaç a l'arxiu",
     moreInfo: 'Més informació',
     noFile: 'No hi ha cap fitxer',
+    pasteFromClipboard: 'Enganxa des del porta-retalls',
     pasteURL: "Enganxa l'URL",
     previewSizes: 'Mides de la vista prèvia',
     renameFile: 'Canviar el nom del fitxer',

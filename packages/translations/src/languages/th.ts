@@ -578,6 +578,7 @@ export const thTranslations: DefaultTranslationsObject = {
     linkToFile: 'ลิงก์ไปยังไฟล์',
     moreInfo: 'แสดงข้อมูล',
     noFile: 'ไม่มีไฟล์',
+    pasteFromClipboard: 'วางจากคลิปบอร์ด',
     pasteURL: 'วาง URL',
     previewSizes: 'ขนาดตัวอย่าง',
     renameFile: 'เปลี่ยนชื่อไฟล์',

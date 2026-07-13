@@ -593,6 +593,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     linkToFile: 'Ссылка на файл',
     moreInfo: 'Больше информации',
     noFile: 'Нет файла',
+    pasteFromClipboard: 'Вставить из буфера обмена',
     pasteURL: 'Вставить URL',
     previewSizes: 'Предварительный просмотр размеров',
     renameFile: 'Переименовать файл',

@@ -592,6 +592,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     linkToFile: 'Հղում դեպի ֆայլ',
     moreInfo: 'Ավելի շատ տեղեկություն',
     noFile: 'Ֆայլ չկա',
+    pasteFromClipboard: 'Տեղադրել սեղմատախտակից',
     pasteURL: 'Տեղադրել URL',
     previewSizes: 'Նախադիտման չափեր',
     renameFile: 'Վերանվանել ֆայլը',

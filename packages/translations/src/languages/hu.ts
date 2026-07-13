@@ -594,6 +594,7 @@ export const huTranslations: DefaultTranslationsObject = {
     linkToFile: 'Hivatkozás a fájlra',
     moreInfo: 'További információ',
     noFile: 'Nincs fájl',
+    pasteFromClipboard: 'Beillesztés a vágólapról',
     pasteURL: 'URL beillesztése',
     previewSizes: 'Előnézeti méretek',
     renameFile: 'Fájl átnevezése',

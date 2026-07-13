@@ -590,6 +590,7 @@ export const taTranslations: DefaultTranslationsObject = {
     linkToFile: 'கோப்பிற்கான இணைப்பு',
     moreInfo: 'மேலும் தகவல்',
     noFile: 'கோப்பு இல்லை',
+    pasteFromClipboard: 'பிடிப்புப் பலகையிலிருந்து ஒட்டுக',
     pasteURL: 'URL ஒட்டுக',
     previewSizes: 'முன்னோட்ட அளவுகள்',
     renameFile: 'கோப்பை மறுபெயரிடு',

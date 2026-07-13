@@ -596,6 +596,7 @@ export const myTranslations: DefaultTranslationsObject = {
     linkToFile: 'ဖိုင်သို့ ချိတ်ဆက်မှု',
     moreInfo: 'အချက်အလက်',
     noFile: 'ဖိုင် မရှိပါ',
+    pasteFromClipboard: 'ကလစ်ဘုတ်မှ ကူးထည့်ပါ',
     pasteURL: 'URL ကို ကူးထည့်ပါ',
     previewSizes: 'အစမ်းကြည့်အရွယ်အစားများ',
     renameFile: 'ဖိုင်အမည်ပြောင်းရန်',

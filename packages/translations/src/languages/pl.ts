@@ -587,6 +587,7 @@ export const plTranslations: DefaultTranslationsObject = {
     linkToFile: 'Link do pliku',
     moreInfo: 'Więcej informacji',
     noFile: 'Brak pliku',
+    pasteFromClipboard: 'Wklej ze schowka',
     pasteURL: 'Wklej URL',
     previewSizes: 'Rozmiary podglądu',
     renameFile: 'Zmień nazwę pliku',

@@ -594,6 +594,7 @@ export const azTranslations: DefaultTranslationsObject = {
     linkToFile: 'Fayla keçid',
     moreInfo: 'Daha çox məlumat',
     noFile: 'Heç bir fayl',
+    pasteFromClipboard: 'Mübadilə buferindən yapışdır',
     pasteURL: 'URL yapışdır',
     previewSizes: 'Öncədən baxış ölçüləri',
     renameFile: 'Fayl adını dəyişdirin',

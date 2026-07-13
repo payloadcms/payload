@@ -583,6 +583,7 @@ export const etTranslations: DefaultTranslationsObject = {
     linkToFile: 'Lingid failile',
     moreInfo: 'Rohkem infot',
     noFile: 'Pole faili',
+    pasteFromClipboard: 'Kleebi lõikelaualt',
     pasteURL: 'Kleebi URL',
     previewSizes: 'Eelvaate suurused',
     renameFile: 'Faili ümbernimetamine',

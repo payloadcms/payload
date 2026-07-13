@@ -594,6 +594,7 @@ export const itTranslations: DefaultTranslationsObject = {
     linkToFile: 'Collega al file',
     moreInfo: 'Più info',
     noFile: 'Nessun file',
+    pasteFromClipboard: 'Incolla dagli appunti',
     pasteURL: 'Incolla URL',
     previewSizes: 'Anteprime Dimensioni',
     renameFile: 'Rinomina file',

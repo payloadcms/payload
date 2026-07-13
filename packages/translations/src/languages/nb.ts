@@ -591,6 +591,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     linkToFile: 'Lenke til fil',
     moreInfo: 'Mer info',
     noFile: 'Ingen fil',
+    pasteFromClipboard: 'Lim inn fra utklippstavle',
     pasteURL: 'Lim inn URL',
     previewSizes: 'Forhåndsvisningsstørrelser',
     renameFile: 'Gi nytt navn til fil',

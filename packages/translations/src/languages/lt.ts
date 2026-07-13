@@ -590,6 +590,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     linkToFile: 'Nuoroda į failą',
     moreInfo: 'Daugiau informacijos',
     noFile: 'Nėra failo',
+    pasteFromClipboard: 'Įklijuokite iš iškarpinės',
     pasteURL: 'Įklijuokite URL',
     previewSizes: 'Peržiūros dydžiai',
     renameFile: 'Pervadinti failą',

@@ -596,6 +596,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     linkToFile: 'Koppeling naar bestand',
     moreInfo: 'Meer info',
     noFile: 'Geen bestand',
+    pasteFromClipboard: 'Plakken vanuit klembord',
     pasteURL: 'URL plakken',
     previewSizes: 'Voorbeeldgroottes',
     renameFile: 'Bestand hernoemen',

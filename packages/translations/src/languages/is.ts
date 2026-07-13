@@ -586,6 +586,7 @@ export const isTranslations: DefaultTranslationsObject = {
     linkToFile: 'Tengill á skrá',
     moreInfo: 'Fleiri upplýsingar',
     noFile: 'Engin skrá',
+    pasteFromClipboard: 'Líma af klippispjaldi',
     pasteURL: 'Líma vefslóð',
     previewSizes: 'Forskoðunarstærðir',
     renameFile: 'Endurnefna skrá',

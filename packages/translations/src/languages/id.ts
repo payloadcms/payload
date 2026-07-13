@@ -592,6 +592,7 @@ export const idTranslations: DefaultTranslationsObject = {
     linkToFile: 'Tautan ke berkas',
     moreInfo: 'Info lebih lanjut',
     noFile: 'Tidak ada file',
+    pasteFromClipboard: 'Tempel dari papan klip',
     pasteURL: 'Tempel URL',
     previewSizes: 'Ukuran Pratinjau',
     renameFile: 'Ganti nama file',

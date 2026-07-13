@@ -576,6 +576,7 @@ export const arTranslations: DefaultTranslationsObject = {
     linkToFile: 'رابط إلى الملف',
     moreInfo: 'معلومات أكثر',
     noFile: 'لا يوجد ملف',
+    pasteFromClipboard: 'لصق من الحافظة',
     pasteURL: 'لصق الرابط',
     previewSizes: 'أحجام المعاينة',
     renameFile: 'إعادة تسمية الملف',

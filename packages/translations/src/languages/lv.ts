@@ -587,6 +587,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     linkToFile: 'Saite uz failu',
     moreInfo: 'Vairāk informācijas',
     noFile: 'Nav faila',
+    pasteFromClipboard: 'Ielīmēt no starpliktuves',
     pasteURL: 'Ielīmēt URL',
     previewSizes: 'Priekšskatījuma izmēri',
     renameFile: 'Pārsaukt failu',
