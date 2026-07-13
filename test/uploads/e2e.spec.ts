@@ -86,7 +86,7 @@ const adminThumbnailFunctionSrcPattern = new RegExp(
     '$',
 )
 
-const { afterAll, beforeAll, beforeEach, describe } = test
+const { afterAll, afterEach, beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
@@ -533,6 +533,59 @@ describe('Uploads', () => {
       hasText: 'Paste URL',
     })
     await expect(pasteURLButton).toBeHidden()
+  })
+
+  describe('paste from clipboard', () => {
+    afterEach(async () => {
+      // Restore clipboard permissions in case a test revoked them, since later tests in this
+      // file share the same browser context and assume clipboard-read/write is granted.
+      await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    })
+
+    test('should paste an image file from the clipboard', async () => {
+      await gotoAndWaitForForm(page, mediaURL.create)
+
+      const imageBytes = Array.from(readFileSync(path.resolve(dirname, './image.png')))
+
+      await page.evaluate(async (bytes) => {
+        const blob = new Blob([new Uint8Array(bytes)], { type: 'image/png' })
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })])
+      }, imageBytes)
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('#field-filemanager-filename')).toHaveValue('clipboard-1.png')
+
+      await saveDocAndAssert(page)
+    })
+
+    test('should show an error when the clipboard has no file', async () => {
+      await gotoAndWaitForForm(page, mediaURL.create)
+
+      await page.evaluate(async () => {
+        await navigator.clipboard.writeText('no files here')
+      })
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'No file found in clipboard.',
+      )
+      await closeAllToasts(page)
+    })
+
+    test('should show an error when clipboard access is blocked', async () => {
+      await gotoAndWaitForForm(page, mediaURL.create)
+
+      await page.context().clearPermissions()
+
+      await page.locator('.file-manager__pasteFromClipboard').click()
+
+      await expect(page.locator('.payload-toast-container .toast-error')).toContainText(
+        'Unable to read from clipboard.',
+      )
+      await closeAllToasts(page)
+    })
   })
 
   test('should properly create IOS file upload', async () => {
