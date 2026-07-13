@@ -70,6 +70,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   const [maxMenuHeight, setMaxMenuHeight] = useState(DEFAULT_MAX_MENU_HEIGHT)
   const [menuPlacement, setMenuPlacement] = useState<'auto' | 'bottom' | 'top'>('auto')
   const containerRef = useRef<HTMLDivElement>(null)
+  const hasMobileOutsideScrollIntentRef = useRef(false)
 
   const {
     captureMenuScroll: captureMenuScrollProp,
@@ -146,7 +147,12 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       const isScrollWithinMenu =
         scrollTarget instanceof Element && Boolean(scrollTarget.closest('.rs__menu'))
 
-      if (isMobile && menuPortalTarget && !isScrollWithinMenu) {
+      if (
+        isMobile &&
+        menuPortalTarget &&
+        !isScrollWithinMenu &&
+        hasMobileOutsideScrollIntentRef.current
+      ) {
         handleMenuClose()
         return
       }
@@ -157,6 +163,12 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
     },
     [handleMenuClose, isMobile, menuPortalTarget, updateMenuViewportSettings],
   )
+
+  const handleWindowTouchMove = useCallback((event: TouchEvent) => {
+    const touchTarget = event.target
+    hasMobileOutsideScrollIntentRef.current =
+      touchTarget instanceof Element && !touchTarget.closest('.rs__menu')
+  }, [])
 
   useEffect(() => {
     setHasMounted(true)
@@ -173,12 +185,14 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
 
     window.addEventListener('resize', updateMenuViewportSettings)
     window.addEventListener('scroll', handleWindowScroll, { capture: true, passive: true })
+    window.addEventListener('touchmove', handleWindowTouchMove, { capture: true, passive: true })
 
     return () => {
       window.removeEventListener('resize', updateMenuViewportSettings)
       window.removeEventListener('scroll', handleWindowScroll, { capture: true })
+      window.removeEventListener('touchmove', handleWindowTouchMove, { capture: true })
     }
-  }, [handleWindowScroll, isMenuOpen, updateMenuViewportSettings])
+  }, [handleWindowScroll, handleWindowTouchMove, isMenuOpen, updateMenuViewportSettings])
 
   // Debounce the loading state so that fast option fetches (e.g. relationship
   // fields that resolve almost instantly) don't cause the clear indicator to
@@ -195,6 +209,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
   )
 
   const handleMenuOpen = () => {
+    hasMobileOutsideScrollIntentRef.current = false
     setIsMenuOpen(true)
     requestAnimationFrame(updateMenuViewportSettings)
     onMenuOpen?.()
