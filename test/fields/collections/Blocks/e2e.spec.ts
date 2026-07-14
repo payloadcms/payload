@@ -2,6 +2,7 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect } from '@playwright/test'
 import { copyPasteField } from '__helpers/e2e/copyPasteField.js'
+import { openArrayRowActions } from '__helpers/e2e/fields/array/index.js'
 import {
   addBlock,
   addBlockBelow,
@@ -803,6 +804,36 @@ describe('Block fields', () => {
 
       // There should ONLY be blockFour and blockFive available
 
+      await expect(labels).toHaveCount(2)
+      await expect(labels.nth(0)).toHaveText('Block Four')
+      await expect(labels.nth(1)).toHaveText('Block Five')
+    })
+
+    test('ensure static filterOptions are respected when adding a block below an existing row', async () => {
+      await page.goto(url.create)
+
+      await addBlock({
+        page,
+        fieldName: 'blocksWithFilterOptions',
+        blockToSelect: 'Block Four',
+      })
+
+      // Open the row actions menu for the row added above and choose "Add Below" to inspect
+      // the choices offered in that drawer, which should be filtered the same way as the
+      // main "Add Content" drawer.
+      const { popupContentLocator } = await openArrayRowActions(page, {
+        fieldName: 'blocksWithFilterOptions',
+        rowIndex: 0,
+      })
+
+      await popupContentLocator.locator('.array-actions__action.array-actions__add').click()
+
+      const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
+      await expect(blocksDrawer).toBeVisible()
+
+      const labels = blocksDrawer.locator('.thumbnail-card__label')
+
+      // There should ONLY be blockFour and blockFive available, same as the main "Add Content" drawer
       await expect(labels).toHaveCount(2)
       await expect(labels.nth(0)).toHaveText('Block Four')
       await expect(labels.nth(1)).toHaveText('Block Five')
