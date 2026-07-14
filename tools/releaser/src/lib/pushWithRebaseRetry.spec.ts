@@ -57,4 +57,36 @@ describe('pushWithRebaseRetry', () => {
     expect(run).not.toHaveBeenCalled()
     expect(log).toHaveBeenCalled()
   })
+
+  it('should rethrow a non-fast-forward-unrelated error immediately without rebasing', async () => {
+    const run = vi.fn(() => {
+      throw new Error('fatal: Authentication failed')
+    })
+
+    let thrownMessage = ''
+
+    await pushWithRebaseRetry({ tag: 'v4.0.0-canary.10', run }).catch((err: unknown) => {
+      thrownMessage = err instanceof Error ? err.message : String(err)
+    })
+
+    expect(thrownMessage).toMatch(/Authentication failed/)
+    expect(thrownMessage).not.toMatch(/after \d+ attempts/)
+
+    const pushes = run.mock.calls.filter((call) => (call[0] as string).startsWith('git push'))
+    const rebases = run.mock.calls.filter((call) =>
+      (call[0] as string).startsWith('git pull --rebase'),
+    )
+    expect(pushes).toHaveLength(1)
+    expect(rebases).toHaveLength(0)
+  })
+
+  it('should throw when maxRetries is less than 1', async () => {
+    const run = vi.fn()
+
+    await expect(
+      pushWithRebaseRetry({ tag: 'v4.0.0-canary.10', maxRetries: 0, run }),
+    ).rejects.toThrow(/at least 1/)
+
+    expect(run).not.toHaveBeenCalled()
+  })
 })

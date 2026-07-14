@@ -1,6 +1,6 @@
 const isNonFastForward = (err: unknown): boolean => {
   const message = err instanceof Error ? err.message : String(err)
-  return /non-fast-forward|\[rejected\]|fetch first/i.test(message)
+  return /non-fast-forward|fetch first/i.test(message)
 }
 
 /**
@@ -21,10 +21,8 @@ export const pushWithRebaseRetry = async ({
   maxRetries?: number
   run: (cmd: string) => void
   tag: string
+  // eslint-disable-next-line @typescript-eslint/require-await -- async only to satisfy the Promise<void> contract; run() is synchronous by design
 }): Promise<void> => {
-  // Explicit await needed to satisfy require-await lint rule (sync logic, async interface)
-  await Promise.resolve()
-
   const pushCmd = `git push --atomic origin HEAD:main refs/tags/${tag}`
 
   if (dryRun) {
@@ -32,18 +30,21 @@ export const pushWithRebaseRetry = async ({
     return
   }
 
+  if (maxRetries < 1) {
+    throw new Error(`maxRetries must be at least 1, got ${maxRetries}`)
+  }
+
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       run(pushCmd)
       return
     } catch (err: unknown) {
-      if (!isNonFastForward(err) || attempt === maxRetries) {
-        if (attempt === maxRetries) {
-          throw new Error(`Failed to push ${tag} after ${maxRetries} attempts: ${String(err)}`)
-        }
+      if (!isNonFastForward(err)) {
         throw err
       }
-
+      if (attempt === maxRetries) {
+        throw new Error(`Failed to push ${tag} after ${maxRetries} attempts: ${String(err)}`)
+      }
       log(`Non-fast-forward push rejected (attempt ${attempt}/${maxRetries}); rebasing...`)
       run('git pull --rebase origin main')
       run(`git tag -f -a ${tag} -m ${tag}`)
