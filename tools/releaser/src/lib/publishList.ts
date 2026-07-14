@@ -1,24 +1,23 @@
 /**
- * Packages that should be published to NPM
+ * Packages that should be published to NPM, in topological order
+ * (every dependency precedes its dependents).
  *
- * Note that this does not include all packages in the monorepo
+ * Note that this does not include all packages in the monorepo.
+ * Verified by publishList.spec.ts.
  */
 export const packagePublishList = [
-  'payload',
+  // Foundation
   'translations',
+  'payload',
+
+  // Core UI/API
   'ui',
-  'next',
-  'tanstack-start',
   'graphql',
-  'admin-bar',
-  'live-preview',
-  'live-preview-react',
-  'live-preview-vue',
+  'next',
   'richtext-lexical',
+  'tanstack-start',
 
-  'create-payload-app',
-
-  // DB Adapters
+  // DB
   'drizzle',
   'db-mongodb',
   'db-postgres',
@@ -26,14 +25,13 @@ export const packagePublishList = [
   'db-d1-sqlite',
   'db-vercel-postgres',
 
-  // Adapters
+  // Email -> cloud
   'email-nodemailer',
   'email-resend',
-
-  // SDK
-  'sdk',
+  'payload-cloud',
 
   // Storage
+  'plugin-cloud-storage',
   'storage-s3',
   'storage-r2',
   'storage-azure',
@@ -41,12 +39,12 @@ export const packagePublishList = [
   'storage-vercel-blob',
   'storage-uploadthing',
 
-  // KV
-  'kv-redis',
+  // Live preview
+  'live-preview',
+  'live-preview-react',
+  'live-preview-vue',
 
   // Plugins
-  'payload-cloud',
-  'plugin-cloud-storage',
   'plugin-ecommerce',
   'plugin-form-builder',
   'plugin-import-export',
@@ -59,11 +57,12 @@ export const packagePublishList = [
   'plugin-seo',
   'plugin-stripe',
 
-  'typescript-plugin',
+  // Leaves
+  'sdk',
+  'kv-redis',
+  'admin-bar',
 
-  // Unpublished
-  // 'storage-uploadthing',
-  // 'eslint-config',
-  // 'eslint-plugin',
-  // 'live-preview-vue',
+  // Standalone
+  'create-payload-app',
+  'typescript-plugin',
 ]
