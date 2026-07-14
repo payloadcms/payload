@@ -35,7 +35,7 @@
     padding: 0;
     margin: 0;
     list-style: none;
-    gap: var(--spacer-3);
+    gap: var(--spacer-2);
     display: grid;
     grid-template-columns: repeat(var(--cols), 1fr);
 

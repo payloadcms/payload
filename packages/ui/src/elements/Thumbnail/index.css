@@ -33,9 +33,22 @@
     width: calc(var(--spacer-6) * 2.5);
   }
 
-  @media (max-width: 1440px) {
-    .thumbnail .thumbnail {
-      width: calc(var(--spacer-6) * 2.5);
+  /* Constrain nested thumbnails on smaller viewports; restore their size-based width on large screens. */
+  .thumbnail .thumbnail {
+    width: calc(var(--spacer-6) * 2.5);
+  }
+
+  @media (min-width: 1440px) {
+    .thumbnail .thumbnail.thumbnail--size-expand {
+      width: 100%;
+    }
+
+    .thumbnail .thumbnail.thumbnail--size-large {
+      width: calc(var(--spacer-6) * 4.5);
+    }
+
+    .thumbnail .thumbnail.thumbnail--size-medium {
+      width: calc(var(--spacer-6) * 3.5);
     }
   }
 }

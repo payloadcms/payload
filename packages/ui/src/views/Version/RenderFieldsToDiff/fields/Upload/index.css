@@ -30,7 +30,7 @@
 
   @media (min-width: 768px) {
     .upload-diff-container--hasMany .field-diff-content {
-      grid-template-columns: unset;
+      grid-template-columns: var(--field-diff-columns, minmax(0, 1fr) minmax(0, 1fr));
       gap: unset;
     }
   }

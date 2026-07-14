@@ -6,7 +6,7 @@
   .bulk-upload-modal.drawer {
     justify-content: center;
     align-items: center;
-    padding: var(--spacer-4);
+    padding: 0;
   }
 
   /* Backdrop fills the whole viewport so clicking outside the modal closes it. */
@@ -19,30 +19,35 @@
   .bulk-upload-modal .drawer__content {
     /* Neutralize the drawer's leftward stacking shift so the modal stays centered. */
     --drawer-layer-offset: 0px;
-    width: clamp(900px, 84vw, 1040px);
-    height: min(86vh, 720px);
+    width: 100%;
+    height: 100dvh;
     max-width: 100%;
-    max-height: 100%;
-    border-radius: var(--radius-large);
+    max-height: 100dvh;
+    border-radius: 0;
     overflow: hidden;
   }
 
-  @media (max-width: 1024px) {
-    .bulk-upload-modal.drawer {
-      padding: 0;
-    }
+  .bulk-upload-modal .document-fields__edit {
+    padding-top: var(--spacer-4);
+  }
 
-    .bulk-upload-modal .drawer__content {
-      width: 100%;
-      height: 100dvh;
-      max-height: 100dvh;
-      border-radius: 0;
+  @media (min-width: 768px) {
+    /* Restore the drawer's default edit padding once the modal is no longer full-bleed. */
+    .bulk-upload-modal .document-fields__edit {
+      padding-top: var(--gutter-h);
     }
   }
 
-  @media (max-width: 768px) {
-    .bulk-upload-modal .document-fields__edit {
-      padding-top: var(--spacer-4);
+  @media (min-width: 1024px) {
+    .bulk-upload-modal.drawer {
+      padding: var(--spacer-4);
+    }
+
+    .bulk-upload-modal .drawer__content {
+      width: clamp(900px, 84vw, 1040px);
+      height: min(86vh, 720px);
+      max-height: 100%;
+      border-radius: var(--radius-large);
     }
   }
 }

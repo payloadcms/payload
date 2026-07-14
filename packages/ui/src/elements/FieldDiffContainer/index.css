@@ -64,7 +64,7 @@
     .field-diff-content > * {
       padding-inline: var(--spacer-2-5);
       background: unset;
-      padding: unset;
+      padding-block: unset;
       min-height: unset;
       overflow: unset;
       align-content: unset;
