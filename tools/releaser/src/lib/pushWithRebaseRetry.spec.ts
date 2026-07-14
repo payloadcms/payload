@@ -72,12 +72,11 @@ describe('pushWithRebaseRetry', () => {
     expect(thrownMessage).toMatch(/Authentication failed/)
     expect(thrownMessage).not.toMatch(/after \d+ attempts/)
 
-    const pushes = run.mock.calls.filter((call) => (call[0] as string).startsWith('git push'))
-    const rebases = run.mock.calls.filter((call) =>
-      (call[0] as string).startsWith('git pull --rebase'),
+    // Exactly one call — the initial push — means no rebase/retag/re-push occurred.
+    expect(run).toHaveBeenCalledTimes(1)
+    expect(run).toHaveBeenCalledWith(
+      'git push --atomic origin HEAD:main refs/tags/v4.0.0-canary.10',
     )
-    expect(pushes).toHaveLength(1)
-    expect(rebases).toHaveLength(0)
   })
 
   it('should throw when maxRetries is less than 1', async () => {
