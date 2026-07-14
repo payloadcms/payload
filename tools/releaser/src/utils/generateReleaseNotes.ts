@@ -164,7 +164,7 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
   if (tag !== 'latest') {
     releaseUrl += `&prerelease=1`
   }
-  if (!openReleaseUrl) {
+  if (openReleaseUrl) {
     await open(releaseUrl)
   }
 

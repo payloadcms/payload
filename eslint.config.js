@@ -32,6 +32,7 @@ export const defaultESLintIgnores = [
   '**/app-tanstack/components/**',
   '**/app-tanstack/router.tsx',
   'src/**/*.spec.ts',
+  'tools/**/*.spec.ts',
   'packages/payload/rollup.dts.config.mjs',
   'scripts/**/*.js',
   'packages/plugin-mcp/bin.js',
