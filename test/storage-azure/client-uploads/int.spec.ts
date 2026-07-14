@@ -48,9 +48,9 @@ describe('@payloadcms/storage-azure clientUploads', () => {
   })
 
   /**
-   * When a doc with the same filename already exists, the signed-URL endpoint
-   * should sanitize the filename (e.g. `duplicate-target-1.png`) so the
-   * browser PUT lands on a fresh blob instead of overwriting the existing one.
+   * When a doc with the same filename already exists, the upload-instructions
+   * endpoint should sanitize the filename (e.g. `duplicate-target-1.png`) so the
+   * browser SDK upload lands on a fresh blob instead of overwriting the existing one.
    */
   it('sanitizes the filename when a duplicate already exists', async () => {
     const dupFilename = 'duplicate-target.png'
@@ -77,7 +77,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
 
     expect(signedURLRes.status).toBe(200)
     const instructions = (await signedURLRes.json()) as UploadInstructions
-    expect(instructions.type).toBe('http')
+    expect(instructions.type).toBe('dispatch')
     expect(instructions.file).toEqual({
       directUpload: { prefix: '' },
       filename: 'duplicate-target-1.png',
@@ -85,13 +85,12 @@ describe('@payloadcms/storage-azure clientUploads', () => {
       size: fileBuffer.length,
     })
 
-    if (instructions.type !== 'http') {
-      throw new Error('Expected HTTP upload instructions')
+    if (instructions.type !== 'dispatch') {
+      throw new Error('Expected dispatch upload instructions')
     }
 
-    expect(instructions.request.method).toBe('PUT')
-    expect(instructions.request.headers).toHaveProperty('x-ms-blob-type', 'BlockBlob')
-    const signedURL = instructions.request.url
+    expect(instructions.name).toBe('uploadToAzure')
+    const { url: signedURL } = instructions.data as { url: string }
 
     const blobKey = decodeURIComponent(
       new URL(signedURL).pathname.replace(`/devstoreaccount1/${TEST_CONTAINER}/`, ''),
