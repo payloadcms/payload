@@ -7,6 +7,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
+import type { TestFileServer } from '../__helpers/shared/startTestFileServer.js'
 import type { Config } from './payload-types.js'
 
 import {
@@ -31,6 +32,7 @@ import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
+import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
@@ -68,7 +70,6 @@ import {
   withoutEnlargeSlug,
   withoutMetadataSlug,
 } from './shared.js'
-import { startMockCorsServer } from './startMockCorsServer.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -134,7 +135,6 @@ let mediaWithFieldsURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
-  let mockCorsServer: ReturnType<typeof startMockCorsServer> | undefined
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -237,12 +237,6 @@ describe('Uploads', () => {
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
-  })
-
-  afterAll(() => {
-    if (mockCorsServer) {
-      mockCorsServer.close()
-    }
   })
 
   test('should show upload filename in upload collection list', async () => {
@@ -1997,13 +1991,20 @@ describe('Uploads', () => {
   })
 
   describe('remote url fetching', () => {
-    beforeAll(() => {
-      mockCorsServer = startMockCorsServer()
+    let testFileServer: TestFileServer | undefined
+
+    beforeAll(async () => {
+      testFileServer = await startTestFileServer({
+        contentType: 'image/jpeg',
+        data: readFileSync(path.resolve(dirname, 'test-image.jpg')),
+        hostname: 'localhost',
+        port: 4000,
+      })
     })
 
-    afterAll(() => {
-      if (mockCorsServer) {
-        mockCorsServer.close()
+    afterAll(async () => {
+      if (testFileServer) {
+        await testFileServer.close()
       }
     })
 

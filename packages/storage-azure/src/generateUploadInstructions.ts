@@ -34,7 +34,7 @@ export const generateUploadInstructions = ({
         blobName: fileKey,
         containerName,
         contentType: mimeType,
-        expiresOn: new Date(Date.now() + 30 * 60 * 1000),
+        expiresOn: new Date(Date.now() + 3 * 60 * 60 * 1000),
         permissions: BlobSASPermissions.parse('w'),
         startsOn: new Date(),
       },
@@ -42,21 +42,16 @@ export const generateUploadInstructions = ({
     )
 
     return {
-      type: 'http',
+      name: 'uploadToAzure',
+      type: 'dispatch',
+      data: {
+        url: `${blobClient.url}?${sasToken.toString()}`,
+      },
       file: {
         directUpload: { prefix: sanitizedDocPrefix },
         filename: sanitizedFilename,
         mimeType,
         size: filesize,
-      },
-      request: {
-        headers: {
-          'Content-Length': String(filesize),
-          'Content-Type': mimeType,
-          'x-ms-blob-type': 'BlockBlob',
-        },
-        method: 'PUT',
-        url: `${blobClient.url}?${sasToken.toString()}`,
       },
     }
   }

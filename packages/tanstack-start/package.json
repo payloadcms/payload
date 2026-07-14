@@ -78,6 +78,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.0",
+    "@vitejs/plugin-rsc": "^0.5.21",
     "payload": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -87,6 +88,7 @@
     "@tanstack/react-router": "^1.120.0",
     "@tanstack/react-start": "^1.168.26",
     "@vitejs/plugin-react": "^6.0.0",
+    "@vitejs/plugin-rsc": "^0.5.21",
     "payload": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -94,6 +96,9 @@
   },
   "peerDependenciesMeta": {
     "@vitejs/plugin-react": {
+      "optional": true
+    },
+    "@vitejs/plugin-rsc": {
       "optional": true
     },
     "vite": {

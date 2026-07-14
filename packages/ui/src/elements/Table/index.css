@@ -111,6 +111,12 @@
       vertical-align: middle;
     }
 
+    .cell-_dragHandle > div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     tbody tr {
       position: relative;
       border-top: var(--stroke-width-small) solid var(--color-border);

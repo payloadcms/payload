@@ -7,12 +7,15 @@ packages:
   - 'templates/ecommerce'
 
 catalog:
+  # TS7 provides `tsc`; tools that import `typescript` use the TS6 compatibility API.
+  # see: https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/#running-side-by-side-with-typescript-6.0
+  '@typescript/native': 'npm:typescript@7.0.2'
   copyfiles: '2.4.1'
   cross-env: '10.1.0'
   dotenv: '16.4.7'
   react: '19.2.6'
   react-dom: '19.2.6'
-  typescript: '6.0.3'
+  typescript: 'npm:@typescript/typescript6@6.0.2'
 
 updateNotifier: false
 symlink: true

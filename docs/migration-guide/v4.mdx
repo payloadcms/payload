@@ -185,48 +185,60 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 
 Run `npx @payloadcms/codemod --transform migrate-aliased-exports` to migrate automatically. Renamed types are imported using an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'`) so existing usages keep compiling — drop the alias and rename usages manually if you want to fully commit to the new name.
 
-### User types: `TypedUser` and `UntypedUser` removed; new `AuthenticatedUser`
+### User types consolidated into `User` and `AuthenticatedUser`
 
 Payload's user types have been consolidated so each one has a clear job. This completes a cleanup already planned in 3.x: `UntypedUser` was deprecated for removal in 4.0, and `TypedUser` was marked to be renamed to `User` in 4.0.
 
 Previously, the public `User` type was an alias of the loose `UntypedUser`, while `TypedUser` was the generated type for auth-enabled collections. `ClientUser` was also loose, and the runtime auth fields `_strategy` and `_sid` were not typed on `req.user`.
 
-There are now three types:
+There are now two types:
 
 - **`User`** — the generated type for a user of an auth-enabled collection (what `TypedUser` used to be). Without generated types, it falls back to a documented shape containing Payload's built-in auth fields.
-- **`AuthenticatedUser`** — `User` plus the optional runtime auth fields `_strategy` and `_sid`. This is what `req.user`, `payload.auth()`, and auth strategies return.
-- **`ClientUser`** — the user as seen on the client (`useAuth().user`) and in `me` responses. It is an alias of `AuthenticatedUser`; `_sid` is optional in the type but is not sent to the client.
+- **`AuthenticatedUser`** — `User` plus the optional runtime auth fields `_strategy` and `_sid`. This is what `req.user`, `payload.auth()`, auth strategies, `me` responses, and `useAuth().user` return.
 
-`ClientUser` already included `collection` through its old base type, and `collection` was already present in client responses. The old comment claiming it was server-only was incorrect. The change is that `ClientUser` now uses the generated user shape instead of a loose index signature.
+`AuthenticatedUser` is intentionally shared by server and client auth APIs. It describes the signed-in identity, not an exact serialization or sanitization contract: runtime, hidden, access-controlled, or unselected fields can be absent from individual responses. Use `User` for other stored or read user documents, including user documents rendered in client code.
+
+`_sid` is flow-dependent: request-authenticated users can carry it, while standard login, `me`, and refresh responses omit it.
+
+The `collection` property remains available on authenticated users and in client auth responses. Removing `ClientUser` does not change runtime serialization.
 
 **What changes:**
 
 - `TypedUser` is removed — replace it with `User`.
-- `UntypedUser` is removed — use `User` for a user document, `AuthenticatedUser` for a signed-in request user, or `ClientUser` in client code.
-- `User` and `ClientUser` no longer have a `{ [key: string]: any }` index signature. Custom auth-collection fields require generated types or an explicit augmented type or cast.
+- `UntypedUser` is removed — use `User` for a user document or `AuthenticatedUser` for the signed-in user.
+- `ClientUser` is removed — replace it with `AuthenticatedUser` for `useAuth().user`, `me` responses, and other client auth APIs.
+- `User` and `AuthenticatedUser` no longer have a `{ [key: string]: any }` index signature. Custom auth-collection fields require generated types or an explicit augmented type or cast.
 - `req.user` and `payload.auth().user` are now typed as `AuthenticatedUser`, so `_strategy` and `_sid` type-check.
+- `@payloadcms/plugin-ecommerce`'s `ClientUserWithCart` is removed — replace it with `UserWithCart`.
+- `MeOperationResult.user` and `refreshCookieAsync()` can be `null`, matching their existing runtime behavior. `refreshCookieAsync()` also preserves the custom user type passed to `useAuth<T>()`.
+- Collection `admin.hidden` callbacks now receive `PayloadRequest['user']`, including `null` when there is no authenticated user.
 - The Local API `user` option is now `User | null` instead of the loose `Document` type for collection `count`, `create`, `delete`, `duplicate`, `find`, `findByID`, `findDistinct`, and `update`; collection and global version operations; and global `findOne` and `update`.
 - `UserSession.createdAt` is now optional and nullable (`createdAt?: Date | null | string`) to match the generated session shape. Callers must handle a missing value.
 
 `AuthenticatedUser` is assignable to `User`, so passing `req.user` to Local API operations continues to work. Passing an arbitrary object now type-errors.
 
 ```diff
-- import type { TypedUser, UntypedUser } from 'payload'
+- import type { ClientUser, TypedUser, UntypedUser } from 'payload'
 + import type { AuthenticatedUser, User } from 'payload'
 
 - const user: TypedUser = req.user
 + const user: AuthenticatedUser = req.user
+
+- type CurrentUser = ClientUser
++ type CurrentUser = AuthenticatedUser
 ```
 
-Use `User` for stored or read user documents. Use `AuthenticatedUser` when code specifically receives the signed-in user from `req.user`, `payload.auth()`, or an auth strategy.
+Use `User` for stored or read user documents. Use `AuthenticatedUser` when code specifically receives the signed-in user from `req.user`, `payload.auth()`, an auth strategy, a `me` response, or `useAuth()`.
 
 **For plugin authors:** because `User` no longer has an index signature, reading a field your plugin adds to the user collection off `req.user` (or `User`) no longer type-checks. Declare an augmented type and cast `req.user` to it — this is what the first-party plugins now do (e.g. `@payloadcms/plugin-ecommerce` for its `cart` join field):
 
 ```ts
-import type { User } from 'payload'
+import type { AuthenticatedUser } from 'payload'
 
 // Your plugin adds a `cart` join field (or any custom field) to the user collection.
-type UserWithCart = { cart?: { docs?: (Cart | string)[] } | null } & User
+type UserWithCart = AuthenticatedUser & {
+  cart?: { docs?: (Cart | string)[] } | null
+}
 
 const user = req.user as null | UserWithCart
 user?.cart?.docs // now typed
@@ -994,7 +1006,7 @@ const response = await fetch('/api/upload-instructions', {
 })
 ```
 
-The old endpoints returned `{ docPrefix, filename, url }`. The shared endpoint returns upload instructions. For S3, Azure, and GCS, follow the returned HTTP request exactly:
+The old endpoints returned `{ docPrefix, filename, url }`. The shared endpoint returns upload instructions. For S3 and GCS, follow the returned HTTP request exactly:
 
 ```ts
 const instructions = await response.json()
@@ -1025,17 +1037,16 @@ The collection comes from `/api/media`, so the `file` value no longer includes `
 
 For custom adapters, `clientUploadContext` becomes `directUpload` on the file and static handler parameters. `handleUpload` no longer receives it because directly uploaded originals are skipped. To detect a file that was uploaded before document creation, check whether `file.directUpload` is present.
 
-#### S3, Azure, and GCS client component exports were removed
+#### Adapter client components no longer need manual registration
 
-These client entry points and their exported components were removed:
+The S3 and GCS client entry points and their exported components were removed:
 
 ```text
 @payloadcms/storage-s3/client
-@payloadcms/storage-azure/client
 @payloadcms/storage-gcs/client
 ```
 
-Remove manual registrations of `S3ClientUploadHandler`, `AzureClientUploadHandler`, and `GcsClientUploadHandler`. Payload's shared Admin upload handler is registered automatically when `clientUploads` is enabled.
+Remove manual registrations of `S3ClientUploadHandler`, `AzureClientUploadHandler`, and `GcsClientUploadHandler`. Payload registers the required Admin upload handler automatically when `clientUploads` is enabled.
 
 #### `ClientUploadsAccess` was replaced
 
@@ -1083,6 +1094,36 @@ uploadInstructions: {
 ```
 
 The `data` value is passed from the server instruction to the client handler. The names must match exactly. If the handler returns an object, it becomes `file.directUpload` in the document request.
+
+### Azure client uploads now use the Azure Blob SDK — update your CORS rules
+
+`@payloadcms/storage-azure` client uploads (`clientUploads`) now upload through the Azure Blob SDK, which splits files into blocks (`Put Block` + `Put Block List`). This lifts the ~5GB single-request limit and raises the effective ceiling to Azure's block-blob maximum (~190TiB).
+
+**This is an infrastructure change, not a code change — it cannot be auto-migrated.** The SDK sends additional `x-ms-*` headers and issues CORS preflight (`OPTIONS`) requests, which is broader than the previous single-`PUT` flow required. If your storage account's CORS rules are scoped narrowly to the old flow, browser uploads will start failing with `RestError: Failed to fetch`.
+
+Update the CORS rules on your storage account (Storage account → **Resource sharing (CORS)** → Blob service) so that they allow:
+
+| Field           | Value                                                      |
+| --------------- | ---------------------------------------------------------- |
+| Allowed origins | Your site origin (e.g. `https://example.com`)              |
+| Allowed methods | `GET,PUT,OPTIONS` (add `HEAD` if reading blobs in-browser) |
+| Allowed headers | `*` (or at minimum `x-ms-*,content-type,content-length`)   |
+| Exposed headers | `*`                                                        |
+| Max age         | `3600`                                                     |
+
+If you already set `Allowed headers` to `*`, no change is required.
+
+If you enabled large-file uploads in v3 via the `clientUploads.chunkLargeFiles` flag, remove it — chunked uploads are now the default in v4 and the option no longer exists:
+
+```diff
+azureStorage({
+- clientUploads: { chunkLargeFiles: true },
++ clientUploads: true,
+  // ...
+})
+```
+
+Run `npx @payloadcms/codemod --transform migrate-azure-chunk-large-files` to remove the flag automatically (it collapses `clientUploads: { chunkLargeFiles: true }` to `clientUploads: true` and keeps any other `clientUploads` options).
 
 ### `FileSizeImproved` removed — use `FileSize` ([#16593](https://github.com/payloadcms/payload/pull/16593))
 

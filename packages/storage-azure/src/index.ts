@@ -6,6 +6,7 @@ import type {
 import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
+import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import { createAzureAdapter } from './adapter.js'
 import { getStorageClient as getStorageClientFunc } from './utils/getStorageClient.js'
@@ -43,7 +44,13 @@ export type AzureStorageOptions = {
   clientCacheKey?: string
 
   /**
-   * Upload directly to Azure instead of through Payload. You must allow CORS PUT requests from your website.
+   * Do uploads directly on the client to bypass limits on Vercel.
+   *
+   * Client uploads use the Azure Blob SDK, which splits large files into blocks
+   * (avoiding the ~5GB limit of a single upload request). The SDK sends `x-ms-*`
+   * headers, so the browser issues a CORS preflight: your storage account's CORS
+   * rules must allow the `OPTIONS` and `PUT` methods and the required headers
+   * (allowed headers `*`, or at minimum `x-ms-*,content-type,content-length`).
    */
   clientUploads?: ClientUploadsConfig
 
@@ -99,6 +106,14 @@ export const azureStorage: AzureStorageFactory = (
       })
 
     const isPluginDisabled = azureStorageOptions.enabled === false
+
+    initClientUploads({
+      clientHandler: '@payloadcms/storage-azure/client#AzureClientUploadHandler',
+      collections: azureStorageOptions.collections,
+      config: incomingConfig,
+      enabled: !isPluginDisabled && Boolean(azureStorageOptions.clientUploads),
+      serverHandlerPath: '/upload-instructions',
+    })
 
     if (isPluginDisabled) {
       return incomingConfig
