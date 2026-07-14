@@ -8,7 +8,6 @@ import type { ACL } from './index.js'
 interface UploadFileArgs {
   acl: ACL
   buffer: Buffer
-  clientUploadContext?: unknown
   data: Record<string, unknown>
   filename: string
   mimeType: string
@@ -18,22 +17,12 @@ interface UploadFileArgs {
 export async function uploadFile({
   acl,
   buffer,
-  clientUploadContext,
   data,
   filename,
   mimeType,
   utApi,
 }: UploadFileArgs): Promise<Record<string, unknown>> {
   try {
-    if (
-      clientUploadContext &&
-      typeof clientUploadContext === 'object' &&
-      'key' in clientUploadContext &&
-      typeof clientUploadContext.key === 'string'
-    ) {
-      await utApi.deleteFiles(clientUploadContext.key)
-    }
-
     const blob = new Blob([buffer], { type: mimeType })
     const res = await utApi.uploadFiles(new UTFile([blob], filename), { acl })
 

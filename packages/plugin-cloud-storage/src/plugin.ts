@@ -107,7 +107,7 @@ export const cloudStoragePlugin =
             // Build the "proxied" handler that responds only when addDataAndFileToRequest fetches the uploaded file
           } else if (adapter.uploadInstructions) {
             handlers.push((req, args) => {
-              if ('clientUploadContext' in args.params) {
+              if ('directUpload' in args.params) {
                 return adapter.staticHandler(req, args)
               }
             })

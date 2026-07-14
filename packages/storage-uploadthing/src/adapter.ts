@@ -42,7 +42,16 @@ export function createUploadthingAdapter({
     uploadInstructions: clientUploads
       ? {
           access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
-          generate: () => ({ name: 'uploadToUploadThing', type: 'dispatch' }),
+          generate: ({ filename, filesize, mimeType }) => ({
+            name: 'uploadToUploadThing',
+            type: 'dispatch',
+            file: {
+              directUpload: {},
+              filename,
+              mimeType,
+              size: filesize,
+            },
+          }),
         }
       : undefined,
 
@@ -51,11 +60,10 @@ export function createUploadthingAdapter({
     handleDelete: ({ doc, filename, req }) =>
       deleteFile({ doc: doc as unknown as Record<string, unknown>, filename, req, utApi }),
 
-    handleUpload: async ({ clientUploadContext, data, file }) => {
+    handleUpload: async ({ data, file }) => {
       const result = await uploadFile({
         acl,
         buffer: file.buffer,
-        clientUploadContext,
         data,
         filename: file.filename,
         mimeType: file.mimeType,
@@ -65,10 +73,10 @@ export function createUploadthingAdapter({
       return result
     },
 
-    staticHandler: (req, { doc, headers, params: { clientUploadContext, collection, filename } }) =>
+    staticHandler: (req, { doc, headers, params: { collection, directUpload, filename } }) =>
       getFile({
-        clientUploadContext,
         collection,
+        directUpload,
         doc: doc as unknown as Record<string, unknown> | undefined,
         filename,
         incomingHeaders: headers || new Headers(),

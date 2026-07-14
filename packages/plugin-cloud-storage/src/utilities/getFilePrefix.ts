@@ -8,20 +8,20 @@ import { sanitizePrefix } from './sanitizePrefix.js'
  *
  * Resolution order:
  * 1. `prefixQueryParam`
- * 2. `clientUploadContext.prefix`
+ * 2. `directUpload.prefix`
  * 3. Stored document `prefix` from the database
  *
  * Resolved values are passed through `sanitizePrefix`.
  */
 export async function getFilePrefix({
-  clientUploadContext,
   collection,
+  directUpload,
   filename,
   prefixQueryParam,
   req,
 }: {
-  clientUploadContext?: unknown
   collection: CollectionConfig
+  directUpload?: unknown
   filename: string
   prefixQueryParam?: string
   req: PayloadRequest
@@ -30,14 +30,14 @@ export async function getFilePrefix({
     return sanitizePrefix(prefixQueryParam)
   }
 
-  // Prioritize from clientUploadContext if there is:
+  // Prioritize the direct upload prefix if there is one.
   if (
-    clientUploadContext &&
-    typeof clientUploadContext === 'object' &&
-    'prefix' in clientUploadContext &&
-    typeof clientUploadContext.prefix === 'string'
+    directUpload &&
+    typeof directUpload === 'object' &&
+    'prefix' in directUpload &&
+    typeof directUpload.prefix === 'string'
   ) {
-    return sanitizePrefix(clientUploadContext.prefix)
+    return sanitizePrefix(directUpload.prefix)
   }
 
   const imageSizes = (collection?.upload as UploadConfig)?.imageSizes || []

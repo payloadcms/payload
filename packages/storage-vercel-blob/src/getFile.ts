@@ -9,9 +9,9 @@ import { generateURL } from './generateURL.js'
 interface GetFileArgs {
   baseUrl: string
   cacheControlMaxAge: number
-  clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
+  directUpload?: unknown
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
@@ -23,9 +23,9 @@ interface GetFileArgs {
 export async function getFile({
   baseUrl,
   cacheControlMaxAge,
-  clientUploadContext,
   collection,
   collectionPrefix = '',
+  directUpload,
   filename,
   incomingHeaders,
   prefixQueryParam,
@@ -35,8 +35,8 @@ export async function getFile({
 }: GetFileArgs): Promise<Response> {
   try {
     const docPrefix = await getDocPrefix({
-      clientUploadContext,
       collection,
+      directUpload,
       filename,
       prefixQueryParam,
       req,

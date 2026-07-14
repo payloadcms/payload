@@ -58,11 +58,10 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        let clientUploadContext, collectionSlug, filename, mimeType, size
+        let directUpload, filename, mimeType, size
+        const collectionSlug = req.routeParams?.collection as string
         try {
-          ;({ clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
-            fields.file,
-          ))
+          ;({ directUpload, filename, mimeType, size } = JSON.parse(fields.file))
         } catch {
           throw new APIError('A file name is required.', 400)
         }
@@ -80,8 +79,8 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
             const result = await handler(req, {
               doc: null!,
               params: {
-                clientUploadContext, // Pass additional specific to adapters context returned from UploadHandler, then staticHandler can use them.
                 collection: collectionSlug,
+                directUpload,
                 filename,
               },
             })
@@ -111,8 +110,8 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
 
         req.file = {
           name: filename,
-          clientUploadContext,
           data: Buffer.from(await response.arrayBuffer()),
+          directUpload,
           mimetype: response.headers.get('Content-Type') || mimeType,
           size,
         }

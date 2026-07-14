@@ -120,10 +120,7 @@ type PayloadRequestData = {
   data?: JsonObject
   /** The file on the request, same rules apply as the `data` property */
   file?: {
-    /**
-     * Context of the file when it was uploaded via client side.
-     */
-    clientUploadContext?: unknown
+    directUpload?: unknown
   } & File
   /** All files from multipart form data, keyed by field name */
   files?: Record<string, File | File[]>

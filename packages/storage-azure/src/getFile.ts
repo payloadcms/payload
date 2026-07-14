@@ -11,9 +11,9 @@ import { getRangeRequestInfo } from 'payload/internal'
 
 interface GetFileArgs {
   client: ContainerClient
-  clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
+  directUpload?: unknown
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
@@ -53,9 +53,9 @@ const abortRequestAndDestroyStream = ({
 
 export async function getFile({
   client,
-  clientUploadContext,
   collection,
   collectionPrefix = '',
+  directUpload,
   filename,
   incomingHeaders,
   prefixQueryParam,
@@ -74,8 +74,8 @@ export async function getFile({
 
   try {
     const docPrefix = await getDocPrefix({
-      clientUploadContext,
       collection,
+      directUpload,
       filename,
       prefixQueryParam,
       req,

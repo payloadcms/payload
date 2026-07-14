@@ -610,16 +610,7 @@ async function uploadWithInstructions(file: File, collectionSlug: string) {
   // 3. Create document in Payload (file already in storage)
   const formData = new FormData()
   formData.append('_payload', JSON.stringify({}))
-  formData.append(
-    'file',
-    JSON.stringify({
-      clientUploadContext: instructions.clientUploadContext,
-      collectionSlug,
-      filename: instructions.filename ?? file.name,
-      mimeType: file.type,
-      size: file.size,
-    }),
-  )
+  formData.append('file', JSON.stringify(instructions.file))
 
   const docResponse = await fetch(`/api/${collectionSlug}`, {
     method: 'POST',

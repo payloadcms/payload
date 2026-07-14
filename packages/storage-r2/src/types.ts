@@ -65,7 +65,7 @@ export interface R2UploadedPart {
   partNumber: number
 }
 
-export interface R2StorageClientUploadContext {
+export interface R2StorageDirectUpload {
   key: string
   prefix: string
 }

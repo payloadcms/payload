@@ -11,9 +11,9 @@ import { getRangeRequestInfo } from 'payload/internal'
 interface GetFileArgs {
   bucket: string
   client: Storage
-  clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
+  directUpload?: unknown
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
@@ -24,9 +24,9 @@ interface GetFileArgs {
 export async function getFile({
   bucket,
   client,
-  clientUploadContext,
   collection,
   collectionPrefix = '',
+  directUpload,
   filename,
   incomingHeaders,
   prefixQueryParam,
@@ -35,8 +35,8 @@ export async function getFile({
 }: GetFileArgs): Promise<Response> {
   try {
     const docPrefix = await getDocPrefix({
-      clientUploadContext,
       collection,
+      directUpload,
       filename,
       prefixQueryParam,
       req,

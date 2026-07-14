@@ -78,8 +78,12 @@ describe('@payloadcms/storage-azure clientUploads', () => {
     expect(signedURLRes.status).toBe(200)
     const instructions = (await signedURLRes.json()) as UploadInstructions
     expect(instructions.type).toBe('http')
-    expect(instructions.filename).toBe('duplicate-target-1.png')
-    expect(instructions.clientUploadContext).toEqual({ prefix: '' })
+    expect(instructions.file).toEqual({
+      directUpload: { prefix: '' },
+      filename: 'duplicate-target-1.png',
+      mimeType: 'image/png',
+      size: fileBuffer.length,
+    })
 
     if (instructions.type !== 'http') {
       throw new Error('Expected HTTP upload instructions')

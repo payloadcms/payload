@@ -66,6 +66,8 @@ Admin
 
 For S3, Azure, and GCS, the instructions contain a signed HTTP request and the file uploads directly to storage. Providers that need their own SDK or multipart behavior return a named instruction handled by their Admin helper. The document still goes through Payload's normal validation, image processing, and hooks.
 
+The response also contains a complete `file` value. After uploading the bytes, the Admin sends that value unchanged with the document request.
+
 The browser receives only an `uploadInstructions: true` marker in the collection config. Access checks and instruction generation stay on the server. This lets the Admin ask one simple question—whether instructions are available—without knowing which storage provider is configured.
 
 This avoids sending large file bytes through the document request. If upload instructions are not enabled, the Admin continues to include the file in the normal create or update request.

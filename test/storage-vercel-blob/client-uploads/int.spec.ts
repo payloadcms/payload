@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, UploadInstructionsFile } from 'payload'
 
 import { del, list } from '@vercel/blob'
 import { put } from '@vercel/blob/client'
@@ -28,6 +28,7 @@ type VercelBlobUploadInstructions = {
     pathname: string
     token: string
   }
+  file: UploadInstructionsFile
   name: 'uploadToVercelBlob'
   type: 'dispatch'
 }
@@ -66,6 +67,12 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     const instructions = (await instructionsResponse.json()) as VercelBlobUploadInstructions
     expect(instructions.type).toBe('dispatch')
     expect(instructions.name).toBe('uploadToVercelBlob')
+    expect(instructions.file).toEqual({
+      directUpload: { prefix: '' },
+      filename: 'image.png',
+      mimeType: 'image/png',
+      size: file.length,
+    })
 
     const result = await put(instructions.data.pathname, new Blob([file], { type: 'image/png' }), {
       access: 'public',

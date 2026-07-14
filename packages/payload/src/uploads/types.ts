@@ -251,8 +251,8 @@ export type UploadConfig = {
       doc: TypeWithID
       headers?: Headers
       params: {
-        clientUploadContext?: unknown
         collection: string
+        directUpload?: unknown
         filename: string
         prefix?: string
       }
@@ -340,8 +340,12 @@ export type UploadInstructionsRequest = {
 }
 
 export type UploadInstructions = {
-  clientUploadContext?: unknown
-  filename?: string
+  file: {
+    directUpload: Record<string, unknown>
+    filename: string
+    mimeType: string
+    size: number
+  }
 } & (
   | {
       data?: unknown

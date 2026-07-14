@@ -56,8 +56,12 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
       .then((res) => res.json<UploadInstructions>())
 
     expect(instructions.type).toBe('http')
-    expect(instructions.filename).toBe('image.png')
-    expect(instructions.clientUploadContext).toEqual({ prefix: '' })
+    expect(instructions.file).toEqual({
+      directUpload: { prefix: '' },
+      filename: 'image.png',
+      mimeType: 'image/png',
+      size: file.length,
+    })
 
     if (instructions.type !== 'http') {
       throw new Error('Expected HTTP upload instructions')

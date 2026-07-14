@@ -1,4 +1,4 @@
-import type { CollectionSlug, FormState } from 'payload'
+import type { FormState } from 'payload'
 
 import { serialize } from 'object-to-formdata'
 import { reduceFieldsToValues } from 'payload/shared'
@@ -8,7 +8,6 @@ import type { UploadHandlersContext } from '../../../providers/UploadHandlers/in
 export async function createFormData(
   formState: FormState = {},
   overrides: Record<string, any> = {},
-  collectionSlug: CollectionSlug,
   uploadHandler: ReturnType<UploadHandlersContext['getUploadHandler']>,
 ) {
   const data = reduceFieldsToValues(formState, true)
@@ -19,23 +18,12 @@ export async function createFormData(
   }
 
   if (file && typeof uploadHandler === 'function') {
-    let filename = file.name
-
-    const clientUploadContext = await uploadHandler({
-      docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
-      file,
-      updateFilename: (value) => {
-        filename = value
-      },
-    })
-
-    file = JSON.stringify({
-      clientUploadContext,
-      collectionSlug,
-      filename,
-      mimeType: file.type,
-      size: file.size,
-    })
+    file = JSON.stringify(
+      await uploadHandler({
+        docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
+        file,
+      }),
+    )
   }
 
   const dataWithOverrides = {

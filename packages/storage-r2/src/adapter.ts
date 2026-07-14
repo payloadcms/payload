@@ -27,7 +27,16 @@ export function createR2Adapter({
     uploadInstructions: clientUploads
       ? {
           access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
-          generate: () => ({ name: 'uploadToR2', type: 'dispatch' }),
+          generate: ({ filename, filesize, mimeType }) => ({
+            name: 'uploadToR2',
+            type: 'dispatch',
+            file: {
+              directUpload: {},
+              filename,
+              mimeType,
+              size: filesize,
+            },
+          }),
         }
       : undefined,
 
@@ -53,12 +62,12 @@ export function createR2Adapter({
 
     staticHandler: (
       req,
-      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
+      { headers, params: { directUpload, filename, prefix: prefixQueryParam } },
     ) =>
       getFile({
         bucket,
-        clientUploadContext,
         collection,
+        directUpload,
         filename,
         incomingHeaders: headers,
         prefix,

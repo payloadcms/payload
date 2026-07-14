@@ -38,8 +38,12 @@ export const generateUploadInstructions = ({
 
     return {
       type: 'http',
-      clientUploadContext: { prefix: sanitizedDocPrefix },
-      filename: sanitizedFilename,
+      file: {
+        directUpload: { prefix: sanitizedDocPrefix },
+        filename: sanitizedFilename,
+        mimeType,
+        size: filesize,
+      },
       request: {
         headers: {
           'Content-Length': String(filesize),

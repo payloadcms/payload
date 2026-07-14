@@ -5,8 +5,8 @@ import { formatAdminURL } from 'payload/shared'
 
 import type {
   R2MultipartUpload,
-  R2StorageClientUploadContext,
   R2StorageClientUploadHandlerParams,
+  R2StorageDirectUpload,
   R2StorageMultipartUploadHandlerParams,
   R2UploadedPart,
 } from '../types.js'
@@ -23,7 +23,7 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
     serverHandlerPath,
     serverURL,
     updateFilename,
-  }): Promise<R2StorageClientUploadContext | undefined> => {
+  }): Promise<R2StorageDirectUpload | undefined> => {
     const { sanitizedDocPrefix } = getFileKey({
       collectionPrefix: prefix,
       docPrefix,

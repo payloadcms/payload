@@ -50,7 +50,6 @@ export function createVercelBlobAdapter({
             return {
               name: 'uploadToVercelBlob',
               type: 'dispatch',
-              clientUploadContext: { prefix: resolved.sanitizedDocPrefix },
               data: {
                 pathname: resolved.fileKey,
                 token: await generateClientTokenFromReadWriteToken({
@@ -62,7 +61,12 @@ export function createVercelBlobAdapter({
                   token,
                 }),
               },
-              filename: resolved.sanitizedFilename,
+              file: {
+                directUpload: { prefix: resolved.sanitizedDocPrefix },
+                filename: resolved.sanitizedFilename,
+                mimeType,
+                size: filesize,
+              },
             }
           },
         }
@@ -110,14 +114,14 @@ export function createVercelBlobAdapter({
 
     staticHandler: (
       req,
-      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
+      { headers, params: { directUpload, filename, prefix: prefixQueryParam } },
     ) =>
       getFile({
         baseUrl,
         cacheControlMaxAge,
-        clientUploadContext,
         collection,
         collectionPrefix: prefix,
+        directUpload,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,

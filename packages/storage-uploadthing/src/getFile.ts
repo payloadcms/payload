@@ -6,8 +6,8 @@ import { getRangeRequestInfo } from 'payload/internal'
 import { getKeyFromFilename } from './utilities.js'
 
 interface GetFileArgs {
-  clientUploadContext?: unknown
   collection: string
+  directUpload?: unknown
   doc?: Record<string, unknown>
   filename: string
   incomingHeaders: Headers
@@ -16,8 +16,8 @@ interface GetFileArgs {
 }
 
 export async function getFile({
-  clientUploadContext,
   collection,
+  directUpload,
   doc,
   filename,
   incomingHeaders,
@@ -29,12 +29,12 @@ export async function getFile({
     const collectionConfig = req.payload.collections[collection]?.config
 
     if (
-      clientUploadContext &&
-      typeof clientUploadContext === 'object' &&
-      'key' in clientUploadContext &&
-      typeof clientUploadContext.key === 'string'
+      directUpload &&
+      typeof directUpload === 'object' &&
+      'key' in directUpload &&
+      typeof directUpload.key === 'string'
     ) {
-      key = clientUploadContext.key
+      key = directUpload.key
     } else {
       let retrievedDoc = doc
 

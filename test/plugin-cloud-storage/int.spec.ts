@@ -114,11 +114,11 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       upload: {},
     } as any
 
-    describe('clientUploadContext prefix sanitization', () => {
+    describe('direct upload prefix sanitization', () => {
       it('should return a valid prefix unchanged', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: 'media/images' },
           collection: mockCollection,
+          directUpload: { prefix: 'media/images' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -127,8 +127,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should strip invalid segments from the prefix', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: '../other-collection/private' },
           collection: mockCollection,
+          directUpload: { prefix: '../other-collection/private' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -138,8 +138,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should handle deeply nested invalid segments', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: 'a/../../outside' },
           collection: mockCollection,
+          directUpload: { prefix: 'a/../../outside' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -149,8 +149,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should strip leading slashes from the prefix', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: '/absolute/path' },
           collection: mockCollection,
+          directUpload: { prefix: '/absolute/path' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -160,8 +160,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should strip dot segments from the prefix', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: './relative/./path' },
           collection: mockCollection,
+          directUpload: { prefix: './relative/./path' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -170,8 +170,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should normalize backslash separators', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: '..\\..\\outside' },
           collection: mockCollection,
+          directUpload: { prefix: '..\\..\\outside' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -180,8 +180,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should strip control characters from the prefix', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: 'media\x00/images' },
           collection: mockCollection,
+          directUpload: { prefix: 'media\x00/images' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -190,8 +190,8 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
       it('should return empty string for a prefix of only invalid segments', async () => {
         const result = await getFilePrefix({
-          clientUploadContext: { prefix: '../../..' },
           collection: mockCollection,
+          directUpload: { prefix: '../../..' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -200,7 +200,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
     })
 
     describe('fallback to DB lookup', () => {
-      it('should return empty string when no clientUploadContext and no DB match', async () => {
+      it('should return empty string when there is no direct upload or DB match', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           filename: 'test.png',
@@ -674,9 +674,9 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       it('should surface user afterChange errors during reupload and preserve the previous file in S3', async () => {
         const imagePath = path.resolve(dirname, '../uploads/image.png')
         const buildFile = (name: string) => ({
+          name,
           data: fs.readFileSync(imagePath),
           mimetype: 'image/png',
-          name,
           size: fs.statSync(imagePath).size,
         })
 
@@ -727,9 +727,9 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       it('should preserve size variants in S3 when reupload reuses the same filename', async () => {
         const imagePath = path.resolve(dirname, '../uploads/image.png')
         const buildFile = (name: string) => ({
+          name,
           data: fs.readFileSync(imagePath),
           mimetype: 'image/png',
-          name,
           size: fs.statSync(imagePath).size,
         })
 

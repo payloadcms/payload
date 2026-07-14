@@ -69,8 +69,13 @@ describe('@payloadcms/storage-vercel-blob clientUploads (composite prefixes)', (
       }),
     })
     const instructions = (await instructionsResponse.json()) as {
-      clientUploadContext: { prefix: string }
       data: { pathname: string; token: string }
+      file: {
+        directUpload: { prefix: string }
+        filename: string
+        mimeType: string
+        size: number
+      }
     }
 
     expect(instructions.data.pathname).toBe(pathname)
@@ -90,16 +95,7 @@ describe('@payloadcms/storage-vercel-blob clientUploads (composite prefixes)', (
         prefix: docPrefix,
       }),
     )
-    formData.append(
-      'file',
-      JSON.stringify({
-        clientUploadContext: instructions.clientUploadContext,
-        collectionSlug: mediaWithCompositePrefixesSlug,
-        filename: uploadedFilename,
-        mimeType: 'image/png',
-        size: file.length,
-      }),
-    )
+    formData.append('file', JSON.stringify(instructions.file))
 
     const createResponse = await restClient.POST(`/${mediaWithCompositePrefixesSlug}`, {
       body: formData,

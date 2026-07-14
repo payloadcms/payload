@@ -1007,7 +1007,23 @@ const { url, ...request } = instructions.request
 await fetch(url, { ...request, body: file })
 ```
 
-The response also includes the sanitized `filename` and `clientUploadContext` needed by the existing document creation request.
+The response includes a complete `file` value for the document request. Send it unchanged as a multipart field:
+
+```ts
+const formData = new FormData()
+formData.append('_payload', JSON.stringify({}))
+formData.append('file', JSON.stringify(instructions.file))
+
+await fetch('/api/media', {
+  method: 'POST',
+  credentials: 'include',
+  body: formData,
+})
+```
+
+The collection comes from `/api/media`, so the `file` value no longer includes `collectionSlug`. The old `clientUploadContext` property is replaced by `directUpload`. Its presence tells Payload that the original file is already in storage, and its contents give the adapter any data needed to find it.
+
+For custom adapters, `clientUploadContext` becomes `directUpload` on the file and static handler parameters. `handleUpload` no longer receives it because directly uploaded originals are skipped. To detect a file that was uploaded before document creation, check whether `file.directUpload` is present.
 
 #### S3, Azure, and GCS client component exports were removed
 
@@ -1052,7 +1068,13 @@ The adapter must return the same name from its `uploadInstructions` capability:
 
 ```ts
 uploadInstructions: {
-  generate: () => ({
+  generate: ({ filename, filesize, mimeType }) => ({
+    file: {
+      directUpload: {},
+      filename,
+      mimeType,
+      size: filesize,
+    },
     type: 'dispatch',
     name: 'uploadToMyProvider',
     data: {},
@@ -1060,7 +1082,7 @@ uploadInstructions: {
 }
 ```
 
-The `data` value is passed from the server instruction to the client handler. The names must match exactly.
+The `data` value is passed from the server instruction to the client handler. The names must match exactly. If the handler returns an object, it becomes `file.directUpload` in the document request.
 
 ### `FileSizeImproved` removed — use `FileSize` ([#16593](https://github.com/payloadcms/payload/pull/16593))
 

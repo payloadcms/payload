@@ -12,7 +12,7 @@ import type {
 
 export interface File {
   buffer: Buffer
-  clientUploadContext?: unknown
+  directUpload?: unknown
   filename: string
   filesize: number
   mimeType: string
@@ -26,7 +26,6 @@ export type ClientUploadsConfig =
   | boolean
 
 export type HandleUpload = (args: {
-  clientUploadContext: unknown
   collection: CollectionConfig
   data: any
   file: File
@@ -60,7 +59,7 @@ export type StaticHandler = (
   args: {
     doc?: TypeWithID
     headers?: Headers
-    params: { clientUploadContext?: unknown; collection: string; filename: string; prefix?: string }
+    params: { collection: string; directUpload?: unknown; filename: string; prefix?: string }
   },
 ) => Promise<Response> | Response
 

@@ -9,8 +9,7 @@ import { useConfig } from '../Config/index.js'
 type UploadHandler = (args: {
   docPrefix?: string
   file: File
-  updateFilename: (filename: string) => void
-}) => Promise<unknown>
+}) => Promise<UploadInstructions['file']>
 
 export type UploadHandlersContext = {
   getUploadHandler: (args: { collectionSlug: UploadCollectionSlug }) => null | UploadHandler
@@ -30,7 +29,7 @@ export const UploadHandlersProvider = ({ children }) => {
       return null
     }
 
-    return async ({ docPrefix, file, updateFilename }) => {
+    return async ({ docPrefix, file }) => {
       const response = await fetch(uploadInstructionsURL, {
         body: JSON.stringify({
           collectionSlug,
@@ -50,10 +49,7 @@ export const UploadHandlersProvider = ({ children }) => {
       }
 
       const instructions = (await response.json()) as UploadInstructions
-
-      if (instructions.filename && instructions.filename !== file.name) {
-        updateFilename(instructions.filename)
-      }
+      let uploadedFile = instructions.file
 
       if (instructions.type === 'http') {
         const { url, ...request } = instructions.request
@@ -63,7 +59,7 @@ export const UploadHandlersProvider = ({ children }) => {
           throw new Error(`Upload failed with status ${upload.status}`)
         }
 
-        return instructions.clientUploadContext
+        return uploadedFile
       }
 
       const result = await new Promise<unknown>((resolve, reject) => {
@@ -76,7 +72,9 @@ export const UploadHandlersProvider = ({ children }) => {
             file,
             reject,
             resolve,
-            updateFilename,
+            updateFilename: (filename: string) => {
+              uploadedFile = { ...uploadedFile, filename }
+            },
           },
         })
 
@@ -85,7 +83,9 @@ export const UploadHandlersProvider = ({ children }) => {
         }
       })
 
-      return result ?? instructions.clientUploadContext
+      return typeof result === 'object' && result !== null
+        ? { ...uploadedFile, directUpload: result as Record<string, unknown> }
+        : uploadedFile
     }
   }
 
