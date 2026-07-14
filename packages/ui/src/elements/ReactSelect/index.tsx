@@ -171,7 +171,7 @@ const SelectAdapter: React.FC<ReactSelectAdapterProps> = (props) => {
       ...(menuPortalTarget && {
         menuPortal: (rsStyles, state) => ({
           ...rsStyles,
-          zIndex: 9999,
+          zIndex: 'var(--z-portal-element)',
           ...externalStyles?.menuPortal?.(rsStyles, state),
         }),
       }),
