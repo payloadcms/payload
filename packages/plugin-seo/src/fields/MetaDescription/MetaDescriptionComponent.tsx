@@ -5,6 +5,7 @@ import type { TextareaFieldClientProps } from 'payload'
 
 import {
   FieldLabel,
+  Spinner,
   TextareaInput,
   useConfig,
   useDocumentInfo,
@@ -16,7 +17,7 @@ import {
 } from '@payloadcms/ui'
 import { reduceToSerializableFields } from '@payloadcms/ui/shared'
 import { formatAdminURL } from 'payload/shared'
-import React, { useCallback } from 'react'
+import React, { useCallback, useState } from 'react'
 
 import type { PluginSEOTranslationKeys, PluginSEOTranslations } from '../../translations/index.js'
 import type { GenerateDescription } from '../../types.js'
@@ -68,43 +69,51 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
     value,
   }: FieldType<string> = useField()
 
+  const [isLoading, setIsLoading] = useState(false)
+
   const regenerateDescription = useCallback(async () => {
     if (!hasGenerateDescriptionFn) {
       return
     }
 
-    const endpoint = formatAdminURL({
-      apiRoute: api,
-      path: '/plugin-seo/generate-description',
-    })
+    setIsLoading(true)
 
-    const genDescriptionResponse = await fetch(endpoint, {
-      body: JSON.stringify({
-        id: docInfo.id,
-        collectionSlug: docInfo.collectionSlug,
-        doc: getData(),
-        docPermissions: docInfo.docPermissions,
-        globalSlug: docInfo.globalSlug,
-        hasPublishPermission: docInfo.hasPublishPermission,
-        hasSavePermission: docInfo.hasSavePermission,
-        initialData: docInfo.initialData,
-        initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
-        locale: typeof locale === 'object' ? locale?.code : locale,
-        title,
-      } satisfies Omit<
-        Parameters<GenerateDescription>[0],
-        'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
-      >),
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      method: 'POST',
-    })
+    try {
+      const endpoint = formatAdminURL({
+        apiRoute: api,
+        path: '/plugin-seo/generate-description',
+      })
 
-    const { result: generatedDescription } = await genDescriptionResponse.json()
+      const genDescriptionResponse = await fetch(endpoint, {
+        body: JSON.stringify({
+          id: docInfo.id,
+          collectionSlug: docInfo.collectionSlug,
+          doc: getData(),
+          docPermissions: docInfo.docPermissions,
+          globalSlug: docInfo.globalSlug,
+          hasPublishPermission: docInfo.hasPublishPermission,
+          hasSavePermission: docInfo.hasSavePermission,
+          initialData: docInfo.initialData,
+          initialState: reduceToSerializableFields(docInfo.initialState ?? {}),
+          locale: typeof locale === 'object' ? locale?.code : locale,
+          title,
+        } satisfies Omit
+          Parameters < GenerateDescription > [0],
+          'collectionConfig' | 'globalConfig' | 'hasPublishedDoc' | 'req' | 'versionCount'
+          >),
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        method: 'POST',
+      })
 
-    setValue(generatedDescription || '')
+      const { result: generatedDescription } = await genDescriptionResponse.json()
+
+      setValue(generatedDescription || '')
+    } finally {
+      setIsLoading(false)
+    }
   }, [
     hasGenerateDescriptionFn,
 
@@ -143,7 +152,8 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
             <React.Fragment>
               &nbsp; &mdash; &nbsp;
               <button
-                disabled={readOnly}
+                aria-busy={isLoading}
+                disabled={readOnly || isLoading}
                 onClick={() => {
                   void regenerateDescription()
                 }}
@@ -152,13 +162,17 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
                   backgroundColor: 'transparent',
                   border: 'none',
                   color: 'currentcolor',
-                  cursor: 'pointer',
+                  cursor: isLoading ? 'wait' : 'pointer',
                   padding: 0,
                   textDecoration: 'underline',
                 }}
                 type="button"
               >
-                {t('plugin-seo:autoGenerate')}
+                {isLoading ? (
+                  <Spinner loadingText={null} size="sm" />
+                ) : (
+                  t('plugin-seo:autoGenerate')
+                )}
               </button>
             </React.Fragment>
           )}
@@ -169,7 +183,7 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
           }}
         >
           {t('plugin-seo:lengthTipDescription', { maxLength, minLength })}
-          <a
+          
             href="https://developers.google.com/search/docs/advanced/appearance/snippet#meta-descriptions"
             rel="noopener noreferrer"
             target="_blank"
@@ -208,6 +222,6 @@ export const MetaDescriptionComponent: React.FC<MetaDescriptionProps> = (props) 
       >
         <LengthIndicator maxLength={maxLength} minLength={minLength} text={value} />
       </div>
-    </div>
+    </div >
   )
 }
