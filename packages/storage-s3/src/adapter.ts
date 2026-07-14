@@ -7,7 +7,7 @@ import type {
 
 import type { SignedDownloadsConfig } from './getFile.js'
 
-import { generateUploadInstructions } from './generateSignedURL.js'
+import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
 
 interface CreateS3AdapterArgs {

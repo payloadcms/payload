@@ -6,7 +6,7 @@ import type {
 } from '@payloadcms/plugin-cloud-storage/types'
 
 import { deleteFile } from './deleteFile.js'
-import { generateUploadInstructions } from './generateSignedURL.js'
+import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
 import { uploadFile } from './uploadFile.js'
