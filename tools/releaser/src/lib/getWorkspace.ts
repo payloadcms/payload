@@ -8,6 +8,8 @@ import pLimit from 'p-limit'
 import path from 'path'
 import semver from 'semver'
 
+import type { PublishResult } from './runPublishSequence.js'
+
 import { getPackageDetails } from './getPackageDetails.js'
 import { isVersionPublished } from './getPackageRegistryVersions.js'
 import { packagePublishList } from './publishList.js'
@@ -30,12 +32,6 @@ type PackageDetails = {
 }
 
 type PackageReleaseType = 'canary' | 'internal' | 'internal-debug' | ReleaseType
-
-type PublishResult = {
-  name: string
-  success: boolean
-  details?: string
-}
 
 type PublishOpts = {
   dryRun?: boolean
@@ -216,7 +212,10 @@ async function publishPackageThrottled(pkg: PackageDetails, opts?: { dryRun?: bo
   return npmPublishLimit(() => publishSinglePackage(pkg, { dryRun }))
 }
 
-export async function publishSinglePackage(pkg: PackageDetails, opts: PublishOpts) {
+export async function publishSinglePackage(
+  pkg: PackageDetails,
+  opts: PublishOpts,
+): Promise<PublishResult> {
   const { dryRun, tag = 'canary' } = opts
 
   if (!dryRun && (await isVersionPublished({ name: pkg.name, version: pkg.version }))) {
