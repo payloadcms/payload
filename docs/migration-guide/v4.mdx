@@ -985,7 +985,7 @@ azureStorage({
 })
 ```
 
-If `chunkLargeFiles` was the only property, collapse the object to `clientUploads: true`; otherwise just delete the `chunkLargeFiles` line. Behaviour is unchanged — chunking is always on in v4.
+Run `npx @payloadcms/codemod --transform migrate-azure-chunk-large-files` to remove the flag automatically (it collapses `clientUploads: { chunkLargeFiles: true }` to `clientUploads: true` and keeps any other `clientUploads` options).
 
 ### `FileSizeImproved` removed — use `FileSize` ([#16593](https://github.com/payloadcms/payload/pull/16593))
 
