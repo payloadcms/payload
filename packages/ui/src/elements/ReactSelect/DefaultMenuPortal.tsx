@@ -17,6 +17,10 @@ type FloatingMenuPortalStyle = {
   '--rs-floating-menu-max-height'?: string
 } & CSSProperties
 
+type ThemedMenuPortalInnerProps = {
+  'data-theme'?: string
+} & React.JSX.IntrinsicElements['div']
+
 type DefaultMenuPortalProps<
   Opt,
   IsMulti extends boolean,
@@ -110,12 +114,12 @@ export function DefaultMenuPortal<Opt, IsMulti extends boolean, Group extends Gr
   }, [appendTo, controlElement, updatePosition])
 
   if (!appendTo || !controlElement) {
-    return (
-      <rsComponents.MenuPortal
-        {...props}
-        innerProps={{ ...innerProps, 'data-theme': menuPortalTheme ?? theme }}
-      />
-    )
+    const themedInnerProps: ThemedMenuPortalInnerProps = {
+      ...innerProps,
+      'data-theme': menuPortalTheme ?? theme,
+    }
+
+    return <rsComponents.MenuPortal {...props} innerProps={themedInnerProps} />
   }
 
   const { className, style, ...restInnerProps } = innerProps
