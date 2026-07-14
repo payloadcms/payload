@@ -12,12 +12,12 @@ import { nextServerAdapter } from './server.js'
 import '@payloadcms/ui/scss/app.scss'
 
 const inter = Inter({
-  subsets: ['latin'],
+  subsets: ['latin', 'latin-ext', 'cyrillic', 'cyrillic-ext', 'greek', 'greek-ext', 'vietnamese'],
   variable: '--font-family-sans',
 })
 
 const robotoMono = Roboto_Mono({
-  subsets: ['latin'],
+  subsets: ['latin', 'latin-ext', 'cyrillic', 'cyrillic-ext', 'greek', 'vietnamese'],
   variable: '--font-family-mono',
 })
 
