@@ -11,6 +11,7 @@ import semver from 'semver'
 import { getPackageDetails } from './getPackageDetails.js'
 import { isVersionPublished } from './getPackageRegistryVersions.js'
 import { packagePublishList } from './publishList.js'
+import { runPublishSequence } from './runPublishSequence.js'
 
 const npmPublishLimit = pLimit(5)
 const cwd = PROJECT_ROOT
@@ -65,37 +66,13 @@ export const getWorkspace = async () => {
     }
   }
 
-  // Publish one package at a time
+  // Publish one package at a time, fail-fast at the first failure.
   const publishSync: Workspace['publishSync'] = async ({ dryRun, tag = 'canary' }) => {
     const packageDetails = await getPackageDetails(packagePublishList)
-    const results: PublishResult[] = []
-    for (const pkg of packageDetails) {
-      const res = await publishSinglePackage(pkg, { dryRun, tag })
-      results.push(res)
-    }
-
-    console.log(`\n\nResults:\n`)
-
-    console.log(
-      results
-        .map((result) => {
-          if (!result.success) {
-            console.error(result.details)
-            return `  ❌ ${result.name}`
-          }
-          return `  ✅ ${result.name}`
-        })
-        .join('\n') + '\n',
-    )
-
-    const failed = results.filter((result) => !result.success)
-    if (failed.length > 0) {
-      throw new Error(
-        `${failed.length} of ${results.length} package(s) failed to publish: ${failed
-          .map((result) => result.name)
-          .join(', ')}`,
-      )
-    }
+    await runPublishSequence({
+      packages: packageDetails,
+      publishOne: (pkg) => publishSinglePackage(pkg, { dryRun, tag }),
+    })
   }
 
   const publish = async () => {
