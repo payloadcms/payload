@@ -50,6 +50,11 @@ window.__vite_plugin_react_preamble_installed__ = true
                 : chunk instanceof Uint8Array
                   ? Buffer.from(chunk).toString()
                   : null
+          // Skip if a host already injected the preamble — a second copy breaks HMR.
+          if (str && str.includes('__vite_plugin_react_preamble_installed__')) {
+            injected = true
+            return chunk
+          }
           if (str && str.includes('</head>')) {
             injected = true
             return str.replace('</head>', `${devScripts}</head>`)
