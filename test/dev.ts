@@ -32,7 +32,11 @@ const dirname = path.dirname(filename)
 const {
   _: [_testSuiteArg = '_community'],
   ...args
-} = minimist(process.argv.slice(2))
+} = minimist(process.argv.slice(2), {
+  // Treat framework flags as boolean so a trailing suite positional
+  // (e.g. `--framework-tanstack-start admin`) isn't consumed as the flag's value.
+  boolean: ['framework-next', 'framework-tanstack-start'],
+})
 
 let testSuiteArg: string | undefined
 let testSuiteConfigOverride: string | undefined
