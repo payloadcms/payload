@@ -43,7 +43,7 @@ type Workspace = {
   tag: string
   packages: PackageDetails[]
   showVersions: () => Promise<void>
-  bumpVersion: (type: PackageReleaseType) => Promise<void>
+  bumpVersion: (type: PackageReleaseType, opts?: { preid?: 'beta' | 'canary' }) => Promise<string>
   build: (opts?: { debug?: boolean }) => Promise<void>
   publish: (opts: PublishOpts) => Promise<void>
   publishSync: (opts: PublishOpts) => Promise<void>
@@ -120,8 +120,12 @@ export const getWorkspace = async () => {
     )
   }
 
-  const bumpVersion = async (bumpType: PackageReleaseType) => {
+  const bumpVersion = async (
+    bumpType: PackageReleaseType,
+    opts?: { preid?: 'beta' | 'canary' },
+  ): Promise<string> => {
     const { version: monorepoVersion, packages: packageDetails } = await getCurrentPackageState()
+    const { preid } = opts ?? {}
 
     let nextReleaseVersion
     if (bumpType === 'internal') {
@@ -130,6 +134,13 @@ export const getWorkspace = async () => {
     } else if (bumpType === 'internal-debug') {
       const hash = execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim().slice(0, 7)
       nextReleaseVersion = semver.inc(monorepoVersion, 'minor') + `-internal-debug.${hash}`
+    } else if (
+      bumpType === 'premajor' ||
+      bumpType === 'preminor' ||
+      bumpType === 'prepatch' ||
+      bumpType === 'prerelease'
+    ) {
+      nextReleaseVersion = semver.inc(monorepoVersion, bumpType, undefined, preid)
     } else if (bumpType === 'canary') {
       const minorCandidateBaseVersion = semver.inc(monorepoVersion, 'minor')
 
@@ -181,6 +192,7 @@ export const getWorkspace = async () => {
     )
 
     await setVersion(nextReleaseVersion)
+    return nextReleaseVersion
   }
 
   const workspace: Workspace = {
