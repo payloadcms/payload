@@ -1,5 +1,5 @@
 @layer payload-default {
-  .widget-card {
+  .card.widget-card {
     --widget-card-visible-rows: 5;
     --widget-card-row-gap: var(--spacer-1);
     --widget-card-row-height: 40px;
