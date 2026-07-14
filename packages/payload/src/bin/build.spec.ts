@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -113,6 +113,102 @@ describe('resolveBuildCommand', () => {
     })
     expect(bin).toMatch(/vite[\\/].*bin[\\/]vite\.js$/)
     expect(args).toEqual(['build', '--mode', 'staging'])
+  })
+})
+
+// Resolution against isolated fixture projects, complementing the cwd/real-install
+// checks above. Installing a fake package into a real temp node_modules proves
+// `createRequire` walks the consumer's node_modules rather than repo hoisting or
+// vitest's ambient NODE_PATH, and exercises bin-field shapes the real installs don't.
+describe('bin resolution walks the consumer project node_modules', () => {
+  const binFixtureDirs: string[] = []
+
+  /**
+   * Build a throwaway project with a fake installed package whose package.json
+   * carries the given `bin` field. Returns the project root to pass as `cwd`. The
+   * bin target file is created so existsSync assertions are meaningful.
+   */
+  const makeProjectWithPackage = ({
+    binField,
+    binRelPath,
+    packageName,
+  }: {
+    binField: unknown
+    binRelPath?: string
+    packageName: string
+  }): string => {
+    // realpath so exact path comparisons hold on macOS, where /var symlinks to
+    // /private/var and require.resolve returns the resolved path.
+    const root = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'payload-build-bin-')))
+    binFixtureDirs.push(root)
+    writeFileSync(path.join(root, 'package.json'), JSON.stringify({ name: 'fixture-app' }))
+
+    const pkgDir = path.join(root, 'node_modules', packageName)
+    mkdirSync(pkgDir, { recursive: true })
+    writeFileSync(
+      path.join(pkgDir, 'package.json'),
+      JSON.stringify({ bin: binField, name: packageName, version: '0.0.0' }),
+    )
+
+    if (binRelPath) {
+      const binFull = path.join(pkgDir, binRelPath)
+      mkdirSync(path.dirname(binFull), { recursive: true })
+      writeFileSync(binFull, '')
+    }
+
+    return root
+  }
+
+  afterEach(() => {
+    for (const dir of binFixtureDirs) {
+      rmSync(dir, { force: true, recursive: true })
+    }
+    binFixtureDirs.length = 0
+  })
+
+  it('resolves the next bin from an isolated project using the object-form bin field', () => {
+    const root = makeProjectWithPackage({
+      binField: { next: './dist/bin/next' },
+      binRelPath: 'dist/bin/next',
+      packageName: 'next',
+    })
+
+    const binPath = resolveNextBin(root)
+
+    expect(binPath).toBe(path.join(root, 'node_modules', 'next', 'dist', 'bin', 'next'))
+    expect(existsSync(binPath)).toBe(true)
+  })
+
+  it('resolves the vite bin from an isolated project using the object-form bin field', () => {
+    const root = makeProjectWithPackage({
+      binField: { vite: 'bin/vite.js' },
+      binRelPath: 'bin/vite.js',
+      packageName: 'vite',
+    })
+
+    const binPath = resolveViteBin(root)
+
+    expect(binPath).toBe(path.join(root, 'node_modules', 'vite', 'bin', 'vite.js'))
+    expect(existsSync(binPath)).toBe(true)
+  })
+
+  it('resolves a string-form bin field', () => {
+    const root = makeProjectWithPackage({
+      binField: './cli.js',
+      binRelPath: 'cli.js',
+      packageName: 'vite',
+    })
+
+    const binPath = resolveViteBin(root)
+
+    expect(binPath).toBe(path.join(root, 'node_modules', 'vite', 'cli.js'))
+    expect(existsSync(binPath)).toBe(true)
+  })
+
+  it('throws a clear error when the package declares no bin field', () => {
+    const root = makeProjectWithPackage({ binField: undefined, packageName: 'vite' })
+
+    expect(() => resolveViteBin(root)).toThrow(/binary path/i)
   })
 })
 
