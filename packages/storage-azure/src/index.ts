@@ -45,7 +45,13 @@ export type AzureStorageOptions = {
   clientCacheKey?: string
 
   /**
-   * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method to your website.
+   * Do uploads directly on the client to bypass limits on Vercel.
+   *
+   * Client uploads use the Azure Blob SDK, which splits large files into blocks
+   * (avoiding the ~5GB limit of a single upload request). The SDK sends `x-ms-*`
+   * headers, so the browser issues a CORS preflight: your storage account's CORS
+   * rules must allow the `OPTIONS` and `PUT` methods and the required headers
+   * (allowed headers `*`, or at minimum `x-ms-*,content-type,content-length`).
    */
   clientUploads?: ClientUploadsConfig
 
