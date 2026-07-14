@@ -64,4 +64,18 @@ describe('findChangelogBaseTag', () => {
 
     expect(base).toBeUndefined()
   })
+
+  it('should ignore a published different-major same-line tag entirely (no cross-major base)', async () => {
+    const isPublished = vi.fn(async () => true)
+
+    const base = await findChangelogBaseTag({
+      version: '4.0.0-beta.0',
+      listTags: () => ['v3.99.0-beta.9'],
+      isPublished,
+    })
+
+    // Only candidate is a v3 beta; same-major filter excludes it, so there is no base.
+    // (If the major filter were removed, this would wrongly return 'v3.99.0-beta.9'.)
+    expect(base).toBeUndefined()
+  })
 })
