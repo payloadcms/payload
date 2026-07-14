@@ -3,20 +3,12 @@ import type { PluginOption } from 'vite'
 /**
  * Stubs `prettier` in the CLIENT bundle only.
  *
- * `payload`'s barrel transitively pulls `configToJSONSchema` →
- * `json-schema-to-typescript` → `prettier` (CommonJS) into the client module
- * graph through re-export side effects. That path is type-generation only
- * (`payload generate:types`) and never runs in the browser, but the bundler
- * still drags `prettier`'s `index.cjs` in — where it fails to parse as ESM and
- * breaks the client build.
+ * `payload`'s barrel transitively pulls `json-schema-to-typescript` → `prettier`
+ * (CommonJS) into the client graph. That path is type-gen only and never runs in
+ * the browser, but the bundler still drags in `prettier`'s `index.cjs`, which
+ * fails to parse as ESM and breaks the client build. SSR/RSC keep real prettier.
  *
- * We redirect `prettier` to a no-op `format` stub in the client environment
- * only. SSR/RSC keep the real `prettier` (there `json-schema-to-typescript`
- * stays external and resolves it from `node_modules`), and the `prettier` CLI /
- * `payload generate:types` are unaffected.
- *
- * Delete this once `payload`'s barrel no longer reaches the type-gen path from
- * the client-reachable export graph.
+ * Delete once `payload`'s barrel no longer reaches type-gen from the client graph.
  */
 export function stubPrettierInClient(): PluginOption {
   const RESOLVED_ID = '\0payload:prettier-client-stub'
@@ -29,11 +21,12 @@ export function stubPrettierInClient(): PluginOption {
         return 'export const format = (source) => source;\nexport default { format };'
       }
     },
-    resolveId(id, _importer, options) {
+    resolveId(id, importer, options) {
       if (options?.ssr) {
         return
       }
-      if (id === 'prettier') {
+      // Only stub the type-gen import; leave a host's own client `prettier` alone.
+      if (id === 'prettier' && importer?.includes('json-schema-to-typescript')) {
         return RESOLVED_ID
       }
     },

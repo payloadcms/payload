@@ -55,6 +55,9 @@ export default defineConfig(
     additionalIgnoreImporters: [
       /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
     ],
+    // In the monorepo, Payload's `.client.*` files resolve to `packages/*/src`
+    // (not `node_modules`), so exempt them from the `.client.*` SSR denial too.
+    clientDenialExcludeFiles: ['**/packages/*/src/**'],
     payloadConfigPath: path.resolve(__dirname, testSuite, 'config.ts'),
     routesDirectory: 'app',
     srcDirectory,

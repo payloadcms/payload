@@ -110,13 +110,27 @@ const tsOptions = payloadTanstackStartOptions()
 if (tsOptions.rsc?.enabled !== true) {
   errors.push('payloadTanstackStartOptions missing rsc.enabled')
 }
-if (tsOptions.router?.autoCodeSplitting !== false) {
-  errors.push('payloadTanstackStartOptions missing router.autoCodeSplitting: false')
+// Admin routes are eager (splitBehavior returns []); host routes keep splitting
+// (undefined → TanStack default).
+const splitBehavior = tsOptions.router?.codeSplittingOptions?.splitBehavior
+if (typeof splitBehavior !== 'function') {
+  errors.push('payloadTanstackStartOptions missing router.codeSplittingOptions.splitBehavior')
+} else {
+  const adminGroupings = splitBehavior({ routeId: '/_payload/admin/$' })
+  if (!Array.isArray(adminGroupings) || adminGroupings.length !== 0) {
+    errors.push('splitBehavior must return [] for admin routes (eager, no split)')
+  }
+  if (splitBehavior({ routeId: '/' }) !== undefined) {
+    errors.push('splitBehavior must return undefined for host routes (keep default splitting)')
+  }
 }
-// Payload redefines `.client.*` as SSR-able client components, so TanStack's
-// default `.client.*` SSR denial must be disabled (else it mocks + crashes them).
-if (tsOptions.importProtection?.server?.files?.length !== 0) {
-  errors.push('payloadTanstackStartOptions must disable the .client.* SSR denial (server.files: [])')
+// The `.client.*` SSR denial stays on (host files keep it); Payload's own
+// `.client.*` are exempted by excluding `node_modules` rather than disabling it.
+if (tsOptions.importProtection?.server?.files !== undefined) {
+  errors.push('payloadTanstackStartOptions must not override server.files (keep TanStack default)')
+}
+if (!tsOptions.importProtection?.server?.excludeFiles?.includes('**/node_modules/**')) {
+  errors.push('payloadTanstackStartOptions must exempt node_modules from the .client.* SSR denial')
 }
 if (typeof payloadReactOptions().include === 'undefined') {
   errors.push('payloadReactOptions missing include')

@@ -1,5 +1,7 @@
 import type { ConfigEnv, Logger, PluginOption, UserConfig, UserConfigFnObject } from 'vite'
 
+// Optional peers, not deps: `plugin-rsc` is a singleton, so bundling our own copy
+// alongside the host's would load two instances and crash.
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import rsc from '@vitejs/plugin-rsc'
@@ -63,6 +65,10 @@ function applyDependencyWarningSuppression(config: UserConfig, enabled: boolean)
 export type WithPayloadOptions = {
   /** Extra import-protection `ignoreImporters` patterns for the TanStack Start plugin. */
   additionalIgnoreImporters?: RegExp[]
+  /** Route id of Payload's admin layout, eager-loaded instead of code-split. Defaults to `'/_payload'`. */
+  adminRouteId?: string
+  /** Extra globs exempted from the `.client.*` SSR denial (beyond the default node_modules exemption). */
+  clientDenialExcludeFiles?: string[]
   /** Path to the user's `payload.config.ts` (required) */
   payloadConfigPath: string
   /** TanStack router routes directory relative to `srcDirectory`. Defaults to `'app'` */
@@ -127,6 +133,8 @@ export function withPayload(
 ): UserConfigFnObject {
   const {
     additionalIgnoreImporters = [],
+    adminRouteId,
+    clientDenialExcludeFiles = [],
     payloadConfigPath,
     routesDirectory = 'app',
     silenceDependencyWarnings = true,
@@ -198,6 +206,8 @@ export function withPayload(
       rsc: payloadRscOptions(),
       tanstackStart: payloadTanstackStartOptions({
         additionalIgnoreImporters,
+        adminRouteId,
+        clientDenialExcludeFiles,
         routesDirectory,
         srcDirectory,
       }),
@@ -236,6 +246,18 @@ export function payloadReactOptions(): NonNullable<Parameters<typeof viteReact>[
 export type PayloadTanstackStartOptionsArgs = {
   /** Additional import-protection `ignoreImporters` patterns. */
   additionalIgnoreImporters?: RegExp[]
+  /**
+   * Route id of Payload's admin layout route, eager-loaded (not code-split) so it
+   * hydrates on first paint. It and its children skip splitting; host routes keep
+   * TanStack's default. Defaults to `'/_payload'` (the `_payload.tsx` convention).
+   */
+  adminRouteId?: string
+  /**
+   * Extra globs exempted from TanStack's `.client.*` SSR denial, on top of the
+   * default node_modules exemption. Needed only when Payload's own `.client.*`
+   * files resolve outside node_modules (e.g. the monorepo's `packages` sources).
+   */
+  clientDenialExcludeFiles?: string[]
   /** TanStack router routes directory relative to `srcDirectory`. Defaults to `'app'`. */
   routesDirectory?: string
   /** TanStack source directory. Defaults to `'src'`. */
@@ -250,7 +272,13 @@ export type PayloadTanstackStartOptionsArgs = {
 export function payloadTanstackStartOptions(
   args: PayloadTanstackStartOptionsArgs = {},
 ): NonNullable<Parameters<typeof tanstackStart>[0]> {
-  const { additionalIgnoreImporters = [], routesDirectory = 'app', srcDirectory = 'src' } = args
+  const {
+    additionalIgnoreImporters = [],
+    adminRouteId = '/_payload',
+    clientDenialExcludeFiles = [],
+    routesDirectory = 'app',
+    srcDirectory = 'src',
+  } = args
 
   return {
     importProtection: {
@@ -259,22 +287,22 @@ export function payloadTanstackStartOptions(
       include: ['**/*'],
       mockAccess: 'warn',
       onViolation: onImportProtectionViolation,
-      // Payload uses the `.client.*` suffix for React Client Components that must
-      // be server-rendered during SSR — its convention app-wide, including host
-      // code. TanStack's default rule denies `**/*.client.*` in the server
-      // environment (client-only semantics), which collides: it would mock those
-      // components and crash React. Filenames can't distinguish the two
-      // conventions, so disable the default `.client.*` denial entirely.
-      server: { files: [] },
+      // Payload's `.client.*` components are React Client Components that must be
+      // server-rendered during SSR; TanStack's default `**/*.client.*` server
+      // denial would mock and crash them. All such files live in `@payloadcms/*`
+      // packages, so keep the denial (host `.client.*` files still get it) and
+      // just exempt Payload's — `node_modules` covers published installs.
+      server: { excludeFiles: ['**/node_modules/**', ...clientDenialExcludeFiles] },
     },
-    // Disable per-route code-splitting so route components ship in the initial
-    // bundle and hydrate on first paint — otherwise the admin renders but isn't
-    // interactive until each lazy `?tsr-split=` chunk lands. `defaultBehavior:
-    // []` is the knob the splitter actually honours; `autoCodeSplitting: false`
-    // is a belt-and-braces signal (the plugin's schema strips it).
     router: {
-      autoCodeSplitting: false,
-      codeSplittingOptions: { defaultBehavior: [] },
+      codeSplittingOptions: {
+        // Eager-load only Payload's admin routes so they hydrate on first paint —
+        // a split admin renders but isn't interactive until its lazy `?tsr-split=`
+        // chunk lands. Returning `[]` disables splitting for a route; `undefined`
+        // lets host routes keep TanStack's default per-route splitting.
+        splitBehavior: ({ routeId }: { routeId: string }) =>
+          routeId === adminRouteId || routeId.startsWith(`${adminRouteId}/`) ? [] : undefined,
+      },
       // Ignore generated importMap files and colocated `*.functions.ts` modules
       // (they define `createServerFn`s, not routes).
       routeFileIgnorePattern: 'importMap\\.(?:js|server\\.ts)$|\\.functions\\.',
