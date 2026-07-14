@@ -1,4 +1,4 @@
-import type { ClientUser, PayloadRequest, SanitizedPermissions } from 'payload'
+import type { PayloadRequest, SanitizedPermissions, User } from 'payload'
 
 import { getAccessResults } from 'payload'
 
@@ -12,7 +12,7 @@ export type GlobalLockData = {
   data: {
     _isLocked: boolean
     _lastEditedAt: string
-    _userEditing: ClientUser | number | string
+    _userEditing: number | string | User
   }
   lockDuration?: number
   slug: string
