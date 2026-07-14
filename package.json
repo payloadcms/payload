@@ -159,6 +159,7 @@
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@types/shelljs": "0.8.15",
+    "@typescript/native": "catalog:",
     "@vitest/ui": "4.1.6",
     "ai": "6.0.206",
     "axe-core": "4.11.0",
