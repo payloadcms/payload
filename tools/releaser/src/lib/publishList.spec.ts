@@ -34,6 +34,9 @@ describe('packagePublishList topological order (turbo-derived)', () => {
     const publishSet = new Set(packagePublishList)
     const positions = new Map(packagePublishList.map((short, index) => [short, index]))
 
+    expect(buildTasks.length).toBeGreaterThan(0)
+
+    let comparisonsChecked = 0
     const violations: string[] = []
     for (const task of buildTasks) {
       const short = shortByPackage.get(task.package)
@@ -45,12 +48,14 @@ describe('packagePublishList topological order (turbo-derived)', () => {
         if (!depShort || !publishSet.has(depShort) || depShort === short) {
           continue
         }
+        comparisonsChecked++
         if (positions.get(depShort)! > positions.get(short)!) {
           violations.push(`${depShort} must precede ${short}`)
         }
       }
     }
 
+    expect(comparisonsChecked).toBeGreaterThan(0)
     expect(violations).toEqual([])
   }, 120_000)
 })
