@@ -3,11 +3,16 @@ import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/clie
 
 import { handleAzureUpload } from './handleAzureUpload.js'
 
-export const AzureClientUploadHandler = createClientUploadHandler({
+export type AzureClientUploadHandlerExtra = {
+  chunkLargeFiles: boolean
+}
+
+export const AzureClientUploadHandler = createClientUploadHandler<AzureClientUploadHandlerExtra>({
   handler: async ({
     apiRoute,
     collectionSlug,
     docPrefix,
+    extra: { chunkLargeFiles },
     file,
     serverHandlerPath,
     serverURL,
@@ -15,6 +20,7 @@ export const AzureClientUploadHandler = createClientUploadHandler({
   }) => {
     return handleAzureUpload({
       apiRoute,
+      chunkLargeFiles,
       collectionSlug,
       docPrefix,
       file,

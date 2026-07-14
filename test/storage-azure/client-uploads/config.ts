@@ -49,7 +49,9 @@ export default buildConfigWithDefaults({
       },
       allowContainerCreate: process.env.AZURE_STORAGE_ALLOW_CONTAINER_CREATE === 'true',
       baseURL: process.env.AZURE_STORAGE_ACCOUNT_BASEURL!,
-      clientUploads: true,
+      clientUploads: {
+        chunkLargeFiles: true,
+      },
       connectionString: process.env.AZURE_STORAGE_CONNECTION_STRING!,
       containerName: process.env.AZURE_STORAGE_CONTAINER_NAME!,
     }),

@@ -1,5 +1,5 @@
 import type {
-  ClientUploadsConfig,
+  ClientUploadsAccess,
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
 } from '@payloadcms/plugin-cloud-storage/types'
@@ -11,6 +11,20 @@ import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 import { createAzureAdapter } from './adapter.js'
 import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 import { getStorageClient as getStorageClientFunc } from './utils/getStorageClient.js'
+
+export type AzureClientUploadsConfig =
+  | {
+      access?: ClientUploadsAccess
+      /**
+       * Upload large files in blocks via the Azure Blob SDK, lifting the ~5GB
+       * single-request limit. Requires broader CORS on the storage account
+       * (the `OPTIONS`/`PUT` methods and `x-ms-*` headers).
+       *
+       * @default false
+       */
+      chunkLargeFiles?: boolean
+    }
+  | boolean
 
 export type AzureStorageOptions = {
   /**
@@ -45,15 +59,16 @@ export type AzureStorageOptions = {
   clientCacheKey?: string
 
   /**
-   * Do uploads directly on the client to bypass limits on Vercel.
+   * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method to your website.
    *
-   * Client uploads use the Azure Blob SDK, which splits large files into blocks
-   * (avoiding the ~5GB limit of a single upload request). The SDK sends `x-ms-*`
-   * headers, so the browser issues a CORS preflight: your storage account's CORS
-   * rules must allow the `OPTIONS` and `PUT` methods and the required headers
-   * (allowed headers `*`, or at minimum `x-ms-*,content-type,content-length`).
+   * Set `chunkLargeFiles: true` to upload through the Azure Blob SDK, which splits
+   * large files into blocks and lifts the ~5GB single-request limit. The SDK sends
+   * additional `x-ms-*` headers, so your storage account's CORS rules must allow the
+   * `OPTIONS` and `PUT` methods and those headers (allowed headers `*`, or at minimum
+   * `x-ms-*,content-type,content-length`). Left off, uploads use a single request
+   * (the default) and are capped at ~5GB.
    */
-  clientUploads?: ClientUploadsConfig
+  clientUploads?: AzureClientUploadsConfig
 
   /**
    * Collection options to apply the Azure Blob adapter to.
@@ -110,6 +125,12 @@ export const azureStorage: AzureStoragePlugin =
       collections: azureStorageOptions.collections,
       config: incomingConfig,
       enabled: !isPluginDisabled && Boolean(azureStorageOptions.clientUploads),
+      extraClientHandlerProps: () => ({
+        chunkLargeFiles:
+          typeof azureStorageOptions.clientUploads === 'object'
+            ? Boolean(azureStorageOptions.clientUploads.chunkLargeFiles)
+            : false,
+      }),
       serverHandler: getGenerateSignedURLHandler({
         access:
           typeof azureStorageOptions.clientUploads === 'object'

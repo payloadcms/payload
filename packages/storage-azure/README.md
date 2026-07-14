@@ -16,11 +16,22 @@ pnpm add @payloadcms/storage-azure
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
 - When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client.
 
-### Client uploads and CORS
+### Large client uploads (files over ~5GB)
 
-Client uploads (`clientUploads: true`) use the Azure Blob SDK, which splits large files into blocks and therefore avoids the ~5GB limit of a single upload request. Because the SDK sends `x-ms-*` headers, the browser issues a CORS preflight, so your storage account's CORS rules must allow the `OPTIONS` and `PUT` methods **and** the required headers.
+By default, client uploads (`clientUploads: true`) send each file in a single request, which Azure caps at ~5GB. To upload larger files, set `chunkLargeFiles: true`:
 
-Configure a CORS rule on the Blob service (Storage account → **Resource sharing (CORS)**):
+```ts
+azureStorage({
+  // ...
+  clientUploads: {
+    chunkLargeFiles: true,
+  },
+})
+```
+
+This uploads through the Azure Blob SDK, which splits the file into blocks (`Put Block` + `Put Block List`) and raises the limit to Azure's block-blob maximum (~190TiB).
+
+Because the SDK sends additional `x-ms-*` headers, the browser issues a CORS preflight, so your storage account's CORS rules must allow the `OPTIONS` and `PUT` methods **and** those headers. Configure a CORS rule on the Blob service (Storage account → **Resource sharing (CORS)**):
 
 | Field           | Value                                                    |
 | --------------- | -------------------------------------------------------- |
@@ -29,8 +40,6 @@ Configure a CORS rule on the Blob service (Storage account → **Resource sharin
 | Allowed headers | `*` (or at minimum `x-ms-*,content-type,content-length`) |
 | Exposed headers | `*`                                                      |
 | Max age         | `3600`                                                   |
-
-> If you previously configured CORS for the older single-`PUT` upload flow, broaden `Allowed headers` to include the `x-ms-*` headers when upgrading.
 
 ```ts
 import { azureStorage } from '@payloadcms/storage-azure'
