@@ -1,12 +1,15 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type {
+  AuthenticatedUser,
   BulkOperationResult,
   CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
   GeneratedTypes,
   JoinQuery,
+  MeOperationResult,
   PaginatedDocs,
+  PayloadRequest,
   PayloadTypesShape,
   SelectType,
   TypedCollectionSelect,
@@ -76,6 +79,13 @@ import type {
 } from './payload-types.js'
 
 describe('Types testing', () => {
+  describe('authenticated user', () => {
+    test('should use AuthenticatedUser for request and me operation users', () => {
+      expect<PayloadRequest['user']>().type.toBe<AuthenticatedUser | null>()
+      expect<MeOperationResult['user']>().type.toBe<AuthenticatedUser | null | undefined>()
+    })
+  })
+
   test('payload.find', () => {
     expect(payload.find({ collection: 'users' })).type.toBe<Promise<PaginatedDocs<User>>>()
   })

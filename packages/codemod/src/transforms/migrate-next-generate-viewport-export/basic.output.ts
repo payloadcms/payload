@@ -24,10 +24,7 @@ const serverFunction: ServerFunctionClient = async function (args) {
   })
 }
 
-const Layout = ({ children }: Args) => (
-  <RootLayout config={config} importMap={importMap} serverFunction={serverFunction}>
-    {children}
-  </RootLayout>
-)
+const Layout = ({ children }: Args) =>
+  React.createElement(RootLayout, { config, importMap, serverFunction }, children)
 
 export default Layout

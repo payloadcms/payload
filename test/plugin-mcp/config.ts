@@ -155,9 +155,8 @@ export default buildConfigWithDefaults({
         },
         media: {
           description: 'This is a Payload collection with Media documents.',
-          // Partial-disable — find/update remain enabled, create/delete blocked.
+          // Partial-disable — create/find/update remain enabled, delete blocked.
           tools: {
-            create: false,
             delete: false,
           },
         },

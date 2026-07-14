@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientUser } from 'payload'
+import type { User } from 'payload'
 
 import React from 'react'
 
@@ -75,7 +75,7 @@ export type SlotTableProps<TRow = Record<string, unknown>> = {
    * Returns the user who is editing/locking a row, or undefined if not locked.
    * When a user is returned, a lock icon replaces the checkbox for that row.
    */
-  getRowLockedUser?: (row: TRow, index: number) => ClientUser | undefined
+  getRowLockedUser?: (row: TRow, index: number) => undefined | User
   /**
    * Merge checkbox header with first column header using colspan (default: false)
    * The first column header will span both checkbox and content cells

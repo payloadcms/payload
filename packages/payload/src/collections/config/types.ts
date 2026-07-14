@@ -8,7 +8,7 @@ import type {
   Arguments as RefreshArguments,
   Result as RefreshResult,
 } from '../../auth/operations/refresh.js'
-import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
+import type { Auth, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
   AfterErrorHookArgs,
@@ -503,7 +503,7 @@ export type CollectionAdminOptions = {
   /**
    * Exclude the collection from the admin nav and routes
    */
-  hidden?: ((args: { user: ClientUser }) => boolean) | boolean
+  hidden?: ((args: { user: PayloadRequest['user'] }) => boolean) | boolean
   /**
    * Additional fields to be searched via the full text search
    */
