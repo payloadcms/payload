@@ -5,10 +5,7 @@
     position: relative;
     tab-size: 1;
     outline: 0;
-    padding-top: var(--spacer-2);
-    padding-bottom: var(--spacer-2);
-    padding-inline-start: 0;
-    padding-inline-end: 0;
+    padding: var(--spacer-2) var(--spacer-3);
 
     &:focus-visible {
       outline: none !important;
@@ -19,14 +16,19 @@
     }
   }
 
-  .rich-text-lexical--show-gutter
-    > .rich-text-lexical__wrap
-    > .rich-text-lexical__editor-content
-    > .editor-container
-    > .editor-scroller
-    > .editor {
-    > .ContentEditable__root {
+  @media (min-width: 768px) {
+    .ContentEditable__root {
       padding: var(--spacer-4) var(--spacer-5);
+    }
+
+    .rich-text-lexical:not(.rich-text-lexical--show-gutter)
+      > .rich-text-lexical__wrap
+      > .rich-text-lexical__editor-content
+      > .editor-container
+      > .editor-scroller
+      > .editor
+      > .ContentEditable__root {
+      padding: var(--spacer-2) 0;
     }
   }
 
