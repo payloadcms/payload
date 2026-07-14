@@ -45,7 +45,7 @@ export type VercelBlobStorageOptions = {
   cacheControlMaxAge?: number
 
   /**
-   * Use upload instructions to avoid including file bytes in document requests.
+   * Upload directly to Vercel Blob instead of through Payload.
    */
   clientUploads?: ClientUploadsConfig
 

@@ -64,9 +64,9 @@ Admin
   -> creates or updates the document with the completed upload metadata
 ```
 
-For S3, Azure, and GCS, the instructions contain a signed HTTP request and the file uploads directly to storage. Providers that need their own SDK or multipart behavior return a named instruction handled by their Admin helper. The document still goes through Payload's normal validation, image processing, and hooks.
+For S3, Azure, and GCS, the browser uploads the file directly to storage instead of through Payload. Providers that need their own SDK or multipart behavior return a named instruction handled by their Admin helper. Payload then reads the stored file during document creation, so normal validation, image processing, and hooks still run.
 
-This avoids sending large files through the document request. If upload instructions are not enabled, the Admin continues to include the file in the normal create or update request.
+If upload instructions are not enabled, the Admin sends the file through Payload with the normal create or update request.
 
 ## Vercel Blob Storage
 
@@ -118,7 +118,7 @@ export default buildConfig({
 | `addRandomSuffix`      | Add a random suffix to the uploaded file name in Vercel Blob storage                     | `false`                       |
 | `cacheControlMaxAge`   | Cache-Control max-age in seconds                                                         | `365 * 24 * 60 * 60` (1 Year) |
 | `token`                | Vercel Blob storage read/write token                                                     | `''`                          |
-| `clientUploads`        | Use upload instructions to avoid including file bytes in the document request.           |                               |
+| `clientUploads`        | Upload directly to Vercel Blob instead of through Payload.                               |                               |
 | `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it. | `false`                       |
 
 ## S3 Storage
@@ -186,7 +186,7 @@ export default buildConfig({
 | `bucket`               | The name of the S3 bucket                                                                |             |
 | `config`               | `S3ClientConfig` object passed to the AWS SDK client                                     |             |
 | `acl`                  | Access control list for uploaded files (e.g. `'public-read'`)                            | `undefined` |
-| `clientUploads`        | Use upload instructions to avoid including file bytes in the document request            |             |
+| `clientUploads`        | Upload directly to S3 instead of through Payload.                                        |             |
 | `signedDownloads`      | Use presigned URLs for file downloads. Can be overridden per collection                  |             |
 | `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it. | `false`     |
 
@@ -304,7 +304,7 @@ export default buildConfig({
 | `baseURL`              | Base URL for the Azure Blob storage account                                              |         |
 | `connectionString`     | Azure Blob storage connection string                                                     |         |
 | `containerName`        | Azure Blob storage container name                                                        |         |
-| `clientUploads`        | Use upload instructions to avoid including file bytes in the document request.           |         |
+| `clientUploads`        | Upload directly to Azure instead of through Payload.                                     |         |
 | `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it. | `false` |
 
 ## Google Cloud Storage
@@ -357,7 +357,7 @@ export default buildConfig({
 | `bucket`               | The name of the bucket to use                                                                       |           |
 | `options`              | Google Cloud Storage client configuration. See [Docs](https://github.com/googleapis/nodejs-storage) |           |
 | `acl`                  | Access control list for files that are uploaded                                                     | `Private` |
-| `clientUploads`        | Use upload instructions to avoid including file bytes in the document request.                      |           |
+| `clientUploads`        | Upload directly to GCS instead of through Payload.                                                  |           |
 | `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it.            | `false`   |
 
 ## Uploadthing Storage
@@ -396,14 +396,14 @@ export default buildConfig({
 
 ### Configuration Options#uploadthing-configuration
 
-| Option           | Description                                               | Default       |
-| ---------------- | --------------------------------------------------------- | ------------- |
-| `token`          | Token from Uploadthing. Required.                         |               |
-| `acl`            | Access control list for files that are uploaded           | `public-read` |
-| `logLevel`       | Log level for Uploadthing                                 | `info`        |
-| `fetch`          | Custom fetch function                                     | `fetch`       |
-| `defaultKeyType` | Default key type for file operations                      | `fileKey`     |
-| `clientUploads`  | Use upload instructions to avoid document request limits. |               |
+| Option           | Description                                                | Default       |
+| ---------------- | ---------------------------------------------------------- | ------------- |
+| `token`          | Token from Uploadthing. Required.                          |               |
+| `acl`            | Access control list for files that are uploaded            | `public-read` |
+| `logLevel`       | Log level for Uploadthing                                  | `info`        |
+| `fetch`          | Custom fetch function                                      | `fetch`       |
+| `defaultKeyType` | Default key type for file operations                       | `fileKey`     |
+| `clientUploads`  | Upload directly to UploadThing instead of through Payload. |               |
 
 ## R2 Storage
 

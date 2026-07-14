@@ -50,4 +50,4 @@ export default buildConfig({
 | `baseURL`              | Base URL for the Azure Blob storage account                              |         |
 | `connectionString`     | Azure Blob storage connection string                                     |         |
 | `containerName`        | Azure Blob storage container name                                        |         |
-| `clientUploads`        | Use upload instructions to avoid document request limits.                |         |
+| `clientUploads`        | Upload directly to Azure instead of through Payload.                     |         |

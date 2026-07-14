@@ -572,7 +572,7 @@ async function submitFormWithFileIds(
 
 #### Using Upload Instructions for Large Files
 
-If your upload collection uses a storage adapter with `clientUploads` enabled (e.g., S3, Azure, GCS), you can upload files directly to cloud storage for better performance with large files. The upload instructions endpoint returns the URL and headers needed for the direct upload:
+If your upload collection uses a storage adapter with `clientUploads` enabled (e.g., S3, Azure, GCS), the browser can upload files directly to cloud storage instead of through Payload. The upload instructions endpoint returns the URL and headers needed for the direct upload:
 
 ```ts
 async function uploadWithInstructions(file: File, collectionSlug: string) {

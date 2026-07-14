@@ -37,7 +37,7 @@ export interface GcsStorageOptions {
    */
   clientCacheKey?: string
   /**
-   * Use upload instructions to avoid including file bytes in document requests. You must allow CORS PUT requests from your website.
+   * Upload directly to GCS instead of through Payload. You must allow CORS PUT requests from your website.
    */
   clientUploads?: ClientUploadsConfig
   /**

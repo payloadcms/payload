@@ -33,7 +33,7 @@ export type UploadthingStorageOptions = {
   alwaysInsertFields?: boolean
 
   /**
-   * Use upload instructions to avoid including file bytes in document requests.
+   * Upload directly to UploadThing instead of through Payload.
    */
   clientUploads?:
     | {

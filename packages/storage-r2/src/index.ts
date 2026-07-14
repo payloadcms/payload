@@ -27,7 +27,7 @@ export interface R2StorageOptions {
 
   bucket: R2Bucket
   /**
-   * Use upload instructions to avoid including file bytes in document requests.
+   * Upload files in chunks through Payload before document creation.
    */
   clientUploads?: ClientUploadsConfig
   /**

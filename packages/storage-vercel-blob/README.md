@@ -48,4 +48,4 @@ export default buildConfig({
 | `addRandomSuffix`    | Add a random suffix to the uploaded file name in Vercel Blob storage | `false`                       |
 | `cacheControlMaxAge` | Cache-Control max-age in seconds                                     | `365 * 24 * 60 * 60` (1 Year) |
 | `token`              | Vercel Blob storage read/write token                                 | `''`                          |
-| `clientUploads`      | Use upload instructions to avoid document request limits             |                               |
+| `clientUploads`      | Upload directly to Vercel Blob instead of through Payload.           |                               |
