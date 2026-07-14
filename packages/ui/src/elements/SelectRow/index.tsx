@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser } from 'payload'
+import type { User } from 'payload'
 
 import React from 'react'
 
@@ -14,7 +14,7 @@ const baseClass = 'select-row'
 export const SelectRow: React.FC<{
   rowData: {
     _isLocked: boolean
-    _userEditing: ClientUser
+    _userEditing: User
     id: string
   }
 }> = ({ rowData }) => {

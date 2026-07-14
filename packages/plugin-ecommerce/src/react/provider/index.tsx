@@ -8,11 +8,11 @@ import React, { createContext, use, useCallback, useEffect, useMemo, useRef, use
 import type {
   AddressesCollection,
   CartsCollection,
-  ClientUserWithCart,
   ContextProps,
   Currency,
   EcommerceConfig,
   EcommerceContextType,
+  UserWithCart,
 } from '../../types/index.js'
 
 const defaultContext: EcommerceContextType = {
@@ -116,7 +116,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
   const [isLoading, setIsLoading] = useState(false)
 
-  const [user, setUser] = useState<ClientUserWithCart | null>(null)
+  const [user, setUser] = useState<null | UserWithCart>(null)
 
   const [addresses, setAddresses] = useState<AddressesCollection[]>()
 
@@ -660,7 +660,7 @@ export const EcommerceProvider: React.FC<ContextProps> = ({
 
       const userData: {
         error?: string
-        user?: ClientUserWithCart
+        user?: UserWithCart
       } = await response.json()
 
       if (userData.error) {
