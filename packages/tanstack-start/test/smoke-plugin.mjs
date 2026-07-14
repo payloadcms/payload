@@ -16,7 +16,7 @@ import {
   withPayload,
 } from '../dist/exports/vite.js'
 
-const factory = withPayload({
+const factory = withPayload(undefined, {
   payloadConfigPath: '/tmp/fake-payload.config.ts',
 })
 
@@ -80,7 +80,7 @@ if (!config.optimizeDeps.exclude.includes('@payloadcms/ui')) {
 
 // The `vite` override must be merged on top of the defaults: arrays appended,
 // objects deep-merged, and the Payload base preserved.
-const mergedFactory = withPayload({
+const mergedFactory = withPayload(undefined, {
   payloadConfigPath: '/tmp/fake-payload.config.ts',
   vite: {
     optimizeDeps: { include: ['recharts'] },
@@ -142,7 +142,6 @@ if (typeof payloadReactOptions().include === 'undefined') {
 // config (workaround plugins only) plus the required plugin options.
 let builderContext
 const builtConfig = withPayload(
-  { payloadConfigPath: '/tmp/fake-payload.config.ts' },
   (context) => {
     builderContext = context
     return {
@@ -156,6 +155,7 @@ const builtConfig = withPayload(
       server: { port: 4000 },
     }
   },
+  { payloadConfigPath: '/tmp/fake-payload.config.ts' },
 )({ command: 'serve', mode: 'development' })
 
 if (!builderContext) {

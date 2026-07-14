@@ -106,7 +106,7 @@ export type WithPayloadBuilder = (context: WithPayloadBuilderContext) => UserCon
  * Zero-config — Payload instantiates the RSC, React, and TanStack Start plugins:
  *
  * ```ts
- * export default withPayload({ payloadConfigPath: './src/payload.config.ts' })
+ * export default withPayload(undefined, { payloadConfigPath: './src/payload.config.ts' })
  * ```
  *
  * Guest mode — pass a `build` callback to instantiate them yourself (one copy of
@@ -114,7 +114,6 @@ export type WithPayloadBuilder = (context: WithPayloadBuilderContext) => UserCon
  *
  * ```ts
  * export default withPayload(
- *   { payloadConfigPath: './src/payload.config.ts' },
  *   ({ config, pluginOptions }) => ({
  *     ...config,
  *     plugins: [
@@ -124,12 +123,13 @@ export type WithPayloadBuilder = (context: WithPayloadBuilderContext) => UserCon
  *       viteReact(pluginOptions.react),
  *     ],
  *   }),
+ *   { payloadConfigPath: './src/payload.config.ts' },
  * )
  * ```
  */
 export function withPayload(
+  build: undefined | WithPayloadBuilder,
   options: WithPayloadOptions,
-  build?: WithPayloadBuilder,
 ): UserConfigFnObject {
   const {
     additionalIgnoreImporters = [],

@@ -51,7 +51,7 @@ const suiteDir = path.resolve(__dirname, testSuite, 'app-tanstack')
 const srcDirectory = fs.existsSync(suiteDir) ? path.relative(__dirname, suiteDir) : 'app-tanstack'
 
 export default defineConfig(
-  withPayload({
+  withPayload(undefined, {
     additionalIgnoreImporters: [
       /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
     ],
