@@ -9,6 +9,7 @@ import path from 'path'
 import semver from 'semver'
 
 import { getPackageDetails } from './getPackageDetails.js'
+import { isVersionPublished } from './getPackageRegistryVersions.js'
 import { packagePublishList } from './publishList.js'
 
 const npmPublishLimit = pLimit(5)
@@ -238,34 +239,52 @@ async function publishPackageThrottled(pkg: PackageDetails, opts?: { dryRun?: bo
   return npmPublishLimit(() => publishSinglePackage(pkg, { dryRun }))
 }
 
-async function publishSinglePackage(pkg: PackageDetails, opts: PublishOpts) {
-  console.log(`🚀 ${pkg.name} publishing...`)
-
+export async function publishSinglePackage(pkg: PackageDetails, opts: PublishOpts) {
   const { dryRun, tag = 'canary' } = opts
 
+  if (!dryRun && (await isVersionPublished({ name: pkg.name, version: pkg.version }))) {
+    console.log(`⏭️  ${pkg.name}@${pkg.version} already published, skipping`)
+    return { name: pkg.name, success: true }
+  }
+
+  console.log(`🚀 ${pkg.name} publishing...`)
+
+  const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--tag', tag]
+  if (dryRun) {
+    cmdArgs.push('--dry-run')
+  }
+
   try {
-    const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--tag', tag]
-    if (dryRun) {
-      cmdArgs.push('--dry-run')
+    const { exitCode, stderr } = await execa('pnpm', cmdArgs, { cwd, stdio: 'inherit' })
+
+    if (exitCode === 0) {
+      console.log(`✅ ${pkg.name} published`)
+      return { name: pkg.name, success: true }
     }
-    const { exitCode, stderr } = await execa('pnpm', cmdArgs, {
+
+    console.log(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n${stderr}`)
+    console.log(`\nRetrying publish for ${pkg.name}...`)
+    const { exitCode: retryExitCode, stderr: retryStderr } = await execa('pnpm', cmdArgs, {
       cwd,
-      // stdio: ['ignore', 'ignore', 'pipe'],
       stdio: 'inherit',
     })
 
-    if (exitCode !== 0) {
-      console.log(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n${stderr}`)
-
-      return {
-        name: pkg.name,
-        success: false,
-        details: `Exit Code: ${exitCode}, stderr: ${stderr}`,
-      }
+    if (retryExitCode === 0) {
+      console.log(`✅ ${pkg.name} published (on retry)`)
+      return { name: pkg.name, success: true }
     }
 
-    console.log(`✅ ${pkg.name} published`)
-    return { name: pkg.name, success: true }
+    // Publish can report failure even though the version actually landed. Recheck the registry.
+    if (!dryRun && (await isVersionPublished({ name: pkg.name, version: pkg.version }))) {
+      console.log(`✅ ${pkg.name}@${pkg.version} landed despite publish error`)
+      return { name: pkg.name, success: true }
+    }
+
+    return {
+      name: pkg.name,
+      success: false,
+      details: `Exit Code: ${retryExitCode}, stderr: ${retryStderr}`,
+    }
   } catch (err: unknown) {
     console.error(err)
     return {
