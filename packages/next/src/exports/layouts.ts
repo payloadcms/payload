@@ -1,2 +1,3 @@
 export { handleServerFunctions } from '../adapters/handleServerFunctions.js'
-export { generateViewport, metadata, RootLayout } from '../adapters/layout.js'
+export { metadata, RootLayout } from '../adapters/layout.js'
+export { generateViewport as generatePayloadViewport } from '../adapters/viewport.js'

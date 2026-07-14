@@ -27,30 +27,47 @@ export const migrateNextGenerateViewportExport: Transform = {
         continue
       }
 
+      const payloadLayoutsImport = getPayloadLayoutsImport(sourceFile)
+      if (!payloadLayoutsImport) {
+        continue
+      }
+
+      payloadLayoutsImport.insertNamedImport(0, 'generatePayloadViewport')
+
       const lastImport = sourceFile.getImportDeclarations().at(-1)
       if (!lastImport) {
         continue
       }
 
-      sourceFile.insertText(lastImport.getEnd(), '\n\nexport { generateViewport }')
+      const lastImportEnd = lastImport.getEnd()
+
+      sourceFile.insertText(
+        lastImportEnd,
+        `\n\nexport const generateViewport = generatePayloadViewport`,
+      )
       filesChanged.add(sourceFile.getFilePath())
     }
 
     return { filesChanged: [...filesChanged] }
   },
   description:
-    "Adds `export { generateViewport }` to app router layout files that already import Payload's shared viewport helper, preserving Next.js viewport behavior without touching custom viewport implementations.",
+    "Adds a `generateViewport` export to app router layout files that already use Payload's shared Next.js layout, preserving Next.js viewport behavior without touching custom viewport implementations.",
 }
 
 function hasPayloadLayoutsImport(sourceFile: SourceFile): boolean {
-  return sourceFile.getImportDeclarations().some((importDecl) => {
+  return Boolean(getPayloadLayoutsImport(sourceFile))
+}
+
+function getPayloadLayoutsImport(sourceFile: SourceFile) {
+  return sourceFile.getImportDeclarations().find((importDecl) => {
+    const importedNames = new Set(
+      importDecl.getNamedImports().map((specifier) => specifier.getName()),
+    )
+
     return (
       importDecl.getModuleSpecifierValue() === PAYLOAD_LAYOUTS_IMPORT &&
-      importDecl
-        .getNamedImports()
-        .some(
-          (specifier) => specifier.getName() === 'generateViewport' && !specifier.getAliasNode(),
-        )
+      importedNames.has('handleServerFunctions') &&
+      importedNames.has('RootLayout')
     )
   })
 }
