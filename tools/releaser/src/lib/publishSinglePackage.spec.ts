@@ -61,4 +61,14 @@ describe('publishSinglePackage idempotency + retry', () => {
 
     expect(result.success).toBe(true)
   })
+
+  it('should return a failure result (not reject) when the registry pre-check throws', async () => {
+    vi.mocked(isVersionPublished).mockRejectedValue(new Error('registry down'))
+
+    const result = await publishSinglePackage(pkg, { tag: 'canary' })
+
+    expect(result.success).toBe(false)
+    expect(result.details).toContain('registry down')
+    expect(execa).not.toHaveBeenCalled()
+  })
 })

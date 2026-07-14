@@ -47,6 +47,8 @@ export const findChangelogBaseTag = async ({
   const firstPublished = async (list: Candidate[]): Promise<string | undefined> => {
     const sorted = [...list].sort((a, b) => semver.rcompare(a.version, b.version))
     for (const candidate of sorted) {
+      // The monorepo release version tracks the root 'payload' package, so its
+      // registry presence is the proxy for "this version was published".
       if (await isPublished({ name: 'payload', version: candidate.version })) {
         return candidate.tag
       }

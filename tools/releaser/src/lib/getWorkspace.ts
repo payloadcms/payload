@@ -174,7 +174,7 @@ export const getWorkspace = async () => {
       }
     } else {
       throw new Error(
-        `Invalid bump type: ${bumpType}. Only 'internal', 'internal-debug' and 'canary' are supported.`,
+        `Invalid bump type: ${bumpType}. Supported types: internal, internal-debug, canary, premajor, preminor, prepatch, prerelease.`,
       )
     }
 
@@ -230,19 +230,19 @@ export async function publishSinglePackage(
 ): Promise<PublishResult> {
   const { dryRun, tag = 'canary' } = opts
 
-  if (!dryRun && (await isVersionPublished({ name: pkg.name, version: pkg.version }))) {
-    console.log(`⏭️  ${pkg.name}@${pkg.version} already published, skipping`)
-    return { name: pkg.name, success: true }
-  }
-
-  console.log(`🚀 ${pkg.name} publishing...`)
-
-  const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--tag', tag]
-  if (dryRun) {
-    cmdArgs.push('--dry-run')
-  }
-
   try {
+    if (!dryRun && (await isVersionPublished({ name: pkg.name, version: pkg.version }))) {
+      console.log(`⏭️  ${pkg.name}@${pkg.version} already published, skipping`)
+      return { name: pkg.name, success: true }
+    }
+
+    console.log(`🚀 ${pkg.name} publishing...`)
+
+    const cmdArgs = ['publish', '-C', pkg.packagePath, '--no-git-checks', '--tag', tag]
+    if (dryRun) {
+      cmdArgs.push('--dry-run')
+    }
+
     const { exitCode, stderr } = await execa('pnpm', cmdArgs, { cwd, stdio: 'inherit' })
 
     if (exitCode === 0) {

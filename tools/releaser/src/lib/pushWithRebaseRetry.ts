@@ -25,13 +25,13 @@ export const pushWithRebaseRetry = async ({
 }): Promise<void> => {
   const pushCmd = `git push --atomic origin HEAD:main refs/tags/${tag}`
 
+  if (maxRetries < 1) {
+    throw new Error(`maxRetries must be at least 1, got ${maxRetries}`)
+  }
+
   if (dryRun) {
     log(`[dry-run] ${pushCmd}`)
     return
-  }
-
-  if (maxRetries < 1) {
-    throw new Error(`maxRetries must be at least 1, got ${maxRetries}`)
   }
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
