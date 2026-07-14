@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -52,6 +52,7 @@ describe('resolveNextBin', () => {
     // next is installed at the repo root; resolving from cwd must succeed
     const binPath = resolveNextBin(process.cwd())
     expect(binPath).toMatch(/next[\\/].*bin[\\/]next$/)
+    expect(existsSync(binPath)).toBe(true)
   })
 
   it('throws a clear error when next cannot be resolved', () => {
@@ -64,6 +65,7 @@ describe('resolveViteBin', () => {
     // vite is installed at the repo root; resolving from cwd must succeed
     const binPath = resolveViteBin(process.cwd())
     expect(binPath).toMatch(/vite[\\/].*bin[\\/]vite\.js$/)
+    expect(existsSync(binPath)).toBe(true)
   })
 
   it('throws a clear error when vite cannot be resolved', async () => {

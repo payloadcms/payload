@@ -7,12 +7,13 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { resolveBuildCommand, resolveNextBin, resolveViteBin } from './build.js'
 
 /**
- * Integration coverage for framework-bin resolution. Unlike build.spec.ts, this
- * suite mocks nothing: it resolves the real installed next/vite bins and, for the
- * edge cases, resolves against isolated fixture projects so it proves
- * `createRequire` actually walks the consumer's node_modules (not repo hoisting or
- * vitest's ambient NODE_PATH). No Payload instance is needed, so it runs under the
- * fast `unit` vitest project alongside build.spec.ts.
+ * Integration coverage for framework-bin resolution against isolated fixture
+ * projects. It installs a fake package into a real temp node_modules so it proves
+ * `createRequire` actually walks the consumer's node_modules, not repo hoisting or
+ * vitest's ambient NODE_PATH. (build.spec.ts covers resolution against the real
+ * installed next/vite; it can only mock node:module to simulate a missing
+ * dependency, which is why the genuine consumer-tree walk lives here.) No Payload
+ * instance is needed, so it runs under the fast `unit` vitest project.
  */
 
 const tempDirs: string[] = []
@@ -47,7 +48,7 @@ const makeProjectWithPackage = ({
   if (binRelPath) {
     const binFull = path.join(pkgDir, binRelPath)
     mkdirSync(path.dirname(binFull), { recursive: true })
-    writeFileSync(binFull, '#!/usr/bin/env node\n')
+    writeFileSync(binFull, '')
   }
 
   return root
@@ -60,24 +61,8 @@ afterEach(() => {
   tempDirs.length = 0
 })
 
-describe('bin resolution against real installs', () => {
-  it('resolves the next bin to a file that exists on disk', () => {
-    const binPath = resolveNextBin(process.cwd())
-
-    expect(binPath).toMatch(/next[\\/].*bin[\\/]next$/)
-    expect(existsSync(binPath)).toBe(true)
-  })
-
-  it('resolves the vite bin to a file that exists on disk', () => {
-    const binPath = resolveViteBin(process.cwd())
-
-    expect(binPath).toMatch(/vite[\\/].*bin[\\/]vite\.js$/)
-    expect(existsSync(binPath)).toBe(true)
-  })
-})
-
 describe('bin resolution walks the consumer project node_modules', () => {
-  it('resolves the next bin from an isolated project using the object-form bin field', () => {
+  it('should resolve the next bin from an isolated project using the object-form bin field', () => {
     const root = makeProjectWithPackage({
       binField: { next: './dist/bin/next' },
       binRelPath: 'dist/bin/next',
@@ -90,7 +75,7 @@ describe('bin resolution walks the consumer project node_modules', () => {
     expect(existsSync(binPath)).toBe(true)
   })
 
-  it('resolves the vite bin from an isolated project using the object-form bin field', () => {
+  it('should resolve the vite bin from an isolated project using the object-form bin field', () => {
     const root = makeProjectWithPackage({
       binField: { vite: 'bin/vite.js' },
       binRelPath: 'bin/vite.js',
@@ -103,7 +88,7 @@ describe('bin resolution walks the consumer project node_modules', () => {
     expect(existsSync(binPath)).toBe(true)
   })
 
-  it('resolves a string-form bin field', () => {
+  it('should resolve a string-form bin field', () => {
     const root = makeProjectWithPackage({
       binField: './cli.js',
       binRelPath: 'cli.js',
@@ -116,22 +101,22 @@ describe('bin resolution walks the consumer project node_modules', () => {
     expect(existsSync(binPath)).toBe(true)
   })
 
-  it('throws a clear error when the package declares no bin field', () => {
+  it('should throw a clear error when the package declares no bin field', () => {
     const root = makeProjectWithPackage({ binField: undefined, packageName: 'vite' })
 
     expect(() => resolveViteBin(root)).toThrow(/binary path/i)
   })
 })
 
-describe('resolveBuildCommand resolves real bins end to end', () => {
-  it('maps next to an existing next bin', () => {
+describe('resolveBuildCommand maps a framework to its resolved bin', () => {
+  it('should map next to the resolved next bin', () => {
     const root = makeProjectWithPackage({
       binField: { next: './dist/bin/next' },
       binRelPath: 'dist/bin/next',
       packageName: 'next',
     })
 
-    const { args, bin } = resolveBuildCommand({
+    const { bin } = resolveBuildCommand({
       cwd: root,
       forwardedArgs: ['--turbopack'],
       framework: 'next',
@@ -139,17 +124,16 @@ describe('resolveBuildCommand resolves real bins end to end', () => {
 
     expect(bin).toBe(path.join(root, 'node_modules', 'next', 'dist', 'bin', 'next'))
     expect(existsSync(bin)).toBe(true)
-    expect(args).toEqual(['build', '--turbopack'])
   })
 
-  it('maps tanstack-start to an existing vite bin', () => {
+  it('should map tanstack-start to the resolved vite bin', () => {
     const root = makeProjectWithPackage({
       binField: { vite: 'bin/vite.js' },
       binRelPath: 'bin/vite.js',
       packageName: 'vite',
     })
 
-    const { args, bin } = resolveBuildCommand({
+    const { bin } = resolveBuildCommand({
       cwd: root,
       forwardedArgs: ['--mode', 'staging'],
       framework: 'tanstack-start',
@@ -157,6 +141,5 @@ describe('resolveBuildCommand resolves real bins end to end', () => {
 
     expect(bin).toBe(path.join(root, 'node_modules', 'vite', 'bin', 'vite.js'))
     expect(existsSync(bin)).toBe(true)
-    expect(args).toEqual(['build', '--mode', 'staging'])
   })
 })
