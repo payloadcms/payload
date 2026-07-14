@@ -89,14 +89,16 @@ export type PayloadPluginOptions = {
 }
 
 export type WithPayloadBuilderContext = {
-  /** Payload's base Vite config; `plugins` holds Payload's workaround plugins only. */
-  config: UserConfig
   env: ConfigEnv
   /** Options to pass to the `viteReact`/`rsc`/`tanstackStart` factories you import. */
   pluginOptions: PayloadPluginOptions
 }
 
-/** Assembles the final Vite config from Payload's base config and plugin options. */
+/**
+ * Returns the extra Vite config — the plugins you instantiate plus any overrides.
+ * `withPayload` deep-merges it onto Payload's base config, so you don't spread or
+ * merge the base yourself.
+ */
 export type WithPayloadBuilder = (context: WithPayloadBuilderContext) => UserConfig
 
 /**
@@ -110,18 +112,18 @@ export type WithPayloadBuilder = (context: WithPayloadBuilderContext) => UserCon
  * ```
  *
  * Guest mode — pass a `build` callback to instantiate them yourself (one copy of
- * each; `@vitejs/plugin-rsc` is a hard singleton):
+ * each; `@vitejs/plugin-rsc` is a hard singleton). Return only your additions;
+ * `withPayload` deep-merges them onto Payload's base config:
  *
  * ```ts
  * export default withPayload(
- *   ({ config, pluginOptions }) => ({
- *     ...config,
+ *   ({ pluginOptions }) => ({
  *     plugins: [
- *       ...config.plugins,
  *       rsc(pluginOptions.rsc),
  *       tanstackStart(pluginOptions.tanstackStart),
  *       viteReact(pluginOptions.react),
  *     ],
+ *     // ...other config options
  *   }),
  *   { payloadConfigPath: './src/payload.config.ts' },
  * )
@@ -215,7 +217,7 @@ export function withPayload(
 
     if (build) {
       return applyDependencyWarningSuppression(
-        build({ config: base, env, pluginOptions }),
+        mergeConfig(base, build({ env, pluginOptions })),
         silenceDependencyWarnings,
       )
     }

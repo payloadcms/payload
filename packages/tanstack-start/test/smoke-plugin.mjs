@@ -137,17 +137,15 @@ if (typeof payloadReactOptions().include === 'undefined') {
 }
 
 // Guest/builder form: the consumer instantiates viteReact/rsc/tanstackStart
-// themselves and assembles the final config. `withPayload` returns whatever the
-// builder returns (after warning suppression), and hands the builder its base
-// config (workaround plugins only) plus the required plugin options.
+// themselves and returns only their additions. `withPayload` deep-merges those
+// onto Payload's base config (after warning suppression) and hands the builder
+// the plugin options plus env.
 let builderContext
 const builtConfig = withPayload(
   (context) => {
     builderContext = context
     return {
-      ...context.config,
       plugins: [
-        ...context.config.plugins,
         rsc(context.pluginOptions.rsc),
         tanstackStart(context.pluginOptions.tanstackStart),
         viteReact(context.pluginOptions.react),
@@ -167,15 +165,21 @@ if (builderContext && !builderContext.env) {
 if (builderContext && !builderContext.pluginOptions?.rsc) {
   errors.push('builder context missing pluginOptions.rsc')
 }
-// The base config handed to the builder must only carry Payload's workaround
-// plugins — the three third-party plugins are the consumer's to add.
-if (builderContext && builderContext.config.plugins.length !== 6) {
-  errors.push(
-    `builder base config should carry 6 workaround plugins, got ${builderContext.config.plugins?.length}`,
-  )
+// The builder's return value must be merged onto the Payload base: its own
+// plugins are appended to Payload's workaround plugins, and its overrides win.
+const builtPluginNames = builtConfig.plugins
+  .filter(Boolean)
+  .flat()
+  .map((p) => p?.name)
+  .filter(Boolean)
+if (!builtPluginNames.includes('payload:client-module-resolution')) {
+  errors.push('builder result missing Payload workaround plugins (base not merged)')
 }
 if (builtConfig.server?.port !== 4000) {
-  errors.push('builder return value not used')
+  errors.push('builder return value not merged')
+}
+if (!builtConfig.ssr?.external?.includes('drizzle-kit')) {
+  errors.push('builder result missing base ssr.external (base not merged)')
 }
 if (!builtConfig.customLogger) {
   errors.push('warning suppression not applied to builder result')
