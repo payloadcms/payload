@@ -1,4 +1,3 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
 import type {
   ImportMap,
   LanguageOptions,
@@ -7,7 +6,6 @@ import type {
   ServerFunctionClient,
 } from 'payload'
 
-import { rtlLanguages } from '@payloadcms/translations'
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
@@ -16,6 +14,7 @@ import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { ProgressBar, RootProvider } from '../../exports/client/index.js'
 import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
+import { getLanguageDir } from '../../utilities/getLanguageDir.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
@@ -127,9 +126,7 @@ const RootLayoutContent = async ({
     headers,
   })
 
-  const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
-    ? 'RTL'
-    : 'LTR'
+  const dir = getLanguageDir({ languageCode })
 
   const languageOptions: LanguageOptions = Object.entries(
     config.i18n.supportedLanguages || {},
