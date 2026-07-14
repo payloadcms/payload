@@ -91,6 +91,8 @@ export const getGenerateSignedURLHandler = ({
       new PutObjectCommand({
         ACL: acl,
         Bucket: bucket,
+        CacheControl:
+          typeof collectionS3Config === 'object' ? collectionS3Config.cacheControl : undefined,
         ContentLength: filesizeLimit ? Math.min(filesize, filesizeLimit) : undefined,
         ContentType: mimeType,
         Key: fileKey,

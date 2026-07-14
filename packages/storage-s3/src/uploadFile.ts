@@ -8,6 +8,7 @@ interface UploadArgs {
   acl?: 'private' | 'public-read'
   bucket: string
   buffer: Buffer
+  cacheControl?: string
   client: AWS.S3
   collectionPrefix?: string
   docPrefix?: string
@@ -23,6 +24,7 @@ export async function uploadFile({
   acl,
   bucket,
   buffer,
+  cacheControl,
   client,
   collectionPrefix = '',
   docPrefix,
@@ -45,6 +47,7 @@ export async function uploadFile({
       ACL: acl,
       Body: fileBufferOrStream,
       Bucket: bucket,
+      CacheControl: cacheControl,
       ContentType: mimeType,
       Key: fileKey,
     })
@@ -58,6 +61,7 @@ export async function uploadFile({
       ACL: acl,
       Body: fileBufferOrStream,
       Bucket: bucket,
+      CacheControl: cacheControl,
       ContentType: mimeType,
       Key: fileKey,
     },

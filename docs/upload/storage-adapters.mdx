@@ -117,6 +117,7 @@ pnpm add @payloadcms/storage-s3
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
 - When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client. You must allow CORS PUT method for the bucket to your website.
 - Configure `signedDownloads` (either globally or per-collection in `collections`) to use [presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html) for files downloading. This can improve performance for large files (like videos) while still respecting your access control. Additionally, with `signedDownloads.shouldUseSignedURL` you can specify a condition whether Payload should use a presigned URL, if you want to use this feature only for specific files.
+- Configure `cacheControl` per-collection in `collections` to define the `Cache-Control` header for uploaded files. This is especially useful when `disablePayloadAccessControl` is enabled and the S3-compatible storage service does not set a cache control header by default.
 - You can conditionally enable the plugin using the `enabled` option. For example, `enabled: Boolean(process.env.S3_BUCKET)` skips the plugin in local development when credentials are not set.
 
 ```ts
@@ -132,6 +133,9 @@ export default buildConfig({
         media: true,
         'media-with-prefix': {
           prefix,
+        },
+        'media-with-cache-control': {
+          cacheControl: 'max-age=31536000, public',
         },
         'media-with-presigned-downloads': {
           // Filter only mp4 files
