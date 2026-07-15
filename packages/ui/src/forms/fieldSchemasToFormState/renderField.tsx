@@ -43,6 +43,7 @@ export const renderField: RenderFieldMethod = ({
   path,
   permissions,
   preferences,
+  previousFieldState,
   readOnly: readOnlyFromProps,
   renderAllFields,
   req,
@@ -54,8 +55,31 @@ export const renderField: RenderFieldMethod = ({
     fieldConfig.admin?.components &&
     ('beforeInput' in fieldConfig.admin.components || 'afterInput' in fieldConfig.admin.components)
 
+  const computedReadOnly =
+    readOnlyFromProps === true
+      ? true
+      : typeof permissions === 'boolean'
+        ? !permissions
+        : !permissions?.[operation]
+
+  // A field's `permissions` can be data-dependent (e.g. a field-level `access` function that reads
+  // sibling field values), so its resolved readOnly state can change between requests even when
+  // `renderAllFields` is false. If that happens, the field must be re-rendered so its custom
+  // components receive the updated `readOnly` prop - otherwise an already-rendered field would keep
+  // showing its stale disabled/enabled state until the next full render (e.g. on save + reload).
+  const readOnlyChanged =
+    previousFieldState?.readOnly !== undefined && previousFieldState.readOnly !== computedReadOnly
+
   const requiresRender =
-    renderAllFields || !lastRenderedPath || lastRenderedPath !== path || hasBeforeOrAfterInput
+    renderAllFields ||
+    !lastRenderedPath ||
+    lastRenderedPath !== path ||
+    hasBeforeOrAfterInput ||
+    readOnlyChanged
+
+  if (fieldState) {
+    fieldState.readOnly = computedReadOnly
+  }
 
   if (!requiresRender && fieldConfig.type !== 'array' && fieldConfig.type !== 'blocks') {
     return
@@ -75,12 +99,7 @@ export const renderField: RenderFieldMethod = ({
     field: clientField,
     path,
     permissions,
-    readOnly:
-      readOnlyFromProps === true
-        ? true
-        : typeof permissions === 'boolean'
-          ? !permissions
-          : !permissions?.[operation],
+    readOnly: computedReadOnly,
     schemaPath,
   }
 
