@@ -4,7 +4,6 @@ import { PROJECT_ROOT, ROOT_PACKAGE_JSON } from '@tools/constants'
 import { execSync, spawn } from 'child_process'
 import execa from 'execa'
 import fse from 'fs-extra'
-import pLimit from 'p-limit'
 import path from 'path'
 import semver from 'semver'
 
@@ -15,7 +14,6 @@ import { isVersionPublished } from './getPackageRegistryVersions.js'
 import { packagePublishList } from './publishList.js'
 import { runPublishSequence } from './runPublishSequence.js'
 
-const npmPublishLimit = pLimit(5)
 const cwd = PROJECT_ROOT
 
 const execaOpts: execa.Options = { stdio: 'inherit', cwd }
@@ -45,7 +43,6 @@ type Workspace = {
   showVersions: () => Promise<void>
   bumpVersion: (type: PackageReleaseType, opts?: { preid?: 'beta' | 'canary' }) => Promise<string>
   build: (opts?: { debug?: boolean }) => Promise<void>
-  publish: (opts: PublishOpts) => Promise<void>
   publishSync: (opts: PublishOpts) => Promise<void>
 }
 
@@ -69,32 +66,6 @@ export const getWorkspace = async () => {
       packages: packageDetails,
       publishOne: (pkg) => publishSinglePackage(pkg, { dryRun, tag }),
     })
-  }
-
-  const publish = async () => {
-    const packageDetails = await getPackageDetails(packagePublishList)
-    const results = await Promise.allSettled(
-      packageDetails.map((pkg) => publishPackageThrottled(pkg, { dryRun: true })),
-    )
-
-    console.log(`\n\nResults:\n`)
-
-    console.log(
-      results
-        .map((result) => {
-          if (result.status === 'rejected') {
-            console.error(result.reason)
-            return `  ❌ ${String(result.reason)}`
-          }
-          const { name, success, details } = result.value
-          let summary = `  ${success ? '✅' : '❌'} ${name}`
-          if (details) {
-            summary += `\n    ${details}\n`
-          }
-          return summary
-        })
-        .join('\n') + '\n',
-    )
   }
 
   const showVersions = async () => {
@@ -202,7 +173,6 @@ export const getWorkspace = async () => {
     showVersions,
     bumpVersion,
     build,
-    publish,
     publishSync,
   }
 
@@ -216,12 +186,6 @@ async function getCurrentPackageState(): Promise<{
   const packageDetails = await getPackageDetails(packagePublishList)
   const rootPackageJson = await fse.readJSON(ROOT_PACKAGE_JSON)
   return { packages: packageDetails, version: rootPackageJson.version }
-}
-
-/** Publish with promise concurrency throttling */
-async function publishPackageThrottled(pkg: PackageDetails, opts?: { dryRun?: boolean }) {
-  const { dryRun = true } = opts ?? {}
-  return npmPublishLimit(() => publishSinglePackage(pkg, { dryRun }))
 }
 
 export async function publishSinglePackage(
