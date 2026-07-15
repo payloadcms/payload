@@ -11,4 +11,4 @@ args = [
 ]
 
 [mcp_servers.payload]
-url = "http://localhost:3000/api/mcp"
+url = "http://localhost:3000/api/mcp?overrideAccess=true"

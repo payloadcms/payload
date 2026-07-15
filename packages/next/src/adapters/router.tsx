@@ -55,6 +55,7 @@ export const NextRouterAdapter: React.FC<{ children: React.ReactNode }> = ({ chi
       push: nextRouter.push,
       refresh: nextRouter.refresh,
       replace: nextRouter.replace,
+      replaceState: (url) => window.history.replaceState(null, '', url),
     }),
     [nextRouter],
   )

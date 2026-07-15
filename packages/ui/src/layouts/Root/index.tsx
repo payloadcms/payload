@@ -20,6 +20,7 @@ import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.j
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { NestProviders } from './NestProviders.js'
+import { getViewportMeta } from './viewport.js'
 // eslint-disable-next-line payload/no-imports-from-self -- Self-import via package path ensures consumer's bundler resolves the full SCSS chain (design tokens, preflight, etc.) in prod builds
 import '@payloadcms/ui/scss/app.scss'
 
@@ -155,6 +156,7 @@ const RootLayoutContent = async ({
   await applyLocaleFiltering({ clientConfig, config, req })
 
   const fontClassNames = fonts.map((f) => f.variable ?? f.className).filter(Boolean)
+  const viewportMeta = getViewportMeta(headers.get('user-agent') ?? undefined)
 
   return (
     <html
@@ -167,6 +169,7 @@ const RootLayoutContent = async ({
       suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
     >
       <head>
+        {viewportMeta}
         <style>{`@layer payload-default, payload;`}</style>
         {headFromProps}
       </head>

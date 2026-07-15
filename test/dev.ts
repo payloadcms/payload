@@ -10,15 +10,17 @@ import { loadEnv } from 'payload/node'
 import type { DevServerResult } from './adapters/nextDevServer.js'
 
 import { assertDbReachable } from './__helpers/shared/assertDbReachable.js'
-import { getNextRootDir } from './__helpers/shared/getNextRootDir.js'
 import { getCurrentDatabaseAdapter } from './dbAdapters.js'
 import { runInit } from './runInit.js'
 import { child } from './safelyRunScript.js'
 import { createTestHooks } from './testHooks.js'
 
-const prod = process.argv.includes('--prod')
-if (prod) {
-  process.argv = process.argv.filter((arg) => arg !== '--prod')
+// --prod-server boots a real production server (next build + dev: false) against the
+// packed dist packages. Without it, the dev server runs against source.
+const prodServer = process.argv.includes('--prod-server')
+
+if (prodServer) {
+  process.argv = process.argv.filter((arg) => arg !== '--prod-server')
   process.env.PAYLOAD_TEST_PROD = 'true'
 }
 
@@ -30,7 +32,11 @@ const dirname = path.dirname(filename)
 const {
   _: [_testSuiteArg = '_community'],
   ...args
-} = minimist(process.argv.slice(2))
+} = minimist(process.argv.slice(2), {
+  // Treat framework flags as boolean so a trailing suite positional
+  // (e.g. `--framework-tanstack-start admin`) isn't consumed as the flag's value.
+  boolean: ['framework-next', 'framework-tanstack-start'],
+})
 
 let testSuiteArg: string | undefined
 let testSuiteConfigOverride: string | undefined
@@ -57,13 +63,22 @@ if (['admin-root'].includes(testSuiteArg)) {
   enableTurbo = false
 }
 
-const framework = process.env.PAYLOAD_FRAMEWORK || 'next'
+// Framework is selected with a --framework-<name> flag (e.g. --framework-tanstack-start),
+// falling back to the PAYLOAD_FRAMEWORK env var, then 'next'. The flag suffix is the
+// framework name. Resolved value is written back to the env var so downstream helpers
+// and spawned child processes (which read PAYLOAD_FRAMEWORK) stay in sync.
+const frameworkFromFlag = Object.keys(args)
+  .find((arg) => arg.startsWith('framework-'))
+  ?.slice('framework-'.length)
+
+const framework = frameworkFromFlag || process.env.PAYLOAD_FRAMEWORK || 'next'
+process.env.PAYLOAD_FRAMEWORK = framework
 
 console.log(
   `Selected test suite: ${testSuiteArg} [${framework}]${framework === 'next' && enableTurbo ? ' [Turbopack]' : framework === 'next' ? ' [Webpack]' : ''}`,
 )
 
-if (enableTurbo && framework === 'next') {
+if (enableTurbo && framework === 'next' && !prodServer) {
   process.env.TURBOPACK = '1'
 }
 
@@ -101,20 +116,36 @@ let serverResult: DevServerResult
 
 switch (framework) {
   case 'next': {
-    const { startNextDevServer } = await import('./adapters/nextDevServer.js')
-    serverResult = await startNextDevServer({
-      enableTurbo,
-      port: availablePort,
-      testSuiteArg,
-    })
+    if (prodServer) {
+      const { startNextProdServer } = await import('./adapters/nextProdServer.js')
+      serverResult = await startNextProdServer({
+        port: availablePort,
+        testSuiteArg,
+      })
+    } else {
+      const { startNextDevServer } = await import('./adapters/nextDevServer.js')
+      serverResult = await startNextDevServer({
+        enableTurbo,
+        port: availablePort,
+        testSuiteArg,
+      })
+    }
     break
   }
   case 'tanstack-start': {
-    const { startTanStackStartDevServer } = await import('./adapters/tanstackStartDevServer.js')
-    serverResult = await startTanStackStartDevServer({
-      port: availablePort,
-      testSuiteArg,
-    })
+    if (prodServer) {
+      const { startTanStackStartProdServer } = await import('./adapters/tanstackStartProdServer.js')
+      serverResult = await startTanStackStartProdServer({
+        port: availablePort,
+        testSuiteArg,
+      })
+    } else {
+      const { startTanStackStartDevServer } = await import('./adapters/tanstackStartDevServer.js')
+      serverResult = await startTanStackStartDevServer({
+        port: availablePort,
+        testSuiteArg,
+      })
+    }
     break
   }
   default: {

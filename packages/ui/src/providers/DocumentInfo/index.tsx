@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, DocumentPreferences } from 'payload'
+import type { DocumentPreferences, User } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -102,7 +102,7 @@ const DocumentInfo: React.FC<
     isLockedFromProps,
   )
 
-  const [currentEditor, setCurrentEditor] = useControllableState<ClientUser | null>(
+  const [currentEditor, setCurrentEditor] = useControllableState<null | User>(
     currentEditorFromProps,
   )
   const [lastUpdateTime, setLastUpdateTime] = useControllableState<number>(lastUpdateTimeFromProps)
@@ -116,7 +116,7 @@ const DocumentInfo: React.FC<
   const documentLockState = useRef<{
     hasShownLockedModal: boolean
     isLocked: boolean
-    user: ClientUser | number | string
+    user: number | string | User
   } | null>({
     hasShownLockedModal: false,
     isLocked: false,
@@ -206,7 +206,7 @@ const DocumentInfo: React.FC<
   )
 
   const updateDocumentEditor = useCallback(
-    async (docID: number | string, slug: string, user: ClientUser | number | string) => {
+    async (docID: number | string, slug: string, user: number | string | User) => {
       // Check if the locked-documents collection exists before making API calls
       if (!hasLockedDocumentsCollection) {
         return

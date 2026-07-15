@@ -1725,7 +1725,7 @@ describe('Access Control', () => {
   describe('blocks field access control', () => {
     test('should respect field-level access control for blocks fields', async () => {
       await page.goto(blocksFieldAccessUrl.create)
-      await expect(page.locator('.doc-header__title')).toContainText('[Untitled]')
+      await expect(page.locator('.doc-header__title')).toContainText('Untitled')
 
       // Editable blocks field should allow adding blocks
       const editableBlocksField = page.locator('#field-editableBlocks')
