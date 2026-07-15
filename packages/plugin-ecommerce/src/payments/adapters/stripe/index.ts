@@ -40,6 +40,12 @@ export type StripeAdapterArgs = {
    */
   apiVersion?: Stripe.StripeConfig['apiVersion']
   appInfo?: Stripe.StripeConfig['appInfo']
+  /**
+   * The HTTP client used to make requests to Stripe.
+   *
+   * Use `Stripe.createFetchHttpClient()` for fetch-only runtimes such as Cloudflare Workers.
+   */
+  httpClient?: Stripe.StripeConfig['httpClient']
   publishableKey: string
   secretKey: string
   webhooks?: StripeWebhookHandlers
@@ -47,7 +53,8 @@ export type StripeAdapterArgs = {
 } & PaymentAdapterArgs
 
 export const stripeAdapter: (props: StripeAdapterArgs) => PaymentAdapter = (props) => {
-  const { apiVersion, appInfo, groupOverrides, secretKey, webhooks, webhookSecret } = props
+  const { apiVersion, appInfo, groupOverrides, httpClient, secretKey, webhooks, webhookSecret } =
+    props
   const label = props?.label || 'Stripe'
 
   const baseFields: Field[] = [
@@ -86,13 +93,17 @@ export const stripeAdapter: (props: StripeAdapterArgs) => PaymentAdapter = (prop
     confirmOrder: confirmOrder({
       apiVersion,
       appInfo,
+      httpClient,
       secretKey,
     }),
-    endpoints: [webhooksEndpoint({ apiVersion, appInfo, secretKey, webhooks, webhookSecret })],
+    endpoints: [
+      webhooksEndpoint({ apiVersion, appInfo, httpClient, secretKey, webhooks, webhookSecret }),
+    ],
     group: groupField,
     initiatePayment: initiatePayment({
       apiVersion,
       appInfo,
+      httpClient,
       secretKey,
     }),
     label,
