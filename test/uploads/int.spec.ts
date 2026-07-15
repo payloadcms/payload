@@ -1,5 +1,5 @@
 import type { AddressInfo } from 'net'
-import type { CollectionSlug, Payload, PayloadRequest } from 'payload'
+import type { CollectionSlug, Payload, PayloadRequest, UploadInstructions } from 'payload'
 
 import { randomUUID } from 'crypto'
 import fs from 'fs'
@@ -66,6 +66,105 @@ describe('Collections - Uploads', () => {
 
   describe('REST API', () => {
     describe('create', () => {
+      it('creates from upload instructions', async () => {
+        const file = fs.readFileSync(path.join(dirname, './image.png'))
+        const instructionsResponse = await restClient.POST('/upload-instructions', {
+          body: JSON.stringify({
+            collectionSlug: mediaSlug,
+            filename: 'staged-image.png',
+            filesize: file.length,
+            mimeType: 'image/png',
+          }),
+        })
+        const instructions = await instructionsResponse.json<UploadInstructions>()
+
+        expect(instructionsResponse.status).toBe(200)
+        expect(instructions.type).toBe('http')
+        expect(instructions.file).toMatchObject({
+          filename: 'staged-image.png',
+          mimeType: 'image/png',
+          size: file.length,
+          uploadReference: { uploadId: expect.any(String) },
+        })
+
+        if (instructions.type !== 'http') {
+          throw new Error('Expected HTTP upload instructions')
+        }
+
+        const uploadPath = new URL(instructions.request.url, restClient.serverURL).pathname.replace(
+          payload.config.routes.api,
+          '',
+        ) as `/${string}`
+        const uploadResponse = await restClient.PUT(uploadPath, {
+          body: file,
+          headers: instructions.request.headers,
+        })
+
+        expect(uploadResponse.status).toBe(204)
+
+        const formData = new FormData()
+        formData.append('_payload', JSON.stringify({ alt: 'Staged image' }))
+        formData.append('file', JSON.stringify(instructions.file))
+
+        const createResponse = await restClient.POST(`/${mediaSlug}`, { body: formData })
+        const { doc } = await createResponse.json()
+
+        expect(createResponse.status).toBe(201)
+        expect(doc.alt).toBe('Staged image')
+        expect(doc.filename).toBe('staged-image.png')
+        expect(doc.width).toBeDefined()
+        expect(doc.sizes.tablet.filename).toBeDefined()
+
+        await payload.delete({ id: doc.id, collection: mediaSlug })
+      })
+
+      /**
+       * The request declares one more byte than it uploads. Payload rejects the partial file so it
+       * cannot be used when creating a document later.
+       */
+      it('rejects staged uploads smaller than the declared size', async () => {
+        const file = fs.readFileSync(path.join(dirname, './image.png'))
+        const instructions = await restClient
+          .POST('/upload-instructions', {
+            body: JSON.stringify({
+              collectionSlug: mediaSlug,
+              filename: 'incomplete.png',
+              filesize: file.length + 1,
+              mimeType: 'image/png',
+            }),
+          })
+          .then((response) => response.json<UploadInstructions>())
+
+        if (instructions.type !== 'http') {
+          throw new Error('Expected HTTP upload instructions')
+        }
+
+        const uploadPath = new URL(instructions.request.url, restClient.serverURL).pathname.replace(
+          payload.config.routes.api,
+          '',
+        ) as `/${string}`
+        const response = await restClient.PUT(uploadPath, {
+          body: file,
+          headers: { 'Content-Type': 'image/png' },
+        })
+
+        expect(response.status).toBe(400)
+      })
+
+      it('requires authentication before staging an upload', async () => {
+        const response = await restClient.POST('/upload-instructions', {
+          auth: false,
+          body: JSON.stringify({
+            collectionSlug: mediaSlug,
+            filename: 'unauthorized.png',
+            filesize: 1,
+            mimeType: 'image/png',
+          }),
+        })
+
+        expect(response.status).toBe(403)
+      })
+
       it('creates from form data given a png', async () => {
         const formData = new FormData()
         const filePath = path.join(dirname, './image.png')
