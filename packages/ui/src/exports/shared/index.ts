@@ -5,6 +5,14 @@ export { mergeFieldStyles } from '../../fields/mergeFieldStyles.js'
 export { reduceToSerializableFields } from '../../forms/Form/reduceToSerializableFields.js'
 export { PayloadIcon } from '../../graphics/Icon/index.js'
 export { PayloadLogo } from '../../graphics/Logo/index.js'
+// Client-safe viewport helpers. Exposed here (not only via `../layouts`, which
+// also re-exports the server-only `RootLayout`) so framework adapters can import
+// them without dragging the server layout into a client bundle.
+export {
+  getViewportContent,
+  getViewportMeta,
+  isIPhoneUserAgent,
+} from '../../layouts/Root/viewport.js'
 // IMPORTANT: the shared.ts file CANNOT contain any Server Components _that import client components_.
 export { filterFields } from '../../providers/TableColumns/buildColumnState/filterFields.js'
 export { getInitialColumns } from '../../providers/TableColumns/getInitialColumns.js'
