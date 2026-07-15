@@ -13,6 +13,15 @@ export const getFileFromUploadInstructions = async ({
   file: UploadInstructions['file']
   req: PayloadRequest
 }): Promise<NonNullable<PayloadRequest['file']>> => {
+  if (
+    !file ||
+    typeof file !== 'object' ||
+    !file.uploadReference ||
+    typeof file.uploadReference !== 'object'
+  ) {
+    throw new APIError('Invalid upload reference.', 400)
+  }
+
   /**
    * Handlers fetch files uploaded to a storage provider. An uploadId points to a temporary file
    * already stored by Payload, so no handler is needed.
