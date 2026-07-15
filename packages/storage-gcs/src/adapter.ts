@@ -41,8 +41,8 @@ export function createGcsAdapter({
 
     uploadInstructions: clientUploads
       ? {
-          access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
           generate: generateUploadInstructions({
+            access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
             bucket,
             collectionPrefix: prefix,
             getStorageClient,

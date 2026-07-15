@@ -44,8 +44,8 @@ export function createS3Adapter({
 
     uploadInstructions: clientUploads
       ? {
-          access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
           generate: generateUploadInstructions({
+            access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
             acl,
             bucket,
             collectionPrefix: prefix,

@@ -35,7 +35,6 @@ export function createUploadthingAdapter({
   ]
   const uploadInstructions: GeneratedAdapter['uploadInstructions'] = clientUploads
     ? {
-        access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
         adminHandler: {
           path: '@payloadcms/storage-uploadthing/client#UploadthingClientUploadHandler',
         },

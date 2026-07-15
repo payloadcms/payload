@@ -7,6 +7,7 @@ import type {
   PayloadRequest,
   TypeWithID,
   UploadCollectionSlug,
+  UploadInstructionsAccess,
   UploadInstructionsCapability,
 } from 'payload'
 
@@ -19,7 +20,7 @@ export interface File {
   tempFilePath?: string
 }
 
-export type ClientUploadsConfig = boolean | Pick<UploadInstructionsCapability, 'access'>
+export type ClientUploadsConfig = { access?: UploadInstructionsAccess } | boolean
 
 export type HandleUpload = (args: {
   collection: CollectionConfig

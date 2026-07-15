@@ -1,9 +1,11 @@
 import type { Storage } from '@google-cloud/storage'
-import type { GenerateUploadInstructions } from 'payload'
+import type { GenerateUploadInstructions, UploadInstructionsAccess } from 'payload'
 
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { Forbidden } from 'payload'
 
 interface Args {
+  access?: UploadInstructionsAccess
   bucket: string
   collectionPrefix: string
   getStorageClient: () => Storage
@@ -11,12 +13,17 @@ interface Args {
 }
 
 export const generateUploadInstructions = ({
+  access,
   bucket,
   collectionPrefix,
   getStorageClient,
   useCompositePrefixes = false,
 }: Args): GenerateUploadInstructions => {
   return async ({ collectionSlug, docPrefix, filename, filesize, mimeType, req }) => {
+    if (access ? !(await access({ collectionSlug, req })) : !req.user) {
+      throw new Forbidden(req.t)
+    }
+
     const { fileKey, sanitizedDocPrefix, sanitizedFilename } = await resolveSignedURLKey({
       collectionPrefix,
       collectionSlug,

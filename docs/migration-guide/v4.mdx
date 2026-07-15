@@ -1060,6 +1060,20 @@ Use the core `UploadInstructionsAccess` type for `clientUploads.access` callback
 + const access: UploadInstructionsAccess = ({ req }) => Boolean(req.user)
 ```
 
+#### Upload access moved to the generator or endpoint
+
+Access now runs where the upload is authorized. Signed URL and token generators check access before returning credentials. Named provider flows such as R2 and UploadThing check access in their supporting endpoint.
+
+Built-in adapters still accept `clientUploads.access` and pass it to the correct generator or endpoint. Custom adapters should do the same:
+
+```diff
+uploadInstructions: {
+- access,
+- generate,
++ generate: generateUploadInstructions({ access }),
+}
+```
+
 #### Custom client upload handlers now use named instructions
 
 `useUploadHandlers().setUploadHandler` was removed. `createClientUploadHandler` now requires a name and listens for a matching `dispatch` instruction:
@@ -1113,7 +1127,6 @@ Custom cloud adapters now define their complete direct-upload setup in `uploadIn
 - })
 
 uploadInstructions: {
-  access,
 + adminHandler: {
 +   path: '/MyClientUploadHandler',
 +   props: { option: 'value' },

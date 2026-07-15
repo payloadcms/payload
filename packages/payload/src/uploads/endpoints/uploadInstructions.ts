@@ -1,7 +1,7 @@
 import type { Endpoint } from '../../config/types.js'
 import type { UploadInstructionsRequest } from '../types.js'
 
-import { APIError, Forbidden } from '../../errors/index.js'
+import { APIError } from '../../errors/index.js'
 
 const bytesToMB = (bytes: number) => bytes / 1024 / 1024
 
@@ -36,13 +36,6 @@ export const uploadInstructionsEndpoint: Endpoint = {
       )
     }
 
-    const { access, generate } = uploadInstructions
-    if (
-      access ? !(await access({ collectionSlug: uploadRequest.collectionSlug, req })) : !req.user
-    ) {
-      throw new Forbidden(req.t)
-    }
-
     const filesizeLimit = req.payload.config.upload.limits?.fileSize
     if (filesizeLimit && uploadRequest.filesize > filesizeLimit) {
       throw new APIError(
@@ -51,7 +44,7 @@ export const uploadInstructionsEndpoint: Endpoint = {
       )
     }
 
-    return Response.json(await generate({ ...uploadRequest, req }))
+    return Response.json(await uploadInstructions.generate({ ...uploadRequest, req }))
   },
   method: 'post',
   path: '/upload-instructions',

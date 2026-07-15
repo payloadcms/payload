@@ -31,7 +31,6 @@ export function createR2Adapter({
       : defaultR2ClientUploadsAccess
   const uploadInstructions: GeneratedAdapter['uploadInstructions'] = clientUploads
     ? {
-        access,
         adminHandler: {
           path: '@payloadcms/storage-r2/client#R2ClientUploadHandler',
         },

@@ -367,9 +367,7 @@ export type GenerateUploadInstructions = (
 ) => Promise<UploadInstructions> | UploadInstructions
 
 export type UploadInstructionsCapability = {
-  /** Controls access to generating upload instructions. */
-  access?: UploadInstructionsAccess
-  /** Generates instructions for uploading a file. */
+  /** Generates upload instructions. The generator or supporting endpoint must check access. */
   generate: GenerateUploadInstructions
 }
 export type checkFileRestrictionsParams = {

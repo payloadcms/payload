@@ -6,6 +6,7 @@ import type {
 
 import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
 import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client'
+import { Forbidden } from 'payload'
 
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
@@ -31,16 +32,25 @@ export function createVercelBlobAdapter({
   token,
   useCompositePrefixes = false,
 }: CreateVercelBlobAdapterArgs): Adapter {
+  const clientUploadsAccess = typeof clientUploads === 'object' ? clientUploads.access : undefined
+
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
 
     uploadInstructions: clientUploads
       ? {
-          access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
           adminHandler: {
             path: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
           },
           generate: async ({ collectionSlug, docPrefix, filename, filesize, mimeType, req }) => {
+            if (
+              clientUploadsAccess
+                ? !(await clientUploadsAccess({ collectionSlug, req }))
+                : !req.user
+            ) {
+              throw new Forbidden(req.t)
+            }
+
             const resolved = await resolveSignedURLKey({
               collectionPrefix: prefix,
               collectionSlug,
