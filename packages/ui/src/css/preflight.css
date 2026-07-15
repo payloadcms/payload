@@ -399,6 +399,7 @@ SOFTWARE.
 */
 
   [hidden]:where(:not([hidden='until-found'])) {
+    /* stylelint-disable-next-line plugin/no-important -- browser-reset guarantee: [hidden] must stay hidden regardless of any component's own display rule */
     display: none !important;
   }
 }

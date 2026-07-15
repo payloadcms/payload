@@ -5,6 +5,7 @@
     gap: calc(var(--spacer-4) - var(--spacer-1));
 
     [role='banner'] {
+      /* stylelint-disable-next-line plugin/no-important -- diffed field content can render its own <header>, which browsers implicitly assign an ARIA banner role; must stay hidden regardless of that content's own styling */
       display: none !important;
     }
   }

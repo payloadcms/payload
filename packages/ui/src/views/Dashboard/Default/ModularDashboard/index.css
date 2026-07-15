@@ -247,8 +247,8 @@
   }
 
   .popup-button-list__button:has(.widget-wrapper__size-btn-label) {
-    display: flex !important;
-    align-items: center !important;
+    display: flex;
+    align-items: center;
     gap: var(--spacer-3);
   }
 
@@ -258,7 +258,7 @@
 
   .popup-button-list__button:has(.widget-wrapper__size-btn-label)
     .widget-wrapper__size-btn-percentage {
-    margin-left: auto !important;
+    margin-left: auto;
   }
 
   .step-nav .dashboard-breadcrumb-dropdown .btn {
@@ -271,7 +271,7 @@
 
   .step-nav .dashboard-breadcrumb-dropdown__editing {
     align-items: center;
-    display: flex !important;
+    display: flex;
     gap: var(--spacer-2-5);
 
     > span:first-child {
@@ -280,7 +280,7 @@
   }
 
   .step-nav .dashboard-breadcrumb-dropdown__actions {
-    display: flex !important;
+    display: flex;
     gap: var(--spacer-2-5);
   }
 

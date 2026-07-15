@@ -24,7 +24,7 @@
     display: inline-flex;
     position: relative;
     box-shadow:
-      0 0 0.25px rgba(0, 0, 0, 0.08),
+      0 0 0.5px rgba(0, 0, 0, 0.08),
       0 2px 2.5px rgba(0, 0, 0, 0.15),
       0 10px 12px rgba(0, 0, 0, 0.18);
   }

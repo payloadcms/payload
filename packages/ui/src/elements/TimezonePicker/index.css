@@ -47,6 +47,7 @@
         border: none;
         padding: 0;
         padding-left: var(--spacer-1);
+        /* stylelint-disable-next-line plugin/no-important -- react-select applies its own min-height even in unstyled mode; no class selector can beat it */
         min-height: auto !important;
         position: relative;
         box-shadow: unset;

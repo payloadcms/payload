@@ -104,6 +104,8 @@
 
     .tooltip__caret {
       --color-border: var(--ramp-grey-700);
+
+      /* stylelint-disable-next-line plugin/no-subpixel-values -- half-pixel nudge hides the anti-aliasing seam between the caret and tooltip body */
       top: calc(100% - 0.5px);
     }
 
@@ -121,6 +123,7 @@
     );
 
     .tooltip__caret {
+      /* stylelint-disable-next-line plugin/no-subpixel-values -- half-pixel nudge hides the anti-aliasing seam between the caret and tooltip body */
       bottom: calc(100% - 0.5px);
       transform: rotate(180deg);
     }
@@ -140,7 +143,9 @@
     transform: translate3d(calc(-100% - var(--caret-height) - var(--caret-offset)), -50%, 0);
 
     .tooltip__caret {
+      /* stylelint-disable-next-line plugin/no-subpixel-values -- half-pixel nudge hides the anti-aliasing seam between the caret and tooltip body */
       top: calc(50% + 0.5px);
+      /* stylelint-disable-next-line plugin/no-subpixel-values -- half-pixel nudge hides the anti-aliasing seam between the caret and tooltip body */
       left: calc(100% - 0.5px);
       transform: translateY(calc(1 * var(--caret-width) / 2)) rotate(-90deg);
       transform-origin: top left;
@@ -153,8 +158,10 @@
     transform: translate3d(calc(var(--caret-height) + var(--caret-offset)), -50%, 0);
 
     .tooltip__caret {
+      /* stylelint-disable-next-line plugin/no-subpixel-values -- half-pixel nudge hides the anti-aliasing seam between the caret and tooltip body */
       top: calc(50% + 0.5px);
       left: unset;
+      /* stylelint-disable-next-line plugin/no-subpixel-values -- half-pixel nudge hides the anti-aliasing seam between the caret and tooltip body */
       right: calc(100% - 0.5px);
       transform: translateY(calc(1 * var(--caret-width) / 2)) rotate(90deg);
       transform-origin: top right;

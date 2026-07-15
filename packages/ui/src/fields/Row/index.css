@@ -21,6 +21,7 @@
         justify-content: flex-start;
         margin-left: 0;
         margin-right: 0;
+        /* stylelint-disable-next-line plugin/no-important -- fields may set an inline width via admin.style; row layout must force full width on mobile regardless */
         width: 100% !important;
         padding-left: 0;
         padding-right: 0;
@@ -48,6 +49,7 @@
         > * {
           margin-left: unset;
           margin-right: unset;
+          /* stylelint-disable-next-line plugin/no-important -- fields may set an inline width via admin.style; desktop row layout must defer to flex-basis instead */
           width: unset !important;
           padding-left: unset;
           padding-right: unset;
