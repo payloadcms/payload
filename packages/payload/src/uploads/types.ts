@@ -252,9 +252,9 @@ export type UploadConfig = {
       headers?: Headers
       params: {
         collection: string
-        uploadReference?: unknown
         filename: string
         prefix?: string
+        uploadReference?: unknown
       }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
@@ -341,10 +341,10 @@ export type UploadInstructionsRequest = {
 
 export type UploadInstructions = {
   file: {
-    uploadReference: Record<string, unknown>
     filename: string
     mimeType: string
     size: number
+    uploadReference: Record<string, unknown>
   }
 } & (
   | {

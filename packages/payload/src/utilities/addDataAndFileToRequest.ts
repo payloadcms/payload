@@ -80,8 +80,8 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
               doc: null!,
               params: {
                 collection: collectionSlug,
-                uploadReference,
                 filename,
+                uploadReference,
               },
             })
             if (result) {
@@ -111,9 +111,9 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         req.file = {
           name: filename,
           data: Buffer.from(await response.arrayBuffer()),
-          uploadReference,
           mimetype: response.headers.get('Content-Type') || mimeType,
           size,
+          uploadReference,
         }
       }
     }
