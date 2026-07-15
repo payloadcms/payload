@@ -61,6 +61,13 @@ const formatFlash = (value: unknown): null | string => {
     return value ? 'On' : 'Off'
   }
   if (typeof value === 'string' && value !== '') {
+    // exifr returns descriptive strings like "Flash did not fire, compulsory flash mode".
+    if (/did not fire|no flash|not fired/i.test(value)) {
+      return 'Off'
+    }
+    if (/fired/i.test(value)) {
+      return 'On'
+    }
     return value
   }
   return null

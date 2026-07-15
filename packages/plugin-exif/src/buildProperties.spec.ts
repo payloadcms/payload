@@ -144,6 +144,20 @@ describe('buildProperties', () => {
     ])
   })
 
+  it("should condense exifr's descriptive Flash strings to On/Off", () => {
+    expect(
+      buildProperties({
+        exif: { raw: { Flash: 'Flash did not fire, compulsory flash mode' } },
+      }),
+    ).toEqual([{ label: 'Flash', value: 'Off' }])
+    expect(buildProperties({ exif: { raw: { Flash: 'No flash function' } } })).toEqual([
+      { label: 'Flash', value: 'Off' },
+    ])
+    expect(buildProperties({ exif: { raw: { Flash: 'Flash fired, auto mode' } } })).toEqual([
+      { label: 'Flash', value: 'On' },
+    ])
+  })
+
   it('should pass through Exposure Mode and White Balance strings', () => {
     const result = buildProperties({
       exif: { raw: { ExposureMode: 'Custom mode', WhiteBalance: 'Cloudy' } },
