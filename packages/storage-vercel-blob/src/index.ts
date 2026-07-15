@@ -6,7 +6,6 @@ import type {
 import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import { createVercelBlobAdapter } from './adapter.js'
 
@@ -123,14 +122,6 @@ export const vercelBlobStorage: VercelBlobStorageFactory = (
     const baseUrl =
       process.env.STORAGE_VERCEL_BLOB_BASE_URL ||
       `https://${storeId}.${optionsWithDefaults.access}.blob.vercel-storage.com`
-
-    initClientUploads({
-      clientHandler: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
-      collections: options.collections,
-      config: incomingConfig,
-      enabled: !isPluginDisabled && Boolean(options.clientUploads),
-      serverHandlerPath: '/upload-instructions',
-    })
 
     // If the plugin is disabled or no token is provided, do not enable the plugin
     if (isPluginDisabled) {

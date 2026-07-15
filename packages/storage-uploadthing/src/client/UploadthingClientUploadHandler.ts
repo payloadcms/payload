@@ -5,10 +5,10 @@ import { genUploader } from 'uploadthing/client'
 
 export const UploadthingClientUploadHandler = createClientUploadHandler({
   name: 'uploadToUploadThing',
-  handler: async ({ apiRoute, collectionSlug, file, serverHandlerPath, serverURL }) => {
+  handler: async ({ apiRoute, collectionSlug, endpointPath, file, serverURL }) => {
     const endpointRoute = formatAdminURL({
       apiRoute,
-      path: `${serverHandlerPath}?collectionSlug=${collectionSlug}`,
+      path: `${endpointPath!}?collectionSlug=${collectionSlug}`,
       serverURL,
     })
     const { uploadFiles } = genUploader({

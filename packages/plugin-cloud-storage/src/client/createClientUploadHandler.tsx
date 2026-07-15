@@ -8,10 +8,9 @@ import { Fragment, type ReactNode, useEffect } from 'react'
 type ClientUploadHandlerProps<T extends Record<string, unknown>> = {
   children: ReactNode
   collectionSlug: UploadCollectionSlug
-  enabled?: boolean
-  extra: T
+  endpointPath?: `/${string}`
   prefix?: string
-  serverHandlerPath: `/${string}`
+  props: T
 }
 
 export const createClientUploadHandler = <T extends Record<string, unknown>>({
@@ -23,10 +22,10 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
     collectionSlug: UploadCollectionSlug
     data?: unknown
     docPrefix?: string
-    extra: T
+    endpointPath?: `/${string}`
     file: File
     prefix?: string
-    serverHandlerPath: `/${string}`
+    props: T
     serverURL: string
     updateFilename: (value: string) => void
   }) => Promise<unknown>
@@ -35,10 +34,9 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
   return function ClientUploadHandler({
     children,
     collectionSlug,
-    enabled,
-    extra,
+    endpointPath,
     prefix,
-    serverHandlerPath,
+    props,
   }: ClientUploadHandlerProps<T>) {
     const {
       config: {
@@ -48,10 +46,6 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
     } = useConfig()
 
     const initializeHandler = useEffectEvent(() => {
-      if (!enabled) {
-        return
-      }
-
       const listener = (event: Event) => {
         const customEvent = event as CustomEvent<{
           collectionSlug: UploadCollectionSlug
@@ -73,10 +67,10 @@ export const createClientUploadHandler = <T extends Record<string, unknown>>({
           collectionSlug,
           data: customEvent.detail.data,
           docPrefix: customEvent.detail.docPrefix,
-          extra,
+          endpointPath,
           file: customEvent.detail.file,
           prefix,
-          serverHandlerPath,
+          props,
           serverURL,
           updateFilename: customEvent.detail.updateFilename,
         }).then(customEvent.detail.resolve, customEvent.detail.reject)

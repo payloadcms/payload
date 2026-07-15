@@ -1,27 +1,26 @@
-import type {
-  Adapter,
-  ClientUploadsConfig,
-  GeneratedAdapter,
-} from '@payloadcms/plugin-cloud-storage/types'
+import type { Adapter, GeneratedAdapter } from '@payloadcms/plugin-cloud-storage/types'
 import type { Field } from 'payload'
 import type { UTApi } from 'uploadthing/server'
 
-import type { ACL } from './index.js'
+import type { ACL, UploadthingStorageOptions } from './index.js'
 
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
+import { getClientUploadRoute } from './getClientUploadRoute.js'
 import { getFile } from './getFile.js'
 import { uploadFile } from './uploadFile.js'
 
 interface CreateUploadthingAdapterArgs {
   acl: ACL
-  clientUploads?: ClientUploadsConfig
+  clientUploads?: UploadthingStorageOptions['clientUploads']
+  token?: string
   utApi: UTApi
 }
 
 export function createUploadthingAdapter({
   acl,
   clientUploads,
+  token,
   utApi,
 }: CreateUploadthingAdapterArgs): Adapter {
   const fields: Field[] = [
@@ -34,26 +33,39 @@ export function createUploadthingAdapter({
       },
     },
   ]
+  const uploadInstructions: GeneratedAdapter['uploadInstructions'] = clientUploads
+    ? {
+        access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+        adminHandler: {
+          path: '@payloadcms/storage-uploadthing/client#UploadthingClientUploadHandler',
+        },
+        endpoint: {
+          handler: getClientUploadRoute({
+            access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+            acl,
+            routerInputConfig:
+              typeof clientUploads === 'object' ? clientUploads.routerInputConfig : undefined,
+            token,
+          }),
+          path: '/storage-uploadthing-client-upload-route',
+        },
+        generate: ({ filename, filesize, mimeType }) => ({
+          name: 'uploadToUploadThing',
+          type: 'dispatch',
+          file: {
+            directUpload: {},
+            filename,
+            mimeType,
+            size: filesize,
+          },
+        }),
+      }
+    : undefined
 
   return (): GeneratedAdapter => ({
     name: 'uploadthing',
     fields,
-
-    uploadInstructions: clientUploads
-      ? {
-          access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
-          generate: ({ filename, filesize, mimeType }) => ({
-            name: 'uploadToUploadThing',
-            type: 'dispatch',
-            file: {
-              directUpload: {},
-              filename,
-              mimeType,
-              size: filesize,
-            },
-          }),
-        }
-      : undefined,
+    uploadInstructions,
 
     generateURL,
 

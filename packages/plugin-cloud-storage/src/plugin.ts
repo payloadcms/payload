@@ -1,6 +1,6 @@
 import type { Config } from 'payload'
 
-import type { AllowList, PluginOptions } from './types.js'
+import type { Adapter, AllowList, PluginOptions } from './types.js'
 
 import { getFields } from './fields/getFields.js'
 import { getAfterChangeHook } from './hooks/afterChange.js'
@@ -69,6 +69,7 @@ export const cloudStoragePlugin =
     }
 
     const initFunctions: Array<() => void> = []
+    const endpointPaths = new Map<Adapter, string>()
 
     return {
       ...config,
@@ -83,6 +84,44 @@ export const cloudStoragePlugin =
 
           if (adapter.onInit) {
             initFunctions.push(adapter.onInit)
+          }
+
+          let uploadInstructions
+
+          if (adapter.uploadInstructions) {
+            const { adminHandler, endpoint, ...instructions } = adapter.uploadInstructions
+            let endpointPath = endpointPaths.get(options.adapter)
+
+            if (endpoint && !endpointPath) {
+              const endpointCount =
+                config.endpoints?.filter(({ path }) => path?.startsWith(endpoint.path)).length || 0
+
+              endpointPath = endpointCount ? `${endpoint.path}-${endpointCount}` : endpoint.path
+              config.endpoints ??= []
+              config.endpoints.push({
+                handler: endpoint.handler,
+                method: 'post',
+                path: endpointPath,
+              })
+              endpointPaths.set(options.adapter, endpointPath)
+            }
+
+            if (adminHandler) {
+              config.admin ??= {}
+              config.admin.components ??= {}
+              config.admin.components.providers ??= []
+              config.admin.components.providers.push({
+                clientProps: {
+                  collectionSlug: existingCollection.slug,
+                  endpointPath,
+                  prefix: options.prefix,
+                  props: adminHandler.props || {},
+                },
+                path: adminHandler.path,
+              })
+            }
+
+            uploadInstructions = instructions
           }
 
           const fields = getFields({
@@ -175,8 +214,8 @@ export const cloudStoragePlugin =
             upload: {
               ...(typeof existingCollection.upload === 'object' ? existingCollection.upload : {}),
               adapter: adapter.name,
-              ...(adapter.uploadInstructions && {
-                uploadInstructions: adapter.uploadInstructions,
+              ...(uploadInstructions && {
+                uploadInstructions,
               }),
               disableLocalStorage:
                 typeof options.disableLocalStorage === 'boolean'
@@ -190,6 +229,8 @@ export const cloudStoragePlugin =
 
         return existingCollection
       }),
+      ...(config.admin && { admin: config.admin }),
+      ...(config.endpoints && { endpoints: config.endpoints }),
       onInit: async (payload) => {
         initFunctions.forEach((fn) => fn())
         if (config.onInit) {

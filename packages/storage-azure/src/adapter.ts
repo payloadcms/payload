@@ -46,6 +46,9 @@ export function createAzureAdapter({
     uploadInstructions: clientUploads
       ? {
           access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+          adminHandler: {
+            path: '@payloadcms/storage-azure/client#AzureClientUploadHandler',
+          },
           generate: generateUploadInstructions({
             collectionPrefix: prefix,
             containerName,

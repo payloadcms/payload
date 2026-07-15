@@ -17,10 +17,10 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
     apiRoute,
     collectionSlug,
     docPrefix,
-    extra: { chunkSize = 5 * 1024 * 1024 },
+    endpointPath,
     file,
     prefix,
-    serverHandlerPath,
+    props: { chunkSize = 5 * 1024 * 1024 },
     serverURL,
     updateFilename,
   }): Promise<R2StorageDirectUpload | undefined> => {
@@ -38,7 +38,7 @@ export const R2ClientUploadHandler = createClientUploadHandler<R2StorageClientUp
     }
     const baseURL = formatAdminURL({
       apiRoute,
-      path: serverHandlerPath,
+      path: endpointPath,
       serverURL,
     })
 

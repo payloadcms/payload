@@ -6,7 +6,6 @@ import type {
 import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import { createAzureAdapter } from './adapter.js'
 import { getStorageClient as getStorageClientFunc } from './utils/getStorageClient.js'
@@ -106,14 +105,6 @@ export const azureStorage: AzureStorageFactory = (
       })
 
     const isPluginDisabled = azureStorageOptions.enabled === false
-
-    initClientUploads({
-      clientHandler: '@payloadcms/storage-azure/client#AzureClientUploadHandler',
-      collections: azureStorageOptions.collections,
-      config: incomingConfig,
-      enabled: !isPluginDisabled && Boolean(azureStorageOptions.clientUploads),
-      serverHandlerPath: '/upload-instructions',
-    })
 
     if (isPluginDisabled) {
       return incomingConfig

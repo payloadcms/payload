@@ -37,6 +37,9 @@ export function createVercelBlobAdapter({
     uploadInstructions: clientUploads
       ? {
           access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+          adminHandler: {
+            path: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
+          },
           generate: async ({ collectionSlug, docPrefix, filename, filesize, mimeType, req }) => {
             const resolved = await resolveSignedURLKey({
               collectionPrefix: prefix,

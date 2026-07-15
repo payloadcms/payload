@@ -12,11 +12,9 @@ import type { createUploadthing } from 'uploadthing/server'
 import type { UTApiOptions } from 'uploadthing/types'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 import { UTApi } from 'uploadthing/server'
 
 import { createUploadthingAdapter } from './adapter.js'
-import { getClientUploadRoute } from './getClientUploadRoute.js'
 
 export type FileRouterInputConfig = Parameters<ReturnType<typeof createUploadthing>>[0]
 
@@ -82,26 +80,6 @@ export const uploadthingStorage: UploadthingStorageFactory = (
   init: (incomingConfig: Config): Config => {
     const isPluginDisabled = uploadthingStorageOptions.enabled === false
 
-    initClientUploads({
-      clientHandler: '@payloadcms/storage-uploadthing/client#UploadthingClientUploadHandler',
-      collections: uploadthingStorageOptions.collections,
-      config: incomingConfig,
-      enabled: !isPluginDisabled && Boolean(uploadthingStorageOptions.clientUploads),
-      serverHandler: getClientUploadRoute({
-        access:
-          typeof uploadthingStorageOptions.clientUploads === 'object'
-            ? uploadthingStorageOptions.clientUploads.access
-            : undefined,
-        acl: uploadthingStorageOptions.options.acl || 'public-read',
-        routerInputConfig:
-          typeof uploadthingStorageOptions.clientUploads === 'object'
-            ? uploadthingStorageOptions.clientUploads.routerInputConfig
-            : undefined,
-        token: uploadthingStorageOptions.options.token,
-      }),
-      serverHandlerPath: '/storage-uploadthing-client-upload-route',
-    })
-
     if (isPluginDisabled) {
       return incomingConfig
     }
@@ -112,6 +90,7 @@ export const uploadthingStorage: UploadthingStorageFactory = (
     const adapter = createUploadthingAdapter({
       acl,
       clientUploads: uploadthingStorageOptions.clientUploads,
+      token: uploadthingStorageOptions.options.token,
       utApi,
     })
 

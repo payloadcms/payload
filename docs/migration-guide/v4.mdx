@@ -1095,6 +1095,41 @@ uploadInstructions: {
 
 The `data` value is passed from the server instruction to the client handler. The names must match exactly. If the handler returns an object, it becomes `file.directUpload` in the document request.
 
+#### `initClientUploads` was removed
+
+Custom cloud adapters now define their complete direct-upload setup in `uploadInstructions`. The cloud-storage plugin registers the optional Admin handler and supporting endpoint automatically.
+
+```diff
+- import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
+
+- initClientUploads({
+-   clientHandler: '/MyClientUploadHandler',
+-   collections,
+-   config,
+-   enabled: true,
+-   extraClientHandlerProps: () => ({ option: 'value' }),
+-   serverHandler,
+-   serverHandlerPath: '/my-upload-endpoint',
+- })
+
+uploadInstructions: {
+  access,
++ adminHandler: {
++   path: '/MyClientUploadHandler',
++   props: { option: 'value' },
++ },
++ endpoint: {
++   handler: serverHandler,
++   path: '/my-upload-endpoint',
++ },
+  generate,
+}
+```
+
+Both additions are optional. Use `adminHandler` when `generate` returns a named `dispatch` instruction, and use `endpoint` when that handler needs a Payload route. If one adapter is used by multiple collections, its endpoint is registered once and the final path is passed to the Admin handler as `endpointPath`.
+
+Handlers made with `createClientUploadHandler` now receive custom `props` instead of `extra`, and `endpointPath` instead of `serverHandlerPath`. The old `enabled` component prop was removed because the handler is only registered when upload instructions are enabled.
+
 ### Azure client uploads now use the Azure Blob SDK — update your CORS rules
 
 `@payloadcms/storage-azure` client uploads (`clientUploads`) now upload through the Azure Blob SDK, which splits files into blocks (`Put Block` + `Put Block List`). This lifts the ~5GB single-request limit and raises the effective ceiling to Azure's block-blob maximum (~190TiB).

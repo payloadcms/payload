@@ -3,10 +3,10 @@ import type {
   Field,
   FileData,
   ImageSize,
+  PayloadHandler,
   PayloadRequest,
   TypeWithID,
   UploadCollectionSlug,
-  UploadInstructionsAccess,
   UploadInstructionsCapability,
 } from 'payload'
 
@@ -19,11 +19,7 @@ export interface File {
   tempFilePath?: string
 }
 
-export type ClientUploadsConfig =
-  | {
-      access?: UploadInstructionsAccess
-    }
-  | boolean
+export type ClientUploadsConfig = boolean | Pick<UploadInstructionsCapability, 'access'>
 
 export type HandleUpload = (args: {
   collection: CollectionConfig
@@ -78,7 +74,16 @@ export interface GeneratedAdapter {
   onInit?: () => void
   staticHandler: StaticHandler
   /** Generates instructions for direct uploads when supported. */
-  uploadInstructions?: UploadInstructionsCapability
+  uploadInstructions?: {
+    adminHandler?: {
+      path: string
+      props?: Record<string, unknown>
+    }
+    endpoint?: {
+      handler: PayloadHandler
+      path: `/${string}`
+    }
+  } & UploadInstructionsCapability
 }
 
 export type Adapter = (args: { collection: CollectionConfig; prefix?: string }) => GeneratedAdapter
