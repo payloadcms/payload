@@ -56,3 +56,7 @@ export type ClipboardPasteActionValidateArgs = {
     }
 ) &
   ClipboardPasteData
+
+export type ClipboardPasteEligibilityArgs = {
+  path: string
+} & (ClipboardCopyBlocksSchema | ClipboardCopyFieldsSchema)
