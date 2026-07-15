@@ -2716,6 +2716,20 @@ describe('Fields', () => {
       expect(typeof found.items[0].richTextField).toBe('object')
       expect(found.items[0].richTextField).toEqual(richTextValue)
     })
+
+    it('should not crash when array contains a null element', async () => {
+      const doc = await payload.create({
+        collection,
+        data: {
+          // @ts-expect-error testing null in array
+          items: [null, { text: 'required', localizedText: 'valid' }],
+        },
+      })
+
+      // The null should be stripped; the valid row should survive intact.
+      expect(doc.items).toHaveLength(1)
+      expect(doc.items[0].text).toBe('required')
+    })
   })
 
   describe('group', () => {
@@ -3601,6 +3615,27 @@ describe('Fields', () => {
         'localizedTextReference',
       )
       expect(doc?.localizedReferencesLocalizedBlock?.en?.[0]?.text).toEqual('localized text')
+    })
+
+    it('should not crash when blocks array contains a null element', async () => {
+      const doc = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          // @ts-expect-error - intentionally injecting null
+          blocks: [
+            null,
+            {
+              blockType: 'content',
+              text: 'valid block',
+            },
+          ],
+        },
+      })
+
+      // The null should be stripped; the valid block should survive intact.
+      expect(doc.blocks).toHaveLength(1)
+      expect(doc.blocks[0].blockType).toBe('content')
+      expect(doc.blocks[0].text).toBe('valid block')
     })
   })
 

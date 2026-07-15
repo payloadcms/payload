@@ -39,7 +39,6 @@ export const packagePublishList = [
   'storage-azure',
   'storage-gcs',
   'storage-vercel-blob',
-  'storage-uploadthing',
 
   // KV
   'kv-redis',
@@ -62,7 +61,6 @@ export const packagePublishList = [
   'typescript-plugin',
 
   // Unpublished
-  // 'storage-uploadthing',
   // 'eslint-config',
   // 'eslint-plugin',
   // 'live-preview-vue',

@@ -1,5 +1,3 @@
-/* eslint-disable no-console -- eval runner reports case progress and summaries */
-
 import type { Payload } from 'payload'
 
 import { randomUUID } from 'node:crypto'
