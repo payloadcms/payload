@@ -979,6 +979,8 @@ POST /api/upload-instructions
 
 If you only configure a storage adapter with `clientUploads: true`, no migration is needed. The Admin Panel uses the new endpoint automatically.
 
+`upload.limits.fileSize` is now checked before Payload returns upload instructions. This is new for Azure, GCS, R2, and Vercel Blob; S3 already enforced this limit. If these client uploads previously exceeded the server limit, increase `upload.limits.fileSize` or Payload will reject them before the upload begins.
+
 You need to migrate if you call an adapter's signing endpoint directly, import its client component, use `ClientUploadsAccess`, or register a custom upload handler with `setUploadHandler`.
 
 #### Provider-specific signing endpoints were removed
