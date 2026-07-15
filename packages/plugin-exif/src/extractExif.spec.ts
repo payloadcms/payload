@@ -34,15 +34,14 @@ describe('extractExif', () => {
     const buffer = await jpegWithExif()
     const result = await extractExif({ buffer })
 
-    expect(result?.cameraMake).toBe('TestCam')
-    expect(result?.cameraModel).toBe('X100')
+    expect(result?.raw).toMatchObject({ Make: 'TestCam', Model: 'X100' })
   })
 
   it('should resolve to null-ish when the image has no exif', async () => {
     const buffer = await jpegWithoutExif()
     const result = await extractExif({ buffer })
 
-    expect(result?.cameraMake ?? null).toBeNull()
+    expect(result?.raw ?? null).toBeNull()
   })
 
   it('should return null for a non-image buffer without throwing', async () => {

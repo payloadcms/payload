@@ -8,8 +8,6 @@ import type { ExtractedExif } from '../types.js'
 import { extractExifHook } from './extractExifHook.js'
 
 const extracted: ExtractedExif = {
-  cameraMake: 'Canon',
-  cameraModel: 'R5',
   latitude: 1,
   longitude: 2,
   raw: { Make: 'Canon' },
@@ -19,7 +17,7 @@ const extracted: ExtractedExif = {
 describe('extractExifHook', () => {
   it('should skip when there is no uploaded file', async () => {
     const extract = vi.fn()
-    const hook = extractExifHook({ fieldName: 'exif' }, extract)
+    const hook = extractExifHook({ extract, fieldName: 'exif' })
     const data = { title: 'x' }
 
     const result = await hook({ data, operation: 'create', req: {} } as never)
@@ -30,7 +28,7 @@ describe('extractExifHook', () => {
 
   it('should populate the exif field from the file buffer', async () => {
     const extract = vi.fn().mockResolvedValue(extracted)
-    const hook = extractExifHook({ fieldName: 'exif' }, extract)
+    const hook = extractExifHook({ extract, fieldName: 'exif' })
     const buffer = Buffer.from('imgbytes')
 
     const result = await hook({
@@ -50,7 +48,7 @@ describe('extractExifHook', () => {
 
   it('should read from tempFilePath when the data buffer is empty', async () => {
     const extract = vi.fn().mockResolvedValue(extracted)
-    const hook = extractExifHook({ fieldName: 'exif' }, extract)
+    const hook = extractExifHook({ extract, fieldName: 'exif' })
     const tempFilePath = path.join(tmpdir(), 'plugin-exif-temp-fixture.bin')
     await writeFile(tempFilePath, Buffer.from('ondisk'))
 
@@ -67,7 +65,7 @@ describe('extractExifHook', () => {
 
   it('should not add the field when extraction returns null', async () => {
     const extract = vi.fn().mockResolvedValue(null)
-    const hook = extractExifHook({ fieldName: 'exif' }, extract)
+    const hook = extractExifHook({ extract, fieldName: 'exif' })
     const data = {}
 
     const result = await hook({

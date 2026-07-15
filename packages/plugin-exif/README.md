@@ -120,7 +120,7 @@ You are responsible for ensuring your handling of this data complies with your p
 
 ## Supported Formats
 
-EXIF parsing is powered by [`exifr`](https://github.com/MikeKovarik/exifr). JPEG, TIFF, and PNG are verified in this package's test suite. `exifr` also documents support for HEIC/HEIF (common on modern iPhones), but that path is currently **unverified** in this package — treat HEIC support as best-effort until a real fixture confirms it. Images in unsupported formats, or with no embedded EXIF, are stored normally with empty (`null`) metadata rather than erroring.
+EXIF parsing is powered by [`exifr`](https://github.com/MikeKovarik/exifr), which documents support for JPEG, TIFF, PNG, and HEIC/HEIF. JPEG is verified in this package's automated test suite. TIFF and PNG were checked via a one-off development probe (see `DECISIONS.md`), while HEIC/HEIF (common on modern iPhones) is documented by `exifr` but has not been verified locally — treat HEIC support as best-effort until a real fixture confirms it. Images in unsupported formats, or with no embedded EXIF, are stored normally with empty (`null`) metadata rather than erroring.
 
 ## Database Compatibility
 

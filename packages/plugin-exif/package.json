@@ -57,11 +57,11 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
-    "exifr": "^7.1.3",
-    "payload": "workspace:*"
+    "exifr": "^7.1.3"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
+    "payload": "workspace:*",
     "sharp": "0.32.6"
   },
   "peerDependencies": {

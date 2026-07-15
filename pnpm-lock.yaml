@@ -1166,13 +1166,13 @@ importers:
       exifr:
         specifier: ^7.1.3
         version: 7.1.3
-      payload:
-        specifier: workspace:*
-        version: link:../payload
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      payload:
+        specifier: workspace:*
+        version: link:../payload
       sharp:
         specifier: 0.32.6
         version: 0.32.6

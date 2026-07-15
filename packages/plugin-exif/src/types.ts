@@ -1,8 +1,6 @@
 import type { CollectionSlug } from 'payload'
 
 export type ExtractedExif = {
-  cameraMake: null | string
-  cameraModel: null | string
   latitude: null | number
   longitude: null | number
   raw: Record<string, unknown>

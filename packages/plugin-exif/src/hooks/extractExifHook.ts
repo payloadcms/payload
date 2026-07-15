@@ -9,10 +9,13 @@ import { extractExif as defaultExtract } from '../extractExif.js'
 type Extractor = (args: { buffer: Buffer }) => Promise<ExtractedExif | null>
 
 export const extractExifHook =
-  (
-    { fieldName }: { fieldName: string },
-    extract: Extractor = defaultExtract,
-  ): CollectionBeforeChangeHook =>
+  ({
+    extract = defaultExtract,
+    fieldName,
+  }: {
+    extract?: Extractor
+    fieldName: string
+  }): CollectionBeforeChangeHook =>
   async ({ data, operation, req }) => {
     if (operation !== 'create' && operation !== 'update') {
       return data
