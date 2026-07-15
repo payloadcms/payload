@@ -24,11 +24,11 @@ export function getIncomingFiles({
   if (file && data.filename && data.mimeType) {
     const mainFile: File = {
       buffer: file.data,
-      uploadReference: file.uploadReference,
       filename: data.filename,
       filesize: file.size,
       mimeType: data.mimeType,
       tempFilePath: file.tempFilePath,
+      uploadReference: file.uploadReference,
     }
 
     files = [mainFile]

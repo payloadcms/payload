@@ -13,11 +13,11 @@ interface GetFileArgs {
   client: Storage
   collection: CollectionConfig
   collectionPrefix?: string
-  uploadReference?: unknown
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
   req: PayloadRequest
+  uploadReference?: unknown
   useCompositePrefixes?: boolean
 }
 
@@ -26,20 +26,20 @@ export async function getFile({
   client,
   collection,
   collectionPrefix = '',
-  uploadReference,
   filename,
   incomingHeaders,
   prefixQueryParam,
   req,
+  uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   try {
     const docPrefix = await getDocPrefix({
       collection,
-      uploadReference,
       filename,
       prefixQueryParam,
       req,
+      uploadReference,
     })
 
     const { fileKey } = getFileKey({

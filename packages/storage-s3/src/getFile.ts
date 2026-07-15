@@ -27,12 +27,12 @@ interface GetFileArgs {
   client: AWS.S3
   collection: CollectionConfig
   collectionPrefix?: string
-  uploadReference?: unknown
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
   req: PayloadRequest
   signedDownloads: SignedDownloadsConfig
+  uploadReference?: unknown
   useCompositePrefixes?: boolean
 }
 
@@ -69,12 +69,12 @@ export async function getFile({
   client,
   collection,
   collectionPrefix = '',
-  uploadReference,
   filename,
   incomingHeaders,
   prefixQueryParam,
   req,
   signedDownloads,
+  uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   let object: AWS.GetObjectOutput | undefined = undefined
@@ -90,10 +90,10 @@ export async function getFile({
   try {
     const docPrefix = await getDocPrefix({
       collection,
-      uploadReference,
       filename,
       prefixQueryParam,
       req,
+      uploadReference,
     })
 
     const { fileKey: key } = getFileKey({

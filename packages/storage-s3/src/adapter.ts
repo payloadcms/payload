@@ -97,12 +97,12 @@ export function createS3Adapter({
         client: getStorageClient(),
         collection,
         collectionPrefix: prefix,
-        uploadReference,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,
         req,
         signedDownloads,
+        uploadReference,
         useCompositePrefixes,
       })
     },

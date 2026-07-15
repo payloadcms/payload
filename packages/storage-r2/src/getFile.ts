@@ -11,12 +11,12 @@ import type { R2Bucket } from './types.js'
 interface GetFileArgs {
   bucket: R2Bucket
   collection: CollectionConfig
-  uploadReference?: unknown
   filename: string
   incomingHeaders?: Headers
   prefix: string
   prefixQueryParam?: string
   req: PayloadRequest
+  uploadReference?: unknown
   useCompositePrefixes?: boolean
 }
 
@@ -25,21 +25,21 @@ const isMiniflare = process.env.NODE_ENV === 'development'
 export async function getFile({
   bucket,
   collection,
-  uploadReference,
   filename,
   incomingHeaders,
   prefix = '',
   prefixQueryParam,
   req,
+  uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   try {
     const docPrefix = await getDocPrefix({
       collection,
-      uploadReference,
       filename,
       prefixQueryParam,
       req,
+      uploadReference,
     })
 
     const { fileKey } = getFileKey({

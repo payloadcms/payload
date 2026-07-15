@@ -6,8 +6,8 @@ import { formatAdminURL } from 'payload/shared'
 import type {
   R2MultipartUpload,
   R2StorageClientUploadHandlerParams,
-  R2StorageUploadReference,
   R2StorageMultipartUploadHandlerParams,
+  R2StorageUploadReference,
   R2UploadedPart,
 } from '../types.js'
 

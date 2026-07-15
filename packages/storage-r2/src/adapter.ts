@@ -47,10 +47,10 @@ export function createR2Adapter({
           name: 'uploadToR2',
           type: 'dispatch',
           file: {
-            uploadReference: {},
             filename,
             mimeType,
             size: filesize,
+            uploadReference: {},
           },
         }),
       }
@@ -87,12 +87,12 @@ export function createR2Adapter({
       getFile({
         bucket,
         collection,
-        uploadReference,
         filename,
         incomingHeaders: headers,
         prefix,
         prefixQueryParam,
         req,
+        uploadReference,
         useCompositePrefixes,
       }),
   })

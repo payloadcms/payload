@@ -11,12 +11,12 @@ interface GetFileArgs {
   cacheControlMaxAge: number
   collection: CollectionConfig
   collectionPrefix?: string
-  uploadReference?: unknown
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
   req: PayloadRequest
   token: string
+  uploadReference?: unknown
   useCompositePrefixes?: boolean
 }
 
@@ -25,21 +25,21 @@ export async function getFile({
   cacheControlMaxAge,
   collection,
   collectionPrefix = '',
-  uploadReference,
   filename,
   incomingHeaders,
   prefixQueryParam,
   req,
   token,
+  uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   try {
     const docPrefix = await getDocPrefix({
       collection,
-      uploadReference,
       filename,
       prefixQueryParam,
       req,
+      uploadReference,
     })
 
     const fileUrl = generateURL({

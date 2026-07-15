@@ -75,10 +75,10 @@ export function createVercelBlobAdapter({
                 }),
               },
               file: {
-                uploadReference: { prefix: resolved.sanitizedDocPrefix },
                 filename: resolved.sanitizedFilename,
                 mimeType,
                 size: filesize,
+                uploadReference: { prefix: resolved.sanitizedDocPrefix },
               },
             }
           },
@@ -134,12 +134,12 @@ export function createVercelBlobAdapter({
         cacheControlMaxAge,
         collection,
         collectionPrefix: prefix,
-        uploadReference,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,
         req,
         token,
+        uploadReference,
         useCompositePrefixes,
       }),
   })

@@ -15,16 +15,16 @@ import { sanitizePrefix } from './sanitizePrefix.js'
  */
 export async function getFilePrefix({
   collection,
-  uploadReference,
   filename,
   prefixQueryParam,
   req,
+  uploadReference,
 }: {
   collection: CollectionConfig
-  uploadReference?: unknown
   filename: string
   prefixQueryParam?: string
   req: PayloadRequest
+  uploadReference?: unknown
 }): Promise<string> {
   if (typeof prefixQueryParam === 'string') {
     return sanitizePrefix(prefixQueryParam)

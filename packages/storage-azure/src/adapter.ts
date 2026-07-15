@@ -90,11 +90,11 @@ export function createAzureAdapter({
         client: getStorageClient(),
         collection,
         collectionPrefix: prefix,
-        uploadReference,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,
         req,
+        uploadReference,
         useCompositePrefixes,
       }),
 

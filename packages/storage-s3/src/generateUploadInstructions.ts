@@ -68,10 +68,10 @@ export const generateUploadInstructions = ({
     return {
       type: 'http',
       file: {
-        uploadReference: { prefix: sanitizedDocPrefix },
         filename: sanitizedFilename,
         mimeType,
         size: filesize,
+        uploadReference: { prefix: sanitizedDocPrefix },
       },
       request: {
         headers: {
