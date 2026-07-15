@@ -1,4 +1,4 @@
-import { getViewportContent } from '@payloadcms/ui/layouts'
+import { getViewportContent } from '@payloadcms/ui/shared'
 
 type MetaEntry =
   | { charSet: string }
