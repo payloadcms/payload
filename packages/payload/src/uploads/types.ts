@@ -252,7 +252,7 @@ export type UploadConfig = {
       headers?: Headers
       params: {
         collection: string
-        directUpload?: unknown
+        uploadReference?: unknown
         filename: string
         prefix?: string
       }
@@ -341,7 +341,7 @@ export type UploadInstructionsRequest = {
 
 export type UploadInstructions = {
   file: {
-    directUpload: Record<string, unknown>
+    uploadReference: Record<string, unknown>
     filename: string
     mimeType: string
     size: number

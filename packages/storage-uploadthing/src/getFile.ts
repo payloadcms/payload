@@ -7,7 +7,7 @@ import { getKeyFromFilename } from './utilities.js'
 
 interface GetFileArgs {
   collection: string
-  directUpload?: unknown
+  uploadReference?: unknown
   doc?: Record<string, unknown>
   filename: string
   incomingHeaders: Headers
@@ -17,7 +17,7 @@ interface GetFileArgs {
 
 export async function getFile({
   collection,
-  directUpload,
+  uploadReference,
   doc,
   filename,
   incomingHeaders,
@@ -29,12 +29,12 @@ export async function getFile({
     const collectionConfig = req.payload.collections[collection]?.config
 
     if (
-      directUpload &&
-      typeof directUpload === 'object' &&
-      'key' in directUpload &&
-      typeof directUpload.key === 'string'
+      uploadReference &&
+      typeof uploadReference === 'object' &&
+      'key' in uploadReference &&
+      typeof uploadReference.key === 'string'
     ) {
-      key = directUpload.key
+      key = uploadReference.key
     } else {
       let retrievedDoc = doc
 

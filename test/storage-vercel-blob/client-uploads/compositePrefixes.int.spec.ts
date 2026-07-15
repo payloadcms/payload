@@ -71,7 +71,7 @@ describe('@payloadcms/storage-vercel-blob clientUploads (composite prefixes)', (
     const instructions = (await instructionsResponse.json()) as {
       data: { pathname: string; token: string }
       file: {
-        directUpload: { prefix: string }
+        uploadReference: { prefix: string }
         filename: string
         mimeType: string
         size: number

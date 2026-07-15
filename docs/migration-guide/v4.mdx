@@ -1033,9 +1033,9 @@ await fetch('/api/media', {
 })
 ```
 
-The collection comes from `/api/media`, so the `file` value no longer includes `collectionSlug`. The old `clientUploadContext` property is replaced by `directUpload`. Its presence tells Payload that the original file is already in storage, and its contents give the adapter any data needed to find it.
+The collection comes from `/api/media`, so the `file` value no longer includes `collectionSlug`. The old `clientUploadContext` property is replaced by `uploadReference`. Its presence tells Payload that the original file was uploaded before document creation, and its contents give the adapter any data needed to find it.
 
-For custom adapters, `clientUploadContext` becomes `directUpload` on the file and static handler parameters. `handleUpload` no longer receives it because directly uploaded originals are skipped. To detect a file that was uploaded before document creation, check whether `file.directUpload` is present.
+For custom adapters, `clientUploadContext` becomes `uploadReference` on the file and static handler parameters. `handleUpload` no longer receives it because files uploaded before document creation are skipped. To detect one of these files, check whether `file.uploadReference` is present.
 
 #### Adapter client components no longer need manual registration
 
@@ -1095,7 +1095,7 @@ The adapter must return the same name from its `uploadInstructions` capability:
 uploadInstructions: {
   generate: ({ filename, filesize, mimeType }) => ({
     file: {
-      directUpload: {},
+      uploadReference: {},
       filename,
       mimeType,
       size: filesize,
@@ -1107,7 +1107,7 @@ uploadInstructions: {
 }
 ```
 
-The `data` value is passed from the server instruction to the client handler. The names must match exactly. If the handler returns an object, it becomes `file.directUpload` in the document request.
+The `data` value is passed from the server instruction to the client handler. The names must match exactly. If the handler returns an object, it becomes `file.uploadReference` in the document request.
 
 #### `initClientUploads` was removed
 

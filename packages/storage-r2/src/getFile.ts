@@ -11,7 +11,7 @@ import type { R2Bucket } from './types.js'
 interface GetFileArgs {
   bucket: R2Bucket
   collection: CollectionConfig
-  directUpload?: unknown
+  uploadReference?: unknown
   filename: string
   incomingHeaders?: Headers
   prefix: string
@@ -25,7 +25,7 @@ const isMiniflare = process.env.NODE_ENV === 'development'
 export async function getFile({
   bucket,
   collection,
-  directUpload,
+  uploadReference,
   filename,
   incomingHeaders,
   prefix = '',
@@ -36,7 +36,7 @@ export async function getFile({
   try {
     const docPrefix = await getDocPrefix({
       collection,
-      directUpload,
+      uploadReference,
       filename,
       prefixQueryParam,
       req,
@@ -58,7 +58,7 @@ export async function getFile({
     const fileSize = headObj.size
 
     // Don't return large file uploads back to the client, or the Worker will run out of memory
-    if (fileSize > 50 * 1024 * 1024 && directUpload) {
+    if (fileSize > 50 * 1024 * 1024 && uploadReference) {
       return new Response(null, { status: 200 })
     }
 

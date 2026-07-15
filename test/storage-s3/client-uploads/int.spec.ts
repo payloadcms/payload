@@ -57,7 +57,7 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
 
     expect(instructions.type).toBe('http')
     expect(instructions.file).toEqual({
-      directUpload: { prefix: '' },
+      uploadReference: { prefix: '' },
       filename: 'image.png',
       mimeType: 'image/png',
       size: file.length,

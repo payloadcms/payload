@@ -58,10 +58,10 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        let directUpload, filename, mimeType, size
+        let filename, mimeType, size, uploadReference
         const collectionSlug = req.routeParams?.collection as string
         try {
-          ;({ directUpload, filename, mimeType, size } = JSON.parse(fields.file))
+          ;({ filename, mimeType, size, uploadReference } = JSON.parse(fields.file))
         } catch {
           throw new APIError('A file name is required.', 400)
         }
@@ -80,7 +80,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
               doc: null!,
               params: {
                 collection: collectionSlug,
-                directUpload,
+                uploadReference,
                 filename,
               },
             })
@@ -111,7 +111,7 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
         req.file = {
           name: filename,
           data: Buffer.from(await response.arrayBuffer()),
-          directUpload,
+          uploadReference,
           mimetype: response.headers.get('Content-Type') || mimeType,
           size,
         }

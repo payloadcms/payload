@@ -27,7 +27,7 @@ interface GetFileArgs {
   client: AWS.S3
   collection: CollectionConfig
   collectionPrefix?: string
-  directUpload?: unknown
+  uploadReference?: unknown
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
@@ -69,7 +69,7 @@ export async function getFile({
   client,
   collection,
   collectionPrefix = '',
-  directUpload,
+  uploadReference,
   filename,
   incomingHeaders,
   prefixQueryParam,
@@ -90,7 +90,7 @@ export async function getFile({
   try {
     const docPrefix = await getDocPrefix({
       collection,
-      directUpload,
+      uploadReference,
       filename,
       prefixQueryParam,
       req,
@@ -103,7 +103,7 @@ export async function getFile({
       useCompositePrefixes,
     })
 
-    if (signedDownloads && !directUpload) {
+    if (signedDownloads && !uploadReference) {
       let useSignedURL = true
       if (
         typeof signedDownloads === 'object' &&

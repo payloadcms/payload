@@ -55,7 +55,7 @@ export const generateUploadInstructions = ({
         url: `${blobClient.url}?${sasToken.toString()}`,
       },
       file: {
-        directUpload: { prefix: sanitizedDocPrefix },
+        uploadReference: { prefix: sanitizedDocPrefix },
         filename: sanitizedFilename,
         mimeType,
         size: filesize,

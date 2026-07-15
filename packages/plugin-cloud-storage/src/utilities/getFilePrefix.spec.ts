@@ -99,12 +99,12 @@ describe('getFilePrefix', () => {
       expect(result).toBe('')
     })
 
-    it('should prioritize the direct upload prefix over the database query', async () => {
+    it('should prioritize the upload reference prefix over the database query', async () => {
       const req = makeReq([{ prefix: 'db-prefix' }])
 
       const result = await getFilePrefix({
         collection: makeCollection(),
-        directUpload: { prefix: 'context-prefix' },
+        uploadReference: { prefix: 'context-prefix' },
         filename: 'logo.png',
         req,
       })

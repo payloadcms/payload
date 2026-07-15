@@ -68,7 +68,7 @@ export const generateUploadInstructions = ({
     return {
       type: 'http',
       file: {
-        directUpload: { prefix: sanitizedDocPrefix },
+        uploadReference: { prefix: sanitizedDocPrefix },
         filename: sanitizedFilename,
         mimeType,
         size: filesize,

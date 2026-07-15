@@ -79,7 +79,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
     const instructions = (await signedURLRes.json()) as UploadInstructions
     expect(instructions.type).toBe('dispatch')
     expect(instructions.file).toEqual({
-      directUpload: { prefix: '' },
+      uploadReference: { prefix: '' },
       filename: 'duplicate-target-1.png',
       mimeType: 'image/png',
       size: fileBuffer.length,

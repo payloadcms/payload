@@ -68,7 +68,7 @@ describe('@payloadcms/storage-vercel-blob clientUploads', () => {
     expect(instructions.type).toBe('dispatch')
     expect(instructions.name).toBe('uploadToVercelBlob')
     expect(instructions.file).toEqual({
-      directUpload: { prefix: '' },
+      uploadReference: { prefix: '' },
       filename: 'image.png',
       mimeType: 'image/png',
       size: file.length,

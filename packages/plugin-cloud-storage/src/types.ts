@@ -13,11 +13,11 @@ import type {
 
 export interface File {
   buffer: Buffer
-  directUpload?: unknown
   filename: string
   filesize: number
   mimeType: string
   tempFilePath?: string
+  uploadReference?: unknown
 }
 
 export type ClientUploadsConfig = { access?: UploadInstructionsAccess } | boolean
@@ -56,7 +56,7 @@ export type StaticHandler = (
   args: {
     doc?: TypeWithID
     headers?: Headers
-    params: { collection: string; directUpload?: unknown; filename: string; prefix?: string }
+    params: { collection: string; filename: string; prefix?: string; uploadReference?: unknown }
   },
 ) => Promise<Response> | Response
 
@@ -74,7 +74,7 @@ export interface GeneratedAdapter {
   name: string
   onInit?: () => void
   staticHandler: StaticHandler
-  /** Generates instructions for direct uploads when supported. */
+  /** Generates upload instructions when supported. */
   uploadInstructions?: {
     adminHandler?: {
       path: string

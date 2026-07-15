@@ -24,7 +24,7 @@ export function getIncomingFiles({
   if (file && data.filename && data.mimeType) {
     const mainFile: File = {
       buffer: file.data,
-      directUpload: file.directUpload,
+      uploadReference: file.uploadReference,
       filename: data.filename,
       filesize: file.size,
       mimeType: data.mimeType,

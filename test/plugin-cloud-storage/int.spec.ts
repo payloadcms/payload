@@ -114,11 +114,11 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       upload: {},
     } as any
 
-    describe('direct upload prefix sanitization', () => {
+    describe('upload reference prefix sanitization', () => {
       it('should return a valid prefix unchanged', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          directUpload: { prefix: 'media/images' },
+          uploadReference: { prefix: 'media/images' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -128,7 +128,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       it('should strip invalid segments from the prefix', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          directUpload: { prefix: '../other-collection/private' },
+          uploadReference: { prefix: '../other-collection/private' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -139,7 +139,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       it('should handle deeply nested invalid segments', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          directUpload: { prefix: 'a/../../outside' },
+          uploadReference: { prefix: 'a/../../outside' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -150,7 +150,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       it('should strip leading slashes from the prefix', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          directUpload: { prefix: '/absolute/path' },
+          uploadReference: { prefix: '/absolute/path' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -161,7 +161,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       it('should strip dot segments from the prefix', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          directUpload: { prefix: './relative/./path' },
+          uploadReference: { prefix: './relative/./path' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -171,7 +171,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       it('should normalize backslash separators', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          directUpload: { prefix: '..\\..\\outside' },
+          uploadReference: { prefix: '..\\..\\outside' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -181,7 +181,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       it('should strip control characters from the prefix', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          directUpload: { prefix: 'media\x00/images' },
+          uploadReference: { prefix: 'media\x00/images' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -191,7 +191,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
       it('should return empty string for a prefix of only invalid segments', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
-          directUpload: { prefix: '../../..' },
+          uploadReference: { prefix: '../../..' },
           filename: 'test.png',
           req: mockReq,
         })
@@ -200,7 +200,7 @@ describe('@payloadcms/plugin-cloud-storage', () => {
     })
 
     describe('fallback to DB lookup', () => {
-      it('should return empty string when there is no direct upload or DB match', async () => {
+      it('should return empty string when there is no upload reference or DB match', async () => {
         const result = await getFilePrefix({
           collection: mockCollection,
           filename: 'test.png',

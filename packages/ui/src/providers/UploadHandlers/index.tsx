@@ -84,7 +84,7 @@ export const UploadHandlersProvider = ({ children }) => {
       })
 
       return typeof result === 'object' && result !== null
-        ? { ...uploadedFile, directUpload: result as Record<string, unknown> }
+        ? { ...uploadedFile, uploadReference: result as Record<string, unknown> }
         : uploadedFile
     }
   }

@@ -52,7 +52,7 @@ export function createUploadthingAdapter({
           name: 'uploadToUploadThing',
           type: 'dispatch',
           file: {
-            directUpload: {},
+            uploadReference: {},
             filename,
             mimeType,
             size: filesize,
@@ -84,14 +84,14 @@ export function createUploadthingAdapter({
       return result
     },
 
-    staticHandler: (req, { doc, headers, params: { collection, directUpload, filename } }) =>
+    staticHandler: (req, { doc, headers, params: { collection, filename, uploadReference } }) =>
       getFile({
         collection,
-        directUpload,
         doc: doc as unknown as Record<string, unknown> | undefined,
         filename,
         incomingHeaders: headers || new Headers(),
         req,
+        uploadReference,
         utApi,
       }),
   })

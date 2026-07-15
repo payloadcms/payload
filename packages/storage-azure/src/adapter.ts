@@ -84,13 +84,13 @@ export function createAzureAdapter({
 
     staticHandler: (
       req,
-      { headers, params: { directUpload, filename, prefix: prefixQueryParam } },
+      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
     ) =>
       getFile({
         client: getStorageClient(),
         collection,
         collectionPrefix: prefix,
-        directUpload,
+        uploadReference,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,

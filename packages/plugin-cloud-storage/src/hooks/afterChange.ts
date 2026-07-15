@@ -27,7 +27,7 @@ export const getAfterChangeHook =
       if (files.length > 0) {
         const uploadResults = await Promise.all(
           files
-            .filter((file) => !file.directUpload)
+            .filter((file) => !file.uploadReference)
             .map((file) =>
               adapter.handleUpload({
                 collection,

@@ -47,7 +47,7 @@ export function createR2Adapter({
           name: 'uploadToR2',
           type: 'dispatch',
           file: {
-            directUpload: {},
+            uploadReference: {},
             filename,
             mimeType,
             size: filesize,
@@ -82,12 +82,12 @@ export function createR2Adapter({
 
     staticHandler: (
       req,
-      { headers, params: { directUpload, filename, prefix: prefixQueryParam } },
+      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
     ) =>
       getFile({
         bucket,
         collection,
-        directUpload,
+        uploadReference,
         filename,
         incomingHeaders: headers,
         prefix,

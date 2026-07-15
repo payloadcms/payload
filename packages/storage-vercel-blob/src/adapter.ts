@@ -75,7 +75,7 @@ export function createVercelBlobAdapter({
                 }),
               },
               file: {
-                directUpload: { prefix: resolved.sanitizedDocPrefix },
+                uploadReference: { prefix: resolved.sanitizedDocPrefix },
                 filename: resolved.sanitizedFilename,
                 mimeType,
                 size: filesize,
@@ -127,14 +127,14 @@ export function createVercelBlobAdapter({
 
     staticHandler: (
       req,
-      { headers, params: { directUpload, filename, prefix: prefixQueryParam } },
+      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
     ) =>
       getFile({
         baseUrl,
         cacheControlMaxAge,
         collection,
         collectionPrefix: prefix,
-        directUpload,
+        uploadReference,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,
