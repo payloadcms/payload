@@ -6,6 +6,7 @@ import type { StripeAdapterArgs } from './index.js'
 type Props = {
   apiVersion?: Stripe.StripeConfig['apiVersion']
   appInfo?: Stripe.StripeConfig['appInfo']
+  httpClient?: Stripe.StripeConfig['httpClient']
   secretKey: StripeAdapterArgs['secretKey']
 }
 
@@ -19,7 +20,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
     transactionsSlug = 'transactions',
   }) => {
     const payload = req.payload
-    const { apiVersion, appInfo, secretKey } = props || {}
+    const { apiVersion, appInfo, httpClient, secretKey } = props || {}
 
     const customerEmail = data.customerEmail
 
@@ -42,6 +43,7 @@ export const confirmOrder: (props: Props) => NonNullable<PaymentAdapter>['confir
         name: 'Stripe Payload Plugin',
         url: 'https://payloadcms.com',
       },
+      httpClient,
     })
 
     try {

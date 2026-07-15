@@ -6,6 +6,7 @@ import type { InitiatePaymentReturnType, StripeAdapterArgs } from './index.js'
 type Props = {
   apiVersion?: Stripe.StripeConfig['apiVersion']
   appInfo?: Stripe.StripeConfig['appInfo']
+  httpClient?: Stripe.StripeConfig['httpClient']
   secretKey: StripeAdapterArgs['secretKey']
 }
 
@@ -13,7 +14,7 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
   (props) =>
   async ({ data, req, transactionsSlug }) => {
     const payload = req.payload
-    const { apiVersion, appInfo, secretKey } = props || {}
+    const { apiVersion, appInfo, httpClient, secretKey } = props || {}
 
     const customerEmail = data.customerEmail
     const currency = data.currency
@@ -51,6 +52,7 @@ export const initiatePayment: (props: Props) => NonNullable<PaymentAdapter>['ini
         name: 'Stripe Payload Plugin',
         url: 'https://payloadcms.com',
       },
+      httpClient,
     })
 
     try {
