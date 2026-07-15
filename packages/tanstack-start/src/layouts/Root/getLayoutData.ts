@@ -4,13 +4,13 @@ import type { ImportMap, LanguageOptions, SanitizedConfig, ServerProps } from 'p
 import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
+import { getRequestTheme } from '@payloadcms/ui/utilities/getRequestTheme'
 import { Outlet } from '@tanstack/react-router'
 import { applyLocaleFiltering } from 'payload/shared'
 import { createElement } from 'react'
 
 import type { RootLayoutData } from './index.js'
 
-import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.server.js'
 
 export type GetLayoutDataArgs = {

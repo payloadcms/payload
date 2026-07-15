@@ -37,7 +37,6 @@ export const packagePublishList = [
   'storage-azure',
   'storage-gcs',
   'storage-vercel-blob',
-  'storage-uploadthing',
 
   // Live preview
   'live-preview',

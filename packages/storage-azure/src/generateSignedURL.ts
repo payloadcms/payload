@@ -65,7 +65,7 @@ export const getGenerateSignedURLHandler = ({
         blobName: fileKey,
         containerName,
         contentType: mimeType,
-        expiresOn: new Date(Date.now() + 30 * 60 * 1000),
+        expiresOn: new Date(Date.now() + 3 * 60 * 60 * 1000),
         permissions: BlobSASPermissions.parse('w'),
         startsOn: new Date(),
       },

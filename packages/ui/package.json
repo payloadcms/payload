@@ -231,6 +231,16 @@
       "types": "./src/utilities/getClientConfig.ts",
       "default": "./src/utilities/getClientConfig.ts"
     },
+    "./utilities/getLanguageDir": {
+      "import": "./src/utilities/getLanguageDir.ts",
+      "types": "./src/utilities/getLanguageDir.ts",
+      "default": "./src/utilities/getLanguageDir.ts"
+    },
+    "./utilities/getRequestTheme": {
+      "import": "./src/utilities/getRequestTheme.ts",
+      "types": "./src/utilities/getRequestTheme.ts",
+      "default": "./src/utilities/getRequestTheme.ts"
+    },
     "./utilities/getRouteWithoutAdmin": {
       "import": "./src/utilities/getRouteWithoutAdmin.ts",
       "types": "./src/utilities/getRouteWithoutAdmin.ts",
@@ -365,6 +375,7 @@
     "@faceless-ui/modal": "3.0.1",
     "@faceless-ui/scroll-info": "2.0.0",
     "@faceless-ui/window-info": "3.0.1",
+    "@floating-ui/dom": "1.7.6",
     "@monaco-editor/react": "4.7.0",
     "@payloadcms/translations": "workspace:*",
     "bson-objectid": "2.0.4",
