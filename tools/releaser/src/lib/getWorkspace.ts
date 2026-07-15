@@ -43,7 +43,7 @@ type Workspace = {
   showVersions: () => Promise<void>
   bumpVersion: (type: PackageReleaseType, opts?: { preid?: 'beta' | 'canary' }) => Promise<string>
   build: (opts?: { debug?: boolean }) => Promise<void>
-  publishSync: (opts: PublishOpts) => Promise<void>
+  publish: (opts: PublishOpts) => Promise<void>
 }
 
 export const getWorkspace = async () => {
@@ -60,7 +60,7 @@ export const getWorkspace = async () => {
   }
 
   // Publish one package at a time, fail-fast at the first failure.
-  const publishSync: Workspace['publishSync'] = async ({ dryRun, tag = 'canary' }) => {
+  const publish: Workspace['publish'] = async ({ dryRun, tag = 'canary' }) => {
     const packageDetails = await getPackageDetails(packagePublishList)
     await runPublishSequence({
       packages: packageDetails,
@@ -173,7 +173,7 @@ export const getWorkspace = async () => {
     showVersions,
     bumpVersion,
     build,
-    publishSync,
+    publish,
   }
 
   return workspace
