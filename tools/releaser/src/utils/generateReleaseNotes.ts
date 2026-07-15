@@ -2,7 +2,6 @@ import type { GitCommit } from 'changelogen'
 
 import { execSync } from 'child_process'
 import minimist from 'minimist'
-import open from 'open'
 import semver from 'semver'
 
 import { getLatestCommits } from './getLatestCommits.js'
@@ -12,7 +11,6 @@ type Args = {
   bump?: 'major' | 'minor' | 'patch' | 'prerelease'
   dryRun?: boolean
   fromVersion?: string
-  openReleaseUrl?: boolean
   toVersion?: string
 }
 
@@ -36,7 +34,7 @@ type ChangelogResult = {
 }
 
 export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogResult> => {
-  const { bump, dryRun, openReleaseUrl, toVersion = 'HEAD' } = args
+  const { bump, dryRun, toVersion = 'HEAD' } = args
 
   const fromVersion =
     args.fromVersion || execSync('git describe --match "v*" --tags --abbrev=0').toString().trim()
@@ -163,9 +161,6 @@ export const generateReleaseNotes = async (args: Args = {}): Promise<ChangelogRe
   let releaseUrl = `https://github.com/payloadcms/payload/releases/new?tag=${proposedReleaseVersion}&title=${proposedReleaseVersion}&body=${encodeURIComponent(releaseNotes)}`
   if (tag !== 'latest') {
     releaseUrl += `&prerelease=1`
-  }
-  if (openReleaseUrl) {
-    await open(releaseUrl)
   }
 
   return {
@@ -338,12 +333,11 @@ function formatCommitForChangelog(commit: GitCommit, includeBreakingNotes = fals
 // module import workaround for ejs
 if (import.meta.url === `file://${process.argv[1]}`) {
   // This module is being run directly
-  const { bump, fromVersion, openReleaseUrl, toVersion } = minimist(process.argv.slice(2))
+  const { bump, fromVersion, toVersion } = minimist(process.argv.slice(2))
   generateReleaseNotes({
     bump,
     dryRun: false,
     fromVersion,
-    openReleaseUrl,
     toVersion,
   })
     .then(() => {
