@@ -82,6 +82,7 @@ export async function runCodegenCase(
   )
 
   const paramsHash = codegenParamsHash({
+    additionalAllowedTools: testCase.additionalAllowedTools,
     category: testCase.category,
     configPath: testCase.configPath,
     fixtureContent: starterConfig,
@@ -90,6 +91,7 @@ export async function runCodegenCase(
     runnerKind: kind,
     skillInstall: kind === 'claude-code' ? skillInstall : undefined,
     systemPromptKey: kind === 'llm' ? systemPromptKey : undefined,
+    workspaceFiles: testCase.workspaceFiles,
   })
 
   const reusable = !shouldRerun() ? findReusableResult({ paramsHash }) : undefined
@@ -123,6 +125,7 @@ export async function runCodegenCase(
       await testCase.setup({ payload })
     }
     runnerOutput = await runCodegenEval(testCase.input, starterConfig, {
+      additionalAllowedTools: testCase.additionalAllowedTools,
       agentModel,
       configPath: testCase.configPath,
       exposeMcpTools,
@@ -132,6 +135,7 @@ export async function runCodegenCase(
       model: runnerModel,
       skillInstall,
       systemPromptKey,
+      workspaceFiles: testCase.workspaceFiles,
     })
   } catch (error) {
     await lazyPayload?.cleanup()
@@ -224,12 +228,17 @@ export async function runCodegenCase(
   }
 
   try {
+    const verifyPayload = await resolveVerifyPayload({
+      boot: lazyPayload.boot,
+      lazyPayload: lazyPayload.payload,
+      verify: testCase.verify,
+    })
     const verifyResult = await testCase.verify({
       ast,
       audit,
       config: evalConfig,
       expect: createEvalExpect(),
-      payload: lazyPayload.payload,
+      payload: verifyPayload,
       score,
       source: modifiedConfig,
       transcript: transcript ?? [],
@@ -284,6 +293,18 @@ export async function runCodegenCase(
   } finally {
     await lazyPayload.cleanup()
   }
+}
+
+export async function resolveVerifyPayload({
+  boot,
+  lazyPayload,
+  verify,
+}: {
+  boot: () => Promise<Payload>
+  lazyPayload: Payload
+  verify: EvalCase['verify']
+}): Promise<Payload> {
+  return verifyUsesArg(verify, 'payload') ? boot() : lazyPayload
 }
 
 function createEvalExpect(): EvalExpect {
