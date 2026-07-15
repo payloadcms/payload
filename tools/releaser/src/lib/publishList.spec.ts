@@ -22,8 +22,15 @@ describe('packagePublishList topological order (turbo-derived)', () => {
       encoding: 'utf8',
       maxBuffer: 50 * 1024 * 1024,
     })
-    // Guard against any non-JSON preamble turbo may print.
-    const json = JSON.parse(raw.slice(raw.indexOf('{'))) as { tasks: TurboTask[] }
+    // Guard against any non-JSON preamble turbo may print. Fail clearly if turbo
+    // emitted no JSON object at all (error, flag change) rather than letting
+    // slice(-1) produce an opaque parse error.
+    const jsonStart = raw.indexOf('{')
+    expect(
+      jsonStart,
+      'turbo run build --dry-run=json produced no JSON object',
+    ).toBeGreaterThanOrEqual(0)
+    const json = JSON.parse(raw.slice(jsonStart)) as { tasks: TurboTask[] }
     const buildTasks = json.tasks.filter((task) => task.task === 'build')
 
     // npm name -> short (publish-list) name, via each task's directory basename.
