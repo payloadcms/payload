@@ -6,7 +6,7 @@
     "noEmit": true,
     "rootDir": "..",
     "paths": {
-      "@payload-config": ["../test/lexical/config.ts"]
+      "@payload-config": ["../test/_community/config.ts"]
     }
   },
   "include": [

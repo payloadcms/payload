@@ -1,4 +1,7 @@
 import { withPayload } from '@payloadcms/tanstack-start/vite'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import viteReact from '@vitejs/plugin-react'
+import rsc from '@vitejs/plugin-rsc'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -51,21 +54,13 @@ const suiteDir = path.resolve(__dirname, testSuite, 'app-tanstack')
 const srcDirectory = fs.existsSync(suiteDir) ? path.relative(__dirname, suiteDir) : 'app-tanstack'
 
 export default defineConfig(
-  withPayload(undefined, {
-    additionalIgnoreImporters: [
-      /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
-    ],
-    // In the monorepo, Payload's `.client.*` files resolve to `packages/*/src`
-    // (not `node_modules`), so exempt them from the `.client.*` SSR denial too.
-    clientDenialExcludeFiles: ['**/packages/*/src/**'],
-    payloadConfigPath: path.resolve(__dirname, testSuite, 'config.ts'),
-    routesDirectory: 'app',
-    srcDirectory,
-    // Everything test/monorepo-specific is layered on via the single `vite`
-    // override — `withPayload` merges it on top of the Payload defaults. (The
-    // `~@payloadcms/ui/scss` importer and sourcemap-warning silencing are now
-    // handled by `withPayload` itself.)
-    vite: {
+  withPayload(
+    ({ pluginOptions }) => ({
+      plugins: [
+        rsc(pluginOptions.rsc),
+        tanstackStart(pluginOptions.tanstackStart),
+        viteReact(pluginOptions.react),
+      ],
       // Keep build output out of the app dirs (they ship as pure source); the
       // repo root already ignores `dist`.
       build: { outDir: path.resolve(repoRoot, 'dist/app-tanstack') },
@@ -105,6 +100,17 @@ export default defineConfig(
           ],
         },
       },
+    }),
+    {
+      additionalIgnoreImporters: [
+        /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
+      ],
+      // In the monorepo, Payload's `.client.*` files resolve to `packages/*/src`
+      // (not `node_modules`), so exempt them from the `.client.*` SSR denial too.
+      clientDenialExcludeFiles: ['**/packages/*/src/**'],
+      payloadConfigPath: path.resolve(__dirname, testSuite, 'config.ts'),
+      routesDirectory: 'app',
+      srcDirectory,
     },
-  }),
+  ),
 )
