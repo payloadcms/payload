@@ -1,0 +1,126 @@
+---
+title: EXIF Plugin
+label: EXIF
+order: 28
+desc: Automatically extract EXIF metadata from uploaded images and store it on your Payload upload collections.
+keywords: plugins, exif, metadata, uploads, images, gps, camera, plugin, payload, cms
+---
+
+![https://www.npmjs.com/package/@payloadcms/plugin-exif](https://img.shields.io/npm/v/@payloadcms/plugin-exif)
+
+This plugin extracts [EXIF](https://en.wikipedia.org/wiki/Exif) metadata from images at upload time and stores it directly on your [upload-enabled collections](../upload/overview). EXIF data is embedded inside image files by cameras and phones and includes information such as the capture date, camera make and model, and GPS coordinates. Extracting it once on upload—rather than re-parsing files on every read—keeps the metadata queryable alongside the rest of your document.
+
+For each targeted collection, the plugin adds an `exif` group field and a `beforeChange` hook that parses the uploaded image buffer and populates the group. The full parsed EXIF is stored as a raw JSON blob, and a small set of commonly-used attributes are promoted to dedicated fields for querying and sorting.
+
+<Banner type="info">
+  This plugin is completely open-source and the [source code can be found
+  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-exif).
+  If you need help, check out our [Community
+  Help](https://payloadcms.com/community-help). If you think you've found a bug,
+  please [open a new
+  issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20exif&template=bug_report.md&title=plugin-exif%3A)
+  with as much detail as possible.
+</Banner>
+
+## Core features
+
+- Extracts EXIF from uploaded images on `create` and `update`
+- Stores the complete parsed EXIF as a raw JSON blob, plus promoted `takenAt` (date) and `location` (point) fields
+- Degrades gracefully—images without EXIF, or non-image uploads, are stored normally with an empty `exif` group
+- Works with any upload-enabled collection
+
+## Installation
+
+Install the plugin using any JavaScript package manager like [pnpm](https://pnpm.io), [npm](https://npmjs.com), or [Yarn](https://yarnpkg.com):
+
+```bash
+  pnpm add @payloadcms/plugin-exif
+```
+
+## Basic Usage
+
+In the `plugins` array of your [Payload Config](https://payloadcms.com/docs/configuration/overview), call the plugin with [options](#options):
+
+```ts
+import { buildConfig } from 'payload'
+import { exifPlugin } from '@payloadcms/plugin-exif'
+
+const config = buildConfig({
+  collections: [
+    {
+      slug: 'media',
+      upload: true,
+      fields: [],
+    },
+  ],
+  plugins: [
+    exifPlugin({
+      collections: ['media'],
+    }),
+  ],
+})
+
+export default config
+```
+
+### Options
+
+| Option        | Type       | Description                                                                                                     |
+| ------------- | ---------- | --------------------------------------------------------------------------------------------------------------- |
+| `collections` | `string[]` | **Required.** The upload-enabled collection slugs to extract EXIF for.                                          |
+| `disabled`    | `boolean`  | When `true`, the `exif` fields are still added (keeping your database schema stable) but extraction is skipped. |
+| `fieldName`   | `string`   | The name of the group field used to store EXIF data. Defaults to `'exif'`.                                      |
+
+## Stored data
+
+The plugin adds a read-only `group` field (named `exif` by default) with the following shape:
+
+| Field      | Type    | Description                                                                                                        |
+| ---------- | ------- | ------------------------------------------------------------------------------------------------------------------ |
+| `raw`      | `json`  | The complete parsed EXIF object. All attributes not promoted below (camera make/model, lens, ISO, etc.) live here. |
+| `takenAt`  | `date`  | Indexed. The capture time, derived from `DateTimeOriginal` (falling back to `CreateDate`/`ModifyDate`).            |
+| `location` | `point` | The GPS coordinates as GeoJSON `[longitude, latitude]`, or `null` when the image has no location data.             |
+
+Only `takenAt` and `location` are promoted to dedicated fields; every other EXIF attribute remains available in `raw`.
+
+## Querying
+
+Promoted fields can be queried and sorted directly:
+
+```ts
+const recent = await payload.find({
+  collection: 'media',
+  sort: '-exif.takenAt',
+})
+```
+
+Non-promoted attributes are queried through the `raw` JSON using dot notation:
+
+```ts
+const shotOnApple = await payload.find({
+  collection: 'media',
+  where: {
+    'exif.raw.Make': { equals: 'Apple' },
+  },
+})
+```
+
+## Privacy
+
+EXIF metadata frequently contains privacy-sensitive information such as GPS coordinates and device serial numbers. This plugin stores everything it extracts **as-is**, with no redaction. If your application should not expose this data, restrict the `exif` group (or specific attributes) using [field-level access control](../access-control/fields), or set `fieldName` and add your own read access rules.
+
+## Supported formats
+
+EXIF parsing is powered by [`exifr`](https://github.com/MikeKovarik/exifr). JPEG extraction is verified in the plugin's automated test suite; TIFF and PNG are also supported by `exifr`. HEIC/HEIF is documented as supported by `exifr` but is not verified in this package's tests.
+
+## Database compatibility
+
+The `location` field uses Payload's `point` type. On database adapters without geospatial support (such as SQLite), the coordinates are still stored—as a JSON value—but cannot be queried with geospatial operators like `near` or `within`. All other fields behave identically across adapters.
+
+## TypeScript
+
+All types can be directly imported:
+
+```ts
+import type { ExifPluginConfig } from '@payloadcms/plugin-exif/types'
+```
