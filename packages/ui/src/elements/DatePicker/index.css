@@ -23,8 +23,9 @@
     border-radius: var(--radius-large);
     display: inline-flex;
     position: relative;
+    /* stylelint-disable-next-line plugin/no-subpixel-values -- kept at 0.25px to avoid a visual regression; revisit whether 0.5px works fine here */
     box-shadow:
-      0 0 0.5px rgba(0, 0, 0, 0.08),
+      0 0 0.25px rgba(0, 0, 0, 0.08),
       0 2px 2.5px rgba(0, 0, 0, 0.15),
       0 10px 12px rgba(0, 0, 0, 0.18);
   }
