@@ -1453,9 +1453,6 @@ importers:
       '@lexical/utils':
         specifier: 0.45.0
         version: 0.45.0
-      '@payloadcms/next':
-        specifier: workspace:*
-        version: link:../next
       '@payloadcms/translations':
         specifier: workspace:*
         version: link:../translations
