@@ -1166,10 +1166,25 @@ importers:
       exifr:
         specifier: ^7.1.3
         version: 7.1.3
+      react:
+        specifier: 19.2.6
+        version: 19.2.6
+      react-dom:
+        specifier: 19.2.6
+        version: 19.2.6(react@19.2.6)
     devDependencies:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.14)
       payload:
         specifier: workspace:*
         version: link:../payload

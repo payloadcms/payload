@@ -40,6 +40,11 @@
       "import": "./src/exports/types.ts",
       "types": "./src/exports/types.ts",
       "default": "./src/exports/types.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
     }
   },
   "main": "./src/index.ts",
@@ -61,11 +66,17 @@
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
+    "@payloadcms/ui": "workspace:*",
+    "@types/react": "19.2.14",
+    "@types/react-dom": "19.2.3",
     "payload": "workspace:*",
     "sharp": "0.32.6"
   },
   "peerDependencies": {
-    "payload": "workspace:*"
+    "@payloadcms/ui": "workspace:*",
+    "payload": "workspace:*",
+    "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
+    "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"
   },
   "publishConfig": {
     "exports": {
@@ -78,6 +89,11 @@
         "import": "./dist/exports/types.js",
         "types": "./dist/exports/types.d.ts",
         "default": "./dist/exports/types.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
       }
     },
     "main": "./dist/index.js",
