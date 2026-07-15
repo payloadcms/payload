@@ -21,3 +21,20 @@ export const SelectPostsButton = () => {
     </>
   )
 }
+
+export const SelectFormatDocURLButton = () => {
+  const listDrawerArgs = useMemo<UseListDrawerArgs>(
+    () => ({
+      collectionSlugs: ['format-doc-url'],
+    }),
+    [],
+  )
+  const [ListDrawer, _, { toggleDrawer }] = useListDrawer(listDrawerArgs)
+
+  return (
+    <>
+      <Button onClick={() => toggleDrawer()}>Select format doc</Button>
+      <ListDrawer allowCreate={false} enableRowSelections={false} />
+    </>
+  )
+}

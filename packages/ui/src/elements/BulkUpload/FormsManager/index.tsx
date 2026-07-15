@@ -28,6 +28,7 @@ import { useUploadHandlers } from '../../../providers/UploadHandlers/index.js'
 import { hasSavePermission as getHasSavePermission } from '../../../utilities/hasSavePermission.js'
 import { LoadingOverlay } from '../../Loading/index.js'
 import { useLoadingOverlay } from '../../LoadingOverlay/index.js'
+import { FieldErrorsToast } from '../../Toasts/fieldErrors.js'
 import { useBulkUpload } from '../index.js'
 import { createFormData } from './createFormData.js'
 import { formsManagementReducer } from './reducer.js'
@@ -101,11 +102,10 @@ type FormsManagerProps = {
 }
 
 export function FormsManagerProvider({ children }: FormsManagerProps) {
-  const { config } = useConfig()
+  const { config, getEntityConfig } = useConfig()
   const {
     routes: { api },
   } = config
-  const folderFieldName = config.folders ? config.folders.fieldName : undefined
   const { code } = useLocale()
   const { i18n, t } = useTranslation()
 
@@ -130,15 +130,20 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
   const { closeModal } = useModal()
   const {
     collectionSlug,
-    drawerSlug,
-    folderID,
     initialFiles,
     initialForms,
+    modalSlug: drawerSlug,
     onSuccess,
+    parentID,
     setInitialFiles,
     setInitialForms,
     setSuccessfullyUploaded,
   } = useBulkUpload()
+
+  const collectionConfig = getEntityConfig({ collectionSlug })
+  const folderFieldName = collectionConfig?.hierarchy
+    ? collectionConfig.hierarchy.parentFieldName
+    : undefined
 
   const [isUploading, setIsUploading] = React.useState(false)
   const [loadingText, setLoadingText] = React.useState('')
@@ -267,19 +272,19 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
   const applyFolderToState = React.useCallback(
     (baseState: FormState | null): FormState | null => {
-      if (folderID && folderFieldName && baseState?.[folderFieldName]) {
+      if (parentID && folderFieldName && baseState?.[folderFieldName]) {
         return {
           ...baseState,
           [folderFieldName]: {
             ...baseState[folderFieldName],
-            initialValue: folderID,
-            value: folderID,
+            initialValue: parentID,
+            value: parentID,
           },
         }
       }
       return baseState
     },
-    [folderID, folderFieldName],
+    [parentID, folderFieldName],
   )
 
   const addFiles = React.useCallback(
@@ -404,7 +409,9 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
           const json = await req.json()
 
-          if (req.status === 201 && json?.doc) {
+          const wasSuccessful = req.status === 201 && json?.doc
+
+          if (wasSuccessful) {
             newDocs.push({
               collectionSlug,
               doc: json.doc,
@@ -490,13 +497,28 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
 
             toast.error(nonFieldErrors[0]?.message)
           } else {
+            let errorCount = fieldErrors.length
+
+            // Fall back to non-field errors when no field errors are present
+            // (e.g., APIError thrown from a hook).
+            if (!wasSuccessful && errorCount === 0) {
+              errorCount = nonFieldErrors.length || 1
+            }
+
             currentForms[i] = {
-              errorCount: fieldErrors.length,
+              errorCount,
               formID: currentForms[i].formID,
               formState: fieldReducer(currentForms[i].formState, {
                 type: 'ADD_SERVER_ERRORS',
                 errors: fieldErrors,
               }),
+            }
+
+            // Mimic forms/Form/index.tsx.
+            if (!wasSuccessful) {
+              nonFieldErrors.forEach((err) => {
+                toast.error(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
+              })
             }
           }
         } catch (_) {
@@ -593,6 +615,14 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
         }
 
         if (hasSubmitted) {
+          // File/Blob objects cannot be serialized across the server-function
+          // boundary (RSC flight / TanStack seroval), so the `file` value is
+          // dropped during the `getFormState` round-trip. Capture it first and
+          // re-attach it afterwards so the file survives — mirroring the
+          // save-retry path below; without this the next save omits the file
+          // entirely and the server responds "No files were uploaded".
+          const originalFileValue = forms[i].formState.file?.value
+
           const { state } = await getFormState({
             collectionSlug,
             docPermissions,
@@ -601,6 +631,10 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             operation: 'create',
             schemaPath: collectionSlug,
           })
+
+          if (originalFileValue instanceof File && state.file) {
+            state.file = { ...state.file, value: originalFileValue }
+          }
 
           const newFormErrorCount = Object.values(state).reduce(
             (acc, value) => (value?.valid === false ? acc + 1 : acc),

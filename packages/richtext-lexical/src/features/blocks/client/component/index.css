@@ -1,0 +1,178 @@
+@layer payload-default {
+  .LexicalEditorTheme__block {
+    margin: var(--spacer-3) 0;
+    z-index: 1;
+    color: var(--color-text);
+
+    &[data-lexical-decorator='true'] {
+      width: auto;
+    }
+
+    .collapsible__header-wrap {
+      inset-inline-end: var(--spacer-4);
+    }
+  }
+
+  .LexicalEditorTheme__block__container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .LexicalEditorTheme__block__row {
+    .collapsible__toggle-wrap {
+      padding-inline-start: var(--spacer-2);
+    }
+  }
+
+  .LexicalEditorTheme__block__header {
+    h3 {
+      margin: 0;
+    }
+  }
+
+  .LexicalEditorTheme__block__header-wrap {
+    display: flex;
+    align-items: flex-end;
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .LexicalEditorTheme__block__heading-with-error {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-2);
+  }
+
+  .LexicalEditorTheme__block--has-no-error {
+    > .array-field__header .array-field__heading-with-error {
+      color: var(--color-text);
+    }
+  }
+
+  .LexicalEditorTheme__block--has-error {
+    > .array-field__header {
+      color: var(--color-text-danger);
+    }
+  }
+
+  .LexicalEditorTheme__block__error-pill {
+    align-self: center;
+  }
+
+  .LexicalEditorTheme__block__header-actions {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+  }
+
+  .LexicalEditorTheme__block__header-action {
+    cursor: pointer;
+    margin-inline-start: var(--spacer-1);
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+  }
+
+  .LexicalEditorTheme__block__removeButton.btn {
+    margin: 0;
+    &:hover {
+      background-color: var(--color-bg-secondary);
+    }
+  }
+
+  .LexicalEditorTheme__block__editButton.btn {
+    margin: 0;
+    width: var(--spacer-4);
+
+    &:hover {
+      background-color: var(--color-bg-secondary);
+    }
+  }
+
+  .LexicalEditorTheme__block__block-header {
+    pointer-events: none;
+  }
+
+  .LexicalEditorTheme__block__block-header * {
+    pointer-events: all;
+  }
+
+  .LexicalEditorTheme__block__block-header,
+  .LexicalEditorTheme__block__block-header > div:first-child {
+    display: flex;
+    max-width: 100%;
+    width: 100%;
+    overflow: hidden;
+    gap: var(--spacer-2);
+    align-items: center;
+    justify-content: flex-start;
+    pointer-events: none;
+
+    & > * {
+      pointer-events: all;
+    }
+  }
+
+  .LexicalEditorTheme__block__block-number {
+    flex-shrink: 0;
+    color: var(--color-text);
+  }
+
+  .LexicalEditorTheme__block__block-number {
+    flex-shrink: 0;
+  }
+
+  .LexicalEditorTheme__block__block-pill {
+    flex-shrink: 0;
+    display: block;
+    line-height: unset;
+  }
+
+  .LexicalEditorTheme__block__rows {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1);
+  }
+
+  .LexicalEditorTheme__block__drawer-toggler {
+    background-color: transparent;
+    margin: 0;
+    padding: 0;
+    border: none;
+    align-self: flex-start;
+
+    .btn {
+      color: var(--color-icon-tertiary);
+      margin: 0;
+
+      &:hover {
+        color: var(--color-text);
+      }
+    }
+  }
+
+  .LexicalEditorTheme__block-not-found {
+    color: var(--color-text-danger);
+  }
+
+  html[data-theme='light'] {
+    .blocks-field--has-error {
+      .section-title__input,
+      .blocks-field__heading-with-error {
+        color: var(--color-text-danger);
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .blocks-field--has-error {
+      .section-title__input,
+      .blocks-field__heading-with-error {
+        color: var(--color-text-danger);
+      }
+    }
+  }
+}

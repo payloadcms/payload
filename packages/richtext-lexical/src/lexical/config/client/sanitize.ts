@@ -9,7 +9,7 @@ import type {
   ResolvedClientFeatureMap,
   SanitizedClientFeatures,
 } from '../../../features/typesClient.js'
-import type { LexicalFieldAdminClientProps } from '../../../types.js'
+import type { LexicalFieldAdminClientProps } from '../../../types/index.js'
 import type { SanitizedClientEditorConfig } from '../types.js'
 
 export const sanitizeClientFeatures = (

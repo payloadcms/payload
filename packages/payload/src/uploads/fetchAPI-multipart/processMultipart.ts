@@ -41,10 +41,16 @@ export const processMultipart: ProcessMultipart = async ({ options, request }) =
     failedResolvingFiles = rej
   })
 
+  // Busboy rejects these from a stream event before the awaits below attach, so
+  // Node reports them as unhandled and kills the process on oversize uploads.
+  allFilesComplete.catch(() => {})
+
   const busboyFinished = new Promise<void>((resolve, reject) => {
     busboyFinishedResolve = resolve
     busboyFinishedReject = reject
   })
+
+  busboyFinished.catch(() => {})
 
   const result: FetchAPIFileUploadResponse = {
     fields: undefined!,

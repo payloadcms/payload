@@ -1,0 +1,154 @@
+@layer payload-default {
+  .file-manager {
+    position: relative;
+    flex: 1 0 0;
+    align-self: stretch;
+    width: 100%;
+    margin-bottom: 0;
+    border-radius: 0;
+    background: var(--color-bg-secondary);
+    min-height: 100px;
+
+    .dropzone {
+      border: none;
+      border-radius: 0;
+    }
+  }
+
+  .file-manager__panel {
+    position: sticky;
+    top: var(--doc-controls-height);
+    height: calc(
+      100dvh - var(--app-header-height) - var(--doc-controls-height) - var(--doc-header-height)
+    );
+    display: flex;
+    flex-direction: column;
+    /* Visible so the mini carousel can grow past the panel to fill the area left behind as the
+       app/doc headers scroll away (see MiniCarousel). */
+    overflow: visible;
+    /* Scroll-driven: grow height as the app header and doc header scroll away, matching the
+       extra space they free up. Mirrors the MiniCarousel approach. Falls back to static height. */
+  }
+
+  .file-manager__content {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 0;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .file-manager__upload {
+    display: flex;
+    flex: 1 0 0;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--spacer-4);
+    position: relative;
+  }
+
+  /* Fill the whole upload area so a file can be dropped onto any part of the file manager,
+     not just the band occupied by the dropzone's buttons. */
+  .file-manager__upload .dropzone {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .file-manager__remove {
+    position: absolute;
+    top: var(--spacer-2);
+    right: var(--spacer-2);
+    margin: 0;
+    z-index: 1;
+  }
+
+  /* Preview of a freshly-selected (not-yet-saved) file. Capped so large media stays contained;
+     the definite height lets the PDF iframe / video / image fill it. */
+  .file-manager__selected-preview {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 420px;
+    height: min(50dvh, 320px);
+    overflow: hidden;
+    border-radius: var(--radius-small);
+  }
+
+  /* Audio is just a player bar — no tall box needed. */
+  .file-manager__selected-preview--audio {
+    height: auto;
+  }
+
+  .file-manager__selected-preview .thumbnail img,
+  .file-manager__selected-preview .thumbnail svg {
+    object-fit: contain;
+  }
+
+  .file-manager__file-adjustments {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-2);
+    margin-bottom: var(--spacer-2);
+  }
+
+  .file-manager__selected-meta {
+    color: var(--color-text-tertiary);
+    font-family: var(--text-body-small-font-family);
+    font-size: var(--text-body-small-font-size);
+    line-height: var(--text-body-small-line-height);
+  }
+
+  .file-manager__hidden-input {
+    display: none;
+  }
+
+  .file-manager__dropzone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacer-2);
+    width: 100%;
+  }
+
+  .file-manager__dropzone-buttons {
+    display: flex;
+    gap: var(--spacer-2);
+    align-items: center;
+  }
+
+  .file-manager__or-text {
+    color: var(--color-text-tertiary);
+    text-transform: lowercase;
+  }
+
+  .file-manager__drag-text {
+    flex-shrink: 0;
+    margin: 0;
+    text-transform: lowercase;
+    color: var(--color-text-tertiary);
+  }
+
+  @container edit-main (max-width: 1024px) {
+    .file-manager {
+      min-height: 400px;
+      border-bottom: var(--stroke-width-small) solid var(--color-border);
+    }
+
+    .file-manager__panel {
+      position: static;
+      height: auto;
+      min-height: 400px;
+    }
+
+    .file-manager__content {
+      flex-direction: column;
+    }
+  }
+}

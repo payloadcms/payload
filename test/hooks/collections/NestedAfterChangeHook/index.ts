@@ -98,6 +98,7 @@ const NestedAfterChangeHooks: CollectionConfig = {
       }),
     },
   ],
+  versions: false,
 }
 
 export default NestedAfterChangeHooks

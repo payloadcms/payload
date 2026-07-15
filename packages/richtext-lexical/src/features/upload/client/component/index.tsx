@@ -7,18 +7,25 @@ import { getTranslation } from '@payloadcms/translations'
 import {
   Button,
   formatDrawerSlug,
+  Pill,
   Thumbnail,
   useConfig,
   useEditDepth,
   usePayloadAPI,
   useTranslation,
 } from '@payloadcms/ui'
-import { $getNodeByKey, type ElementFormatType } from 'lexical'
+import {
+  $getNodeByKey,
+  $getSelection,
+  $isNodeSelection,
+  $isRangeSelection,
+  type ElementFormatType,
+} from 'lexical'
 import { formatAdminURL, isImage } from 'payload/shared'
-import React, { useCallback, useId, useReducer, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useId, useReducer, useRef, useState } from 'react'
 
 import type { BaseClientFeatureProps } from '../../../typesClient.js'
-import type { UploadData } from '../../server/nodes/UploadNode.js'
+import type { UploadData } from '../../server/schema.js'
 import type { UploadFeaturePropsClient } from '../index.js'
 import type { UploadNode } from '../nodes/UploadNode.js'
 
@@ -27,7 +34,7 @@ import { FieldsDrawer } from '../../../../utilities/fieldsDrawer/Drawer.js'
 import { useLexicalDocumentDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDocumentDrawer.js'
 import { useLexicalDrawer } from '../../../../utilities/fieldsDrawer/useLexicalDrawer.js'
 import { INSERT_UPLOAD_WITH_DRAWER_COMMAND } from '../drawer/commands.js'
-import './index.scss'
+import './index.css'
 
 const initialParams = {
   depth: 0,
@@ -72,6 +79,7 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
   } = useEditorConfigContext()
   const isEditable = useLexicalEditable()
   const { i18n, t } = useTranslation()
+  const [isSelected, setIsSelected] = useState(false)
   const [cacheBust, dispatchCacheBust] = useReducer((state) => state + 1, 0)
   const [relatedCollection] = useState<ClientCollectionConfig>(() =>
     getEntityConfig({ collectionSlug: relationTo }),
@@ -99,6 +107,31 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
   )
 
   const thumbnailSRC = data?.thumbnailURL || data?.url
+
+  useEffect(() => {
+    return editor.registerUpdateListener(({ editorState }) => {
+      editorState.read(() => {
+        const selection = $getSelection()
+
+        if ($isNodeSelection(selection)) {
+          setIsSelected(selection.has(nodeKey))
+        } else if ($isRangeSelection(selection)) {
+          const nodes = selection.getNodes()
+          setIsSelected(nodes.some((node) => node.getKey() === nodeKey))
+        } else {
+          setIsSelected(false)
+        }
+      })
+    })
+  }, [editor, nodeKey])
+
+  useEffect(() => {
+    const outerEl = uploadRef.current?.closest(`.${baseClass}`)
+
+    if (outerEl) {
+      outerEl.classList.toggle(`${baseClass}--selected`, isSelected)
+    }
+  }, [isSelected, baseClass])
 
   const removeUpload = useCallback(() => {
     editor.update(() => {
@@ -166,65 +199,64 @@ export const UploadComponent: React.FC<ElementProps> = (props) => {
           />
 
           {isEditable && (
-            <div className={`${baseClass}__overlay ${baseClass}__floater`}>
-              <div className={`${baseClass}__actions`} role="toolbar">
-                {hasExtraFields ? (
-                  <Button
-                    buttonStyle="icon-label"
-                    className={`${baseClass}__upload-drawer-toggler`}
-                    disabled={!isEditable}
-                    el="button"
-                    icon="edit"
-                    onClick={toggleDrawer}
-                    round
-                    size="medium"
-                    tooltip={t('fields:editRelationship')}
-                  />
-                ) : null}
+            <div className={`${baseClass}__floater`} data-theme="dark">
+              <Pill className={`${baseClass}__collectionLabel`} pillStyle="dark" size="small">
+                {getTranslation(relatedCollection.labels.singular, i18n)}
+              </Pill>
 
+              <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
+                <span className={`${baseClass}__filename`}>
+                  {data?.filename || t('general:untitled')}
+                </span>
+              </DocumentDrawerToggler>
+
+              {hasExtraFields ? (
                 <Button
-                  buttonStyle="icon-label"
-                  className={`${baseClass}__swap-drawer-toggler`}
+                  buttonStyle="ghost"
+                  className={`${baseClass}__upload-drawer-toggler`}
                   disabled={!isEditable}
                   el="button"
-                  icon="swap"
-                  onClick={() => {
-                    editor.dispatchCommand(INSERT_UPLOAD_WITH_DRAWER_COMMAND, {
-                      replace: { nodeKey },
-                    })
-                  }}
+                  icon="write"
+                  onClick={toggleDrawer}
                   round
                   size="medium"
-                  tooltip={t('fields:swapUpload')}
+                  tooltip={t('fields:editRelationship')}
                 />
+              ) : null}
 
-                <Button
-                  buttonStyle="icon-label"
-                  className={`${baseClass}__removeButton`}
-                  disabled={!isEditable}
-                  icon="x"
-                  onClick={(e) => {
-                    e.preventDefault()
-                    removeUpload()
-                  }}
-                  round
-                  size="medium"
-                  tooltip={t('fields:removeUpload')}
-                />
-              </div>
+              <div className={`${baseClass}__divider`} />
+
+              <Button
+                buttonStyle="ghost"
+                className={`${baseClass}__swap-drawer-toggler`}
+                disabled={!isEditable}
+                el="button"
+                icon="swap"
+                onClick={() => {
+                  editor.dispatchCommand(INSERT_UPLOAD_WITH_DRAWER_COMMAND, {
+                    replace: { nodeKey },
+                  })
+                }}
+                round
+                size="medium"
+                tooltip={t('fields:swapUpload')}
+              />
+
+              <Button
+                buttonStyle="ghost"
+                className={`${baseClass}__removeButton`}
+                disabled={!isEditable}
+                icon="x"
+                onClick={(e) => {
+                  e.preventDefault()
+                  removeUpload()
+                }}
+                round
+                size="medium"
+                tooltip={t('fields:removeUpload')}
+              />
             </div>
           )}
-        </div>
-
-        <div className={`${baseClass}__metaOverlay ${baseClass}__floater`}>
-          <DocumentDrawerToggler className={`${baseClass}__doc-drawer-toggler`}>
-            <strong className={`${baseClass}__filename`}>
-              {data?.filename || t('general:untitled')}
-            </strong>
-          </DocumentDrawerToggler>
-          <div className={`${baseClass}__collectionLabel`}>
-            {getTranslation(relatedCollection.labels.singular, i18n)}
-          </div>
         </div>
       </div>
 

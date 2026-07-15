@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import type { Config } from './payload-types.js'
 
 import { addArrayRow, removeArrayRow } from '../__helpers/e2e/fields/array/index.js'
+import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
 import {
   ensureCompilationIsDone,
   getRoutes,
@@ -181,10 +182,7 @@ describe('Field Error States', () => {
       await page.goto(prevValueRelation.create)
       await waitForFormReady(page)
       await page.locator('#field-previousValueRelation .react-select').click()
-      await page
-        .locator('#field-previousValueRelation .rs__option', { hasText: 'original value 2' })
-        .last()
-        .click()
+      await page.locator('.rs__option', { hasText: 'original value 2' }).last().click()
       await saveDocAndAssert(page)
 
       // go back to doc
@@ -230,7 +228,7 @@ describe('Field Error States', () => {
       await prefillHomeAndHeroTabs(page)
 
       // fill out new tabs with required arrays
-      const tabWithRequiredArrayButton = page.getByRole('button', {
+      const tabWithRequiredArrayButton = page.getByRole('tab', {
         name: 'Tab with Required Array',
         exact: true,
       })
@@ -238,7 +236,7 @@ describe('Field Error States', () => {
       await addArrayRow(page, { fieldName: 'tabWithRequiredArray__requiredArray' })
       await page.locator('#field-tabWithRequiredArray__requiredArray__0__arrayText').fill('Test')
 
-      const unnamedTabButton = page.getByRole('button', {
+      const unnamedTabButton = page.getByRole('tab', {
         name: 'Unnamed Tab with Required Array',
         exact: true,
       })
@@ -273,7 +271,7 @@ describe('Field Error States', () => {
       await waitForFormReady(page)
       await prefillHomeAndHeroTabs(page)
 
-      const tabWithRequiredArrayButton = page.getByRole('button', {
+      const tabWithRequiredArrayButton = page.getByRole('tab', {
         name: 'Tab with Required Array',
         exact: true,
       })
@@ -317,6 +315,50 @@ describe('Field Error States', () => {
 
       // error badge should disappear
       await expect(tabErrorBadge).toBeHidden()
+    })
+
+    test('array error pill should show for minRows errors before child edits', async ({ page }) => {
+      await page.goto(errorFieldsURL.create)
+      await waitForFormReady(page)
+      await prefillBaseRequiredFields(page)
+
+      await addArrayRow(page, { fieldName: 'arrayWithMinRows' })
+      await saveDocAndAssert(page, '#action-save', 'error')
+
+      const arrayErrorPill = page.locator(
+        '#field-arrayWithMinRows .array-field__header .error-pill',
+      )
+      await expect(arrayErrorPill).toBeVisible()
+      await expect(arrayErrorPill).toContainText('1 error')
+      await expect(
+        page.locator('#field-arrayWithMinRows .banner.banner--type-danger'),
+      ).toBeVisible()
+      await expect(page.locator('#field-arrayWithMinRows .field-error')).toHaveCount(0)
+    })
+
+    test('blocks error pill should show for minRows errors before child edits', async ({
+      page,
+    }) => {
+      await page.goto(errorFieldsURL.create)
+      await waitForFormReady(page)
+      await prefillBaseRequiredFields(page)
+
+      await addBlock({
+        page,
+        blockToSelect: 'Min Rows Block',
+        fieldName: 'blocksWithMinRows',
+      })
+      await saveDocAndAssert(page, '#action-save', 'error')
+
+      const blocksErrorPill = page.locator(
+        '#field-blocksWithMinRows .blocks-field__header .error-pill',
+      )
+      await expect(blocksErrorPill).toBeVisible()
+      await expect(blocksErrorPill).toContainText('1 error')
+      await expect(
+        page.locator('#field-blocksWithMinRows .banner.banner--type-danger'),
+      ).toBeVisible()
+      await expect(page.locator('#field-blocksWithMinRows .field-error')).toHaveCount(0)
     })
   })
 })

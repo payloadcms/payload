@@ -10,20 +10,19 @@ import { fileURLToPath } from 'url'
 const __filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(__filename)
 
-// @todo remove in 4.0 - will behave like this by default in 4.0
-process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY = 'true'
-
 shelljs.env.DISABLE_LOGGING = 'true'
 
-const prod = process.argv.includes('--prod')
-if (prod) {
+// --prod-server boots a real production server (next build / vite build) per suite
+// against the packed dist packages. Without it, the dev server runs against source.
+const prodServer = process.argv.includes('--prod-server')
+if (prodServer) {
   process.env.PAYLOAD_TEST_PROD = 'true'
   shelljs.env.PAYLOAD_TEST_PROD = 'true'
 }
 
 const turbo = process.argv.includes('--no-turbo') ? false : true
 
-process.argv = process.argv.filter((arg) => arg !== '--prod' && arg !== '--no-turbo')
+process.argv = process.argv.filter((arg) => arg !== '--prod-server' && arg !== '--no-turbo')
 
 const playwrightBin = path.resolve(dirname, '../node_modules/.bin/playwright')
 
@@ -33,6 +32,7 @@ const {
   bail,
   'fully-parallel': fullyParallel,
   grep,
+  headed,
   part,
   shard,
   workers,
@@ -76,7 +76,17 @@ if (!suiteName) {
     if (!baseTestFolder) {
       throw new Error(`No base test folder found for ${file}`)
     }
-    await executePlaywright(file, baseTestFolder, bail)
+    await executePlaywright(
+      file,
+      baseTestFolder,
+      bail,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      undefined,
+      headed,
+    )
   }
 } else {
   let inputSuitePath: string | undefined = suiteName
@@ -118,6 +128,7 @@ if (!suiteName) {
     fullyParallel,
     workers,
     grep,
+    headed,
   )
 }
 
@@ -139,6 +150,7 @@ async function executePlaywright(
   fullyParallelArg?: boolean,
   workersArg?: number,
   grepArg?: string,
+  headedArg?: boolean,
 ) {
   const paths = Array.isArray(suitePaths) ? suitePaths : [suitePaths]
   console.log(`Executing ${paths.join(', ')}...`)
@@ -151,8 +163,8 @@ async function executePlaywright(
     'dev',
     suiteConfigPath ? `${baseTestFolder}#${suiteConfigPath}` : baseTestFolder,
   ]
-  if (prod) {
-    spawnDevArgs.push('--prod')
+  if (prodServer) {
+    spawnDevArgs.push('--prod-server')
   }
 
   if (!turbo) {
@@ -184,12 +196,20 @@ async function executePlaywright(
     })
   }
 
+  // A prod server only starts listening after the build/init completes, which outlasts Playwright's navigation timeout.
+  // Wait for it before running tests.
+  // (The dev server compiles routes lazily, so it needs no upfront wait.)
+  if (prodServer && !portInUse) {
+    await waitForServer(e2ePort)
+  }
+
   const shardFlag = shardArg ? ` --shard=${shardArg}` : ''
   const fullyParallelFlag = fullyParallelArg ? ' --fully-parallel' : ''
   const workersFlag = workersArg !== undefined ? ` --workers=${workersArg}` : ''
   const grepFlag = grepArg ? ` --grep="${grepArg}"` : ''
+  const headedFlag = headedArg ? ' --headed' : ''
   const cmd = slash(
-    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${grepFlag}`,
+    `${playwrightBin} test ${paths.join(' ')} -c ${playwrightCfg}${shardFlag}${fullyParallelFlag}${workersFlag}${grepFlag}${headedFlag}`,
   )
   console.log('\n', cmd)
   const { code, stdout } = shelljs.exec(cmd, {
@@ -215,4 +235,27 @@ async function executePlaywright(
 function clearWebpackCache() {
   const webpackCachePath = path.resolve(dirname, '../node_modules/.cache/webpack')
   shelljs.rm('-rf', webpackCachePath)
+}
+
+/**
+ * Poll a port until the server responds, so Playwright doesn't start against a prod server that is still building.
+ * Resolves on any HTTP response (the server only binds after the build/init finishes);
+ * rejects if it never comes up.
+ */
+async function waitForServer(port: number, timeoutMs = 8 * 60 * 1000): Promise<void> {
+  const url = `http://localhost:${port}/`
+  const start = Date.now()
+  console.log(`Waiting for prod server on ${url} …`)
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      await fetch(url)
+      console.log(`Prod server ready after ${Math.round((Date.now() - start) / 1000)}s`)
+      return
+    } catch {
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+    }
+  }
+
+  throw new Error(`Prod server did not start within ${timeoutMs / 1000}s`)
 }

@@ -1,4 +1,4 @@
-import type { StaticDescription, StaticLabel } from 'payload'
+import type { BrowserAutoComplete, StaticDescription, StaticLabel } from 'payload'
 import type { ChangeEvent, JSX } from 'react'
 import type React from 'react'
 
@@ -22,8 +22,15 @@ export type TextInputProps = {
   readonly description?: StaticDescription
   readonly Error?: React.ReactNode
   readonly htmlAttributes?: {
-    autoComplete?: JSX.IntrinsicElements['input']['autoComplete']
+    'aria-label'?: JSX.IntrinsicElements['input']['aria-label']
+    autoComplete?: BrowserAutoComplete
+    readOnly?: JSX.IntrinsicElements['input']['readOnly']
   }
+  /**
+   * Overrides the input `id` and label `htmlFor`. Defaults to 'field-' + path.
+   * Use to avoid duplicate IDs when two inputs share a path.
+   */
+  readonly id?: string
   readonly inputRef?: React.RefObject<HTMLInputElement>
   readonly Label?: React.ReactNode
   readonly label?: StaticLabel
@@ -37,6 +44,10 @@ export type TextInputProps = {
   readonly required?: boolean
   readonly rtl?: boolean
   readonly showError?: boolean
+  /**
+   * Controls the height of the input. Defaults to `'large'`.
+   */
+  readonly size?: 'large' | 'medium'
   readonly style?: React.CSSProperties
   readonly value?: string
   readonly valueToRender?: Option[]

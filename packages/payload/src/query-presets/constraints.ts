@@ -28,8 +28,9 @@ export const getConstraints = (config: Config): Field => ({
   name: 'access',
   type: 'group',
   admin: {
+    className: 'query-preset-access-group',
     components: {
-      Cell: '@payloadcms/next/client#QueryPresetsAccessCell',
+      Cell: '@payloadcms/ui#QueryPresetsAccessCell',
     },
     condition: (data) => Boolean(data?.isShared),
   },
@@ -113,6 +114,6 @@ export const getConstraints = (config: Config): Field => ({
     ],
     label: () => toWords(constraintOperation),
   })),
-  label: 'Sharing settings',
+  label: false,
   validate: preventLockout,
 })

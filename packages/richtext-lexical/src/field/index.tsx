@@ -8,7 +8,7 @@ import React, { lazy, Suspense, useEffect, useState } from 'react'
 
 import type { FeatureProviderClient } from '../features/typesClient.js'
 import type { SanitizedClientEditorConfig } from '../lexical/config/types.js'
-import type { LexicalFieldAdminClientProps, LexicalRichTextFieldProps } from '../types.js'
+import type { LexicalFieldAdminClientProps, LexicalRichTextFieldProps } from '../types/index.js'
 
 import { defaultEditorLexicalConfig } from '../lexical/config/client/default.js'
 import { loadClientFeatures } from '../lexical/config/client/loader.js'
@@ -64,12 +64,12 @@ export const RichTextFieldImpl: React.FC<LexicalRichTextFieldProps> = (props) =>
 
     const featureProvidersLocal: FeatureProviderClient<any, any>[] = []
     for (const clientFeature of Object.values(filteredClientFeatures)) {
-      if (!clientFeature.clientFeatureProvider) {
+      if (!clientFeature.clientFeatureProvider || !clientFeature.clientFeatureProps) {
         continue
       }
       featureProvidersLocal.push(
         clientFeature.clientFeatureProvider(clientFeature.clientFeatureProps),
-      ) // Execute the clientFeatureProvider function here, as the server cannot execute functions imported from use client files
+      )
     }
 
     const resolvedClientFeatures = loadClientFeatures({

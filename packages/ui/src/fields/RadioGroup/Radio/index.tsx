@@ -6,7 +6,7 @@ import React from 'react'
 
 import { useEditDepth } from '../../../providers/EditDepth/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
-import './index.scss'
+import './index.css'
 
 const baseClass = 'radio-input'
 

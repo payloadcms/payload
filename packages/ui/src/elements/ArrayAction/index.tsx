@@ -1,15 +1,16 @@
 'use client'
 import React from 'react'
 
-import { ChevronIcon } from '../../icons/Chevron/index.js'
+import { ArrowIcon } from '../../icons/Arrow/index.js'
+import { ClipboardIcon } from '../../icons/Clipboard/index.js'
 import { CopyIcon } from '../../icons/Copy/index.js'
+import { DuplicateIcon } from '../../icons/Duplicate/index.js'
 import { MoreIcon } from '../../icons/More/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import { ClipboardActionLabel } from '../ClipboardAction/ClipboardActionLabel.js'
-import './index.scss'
 import { Popup, PopupList } from '../Popup/index.js'
+import './index.css'
 
 const baseClass = 'array-actions'
 
@@ -43,37 +44,35 @@ export const ArrayAction: React.FC<Props> = ({
   return (
     <Popup
       button={<MoreIcon />}
+      buttonAriaLabel={t('general:moreOptions')}
       buttonClassName={`${baseClass}__button`}
+      caret={false}
       className={baseClass}
-      horizontalAlign="center"
+      horizontalAlign="right"
       render={({ close }) => {
         return (
-          <PopupList.ButtonGroup buttonSize="small">
+          <PopupList.MenuItem>
             {isSortable && index !== 0 && (
               <PopupList.Button
                 className={`${baseClass}__action ${baseClass}__move-up`}
+                icon={<ArrowIcon direction="up" size={24} />}
                 onClick={() => {
                   moveRow(index, index - 1)
                   close()
                 }}
               >
-                <div className={`${baseClass}__action-chevron`}>
-                  <ChevronIcon direction="up" />
-                </div>
                 {t('general:moveUp')}
               </PopupList.Button>
             )}
             {isSortable && index < rowCount - 1 && (
               <PopupList.Button
                 className={`${baseClass}__action`}
+                icon={<ArrowIcon direction="down" size={24} />}
                 onClick={() => {
                   moveRow(index, index + 1)
                   close()
                 }}
               >
-                <div className={`${baseClass}__action-chevron`}>
-                  <ChevronIcon />
-                </div>
                 {t('general:moveDown')}
               </PopupList.Button>
             )}
@@ -81,58 +80,59 @@ export const ArrayAction: React.FC<Props> = ({
               <React.Fragment>
                 <PopupList.Button
                   className={`${baseClass}__action ${baseClass}__add`}
+                  icon={<PlusIcon size={24} />}
                   onClick={() => {
                     void addRow(index + 1)
                     close()
                   }}
                 >
-                  <PlusIcon />
                   {t('general:addBelow')}
                 </PopupList.Button>
                 <PopupList.Button
                   className={`${baseClass}__action ${baseClass}__duplicate`}
+                  icon={<DuplicateIcon size={24} />}
                   onClick={() => {
                     duplicateRow(index)
                     close()
                   }}
                 >
-                  <CopyIcon />
                   {t('general:duplicate')}
                 </PopupList.Button>
               </React.Fragment>
             )}
             <PopupList.Button
               className={`${baseClass}__action ${baseClass}__copy`}
+              icon={<CopyIcon size={24} />}
               onClick={() => {
                 copyRow(index)
                 close()
               }}
             >
-              <ClipboardActionLabel isRow />
+              {t('general:copyRow')}
             </PopupList.Button>
             <PopupList.Button
               className={`${baseClass}__action ${baseClass}__paste`}
+              icon={<ClipboardIcon size={24} />}
               onClick={() => {
                 pasteRow(index)
                 close()
               }}
             >
-              <ClipboardActionLabel isPaste isRow />
+              {t('general:pasteRow')}
             </PopupList.Button>
             <PopupList.Button
               className={`${baseClass}__action ${baseClass}__remove`}
+              icon={<XIcon size={24} />}
               onClick={() => {
                 removeRow(index)
                 close()
               }}
             >
-              <XIcon />
               {t('general:remove')}
             </PopupList.Button>
-          </PopupList.ButtonGroup>
+          </PopupList.MenuItem>
         )
       }}
-      size="medium"
     />
   )
 }

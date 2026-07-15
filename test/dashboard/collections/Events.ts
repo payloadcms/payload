@@ -32,7 +32,6 @@ export const Events: CollectionConfig = {
     {
       name: 'type',
       type: 'select',
-      required: true,
       defaultValue: 'meeting',
       options: [
         {
@@ -56,6 +55,7 @@ export const Events: CollectionConfig = {
           value: 'other',
         },
       ],
+      required: true,
     },
     {
       name: 'organizer',
@@ -65,7 +65,6 @@ export const Events: CollectionConfig = {
     {
       name: 'status',
       type: 'select',
-      required: true,
       defaultValue: 'scheduled',
       options: [
         {
@@ -85,6 +84,24 @@ export const Events: CollectionConfig = {
           value: 'cancelled',
         },
       ],
+      required: true,
+    },
+    // Nested group, so the collection-query widget can sort/filter by a dot-path field
+    // such as `details.priority`.
+    {
+      name: 'details',
+      type: 'group',
+      fields: [
+        {
+          name: 'priority',
+          type: 'number',
+        },
+        {
+          name: 'room',
+          type: 'text',
+        },
+      ],
     },
   ],
+  versions: false,
 }

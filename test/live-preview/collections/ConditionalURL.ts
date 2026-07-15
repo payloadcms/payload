@@ -20,4 +20,5 @@ export const ConditionalURL: CollectionConfig = {
       type: 'checkbox',
     },
   ],
+  versions: false,
 }

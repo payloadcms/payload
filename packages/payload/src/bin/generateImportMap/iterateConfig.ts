@@ -1,6 +1,7 @@
 import type { SanitizedConfig } from '../../config/types.js'
 import type { AddToImportMap, Imports, InternalImportMap } from './index.js'
 
+import { isUserMenuSettingsGroup } from '../../config/types.js'
 import { iterateCollections } from './iterateCollections.js'
 import { genImportMapIterateFields } from './iterateFields.js'
 import { iterateGlobals } from './iterateGlobals.js'
@@ -58,6 +59,17 @@ export function iterateConfig({
   addToImportMap(config.admin?.components?.header)
   addToImportMap(config.admin?.components?.logout?.Button)
   addToImportMap(config.admin?.components?.settingsMenu)
+  if (config.admin?.components?.userMenuSettingsItems?.length) {
+    for (const userMenuSettingsItem of config.admin.components.userMenuSettingsItems) {
+      if (isUserMenuSettingsGroup(userMenuSettingsItem)) {
+        for (const groupedItem of userMenuSettingsItem.items) {
+          addToImportMap(groupedItem)
+        }
+      } else {
+        addToImportMap(userMenuSettingsItem)
+      }
+    }
+  }
   addToImportMap(config.admin?.components?.graphics?.Icon)
   addToImportMap(config.admin?.components?.graphics?.Logo)
 
@@ -72,6 +84,14 @@ export function iterateConfig({
   addToImportMap(config.admin?.components?.beforeNavLinks)
 
   addToImportMap(config.admin?.components?.providers)
+
+  // Sidebar tabs
+  if (config.admin?.components?.sidebar?.tabs?.length) {
+    for (const tab of config.admin.components.sidebar.tabs) {
+      addToImportMap(tab.components.Icon)
+      addToImportMap(tab.components.Content)
+    }
+  }
 
   if (config.admin?.components?.views) {
     if (Object.keys(config.admin?.components?.views)?.length) {

@@ -1,5 +1,5 @@
 import type { Field } from '../../fields/config/types.js'
-import type { TypedUser } from '../../index.js'
+import type { User } from '../../index.js'
 import type { TaskConfig } from '../../queues/config/types/taskTypes.js'
 import type { SchedulePublishTaskInput } from './types.js'
 
@@ -21,40 +21,35 @@ export const getSchedulePublishTask = ({
 
       const userID = input.user
 
-      let user: null | TypedUser = null
+      let user: null | User = null
 
       if (userID) {
         user = (await req.payload.findByID({
           id: userID,
           collection: adminUserSlug,
           depth: 0,
-        })) as TypedUser
+        })) as User
 
         user.collection = adminUserSlug
       }
 
-      let publishSpecificLocale: string
-
-      if (input?.type === 'publish' && input.locale && req.payload.config.localization) {
-        const matchedLocale = req.payload.config.localization.locales.find(
-          ({ code }) => code === input.locale,
-        )
-
-        if (matchedLocale) {
-          publishSpecificLocale = input.locale
-        }
-      }
-
       if (input.doc) {
+        // input.doc.value is always a string (#10481); coerce back to the real ID type.
+        const idType =
+          req.payload.collections[input.doc.relationTo]?.customIDType ??
+          req.payload.db?.defaultIDType ??
+          'text'
+        const id = idType === 'number' ? Number(input.doc.value) : input.doc.value
+
         await req.payload.update({
-          id: input.doc.value,
+          id,
           collection: input.doc.relationTo,
           data: {
             _status,
           },
           depth: 0,
+          locale: input.locale,
           overrideAccess: user === null,
-          publishSpecificLocale: publishSpecificLocale!,
           user,
         })
       }
@@ -66,8 +61,8 @@ export const getSchedulePublishTask = ({
             _status,
           },
           depth: 0,
+          locale: input.locale,
           overrideAccess: user === null,
-          publishSpecificLocale: publishSpecificLocale!,
           user,
         })
       }

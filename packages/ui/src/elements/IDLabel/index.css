@@ -1,0 +1,36 @@
+@layer payload-default {
+  .id-label {
+    --id-label-letter-spacing: -0.032px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    height: var(--spacer-4);
+    padding: var(--spacer-1) var(--spacer-2);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-medium);
+    font-family: var(--text-body-large-font-family);
+    font-size: var(--text-body-large-font-size);
+    font-weight: var(--text-body-large-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--id-label-letter-spacing);
+    width: fit-content;
+    white-space: nowrap;
+  }
+
+  .id-label__prefix {
+    color: var(--color-text-secondary);
+  }
+
+  .id-label__value {
+    color: var(--color-text);
+  }
+
+  .id-label__link {
+    color: var(--color-text);
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}

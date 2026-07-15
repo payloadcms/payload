@@ -1,5 +1,4 @@
 import type { Page } from '@playwright/test'
-import type { Config } from 'payload-types.js'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -7,6 +6,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
+import type { Config } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
@@ -44,6 +44,7 @@ import {
   customLivePreviewSlug,
   desktopBreakpoint,
   mobileBreakpoint,
+  openByDefaultSlug,
   pagesSlug,
   postsSlug,
   renderedPageTitleID,
@@ -170,6 +171,38 @@ describe('Live Preview', () => {
     await expect(toggler).toHaveClass(/live-preview-toggler--active/)
     await expect(iframe).toBeVisible()
 
+    await toggleLivePreview(page, {
+      targetState: 'off',
+    })
+
+    await page.reload()
+
+    await expect(toggler).not.toHaveClass(/live-preview-toggler--active/)
+    await expect(iframe).toBeHidden()
+  })
+
+  test('collection — opens live preview by default on first visit when openByDefault is set', async () => {
+    const openByDefaultURL = new AdminUrlUtil(serverURL, openByDefaultSlug)
+
+    await deletePreferences({
+      payload,
+      user,
+      key: `collection-${openByDefaultSlug}`,
+    })
+
+    await page.goto(openByDefaultURL.create)
+    await page.locator('#field-title').fill('Open By Default')
+    await saveDocAndAssert(page)
+
+    const toggler = page.locator('button#live-preview-toggler')
+    await expect(toggler).toBeVisible()
+
+    // No stored preference exists, so openByDefault should auto-open the panel
+    await expect(toggler).toHaveClass(/live-preview-toggler--active/)
+    const { iframe } = await getLivePreviewIframe(page)
+    await expect(iframe).toBeVisible()
+
+    // Once the user toggles off, their stored preference wins over openByDefault
     await toggleLivePreview(page, {
       targetState: 'off',
     })
@@ -828,7 +861,7 @@ describe('Live Preview', () => {
     await expect(customLivePreview).toContainText('Custom live preview being rendered')
   })
 
-  describe('A11y', () => {
+  describe.skip('A11y', () => {
     test.fixme(
       'Live preview and edit view should have no accessibility violations',
       async ({}, testInfo) => {

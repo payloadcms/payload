@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--warning {
+    color: var(--color-bg-warning);
+  }
+}

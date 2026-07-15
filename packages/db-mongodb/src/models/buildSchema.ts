@@ -25,6 +25,7 @@ import {
   type SanitizedCompoundIndex,
   type SanitizedLocalizationConfig,
   type SelectField,
+  type SlugField,
   type Tab,
   type TabsField,
   type TextareaField,
@@ -258,7 +259,7 @@ const blocks: FieldSchemaGenerator<BlocksField> = (
       parentIsLocalized,
     ),
   })
-  ;(field.blockReferences ?? field.blocks).forEach((blockItem) => {
+  field.blocks.forEach((blockItem) => {
     const blockSchema = new mongoose.Schema({}, { _id: false, id: false })
 
     const block = typeof blockItem === 'string' ? payload.blocks[blockItem] : blockItem
@@ -779,6 +780,23 @@ const text: FieldSchemaGenerator<TextField> = (
   })
 }
 
+const slug: FieldSchemaGenerator<SlugField> = (
+  field,
+  schema,
+  payload,
+  buildSchemaOptions,
+  parentIsLocalized,
+): void => {
+  const baseSchema: SchemaTypeOptions<any> = {
+    ...formatBaseSchema({ buildSchemaOptions, field, parentIsLocalized }),
+    type: String,
+  }
+
+  schema.add({
+    [field.name]: localizeSchema(field, baseSchema, payload.config.localization, parentIsLocalized),
+  })
+}
+
 const textarea: FieldSchemaGenerator<TextareaField> = (
   field: TextareaField,
   schema,
@@ -889,6 +907,7 @@ const getSchemaGenerator = (fieldType: string): FieldSchemaGenerator | null => {
 }
 
 const fieldToSchemaMap = {
+  slug,
   array,
   blocks,
   checkbox,

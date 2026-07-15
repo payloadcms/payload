@@ -1,5 +1,7 @@
 import type { ScopeContext } from '@sentry/types'
-import type { APIError, Config } from 'payload'
+import type { APIError } from 'payload'
+
+import { definePlugin } from 'payload'
 
 import type { PluginOptions } from './types.js'
 
@@ -26,9 +28,9 @@ export { PluginOptions }
  * })
  * ```
  */
-export const sentryPlugin =
-  (pluginOptions: PluginOptions) =>
-  (config: Config): Config => {
+export const sentryPlugin = definePlugin<PluginOptions>({
+  slug: '@payloadcms/plugin-sentry',
+  plugin: ({ config, options: pluginOptions }) => {
     const { enabled = true, options = {}, Sentry } = pluginOptions
 
     if (!enabled || !Sentry) {
@@ -63,9 +65,10 @@ export const sentryPlugin =
                   user: {
                     id: args.req.user.id,
                     collection: args.req.user.collection,
-                    email: args.req.user.email,
+                    // Payload types email/username as nullable; Sentry's user expects string | undefined
+                    email: args.req.user.email ?? undefined,
                     ip_address: args.req.headers?.get('X-Forwarded-For') ?? undefined,
-                    username: args.req.user.username,
+                    username: args.req.user.username ?? undefined,
                   },
                 }),
               }
@@ -89,4 +92,5 @@ export const sentryPlugin =
         ],
       },
     }
-  }
+  },
+})

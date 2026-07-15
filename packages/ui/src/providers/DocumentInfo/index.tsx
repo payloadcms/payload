@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, DocumentPreferences } from 'payload'
+import type { DocumentPreferences, User } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -10,7 +10,6 @@ import type { DocumentInfoContext, DocumentInfoProps } from './types.js'
 import { useControllableState } from '../../hooks/useControllableState.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { requests } from '../../utilities/api.js'
-import { formatDocTitle } from '../../utilities/formatDocTitle/index.js'
 import { useConfig } from '../Config/index.js'
 import { DocumentTitleProvider } from '../DocumentTitle/index.js'
 import { useLocale, useLocaleLoading } from '../Locale/index.js'
@@ -39,6 +38,7 @@ const DocumentInfo: React.FC<
     hasPublishedDoc: hasPublishedDocFromProps,
     hasPublishPermission: hasPublishPermissionFromProps,
     hasSavePermission: hasSavePermissionFromProps,
+    hasScheduledPublish: hasScheduledPublishFromProps,
     initialData,
     initialState,
     isLocked: isLockedFromProps,
@@ -82,21 +82,6 @@ const DocumentInfo: React.FC<
 
   const { uploadEdits } = useUploadEdits()
 
-  /**
-   * @deprecated This state will be removed in v4.
-   * This is for performance reasons. Use the `DocumentTitleContext` instead.
-   */
-  const [title, setDocumentTitle] = useState(() =>
-    formatDocTitle({
-      collectionConfig,
-      data: { ...(initialData || {}), id },
-      dateFormat,
-      fallback: id?.toString(),
-      globalConfig,
-      i18n,
-    }),
-  )
-
   const [mostRecentVersionIsAutosaved, setMostRecentVersionIsAutosaved] = useState(
     mostRecentVersionIsAutosavedFromProps,
   )
@@ -109,11 +94,15 @@ const DocumentInfo: React.FC<
     unpublishedVersionCountFromProps,
   )
 
+  const [hasScheduledPublish, setHasScheduledPublish] = useState(
+    Boolean(hasScheduledPublishFromProps),
+  )
+
   const [documentIsLocked, setDocumentIsLocked] = useControllableState<boolean | undefined>(
     isLockedFromProps,
   )
 
-  const [currentEditor, setCurrentEditor] = useControllableState<ClientUser | null>(
+  const [currentEditor, setCurrentEditor] = useControllableState<null | User>(
     currentEditorFromProps,
   )
   const [lastUpdateTime, setLastUpdateTime] = useControllableState<number>(lastUpdateTimeFromProps)
@@ -127,7 +116,7 @@ const DocumentInfo: React.FC<
   const documentLockState = useRef<{
     hasShownLockedModal: boolean
     isLocked: boolean
-    user: ClientUser | number | string
+    user: number | string | User
   } | null>({
     hasShownLockedModal: false,
     isLocked: false,
@@ -217,7 +206,7 @@ const DocumentInfo: React.FC<
   )
 
   const updateDocumentEditor = useCallback(
-    async (docID: number | string, slug: string, user: ClientUser | number | string) => {
+    async (docID: number | string, slug: string, user: number | string | User) => {
       // Check if the locked-documents collection exists before making API calls
       if (!hasLockedDocumentsCollection) {
         return
@@ -326,23 +315,6 @@ const DocumentInfo: React.FC<
     }
   }, [collectionConfig, globalConfig, versionCount])
 
-  /**
-   * @todo: Remove this in v4
-   * Users should use the `DocumentTitleContext` instead.
-   */
-  useEffect(() => {
-    setDocumentTitle(
-      formatDocTitle({
-        collectionConfig,
-        data: { ...data, id },
-        dateFormat,
-        fallback: id?.toString(),
-        globalConfig,
-        i18n,
-      }),
-    )
-  }, [collectionConfig, globalConfig, data, dateFormat, i18n, id])
-
   // clean on unmount
   useEffect(() => {
     const re1 = abortControllerRef.current
@@ -388,6 +360,7 @@ const DocumentInfo: React.FC<
     hasPublishedDoc,
     hasPublishPermission,
     hasSavePermission,
+    hasScheduledPublish,
     incrementVersionCount,
     initialData,
     initialState,
@@ -400,13 +373,12 @@ const DocumentInfo: React.FC<
     setData,
     setDocFieldPreferences,
     setDocumentIsLocked,
-    setDocumentTitle,
     setHasPublishedDoc,
+    setHasScheduledPublish,
     setLastUpdateTime,
     setMostRecentVersionIsAutosaved,
     setUnpublishedVersionCount,
     setUploadStatus: updateUploadStatus,
-    title,
     unlockDocument,
     unpublishedVersionCount,
     updateDocumentEditor,

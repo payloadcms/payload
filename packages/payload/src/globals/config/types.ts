@@ -3,27 +3,14 @@ import type { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import type { DeepRequired, IsAny } from 'ts-essentials'
 
 import type {
-  CustomPreviewButton,
-  CustomSaveButton,
-  CustomSaveDraftButton,
-  CustomStatus,
-  PublishButtonClientProps,
-  PublishButtonServerProps,
-  UnpublishButtonClientProps,
-  UnpublishButtonServerProps,
-} from '../../admin/types.js'
-import type {
   Access,
-  CustomComponent,
-  EditConfig,
   Endpoint,
   EntityDescription,
-  EntityDescriptionComponent,
   GeneratePreviewURL,
   LabelFunction,
   LivePreviewConfig,
   MetaConfig,
-  PayloadComponent,
+  SharedAdminComponents,
   StaticLabel,
 } from '../../config/types.js'
 import type { DBIdentifierName } from '../../database/types.js'
@@ -37,7 +24,7 @@ import type {
   TypedGlobal,
   TypedGlobalSelect,
 } from '../../index.js'
-import type { PayloadRequest, SelectIncludeType, Where } from '../../types/index.js'
+import type { PayloadRequest, SelectIncludeType, Where, WithSelectFn } from '../../types/index.js'
 import type { IncomingGlobalVersions, SanitizedGlobalVersions } from '../../versions/types.js'
 
 export type DataFromGlobalSlug<TSlug extends GlobalSlug> = TypedGlobal[TSlug]
@@ -169,51 +156,7 @@ export type GlobalAdminOptions = {
   /**
    * Custom admin components
    */
-  components?: {
-    elements?: {
-      /**
-       * Inject custom components before the document controls
-       */
-      beforeDocumentControls?: CustomComponent[]
-      Description?: EntityDescriptionComponent
-      /**
-       * Replaces the "Preview" button
-       */
-      PreviewButton?: CustomPreviewButton
-      /**
-       * Replaces the "Publish" button
-       * + drafts must be enabled
-       */
-      PublishButton?: PayloadComponent<PublishButtonServerProps, PublishButtonClientProps>
-      /**
-       * Replaces the "Save" button
-       * + drafts must be disabled
-       */
-      SaveButton?: CustomSaveButton
-      /**
-       * Replaces the "Save Draft" button
-       * + drafts must be enabled
-       * + autosave must be disabled
-       */
-      SaveDraftButton?: CustomSaveDraftButton
-      /**
-       * Replaces the "Status" section
-       */
-      Status?: CustomStatus
-      /**
-       * Replaces the "Unpublish" button
-       * + drafts must be enabled
-       */
-      UnpublishButton?: PayloadComponent<UnpublishButtonServerProps, UnpublishButtonClientProps>
-    }
-    views?: {
-      /**
-       * Set to a React component to replace the entire Edit View, including all nested routes.
-       * Set to an object to replace or modify individual nested routes, or to add new ones.
-       */
-      edit?: EditConfig
-    }
-  }
+  components?: SharedAdminComponents
   /** Extension point to add your custom data. Available in server and client. */
   custom?: GlobalAdminCustom
   /**
@@ -231,10 +174,6 @@ export type GlobalAdminOptions = {
    * Exclude the global from the admin nav and routes
    */
   hidden?: ((args: { user: PayloadRequest['user'] }) => boolean) | boolean
-  /**
-   * Hide the API URL within the Edit View
-   */
-  hideAPIURL?: boolean
   /**
    * Live preview options
    */
@@ -266,12 +205,6 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
   dbName?: DBIdentifierName
   endpoints?: false | Omit<Endpoint, 'root'>[]
   fields: Field[]
-  /**
-   * Specify which fields should be selected always, regardless of the `select` query which can be useful that the field exists for access control / hooks
-   */
-  forceSelect?: IsAny<SelectFromGlobalSlug<TSlug>> extends true
-    ? SelectIncludeType
-    : SelectFromGlobalSlug<TSlug>
   graphQL?:
     | {
         disableMutations?: true
@@ -308,7 +241,14 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
     interface?: string
   }
   versions?: boolean | IncomingGlobalVersions
-}
+} & Pick<
+  WithSelectFn<
+    IsAny<SelectFromGlobalSlug<TSlug>> extends true
+      ? SelectIncludeType
+      : SelectFromGlobalSlug<TSlug>
+  >,
+  'select'
+>
 
 export interface SanitizedGlobalConfig
   extends Omit<DeepRequired<GlobalConfig>, 'endpoints' | 'fields' | 'slug' | 'versions'> {

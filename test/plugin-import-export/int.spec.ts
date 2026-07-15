@@ -1,4 +1,4 @@
-import type { CollectionSlug, Payload } from 'payload'
+import type { AuthenticatedUser, CollectionSlug, Payload } from 'payload'
 
 import fs from 'fs'
 import path from 'path'
@@ -18,7 +18,7 @@ import { customIdPagesSlug, postsWithS3Slug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
-let user: any
+let user: AuthenticatedUser
 let restrictedUser: any
 
 const filename = fileURLToPath(import.meta.url)
@@ -27,13 +27,15 @@ const dirname = path.dirname(filename)
 describe('@payloadcms/plugin-import-export', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
-    user = await payload.login({
+    const loginResult = await payload.login({
       collection: 'users',
       data: {
         email: devUser.email,
         password: devUser.password,
       },
     })
+
+    user = loginResult.user!
     const userDocs = await payload.find({
       collection: 'users',
       where: {
@@ -48,6 +50,25 @@ describe('@payloadcms/plugin-import-export', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  describe('i18n scoping', () => {
+    it('should only merge plugin translations for supportedLanguages', () => {
+      const supportedLangKeys = Object.keys(payload.config.i18n.supportedLanguages)
+      expect(supportedLangKeys.sort()).toEqual(['en', 'es', 'he'])
+
+      // German is not in supportedLanguages — plugin-import-export must not contribute keys to it.
+      const deTranslations = payload.config.i18n.translations.de as
+        | Record<string, unknown>
+        | undefined
+
+      expect(deTranslations?.['plugin-import-export']).toBeUndefined()
+
+      // It should be present for supportedLanguages.
+      expect(payload.config.i18n.translations.en).toHaveProperty('plugin-import-export')
+      expect(payload.config.i18n.translations.es).toHaveProperty('plugin-import-export')
+      expect(payload.config.i18n.translations.he).toHaveProperty('plugin-import-export')
+    })
   })
 
   describe('graphql', () => {
@@ -654,7 +675,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].createdAt).toBeDefined()
     })
 
-    it('should run custom toCSV function on a field', async () => {
+    it('should run beforeExport hook on a field', async () => {
       const fields = [
         'id',
         'custom',
@@ -956,6 +977,43 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data[0].hasManyPolymorphic_1_relationTo).toBe('posts')
     })
 
+    it('should not produce duplicate columns for hasOne polymorphic relationship export', async () => {
+      const doc = await payload.create({
+        collection: 'exports',
+        user,
+        data: {
+          collectionSlug: 'pages',
+          fields: ['id', 'hasOnePolymorphic'],
+          format: 'csv',
+          where: {
+            title: { contains: 'Polymorphic' },
+          },
+        },
+      })
+
+      await payload.jobs.run()
+
+      const exportDoc = await payload.findByID({
+        collection: 'exports',
+        id: doc.id,
+      })
+
+      expect(exportDoc.filename).toBeDefined()
+      const expectedPath = path.join(dirname, './uploads', exportDoc.filename as string)
+      const buffer = fs.readFileSync(expectedPath)
+      const headerLine = buffer.toString().split('\n')[0] ?? ''
+      const headers = headerLine.split(',').map((h) => h.replace(/^\ufeff/, '').trim())
+
+      expect(headers).toContain('hasOnePolymorphic_id')
+      expect(headers).toContain('hasOnePolymorphic_relationTo')
+
+      const leakedColumns = headers.filter(
+        (h) =>
+          h.startsWith('hasOnePolymorphic_value') || h.startsWith('hasOnePolymorphic_relationTo_'),
+      )
+      expect(leakedColumns).toEqual([])
+    })
+
     it('should export hasMany monomorphic relationship fields to CSV', async () => {
       const doc = await payload.create({
         collection: 'exports',
@@ -1173,13 +1231,13 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
-    describe('toCSV derived columns positioning', () => {
+    describe('beforeExport derived columns positioning', () => {
       it('should position derived columns at the base field position and remove the original column', async () => {
         const page = await payload.create({
           collection: 'pages',
           data: {
             title: 'Derived Columns Test',
-            customRelationship: user.user.id,
+            customRelationship: user.id,
             excerpt: 'test excerpt',
             _status: 'published',
           },
@@ -1204,7 +1262,7 @@ describe('@payloadcms/plugin-import-export', () => {
         const data = await readCSV(csvPath)
         const columns = Object.keys(data[0])
 
-        // The original customRelationship column should NOT exist since toCSV
+        // The original customRelationship column should NOT exist since beforeExport
         // returned undefined and wrote derived columns instead
         const customRelIdx = columns.indexOf('customRelationship')
         expect(customRelIdx).toBe(-1)
@@ -1222,12 +1280,12 @@ describe('@payloadcms/plugin-import-export', () => {
         await payload.delete({ collection: 'pages', id: page.id })
       })
 
-      it('should remove original column when toCSV writes _name and _email (no _id)', async () => {
+      it('should remove original column when beforeExport hook writes _name and _email (no _id)', async () => {
         const page = await payload.create({
           collection: 'pages',
           data: {
             title: 'NameEmail Derived Test',
-            customRelNameEmail: user.user.id,
+            customRelNameEmail: user.id,
             excerpt: 'test excerpt',
             _status: 'published',
           },
@@ -1267,17 +1325,17 @@ describe('@payloadcms/plugin-import-export', () => {
 
         // Verify the values are correct
         expect(data[0].customRelNameEmail_name).toBe('name value')
-        expect(data[0].customRelNameEmail_email).toBe(user.user.email)
+        expect(data[0].customRelNameEmail_email).toBe(user.email)
 
         await payload.delete({ collection: 'pages', id: page.id })
       })
 
-      it('should remove original column when toCSV writes _id and _locationName', async () => {
+      it('should remove original column when beforeExport hook writes _id and _locationName', async () => {
         const page = await payload.create({
           collection: 'pages',
           data: {
             title: 'IdLocationName Derived Test',
-            customRelIdName: user.user.id,
+            customRelIdName: user.id,
             excerpt: 'test excerpt',
             _status: 'published',
           },
@@ -1316,7 +1374,7 @@ describe('@payloadcms/plugin-import-export', () => {
         expect(excerptIdx).toBeGreaterThan(locationNameIdx)
 
         // Verify the values are correct
-        expect(data[0].customRelIdName_id).toBe(String(user.user.id))
+        expect(data[0].customRelIdName_id).toBe(String(user.id))
         expect(data[0].customRelIdName_locationName).toBe('name value')
 
         await payload.delete({ collection: 'pages', id: page.id })
@@ -1327,7 +1385,7 @@ describe('@payloadcms/plugin-import-export', () => {
           collection: 'pages',
           data: {
             title: 'Derived Position With Preview Test',
-            customRelationship: user.user.id,
+            customRelationship: user.id,
             excerpt: 'trailing field value',
             _status: 'published',
           },
@@ -1384,18 +1442,18 @@ describe('@payloadcms/plugin-import-export', () => {
         await payload.delete({ collection: 'pages', id: page.id })
       })
 
-      it('should respect custom field order with toCSV field first and match preview column order', async () => {
+      it('should respect custom field order with beforeExport field first and match preview column order', async () => {
         const page = await payload.create({
           collection: 'pages',
           data: {
-            title: 'Custom Order toCSV First Test',
-            customRelationship: user.user.id,
+            title: 'Custom Order beforeExport First Test',
+            customRelationship: user.id,
             excerpt: 'some excerpt',
             _status: 'published',
           },
         })
 
-        // Put the toCSV relationship field first
+        // Put the beforeExport relationship field first
         const fields = ['customRelationship', 'id', 'title', 'excerpt']
 
         // Export
@@ -1814,6 +1872,88 @@ describe('@payloadcms/plugin-import-export', () => {
           where: {
             title: { equals: 'JSON Roundtrip CSV Test' },
           },
+        })
+      })
+
+      it('should roundtrip a block containing a nested array with richText through CSV export/import', async () => {
+        const testPage = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'FAQ Block Roundtrip Test',
+            blocks: [
+              {
+                blockType: 'faqSection',
+                faqs: [
+                  { question: 'What is Payload?', answer: richTextData },
+                  { question: 'Is it open source?', answer: richTextData },
+                ],
+              },
+            ],
+          },
+        })
+
+        let exportDoc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            format: 'csv',
+            where: { id: { equals: testPage.id } },
+          },
+        })
+
+        await payload.jobs.run()
+
+        exportDoc = await payload.findByID({ collection: 'exports', id: exportDoc.id })
+
+        const csvPath = path.join(dirname, './uploads', exportDoc.filename as string)
+
+        await payload.delete({ collection: 'pages', id: testPage.id })
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: { collectionSlug: 'pages', importMode: 'create' },
+          file: {
+            data: fs.readFileSync(csvPath),
+            mimetype: 'text/csv',
+            name: 'faq-roundtrip.csv',
+            size: fs.statSync(csvPath).size,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({ collection: 'imports', id: importDoc.id })
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(1)
+
+        const importedPages = await payload.find({
+          collection: 'pages',
+          where: { title: { equals: 'FAQ Block Roundtrip Test' } },
+        })
+
+        expect(importedPages.docs).toHaveLength(1)
+        const imported = importedPages.docs[0]
+
+        expect(imported?.blocks).toHaveLength(1)
+        const faqBlock = imported?.blocks?.[0]
+        expect(faqBlock?.blockType).toBe('faqSection')
+
+        const faqs = (faqBlock as any)?.faqs
+        expect(Array.isArray(faqs)).toBe(true)
+        expect(faqs).toHaveLength(2)
+
+        expect(faqs[0]?.question).toBe('What is Payload?')
+        expect(typeof faqs[0]?.answer).not.toBe('string')
+        expect(faqs[0]?.answer?.root?.type).toBe('root')
+
+        expect(faqs[1]?.question).toBe('Is it open source?')
+        expect(typeof faqs[1]?.answer).not.toBe('string')
+
+        await payload.delete({
+          collection: 'pages',
+          where: { title: { equals: 'FAQ Block Roundtrip Test' } },
         })
       })
 
@@ -4308,7 +4448,7 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(importedPages.docs[0]?.excerpt).toBe('excerpt 1')
     })
 
-    it('should successfully roundtrip export and import with toCSV/fromCSV functions', async () => {
+    it('should successfully roundtrip export and import with beforeExport/beforeImport hooks', async () => {
       const createdPages = []
       for (let i = 0; i < 3; i++) {
         const page = await payload.create({
@@ -6300,14 +6440,14 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(data.error).toContain('not found')
     })
 
-    it('should apply toCSV customizations in export preview and remove replaced columns', async () => {
+    it('should apply beforeExport hook customizations in export preview and remove replaced columns', async () => {
       const page = await payload.create({
         collection: 'pages',
         data: {
-          title: 'Preview toCSV Test',
-          customRelationship: user.user.id,
-          customRelNameEmail: user.user.id,
-          customRelIdName: user.user.id,
+          title: 'Preview beforeExport Test',
+          customRelationship: user.id,
+          customRelNameEmail: user.id,
+          customRelIdName: user.id,
           excerpt: 'preview excerpt',
           _status: 'published',
         },
@@ -6354,9 +6494,9 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(doc.customRelationship_email).toBeDefined()
 
       expect(doc.customRelNameEmail_name).toBe('name value')
-      expect(doc.customRelNameEmail_email).toBe(user.user.email)
+      expect(doc.customRelNameEmail_email).toBe(user.email)
 
-      expect(doc.customRelIdName_id).toBe(user.user.id)
+      expect(doc.customRelIdName_id).toBe(user.id)
       expect(doc.customRelIdName_locationName).toBe('name value')
 
       // excerpt should still be present
@@ -6369,10 +6509,10 @@ describe('@payloadcms/plugin-import-export', () => {
       const page = await payload.create({
         collection: 'pages',
         data: {
-          title: 'Preview No Fields toCSV Test',
-          customRelationship: user.user.id,
-          customRelNameEmail: user.user.id,
-          customRelIdName: user.user.id,
+          title: 'Preview No Fields beforeExport Test',
+          customRelationship: user.id,
+          customRelNameEmail: user.id,
+          customRelIdName: user.id,
           _status: 'published',
         },
       })
@@ -6392,7 +6532,7 @@ describe('@payloadcms/plugin-import-export', () => {
 
       expect(response.docs).toHaveLength(1)
 
-      // Original columns replaced by toCSV should not appear in columns or doc data
+      // Original columns replaced by beforeExport hook should not appear in columns or doc data
       const responseColumns: string[] = response.columns
       const doc = response.docs[0]
 
@@ -7187,7 +7327,7 @@ describe('@payloadcms/plugin-import-export', () => {
   })
 
   describe('custom field functions edge cases', () => {
-    it('should handle toCSV function that returns undefined', async () => {
+    it('should handle beforeExport hook that returns undefined', async () => {
       const page = await payload.create({
         collection: 'pages',
         data: {
@@ -7230,7 +7370,7 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
-    it('should apply fromCSV to reconstruct relationships', async () => {
+    it('should apply beforeImport hook to reconstruct relationships', async () => {
       const page = await payload.create({
         collection: 'pages',
         data: {
@@ -8327,13 +8467,15 @@ describe('@payloadcms/plugin-import-export', () => {
         })
 
         // Restore the original user login state
-        user = await payload.login({
+        const loginResult = await payload.login({
           collection: 'users',
           data: {
             email: devUser.email,
             password: devUser.password,
           },
         })
+
+        user = loginResult.user!
 
         // Clean up test documents
         for (const id of createdPostIds) {

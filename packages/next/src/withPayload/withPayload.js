@@ -4,12 +4,6 @@
  * TypeScript compilation is not available. This ensures compatibility with all templates and
  * user projects regardless of their TypeScript setup.
  */
-import {
-  getNextjsVersion,
-  supportsServerFastRefreshConfig,
-  supportsTurbopackExternalizeTransitiveDependencies,
-} from './withPayload.utils.js'
-import { withPayloadLegacy } from './withPayloadLegacy.js'
 
 const poweredByHeader = {
   key: 'X-Powered-By',
@@ -22,11 +16,6 @@ const poweredByHeader = {
  * @param {boolean} [options.devBundleServerPackages] - Whether to bundle server packages in development mode. @default false
  * */
 export const withPayload = (nextConfig = {}, options = {}) => {
-  const nextjsVersion = getNextjsVersion()
-
-  const supportsTurbopackBuild = supportsTurbopackExternalizeTransitiveDependencies(nextjsVersion)
-  const hasServerFastRefreshConfigOption = supportsServerFastRefreshConfig(nextjsVersion)
-
   const env = nextConfig.env || {}
 
   if (nextConfig.experimental?.staleTimes?.dynamic) {
@@ -38,12 +27,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
 
   if (nextConfig.cacheComponents) {
     env.PAYLOAD_CACHE_COMPONENTS_ENABLED = 'true'
-  }
-
-  if (nextjsVersion?.major === 16 && !hasServerFastRefreshConfigOption) {
-    console.warn(
-      'Payload: You are using an unsupported Next.js 16 version. You can find the supported Next.js versions here: https://payloadcms.com/docs/getting-started/installation',
-    )
   }
 
   const consoleWarn = console.warn
@@ -68,11 +51,12 @@ export const withPayload = (nextConfig = {}, options = {}) => {
   /** @type {import('next').NextConfig} */
   const baseConfig = {
     ...nextConfig,
+    devIndicators: nextConfig.devIndicators !== undefined ? nextConfig.devIndicators : false,
     env,
     experimental: {
       ...(nextConfig.experimental || {}),
       // Server fast refresh breaks HMR
-      ...(hasServerFastRefreshConfigOption ? { turbopackServerFastRefresh: false } : {}),
+      turbopackServerFastRefresh: false,
     },
     sassOptions: {
       ...(nextConfig.sassOptions || {}),
@@ -142,6 +126,17 @@ export const withPayload = (nextConfig = {}, options = {}) => {
       // WHY: without externalizing graphql, a graphql version error will be thrown
       // during runtime ("Ensure that there is only one instance of \"graphql\" in the node_modules\ndirectory.")
       'graphql',
+      'drizzle-kit',
+      'drizzle-kit/api',
+      'sharp',
+      'libsql',
+      'require-in-the-middle',
+      'json-schema-to-typescript',
+      // Prevents turbopack build errors by the thread-stream package which is installed by pino
+      'pino',
+      // file-type v22 uses `import(specifier)` with a non-literal specifier, which Turbopack rejects
+      // with "Cannot find module as expression is too dynamic"
+      'file-type',
       ...(process.env.NODE_ENV === 'development' && options.devBundleServerPackages !== true
         ? /**
            * Unless explicitly disabled by the user, by passing `devBundleServerPackages: true` to withPayload, we
@@ -270,24 +265,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     baseConfig.env.NEXT_BASE_PATH = nextConfig.basePath
   }
 
-  if (!supportsTurbopackBuild) {
-    return withPayloadLegacy(baseConfig)
-  } else {
-    return {
-      ...baseConfig,
-      serverExternalPackages: [
-        ...(baseConfig.serverExternalPackages || []),
-        'drizzle-kit',
-        'drizzle-kit/api',
-        'sharp',
-        'libsql',
-        'require-in-the-middle',
-        'json-schema-to-typescript',
-        // Prevents turbopack build errors by the thread-stream package which is installed by pino
-        'pino',
-      ],
-    }
-  }
+  return baseConfig
 }
 
 export default withPayload

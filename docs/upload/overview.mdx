@@ -202,18 +202,20 @@ Each image size also supports `admin` options to control whether it appears in t
   width: 400,
   height: 300,
   admin: {
-    disableGroupBy: true, // hide from list view groupBy options
-    disableListColumn: true, // hide from list view columns
-    disableListFilter: true, // hide from list view filters
+    disabled: {
+      groupBy: true,  // hide from list view groupBy options
+      column: true,   // hide from list view columns
+      filter: true,   // hide from list view filters
+    },
   },
 }
 ```
 
-| Option                  | Description                                                                                                                              |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| **`disableGroupBy`**    | If set to `true`, this image size will not be available as a selectable groupBy option in the collection list view. Defaults to `false`. |
-| **`disableListColumn`** | If set to `true`, this image size will not be available as a selectable column in the collection list view. Defaults to `false`.         |
-| **`disableListFilter`** | If set to `true`, this image size will not be available as a filter option in the collection list view. Defaults to `false`.             |
+| Option                 | Description                                                                                                                              |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| **`disabled.groupBy`** | If set to `true`, this image size will not be available as a selectable groupBy option in the collection list view. Defaults to `false`. |
+| **`disabled.column`**  | If set to `true`, this image size will not be available as a selectable column in the collection list view. Defaults to `false`.         |
+| **`disabled.filter`**  | If set to `true`, this image size will not be available as a filter option in the collection list view. Defaults to `false`.             |
 
 This is useful for hiding large or rarely used image sizes from the list view UI while still keeping them available in the API.
 
@@ -329,6 +331,110 @@ export const Media: CollectionConfig = {
   },
 }
 ```
+
+## File Previews
+
+When editing a document in an upload-enabled Collection, the Admin Panel renders a preview of the file in the upload side panel. The preview that's used is chosen automatically based on the file's MIME type:
+
+| File type         | Built-in preview                                   |
+| ----------------- | -------------------------------------------------- |
+| `image/*`         | Image thumbnail (falls back to a file icon)        |
+| `video/*`         | Native HTML5 `<video>` player                      |
+| `audio/*`         | Native HTML5 `<audio>` player                      |
+| `application/pdf` | The browser's built-in PDF viewer (in an `iframe`) |
+| Everything else   | Image thumbnail / generic file icon                |
+
+These built-in previews require no configuration.
+
+### Custom File Previews
+
+To render your own preview component in place of the built-in one, use the `upload.admin.components.filePreview` property. It accepts either a single component that renders for every file, or a map keyed by MIME type pattern so you can target specific file types.
+
+#### A single component for all file types
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Media: CollectionConfig = {
+  slug: 'media',
+  upload: {
+    admin: {
+      components: {
+        // highlight-start
+        filePreview: '/components/MediaPreview#MediaPreview',
+        // highlight-end
+      },
+    },
+  },
+  fields: [],
+}
+```
+
+#### A map keyed by MIME type
+
+When `filePreview` is an object, each key is a MIME type pattern. Payload resolves the component to render in the following priority order:
+
+1. **Exact match** — e.g. `application/pdf`
+2. **Category wildcard** — e.g. `video/*`
+3. **Universal fallback** — `*`
+
+If no pattern matches, Payload renders the default built-in preview for that file.
+
+```ts
+import type { CollectionConfig } from 'payload'
+
+export const Media: CollectionConfig = {
+  slug: 'media',
+  upload: {
+    admin: {
+      components: {
+        // highlight-start
+        filePreview: {
+          'application/pdf': '/components/PdfPreview#PdfPreview', // exact match
+          'video/*': '/components/VideoPreview#VideoPreview', // category wildcard
+          '*': '/components/GenericPreview#GenericPreview', // universal fallback
+        },
+        // highlight-end
+      },
+    },
+  },
+  fields: [],
+}
+```
+
+#### Building a File Preview component
+
+A File Preview component can be a Server or Client Component. It receives the following props describing the current file:
+
+| Prop       | Type     | Description                          |
+| ---------- | -------- | ------------------------------------ |
+| `fileSrc`  | `string` | Resolved URL of the file (`doc.url`) |
+| `filename` | `string` | The file's name                      |
+| `filesize` | `number` | The file's size in bytes             |
+| `mimeType` | `string` | The file's MIME type                 |
+| `width`    | `number` | Image width, when available          |
+| `height`   | `number` | Image height, when available         |
+
+```tsx
+'use client'
+import type { UploadFilePreviewClientProps } from 'payload'
+
+import React from 'react'
+
+export const MediaPreview: React.FC<UploadFilePreviewClientProps> = ({
+  filename,
+  fileSrc,
+  mimeType,
+}) => {
+  if (mimeType?.startsWith('video/')) {
+    return <video controls src={fileSrc} />
+  }
+
+  return <img alt={filename} src={fileSrc} />
+}
+```
+
+Component paths use the same syntax as other [Custom Components](../custom-components/overview#component-paths) — a string with `#ExportName`, or an object with `path` and `exportName`.
 
 ## Customizing the Upload UI
 
@@ -607,8 +713,8 @@ export const Media: CollectionConfig = {
 <Banner type="warning">
   **Important:**
 
-Uploading files is currently only possible through the REST and Local APIs due to how GraphQL
-works. It's difficult and fairly nonsensical to support uploading files through GraphQL.
+Uploading files is supported through the REST API, Local API, and MCP. GraphQL does not support
+file uploads.
 
 </Banner>
 
@@ -651,6 +757,12 @@ fetch('api/:upload-slug', {
    */
 })
 ```
+
+### MCP uploads
+
+The MCP plugin's `createDocument` and `updateDocument` tools accept files from a URL or as base64 data. Call `getCollectionSchema` first and use only the sources listed in `upload.sources`.
+
+MCP does not expose the Local API's `filePath` option, preventing MCP clients from requesting arbitrary files from the server's filesystem.
 
 ## Uploading Files stored locally
 

@@ -8,6 +8,7 @@ import type {
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
+import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { renderField } from '@payloadcms/ui/forms/renderField'
 import { getFromImportMap } from 'payload/shared'
 import React from 'react'
@@ -18,7 +19,7 @@ import type {
   LexicalEditorViewMap,
   LexicalFieldAdminClientProps,
   LexicalRichTextFieldProps,
-} from '../types.js'
+} from '../types/index.js'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir
 import { RichTextField } from '../exports/client/index.js'
@@ -68,6 +69,7 @@ export const RscEntryLexicalField: React.FC<
         operation: args.operation,
         permissions: args.permissions,
         preferences: args.preferences,
+        renderComponent: args.renderComponent || RenderServerComponent,
         renderFieldFn: renderField,
         req: args.req,
       },

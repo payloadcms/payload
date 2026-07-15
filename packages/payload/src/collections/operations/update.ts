@@ -17,7 +17,7 @@ import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
 import { APIError } from '../../errors/index.js'
-import { type CollectionSlug, deepCopyObjectSimple, type FindOptions } from '../../index.js'
+import { type CollectionSlug, type FindOptions } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
@@ -26,12 +26,14 @@ import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildVersionCollectionFields } from '../../versions/buildCollectionFields.js'
 import { appendVersionToQueryKey } from '../../versions/drafts/appendVersionToQueryKey.js'
 import { getQueryDraftsSort } from '../../versions/drafts/getQueryDraftsSort.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
+import { copyDataWithFreshRowIDs } from './utilities/copyDataWithFreshRowIDs.js'
 import { sanitizeSortQuery } from './utilities/sanitizeSortQuery.js'
 import { updateDocument } from './utilities/update.js'
 
@@ -49,7 +51,6 @@ export type Arguments<TSlug extends CollectionSlug> = {
   overwriteExistingFiles?: boolean
   populate?: PopulateType
   publishAllLocales?: boolean
-  publishSpecificLocale?: string
   req: PayloadRequest
   showHiddenFields?: boolean
   /**
@@ -101,7 +102,6 @@ export const updateOperation = async <
       overwriteExistingFiles = false,
       populate,
       publishAllLocales,
-      publishSpecificLocale,
       req: {
         fallbackLocale,
         locale,
@@ -243,8 +243,12 @@ export const updateOperation = async <
 
         const select = sanitizeSelect({
           fields: collectionConfig.flattenedFields,
-          forceSelect: collectionConfig.forceSelect,
-          select: incomingSelect,
+          select: resolveSelect({
+            config: collectionConfig.select,
+            operation: 'update',
+            req,
+            select: incomingSelect,
+          }),
         })
 
         // ///////////////////////////////////////////////
@@ -255,7 +259,12 @@ export const updateOperation = async <
           autosave,
           collectionConfig,
           config,
-          data: deepCopyObjectSimple(data),
+          data: copyDataWithFreshRowIDs({
+            config,
+            data,
+            existingDoc: docWithLocales,
+            fields: collectionConfig.fields,
+          }),
           depth: depth!,
           docWithLocales,
           draftArg,
@@ -267,7 +276,6 @@ export const updateOperation = async <
           payload,
           populate,
           publishAllLocales,
-          publishSpecificLocale,
           req,
           select: select!,
           showHiddenFields: showHiddenFields!,

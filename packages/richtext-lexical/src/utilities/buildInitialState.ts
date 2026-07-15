@@ -1,6 +1,7 @@
 import type { SerializedLexicalNode } from 'lexical'
 import type {
   ClientFieldSchemaMap,
+  ComponentRenderer,
   DocumentPreferences,
   FieldSchemaMap,
   FormState,
@@ -12,7 +13,7 @@ import type {
 
 import { fieldSchemasToFormState } from '@payloadcms/ui/forms/fieldSchemasToFormState'
 
-import type { SerializedBlockNode } from '../nodeTypes.js'
+import type { SerializedBlockNode } from '../types/nodeTypes.js'
 
 export type InitialLexicalFormState = {
   [nodeID: string]: {
@@ -34,6 +35,7 @@ type Props = {
     operation: Operation
     permissions?: SanitizedFieldPermissions
     preferences: DocumentPreferences
+    renderComponent: ComponentRenderer
     renderFieldFn: any
     req: PayloadRequest
   }

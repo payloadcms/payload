@@ -200,7 +200,9 @@ export const getFields = ({
     fields.push({
       ...basePrefixField,
       ...(existingPrefixField || {}),
-      defaultValue: useCompositePrefixes ? '' : prefix ? path.posix.join(prefix) : '',
+      defaultValue:
+        existingPrefixField?.defaultValue ??
+        (useCompositePrefixes ? '' : prefix ? path.posix.join(prefix) : ''),
     } as TextField)
   }
 

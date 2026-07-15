@@ -7,14 +7,13 @@ import { useLexicalEditable } from '@lexical/react/useLexicalEditable'
 import { $findMatchingParent, mergeRegister } from '@lexical/utils'
 import { getTranslation } from '@payloadcms/translations'
 import {
-  CloseMenuIcon,
-  EditIcon,
-  ExternalLinkIcon,
   formatDrawerSlug,
+  NewTabIcon,
   useConfig,
   useEditDepth,
   useLocale,
   useTranslation,
+  WriteIcon,
 } from '@payloadcms/ui'
 import { requests } from '@payloadcms/ui/shared'
 import {
@@ -31,10 +30,13 @@ import { formatAdminURL } from 'payload/shared'
 import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import type { LinkNode } from '../../../../nodes/LinkNode.js'
-import type { LinkFields } from '../../../../nodes/types.js'
+import type { LinkFields } from '../../../../server/schema.js'
 import type { LinkPayload } from '../types.js'
 
 import { useEditorConfigContext } from '../../../../../../lexical/config/client/EditorConfigProvider.js'
+import { LinkIcon } from '../../../../../../lexical/ui/icons/Link/index.js'
+import { PageIcon } from '../../../../../../lexical/ui/icons/Page/index.js'
+import { TrashIcon } from '../../../../../../lexical/ui/icons/Trash/index.js'
 import { getSelectedNode } from '../../../../../../lexical/utils/getSelectedNode.js'
 import { setFloatingElemPositionForLinkEditor } from '../../../../../../lexical/utils/setFloatingElemPositionForLinkEditor.js'
 import { FieldsDrawer } from '../../../../../../utilities/fieldsDrawer/Drawer.js'
@@ -362,22 +364,31 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
 
   return (
     <React.Fragment>
-      <div className="link-editor" ref={editorRef}>
+      <div className="link-editor" data-theme="dark" ref={editorRef}>
         <div className="link-input">
+          {linkNode?.__fields?.linkType === 'custom' ? <LinkIcon /> : <PageIcon />}
           {linkUrl && linkUrl.length > 0 ? (
-            <a href={linkUrl} rel="noopener noreferrer" target="_blank">
-              {linkNode?.__fields.newTab ? <ExternalLinkIcon /> : null}
+            <a className="link-input__url" href={linkUrl} rel="noopener noreferrer" target="_blank">
               {linkLabel != null && linkLabel.length > 0 ? linkLabel : linkUrl}
+              {linkNode?.__fields.newTab ? (
+                <>
+                  <NewTabIcon size={16} /> <div className="link-input__divider" />{' '}
+                </>
+              ) : null}
             </a>
           ) : linkLabel != null && linkLabel.length > 0 ? (
             <>
-              {linkNode?.__fields.newTab ? <ExternalLinkIcon /> : null}
               <span className="link-input__label-pure">{linkLabel}</span>
+              {linkNode?.__fields.newTab ? (
+                <>
+                  <NewTabIcon size={16} /> <div className="link-input__divider" />{' '}
+                </>
+              ) : null}
             </>
           ) : null}
 
           {isEditable && (
-            <React.Fragment>
+            <div className="link-input__actions">
               <button
                 aria-label="Edit link"
                 className="link-edit"
@@ -389,7 +400,7 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
                 tabIndex={0}
                 type="button"
               >
-                <EditIcon />
+                <WriteIcon />
               </button>
               {!isAutoLink && (
                 <button
@@ -402,10 +413,10 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
                   tabIndex={0}
                   type="button"
                 >
-                  <CloseMenuIcon />
+                  <TrashIcon small />
                 </button>
               )}
-            </React.Fragment>
+            </div>
           )}
         </div>
       </div>

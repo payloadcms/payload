@@ -1,0 +1,24 @@
+@layer payload-default {
+  .forgot-password__form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-5);
+    width: 100%;
+  }
+
+  .forgot-password__form .form-header {
+    margin-bottom: 0;
+  }
+
+  .forgot-password__form__inputWrap {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-3);
+  }
+
+  .forgot-password__form__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}

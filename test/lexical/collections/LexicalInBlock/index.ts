@@ -65,4 +65,5 @@ export const LexicalInBlock: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }

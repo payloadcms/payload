@@ -10,11 +10,12 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 import WebSocket from 'ws'
 
+import type { DevReloadStrategy } from './admin/adapters/devReload.js'
 import type { AuthArgs } from './auth/operations/auth.js'
 import type { Result as ForgotPasswordResult } from './auth/operations/forgotPassword.js'
 import type { LoginResult } from './auth/operations/login.js'
 import type { Result as ResetPasswordResult } from './auth/operations/resetPassword.js'
-import type { AuthStrategy, UntypedUser } from './auth/types.js'
+import type { AuthStrategy, UserSession } from './auth/types.js'
 import type {
   BulkOperationResult,
   Collection,
@@ -37,7 +38,7 @@ import {
   verifyEmailLocal,
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
-export type { FieldState } from './admin/forms/Form.js'
+export type * from './admin/adapters/index.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
@@ -119,8 +120,14 @@ import {
   updateGlobalLocal,
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
+export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
 export { EntityType } from './admin/views/dashboard.js'
+/**
+ * Export of all base fields that could potentially be
+ * useful as users wish to extend built-in fields with custom logic
+ */
+export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
 import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
@@ -150,18 +157,14 @@ import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
-/**
- * Export of all base fields that could potentially be
- * useful as users wish to extend built-in fields with custom logic
- */
-export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
-export { apiKeyFields as baseAPIKeyFields } from './auth/baseFields/apiKey.js'
+export { createAPIKeyFields } from './auth/baseFields/apiKey.js'
 export { baseAuthFields } from './auth/baseFields/auth.js'
 export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
 export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sessions.js'
 export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
-
 export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
+export { defaultUserCollection } from './auth/defaultUser.js'
+
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
@@ -254,7 +257,52 @@ export interface UntypedPayloadTypes {
     }
   }
   locale: null | string
-  user: UntypedUser
+  /**
+   * User shape used when generated types are unavailable.
+   * Includes common document fields and fields managed by Payload auth. Custom fields and
+   * collection features such as drafts, trash, and uploads require generated types. Runtime fields
+   * `_strategy` and `_sid` belong to `AuthenticatedUser`.
+   */
+  user: {
+    /** Email verification token. Hidden (needs `showHiddenFields`). Only with `auth.verify`, until verified. */
+    _verificationToken?: null | string
+    /** Whether the email is verified. Only with `auth.verify`. */
+    _verified?: boolean | null
+    /** The user's API key. Only with `auth.useAPIKey`, once enabled for this user. */
+    apiKey?: null | string
+    /** Internal lookup index for the API key. Hidden (needs `showHiddenFields`). Only with `auth.useAPIKey`. */
+    apiKeyIndex?: null | string
+    /** Slug of the auth collection this user belongs to. Always present; identifies the source collection. */
+    collection: string
+    /** When the user was created. Not present when timestamps are disabled. */
+    createdAt?: string
+    /** The user's email. Absent if email login is disabled via `auth.loginWithUsername`. */
+    email?: null | string
+    /** Whether API key auth is enabled for this user. Only with `auth.useAPIKey`. */
+    enableAPIKey?: boolean | null
+    /** Hashed password. Hidden (needs `showHiddenFields`). Only with the local strategy. */
+    hash?: null | string
+    /** The user's ID. Always present. */
+    id: UntypedPayloadTypes['db']['defaultIDType']
+    /** Locked-until timestamp. Hidden (needs `showHiddenFields`). Only with `auth.maxLoginAttempts`, while locked. */
+    lockUntil?: null | string
+    /** Failed login attempt count. Hidden (needs `showHiddenFields`). Only with `auth.maxLoginAttempts`. */
+    loginAttempts?: null | number
+    /** Plain-text password. Write-only: accepted on `create`/`update`, never returned on reads. */
+    password?: null | string
+    /** Reset-token expiry. Hidden (needs `showHiddenFields`). Only after `forgotPassword`, until reset. */
+    resetPasswordExpiration?: null | string
+    /** Active password-reset token. Hidden (needs `showHiddenFields`). Only after `forgotPassword`, until reset. */
+    resetPasswordToken?: null | string
+    /** Password salt. Hidden (needs `showHiddenFields`). Only with the local strategy. */
+    salt?: null | string
+    /** Active login sessions. Only with `auth.useSessions` (the default). */
+    sessions?: Array<UserSession> | null
+    /** When the user was last updated. Not present when timestamps are disabled. */
+    updatedAt?: string
+    /** The user's username. Only with `auth.loginWithUsername`. */
+    username?: null | string
+  }
   widgets: {
     [slug: string]: JsonObject
   }
@@ -359,13 +407,13 @@ export type TypedLocale<T extends PayloadTypesShape = PayloadTypes> = T['locale'
 export type TypedFallbackLocale = PayloadTypes['fallbackLocale']
 
 /**
+ * User document type for auth-enabled collections.
+ * Uses generated types when available and the auth-only fallback above otherwise. Generated types
+ * include custom fields and can be a union when several collections support auth.
  *
- * TypedUser is the type of the user object. This can be a union of multiple user types, if you have multiple
- * auth-enabled collections.
- *
- * @todo rename to `User` in 4.0
+ * Not the signed-in `req.user`, which also has `_strategy` and `_sid` - use `AuthenticatedUser`.
  */
-export type TypedUser = PayloadTypes['user']
+export type User = PayloadTypes['user']
 
 export type TypedAuthOperations<T extends PayloadTypesShape = PayloadTypes> = T['auth']
 
@@ -761,8 +809,6 @@ export class BasePayload {
               },
               // Do not run consecutive crons if previous crons still ongoing
               protect: true,
-              // TODO: Remove this compatibility option in 4.0. This only exists to ensure backwards-compatibility between Croner v9 and Croner v10 cron syntax
-              sloppyRanges: true,
             },
           )
 
@@ -1113,11 +1159,11 @@ export const reload = async (
 let _cached: Map<
   string,
   {
+    devReloadCleanup: (() => void) | null
     initializedCrons: boolean
     payload: null | Payload
     promise: null | Promise<Payload>
     reload: boolean | Promise<void>
-    ws: null | WebSocket
   }
 > = (global as any)._payload
 
@@ -1133,8 +1179,61 @@ if (!_cached) {
  * when calling getPayload multiple times or from multiple locations.
  * - adds HMR support and reloads the payload instance when the config changes.
  */
+/**
+ * Default HMR reload strategy using Next.js webpack-hmr WebSocket.
+ * Used as fallback when no custom devReloadStrategy is provided.
+ */
+function defaultNextJsDevReloadStrategy(): DevReloadStrategy | null {
+  try {
+    const port = process.env.PORT || '3000'
+    const hasHTTPS =
+      process.env.USE_HTTPS === 'true' || process.argv.includes('--experimental-https')
+    const protocol = hasHTTPS ? 'wss' : 'ws'
+
+    const hmrPath = '/_next/webpack-hmr'
+    const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
+
+    const url =
+      process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `${protocol}://localhost:${port}${prefix}${hmrPath}`
+
+    return {
+      connect(onReload) {
+        const ws = new WebSocket(url)
+
+        ws.onmessage = (event) => {
+          if (typeof event.data === 'string') {
+            const data = JSON.parse(event.data)
+            if (
+              data.type === 'serverComponentChanges' ||
+              data.action === 'serverComponentChanges'
+            ) {
+              onReload()
+            }
+          }
+        }
+
+        ws.onerror = () => {
+          // swallow any websocket connection error
+        }
+
+        return () => {
+          ws.close()
+        }
+      },
+    }
+  } catch (_) {
+    return null
+  }
+}
+
 export const getPayload = async (
   options: {
+    /**
+     * Custom dev reload strategy. If provided, replaces the default
+     * Next.js HMR WebSocket listener. The strategy's `connect` function
+     * receives a callback to trigger config reload.
+     */
+    devReloadStrategy?: DevReloadStrategy
     /**
      * A unique key to identify the payload instance. You can pass your own key if you want to cache this payload instance separately.
      * This is useful if you pass a different payload config for each instance.
@@ -1153,11 +1252,11 @@ export const getPayload = async (
   let cached = _cached.get(options.key ?? 'default')
   if (!cached) {
     cached = {
+      devReloadCleanup: null,
       initializedCrons: Boolean(options.cron),
       payload: null,
       promise: null,
       reload: false,
-      ws: null,
     }
     _cached.set(options.key ?? 'default', cached)
   } else {
@@ -1220,52 +1319,24 @@ export const getPayload = async (
     cached.payload = await cached.promise
 
     if (
-      !cached.ws &&
+      !cached.devReloadCleanup &&
       process.env.NODE_ENV !== 'production' &&
       process.env.NODE_ENV !== 'test' &&
       process.env.DISABLE_PAYLOAD_HMR !== 'true'
     ) {
-      try {
-        const port = process.env.PORT || '3000'
-        const hasHTTPS =
-          process.env.USE_HTTPS === 'true' || process.argv.includes('--experimental-https')
-        const protocol = hasHTTPS ? 'wss' : 'ws'
+      const strategy = options.devReloadStrategy ?? defaultNextJsDevReloadStrategy()
 
-        const path = '/_next/webpack-hmr'
-        // The __NEXT_ASSET_PREFIX env variable is set for both assetPrefix and basePath (tested in Next.js 15.1.6)
-        const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
-
-        cached.ws = new WebSocket(
-          process.env.PAYLOAD_HMR_URL_OVERRIDE ?? `${protocol}://localhost:${port}${prefix}${path}`,
-        )
-
-        cached.ws.onmessage = (event) => {
-          if (cached.reload instanceof Promise) {
-            // If there is an in-progress reload in the same getPayload
-            // cache instance, do not set reload to true again, which would
-            // trigger another reload.
-            // Instead, wait for the in-progress reload to finish.
-            return
-          }
-
-          if (typeof event.data === 'string') {
-            const data = JSON.parse(event.data)
-
-            if (
-              // On Next.js 15, we need to check for data.action. On Next.js 16, we need to check for data.type.
-              data.type === 'serverComponentChanges' ||
-              data.action === 'serverComponentChanges'
-            ) {
-              cached.reload = true
+      if (strategy) {
+        try {
+          cached.devReloadCleanup = strategy.connect(() => {
+            if (cached.reload instanceof Promise) {
+              return
             }
-          }
+            cached.reload = true
+          })
+        } catch (_) {
+          // swallow connection errors
         }
-
-        cached.ws.onerror = (_) => {
-          // swallow any websocket connection error
-        }
-      } catch (_) {
-        // swallow e
       }
     }
   } catch (e) {
@@ -1325,15 +1396,13 @@ export type {
   SanitizedFieldPermissions,
   SanitizedGlobalPermission,
   SanitizedPermissions,
-  UntypedUser as User,
   VerifyConfig,
 } from './auth/types.js'
 export { generateImportMap } from './bin/generateImportMap/index.js'
-
 export type { ImportMap } from './bin/generateImportMap/index.js'
+
 export { genImportMapIterateFields } from './bin/generateImportMap/iterateFields.js'
 export { migrate as migrateCLI } from './bin/migrate.js'
-
 export {
   type ClientCollectionConfig,
   createClientCollectionConfig,
@@ -1370,6 +1439,7 @@ export type {
   CollectionConfig,
   DataFromCollectionSlug,
   HookOperationType,
+  IDTypeForCollectionSlug,
   MeHook as CollectionMeHook,
   RefreshHook as CollectionRefreshHook,
   RequiredDataFromCollection,
@@ -1380,10 +1450,11 @@ export type {
   TypeWithTimestamps,
 } from './collections/config/types.js'
 
-export type { CompoundIndex } from './collections/config/types.js'
-export type { SanitizedCompoundIndex } from './collections/config/types.js'
+export type { CompoundIndex, FoldersConfig, TagsConfig } from './collections/config/types.js'
 
+export type { SanitizedCompoundIndex } from './collections/config/types.js'
 export { createDataloaderCacheKey, getDataLoader } from './collections/dataloader.js'
+
 export { countOperation } from './collections/operations/count.js'
 export { createOperation } from './collections/operations/create.js'
 export { deleteOperation } from './collections/operations/delete.js'
@@ -1407,10 +1478,11 @@ export {
   serverOnlyConfigProperties,
   type UnauthenticatedClientConfig,
 } from './config/client.js'
-export { defaults } from './config/defaults.js'
+export { addDefaultsToConfig } from './config/defaults.js'
 export { definePlugin } from './config/definePlugin.js'
 
 export { type OrderableEndpointBody } from './config/orderable/index.js'
+
 export { sanitizeConfig } from './config/sanitize.js'
 export type * from './config/types.js'
 export { combineQueries } from './database/combineQueries.js'
@@ -1534,11 +1606,8 @@ export {
 export type { ValidationFieldError } from './errors/index.js'
 
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
-
 export { baseIDField } from './fields/baseFields/baseIDField.js'
-export { slugField, type SlugFieldClientProps } from './fields/baseFields/slug/index.js'
-
-export { type SlugField } from './fields/baseFields/slug/index.js'
+export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 
 export {
   createClientBlocks,
@@ -1570,6 +1639,7 @@ export type {
   BlockJSX,
   BlocksField,
   BlocksFieldClient,
+  BrowserAutoComplete,
   CheckboxField,
   CheckboxFieldClient,
   ClientBlock,
@@ -1650,6 +1720,8 @@ export type {
   SelectFieldClient,
   SingleRelationshipField,
   SingleRelationshipFieldClient,
+  SlugField,
+  SlugFieldClient,
   Tab,
   TabAsField,
   TabAsFieldClient,
@@ -1671,14 +1743,24 @@ export type {
   ValueWithRelation,
 } from './fields/config/types.js'
 
+export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
+
 export { getDefaultValue } from './fields/getDefaultValue.js'
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
 
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
 export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
+
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
-
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
 export { validateBlocksFilterOptions, validations } from './fields/validations.js'
 
@@ -1713,8 +1795,7 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
-export type { FolderSortKeys } from './folders/types.js'
-export { getFolderData } from './folders/utils/getFolderData.js'
+
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1734,17 +1815,41 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
+
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
-
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
-
 export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
+
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
+export {
+  DEFAULT_ALLOW_HAS_MANY,
+  DEFAULT_HIERARCHY_TREE_LIMIT,
+  getHierarchyFieldName,
+  HIERARCHY_DEFAULT_LOCALE,
+  HIERARCHY_SLUG_PATH_FIELD,
+  HIERARCHY_TITLE_PATH_FIELD,
+} from './hierarchy/constants.js'
+export { createFolderField } from './hierarchy/createFolderField.js'
+export type { CreateFolderFieldOptions } from './hierarchy/createFolderField.js'
+export { createTagField } from './hierarchy/createTagField.js'
+export type { CreateTagFieldOptions } from './hierarchy/createTagField.js'
+export { getInitialTreeData } from './hierarchy/getInitialTreeData.js'
+export type { GetInitialTreeDataArgs, InitialTreeData } from './hierarchy/getInitialTreeData.js'
+export { injectHierarchyButton } from './hierarchy/injectHierarchyButton.js'
+export { resolveHierarchyCollections } from './hierarchy/resolveHierarchyCollections.js'
+export type {
+  HierarchyConfig,
+  SanitizedHierarchyConfig,
+  SanitizedHierarchyRelatedCollection,
+} from './hierarchy/types.js'
+export type { Ancestor } from './hierarchy/utils/getAncestors.js'
+export { getAncestors } from './hierarchy/utils/getAncestors.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'
 export * from './kv/adapters/InMemoryKVAdapter.js'
 export * from './kv/index.js'
+
 export type {
   CollapsedPreferences,
   CollectionPreferences,
@@ -1758,6 +1863,8 @@ export type {
   InsideFieldsPreferences,
   PreferenceRequest,
   PreferenceUpdateRequest,
+  RecentlyViewedItem,
+  RecentlyViewedPreferences,
   TabsPreferences,
 } from './preferences/types.js'
 export type { QueryPreset } from './query-presets/types.js'
@@ -1799,9 +1906,9 @@ export {
 } from './queues/utilities/getCurrentDate.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
 export * from './types/index.js'
+
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
-
 export type * from './uploads/types.js'
 export { addDataAndFileToRequest } from './utilities/addDataAndFileToRequest.js'
 export { addLocalesToRequestFromData, sanitizeLocales } from './utilities/addLocalesToRequest.js'
@@ -1810,7 +1917,11 @@ export { commitTransaction } from './utilities/commitTransaction.js'
 export {
   configToJSONSchema,
   entityToJSONSchema,
+  entityToStandaloneJSONSchema,
   fieldsToJSONSchema,
+  type FieldsToJSONSchemaArgs,
+  registerBlockInterface,
+  type SchemaVariant,
   withNullableJSONSchemaType,
 } from './utilities/configToJSONSchema.js'
 export { createArrayFromCommaDelineated } from './utilities/createArrayFromCommaDelineated.js'
@@ -1863,29 +1974,29 @@ export type { PayloadLogger } from './utilities/logger.js'
 export { mapAsync } from './utilities/mapAsync.js'
 export { mergeHeaders } from './utilities/mergeHeaders.js'
 export { parseDocumentID } from './utilities/parseDocumentID.js'
+export { parseParams } from './utilities/parseParams/index.js'
+export type { ParsedParams, RawParams } from './utilities/parseParams/index.js'
 export { sanitizeFallbackLocale } from './utilities/sanitizeFallbackLocale.js'
 export { sanitizeJoinParams } from './utilities/sanitizeJoinParams.js'
+export type { JoinParams } from './utilities/sanitizeJoinParams.js'
 export { sanitizePopulateParam } from './utilities/sanitizePopulateParam.js'
 export { sanitizeSelectParam } from './utilities/sanitizeSelectParam.js'
+export { sanitizeSortParams } from './utilities/sanitizeSortParams.js'
 export { stripUnselectedFields } from './utilities/stripUnselectedFields.js'
 export { traverseFields } from './utilities/traverseFields.js'
 export type { TraverseFieldsCallback } from './utilities/traverseFields.js'
 export { buildVersionCollectionFields } from './versions/buildCollectionFields.js'
 export { buildVersionGlobalFields } from './versions/buildGlobalFields.js'
 export { buildVersionCompoundIndexes } from './versions/buildVersionCompoundIndexes.js'
+
 export { versionDefaults } from './versions/defaults.js'
 export { deleteCollectionVersions } from './versions/deleteCollectionVersions.js'
-
 export { appendVersionToQueryKey } from './versions/drafts/appendVersionToQueryKey.js'
 export { getQueryDraftsSort } from './versions/drafts/getQueryDraftsSort.js'
 export { enforceMaxVersions } from './versions/enforceMaxVersions.js'
 export { getLatestCollectionVersion } from './versions/getLatestCollectionVersion.js'
 export { getLatestGlobalVersion } from './versions/getLatestGlobalVersion.js'
-export { localizeStatus } from './versions/migrations/localizeStatus/index.js'
-export type {
-  MongoLocalizeStatusArgs,
-  SqlLocalizeStatusArgs,
-} from './versions/migrations/localizeStatus/index.js'
+
 export { saveVersion } from './versions/saveVersion.js'
 export type { SchedulePublishTaskInput } from './versions/schedule/types.js'
 

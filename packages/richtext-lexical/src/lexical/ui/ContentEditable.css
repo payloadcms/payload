@@ -1,0 +1,99 @@
+@layer payload-default {
+  .ContentEditable__root {
+    border: 0;
+    display: block;
+    position: relative;
+    tab-size: 1;
+    outline: 0;
+    padding-top: var(--spacer-2);
+    padding-bottom: var(--spacer-2);
+    padding-inline-start: 0;
+    padding-inline-end: 0;
+
+    &:focus-visible {
+      outline: none !important;
+    }
+
+    & > * {
+      transition: transform 0.2s ease-in-out;
+    }
+  }
+
+  .rich-text-lexical--show-gutter
+    > .rich-text-lexical__wrap
+    > .rich-text-lexical__editor-content
+    > .editor-container
+    > .editor-scroller
+    > .editor {
+    > .ContentEditable__root {
+      padding: var(--spacer-4) var(--spacer-5);
+    }
+  }
+
+  html[data-theme='light'] {
+    .rich-text-lexical.rich-text-lexical--show-gutter {
+      &.error:not(:hover) {
+        > .rich-text-lexical__wrap
+          > .rich-text-lexical__editor-content
+          > .editor-container
+          > .editor-scroller
+          > .editor
+          > .ContentEditable__root::before {
+          border-inline-start: var(--stroke-width-medium) solid var(--color-border-danger);
+        }
+      }
+
+      &.error:hover {
+        > .rich-text-lexical__wrap
+          > .rich-text-lexical__editor-content
+          > .editor-container
+          > .editor-scroller
+          > .editor
+          > .ContentEditable__root::before {
+          border-inline-start: var(--stroke-width-medium) solid var(--color-border-danger);
+        }
+      }
+    }
+
+    @media (max-width: 768px) {
+      .rich-text-lexical {
+        &.error {
+          > .rich-text-lexical__wrap {
+            background-color: var(--color-bg-danger-tertiary);
+            border: var(--stroke-width-small) solid var(--color-border-danger);
+          }
+        }
+      }
+    }
+  }
+
+  html[data-theme='dark'] {
+    .rich-text-lexical.rich-text-lexical--show-gutter {
+      &.error {
+        > .rich-text-lexical__wrap
+          > .rich-text-lexical__editor-content
+          > .editor-container
+          > .editor-scroller
+          > .editor
+          > .ContentEditable__root::before {
+          border-inline-start: var(--stroke-width-medium) solid var(--color-border-danger);
+        }
+      }
+    }
+
+    @media (max-width: 768px) {
+      .rich-text-lexical {
+        &.error {
+          > .rich-text-lexical__wrap {
+            background-color: var(--color-bg-danger-tertiary);
+            border: var(--stroke-width-small) solid var(--color-border-danger);
+
+            &:hover {
+              border-color: var(--color-border-danger);
+            }
+          }
+        }
+      }
+    }
+  }
+}

@@ -19,6 +19,10 @@ This plugin sets up multi-tenancy for your application from within your [Admin P
   issue](https://github.com/payloadcms/payload/issues/new/choose) with as much
   detail as possible.
 </Banner>
+<YouTube
+  id="oX7ZHWuin-I"
+  title="One Payload instance—endless possibilities: Payload Multi-Tenant Plugin"
+/>
 
 ## Core features
 
@@ -247,9 +251,7 @@ type MultiTenantPluginConfig<ConfigTypes = unknown> = {
    * Useful for super-admin type users
    */
   userHasAccessToAllTenants?: (
-    user: ConfigTypes extends { user: unknown }
-      ? ConfigTypes['user']
-      : TypedUser,
+    user: ConfigTypes extends { user: unknown } ? ConfigTypes['user'] : User,
   ) => boolean
   /**
    * Override the access result on the users collection access control functions

@@ -1,9 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
+import path from 'path'
+import { fileURLToPath } from 'url'
+
 import { customUploadFieldSlug } from '../../shared.js'
 
-import { fileURLToPath } from 'url'
-import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -25,4 +26,5 @@ export const CustomUploadFieldCollection: CollectionConfig = {
       type: 'text',
     },
   ],
+  versions: false,
 }

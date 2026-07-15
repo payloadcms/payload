@@ -21,20 +21,38 @@
       "url": "https://payloadcms.com"
     }
   ],
-  "sideEffects": false,
   "type": "module",
   "exports": {
     ".": {
       "import": "./src/index.ts",
       "types": "./src/index.ts",
       "default": "./src/index.ts"
+    },
+    "./client": {
+      "import": "./src/exports/client.ts",
+      "types": "./src/exports/client.ts",
+      "default": "./src/exports/client.ts"
+    },
+    "./stdio": {
+      "import": "./src/stdio.ts",
+      "types": "./src/stdio.ts",
+      "default": "./src/stdio.ts"
+    },
+    "./internal": {
+      "import": "./src/exports/internal.ts",
+      "types": "./src/exports/internal.ts",
+      "default": "./src/exports/internal.ts"
     }
   },
   "main": "./src/index.ts",
   "types": "./src/index.ts",
+  "bin": {
+    "payload-mcp": "./bin.js"
+  },
   "files": [
     "src",
-    "dist"
+    "dist",
+    "bin.js"
   ],
   "scripts": {
     "build": "pnpm copyfiles && pnpm build:types && pnpm build:swc",
@@ -48,11 +66,9 @@
     "pack:plugin": "pnpm build && pnpm pack"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.27.1",
-    "@types/json-schema": "7.0.15",
-    "json-schema-to-zod": "2.6.1",
-    "mcp-handler": "^1.0.7",
-    "zod": "^3.25.50"
+    "@modelcontextprotocol/server": "2.0.0-beta.3",
+    "tsx": "4.22.4",
+    "zod": "^4.2.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
@@ -67,10 +83,29 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./client": {
+        "import": "./dist/exports/client.js",
+        "types": "./dist/exports/client.d.ts",
+        "default": "./dist/exports/client.js"
+      },
+      "./stdio": {
+        "import": "./dist/stdio.js",
+        "types": "./dist/stdio.d.ts",
+        "default": "./dist/stdio.js"
+      },
+      "./internal": {
+        "import": "./dist/exports/internal.js",
+        "types": "./dist/exports/internal.d.ts",
+        "default": "./dist/exports/internal.js"
       }
     },
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts"
+  },
+  "//deps_notes": {
+    "zod": "zod is a hard dependency of @modelcontextprotocol/server, thus we can safely use it without it impacting bundle size. Make extra sure the zod version here matches exactly what's defined in the dependencies of @modelcontextprotocol/server to avoid duplicate versions being installed.",
+    "tsx": "Required by the `bin.js` stdio mcp. Keep the version pinned to whatever `payload` ships to avoid duplicate installs."
   },
   "homepage:": "https://payloadcms.com"
 }

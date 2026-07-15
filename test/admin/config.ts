@@ -15,6 +15,7 @@ import { DisableCopyToLocale } from './collections/DisableCopyToLocale.js'
 import { DisableDuplicate } from './collections/DisableDuplicate.js'
 import { EditMenuItems } from './collections/editMenuItems.js'
 import { FormatDocURL } from './collections/FormatDocURL/index.js'
+import { FullyFeatured } from './collections/FullyFeatured.js'
 import { Geo } from './collections/Geo.js'
 import { CollectionGroup1A } from './collections/Group1A.js'
 import { CollectionGroup1B } from './collections/Group1B.js'
@@ -140,6 +141,43 @@ export default buildConfigWithDefaults({
           path: '/button-styles',
         },
       },
+      sidebar: {
+        tabs: [
+          {
+            slug: 'custom-tab',
+            label: 'Folders',
+            components: {
+              Icon: '@payloadcms/ui#FolderIcon',
+              Content: {
+                path: '/components/CustomTab.js#CustomTab',
+                clientProps: {
+                  heading: 'Folders',
+                  content: 'Example folders tab content.',
+                },
+              },
+            },
+          },
+          {
+            slug: 'custom-tab-2',
+            label: 'Settings',
+            components: {
+              Icon: {
+                path: '@payloadcms/ui#GearIcon',
+                clientProps: {
+                  size: 24,
+                },
+              },
+              Content: {
+                path: '/components/CustomTab.js#CustomTab',
+                clientProps: {
+                  heading: 'Settings',
+                  content: 'Example settings tab content.',
+                },
+              },
+            },
+          },
+        ],
+      },
     },
     dependencies: {
       myTestComponent: {
@@ -215,6 +253,7 @@ export default buildConfigWithDefaults({
     Virtuals,
     NoTimestampsCollection,
     Localized,
+    FullyFeatured,
   ],
   globals: [
     GlobalHidden,

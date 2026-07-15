@@ -10,7 +10,7 @@ import { useEditDepth } from '../../providers/EditDepth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { generateFieldID } from '../../utilities/generateFieldID.js'
-import './index.scss'
+import './index.css'
 
 export const FieldLabel: React.FC<GenericLabelProps> = (props) => {
   const {

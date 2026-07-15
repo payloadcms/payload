@@ -18,7 +18,7 @@ import { useEditorConfigContext } from '../../../../../lexical/config/client/Edi
 import { ToolbarButton } from '../../../shared/ToolbarButton/index.js'
 import { ToolbarDropdown } from '../../../shared/ToolbarDropdown/index.js'
 import { useToolbarStates } from '../../../shared/useToolbarStates.js'
-import './index.scss'
+import './index.css'
 
 function ButtonGroupItem({
   active,

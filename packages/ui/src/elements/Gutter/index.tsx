@@ -1,7 +1,7 @@
 'use client'
 import React from 'react'
 
-import './index.scss'
+import './index.css'
 
 export type GutterProps = {
   children: React.ReactNode

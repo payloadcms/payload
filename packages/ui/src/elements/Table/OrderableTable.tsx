@@ -2,7 +2,7 @@
 
 import type { ClientCollectionConfig, Column, OrderableEndpointBody } from 'payload'
 
-import './index.scss'
+import './index.css'
 
 import { DragOverlay } from '@dnd-kit/core'
 import { formatAdminURL } from 'payload/shared'

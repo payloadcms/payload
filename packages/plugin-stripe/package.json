@@ -66,13 +66,13 @@
     "@payloadcms/ui": "workspace:*",
     "lodash.get": "^4.4.2",
     "stripe": "^10.2.0",
-    "uuid": "11.1.0"
+    "uuid": "14.0.0"
   },
   "devDependencies": {
     "@payloadcms/eslint-config": "workspace:*",
     "@payloadcms/next": "workspace:*",
     "@types/lodash.get": "^4.4.7",
-    "@types/react": "19.2.9",
+    "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "payload": "workspace:*"
   },

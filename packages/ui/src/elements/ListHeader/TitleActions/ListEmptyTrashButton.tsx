@@ -3,7 +3,6 @@ import type { ClientCollectionConfig } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { getTranslation } from '@payloadcms/translations'
-import { useRouter, useSearchParams } from 'next/navigation.js'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React from 'react'
@@ -12,6 +11,7 @@ import { toast } from 'sonner'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useLocale } from '../../../providers/Locale/index.js'
 import { useRouteCache } from '../../../providers/RouteCache/index.js'
+import { useRouter, useSearchParams } from '../../../providers/RouterAdapter/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { requests } from '../../../utilities/api.js'
 import { Button } from '../../Button/index.js'
@@ -170,7 +170,7 @@ export function ListEmptyTrashButton({
         onClick={() => {
           openModal(confirmEmptyTrashSlug)
         }}
-        size="small"
+        size="medium"
       >
         {t('general:emptyTrash')}
       </Button>

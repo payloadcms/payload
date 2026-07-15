@@ -25,6 +25,7 @@ import { hasScheduledPublishEnabled } from '../../utilities/getVersionsConfig.js
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { isErrorPublic } from '../../utilities/isErrorPublic.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { deleteCollectionVersions } from '../../versions/deleteCollectionVersions.js'
 import { deleteScheduledPublishJobs } from '../../versions/deleteScheduledPublishJobs.js'
@@ -51,6 +52,10 @@ export const deleteOperation = async <
   incomingArgs: Arguments,
 ): Promise<BulkOperationResult<TSlug, TSelect>> => {
   let args = incomingArgs
+
+  if (args.collection.config.disableBulkDelete && !args.overrideAccess) {
+    throw new APIError(`Collection ${args.collection.config.slug} has disabled bulk delete`, 403)
+  }
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))
@@ -118,8 +123,12 @@ export const deleteOperation = async <
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
-      forceSelect: collectionConfig.forceSelect,
-      select: incomingSelect,
+      select: resolveSelect({
+        config: collectionConfig.select,
+        operation: 'delete',
+        req,
+        select: incomingSelect,
+      }),
     })
 
     // /////////////////////////////////////

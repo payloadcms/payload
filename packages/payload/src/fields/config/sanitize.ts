@@ -1,5 +1,3 @@
-import { deepMergeSimple } from '@payloadcms/translations/utilities'
-
 import type {
   CollectionConfig,
   SanitizedJoin,
@@ -24,6 +22,7 @@ import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { validateTimezones } from '../../utilities/validateTimezones.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
+import { generateSlug } from '../baseFields/slug/generateSlug.js'
 import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
 import { defaultTimezones } from '../baseFields/timezone/defaultTimezones.js'
 import { getFieldPaths } from '../getFieldPaths.js'
@@ -264,20 +263,6 @@ export const sanitizeField = async ({
         }
       })
     }
-
-    if (field.min && !field.minRows) {
-      console.warn(
-        `(payload): The "min" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "minRows" instead.`,
-      )
-      field.minRows = field.min
-    }
-
-    if (field.max && !field.maxRows) {
-      console.warn(
-        `(payload): The "max" property is deprecated for the Relationship field "${field.name}" and will be removed in a future version. Please use "maxRows" instead.`,
-      )
-      field.maxRows = field.max
-    }
   }
 
   // Upload isSortable default
@@ -288,6 +273,48 @@ export const sanitizeField = async ({
         ...field.admin,
       }
     }
+  }
+
+  // Slug field: apply defaults, attach generation hook, expose slugify to the server fn.
+  if (field.type === 'slug') {
+    const useAsSlug = field.useAsSlug
+
+    if (!useAsSlug) {
+      throw new InvalidConfiguration(
+        `The slug field "${field.name}" is missing the required "useAsSlug" property, which must name the field to generate the slug from.`,
+      )
+    }
+
+    if (typeof field.required === 'undefined') {
+      field.required = true
+    }
+    if (typeof field.unique === 'undefined') {
+      field.unique = true
+    }
+    if (typeof field.index === 'undefined') {
+      field.index = true
+    }
+
+    field.admin = {
+      position: 'sidebar',
+      ...field.admin,
+    }
+
+    // The slugifyHandler server function resolves the custom slugify by field path.
+    if (field.slugify) {
+      field.custom = {
+        ...field.custom,
+        slugify: field.slugify,
+      }
+    }
+
+    if (!field.hooks) {
+      field.hooks = {}
+    }
+    field.hooks.beforeChange = [
+      generateSlug({ name: field.name, slugify: field.slugify, useAsSlug }),
+      ...(field.hooks.beforeChange || []),
+    ]
   }
 
   // Array ID field
@@ -311,18 +338,7 @@ export const sanitizeField = async ({
     }
 
     if (typeof field.localized !== 'undefined') {
-      let shouldDisableLocalized = !config.localization
-
-      if (
-        process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized !== 'true' &&
-        parentIsLocalized &&
-        // @todo PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY=true will be the default in 4.0
-        process.env.PAYLOAD_DO_NOT_SANITIZE_LOCALIZED_PROPERTY !== 'true'
-      ) {
-        shouldDisableLocalized = true
-      }
-
-      if (shouldDisableLocalized) {
+      if (!config.localization) {
         delete field.localized
       }
     }
@@ -379,10 +395,6 @@ export const sanitizeField = async ({
           parentIsLocalized: (parentIsLocalized || field.localized)!,
         })
       }
-
-      if (field.editor.i18n && Object.keys(field.editor.i18n).length >= 0) {
-        config.i18n!.translations = deepMergeSimple(config.i18n!.translations!, field.editor.i18n)
-      }
     }
     if (richTextSanitizationPromises) {
       richTextSanitizationPromises.push(sanitizeRichText)
@@ -392,13 +404,9 @@ export const sanitizeField = async ({
   }
 
   if (field.type === 'blocks' && field.blocks) {
-    if (field.blockReferences && field.blocks?.length) {
-      throw new Error('You cannot have both blockReferences and blocks in the same blocks field')
-    }
-
     const blockSlugs: string[] = []
 
-    for (const block of field.blockReferences ?? field.blocks) {
+    for (const block of field.blocks) {
       const blockSlug = typeof block === 'string' ? block : block.slug
 
       if (blockSlugs.includes(blockSlug)) {
@@ -503,8 +511,17 @@ export const sanitizeField = async ({
     }
   }
 
-  if (field.type === 'ui' && typeof field.admin.disableBulkEdit === 'undefined') {
-    field.admin.disableBulkEdit = true
+  if (field.type === 'ui') {
+    const existing = field.admin.disabled
+    if (existing === undefined) {
+      field.admin.disabled = { bulkEdit: true }
+    } else if (
+      existing !== true &&
+      typeof existing === 'object' &&
+      existing.bulkEdit === undefined
+    ) {
+      field.admin.disabled = { ...existing, bulkEdit: true }
+    }
   }
 
   // Timezone field insertion

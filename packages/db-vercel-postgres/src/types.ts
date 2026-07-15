@@ -1,3 +1,4 @@
+import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type {
   BasePostgresAdapter,
   GenericEnum,
@@ -6,7 +7,6 @@ import type {
   PostgresDB,
   PostgresSchemaHook,
 } from '@payloadcms/drizzle/postgres'
-import type { DrizzleAdapter } from '@payloadcms/drizzle/types'
 import type { VercelPool, VercelPostgresPoolConfig } from '@vercel/postgres'
 import type { DrizzleConfig } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
@@ -107,7 +107,7 @@ export type VercelPostgresAdapter = {
 
 declare module 'payload' {
   export interface DatabaseAdapter
-    extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
+    extends Omit<Args, 'extensions' | 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
     afterSchemaInit: PostgresSchemaHook[]
     beforeSchemaInit: PostgresSchemaHook[]
@@ -121,7 +121,7 @@ declare module 'payload' {
      * Used for returning properly formed errors from unique fields
      */
     fieldConstraints: Record<string, Record<string, string>>
-    idType: Args['idType']
+    idType: NonNullable<Args['idType']>
     initializing: Promise<void>
     localesSuffix?: string
     logger: DrizzleConfig['logger']
@@ -134,13 +134,16 @@ declare module 'payload' {
       up: (args: MigrateUpArgs) => Promise<void>
     }[]
     push: boolean
+    readReplicasAfterWriteInterval: number
     rejectInitializing: () => void
     relationshipsSuffix?: string
     resolveInitializing: () => void
     schema: Record<string, unknown>
     schemaName?: Args['schemaName']
+    sessions: DrizzleAdapter['sessions']
     tableNameMap: Map<string, string>
     tablesFilter?: string[]
+    transactionOptions: PgTransactionConfig | undefined
     versionsSuffix?: string
   }
 }

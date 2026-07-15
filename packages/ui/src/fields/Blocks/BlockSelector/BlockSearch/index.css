@@ -1,0 +1,18 @@
+@layer payload-default {
+  .block-search {
+    position: sticky;
+    top: 0;
+    display: flex;
+    width: 100%;
+    align-items: flex-start;
+    padding: var(--spacer-2-5) var(--spacer-3);
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
+    z-index: 1;
+    background: var(--color-bg);
+  }
+
+  .block-search__input {
+    flex: 1 0 0;
+    min-width: 0;
+  }
+}

@@ -25,4 +25,5 @@ export const OrderableCollection: CollectionConfig = {
       localized: true,
     },
   ],
+  versions: false,
 }

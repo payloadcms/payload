@@ -11,11 +11,10 @@ const ReactDatePicker =
 import type { Props } from './types.js'
 
 import { CalendarIcon } from '../../icons/Calendar/index.js'
-import { XIcon } from '../../icons/X/index.js'
+import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
-import './library.scss'
-import './index.scss'
 import { getFormattedLocale } from './getFormattedLocale.js'
+import './index.css'
 
 const baseClass = 'date-time-picker'
 
@@ -91,13 +90,19 @@ const DatePicker: React.FC<Props> = (props) => {
     minDate,
     minTime,
     monthsShown: Math.min(2, monthsToShow),
+    nextMonthButtonLabel: <ChevronIcon direction="right" />,
+    nextYearButtonLabel: '›',
     onChange,
     placeholderText,
     popperPlacement: 'bottom-start',
+    previousMonthButtonLabel: <ChevronIcon direction="left" />,
+    previousYearButtonLabel: '‹',
     selected: value && new Date(value),
+    shouldCloseOnSelect: false,
     showMonthYearPicker: pickerAppearance === 'monthOnly',
     showPopperArrow: false,
     showTimeSelect: pickerAppearance === 'dayAndTime' || pickerAppearance === 'timeOnly',
+    showTimeSelectOnly: pickerAppearance === 'timeOnly',
     timeFormat,
     timeIntervals,
     ...(overrides as Extract<
@@ -116,7 +121,7 @@ const DatePicker: React.FC<Props> = (props) => {
         const datepickerLocale = getFormattedLocale(i18n.language)
         registerLocale(datepickerLocale, i18n.dateFNS)
         setDefaultLocale(datepickerLocale)
-      } catch (e) {
+      } catch (_error) {
         // eslint-disable-next-line no-console
         console.warn(`Could not find DatePicker locale for ${i18n.language}`)
       }
@@ -125,25 +130,14 @@ const DatePicker: React.FC<Props> = (props) => {
 
   return (
     <div className={classes} id={id}>
-      <div className={`${baseClass}__icon-wrap`}>
-        {dateTimePickerProps.selected && (
-          <button
-            className={`${baseClass}__clear-button`}
-            onClick={() => onChange(null)}
-            type="button"
-          >
-            <XIcon />
-          </button>
-        )}
-        <CalendarIcon />
-      </div>
       <div className={`${baseClass}__input-wrapper`}>
         <ReactDatePicker
           {...dateTimePickerProps}
           dropdownMode="select"
-          showMonthDropdown
-          showYearDropdown
+          showMonthDropdown={pickerAppearance !== 'monthOnly'}
+          showYearDropdown={pickerAppearance !== 'monthOnly'}
         />
+        <CalendarIcon />
       </div>
     </div>
   )

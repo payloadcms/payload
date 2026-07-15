@@ -107,6 +107,7 @@ const NumberFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default NumberFields

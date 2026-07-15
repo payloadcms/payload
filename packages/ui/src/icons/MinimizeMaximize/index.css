@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--minimize-maximize {
+    /* Icon uses fill, no additional styles needed */
+  }
+}

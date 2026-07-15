@@ -1,12 +1,12 @@
-import { beforeAll } from 'vitest'
+import { describe } from 'vitest'
 
-import { registerCollectionsSuite } from './suites/index.js'
+import { collectionsCodegenDataset } from './datasets/collections/codegen.js'
+import { registerCodegenCases } from './suites/helpers.js'
 import { resolveVariantOptions } from './variantOptions.js'
 
-beforeAll(() => {
-  if (!process.env.OPENAI_API_KEY) {
-    throw new Error('OPENAI_API_KEY must be set to run eval tests')
-  }
-})
+const options = resolveVariantOptions()
+const { labelSuffix = '' } = options
 
-registerCollectionsSuite(resolveVariantOptions())
+describe(`Collections${labelSuffix}`, () => {
+  registerCodegenCases(collectionsCodegenDataset, 'Collections: Codegen', options)
+})

@@ -3,7 +3,7 @@ import type {
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin, UploadCollectionSlug } from 'payload'
+import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
@@ -51,11 +51,14 @@ export interface R2StorageOptions {
   useCompositePrefixes?: boolean
 }
 
-type R2StoragePlugin = (r2StorageArgs: R2StorageOptions) => Plugin
+type R2StorageFactory = (r2StorageArgs: R2StorageOptions) => StorageAdapter
 
-export const r2Storage: R2StoragePlugin =
-  (r2StorageOptions) =>
-  (incomingConfig: Config): Config => {
+export const r2Storage: R2StorageFactory = (
+  r2StorageOptions: R2StorageOptions,
+): StorageAdapter => ({
+  name: 'r2',
+  collections: Object.keys(r2StorageOptions.collections),
+  init: (incomingConfig: Config): Config => {
     const adapter = createR2Adapter({
       bucket: r2StorageOptions.bucket,
       clientUploads: r2StorageOptions.clientUploads,
@@ -125,4 +128,5 @@ export const r2Storage: R2StoragePlugin =
       collections: collectionsWithAdapter,
       useCompositePrefixes: r2StorageOptions.useCompositePrefixes,
     })(config)
-  }
+  },
+})

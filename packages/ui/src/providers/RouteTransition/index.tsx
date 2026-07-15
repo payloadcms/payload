@@ -110,8 +110,7 @@ const RouteTransitionContext = React.createContext<RouteTransitionContextValue>(
  * @example
  * 'use client'
  * import React, { useCallback } from 'react'
- * import { useTransition } from '@payloadcms/ui'
- * import { useRouter } from 'next/navigation'
+ * import { useTransition, useRouter } from '@payloadcms/ui'
  *
  * const MyComponent: React.FC = () => {
  *   const router = useRouter()

@@ -1,15 +1,12 @@
-import type { ManyOptions } from '../../collections/operations/local/update.js'
 import type { UpdateJobsArgs } from '../../database/types.js'
 import type { Job } from '../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../types/index.js'
 
-import { jobAfterRead, jobsCollectionSlug } from '../config/collection.js'
+import { jobAfterRead } from '../config/collection.js'
 import { getCurrentDate } from './getCurrentDate.js'
 
 type BaseArgs = {
   data: Partial<Job>
-  depth?: number
-  disableTransaction?: boolean
   limit?: number
   req: PayloadRequest
   returning?: boolean
@@ -49,8 +46,6 @@ export async function updateJob(args: ArgsByID & BaseArgs) {
 export async function updateJobs({
   id,
   data,
-  depth,
-  disableTransaction,
   limit: limitArg,
   req,
   returning,
@@ -59,23 +54,6 @@ export async function updateJobs({
 }: RunJobsArgs): Promise<Job[] | null> {
   const limit = id ? 1 : limitArg
   const where = id ? { id: { equals: id } } : whereArg
-
-  if (depth || req.payload.config?.jobs?.runHooks) {
-    const result = await req.payload.update({
-      id,
-      collection: jobsCollectionSlug,
-      data,
-      depth,
-      disableTransaction,
-      limit,
-      req,
-      where,
-    } as ManyOptions<any, any>)
-    if (returning === false || !result) {
-      return null
-    }
-    return result.docs as Job[]
-  }
 
   const jobReq = {
     transactionID:

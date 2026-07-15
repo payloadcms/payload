@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { lexicalLinkFeatureSlug } from 'lexical/slugs.js'
+import { lexicalLinkFeatureSlug } from '../../slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -36,6 +36,7 @@ describe('Lexical Link Feature', () => {
     const lexical = new LexicalHelpers(page)
     await page.goto(url.create)
     await waitForFormReady(page)
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
 

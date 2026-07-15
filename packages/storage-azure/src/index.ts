@@ -3,7 +3,7 @@ import type {
   PluginOptions as CloudStoragePluginOptions,
   CollectionOptions,
 } from '@payloadcms/plugin-cloud-storage/types'
-import type { Config, Plugin, UploadCollectionSlug } from 'payload'
+import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
 import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
@@ -45,7 +45,13 @@ export type AzureStorageOptions = {
   clientCacheKey?: string
 
   /**
-   * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method to your website.
+   * Do uploads directly on the client to bypass limits on Vercel.
+   *
+   * Client uploads use the Azure Blob SDK, which splits large files into blocks
+   * (avoiding the ~5GB limit of a single upload request). The SDK sends `x-ms-*`
+   * headers, so the browser issues a CORS preflight: your storage account's CORS
+   * rules must allow the `OPTIONS` and `PUT` methods and the required headers
+   * (allowed headers `*`, or at minimum `x-ms-*,content-type,content-length`).
    */
   clientUploads?: ClientUploadsConfig
 
@@ -86,11 +92,14 @@ export type AzureStorageOptions = {
   useCompositePrefixes?: boolean
 }
 
-type AzureStoragePlugin = (azureStorageArgs: AzureStorageOptions) => Plugin
+type AzureStorageFactory = (azureStorageArgs: AzureStorageOptions) => StorageAdapter
 
-export const azureStorage: AzureStoragePlugin =
-  (azureStorageOptions: AzureStorageOptions) =>
-  (incomingConfig: Config): Config => {
+export const azureStorage: AzureStorageFactory = (
+  azureStorageOptions: AzureStorageOptions,
+): StorageAdapter => ({
+  name: 'azure',
+  collections: Object.keys(azureStorageOptions.collections),
+  init: (incomingConfig: Config): Config => {
     const getStorageClient = () =>
       getStorageClientFunc({
         connectionString: azureStorageOptions.connectionString,
@@ -177,6 +186,7 @@ export const azureStorage: AzureStoragePlugin =
       collections: collectionsWithAdapter,
       useCompositePrefixes: azureStorageOptions.useCompositePrefixes,
     })(config)
-  }
+  },
+})
 
 export { getStorageClientFunc as getStorageClient }

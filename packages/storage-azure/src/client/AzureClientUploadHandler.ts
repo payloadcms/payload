@@ -1,41 +1,26 @@
 'use client'
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
-import { formatAdminURL } from 'payload/shared'
+
+import { handleAzureUpload } from './handleAzureUpload.js'
 
 export const AzureClientUploadHandler = createClientUploadHandler({
-  handler: async ({ apiRoute, collectionSlug, docPrefix, file, serverHandlerPath, serverURL }) => {
-    const endpointRoute = formatAdminURL({
+  handler: async ({
+    apiRoute,
+    collectionSlug,
+    docPrefix,
+    file,
+    serverHandlerPath,
+    serverURL,
+    updateFilename,
+  }) => {
+    return handleAzureUpload({
       apiRoute,
-      path: serverHandlerPath,
+      collectionSlug,
+      docPrefix,
+      file,
+      serverHandlerPath,
       serverURL,
+      updateFilename,
     })
-    const response = await fetch(endpointRoute, {
-      body: JSON.stringify({
-        collectionSlug,
-        docPrefix,
-        filename: file.name,
-        mimeType: file.type,
-      }),
-      credentials: 'include',
-      method: 'POST',
-    })
-
-    const { docPrefix: sanitizedDocPrefix, url } = (await response.json()) as {
-      docPrefix: string
-      url: string
-    }
-
-    await fetch(url, {
-      body: file,
-      headers: {
-        'Content-Length': file.size.toString(),
-        'Content-Type': file.type,
-        // Required for azure
-        'x-ms-blob-type': 'BlockBlob',
-      },
-      method: 'PUT',
-    })
-
-    return { prefix: sanitizedDocPrefix }
   },
 })

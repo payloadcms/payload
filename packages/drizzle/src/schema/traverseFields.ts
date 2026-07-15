@@ -384,7 +384,7 @@ export const traverseFields = ({
 
         const disableNotNullFromHere = Boolean(field.admin?.condition) || disableNotNull
 
-        ;(field.blockReferences ?? field.blocks).forEach((_block) => {
+        field.blocks.forEach((_block) => {
           const block = typeof _block === 'string' ? adapter.payload.blocks[_block] : _block
 
           let blockTableName = createTableName({
@@ -622,6 +622,7 @@ export const traverseFields = ({
 
       case 'code':
       case 'email':
+      case 'slug':
       case 'textarea': {
         targetTable[fieldName] = withDefault(
           {

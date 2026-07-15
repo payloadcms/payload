@@ -2,9 +2,8 @@ import type { CollectionConfig } from 'payload'
 
 import {
   BlocksFeature,
-  HTMLConverterFeature,
   lexicalEditor,
-  lexicalHTML,
+  lexicalHTMLField,
   LinkFeature,
   TreeViewFeature,
   UploadFeature,
@@ -35,7 +34,6 @@ const RichTextFields: CollectionConfig = {
         features: ({ defaultFeatures }) => [
           ...defaultFeatures,
           TreeViewFeature(),
-          HTMLConverterFeature({}),
           LinkFeature({
             fields: ({ defaultFields }) => [
               ...defaultFields,
@@ -71,7 +69,19 @@ const RichTextFields: CollectionConfig = {
         ],
       }),
     },
-    lexicalHTML('lexicalCustomFields', { name: 'lexicalCustomFields_html' }),
+    lexicalHTMLField({
+      htmlFieldName: 'lexicalCustomFields_html',
+      lexicalFieldName: 'lexicalCustomFields',
+      converters: ({ defaultConverters }) => ({
+        ...defaultConverters,
+        link: async ({ node, nodesToHTML, providedStyleTag }) => {
+          const children = (await nodesToHTML({ nodes: node.children })).join('')
+          const href = node.fields.linkType === 'internal' ? '#' : (node.fields.url ?? '')
+          const newTabAttrs = node.fields.newTab ? ' rel="noopener noreferrer" target="_blank"' : ''
+          return `<a${providedStyleTag} href="${href}"${newTabAttrs}>${children}</a>`
+        },
+      }),
+    }),
     {
       name: 'lexical',
       type: 'richText',
@@ -157,6 +167,7 @@ const RichTextFields: CollectionConfig = {
       ],
     },
   ],
+  versions: false,
 }
 
 export default RichTextFields

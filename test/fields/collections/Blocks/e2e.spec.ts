@@ -1,6 +1,6 @@
 import type { BrowserContext, Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { copyPasteField } from '__helpers/e2e/copyPasteField.js'
 import {
   addBlock,
@@ -8,7 +8,9 @@ import {
   duplicateBlock,
   openBlocksDrawer,
   reorderBlocks,
+  selectBlockFromDrawer,
 } from '__helpers/e2e/fields/blocks/index.js'
+import { test } from '__helpers/e2e/playwright.js'
 import { scrollEntirePage } from '__helpers/e2e/scrollEntirePage.js'
 import { toggleBlockOrArrayRow } from '__helpers/e2e/toggleCollapsible.js'
 import path from 'path'
@@ -85,7 +87,7 @@ describe('Block fields', () => {
     url = new AdminUrlUtil(serverURL, 'block-fields')
   })
 
-  test('should open blocks drawer and select first block', async () => {
+  test('should open blocks drawer and select first block', { framework: 'rsc' }, async () => {
     await page.goto(url.create)
 
     await addBlock({
@@ -110,7 +112,7 @@ describe('Block fields', () => {
       fieldName: 'blocks',
     })
 
-    const searchInput = page.locator('.block-search__input')
+    const searchInput = page.locator('.block-search__input input')
     await searchInput.fill('Number')
 
     // select the first block in the drawer
@@ -130,7 +132,7 @@ describe('Block fields', () => {
     await expect(firstBlockSelector).toContainText('Content')
   })
 
-  test('should open blocks drawer from block row and add below', async () => {
+  test('should open blocks drawer from block row and add below', { framework: 'rsc' }, async () => {
     await page.goto(url.create)
 
     await addBlockBelow(page, { fieldName: 'blocks', blockToSelect: 'Content' })
@@ -228,7 +230,7 @@ describe('Block fields', () => {
     )
   })
 
-  test('should render custom block row label', async () => {
+  test('should render custom block row label', { framework: 'rsc' }, async () => {
     await page.goto(url.create)
 
     await addBlock({
@@ -337,48 +339,52 @@ describe('Block fields', () => {
   })
 
   describe('row manipulation', () => {
-    test('moving rows should immediately move custom row labels', async () => {
-      await page.goto(url.create)
-      // Ensure blocks are loaded
-      await expect(page.locator('.shimmer-effect')).toHaveCount(0)
+    test(
+      'moving rows should immediately move custom row labels',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(url.create)
+        // Ensure blocks are loaded
+        await expect(page.locator('.shimmer-effect')).toHaveCount(0)
 
-      // first ensure that the first block has the custom header, and that the second block doesn't
+        // first ensure that the first block has the custom header, and that the second block doesn't
 
-      await expect(
-        page.locator('#field-blocks #blocks-row-0 .blocks-field__block-header'),
-      ).toHaveText('Custom Block Label: Content 01')
+        await expect(
+          page.locator('#field-blocks #blocks-row-0 .blocks-field__block-header'),
+        ).toHaveText('Custom Block Label: Content 01')
 
-      const secondBlockHeader = page.locator(
-        '#field-blocks #blocks-row-1 .blocks-field__block-header',
-      )
+        const secondBlockHeader = page.locator(
+          '#field-blocks #blocks-row-1 .blocks-field__block-header',
+        )
 
-      await expect(secondBlockHeader.locator('.blocks-field__block-pill')).toHaveText('Number')
+        await expect(secondBlockHeader.locator('.blocks-field__block-pill')).toHaveText('Number')
 
-      await expect(secondBlockHeader.locator('input[id="blocks.1.blockName"]')).toHaveValue(
-        'Second block',
-      )
+        await expect(secondBlockHeader.locator('input[id="blocks.1.blockName"]')).toHaveValue(
+          'Second block',
+        )
 
-      await wait(1000)
+        await wait(1000)
 
-      await reorderBlocks({
-        page,
-        fieldName: 'blocks',
-        fromBlockIndex: 0,
-        toBlockIndex: 1,
-      })
+        await reorderBlocks({
+          page,
+          fieldName: 'blocks',
+          fromBlockIndex: 0,
+          toBlockIndex: 1,
+        })
 
-      // Important: do _not_ poll here, use `textContent()` instead of `toHaveText()`
-      // This will prevent Playwright from polling for the change to the DOM
-      await expect(async () => {
-        const text = await page
-          .locator('#field-blocks #blocks-row-1 .blocks-field__block-header')
-          .textContent()
-        expect(text).toMatch(/^Custom Block Label: Content/)
-      }).toPass()
-    })
+        // Important: do _not_ poll here, use `textContent()` instead of `toHaveText()`
+        // This will prevent Playwright from polling for the change to the DOM
+        await expect(async () => {
+          const text = await page
+            .locator('#field-blocks #blocks-row-1 .blocks-field__block-header')
+            .textContent()
+          expect(text).toMatch(/^Custom Block Label: Content/)
+        }).toPass()
+      },
+    )
 
     describe('react hooks', () => {
-      test('should add 2 new block rows', async () => {
+      test('should add 2 new block rows', { framework: 'rsc' }, async () => {
         await page.goto(url.create)
         // Ensure blocks are loaded
         await expect(page.locator('.shimmer-effect')).toHaveCount(0)
@@ -802,7 +808,8 @@ describe('Block fields', () => {
       await expect(labels.nth(1)).toHaveText('Block Five')
     })
 
-    test('ensure dynamic filterOptions are respected', async () => {
+    test('ensure dynamic filterOptions are respected', { framework: 'rsc' }, async () => {
+      test.slow()
       await page.goto(url.create)
 
       /**
@@ -816,21 +823,20 @@ describe('Block fields', () => {
       const blocksDrawer = page.locator('[id^=drawer_1_blocks-drawer-]')
       await expect(blocksDrawer).toBeVisible()
 
-      const labels = blocksDrawer.locator('.thumbnail-card__label')
+      // Close locator
+      const drawerClose = page.locator('.drawer__header__close')
 
       // All blocks available by default
+      const labels = blocksDrawer.locator('.thumbnail-card__label')
       await expect(labels).toHaveCount(3)
       await expect(labels.nth(0)).toHaveText('Block One')
       await expect(labels.nth(1)).toHaveText('Block Two')
       await expect(labels.nth(2)).toHaveText('Block Three')
 
-      // Close the drawer
-      const drawerClose = page.locator('.drawer__header__close')
-
-      // Click Block One and ensure drawer closes
-      await labels.nth(0).click()
-
-      await expect(blocksDrawer).toBeHidden()
+      await selectBlockFromDrawer({
+        blocksDrawer,
+        blockToSelect: 'Block One',
+      })
 
       await expect(page.locator('#blocksWithDynamicFilterOptions-row-0')).toBeVisible()
       // Ensure no shimmer is present

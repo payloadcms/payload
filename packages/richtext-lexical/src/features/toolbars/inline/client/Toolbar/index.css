@@ -1,0 +1,32 @@
+@layer payload-default {
+  .inline-toolbar-popup {
+    display: flex;
+    align-items: center;
+    background: var(--color-bg);
+    padding: 0 var(--spacer-1);
+    gap: var(--spacer-1);
+    vertical-align: middle;
+    position: absolute;
+    top: 0;
+    inset-inline-start: 0;
+    z-index: 2;
+    opacity: 0;
+    border-radius: var(--radius-medium);
+    transition: opacity 0.2s;
+    will-change: transform;
+    box-shadow: var(--elevation-300-tooltip);
+  }
+
+  .inline-toolbar-popup__group {
+    display: flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    height: var(--spacer-5);
+
+    .divider {
+      width: var(--stroke-width-small);
+      align-self: stretch;
+      background-color: var(--lexical-border-color);
+    }
+  }
+}

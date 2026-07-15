@@ -7,6 +7,7 @@ import { defineConfig } from 'vitest/config'
 const ROOT_DIR = process.cwd()
 const figmaPath = path.resolve(ROOT_DIR, '../enterprise-plugins/packages/figma/src/index.ts')
 const hasFigma = fs.existsSync(figmaPath)
+const evalFixturesDir = path.resolve(ROOT_DIR, 'test/evals/fixtures')
 
 // Resolve graphql to a single copy to avoid duplicate-instance issues (instanceof checks fail).
 // pnpm's isolated linker means graphql isn't hoisted to root node_modules, so we resolve
@@ -39,6 +40,15 @@ export default defineConfig({
     },
     projects: [
       {
+        // Vite 8 / oxc reads `jsx: preserve` from the workspace tsconfig (needed by Next.js)
+        // and refuses to transform JSX. Set jsx explicitly here so oxc transforms it.
+        // Project vite options are NOT inherited from the root config.
+        oxc: {
+          jsx: {
+            runtime: 'automatic',
+            importSource: 'react',
+          },
+        },
         test: {
           include: ['packages/**/*.spec.ts'],
           name: 'unit',
@@ -52,6 +62,15 @@ export default defineConfig({
             { find: /^graphql$/, replacement: path.join(graphqlDir, 'index.js') },
             ...(hasFigma ? [{ find: '@payloadcms/figma', replacement: figmaPath }] : []),
           ],
+        },
+        // Vite 8 / oxc reads `jsx: preserve` from the workspace tsconfig (needed by Next.js)
+        // and refuses to transform JSX. Set jsx explicitly here so oxc transforms it.
+        // Project vite options are NOT inherited from the root config.
+        oxc: {
+          jsx: {
+            runtime: 'automatic',
+            importSource: 'react',
+          },
         },
         test: {
           include: ['test/**/*int.spec.ts'],
@@ -73,12 +92,32 @@ export default defineConfig({
         },
       },
       {
+        resolve: {
+          // Eval fixture configs use `@/db-stub.js` as a fixture-local alias.
+          // TSC knows that from `test/evals/fixtures/tsconfig.json`, but runtime
+          // `verify({ config })` imports generated fixture configs through Vite,
+          // so this project needs the same alias for those imports to resolve.
+          alias: [
+            { find: /^@\//, replacement: `${evalFixturesDir}/` },
+            ...(hasFigma ? [{ find: '@payloadcms/figma', replacement: figmaPath }] : []),
+          ],
+        },
+        // Runtime eval cases in this project boot a real Payload config, which
+        // can import TSX routes from packages/next.
+        oxc: {
+          jsx: {
+            runtime: 'automatic',
+            importSource: 'react',
+          },
+        },
         test: {
           include: ['test/evals/**/*.spec.ts'],
           name: 'eval',
           environment: 'node',
           fileParallelism: false,
           globalSetup: ['test/evals/globalSetup.ts'],
+          // Loads .env
+          setupFiles: ['./test/evals/vitest.setup.ts'],
           // 10 minutes per test: LLM call (~60-120s) + tsc wait + scorer + buffer.
           testTimeout: 600000,
         },

@@ -75,6 +75,194 @@ describe('Fields', () => {
     await payload.destroy()
   })
 
+  describe('slug field', () => {
+    const created: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of created) {
+        await payload.delete({ collection: 'slug-fields', id })
+      }
+      created.length = 0
+    })
+
+    it('should generate a slug from the source field on create', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'My First Post' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('my-first-post')
+    })
+
+    it('should keep a user-provided slug on create', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'My First Post', slug: 'custom-slug' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('custom-slug')
+    })
+
+    it('should freeze a diverged slug on update', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Original Title' },
+      })
+      created.push(doc.id)
+
+      const updated = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { title: 'Changed Title', slug: 'manual-value' },
+      })
+      expect(updated.slug).toBe('manual-value')
+
+      const again = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { title: 'Changed Title Again' },
+      })
+      expect(again.slug).toBe('manual-value')
+    })
+
+    it('should generate localized slugs independently per locale', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Title', localizedTitle: 'English Title' },
+        locale: 'en',
+      })
+      created.push(doc.id)
+      expect(doc.localizedSlug).toBe('english-title')
+
+      const es = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { localizedTitle: 'Titulo Espanol' },
+        locale: 'es',
+      })
+      expect(es.localizedSlug).toBe('titulo-espanol')
+
+      const allLocales = await payload.findByID({
+        collection: 'slug-fields',
+        id: doc.id,
+        locale: 'all',
+      })
+      const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
+      expect(localizedSlug.en).toBe('english-title')
+      expect(localizedSlug.es).toBe('titulo-espanol')
+    })
+
+    describe('autosave drafts', () => {
+      const created: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of created) {
+          await payload.delete({ collection: 'slug-autosave', id })
+        }
+        created.length = 0
+      })
+
+      it('should NOT generate a slug on the initial draft (req 1)', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+        created.push(draft.id)
+        expect(draft.slug == null || draft.slug === '').toBe(true)
+      })
+
+      it('should keep an explicit slug the user typed on the initial draft', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One', slug: 'user-typed' },
+        })
+        created.push(draft.id)
+        expect(draft.slug).toBe('user-typed')
+      })
+
+      it('should generate once content exists on a subsequent autosave', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+        created.push(draft.id)
+
+        const updated = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Draft One Updated' },
+        })
+        expect(updated.slug).toBe('draft-one-updated')
+      })
+
+      it('should keep an admin overwrite across subsequent autosaves (req 2)', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+        created.push(draft.id)
+
+        await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Draft Two' },
+        })
+
+        const overwritten = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { slug: 'human-chosen-slug' },
+        })
+        expect(overwritten.slug).toBe('human-chosen-slug')
+
+        const afterMoreEdits = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Draft Three' },
+        })
+        expect(afterMoreEdits.slug).toBe('human-chosen-slug')
+      })
+
+      it('should stabilize the slug after publish', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+        created.push(draft.id)
+
+        await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Publishable Title' },
+        })
+
+        const published = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          data: { _status: 'published', title: 'Publishable Title' },
+        })
+        expect(published.slug).toBe('publishable-title')
+
+        const afterPublish = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          data: { _status: 'published', title: 'Title Changed After Publish' },
+        })
+        expect(afterPublish.slug).toBe('publishable-title')
+      })
+    })
+  })
+
   describe('text', () => {
     let doc
     const text = 'text field'
@@ -2388,7 +2576,7 @@ describe('Fields', () => {
       const idFields = arrayWithNestedCustomIDField?.fields.filter((f) => f.name === 'id')
 
       expect(idFields).toHaveLength(1)
-      expect(idFields[0].admin?.disableListFilter).toBe(true)
+      expect((idFields[0].admin?.disabled as { filter?: boolean })?.filter).toBe(true)
     })
 
     it('should query exists true', { db: 'mongo' }, async () => {
@@ -2527,6 +2715,20 @@ describe('Fields', () => {
       expect(found.items[0].richTextField).toBeDefined()
       expect(typeof found.items[0].richTextField).toBe('object')
       expect(found.items[0].richTextField).toEqual(richTextValue)
+    })
+
+    it('should not crash when array contains a null element', async () => {
+      const doc = await payload.create({
+        collection,
+        data: {
+          // @ts-expect-error testing null in array
+          items: [null, { text: 'required', localizedText: 'valid' }],
+        },
+      })
+
+      // The null should be stripped; the valid row should survive intact.
+      expect(doc.items).toHaveLength(1)
+      expect(doc.items[0].text).toBe('required')
     })
   })
 
@@ -3413,6 +3615,27 @@ describe('Fields', () => {
         'localizedTextReference',
       )
       expect(doc?.localizedReferencesLocalizedBlock?.en?.[0]?.text).toEqual('localized text')
+    })
+
+    it('should not crash when blocks array contains a null element', async () => {
+      const doc = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          // @ts-expect-error - intentionally injecting null
+          blocks: [
+            null,
+            {
+              blockType: 'content',
+              text: 'valid block',
+            },
+          ],
+        },
+      })
+
+      // The null should be stripped; the valid block should survive intact.
+      expect(doc.blocks).toHaveLength(1)
+      expect(doc.blocks[0].blockType).toBe('content')
+      expect(doc.blocks[0].text).toBe('valid block')
     })
   })
 
@@ -4998,7 +5221,7 @@ describe('Fields', () => {
     })
 
     it('should apply timezone override function to customize the field', async () => {
-      // The dateWithTimezoneWithDisabledColumns field has an override that sets disableListColumn: true
+      // The dateWithTimezoneWithDisabledColumns field has an override that sets disabled.column: true
       // We can verify this by checking the collection config has the modified field
       const dateCollection = payload.collections[dateFieldsSlug]
       const fields = dateCollection.config.flattenedFields
@@ -5006,7 +5229,7 @@ describe('Fields', () => {
       const timezoneField = fields.find((f) => f.name === 'dateWithTimezoneWithDisabledColumns_tz')
       expect(timezoneField).toBeDefined()
       expect(timezoneField?.type).toEqual('select')
-      expect(timezoneField?.admin?.disableListColumn).toBe(true)
+      expect((timezoneField?.admin?.disabled as { column?: boolean })?.column).toBe(true)
       expect(timezoneField?.admin?.description).toEqual(
         'This timezone field was customized via override',
       )

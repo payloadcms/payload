@@ -27,6 +27,7 @@ import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.j
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
@@ -99,8 +100,12 @@ export const findByIDOperation = async <
 
     const select = sanitizeSelect({
       fields: collectionConfig.flattenedFields,
-      forceSelect: collectionConfig.forceSelect,
-      select: incomingSelect,
+      select: resolveSelect({
+        config: collectionConfig.select,
+        operation: 'read',
+        req,
+        select: incomingSelect,
+      }),
     })
 
     // /////////////////////////////////////
@@ -181,9 +186,9 @@ export const findByIDOperation = async <
       throw new NotFound(t)
     }
 
-    const docFromDB = await req.payload.db.findOne(findOneArgs)
+    const docWithLocales = await req.payload.db.findOne(findOneArgs)
 
-    if (!docFromDB && !args.data) {
+    if (!docWithLocales && !args.data) {
       if (!disableErrors) {
         throw new NotFound(req.t)
       }
@@ -191,7 +196,7 @@ export const findByIDOperation = async <
     }
 
     let result: DataFromCollectionSlug<TSlug> =
-      (args.data as DataFromCollectionSlug<TSlug>) ?? docFromDB!
+      (args.data as DataFromCollectionSlug<TSlug>) ?? docWithLocales!
 
     // /////////////////////////////////////
     // Add collection property for auth collections
