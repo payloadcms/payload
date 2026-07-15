@@ -17,7 +17,7 @@ describe('isVersionPublished', () => {
   })
 
   it('should return false when the registry returns 404', async () => {
-    const fetchImpl = vi.fn(async () => ({ ok: false }) as Response)
+    const fetchImpl = vi.fn(async () => ({ ok: false, status: 404 }) as Response)
 
     const result = await isVersionPublished({
       name: 'payload',
@@ -26,5 +26,19 @@ describe('isVersionPublished', () => {
     })
 
     expect(result).toBe(false)
+  })
+
+  it('should throw on a non-404 error status rather than reporting not-published', async () => {
+    const fetchImpl = vi.fn(
+      async () => ({ ok: false, status: 503, statusText: 'Service Unavailable' }) as Response,
+    )
+
+    await expect(
+      isVersionPublished({
+        name: 'payload',
+        version: '4.0.0-canary.10',
+        fetchImpl: fetchImpl as unknown as typeof fetch,
+      }),
+    ).rejects.toThrow(/503/)
   })
 })

@@ -1,7 +1,7 @@
 import type { ReleaseType } from 'semver'
 
 import { PROJECT_ROOT, ROOT_PACKAGE_JSON } from '@tools/constants'
-import { execSync } from 'child_process'
+import { execSync, spawn } from 'child_process'
 import execa from 'execa'
 import fse from 'fs-extra'
 import pLimit from 'p-limit'
@@ -231,9 +231,23 @@ export async function publishSinglePackage(
   const { dryRun, tag = 'canary' } = opts
 
   try {
-    if (!dryRun && (await isVersionPublished({ name: pkg.name, version: pkg.version }))) {
-      console.log(`⏭️  ${pkg.name}@${pkg.version} already published, skipping`)
-      return { name: pkg.name, success: true }
+    // The pre-check is an optimization to skip already-published packages. A
+    // registry failure here must not be fatal — fall through and let the publish
+    // attempt (and its post-failure recheck) decide the outcome.
+    if (!dryRun) {
+      let alreadyPublished = false
+      try {
+        alreadyPublished = await isVersionPublished({ name: pkg.name, version: pkg.version })
+      } catch (err: unknown) {
+        console.warn(
+          `⚠️  Could not verify whether ${pkg.name}@${pkg.version} is published; proceeding to publish. (${err instanceof Error ? err.message : String(err)})`,
+        )
+      }
+
+      if (alreadyPublished) {
+        console.log(`⏭️  ${pkg.name}@${pkg.version} already published, skipping`)
+        return { name: pkg.name, success: true }
+      }
     }
 
     console.log(`🚀 ${pkg.name} publishing...`)
@@ -243,26 +257,37 @@ export async function publishSinglePackage(
       cmdArgs.push('--dry-run')
     }
 
-    const { exitCode, stderr } = await execa('pnpm', cmdArgs, { cwd, stdio: 'inherit' })
+    const { exitCode, output } = await runPnpm(cmdArgs)
 
     if (exitCode === 0) {
       console.log(`✅ ${pkg.name} published`)
       return { name: pkg.name, success: true }
     }
 
-    console.log(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed\n\n${stderr}`)
+    // An already-published conflict means a prior run landed this version; treat
+    // the re-run as an idempotent success rather than retrying (a retry would
+    // just conflict again). This is authoritative, unlike the CDN-cached read.
+    if (isAlreadyPublishedError(output)) {
+      console.log(`⏭️  ${pkg.name}@${pkg.version} already published, skipping`)
+      return { name: pkg.name, success: true }
+    }
+
+    console.log(`\n\n❌ ${pkg.name} ERROR: pnpm publish failed (exit code ${exitCode})`)
     console.log(`\nRetrying publish for ${pkg.name}...`)
-    const { exitCode: retryExitCode, stderr: retryStderr } = await execa('pnpm', cmdArgs, {
-      cwd,
-      stdio: 'inherit',
-    })
+    const { exitCode: retryExitCode, output: retryOutput } = await runPnpm(cmdArgs)
 
     if (retryExitCode === 0) {
       console.log(`✅ ${pkg.name} published (on retry)`)
       return { name: pkg.name, success: true }
     }
 
-    // Publish can report failure even though the version actually landed. Recheck the registry.
+    if (isAlreadyPublishedError(retryOutput)) {
+      console.log(`⏭️  ${pkg.name}@${pkg.version} already published, skipping`)
+      return { name: pkg.name, success: true }
+    }
+
+    // Publish can report failure even though the version actually landed (e.g. a
+    // dropped connection after the registry accepted it). Recheck the registry.
     if (!dryRun && (await isVersionPublished({ name: pkg.name, version: pkg.version }))) {
       console.log(`✅ ${pkg.name}@${pkg.version} landed despite publish error`)
       return { name: pkg.name, success: true }
@@ -271,7 +296,7 @@ export async function publishSinglePackage(
     return {
       name: pkg.name,
       success: false,
-      details: `Exit Code: ${retryExitCode}, stderr: ${retryStderr}`,
+      details: `pnpm publish failed for ${pkg.name} (exit code ${retryExitCode})`,
     }
   } catch (err: unknown) {
     console.error(err)
@@ -285,3 +310,41 @@ export async function publishSinglePackage(
     }
   }
 }
+
+type PnpmResult = {
+  exitCode: number
+  /** Combined stdout + stderr, captured while also streaming live. */
+  output: string
+}
+
+/**
+ * Runs `pnpm <args>`, streaming output live to the parent while also capturing
+ * it. Resolves with the exit code and combined output — a non-zero exit resolves
+ * (unlike execa's default, which rejects) so callers can branch on the code and
+ * inspect the output. Only a spawn error (e.g. pnpm not found) rejects.
+ */
+function runPnpm(args: string[]): Promise<PnpmResult> {
+  return new Promise((resolve, reject) => {
+    const child = spawn('pnpm', args, { cwd, stdio: ['inherit', 'pipe', 'pipe'] })
+    let output = ''
+    child.stdout?.on('data', (chunk: Buffer) => {
+      output += chunk.toString()
+      process.stdout.write(chunk)
+    })
+    child.stderr?.on('data', (chunk: Buffer) => {
+      output += chunk.toString()
+      process.stderr.write(chunk)
+    })
+    child.on('error', reject)
+    child.on('close', (code) => resolve({ exitCode: code ?? 1, output }))
+  })
+}
+
+/**
+ * npm rejects re-publishing an existing version with an EPUBLISHCONFLICT / "cannot
+ * publish over the previously published versions" error. That is the authoritative
+ * signal that a version is already published — unlike the CDN-cached registry read,
+ * which can serve a stale 404 — so callers treat it as an idempotent success.
+ */
+const isAlreadyPublishedError = (output: string): boolean =>
+  /EPUBLISHCONFLICT|cannot publish over|previously published version/i.test(output)
