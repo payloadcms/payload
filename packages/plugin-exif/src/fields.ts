@@ -4,7 +4,15 @@ export const buildExifFields = (fieldName: string): Field[] => [
   {
     name: fieldName,
     type: 'group',
-    admin: { readOnly: true },
+    admin: {
+      components: {
+        Field: {
+          clientProps: { fieldName },
+          path: '@payloadcms/plugin-exif/client#ExifProperties',
+        },
+      },
+      position: 'sidebar',
+    },
     fields: [
       { name: 'raw', type: 'json' },
       { name: 'takenAt', type: 'date', index: true },
