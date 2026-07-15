@@ -2,8 +2,9 @@
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 
 import { useConfig } from '../Config/index.js'
+import { defaultTheme, type Theme } from './shared.js'
 
-export type Theme = 'dark' | 'light'
+export { defaultTheme, type Theme }
 
 export type ThemeContext = {
   autoMode: boolean
@@ -70,8 +71,6 @@ const detectHighContrastMode = (cookieKey: string): boolean => {
 
   return isHighContrast
 }
-
-export const defaultTheme: Theme = 'light'
 
 /**
  * Provides theme context to its children.
