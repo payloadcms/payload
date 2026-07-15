@@ -65,7 +65,12 @@ export const createDraftGitHubRelease = async ({
   return { releaseUrl: resBody.html_url }
 }
 
-// GET /releases/tags/{tag} returns 404 for DRAFT releases, so we list and match instead.
+// GET /releases/tags/{tag} returns 404 for DRAFT releases, so we list and match
+// instead. The list is newest-first by created_at and a draft we would update was
+// created recently, so it sits on the first page — we scan only the newest page to
+// stay O(1) as the release history grows. A match buried deeper would require ~100
+// releases created after the draft (implausible for a re-run); we warn if that
+// near-impossible case is even reachable.
 const findReleaseByTag = async ({
   fetchImpl,
   tag,
@@ -73,30 +78,29 @@ const findReleaseByTag = async ({
   fetchImpl: typeof fetch
   tag: string
 }): Promise<GitHubRelease | undefined> => {
-  for (let page = 1; ; page++) {
-    const res = await fetchImpl(
-      `https://api.github.com/repos/${REPO}/releases?per_page=${PER_PAGE}&page=${page}`,
-      {
-        headers: {
-          Accept: 'application/vnd.github.v3+json',
-          Authorization: `token ${process.env.GITHUB_TOKEN}`,
-        },
-        method: 'GET',
+  const res = await fetchImpl(
+    `https://api.github.com/repos/${REPO}/releases?per_page=${PER_PAGE}&page=1`,
+    {
+      headers: {
+        Accept: 'application/vnd.github.v3+json',
+        Authorization: `token ${process.env.GITHUB_TOKEN}`,
       },
-    )
+      method: 'GET',
+    },
+  )
 
-    if (!res.ok) {
-      throw new Error(`Failed to list releases: ${await res.text()}`)
-    }
-
-    const releases = (await res.json()) as GitHubRelease[]
-    const match = releases.find((release) => release.tag_name === tag)
-    if (match) {
-      return match
-    }
-
-    if (releases.length < PER_PAGE) {
-      return undefined
-    }
+  if (!res.ok) {
+    throw new Error(`Failed to list releases: ${await res.text()}`)
   }
+
+  const releases = (await res.json()) as GitHubRelease[]
+  const match = releases.find((release) => release.tag_name === tag)
+
+  if (!match && releases.length === PER_PAGE) {
+    console.warn(
+      `⚠️  ${tag} not found in the ${PER_PAGE} most recent releases; treating it as new. A draft buried deeper in the history would not be updated.`,
+    )
+  }
+
+  return match
 }

@@ -75,16 +75,17 @@ describe('createDraftGitHubRelease', () => {
     expect(fetchImpl).toHaveBeenCalledTimes(1)
   })
 
-  it('should find a match on page 2 (pagination)', async () => {
+  it('should scan only the newest page and treat a not-found tag as new (with a warning)', async () => {
     const fullPage = Array.from({ length: 100 }, (_, i) => ({
       id: i,
+      draft: true,
       tag_name: `v4.0.0-canary.${i}`,
     }))
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
     const fetchImpl = vi
       .fn()
-      .mockResolvedValueOnce(jsonResponse(fullPage)) // page 1: 100 items, no match
-      .mockResolvedValueOnce(jsonResponse([{ id: 999, draft: true, tag_name: 'v4.0.0-beta.0' }])) // page 2: match
-      .mockResolvedValueOnce(jsonResponse({ html_url: 'https://gh/p2' })) // PATCH
+      .mockResolvedValueOnce(jsonResponse(fullPage)) // page 1: 100 items, target absent
+      .mockResolvedValueOnce(jsonResponse({ html_url: 'https://gh/new' })) // POST (treated as new)
 
     const { releaseUrl } = await createDraftGitHubRelease({
       branch: 'main',
@@ -93,9 +94,13 @@ describe('createDraftGitHubRelease', () => {
       fetchImpl: fetchImpl as unknown as typeof fetch,
     })
 
-    expect(releaseUrl).toBe('https://gh/p2')
-    const patchCall = fetchImpl.mock.calls.at(-1)!
-    expect(patchCall[0]).toContain('/releases/999')
-    expect(patchCall[1].method).toBe('PATCH')
+    expect(releaseUrl).toBe('https://gh/new')
+    // Only the first page is listed — no page-2 fetch — then a POST.
+    expect(fetchImpl).toHaveBeenCalledTimes(2)
+    expect(fetchImpl.mock.calls[0]![0]).toContain('page=1')
+    expect(fetchImpl.mock.calls.at(-1)![1].method).toBe('POST')
+    expect(warn).toHaveBeenCalled()
+
+    warn.mockRestore()
   })
 })
