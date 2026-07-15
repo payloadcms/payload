@@ -10,6 +10,7 @@ import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../co
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
 import { getFallbackValue } from './getFallbackValue.js'
+import { stripNullRows } from './stripNullRows.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
@@ -347,9 +348,16 @@ export const promise = async <T>({
       const rows = siblingData[field.name]
 
       if (Array.isArray(rows)) {
+        const filteredRows = stripNullRows(
+          rows,
+          'array',
+          field.name,
+          req.payload.logger,
+          siblingData,
+        )
         const promises: Promise<void>[] = []
 
-        rows.forEach((row, rowIndex) => {
+        filteredRows.forEach((row, rowIndex) => {
           promises.push(
             traverseFields({
               id,
@@ -367,8 +375,8 @@ export const promise = async <T>({
               parentPath: path + '.' + rowIndex,
               parentSchemaPath: schemaPath,
               req,
-              siblingData: row as JsonObject,
-              siblingDoc: getExistingRowDoc(row as JsonObject, siblingDoc[field.name]),
+              siblingData: row,
+              siblingDoc: getExistingRowDoc(row, siblingDoc[field.name]),
             }),
           )
         })
@@ -382,11 +390,18 @@ export const promise = async <T>({
       const rows = siblingData[field.name]
 
       if (Array.isArray(rows)) {
+        const filteredRows = stripNullRows(
+          rows,
+          'blocks',
+          field.name,
+          req.payload.logger,
+          siblingData,
+        )
         const promises: Promise<void>[] = []
 
-        rows.forEach((row, rowIndex) => {
-          const rowSiblingDoc = getExistingRowDoc(row as JsonObject, siblingDoc[field.name])
-          const blockTypeToMatch = (row as JsonObject).blockType || rowSiblingDoc.blockType
+        filteredRows.forEach((row, rowIndex) => {
+          const rowSiblingDoc = getExistingRowDoc(row, siblingDoc[field.name])
+          const blockTypeToMatch = row.blockType || rowSiblingDoc.blockType
 
           const block: Block | undefined =
             req.payload.blocks[blockTypeToMatch] ??
@@ -395,7 +410,7 @@ export const promise = async <T>({
             ) as Block | undefined)
 
           if (block) {
-            ;(row as JsonObject).blockType = blockTypeToMatch
+            row.blockType = blockTypeToMatch
 
             promises.push(
               traverseFields({
@@ -414,7 +429,7 @@ export const promise = async <T>({
                 parentPath: path + '.' + rowIndex,
                 parentSchemaPath: schemaPath + '.' + block.slug,
                 req,
-                siblingData: row as JsonObject,
+                siblingData: row,
                 siblingDoc: rowSiblingDoc,
               }),
             )
