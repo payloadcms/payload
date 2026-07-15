@@ -92,8 +92,6 @@
     padding-block: var(--spacer-1);
     padding-inline: var(--spacer-2);
     text-decoration: none;
-    font-size: var(--text-body-small-font-size);
-    line-height: var(--spacer-4);
   }
 
   a.nav__link {
@@ -115,11 +113,6 @@
     .nav__scroll {
       --nav-padding-inline-start: var(--spacer-2);
       --nav-padding-inline-end: var(--spacer-2);
-    }
-
-    .nav__link {
-      font-size: unset;
-      line-height: unset;
     }
 
     .nav__mobile-close {

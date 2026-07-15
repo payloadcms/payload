@@ -6,8 +6,54 @@ packages:
   - 'templates/website'
   - 'templates/ecommerce'
 
+catalog:
+  # TS7 provides `tsc`; tools that import `typescript` use the TS6 compatibility API.
+  # see: https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/#running-side-by-side-with-typescript-6.0
+  '@typescript/native': 'npm:typescript@7.0.2'
+  copyfiles: '2.4.1'
+  cross-env: '10.1.0'
+  dotenv: '16.4.7'
+  react: '19.2.6'
+  react-dom: '19.2.6'
+  typescript: 'npm:@typescript/typescript6@6.0.2'
+
 updateNotifier: false
 symlink: true
 nodeLinker: isolated
 hoistWorkspacePackages: false # the default in pnpm v9 is true, but that can break our runtime dependency checks
 savePrefix: ''
+# pnpm v11 defaults this to `install`, which auto-reinstalls when node_modules looks
+# stale before any `pnpm run`/`pnpm exec`. The root `prepare` script nests `pnpm turbo`
+# inside the outer install's lifecycle, so that check deadlocks against the in-flight
+# install (CI hangs until SIGTERM). Restore the v10 behavior.
+# See https://github.com/pnpm/pnpm/issues/8865
+verifyDepsBeforeRun: false
+
+overrides:
+  '@types/request>form-data': '^2.5.6'
+  'amazon-cognito-identity-js>js-cookie': '^3.0.7'
+  copyfiles: 'catalog:'
+  cross-env: 'catalog:'
+  dotenv: 'catalog:'
+  graphql: '16.8.1'
+  react: 'catalog:'
+  react-dom: 'catalog:'
+  typescript: 'catalog:'
+
+# Replaces pnpm v10 `onlyBuiltDependencies`: packages permitted to run install scripts.
+allowBuilds:
+  '@parcel/watcher': true
+  '@sentry/cli': true
+  '@swc/core': true
+  '@vercel/git-hooks': true
+  better-sqlite3: true
+  bufferutil: true
+  esbuild: true
+  mongodb-memory-server: true
+  sharp: true
+  unrs-resolver: true
+  utf-8-validate: true
+  workerd: true
+
+minimumReleaseAgeExclude:
+  - '@faceless-ui/modal@3.0.1'

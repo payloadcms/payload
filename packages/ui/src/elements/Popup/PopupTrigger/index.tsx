@@ -16,6 +16,7 @@ export type PopupButtonRenderProps = {
 export type PopupTriggerProps = {
   active: boolean
   button?: React.ReactNode
+  buttonAriaLabel?: string
   buttonType: 'custom' | 'default'
   className?: string
   disabled?: boolean
@@ -29,6 +30,7 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
   const {
     active,
     button,
+    buttonAriaLabel,
     buttonType,
     className,
     disabled,
@@ -79,6 +81,7 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
   if (buttonType === 'custom') {
     return (
       <div
+        aria-label={buttonAriaLabel}
         className={classes}
         onClick={handleClick}
         onKeyDown={handleKeyDown}
@@ -92,6 +95,7 @@ export const PopupTrigger: React.FC<PopupTriggerProps> = (props) => {
 
   return (
     <button
+      aria-label={buttonAriaLabel}
       className={classes}
       disabled={disabled}
       onClick={handleClick}

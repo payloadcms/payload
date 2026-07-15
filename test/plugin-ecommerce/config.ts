@@ -88,6 +88,22 @@ export default buildConfigWithDefaults({
       },
       products: {
         variants: true,
+        productsCollectionOverride: ({ defaultCollection }) => ({
+          ...defaultCollection,
+          admin: {
+            ...defaultCollection.admin,
+            defaultColumns: ['name', ...(defaultCollection.admin?.defaultColumns ?? [])],
+            useAsTitle: 'name',
+          },
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+              required: true,
+            },
+            ...defaultCollection.fields,
+          ],
+        }),
       },
       payments: {
         paymentMethods: [

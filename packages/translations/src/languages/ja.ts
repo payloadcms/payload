@@ -115,6 +115,25 @@ export const jaTranslations: DefaultTranslationsObject = {
       'あなたのダッシュボードにはウィジェットがありません。 上部バーにある「ダッシュボード」メニューからそれらを追加することができます。',
     resetLayout: 'レイアウトをリセット',
     searchWidgets: 'ウィジェットを検索...',
+    widgetCollectionRequired: 'Collectionは必須です。',
+    widgetConfigurationError: 'ウィジェット設定エラー',
+    widgetInvalidCollection: 'Collection「{{collection}}」は存在しません。',
+    widgetInvalidFilterField:
+      'コレクション「{{collection}}」にフィルターField「{{field}}」は存在しません。',
+    widgetInvalidSortField:
+      'コレクション「{{collection}}」に並べ替え用のフィールド「{{field}}」が存在しません。',
+    widgetLimitLabel: '制限',
+    widgetNonSortableSortField:
+      'コレクション「{{collection}}」でソートフィールド「{{field}}」はソートできません。',
+    widgetQueryError: 'このウィジェットのドキュメントを読み込めませんでした。',
+    widgetRecentlyViewedEmpty: 'まだドキュメントを閲覧していません。',
+    widgetRecentlyViewedTitle: '最近閲覧した',
+    widgetSelectCollectionFirst: '並べ替えを選択する前に、Collectionを選択してください。',
+    widgetSelectSortField: '並べ替えに使用するFieldを選択してください',
+    widgetSortDirectionLabel: '並び順の方向',
+    widgetSortFieldLabel: 'ソートフィールド',
+    widgetTitleFallback: 'コレクションクエリ',
+    widgetTitleLabel: 'タイトル',
   },
   error: {
     accountAlreadyActivated: 'このアカウントはすでに有効です。',
@@ -184,6 +203,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     addRelationship: 'リレーションシップを追加',
     addUpload: 'アップロードを追加',
     block: 'ブロック',
+    blockName: 'ブロック名',
     blocks: 'ブロック',
     blockType: 'ブロックタイプ',
     chooseBetweenCustomTextOrDocument:

@@ -115,6 +115,24 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
       'Na vašoj kontrolnoj tabli nema vidžeta. Možete ih dodati iz menija "Kontrolna tabla" koji se nalazi na vrhu stranice.',
     resetLayout: 'Resetuj raspored',
     searchWidgets: 'Pretraži dodatke...',
+    widgetCollectionRequired: 'Kolekcija je obavezna.',
+    widgetConfigurationError: 'Greška u konfiguraciji vidžeta',
+    widgetInvalidCollection: 'Kolekcija "{{collection}}" ne postoji.',
+    widgetInvalidFilterField:
+      'Polje za filtriranje "{{field}}" ne postoji u kolekciji "{{collection}}".',
+    widgetInvalidSortField: 'Sort polje "{{field}}" ne postoji u kolekciji "{{collection}}".',
+    widgetLimitLabel: 'Ograničenje',
+    widgetNonSortableSortField:
+      'Polje za sortiranje "{{field}}" nije moguće sortirati u kolekciji "{{collection}}".',
+    widgetQueryError: 'Nije moguće učitati dokumente za ovaj vidžet.',
+    widgetRecentlyViewedEmpty: 'Još uvek niste pregledali nijedan dokument.',
+    widgetRecentlyViewedTitle: 'Nedavno ste pregledali',
+    widgetSelectCollectionFirst: 'Izaberite Collection pre nego što izaberete sortiranje',
+    widgetSelectSortField: 'Izaberite polje po kojem želite da sortirate',
+    widgetSortDirectionLabel: 'Smer sortiranja',
+    widgetSortFieldLabel: 'Sortiraj Field',
+    widgetTitleFallback: 'Upit kolekcije',
+    widgetTitleLabel: 'Naslov',
   },
   error: {
     accountAlreadyActivated: 'Ovaj nalog je već aktiviran.',
@@ -184,6 +202,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     addRelationship: 'Dodaj relaciju',
     addUpload: 'Dodaj učitavanje',
     block: 'Blokiranje',
+    blockName: 'Ime bloka',
     blocks: 'blokiranja',
     blockType: 'Vrsta blokiranja',
     chooseBetweenCustomTextOrDocument:

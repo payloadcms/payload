@@ -1,0 +1,18 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "strict": false,
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "rootDir": "..",
+    "paths": {
+      "@payload-config": ["../test/lexical/config.ts"]
+    }
+  },
+  "include": [
+    "app/**/*",
+    "components/**/*",
+    "router.tsx",
+    "../test/admin/config.ts"
+  ]
+}

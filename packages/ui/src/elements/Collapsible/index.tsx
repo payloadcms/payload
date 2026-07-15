@@ -107,6 +107,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
               className={`${baseClass}__drag`}
               {...dragHandleProps.attributes}
               {...dragHandleProps.listeners}
+              aria-label={t('general:dragToReorder')}
             >
               <AlignJustifiedIcon />
             </div>
@@ -127,6 +128,7 @@ export const Collapsible: React.FC<CollapsibleProps> = ({
             {actions ? <div className={`${baseClass}__actions`}>{actions}</div> : null}
             {!disableToggleIndicator && (
               <button
+                aria-label={t(isCollapsed ? 'general:expand' : 'general:collapse')}
                 className={`${baseClass}__indicator`}
                 onClick={toggleCollapsible}
                 tabIndex={-1}

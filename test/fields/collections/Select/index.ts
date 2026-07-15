@@ -272,7 +272,7 @@ const SelectFields: CollectionConfig = {
             )
           : options,
     },
-  ]
+  ],
 }
 
 export default SelectFields

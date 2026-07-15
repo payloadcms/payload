@@ -84,6 +84,18 @@
       text-align: center;
     }
 
+    /* Size the locked-row lock icon to the checkbox's 16px box (keeping the column
+     * width stable) and center it like the checkbox; the larger icon overflows. */
+    .cell-_select .locked {
+      display: flex;
+      height: var(--spacer-3);
+      width: var(--spacer-3);
+
+      svg {
+        flex-shrink: 0;
+      }
+    }
+
     #heading-_dragHandle {
       display: flex;
       align-items: center;
@@ -97,6 +109,12 @@
       padding: var(--spacer-2) 0;
       text-align: center;
       vertical-align: middle;
+    }
+
+    .cell-_dragHandle > div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     tbody tr {
@@ -143,6 +161,8 @@
   /* Condensed appearance */
   .table--appearance-condensed {
     border-radius: var(--radius-medium);
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-color) transparent;
 
     table {
       border-collapse: collapse;
@@ -212,16 +232,19 @@
         padding: 0;
       }
 
-      > :is(a, button) {
+      > :is(a, button, .drawer-link) {
         display: flex;
         align-items: center;
         width: 100%;
         padding: 0 var(--spacer-2-5);
         min-height: var(--spacer-5);
+      }
+
+      > :is(a, button) {
         cursor: pointer;
       }
 
-      &:first-child > :is(a, button) {
+      &:first-child > :is(a, button, .drawer-link) {
         padding-inline-start: var(--spacer-2-5);
       }
     }

@@ -1,21 +1,31 @@
-import type { Client } from '@modelcontextprotocol/client'
+import type { Client, ProtocolEra } from '@modelcontextprotocol/client'
 
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
+import type { McpHTTPResponse } from './realMcpClient.js'
 
 import { connectMcpClient } from './realMcpClient.js'
 
 export type McpClient = {
   /** Disconnects every client opened during the test. */
   close: () => Promise<void>
-  /** Returns a connected MCP client for the given API key (one per key, reused). */
-  connect: (apiKey: string) => Promise<Client>
+  /** Returns a connected MCP client for the given API key and access mode (reused). */
+  connect: (apiKey: string, options?: { overrideAccess?: boolean }) => Promise<Client>
+  /** Returns the HTTP responses observed by the real MCP transport. */
+  getHTTPResponses: () => McpHTTPResponse[]
   /** Sends a raw POST to `/mcp` — for the auth/malformed-request tests a real client can't make. */
-  rawPost: (args: { apiKey?: string; body: unknown }) => Promise<Response>
+  rawPost: (args: { apiKey?: string; body: unknown; contentType?: string }) => Promise<Response>
 }
 
-export function createMcpClient(restClient: NextRESTClient): McpClient {
-  // One connected client per API key — the handshake runs once, then reused.
+export function createMcpClient({
+  protocolEra,
+  restClient,
+}: {
+  protocolEra: ProtocolEra
+  restClient: NextRESTClient
+}): McpClient {
+  // One connected client per API key and access mode — the handshake runs once, then reused.
   const clients = new Map<string, Promise<Client>>()
+  const httpResponses: McpHTTPResponse[] = []
 
   return {
     close: async () => {
@@ -31,36 +41,50 @@ export function createMcpClient(restClient: NextRESTClient): McpClient {
         }),
       )
     },
-    connect: (apiKey) => {
-      let client = clients.get(apiKey)
+    connect: (apiKey, { overrideAccess = false } = {}) => {
+      const cacheKey = `${apiKey}:${overrideAccess}`
+      let client = clients.get(cacheKey)
       if (!client) {
-        client = connectMcpClient({ apiKey, restClient })
-        clients.set(apiKey, client)
+        client = connectMcpClient({
+          apiKey,
+          onResponse: (response) => httpResponses.push(response),
+          overrideAccess,
+          protocolEra,
+          restClient,
+        })
+        clients.set(cacheKey, client)
       }
       return client
     },
-    rawPost: async ({ apiKey, body }) =>
+    getHTTPResponses: () => [...httpResponses],
+    rawPost: async ({ apiKey, body, contentType = 'application/json' }) =>
       restClient.POST('/mcp', {
         body: JSON.stringify(body),
         headers: {
           Accept: 'application/json, text/event-stream',
           ...(apiKey ? { Authorization: `users API-Key ${apiKey}` } : {}),
-          'Content-Type': 'application/json',
+          'Content-Type': contentType,
         },
       }),
   }
 }
 
 /** A tool/call result's content — what `client.callTool()` returns. */
-type ToolResult = { content?: Array<{ text?: string }> }
+type ToolResult = { content?: readonly unknown[] }
 
 /**
  * Returns the first text content block from a tool/call result.
  */
-export function getToolText(result: ToolResult): string {
-  const text = result.content?.[0]?.text
+export function getToolText(result: ToolResult, index = 0): string {
+  const firstContent = result.content?.[index]
+  const text =
+    typeof firstContent === 'object' && firstContent !== null && 'text' in firstContent
+      ? firstContent.text
+      : undefined
   if (typeof text !== 'string') {
-    throw new Error(`MCP tool result has no text content: ${JSON.stringify(result, null, 2)}`)
+    throw new Error(
+      `MCP tool result has no text content at index ${index}: ${JSON.stringify(result, null, 2)}`,
+    )
   }
   return text
 }

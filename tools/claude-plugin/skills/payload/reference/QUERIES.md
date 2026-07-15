@@ -1,4 +1,4 @@
-# Payload CMS Querying Reference
+# Payload Querying Reference
 
 Complete reference for querying data across Local API, REST, and GraphQL.
 

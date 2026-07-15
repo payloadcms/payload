@@ -12,8 +12,7 @@ let cached: null | string = null
  * the markdown links inside SKILL.md (e.g. `[FIELDS.md](reference/FIELDS.md)`)
  * are inert text — without inlining, references are effectively invisible.
  *
- * Cached for the process lifetime; cache.getSkillHash hashes the same string
- * so cache keys invalidate when any skill file changes.
+ * Memoized for the process lifetime.
  */
 export function loadSkillContext(): string {
   if (cached !== null) {

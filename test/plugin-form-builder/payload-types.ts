@@ -62,30 +62,25 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_47A9529B".
+ * via the `definition` "LexicalNodes_0568D85A".
  */
-export type LexicalNodes_47A9529B =
+export type LexicalNodes_0568D85A =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_47A9529B>
+  | SerializedParagraphNode<LexicalNodes_0568D85A>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
   | SerializedUploadNode<'documents'>
-  | SerializedQuoteNode<LexicalNodes_47A9529B>
+  | SerializedQuoteNode<LexicalNodes_0568D85A>
   | SerializedRelationshipNode<
-      | 'pages'
-      | 'users'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
+      'pages' | 'users' | 'payload-kv' | 'payload-locked-documents' | 'payload-preferences' | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_47A9529B, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_47A9529B, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_47A9529B>
-  | SerializedListItemNode<LexicalNodes_47A9529B>
-  | SerializedHeadingNode<LexicalNodes_47A9529B>;
+  | SerializedAutoLinkNode<LexicalNodes_0568D85A, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_0568D85A, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_0568D85A>
+  | SerializedListItemNode<LexicalNodes_0568D85A>
+  | SerializedHeadingNode<LexicalNodes_0568D85A>;
 
 export interface Config {
   auth: {
@@ -192,7 +187,7 @@ export interface Form {
    * Choose whether to display an on-page message or redirect to a different page after they submit the form.
    */
   confirmationType?: ('message' | 'redirect') | null;
-  confirmationMessage?: LexicalRichText<LexicalNodes_47A9529B>;
+  confirmationMessage?: LexicalRichText<LexicalNodes_0568D85A>;
   redirect?: {
     type?: ('reference' | 'custom') | null;
     reference?: {
@@ -215,7 +210,7 @@ export interface Form {
         /**
          * Enter the message that should be sent in this email.
          */
-        message?: LexicalRichText<LexicalNodes_47A9529B> | null;
+        message?: LexicalRichText<LexicalNodes_0568D85A> | null;
         id?: string | null;
       }[]
     | null;
@@ -268,7 +263,7 @@ export interface Email {
  * via the `definition` "Message".
  */
 export interface Message {
-  message?: LexicalRichText<LexicalNodes_47A9529B> | null;
+  message?: LexicalRichText<LexicalNodes_0568D85A> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'message';
@@ -1060,7 +1055,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -1075,7 +1070,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

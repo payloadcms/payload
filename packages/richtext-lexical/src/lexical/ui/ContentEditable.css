@@ -7,8 +7,8 @@
     outline: 0;
     padding-top: var(--spacer-2);
     padding-bottom: var(--spacer-2);
-    padding-left: 0;
-    padding-right: 0;
+    padding-inline-start: 0;
+    padding-inline-end: 0;
 
     &:focus-visible {
       outline: none !important;
@@ -21,6 +21,7 @@
 
   .rich-text-lexical--show-gutter
     > .rich-text-lexical__wrap
+    > .rich-text-lexical__editor-content
     > .editor-container
     > .editor-scroller
     > .editor {
@@ -33,21 +34,23 @@
     .rich-text-lexical.rich-text-lexical--show-gutter {
       &.error:not(:hover) {
         > .rich-text-lexical__wrap
+          > .rich-text-lexical__editor-content
           > .editor-container
           > .editor-scroller
           > .editor
           > .ContentEditable__root::before {
-          border-left: 2px solid var(--color-border-danger);
+          border-inline-start: var(--stroke-width-medium) solid var(--color-border-danger);
         }
       }
 
       &.error:hover {
         > .rich-text-lexical__wrap
+          > .rich-text-lexical__editor-content
           > .editor-container
           > .editor-scroller
           > .editor
           > .ContentEditable__root::before {
-          border-left: 2px solid var(--color-border-danger);
+          border-inline-start: var(--stroke-width-medium) solid var(--color-border-danger);
         }
       }
     }
@@ -68,11 +71,12 @@
     .rich-text-lexical.rich-text-lexical--show-gutter {
       &.error {
         > .rich-text-lexical__wrap
+          > .rich-text-lexical__editor-content
           > .editor-container
           > .editor-scroller
           > .editor
           > .ContentEditable__root::before {
-          border-left: 2px solid var(--color-border-danger);
+          border-inline-start: var(--stroke-width-medium) solid var(--color-border-danger);
         }
       }
     }

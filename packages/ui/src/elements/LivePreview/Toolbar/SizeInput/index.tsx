@@ -96,6 +96,7 @@ export const PreviewFrameSizeInput: React.FC<{
       onStep={handleStep}
       path={axis === 'x' ? 'live-preview-width' : 'live-preview-height'}
       prefix={axis === 'x' ? 'W' : 'H'}
+      size="medium"
       step={1}
       value={internalState || 0}
     />

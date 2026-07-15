@@ -116,6 +116,25 @@ export const ruTranslations: DefaultTranslationsObject = {
       'На вашей панели нет виджетов. Вы можете добавить их из меню "Панель управления", расположенного в верхней панели.',
     resetLayout: 'Сбросить Макет',
     searchWidgets: 'Поиск виджетов...',
+    widgetCollectionRequired: 'Collection является обязательным.',
+    widgetConfigurationError: 'Ошибка конфигурации виджета',
+    widgetInvalidCollection: 'Коллекция "{{collection}}" не существует.',
+    widgetInvalidFilterField:
+      'Поле фильтра «{{field}}» не существует в коллекции «{{collection}}».',
+    widgetInvalidSortField:
+      'Поле сортировки "{{field}}" не существует в коллекции "{{collection}}".',
+    widgetLimitLabel: 'Ограничение',
+    widgetNonSortableSortField:
+      'Поле сортировки "{{field}}" не может быть отсортировано в коллекции "{{collection}}".',
+    widgetQueryError: 'Не удалось загрузить документы для этого виджета.',
+    widgetRecentlyViewedEmpty: 'Вы ещё не просматривали ни одного документа.',
+    widgetRecentlyViewedTitle: 'Вы недавно просмотрели',
+    widgetSelectCollectionFirst: 'Выберите коллекцию перед выбором сортировки',
+    widgetSelectSortField: 'Выберите поле для сортировки',
+    widgetSortDirectionLabel: 'Направление сортировки',
+    widgetSortFieldLabel: 'Сортировать поле',
+    widgetTitleFallback: 'Запрос к Collection',
+    widgetTitleLabel: 'Заголовок',
   },
   error: {
     accountAlreadyActivated: 'Этот аккаунт уже был активирован.',
@@ -186,6 +205,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     addRelationship: 'Добавить Отношения',
     addUpload: 'Добавить загрузку',
     block: 'Блок',
+    blockName: 'Название блока',
     blocks: 'Блоки',
     blockType: 'Тип Блока',
     chooseBetweenCustomTextOrDocument:

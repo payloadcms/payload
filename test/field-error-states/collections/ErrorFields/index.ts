@@ -238,6 +238,47 @@ export const ErrorFieldsCollection: CollectionConfig = {
       ],
     },
     {
+      name: 'arrayWithMinRows',
+      type: 'array',
+      labels: {
+        plural: 'Min Rows',
+        singular: 'Min Row',
+      },
+      minRows: 2,
+      fields: [
+        {
+          name: 'name',
+          type: 'text',
+        },
+      ],
+      label: 'With Min Rows',
+    },
+    {
+      name: 'blocksWithMinRows',
+      type: 'blocks',
+      labels: {
+        plural: 'Min Rows Blocks',
+        singular: 'Min Rows Block',
+      },
+      minRows: 2,
+      blocks: [
+        {
+          slug: 'minRowsBlock',
+          labels: {
+            plural: 'Min Rows Blocks',
+            singular: 'Min Rows Block',
+          },
+          fields: [
+            {
+              name: 'name',
+              type: 'text',
+            },
+          ],
+        },
+      ],
+      label: 'With Min Rows Blocks',
+    },
+    {
       name: 'group',
       type: 'group',
       fields: [

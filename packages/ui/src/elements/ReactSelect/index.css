@@ -7,7 +7,7 @@
     .rs__control {
       position: relative;
       width: 100%;
-      min-height: var(--field-min-height);
+      min-height: var(--field-min-height-large);
       background: var(--field-color-bg);
       border: var(--stroke-width-small) solid var(--field-color-border);
       border-radius: var(--field-border-radius);
@@ -57,7 +57,7 @@
       position: absolute;
       right: var(--spacer-1);
       top: -1px; /* Adjust for border */
-      min-height: var(--field-min-height);
+      min-height: var(--field-min-height-large);
       display: flex;
     }
 
@@ -91,7 +91,7 @@
     border-radius: var(--radius-medium);
     box-shadow: var(--elevation-400-menu-panel);
     background: var(--color-bg);
-    /* overflow: clip; */
+    overflow: clip;
   }
 
   .rs__menu--placement-bottom {

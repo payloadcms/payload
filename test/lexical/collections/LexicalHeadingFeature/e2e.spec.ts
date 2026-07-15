@@ -1,12 +1,12 @@
 import { expect, test } from '@playwright/test'
-import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { lexicalHeadingFeatureSlug } from '../../slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { ensureCompilationIsDone } from '../../../__helpers/e2e/helpers.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { lexicalHeadingFeatureSlug } from '../../slugs.js'
 import { LexicalHelpers } from '../utils.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -38,6 +38,7 @@ describe('Lexical Heading Feature', () => {
     const url = new AdminUrlUtil(serverURL, lexicalHeadingFeatureSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
 

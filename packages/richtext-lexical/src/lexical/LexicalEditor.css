@@ -30,21 +30,23 @@
 
   .rich-text-lexical--show-gutter
     > .rich-text-lexical__wrap
+    > .rich-text-lexical__editor-content
     > .editor-container
     > .editor-scroller
     > .editor
     > div
     > .LexicalEditorTheme__placeholder {
-    left: var(--spacer-5);
+    inset-inline-start: var(--spacer-5);
   }
 
   .rich-text-lexical:not(.rich-text-lexical--show-gutter)
     > .rich-text-lexical__wrap
+    > .rich-text-lexical__editor-content
     > .editor-container
     > .editor-scroller
     > .editor
     > div
     > .LexicalEditorTheme__placeholder {
-    left: 0;
+    inset-inline-start: 0;
   }
 }

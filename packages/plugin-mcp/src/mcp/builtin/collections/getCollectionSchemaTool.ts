@@ -1,3 +1,5 @@
+import { getAccessResults } from 'payload'
+
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
@@ -6,12 +8,7 @@ export const getCollectionSchemaTool = defineCollectionTool({
   access: (args) => {
     const permissions = args.permissions?.collections?.[args.collectionSlug]
 
-    return (
-      defaultAccess(args) &&
-      Boolean(
-        permissions?.create || permissions?.delete || permissions?.read || permissions?.update,
-      )
-    )
+    return defaultAccess(args) && Boolean(permissions?.create || permissions?.update)
   },
   annotations: {
     destructiveHint: false,
@@ -21,8 +18,28 @@ export const getCollectionSchemaTool = defineCollectionTool({
     title: 'Get Collection Schema',
   },
   description: 'Get the input schema for creating or updating documents in a collection.',
-}).handler(({ collectionSlug, req }) => {
-  const inputSchema = getCollectionInputSchema({ collectionSlug, req })
+}).handler(async ({ authorizedMCP, collectionSlug, req }) => {
+  const permissions = authorizedMCP.overrideAccess
+    ? null
+    : (await getAccessResults({ req })).collections?.[collectionSlug]
+
+  if (!authorizedMCP.overrideAccess && !permissions?.create && !permissions?.update) {
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Error: MCP access to "getCollectionSchema" is not enabled for collection "${collectionSlug}"`,
+        },
+      ],
+      isError: true,
+    }
+  }
+
+  const inputSchema = getCollectionInputSchema({
+    collectionSlug,
+    req,
+    ...(permissions ? { permissions } : {}),
+  })
 
   if (!inputSchema) {
     return {
@@ -31,16 +48,29 @@ export const getCollectionSchemaTool = defineCollectionTool({
     }
   }
 
+  const uploadConfig = req.payload.collections[collectionSlug]?.config.upload
+  const maxFileSize = req.payload.config.upload.limits?.fileSize
+  const upload = uploadConfig
+    ? {
+        enabled: true,
+        filesRequiredOnCreate: uploadConfig.filesRequiredOnCreate !== false,
+        mimeTypes: uploadConfig.mimeTypes ?? ['*/*'],
+        sources: [...(uploadConfig.pasteURL !== false ? ['url'] : []), 'base64'],
+        ...(typeof maxFileSize === 'number' && Number.isFinite(maxFileSize) ? { maxFileSize } : {}),
+      }
+    : { enabled: false }
+
   return {
     content: [
       {
         type: 'text',
-        text: `Schema for collection "${collectionSlug}":\n\`\`\`json\n${JSON.stringify(inputSchema)}\n\`\`\``,
+        text: `Schema for collection "${collectionSlug}":\n\`\`\`json\n${JSON.stringify(inputSchema)}\n\`\`\`\nUpload configuration:\n\`\`\`json\n${JSON.stringify(upload)}\n\`\`\``,
       },
     ],
     structuredContent: {
       collectionSlug,
       schema: inputSchema,
+      upload,
     },
   }
 })

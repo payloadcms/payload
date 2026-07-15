@@ -1,6 +1,6 @@
 import type { CollectionSlug, GlobalSlug, PayloadRequest, SanitizedConfig } from 'payload'
 
-import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/server'
+import { CfWorkerJsonSchemaValidator } from '@modelcontextprotocol/server/validators/cf-worker'
 
 import type { JsonSchemaType, MCPToolResponse } from '../../types.js'
 

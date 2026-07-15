@@ -64,7 +64,7 @@ export const RenderWidget: React.FC<{
                 background: 'var(--theme-error-50)',
                 border: 'var(--stroke-width-small) solid var(--theme-error-200)',
                 borderRadius: '4px',
-                color: 'var(--theme-error-text)',
+                color: 'var(--color-text-danger)',
                 padding: '20px',
                 textAlign: 'center',
               },

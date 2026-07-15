@@ -1,6 +1,6 @@
 'use client'
 
-import type { ClientUser, DocumentViewClientProps } from 'payload'
+import type { DocumentViewClientProps, User } from 'payload'
 
 import { formatAdminURL, hasAutosaveEnabled } from 'payload/shared'
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -234,9 +234,9 @@ export function DefaultEditView({
           documentLockState.current = {
             hasShownLockedModal: documentLockState.current?.hasShownLockedModal || false,
             isLocked: true,
-            user: lockedState.user as ClientUser,
+            user: lockedState.user as User,
           }
-          setCurrentEditor(lockedState.user as ClientUser)
+          setCurrentEditor(lockedState.user as User)
         }
 
         // Update lastUpdateTime when lock state changes
@@ -682,7 +682,8 @@ export function DefaultEditView({
     />
   ) : undefined
 
-  const shouldRenderUploadPanel = Boolean(upload)
+  const shouldRenderUploadPanel =
+    Boolean(upload) && !(operation === 'create' && upload.hideFileInputOnCreate)
   const shouldScrollFieldsOnly = shouldRenderUploadPanel
 
   return (

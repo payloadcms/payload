@@ -9,11 +9,11 @@ import {
   getCollectionVirtualFieldNames,
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { whereSchema } from '../../../utils/whereSchema.js'
 import { validateCollectionData } from '../validateEntityData.js'
+import { fileInputSchema, resolveFileInput } from './fileInput.js'
 import { formatCollectionError } from './formatCollectionError.js'
 
 const DEFAULT_DESCRIPTION =
@@ -32,7 +32,11 @@ export const updateDocumentTool = defineCollectionTool({
   description: DEFAULT_DESCRIPTION,
   input: z.object({
     id: z.union([z.string(), z.number()]).describe('The ID of the document to update').optional(),
-    data: z.record(z.string(), z.unknown()).describe('The fields to update'),
+    data: z
+      .record(z.string(), z.unknown())
+      .describe(
+        'The fields to update. Only include fields permitted by the schema returned by getCollectionSchema.',
+      ),
     depth: z
       .number()
       .describe('How many levels deep to populate relationships')
@@ -40,14 +44,16 @@ export const updateDocumentTool = defineCollectionTool({
       .default(0),
     draft: z
       .boolean()
-      .describe('Whether to update the document as a draft')
+      .describe(
+        'Only if getCollectionSchema includes _status; otherwise _status does not exist. true saves only a draft version; false updates main and versions. data._status: "published" overrides true.',
+      )
       .optional()
       .default(false),
     fallbackLocale: z
       .string()
       .describe('Optional: fallback locale code to use when requested locale is not available')
       .optional(),
-    filePath: z.string().describe('File path for file uploads').optional(),
+    file: fileInputSchema.optional(),
     locale: z
       .string()
       .describe(
@@ -64,6 +70,12 @@ export const updateDocumentTool = defineCollectionTool({
       .describe('Whether to overwrite existing files')
       .optional()
       .default(false),
+    publishAllLocales: z
+      .boolean()
+      .describe(
+        'For collections with localized publishing status, whether publishing should affect every locale. Set false with locale to publish only that locale.',
+      )
+      .optional(),
     select: z
       .record(z.string(), z.unknown())
       .describe(
@@ -86,10 +98,11 @@ export const updateDocumentTool = defineCollectionTool({
     depth,
     draft,
     fallbackLocale,
-    filePath,
+    file: fileInput,
     locale,
     overrideLock,
     overwriteExistingFiles,
+    publishAllLocales,
     select,
     where,
   } = input
@@ -119,6 +132,7 @@ export const updateDocumentTool = defineCollectionTool({
     }
 
     const parsedData = transformPointDataToPayload(inputData)
+    const file = await resolveFileInput({ collectionSlug, input: fileInput, req })
 
     const whereClause: Where = where ?? {}
 
@@ -129,11 +143,12 @@ export const updateDocumentTool = defineCollectionTool({
         data: parsedData,
         depth,
         draft,
+        overrideAccess: authorizedMCP.overrideAccess,
         overrideLock,
         req,
-        ...localAPIDefaults(authorizedMCP),
-        ...(filePath ? { filePath } : {}),
+        ...(file ? { file } : {}),
         ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
+        ...(publishAllLocales !== undefined ? { publishAllLocales } : {}),
         ...(locale ? { locale } : {}),
         ...(fallbackLocale ? { fallbackLocale } : {}),
         ...(select ? { select: select as SelectType } : {}),
@@ -155,12 +170,13 @@ export const updateDocumentTool = defineCollectionTool({
       data: parsedData,
       depth,
       draft,
+      overrideAccess: authorizedMCP.overrideAccess,
       overrideLock,
       req,
       where: whereClause,
-      ...localAPIDefaults(authorizedMCP),
-      ...(filePath ? { filePath } : {}),
+      ...(file ? { file } : {}),
       ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
+      ...(publishAllLocales !== undefined ? { publishAllLocales } : {}),
       ...(locale ? { locale } : {}),
       ...(fallbackLocale ? { fallbackLocale } : {}),
       ...(select ? { select: select as SelectType } : {}),

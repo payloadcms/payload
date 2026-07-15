@@ -6,7 +6,7 @@ import {
   Forbidden,
   type JobTaskStatus,
   type Payload,
-  type TypedUser,
+  type User,
 } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -27,7 +27,7 @@ describe('Queues - Payload', () => {
   let payload: Payload
   let restClient: NextRESTClient
   let token: string
-  let user: TypedUser
+  let user: User
 
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit

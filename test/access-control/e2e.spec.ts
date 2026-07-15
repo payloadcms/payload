@@ -159,22 +159,34 @@ describe('Access Control', () => {
     test('ensure field with update access control is readOnly during both initial load and after saving', async () => {
       test.setTimeout(TEST_TIMEOUT_LONG)
 
+      const isTanStack = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
+
       async function waitForFormState(action: 'reload' | 'save') {
-        await assertNetworkRequests(
-          page,
-          '/admin/collections/field-restricted-update-based-on-data',
-          async () => {
-            if (action === 'save') {
-              await saveDocAndAssert(page)
-            } else {
-              await page.reload()
-            }
-          },
-          {
-            allowedNumberOfRequests: action === 'save' ? 2 : 1,
-            minimumNumberOfRequests: action === 'save' ? 2 : 1,
-          },
-        )
+        if (isTanStack) {
+          if (action === 'save') {
+            await saveDocAndAssert(page)
+          } else {
+            await page.reload()
+          }
+          // eslint-disable-next-line playwright/no-networkidle
+          await page.waitForLoadState('networkidle')
+        } else {
+          await assertNetworkRequests(
+            page,
+            '/admin/collections/field-restricted-update-based-on-data',
+            async () => {
+              if (action === 'save') {
+                await saveDocAndAssert(page)
+              } else {
+                await page.reload()
+              }
+            },
+            {
+              allowedNumberOfRequests: action === 'save' ? 2 : 1,
+              minimumNumberOfRequests: action === 'save' ? 2 : 1,
+            },
+          )
+        }
       }
       // Reproduces a bug where the shape of the `data` object passed to the field update access control function is incorrect
       // after saving the document, and correct on initial load.
@@ -887,6 +899,15 @@ describe('Access Control', () => {
   describe('restricting update access to auth fields', () => {
     let existingDoc: ReadOnlyCollection
     beforeAll(async () => {
+      const existing = await payload.find({
+        collection: authSlug,
+        where: { email: { equals: 'test@payloadcms.com' } },
+        limit: 1,
+      })
+      for (const doc of existing.docs) {
+        await payload.delete({ collection: authSlug, id: doc.id })
+      }
+
       existingDoc = await payload.create({
         collection: authSlug,
         data: {
@@ -894,6 +915,12 @@ describe('Access Control', () => {
           password: 'test',
         },
       })
+    })
+
+    afterAll(async () => {
+      if (existingDoc?.id) {
+        await payload.delete({ collection: authSlug, id: existingDoc.id })
+      }
     })
     test('should show email as readonly when user does not have update permission', async () => {
       await page.goto(authFields.edit(existingDoc.id))
@@ -1698,7 +1725,7 @@ describe('Access Control', () => {
   describe('blocks field access control', () => {
     test('should respect field-level access control for blocks fields', async () => {
       await page.goto(blocksFieldAccessUrl.create)
-      await expect(page.locator('.doc-header__title')).toContainText('[Untitled]')
+      await expect(page.locator('.doc-header__title')).toContainText('Untitled')
 
       // Editable blocks field should allow adding blocks
       const editableBlocksField = page.locator('#field-editableBlocks')

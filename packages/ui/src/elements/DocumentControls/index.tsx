@@ -1,10 +1,10 @@
 'use client'
 import type {
-  ClientUser,
   Data,
   SanitizedCollectionConfig,
   SanitizedCollectionPermission,
   SanitizedGlobalPermission,
+  User,
 } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
@@ -85,7 +85,7 @@ export const DocumentControls: React.FC<{
   readonly redirectAfterDuplicate?: boolean
   readonly redirectAfterRestore?: boolean
   readonly slug: SanitizedCollectionConfig['slug']
-  readonly user?: ClientUser
+  readonly user?: User
   /**
    * Controls how the document controls render.
    * - `default`: full controls bar (meta + actions), used on the edit page.
@@ -380,6 +380,7 @@ export const DocumentControls: React.FC<{
             renderButton={({ active, ...buttonProps }) => (
               <Button
                 {...buttonProps}
+                aria-label={t('general:moreOptions')}
                 buttonStyle="ghost"
                 className={`${baseClass}__popup-button`}
                 icon={<MoreIcon />}

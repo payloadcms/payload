@@ -25,6 +25,7 @@ jobs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       needs_tests: ${{ steps.filter.outputs.needs_tests }}
       templates: ${{ steps.filter.outputs.templates }}
+      build_approvals: ${{ steps.filter.outputs.build_approvals }}
     steps:
       # https://github.com/actions/virtual-environments/issues/1187
       - name: tune linux network
@@ -53,11 +54,18 @@ jobs:
               - 'package.json'
             templates:
               - 'templates/**'
+            build_approvals:
+              - '.github/workflows/main.yml'
+              # Any dependency-graph change (packages/* or the blank workspace member) lands in
+              # the root lockfile; that, plus the allowlist itself, is what can introduce drift.
+              - 'pnpm-lock.yaml'
+              - 'packages/create-payload-app/src/lib/configure-pnpm-builds.ts'
       - name: Log filter results
         run: |
           echo "needs_build: ${{ steps.filter.outputs.needs_build }}"
           echo "needs_tests: ${{ steps.filter.outputs.needs_tests }}"
           echo "templates: ${{ steps.filter.outputs.templates }}"
+          echo "build_approvals: ${{ steps.filter.outputs.build_approvals }}"
 
   # Detects upstream Next.js canary publishes that are missing `@next/env` or
   # `@next/eslint-plugin-next` for the same version (would break
@@ -304,14 +312,18 @@ jobs:
   tests-e2e:
     runs-on: ubuntu-24.04
     needs: [e2e-matrix, e2e-prep]
-    name: E2E - ${{ matrix.suite }}${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.cacheComponents && ' [cacheComponents]' || '' }}
+    name: E2E - ${{ matrix.suite }} [${{ matrix.framework }}]${{ matrix.total-shards > 1 && format(' ({0}/{1})', matrix.shard, matrix.total-shards) || '' }}${{ matrix.cacheComponents && ' [cacheComponents]' || '' }}
     timeout-minutes: 45
+    # TanStack Start suites are optional for now: their failures must not block the
+    # `all-green` gate. `matrix.optional` is true for tanstack-start entries (see e2e-matrix.ts).
+    continue-on-error: ${{ matrix.optional }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.e2e-matrix.outputs.matrix) }}
     env:
       SUITE_NAME: ${{ matrix.suite }}
       PAYLOAD_CACHE_COMPONENTS: ${{ matrix.cacheComponents && 'true' || '' }}
+      PAYLOAD_FRAMEWORK: ${{ matrix.framework }}
     steps:
       - uses: actions/checkout@v5
 
@@ -350,8 +362,9 @@ jobs:
 
       - name: Store Playwright's Version
         run: |
-          # Extract the version number using a more targeted regex pattern with awk
-          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          # `exit` after the first match: v11's `pnpm ls` lists the dep across every workspace
+          # project, and a multi-line value would break the GITHUB_ENV write.
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2; exit}')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
@@ -373,8 +386,9 @@ jobs:
       - name: E2E Tests
         # E2E Test Execution Strategy:
         #
-        # The e2e.config.ts defines each test suite with: { file, shards, parallel? }
+        # The e2e.config.ts defines each test suite with: { file, framework?, shards, parallel? }
         # - shards: Number of CI runners to split this suite across
+        # - framework: Framework adapter used to boot the test app (default: next)
         # - parallel: Whether tests within the suite can run concurrently (default: false)
         #
         # Flags explained:
@@ -397,17 +411,18 @@ jobs:
         #   Suites with parallel=true (e.g. LexicalFullyFeatured) use the default 16 workers.
         #
         # Note: The e2e-prep job runs prepare-run-test-against-prod:ci once and uploads the result
-        # as an artifact. This job downloads that artifact, so we use test:e2e:prod:run which skips preparation.
-        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.shard }}.json pnpm test:e2e:prod:run ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
+        # as an artifact. This job downloads that artifact, so we skip preparation. Each shard runs a
+        # real production server (next build / vite build, ~10s), booted per shard by runE2E.
+        run: PLAYWRIGHT_JSON_OUTPUT_NAME=results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json pnpm test:e2e:prod:server:run:noturbo ${{ matrix.suite }} --shard=${{ matrix.shard }}/${{ matrix.total-shards }} --fully-parallel${{ matrix.parallel == false && ' --workers=1' || '' }}
         env:
-          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.shard }}.json
+          PLAYWRIGHT_JSON_OUTPUT_NAME: results_${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}.json
           NEXT_TELEMETRY_DISABLED: 1
           PAYLOAD_DATABASE: mongodb
 
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: always()
         with:
-          name: test-results-${{ matrix.suite }}_${{ matrix.shard }}${{ matrix.cacheComponents && '_cc' || '' }}
+          name: test-results-${{ matrix.suite }}_${{ matrix.framework }}_${{ matrix.shard }}${{ matrix.cacheComponents && '_cc' || '' }}
           path: test/test-results/
           if-no-files-found: ignore
           retention-days: 1
@@ -424,8 +439,6 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [changes, build]
     if: needs.changes.outputs.needs_build == 'true'
-    # Non-blocking until templates are updated for 4.x breaking changes.
-    continue-on-error: true
     name: build-template-${{ matrix.template }}-${{ matrix.database }}
     strategy:
       fail-fast: false
@@ -478,8 +491,9 @@ jobs:
 
       - name: Store Playwright's Version
         run: |
-          # Extract the version number using a more targeted regex pattern with awk
-          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2}')
+          # `exit` after the first match: v11's `pnpm ls` lists the dep across every workspace
+          # project, and a multi-line value would break the GITHUB_ENV write.
+          PLAYWRIGHT_VERSION=$(pnpm ls @playwright/test --depth=0 | awk '/@playwright\/test/ {print $2; exit}')
           echo "Playwright's Version: $PLAYWRIGHT_VERSION"
           echo "PLAYWRIGHT_VERSION=$PLAYWRIGHT_VERSION" >> $GITHUB_ENV
 
@@ -514,6 +528,21 @@ jobs:
           POSTGRES_URL: ${{ steps.db.outputs.POSTGRES_URL }}
           MONGODB_URL: ${{ steps.db.outputs.MONGODB_URL }}
           NEXT_TELEMETRY_DISABLED: 1
+
+  # Fails if create-payload-app's build-script allowlist drifts from the blank template's deps:
+  # scaffolds blank, installs it standalone under pnpm v11, and asserts no ERR_PNPM_IGNORED_BUILDS.
+  check-template-build-approvals:
+    runs-on: ubuntu-24.04
+    needs: [changes, build]
+    if: needs.changes.outputs.build_approvals == 'true'
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Node setup
+        uses: ./.github/actions/setup
+
+      - name: Check create-payload-app build approvals
+        run: pnpm --filter scripts check-template-build-approvals
 
   tests-type-generation:
     runs-on: ubuntu-24.04

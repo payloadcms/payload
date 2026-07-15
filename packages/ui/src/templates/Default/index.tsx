@@ -206,6 +206,16 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                         })
                       : undefined
                   }
+                  CustomLogoutButton={
+                    components?.logout?.Button
+                      ? RenderServerComponent({
+                          clientProps,
+                          Component: components.logout.Button,
+                          importMap: payload.importMap,
+                          serverProps,
+                        })
+                      : undefined
+                  }
                   settingsItemGroups={settingsItemGroups}
                 />
                 {children}

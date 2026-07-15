@@ -82,6 +82,7 @@ jobs:
             storage-uploadthing
             storage-vercel-blob
             storage-s3
+            tanstack-start
             translations
             ui
             templates

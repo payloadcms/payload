@@ -6,7 +6,7 @@
     cursor: grab;
     opacity: 0;
     position: absolute;
-    left: 0;
+    inset-inline-start: 0;
     top: 0;
     will-change: transform;
     background-color: var(--color-bg);
@@ -46,11 +46,12 @@
 
   .rich-text-lexical--show-gutter
     > .rich-text-lexical__wrap
+    > .rich-text-lexical__editor-content
     > .editor-container
     > .editor-scroller
     > .editor {
     > .draggable-block-target-line {
-      left: var(--spacer-5);
+      inset-inline-start: var(--spacer-5);
     }
   }
 
@@ -60,7 +61,7 @@
     border-radius: var(--radius-small);
     height: var(--spacer-1);
     position: absolute;
-    left: 0;
+    inset-inline-start: 0;
     top: 0;
     opacity: 0;
     will-change: transform;

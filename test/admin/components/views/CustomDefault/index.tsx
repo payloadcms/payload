@@ -1,13 +1,9 @@
-import LinkImport from 'next/link.js'
-import { redirect } from 'next/navigation.js'
-import React from 'react'
-
-const Link = 'default' in LinkImport ? LinkImport.default : LinkImport
-
 import type { AdminViewServerProps } from 'payload'
 
 import { Button, SetStepNav } from '@payloadcms/ui'
 import { DefaultTemplate } from '@payloadcms/ui/rsc'
+import { redirect } from 'next/navigation.js'
+import React from 'react'
 
 import { customViewPath } from '../../../shared.js'
 import './index.scss'
@@ -66,16 +62,11 @@ export function CustomDefaultView({ initPageResult, params, searchParams }: Admi
           Template, so the sidebar is rendered.
         </p>
         <div className="custom-view__controls">
-          <Button buttonStyle="secondary" el="link" Link={Link} to={`${adminRoute}`}>
+          <Button buttonStyle="secondary" el="link" to={`${adminRoute}`}>
             Go to Dashboard
           </Button>
           &nbsp; &nbsp; &nbsp;
-          <Button
-            buttonStyle="secondary"
-            el="link"
-            Link={Link}
-            to={`${adminRoute}/${customViewPath}`}
-          >
+          <Button buttonStyle="secondary" el="link" to={`${adminRoute}/${customViewPath}`}>
             Go to Custom View
           </Button>
         </div>

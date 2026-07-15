@@ -7,9 +7,11 @@
  * Usage: node .github/workflows/e2e.config.ts
  */
 
+import type { TestConfig } from './utilities/e2e-matrix.ts'
+
 import { createE2EConfig } from './utilities/e2e-matrix.ts'
 
-export default createE2EConfig([
+const nextSuites: TestConfig[] = [
   { file: '_community', shards: 1 },
   { file: 'a11y', shards: 1 },
   { file: 'access-control', shards: 2 },
@@ -102,4 +104,12 @@ export default createE2EConfig([
   { file: 'trash', shards: 2 },
   { file: 'versions', shards: 3 },
   { file: 'uploads', shards: 3 },
-])
+]
+
+// tanstack-start suites are temporarily disabled in CI.
+// const tanstackSuites: TestConfig[] = nextSuites.map((suite) => ({
+//   ...suite,
+//   framework: 'tanstack-start' as const,
+// }))
+
+export default createE2EConfig([...nextSuites])

@@ -1,5 +1,5 @@
 import type { Field } from '../../fields/config/types.js'
-import type { TypedUser } from '../../index.js'
+import type { User } from '../../index.js'
 import type { TaskConfig } from '../../queues/config/types/taskTypes.js'
 import type { SchedulePublishTaskInput } from './types.js'
 
@@ -21,21 +21,28 @@ export const getSchedulePublishTask = ({
 
       const userID = input.user
 
-      let user: null | TypedUser = null
+      let user: null | User = null
 
       if (userID) {
         user = (await req.payload.findByID({
           id: userID,
           collection: adminUserSlug,
           depth: 0,
-        })) as TypedUser
+        })) as User
 
         user.collection = adminUserSlug
       }
 
       if (input.doc) {
+        // input.doc.value is always a string (#10481); coerce back to the real ID type.
+        const idType =
+          req.payload.collections[input.doc.relationTo]?.customIDType ??
+          req.payload.db?.defaultIDType ??
+          'text'
+        const id = idType === 'number' ? Number(input.doc.value) : input.doc.value
+
         await req.payload.update({
-          id: input.doc.value,
+          id,
           collection: input.doc.relationTo,
           data: {
             _status,

@@ -40,6 +40,7 @@ describe('Lexical On Demand', () => {
       const url = new AdminUrlUtil(serverURL, 'OnDemandForm')
       lexical = new LexicalHelpers(page)
       await page.goto(url.create)
+      await expect(lexical.editor.first()).toBeVisible()
       await lexical.editor.first().focus()
     })
     test('lexical is rendered on demand within form', async ({ page }) => {
@@ -77,6 +78,7 @@ describe('Lexical On Demand', () => {
       const url = new AdminUrlUtil(serverURL, 'OnDemandOutsideForm')
       lexical = new LexicalHelpers(page)
       await page.goto(url.create)
+      await expect(lexical.editor.first()).toBeVisible()
       await lexical.editor.first().focus()
     })
     test('lexical is rendered on demand outside form', async ({ page }) => {

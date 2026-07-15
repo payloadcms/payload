@@ -147,7 +147,14 @@ export const ListQueryProvider: React.FC<ListQueryProps> = ({
     if (window.location.search !== search) {
       setQuery(newQuery)
       // Important: do not use router.replace here to avoid re-rendering.
-      window.history.replaceState(null, '', search)
+      // Go through the adapter's replaceState so routers that observe history
+      // mutations (e.g. TanStack) don't re-run their loader and double-load the
+      // view. Falls back to the native call for adapters that don't implement it.
+      if (router.replaceState) {
+        router.replaceState(search)
+      } else {
+        window.history.replaceState(null, '', search)
+      }
     }
   })
 

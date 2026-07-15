@@ -80,6 +80,7 @@
     --sidebar-wrap-top: initial;
     --sidebar-wrap-height: initial;
     --sidebar-wrap-flex-shrink: initial;
+    display: none;
   }
 
   .document-fields__sidebar {
@@ -242,6 +243,7 @@
     }
 
     .document-fields__sidebar {
+      padding-top: var(--gutter-h);
       padding-bottom: calc(var(--spacer-5) * 2);
       overflow: visible;
     }
@@ -256,5 +258,12 @@
 
   .drawer .document-fields__edit {
     padding: var(--gutter-h);
+  }
+
+  /* In a drawer the main and sidebar fields stack without the page's vertical
+     divider, so add a top border to the sidebar fields to separate them from
+     the main fields above. */
+  .drawer .document-fields__sidebar-wrap {
+    border-top: var(--stroke-width-small) solid var(--color-border);
   }
 }

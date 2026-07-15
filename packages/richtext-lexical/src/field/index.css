@@ -7,7 +7,7 @@
     }
 
     & > .field-error.tooltip {
-      right: auto;
+      inset-inline-end: auto;
       position: static;
       margin-bottom: 0.2em;
       max-width: fit-content;
@@ -27,7 +27,7 @@
     gap: var(--spacer-2);
 
     label.field-label:not(.unstyled) {
-      margin-right: unset;
+      margin-inline-end: unset;
       padding-bottom: unset;
     }
   }
@@ -46,9 +46,6 @@
         @keyframes fadeInBackground {
           from {
             background-color: transparent;
-          }
-          to {
-            background-color: var(--color-bg-hover);
           }
           to {
             background-color: var(--color-bg-hover);

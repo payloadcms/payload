@@ -27,6 +27,13 @@ const start = async () => {
     return
   }
 
+  // tsx 4.22.4's synchronous loader leaks its namespace query onto Node built-ins on Node 23.5+.
+  // Force the stable asynchronous loader path, matching payload/bin.js.
+  const nodeModule = await import('node:module')
+  if (typeof nodeModule.default.registerHooks === 'function') {
+    nodeModule.default.registerHooks = undefined
+  }
+
   const { tsImport } = await import('tsx/esm/api')
   const { runMcpStdio } = await tsImport('./dist/stdio.js', baseURL)
   await runMcpStdio()

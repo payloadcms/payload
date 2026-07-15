@@ -1,13 +1,13 @@
 import type { AcceptedLanguages } from '@payloadcms/translations'
-import type { ReadonlyRequestCookies } from 'next/dist/server/web/spec-extension/adapters/request-cookies.js'
 
 import { extractHeaderLanguage } from '@payloadcms/translations'
 
+import type { CookieStore } from '../admin/adapters/cookies.js'
 import type { SanitizedConfig } from '../config/types.js'
 
 type GetRequestLanguageArgs = {
   config: SanitizedConfig
-  cookies: Map<string, string> | ReadonlyRequestCookies
+  cookies: CookieStore | Map<string, string>
   defaultLanguage?: AcceptedLanguages
   headers: Request['headers']
 }

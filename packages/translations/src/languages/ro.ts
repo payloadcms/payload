@@ -117,6 +117,24 @@ export const roTranslations: DefaultTranslationsObject = {
       'Nu există widget-uri pe tabloul dvs. de bord. Le puteți adăuga din meniul "Tablou de bord" situat în bara superioară.',
     resetLayout: 'Resetează Aspectul',
     searchWidgets: 'Caută widgeturi...',
+    widgetCollectionRequired: 'Colecția este obligatorie.',
+    widgetConfigurationError: 'Eroare de configurare a widgetului',
+    widgetInvalidCollection: 'Colecția "{{collection}}" nu există.',
+    widgetInvalidFilterField:
+      'Câmpul de filtrare "{{field}}" nu există în colecția "{{collection}}".',
+    widgetInvalidSortField: 'Câmpul de sortare "{{field}}" nu există în colecția "{{collection}}".',
+    widgetLimitLabel: 'Limită',
+    widgetNonSortableSortField:
+      'Câmpul de sortare "{{field}}" nu poate fi sortat în colecția "{{collection}}".',
+    widgetQueryError: 'Nu s-au putut încărca documentele pentru acest widget.',
+    widgetRecentlyViewedEmpty: 'Nu ați vizualizat încă niciun document.',
+    widgetRecentlyViewedTitle: 'Ați vizualizat recent',
+    widgetSelectCollectionFirst: 'Selectați o colecție înainte de a alege ordonarea',
+    widgetSelectSortField: 'Selectați un câmp după care să sortați',
+    widgetSortDirectionLabel: 'Direcție de sortare',
+    widgetSortFieldLabel: 'Sortare Field',
+    widgetTitleFallback: 'Interogare de colecție',
+    widgetTitleLabel: 'Titlu',
   },
   error: {
     accountAlreadyActivated: 'Acest cont a fost deja activat.',
@@ -188,6 +206,7 @@ export const roTranslations: DefaultTranslationsObject = {
     addRelationship: 'Adăugați o relație',
     addUpload: 'Adăugați un fișier',
     block: 'Bloc',
+    blockName: 'Nume de bloc',
     blocks: 'Blocuri',
     blockType: 'Tip de bloc',
     chooseBetweenCustomTextOrDocument:

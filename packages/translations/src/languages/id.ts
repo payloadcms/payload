@@ -115,6 +115,24 @@ export const idTranslations: DefaultTranslationsObject = {
       'Tidak ada widget di dasbor Anda. Anda dapat menambahkannya dari menu "Dashboard" yang terletak di bar atas.',
     resetLayout: 'Atur Ulang Tata Letak',
     searchWidgets: 'Cari widget...',
+    widgetCollectionRequired: 'Collection wajib diisi.',
+    widgetConfigurationError: 'Kesalahan konfigurasi widget',
+    widgetInvalidCollection: 'Collection "{{collection}}" tidak ada.',
+    widgetInvalidFilterField:
+      'Filter field "{{field}}" tidak ada pada Collection "{{collection}}".',
+    widgetInvalidSortField: 'Field urut "{{field}}" tidak ada pada Collection "{{collection}}".',
+    widgetLimitLabel: 'Batas',
+    widgetNonSortableSortField:
+      'Field pengurutan "{{field}}" tidak dapat diurutkan pada Collection "{{collection}}".',
+    widgetQueryError: 'Tidak dapat memuat dokumen untuk widget ini.',
+    widgetRecentlyViewedEmpty: 'Anda belum melihat dokumen apa pun.',
+    widgetRecentlyViewedTitle: 'Baru-baru ini Anda lihat',
+    widgetSelectCollectionFirst: 'Pilih sebuah Collection sebelum memilih urutan',
+    widgetSelectSortField: 'Pilih Field untuk diurutkan',
+    widgetSortDirectionLabel: 'Arah Pengurutan',
+    widgetSortFieldLabel: 'Urutkan Field',
+    widgetTitleFallback: 'Kueri Collection',
+    widgetTitleLabel: 'Judul',
   },
   error: {
     accountAlreadyActivated: 'Akun ini sudah diaktifkan.',
@@ -184,6 +202,7 @@ export const idTranslations: DefaultTranslationsObject = {
     addRelationship: 'Tambah Hubungan',
     addUpload: 'Tambah Unggahan',
     block: 'Blok',
+    blockName: 'Nama blok',
     blocks: 'blok',
     blockType: 'Tipe Blok',
     chooseBetweenCustomTextOrDocument:

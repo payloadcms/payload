@@ -7,9 +7,7 @@
     justify-content: space-between;
     z-index: var(--z-nav);
     gap: var(--spacer-2);
-    padding: var(--spacer-2-5);
-    padding-right: var(--spacer-2-5);
-    gap: var(--spacer-2);
+    padding: var(--spacer-2-5) var(--gutter-h);
     flex-wrap: wrap;
     border-bottom: var(--stroke-width-small) solid var(--color-border);
     background-color: var(--color-bg);
@@ -177,7 +175,6 @@
     }
 
     .doc-controls {
-      padding: var(--spacer-2-5) var(--gutter-h);
       gap: var(--spacer-2);
       flex-wrap: nowrap;
     }

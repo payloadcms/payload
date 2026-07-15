@@ -7,6 +7,8 @@ import type {
   GlobalPermission,
   Permission,
 } from '../../auth/types.js'
+import type { SanitizedCollectionConfig } from '../../collections/config/types.js'
+import type { SanitizedGlobalConfig } from '../../globals/config/types.js'
 import type { DefaultDocumentIDType } from '../../index.js'
 import type { AllOperations, JsonObject, PayloadRequest } from '../../types/index.js'
 import type { BlockReferencesPermissions } from './getEntityPermissions.js'
@@ -52,8 +54,10 @@ const setPermission = (
 export const populateFieldPermissions = ({
   id,
   blockReferencesPermissions,
+  collection,
   data,
   fields,
+  global,
   operations,
   parentPermissionsObject,
   permissionsObject,
@@ -61,8 +65,12 @@ export const populateFieldPermissions = ({
   req,
 }: {
   blockReferencesPermissions: BlockReferencesPermissions
+  /** The collection which the fields belong to. If the fields belong to a global, this will be null. */
+  collection: null | SanitizedCollectionConfig
   data: JsonObject | undefined
   fields: Field[]
+  /** The global which the fields belong to. If the fields belong to a collection, this will be null. */
+  global: null | SanitizedGlobalConfig
   id?: DefaultDocumentIDType
   /**
    * Operations to check access for
@@ -92,15 +100,29 @@ export const populateFieldPermissions = ({
         const fieldPermissions: FieldPermissions = permissionsObject[field.name]!
 
         if ('access' in field && field.access && typeof field.access[operation] === 'function') {
-          const accessResult = field.access[operation]({
-            id,
-            data,
-            doc: data,
-            req,
-            // We cannot include siblingData or blockData here, as we do not have siblingData/blockData available once we reach block or array
-            // rows, as we're calculating schema permissions, which do not include individual rows.
-            // For consistency, it's thus better to never include the siblingData and blockData
-          })
+          const accessResult = field.access[operation](
+            collection
+              ? {
+                  id,
+                  collection,
+                  data,
+                  doc: data,
+                  req,
+                  // We cannot include siblingData or blockData here, as we do not have siblingData/blockData available once we reach block or array
+                  // rows, as we're calculating schema permissions, which do not include individual rows.
+                  // For consistency, it's thus better to never include the siblingData and blockData
+                }
+              : {
+                  id,
+                  data,
+                  doc: data,
+                  global: global!,
+                  req,
+                  // We cannot include siblingData or blockData here, as we do not have siblingData/blockData available once we reach block or array
+                  // rows, as we're calculating schema permissions, which do not include individual rows.
+                  // For consistency, it's thus better to never include the siblingData and blockData
+                },
+          )
 
           // Handle both sync and async access results
           if (isThenable(accessResult)) {
@@ -128,8 +150,10 @@ export const populateFieldPermissions = ({
         populateFieldPermissions({
           id,
           blockReferencesPermissions,
+          collection,
           data,
           fields: field.fields,
+          global,
           operations,
           parentPermissionsObject: fieldPermissions,
           permissionsObject: fieldPermissions.fields,
@@ -221,8 +245,10 @@ export const populateFieldPermissions = ({
           populateFieldPermissions({
             id,
             blockReferencesPermissions,
+            collection,
             data,
             fields: block.fields,
+            global,
             operations,
             parentPermissionsObject: blockPermission,
             permissionsObject: blockPermission.fields,
@@ -238,8 +264,10 @@ export const populateFieldPermissions = ({
       // Field does not have a name => same parentPermissionsObject
       populateFieldPermissions({
         id,
+        collection,
         data,
         fields: field.fields,
+        global,
         operations,
         // Field does not have a name here => use parent permissions object
         blockReferencesPermissions,
@@ -289,8 +317,10 @@ export const populateFieldPermissions = ({
           populateFieldPermissions({
             id,
             blockReferencesPermissions,
+            collection,
             data,
             fields: tab.fields,
+            global,
             operations,
             parentPermissionsObject: tabPermissions,
             permissionsObject: tabPermissions.fields,
@@ -301,8 +331,10 @@ export const populateFieldPermissions = ({
           // Tab does not have a name => same parentPermissionsObject
           populateFieldPermissions({
             id,
+            collection,
             data,
             fields: tab.fields,
+            global,
             operations,
             // Tab does not have a name here => use parent permissions object
             blockReferencesPermissions,

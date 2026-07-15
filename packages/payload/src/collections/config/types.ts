@@ -8,7 +8,7 @@ import type {
   Arguments as RefreshArguments,
   Result as RefreshResult,
 } from '../../auth/operations/refresh.js'
-import type { Auth, ClientUser, IncomingAuthType } from '../../auth/types.js'
+import type { Auth, IncomingAuthType } from '../../auth/types.js'
 import type {
   Access,
   AfterErrorHookArgs,
@@ -72,6 +72,13 @@ import type {
 } from '../operations/utilities/types.js'
 
 export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
+
+/**
+ * The ID type of a given collection (e.g. `string` or `number`), taken from its generated type.
+ * Use this instead of the project-wide {@link DefaultDocumentIDType} when the collection slug is
+ * known, since each collection can have its own ID type.
+ */
+export type IDTypeForCollectionSlug<TSlug extends CollectionSlug> = DataFromCollectionSlug<TSlug>['id']
 
 export type SelectFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollectionSelect[TSlug]
 
@@ -496,7 +503,7 @@ export type CollectionAdminOptions = {
   /**
    * Exclude the collection from the admin nav and routes
    */
-  hidden?: ((args: { user: ClientUser }) => boolean) | boolean
+  hidden?: ((args: { user: PayloadRequest['user'] }) => boolean) | boolean
   /**
    * Additional fields to be searched via the full text search
    */

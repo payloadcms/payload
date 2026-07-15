@@ -1,6 +1,6 @@
 'use client'
 
-import type { SlugFieldClientProps } from 'payload'
+import type { SlugFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
@@ -11,6 +11,7 @@ import { FieldError } from '../../fields/FieldError/index.js'
 import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useForm } from '../../forms/Form/index.js'
 import { useField } from '../../forms/useField/index.js'
+import { withCondition } from '../../forms/withCondition/index.js'
 import { LockIcon } from '../../icons/Lock/index.js'
 import { LockOpenIcon } from '../../icons/LockOpen/index.js'
 import { RefreshIcon } from '../../icons/Refresh/index.js'
@@ -21,11 +22,16 @@ import './index.css'
 
 const baseClass = 'slug-field-component'
 
+type SlugFieldProps = {
+  readonly field: SlugFieldClient
+  readonly path?: string
+}
+
 /**
  * @experimental This component is experimental and may change or be removed in the future. Use at your own risk.
  */
-export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSlug }) => {
-  const { admin, label, required } = field
+const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
+  const { admin, label, required, useAsSlug } = field
   const { description, placeholder, readOnly: readOnlyFromProps } = admin || {}
 
   const { i18n, t } = useTranslation()
@@ -170,3 +176,5 @@ export const SlugField: React.FC<SlugFieldClientProps> = ({ field, path, useAsSl
     </div>
   )
 }
+
+export const SlugField = withCondition(SlugFieldComponent)
