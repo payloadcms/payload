@@ -8,8 +8,8 @@ keywords: uploads, images, media, storage, adapters, s3, vercel, google cloud, a
 
 Payload offers additional storage adapters to handle file uploads. These adapters allow you to store files in different locations, such as Amazon S3, Vercel Blob Storage, Google Cloud Storage, and more.
 
-| Service              | Package                                                                                                           |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| Service              | Package                                                                                                          |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | Vercel Blob          | [`@payloadcms/storage-vercel-blob`](https://github.com/payloadcms/payload/tree/3.x/packages/storage-vercel-blob) |
 | AWS S3               | [`@payloadcms/storage-s3`](https://github.com/payloadcms/payload/tree/3.x/packages/storage-s3)                   |
 | Azure                | [`@payloadcms/storage-azure`](https://github.com/payloadcms/payload/tree/3.x/packages/storage-azure)             |
@@ -216,7 +216,26 @@ pnpm add @payloadcms/storage-azure
 
 - Configure the `collections` object to specify which collections should use the Azure Blob adapter. The slug _must_ match one of your existing collection slugs.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
-- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client. You must allow CORS PUT method to your website.
+- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client.
+
+- Client uploads send each file in a single request, which Azure caps at ~5GB. To upload larger files, set `clientUploads: { chunkLargeFiles: true }` — this uploads through the Azure Blob SDK, which splits the file into blocks and raises the limit to Azure's block-blob maximum.
+
+<Banner type="warning">
+  **`chunkLargeFiles` and CORS:** With `chunkLargeFiles: true`, the Azure Blob SDK
+  sends additional `x-ms-*` headers, so the browser issues a CORS preflight. Your
+  storage account's CORS rules must allow the `OPTIONS` and `PUT` methods **and**
+  those headers. Configure a CORS rule on the Blob service (Storage account →
+  **Resource sharing (CORS)**):
+
+| Field           | Value                                                    |
+| --------------- | -------------------------------------------------------- |
+| Allowed origins | Your site origin (e.g. `https://example.com`)            |
+| Allowed methods | `GET,PUT,OPTIONS` (`HEAD` if reading in-browser)         |
+| Allowed headers | `*` (or at minimum `x-ms-*,content-type,content-length`) |
+| Exposed headers | `*`                                                      |
+| Max age         | `3600`                                                   |
+
+</Banner>
 
 ```ts
 import { azureStorage } from '@payloadcms/storage-azure'
@@ -452,13 +471,13 @@ This plugin is configurable to work across many different Payload collections. A
 
 ## Collection-specific options
 
-| Option                        | Type                                                                                                              | Description                                                                                                                                                                                                   |
-| ----------------------------- | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Option                        | Type                                                                                                             | Description                                                                                                                                                                                                   |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `adapter` \*                  | [Adapter](https://github.com/payloadcms/payload/blob/3.x/packages/plugin-cloud-storage/src/types.ts#L49)         | Pass in the adapter that you'd like to use for this collection. You can also set this field to `null` for local development if you'd like to bypass cloud storage in certain scenarios and use local storage. |
-| `disableLocalStorage`         | `boolean`                                                                                                         | Choose to disable local storage on this collection. Defaults to `true`.                                                                                                                                       |
-| `disablePayloadAccessControl` | `true`                                                                                                            | Set to `true` to disable Payload's Access Control. [More](#payload-access-control)                                                                                                                            |
+| `disableLocalStorage`         | `boolean`                                                                                                        | Choose to disable local storage on this collection. Defaults to `true`.                                                                                                                                       |
+| `disablePayloadAccessControl` | `true`                                                                                                           | Set to `true` to disable Payload's Access Control. [More](#payload-access-control)                                                                                                                            |
 | `generateFileURL`             | [GenerateFileURL](https://github.com/payloadcms/payload/blob/3.x/packages/plugin-cloud-storage/src/types.ts#L67) | Override the generated file URL with one that you create.                                                                                                                                                     |
-| `prefix`                      | `string`                                                                                                          | Set to `media/images` to upload files inside `media/images` folder in the bucket.                                                                                                                             |
+| `prefix`                      | `string`                                                                                                         | Set to `media/images` to upload files inside `media/images` folder in the bucket.                                                                                                                             |
 
 ## Prefix Composition
 

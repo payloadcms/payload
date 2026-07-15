@@ -14,7 +14,32 @@ pnpm add @payloadcms/storage-azure
 
 - Configure the `collections` object to specify which collections should use the Azure Blob Storage adapter. The slug _must_ match one of your existing collection slugs.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
-- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client. You must allow CORS PUT method to your website.
+- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client.
+
+### Large client uploads (files over ~5GB)
+
+By default, client uploads (`clientUploads: true`) send each file in a single request, which Azure caps at ~5GB. To upload larger files, set `chunkLargeFiles: true`:
+
+```ts
+azureStorage({
+  // ...
+  clientUploads: {
+    chunkLargeFiles: true,
+  },
+})
+```
+
+This uploads through the Azure Blob SDK, which splits the file into blocks (`Put Block` + `Put Block List`) and raises the limit to Azure's block-blob maximum (~190TiB).
+
+Because the SDK sends additional `x-ms-*` headers, the browser issues a CORS preflight, so your storage account's CORS rules must allow the `OPTIONS` and `PUT` methods **and** those headers. Configure a CORS rule on the Blob service (Storage account → **Resource sharing (CORS)**):
+
+| Field           | Value                                                    |
+| --------------- | -------------------------------------------------------- |
+| Allowed origins | Your site origin (e.g. `https://example.com`)            |
+| Allowed methods | `GET,PUT,OPTIONS` (add `HEAD` if reading in-browser)     |
+| Allowed headers | `*` (or at minimum `x-ms-*,content-type,content-length`) |
+| Exposed headers | `*`                                                      |
+| Max age         | `3600`                                                   |
 
 ```ts
 import { azureStorage } from '@payloadcms/storage-azure'
