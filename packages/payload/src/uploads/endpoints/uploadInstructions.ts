@@ -27,7 +27,7 @@ export const uploadInstructionsEndpoint: Endpoint = {
 
     const uploadRequest = upload as UploadInstructionsRequest
     const collection = req.payload.collections[uploadRequest.collectionSlug]
-    const uploadInstructions = collection?.config?.upload.uploadInstructions
+    const uploadInstructions = collection?.config?.upload?.uploadInstructions
 
     if (!collection || !uploadInstructions) {
       throw new APIError(
