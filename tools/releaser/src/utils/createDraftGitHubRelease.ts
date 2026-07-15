@@ -6,6 +6,7 @@ type Args = {
 }
 
 type GitHubRelease = {
+  draft: boolean
   html_url: string
   id: number
   tag_name: string
@@ -21,6 +22,14 @@ export const createDraftGitHubRelease = async ({
   tag,
 }: Args): Promise<{ releaseUrl: string }> => {
   const existing = await findReleaseByTag({ fetchImpl, tag })
+
+  // Only a still-draft release is safe to overwrite. A matching PUBLISHED release
+  // means this tag already shipped — refuse rather than clobber its live notes.
+  if (existing && !existing.draft) {
+    throw new Error(
+      `Refusing to overwrite the already-published GitHub release for ${tag}. Edit it manually if the update is intended.`,
+    )
+  }
 
   // https://docs.github.com/en/rest/releases/releases?apiVersion=2022-11-28
   const url = existing

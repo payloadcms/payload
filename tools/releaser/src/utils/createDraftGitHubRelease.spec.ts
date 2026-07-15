@@ -34,7 +34,9 @@ describe('createDraftGitHubRelease', () => {
     const fetchImpl = vi
       .fn()
       .mockResolvedValueOnce(
-        jsonResponse([{ id: 42, tag_name: 'v4.0.0-canary.10', html_url: 'https://gh/existing' }]),
+        jsonResponse([
+          { id: 42, draft: true, tag_name: 'v4.0.0-canary.10', html_url: 'https://gh/existing' },
+        ]),
       )
       .mockResolvedValueOnce(jsonResponse({ html_url: 'https://gh/existing' }))
 
@@ -51,6 +53,28 @@ describe('createDraftGitHubRelease', () => {
     expect(patchCall[1].method).toBe('PATCH')
   })
 
+  it('should refuse to overwrite an already-published release', async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce(
+        jsonResponse([
+          { id: 7, draft: false, tag_name: 'v4.0.0-canary.10', html_url: 'https://gh/published' },
+        ]),
+      )
+
+    await expect(
+      createDraftGitHubRelease({
+        branch: 'main',
+        tag: 'v4.0.0-canary.10',
+        releaseNotes: 'notes',
+        fetchImpl: fetchImpl as unknown as typeof fetch,
+      }),
+    ).rejects.toThrow(/already-published/)
+
+    // Only the list call happened — no PATCH/POST was attempted.
+    expect(fetchImpl).toHaveBeenCalledTimes(1)
+  })
+
   it('should find a match on page 2 (pagination)', async () => {
     const fullPage = Array.from({ length: 100 }, (_, i) => ({
       id: i,
@@ -59,7 +83,7 @@ describe('createDraftGitHubRelease', () => {
     const fetchImpl = vi
       .fn()
       .mockResolvedValueOnce(jsonResponse(fullPage)) // page 1: 100 items, no match
-      .mockResolvedValueOnce(jsonResponse([{ id: 999, tag_name: 'v4.0.0-beta.0' }])) // page 2: match
+      .mockResolvedValueOnce(jsonResponse([{ id: 999, draft: true, tag_name: 'v4.0.0-beta.0' }])) // page 2: match
       .mockResolvedValueOnce(jsonResponse({ html_url: 'https://gh/p2' })) // PATCH
 
     const { releaseUrl } = await createDraftGitHubRelease({
