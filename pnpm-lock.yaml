@@ -2444,6 +2444,9 @@ importers:
       '@payloadcms/plugin-ecommerce':
         specifier: workspace:*
         version: link:../packages/plugin-ecommerce
+      '@payloadcms/plugin-exif':
+        specifier: workspace:*
+        version: link:../packages/plugin-exif
       '@payloadcms/plugin-form-builder':
         specifier: workspace:*
         version: link:../packages/plugin-form-builder
