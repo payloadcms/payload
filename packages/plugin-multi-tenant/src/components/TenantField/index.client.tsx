@@ -150,11 +150,7 @@ export const TenantField = ({ debug, unique, ...fieldArgs }: Props) => {
     if (!unique) {
       /** Editing a non-global tenant document */
       return (
-        <AssignTenantFieldModal
-          afterModalClose={() => undefined}
-          afterModalOpen={afterModalOpen}
-          onConfirm={onConfirm}
-        >
+        <AssignTenantFieldModal afterModalOpen={afterModalOpen} onConfirm={onConfirm}>
           <FieldPathContext value={tenantField.path}>
             <FieldContext value={localTenantField}>
               <TenantRelationshipField fieldArgs={fieldArgs} unique={unique} />
