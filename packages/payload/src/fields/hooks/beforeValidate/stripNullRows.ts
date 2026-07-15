@@ -1,9 +1,9 @@
 import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 
 /**
- * Strips null rows from an array or blocks field value in place and warns if any were found.
- * Null slots can appear when the Admin UI form state desync leaves null indices after
- * rapidly adding, deleting, or reordering rows.
+ * Strips invalid rows (null, undefined, primitives, arrays) from an array or blocks field
+ * value in place and warns if any were found. Rows must be plain objects; anything else
+ * can crash downstream code that assigns properties to them (e.g. `row.blockType = ...`).
  *
  * Returns the cleaned array typed as JsonObject[].
  */
@@ -14,12 +14,14 @@ export function stripNullRows(
   logger: PayloadRequest['payload']['logger'],
   siblingData: JsonObject,
 ): JsonObject[] {
-  const nullCount = rows.reduce((n: number, row) => (row == null ? n + 1 : n), 0)
-  if (nullCount > 0) {
+  const filteredRows = rows.filter(
+    (row): row is JsonObject => row != null && typeof row === 'object' && !Array.isArray(row),
+  )
+  if (filteredRows.length !== rows.length) {
     logger.warn({
-      msg: `Stripped ${nullCount} null row(s) from ${fieldType} field "${fieldName}". This is likely caused by a form state desync in the Admin UI.`,
+      msg: `Stripped ${rows.length - filteredRows.length} invalid row(s) from ${fieldType} field "${fieldName}". Rows must be plain objects.`,
     })
-    siblingData[fieldName] = rows.filter((row) => row != null)
+    siblingData[fieldName] = filteredRows
   }
   return siblingData[fieldName] as JsonObject[]
 }

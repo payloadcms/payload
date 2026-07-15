@@ -2530,15 +2530,17 @@ describe('Fields', () => {
     })
 
     it('should not crash when array contains a null element', async () => {
-      await expect(
-        payload.create({
-          collection,
-          data: {
-            // @ts-expect-error testing null in array
-            items: [null, { text: 'required', localizedText: 'valid' }],
-          },
-        }),
-      ).resolves.toBeDefined()
+      const doc = await payload.create({
+        collection,
+        data: {
+          // @ts-expect-error testing null in array
+          items: [null, { text: 'required', localizedText: 'valid' }],
+        },
+      })
+
+      // The null should be stripped; the valid row should survive intact.
+      expect(doc.items).toHaveLength(1)
+      expect(doc.items[0].text).toBe('required')
     })
   })
 
@@ -3412,21 +3414,24 @@ describe('Fields', () => {
     })
 
     it('should not crash when blocks array contains a null element', async () => {
-      await expect(
-        payload.create({
-          collection: blockFieldsSlug,
-          data: {
-            // @ts-expect-error — intentionally injecting null to simulate the broken client state
-            blocks: [
-              null,
-              {
-                blockType: 'text',
-                text: 'valid block',
-              },
-            ],
-          },
-        }),
-      ).resolves.toBeDefined()
+      const doc = await payload.create({
+        collection: blockFieldsSlug,
+        data: {
+          // @ts-expect-error — intentionally injecting null to simulate the broken client state
+          blocks: [
+            null,
+            {
+              blockType: 'content',
+              text: 'valid block',
+            },
+          ],
+        },
+      })
+
+      // The null should be stripped; the valid block should survive intact.
+      expect(doc.blocks).toHaveLength(1)
+      expect(doc.blocks[0].blockType).toBe('content')
+      expect(doc.blocks[0].text).toBe('valid block')
     })
   })
 
