@@ -58,14 +58,18 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        let filename, mimeType, size, uploadReference
-        const collectionSlug = req.routeParams?.collection as string
+        let collectionSlug, filename, mimeType, size, uploadReference
         try {
-          ;({ filename, mimeType, size, uploadReference } = JSON.parse(fields.file))
+          ;({ collectionSlug, filename, mimeType, size, uploadReference } = JSON.parse(fields.file))
         } catch {
           throw new APIError('A file name is required.', 400)
         }
-        const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
+        collectionSlug = req.routeParams?.collection || collectionSlug
+        const uploadConfig = req.payload.collections[collectionSlug]?.config.upload
+
+        if (!uploadConfig) {
+          throw new APIError('Invalid upload collection.', 400)
+        }
 
         if (!uploadConfig.handlers) {
           throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
