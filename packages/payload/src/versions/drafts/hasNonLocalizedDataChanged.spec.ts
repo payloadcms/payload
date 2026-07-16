@@ -170,6 +170,38 @@ describe('hasNonLocalizedDataChanged', () => {
     ).toBe(false)
   })
 
+  it('should ignore empty non-localized groups when the stored document omits them', () => {
+    expect(
+      hasNonLocalizedDataChanged({
+        after: {
+          meta: {},
+          title: { en: 'Draft EN' },
+        },
+        before: {
+          title: { en: 'Published EN' },
+        },
+        configBlockReferences: [],
+        fields,
+      }),
+    ).toBe(false)
+  })
+
+  it('should ignore empty non-localized arrays when the stored document omits them', () => {
+    expect(
+      hasNonLocalizedDataChanged({
+        after: {
+          rows: [],
+          title: { en: 'Draft EN' },
+        },
+        before: {
+          title: { en: 'Published EN' },
+        },
+        configBlockReferences: [],
+        fields,
+      }),
+    ).toBe(false)
+  })
+
   it('should detect non-localized array structure changes', () => {
     expect(
       hasNonLocalizedDataChanged({
@@ -178,6 +210,21 @@ describe('hasNonLocalizedDataChanged', () => {
             { id: 'row-1', sharedLabel: 'One' },
             { id: 'row-2', sharedLabel: 'Two' },
           ],
+        },
+        before: {
+          rows: [{ id: 'row-1', sharedLabel: 'One' }],
+        },
+        configBlockReferences: [],
+        fields,
+      }),
+    ).toBe(true)
+  })
+
+  it('should detect removing all rows from a non-localized array', () => {
+    expect(
+      hasNonLocalizedDataChanged({
+        after: {
+          rows: [],
         },
         before: {
           rows: [{ id: 'row-1', sharedLabel: 'One' }],
@@ -217,6 +264,27 @@ describe('hasNonLocalizedDataChanged', () => {
         },
         before: {
           blocks: [],
+        },
+        configBlockReferences: [],
+        fields,
+      }),
+    ).toBe(true)
+  })
+
+  it('should detect removing all rows from a non-localized blocks field', () => {
+    expect(
+      hasNonLocalizedDataChanged({
+        after: {
+          blocks: [],
+        },
+        before: {
+          blocks: [
+            {
+              blockType: 'textBlock',
+              id: 'block-1',
+              sharedBlockText: 'One',
+            },
+          ],
         },
         configBlockReferences: [],
         fields,
