@@ -227,7 +227,7 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
         .POST(signedURLEndpoint, {
           body: signedURLBody(
             'media-with-prefix',
-            '../../other-prefix/document.js',
+            '../../other-prefix/document.png',
             file.length,
             'image/png',
           ),
@@ -236,7 +236,7 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
-      expect(url).toContain('document.js')
+      expect(url).toContain('document.png')
       expect(url).not.toContain('..')
       expect(url).not.toContain('other-prefix')
     })
