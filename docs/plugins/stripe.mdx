@@ -97,7 +97,7 @@ const res = await fetch(`/api/stripe/rest`, {
     // Authorization: `JWT ${token}` // NOTE: do this if not in a browser (i.e. curl or Postman)
   },
   body: JSON.stringify({
-    stripeMethod: 'stripe.subscriptions.list',
+    stripeMethod: 'subscriptions.list',
     stripeArgs: [
       {
         customer: 'abc',
