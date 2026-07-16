@@ -35,6 +35,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
+import { getLocalizedDraftStatus } from '../../versions/drafts/getLocalizedDraftStatus.js'
 import { hasNonLocalizedDataChanged } from '../../versions/drafts/hasNonLocalizedDataChanged.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
@@ -272,47 +273,19 @@ export const updateOperation = async <
     }
 
     const localization = config?.localization
-    const shouldDraftAllLocales =
-      isSavingDraft &&
-      localization &&
-      hasLocalizeStatusEnabled(globalConfig) &&
-      hasNonLocalizedDataChanged({
+    if (isSavingDraft && localization && hasLocalizeStatusEnabled(globalConfig)) {
+      const shouldDraftAllLocales = hasNonLocalizedDataChanged({
         after: result,
         before: globalJSON,
         configBlockReferences: config?.blocks ?? [],
         fields: globalConfig.fields,
       })
 
-    if (shouldDraftAllLocales && localization) {
-      if (!result._status || typeof result._status !== 'object' || Array.isArray(result._status)) {
-        result._status = {}
-      }
-
-      for (const localeCode of localization.localeCodes) {
-        ;(result._status as Record<string, unknown>)[localeCode] = 'draft'
-      }
-    } else if (isSavingDraft && localization && hasLocalizeStatusEnabled(globalConfig)) {
-      const existingStatus =
-        globalJSON._status &&
-        typeof globalJSON._status === 'object' &&
-        !Array.isArray(globalJSON._status)
-          ? globalJSON._status
-          : {}
-
-      if (locale === 'all') {
-        const statusByLocale = { ...existingStatus }
-
-        for (const localeCode of localization.localeCodes) {
-          statusByLocale[localeCode] = 'draft'
-        }
-
-        result._status = statusByLocale
-      } else {
-        result._status = {
-          ...existingStatus,
-          [locale!]: 'draft',
-        }
-      }
+      result._status = getLocalizedDraftStatus({
+        existingStatus: shouldDraftAllLocales ? result._status : globalJSON._status,
+        locale: shouldDraftAllLocales ? 'all' : locale!,
+        localeCodes: localization.localeCodes,
+      })
     }
 
     // /////////////////////////////////////
