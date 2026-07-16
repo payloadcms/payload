@@ -1,13 +1,14 @@
 @layer payload-default {
   .file-manager {
+    --file-fields-max-width: 600px;
     position: relative;
-    flex: 1 0 0;
     align-self: stretch;
     width: 100%;
     margin-bottom: 0;
     border-radius: 0;
     background: var(--color-bg-secondary);
-    min-height: 100px;
+    min-height: 400px;
+    border-bottom: var(--stroke-width-small) solid var(--color-border);
 
     .dropzone {
       border: none;
@@ -16,25 +17,23 @@
   }
 
   .file-manager__panel {
-    position: sticky;
-    top: var(--doc-controls-height);
-    height: calc(
-      100dvh - var(--app-header-height) - var(--doc-controls-height) - var(--doc-header-height)
-    );
+    position: static;
+    height: auto;
+    min-height: 400px;
     display: flex;
     flex-direction: column;
     /* Visible so the mini carousel can grow past the panel to fill the area left behind as the
        app/doc headers scroll away (see MiniCarousel). */
     overflow: visible;
-    /* Scroll-driven: grow height as the app header and doc header scroll away, matching the
-       extra space they free up. Mirrors the MiniCarousel approach. Falls back to static height. */
   }
 
   .file-manager__content {
     display: flex;
-    flex-direction: row;
-    flex: 1 1 0;
-    min-height: 0;
+    flex-direction: column;
+    /* flex-basis: auto (not 0) so this sizes to its content when the panel's height is auto
+       (stacked layout) instead of collapsing — flex-basis 0 only makes sense when the panel
+       has a definite height to grow into (see the min-width override below). */
+    flex: 1 1 auto;
     overflow: visible;
   }
 
@@ -44,7 +43,11 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: var(--spacer-4);
+    gap: var(--spacer-4);
+    padding-top: var(--spacer-4);
+    padding-bottom: var(--spacer-4);
+    padding-left: var(--gutter-h);
+    padding-right: var(--gutter-h);
     position: relative;
   }
 
@@ -60,8 +63,8 @@
 
   .file-manager__remove {
     position: absolute;
-    top: var(--spacer-2);
-    right: var(--spacer-2);
+    top: var(--gutter-h);
+    right: var(--gutter-h);
     margin: 0;
     z-index: 1;
   }
@@ -135,20 +138,33 @@
     color: var(--color-text-tertiary);
   }
 
-  @container edit-main (max-width: 1024px) {
+  @container edit-main (min-width: 1024px) {
     .file-manager {
-      min-height: 400px;
-      border-bottom: var(--stroke-width-small) solid var(--color-border);
+      min-height: 100px;
+      border-bottom: none;
+    }
+
+    .file-manager__upload {
+      padding: var(--spacer-4);
+    }
+
+    .file-manager__file-adjustments {
+      max-width: var(--file-fields-max-width);
     }
 
     .file-manager__panel {
-      position: static;
-      height: auto;
-      min-height: 400px;
+      position: sticky;
+      top: var(--doc-controls-height);
+      /* Scroll-driven: grow height as the app header and doc header scroll away, matching the
+         extra space they free up. Mirrors the MiniCarousel approach. Falls back to static height. */
+      height: calc(
+        100dvh - var(--app-header-height) - var(--doc-controls-height) - var(--doc-header-height)
+      );
     }
 
     .file-manager__content {
-      flex-direction: column;
+      flex-direction: row;
+      min-height: 0;
     }
   }
 }
