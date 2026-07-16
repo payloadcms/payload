@@ -1,4 +1,4 @@
-import type { Payload, UploadInstructionsFile } from 'payload'
+import type { Payload, UploadInstructions } from 'payload'
 
 import { del, list } from '@vercel/blob'
 import { put } from '@vercel/blob/client'
@@ -28,7 +28,7 @@ type VercelBlobUploadInstructions = {
     pathname: string
     token: string
   }
-  file: UploadInstructionsFile
+  file: UploadInstructions['file']
   name: 'uploadToVercelBlob'
   type: 'dispatch'
 }
