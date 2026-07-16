@@ -5,6 +5,7 @@ import { formatAdminURL } from 'payload/shared'
 
 export type VercelBlobClientUploadHandlerExtra = {
   addRandomSuffix: boolean
+  allowOverwrite: boolean
   useCompositePrefixes: boolean
 }
 
@@ -21,7 +22,7 @@ export const VercelBlobClientUploadHandler =
       apiRoute,
       collectionSlug,
       docPrefix,
-      extra: { addRandomSuffix, useCompositePrefixes = false },
+      extra: { addRandomSuffix, allowOverwrite, useCompositePrefixes = false },
       file,
       prefix,
       serverHandlerPath,
