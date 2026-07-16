@@ -34,16 +34,40 @@ export const hasNonLocalizedDataChanged = ({
 }: HasNonLocalizedDataChangedArgs): boolean => {
   const beforeSharedData = normalizeNonLocalizedData({
     configBlockReferences,
-    data: before,
+    data: removeUndefinedValues(before),
     fields,
   })
   const afterSharedData = normalizeNonLocalizedData({
     configBlockReferences,
-    data: after,
+    data: removeUndefinedValues(after),
     fields,
   })
 
   return stableStringify(beforeSharedData) !== stableStringify(afterSharedData)
+}
+
+const removeUndefinedValues = <T>(value: T): T => {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => removeUndefinedValues(item))
+      .filter((item) => typeof item !== 'undefined') as T
+  }
+
+  if (value && typeof value === 'object') {
+    const cleanedValue: Record<string, unknown> = {}
+
+    for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+      const cleanedItem = removeUndefinedValues(item)
+
+      if (typeof cleanedItem !== 'undefined') {
+        cleanedValue[key] = cleanedItem
+      }
+    }
+
+    return cleanedValue as T
+  }
+
+  return value
 }
 
 const normalizeNonLocalizedData = ({

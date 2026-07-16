@@ -252,4 +252,25 @@ describe('hasNonLocalizedDataChanged', () => {
       }),
     ).toBe(false)
   })
+
+  it('should ignore undefined values when comparing non-localized data', () => {
+    expect(
+      hasNonLocalizedDataChanged({
+        after: {
+          meta: {
+            sharedDescription: undefined,
+          },
+          rows: [{ id: 'row-1', sharedLabel: 'One' }, undefined],
+          summary: 'Shared',
+        },
+        before: {
+          meta: {},
+          rows: [{ id: 'row-1', sharedLabel: 'One' }],
+          summary: 'Shared',
+        },
+        configBlockReferences: [],
+        fields,
+      }),
+    ).toBe(false)
+  })
 })
