@@ -292,27 +292,6 @@ export const updateDocument = async <
     }
   }
 
-  if (isSavingDraft && config.localization && hasLocalizeStatusEnabled(collectionConfig)) {
-    const shouldDraftAllLocales = hasNonLocalizedDataChanged({
-      after: mergeLocalizedData({
-        configBlockReferences: config.blocks,
-        dataWithLocales: result,
-        docWithLocales,
-        fields: collectionConfig.fields,
-        localesToUpdate: config.localization.localeCodes,
-      }),
-      before: docWithLocales,
-      configBlockReferences: config.blocks,
-      fields: collectionConfig.fields,
-    })
-
-    result._status = getLocalizedDraftStatus({
-      existingStatus: shouldDraftAllLocales ? result._status : docWithLocales._status,
-      locale: shouldDraftAllLocales ? 'all' : locale,
-      localeCodes: config.localization.localeCodes,
-    })
-  }
-
   let localizedPublishData: JsonObject | null = null
 
   if (config.localization && collectionConfig.versions) {
@@ -337,6 +316,25 @@ export const updateDocument = async <
         for (const localeCode of accessibleLocaleCodes) {
           result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
         }
+      } else if (isSavingDraft) {
+        const shouldDraftAllLocales = hasNonLocalizedDataChanged({
+          after: mergeLocalizedData({
+            configBlockReferences: config.blocks,
+            dataWithLocales: result,
+            docWithLocales,
+            fields: collectionConfig.fields,
+            localesToUpdate: config.localization.localeCodes,
+          }),
+          before: docWithLocales,
+          configBlockReferences: config.blocks,
+          fields: collectionConfig.fields,
+        })
+
+        result._status = getLocalizedDraftStatus({
+          existingStatus: shouldDraftAllLocales ? result._status : docWithLocales._status,
+          locale: shouldDraftAllLocales ? 'all' : locale,
+          localeCodes: config.localization.localeCodes,
+        })
       } else if (
         !isSavingDraft &&
         result._status &&
