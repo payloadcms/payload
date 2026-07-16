@@ -94,30 +94,42 @@ const normalizeNonLocalizedData = ({
 
       switch (field.type) {
         case 'array': {
-          result[field.name] = normalizeArrayRows({
+          const normalizedRows = normalizeArrayRows({
             configBlockReferences,
             fields: field.fields,
             rows: Array.isArray(value) ? value : [],
           })
+
+          if (normalizedRows.length > 0) {
+            result[field.name] = normalizedRows
+          }
           break
         }
 
         case 'blocks': {
-          result[field.name] = normalizeBlocks({
+          const normalizedBlocks = normalizeBlocks({
             blocks: Array.isArray(value) ? value : [],
             configBlockReferences,
             fieldBlocks: field.blocks,
           })
+
+          if (normalizedBlocks.length > 0) {
+            result[field.name] = normalizedBlocks
+          }
           break
         }
 
         case 'group': {
-          result[field.name] = normalizeNonLocalizedData({
+          const normalizedGroup = normalizeNonLocalizedData({
             configBlockReferences,
             data: isJsonObject(value) ? value : {},
             fields: field.fields,
             parentIsLocalized,
           })
+
+          if (Object.keys(normalizedGroup).length > 0) {
+            result[field.name] = normalizedGroup
+          }
           break
         }
 
@@ -146,12 +158,16 @@ const normalizeNonLocalizedData = ({
           }
 
           const tabValue = data[tab.name]
-          result[tab.name] = normalizeNonLocalizedData({
+          const normalizedTab = normalizeNonLocalizedData({
             configBlockReferences,
             data: isJsonObject(tabValue) ? tabValue : {},
             fields: tab.fields,
             parentIsLocalized,
           })
+
+          if (Object.keys(normalizedTab).length > 0) {
+            result[tab.name] = normalizedTab
+          }
         } else {
           Object.assign(
             result,

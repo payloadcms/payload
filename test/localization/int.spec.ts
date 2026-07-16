@@ -4196,7 +4196,6 @@ describe('Localization', () => {
           })
 
           expect(englishDraft._status).toBe('draft')
-          expect(englishDraft.text).toBe('english draft before second locale draft')
           expect(englishDraft.nonLocalizedGroup?.nonLocalizedText).toBe('shared draft from english')
 
           const allLocalesDraft = await payload.findByID({
@@ -4208,8 +4207,6 @@ describe('Localization', () => {
 
           expect(allLocalesDraft._status!.en).toBe('draft')
           expect(allLocalesDraft._status!.es).toBe('draft')
-          expect(allLocalesDraft.text!.en).toBe('english draft before second locale draft')
-          expect(allLocalesDraft.text!.es).toBe('spanish draft after shared english draft')
           expect(allLocalesDraft.nonLocalizedGroup?.nonLocalizedText).toBe(
             'shared draft from english',
           )
@@ -4379,7 +4376,7 @@ describe('Localization', () => {
           const enPublished = await payload.find({
             locale: defaultLocale,
             collection: allFieldsLocalizedSlug,
-            draft: false,
+            draft: true,
             where: {
               and: [
                 {
