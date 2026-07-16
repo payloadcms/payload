@@ -4,14 +4,13 @@
  */
 
 /**
- * Server-only packages (Node-only or only ever used by the server bundle).
- * These are the Vite equivalent of Next.js's `serverExternalPackages`.
+ * Packages externalized during dev serve (`ssr.external`). Node's loader resolves
+ * their CJS/UMD directly; letting Vite's dev SSR transform touch them can break
+ * fragile UMD wrappers (e.g. `pluralize`, whose `this`-based global assignment
+ * throws when transformed rather than required).
  *
- * Only genuinely server-only packages belong here. A pure-JS package reachable
- * from client-safe code (e.g. `pluralize`, imported by `payload`'s `formatLabels`
- * which ships in the `browser`/`shared` export) must NOT be listed: externalizing
- * it leaves a bare specifier in a bundled client chunk that pnpm can't resolve
- * from `dist/` at runtime. Let it bundle instead.
+ * Note `pluralize` is deliberately excluded from {@link buildExternalPackages}:
+ * for the production build it must bundle (see there).
  */
 export const ssrExternalPackages: string[] = [
   'ajv',
@@ -27,6 +26,7 @@ export const ssrExternalPackages: string[] = [
   'graphql',
   'nodemailer',
   'aws4',
+  'pluralize',
   'console-table-printer',
   '@azure/storage-blob',
   '@aws-sdk/client-s3',
@@ -58,6 +58,11 @@ export const ssrExternalPackages: string[] = [
  * TypeScript source (`.ts` imported via `.js` specifiers), which only Vite's
  * transform can resolve — an externalized copy would hit Node's raw resolver and
  * fail on the `.js`→`.ts` mismatch.
+ *
+ * `pluralize` is excluded: it is reached from client-safe code (`payload`'s
+ * `formatLabels`, shipped in the `/shared` export), so externalizing it would
+ * leave a bare specifier in a bundled client chunk that pnpm can't resolve from
+ * `dist/` at runtime. It must bundle for the build.
  */
 export const buildExternalPackages: string[] = [
   'payload',
@@ -68,7 +73,7 @@ export const buildExternalPackages: string[] = [
   '@payloadcms/db-vercel-postgres',
   '@payloadcms/db-sqlite',
   '@payloadcms/db-d1-sqlite',
-  ...ssrExternalPackages,
+  ...ssrExternalPackages.filter((pkg) => pkg !== 'pluralize'),
 ]
 
 export const payloadNoExternalPatterns: Array<RegExp | string> = [
