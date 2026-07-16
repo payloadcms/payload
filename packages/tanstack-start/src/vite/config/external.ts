@@ -6,6 +6,12 @@
 /**
  * Server-only packages (Node-only or only ever used by the server bundle).
  * These are the Vite equivalent of Next.js's `serverExternalPackages`.
+ *
+ * Only genuinely server-only packages belong here. A pure-JS package reachable
+ * from client-safe code (e.g. `pluralize`, imported by `payload`'s `formatLabels`
+ * which ships in the `browser`/`shared` export) must NOT be listed: externalizing
+ * it leaves a bare specifier in a bundled client chunk that pnpm can't resolve
+ * from `dist/` at runtime. Let it bundle instead.
  */
 export const ssrExternalPackages: string[] = [
   'ajv',
@@ -21,7 +27,6 @@ export const ssrExternalPackages: string[] = [
   'graphql',
   'nodemailer',
   'aws4',
-  'pluralize',
   'console-table-printer',
   '@azure/storage-blob',
   '@aws-sdk/client-s3',
