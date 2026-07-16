@@ -6,6 +6,7 @@ import type {
 } from '@payloadcms/plugin-cloud-storage/types'
 
 import { deleteFile } from './deleteFile.js'
+import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
 import { uploadFile } from './uploadFile.js'
@@ -27,7 +28,6 @@ export function createGcsAdapter({
 }: CreateGcsAdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'gcs',
-    clientUploads,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -38,6 +38,17 @@ export function createGcsAdapter({
         prefix: urlPrefix,
         useCompositePrefixes,
       }),
+
+    uploadInstructions: {
+      enabled: Boolean(clientUploads),
+      generate: generateUploadInstructions({
+        access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+        bucket,
+        collectionPrefix: prefix,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
+    },
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
       deleteFile({
@@ -67,18 +78,18 @@ export function createGcsAdapter({
 
     staticHandler: (
       req,
-      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
+      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
     ) =>
       getFile({
         bucket,
         client: getStorageClient(),
-        clientUploadContext,
         collection,
         collectionPrefix: prefix,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,
         req,
+        uploadReference,
         useCompositePrefixes,
       }),
   })

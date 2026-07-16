@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, UploadInstructions } from 'payload'
 
 import { readFileSync } from 'fs'
 import path from 'path'
@@ -23,7 +23,7 @@ const dirname = path.dirname(filename)
 let restClient: NextRESTClient
 let payload: Payload
 
-const signedURLEndpoint = '/storage-s3-generate-signed-url'
+const signedURLEndpoint = '/upload-instructions'
 
 const signedURLBody = (
   collectionSlug: string,
@@ -49,20 +49,39 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
   it('should generate a signed upload URL', async () => {
     const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
 
-    const { url } = await restClient
+    const instructions = await restClient
       .POST(signedURLEndpoint, {
         body: signedURLBody('media', 'image.png', file.length, 'image/png'),
       })
-      .then((res) => res.json<{ url: string }>())
+      .then((res) => res.json<UploadInstructions>())
+
+    expect(instructions.type).toBe('http')
+    expect(instructions.file).toEqual({
+      uploadReference: { prefix: '' },
+      filename: 'image.png',
+      mimeType: 'image/png',
+      size: file.length,
+    })
+
+    if (instructions.type !== 'http') {
+      throw new Error('Expected HTTP upload instructions')
+    }
+
+    expect(instructions.request.method).toBe('PUT')
+    expect(instructions.request.headers).toEqual({
+      'Content-Length': String(file.length),
+      'Content-Type': 'image/png',
+    })
+    const { url } = instructions.request
 
     expect(url).toBeDefined()
 
     const uploadResponse = await fetch(url, {
-      method: 'PUT',
+      body: file,
       headers: {
         'Content-Type': 'image/png',
       },
-      body: file,
+      method: 'PUT',
     })
 
     expect(uploadResponse.ok).toBe(true)
@@ -85,10 +104,10 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
 
   it("should reject signed URL generation by access control when 'x-disallow-access' header is set", async () => {
     const response = await restClient.POST(signedURLEndpoint, {
+      body: signedURLBody('media', 'image.png', MB(1), 'image/png'),
       headers: {
         'x-disallow-access': 'true',
       },
-      body: signedURLBody('media', 'image.png', MB(1), 'image/png'),
     })
 
     expect(response.status).toBe(403)
@@ -100,7 +119,9 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     })
 
     expect(response.status).toBe(200)
-    const { url } = await response.json()
+    const {
+      request: { url },
+    } = await response.json()
     expect(url).toBeDefined()
     expect(url).toContain(getTestBucketName())
     expect(url).toContain('small-file.png')
@@ -136,7 +157,9 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     })
 
     expect(response.status).toBe(200)
-    const { url } = await response.json()
+    const {
+      request: { url },
+    } = await response.json()
     expect(url).toBeDefined()
   })
 
@@ -148,20 +171,22 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     const buffer = Buffer.alloc(actualFilesize, 0)
     const file = new Blob([buffer], { type: mimeType })
 
-    const { url } = await restClient
+    const {
+      request: { url },
+    } = await restClient
       .POST(signedURLEndpoint, {
         body: signedURLBody('media', 'bypass-file.png', declaredFilesize, mimeType),
       })
-      .then((res) => res.json<{ url: string }>())
+      .then((res) => res.json<{ request: { url: string } }>())
 
     expect(url).toBeDefined()
 
     const uploadResponse = await fetch(url, {
-      method: 'PUT',
+      body: file,
       headers: {
         'Content-Type': mimeType,
       },
-      body: file,
+      method: 'PUT',
     })
 
     if (process.env.S3_ENDPOINT?.includes('localhost')) {
@@ -179,11 +204,13 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     it('should sanitize special characters in filename', async () => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
 
-      const { url } = await restClient
+      const {
+        request: { url },
+      } = await restClient
         .POST(signedURLEndpoint, {
           body: signedURLBody('media-with-prefix', '../photo.png', file.length, 'image/png'),
         })
-        .then((res) => res.json<{ url: string }>())
+        .then((res) => res.json<{ request: { url: string } }>())
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
@@ -194,7 +221,9 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     it('should sanitize deeply nested special characters in filename', async () => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
 
-      const { url } = await restClient
+      const {
+        request: { url },
+      } = await restClient
         .POST(signedURLEndpoint, {
           body: signedURLBody(
             'media-with-prefix',
@@ -203,7 +232,7 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
             'image/png',
           ),
         })
-        .then((res) => res.json<{ url: string }>())
+        .then((res) => res.json<{ request: { url: string } }>())
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
@@ -215,11 +244,13 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     it('should sanitize backslash characters in filename', async () => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
 
-      const { url } = await restClient
+      const {
+        request: { url },
+      } = await restClient
         .POST(signedURLEndpoint, {
           body: signedURLBody('media-with-prefix', '..\\..\\photo.png', file.length, 'image/png'),
         })
-        .then((res) => res.json<{ url: string }>())
+        .then((res) => res.json<{ request: { url: string } }>())
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')
@@ -230,11 +261,13 @@ describe('@payloadcms/storage-s3 clientUploads', () => {
     it('should allow normal filenames with prefix', async () => {
       const file = readFileSync(path.resolve(dirname, '../../uploads/image.png'))
 
-      const { url } = await restClient
+      const {
+        request: { url },
+      } = await restClient
         .POST(signedURLEndpoint, {
           body: signedURLBody('media-with-prefix', 'safe-image.png', file.length, 'image/png'),
         })
-        .then((res) => res.json<{ url: string }>())
+        .then((res) => res.json<{ request: { url: string } }>())
 
       expect(url).toBeDefined()
       expect(url).toContain('test-prefix')

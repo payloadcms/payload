@@ -8,10 +8,8 @@ import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { Storage } from '@google-cloud/storage'
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import { createGcsAdapter } from './adapter.js'
-import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 
 export interface GcsStorageOptions {
   acl?: 'Private' | 'Public'
@@ -39,7 +37,7 @@ export interface GcsStorageOptions {
    */
   clientCacheKey?: string
   /**
-   * Do uploads directly on the client to bypass limits on Vercel. You must allow CORS PUT method for the bucket to your website.
+   * Upload directly to GCS instead of through Payload. You must allow CORS PUT requests from your website.
    */
   clientUploads?: ClientUploadsConfig
   /**
@@ -105,24 +103,6 @@ export const gcsStorage: GcsStorageFactory = (
     })
 
     const isPluginDisabled = gcsStorageOptions.enabled === false
-
-    initClientUploads({
-      clientHandler: '@payloadcms/storage-gcs/client#GcsClientUploadHandler',
-      collections: gcsStorageOptions.collections,
-      config: incomingConfig,
-      enabled: !isPluginDisabled && Boolean(gcsStorageOptions.clientUploads),
-      serverHandler: getGenerateSignedURLHandler({
-        access:
-          typeof gcsStorageOptions.clientUploads === 'object'
-            ? gcsStorageOptions.clientUploads.access
-            : undefined,
-        bucket: gcsStorageOptions.bucket,
-        collections: gcsStorageOptions.collections,
-        getStorageClient,
-        useCompositePrefixes: gcsStorageOptions.useCompositePrefixes,
-      }),
-      serverHandlerPath: '/storage-gcs-generate-signed-url',
-    })
 
     if (isPluginDisabled) {
       return incomingConfig

@@ -1,4 +1,5 @@
 import type { PayloadRequest } from '../types/index.js'
+import type { UploadInstructions } from '../uploads/types.js'
 
 import { APIError } from '../errors/APIError.js'
 import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js'
@@ -58,15 +59,24 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        let clientUploadContext, collectionSlug, filename, mimeType, size
+        let uploadedFile: UploadInstructions['file']
         try {
-          ;({ clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
-            fields.file,
-          ))
+          uploadedFile = JSON.parse(fields.file)
         } catch {
           throw new APIError('A file name is required.', 400)
         }
-        const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
+        const { filename, mimeType, size, uploadReference } = uploadedFile
+        const collectionSlug =
+          typeof req.routeParams?.collection === 'string'
+            ? req.routeParams.collection
+            : uploadedFile.collectionSlug
+        const uploadConfig = collectionSlug
+          ? req.payload.collections[collectionSlug]?.config.upload
+          : undefined
+
+        if (!collectionSlug || !uploadConfig) {
+          throw new APIError('Invalid upload collection.', 400)
+        }
 
         if (!uploadConfig.handlers) {
           throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
@@ -80,9 +90,9 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
             const result = await handler(req, {
               doc: null!,
               params: {
-                clientUploadContext, // Pass additional specific to adapters context returned from UploadHandler, then staticHandler can use them.
                 collection: collectionSlug,
                 filename,
+                uploadReference,
               },
             })
             if (result) {
@@ -111,10 +121,10 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
 
         req.file = {
           name: filename,
-          clientUploadContext,
           data: Buffer.from(await response.arrayBuffer()),
           mimetype: response.headers.get('Content-Type') || mimeType,
           size,
+          uploadReference,
         }
       }
     }

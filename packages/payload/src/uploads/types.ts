@@ -2,6 +2,7 @@ import type { ResizeOptions, Sharp, SharpOptions } from 'sharp'
 
 import type { CollectionConfig, TypeWithID } from '../collections/config/types.js'
 import type { PayloadComponent } from '../config/types.js'
+import type { UploadCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { WithMetadata } from './optionallyAppendMetadata.js'
 
@@ -250,10 +251,10 @@ export type UploadConfig = {
       doc: TypeWithID
       headers?: Headers
       params: {
-        clientUploadContext?: unknown
         collection: string
         filename: string
         prefix?: string
+        uploadReference?: unknown
       }
     },
   ) => Promise<Response> | Promise<void> | Response | void)[]
@@ -307,6 +308,12 @@ export type UploadConfig = {
   staticDir?: string
   trimOptions?: ImageUploadTrimOptions
   /**
+   * Adapter-provided upload instructions. Client config exposes this as a `true` marker without
+   * the server-only access and generate functions.
+   * @internal
+   */
+  uploadInstructions?: UploadInstructionsCapability
+  /**
    * Optionally append metadata to the image during processing.
    *
    * Can be a boolean or a function.
@@ -317,6 +324,52 @@ export type UploadConfig = {
    * @default false
    */
   withMetadata?: WithMetadata
+}
+
+export type UploadInstructionsAccess = (args: {
+  collectionSlug: UploadCollectionSlug
+  req: PayloadRequest
+}) => boolean | Promise<boolean>
+
+export type UploadInstructionsRequest = {
+  collectionSlug: UploadCollectionSlug
+  docPrefix?: string
+  filename: string
+  filesize: number
+  mimeType: string
+}
+
+export type UploadInstructions = {
+  file: {
+    collectionSlug?: UploadCollectionSlug
+    filename: string
+    mimeType: string
+    size: number
+    uploadReference: Record<string, unknown>
+  }
+} & (
+  | {
+      data?: unknown
+      name: string
+      type: 'dispatch'
+    }
+  | {
+      request: {
+        headers?: Record<string, string>
+        method: 'POST' | 'PUT'
+        url: string
+      }
+      type: 'http'
+    }
+)
+
+export type GenerateUploadInstructions = (
+  args: { req: PayloadRequest } & UploadInstructionsRequest,
+) => Promise<UploadInstructions> | UploadInstructions
+
+export type UploadInstructionsCapability = {
+  /** Generates upload instructions. The generator or supporting endpoint must check access. */
+  generate: GenerateUploadInstructions
 }
 export type checkFileRestrictionsParams = {
   collection: CollectionConfig
