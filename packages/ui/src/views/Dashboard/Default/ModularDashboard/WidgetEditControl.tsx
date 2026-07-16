@@ -4,6 +4,7 @@ import type { Data } from 'payload'
 
 import React, { useId } from 'react'
 
+import { Button } from '../../../../elements/Button/index.js'
 import { useModal } from '../../../../elements/Modal/index.js'
 import { EditIcon } from '../../../../icons/Edit/index.js'
 import { useConfig } from '../../../../providers/Config/index.js'
@@ -39,18 +40,16 @@ export function WidgetEditControl({
 
   return (
     <>
-      <button
+      <Button
+        aria-label={`${t('general:edit')} ${widgetID}`}
+        buttonStyle="secondary"
         className="widget-wrapper__edit-btn"
+        icon={<EditIcon size={24} />}
+        margin={false}
         onClick={() => {
           openModal(drawerSlug)
         }}
-        type="button"
-      >
-        <span className="sr-only">
-          {t('general:edit')} {widgetID}
-        </span>
-        <EditIcon />
-      </button>
+      />
       <WidgetConfigDrawer
         drawerSlug={drawerSlug}
         onSave={onSave}
