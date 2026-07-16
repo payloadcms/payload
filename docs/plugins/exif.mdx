@@ -13,11 +13,8 @@ This plugin extracts [EXIF](https://en.wikipedia.org/wiki/Exif) metadata from im
 For each targeted collection, the plugin adds an `exif` group field and a `beforeChange` hook that parses the uploaded image buffer and populates the group. The full parsed EXIF is stored as a raw JSON blob, and a small set of commonly-used attributes are promoted to dedicated fields for querying and sorting.
 
 <Banner type="info">
-  This plugin is completely open-source and the [source code can be found
-  here](https://github.com/payloadcms/payload/tree/main/packages/plugin-exif).
-  If you need help, check out our [Community
-  Help](https://payloadcms.com/community-help). If you think you've found a bug,
-  please [open a new
+  {' '}
+  If you think you've found a bug, please [open a new
   issue](https://github.com/payloadcms/payload/issues/new?assignees=&labels=plugin%3A%20exif&template=bug_report.md&title=plugin-exif%3A)
   with as much detail as possible.
 </Banner>
@@ -36,6 +33,8 @@ Install the plugin using any JavaScript package manager like [pnpm](https://pnpm
 ```bash
   pnpm add @payloadcms/plugin-exif
 ```
+
+The plugin installs the [exifr](https://www.npmjs.com/package/exifr) as a dependency and is used to parse the metadata from uploads.
 
 ## Basic Usage
 
