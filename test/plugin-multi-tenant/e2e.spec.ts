@@ -352,14 +352,39 @@ test.describe('Multi Tenant', () => {
         urlUtil: menuItemsURL,
       })
 
-      await selectDocumentTenant({
-        action: 'cancel',
+      await closeNav(page)
+      await openAssignTenantModal({ page, payload })
+      await selectInput({
         page,
-        payload,
-        tenant: 'Steel Cat',
+        multiSelect: false,
+        option: 'Steel Cat',
+        selectLocator: page.locator('.tenantField'),
       })
 
       await expect(page.locator('#action-save')).toBeDisabled()
+      await expect
+        .poll(async () => {
+          return await getSelectedTenantFilterName({ page, payload })
+        })
+        .toBe('Blue Dog')
+
+      const assignTenantModal = page.locator('#assign-tenant-field-modal')
+      await assignTenantModal.locator('button', { hasText: 'Cancel' }).click()
+      await expect(assignTenantModal).toBeHidden()
+
+      await expect(page.locator('#action-save')).toBeDisabled()
+
+      await closeNav(page)
+      await openAssignTenantModal({ page, payload })
+      await expect
+        .poll(async () =>
+          getSelectInputValue({
+            multiSelect: false,
+            selectLocator: page.locator('.tenantField'),
+            selectType: 'relationship',
+          }),
+        )
+        .toBe('Blue Dog')
 
       await page.goto(menuItemsURL.list)
       await expect
@@ -386,11 +411,32 @@ test.describe('Multi Tenant', () => {
         urlUtil: menuItemsURL,
       })
 
-      await selectDocumentTenant({
+      await closeNav(page)
+      await openAssignTenantModal({ page, payload })
+      await selectInput({
         page,
-        payload,
-        tenant: 'Steel Cat',
+        multiSelect: false,
+        option: 'Steel Cat',
+        selectLocator: page.locator('.tenantField'),
       })
+
+      await expect(page.locator('#action-save')).toBeDisabled()
+      await expect
+        .poll(async () => {
+          return await getSelectedTenantFilterName({ page, payload })
+        })
+        .toBe('Blue Dog')
+
+      const assignTenantModal = page.locator('#assign-tenant-field-modal')
+      await assignTenantModal.locator('button', { hasText: 'Confirm' }).click()
+      await expect(assignTenantModal).toBeHidden()
+
+      await expect(page.locator('#action-save')).toBeEnabled()
+      await expect
+        .poll(async () => {
+          return await getSelectedTenantFilterName({ page, payload })
+        })
+        .toBe('Steel Cat')
 
       await saveDocAndAssert(page)
     })
@@ -1044,7 +1090,12 @@ async function openAssignTenantModal({
   // Open the assign tenant modal
   const docControlsPopup = page.locator('.popup__content')
   const docControlsButton = page.locator('.doc-controls__popup .popup-button')
-  await expect(docControlsButton).toBeVisible()
+
+  if (!(await docControlsButton.isVisible())) {
+    await expect(assignTenantModal).toBeVisible()
+    return
+  }
+
   await docControlsButton.click()
 
   const assignTenantButtonLocator = docControlsPopup.locator('button', { hasText: 'Assign Site' })
