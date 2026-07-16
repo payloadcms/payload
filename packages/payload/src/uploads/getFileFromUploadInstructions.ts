@@ -51,6 +51,13 @@ export const getFileFromUploadInstructions = async ({
       })
       if (result) {
         response = result
+        /**
+         * - If a handler returns a Response, the response will be sent to the client and no further handlers will be run.
+         * - If a handler returns null, the next handler will be run.
+         *
+         * @see packages/payload/src/uploads/types.ts
+         */
+        break
       }
     } catch (err) {
       error = err
