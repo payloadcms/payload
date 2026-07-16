@@ -35,10 +35,6 @@ export const ExifProperties: React.FC<{ fieldName?: string }> = ({ fieldName = '
         <p className={`${baseClass}__empty`}>No metadata available</p>
       ) : (
         <div className={`${baseClass}__table`}>
-          <div className={`${baseClass}__row ${baseClass}__row--head`}>
-            <span className={`${baseClass}__col-label`}>Property</span>
-            <span className={`${baseClass}__col-label`}>Value</span>
-          </div>
           {rows.map((row) => (
             <div className={`${baseClass}__row`} key={row.label}>
               <span className={`${baseClass}__label`}>{row.label}</span>

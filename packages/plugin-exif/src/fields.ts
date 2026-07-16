@@ -11,7 +11,6 @@ export const buildExifFields = (fieldName: string): Field[] => [
           path: '@payloadcms/plugin-exif/client#ExifProperties',
         },
       },
-      position: 'sidebar',
     },
     fields: [
       { name: 'raw', type: 'json' },

@@ -20,10 +20,6 @@
     gap: calc(var(--base) * 0.5);
     grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
     padding: calc(var(--base) * 0.3) 0;
-
-    &--head {
-      border-bottom: 1px solid var(--theme-border-color);
-    }
   }
 
   &__col-label {
