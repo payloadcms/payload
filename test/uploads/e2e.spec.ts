@@ -2672,6 +2672,45 @@ describe('Uploads', () => {
     await expect(titleField).toHaveValue('updated title')
   })
 
+  test('should show the file preview for the new file after saving a replaced file', async () => {
+    await gotoAndWaitForForm(page, uploadsTwo.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await page.locator('#field-prefix').fill('initial')
+    await saveDocAndAssert(page)
+
+    await page.locator('.file-toolbar__filename-btn').click()
+    await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
+    await page.setInputFiles(
+      '.file-manager input[type="file"]',
+      path.resolve(dirname, './test-image.jpg'),
+    )
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('.file-toolbar__filename-btn')).toBeVisible()
+    await expect(page.locator('.file-toolbar__filename-text')).toContainText('test-image')
+    await expect(page.locator('.file-manager .dropzone')).toBeHidden()
+  })
+
+  test('should allow cancelling a replace before selecting a new file', async () => {
+    await gotoAndWaitForForm(page, uploadsTwo.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await page.locator('#field-prefix').fill('initial')
+    await saveDocAndAssert(page)
+
+    await page.locator('.file-toolbar__filename-btn').click()
+    await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
+
+    await expect(page.locator('.file-manager .dropzone')).toBeVisible()
+
+    await page.locator('.file-manager__remove').click()
+
+    await expect(page.locator('.file-toolbar__filename-btn')).toBeVisible()
+    await expect(page.locator('.file-toolbar__filename-text')).toContainText('image')
+    await expect(page.locator('.file-manager .dropzone')).toBeHidden()
+  })
+
   test('should show data in drawer when editing relationship to upload collection with filesRequiredOnCreate: false', async () => {
     const uploadDoc = await payload.create({
       collection: noFilesRequiredSlug,
