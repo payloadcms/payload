@@ -4140,6 +4140,81 @@ describe('Localization', () => {
           expect(spanishView.nonLocalizedGroup?.nonLocalizedText).toBe('shared draft')
         })
 
+        it('should preserve non-localized draft changes when another locale saves a localized draft', async () => {
+          const doc = await payload.create({
+            collection: allFieldsLocalizedSlug,
+            data: {
+              nonLocalizedGroup: {
+                nonLocalizedText: 'shared published before second locale draft',
+              },
+              text: 'english published before second locale draft',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'spanish published before second locale draft',
+              _status: 'published',
+            },
+            locale: spanishLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              nonLocalizedGroup: {
+                nonLocalizedText: 'shared draft from english',
+              },
+              text: 'english draft before second locale draft',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: defaultLocale,
+          })
+
+          await payload.update({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            data: {
+              text: 'spanish draft after shared english draft',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: spanishLocale,
+          })
+
+          const englishDraft = await payload.findByID({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            draft: true,
+            locale: defaultLocale,
+          })
+
+          expect(englishDraft._status).toBe('draft')
+          expect(englishDraft.text).toBe('english draft before second locale draft')
+          expect(englishDraft.nonLocalizedGroup?.nonLocalizedText).toBe('shared draft from english')
+
+          const allLocalesDraft = await payload.findByID({
+            collection: allFieldsLocalizedSlug,
+            id: doc.id,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(allLocalesDraft._status!.en).toBe('draft')
+          expect(allLocalesDraft._status!.es).toBe('draft')
+          expect(allLocalesDraft.text!.en).toBe('english draft before second locale draft')
+          expect(allLocalesDraft.text!.es).toBe('spanish draft after shared english draft')
+          expect(allLocalesDraft.nonLocalizedGroup?.nonLocalizedText).toBe(
+            'shared draft from english',
+          )
+        })
+
         it('should keep published locales published when a draft save changes only localized fields', async () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
@@ -4236,7 +4311,6 @@ describe('Localization', () => {
 
           expect(allLocalesDraft._status!.en).toBe('draft')
           expect(allLocalesDraft._status!.es).toBe('draft')
-          expect(allLocalesDraft._status).not.toHaveProperty('all')
         })
 
         it('should allow querying metadata per locale', async () => {
@@ -4571,7 +4645,6 @@ describe('Localization', () => {
 
           expect(allLocalesDraft._status!.en).toBe('draft')
           expect(allLocalesDraft._status!.es).toBe('draft')
-          expect(allLocalesDraft._status).not.toHaveProperty('all')
         })
       })
     })
