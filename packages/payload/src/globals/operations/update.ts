@@ -283,6 +283,18 @@ export const updateOperation = async <
       for (const localeCode of localization.localeCodes) {
         ;(result._status as Record<string, unknown>)[localeCode] = 'draft'
       }
+    } else if (isSavingDraft && localization && hasLocalizeStatusEnabled(globalConfig)) {
+      const existingStatus =
+        globalJSON._status &&
+        typeof globalJSON._status === 'object' &&
+        !Array.isArray(globalJSON._status)
+          ? globalJSON._status
+          : {}
+
+      result._status = {
+        ...existingStatus,
+        [locale!]: 'draft',
+      }
     }
 
     // /////////////////////////////////////

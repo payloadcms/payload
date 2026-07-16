@@ -4473,6 +4473,50 @@ describe('Localization', () => {
           expect(allLocalesDraft._status!.en).toBe('draft')
           expect(allLocalesDraft._status!.es).toBe('draft')
         })
+
+        it('should keep published locales published when a global draft save changes only localized fields', async () => {
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              localizedText: englishTitle,
+              sharedText: 'english global published localized-only',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              localizedText: spanishTitle,
+              sharedText: 'spanish global published localized-only',
+              _status: 'published',
+            },
+            locale: spanishLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              localizedText: 'english global draft localized-only',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: defaultLocale,
+          })
+
+          const allLocalesDraft = await payload.findGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(allLocalesDraft._status!.en).toBe('draft')
+          expect(allLocalesDraft._status!.es).toBe('published')
+          expect(allLocalesDraft.localizedText!.en).toBe('english global draft localized-only')
+          expect(allLocalesDraft.localizedText!.es).toBe(spanishTitle)
+          expect(allLocalesDraft.sharedText).toBe('spanish global published localized-only')
+        })
       })
     })
 
