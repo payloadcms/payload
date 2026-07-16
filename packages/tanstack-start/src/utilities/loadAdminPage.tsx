@@ -1,6 +1,6 @@
 import type { ImportMap, MetaConfig, SanitizedConfig } from 'payload'
 
-import { getViewportContent } from '@payloadcms/ui/layouts'
+import { getViewportContent } from '@payloadcms/ui/shared'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 
 import type { AdminPageMetadata } from './meta.js'
