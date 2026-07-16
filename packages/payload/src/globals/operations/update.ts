@@ -272,22 +272,6 @@ export const updateOperation = async <
       }
     }
 
-    const localization = config?.localization
-    if (isSavingDraft && localization && hasLocalizeStatusEnabled(globalConfig)) {
-      const shouldDraftAllLocales = hasNonLocalizedDataChanged({
-        after: result,
-        before: globalJSON,
-        configBlockReferences: config?.blocks ?? [],
-        fields: globalConfig.fields,
-      })
-
-      result._status = getLocalizedDraftStatus({
-        existingStatus: shouldDraftAllLocales ? result._status : globalJSON._status,
-        locale: shouldDraftAllLocales ? 'all' : locale!,
-        localeCodes: localization.localeCodes,
-      })
-    }
-
     // /////////////////////////////////////
     // Handle Localized Data Merging
     // /////////////////////////////////////
@@ -316,6 +300,19 @@ export const updateOperation = async <
           for (const localeCode of accessibleLocaleCodes) {
             result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
           }
+        } else if (isSavingDraft) {
+          const shouldDraftAllLocales = hasNonLocalizedDataChanged({
+            after: result,
+            before: globalJSON,
+            configBlockReferences: config.blocks,
+            fields: globalConfig.fields,
+          })
+
+          result._status = getLocalizedDraftStatus({
+            existingStatus: shouldDraftAllLocales ? result._status : globalJSON._status,
+            locale: shouldDraftAllLocales ? 'all' : locale!,
+            localeCodes: config.localization.localeCodes,
+          })
         } else if (
           !isSavingDraft &&
           result._status &&
