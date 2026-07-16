@@ -1,6 +1,7 @@
 export { login } from '../auth/login.js'
 export { logout } from '../auth/logout.js'
 export { refresh } from '../auth/refresh.js'
+export { payloadApiHandlers } from '../routes/apiRoute.js'
 export { getRequestI18n } from '../utilities/getRequestI18n.server.js'
 export { getRequestLocale } from '../utilities/getRequestLocale.js'
 export { handleGraphQL } from '../utilities/graphqlHandler.server.js'

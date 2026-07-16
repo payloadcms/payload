@@ -7,10 +7,15 @@ type ApiRouteHandler = (ctx: { request: Request }) => Promise<Response>
  * (`/_payload/api/$`). The app supplies `getConfig` (an `@payload-config`
  * import) since the package cannot resolve the consumer's config.
  *
+ * Imported from `@payloadcms/tanstack-start/server` (not the root barrel) so
+ * the server-only `handleAPIRoute` graph never reaches the client bundle.
+ *
  * Spread the result into a literal `server.handlers` key so TanStack Start's
  * client compiler can statically see — and prune — the server-only route:
  *
  * ```ts
+ * import { payloadApiHandlers } from '@payloadcms/tanstack-start/server'
+ *
  * export const Route = createFileRoute('/_payload/api/$')({
  *   server: {
  *     handlers: payloadApiHandlers({ getConfig: async () => (await import('@payload-config')).default }),
