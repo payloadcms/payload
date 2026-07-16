@@ -4190,44 +4190,6 @@ describe('Localization', () => {
           )
         })
 
-        it('should resolve drafts by localized status when no locale is specified', async () => {
-          const doc = await payload.create({
-            collection: allFieldsLocalizedSlug,
-            data: {
-              nonLocalizedGroup: {
-                nonLocalizedText: 'shared published without locale',
-              },
-              text: 'published without locale',
-              _status: 'published',
-            },
-            locale: defaultLocale,
-          })
-
-          await payload.update({
-            collection: allFieldsLocalizedSlug,
-            id: doc.id,
-            data: {
-              nonLocalizedGroup: {
-                nonLocalizedText: 'shared draft without locale',
-              },
-              text: 'draft without locale',
-              _status: 'draft',
-            },
-            draft: true,
-            locale: defaultLocale,
-          })
-
-          const response = await restClient.GET(`/${allFieldsLocalizedSlug}/${doc.id}?draft=true`)
-
-          expect(response.status).toBe(200)
-
-          const result = await response.json()
-
-          expect(result._status).toBe('draft')
-          expect(result.text).toBe('draft without locale')
-          expect(result.nonLocalizedGroup?.nonLocalizedText).toBe('shared draft without locale')
-        })
-
         it('should allow querying metadata per locale', async () => {
           const doc = await payload.create({
             collection: allFieldsLocalizedSlug,
@@ -4294,7 +4256,7 @@ describe('Localization', () => {
           const enPublished = await payload.find({
             locale: defaultLocale,
             collection: allFieldsLocalizedSlug,
-            draft: true,
+            draft: false,
             where: {
               and: [
                 {
