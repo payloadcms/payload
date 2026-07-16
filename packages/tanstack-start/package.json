@@ -49,11 +49,6 @@
       "browser": "./src/exports/rsc.browser.ts",
       "import": "./src/exports/rsc.ts",
       "default": "./src/exports/rsc.ts"
-    },
-    "./vite": {
-      "import": "./src/exports/vite.ts",
-      "types": "./src/exports/vite.ts",
-      "default": "./src/exports/vite.ts"
     }
   },
   "main": "./src/index.ts",
@@ -145,11 +140,6 @@
         "browser": "./dist/exports/rsc.browser.js",
         "import": "./dist/exports/rsc.js",
         "default": "./dist/exports/rsc.js"
-      },
-      "./vite": {
-        "import": "./dist/exports/vite.js",
-        "types": "./dist/exports/vite.d.ts",
-        "default": "./dist/exports/vite.js"
       }
     },
     "main": "./dist/index.js",
