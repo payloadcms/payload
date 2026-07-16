@@ -971,27 +971,15 @@ Run `npx @payloadcms/codemod --transform migrate-storage-adapters-to-config` to 
 
 ### Direct uploads now use Payload's shared upload-instructions endpoint
 
-Client uploads for S3, Azure, and GCS now start through one Payload endpoint instead of an endpoint and Admin handler registered by each adapter:
+Official storage packages now use `POST /api/upload-instructions` instead of provider-specific endpoints.
 
-```text
-POST /api/upload-instructions
-```
+#### If you use an official Payload storage adapter
 
-If you only configure a storage adapter with `clientUploads: true`, no migration is needed. The Admin Panel uses the new endpoint automatically.
+If you only enable `clientUploads` in your storage adapter config, no migration is needed. The Admin Panel uses the new endpoint automatically.
 
-`upload.limits.fileSize` is now checked before Payload returns upload instructions. This is new for Azure, GCS, R2, and Vercel Blob; S3 already enforced this limit. If these client uploads previously exceeded the server limit, increase `upload.limits.fileSize` or Payload will reject them before the upload begins.
+Payload now checks `upload.limits.fileSize` before returning upload instructions. This is new for Azure, GCS, R2, and Vercel Blob; S3 already checked it. Increase the limit if your direct uploads previously exceeded it.
 
-You need to migrate if you call an adapter's signing endpoint directly, import its client component, use `ClientUploadsAccess`, or register a custom upload handler with `setUploadHandler`.
-
-#### Provider-specific signing endpoints were removed
-
-The following endpoints no longer exist:
-
-- `/api/storage-s3-generate-signed-url`
-- `/api/storage-azure-generate-signed-url`
-- `/api/storage-gcs-generate-signed-url`
-
-Call `/api/upload-instructions` with the same file metadata:
+The old S3, Azure, and GCS signing endpoints (e.g. `/api/storage-s3-generate-signed-url`) were removed. If you called one directly, call `/api/upload-instructions` instead:
 
 ```ts
 const response = await fetch('/api/upload-instructions', {
@@ -1008,7 +996,7 @@ const response = await fetch('/api/upload-instructions', {
 })
 ```
 
-The old endpoints returned `{ docPrefix, filename, url }`. The shared endpoint returns upload instructions. For S3 and GCS, follow the returned HTTP request exactly:
+For S3 and GCS, send the file using the returned HTTP request, then pass `instructions.file` unchanged when creating the document:
 
 ```ts
 const instructions = await response.json()
@@ -1019,11 +1007,7 @@ if (instructions.type !== 'http') {
 
 const { url, ...request } = instructions.request
 await fetch(url, { ...request, body: file })
-```
 
-The response includes a complete `file` value for the document request. Send it unchanged as a multipart field:
-
-```ts
 const formData = new FormData()
 formData.append('_payload', JSON.stringify({}))
 formData.append('file', JSON.stringify(instructions.file))
@@ -1035,24 +1019,9 @@ await fetch('/api/media', {
 })
 ```
 
-The collection comes from `/api/media`, so the `file` value no longer includes `collectionSlug`. The old `clientUploadContext` property is replaced by `uploadReference`. Its presence tells Payload that the original file was uploaded before document creation, and its contents give the adapter any data needed to find it.
+Remove manual registrations of `S3ClientUploadHandler`, `AzureClientUploadHandler`, and `GcsClientUploadHandler`; Payload now registers them. The S3 and GCS `/client` exports were also removed.
 
-For custom adapters, `clientUploadContext` becomes `uploadReference` on the file and static handler parameters. `handleUpload` no longer receives it because files uploaded before document creation are skipped. To detect one of these files, check whether `file.uploadReference` is present.
-
-#### Adapter client components no longer need manual registration
-
-The S3 and GCS client entry points and their exported components were removed:
-
-```text
-@payloadcms/storage-s3/client
-@payloadcms/storage-gcs/client
-```
-
-Remove manual registrations of `S3ClientUploadHandler`, `AzureClientUploadHandler`, and `GcsClientUploadHandler`. Payload registers the required Admin upload handler automatically when `clientUploads` is enabled.
-
-#### `ClientUploadsAccess` was replaced
-
-Use the core `UploadInstructionsAccess` type for `clientUploads.access` callbacks:
+If you typed `clientUploads.access`, replace `ClientUploadsAccess` with `UploadInstructionsAccess`:
 
 ```diff
 - import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
@@ -1062,11 +1031,11 @@ Use the core `UploadInstructionsAccess` type for `clientUploads.access` callback
 + const access: UploadInstructionsAccess = ({ req }) => Boolean(req.user)
 ```
 
-#### Upload access moved to the generator or endpoint
+#### If you maintain a custom storage adapter
 
-Access now runs where the upload is authorized. Signed URL and token generators check access before returning credentials. R2 checks access in its supporting endpoint.
+Replace `clientUploadContext` with `uploadReference` in generated file metadata and static handler parameters. `handleUpload` no longer receives it because Payload skips uploading files that are already stored.
 
-Built-in adapters still accept `clientUploads.access` and pass it to the correct generator or endpoint. Custom adapters should do the same:
+Move access checks into the generator or supporting endpoint that authorizes the upload:
 
 ```diff
 uploadInstructions: {
@@ -1076,9 +1045,7 @@ uploadInstructions: {
 }
 ```
 
-#### Custom client upload handlers now use named instructions
-
-`useUploadHandlers().setUploadHandler` was removed. `createClientUploadHandler` now requires a name and listens for a matching `dispatch` instruction:
+`useUploadHandlers().setUploadHandler` was removed. Name custom client handlers and return the same name in a `dispatch` instruction:
 
 ```ts
 import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
@@ -1089,11 +1056,7 @@ export const MyClientUploadHandler = createClientUploadHandler({
     await uploadToMyProvider({ data, file })
   },
 })
-```
 
-The adapter must return the same name from its `uploadInstructions` capability:
-
-```ts
 uploadInstructions: {
   generate: ({ filename, filesize, mimeType }) => ({
     file: {
@@ -1109,11 +1072,9 @@ uploadInstructions: {
 }
 ```
 
-The `data` value is passed from the server instruction to the client handler. The names must match exactly. If the handler returns an object, it becomes `file.uploadReference` in the document request.
+`data` is passed to the client handler. If the handler returns an object, Payload uses it as `file.uploadReference`.
 
-#### `initClientUploads` was removed
-
-Custom cloud adapters now define their complete direct-upload setup in `uploadInstructions`. The cloud-storage plugin registers the optional Admin handler and supporting endpoint automatically.
+Finally, remove `initClientUploads` and declare its Admin handler and supporting endpoint on `uploadInstructions`:
 
 ```diff
 - import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
@@ -1141,9 +1102,7 @@ uploadInstructions: {
 }
 ```
 
-Both additions are optional. Use `adminHandler` when `generate` returns a named `dispatch` instruction, and use `endpoint` when that handler needs a Payload route. If one adapter is used by multiple collections, its endpoint is registered once and the final path is passed to the Admin handler as `endpointPath`.
-
-Handlers made with `createClientUploadHandler` now receive custom `props` instead of `extra`, and `endpointPath` instead of `serverHandlerPath`. The old `enabled` component prop was removed because the handler is only registered when upload instructions are enabled.
+Both are optional. Custom handler props are now passed as `props`, and the supporting route is available as `endpointPath` instead of `serverHandlerPath`. The `enabled` prop was removed.
 
 ### `@payloadcms/storage-uploadthing` has been removed
 
