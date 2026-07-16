@@ -11,6 +11,8 @@ import type {
   User,
 } from 'payload'
 
+export type TenantValue = (number | string)[] | (number | string)
+
 export type MultiTenantPluginConfig = {
   /**
    * After a tenant is deleted, the plugin will attempt to clean up related documents
