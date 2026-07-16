@@ -14,7 +14,6 @@ import { migrateForceSelect } from './transforms/migrate-force-select/index.js'
 import { migrateHideAPIURL } from './transforms/migrate-hide-api-url/index.js'
 import { migrateImportExportHooks } from './transforms/migrate-import-export-hooks/index.js'
 import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-api/index.js'
-import { migrateNextGenerateViewportExport } from './transforms/migrate-next-generate-viewport-export/index.js'
 import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exports/index.js'
 import { migrateSlugField } from './transforms/migrate-slug-field/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
@@ -43,7 +42,6 @@ export const transforms: Transform[] = [
   renameStorageAdaptersToStorage,
   migrateImportExportHooks,
   migrateDbTypesSubpath,
-  migrateNextGenerateViewportExport,
   migrateNextSubpathExports,
   migrateSlugField,
   migrateVersionsDefault,

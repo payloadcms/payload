@@ -1,6 +1,5 @@
 import type { ImportMap, MetaConfig, SanitizedConfig } from 'payload'
 
-import { getViewportContent } from '@payloadcms/ui/layouts'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
 
 import type { AdminPageMetadata } from './meta.js'
@@ -170,22 +169,18 @@ export async function loadAdminPage({
   // by RSC streaming deep inside view components). Read after the render.
   const nav: { type?: 'notFound' | 'redirect'; url?: string } = {}
   const pageServerAdapter = createPageRenderServerAdapter(nav)
-  let userAgent: string | undefined
 
   // `renderRoot` calls `initReq` itself with its own overrides (query
   // re-nesting, `urlSuffix`, `fallbackLocale`). Forward them, injecting the
   // page-render `ServerAdapter` so `req.server.redirect()` / `.notFound()`
   // is recorded + thrown rather than escaping as raw TanStack nav.
-  const boundInitReq: Parameters<typeof renderRoot>[0]['initReq'] = async (args) => {
-    const result = await initReq({
+  const boundInitReq: Parameters<typeof renderRoot>[0]['initReq'] = (args) =>
+    initReq({
       configPromise: args.configPromise,
       importMap: args.importMap,
       overrides: args.overrides,
       serverAdapter: pageServerAdapter,
     })
-    userAgent = result.headers.get('user-agent') ?? undefined
-    return result
-  }
 
   const notFound = (): never => {
     nav.type = 'notFound'
@@ -289,10 +284,7 @@ export async function loadAdminPage({
     })
 
     return {
-      metadata: {
-        ...toAdminPageMetadata(meta),
-        viewport: getViewportContent(userAgent),
-      },
+      metadata: toAdminPageMetadata(meta),
       routeKey: splat ?? '',
       rscPayload,
     }

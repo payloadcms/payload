@@ -1,5 +1,3 @@
-import { getViewportContent } from '@payloadcms/ui/layouts'
-
 type MetaEntry =
   | { charSet: string }
   | { content: string; name: string }
@@ -49,7 +47,6 @@ export type AdminPageMetadata = {
   }
   robots?: string
   title?: string
-  viewport?: string
 }
 
 /**
@@ -70,7 +67,7 @@ export function getAdminMeta(metadata?: AdminPageMetadata): {
 } {
   const meta: MetaEntry[] = [
     { charSet: 'utf-8' },
-    { name: 'viewport', content: metadata?.viewport ?? getViewportContent() },
+    { name: 'viewport', content: 'width=device-width, initial-scale=1' },
   ]
   const links: LinkEntry[] = []
 
