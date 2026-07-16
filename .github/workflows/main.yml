@@ -20,7 +20,7 @@ jobs:
   changes:
     runs-on: ubuntu-24.04
     permissions:
-      pull-requests: read
+      contents: read
     outputs:
       needs_build: ${{ steps.filter.outputs.needs_build }}
       needs_tests: ${{ steps.filter.outputs.needs_tests }}
@@ -35,6 +35,7 @@ jobs:
       - uses: dorny/paths-filter@7b450fff21473bca461d4b92ce414b9d0420d706 # v4.0.2
         id: filter
         with:
+          token: ''
           filters: |
             needs_build:
               - '.github/workflows/main.yml'
