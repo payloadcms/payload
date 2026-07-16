@@ -37,7 +37,34 @@ import {
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
+import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
+import { hasNonLocalizedDataChanged } from '../../../versions/drafts/hasNonLocalizedDataChanged.js'
+
+const removeUndefinedValues = <T>(value: T): T => {
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => removeUndefinedValues(item))
+      .filter((item) => typeof item !== 'undefined') as T
+  }
+
+  if (value && typeof value === 'object') {
+    const cleanedValue: Record<string, unknown> = {}
+
+    for (const [key, item] of Object.entries(value as Record<string, unknown>)) {
+      const cleanedItem = removeUndefinedValues(item)
+
+      if (typeof cleanedItem !== 'undefined') {
+        cleanedValue[key] = cleanedItem
+      }
+    }
+
+    return cleanedValue as T
+  }
+
+  return value
+}
+
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -285,6 +312,47 @@ export const updateDocument = async <
     result._status = {}
     for (const localeCode of config.localization.localeCodes) {
       ;(result._status as Record<string, unknown>)[localeCode] = statusStr
+    }
+  }
+
+  const shouldDraftAllLocales =
+    isSavingDraft &&
+    config.localization &&
+    hasLocalizeStatusEnabled(collectionConfig) &&
+    hasNonLocalizedDataChanged({
+      after: removeUndefinedValues(
+        mergeLocalizedData({
+          configBlockReferences: config.blocks,
+          dataWithLocales: result,
+          docWithLocales,
+          fields: collectionConfig.fields,
+          localesToUpdate: config.localization.localeCodes,
+        }),
+      ),
+      before: removeUndefinedValues(docWithLocales),
+      configBlockReferences: config.blocks,
+      fields: collectionConfig.fields,
+    })
+
+  if (shouldDraftAllLocales && config.localization) {
+    if (!result._status || typeof result._status !== 'object' || Array.isArray(result._status)) {
+      result._status = {}
+    }
+
+    for (const localeCode of config.localization.localeCodes) {
+      ;(result._status as Record<string, unknown>)[localeCode] = 'draft'
+    }
+  } else if (isSavingDraft && config.localization && hasLocalizeStatusEnabled(collectionConfig)) {
+    const existingStatus =
+      docWithLocales._status &&
+      typeof docWithLocales._status === 'object' &&
+      !Array.isArray(docWithLocales._status)
+        ? docWithLocales._status
+        : {}
+
+    result._status = {
+      ...existingStatus,
+      [locale]: 'draft',
     }
   }
 
