@@ -1316,6 +1316,32 @@ describe('Uploads', () => {
       ).toBeVisible()
     })
 
+    test('should wrap the drag and drop text below the dropzone buttons instead of overflowing', async () => {
+      await page.goto(uploadsOne.list)
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await bulkUploadButton.click()
+
+      await page
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles(path.resolve(dirname, './image.png'))
+
+      const dropzoneContent = page.locator('#field-hasManyUpload .upload__dropzoneContent')
+      const buttons = dropzoneContent.locator('.upload__dropzoneContent__buttons')
+      const dragAndDropText = dropzoneContent.locator('.upload__dragAndDropText')
+
+      await expect(dragAndDropText).toBeVisible()
+
+      const buttonsBox = (await buttons.boundingBox())!
+      const textBox = (await dragAndDropText.boundingBox())!
+
+      // Wrapped onto its own line below the buttons, rather than overflowing past them on the
+      // same line.
+      expect(textBox.y).toBeGreaterThanOrEqual(buttonsBox.y + buttonsBox.height - 1)
+    })
+
     test('should bulk upload non-image files without page errors', async () => {
       // Enable collection ONLY for this test
       collectErrorsFromPage()
