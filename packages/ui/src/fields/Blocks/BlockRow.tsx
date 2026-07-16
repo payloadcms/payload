@@ -85,6 +85,11 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
+  const pasteData = React.useMemo(
+    () => ({ path, schemaBlocks: blocks as ClientBlock[] }),
+    [path, blocks],
+  )
+
   const fieldHasErrors = hasSubmitted && errorCount > 0
 
   const showBlockName = !block.admin?.disableBlockName
@@ -158,6 +163,7 @@ export const BlockRow: React.FC<BlocksFieldProps> = ({
               isSortable={isSortable}
               labels={labels}
               moveRow={moveRow}
+              pasteData={pasteData}
               pasteRow={pasteRow}
               removeRow={removeRow}
               rowCount={rowCount}

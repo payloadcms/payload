@@ -534,15 +534,61 @@ describe('Block fields', () => {
         fieldName: 'readOnly',
         page,
       })
+      const popupBtn = page
+        .locator('#field-groupedBlocks .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await expect(popupBtn).toBeVisible()
+      await popupBtn.click()
+      const disabledPasteBtn = page.locator(
+        '.popup__content div.popup-button-list__disabled:has-text("Paste Field")',
+      )
+      await expect(disabledPasteBtn).toBeVisible()
+    })
+
+    test('should disable paste when the clipboard is empty', async () => {
+      await page.goto(url.create)
+      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+
+      const fieldPopupBtn = page
+        .locator('#field-blocks .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+      ).toBeVisible()
+      await page.keyboard.press('Escape')
+
+      const rowPopupBtn = page
+        .locator('#blocks-row-0 .collapsible__actions button.array-actions__button')
+        .first()
+      await rowPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Row")'),
+      ).toBeVisible()
+    })
+
+    test('should enable paste after copying a compatible field', async () => {
+      await page.goto(url.create)
+      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+
+      const fieldPopupBtn = page
+        .locator('#field-blocks .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+      ).toBeVisible()
+      await page.keyboard.press('Escape')
+
       await copyPasteField({
-        fieldName: 'groupedBlocks',
+        fieldName: 'blocks',
         page,
-        action: 'paste',
       })
-      const pasteErrorToast = page
-        .locator('.payload-toast-item.toast-error')
-        .filter({ hasText: 'Invalid clipboard data.' })
-      await expect(pasteErrorToast).toBeVisible()
+
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content .popup-button-list button:has-text("Paste Field")'),
+      ).toBeVisible()
     })
 
     test('should copy and paste block fields', async () => {
@@ -714,6 +760,78 @@ describe('Block fields', () => {
 
       await expect(subArrayContainer).toHaveCount(0)
       await expect(subArrayContainer2).toHaveCount(0)
+    })
+
+    test('should copy a nested block row and paste into a sibling nested block row', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-blocks')
+
+      const sourceText = field.locator('#field-blocks__2__subBlocks__1__text')
+      await expect(sourceText).toBeVisible()
+
+      const textVal = 'nested block row copy'
+      await sourceText.fill(textVal)
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks__2__subBlocks',
+        rowIndex: 1,
+      })
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks__2__subBlocks',
+        rowIndex: 0,
+        action: 'paste',
+      })
+
+      const targetText = field.locator('#field-blocks__2__subBlocks__0__text')
+      await expect(targetText).toBeVisible()
+      await expect(targetText).toHaveValue(textVal)
+    })
+
+    test('should copy a nested block field and paste into a sibling nested block field', async () => {
+      await page.goto(url.create)
+
+      await addBlock({
+        page,
+        fieldName: 'blocks',
+        blockToSelect: 'Sub Block',
+      })
+
+      const field = page.locator('#field-blocks')
+
+      const sourceRows = field.locator('#field-blocks__2__subBlocks > div.blocks-field__rows > div')
+      const targetRows = field.locator('#field-blocks__4__subBlocks > div.blocks-field__rows > div')
+      await expect(sourceRows).toHaveCount(2)
+      await expect(targetRows).toHaveCount(0)
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks__2__subBlocks',
+      })
+
+      await copyPasteField({
+        page,
+        fieldName: 'blocks__4__subBlocks',
+        action: 'paste',
+      })
+
+      await expect(targetRows).toHaveCount(2)
+    })
+
+    test('should disable paste on a nested block row when the clipboard is empty', async () => {
+      await page.goto(url.create)
+      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+
+      const rowPopupBtn = page
+        .locator('#blocks-2-subBlocks-row-0 .collapsible__actions button.array-actions__button')
+        .first()
+      await rowPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Row")'),
+      ).toBeVisible()
     })
 
     test('should generate unique block IDs when pasting blocks across documents', async () => {
