@@ -34,6 +34,11 @@
       "types": "./src/exports/server.ts",
       "default": "./src/exports/server.ts"
     },
+    "./shared": {
+      "import": "./src/exports/shared.ts",
+      "types": "./src/exports/shared.ts",
+      "default": "./src/exports/shared.ts"
+    },
     "./layouts": {
       "import": "./src/exports/layouts.ts",
       "types": "./src/exports/layouts.ts",
@@ -124,6 +129,11 @@
         "import": "./dist/exports/server.js",
         "types": "./dist/exports/server.d.ts",
         "default": "./dist/exports/server.js"
+      },
+      "./shared": {
+        "import": "./dist/exports/shared.js",
+        "types": "./dist/exports/shared.d.ts",
+        "default": "./dist/exports/shared.js"
       },
       "./layouts": {
         "import": "./dist/exports/layouts.js",

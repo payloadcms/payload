@@ -21,7 +21,7 @@ import * as qs from 'qs-esm'
  * @example
  * ```ts
  * import { createRouter } from '@tanstack/react-router'
- * import { payloadParseSearch, payloadStringifySearch } from '@payloadcms/tanstack-start'
+ * import { payloadParseSearch, payloadStringifySearch } from '@payloadcms/tanstack-start/shared'
  *
  * export function getRouter() {
  *   return createRouter({
