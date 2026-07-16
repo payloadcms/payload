@@ -1,6 +1,6 @@
 import type { PayloadRequest, User } from 'payload'
 
-import { isolateObjectProperty } from 'payload'
+import { getDataLoader, isolateObjectProperty } from 'payload'
 
 import type { ImportAfterHook, ImportBeforeHook, ImportResult } from '../types.js'
 import type { ImportMode } from './createImport.js'
@@ -169,8 +169,16 @@ async function processImportBatch({
   // Payload's error handling calls killTransaction(req), which would kill the parent's transaction
   // if we shared the same transaction. By isolating and clearing transactionID, each nested
   // operation either uses no transaction or starts its own, independent of the parent.
-  const req = isolateObjectProperty(reqFromArgs, 'transactionID')
+  //
+  // We also isolate `payloadDataLoader` and give the proxy its own loader. The shared dataloader
+  // is bound to the parent request and mutates its captured `req.transactionID` while batching
+  // relationship populations (see `batchAndLoadDocs`). Without an isolated loader, populating a
+  // relationship on a nested document (e.g. the `createdBy`/`updatedBy` authorship fields) would
+  // write the nested operation's transaction back onto the parent request, breaking the isolation
+  // above and causing subsequent parent-transaction reads/writes to fail.
+  const req = isolateObjectProperty(reqFromArgs, ['payloadDataLoader', 'transactionID'])
   req.transactionID = undefined
+  req.payloadDataLoader = getDataLoader(req)
 
   const collectionEntry = req.payload.collections[collectionSlug]
 
