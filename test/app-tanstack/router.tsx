@@ -1,4 +1,4 @@
-import { payloadParseSearch, payloadStringifySearch } from '@payloadcms/tanstack-start'
+import { payloadParseSearch, payloadStringifySearch } from '@payloadcms/tanstack-start/shared'
 import { createRouter } from '@tanstack/react-router'
 
 import { routeTree } from './routeTree.gen'

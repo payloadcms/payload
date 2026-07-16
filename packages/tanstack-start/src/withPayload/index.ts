@@ -8,7 +8,11 @@ import rsc from '@vitejs/plugin-rsc'
 import path from 'node:path'
 import { createLogger, mergeConfig } from 'vite'
 
-import { payloadNoExternalPatterns, ssrExternalPackages } from './config/external.js'
+import {
+  buildExternalPackages,
+  payloadNoExternalPatterns,
+  ssrExternalPackages,
+} from './config/external.js'
 import { optimizeDepsExcludeDefaults, optimizeDepsIncludeDefaults } from './config/optimizeDeps.js'
 import { payloadScssImporters } from './config/scss.js'
 import {
@@ -145,6 +149,25 @@ export function withPayload(
   } = options
 
   return (env) => {
+    // `pluralize` ships a UMD wrapper that throws when run through Vite's dev SSR
+    // transform, so dev serve keeps it external and lets Node require it.
+    // The production build must bundle it instead: it is reached from the
+    // force-bundled `@payloadcms/ui` / `@payloadcms/translations`, and Vite would
+    // otherwise externalize it into a client chunk as a bare specifier that pnpm
+    // can't resolve from `dist/` at runtime. Dropping it from the externals list
+    // isn't enough — Vite externalizes deps of `noExternal` packages by default,
+    // so it must be forced back in via `noExternal`.
+    const isBuild = env.command === 'build'
+    const noExternalPatterns = isBuild
+      ? [...payloadNoExternalPatterns, 'pluralize']
+      : payloadNoExternalPatterns
+    // Dev serve externalizes the server-only Node packages (including `pluralize`,
+    // whose UMD wrapper breaks under Vite's SSR transform). The prod build instead
+    // externalizes the package boundaries (`buildExternalPackages`) and drops
+    // `pluralize` so it bundles — leaving it in `ssr.external` here would win over
+    // `noExternal` and re-emit the bare specifier.
+    const ssrExternal = isBuild ? buildExternalPackages : ssrExternalPackages
+
     const base: UserConfig = {
       build: {
         cssMinify: 'esbuild',
@@ -162,12 +185,12 @@ export function withPayload(
       },
       environments: {
         rsc: {
-          build: { rollupOptions: { external: ssrExternalPackages } },
-          resolve: { noExternal: payloadNoExternalPatterns },
+          build: { rollupOptions: { external: buildExternalPackages } },
+          resolve: { noExternal: noExternalPatterns },
         },
         ssr: {
-          build: { rollupOptions: { external: ssrExternalPackages } },
-          resolve: { noExternal: payloadNoExternalPatterns },
+          build: { rollupOptions: { external: buildExternalPackages } },
+          resolve: { noExternal: noExternalPatterns },
         },
       } as any,
       optimizeDeps: {
@@ -198,8 +221,8 @@ export function withPayload(
         tsconfigPaths: true,
       } as any,
       ssr: {
-        external: ssrExternalPackages,
-        noExternal: payloadNoExternalPatterns,
+        external: ssrExternal,
+        noExternal: noExternalPatterns,
       },
     }
 
