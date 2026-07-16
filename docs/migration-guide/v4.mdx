@@ -1035,12 +1035,15 @@ If you typed `clientUploads.access`, replace `ClientUploadsAccess` with `UploadI
 
 Replace `clientUploadContext` with `uploadReference` in generated file metadata and static handler parameters. `handleUpload` no longer receives it because Payload skips uploading files that are already stored.
 
+Set `uploadInstructions.enabled`. When false, Payload adds `adminHandler` to the import map without rendering it. When true, Payload also renders it and exposes the instructions and supporting endpoint.
+
 Move access checks into the generator or supporting endpoint that authorizes the upload:
 
 ```diff
 uploadInstructions: {
 - access,
 - generate,
++ enabled: Boolean(clientUploads),
 + generate: generateUploadInstructions({ access }),
 }
 ```
@@ -1058,6 +1061,7 @@ export const MyClientUploadHandler = createClientUploadHandler({
 })
 
 uploadInstructions: {
+  enabled: true,
   generate: ({ filename, filesize, mimeType }) => ({
     file: {
       uploadReference: {},
@@ -1094,6 +1098,7 @@ uploadInstructions: {
 +   path: '/MyClientUploadHandler',
 +   props: { option: 'value' },
 + },
++ enabled: Boolean(clientUploads),
 + endpoint: {
 +   handler: serverHandler,
 +   path: '/my-upload-endpoint',
@@ -1102,7 +1107,7 @@ uploadInstructions: {
 }
 ```
 
-Both are optional. Custom handler props are now passed as `props`, and the supporting route is available as `endpointPath` instead of `serverHandlerPath`. The `enabled` prop was removed.
+Both are optional. Custom handler props are now passed as `props`, and the supporting route is available as `endpointPath` instead of `serverHandlerPath`. The old Admin component `enabled` prop was removed.
 
 ### `@payloadcms/storage-uploadthing` has been removed
 

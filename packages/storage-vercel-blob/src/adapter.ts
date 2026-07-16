@@ -37,53 +37,50 @@ export function createVercelBlobAdapter({
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
 
-    uploadInstructions: clientUploads
-      ? {
-          adminHandler: {
-            path: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
+    uploadInstructions: {
+      adminHandler: {
+        path: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
+      },
+      enabled: Boolean(clientUploads),
+      generate: async ({ collectionSlug, docPrefix, filename, filesize, mimeType, req }) => {
+        if (
+          clientUploadsAccess ? !(await clientUploadsAccess({ collectionSlug, req })) : !req.user
+        ) {
+          throw new Forbidden(req.t)
+        }
+
+        const resolved = await resolveSignedURLKey({
+          collectionPrefix: prefix,
+          collectionSlug,
+          docPrefix,
+          filename,
+          req,
+          useCompositePrefixes,
+        })
+
+        return {
+          name: 'uploadToVercelBlob',
+          type: 'dispatch',
+          data: {
+            pathname: resolved.fileKey,
+            token: await generateClientTokenFromReadWriteToken({
+              addRandomSuffix,
+              allowedContentTypes: mimeType ? [mimeType] : undefined,
+              cacheControlMaxAge,
+              maximumSizeInBytes: filesize,
+              pathname: resolved.fileKey,
+              token,
+            }),
           },
-          generate: async ({ collectionSlug, docPrefix, filename, filesize, mimeType, req }) => {
-            if (
-              clientUploadsAccess
-                ? !(await clientUploadsAccess({ collectionSlug, req }))
-                : !req.user
-            ) {
-              throw new Forbidden(req.t)
-            }
-
-            const resolved = await resolveSignedURLKey({
-              collectionPrefix: prefix,
-              collectionSlug,
-              docPrefix,
-              filename,
-              req,
-              useCompositePrefixes,
-            })
-
-            return {
-              name: 'uploadToVercelBlob',
-              type: 'dispatch',
-              data: {
-                pathname: resolved.fileKey,
-                token: await generateClientTokenFromReadWriteToken({
-                  addRandomSuffix,
-                  allowedContentTypes: mimeType ? [mimeType] : undefined,
-                  cacheControlMaxAge,
-                  maximumSizeInBytes: filesize,
-                  pathname: resolved.fileKey,
-                  token,
-                }),
-              },
-              file: {
-                filename: resolved.sanitizedFilename,
-                mimeType,
-                size: filesize,
-                uploadReference: { prefix: resolved.sanitizedDocPrefix },
-              },
-            }
+          file: {
+            filename: resolved.sanitizedFilename,
+            mimeType,
+            size: filesize,
+            uploadReference: { prefix: resolved.sanitizedDocPrefix },
           },
         }
-      : undefined,
+      },
+    },
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({

@@ -39,17 +39,16 @@ export function createGcsAdapter({
         useCompositePrefixes,
       }),
 
-    uploadInstructions: clientUploads
-      ? {
-          generate: generateUploadInstructions({
-            access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
-            bucket,
-            collectionPrefix: prefix,
-            getStorageClient,
-            useCompositePrefixes,
-          }),
-        }
-      : undefined,
+    uploadInstructions: {
+      enabled: Boolean(clientUploads),
+      generate: generateUploadInstructions({
+        access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+        bucket,
+        collectionPrefix: prefix,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
+    },
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
       deleteFile({

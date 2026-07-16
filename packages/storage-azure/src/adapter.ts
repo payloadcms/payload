@@ -43,20 +43,19 @@ export function createAzureAdapter({
         useCompositePrefixes,
       }),
 
-    uploadInstructions: clientUploads
-      ? {
-          adminHandler: {
-            path: '@payloadcms/storage-azure/client#AzureClientUploadHandler',
-          },
-          generate: generateUploadInstructions({
-            access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
-            collectionPrefix: prefix,
-            containerName,
-            getStorageClient,
-            useCompositePrefixes,
-          }),
-        }
-      : undefined,
+    uploadInstructions: {
+      adminHandler: {
+        path: '@payloadcms/storage-azure/client#AzureClientUploadHandler',
+      },
+      enabled: Boolean(clientUploads),
+      generate: generateUploadInstructions({
+        access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+        collectionPrefix: prefix,
+        containerName,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
+    },
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
       deleteFile({

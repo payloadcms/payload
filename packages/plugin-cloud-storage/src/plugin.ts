@@ -89,10 +89,10 @@ export const cloudStoragePlugin =
           let uploadInstructions
 
           if (adapter.uploadInstructions) {
-            const { adminHandler, endpoint, ...instructions } = adapter.uploadInstructions
+            const { adminHandler, enabled, endpoint, ...instructions } = adapter.uploadInstructions
             let endpointPath = endpointPaths.get(options.adapter)
 
-            if (endpoint && !endpointPath) {
+            if (enabled && endpoint && !endpointPath) {
               const endpointCount =
                 config.endpoints?.filter(({ path }) => path?.startsWith(endpoint.path)).length || 0
 
@@ -106,7 +106,7 @@ export const cloudStoragePlugin =
               endpointPaths.set(options.adapter, endpointPath)
             }
 
-            if (adminHandler) {
+            if (enabled && adminHandler) {
               config.admin ??= {}
               config.admin.components ??= {}
               config.admin.components.providers ??= []
@@ -121,7 +121,17 @@ export const cloudStoragePlugin =
               })
             }
 
-            uploadInstructions = instructions
+            if (enabled) {
+              uploadInstructions = instructions
+            } else if (adminHandler) {
+              /** Avoid importMap.js differences when client uploads vary between dev and production. */
+              config.admin ??= {}
+              config.admin.dependencies ??= {}
+              config.admin.dependencies[adminHandler.path] = {
+                type: 'component',
+                path: adminHandler.path,
+              }
+            }
           }
 
           const fields = getFields({
@@ -144,7 +154,7 @@ export const cloudStoragePlugin =
             handlers.push(adapter.staticHandler)
             // Else if disablePayloadAccessControl: true and upload instructions are used
             // Build the "proxied" handler that responds only when addDataAndFileToRequest fetches the uploaded file
-          } else if (adapter.uploadInstructions) {
+          } else if (uploadInstructions) {
             handlers.push((req, args) => {
               if ('uploadReference' in args.params) {
                 return adapter.staticHandler(req, args)

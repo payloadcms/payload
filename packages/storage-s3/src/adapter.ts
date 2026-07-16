@@ -42,18 +42,17 @@ export function createS3Adapter({
         useCompositePrefixes,
       }),
 
-    uploadInstructions: clientUploads
-      ? {
-          generate: generateUploadInstructions({
-            access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
-            acl,
-            bucket,
-            collectionPrefix: prefix,
-            getStorageClient,
-            useCompositePrefixes,
-          }),
-        }
-      : undefined,
+    uploadInstructions: {
+      enabled: Boolean(clientUploads),
+      generate: generateUploadInstructions({
+        access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+        acl,
+        bucket,
+        collectionPrefix: prefix,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
+    },
 
     // Helpers below dynamic-import their @aws-sdk dependencies so the SDK only
     // loads on the first request that actually needs it.

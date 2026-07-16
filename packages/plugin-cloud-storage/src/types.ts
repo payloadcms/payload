@@ -80,6 +80,7 @@ export interface GeneratedAdapter {
       path: string
       props?: Record<string, unknown>
     }
+    enabled: boolean
     endpoint?: {
       handler: PayloadHandler
       path: `/${string}`

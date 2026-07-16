@@ -29,32 +29,31 @@ export function createR2Adapter({
     typeof clientUploads === 'object' && clientUploads.access
       ? clientUploads.access
       : defaultR2ClientUploadsAccess
-  const uploadInstructions: GeneratedAdapter['uploadInstructions'] = clientUploads
-    ? {
-        adminHandler: {
-          path: '@payloadcms/storage-r2/client#R2ClientUploadHandler',
-        },
-        endpoint: {
-          handler: getHandleMultiPartUpload({
-            access,
-            bucket,
-            collections,
-            useCompositePrefixes,
-          }),
-          path: '/storage-r2-multi-part-upload',
-        },
-        generate: ({ filename, filesize, mimeType }) => ({
-          name: 'uploadToR2',
-          type: 'dispatch',
-          file: {
-            filename,
-            mimeType,
-            size: filesize,
-            uploadReference: {},
-          },
-        }),
-      }
-    : undefined
+  const uploadInstructions: GeneratedAdapter['uploadInstructions'] = {
+    adminHandler: {
+      path: '@payloadcms/storage-r2/client#R2ClientUploadHandler',
+    },
+    enabled: Boolean(clientUploads),
+    endpoint: {
+      handler: getHandleMultiPartUpload({
+        access,
+        bucket,
+        collections,
+        useCompositePrefixes,
+      }),
+      path: '/storage-r2-multi-part-upload',
+    },
+    generate: ({ filename, filesize, mimeType }) => ({
+      name: 'uploadToR2',
+      type: 'dispatch',
+      file: {
+        filename,
+        mimeType,
+        size: filesize,
+        uploadReference: {},
+      },
+    }),
+  }
 
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'r2',
