@@ -37,13 +37,19 @@ export const stripeREST = async (args: {
     const { status } = responseJSON
     responseStatus = status
   } catch (error: unknown) {
-    const message = `An error has occurred in the Stripe plugin REST handler: '${JSON.stringify(
-      error,
-    )}'`
-    payload.logger.error(message)
-    responseStatus = 500
-    responseJSON = {
-      message,
+    if (error instanceof Forbidden) {
+      responseStatus = error.status
+      responseJSON = {
+        message: error.message,
+      }
+    } else {
+      const message = 'An error has occurred in the Stripe plugin REST handler.'
+
+      payload.logger.error({ err: error, msg: message })
+      responseStatus = 500
+      responseJSON = {
+        message,
+      }
     }
   }
 
