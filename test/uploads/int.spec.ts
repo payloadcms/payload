@@ -152,6 +152,50 @@ describe('Collections - Uploads', () => {
         expect(response.status).toBe(400)
       })
 
+      it('rejects restricted file metadata before creating staged instructions', async () => {
+        const response = await restClient.POST('/upload-instructions', {
+          body: JSON.stringify({
+            collectionSlug: mediaSlug,
+            filename: 'malware.exe',
+            filesize: 2,
+            mimeType: 'application/octet-stream',
+          }),
+        })
+
+        expect(response.status).toBe(400)
+      })
+
+      it('rejects staged file bytes that do not match the collection MIME types', async () => {
+        const executable = Buffer.alloc(64)
+        executable.write('MZ')
+
+        const instructions = await restClient
+          .POST('/upload-instructions', {
+            body: JSON.stringify({
+              collectionSlug: pdfOnlySlug,
+              filename: 'disguised.pdf',
+              filesize: executable.length,
+              mimeType: 'application/pdf',
+            }),
+          })
+          .then((response) => response.json<UploadInstructions>())
+
+        if (instructions.type !== 'http') {
+          throw new Error('Expected HTTP upload instructions')
+        }
+
+        const uploadPath = new URL(instructions.request.url, restClient.serverURL).pathname.replace(
+          payload.config.routes.api,
+          '',
+        ) as `/${string}`
+        const response = await restClient.PUT(uploadPath, {
+          body: executable,
+          headers: instructions.request.headers,
+        })
+
+        expect(response.status).toBe(400)
+      })
+
       it('requires authentication before staging an upload', async () => {
         const response = await restClient.POST('/upload-instructions', {
           auth: false,

@@ -376,6 +376,8 @@ export type UploadInstructionsCapability = {
   useInAdmin: boolean
 }
 export type checkFileRestrictionsParams = {
+  /** Set to false when the file bytes have not been uploaded yet. */
+  checkFileContents?: boolean
   collection: CollectionConfig
   file: File
   req: PayloadRequest

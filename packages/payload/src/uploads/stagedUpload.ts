@@ -11,6 +11,7 @@ import type { File, UploadInstructions, UploadInstructionsRequest } from './type
 import { jwtSign } from '../auth/jwt.js'
 import { APIError, Forbidden } from '../errors/index.js'
 import { formatAdminURL } from '../utilities/formatAdminURL.js'
+import { checkFileRestrictions } from './checkFileRestrictions.js'
 
 /**
  * Creates a signed, one-hour URL where the client can send the file bytes. The returned file value
@@ -104,12 +105,25 @@ export const uploadStagedFile: PayloadHandler = async (req) => {
     } finally {
       await file.close()
     }
+
+    const collection = req.payload.collections[upload.collectionSlug]!.config
+    await checkFileRestrictions({
+      collection,
+      file: {
+        name: upload.filename,
+        data: Buffer.alloc(0),
+        mimetype: upload.mimeType,
+        size: upload.filesize,
+        tempFilePath: temporaryPath,
+      },
+      req,
+    })
+
+    await fs.rename(temporaryPath, uploadPath)
   } catch (error) {
     await fs.rm(temporaryPath, { force: true })
     throw error
   }
-
-  await fs.rename(temporaryPath, uploadPath)
 
   return new Response(null, { status: 204 })
 }
