@@ -11,11 +11,12 @@ import type {
 
 import ObjectIdImport from 'bson-objectid'
 import { fieldAffectsData, flattenTopLevelFields } from 'payload/shared'
-import React, { useMemo } from 'react'
+import React, { useCallback, useMemo } from 'react'
 
 import { ErrorPill } from '../../elements/ErrorPill/index.js'
 import { RelationshipTable } from '../../elements/RelationshipTable/index.js'
 import { RenderCustomComponent } from '../../elements/RenderCustomComponent/index.js'
+import { useForm } from '../../forms/Form/context.js'
 import { useField } from '../../forms/useField/index.js'
 import { withCondition } from '../../forms/withCondition/index.js'
 import { useConfig } from '../../providers/Config/index.js'
@@ -140,6 +141,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
     customComponents: { AfterInput, BeforeInput, Description, Label } = {},
     errorPaths,
     path,
+    setValue,
     showError,
     value,
   } = useField<PaginatedDocs>({
@@ -148,6 +150,16 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
 
   const fieldErrorCount = errorPaths?.length || (showError ? 1 : 0)
   const fieldHasErrors = fieldErrorCount > 0
+
+  const { requestFormStateRefresh } = useForm()
+
+  const handleDataChange = useCallback(
+    (data: PaginatedDocs) => {
+      setValue(data, true)
+      requestFormStateRefresh()
+    },
+    [requestFormStateRefresh, setValue],
+  )
 
   const filterOptions: null | Where = useMemo(() => {
     if (!docID) {
@@ -223,6 +235,7 @@ const JoinFieldComponent: JoinFieldClientComponent = (props) => {
             {fieldHasErrors && <ErrorPill count={fieldErrorCount} i18n={i18n} withMessage />}
           </div>
         }
+        onDataChange={handleDataChange}
         parent={
           typeof docID !== 'undefined'
             ? {
