@@ -1,4 +1,5 @@
 import type { CollectionSlug } from '../../../index.js'
+import type { PayloadRequest } from '../../../types/index.js'
 import type { FieldHook, PolymorphicRelationshipField } from '../../config/types.js'
 import type { Authorship, SanitizedAuthorship } from './types.js'
 
@@ -52,6 +53,15 @@ const relationsEqual = (a: RelationValue, b: RelationValue): boolean => {
 const isExplicitlyProvided = (incoming: RelationValue, previousValue: RelationValue): boolean =>
   incoming !== undefined && !relationsEqual(incoming, previousValue)
 
+const userToRelation = (req: PayloadRequest): RelationValue => {
+  // Skip stamping when `collection` is missing rather than writing an invalid `relationTo`.
+  if (req.user?.collection && req.user.id !== undefined && req.user.id !== null) {
+    return { relationTo: req.user.collection, value: req.user.id }
+  }
+
+  return undefined
+}
+
 const setUpdatedBy: FieldHook = ({ data, previousValue, req }) => {
   const incoming = data?.updatedBy as RelationValue
 
@@ -59,12 +69,8 @@ const setUpdatedBy: FieldHook = ({ data, previousValue, req }) => {
     return incoming
   }
 
-  if (req.user) {
-    return { relationTo: req.user.collection, value: req.user.id }
-  }
-
-  // No user on the request (e.g. Local API without `req.user`): leave the value unchanged.
-  return previousValue
+  // No (usable) user on the request (e.g. Local API without `req.user`): leave the value unchanged.
+  return userToRelation(req) ?? previousValue
 }
 
 const setCreatedBy: FieldHook = ({ data, previousValue, req }) => {
@@ -81,11 +87,7 @@ const setCreatedBy: FieldHook = ({ data, previousValue, req }) => {
     return incoming
   }
 
-  if (req.user) {
-    return { relationTo: req.user.collection, value: req.user.id }
-  }
-
-  return previousValue
+  return userToRelation(req) ?? previousValue
 }
 
 /**

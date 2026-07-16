@@ -212,6 +212,8 @@ describe('Field Paths', () => {
         'blocks.CollapsibleBlock._index-0-0.textInCollapsibleInCollapsibleBlock',
         'blocks.CollapsibleBlock.id',
         'blocks.CollapsibleBlock.blockName',
+        'createdBy',
+        'updatedBy',
         'updatedAt',
         'createdAt',
         '_status',
