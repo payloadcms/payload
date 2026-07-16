@@ -35,6 +35,7 @@ import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
+import { hasNonLocalizedDataChanged } from '../../versions/drafts/hasNonLocalizedDataChanged.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 type Args<TSlug extends GlobalSlug> = {
@@ -267,6 +268,28 @@ export const updateOperation = async <
       result._status = {}
       for (const localeCode of config.localization.localeCodes) {
         ;(result._status as Record<string, unknown>)[localeCode] = statusStr
+      }
+    }
+
+    const localization = config?.localization
+    const shouldDraftAllLocales =
+      isSavingDraft &&
+      localization &&
+      hasLocalizeStatusEnabled(globalConfig) &&
+      hasNonLocalizedDataChanged({
+        after: result,
+        before: globalJSON,
+        configBlockReferences: config?.blocks ?? [],
+        fields: globalConfig.fields,
+      })
+
+    if (shouldDraftAllLocales && localization) {
+      if (!result._status || typeof result._status !== 'object' || Array.isArray(result._status)) {
+        result._status = {}
+      }
+
+      for (const localeCode of localization.localeCodes) {
+        ;(result._status as Record<string, unknown>)[localeCode] = 'draft'
       }
     }
 
