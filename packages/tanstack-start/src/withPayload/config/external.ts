@@ -6,6 +6,12 @@
 /**
  * Server-only packages (Node-only or only ever used by the server bundle).
  * These are the Vite equivalent of Next.js's `serverExternalPackages`.
+ *
+ * Only genuinely server-only packages belong here. A pure-JS package reachable
+ * from client-safe code (e.g. `pluralize`, imported by `payload`'s `formatLabels`
+ * which ships in the `browser`/`shared` export) must NOT be listed: externalizing
+ * it leaves a bare specifier in a bundled client chunk that pnpm can't resolve
+ * from `dist/` at runtime. Let it bundle instead.
  */
 export const ssrExternalPackages: string[] = [
   'ajv',
@@ -21,7 +27,6 @@ export const ssrExternalPackages: string[] = [
   'graphql',
   'nodemailer',
   'aws4',
-  'pluralize',
   'console-table-printer',
   '@azure/storage-blob',
   '@aws-sdk/client-s3',
@@ -38,6 +43,32 @@ export const ssrExternalPackages: string[] = [
   // Mongo (`@payloadcms/db-mongodb`)
   'mongodb',
   'mongoose',
+]
+
+/**
+ * External packages for the production `vite build` only (not dev serve).
+ *
+ * Externalizes the `@payloadcms/*` package boundaries — plus `payload` — so each
+ * resolves its own transitive Node deps (`pino`, `drizzle-orm`, `libsql`, …) from
+ * its own `node_modules` at runtime. Externalizing only the leaf deps breaks under
+ * pnpm: a leaf imported by bundled code becomes an unresolvable bare specifier from
+ * `dist/`, since pnpm does not hoist it.
+ *
+ * Kept out of dev's `ssr.external` on purpose: the monorepo resolves these to
+ * TypeScript source (`.ts` imported via `.js` specifiers), which only Vite's
+ * transform can resolve — an externalized copy would hit Node's raw resolver and
+ * fail on the `.js`→`.ts` mismatch.
+ */
+export const buildExternalPackages: string[] = [
+  'payload',
+  'payload/node',
+  '@payloadcms/drizzle',
+  '@payloadcms/db-mongodb',
+  '@payloadcms/db-postgres',
+  '@payloadcms/db-vercel-postgres',
+  '@payloadcms/db-sqlite',
+  '@payloadcms/db-d1-sqlite',
+  ...ssrExternalPackages,
 ]
 
 export const payloadNoExternalPatterns: Array<RegExp | string> = [
