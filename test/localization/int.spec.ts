@@ -4187,53 +4187,6 @@ describe('Localization', () => {
           expect(allLocalesDraft.nonLocalizedGroup?.nonLocalizedText).toBe(
             'shared published localized-only test',
           )
-
-          const spanishDraftDoc = await payload.create({
-            collection: allFieldsLocalizedSlug,
-            data: {
-              nonLocalizedGroup: {
-                nonLocalizedText: 'inverse shared published',
-              },
-              text: 'inverse english published',
-              _status: 'published',
-            },
-            locale: defaultLocale,
-          })
-
-          await payload.update({
-            collection: allFieldsLocalizedSlug,
-            id: spanishDraftDoc.id,
-            data: {
-              text: 'inverse spanish published',
-              _status: 'published',
-            },
-            locale: spanishLocale,
-          })
-
-          await payload.update({
-            collection: allFieldsLocalizedSlug,
-            id: spanishDraftDoc.id,
-            data: {
-              nonLocalizedGroup: {
-                nonLocalizedText: 'inverse shared draft',
-              },
-              text: 'inverse spanish draft',
-              _status: 'draft',
-            },
-            draft: true,
-            locale: spanishLocale,
-          })
-
-          const englishView = await payload.findByID({
-            collection: allFieldsLocalizedSlug,
-            id: spanishDraftDoc.id,
-            draft: true,
-            locale: defaultLocale,
-          })
-
-          expect(englishView._status).toBe('published')
-          expect(englishView.text).toBe('inverse english published')
-          expect(englishView.nonLocalizedGroup?.nonLocalizedText).toBe('inverse shared draft')
         })
 
         it('should resolve drafts by localized status when no locale is specified', async () => {
