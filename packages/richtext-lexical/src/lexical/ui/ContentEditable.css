@@ -6,9 +6,8 @@
     tab-size: 1;
     outline: 0;
     padding: var(--spacer-3) var(--spacer-3);
-    /* Kept at spacer-4 regardless of viewport: InsertParagraphAtEnd overlaps this
-       bottom padding by the same amount to place its hover "+" affordance, so
-       shrinking it here would make that control cover the last line of text. */
+    /* Reserve space for the InsertParagraphAtEnd hover "+" affordance, which
+       overlaps this bottom padding; shrinking it would cover the last line. */
     padding-bottom: var(--spacer-4);
 
     &:focus-visible {
