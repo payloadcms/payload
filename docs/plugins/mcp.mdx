@@ -177,6 +177,15 @@ The `tools` map keys can be:
 
 `globals[slug]` accepts the same shape, but the built-in keys are limited to `getGlobalSchema`, `find`, and `update` (globals are singletons; create / delete don't apply).
 
+## Uploading files
+
+MCP can add or replace files in upload-enabled collections.
+
+- For a file that is already online, include its URL in your prompt: `Add https://example.com/logo.png to the media library with the alt text "Company logo".`
+- If your MCP client supports attachments, attach a small local file and ask the agent to upload it.
+
+The agent reads the collection's upload settings before acting. MIME type and file-size restrictions still apply, URL uploads respect `pasteURL` and its allow list, and local files are transferred as base64.
+
 ## Transports
 
 The plugin ships two transports. You can use either or both.

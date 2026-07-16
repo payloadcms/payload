@@ -1,11 +1,10 @@
-import { payloadPlugin } from '@payloadcms/tanstack-start/vite'
+import { withPayload } from '@payloadcms/tanstack-start/vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import rsc from '@vitejs/plugin-rsc'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { createLogger, defineConfig, mergeConfig } from 'vite'
 
 // This config drives the TanStack admin app from the `test` package, mirroring
 // how the Next.js test apps live under `test/`. Its dependencies are declared by
@@ -21,26 +20,6 @@ import { createLogger, defineConfig, mergeConfig } from 'vite'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 const repoRoot = path.resolve(__dirname, '..')
-
-// Third-party deps (react-datepicker, @faceless-ui/*) ship sourcemaps whose
-// original source files aren't published, so Vite warns on every one. Silence
-// just those warnings to keep dev startup output readable.
-const logger = createLogger()
-const isMissingSourcemapWarning = (msg: string) => msg.includes('points to missing source files')
-const baseWarn = logger.warn.bind(logger)
-const baseWarnOnce = logger.warnOnce.bind(logger)
-logger.warn = (msg, options) => {
-  if (isMissingSourcemapWarning(msg)) {
-    return
-  }
-  baseWarn(msg, options)
-}
-logger.warnOnce = (msg, options) => {
-  if (isMissingSourcemapWarning(msg)) {
-    return
-  }
-  baseWarnOnce(msg, options)
-}
 
 const databaseAdapterPath = path.resolve(__dirname, 'databaseAdapter.js')
 if (!fs.existsSync(databaseAdapterPath)) {
@@ -73,81 +52,62 @@ const testSuite = process.env.PAYLOAD_TEST_SUITE || '_community'
 const suiteDir = path.resolve(__dirname, testSuite, 'app-tanstack')
 const srcDirectory = fs.existsSync(suiteDir) ? path.relative(__dirname, suiteDir) : 'app-tanstack'
 
-export default defineConfig((env) =>
-  mergeConfig(
-    payloadPlugin({
-      additionalIgnoreImporters: [
-        /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
+export default withPayload(
+  ({ pluginOptions }) => ({
+    plugins: [
+      rsc(pluginOptions.rsc),
+      tanstackStart(pluginOptions.tanstackStart),
+      viteReact(pluginOptions.react),
+    ],
+    // Keep build output out of the app dirs (they ship as pure source); the
+    // repo root already ignores `dist`.
+    build: { outDir: path.resolve(repoRoot, 'dist/app-tanstack') },
+    optimizeDeps: {
+      include: [
+        // `recharts` is only reached through the dashboard suite's Revenue
+        // widget, which is rendered on-demand via the `render-widget` server
+        // function. Vite discovers it (and its d3-* subdeps) *after* the
+        // initial crawl, forcing a full dep re-optimization + page reload
+        // mid-test. That reload remounts the admin view and silently drops
+        // client state (e.g. the dashboard's `isEditing`/unsaved layout),
+        // flaking the add/delete/reset widget tests. Pre-bundle it so the
+        // first optimization pass is complete.
+        'recharts',
+        // `@payloadcms/storage-vercel-blob`'s client upload handler imports
+        // `upload` from `@vercel/blob/client`, which depends on the CommonJS
+        // `async-retry`. Because the storage adapter is `noExternal` (bundled
+        // from source), Vite's optimizer never crawls into it to discover
+        // `@vercel/blob/client`, so it ships raw — and `async-retry`'s bare
+        // `require()` throws "require() is not available in the browser
+        // bundle", breaking the upload field (file input never mounts).
+        // Pre-bundling lets esbuild convert the CJS require to ESM.
+        '@vercel/blob/client',
       ],
-      payloadConfigPath: path.resolve(__dirname, testSuite, 'config.ts'),
-      reactPlugin: viteReact({
-        exclude: [],
-        include: /\.[jt]sx?$/,
-      }),
-      routesDirectory: 'app',
-      rscPlugin: rsc({ serverHandler: false }),
-      srcDirectory,
-      tanstackStart,
-    })(env),
-    {
-      css: {
-        preprocessorOptions: {
-          scss: {
-            importers: [
-              {
-                findFileUrl(url: string) {
-                  if (url.startsWith('~@payloadcms/ui/scss')) {
-                    return new URL(
-                      'file://' + path.resolve(repoRoot, 'packages/ui/src/scss/styles.scss'),
-                    )
-                  }
-                  return null
-                },
-              },
-            ],
-          },
-        },
-      },
-      // Keep build output out of the app dirs (they ship as pure source); the
-      // repo root already ignores `dist`.
-      build: { outDir: path.resolve(repoRoot, 'dist/app-tanstack') },
-      optimizeDeps: {
-        include: [
-          // `recharts` is only reached through the dashboard suite's Revenue
-          // widget, which is rendered on-demand via the `render-widget` server
-          // function. Vite discovers it (and its d3-* subdeps) *after* the
-          // initial crawl, forcing a full dep re-optimization + page reload
-          // mid-test. That reload remounts the admin view and silently drops
-          // client state (e.g. the dashboard's `isEditing`/unsaved layout),
-          // flaking the add/delete/reset widget tests. Pre-bundle it so the
-          // first optimization pass is complete.
-          'recharts',
-          // `@payloadcms/storage-vercel-blob`'s client upload handler imports
-          // `upload` from `@vercel/blob/client`, which depends on the CommonJS
-          // `async-retry`. Because the storage adapter is `noExternal` (bundled
-          // from source), Vite's optimizer never crawls into it to discover
-          // `@vercel/blob/client`, so it ships raw — and `async-retry`'s bare
-          // `require()` throws "require() is not available in the browser
-          // bundle", breaking the upload field (file input never mounts).
-          // Pre-bundling lets esbuild convert the CJS require to ESM.
-          '@vercel/blob/client',
+    },
+    envDir: repoRoot,
+    server: {
+      fs: { allow: [repoRoot] },
+      port,
+      strictPort: true,
+      warmup: {
+        clientFiles: [
+          './app-tanstack/app/__root.tsx',
+          './app-tanstack/app/_payload.tsx',
+          './app-tanstack/app/_payload/admin.index.tsx',
+          './app-tanstack/app/_payload/admin.$.tsx',
         ],
       },
-      customLogger: logger,
-      envDir: repoRoot,
-      server: {
-        fs: { allow: [repoRoot] },
-        port,
-        strictPort: true,
-        warmup: {
-          clientFiles: [
-            './app-tanstack/app/__root.tsx',
-            './app-tanstack/app/_payload.tsx',
-            './app-tanstack/app/_payload/admin.index.tsx',
-            './app-tanstack/app/_payload/admin.$.tsx',
-          ],
-        },
-      },
     },
-  ),
+  }),
+  {
+    additionalIgnoreImporters: [
+      /^\.\.\/packages\/tanstack-start\/src\/views\/AdminView\.tsx(?:\?.*)?$/,
+    ],
+    // In the monorepo, Payload's `.client.*` files resolve to `packages/*/src`
+    // (not `node_modules`), so exempt them from the `.client.*` SSR denial too.
+    clientDenialExcludeFiles: ['**/packages/*/src/**'],
+    payloadConfigPath: path.resolve(__dirname, testSuite, 'config.ts'),
+    routesDirectory: 'app',
+    srcDirectory,
+  },
 )

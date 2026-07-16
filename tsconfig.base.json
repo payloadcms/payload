@@ -62,6 +62,12 @@
       "@payloadcms/plugin-form-builder/client": [
         "./packages/plugin-form-builder/src/exports/client.ts"
       ],
+      "@payloadcms/plugin-form-builder/translations/languages/all": [
+        "./packages/plugin-form-builder/src/translations/index.ts"
+      ],
+      "@payloadcms/plugin-form-builder/translations/languages/*": [
+        "./packages/plugin-form-builder/src/translations/languages/*.ts"
+      ],
       "@payloadcms/plugin-import-export/rsc": [
         "./packages/plugin-import-export/src/exports/rsc.ts"
       ],
@@ -91,9 +97,6 @@
         "./packages/storage-vercel-blob/src/exports/client.ts"
       ],
       "@payloadcms/storage-gcs/client": ["./packages/storage-gcs/src/exports/client.ts"],
-      "@payloadcms/storage-uploadthing/client": [
-        "./packages/storage-uploadthing/src/exports/client.ts"
-      ],
       "@payloadcms/storage-r2/client": ["./packages/storage-r2/src/exports/client.ts"]
     }
   },

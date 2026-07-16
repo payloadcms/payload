@@ -150,8 +150,6 @@
     }
 
     .doc-controls {
-      padding: var(--spacer-2-5);
-      padding-right: var(--spacer-2-5);
       gap: var(--spacer-2);
       flex-wrap: wrap;
     }

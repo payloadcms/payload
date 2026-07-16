@@ -8,6 +8,10 @@ export const Media: CollectionConfig = {
       type: 'text',
     },
   ],
-  upload: true,
+  upload: {
+    pasteURL: {
+      allowList: [{ hostname: '127.0.0.1', protocol: 'http' }],
+    },
+  },
   versions: false,
 }

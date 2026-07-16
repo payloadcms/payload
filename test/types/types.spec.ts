@@ -1,12 +1,15 @@
 import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical'
 import type {
+  AuthenticatedUser,
   BulkOperationResult,
   CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
   GeneratedTypes,
   JoinQuery,
+  MeOperationResult,
   PaginatedDocs,
+  PayloadRequest,
   PayloadTypesShape,
   SelectType,
   TypedCollectionSelect,
@@ -76,6 +79,13 @@ import type {
 } from './payload-types.js'
 
 describe('Types testing', () => {
+  describe('authenticated user', () => {
+    test('should use AuthenticatedUser for request and me operation users', () => {
+      expect<PayloadRequest['user']>().type.toBe<AuthenticatedUser | null>()
+      expect<MeOperationResult['user']>().type.toBe<AuthenticatedUser | null | undefined>()
+    })
+  })
+
   test('payload.find', () => {
     expect(payload.find({ collection: 'users' })).type.toBe<Promise<PaginatedDocs<User>>>()
   })
@@ -1393,9 +1403,10 @@ describe('Types testing', () => {
       expect<InputTypeInput>().type.not.toHaveProperty('updatedAt')
     })
 
-    test('_status is not part of write data', () => {
+    test('_status is part of write data for draft-enabled entities', () => {
       expect<DraftPost>().type.toHaveProperty('_status')
-      expect<DraftPostInput>().type.not.toHaveProperty('_status')
+      expect<DraftPostInput>().type.toHaveProperty('_status')
+      expect<DraftPostInput['_status']>().type.toBe<DraftPost['_status']>()
     })
 
     test('fields with a defaultValue are optional in write data', () => {

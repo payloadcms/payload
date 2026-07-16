@@ -5,6 +5,7 @@ import { globalsComponentsEdit } from './transforms/globals-components-edit/inde
 import { migrateAfterOperationRead } from './transforms/migrate-after-operation-read/index.js'
 import { migrateAliasedExports } from './transforms/migrate-aliased-exports/index.js'
 import { migrateAuthorshipDefault } from './transforms/migrate-authorship-default/index.js'
+import { migrateAzureChunkLargeFiles } from './transforms/migrate-azure-chunk-large-files/index.js'
 import { migrateBlockReferencesToBlocks } from './transforms/migrate-block-references-to-blocks/index.js'
 import { migrateBuildScript } from './transforms/migrate-build-script/index.js'
 import { migrateDbTypesSubpath } from './transforms/migrate-db-types-subpath/index.js'
@@ -14,6 +15,7 @@ import { migrateForceSelect } from './transforms/migrate-force-select/index.js'
 import { migrateHideAPIURL } from './transforms/migrate-hide-api-url/index.js'
 import { migrateImportExportHooks } from './transforms/migrate-import-export-hooks/index.js'
 import { migrateListViewSelectAPI } from './transforms/migrate-list-view-select-api/index.js'
+import { migrateNextGenerateViewportExport } from './transforms/migrate-next-generate-viewport-export/index.js'
 import { migrateNextSubpathExports } from './transforms/migrate-next-subpath-exports/index.js'
 import { migrateSlugField } from './transforms/migrate-slug-field/index.js'
 import { migrateStorageAdaptersToConfig } from './transforms/migrate-storage-adapters-to-config/index.js'
@@ -38,9 +40,11 @@ export const transforms: Transform[] = [
   migrateBuildScript,
   migrateDocumentTitleContext,
   migrateStorageAdaptersToConfig,
+  migrateAzureChunkLargeFiles,
   renameStorageAdaptersToStorage,
   migrateImportExportHooks,
   migrateDbTypesSubpath,
+  migrateNextGenerateViewportExport,
   migrateNextSubpathExports,
   migrateSlugField,
   migrateVersionsDefault,

@@ -10,7 +10,7 @@
       border: var(--stroke-width-small) solid var(--field-color-border);
       border-radius: var(--field-border-radius);
       padding: var(--spacer-2) 0;
-      overflow: clip;
+      overflow: visible;
       box-shadow: none;
 
       &:hover {

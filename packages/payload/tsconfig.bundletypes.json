@@ -6,8 +6,8 @@
     // This ensures node types do not conflict with node types (e.g. fetch.dispatcher)
     "lib": ["ES2022"],
     "paths": {
-      "@payloadcms/translations": ["../translations/dist/exports/index.d.ts"],
-      "@payloadcms/translations/utilities": ["../translations/dist/exports/utilities.d.ts"]
+      "@payloadcms/translations": ["../translations/src/exports/index.ts"],
+      "@payloadcms/translations/utilities": ["../translations/src/exports/utilities.ts"]
     }
   }
 }

@@ -1,0 +1,9 @@
+@layer payload-default {
+  :root {
+    --z-popup: 60;
+    --z-nav: 20;
+    --z-modal: 30;
+    --z-status: 40;
+    --z-portal-element: 9999;
+  }
+}

@@ -25,8 +25,12 @@ export async function copyPasteField({
     await wait(1000)
   }
 
+  // Field ids join path segments with `__`, but row ids use `-`
+  // (e.g. `field-items__0__subArray` vs `items-0-subArray-row-0`).
+  const rowIdPrefix = fieldName.replaceAll('__', '-')
+
   const popupBtnSelector = rowAction
-    ? `#${fieldName}-row-${rowIndex} .collapsible__actions button.array-actions__button`
+    ? `#${rowIdPrefix}-row-${rowIndex} .collapsible__actions button.array-actions__button`
     : 'header .clipboard-action__popup button.popup-button'
   const popupBtn = field.locator(popupBtnSelector).first()
   await expect(popupBtn).toBeVisible()

@@ -1,7 +1,13 @@
 import type { JsonSchemaType } from '@modelcontextprotocol/client'
 
+import { readFile } from 'fs/promises'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { afterEach, describe, expect, vi } from 'vitest'
 
+import type { TestFileServer } from '../__helpers/shared/startTestFileServer.js'
+
+import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
 import { getToolDoc, getToolText } from './helpers/mcpClient.js'
 import {
   getApiKey,
@@ -12,6 +18,8 @@ import {
   restClient,
   userId,
 } from './helpers/mcpFixtures.js'
+
+const dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
  * Reports JSON Schema draft 2020-12 violations in a tool's `input_schema
@@ -118,6 +126,45 @@ describe('@payloadcms/plugin-mcp', () => {
     expect(responses.some(({ contentType }) => contentType?.includes('text/event-stream'))).toBe(
       false,
     )
+  })
+
+  it('should reject misleading non-JSON content types', async ({ mcp }) => {
+    const apiKey = await getApiKey()
+    const response = await mcp.rawPost({
+      apiKey,
+      body: {},
+      contentType: 'text/plain; profile=application/json',
+    })
+
+    expect(response.status).toBe(415)
+    await expect(response.json()).resolves.toEqual({
+      error: {
+        code: -32_000,
+        message: 'Unsupported Media Type: Content-Type must be application/json',
+      },
+      id: null,
+      jsonrpc: '2.0',
+    })
+  })
+
+  it('should accept JSON content types case-insensitively and with parameters', async ({ mcp }) => {
+    const apiKey = await getApiKey()
+    const response = await mcp.rawPost({
+      apiKey,
+      body: {
+        id: 1,
+        jsonrpc: '2.0',
+        method: 'initialize',
+        params: {
+          capabilities: {},
+          clientInfo: { name: 'content-type-test', version: '1.0.0' },
+          protocolVersion: '2025-11-25',
+        },
+      },
+      contentType: 'Application/JSON; charset=utf-8',
+    })
+
+    expect(response.status).toBe(200)
   })
 
   /* eslint-disable vitest/no-standalone-expect -- itModern is a custom Vitest test registrar. */
@@ -440,6 +487,8 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(createDocument.inputSchema.properties.draft).toBeDefined()
       expect(createDocument.inputSchema.properties.draft.type).toBe('boolean')
       expect(createDocument.inputSchema.properties.fallbackLocale).toBeDefined()
+      expect(createDocument.inputSchema.properties.file).toBeDefined()
+      expect(createDocument.inputSchema.properties.filePath).toBeUndefined()
       expect(createDocument.inputSchema.properties.locale).toBeDefined()
       expect(createDocument.inputSchema.properties.select).toBeDefined()
       expect(createDocument.inputSchema.properties.select.type).toBe('object')
@@ -640,6 +689,10 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(updateToolSchema.inputSchema.properties.select.description).toContain(
         "Optional: define exactly which fields you'd like to return in the response",
       )
+      expect(updateToolSchema.inputSchema.properties.publishAllLocales).toBeDefined()
+      expect(updateToolSchema.inputSchema.properties.publishAllLocales.type).toBe('boolean')
+      expect(updateToolSchema.inputSchema.properties.file).toBeDefined()
+      expect(updateToolSchema.inputSchema.properties.filePath).toBeUndefined()
     })
   })
 
@@ -781,9 +834,19 @@ describe('@payloadcms/plugin-mcp', () => {
   })
 
   describe('Collections', () => {
+    const createdMediaIDs: Array<number | string> = []
     const createdPostIDs: Array<number | string> = []
+    const uploadServers: TestFileServer[] = []
 
     afterEach(async () => {
+      await Promise.all(uploadServers.map(({ close }) => close()))
+      uploadServers.length = 0
+
+      for (const id of createdMediaIDs) {
+        await payload.delete({ collection: 'media', id })
+      }
+      createdMediaIDs.length = 0
+
       for (const id of createdPostIDs) {
         await payload.delete({ collection: 'posts', id })
       }
@@ -803,6 +866,7 @@ describe('@payloadcms/plugin-mcp', () => {
 
       expect(schema.properties?.title).toBeDefined()
       expect(schema.properties?.content).toBeDefined()
+      expect(schema.properties?._status?.enum).toEqual(['draft', 'published'])
       expect(schema.properties?.badProperty).toBeUndefined()
     })
 
@@ -863,6 +927,113 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(overrideText).toContain('Override MCP response for Posts!')
     })
 
+    it('should create an upload document from a URL', async ({ mcp }) => {
+      const image = await readFile(path.resolve(dirname, '../uploads/image.png'))
+      const server = await startTestFileServer({
+        contentType: 'image/png',
+        data: image,
+      })
+      uploadServers.push(server)
+
+      const apiKey = await getApiKey()
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
+          collectionSlug: 'media',
+          data: {
+            alt: 'Uploaded from a URL through MCP',
+          },
+          file: {
+            name: 'mcp-url.png',
+            source: 'url',
+            url: `${server.url}/image.png`,
+          },
+        },
+        name: 'createDocument',
+      })
+      const createdMedia = getToolDoc<{ id: number | string }>(callResponse)
+      createdMediaIDs.push(createdMedia.id)
+
+      const storedMedia = await payload.findByID({
+        id: createdMedia.id,
+        collection: 'media',
+      })
+
+      expect(storedMedia.alt).toBe('Uploaded from a URL through MCP')
+      expect(storedMedia.filename).toBe('mcp-url.png')
+      expect(storedMedia.mimeType).toBe('image/png')
+      expect(storedMedia.filesize).toBe(image.length)
+    })
+
+    it('should replace an upload document from base64', async ({ mcp }) => {
+      const media = await payload.create({
+        collection: 'media',
+        data: {
+          alt: 'Original asset',
+        },
+        filePath: path.resolve(dirname, '../uploads/image.jpg'),
+      })
+      createdMediaIDs.push(media.id)
+      const image = await readFile(path.resolve(dirname, '../uploads/image.png'))
+
+      const apiKey = await getApiKey()
+      const client = await mcp.connect(apiKey)
+      await client.callTool({
+        arguments: {
+          collectionSlug: 'media',
+          data: {
+            alt: 'Replaced from base64 through MCP',
+          },
+          file: {
+            data: image.toString('base64'),
+            mimeType: 'image/png',
+            name: 'mcp-replacement.png',
+            source: 'base64',
+          },
+          id: media.id,
+        },
+        name: 'updateDocument',
+      })
+
+      const storedMedia = await payload.findByID({
+        id: media.id,
+        collection: 'media',
+      })
+
+      expect(storedMedia.alt).toBe('Replaced from base64 through MCP')
+      expect(storedMedia.filename).toBe('mcp-replacement.png')
+      expect(storedMedia.mimeType).toBe('image/png')
+      expect(storedMedia.filesize).toBe(image.length)
+    })
+
+    it('should create a published document from data._status', async ({ mcp }) => {
+      const apiKey = await getApiKey()
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
+          collectionSlug: 'posts',
+          data: {
+            _status: 'published',
+            title: 'Published through MCP',
+          },
+          draft: false,
+          locale: 'en',
+        },
+        name: 'createDocument',
+      })
+      const createdPost = getToolDoc<{ id: number | string }>(callResponse)
+      createdPostIDs.push(createdPost.id)
+
+      const storedPost = await payload.findByID({
+        id: createdPost.id,
+        collection: 'posts',
+        draft: false,
+        locale: 'all',
+      })
+
+      expect(storedPost._status).toMatchObject({ en: 'published' })
+    })
+
     it('should call createDocument with select to limit returned fields', async ({ mcp }) => {
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
@@ -883,40 +1054,55 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(callResponse.content[0].text).not.toContain('Content should be omitted')
     })
 
-    it('should call getCollectionSchema', async ({ mcp }) => {
+    it('should return upload requirements from getCollectionSchema', async ({ mcp }) => {
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
       const callResponse = await client.callTool({
         arguments: {
-          collectionSlug: 'posts',
+          collectionSlug: 'media',
         },
         name: 'getCollectionSchema',
       })
 
-      expect(callResponse.content[0].text).toContain('Schema for collection "posts"')
-      expect(callResponse.content[0].text).toContain('"title"')
-      expect(callResponse.content[0].text).toContain('"content"')
+      expect(callResponse.structuredContent?.upload).toMatchObject({
+        enabled: true,
+        filesRequiredOnCreate: true,
+        mimeTypes: ['*/*'],
+        sources: ['url', 'base64'],
+      })
     })
 
-    it('should call createDocument', async ({ mcp }) => {
+    it('should create an upload document from base64', async ({ mcp }) => {
+      const image = await readFile(path.resolve(dirname, '../uploads/image.png'))
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
       const callResponse = await client.callTool({
         arguments: {
-          collectionSlug: 'posts',
+          collectionSlug: 'media',
           data: {
-            content: 'Content for generic create.',
-            title: 'Generic Create Post',
+            alt: 'Uploaded from base64 through MCP',
+          },
+          file: {
+            data: image.toString('base64'),
+            mimeType: 'image/png',
+            name: 'mcp-base64.png',
+            source: 'base64',
           },
         },
         name: 'createDocument',
       })
+      const createdMedia = getToolDoc<{ id: number | string }>(callResponse)
+      createdMediaIDs.push(createdMedia.id)
 
-      expect(callResponse.content[0].text).toContain(
-        'Document created successfully in collection "posts"!',
-      )
-      expect(callResponse.content[0].text).toContain('"title":"Generic Create Post"')
-      expect(callResponse.content[1].text).toContain('Override MCP response for Posts!')
+      const storedMedia = await payload.findByID({
+        id: createdMedia.id,
+        collection: 'media',
+      })
+
+      expect(storedMedia.alt).toBe('Uploaded from base64 through MCP')
+      expect(storedMedia.filename).toBe('mcp-base64.png')
+      expect(storedMedia.mimeType).toBe('image/png')
+      expect(storedMedia.filesize).toBe(image.length)
     })
 
     it('should call findDocuments', async ({ mcp }) => {
@@ -1312,6 +1498,65 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(callResponse.content[0].text).toContain(
         '"content":"Updated content for test post to update."',
       )
+    })
+
+    it('should forward publishAllLocales when updating a document', async ({ mcp }) => {
+      const post = await payload.create({
+        collection: 'posts',
+        data: {
+          title: 'English draft title',
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      try {
+        await payload.update({
+          id: post.id,
+          collection: 'posts',
+          data: { title: 'Spanish draft title' },
+          draft: true,
+          locale: 'es',
+        })
+
+        const apiKey = await getApiKey()
+        const client = await mcp.connect(apiKey)
+        const callResponse = await client.callTool({
+          arguments: {
+            collectionSlug: 'posts',
+            id: post.id,
+            data: {
+              _status: 'published',
+              title: 'Published English title',
+            },
+            draft: false,
+            locale: 'en',
+            publishAllLocales: false,
+          },
+          name: 'updateDocument',
+        })
+        const publishedPost = await payload.findByID({
+          id: post.id,
+          collection: 'posts',
+          draft: false,
+          locale: 'all',
+        })
+        const spanishDraft = await payload.findByID({
+          id: post.id,
+          collection: 'posts',
+          draft: true,
+          locale: 'es',
+        })
+
+        expect(callResponse).toBeDefined()
+        expect(publishedPost._status).toMatchObject({ en: 'published' })
+        expect(publishedPost._status).not.toMatchObject({ es: 'published' })
+        expect(publishedPost._status).not.toMatchObject({ fr: 'published' })
+        expect(spanishDraft.title).toBe('Spanish draft title')
+        expect(spanishDraft._status).toBe('draft')
+      } finally {
+        await payload.delete({ collection: 'posts', id: post.id })
+      }
     })
 
     it('should call updateDocument with nullable union type field set to null', async ({ mcp }) => {
@@ -1837,7 +2082,7 @@ describe('@payloadcms/plugin-mcp', () => {
       const apiKey = await getApiKey()
       const client = await mcp.connect(apiKey)
       const callResponse = await client.callTool({
-        arguments: { globalSlug: 'site-settings' },
+        arguments: { depth: 9, globalSlug: 'site-settings' },
         name: 'findGlobal',
       })
 
@@ -1947,7 +2192,7 @@ describe('@payloadcms/plugin-mcp', () => {
           data: {
             maintenanceMode: false,
             siteDescription: 'A test site for MCP global operations',
-            siteName: 'MCP Test Site',
+            siteName: 'MCP payloadAPI probe',
           },
         },
         name: 'updateGlobal',

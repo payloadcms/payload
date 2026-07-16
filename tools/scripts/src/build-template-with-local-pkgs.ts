@@ -93,13 +93,6 @@ DATABASE_URL=${databaseConnection}
 POSTGRES_URL=${databaseConnection}
 BLOB_READ_WRITE_TOKEN=vercel_blob_rw_TEST_asdf`,
   )
-  // Important: run generate:types and generate:importmap first
-  if (templateName !== 'plugin') {
-    // TODO: fix in a separate PR - these commands currently fail in the plugin template
-    execSync('pnpm run generate:types', execOpts)
-    execSync('pnpm run generate:importmap', execOpts)
-  }
-
   await runBuildWithWarningsCheck({ cwd: templatePath, allowWarnings })
 
   header(`\n🎉 Done!`)

@@ -6,7 +6,6 @@ Complete reference for collection configurations and patterns.
 
 ```ts
 import type { CollectionConfig } from 'payload'
-import { slugField } from 'payload'
 
 export const Posts: CollectionConfig = {
   slug: 'posts',
@@ -33,7 +32,7 @@ export const Posts: CollectionConfig = {
       required: true,
       index: true,
     },
-    slugField(), // unique + indexed, sidebar position — don't hand-roll a slug text field
+    { name: 'slug', type: 'slug', useAsSlug: 'title' }, // unique + indexed, sidebar position — don't hand-roll a slug text field
   ],
   defaultSort: '-createdAt',
   timestamps: true,
@@ -128,7 +127,6 @@ Enable real-time content preview during editing.
 
 ```ts
 import type { CollectionConfig } from 'payload'
-import { slugField } from 'payload'
 
 const generatePreviewPath = ({
   slug,
@@ -164,7 +162,10 @@ export const Pages: CollectionConfig = {
         req,
       }),
   },
-  fields: [{ name: 'title', type: 'text' }, slugField()],
+  fields: [
+    { name: 'title', type: 'text' },
+    { name: 'slug', type: 'slug', useAsSlug: 'title' },
+  ],
 }
 ```
 

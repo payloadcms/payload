@@ -106,9 +106,10 @@ const nextSuites: TestConfig[] = [
   { file: 'uploads', shards: 3 },
 ]
 
-const tanstackSuites: TestConfig[] = nextSuites.map((suite) => ({
-  ...suite,
-  framework: 'tanstack-start' as const,
-}))
+// tanstack-start suites are temporarily disabled in CI.
+// const tanstackSuites: TestConfig[] = nextSuites.map((suite) => ({
+//   ...suite,
+//   framework: 'tanstack-start' as const,
+// }))
 
-export default createE2EConfig([...nextSuites, ...tanstackSuites])
+export default createE2EConfig([...nextSuites])

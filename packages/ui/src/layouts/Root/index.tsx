@@ -1,4 +1,3 @@
-import type { AcceptedLanguages } from '@payloadcms/translations'
 import type {
   ImportMap,
   LanguageOptions,
@@ -7,7 +6,6 @@ import type {
   ServerFunctionClient,
 } from 'payload'
 
-import { rtlLanguages } from '@payloadcms/translations'
 import { applyLocaleFiltering } from 'payload/shared'
 import React, { Suspense } from 'react'
 
@@ -16,10 +14,12 @@ import { getNavPrefs } from '../../elements/Nav/getNavPrefs.js'
 import { ProgressBar, RootProvider } from '../../exports/client/index.js'
 import { checkDependencies, type CheckDependenciesArgs } from '../../utilities/checkDependencies.js'
 import { getClientConfig } from '../../utilities/getClientConfig.js'
+import { getLanguageDir } from '../../utilities/getLanguageDir.js'
 import { getRequestHighContrast } from '../../utilities/getRequestHighContrast.js'
 import { getRequestTheme } from '../../utilities/getRequestTheme.js'
 import { initReq } from '../../utilities/initReq.js'
 import { NestProviders } from './NestProviders.js'
+import { getViewportMeta } from './viewport.js'
 // eslint-disable-next-line payload/no-imports-from-self -- Self-import via package path ensures consumer's bundler resolves the full SCSS chain (design tokens, preflight, etc.) in prod builds
 import '@payloadcms/ui/scss/app.scss'
 
@@ -126,9 +126,7 @@ const RootLayoutContent = async ({
     headers,
   })
 
-  const dir = (rtlLanguages as unknown as AcceptedLanguages[]).includes(languageCode)
-    ? 'RTL'
-    : 'LTR'
+  const dir = getLanguageDir({ languageCode })
 
   const languageOptions: LanguageOptions = Object.entries(
     config.i18n.supportedLanguages || {},
@@ -155,6 +153,7 @@ const RootLayoutContent = async ({
   await applyLocaleFiltering({ clientConfig, config, req })
 
   const fontClassNames = fonts.map((f) => f.variable ?? f.className).filter(Boolean)
+  const viewportMeta = getViewportMeta(headers.get('user-agent') ?? undefined)
 
   return (
     <html
@@ -167,6 +166,7 @@ const RootLayoutContent = async ({
       suppressHydrationWarning={config?.admin?.suppressHydrationWarning ?? false}
     >
       <head>
+        {viewportMeta}
         <style>{`@layer payload-default, payload;`}</style>
         {headFromProps}
       </head>
