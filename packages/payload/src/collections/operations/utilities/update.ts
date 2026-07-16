@@ -293,27 +293,6 @@ export const updateDocument = async <
     }
   }
 
-  if (isSavingDraft && config.localization && hasLocalizeStatusEnabled(collectionConfig)) {
-    const shouldDraftAllLocales = hasNonLocalizedDataChanged({
-      after: mergeLocalizedData({
-        configBlockReferences: config.blocks,
-        dataWithLocales: result,
-        docWithLocales,
-        fields: collectionConfig.fields,
-        localesToUpdate: config.localization.localeCodes,
-      }),
-      before: docWithLocales,
-      configBlockReferences: config.blocks,
-      fields: collectionConfig.fields,
-    })
-
-    result._status = getLocalizedDraftStatus({
-      existingStatus: shouldDraftAllLocales ? result._status : docWithLocales._status,
-      locale: shouldDraftAllLocales ? 'all' : locale,
-      localeCodes: config.localization.localeCodes,
-    })
-  }
-
   if (config.localization && collectionConfig.versions) {
     let snapshotData: JsonObject | undefined
     let currentDoc
@@ -339,10 +318,35 @@ export const updateDocument = async <
         for (const localeCode of accessibleLocaleCodes) {
           result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
         }
-      } else if (!isSavingDraft) {
-        // publishing a single locale
+      } else if (isSavingDraft) {
+        const shouldDraftAllLocales = hasNonLocalizedDataChanged({
+          after: mergeLocalizedData({
+            configBlockReferences: config.blocks,
+            dataWithLocales: result,
+            docWithLocales,
+            fields: collectionConfig.fields,
+            localesToUpdate: config.localization.localeCodes,
+          }),
+          before: docWithLocales,
+          configBlockReferences: config.blocks,
+          fields: collectionConfig.fields,
+        })
+
+        result._status = getLocalizedDraftStatus({
+          existingStatus: shouldDraftAllLocales ? result._status : docWithLocales._status,
+          locale: shouldDraftAllLocales ? 'all' : locale,
+          localeCodes: config.localization.localeCodes,
+        })
+      } else if (
+        !isSavingDraft &&
+        result._status &&
+        typeof result._status === 'object' &&
+        !Array.isArray(result._status) &&
+        (result._status as Record<string, unknown>)[locale] === 'published'
+      ) {
         currentDoc = await payload.db.findOne<DataFromCollectionSlug<TSlug>>({
           collection: collectionConfig.slug,
+          locale: 'all',
           req,
           where: { id: { equals: id } },
         })
