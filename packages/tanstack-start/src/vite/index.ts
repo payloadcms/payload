@@ -8,7 +8,11 @@ import rsc from '@vitejs/plugin-rsc'
 import path from 'node:path'
 import { createLogger, mergeConfig } from 'vite'
 
-import { payloadNoExternalPatterns, ssrExternalPackages } from './config/external.js'
+import {
+  buildExternalPackages,
+  payloadNoExternalPatterns,
+  ssrExternalPackages,
+} from './config/external.js'
 import { optimizeDepsExcludeDefaults, optimizeDepsIncludeDefaults } from './config/optimizeDeps.js'
 import { payloadScssImporters } from './config/scss.js'
 import {
@@ -162,11 +166,11 @@ export function withPayload(
       },
       environments: {
         rsc: {
-          build: { rollupOptions: { external: ssrExternalPackages } },
+          build: { rollupOptions: { external: buildExternalPackages } },
           resolve: { noExternal: payloadNoExternalPatterns },
         },
         ssr: {
-          build: { rollupOptions: { external: ssrExternalPackages } },
+          build: { rollupOptions: { external: buildExternalPackages } },
           resolve: { noExternal: payloadNoExternalPatterns },
         },
       } as any,

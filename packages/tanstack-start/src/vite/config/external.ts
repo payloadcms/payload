@@ -40,6 +40,32 @@ export const ssrExternalPackages: string[] = [
   'mongoose',
 ]
 
+/**
+ * External packages for the production `vite build` only (not dev serve).
+ *
+ * Externalizes the `@payloadcms/*` package boundaries — plus `payload` — so each
+ * resolves its own transitive Node deps (`pino`, `drizzle-orm`, `libsql`, …) from
+ * its own `node_modules` at runtime. Externalizing only the leaf deps breaks under
+ * pnpm: a leaf imported by bundled code becomes an unresolvable bare specifier from
+ * `dist/`, since pnpm does not hoist it.
+ *
+ * Kept out of dev's `ssr.external` on purpose: the monorepo resolves these to
+ * TypeScript source (`.ts` imported via `.js` specifiers), which only Vite's
+ * transform can resolve — an externalized copy would hit Node's raw resolver and
+ * fail on the `.js`→`.ts` mismatch.
+ */
+export const buildExternalPackages: string[] = [
+  'payload',
+  'payload/node',
+  '@payloadcms/drizzle',
+  '@payloadcms/db-mongodb',
+  '@payloadcms/db-postgres',
+  '@payloadcms/db-vercel-postgres',
+  '@payloadcms/db-sqlite',
+  '@payloadcms/db-d1-sqlite',
+  ...ssrExternalPackages,
+]
+
 export const payloadNoExternalPatterns: Array<RegExp | string> = [
   '@payloadcms/ui',
   '@payloadcms/translations',
