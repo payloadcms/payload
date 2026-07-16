@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-exif",
-  "version": "0.1.0",
+  "version": "4.0.0-beta.0",
   "description": "Extract EXIF metadata from uploaded images and store it on Payload upload collections",
   "keywords": [
     "payload",
