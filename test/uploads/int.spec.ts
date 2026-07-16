@@ -30,6 +30,7 @@ import {
   focalNoSizesSlug,
   focalOnlySlug,
   mediaSlug,
+  mediaWithoutWriteAccessSlug,
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
   pdfOnlySlug,
@@ -163,6 +164,29 @@ describe('Collections - Uploads', () => {
         })
 
         expect(response.status).toBe(403)
+      })
+
+      it('requires create or update permission before staging an upload', async () => {
+        const response = await restClient.POST('/upload-instructions', {
+          body: JSON.stringify({
+            collectionSlug: mediaWithoutWriteAccessSlug,
+            filename: 'forbidden.png',
+            filesize: 1,
+            mimeType: 'image/png',
+          }),
+        })
+
+        expect(response.status).toBe(403)
+      })
+
+      it('rejects a file payload missing an upload reference with a 400', async () => {
+        const formData = new FormData()
+        formData.append('_payload', JSON.stringify({ alt: 'Missing reference' }))
+        formData.append('file', JSON.stringify({ filename: 'no-reference.png' }))
+
+        const response = await restClient.POST(`/${mediaSlug}`, { body: formData })
+
+        expect(response.status).toBe(400)
       })
 
       it('creates from form data given a png', async () => {
