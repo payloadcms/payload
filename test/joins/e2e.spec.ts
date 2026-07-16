@@ -407,6 +407,52 @@ describe('Join Field', () => {
     ).toBeVisible()
   })
 
+  test('should refresh sibling join tables when a document is created through another join table', async () => {
+    // `relatedPosts` and `noRowTypes` are two separate join fields backed by the
+    // same relationship (collection: posts, on: 'category'). Creating a post through
+    // one table should refresh the other without a full page reload.
+    await page.goto(categoriesURL.edit(categoryID))
+
+    const actingField = page.locator('#field-relatedPosts.field-type.join')
+    const siblingField = page.locator('#field-noRowTypes.field-type.join')
+    await expect(actingField).toBeVisible()
+    await expect(siblingField).toBeVisible()
+
+    const newTitle = 'Sibling Refresh Post'
+
+    // The new document should not be present in the sibling table yet.
+    await expect(siblingField.locator('tbody tr td', { hasText: exactText(newTitle) })).toBeHidden()
+
+    const addButton = actingField.locator(
+      '.relationship-table__actions button.doc-drawer__toggler',
+      { hasText: exactText('Add new') },
+    )
+    await expect(addButton).toBeVisible()
+    await addButton.click()
+
+    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(drawer).toBeVisible()
+
+    const categoryField = drawer.locator('#field-category')
+    await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 5 })
+    await expect(categoryField.locator('.relationship--single-value__text')).toHaveText('example')
+
+    const titleField = drawer.locator('#field-title')
+    await expect(titleField).toBeVisible()
+    await titleField.fill(newTitle)
+
+    await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] button#action-save')
+    await expect(drawer).toBeHidden()
+
+    // The acting table shows the new row...
+    await expect(actingField.locator('tbody tr td', { hasText: exactText(newTitle) })).toBeVisible()
+
+    // ...and the sibling join table refreshes to show it too, without a page reload.
+    await expect(
+      siblingField.locator('tbody tr td', { hasText: exactText(newTitle) }),
+    ).toBeVisible()
+  })
+
   test('should edit joined document and update relationship table', async () => {
     await page.goto(categoriesURL.edit(categoryID))
 

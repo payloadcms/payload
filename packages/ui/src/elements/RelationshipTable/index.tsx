@@ -3,6 +3,7 @@ import { getTranslation } from '@payloadcms/translations'
 import {
   type CollectionSlug,
   type Column,
+  type DocumentEvent,
   type JoinFieldClient,
   type ListQuery,
   type PaginatedDocs,
@@ -16,6 +17,7 @@ import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
@@ -262,6 +264,30 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
       setCurrentDrawerID(undefined)
     }
   }, [isDrawerOpen])
+
+  // Keep this table in sync with documents created, updated, or deleted elsewhere
+  // (a sibling join table, the relationship field, or an inline drawer edit).
+  const { mostRecentUpdate } = useDocumentEvents()
+  const lastHandledEventRef = useRef<DocumentEvent | null>(null)
+
+  const handleDocumentEvent = useEffectEvent((event: DocumentEvent | null) => {
+    if (disableTable || !event || event === lastHandledEventRef.current) {
+      return
+    }
+
+    const relationSlugs = Array.isArray(relationTo) ? relationTo : [relationTo]
+
+    if (!relationSlugs.includes(event.entitySlug)) {
+      return
+    }
+
+    lastHandledEventRef.current = event
+    void renderTable()
+  })
+
+  useEffect(() => {
+    handleDocumentEvent(mostRecentUpdate)
+  }, [mostRecentUpdate])
 
   const canCreate =
     allowCreate !== false &&
