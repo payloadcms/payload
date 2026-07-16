@@ -341,6 +341,7 @@ export type UploadInstructionsRequest = {
 
 export type UploadInstructions = {
   file: {
+    collectionSlug?: UploadCollectionSlug
     filename: string
     mimeType: string
     size: number

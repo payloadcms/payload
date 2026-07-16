@@ -1,4 +1,5 @@
 import type { PayloadRequest } from '../types/index.js'
+import type { UploadInstructions } from '../uploads/types.js'
 
 import { APIError } from '../errors/APIError.js'
 import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js'
@@ -58,16 +59,22 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        let collectionSlug, filename, mimeType, size, uploadReference
+        let uploadedFile: UploadInstructions['file']
         try {
-          ;({ collectionSlug, filename, mimeType, size, uploadReference } = JSON.parse(fields.file))
+          uploadedFile = JSON.parse(fields.file)
         } catch {
           throw new APIError('A file name is required.', 400)
         }
-        collectionSlug = req.routeParams?.collection || collectionSlug
-        const uploadConfig = req.payload.collections[collectionSlug]?.config.upload
+        const { filename, mimeType, size, uploadReference } = uploadedFile
+        const collectionSlug =
+          typeof req.routeParams?.collection === 'string'
+            ? req.routeParams.collection
+            : uploadedFile.collectionSlug
+        const uploadConfig = collectionSlug
+          ? req.payload.collections[collectionSlug]?.config.upload
+          : undefined
 
-        if (!uploadConfig) {
+        if (!collectionSlug || !uploadConfig) {
           throw new APIError('Invalid upload collection.', 400)
         }
 
