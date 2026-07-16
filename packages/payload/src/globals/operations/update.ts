@@ -291,9 +291,19 @@ export const updateOperation = async <
           ? globalJSON._status
           : {}
 
-      result._status = {
-        ...existingStatus,
-        [locale!]: 'draft',
+      if (locale === 'all') {
+        const statusByLocale = { ...existingStatus }
+
+        for (const localeCode of localization.localeCodes) {
+          statusByLocale[localeCode] = 'draft'
+        }
+
+        result._status = statusByLocale
+      } else {
+        result._status = {
+          ...existingStatus,
+          [locale!]: 'draft',
+        }
       }
     }
 
