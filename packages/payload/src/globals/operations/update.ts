@@ -34,6 +34,7 @@ import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { mergeLocalizedData } from '../../utilities/mergeLocalizedData.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { hasNonLocalizedDataChanged } from '../../versions/drafts/hasNonLocalizedDataChanged.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
 type Args<TSlug extends GlobalSlug> = {
@@ -261,6 +262,28 @@ export const updateOperation = async <
 
     let result: JsonObject = await beforeChange(beforeChangeArgs)
     let snapshotToSave: JsonObject | undefined
+
+    const localization = config?.localization
+    const shouldDraftAllLocales =
+      isSavingDraft &&
+      localization &&
+      hasLocalizeStatusEnabled(globalConfig) &&
+      hasNonLocalizedDataChanged({
+        after: result,
+        before: globalJSON,
+        configBlockReferences: config?.blocks ?? [],
+        fields: globalConfig.fields,
+      })
+
+    if (shouldDraftAllLocales && localization) {
+      if (!result._status || typeof result._status !== 'object' || Array.isArray(result._status)) {
+        result._status = {}
+      }
+
+      for (const localeCode of localization.localeCodes) {
+        ;(result._status as Record<string, unknown>)[localeCode] = 'draft'
+      }
+    }
 
     // /////////////////////////////////////
     // Handle Localized Data Merging

@@ -37,6 +37,7 @@ import {
   localizedDraftsSlug,
   localizedPostsSlug,
   localizedSortSlug,
+  localizedStatusSharedGlobalSlug,
   portugueseLocale,
   relationEnglishTitle,
   relationEnglishTitle2,
@@ -4430,6 +4431,47 @@ describe('Localization', () => {
 
           expect(unpublishedDocument._status!.en).toBe('draft')
           expect(unpublishedDocument._status!.es).toBe('draft')
+        })
+
+        it('should mark all locales as draft when a global draft save changes a non-localized field', async () => {
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              localizedText: englishTitle,
+              sharedText: 'english global published',
+              _status: 'published',
+            },
+            locale: defaultLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              localizedText: spanishTitle,
+              sharedText: 'spanish global published',
+              _status: 'published',
+            },
+            locale: spanishLocale,
+          })
+
+          await payload.updateGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            data: {
+              sharedText: 'english global draft',
+              _status: 'draft',
+            },
+            draft: true,
+            locale: defaultLocale,
+          })
+
+          const allLocalesDraft = await payload.findGlobal({
+            slug: localizedStatusSharedGlobalSlug,
+            draft: true,
+            locale: 'all',
+          })
+
+          expect(allLocalesDraft._status!.en).toBe('draft')
+          expect(allLocalesDraft._status!.es).toBe('draft')
         })
       })
     })
