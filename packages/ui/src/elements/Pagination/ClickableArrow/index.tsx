@@ -35,7 +35,7 @@ export const ClickableArrow: React.FC<ClickableArrowProps> = (props) => {
       type="button"
 
     >
-      <ChevronIcon area-hidden="true" />
+      <ChevronIcon  />
     </button>
   )
 }
