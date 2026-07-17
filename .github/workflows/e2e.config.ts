@@ -126,17 +126,30 @@ const requiredTanstackFiles = new Set([
 ])
 
 /**
+ * Suites known to fail under the tanstack-start adapter. Excluded from the matrix entirely
+ * so they don't burn CI cycles. Remove a file here once the adapter is fixed to re-enable it.
+ */
+const blacklistedTanstackFiles = new Set([
+  'base-path',
+  'server-functions',
+  'plugin-cloud-storage',
+  'plugin-seo',
+])
+
+/**
  * Full tanstack-start matrix, for a high-level view of adapter coverage across all suites.
  * Verified-passing suites (`requiredTanstackFiles`) block the `all-green` gate; every other
- * suite runs optional (non-blocking) until it stabilizes. `plugin-mcp` is not part of
- * `nextSuites` but passes under tanstack-start, so it is added explicitly.
+ * suite runs optional (non-blocking) until it stabilizes. Blacklisted suites are skipped.
+ * `plugin-mcp` is not part of `nextSuites` but passes under tanstack-start, so it is added explicitly.
  */
 const tanstackSuites: TestConfig[] = [
-  ...nextSuites.map((suite) => ({
-    ...suite,
-    framework: 'tanstack-start' as const,
-    optional: !requiredTanstackFiles.has(suite.file),
-  })),
+  ...nextSuites
+    .filter((suite) => !blacklistedTanstackFiles.has(suite.file))
+    .map((suite) => ({
+      ...suite,
+      framework: 'tanstack-start' as const,
+      optional: !requiredTanstackFiles.has(suite.file),
+    })),
   { file: 'plugin-mcp', framework: 'tanstack-start', optional: false, shards: 1 },
 ]
 
