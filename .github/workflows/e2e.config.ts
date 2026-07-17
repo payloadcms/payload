@@ -11,7 +11,7 @@ import type { TestConfig } from './utilities/e2e-matrix.ts'
 
 import { createE2EConfig } from './utilities/e2e-matrix.ts'
 
-const nextSuites: TestConfig[] = [
+const allTestSuites: TestConfig[] = [
   { file: '_community', shards: 1 },
   { file: 'a11y', shards: 1 },
   { file: 'access-control', shards: 2 },
@@ -110,26 +110,37 @@ const nextSuites: TestConfig[] = [
  * Suites verified passing under the tanstack-start adapter. These are required, so their
  * failures block the `all-green` gate. Promote a suite here once it passes reliably.
  */
-const requiredTanstackFiles = new Set([
+const stableTanstackTestSuites = new Set([
   '_community',
+  'a11y',
   'admin-bar',
+  'admin-root',
+  'auth-basic',
+  'bulk-edit',
   'server-url',
   'field-paths',
-  'auth-basic',
-  'plugin-redirects',
-  'sort',
+  'fields-relationship',
+  'form-state',
+  'group-by',
+  'hierarchy',
   'hooks',
-  'plugin-nested-docs',
   'i18n',
-  'a11y',
+  'plugin-redirects',
+  'plugin-nested-docs',
+  'plugin-multi-tenant',
   'plugin-mcp',
+  'query-presets',
+  'server-url',
+  'storage-s3__client-uploads#client-uploads/config.ts',
+  'sort',
+  'trash',
 ])
 
 /**
  * Suites known to fail under the tanstack-start adapter. Excluded from the matrix entirely
  * so they don't burn CI cycles. Remove a file here once the adapter is fixed to re-enable it.
  */
-const blacklistedTanstackFiles = new Set([
+const failingTanstackTestSuites = new Set([
   'base-path',
   'server-functions',
   'plugin-cloud-storage',
@@ -138,19 +149,19 @@ const blacklistedTanstackFiles = new Set([
 
 /**
  * Full tanstack-start matrix, for a high-level view of adapter coverage across all suites.
- * Verified-passing suites (`requiredTanstackFiles`) block the `all-green` gate; every other
+ * Verified-passing suites (`requiredTanstackSuites`) block the `all-green` gate; every other
  * suite runs optional (non-blocking) until it stabilizes. Blacklisted suites are skipped.
  * `plugin-mcp` is not part of `nextSuites` but passes under tanstack-start, so it is added explicitly.
  */
 const tanstackSuites: TestConfig[] = [
-  ...nextSuites
-    .filter((suite) => !blacklistedTanstackFiles.has(suite.file))
+  ...allTestSuites
+    .filter((suite) => !failingTanstackTestSuites.has(suite.file))
     .map((suite) => ({
       ...suite,
       framework: 'tanstack-start' as const,
-      optional: !requiredTanstackFiles.has(suite.file),
+      optional: !stableTanstackTestSuites.has(suite.file),
     })),
   { file: 'plugin-mcp', framework: 'tanstack-start', optional: false, shards: 1 },
 ]
 
-export default createE2EConfig([...nextSuites, ...tanstackSuites])
+export default createE2EConfig([...allTestSuites, ...tanstackSuites])
