@@ -1519,6 +1519,12 @@ describe('List View', () => {
       expect(firstPageIds).not.toContain(secondPageIds[0])
     })
 
+    test('should render a list view when field admin components are undefined', async () => {
+      await page.goto(noTimestampsUrl.list)
+
+      await expect(page.getByRole('heading', { name: 'No Timestamps' })).toBeVisible()
+    })
+
     test('should persist per-page limit in list drawer', async () => {
       await payload.delete({
         collection: listDrawerSlug,
