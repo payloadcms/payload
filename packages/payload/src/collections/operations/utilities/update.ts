@@ -325,7 +325,7 @@ export const updateDocument = async <
             dataWithLocales: result,
             docWithLocales,
             fields: collectionConfig.fields,
-            localesToUpdate: config.localization.localeCodes,
+            selectedLocales: config.localization.localeCodes,
           }),
           before: docWithLocales,
           configBlockReferences: config.blocks,
