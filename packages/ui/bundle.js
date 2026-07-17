@@ -189,6 +189,7 @@ function require(m) {
     // 24.15.0 is the lowest version of node supported by Payload
     target: 'node24.15.0',
   })
+
   console.log('client.ts bundled successfully')
 
   const resultShared = await esbuild.build({
