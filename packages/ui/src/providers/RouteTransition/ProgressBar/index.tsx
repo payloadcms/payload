@@ -6,7 +6,13 @@ import './index.css'
 
 const transitionDuration = 200
 const baseClass = 'progress-bar'
-const initialDelay = 150
+// Minimum time the bar stays on screen once a navigation starts. Guarantees a
+// visible sweep even for near-instant client navigations (e.g. TanStack routing
+// to already-loaded data), which would otherwise finish before the bar appeared.
+const minVisibleDuration = 400
+// Progress shown the moment the bar appears, so there is always something
+// visible before `transitionProgress` begins advancing.
+const initialProgress = 0.1
 
 /**
  * Renders a progress bar that shows the progress of a route transition.
@@ -24,38 +30,43 @@ const initialDelay = 150
 export const ProgressBar = () => {
   const { isTransitioning, transitionProgress } = useRouteTransition()
   const [progressToShow, setProgressToShow] = React.useState<null | number>(null)
-  const shouldDelayProgress = useRef(true)
+  const shownAtRef = useRef<null | number>(null)
 
   useEffect(() => {
-    let clearTimerID: NodeJS.Timeout
-    let delayTimerID: NodeJS.Timeout
+    let completeTimerID: NodeJS.Timeout
+    let hideTimerID: NodeJS.Timeout
 
     if (isTransitioning) {
-      if (shouldDelayProgress.current) {
-        delayTimerID = setTimeout(() => {
-          setProgressToShow(transitionProgress)
-          shouldDelayProgress.current = false
-        }, initialDelay)
-      } else {
-        setProgressToShow(transitionProgress)
+      // Show the bar immediately and remember when, so we can keep it on screen
+      // for at least `minVisibleDuration` no matter how fast the navigation is.
+      if (shownAtRef.current === null) {
+        shownAtRef.current = performance.now()
       }
-    } else {
-      shouldDelayProgress.current = true
 
-      // Fast forward to 100% when the transition is complete
-      // Then fade out the progress bar directly after
-      setProgressToShow(1)
+      setProgressToShow(Math.max(transitionProgress, initialProgress))
+    } else if (shownAtRef.current !== null) {
+      // A navigation just finished (the guard skips the initial mount, where no
+      // navigation was ever in progress). Keep the bar visible for the rest of
+      // `minVisibleDuration`, then fast-forward to 100% and fade out.
+      const elapsed = performance.now() - shownAtRef.current
+      const remaining = Math.max(0, minVisibleDuration - elapsed)
 
-      // Wait for CSS transition to finish before hiding the progress bar
-      // This includes both the fast-forward to 100% and the subsequent fade-out
-      clearTimerID = setTimeout(() => {
-        setProgressToShow(null)
-      }, transitionDuration * 2)
+      shownAtRef.current = null
+
+      completeTimerID = setTimeout(() => {
+        setProgressToShow(1)
+
+        // Wait for the CSS transition to finish before hiding the progress bar.
+        // This covers both the fast-forward to 100% and the subsequent fade-out.
+        hideTimerID = setTimeout(() => {
+          setProgressToShow(null)
+        }, transitionDuration * 2)
+      }, remaining)
     }
 
     return () => {
-      clearTimeout(clearTimerID)
-      clearTimeout(delayTimerID)
+      clearTimeout(completeTimerID)
+      clearTimeout(hideTimerID)
     }
   }, [isTransitioning, transitionProgress])
 
