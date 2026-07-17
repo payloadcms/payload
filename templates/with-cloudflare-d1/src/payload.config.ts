@@ -62,6 +62,14 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    meta: {
+      // Disabling OG image generation here and aliasing the endpoint module
+      // to a stub in next.config.ts keeps @vercel/og (~744 KiB gzip) out of
+      // the Worker bundle. @vercel/og works on Workers through OpenNext's
+      // compatibility patches, but the size cost exceeds the free-tier limit.
+      // To re-enable, remove this setting and the alias in next.config.ts.
+      defaultOGImageType: 'off',
+    },
   },
   collections: [Users, Media],
   editor: lexicalEditor(),
