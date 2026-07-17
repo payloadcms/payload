@@ -3,6 +3,8 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacer-2);
+    container-type: inline-size;
+    container-name: upload-dropzone;
   }
 
   .upload__dropzoneAndUpload .dropzone.dropzone--style-default {
@@ -12,7 +14,6 @@
   .upload__dropzoneContent {
     display: flex;
     align-items: center;
-    justify-content: space-between;
     flex-wrap: wrap;
     row-gap: var(--spacer-2);
     padding: var(--spacer-3);
@@ -39,6 +40,7 @@
   }
 
   .upload__dragAndDropText {
+    display: none;
     flex-shrink: 0;
     margin: 0;
     text-transform: lowercase;
@@ -56,9 +58,9 @@
     border: var(--stroke-width-small) solid var(--color-border);
   }
 
-  @media (max-width: 768px) {
+  @container upload-dropzone (min-width: 400px) {
     .upload__dragAndDropText {
-      display: none;
+      display: block;
     }
   }
 }

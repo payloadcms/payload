@@ -1316,7 +1316,7 @@ describe('Uploads', () => {
       ).toBeVisible()
     })
 
-    test('should wrap the drag and drop text below the dropzone buttons instead of overflowing', async () => {
+    test('should hide the drag and drop text based on the field container width, not the viewport', async () => {
       await page.goto(uploadsOne.list)
 
       const bulkUploadButton = page.locator('.list-header__title-actions button', {
@@ -1328,18 +1328,18 @@ describe('Uploads', () => {
         .locator('.dropzone input[type="file"]')
         .setInputFiles(path.resolve(dirname, './image.png'))
 
-      const dropzoneContent = page.locator('#field-hasManyUpload .upload__dropzoneContent')
-      const buttons = dropzoneContent.locator('.upload__dropzoneContent__buttons')
-      const dragAndDropText = dropzoneContent.locator('.upload__dragAndDropText')
+      await expect(page.locator('#field-hasManyUpload .upload__dropzoneContent')).toHaveCSS(
+        'flex-wrap',
+        'wrap',
+      )
 
-      await expect(dragAndDropText).toBeVisible()
+      await expect(page.locator('#field-hasManyUpload .upload__dragAndDropText')).toBeHidden()
+    })
 
-      const buttonsBox = (await buttons.boundingBox())!
-      const textBox = (await dragAndDropText.boundingBox())!
+    test('should show the drag and drop text when a field has enough room outside the bulk upload drawer', async () => {
+      await gotoAndWaitForForm(page, relationURL.create)
 
-      // Wrapped onto its own line below the buttons, rather than overflowing past them on the
-      // same line.
-      expect(textBox.y).toBeGreaterThanOrEqual(buttonsBox.y + buttonsBox.height - 1)
+      await expect(page.locator('#field-hasManyImage .upload__dragAndDropText')).toBeVisible()
     })
 
     test('should bulk upload non-image files without page errors', async () => {
