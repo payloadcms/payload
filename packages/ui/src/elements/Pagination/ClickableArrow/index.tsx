@@ -15,6 +15,9 @@ export type ClickableArrowProps = {
 export const ClickableArrow: React.FC<ClickableArrowProps> = (props) => {
   const { direction = 'right', isDisabled = false, updatePage } = props
 
+  const ariaLabel =
+  direction === 'left' ? 'Previous page' : 'Next page'
+
   const classes = [
     baseClass,
     isDisabled && `${baseClass}--is-disabled`,
@@ -25,12 +28,14 @@ export const ClickableArrow: React.FC<ClickableArrowProps> = (props) => {
 
   return (
     <button
+      aria-label={ariaLabel}
       className={classes}
       disabled={isDisabled}
       onClick={!isDisabled ? updatePage : undefined}
       type="button"
+
     >
-      <ChevronIcon />
+      <ChevronIcon area-hidden="true" />
     </button>
   )
 }
