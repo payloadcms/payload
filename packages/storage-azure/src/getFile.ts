@@ -11,13 +11,13 @@ import { getRangeRequestInfo } from 'payload/internal'
 
 interface GetFileArgs {
   client: ContainerClient
-  clientUploadContext?: unknown
   collection: CollectionConfig
   collectionPrefix?: string
   filename: string
   incomingHeaders?: Headers
   prefixQueryParam?: string
   req: PayloadRequest
+  uploadReference?: unknown
   useCompositePrefixes?: boolean
 }
 
@@ -53,13 +53,13 @@ const abortRequestAndDestroyStream = ({
 
 export async function getFile({
   client,
-  clientUploadContext,
   collection,
   collectionPrefix = '',
   filename,
   incomingHeaders,
   prefixQueryParam,
   req,
+  uploadReference,
   useCompositePrefixes = false,
 }: GetFileArgs): Promise<Response> {
   let blob: BlobDownloadResponseParsed | undefined = undefined
@@ -74,11 +74,11 @@ export async function getFile({
 
   try {
     const docPrefix = await getDocPrefix({
-      clientUploadContext,
       collection,
       filename,
       prefixQueryParam,
       req,
+      uploadReference,
     })
 
     const { fileKey } = getFileKey({

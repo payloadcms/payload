@@ -33,6 +33,10 @@ import { getPreferencesCollection, preferencesCollectionSlug } from '../preferen
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
+import {
+  stagedUploadEndpoints,
+  uploadInstructionsEndpoint,
+} from '../uploads/endpoints/uploadInstructions.js'
 import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
@@ -246,6 +250,10 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   if (!config.endpoints) {
     config.endpoints = []
+  }
+
+  if (configWithDefaults.collections?.some(({ upload }) => upload)) {
+    config.endpoints.push(uploadInstructionsEndpoint, ...stagedUploadEndpoints)
   }
 
   for (const endpoint of authRootEndpoints) {

@@ -949,7 +949,7 @@ The same change applies to `upload` fields with `hasMany: true`.
 
 Storage adapter packages (`@payloadcms/storage-s3`, `-azure`, `-gcs`, `-r2`, `-vercel-blob`) must now be placed under the top-level `storage` key in your Payload config instead of inside `plugins`.
 
-Declaring adapters inside `plugins` no longer works. The `storage` key ensures upload hooks, static file handlers, and presigned-URL endpoints are wired up before any plugin runs.
+Declaring adapters inside `plugins` no longer works. The `storage` key ensures upload hooks, static file handlers, and upload instructions are wired up before any plugin runs.
 
 ```diff
 import { s3Storage } from '@payloadcms/storage-s3'
@@ -968,6 +968,152 @@ export default buildConfig({
 ```
 
 Run `npx @payloadcms/codemod --transform migrate-storage-adapters-to-config` to migrate automatically.
+
+### Direct uploads now use Payload's shared upload-instructions endpoint
+
+Official storage packages now use `POST /api/upload-instructions` instead of provider-specific endpoints.
+
+#### If you use an official Payload storage adapter
+
+If you only enable `clientUploads` in your storage adapter config, no migration is needed. The Admin Panel uses the new endpoint automatically.
+
+Payload now checks `upload.limits.fileSize` before returning upload instructions. This is new for Azure, GCS, R2, and Vercel Blob; S3 already checked it. Increase the limit if your direct uploads previously exceeded it.
+
+The old S3, Azure, and GCS signing endpoints (e.g. `/api/storage-s3-generate-signed-url`) were removed. If you called one directly, call `/api/upload-instructions` instead:
+
+```ts
+const response = await fetch('/api/upload-instructions', {
+  method: 'POST',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    collectionSlug: 'media',
+    docPrefix: 'gallery',
+    filename: file.name,
+    filesize: file.size,
+    mimeType: file.type,
+  }),
+})
+```
+
+For S3 and GCS, send the file using the returned HTTP request, then pass `instructions.file` unchanged when creating the document:
+
+```ts
+const instructions = await response.json()
+
+if (instructions.type !== 'http') {
+  throw new Error(`Unsupported upload instruction: ${instructions.type}`)
+}
+
+const { url, ...request } = instructions.request
+await fetch(url, { ...request, body: file })
+
+const formData = new FormData()
+formData.append('_payload', JSON.stringify({}))
+formData.append('file', JSON.stringify(instructions.file))
+
+await fetch('/api/media', {
+  method: 'POST',
+  credentials: 'include',
+  body: formData,
+})
+```
+
+Remove manual registrations of `S3ClientUploadHandler`, `AzureClientUploadHandler`, and `GcsClientUploadHandler`; Payload now registers them. The S3 and GCS `/client` exports were also removed.
+
+If you typed `clientUploads.access`, replace `ClientUploadsAccess` with `UploadInstructionsAccess`:
+
+```diff
+- import type { ClientUploadsAccess } from '@payloadcms/plugin-cloud-storage/types'
++ import type { UploadInstructionsAccess } from 'payload'
+
+- const access: ClientUploadsAccess = ({ req }) => Boolean(req.user)
++ const access: UploadInstructionsAccess = ({ req }) => Boolean(req.user)
+```
+
+#### If you maintain a custom storage adapter
+
+Replace `clientUploadContext` with `uploadReference` in generated file metadata and static handler parameters. `handleUpload` no longer receives it because Payload skips uploading files that are already stored.
+
+Set `uploadInstructions.enabled`. When false, Payload adds `adminHandler` to the import map without rendering it. When true, Payload also renders it and exposes the instructions and supporting endpoint.
+
+Move access checks into the generator or supporting endpoint that authorizes the upload:
+
+```diff
+uploadInstructions: {
+- access,
+- generate,
++ enabled: Boolean(clientUploads),
++ generate: generateUploadInstructions({ access }),
+}
+```
+
+`useUploadHandlers().setUploadHandler` was removed. Name custom client handlers and return the same name in a `dispatch` instruction:
+
+```ts
+import { createClientUploadHandler } from '@payloadcms/plugin-cloud-storage/client'
+
+export const MyClientUploadHandler = createClientUploadHandler({
+  name: 'uploadToMyProvider',
+  handler: async ({ data, file }) => {
+    await uploadToMyProvider({ data, file })
+  },
+})
+
+uploadInstructions: {
+  enabled: true,
+  generate: ({ filename, filesize, mimeType }) => ({
+    file: {
+      uploadReference: {},
+      filename,
+      mimeType,
+      size: filesize,
+    },
+    type: 'dispatch',
+    name: 'uploadToMyProvider',
+    data: {},
+  }),
+  useInAdmin: true,
+}
+```
+
+Set `useInAdmin` to `true` when the Admin panel should use the instructions instead of attaching the whole file to the document request. This can also benefit chunked uploads that still pass through Payload.
+
+R2's multipart client route is one example: it passes chunks through Payload, but the Admin still uses it to avoid sending the whole file in one request.
+
+The `data` value is passed from the server instruction to the client handler. The names must match exactly. If the handler returns an object, it becomes `file.uploadReference` in the document request.
+
+Finally, remove `initClientUploads` and declare its Admin handler and supporting endpoint on `uploadInstructions`:
+
+```diff
+- import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
+
+- initClientUploads({
+-   clientHandler: '/MyClientUploadHandler',
+-   collections,
+-   config,
+-   enabled: true,
+-   extraClientHandlerProps: () => ({ option: 'value' }),
+-   serverHandler,
+-   serverHandlerPath: '/my-upload-endpoint',
+- })
+
+uploadInstructions: {
++ adminHandler: {
++   path: '/MyClientUploadHandler',
++   props: { option: 'value' },
++ },
++ enabled: Boolean(clientUploads),
++ endpoint: {
++   handler: serverHandler,
++   path: '/my-upload-endpoint',
++ },
+  generate,
++ useInAdmin: true,
+}
+```
+
+Both are optional. Custom handler props are now passed as `props`, and the supporting route is available as `endpointPath` instead of `serverHandlerPath`. The old Admin component `enabled` prop was removed.
 
 ### `@payloadcms/storage-uploadthing` has been removed
 

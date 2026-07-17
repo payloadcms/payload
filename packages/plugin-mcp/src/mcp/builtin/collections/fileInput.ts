@@ -1,13 +1,20 @@
 import type { CollectionSlug, File, FileData, PayloadRequest } from 'payload'
 
 import { APIError } from 'payload'
-import { getExternalFile, isURLAllowed } from 'payload/internal'
+import { getExternalFile, getFileFromUploadInstructions, isURLAllowed } from 'payload/internal'
 import { sanitizeFilename } from 'payload/shared'
 import { z } from 'zod'
 
 const mimeTypeSchema = z
   .string()
   .regex(/^[!#$%&'*+.^`|~\w-]+\/[!#$%&'*+.^`|~\w-]+$/, 'MIME type must use the type/subtype format')
+
+const uploadFileSchema = z.object({
+  filename: z.string(),
+  mimeType: z.string(),
+  size: z.number().int().nonnegative(),
+  uploadReference: z.record(z.string(), z.unknown()),
+})
 
 export const fileInputSchema = z
   .discriminatedUnion('source', [
@@ -19,17 +26,21 @@ export const fileInputSchema = z
     }),
     z.object({
       name: z.string().min(1).describe('Optional file name override').optional(),
-      source: z.literal('url'),
+      source: z.literal('externalURL'),
       url: z.url().describe('The http or https URL to download'),
+    }),
+    z.object({
+      file: uploadFileSchema.describe('The file value returned by getUploadInstructions'),
+      source: z.literal('uploadReference'),
     }),
   ])
   .describe(
-    'A file for an upload collection. Use only a source listed by getCollectionSchema: url for an online file or base64 for a local file.',
+    'A file for an upload collection. Use externalURL for an online file, base64 for local file bytes, or uploadReference after following getUploadInstructions. Usage of getUploadInstructions and uploadReference is recommended.',
   )
 
 type FileInput = z.infer<typeof fileInputSchema>
 
-export async function resolveFileInput({
+export async function resolveFile({
   collectionSlug,
   input,
   req,
@@ -40,6 +51,10 @@ export async function resolveFileInput({
 }): Promise<File | undefined> {
   if (!input) {
     return undefined
+  }
+
+  if (input.source === 'uploadReference') {
+    return getFileFromUploadInstructions({ collectionSlug, file: input.file, req })
   }
 
   const uploadConfig = req.payload.collections[collectionSlug]?.config.upload
