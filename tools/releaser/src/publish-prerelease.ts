@@ -17,7 +17,7 @@ async function main() {
   console.log(`  Debug: ${debug ? 'Enabled' : 'Disabled'}`)
   console.log(`  Dry Run: ${dryRun ? 'Enabled' : 'Disabled'}`)
 
-  const workspace = await getWorkspace()
+  const workspace = getWorkspace()
   await workspace.bumpVersion(tag)
   await workspace.build({ debug: debug ?? false })
   console.log('Build successful. Publishing packages...')

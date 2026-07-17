@@ -28,7 +28,7 @@ describe('bumpVersion', () => {
   })
 
   it('should accept a prerelease type and apply the beta preid, returning the new version', async () => {
-    const workspace = await getWorkspace()
+    const workspace = getWorkspace()
 
     const next = await workspace.bumpVersion('prerelease', { preid: 'beta' })
 
@@ -37,7 +37,7 @@ describe('bumpVersion', () => {
   })
 
   it('should accept a prerelease type and apply the canary preid, returning the new version', async () => {
-    const workspace = await getWorkspace()
+    const workspace = getWorkspace()
 
     const next = await workspace.bumpVersion('prerelease', { preid: 'canary' })
 
@@ -51,7 +51,7 @@ describe('bumpVersion', () => {
   // for removal once canary derives from the committed version.
   it('should increment the canary iteration from the registry dist-tag', async () => {
     stubRegistryCanary('4.0.0-canary.9')
-    const workspace = await getWorkspace()
+    const workspace = getWorkspace()
 
     const next = await workspace.bumpVersion('canary')
 
@@ -60,7 +60,7 @@ describe('bumpVersion', () => {
 
   it('should reset the canary iteration to 0 when the registry canary is on a different minor base', async () => {
     stubRegistryCanary('3.99.0-canary.5')
-    const workspace = await getWorkspace()
+    const workspace = getWorkspace()
 
     const next = await workspace.bumpVersion('canary')
 
