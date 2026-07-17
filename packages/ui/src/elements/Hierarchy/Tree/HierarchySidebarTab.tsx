@@ -97,7 +97,7 @@ export const HierarchySidebarTab: React.FC<
         path: `/collections/${hierarchyCollectionSlug}/hierarchy?${queryParam}=${id}`,
       })
       startRouteTransition(() => {
-        router.push(url)
+        void router.push(url)
         router.refresh()
       })
     },

@@ -251,7 +251,7 @@ export const HierarchyProvider: React.FC<HierarchyProviderProps> = ({ children }
         adminRoute,
         path: `/collections/${collectionSlug}${id !== null ? `?${queryParam}=${id}` : ''}`,
       })
-      router.push(url)
+      void router.push(url)
       router.refresh()
     },
     [adminRoute, collectionSlug, parentFieldName, router],

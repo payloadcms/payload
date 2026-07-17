@@ -64,7 +64,7 @@ export const DefaultListViewTabs: React.FC<DefaultListViewTabsProps> = ({
       path,
     })
 
-    router.push(url)
+    void router.push(url)
   }
 
   const collectionLabel = getTranslation(collectionConfig?.labels?.plural, i18n)

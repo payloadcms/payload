@@ -141,7 +141,7 @@ export function PublishManyDrawerContent(props: PublishManyDrawerContentProps) {
               })
             }
 
-            router.replace(
+            void router.replace(
               qs.stringify(
                 {
                   ...parseSearchParams(searchParams),
