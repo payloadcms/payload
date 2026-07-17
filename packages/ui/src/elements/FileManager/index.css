@@ -58,7 +58,7 @@
     justify-content: center;
   }
 
-  .file-manager__remove {
+  .file-manager__upload .file-manager__remove {
     position: absolute;
     top: var(--gutter-h);
     right: var(--gutter-h);
