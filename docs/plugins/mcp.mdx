@@ -22,9 +22,7 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
 
 ## Core features
 
-- Two transports out of the box:
-  - **HTTP** at `/api/mcp` - for remote clients, using Payload auth when provided
-  - **stdio** via the `payload-mcp` bin - for local AI clients spawning a child process
+- Streamable HTTP transport at `/api/mcp` for local and remote clients, using Payload auth when provided
 - Stable discovery and CRUD tools for configured collections and globals (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `getGlobalSchema`, `findGlobal`, `updateGlobal`) - filtered by Payload access and configurable with simple keys like `tools: { delete: false }`
 - Auth-enabled collections expose opt-in `login`, `auth`, `forgotPassword`, `resetPassword`, `unlock`, `verify` tools
 - Define your own `tools`, `prompts`, and `resources` with full TypeScript inference via `defineTool` / `defineCollectionTool` / `defineGlobalTool` / `definePrompt`
@@ -52,34 +50,24 @@ export default buildConfig({
 })
 ```
 
-**2.** Point your MCP client (Claude Desktop, your IDE, …) at the stdio server:
+**2.** Start Payload and point your MCP client at the HTTP endpoint:
 
 ```json
 {
   "mcpServers": {
     "Payload": {
-      "command": "npx",
-      "args": ["payload-mcp"],
-      "env": {
-        "PAYLOAD_MCP_OVERRIDE_ACCESS": "true"
-      }
+      "type": "http",
+      "url": "http://127.0.0.1:3000/api/mcp?overrideAccess=true"
     }
   }
 }
 ```
 
-That's it for local development - every collection and global is now available through the generic MCP tools. For example, call `getConfigInfo` to see available slugs, inspect a collection with `getCollectionSchema`, then create a document with `createDocument`.
+This development URL skips access control. Outside development, remove
+`overrideAccess=true` and [send Payload authorization](#authorization). If your
+client does not support HTTP natively, see [Connecting MCP clients](#connecting-mcp-clients).
 
-The `payload-mcp` bin finds your `payload.config.ts` automatically, since it's installed
-inside your project. If your project has an unusual layout (e.g. a monorepo), see
-[locating the config](#locating-the-config).
-
-### Production setup (HTTP)
-
-The stdio server above is for local development, and works even when the dev server is not running.
-
-For deployed apps and remote clients, use the HTTP transport - `mcpPlugin` exposes `POST /api/mcp`.
-Most setups should [create a user API key](#creating-an-api-key), then point your client at the endpoint - see [Connecting MCP clients](#http).
+That's it - every collection and global is now available through the generic MCP tools. For example, call `getConfigInfo` to see available slugs, inspect a collection with `getCollectionSchema`, then create a document with `createDocument`.
 
 ### Configuring per-collection tools
 
@@ -186,11 +174,9 @@ MCP can add or replace files in upload-enabled collections.
 
 The agent reads the collection's upload settings before acting. MIME type and file-size restrictions still apply, URL uploads respect `pasteURL` and its allow list, and local files are transferred as base64.
 
-## Transports
+## HTTP transport
 
-The plugin ships two transports. You can use either or both.
-
-### HTTP transport (`/api/mcp`)
+HTTP is the recommended transport for both local development and deployed apps. During development, config changes follow Payload's normal dev-server reload lifecycle.
 
 Once `mcpPlugin` is in your `plugins` array, `POST /api/mcp` accepts JSON-RPC 2.0 MCP requests. Send Payload authorization when you want MCP to run as a user (see [Authorization](#authorization)); without it, MCP runs access control with no user.
 
@@ -205,32 +191,15 @@ curl -i 'http://localhost:3000/api/mcp' \
   -d '{"jsonrpc":"2.0","id":"1","method":"tools/list","params":{}}'
 ```
 
-### stdio transport (`payload-mcp`)
-
-The plugin ships a `payload-mcp` bin that serves the MCP protocol over stdin/stdout. It loads your `payload.config.ts`, boots Payload, and serves MCP requests until the parent process closes the stream.
-
-```bash
-npx payload-mcp
-```
-
-Notes on stdio:
-
-- **You don't need `mcpPlugin` in your `plugins` array** for stdio to work. The bin auto-detects the plugin and falls back to default configuration (all collections / globals configured with default tools) when it isn't registered. Access filtering still applies. Installing the package is enough.
-- Add `mcpPlugin({ ... })` to your config when you want to customize tools, descriptions, prompts, or resources - the bin will pick up that configuration too.
-- Pass `PAYLOAD_MCP_AUTHORIZATION` when you want stdio to authenticate with Payload.
-- If you omit auth, MCP still runs access control with no user. Set `PAYLOAD_MCP_OVERRIDE_ACCESS=true` in development when you want local stdio to skip access control.
-- The bin uses `tsx` to load TypeScript configs directly. Pass `--disable-transpile` if your config is already compiled to JavaScript.
-
 ## Authorization
 
-HTTP and stdio use Payload authorization. A user API key uses this value:
+The HTTP endpoint uses Payload authorization. A user API key uses this header:
 
 ```txt
 Authorization: <authCollectionSlug> API-Key <key>
 ```
 
-For HTTP, send authorization as the `Authorization` header. For stdio, pass the
-same header value through the `PAYLOAD_MCP_AUTHORIZATION` environment variable.
+Send this value in the `Authorization` header.
 
 When authorization is sent, MCP authenticates with Payload's normal auth system.
 The authenticated user is used for Payload access control, and MCP only
@@ -242,9 +211,8 @@ If no authorization is sent, MCP runs access control with no user.
 1. Start your Payload server and open the admin panel
 2. Open a user document in an auth-enabled collection with `auth.useAPIKey`
 3. Enable API key auth for that user, generate a key, then save and copy it
-4. Use that key as `Authorization: users API-Key <key>` for HTTP, or set
-   `PAYLOAD_MCP_AUTHORIZATION` to `users API-Key <key>` for stdio. Replace
-   `users` with that auth collection's slug.
+4. Use that key as `Authorization: users API-Key <key>`. Replace `users` with
+   that auth collection's slug.
 
 ### `overrideAccess`
 
@@ -261,15 +229,6 @@ POST /api/mcp?overrideAccess=true
 ```
 
 HTTP rejects the `overrideAccess` URL argument outside development.
-
-For stdio, set `PAYLOAD_MCP_OVERRIDE_ACCESS`:
-
-```txt
-PAYLOAD_MCP_OVERRIDE_ACCESS=true
-```
-
-Stdio defaults to `false` and rejects `PAYLOAD_MCP_OVERRIDE_ACCESS=true` outside
-development.
 
 ### Custom auth
 
@@ -393,53 +352,6 @@ claude mcp add --transport http Payload http://127.0.0.1:3000/api/mcp \
 }
 ```
 
-### stdio
-
-For clients that spawn local processes (Claude Desktop, Cursor stdio servers, etc.):
-
-```json
-{
-  "mcpServers": {
-    "Payload": {
-      "command": "npx",
-      "args": ["payload-mcp"],
-      "env": {
-        "PAYLOAD_MCP_AUTHORIZATION": "users API-Key YOUR_API_KEY"
-      }
-    }
-  }
-}
-```
-
-`PAYLOAD_MCP_AUTHORIZATION` is the same value you would send in the HTTP
-`Authorization` header. If you omit it, MCP runs access control with no user.
-Set `PAYLOAD_MCP_OVERRIDE_ACCESS=true` in development to skip access control
-for local stdio.
-
-#### Locating the config
-
-The `payload-mcp` bin is installed inside your project's `node_modules`, so it derives
-your project root from its own location and resolves `payload.config.ts` from there - no
-matter which working directory the MCP client spawns it from.
-
-For layouts where that derived root is wrong (most commonly a monorepo where the package
-is hoisted above the app that actually contains the config), point the bin at the config
-explicitly with the `PAYLOAD_CONFIG_PATH` environment variable:
-
-```json
-{
-  "mcpServers": {
-    "Payload": {
-      "command": "npx",
-      "args": ["payload-mcp"],
-      "env": {
-        "PAYLOAD_CONFIG_PATH": "/absolute/path/to/your/payload.config.ts"
-      }
-    }
-  }
-}
-```
-
 ## Testing your MCP endpoint
 
 The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is the fastest way to explore and call your server interactively:
@@ -448,12 +360,8 @@ The [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is the fa
 npx @modelcontextprotocol/inspector
 ```
 
-- For HTTP: set the URL to `http://127.0.0.1:3000/api/mcp` and add `Authorization: users API-Key MCP-USER-API-KEY` as a header.
-- For stdio: choose the stdio transport, set the command to `npx payload-mcp`,
-  and set `PAYLOAD_MCP_AUTHORIZATION` to `users API-Key MCP-USER-API-KEY`.
-  In development, set `PAYLOAD_MCP_OVERRIDE_ACCESS=true` instead if you want to skip access control.
-  Run the Inspector from your project directory, or set `PAYLOAD_CONFIG_PATH`
-  (see [locating the config](#locating-the-config)).
+Set the URL to `http://127.0.0.1:3000/api/mcp` and add
+`Authorization: users API-Key MCP-USER-API-KEY` as a header.
 
 ## Defining custom tools, prompts, and resources
 
@@ -927,3 +835,68 @@ mcpPlugin({
   },
 })
 ```
+
+## stdio transport (with limitations)
+
+<Banner type="warning">
+  HTTP is the recommended transport for both local development and production.
+  The stdio server does not hot reload Payload configuration or refresh its MCP
+  registrations and authorization state. Restart the server and reconnect your
+  MCP client after changing your Payload config, collections, globals, tools,
+  prompts, resources, hooks, or access rules.
+</Banner>
+
+For clients that can only spawn local processes, the package also ships a
+`payload-mcp` bin. It loads your Payload config, boots a separate Payload
+instance, and serves MCP over stdin/stdout.
+
+```json
+{
+  "mcpServers": {
+    "Payload": {
+      "command": "npx",
+      "args": ["payload-mcp"],
+      "env": {
+        "PAYLOAD_MCP_AUTHORIZATION": "users API-Key YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+`PAYLOAD_MCP_AUTHORIZATION` is the same value used for the HTTP `Authorization`
+header. If you omit it, MCP runs access control without a user. During
+development, you can instead set `NODE_ENV=development` and
+`PAYLOAD_MCP_OVERRIDE_ACCESS=true` to skip access control.
+
+You do not need to add `mcpPlugin` to your Payload config to use the bin. Add it
+when you want to configure tools, descriptions, prompts, or resources. The bin
+uses `tsx` to load TypeScript configs; pass `--disable-transpile` when loading an
+already compiled JavaScript config.
+
+### Locating the config
+
+The bin derives the project root from the installed package and resolves
+`payload.config.ts` from there. In hoisted monorepos or other unusual layouts,
+set `PAYLOAD_CONFIG_PATH` explicitly:
+
+```json
+{
+  "mcpServers": {
+    "Payload": {
+      "command": "npx",
+      "args": ["payload-mcp"],
+      "env": {
+        "PAYLOAD_CONFIG_PATH": "/absolute/path/to/your/payload.config.ts"
+      }
+    }
+  }
+}
+```
+
+### Drawbacks
+
+- Payload config, MCP registrations, request context, and authorization are initialized once. Changes require restarting the server and reconnecting the client; some clients may continue showing old discovery results until the client itself is restarted.
+- Credentials and permissions are evaluated only at startup. User, role, or access changes do not take effect until restart, while HTTP reevaluates them for every request.
+- Each client starts a separate Payload process and database connection instead of reusing the running app.
+- stdout is reserved for MCP JSON-RPC messages. Config, plugin, or dependency logs written to stdout can break the connection.
