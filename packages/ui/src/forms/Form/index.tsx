@@ -22,6 +22,12 @@ import type {
   SubmitOptions,
 } from './types.js'
 
+import { CloudLimitDocumentCountModal } from '../../elements/CloudLimitModal/index.js'
+import {
+  getCloudLimitErrorCode,
+  getCloudLimitErrorCodeFromError,
+} from '../../elements/CloudLimitModal/shared.js'
+import { useCloudLimitErrorHandler } from '../../elements/CloudLimitModal/useCloudLimitErrorHandler.js'
 import { FieldErrorsToast } from '../../elements/Toasts/fieldErrors.js'
 import { useDebouncedEffect } from '../../hooks/useDebouncedEffect.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
@@ -62,6 +68,8 @@ export const Form: React.FC<FormProps> = (props) => {
     useDocumentInfo()
 
   const validateDrafts = hasDraftValidationEnabled(docConfig)
+
+  const { documentCountModalSlug, showCloudLimitError } = useCloudLimitErrorHandler()
 
   const {
     action,
@@ -269,6 +277,7 @@ export const Form: React.FC<FormProps> = (props) => {
 
       // create new toast promise which will resolve manually later
       let errorToast, successToast
+      let submittingToastID: number | string | undefined
 
       const promise = new Promise((resolve, reject) => {
         successToast = resolve
@@ -284,7 +293,7 @@ export const Form: React.FC<FormProps> = (props) => {
         successToast = (data) => toast.success(data)
         errorToast = (data) => toast.error(data)
       } else {
-        toast.promise(promise, {
+        submittingToastID = toast.promise(promise, {
           error: (data) => {
             return data as string
           },
@@ -292,7 +301,15 @@ export const Form: React.FC<FormProps> = (props) => {
           success: (data) => {
             return data as string
           },
-        })
+        }) as number | string
+      }
+
+      const handleCloudLimitError = (code: string): void => {
+        if (submittingToastID !== undefined) {
+          toast.dismiss(submittingToastID)
+        }
+
+        showCloudLimitError(code)
       }
 
       if (e) {
@@ -470,6 +487,15 @@ export const Form: React.FC<FormProps> = (props) => {
 
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
 
+          // Content API "cloud limit" errors returned in the save response (doc-count, data-size).
+          // TODO: verify once the @payloadcms/figma plugin
+          // preserves the error code/status and its writes reach the enforcing v1 endpoints.
+          const cloudLimitCode = getCloudLimitErrorCode(json)
+          if (cloudLimitCode) {
+            handleCloudLimitError(cloudLimitCode)
+            return
+          }
+
           if (json.message) {
             errorToast(json.message)
             return
@@ -524,10 +550,19 @@ export const Form: React.FC<FormProps> = (props) => {
 
         return { formState: contextRef.current.fields, res }
       } catch (err) {
-        console.error('Error submitting form', err) // eslint-disable-line no-console
         setProcessing(false)
         setSubmitted(true)
         setDisabled(false)
+
+        // Client-side upload limits (e.g. asset storage) throw here instead of returning a 4xx
+        // response, so run the same cloud-limit handling on the thrown error.
+        const cloudLimitCode = getCloudLimitErrorCodeFromError(err)
+        if (cloudLimitCode) {
+          handleCloudLimitError(cloudLimitCode)
+          return
+        }
+
+        console.error('Error submitting form', err) // eslint-disable-line no-console
         errorToast(err.message)
       }
     },
@@ -551,6 +586,7 @@ export const Form: React.FC<FormProps> = (props) => {
       waitForAutocomplete,
       setModified,
       setSubmitted,
+      showCloudLimitError,
     ],
   )
 
@@ -869,46 +905,54 @@ export const Form: React.FC<FormProps> = (props) => {
   const El: 'form' = (el as unknown as 'form') || 'form'
 
   return (
-    <El
-      action={typeof action === 'function' ? void action : action}
-      className={classes}
-      /**
-       * data-form-ready signals if the form is ready to be used. This is used by our e2e tests
-       * to wait for the form to be ready before interacting with it, reducing flakiness if the test is run in
-       * slow network conditions.
-       */
-      data-form-ready={!processing && isMounted && !initializing}
-      method={method}
-      noValidate
-      onSubmit={(e) => void contextRef.current.submit({}, e)}
-      ref={formRef}
-    >
-      <DocumentFormContextComponent {...documentFormContextProps}>
-        <FormContext value={contextRef.current}>
-          <FormWatchContext
-            value={{
-              fields: formState,
-              ...contextRef.current,
-            }}
-          >
-            <SubmittedContext value={submitted}>
-              <InitializingContext value={!isMounted || (isMounted && initializing)}>
-                <ProcessingContext value={processing}>
-                  <BackgroundProcessingContext value={backgroundProcessing}>
-                    <ModifiedContext value={modified}>
-                      {/* eslint-disable-next-line @eslint-react/no-context-provider */}
-                      <FormFieldsContext.Provider value={fieldsReducer}>
-                        {children}
-                      </FormFieldsContext.Provider>
-                    </ModifiedContext>
-                  </BackgroundProcessingContext>
-                </ProcessingContext>
-              </InitializingContext>
-            </SubmittedContext>
-          </FormWatchContext>
-        </FormContext>
-      </DocumentFormContextComponent>
-    </El>
+    <React.Fragment>
+      <El
+        action={typeof action === 'function' ? void action : action}
+        className={classes}
+        /**
+         * data-form-ready signals if the form is ready to be used. This is used by our e2e tests
+         * to wait for the form to be ready before interacting with it, reducing flakiness if the test is run in
+         * slow network conditions.
+         */
+        data-form-ready={!processing && isMounted && !initializing}
+        method={method}
+        noValidate
+        onSubmit={(e) => void contextRef.current.submit({}, e)}
+        ref={formRef}
+      >
+        <DocumentFormContextComponent {...documentFormContextProps}>
+          <FormContext value={contextRef.current}>
+            <FormWatchContext
+              value={{
+                fields: formState,
+                ...contextRef.current,
+              }}
+            >
+              <SubmittedContext value={submitted}>
+                <InitializingContext value={!isMounted || (isMounted && initializing)}>
+                  <ProcessingContext value={processing}>
+                    <BackgroundProcessingContext value={backgroundProcessing}>
+                      <ModifiedContext value={modified}>
+                        {/* eslint-disable-next-line @eslint-react/no-context-provider */}
+                        <FormFieldsContext.Provider value={fieldsReducer}>
+                          {children}
+                        </FormFieldsContext.Provider>
+                      </ModifiedContext>
+                    </BackgroundProcessingContext>
+                  </ProcessingContext>
+                </InitializingContext>
+              </SubmittedContext>
+            </FormWatchContext>
+          </FormContext>
+        </DocumentFormContextComponent>
+      </El>
+      {collectionSlug ? (
+        <CloudLimitDocumentCountModal
+          modalSlug={documentCountModalSlug}
+          onRetry={() => void submit({})}
+        />
+      ) : null}
+    </React.Fragment>
   )
 }
 

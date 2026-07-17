@@ -4,4 +4,10 @@
     flex-direction: column;
     gap: var(--spacer-2);
   }
+
+  .confirmation-modal__footer-link {
+    display: flex;
+    align-items: center;
+    margin-inline-end: auto;
+  }
 }

@@ -19,6 +19,7 @@ export type ConfirmationModalProps = {
   className?: string
   confirmingLabel?: string
   confirmLabel?: string
+  footerLinkAction?: React.ReactNode
   heading: React.ReactNode
   modalSlug: string
   onCancel?: OnCancel
@@ -32,6 +33,7 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
     className,
     confirmingLabel,
     confirmLabel,
+    footerLinkAction,
     heading,
     modalSlug,
     onCancel,
@@ -47,6 +49,9 @@ export function ConfirmationModal(props: ConfirmationModalProps) {
         </div>
       </DialogBody>
       <DialogFooter>
+        {footerLinkAction ? (
+          <div className="confirmation-modal__footer-link">{footerLinkAction}</div>
+        ) : null}
         <DialogCancel label={cancelLabel} onClick={onCancel} />
         <DialogConfirm label={confirmLabel} loadingLabel={confirmingLabel} onClick={onConfirm} />
       </DialogFooter>

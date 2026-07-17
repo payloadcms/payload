@@ -30,6 +30,8 @@ export const listDrawerSlug = 'with-list-drawer'
 export const virtualsSlug = 'virtuals'
 export const formatDocURLCollectionSlug = 'format-doc-url'
 export const fullyFeaturedCollectionSlug = 'fully-featured'
+export const cloudLimitsCollectionSlug = 'cloud-limits'
+export const cloudLimitsAutosaveCollectionSlug = 'cloud-limits-autosave'
 export const collectionSlugs = [
   usersCollectionSlug,
   customViews1CollectionSlug,

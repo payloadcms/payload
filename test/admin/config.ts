@@ -4,6 +4,7 @@ import path from 'path'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { Array } from './collections/Array.js'
 import { BaseListFilter } from './collections/BaseListFilter.js'
+import { CloudLimits, CloudLimitsAutosave } from './collections/CloudLimits/index.js'
 import { CustomCollectionView } from './collections/CustomCollectionView.js'
 import { CollectionCustomDocumentControls } from './collections/CustomDocumentControls.js'
 import { CustomFields } from './collections/CustomFields/index.js'
@@ -254,6 +255,8 @@ export default buildConfigWithDefaults({
     NoTimestampsCollection,
     Localized,
     FullyFeatured,
+    CloudLimits,
+    CloudLimitsAutosave,
   ],
   globals: [
     GlobalHidden,

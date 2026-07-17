@@ -1,0 +1,8 @@
+@layer payload-default {
+  .cloud-limit-modal__review-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    color: var(--ramp-blue-600);
+  }
+}
