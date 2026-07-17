@@ -308,8 +308,7 @@ export type UploadConfig = {
   staticDir?: string
   trimOptions?: ImageUploadTrimOptions
   /**
-   * Adapter-provided upload instructions. Client config exposes this as a `true` marker without
-   * the server-only access and generate functions.
+   * Adapter-provided upload instructions.
    * @internal
    */
   uploadInstructions?: UploadInstructionsCapability
@@ -364,14 +363,21 @@ export type UploadInstructions = {
 )
 
 export type GenerateUploadInstructions = (
-  args: { req: PayloadRequest } & UploadInstructionsRequest,
+  args: { overrideAccess?: boolean; req: PayloadRequest } & UploadInstructionsRequest,
 ) => Promise<UploadInstructions> | UploadInstructions
 
 export type UploadInstructionsCapability = {
   /** Generates upload instructions. The generator or supporting endpoint must check access. */
   generate: GenerateUploadInstructions
+  /**
+   * Whether the Admin panel should use these instructions before saving a document.
+   * This can still be useful when upload chunks pass through Payload.
+   */
+  useInAdmin: boolean
 }
 export type checkFileRestrictionsParams = {
+  /** Set to false when the file bytes have not been uploaded yet. */
+  checkFileContents?: boolean
   collection: CollectionConfig
   file: File
   req: PayloadRequest

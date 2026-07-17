@@ -39,6 +39,7 @@ import {
   mediaWithoutCacheTagsSlug,
   mediaWithoutDeleteAccessSlug,
   mediaWithoutRelationPreviewSlug,
+  mediaWithoutWriteAccessSlug,
   mediaWithRelationPreviewSlug,
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
@@ -1086,6 +1087,18 @@ export default buildConfigWithDefaults({
         staticDir: path.resolve(dirname, './media'),
       },
       access: { delete: () => false },
+      versions: false,
+    },
+    {
+      slug: mediaWithoutWriteAccessSlug,
+      access: {
+        create: () => false,
+        update: () => false,
+      },
+      fields: [],
+      upload: {
+        staticDir: path.resolve(dirname, './media'),
+      },
       versions: false,
     },
     {

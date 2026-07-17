@@ -10,7 +10,7 @@ import type {
 import type { ClientField } from '../../fields/config/client.js'
 import type { ClientHierarchyConfig } from '../../hierarchy/types.js'
 import type { Payload } from '../../types/index.js'
-import type { SanitizedUploadConfig } from '../../uploads/types.js'
+import type { SanitizedUploadConfig, UploadInstructionsCapability } from '../../uploads/types.js'
 import type { SanitizedCollectionConfig } from './types.js'
 
 import { createClientFields } from '../../fields/config/client.js'
@@ -46,8 +46,7 @@ export type ServerOnlyUploadProperties = keyof Pick<
 >
 
 type ClientUploadConfig = {
-  /** Whether this collection provides separate upload instructions. */
-  uploadInstructions?: true
+  uploadInstructions: Pick<UploadInstructionsCapability, 'useInAdmin'>
 } & Omit<SanitizedUploadConfig, 'uploadInstructions'>
 
 export type ClientCollectionConfig = {
@@ -284,16 +283,13 @@ export const createClientCollectionConfig = ({
           break
         }
 
-        clientCollection.upload = {} as ClientUploadConfig
+        clientCollection.upload = {
+          uploadInstructions: {
+            useInAdmin: collection.upload.uploadInstructions?.useInAdmin ?? false,
+          },
+        } as ClientUploadConfig
 
         for (const uploadKey in collection.upload) {
-          if (uploadKey === 'uploadInstructions') {
-            if (collection.upload.uploadInstructions) {
-              clientCollection.upload.uploadInstructions = true
-            }
-            continue
-          }
-
           if (serverOnlyUploadProperties.includes(uploadKey as any)) {
             continue
           }

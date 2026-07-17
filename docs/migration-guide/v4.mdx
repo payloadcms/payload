@@ -1073,10 +1073,15 @@ uploadInstructions: {
     name: 'uploadToMyProvider',
     data: {},
   }),
+  useInAdmin: true,
 }
 ```
 
-`data` is passed to the client handler. If the handler returns an object, Payload uses it as `file.uploadReference`.
+Set `useInAdmin` to `true` when the Admin panel should use the instructions instead of attaching the whole file to the document request. This can also benefit chunked uploads that still pass through Payload.
+
+R2's multipart client route is one example: it passes chunks through Payload, but the Admin still uses it to avoid sending the whole file in one request.
+
+The `data` value is passed from the server instruction to the client handler. The names must match exactly. If the handler returns an object, it becomes `file.uploadReference` in the document request.
 
 Finally, remove `initClientUploads` and declare its Admin handler and supporting endpoint on `uploadInstructions`:
 
@@ -1104,6 +1109,7 @@ uploadInstructions: {
 +   path: '/my-upload-endpoint',
 + },
   generate,
++ useInAdmin: true,
 }
 ```
 
