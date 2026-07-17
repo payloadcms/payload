@@ -2,6 +2,7 @@
   .mini-carousel {
     --carousel-item-width: 48px;
     --carousel-item-height: 48px;
+    --carousel-divider-height: 48px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -57,7 +58,7 @@
 
   .mini-carousel__divider {
     width: var(--stroke-width-small);
-    height: 48px;
+    height: var(--carousel-divider-height);
     margin: 0 var(--spacer-2);
     background: var(--color-border);
     flex-shrink: 0;
