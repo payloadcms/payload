@@ -107,25 +107,37 @@ const nextSuites: TestConfig[] = [
 ]
 
 /**
- * tanstack-start coverage is being rolled out one suite at a time.
- * Only the `_community` suite runs for now, and it is required so its failures block the `all-green` gate.
- *
- * @todo as the tanstack-start adapter becomes stable, turn on the full suite matrix, one-by-one.
- * To enable all
- *  - Use `nextSuites.map((suite) => ({ ...suite, framework: 'tanstack-start' }))` —
- *  - Drop the per-suite `optional` overrides and remove the `optional` default for tanstack-start in e2e matrix.
+ * Suites verified passing under the tanstack-start adapter. These are required, so their
+ * failures block the `all-green` gate. Promote a suite here once it passes reliably.
+ */
+const requiredTanstackFiles = new Set([
+  '_community',
+  'admin-bar',
+  'server-url',
+  'field-paths',
+  'auth-basic',
+  'plugin-redirects',
+  'sort',
+  'hooks',
+  'plugin-nested-docs',
+  'i18n',
+  'a11y',
+  'plugin-mcp',
+])
+
+/**
+ * Full tanstack-start matrix, for a high-level view of adapter coverage across all suites.
+ * Verified-passing suites (`requiredTanstackFiles`) block the `all-green` gate; every other
+ * suite runs optional (non-blocking) until it stabilizes. `plugin-mcp` is not part of
+ * `nextSuites` but passes under tanstack-start, so it is added explicitly.
  */
 const tanstackSuites: TestConfig[] = [
-  { file: '_community', framework: 'tanstack-start', optional: false, shards: 1 },
-  { file: 'admin-bar', framework: 'tanstack-start', optional: false, shards: 1 },
-  { file: 'server-url', framework: 'tanstack-start', optional: false, shards: 1 },
-  { file: 'field-paths', framework: 'tanstack-start', optional: false, shards: 1 },
-  { file: 'auth-basic', framework: 'tanstack-start', optional: false, shards: 1 },
-  { file: 'plugin-redirects', framework: 'tanstack-start', optional: false, shards: 1 },
-  { file: 'sort', framework: 'tanstack-start', optional: false, shards: 1 },
-  { file: 'hooks', framework: 'tanstack-start', optional: false, shards: 1 },
-  { file: 'plugin-nested-docs', framework: 'tanstack-start', optional: false, shards: 1 },
-  { file: 'i18n', framework: 'tanstack-start', optional: false, shards: 1 },
+  ...nextSuites.map((suite) => ({
+    ...suite,
+    framework: 'tanstack-start' as const,
+    optional: !requiredTanstackFiles.has(suite.file),
+  })),
+  { file: 'plugin-mcp', framework: 'tanstack-start', optional: false, shards: 1 },
 ]
 
 export default createE2EConfig([...nextSuites, ...tanstackSuites])
