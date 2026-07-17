@@ -1,6 +1,6 @@
 import type { Payload } from 'payload'
 
-import { getPluginConfig } from './getPluginConfig.js'
+import { findPluginConfig } from './getPluginConfig.js'
 
 /**
  * Get the logger for the MCP plugin. Child of the main Payload logger, prefixed with `[plugin-mcp]`
@@ -8,9 +8,7 @@ import { getPluginConfig } from './getPluginConfig.js'
  * are silenced; warn/error still surface so operators don't lose error signal.
  */
 export const getLogger: (args: { payload: Payload }) => Payload['logger'] = ({ payload }) => {
-  const pluginConfig = getPluginConfig({ config: payload.config })
-
-  const useVerboseLogs = pluginConfig?.mcp?.verboseLogs ?? false
+  const useVerboseLogs = findPluginConfig({ config: payload.config })?.mcp?.verboseLogs ?? false
 
   const logger = payload.logger.child({ plugin: 'mcp' }, { msgPrefix: '[plugin-mcp] ' })
 

@@ -4,7 +4,8 @@ import { getAccessResults, UnauthorizedError } from 'payload'
 
 import type { AuthorizedMCP, MCPItem } from '../types.js'
 
-import { getPluginConfig } from '../utils/getPluginConfig.js'
+import { sanitizeMCPConfig } from '../mcp/sanitizeMCPConfig.js'
+import { findPluginConfig } from '../utils/getPluginConfig.js'
 
 export type GetAuthorizedMCPArgs = {
   overrideAccess: boolean
@@ -19,7 +20,9 @@ export const getAuthorizedMCP: (args: GetAuthorizedMCPArgs) => Promise<Authorize
   overrideAccess,
   req,
 }) => {
-  const pluginConfig = getPluginConfig({ config: req.payload.config })
+  const pluginConfig =
+    findPluginConfig({ config: req.payload.config }) ??
+    sanitizeMCPConfig({ config: req.payload.config, pluginConfig: {} })
 
   if (pluginConfig.overrideGetAuthorizedMCP) {
     return await pluginConfig.overrideGetAuthorizedMCP({

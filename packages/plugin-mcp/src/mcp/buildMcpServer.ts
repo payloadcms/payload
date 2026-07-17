@@ -13,6 +13,7 @@ import type {
   ToolInputSchema,
 } from '../types.js'
 
+import { getAuthorizedMCP } from '../endpoint/access.js'
 import { getLogger } from '../utils/getLogger.js'
 import { toStandardSchema } from '../utils/toStandardSchema.js'
 
@@ -98,7 +99,11 @@ export const buildMcpServer = ({
       }
     }
 
-    const match = authorizedMCP.items.find(
+    const currentAuthorizedMCP = await getAuthorizedMCP({
+      overrideAccess: authorizedMCP.overrideAccess,
+      req,
+    })
+    const match = currentAuthorizedMCP.items.find(
       (candidate): candidate is CollectionMCPItem | GlobalMCPItem =>
         candidate.type === item.type &&
         candidate.mcpName === item.mcpName &&
@@ -120,7 +125,7 @@ export const buildMcpServer = ({
     }
 
     const handlerArgs = {
-      authorizedMCP,
+      authorizedMCP: currentAuthorizedMCP,
       input: toolInput,
       req,
       serverContext,
@@ -220,15 +225,34 @@ export const buildMcpServer = ({
             },
             async (input: unknown, ctx: ServerContext) => {
               const toolInput = (input ?? {}) as Record<string, unknown>
-              const response = await tool.handler({
-                authorizedMCP,
+              const currentAuthorizedMCP = await getAuthorizedMCP({
+                overrideAccess: authorizedMCP.overrideAccess,
+                req,
+              })
+              const currentItem = currentAuthorizedMCP.items.find(
+                (candidate): candidate is typeof item =>
+                  candidate.type === 'tool' && candidate.mcpName === item.mcpName,
+              )
+              if (!currentItem) {
+                return {
+                  content: [
+                    {
+                      type: 'text',
+                      text: `Error: MCP access to "${item.mcpName}" is not enabled`,
+                    },
+                  ],
+                  isError: true,
+                }
+              }
+              const response = await currentItem.tool.handler({
+                authorizedMCP: currentAuthorizedMCP,
                 input: toolInput,
                 req,
                 serverContext: ctx,
               })
               return finalizeToolResponse({
                 input: toolInput,
-                overrideResponse: tool.overrideResponse,
+                overrideResponse: currentItem.tool.overrideResponse,
                 response,
                 toolName: item.mcpName,
               })

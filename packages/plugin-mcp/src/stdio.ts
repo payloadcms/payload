@@ -1,4 +1,4 @@
-import type { Config, Plugin, SanitizedConfig } from 'payload'
+import type { Config, SanitizedConfig } from 'payload'
 
 /* eslint-disable no-console */
 import { serveStdio } from '@modelcontextprotocol/server/stdio'
@@ -6,12 +6,10 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 import { createLocalReq, getPayload } from 'payload'
 import { findConfig, loadEnv } from 'payload/node'
 
-import type { SanitizedMCPPluginConfig } from './types.js'
-
 import { getAuthorizedMCP } from './endpoint/access.js'
 import { buildMcpServer } from './mcp/buildMcpServer.js'
 import { sanitizeMCPConfig } from './mcp/sanitizeMCPConfig.js'
-import { getPluginConfig } from './utils/getPluginConfig.js'
+import { findPluginConfig } from './utils/getPluginConfig.js'
 import { resolveProjectRoot } from './utils/resolveProjectRoot.js'
 
 /**
@@ -58,21 +56,9 @@ export const runMcpStdio = async (configOverride?: SanitizedConfig): Promise<voi
 
   const payload = await getPayload({ config, cron: false, disableOnInit: true })
 
-  let pluginConfig: SanitizedMCPPluginConfig
-  try {
-    pluginConfig = getPluginConfig({ config: payload.config })
-  } catch {
-    // The command also works when mcpPlugin() is not in the Payload config.
-    pluginConfig = sanitizeMCPConfig({ config: payload.config, pluginConfig: {} })
-
-    const fallbackPlugin: Plugin = (config) => config
-    Object.assign(fallbackPlugin, {
-      slug: '@payloadcms/plugin-mcp',
-      sanitizedOptions: pluginConfig,
-    })
-    payload.config.plugins ??= []
-    payload.config.plugins.push(fallbackPlugin)
-  }
+  const pluginConfig =
+    findPluginConfig({ config: payload.config }) ??
+    sanitizeMCPConfig({ config: payload.config, pluginConfig: {} })
 
   const overrideAccessEnv = process.env.PAYLOAD_MCP_OVERRIDE_ACCESS
   let overrideAccess = false
