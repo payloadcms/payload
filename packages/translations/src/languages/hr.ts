@@ -587,6 +587,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     linkToFile: 'Poveznica na datoteku',
     moreInfo: 'Više informacija',
     noFile: 'Nema datoteke',
+    pasteFromClipboard: 'Zalijepi iz međuspremnika',
     pasteURL: 'Zalijepi URL',
     previewSizes: 'Veličine pregleda',
     renameFile: 'Preimenujte datoteku',

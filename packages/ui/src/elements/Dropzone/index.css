@@ -1,5 +1,7 @@
 @layer payload-default {
   .dropzone {
+    --accessibility-outline-offset: -2px;
+
     position: relative;
     display: flex;
     align-items: flex-start;
@@ -15,6 +17,11 @@
 
     &:hover {
       background: var(--color-bg-hover);
+    }
+
+    &:focus {
+      outline: var(--accessibility-outline);
+      outline-offset: var(--accessibility-outline-offset);
     }
 
     &.dragging {

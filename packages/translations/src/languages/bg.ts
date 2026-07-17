@@ -588,6 +588,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     linkToFile: 'Връзка към файл',
     moreInfo: 'Повече информация',
     noFile: 'Няма файл',
+    pasteFromClipboard: 'Поставяне от клипборда',
     pasteURL: 'Поставяне на URL',
     previewSizes: 'Преглед на размери',
     renameFile: 'Преименувайте файл',

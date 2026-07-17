@@ -588,6 +588,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     linkToFile: 'ファイルへのリンク',
     moreInfo: '詳細を表示',
     noFile: 'ファイルなし',
+    pasteFromClipboard: 'クリップボードから貼り付け',
     pasteURL: 'URLを貼り付け',
     previewSizes: 'プレビューサイズ',
     renameFile: 'ファイル名を変更',

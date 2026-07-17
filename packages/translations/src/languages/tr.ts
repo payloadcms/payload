@@ -595,6 +595,7 @@ export const trTranslations: DefaultTranslationsObject = {
     linkToFile: 'Dosyaya bağlantı',
     moreInfo: 'Daha fazla bilgi',
     noFile: 'Dosya yok',
+    pasteFromClipboard: 'Panodan yapıştır',
     pasteURL: 'URL yapıştır',
     previewSizes: 'Önizleme Boyutları',
     renameFile: 'Dosyayı yeniden adlandır',

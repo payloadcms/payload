@@ -594,6 +594,7 @@ export const roTranslations: DefaultTranslationsObject = {
     linkToFile: 'Link către fișier',
     moreInfo: 'Mai multe informații',
     noFile: 'Niciun fișier',
+    pasteFromClipboard: 'Lipește din clipboard',
     pasteURL: 'Lipește URL',
     previewSizes: 'Dimensiuni Previzualizare',
     renameFile: 'Redenumiți fișierul',

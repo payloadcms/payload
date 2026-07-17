@@ -586,6 +586,7 @@ export const slTranslations: DefaultTranslationsObject = {
     linkToFile: 'Povezava do datoteke',
     moreInfo: 'Več informacij',
     noFile: 'Ni datoteke.',
+    pasteFromClipboard: 'Prilepi iz odložišča',
     pasteURL: 'Prilepi URL',
     previewSizes: 'Velikosti predogleda',
     renameFile: 'Preimenuj datoteko',

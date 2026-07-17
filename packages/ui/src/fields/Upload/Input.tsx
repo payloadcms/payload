@@ -17,6 +17,7 @@ import { useModal } from '@faceless-ui/modal'
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
 import React, { useCallback, useEffect, useMemo } from 'react'
+import { toast } from 'sonner'
 
 import type { ListDrawerProps } from '../../elements/ListDrawer/types.js'
 import type { ReloadDoc, ValueAsDataWithRelation } from './types.js'
@@ -34,6 +35,7 @@ import { FieldLabel } from '../../fields/FieldLabel/index.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { getFilesFromClipboard } from '../../utilities/getFilesFromClipboard.js'
 import { normalizeRelationshipValue } from '../../utilities/normalizeRelationshipValue.js'
 import { fieldBaseClass } from '../shared/index.js'
 import { UploadComponentHasMany } from './HasMany/index.js'
@@ -411,6 +413,19 @@ export function UploadInput(props: UploadInputProps) {
     ],
   )
 
+  const handlePasteFromClipboard = useCallback(async () => {
+    try {
+      const files = await getFilesFromClipboard()
+      if (!files) {
+        toast.error('No file found in clipboard.')
+        return
+      }
+      onLocalFileSelection(files)
+    } catch (_err) {
+      toast.error('Unable to read from clipboard.')
+    }
+  }, [onLocalFileSelection])
+
   // only hasMany can bulk select
   const onListBulkSelect = React.useCallback<NonNullable<ListDrawerProps['onBulkSelect']>>(
     async (docs, collectionSlug) => {
@@ -757,6 +772,21 @@ export function UploadInput(props: UploadInputProps) {
                   >
                     {t('fields:chooseFromExisting')}
                   </Button>
+                  {canCreate && !readOnly && (
+                    <>
+                      <span className={`${baseClass}__dropzoneContent__orText`}>
+                        {t('general:or')}
+                      </span>
+                      <Button
+                        buttonStyle="secondary"
+                        className={`${baseClass}__pasteFromClipboard`}
+                        icon="clipboard"
+                        onClick={handlePasteFromClipboard}
+                        size="medium"
+                        tooltip={t('upload:pasteFromClipboard')}
+                      />
+                    </>
+                  )}
                   <CreateDocDrawer onSave={onDocCreate} />
                   <ListDrawer
                     allowCreate={canCreate}

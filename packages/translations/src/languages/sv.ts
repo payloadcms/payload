@@ -590,6 +590,7 @@ export const svTranslations: DefaultTranslationsObject = {
     linkToFile: 'Länk till fil',
     moreInfo: 'Mer info',
     noFile: 'Ingen fil',
+    pasteFromClipboard: 'Klistra in från urklipp',
     pasteURL: 'Klistra in URL',
     previewSizes: 'Förhandsgranska storlekar',
     renameFile: 'Byt namn på fil',
