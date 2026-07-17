@@ -12,7 +12,7 @@
   .app-header__content {
     display: flex;
     align-items: center;
-    padding: var(--spacer-2-5) var(--gutter-h);
+    padding: var(--spacer-2-5);
     gap: var(--spacer-2-5);
     position: relative;
     flex-grow: 1;
@@ -59,7 +59,7 @@
     margin-left: calc(-1 * var(--spacer-1));
     flex-grow: 0;
     gap: var(--spacer-1);
-    width: 100%;
+    width: unset;
   }
 
   .app-header__controls-wrapper {
@@ -68,6 +68,7 @@
     gap: var(--spacer-2);
     flex: 1;
     min-width: 0;
+    flex-wrap: wrap;
   }
 
   .app-header__sidebar-toggle {
@@ -115,8 +116,9 @@
     align-items: center;
     gap: var(--spacer-2);
     flex-shrink: 0;
-    max-width: 600px;
+    max-width: 150px;
     white-space: nowrap;
+    margin-right: 0;
 
     &::-webkit-scrollbar {
       display: none;
@@ -127,46 +129,50 @@
     margin-right: var(--spacer-3);
   }
 
-  @media (max-width: 1440px) {
-    .app-header__actions {
-      max-width: 500px;
-    }
+  .app-header--nav-open .app-header__localizer {
+    display: none;
   }
 
-  @media (max-width: 1024px) {
+  @media (min-width: 768px) {
+    .app-header__content {
+      padding: var(--spacer-2-5) var(--gutter-h);
+    }
+
+    .app-header__controls-wrapper {
+      flex-wrap: unset;
+    }
+
+    .app-header__step-nav-wrapper {
+      width: 100%;
+    }
+
+    .app-header--nav-open .app-header__localizer {
+      display: unset;
+    }
+
     .app-header__gradient-placeholder {
       right: var(--spacer-3);
     }
 
     .app-header__actions {
       max-width: 300px;
+      margin-right: unset;
     }
   }
 
-  @media (max-width: 768px) {
-    .app-header__wrapper {
-      align-items: flex-start;
-    }
-
-    .app-header__controls-wrapper {
-      flex-wrap: wrap;
-    }
-
-    .app-header__step-nav-wrapper {
-      width: unset;
-    }
-
-    .app-header--nav-open .app-header__localizer {
-      display: none;
-    }
-
+  @media (min-width: 1024px) {
     .app-header__gradient-placeholder {
       right: 0;
     }
 
     .app-header__actions {
-      max-width: 150px;
-      margin-right: 0;
+      max-width: 500px;
+    }
+  }
+
+  @media (min-width: 1440px) {
+    .app-header__actions {
+      max-width: 600px;
     }
   }
 }

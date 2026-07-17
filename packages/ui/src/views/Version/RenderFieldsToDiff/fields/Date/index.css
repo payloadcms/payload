@@ -1,4 +1,5 @@
 @layer payload-default {
+  /* stylelint-disable plugin/no-important -- neutralizes HTMLDiff's pill highlighting, whose compound :not() selectors outrank these on specificity */
   .date-diff[data-match-type] {
     background-color: unset !important;
     border-radius: unset !important;
@@ -16,14 +17,23 @@
       background-color: unset !important;
     }
   }
+  /* stylelint-enable plugin/no-important */
 
-  @media (max-width: 768px) {
+  .field-diff-content .date-diff {
+    display: contents;
+  }
+
+  .date-diff .field-diff-content > .html-diff {
+    justify-content: center;
+  }
+
+  @media (min-width: 768px) {
     .field-diff-content .date-diff {
-      display: contents;
+      display: revert;
     }
 
     .date-diff .field-diff-content > .html-diff {
-      justify-content: center;
+      justify-content: revert;
     }
   }
 }

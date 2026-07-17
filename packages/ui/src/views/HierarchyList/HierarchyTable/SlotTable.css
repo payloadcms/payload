@@ -48,6 +48,7 @@
     min-width: 150px;
     position: relative;
     height: calc(var(--spacer-4) * 2);
+    max-width: 70vw;
 
     [dir='rtl'] & {
       text-align: right;
@@ -60,6 +61,13 @@
 
     &:last-child {
       padding-inline-end: var(--spacer-2);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .slot-table__th,
+    .slot-table__td {
+      max-width: unset;
     }
   }
 
@@ -192,13 +200,6 @@
       &:last-child {
         padding-inline-end: var(--spacer-2-5);
       }
-    }
-  }
-
-  @media (max-width: 1024px) {
-    .slot-table__th,
-    .slot-table__td {
-      max-width: 70vw;
     }
   }
 }

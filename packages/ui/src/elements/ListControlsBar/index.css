@@ -3,18 +3,20 @@
     display: flex;
     align-items: center;
     gap: var(--spacer-2);
-    padding: var(--spacer-2-5) var(--gutter-h);
+    padding: var(--spacer-2-5) var(--spacer-3);
+    flex-wrap: wrap;
+    row-gap: var(--spacer-2);
   }
 
   .list-controls-bar--border {
     border-bottom: var(--stroke-width-small) solid var(--color-border);
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     .list-controls-bar {
-      padding: var(--spacer-2-5) var(--spacer-3);
-      flex-wrap: wrap;
-      row-gap: var(--spacer-2);
+      padding: var(--spacer-2-5) var(--gutter-h);
+      flex-wrap: nowrap;
+      row-gap: 0;
     }
   }
 }

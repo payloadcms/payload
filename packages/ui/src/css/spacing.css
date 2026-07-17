@@ -10,26 +10,26 @@
     --spacer-6: 2.5rem; /** 40px */
 
     /* Layout spacing */
-    --gutter-h: var(--spacer-5);
-    --spacing-field: var(--spacer-3);
-    --spacing-view-bottom: var(--gutter-h);
+    --gutter-h: var(--spacer-3);
+    --spacing-field: var(--spacer-2-5);
+    --spacing-view-bottom: var(--spacer-6);
 
     /* Breakpoints */
     --breakpoint-m-width: 1024px;
     --breakpoint-s-width: 768px;
   }
 
-  @media (max-width: 1024px) {
+  @media (min-width: 768px) {
     :root {
       --gutter-h: var(--spacer-4);
+      --spacing-field: var(--spacer-3);
+      --spacing-view-bottom: var(--gutter-h);
     }
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 1024px) {
     :root {
-      --gutter-h: var(--spacer-3);
-      --spacing-field: var(--spacer-2-5);
-      --spacing-view-bottom: var(--spacer-6);
+      --gutter-h: var(--spacer-5);
     }
   }
 }

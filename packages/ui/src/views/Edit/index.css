@@ -173,12 +173,14 @@
 
   .collection-edit__auth {
     border-radius: var(--radius-small);
+    margin-top: 0;
+    margin-bottom: var(--spacer-3);
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     .collection-edit__auth {
-      margin-top: 0;
-      margin-bottom: var(--spacer-3);
+      margin-top: unset;
+      margin-bottom: unset;
     }
   }
 }

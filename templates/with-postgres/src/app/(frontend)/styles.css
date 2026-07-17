@@ -22,15 +22,15 @@ body,
 
 body {
   font-family: system-ui;
-  font-size: 18px;
-  line-height: 32px;
+  font-size: 15px;
+  line-height: 24px;
 
   margin: 0;
   color: rgb(1000, 1000, 1000);
 
-  @media (max-width: 1024px) {
-    font-size: 15px;
-    line-height: 24px;
+  @media (min-width: 1024px) {
+    font-size: 18px;
+    line-height: 32px;
   }
 }
 
@@ -41,33 +41,34 @@ img {
 }
 
 h1 {
-  margin: 40px 0;
-  font-size: 64px;
-  line-height: 70px;
+  margin: 24px 0;
+  font-size: 32px;
+  line-height: 32px;
   font-weight: bold;
 
-  @media (max-width: 1024px) {
+  @media (min-width: 400px) {
+    font-size: 38px;
+    line-height: 38px;
+  }
+
+  @media (min-width: 768px) {
     margin: 24px 0;
     font-size: 42px;
     line-height: 42px;
   }
 
-  @media (max-width: 768px) {
-    font-size: 38px;
-    line-height: 38px;
-  }
-
-  @media (max-width: 400px) {
-    font-size: 32px;
-    line-height: 32px;
+  @media (min-width: 1024px) {
+    margin: 40px 0;
+    font-size: 64px;
+    line-height: 70px;
   }
 }
 
 p {
-  margin: 24px 0;
+  margin: calc(var(--base) * 0.75) 0;
 
-  @media (max-width: 1024px) {
-    margin: calc(var(--base) * 0.75) 0;
+  @media (min-width: 1024px) {
+    margin: 24px 0;
   }
 }
 
@@ -95,13 +96,13 @@ svg {
   justify-content: space-between;
   align-items: center;
   height: 100vh;
-  padding: 45px;
+  padding: 24px;
   max-width: 1024px;
   margin: 0 auto;
   overflow: hidden;
 
-  @media (max-width: 400px) {
-    padding: 24px;
+  @media (min-width: 400px) {
+    padding: 45px;
   }
 
   .content {
@@ -143,11 +144,12 @@ svg {
   .footer {
     display: flex;
     align-items: center;
-    gap: 8px;
+    flex-direction: column;
+    gap: 6px;
 
-    @media (max-width: 1024px) {
-      flex-direction: column;
-      gap: 6px;
+    @media (min-width: 1024px) {
+      flex-direction: row;
+      gap: 8px;
     }
 
     p {

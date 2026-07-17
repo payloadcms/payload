@@ -22,27 +22,44 @@
     padding-right: 0;
   }
 
-  @media (max-width: 768px) {
-    /* Stack hasMany columns vertically */
+  /* Stack hasMany columns vertically */
+  .upload-diff-container--hasMany .field-diff-content {
+    grid-template-columns: 1fr;
+    gap: var(--spacer-2);
+  }
+
+  @media (min-width: 768px) {
     .upload-diff-container--hasMany .field-diff-content {
-      grid-template-columns: 1fr;
-      gap: var(--spacer-2);
+      grid-template-columns: var(--field-diff-columns, minmax(0, 1fr) minmax(0, 1fr));
+      gap: unset;
     }
+  }
 
-    /*
-     * Suppress the generic mobile column-level styling for uploads.
-     * Individual .upload-diff elements handle their own create/delete backgrounds.
-     */
-    .upload-diff-container .field-diff-content > .html-diff__diff-old,
-    .upload-diff-container .field-diff-content > .html-diff__diff-new {
-      background: transparent;
-      padding: 0;
-      border-radius: 0;
-      min-height: unset;
-      overflow: visible;
-    }
+  /*
+   * Suppress the generic mobile column-level styling for uploads.
+   * Individual .upload-diff elements handle their own create/delete backgrounds.
+   */
+  .upload-diff-container .field-diff-content > .html-diff__diff-old,
+  .upload-diff-container .field-diff-content > .html-diff__diff-new {
+    background: transparent;
+    padding: 0;
+    border-radius: 0;
+    min-height: unset;
+    overflow: visible;
+  }
 
-    /* On mobile, remove .upload-diff padding so it sits flush inside the stacked column */
+  /* On mobile, remove .upload-diff padding so it sits flush inside the stacked column */
+  .upload-diff-container--hasOne .upload-diff,
+  .upload-diff-container--hasOne
+    .html-diff
+    .upload-diff.upload-diff.upload-diff[data-match-type='create'],
+  .upload-diff-container--hasOne
+    .html-diff
+    .upload-diff.upload-diff.upload-diff[data-match-type='delete'] {
+    padding: 0;
+  }
+
+  @media (min-width: 768px) {
     .upload-diff-container--hasOne .upload-diff,
     .upload-diff-container--hasOne
       .html-diff
@@ -50,7 +67,7 @@
     .upload-diff-container--hasOne
       .html-diff
       .upload-diff.upload-diff.upload-diff[data-match-type='delete'] {
-      padding: 0;
+      padding: var(--spacer-1);
     }
   }
 

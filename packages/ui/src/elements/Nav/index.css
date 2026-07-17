@@ -20,7 +20,8 @@
   }
 
   .nav__mobile-close {
-    display: none;
+    display: flex;
+    align-items: center;
     background: none;
     border: 0;
     outline: 0;
@@ -34,6 +35,8 @@
     padding: var(--nav-padding-block-start) var(--nav-padding-inline-end)
       var(--nav-padding-block-end) var(--nav-padding-inline-start);
     overflow-y: auto;
+    --nav-padding-inline-start: var(--gutter-h);
+    --nav-padding-inline-end: var(--gutter-h);
 
     &::-webkit-scrollbar {
       display: none;
@@ -106,22 +109,21 @@
     background: var(--color-bg-selected);
   }
 
-  @media (max-width: 1024px) {
+  @media (min-width: 768px) {
     .nav__scroll {
       --nav-padding-inline-start: var(--spacer-2);
       --nav-padding-inline-end: var(--spacer-2);
     }
-  }
-
-  @media (max-width: 768px) {
-    .nav__scroll {
-      --nav-padding-inline-start: var(--gutter-h);
-      --nav-padding-inline-end: var(--gutter-h);
-    }
 
     .nav__mobile-close {
-      display: flex;
-      align-items: center;
+      display: none;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .nav__scroll {
+      --nav-padding-inline-start: var(--spacer-2-5);
+      --nav-padding-inline-end: var(--spacer-2-5);
     }
   }
 }

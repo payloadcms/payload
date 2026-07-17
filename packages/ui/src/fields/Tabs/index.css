@@ -16,6 +16,8 @@
 
   .tabs-field--within-collapsible {
     margin: 0 calc(var(--spacer-3) * -1);
+    margin-left: calc(var(--gutter-h) * -1);
+    margin-right: calc(var(--gutter-h) * -1);
 
     .tabs-field__content-wrap {
       padding-left: var(--spacer-3);
@@ -65,10 +67,10 @@
     margin-bottom: var(--spacer-4);
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     .tabs-field--within-collapsible {
-      margin-left: calc(var(--gutter-h) * -1);
-      margin-right: calc(var(--gutter-h) * -1);
+      margin-left: calc(var(--spacer-3) * -1);
+      margin-right: calc(var(--spacer-3) * -1);
     }
   }
 }

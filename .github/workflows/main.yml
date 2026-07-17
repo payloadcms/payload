@@ -127,8 +127,8 @@ jobs:
       - name: Lint TypeScript/JavaScript
         run: pnpm lint -- --quiet
 
-      - name: Lint SCSS
-        run: pnpm run lint:scss
+      - name: Lint CSS
+        run: pnpm run lint:css
 
   build:
     needs: changes

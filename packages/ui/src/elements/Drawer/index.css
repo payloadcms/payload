@@ -6,13 +6,13 @@
     position: fixed;
     inset: 0;
 
-    --gutter-h: var(--spacer-4);
+    --gutter-h: var(--spacer-3);
     --gutter-v: var(--spacer-4);
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     .drawer {
-      --gutter-h: var(--spacer-3);
+      --gutter-h: var(--spacer-4);
     }
   }
 

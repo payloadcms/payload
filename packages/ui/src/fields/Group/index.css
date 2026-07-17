@@ -123,7 +123,7 @@
     padding-top: 0;
   }
 
-  @media (max-width: 768px) {
+  @media (min-width: 768px) {
     .group-field--top-level {
       &::before {
         border-top: var(--stroke-width-small) solid var(--color-border);
