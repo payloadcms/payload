@@ -3,6 +3,7 @@
     "esbenp.prettier-vscode",
     "dbaeumer.vscode-eslint",
     "stylelint.vscode-stylelint",
+    "TypeScriptTeam.native-preview",
     "vitest.explorer",
     "ms-playwright.playwright"
   ]

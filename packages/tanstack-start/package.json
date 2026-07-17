@@ -34,6 +34,11 @@
       "types": "./src/exports/server.ts",
       "default": "./src/exports/server.ts"
     },
+    "./shared": {
+      "import": "./src/exports/shared.ts",
+      "types": "./src/exports/shared.ts",
+      "default": "./src/exports/shared.ts"
+    },
     "./layouts": {
       "import": "./src/exports/layouts.ts",
       "types": "./src/exports/layouts.ts",
@@ -44,11 +49,6 @@
       "browser": "./src/exports/rsc.browser.ts",
       "import": "./src/exports/rsc.ts",
       "default": "./src/exports/rsc.ts"
-    },
-    "./vite": {
-      "import": "./src/exports/vite.ts",
-      "types": "./src/exports/vite.ts",
-      "default": "./src/exports/vite.ts"
     }
   },
   "main": "./src/index.ts",
@@ -78,6 +78,7 @@
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^6.0.0",
+    "@vitejs/plugin-rsc": "^0.5.21",
     "payload": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -87,6 +88,7 @@
     "@tanstack/react-router": "^1.120.0",
     "@tanstack/react-start": "^1.168.26",
     "@vitejs/plugin-react": "^6.0.0",
+    "@vitejs/plugin-rsc": "^0.5.21",
     "payload": "workspace:*",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
@@ -94,6 +96,9 @@
   },
   "peerDependenciesMeta": {
     "@vitejs/plugin-react": {
+      "optional": true
+    },
+    "@vitejs/plugin-rsc": {
       "optional": true
     },
     "vite": {
@@ -120,6 +125,11 @@
         "types": "./dist/exports/server.d.ts",
         "default": "./dist/exports/server.js"
       },
+      "./shared": {
+        "import": "./dist/exports/shared.js",
+        "types": "./dist/exports/shared.d.ts",
+        "default": "./dist/exports/shared.js"
+      },
       "./layouts": {
         "import": "./dist/exports/layouts.js",
         "types": "./dist/exports/layouts.d.ts",
@@ -130,11 +140,6 @@
         "browser": "./dist/exports/rsc.browser.js",
         "import": "./dist/exports/rsc.js",
         "default": "./dist/exports/rsc.js"
-      },
-      "./vite": {
-        "import": "./dist/exports/vite.js",
-        "types": "./dist/exports/vite.d.ts",
-        "default": "./dist/exports/vite.js"
       }
     },
     "main": "./dist/index.js",

@@ -5,7 +5,12 @@ import type { ExpectStatic } from 'vitest'
 import type { AuditEvent } from '../__helpers/plugins/audit/index.js'
 import type { ParsedConfig } from './assertions/parseConfig.js'
 import type { EvalConfig } from './evalConfig.js'
-import type { RunnerKind, SkillInstallMode } from './runner/types.js'
+import type {
+  AgentBuiltinTool,
+  AgentWorkspaceFile,
+  RunnerKind,
+  SkillInstallMode,
+} from './runner/types.js'
 
 // Dataset
 export type EvalCategory =
@@ -25,6 +30,8 @@ export type EvalCategory =
   | 'testing'
 
 export type EvalCase = {
+  /** Extra built-in tools available to the agent for this case. */
+  additionalAllowedTools?: AgentBuiltinTool[]
   /** Boot the starter config before the agent runs. */
   bootConfig?: boolean
   category: EvalCategory
@@ -50,6 +57,8 @@ export type EvalCase = {
    * the LLM scorer should judge the result.
    */
   verify: (args: EvalVerifyContext) => EvalVerifyResult | Promise<EvalVerifyResult>
+  /** Files copied into the agent's temporary workspace before it starts. */
+  workspaceFiles?: AgentWorkspaceFile[]
 }
 
 export type EvalExpect = ExpectStatic

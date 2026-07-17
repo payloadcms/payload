@@ -13,6 +13,7 @@ import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEnt
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { whereSchema } from '../../../utils/whereSchema.js'
 import { validateCollectionData } from '../validateEntityData.js'
+import { fileInputSchema, resolveFileInput } from './fileInput.js'
 import { formatCollectionError } from './formatCollectionError.js'
 
 const DEFAULT_DESCRIPTION =
@@ -52,7 +53,7 @@ export const updateDocumentTool = defineCollectionTool({
       .string()
       .describe('Optional: fallback locale code to use when requested locale is not available')
       .optional(),
-    filePath: z.string().describe('File path for file uploads').optional(),
+    file: fileInputSchema.optional(),
     locale: z
       .string()
       .describe(
@@ -97,7 +98,7 @@ export const updateDocumentTool = defineCollectionTool({
     depth,
     draft,
     fallbackLocale,
-    filePath,
+    file: fileInput,
     locale,
     overrideLock,
     overwriteExistingFiles,
@@ -131,6 +132,7 @@ export const updateDocumentTool = defineCollectionTool({
     }
 
     const parsedData = transformPointDataToPayload(inputData)
+    const file = await resolveFileInput({ collectionSlug, input: fileInput, req })
 
     const whereClause: Where = where ?? {}
 
@@ -144,7 +146,7 @@ export const updateDocumentTool = defineCollectionTool({
         overrideAccess: authorizedMCP.overrideAccess,
         overrideLock,
         req,
-        ...(filePath ? { filePath } : {}),
+        ...(file ? { file } : {}),
         ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
         ...(publishAllLocales !== undefined ? { publishAllLocales } : {}),
         ...(locale ? { locale } : {}),
@@ -172,7 +174,7 @@ export const updateDocumentTool = defineCollectionTool({
       overrideLock,
       req,
       where: whereClause,
-      ...(filePath ? { filePath } : {}),
+      ...(file ? { file } : {}),
       ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
       ...(publishAllLocales !== undefined ? { publishAllLocales } : {}),
       ...(locale ? { locale } : {}),

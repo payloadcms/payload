@@ -4,6 +4,10 @@ import type {
   GeneratedAdapter,
 } from '@payloadcms/plugin-cloud-storage/types'
 
+import { resolveSignedURLKey } from '@payloadcms/plugin-cloud-storage/utilities'
+import { generateClientTokenFromReadWriteToken } from '@vercel/blob/client'
+import { Forbidden } from 'payload'
+
 import { deleteFile } from './deleteFile.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
@@ -28,9 +32,55 @@ export function createVercelBlobAdapter({
   token,
   useCompositePrefixes = false,
 }: CreateVercelBlobAdapterArgs): Adapter {
+  const clientUploadsAccess = typeof clientUploads === 'object' ? clientUploads.access : undefined
+
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'vercel-blob',
-    clientUploads,
+
+    uploadInstructions: {
+      adminHandler: {
+        path: '@payloadcms/storage-vercel-blob/client#VercelBlobClientUploadHandler',
+      },
+      enabled: Boolean(clientUploads),
+      generate: async ({ collectionSlug, docPrefix, filename, filesize, mimeType, req }) => {
+        if (
+          clientUploadsAccess ? !(await clientUploadsAccess({ collectionSlug, req })) : !req.user
+        ) {
+          throw new Forbidden(req.t)
+        }
+
+        const resolved = await resolveSignedURLKey({
+          collectionPrefix: prefix,
+          collectionSlug,
+          docPrefix,
+          filename,
+          req,
+          useCompositePrefixes,
+        })
+
+        return {
+          name: 'uploadToVercelBlob',
+          type: 'dispatch',
+          data: {
+            pathname: resolved.fileKey,
+            token: await generateClientTokenFromReadWriteToken({
+              addRandomSuffix,
+              allowedContentTypes: mimeType ? [mimeType] : undefined,
+              cacheControlMaxAge,
+              maximumSizeInBytes: filesize,
+              pathname: resolved.fileKey,
+              token,
+            }),
+          },
+          file: {
+            filename: resolved.sanitizedFilename,
+            mimeType,
+            size: filesize,
+            uploadReference: { prefix: resolved.sanitizedDocPrefix },
+          },
+        }
+      },
+    },
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -74,12 +124,11 @@ export function createVercelBlobAdapter({
 
     staticHandler: (
       req,
-      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
+      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
     ) =>
       getFile({
         baseUrl,
         cacheControlMaxAge,
-        clientUploadContext,
         collection,
         collectionPrefix: prefix,
         filename,
@@ -87,6 +136,7 @@ export function createVercelBlobAdapter({
         prefixQueryParam,
         req,
         token,
+        uploadReference,
         useCompositePrefixes,
       }),
   })

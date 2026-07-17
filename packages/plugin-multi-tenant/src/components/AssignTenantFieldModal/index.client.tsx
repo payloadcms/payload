@@ -46,8 +46,8 @@ export const AssignTenantFieldTrigger: React.FC = () => {
 }
 
 export const AssignTenantFieldModal: React.FC<{
-  afterModalClose: () => void
-  afterModalOpen: () => void
+  afterModalClose?: () => void
+  afterModalOpen?: () => void
   children: React.ReactNode
   onCancel?: () => void
   onConfirm?: () => void

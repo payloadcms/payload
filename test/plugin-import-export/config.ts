@@ -212,6 +212,11 @@ export default buildConfigWithDefaults({
               if (collection.admin) {
                 collection.admin.group = 'S3 Tests'
               }
+              // The import task fetches the uploaded CSV back through Payload's
+              // file endpoint, which resolves to `localhost` under prod-server
+              // e2e and gets rejected by `safeFetch`'s SSRF guard.
+              collection.upload = typeof collection.upload === 'object' ? collection.upload : {}
+              collection.upload.skipSafeFetch = true
               return collection
             },
           },

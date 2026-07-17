@@ -8,8 +8,8 @@ import type {
   User,
 } from 'payload'
 
-import { rtlLanguages } from '@payloadcms/translations'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
+import { getLanguageDir } from '@payloadcms/ui/utilities/getLanguageDir'
 import React from 'react'
 import '@payloadcms/ui/scss/app.scss'
 
@@ -43,7 +43,7 @@ export type RootLayoutProps = {
 }
 
 export function RootLayout({ children, data, serverFunction }: RootLayoutProps) {
-  const dir = (rtlLanguages as unknown as string[]).includes(data.languageCode) ? 'RTL' : 'LTR'
+  const dir = getLanguageDir({ languageCode: data.languageCode })
 
   return (
     <html data-theme={data.theme} dir={dir} lang={data.languageCode} suppressHydrationWarning>

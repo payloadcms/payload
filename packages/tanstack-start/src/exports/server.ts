@@ -1,11 +1,11 @@
 export { login } from '../auth/login.js'
 export { logout } from '../auth/logout.js'
 export { refresh } from '../auth/refresh.js'
+export { payloadApiHandlers } from '../routes/apiRoute.js'
 export { getRequestI18n } from '../utilities/getRequestI18n.server.js'
 export { getRequestLocale } from '../utilities/getRequestLocale.js'
-export { getRequestTheme } from '../utilities/getRequestTheme.js'
 export { handleGraphQL } from '../utilities/graphqlHandler.server.js'
-export { handleAPIRoute } from '../utilities/handleAPIRoute.js'
+export { handleAPIRoute } from '../utilities/handleAPIRoute.server.js'
 export { handleServerFunctions } from '../utilities/handleServerFunctions.js'
 export { getImportMapOutputPath } from '../utilities/importMap.server.js'
 export { initReq } from '../utilities/initReq.server.js'
@@ -22,3 +22,4 @@ export {
   tanstackServerAdapter,
 } from '../utilities/serverAdapter.server.js'
 export { toSerializable } from '../utilities/toSerializable.js'
+export { getRequestTheme } from '@payloadcms/ui/utilities/getRequestTheme'

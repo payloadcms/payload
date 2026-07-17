@@ -190,7 +190,6 @@ export const withPayload = (nextConfig = {}, options = {}) => {
             //'@payloadcms/storage-azure',
             //'@payloadcms/storage-gcs',
             //'@payloadcms/storage-s3',
-            //'@payloadcms/storage-uploadthing',
             //'@payloadcms/storage-vercel-blob',
           ]
         : []),

@@ -1,6 +1,8 @@
 'use client'
 import React from 'react'
 
+import type { ClipboardPasteEligibilityArgs } from '../ClipboardAction/types.js'
+
 import { ArrowIcon } from '../../icons/Arrow/index.js'
 import { ClipboardIcon } from '../../icons/Clipboard/index.js'
 import { CopyIcon } from '../../icons/Copy/index.js'
@@ -9,6 +11,7 @@ import { MoreIcon } from '../../icons/More/index.js'
 import { PlusIcon } from '../../icons/Plus/index.js'
 import { XIcon } from '../../icons/X/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
+import { useCanPasteClipboard } from '../ClipboardAction/useCanPasteClipboard.js'
 import { Popup, PopupList } from '../Popup/index.js'
 import './index.css'
 
@@ -22,6 +25,7 @@ export type Props = {
   index: number
   isSortable?: boolean
   moveRow: (from: number, to: number) => void
+  pasteData: ClipboardPasteEligibilityArgs
   pasteRow: (index: number) => void
   removeRow: (index: number) => void
   rowCount: number
@@ -35,11 +39,14 @@ export const ArrayAction: React.FC<Props> = ({
   index,
   isSortable,
   moveRow,
+  pasteData,
   pasteRow,
   removeRow,
   rowCount,
 }) => {
   const { t } = useTranslation()
+
+  const { canPaste, refresh } = useCanPasteClipboard(pasteData)
 
   return (
     <Popup
@@ -49,6 +56,11 @@ export const ArrayAction: React.FC<Props> = ({
       caret={false}
       className={baseClass}
       horizontalAlign="right"
+      onToggleOpen={(active) => {
+        if (active) {
+          refresh()
+        }
+      }}
       render={({ close }) => {
         return (
           <PopupList.MenuItem>
@@ -112,6 +124,7 @@ export const ArrayAction: React.FC<Props> = ({
             </PopupList.Button>
             <PopupList.Button
               className={`${baseClass}__action ${baseClass}__paste`}
+              disabled={!canPaste}
               icon={<ClipboardIcon size={24} />}
               onClick={() => {
                 pasteRow(index)

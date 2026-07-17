@@ -6,6 +6,7 @@ import type {
 } from '@payloadcms/plugin-cloud-storage/types'
 
 import { deleteFile } from './deleteFile.js'
+import { generateUploadInstructions } from './generateUploadInstructions.js'
 import { generateURL } from './generateURL.js'
 import { getFile } from './getFile.js'
 import { uploadFile } from './uploadFile.js'
@@ -31,7 +32,6 @@ export function createAzureAdapter({
 }: CreateAzureAdapterArgs): Adapter {
   return ({ collection, prefix = '' }): GeneratedAdapter => ({
     name: 'azure',
-    clientUploads,
 
     generateURL: ({ filename, prefix: urlPrefix = '' }) =>
       generateURL({
@@ -42,6 +42,20 @@ export function createAzureAdapter({
         prefix: urlPrefix,
         useCompositePrefixes,
       }),
+
+    uploadInstructions: {
+      adminHandler: {
+        path: '@payloadcms/storage-azure/client#AzureClientUploadHandler',
+      },
+      enabled: Boolean(clientUploads),
+      generate: generateUploadInstructions({
+        access: typeof clientUploads === 'object' ? clientUploads.access : undefined,
+        collectionPrefix: prefix,
+        containerName,
+        getStorageClient,
+        useCompositePrefixes,
+      }),
+    },
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>
       deleteFile({
@@ -69,17 +83,17 @@ export function createAzureAdapter({
 
     staticHandler: (
       req,
-      { headers, params: { clientUploadContext, filename, prefix: prefixQueryParam } },
+      { headers, params: { filename, prefix: prefixQueryParam, uploadReference } },
     ) =>
       getFile({
         client: getStorageClient(),
-        clientUploadContext,
         collection,
         collectionPrefix: prefix,
         filename,
         incomingHeaders: headers,
         prefixQueryParam,
         req,
+        uploadReference,
         useCompositePrefixes,
       }),
 

@@ -41,8 +41,14 @@ export type ServerOnlyUploadProperties = keyof Pick<
   | 'externalFileHeaderFilter'
   | 'handlers'
   | 'modifyResponseHeaders'
+  | 'uploadInstructions'
   | 'withMetadata'
 >
+
+type ClientUploadConfig = {
+  /** Whether this collection provides separate upload instructions. */
+  uploadInstructions?: true
+} & Omit<SanitizedUploadConfig, 'uploadInstructions'>
 
 export type ClientCollectionConfig = {
   admin: {
@@ -69,9 +75,10 @@ export type ClientCollectionConfig = {
     plural: StaticLabel
     singular: StaticLabel
   }
+  upload: ClientUploadConfig
 } & Omit<
   SanitizedCollectionConfig,
-  'admin' | 'auth' | 'fields' | 'hierarchy' | 'labels' | ServerOnlyCollectionProperties
+  'admin' | 'auth' | 'fields' | 'hierarchy' | 'labels' | 'upload' | ServerOnlyCollectionProperties
 >
 
 const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
@@ -96,6 +103,7 @@ const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
   'externalFileHeaderFilter',
   'handlers',
   'modifyResponseHeaders',
+  'uploadInstructions',
   'withMetadata',
 ]
 
@@ -276,9 +284,16 @@ export const createClientCollectionConfig = ({
           break
         }
 
-        clientCollection.upload = {} as SanitizedUploadConfig
+        clientCollection.upload = {} as ClientUploadConfig
 
         for (const uploadKey in collection.upload) {
+          if (uploadKey === 'uploadInstructions') {
+            if (collection.upload.uploadInstructions) {
+              clientCollection.upload.uploadInstructions = true
+            }
+            continue
+          }
+
           if (serverOnlyUploadProperties.includes(uploadKey as any)) {
             continue
           }

@@ -48,16 +48,29 @@ export const getCollectionSchemaTool = defineCollectionTool({
     }
   }
 
+  const uploadConfig = req.payload.collections[collectionSlug]?.config.upload
+  const maxFileSize = req.payload.config.upload.limits?.fileSize
+  const upload = uploadConfig
+    ? {
+        enabled: true,
+        filesRequiredOnCreate: uploadConfig.filesRequiredOnCreate !== false,
+        mimeTypes: uploadConfig.mimeTypes ?? ['*/*'],
+        sources: [...(uploadConfig.pasteURL !== false ? ['url'] : []), 'base64'],
+        ...(typeof maxFileSize === 'number' && Number.isFinite(maxFileSize) ? { maxFileSize } : {}),
+      }
+    : { enabled: false }
+
   return {
     content: [
       {
         type: 'text',
-        text: `Schema for collection "${collectionSlug}":\n\`\`\`json\n${JSON.stringify(inputSchema)}\n\`\`\``,
+        text: `Schema for collection "${collectionSlug}":\n\`\`\`json\n${JSON.stringify(inputSchema)}\n\`\`\`\nUpload configuration:\n\`\`\`json\n${JSON.stringify(upload)}\n\`\`\``,
       },
     ],
     structuredContent: {
       collectionSlug,
       schema: inputSchema,
+      upload,
     },
   }
 })
