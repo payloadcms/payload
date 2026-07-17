@@ -243,6 +243,11 @@ export async function loadAdminPage({
       params: Promise.resolve({ segments }) as Parameters<typeof renderRoot>[0]['params'],
       redirect,
       searchParams: Promise.resolve(searchParams),
+      // Per-route key so the *view* remounts on navigation (resetting view-scoped
+      // client providers) while the nav/template reconciles in place. The client
+      // renders the RSC payload without an outer key, so the template — including
+      // the nav sidebar — persists across navigations instead of flashing.
+      viewRemountKey: splat ?? '',
     })
 
     const rscPayload = await renderServerComponent(node as React.ReactElement)
