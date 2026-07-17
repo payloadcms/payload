@@ -11,6 +11,5 @@ export const bin = async (): Promise<void> => {
     viteHMR = await initializeViteHMR()
   }
 
-  await runMcpStdio(viteHMR?.config)
-  await viteHMR?.connect()
+  await runMcpStdio(viteHMR?.config, viteHMR?.connect)
 }

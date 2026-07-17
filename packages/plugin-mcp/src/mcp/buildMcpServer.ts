@@ -1,4 +1,4 @@
-import { McpServer, type ServerContext } from '@modelcontextprotocol/server'
+import { completable, McpServer, type ServerContext } from '@modelcontextprotocol/server'
 import { APIError, type PayloadRequest } from 'payload'
 import { z } from 'zod'
 
@@ -17,11 +17,20 @@ import { getAuthorizedMCP } from '../endpoint/access.js'
 import { getLogger } from '../utils/getLogger.js'
 import { toStandardSchema } from '../utils/toStandardSchema.js'
 
+type BuildMcpServerArgs = {
+  authorizedMCP: AuthorizedMCP
+  pluginConfig: SanitizedMCPPluginConfig
+  req: PayloadRequest
+}
+
+type MCPRegistration = { remove: () => void }
+
+const serverRegistrations = new WeakMap<McpServer, MCPRegistration[]>()
+
 /**
- * Serving-entry-agnostic core: registers every authorized MCP item onto a fresh
- * `McpServer` and returns it. The HTTP and stdio entry point callers provide fresh
- * instances from this builder while they own the transport and protocol-era
- * decision.
+ * Serving-entry-agnostic core: registers every authorized MCP item onto an
+ * `McpServer` and returns it. HTTP creates a fresh instance per request; stdio
+ * keeps one instance and refreshes its registrations after HMR.
  *
  * `req` is the request context handlers see. For HTTP it's the live
  * `PayloadRequest` derived from the incoming HTTP request; for stdio it's a
@@ -30,17 +39,36 @@ import { toStandardSchema } from '../utils/toStandardSchema.js'
 export const buildMcpServer = ({
   authorizedMCP,
   pluginConfig,
+  refreshable,
   req,
-}: {
-  authorizedMCP: AuthorizedMCP
-  pluginConfig: SanitizedMCPPluginConfig
-  req: PayloadRequest
-}): McpServer => {
+  server: existingServer,
+}: { refreshable?: boolean; server?: McpServer } & BuildMcpServerArgs): McpServer => {
   const serverOptions = pluginConfig.mcp?.serverOptions || {}
-  const server = new McpServer(
-    { name: 'Payload MCP Server', version: '1.0.0', ...serverOptions.serverInfo },
-    serverOptions.options,
-  )
+  const server =
+    existingServer ??
+    new McpServer(
+      { name: 'Payload MCP Server', version: '1.0.0', ...serverOptions.serverInfo },
+      serverOptions.options,
+    )
+
+  if (refreshable && !existingServer) {
+    // Prime the SDK's lazy registries before stdio connects so HMR can add the
+    // first tool, resource, prompt, or completion later.
+    server.registerTool('__payload_mcp_hmr__', {}, () => ({ content: [] })).remove()
+    server
+      .registerResource('__payload_mcp_hmr__', 'payload-mcp://hmr', {}, () => ({ contents: [] }))
+      .remove()
+    server
+      .registerPrompt(
+        '__payload_mcp_hmr__',
+        { argsSchema: z.object({ value: completable(z.string(), () => []) }) },
+        () => ({ messages: [] }),
+      )
+      .remove()
+  }
+
+  const registrations: MCPRegistration[] = []
+  serverRegistrations.set(server, registrations)
 
   const logger = getLogger({ payload: req.payload })
 
@@ -159,7 +187,7 @@ export const buildMcpServer = ({
             input: item.tool.input,
           })
 
-          server.registerTool(
+          const registration = server.registerTool(
             item.mcpName,
             {
               annotations: item.tool.annotations,
@@ -169,12 +197,13 @@ export const buildMcpServer = ({
             async (input: unknown, ctx: ServerContext) =>
               callEntityTool({ input, item, serverContext: ctx }),
           )
+          registrations.push(registration)
           logger.info(`✅ Tool: ${item.mcpName} Registered.`)
           break
         }
         case 'prompt': {
           const prompt = item.prompt
-          server.registerPrompt(
+          const registration = server.registerPrompt(
             item.mcpName,
             {
               argsSchema: prompt.argsSchema ? toStandardSchema(prompt.argsSchema) : undefined,
@@ -188,12 +217,13 @@ export const buildMcpServer = ({
                 serverContext: ctx,
               }),
           )
+          registrations.push(registration)
           logger.info(`✅ Prompt: ${prompt.title} Registered.`)
           break
         }
         case 'resource': {
           const resource = item.resource
-          server.registerResource(
+          const registration = server.registerResource(
             item.mcpName,
             // @ts-expect-error - Overload type ambiguity (string OR ResourceTemplate is valid)
             resource.uri,
@@ -211,12 +241,13 @@ export const buildMcpServer = ({
               return resource.handler({ params, req, serverContext: ctx, uri })
             },
           )
+          registrations.push(registration)
           logger.info(`✅ Resource: ${resource.title} Registered.`)
           break
         }
         case 'tool': {
           const tool = item.tool
-          server.registerTool(
+          const registration = server.registerTool(
             item.mcpName,
             {
               annotations: tool.annotations,
@@ -258,6 +289,7 @@ export const buildMcpServer = ({
               })
             },
           )
+          registrations.push(registration)
           logger.info(`✅ Tool: ${item.mcpName} Registered.`)
           break
         }
@@ -268,6 +300,16 @@ export const buildMcpServer = ({
   }
 
   return server
+}
+
+export const refreshMcpServer = ({
+  server,
+  ...args
+}: { server: McpServer } & BuildMcpServerArgs): void => {
+  // Validate the complete replacement before mutating the connected server.
+  buildMcpServer(args)
+  serverRegistrations.get(server)?.forEach((registration) => registration.remove())
+  buildMcpServer({ ...args, server })
 }
 
 const withSlugInput = ({

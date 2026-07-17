@@ -11,7 +11,7 @@ import { resolveProjectRoot } from '../utils/resolveProjectRoot.js'
 
 type ViteHMR = {
   config: SanitizedConfig
-  connect: () => Promise<void>
+  connect: (refreshMcpServer: () => Promise<void>) => Promise<void>
 }
 
 export const initializeViteHMR = async (): Promise<undefined | ViteHMR> => {
@@ -53,14 +53,18 @@ export const initializeViteHMR = async (): Promise<undefined | ViteHMR> => {
 
   return {
     config,
-    connect: async () => {
+    connect: async (refreshMcpServer) => {
       const payload = await getPayload({ config, cron: false, disableOnInit: true })
-      let payloadReloadQueue = Promise.resolve()
-      const reloadPayload = (nextConfig: SanitizedConfig): Promise<void> => {
-        payloadReloadQueue = payloadReloadQueue
-          .then(() => reload(nextConfig, payload, false))
-          .catch((error) => console.error('[payload-mcp] config reload failed:', error))
-        return payloadReloadQueue
+      const reloadPayload = async (nextConfig: SanitizedConfig): Promise<void> => {
+        process.stdin.pause()
+        try {
+          await reload(nextConfig, payload, true)
+          await refreshMcpServer()
+        } catch (error) {
+          console.error('[payload-mcp] config reload failed:', error)
+        } finally {
+          process.stdin.resume()
+        }
       }
 
       boundary.subscribe(reloadPayload)

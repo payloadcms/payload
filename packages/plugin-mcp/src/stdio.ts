@@ -7,7 +7,7 @@ import { createLocalReq, getPayload } from 'payload'
 import { findConfig, loadEnv } from 'payload/node'
 
 import { getAuthorizedMCP } from './endpoint/access.js'
-import { buildMcpServer } from './mcp/buildMcpServer.js'
+import { buildMcpServer, refreshMcpServer } from './mcp/buildMcpServer.js'
 import { sanitizeMCPConfig } from './mcp/sanitizeMCPConfig.js'
 import { findPluginConfig } from './utils/getPluginConfig.js'
 import { resolveProjectRoot } from './utils/resolveProjectRoot.js'
@@ -18,7 +18,10 @@ import { resolveProjectRoot } from './utils/resolveProjectRoot.js'
  * Set `PAYLOAD_MCP_AUTHORIZATION` to authenticate. In development,
  * `PAYLOAD_MCP_OVERRIDE_ACCESS=true` skips access checks.
  */
-export const runMcpStdio = async (configOverride?: SanitizedConfig): Promise<void> => {
+export const runMcpStdio = async (
+  configOverride?: SanitizedConfig,
+  connectHMR?: (refreshMcpServer: () => Promise<void>) => Promise<void>,
+): Promise<void> => {
   // MCP clients may start this command from another folder. Move to the Payload
   // project so findConfig() can find the config.
   const projectRoot = resolveProjectRoot(fileURLToPath(import.meta.url))
@@ -54,11 +57,12 @@ export const runMcpStdio = async (configOverride?: SanitizedConfig): Promise<voi
     loggerConfig.logger = { destination: process.stderr, options: {} }
   }
 
-  const payload = await getPayload({ config, cron: false, disableOnInit: true })
-
-  const pluginConfig =
-    findPluginConfig({ config: payload.config }) ??
-    sanitizeMCPConfig({ config: payload.config, pluginConfig: {} })
+  const payload = await getPayload({
+    config,
+    cron: false,
+    devReloadStrategy: { connect: () => () => undefined },
+    disableOnInit: true,
+  })
 
   const overrideAccessEnv = process.env.PAYLOAD_MCP_OVERRIDE_ACCESS
   let overrideAccess = false
@@ -78,16 +82,39 @@ export const runMcpStdio = async (configOverride?: SanitizedConfig): Promise<voi
     headers.set('Authorization', process.env.PAYLOAD_MCP_AUTHORIZATION)
   }
 
-  const req = await createLocalReq({ req: { headers } }, payload)
-  req.payloadAPI = 'MCP' as const
-  const authorizedMCP = await getAuthorizedMCP({ overrideAccess, req })
+  const createMcpServerArgs = async () => {
+    const pluginConfig =
+      findPluginConfig({ config: payload.config }) ??
+      sanitizeMCPConfig({ config: payload.config, pluginConfig: {} })
 
-  const stdioServer = serveStdio(() => buildMcpServer({ authorizedMCP, pluginConfig, req }), {
-    onerror: (err) => {
-      // MCP messages use stdout, so write SDK errors to stderr.
-      console.error('[payload-mcp] error serving MCP over stdio:', err)
+    const req = await createLocalReq({ req: { headers } }, payload)
+    req.payloadAPI = 'MCP' as const
+    const authorizedMCP = await getAuthorizedMCP({ overrideAccess, req })
+
+    return { authorizedMCP, pluginConfig, req }
+  }
+  let mcpServer: ReturnType<typeof buildMcpServer> | undefined
+  const stdioServer = serveStdio(
+    async () => {
+      mcpServer = buildMcpServer({
+        ...(await createMcpServerArgs()),
+        refreshable: Boolean(connectHMR),
+      })
+      return mcpServer
     },
-  })
+    {
+      onerror: (err) => {
+        // MCP messages use stdout, so write SDK errors to stderr.
+        console.error('[payload-mcp] error serving MCP over stdio:', err)
+      },
+    },
+  )
+
+  const refreshStdioServer = async () => {
+    if (mcpServer) {
+      refreshMcpServer({ ...(await createMcpServerArgs()), server: mcpServer })
+    }
+  }
 
   // Close the MCP server and Payload when the client disconnects or the process stops.
   let isShuttingDown = false
@@ -115,4 +142,6 @@ export const runMcpStdio = async (configOverride?: SanitizedConfig): Promise<voi
   process.once('SIGINT', () => void shutdown())
   process.once('SIGTERM', () => void shutdown())
   process.stdin.once('close', () => void shutdown())
+
+  await connectHMR?.(refreshStdioServer)
 }
