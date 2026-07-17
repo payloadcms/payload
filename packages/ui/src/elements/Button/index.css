@@ -56,11 +56,11 @@
     border: var(--stroke-width-small) solid var(--special-border-translucent);
 
     &:hover:not(.btn--disabled) {
-      background-color: var(--color-bg-transparent-hover);
+      background-color: var(--color-bg-secondary-hover);
     }
 
     &:active:not(.btn--disabled) {
-      background-color: var(--color-bg-transparent-pressed);
+      background-color: var(--color-bg-secondary-pressed);
     }
 
     &.btn--disabled {
