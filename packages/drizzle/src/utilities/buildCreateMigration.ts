@@ -1,4 +1,3 @@
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { CreateMigration, Payload } from 'payload'
 
 import fs from 'fs'
@@ -6,7 +5,7 @@ import path from 'path'
 import { getPredefinedMigration, writeMigrationIndex } from 'payload'
 import prompts from 'prompts'
 
-import type { DrizzleAdapter } from '../types.js'
+import type { DrizzleAdapter, DrizzleSnapshotJSON } from '../types.js'
 
 import { getMigrationTemplate } from './getMigrationTemplate.js'
 
@@ -75,12 +74,6 @@ export const buildCreateMigration = ({
     }
 
     let drizzleJsonBefore = this.defaultDrizzleSnapshot as DrizzleSnapshotJSON
-
-    if (this.schemaName) {
-      drizzleJsonBefore.schemas = {
-        [this.schemaName]: this.schemaName,
-      }
-    }
 
     if (!upSQL) {
       // Get latest migration snapshot

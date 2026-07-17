@@ -1,4 +1,4 @@
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
+import type { DrizzleSnapshotJSON } from '../../../types.js'
 import type { Payload, PayloadRequest } from 'payload'
 
 import { sql } from 'drizzle-orm'
@@ -51,7 +51,7 @@ export const migratePostgresV2toV3 = async ({ debug, payload, req }: Args) => {
 
   // get the drizzle migrateUpSQL from drizzle using the last schema
   const { generateDrizzleJson, generateMigration, upSnapshot } = adapter.requireDrizzleKit()
-  const drizzleJsonAfter = generateDrizzleJson(adapter.schema) as DrizzleSnapshotJSON
+  const drizzleJsonAfter = (await generateDrizzleJson(adapter.schema)) as DrizzleSnapshotJSON
 
   // Get the previous migration snapshot
   const previousSnapshot = fs

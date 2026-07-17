@@ -6,9 +6,14 @@ import type {
   MigrateUpArgs,
   PostgresSchemaHook,
 } from '@payloadcms/drizzle/postgres'
-import type { DrizzleConfig } from 'drizzle-orm'
+import type { AnyRelations, DrizzleConfig } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
-import type { PgSchema, PgTableFn, PgTransactionConfig, PgWithReplicas } from 'drizzle-orm/pg-core'
+import type {
+  PgAsyncWithReplicas,
+  PgSchema,
+  PgTableFn,
+  PgTransactionConfig,
+} from 'drizzle-orm/pg-core'
 import type pg from 'pg'
 import type { Pool, PoolConfig } from 'pg'
 
@@ -80,7 +85,7 @@ export type Args = {
 }
 
 export interface GeneratedDatabaseSchema {
-  schemaUntyped: Record<string, unknown>
+  schemaUntyped: AnyRelations
 }
 
 type ResolveSchemaType<T> = 'schema' extends keyof T
@@ -89,7 +94,7 @@ type ResolveSchemaType<T> = 'schema' extends keyof T
 
 type Drizzle =
   | NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>
-  | PgWithReplicas<NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>>
+  | PgAsyncWithReplicas<NodePgDatabase<ResolveSchemaType<GeneratedDatabaseSchema>>>
 
 export type PostgresAdapter = {
   drizzle: Drizzle

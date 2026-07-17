@@ -9,13 +9,13 @@ export const requireDrizzleKit: RequireDrizzleKit = () => {
     generateDrizzleJson,
     generateMigration,
     pushSchema,
-    upPgSnapshot,
-  } = require('drizzle-kit/api')
+    up,
+  } = require('drizzle-kit/payload/postgres')
 
   return {
     generateDrizzleJson,
     generateMigration,
     pushSchema,
-    upSnapshot: upPgSnapshot,
+    upSnapshot: (snapshot) => up(snapshot).snapshot,
   }
 }

@@ -108,7 +108,7 @@ export const createSchemaGenerator = ({
     addImport(corePackage, 'foreignKey')
 
     addImport(`${this.packageName}/drizzle`, 'sql')
-    addImport(`${this.packageName}/drizzle`, 'relations')
+    addImport(`${this.packageName}/drizzle`, 'defineRelations')
 
     const fkGraph: Record<string, Set<string>> = {}
 
@@ -223,49 +223,82 @@ ${Object.entries(table.columns)
       tableDeclarations.push(tableCode)
     }
 
+    // drizzle v1 (RQB v2) defines every relation in a single `defineRelations` call. Mirror
+    // `buildDrizzleRelations`: a `one` relation is owned by the table its `from` columns belong
+    // to, `many` relations only carry an alias, and keys that collide with columns are mangled.
+    const relationConfigs: Record<string, string[]> = {}
+    const usedRelationKeys: Record<string, Set<string>> = {}
+
+    const getOwnerConfig = (owner: string): string[] => {
+      if (!relationConfigs[owner]) {
+        relationConfigs[owner] = []
+      }
+      return relationConfigs[owner]
+    }
+
+    const resolveRelationKey = (owner: string, key: string): string => {
+      const columns = this.rawTables[owner]?.columns ?? {}
+      if (!usedRelationKeys[owner]) {
+        usedRelationKeys[owner] = new Set()
+      }
+      let relationKey = key
+      while (relationKey in columns || usedRelationKeys[owner].has(relationKey)) {
+        relationKey = `_${relationKey}`
+      }
+      usedRelationKeys[owner].add(relationKey)
+      return relationKey
+    }
+
     for (const tableName in this.rawRelations) {
       const relations = this.rawRelations[tableName]
-      const properties: string[] = []
 
       for (const key in relations) {
         const relation = relations[key]
-        let declaration: string
 
         if (relation.type === 'one') {
-          declaration = `${sanitizeObjectKey(key)}: one(${relation.to}, {
-    ${relation.fields.some((field) => field.table !== tableName) ? '// @ts-expect-error Drizzle TypeScript bug for ONE relationships with a field in different table' : ''}
-    fields: [${relation.fields.map((field) => `${accessProperty(field.table, field.name)}`).join(', ')}],
-    references: [${relation.references.map((col) => `${accessProperty(relation.to, col)}`).join(', ')}],
-    ${relation.relationName ? `relationName: '${relation.relationName}',` : ''}
-    }),`
-        } else {
-          declaration = `${sanitizeObjectKey(key)}: many(${relation.to}, {
-            ${relation.relationName ? `relationName: '${relation.relationName}',` : ''}
-    }),`
+          const owner = relation.fields[0]?.table ?? tableName
+          const relationKey = resolveRelationKey(owner, key)
+
+          const from = relation.fields
+            .map((field) => accessProperty(accessProperty('r', field.table), field.name))
+            .join(', ')
+          const to = relation.references
+            .map((col) => accessProperty(accessProperty('r', relation.to), col))
+            .join(', ')
+
+          getOwnerConfig(owner).push(
+            `${sanitizeObjectKey(relationKey)}: ${accessProperty('r.one', relation.to)}({
+      from: [${from}],${relation.relationName ? `\n      alias: '${relation.relationName}',` : ''}
+      optional: true,
+      to: [${to}],
+    }),`,
+          )
+        } else if (this.rawTables[relation.to]) {
+          const relationKey = resolveRelationKey(tableName, key)
+
+          getOwnerConfig(tableName).push(
+            `${sanitizeObjectKey(relationKey)}: ${accessProperty('r.many', relation.to)}({${relation.relationName ? `\n      alias: '${relation.relationName}',` : ''}
+    }),`,
+          )
         }
-
-        properties.push(declaration)
       }
-
-      // beautify / lintify relations callback output, when no many for example, don't add it
-      const args = []
-
-      if (Object.values(relations).some((rel) => rel.type === 'one')) {
-        args.push('one')
-      }
-
-      if (Object.values(relations).some((rel) => rel.type === 'many')) {
-        args.push('many')
-      }
-
-      const arg = args.length ? `{ ${args.join(', ')} }` : ''
-
-      const declaration = `export const relations_${tableName} = relations(${tableName}, (${arg}) => ({
-  ${properties.join('\n    ')}
-      }))`
-
-      relationsDeclarations.push(declaration)
     }
+
+    const relationsSchemaArg = `{ ${Object.keys(this.rawTables).join(', ')} }`
+
+    const relationsDeclaration = Object.keys(relationConfigs).length
+      ? `export const relations = defineRelations(${relationsSchemaArg}, (r) => ({
+  ${Object.entries(relationConfigs)
+    .map(
+      ([owner, props]) => `${sanitizeObjectKey(owner)}: {
+    ${props.join('\n    ')}
+  },`,
+    )
+    .join('\n  ')}
+}))`
+      : `export const relations = defineRelations(${relationsSchemaArg})`
+
+    relationsDeclarations.push(relationsDeclaration)
 
     if (enumDeclarations.length && !this.schemaName) {
       addImport(corePackage, enumImport)
@@ -281,18 +314,9 @@ ${Object.entries(table.columns)
       )
     }
 
+    // In drizzle v1 the typed database schema is the `defineRelations` output.
     const schemaType = `
-type DatabaseSchema = {
-  ${[
-    this.schemaName ? 'db_schema' : null,
-    ...enumsList,
-    ...Object.keys(this.rawTables),
-    ...Object.keys(this.rawRelations).map((table) => `relations_${table}`),
-  ]
-    .filter(Boolean)
-    .map((name) => `${name}: typeof ${name}`)
-    .join('\n  ')}
-}
+type DatabaseSchema = typeof relations
     `
 
     const finalDeclaration = `

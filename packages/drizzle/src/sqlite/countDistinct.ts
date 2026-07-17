@@ -27,7 +27,7 @@ export const countDistinct: CountDistinct = async function countDistinct(
     .where(where)
     .groupBy(column ?? this.tables[tableName].id)
     .limit(1)
-    .$dynamic()
+    .$dynamic() as unknown as SQLiteSelect
 
   joins.forEach(({ type, condition, table }) => {
     query = query[type ?? 'leftJoin'](table, condition)
@@ -37,7 +37,7 @@ export const countDistinct: CountDistinct = async function countDistinct(
   // COUNT(*) doesn't work for this well in this case, as it also counts joined tables.
   // SELECT (COUNT DISTINCT id) has a very slow performance on large tables.
   // Instead, COUNT (GROUP BY id) can be used which is still slower than COUNT(*) but acceptable.
-  const countResult = await query
+  const countResult = await query.execute()
 
   return Number(countResult?.[0]?.count ?? 0)
 }
