@@ -11,6 +11,7 @@ import { createElement } from 'react'
 
 import type { RootLayoutData } from './index.js'
 
+import { getRequestEmbed } from '../../utilities/getRequestEmbed.js'
 import { initReq } from '../../utilities/initReq.server.js'
 
 export type GetLayoutDataArgs = {
@@ -38,6 +39,7 @@ export async function getLayoutData({
   } = await initReq({ configPromise, importMap })
 
   const theme = getRequestTheme({ config, cookies, headers })
+  const isEmbedded = getRequestEmbed({ config, cookies })
 
   const languageOptions: LanguageOptions = Object.entries(
     config.i18n.supportedLanguages || {},
@@ -101,6 +103,7 @@ export async function getLayoutData({
     clientConfig,
     dateFNSKey: req.i18n.dateFNSKey,
     fallbackLang: config.i18n.fallbackLanguage,
+    isEmbedded,
     isNavOpen: navPrefs?.open ?? true,
     languageCode,
     languageOptions,
