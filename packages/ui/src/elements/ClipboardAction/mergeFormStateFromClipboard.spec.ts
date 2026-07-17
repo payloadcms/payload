@@ -3,7 +3,10 @@ import type { FormState } from 'payload'
 import ObjectIdImport from 'bson-objectid'
 import { describe, expect, it } from 'vitest'
 
-import { mergeFormStateFromClipboard } from './mergeFormStateFromClipboard.js'
+import {
+  mergeFormStateFromClipboard,
+  reduceFormStateByPath,
+} from './mergeFormStateFromClipboard.js'
 import type { ClipboardPasteData } from './types.js'
 
 const ObjectId = (
@@ -11,6 +14,39 @@ const ObjectId = (
 ) as typeof ObjectIdImport
 
 describe('mergeFormStateFromClipboard', () => {
+  describe('clipboard serialization', () => {
+    it('should clear stale render paths from copied fields and rows', () => {
+      const formState: FormState = {
+        'layout.0': {
+          initialValue: 'content',
+          lastRenderedPath: 'layout.0',
+          valid: true,
+          value: 'content',
+        },
+        'layout.0.content': {
+          initialValue: 'content',
+          lastRenderedPath: 'layout.0.content',
+          valid: true,
+          value: 'content',
+        },
+        'layout.0.items': {
+          initialValue: 1,
+          lastRenderedPath: 'layout.0.items',
+          rows: [{ id: 'row-id', lastRenderedPath: 'layout.0.items.0' }],
+          valid: true,
+          value: 1,
+        },
+      }
+
+      const result = reduceFormStateByPath({ formState, path: 'layout', rowIndex: 0 })
+
+      expect(result['layout.0'].lastRenderedPath).toBeUndefined()
+      expect(result['layout.0.content'].lastRenderedPath).toBeUndefined()
+      expect(result['layout.0.items'].lastRenderedPath).toBeUndefined()
+      expect(result['layout.0.items'].rows?.[0]?.lastRenderedPath).toBeUndefined()
+    })
+  })
+
   describe('block ID regeneration', () => {
     it('should generate new IDs when pasting blocks to prevent duplicates', () => {
       const copiedBlockID = new ObjectId().toHexString()
