@@ -48,9 +48,15 @@ export const selectDistinct = ({
     // bind this otherwise we get TypeError: Cannot read properties of undefined (reading 'session')
     selectFunc = selectFunc.bind(db)
 
-    query = selectFunc(selectFields as Record<string, SQLiteColumn>)
+    // Virtual/unresolved sort fields can leave nullish entries in selectFields; drizzle's
+    // select builder throws when a selected field is null/undefined, so filter them out.
+    const cleanedSelectFields = Object.fromEntries(
+      Object.entries(selectFields).filter(([, column]) => column != null),
+    )
+
+    query = selectFunc(cleanedSelectFields as Record<string, SQLiteColumn>)
       .from(table)
-      .$dynamic()
+      .$dynamic() as unknown as SQLiteSelect
 
     if (where) {
       query = query.where(where)
@@ -61,7 +67,6 @@ export const selectDistinct = ({
     })
 
     if (hasAggregates && '_selected' in selectFields) {
-      // @ts-expect-error - Drizzle types are not accurate here
       query = query.groupBy(selectFields['_selected'])
     }
 

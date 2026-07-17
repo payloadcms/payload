@@ -123,7 +123,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       if (!hasDataToUpdate) {
         // Nothing to update => just fetch current row and return
-        findManyArgs.where = updateWhere
+        findManyArgs.where = { RAW: () => updateWhere }
 
         const doc = await db.query[tableName].findFirst(findManyArgs)
 
@@ -190,7 +190,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
 
       insertedRow = docs[0]
 
-      findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
+      findManyArgs.where = { RAW: (table) => eq(table.id, insertedRow.id) }
 
       const doc = await db.query[tableName].findFirst(findManyArgs)
 
@@ -783,7 +783,7 @@ export const upsertRow = async <T extends Record<string, unknown> | TypeWithID>(
     tableName,
   })
 
-  findManyArgs.where = eq(adapter.tables[tableName].id, insertedRow.id)
+  findManyArgs.where = { RAW: (table) => eq(table.id, insertedRow.id) }
 
   const doc = await db.query[tableName].findFirst(findManyArgs)
 

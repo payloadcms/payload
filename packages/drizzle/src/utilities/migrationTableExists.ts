@@ -29,7 +29,7 @@ export const migrationTableExists = async (
     raw: statement,
   })
 
-  const [row] = result.rows
+  const [row] = (result as { rows: unknown[] }).rows
 
   return row && typeof row === 'object' && 'exists' in row && !!row.exists
 }

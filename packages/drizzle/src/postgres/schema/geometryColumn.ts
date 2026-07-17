@@ -1,20 +1,13 @@
-// Uses custom one instead of geometry() from drizzle-orm/pg-core because it's broken on pushDevSchema
-// Why?
-// It tries to give us a prompt "you're about to change.. from geometry(Point) to geometry(point)"
-import { customType } from 'drizzle-orm/pg-core'
-import { parseEWKB } from 'drizzle-orm/pg-core/columns/postgis_extension/utils'
+import { geometry } from 'drizzle-orm/pg-core'
 
-type Point = [number, number]
-
+/**
+ * Point geometry column.
+ *
+ * drizzle-kit v1's rewritten introspection recognizes `geometry(point)` as its native
+ * PostGIS geometry type, so the previous `customType` implementation (which lacked the
+ * native `mode`/`srid` config) broke `push`/introspection with "unknown geometry type".
+ * The native `geometry` builder in tuple mode round-trips `[x, y]` tuples and is understood
+ * by drizzle-kit.
+ */
 export const geometryColumn = (name: string) =>
-  customType<{ data: Point; driverData: string }>({
-    dataType() {
-      return `geometry(Point)`
-    },
-    fromDriver(value: string) {
-      return parseEWKB(value)
-    },
-    toDriver(value: Point) {
-      return `SRID=4326;point(${value[0]} ${value[1]})`
-    },
-  })(name)
+  geometry(name, { type: 'point', mode: 'tuple', srid: 4326 })

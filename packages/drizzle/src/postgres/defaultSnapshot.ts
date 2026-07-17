@@ -1,20 +1,14 @@
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
+import type { DrizzleSnapshotJSON } from '../types.js'
 
+/**
+ * Empty baseline snapshot in the drizzle-kit v1 format (DDL-snapshot based, version 8).
+ * Used as the "before" state when generating the first migration.
+ */
 export const defaultDrizzleSnapshot: DrizzleSnapshotJSON = {
   id: '00000000-0000-0000-0000-000000000000',
-  _meta: {
-    columns: {},
-    schemas: {},
-    tables: {},
-  },
-  dialect: 'postgresql',
-  enums: {},
-  policies: {},
-  prevId: '00000000-0000-0000-0000-00000000000',
-  roles: {},
-  schemas: {},
-  sequences: {},
-  tables: {},
-  version: '7',
-  views: {},
+  ddl: [],
+  dialect: 'postgres',
+  prevIds: [],
+  renames: [],
+  version: '8',
 }

@@ -36,6 +36,9 @@ export const deleteOne: DeleteOne = async function deleteOne(
   const selectDistinctResult = await selectDistinct({
     adapter: this,
     db,
+    // Resolve the target id via a manual select so the relational fetch only filters by primary
+    // key (RQB v2 aliases the base table, breaking raw SQL that references real table names).
+    forceRun: true,
     joins,
     query: ({ query }) => query.limit(1),
     selectFields,
@@ -45,9 +48,9 @@ export const deleteOne: DeleteOne = async function deleteOne(
 
   if (selectDistinctResult?.[0]?.id) {
     docToDelete = await db.query[tableName].findFirst({
-      where: eq(this.tables[tableName].id, selectDistinctResult[0].id),
+      where: { RAW: (table) => eq(table.id, selectDistinctResult[0].id) },
     })
-  } else {
+  } else if (!selectDistinctResult) {
     const findManyArgs = buildFindManyArgs({
       adapter: this,
       depth: 0,
@@ -57,7 +60,7 @@ export const deleteOne: DeleteOne = async function deleteOne(
       tableName,
     })
 
-    findManyArgs.where = where
+    findManyArgs.where = { RAW: where }
 
     docToDelete = await db.query[tableName].findFirst(findManyArgs)
   }
