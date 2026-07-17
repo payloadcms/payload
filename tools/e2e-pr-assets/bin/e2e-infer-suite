@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+# e2e-infer-suite <pr_number> <owner/repo> [--repo /path/to/repo] [--top N]
+# Ranks likely e2e suites based on overlap with PR-changed files.
+
+set -euo pipefail
+
+PR="${1:-}"
+REPO="${2:-}"
+REPO_ROOT=""
+TOP=5
+
+shift 2 || true
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --repo)
+      REPO_ROOT="${2:-}"
+      shift 2
+      ;;
+    --top)
+      TOP="${2:-}"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      echo "Usage: e2e-infer-suite <pr_number> <owner/repo> [--repo /path/to/repo] [--top N]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "$PR" || -z "$REPO" ]]; then
+  echo "Usage: e2e-infer-suite <pr_number> <owner/repo> [--repo /path/to/repo] [--top N]" >&2
+  exit 1
+fi
+
+if [[ -z "$REPO_ROOT" ]]; then
+  REPO_ROOT="$(pwd)"
+fi
+
+if [[ ! -d "$REPO_ROOT/test" ]]; then
+  echo "Error: could not find test directory at $REPO_ROOT/test" >&2
+  exit 1
+fi
+
+if ! command -v gh >/dev/null 2>&1; then
+  echo "Error: gh is required" >&2
+  exit 1
+fi
+
+CHANGED_FILES=$(gh pr view "$PR" --repo "$REPO" --json files --jq '.files[].path')
+if [[ -z "$CHANGED_FILES" ]]; then
+  echo "Error: no changed files found for PR #$PR in $REPO" >&2
+  exit 1
+fi
+
+TEST_FILES=$(find "$REPO_ROOT/test" -name "*e2e.spec.ts" -print)
+if [[ -z "$TEST_FILES" ]]; then
+  echo "Error: no e2e suites found under $REPO_ROOT/test" >&2
+  exit 1
+fi
+
+export CHANGED_FILES
+export TEST_FILES
+export REPO_ROOT
+
+python3 - "$TOP" <<'PY'
+import os
+import re
+import sys
+from pathlib import Path
+
+top_n = int(sys.argv[1])
+
+changed = os.environ.get("CHANGED_FILES", "").strip().splitlines()
+if not changed:
+    print("No changed files provided", file=sys.stderr)
+    sys.exit(1)
+
+repo_root = Path(os.environ.get("REPO_ROOT", ".")).resolve()
+tests = os.environ.get("TEST_FILES", "").strip().splitlines()
+if not tests:
+    print("No e2e suites found", file=sys.stderr)
+    sys.exit(1)
+
+def tokenize(path: str):
+    base = path.lower().replace("\\", "/")
+    parts = re.split(r"[/._\-]+", base)
+    return {p for p in parts if p and len(p) > 2}
+
+changed_tokens = [tokenize(p) for p in changed]
+all_changed = set().union(*changed_tokens) if changed_tokens else set()
+
+scored = []
+for test in tests:
+    rel = str(Path(test).resolve().relative_to(repo_root)).replace("\\", "/")
+    tks = tokenize(rel)
+    score = 0
+    changed_norm = [c.lower().replace("\\", "/") for c in changed]
+
+    # Direct token overlap with all changed files.
+    score += len(tks & all_changed) * 2
+
+    # Hard priority: if this exact e2e file is in the PR, always rank first.
+    if rel.lower() in changed_norm:
+        score += 1000
+
+    # Bonus if test folder name appears in changed file path segments.
+    folder = rel.split("/")[1] if rel.startswith("test/") and len(rel.split("/")) > 1 else ""
+    if folder:
+        for cf in changed_norm:
+            if f"/{folder}/" in f"/{cf}/":
+                score += 5
+
+    # Bonus for explicit ui/admin changes (common case in this repo)
+    if any(seg in rel for seg in ["admin", "fields", "versions", "globals"]):
+        if any(("packages/ui/" in c or "packages/next/" in c) for c in changed_norm):
+            score += 2
+
+    scored.append((score, rel))
+
+scored.sort(key=lambda x: (-x[0], x[1]))
+
+for score, rel in scored[:top_n]:
+    print(f"{score}\t{rel}")
+PY

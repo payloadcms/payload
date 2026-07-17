@@ -1,0 +1,268 @@
+#!/usr/bin/env bash
+# e2e-run-script <scenario.mjs> [--record] [--label before|after] [--repo /path/to/repo] [--base-url URL] [--headed]
+# Runs an agent-generated Playwright scenario that is not part of the committed e2e suite.
+
+set -euo pipefail
+
+SCENARIO="${1:-}"
+RECORD=false
+LABEL="run"
+REPO_ROOT=""
+BASE_URL="http://localhost:3000"
+HEADED=false
+
+if [[ -n "$SCENARIO" ]]; then
+  shift
+fi
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --record)
+      RECORD=true
+      shift
+      ;;
+    --label)
+      LABEL="${2:-}"
+      shift 2
+      ;;
+    --repo)
+      REPO_ROOT="${2:-}"
+      shift 2
+      ;;
+    --base-url)
+      BASE_URL="${2:-}"
+      shift 2
+      ;;
+    --headed)
+      HEADED=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      echo "Usage: e2e-run-script <scenario.mjs> [--record] [--label before|after] [--repo /path/to/repo] [--base-url URL] [--headed]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "$SCENARIO" ]]; then
+  echo "Usage: e2e-run-script <scenario.mjs> [--record] [--label before|after] [--repo /path/to/repo] [--base-url URL] [--headed]" >&2
+  exit 1
+fi
+
+if [[ ! -f "$SCENARIO" ]]; then
+  echo "Error: scenario file not found: $SCENARIO" >&2
+  exit 1
+fi
+
+if [[ -z "$REPO_ROOT" ]]; then
+  REPO_ROOT="$(pwd)"
+fi
+
+if [[ ! -d "$REPO_ROOT" ]]; then
+  echo "Error: repo directory not found: $REPO_ROOT" >&2
+  exit 1
+fi
+
+cd "$REPO_ROOT"
+
+export SCENARIO
+export RECORD
+export LABEL
+export REPO_ROOT
+export BASE_URL
+export HEADED
+
+node <<'NODE'
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
+const { pathToFileURL } = require('node:url')
+const { chromium, expect } = require('@playwright/test')
+
+const scenarioPath = path.resolve(process.env.SCENARIO)
+const repoRoot = path.resolve(process.env.REPO_ROOT)
+const label = process.env.LABEL
+const baseURL = process.env.BASE_URL
+const record = process.env.RECORD === 'true'
+const headed = process.env.HEADED === 'true'
+const videoDir = path.join('/tmp', `payload-e2e-script-${Date.now()}`)
+const userDataDir = fs.mkdtempSync(path.join(os.tmpdir(), 'payload-e2e-script-profile-'))
+
+async function installCursorOverlay(page) {
+  const cursorScript = () => {
+    window.__payloadE2ECursor = {
+      ensure() {
+        let cursor = document.getElementById('payload-e2e-cursor')
+
+        if (!cursor) {
+          cursor = document.createElement('div')
+          cursor.id = 'payload-e2e-cursor'
+          cursor.style.position = 'fixed'
+          cursor.style.left = '0'
+          cursor.style.top = '0'
+          cursor.style.width = '22px'
+          cursor.style.height = '22px'
+          cursor.style.border = '3px solid #111827'
+          cursor.style.borderRadius = '9999px'
+          cursor.style.background = 'rgba(255, 255, 255, .85)'
+          cursor.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, .35), 0 8px 18px rgba(0, 0, 0, .25)'
+          cursor.style.pointerEvents = 'none'
+          cursor.style.transform = 'translate(-50%, -50%)'
+          cursor.style.transition = 'left 180ms ease, top 180ms ease, transform 100ms ease'
+          cursor.style.zIndex = '2147483647'
+          document.documentElement.appendChild(cursor)
+        }
+
+        return cursor
+      },
+      moveTo(x, y) {
+        const cursor = this.ensure()
+        cursor.style.left = `${x}px`
+        cursor.style.top = `${y}px`
+      },
+      pulse() {
+        const cursor = this.ensure()
+        cursor.style.transform = 'translate(-50%, -50%) scale(.72)'
+        window.setTimeout(() => {
+          cursor.style.transform = 'translate(-50%, -50%) scale(1)'
+        }, 120)
+      },
+    }
+    window.__payloadE2ECursor.moveTo(window.innerWidth / 2, window.innerHeight / 2)
+  }
+
+  await page.addInitScript(cursorScript)
+  await page.evaluate(cursorScript)
+}
+
+async function createCursorHelper(page) {
+  const moveToLocator = async (locator) => {
+    await locator.scrollIntoViewIfNeeded()
+    const box = await locator.boundingBox()
+
+    if (!box) {
+      return
+    }
+
+    const x = box.x + box.width / 2
+    const y = box.y + box.height / 2
+    await page.evaluate(({ x: cursorX, y: cursorY }) => {
+      window.__payloadE2ECursor?.moveTo(cursorX, cursorY)
+    }, { x, y })
+    await page.mouse.move(x, y, { steps: 10 })
+    await page.waitForTimeout(220)
+  }
+
+  return {
+    async click(target, options) {
+      const locator = typeof target === 'string' ? page.locator(target) : target
+      await moveToLocator(locator)
+      await page.evaluate(() => window.__payloadE2ECursor?.pulse())
+      await locator.click(options)
+      await page.waitForTimeout(120)
+    },
+    async fill(target, value, options) {
+      const locator = typeof target === 'string' ? page.locator(target) : target
+      await moveToLocator(locator)
+      await locator.fill(value, options)
+      await page.waitForTimeout(120)
+    },
+    async moveTo(target) {
+      const locator = typeof target === 'string' ? page.locator(target) : target
+      await moveToLocator(locator)
+    },
+  }
+}
+
+function installCursorActionWrappers(page, cursor) {
+  const locatorPrototype = Object.getPrototypeOf(page.locator('body'))
+  const originalLocatorClick = locatorPrototype.click
+  const originalLocatorFill = locatorPrototype.fill
+  const originalPageClick = page.click.bind(page)
+  const originalPageFill = page.fill.bind(page)
+
+  locatorPrototype.click = async function wrappedLocatorClick(...args) {
+    await cursor.moveTo(this)
+    await page.evaluate(() => window.__payloadE2ECursor?.pulse())
+    return originalLocatorClick.apply(this, args)
+  }
+
+  locatorPrototype.fill = async function wrappedLocatorFill(...args) {
+    await cursor.moveTo(this)
+    return originalLocatorFill.apply(this, args)
+  }
+
+  page.click = async (selector, options) => {
+    await cursor.moveTo(selector)
+    await page.evaluate(() => window.__payloadE2ECursor?.pulse())
+    return originalPageClick(selector, options)
+  }
+
+  page.fill = async (selector, value, options) => {
+    await cursor.moveTo(selector)
+    return originalPageFill(selector, value, options)
+  }
+}
+
+async function main() {
+  const mod = await import(pathToFileURL(scenarioPath).href)
+  const scenario = mod.default || mod.scenario || mod.run
+
+  if (typeof scenario !== 'function') {
+    throw new Error('Scenario must export a default function, scenario(), or run()')
+  }
+
+  const context = await chromium.launchPersistentContext(userDataDir, {
+    headless: !headed,
+    recordVideo: record ? { dir: videoDir, size: { width: 1440, height: 900 } } : undefined,
+    viewport: { width: 1440, height: 900 },
+  })
+
+  const page = await context.newPage()
+  const pageVideo = record ? page.video() : null
+
+  if (record) {
+    await installCursorOverlay(page)
+  }
+
+  const cursor = record ? await createCursorHelper(page) : null
+
+  if (record) {
+    installCursorActionWrappers(page, cursor)
+  }
+
+  try {
+    await scenario({
+      baseURL,
+      browserContext: context,
+      cursor,
+      expect,
+      label,
+      page,
+      record,
+      repoRoot,
+    })
+  } finally {
+    await context.close()
+  }
+
+  if (record) {
+    if (!pageVideo) {
+      throw new Error(`Recording was enabled but no .webm was created in ${videoDir}`)
+    }
+
+    const videoPath = await pageVideo.path()
+    const destination = `/tmp/payload-e2e-${label}.webm`
+    fs.copyFileSync(videoPath, destination)
+    console.log(`Video saved to ${destination}`)
+  }
+
+  fs.rmSync(userDataDir, { force: true, recursive: true })
+}
+
+main().catch((error) => {
+  console.error(error instanceof Error ? error.message : String(error))
+  process.exit(1)
+})
+NODE

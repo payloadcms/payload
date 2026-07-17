@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# e2e-run <suite> [--record] [--label before|after] [--repo /path/to/repo]
+# Runs a Playwright e2e suite with optional video recording.
+# Exits with the test exit code so callers can gate on pass/fail.
+
+set -euo pipefail
+
+SUITE=""
+RECORD=false
+LABEL="run"
+REPO_ROOT=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --record) RECORD=true ;;
+    --label) LABEL="${2:-}"; shift ;;
+    --repo) REPO_ROOT="${2:-}"; shift ;;
+    *) SUITE="$1" ;;
+  esac
+  shift
+done
+
+if [[ -z "$SUITE" ]]; then
+  echo "Usage: e2e-run <suite> [--record] [--label before|after] [--repo /path/to/repo]" >&2
+  exit 1
+fi
+
+if [[ -z "$REPO_ROOT" ]]; then
+  REPO_ROOT="$(pwd)"
+fi
+
+cd "$REPO_ROOT"
+
+SENTINEL=$(mktemp)
+touch "$SENTINEL"
+
+if [[ "$RECORD" == "true" ]]; then
+  set +e
+  PLAYWRIGHT_VIDEO=on pnpm run test:e2e "$SUITE"
+  EXIT_CODE=$?
+  set -e
+else
+  set +e
+  PLAYWRIGHT_VIDEO=off pnpm run test:e2e "$SUITE"
+  EXIT_CODE=$?
+  set -e
+fi
+
+if [[ "$RECORD" == "true" ]]; then
+  WEBM=$(find "$REPO_ROOT/test-results" -name "*.webm" -newer "$SENTINEL" -print 2>/dev/null | head -1)
+  if [[ -n "$WEBM" ]]; then
+    cp "$WEBM" "/tmp/payload-e2e-${LABEL}.webm"
+    echo "Video saved to /tmp/payload-e2e-${LABEL}.webm"
+  else
+    echo "Warning: recording was enabled but no .webm was found in test-results/" >&2
+  fi
+fi
+
+rm -f "$SENTINEL"
+exit $EXIT_CODE

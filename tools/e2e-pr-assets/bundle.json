@@ -1,0 +1,25 @@
+{
+  "name": "e2e-pr-assets",
+  "version": 1,
+  "skills": [
+    {
+      "name": "e2e-pr-assets",
+      "path": ".claude/skills/e2e-pr-assets/SKILL.md"
+    }
+  ],
+  "required_sub_skills": [],
+  "scripts": [
+    "tools/e2e-pr-assets/bin/e2e-attach-pr",
+    "tools/e2e-pr-assets/bin/e2e-capture-screenshot",
+    "tools/e2e-pr-assets/bin/e2e-convert-video",
+    "tools/e2e-pr-assets/bin/e2e-github-login-profile",
+    "tools/e2e-pr-assets/bin/e2e-infer-suite",
+    "tools/e2e-pr-assets/bin/e2e-run",
+    "tools/e2e-pr-assets/bin/e2e-run-script",
+    "tools/e2e-pr-assets/bin/e2e-upload-github-attachments"
+  ],
+  "commands": {
+    "install": "bash tools/e2e-pr-assets/install.sh",
+    "check": "bash tools/e2e-pr-assets/check.sh"
+  }
+}

@@ -1,0 +1,176 @@
+#!/usr/bin/env bash
+# e2e-attach-pr <pr_number> <owner/repo> [--mode video|screenshot]
+# Uploads before/after media and appends them to the PR body.
+# Requires: gh CLI (authenticated), jq
+
+set -euo pipefail
+
+PR="${1:-}"
+REPO="${2:-}"
+MODE="video"
+BEFORE_URL_OVERRIDE=""
+AFTER_URL_OVERRIDE=""
+
+shift 2 || true
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --mode)
+      MODE="${2:-}"
+      shift 2
+      ;;
+    --before-url)
+      BEFORE_URL_OVERRIDE="${2:-}"
+      shift 2
+      ;;
+    --after-url)
+      AFTER_URL_OVERRIDE="${2:-}"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      echo "Usage: e2e-attach-pr <pr_number> <owner/repo> [--mode video|screenshot] [--before-url URL --after-url URL]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "$PR" || -z "$REPO" ]]; then
+  echo "Usage: e2e-attach-pr <pr_number> <owner/repo> [--mode video|screenshot] [--before-url URL --after-url URL]" >&2
+  exit 1
+fi
+
+if [[ "$MODE" != "video" && "$MODE" != "screenshot" ]]; then
+  echo "Error: --mode must be 'video' or 'screenshot'" >&2
+  exit 1
+fi
+
+if [[ -n "$BEFORE_URL_OVERRIDE" || -n "$AFTER_URL_OVERRIDE" ]]; then
+  if [[ -z "$BEFORE_URL_OVERRIDE" || -z "$AFTER_URL_OVERRIDE" ]]; then
+    echo "Error: provide both --before-url and --after-url" >&2
+    exit 1
+  fi
+
+  if [[ "$MODE" == "video" ]]; then
+    if [[ "$BEFORE_URL_OVERRIDE" != https://github.com/user-attachments/assets/* || "$AFTER_URL_OVERRIDE" != https://github.com/user-attachments/assets/* ]]; then
+      echo "Error: video URLs must be GitHub user-attachment URLs for inline rendering" >&2
+      exit 1
+    fi
+  fi
+fi
+
+upload_asset() {
+  local label=$1
+  local file=""
+  local content_type=""
+  local asset_name=""
+
+  if [[ "$MODE" == "video" ]]; then
+    file="/tmp/payload-e2e-${label}.mp4"
+    content_type="video/mp4"
+    asset_name="e2e-${label}.mp4"
+  else
+    file="/tmp/payload-e2e-${label}.png"
+    content_type="image/png"
+    asset_name="e2e-${label}.png"
+  fi
+
+  if [[ ! -f "$file" ]]; then
+    echo "Error: $file not found" >&2
+    exit 1
+  fi
+
+  if [[ "$MODE" == "video" ]]; then
+    local codec
+    codec="$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 "$file")"
+    if [[ "$codec" != "h264" ]]; then
+      echo "Error: $file must be H.264 MP4 for GitHub inline rendering; got codec '$codec'" >&2
+      exit 1
+    fi
+  fi
+
+  echo "Uploading ${label} ${MODE} ($(( $(stat -f%z "$file" 2>/dev/null || stat -c%s "$file") / 1024 ))KB)..." >&2
+
+  local response url
+  response="$(mktemp)"
+  gh api \
+    --hostname "uploads.github.com" \
+    --method POST \
+    -F "file=@${file};type=${content_type}" \
+    "/repos/${REPO}/issues/${PR}/assets?name=${asset_name}" \
+    > "$response" || true
+
+  url="$(jq -r '.browser_download_url // empty' "$response")"
+  rm -f "$response"
+
+  if [[ -z "$url" ]]; then
+    if [[ "$MODE" == "video" ]]; then
+      echo "Error: GitHub API upload did not return an inline attachment URL for ${label} video." >&2
+      echo "Use e2e-upload-github-attachments ${PR} ${REPO} /tmp/payload-e2e-before.mp4 /tmp/payload-e2e-after.mp4 with a signed-in browser profile, then rerun e2e-attach-pr with --before-url and --after-url." >&2
+      exit 1
+    fi
+
+    echo "Error: GitHub API upload did not return an attachment URL for ${label} ${MODE}." >&2
+    echo "Upload media through GitHub's attachment UI, then rerun e2e-attach-pr with --before-url and --after-url." >&2
+    exit 1
+  fi
+
+  printf '%s' "$url"
+}
+
+if [[ -n "$BEFORE_URL_OVERRIDE" ]]; then
+  BEFORE_URL="$BEFORE_URL_OVERRIDE"
+  AFTER_URL="$AFTER_URL_OVERRIDE"
+else
+  BEFORE_URL=$(upload_asset "before")
+  AFTER_URL=$(upload_asset "after")
+fi
+
+if [[ -z "$BEFORE_URL" || -z "$AFTER_URL" || "$BEFORE_URL" == "null" || "$AFTER_URL" == "null" ]]; then
+  echo "Error: one or both uploads failed" >&2
+  exit 1
+fi
+
+CURRENT_BODY=$(gh pr view "$PR" --repo "$REPO" --json body --jq '.body')
+
+if [[ "$MODE" == "video" ]]; then
+  BEFORE_VALUE="$BEFORE_URL"
+  AFTER_VALUE="$AFTER_URL"
+else
+  BEFORE_VALUE="![before]($BEFORE_URL)"
+  AFTER_VALUE="![after]($AFTER_URL)"
+fi
+
+BEFORE_AFTER_BLOCK=$(cat <<EOF
+<!-- e2e-pr-media:start -->
+### Before
+$BEFORE_VALUE
+
+### After
+$AFTER_VALUE
+<!-- e2e-pr-media:end -->
+EOF
+)
+
+if echo "$CURRENT_BODY" | grep -qE "<!-- e2e-pr-media:start -->|<!-- e2e-pr-video:start -->"; then
+  NEW_BODY=$(printf "%s" "$CURRENT_BODY" | awk '
+    BEGIN { skip=0 }
+    /<!-- e2e-pr-media:start -->/ { skip=1; next }
+    /<!-- e2e-pr-media:end -->/ { skip=0; next }
+    /<!-- e2e-pr-video:start -->/ { skip=1; next }
+    /<!-- e2e-pr-video:end -->/ { skip=0; next }
+    skip==0 { print }
+  ')
+else
+  NEW_BODY="$CURRENT_BODY"
+fi
+
+TMP_BODY=$(mktemp)
+{
+  printf "%s\n\n" "$NEW_BODY"
+  printf "%s\n" "$BEFORE_AFTER_BLOCK"
+} > "$TMP_BODY"
+
+gh pr edit "$PR" --repo "$REPO" --body-file "$TMP_BODY"
+rm -f "$TMP_BODY"
+
+echo "PR #${PR} updated with Before/After ${MODE} section"

@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+# e2e-upload-github-attachments <pr_number> <owner/repo> <before_file> <after_file> [--repo /path/to/repo]
+# Uploads files through GitHub's web attachment flow using an authenticated browser profile.
+
+set -euo pipefail
+
+resolve_script_dir() {
+  local source="${BASH_SOURCE[0]}"
+  while [[ -h "$source" ]]; do
+    local dir
+    dir="$(cd -P "$(dirname "$source")" && pwd)"
+    source="$(readlink "$source")"
+    [[ "$source" != /* ]] && source="${dir}/${source}"
+  done
+  cd -P "$(dirname "$source")" && pwd
+}
+
+SCRIPT_DIR="$(resolve_script_dir)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
+
+PR="${1:-}"
+REPO="${2:-}"
+BEFORE_FILE="${3:-}"
+AFTER_FILE="${4:-}"
+BROWSER_PROFILE="${GITHUB_BROWSER_PROFILE:-$HOME/Library/Application Support/Chromium}"
+
+shift 4 || true
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --repo)
+      REPO_ROOT="${2:-}"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      echo "Usage: e2e-upload-github-attachments <pr_number> <owner/repo> <before_file> <after_file> [--repo /path/to/repo]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "$PR" || -z "$REPO" || -z "$BEFORE_FILE" || -z "$AFTER_FILE" ]]; then
+  echo "Usage: e2e-upload-github-attachments <pr_number> <owner/repo> <before_file> <after_file> [--repo /path/to/repo]" >&2
+  exit 1
+fi
+
+if [[ ! -f "$BEFORE_FILE" || ! -f "$AFTER_FILE" ]]; then
+  echo "Error: before/after files must exist" >&2
+  exit 1
+fi
+
+pnpm --dir "$REPO_ROOT" exec node - "$PR" "$REPO" "$BEFORE_FILE" "$AFTER_FILE" "$BROWSER_PROFILE" <<'NODE'
+const { chromium } = require('@playwright/test')
+
+const [, , pr, repo, beforeFile, afterFile, browserProfile] = process.argv
+
+const fail = async (context, message) => {
+  if (context) {
+    await context.close().catch(() => {})
+  }
+  console.error(`Error: ${message}`)
+  process.exit(1)
+}
+
+;(async () => {
+  let context
+
+  try {
+    context = await chromium.launchPersistentContext(browserProfile, {
+      headless: true,
+      args: ['--profile-directory=Default'],
+    })
+
+    const page = await context.newPage()
+    await page.goto(`https://github.com/${repo}/pull/${pr}`, {
+      waitUntil: 'domcontentloaded',
+      timeout: 60000,
+    })
+    await page.waitForLoadState('load', { timeout: 60000 }).catch(() => {})
+    await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
+
+    const isSignedIn = await page.evaluate(() => {
+      const login = document.querySelector('meta[name="user-login"]')?.getAttribute('content')
+      return Boolean(login) && !document.body.innerText.includes('Sign in to comment')
+    })
+
+    if (!isSignedIn) {
+      await fail(
+        context,
+        `GitHub is not signed in for browser profile: ${browserProfile}. Sign in with that profile, or set GITHUB_BROWSER_PROFILE to a signed-in profile.`,
+      )
+    }
+
+    const fileInput = page.locator('file-attachment input[type="file"]').last()
+    if (!(await fileInput.waitFor({ state: 'attached', timeout: 30000 }).then(() => true).catch(() => false))) {
+      await fail(context, 'Could not find GitHub file attachment input on the PR page.')
+    }
+
+    const commentField = page.locator('.js-comment-field, textarea[placeholder*="comment" i]').last()
+    if (!(await commentField.waitFor({ state: 'visible', timeout: 30000 }).then(() => true).catch(() => false))) {
+      await fail(context, 'Could not find GitHub comment editor on the PR page.')
+    }
+
+    await commentField.click()
+    await fileInput.setInputFiles([beforeFile, afterFile])
+
+    await page.waitForFunction(() => {
+      const fields = Array.from(document.querySelectorAll('.js-comment-field, textarea'))
+      return fields.some((field) => {
+        const value = field.value || ''
+        return (value.match(/https:\/\/github\.com\/user-attachments\/assets\/[0-9a-f-]+/g) || [])
+          .length >= 2
+      })
+    }, null, { timeout: 120000 })
+
+    const value = await commentField.inputValue()
+    const urls = [...value.matchAll(/https:\/\/github\.com\/user-attachments\/assets\/[0-9a-f-]+/g)].map(
+      (match) => match[0],
+    )
+
+    if (urls.length < 2) {
+      await fail(context, 'GitHub upload completed without two user-attachment URLs.')
+    }
+
+    console.log(JSON.stringify({ before: urls[0], after: urls[1] }))
+    await context.close()
+  } catch (error) {
+    await fail(context, error instanceof Error ? error.message : String(error))
+  }
+})()
+NODE

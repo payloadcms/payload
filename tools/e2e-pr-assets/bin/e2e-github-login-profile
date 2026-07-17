@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+# e2e-github-login-profile [profile-dir] [--repo /path/to/repo]
+# Opens a headed Chromium session for manually signing in to GitHub.
+
+set -euo pipefail
+
+resolve_script_dir() {
+  local source="${BASH_SOURCE[0]}"
+  while [[ -h "$source" ]]; do
+    local dir
+    dir="$(cd -P "$(dirname "$source")" && pwd)"
+    source="$(readlink "$source")"
+    [[ "$source" != /* ]] && source="${dir}/${source}"
+  done
+  cd -P "$(dirname "$source")" && pwd
+}
+
+SCRIPT_DIR="$(resolve_script_dir)"
+REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
+PROFILE_DIR=""
+POSITIONAL_PROFILE="${1:-}"
+
+if [[ -n "$POSITIONAL_PROFILE" && "$POSITIONAL_PROFILE" == "--repo" ]]; then
+  POSITIONAL_PROFILE=""
+fi
+
+if [[ -n "$POSITIONAL_PROFILE" ]]; then
+  PROFILE_DIR="$POSITIONAL_PROFILE"
+  shift
+fi
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --repo)
+      REPO_ROOT="${2:-}"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      echo "Usage: e2e-github-login-profile [profile-dir] [--repo /path/to/repo]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "$PROFILE_DIR" ]]; then
+  PROFILE_DIR="${GITHUB_BROWSER_PROFILE:-/tmp/github-upload-profile}"
+fi
+
+pnpm --dir "$REPO_ROOT" exec node - "$PROFILE_DIR" <<'NODE'
+const { chromium } = require('@playwright/test')
+
+const profileDir = process.argv[2]
+
+;(async () => {
+  const context = await chromium.launchPersistentContext(profileDir, {
+    headless: false,
+    args: ['--profile-directory=Default'],
+  })
+
+  const page = await context.newPage()
+  await page.goto('https://github.com/login', {
+    waitUntil: 'domcontentloaded',
+    timeout: 30000,
+  })
+
+  console.log(`GitHub login window opened with profile: ${profileDir}`)
+  console.log('Sign in manually, then close the browser window when finished.')
+
+  await new Promise((resolve) => {
+    context.on('close', resolve)
+  })
+})().catch((error) => {
+  console.error(error instanceof Error ? error.message : String(error))
+  process.exit(1)
+})
+NODE

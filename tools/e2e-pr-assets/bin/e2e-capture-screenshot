@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# e2e-capture-screenshot <label> [--repo /path/to/repo] [--source /path/to/image.png]
+# Copies a screenshot to /tmp/payload-e2e-<label>.png for PR attachment.
+# If --source is omitted, copies the newest PNG from test-results in --repo.
+
+set -euo pipefail
+
+LABEL="${1:-}"
+REPO_ROOT=""
+SOURCE=""
+
+if [[ -z "$LABEL" ]]; then
+  echo "Usage: e2e-capture-screenshot <label> [--repo /path/to/repo] [--source /path/to/image.png]" >&2
+  exit 1
+fi
+
+shift || true
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --repo)
+      REPO_ROOT="${2:-}"
+      shift 2
+      ;;
+    --source)
+      SOURCE="${2:-}"
+      shift 2
+      ;;
+    *)
+      echo "Unknown option: $1" >&2
+      echo "Usage: e2e-capture-screenshot <label> [--repo /path/to/repo] [--source /path/to/image.png]" >&2
+      exit 1
+      ;;
+  esac
+done
+
+if [[ -z "$SOURCE" ]]; then
+  if [[ -z "$REPO_ROOT" ]]; then
+    REPO_ROOT="$(pwd)"
+  fi
+
+  SOURCE=$(find "$REPO_ROOT/test-results" -name "*.png" -print 2>/dev/null | tail -1)
+fi
+
+if [[ -z "$SOURCE" || ! -f "$SOURCE" ]]; then
+  echo "Error: screenshot source not found (provide --source or ensure test-results has PNG files)" >&2
+  exit 1
+fi
+
+DEST="/tmp/payload-e2e-${LABEL}.png"
+cp "$SOURCE" "$DEST"
+echo "$DEST"

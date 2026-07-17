@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+# e2e-convert-video <label>
+# Converts /tmp/payload-e2e-<label>.webm -> /tmp/payload-e2e-<label>.mp4
+# If output exceeds 9.5MB, re-encodes with two-pass targeting 9MB to stay
+# under GitHub's 10MB PR comment asset limit.
+
+set -euo pipefail
+
+LABEL="${1:-}"
+if [[ -z "$LABEL" ]]; then
+  echo "Usage: e2e-convert-video <label>  (e.g. before | after)" >&2
+  exit 1
+fi
+
+INPUT="/tmp/payload-e2e-${LABEL}.webm"
+OUTPUT="/tmp/payload-e2e-${LABEL}.mp4"
+MAX_BYTES=9961472
+TARGET_MB=9
+TRIM_START_SECONDS="${E2E_VIDEO_TRIM_START_SECONDS:-1}"
+
+if [[ ! -f "$INPUT" ]]; then
+  echo "Error: $INPUT not found" >&2
+  exit 1
+fi
+
+for bin in ffmpeg ffprobe bc; do
+  if ! command -v "$bin" >/dev/null 2>&1; then
+    echo "Error: required binary '$bin' is not installed" >&2
+    exit 1
+  fi
+done
+
+echo "Converting $INPUT -> $OUTPUT ..."
+
+if ffmpeg -hide_banner -encoders 2>/dev/null | grep -q 'h264_videotoolbox'; then
+  ffmpeg -nostdin -ss "$TRIM_START_SECONDS" -i "$INPUT" -c:v h264_videotoolbox -b:v 3200k -pix_fmt yuv420p -movflags +faststart "$OUTPUT" -y -loglevel error
+else
+  ffmpeg -nostdin -ss "$TRIM_START_SECONDS" -i "$INPUT" -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p -movflags +faststart "$OUTPUT" -y -loglevel error
+fi
+
+if [[ ! -s "$OUTPUT" ]]; then
+  echo "Error: conversion did not create $OUTPUT" >&2
+  exit 1
+fi
+
+if ! ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 "$OUTPUT" | grep -q '^h264$'; then
+  echo "Error: $OUTPUT is not H.264 MP4; GitHub may not render it inline" >&2
+  exit 1
+fi
+
+SIZE=$(stat -f%z "$OUTPUT" 2>/dev/null || stat -c%s "$OUTPUT")
+
+if [[ "$SIZE" -gt "$MAX_BYTES" ]]; then
+  SIZE_MB=$(( SIZE / 1024 / 1024 ))
+  echo "Output is ${SIZE_MB}MB, exceeds limit — re-encoding to ~${TARGET_MB}MB with two-pass..."
+
+  DURATION=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUTPUT")
+  BITRATE=$(echo "scale=0; $TARGET_MB * 8192 / $DURATION" | bc)
+
+  ffmpeg -ss "$TRIM_START_SECONDS" -i "$INPUT" -c:v libx264 -b:v "${BITRATE}k" -pix_fmt yuv420p -pass 1 -f mp4 /dev/null -y -loglevel error
+  ffmpeg -ss "$TRIM_START_SECONDS" -i "$INPUT" -c:v libx264 -b:v "${BITRATE}k" -pix_fmt yuv420p -pass 2 -movflags +faststart "$OUTPUT" -y -loglevel error
+  rm -f ffmpeg2pass-0.log ffmpeg2pass-0.log.mbtree
+
+  FINAL_SIZE=$(stat -f%z "$OUTPUT" 2>/dev/null || stat -c%s "$OUTPUT")
+  echo "Re-encoded to $(( FINAL_SIZE / 1024 / 1024 ))MB"
+fi
+
+echo "$OUTPUT"
