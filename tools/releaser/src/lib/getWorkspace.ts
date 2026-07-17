@@ -38,15 +38,12 @@ type PublishOpts = {
 
 type Workspace = {
   version: () => Promise<string>
-  tag: string
-  packages: PackageDetails[]
-  showVersions: () => Promise<void>
   bumpVersion: (type: PackageReleaseType, opts?: { preid?: 'beta' | 'canary' }) => Promise<string>
   build: (opts?: { debug?: boolean }) => Promise<void>
   publish: (opts: PublishOpts) => Promise<void>
 }
 
-export const getWorkspace = async () => {
+export const getWorkspace = (): Workspace => {
   const build = async (opts?: { debug?: boolean }) => {
     await execa('pnpm', ['install'], execaOpts)
 
@@ -66,13 +63,6 @@ export const getWorkspace = async () => {
       packages: packageDetails,
       publishOne: (pkg) => publishSinglePackage(pkg, { dryRun, tag }),
     })
-  }
-
-  const showVersions = async () => {
-    const { packages, version } = await getCurrentPackageState()
-    console.log(`\n  Version: ${version}\n`)
-    console.log(`  Changes (${packages.length} packages):\n`)
-    console.log(`${packages.map((p) => `  - ${p.name.padEnd(32)} ${p.version}`).join('\n')}\n`)
   }
 
   const setVersion = async (version: string) => {
@@ -168,9 +158,6 @@ export const getWorkspace = async () => {
 
   const workspace: Workspace = {
     version: async () => (await fse.readJSON(ROOT_PACKAGE_JSON)).version,
-    tag: 'latest',
-    packages: await getPackageDetails(packagePublishList),
-    showVersions,
     bumpVersion,
     build,
     publish,
