@@ -44,7 +44,7 @@ export function WidgetEditControl({
         aria-label={`${t('general:edit')} ${widgetID}`}
         buttonStyle="secondary"
         className="widget-wrapper__edit-btn"
-        icon={<EditIcon size={24} />}
+        icon={<EditIcon />}
         margin={false}
         onClick={() => {
           openModal(drawerSlug)
