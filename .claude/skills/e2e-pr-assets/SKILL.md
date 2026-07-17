@@ -123,7 +123,9 @@ export default async function scenario({ baseURL, cursor, expect, label, page, r
    - Do not switch to screenshots unless the user explicitly changes the requested mode.
 9. Upload through GitHub's attachment UI to get `https://github.com/user-attachments/assets/...` URLs:
    - `e2e-upload-github-attachments <pr-number> <owner/repo> /tmp/payload-e2e-before.mp4 /tmp/payload-e2e-after.mp4`
-   - Requires a signed-in browser profile. If needed, set `GITHUB_BROWSER_PROFILE=/path/to/profile`.
+   - If the configured browser profile is not signed in, the script automatically opens the login flow, waits for manual sign-in detection, then retries upload once.
+   - Optional profile override: `GITHUB_BROWSER_PROFILE=/path/to/profile`
+   - To disable automatic login flow, set `E2E_GITHUB_AUTO_LOGIN=0`.
 10. Attach the returned user-attachment URLs to the PR body:
 
 - `urls=$(e2e-upload-github-attachments <pr-number> <owner/repo> /tmp/payload-e2e-before.mp4 /tmp/payload-e2e-after.mp4)`
@@ -156,5 +158,5 @@ fi
 - `e2e-attach-pr` is idempotent: it replaces the prior generated media block instead of duplicating it.
 - Video conversion records at full viewport size, trims the initial blank Playwright frame by default, and auto-compresses to fit GitHub upload constraints when needed.
 - Video mode is complete only when the PR body contains `github.com/user-attachments/assets` video links. `.webm` links or raw `.mp4` links are failed video-mode results.
-- Media artifacts are stored in `/tmp` for session-scoped use.
+- Media artifacts are stored in `/tmp` and are automatically removed after `e2e-attach-pr` completes by default. Disable with `E2E_MEDIA_AUTO_CLEANUP=0`.
 - Never store PR evidence media in repository branches such as `.github/e2e-assets/...` or `e2e-assets-<pr>`. Those commits pollute the PR timeline and file list. If GitHub attachment upload fails, fix the upload flow instead of committing media files.

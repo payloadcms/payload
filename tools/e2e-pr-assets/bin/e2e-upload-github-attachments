@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 # e2e-upload-github-attachments <pr_number> <owner/repo> <before_file> <after_file> [--repo /path/to/repo]
 # Uploads files through GitHub's web attachment flow using an authenticated browser profile.
+# Default behavior:
+# - Uses ephemeral profile: /tmp/github-upload-profile
+# - If profile is unsigned, auto-opens login flow and retries once
+# - Removes temporary profile directory after completion (success/failure)
+# Environment controls:
+# - E2E_GITHUB_AUTO_LOGIN=0 to disable auto-login flow
+# - E2E_GITHUB_AUTO_REMOVE_PROFILE=0 to keep profile
+# - E2E_GITHUB_FORCE_REMOVE_PROFILE=1 to force-remove non-/tmp profile paths
 
 set -euo pipefail
 
@@ -22,7 +30,10 @@ PR="${1:-}"
 REPO="${2:-}"
 BEFORE_FILE="${3:-}"
 AFTER_FILE="${4:-}"
-BROWSER_PROFILE="${GITHUB_BROWSER_PROFILE:-$HOME/Library/Application Support/Chromium}"
+BROWSER_PROFILE="${GITHUB_BROWSER_PROFILE:-/tmp/github-upload-profile}"
+AUTO_LOGIN_ON_UNSIGNED_PROFILE="${E2E_GITHUB_AUTO_LOGIN:-1}"
+AUTO_REMOVE_PROFILE="${E2E_GITHUB_AUTO_REMOVE_PROFILE:-1}"
+FORCE_REMOVE_PROFILE="${E2E_GITHUB_FORCE_REMOVE_PROFILE:-0}"
 
 shift 4 || true
 while [[ $# -gt 0 ]]; do
@@ -49,7 +60,35 @@ if [[ ! -f "$BEFORE_FILE" || ! -f "$AFTER_FILE" ]]; then
   exit 1
 fi
 
-pnpm --dir "$REPO_ROOT" exec node - "$PR" "$REPO" "$BEFORE_FILE" "$AFTER_FILE" "$BROWSER_PROFILE" <<'NODE'
+cleanup_profile() {
+  if [[ "$AUTO_REMOVE_PROFILE" != "1" ]]; then
+    return
+  fi
+
+  if [[ ! -d "$BROWSER_PROFILE" ]]; then
+    return
+  fi
+
+  if [[ "$FORCE_REMOVE_PROFILE" == "1" ]]; then
+    rm -rf "$BROWSER_PROFILE"
+    echo "Removed browser profile: $BROWSER_PROFILE" >&2
+    return
+  fi
+
+  case "$BROWSER_PROFILE" in
+    /tmp/github-upload-profile|/tmp/e2e-gh-*|/private/tmp/github-upload-profile|/private/tmp/e2e-gh-*)
+      rm -rf "$BROWSER_PROFILE"
+      echo "Removed browser profile: $BROWSER_PROFILE" >&2
+      ;;
+    *)
+      echo "Skipping profile removal for non-temporary path: $BROWSER_PROFILE" >&2
+      echo "Set E2E_GITHUB_FORCE_REMOVE_PROFILE=1 to force removal." >&2
+      ;;
+  esac
+}
+
+run_upload() {
+  pnpm --dir "$REPO_ROOT" exec node - "$PR" "$REPO" "$BEFORE_FILE" "$AFTER_FILE" "$BROWSER_PROFILE" <<'NODE'
 const { chromium } = require('@playwright/test')
 
 const [, , pr, repo, beforeFile, afterFile, browserProfile] = process.argv
@@ -129,3 +168,38 @@ const fail = async (context, message) => {
   }
 })()
 NODE
+}
+
+set +e
+upload_output="$(run_upload 2>&1)"
+upload_exit_code=$?
+set -e
+
+if [[ "$upload_exit_code" -eq 0 ]]; then
+  cleanup_profile
+  printf '%s\n' "$upload_output"
+  exit 0
+fi
+
+if [[ "$AUTO_LOGIN_ON_UNSIGNED_PROFILE" == "1" ]] && grep -q "GitHub is not signed in for browser profile" <<<"$upload_output"; then
+  echo "$upload_output" >&2
+  echo "Opening GitHub login flow for browser profile: $BROWSER_PROFILE" >&2
+  "${SCRIPT_DIR}/e2e-github-login-profile" "$BROWSER_PROFILE" --repo "$REPO_ROOT"
+  echo "Retrying upload after sign-in..." >&2
+  set +e
+  retry_output="$(run_upload 2>&1)"
+  retry_exit_code=$?
+  set -e
+  if [[ "$retry_exit_code" -ne 0 ]]; then
+    echo "$retry_output" >&2
+    cleanup_profile
+    exit "$retry_exit_code"
+  fi
+  cleanup_profile
+  printf '%s\n' "$retry_output"
+  exit 0
+fi
+
+echo "$upload_output" >&2
+cleanup_profile
+exit "$upload_exit_code"

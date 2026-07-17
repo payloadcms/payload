@@ -10,6 +10,7 @@ REPO="${2:-}"
 MODE="video"
 BEFORE_URL_OVERRIDE=""
 AFTER_URL_OVERRIDE=""
+AUTO_CLEANUP_MEDIA="${E2E_MEDIA_AUTO_CLEANUP:-1}"
 
 shift 2 || true
 while [[ $# -gt 0 ]]; do
@@ -117,6 +118,21 @@ upload_asset() {
   printf '%s' "$url"
 }
 
+cleanup_media() {
+  if [[ "$AUTO_CLEANUP_MEDIA" != "1" ]]; then
+    return
+  fi
+
+  rm -f \
+    /tmp/payload-e2e-before.mp4 \
+    /tmp/payload-e2e-after.mp4 \
+    /tmp/payload-e2e-before.webm \
+    /tmp/payload-e2e-after.webm \
+    /tmp/payload-e2e-before.png \
+    /tmp/payload-e2e-after.png
+  echo "Cleaned up local media artifacts from /tmp." >&2
+}
+
 if [[ -n "$BEFORE_URL_OVERRIDE" ]]; then
   BEFORE_URL="$BEFORE_URL_OVERRIDE"
   AFTER_URL="$AFTER_URL_OVERRIDE"
@@ -172,5 +188,7 @@ TMP_BODY=$(mktemp)
 
 gh pr edit "$PR" --repo "$REPO" --body-file "$TMP_BODY"
 rm -f "$TMP_BODY"
+
+cleanup_media
 
 echo "PR #${PR} updated with Before/After ${MODE} section"

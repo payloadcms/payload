@@ -65,11 +65,35 @@ const profileDir = process.argv[2]
   })
 
   console.log(`GitHub login window opened with profile: ${profileDir}`)
-  console.log('Sign in manually, then close the browser window when finished.')
+  console.log('Sign in manually. This process auto-continues when GitHub sign-in is detected.')
 
-  await new Promise((resolve) => {
-    context.on('close', resolve)
-  })
+  const isSignedIn = async () => {
+    try {
+      const cookies = await context.cookies('https://github.com')
+      return cookies.some((cookie) => cookie.name === 'user_session' && Boolean(cookie.value))
+    } catch {
+      return false
+    }
+  }
+
+  const startedAt = Date.now()
+  const timeoutMs = 10 * 60 * 1000
+  let signedIn = false
+
+  while (!signedIn && Date.now() - startedAt < timeoutMs) {
+    signedIn = await isSignedIn()
+    if (!signedIn) {
+      await page.waitForTimeout(1500)
+    }
+  }
+
+  if (!signedIn) {
+    console.error('Timed out waiting for GitHub sign-in. Close this browser and re-run the command.')
+    process.exit(1)
+  }
+
+  console.log('GitHub sign-in detected for this profile.')
+  await context.close()
 })().catch((error) => {
   console.error(error instanceof Error ? error.message : String(error))
   process.exit(1)
