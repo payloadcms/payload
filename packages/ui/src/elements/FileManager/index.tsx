@@ -246,6 +246,13 @@ export const FileManager: React.FC<FileManagerProps> = ({
     [setModified, updateUploadEdits],
   )
 
+  // Reset states for when replacing the file with a new upload
+  useEffect(() => {
+    setSelectedSize(null)
+    setRemovedFile(false)
+    setFileSrc('')
+  }, [data?.url, data?.filename])
+
   useEffect(() => {
     if (initialState?.file?.value instanceof File) {
       setFileSrc(URL.createObjectURL(initialState.file.value))
@@ -260,10 +267,6 @@ export const FileManager: React.FC<FileManagerProps> = ({
       }
     }
   }, [fileSrc])
-
-  useEffect(() => {
-    setSelectedSize(null)
-  }, [data?.url, data?.filename])
 
   useEffect(() => {
     const handleControlFileUrl = async () => {
@@ -394,6 +397,16 @@ export const FileManager: React.FC<FileManagerProps> = ({
             />
           ) : showUploadInput ? (
             <div className={`${baseClass}__upload`}>
+              {!value && removedFile && data?.filename && (
+                <Button
+                  buttonStyle="secondary"
+                  className={`${baseClass}__remove`}
+                  icon="x"
+                  onClick={() => setRemovedFile(false)}
+                  round
+                  tooltip={t('general:cancel')}
+                />
+              )}
               {!value && (
                 <Dropzone onChange={handleFileSelection}>
                   <div className={`${baseClass}__dropzone-content`}>
