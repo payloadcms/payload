@@ -1,5 +1,7 @@
 @layer payload-default {
   .mini-carousel {
+    --carousel-item-width: 48px;
+    --carousel-item-height: 48px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -35,8 +37,8 @@
     background: var(--color-bg-secondary);
     cursor: pointer;
     overflow: hidden;
-    width: 48px;
-    height: 48px;
+    width: var(--carousel-item-width);
+    height: var(--carousel-item-height);
   }
 
   .mini-carousel__item img {
