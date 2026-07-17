@@ -1,4 +1,5 @@
 import type { JsonSchemaType } from '@modelcontextprotocol/client'
+import type { UploadInstructions } from 'payload'
 
 import { readFile } from 'fs/promises'
 import path from 'path'
@@ -416,6 +417,7 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(toolsByName.findVersionByID).toBeDefined()
       expect(toolsByName.findVersions).toBeDefined()
       expect(toolsByName.getCollectionSchema).toBeDefined()
+      expect(toolsByName.getUploadInstructions).toBeDefined()
       expect(toolsByName.restoreVersion).toBeDefined()
       expect(toolsByName.createDocument.inputSchema.properties.collectionSlug).toBeDefined()
       expect(toolsByName.createDocument.inputSchema.properties.collectionSlug.type).toBe('string')
@@ -514,6 +516,12 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(findVersions.inputSchema.properties.collectionSlug).toBeDefined()
       expect(findVersions.inputSchema.properties.where).toBeDefined()
       expect(restoreVersion.inputSchema.properties.id).toBeDefined()
+
+      const getUploadInstructions = toolsByName.getUploadInstructions
+      expect(getUploadInstructions.inputSchema.properties.collectionSlug.type).toBe('string')
+      expect(getUploadInstructions.inputSchema.properties.filename.type).toBe('string')
+      expect(getUploadInstructions.inputSchema.properties.filesize.type).toBe('integer')
+      expect(getUploadInstructions.inputSchema.properties.mimeType.type).toBe('string')
 
       // Custom top-level tool schema
       expect(diceRoll.inputSchema).toBeDefined()
@@ -945,7 +953,7 @@ describe('@payloadcms/plugin-mcp', () => {
           },
           file: {
             name: 'mcp-url.png',
-            source: 'url',
+            source: 'externalURL',
             url: `${server.url}/image.png`,
           },
         },
@@ -1004,6 +1012,118 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(storedMedia.filename).toBe('mcp-replacement.png')
       expect(storedMedia.mimeType).toBe('image/png')
       expect(storedMedia.filesize).toBe(image.length)
+    })
+
+    it('should create and update uploads without sending file bytes through MCP', async ({
+      mcp,
+    }) => {
+      const apiKey = await getApiKey()
+      const client = await mcp.connect(apiKey)
+      const file = await readFile(new URL('../uploads/image.png', import.meta.url))
+
+      const upload = async (filename: string) => {
+        const response = await client.callTool({
+          arguments: {
+            collectionSlug: 'media',
+            filename,
+            filesize: file.length,
+            mimeType: 'image/png',
+          },
+          name: 'getUploadInstructions',
+        })
+        const instructions = getToolDoc<UploadInstructions>(response)
+
+        expect(instructions.file.uploadReference.uploadId).toBeTruthy()
+
+        if (instructions.type !== 'http') {
+          throw new Error('Expected HTTP upload instructions')
+        }
+
+        const uploadPath = new URL(instructions.request.url, restClient.serverURL).pathname.replace(
+          payload.config.routes.api,
+          '',
+        ) as `/${string}`
+        const uploadResponse = await restClient.PUT(uploadPath, {
+          body: file,
+          headers: instructions.request.headers,
+        })
+
+        expect(uploadResponse.status).toBe(204)
+
+        return { file: instructions.file, source: 'uploadReference' as const }
+      }
+
+      let id: number | string | undefined
+
+      try {
+        const createResponse = await client.callTool({
+          arguments: {
+            collectionSlug: 'media',
+            data: { alt: 'Created through MCP' },
+            file: await upload('mcp-created.png'),
+          },
+          name: 'createDocument',
+        })
+        const created = getToolDoc<{
+          alt: string
+          filename: string
+          id: number | string
+          width: number
+        }>(createResponse)
+        id = created.id
+
+        expect(created.alt).toBe('Created through MCP')
+        expect(created.filename).toBe('mcp-created.png')
+        expect(created.width).toBeGreaterThan(0)
+
+        const updateResponse = await client.callTool({
+          arguments: {
+            collectionSlug: 'media',
+            data: { alt: 'Updated through MCP' },
+            file: await upload('mcp-updated.png'),
+            id,
+          },
+          name: 'updateDocument',
+        })
+        const updated = getToolDoc<{ alt: string; filename: string }>(updateResponse)
+
+        expect(updated.alt).toBe('Updated through MCP')
+        expect(updated.filename).toBe('mcp-updated.png')
+      } finally {
+        if (id !== undefined) {
+          await payload.delete({ id, collection: 'media' })
+        }
+      }
+    })
+
+    it('should return named upload instructions for provider-specific uploaders', async ({
+      mcp,
+    }) => {
+      const apiKey = await getApiKey()
+      const client = await mcp.connect(apiKey)
+      const response = await client.callTool({
+        arguments: {
+          collectionSlug: 'dispatch-media',
+          filename: 'provider.png',
+          filesize: 123,
+          mimeType: 'image/png',
+        },
+        name: 'getUploadInstructions',
+      })
+      const instructions = getToolDoc<UploadInstructions>(response)
+
+      expect(instructions).toMatchObject({
+        data: { token: 'test-token' },
+        name: 'uploadToTestProvider',
+        type: 'dispatch',
+      })
+      expect(response.content[0].text).toContain(
+        'Call the local MCP tool named "uploadToTestProvider" with the file and data',
+      )
+      expect(response.content[0].text).toContain('{ source: "uploadReference", file }')
+      await expect(
+        client.callTool({ arguments: {}, name: 'uploadToTestProvider' }),
+      ).rejects.toThrow()
     })
 
     it('should create a published document from data._status', async ({ mcp }) => {
@@ -1068,7 +1188,7 @@ describe('@payloadcms/plugin-mcp', () => {
         enabled: true,
         filesRequiredOnCreate: true,
         mimeTypes: ['*/*'],
-        sources: ['url', 'base64'],
+        sources: ['externalURL', 'base64', 'uploadReference'],
       })
     })
 

@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, UploadInstructions } from 'payload'
 import type { SuiteAPI } from 'vitest'
 
 import * as AWS from '@aws-sdk/client-s3'
@@ -11,6 +11,7 @@ import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Config } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
@@ -268,10 +269,11 @@ describe('@payloadcms/plugin-cloud-storage', () => {
 
   describe('integration (non-composite prefixes)', () => {
     let payload: Payload
+    let restClient: NextRESTClient
     let TEST_BUCKET: string
 
     beforeAll(async () => {
-      ;({ payload } = await initPayloadInt(dirname, undefined, true, 'config.ts'))
+      ;({ payload, restClient } = await initPayloadInt(dirname, undefined, true, 'config.ts'))
       TEST_BUCKET = process.env.S3_BUCKET!
     })
 
@@ -594,6 +596,58 @@ describe('@payloadcms/plugin-cloud-storage', () => {
           uploadTimestamp: upload.uploadTimestamp,
           uploadVersion: upload.uploadVersion,
         })
+      })
+
+      it('supports upload instructions when the adapter does not', async () => {
+        await restClient.login({ slug: 'users' })
+
+        const file = fs.readFileSync(path.resolve(dirname, '../uploads/image.png'))
+        const instructionsResponse = await restClient.POST('/upload-instructions', {
+          body: JSON.stringify({
+            collectionSlug: testMetadataSlug,
+            filename: 'staged-image.png',
+            filesize: file.length,
+            mimeType: 'image/png',
+          }),
+        })
+        const instructions = await instructionsResponse.json<UploadInstructions>()
+
+        expect(instructionsResponse.status).toBe(200)
+        expect(instructions.file.uploadReference.uploadId).toBeTruthy()
+
+        if (instructions.type !== 'http') {
+          throw new Error('Expected HTTP upload instructions')
+        }
+
+        const uploadPath = new URL(instructions.request.url, restClient.serverURL).pathname.replace(
+          payload.config.routes.api,
+          '',
+        ) as `/${string}`
+        const uploadResponse = await restClient.PUT(uploadPath, {
+          body: file,
+          headers: instructions.request.headers,
+        })
+
+        expect(uploadResponse.status).toBe(204)
+
+        const formData = new FormData()
+        formData.append('_payload', JSON.stringify({ testNote: 'Staged adapter upload' }))
+        formData.append('file', JSON.stringify(instructions.file))
+
+        const createResponse = await restClient.POST(`/${testMetadataSlug}`, { body: formData })
+        const { doc } = await createResponse.json<{
+          doc: {
+            id: number | string
+            sizes: { thumbnail: { filename: string } }
+            storageProvider: string
+          }
+        }>()
+
+        createdIDs.push(doc.id)
+
+        expect(createResponse.status).toBe(201)
+        expect(doc.storageProvider).toBe('test-adapter')
+        expect(doc.sizes.thumbnail.filename).toBeTruthy()
       })
 
       it('should persist metadata on update operations', async () => {
