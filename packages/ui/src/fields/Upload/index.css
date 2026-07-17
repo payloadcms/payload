@@ -5,13 +5,17 @@
     gap: var(--spacer-2);
   }
 
+  .upload__dropzoneAndUpload .dropzone.dropzone--style-default {
+    padding-block: 0;
+  }
+
   .upload__dropzoneContent {
     display: flex;
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
     row-gap: var(--spacer-2);
-    padding: var(--spacer-2-5);
+    padding: var(--spacer-3);
     gap: var(--spacer-2);
     width: 100%;
   }
