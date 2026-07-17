@@ -18,6 +18,7 @@ import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2E
 import { BASE_PATH, customAdminRoutes } from '../../shared.js'
 import {
   arrayCollectionSlug,
+  customFieldsSlug,
   customViews1CollectionSlug,
   formatDocURLCollectionSlug,
   geoCollectionSlug,
@@ -85,6 +86,7 @@ describe('List View', () => {
   let user: any
   let virtualsUrl: AdminUrlUtil
   let noTimestampsUrl: AdminUrlUtil
+  let customFieldsUrl: AdminUrlUtil
 
   let serverURL: string
   let adminRoutes: ReturnType<typeof getRoutes>
@@ -112,6 +114,7 @@ describe('List View', () => {
     formatDocURLUrl = new AdminUrlUtil(serverURL, formatDocURLCollectionSlug)
     virtualsUrl = new AdminUrlUtil(serverURL, virtualsSlug)
     noTimestampsUrl = new AdminUrlUtil(serverURL, noTimestampsSlug)
+    customFieldsUrl = new AdminUrlUtil(serverURL, customFieldsSlug)
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
@@ -192,6 +195,11 @@ describe('List View', () => {
         'href',
         `${adminRoutes.routes?.admin}/collections/posts/${id}`,
       )
+    })
+
+    test('should render when a field has admin.components explicitly set to undefined', async () => {
+      await page.goto(customFieldsUrl.list)
+      await expect(page.locator('.collection-list--custom-fields')).toBeVisible()
     })
 
     test('should hide create new button when allowCreate is false', async () => {
