@@ -24,6 +24,7 @@ const dirname = path.dirname(filename)
 
 let user: TestUser
 let admin: TestUser
+let otherUser: TestUser
 
 const createdPostIDs: (number | string)[] = []
 
@@ -42,10 +43,14 @@ describe('Authorship', () => {
   beforeAll(async () => {
     ;({ payload } = await initPayloadInt(dirname))
 
-    const userDoc = await payload.findByID({
-      id: (await payload.find({ collection: usersSlug, depth: 0, limit: 1 })).docs[0]!.id,
-      collection: usersSlug,
-    })
+    const userDoc = (
+      await payload.find({
+        collection: usersSlug,
+        depth: 0,
+        limit: 1,
+        where: { email: { equals: devUser.email } },
+      })
+    ).docs[0]!
     user = { ...userDoc, collection: usersSlug }
 
     const adminDoc = await payload.create({
@@ -56,6 +61,16 @@ describe('Authorship', () => {
       },
     })
     admin = { ...adminDoc, collection: adminsSlug }
+
+    const otherUserDoc = (
+      await payload.find({
+        collection: usersSlug,
+        depth: 0,
+        limit: 1,
+        where: { email: { equals: 'other@payloadcms.com' } },
+      })
+    ).docs[0]!
+    otherUser = { ...otherUserDoc, collection: usersSlug }
   })
 
   afterEach(async () => {
@@ -74,6 +89,39 @@ describe('Authorship', () => {
 
     expect(post.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
     expect(post.updatedBy).toEqual({ relationTo: usersSlug, value: user.id })
+  })
+
+  it('should keep createdBy as an id reference when the reader lacks access to the related user', async () => {
+    const post = await createPost({ data: { title: 'restricted' }, user })
+
+    // `otherUser` can only read their own user record, so populating `user` is denied
+    // and the relationship falls back to the id reference rather than the user's data.
+    const read = await payload.findByID({
+      id: post.id,
+      collection: postsSlug,
+      depth: 1,
+      overrideAccess: false,
+      user: otherUser,
+    })
+
+    expect(read.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
+    expect(read.updatedBy).toEqual({ relationTo: usersSlug, value: user.id })
+  })
+
+  it('should populate createdBy when the reader has access to the related user', async () => {
+    const post = await createPost({ data: { title: 'own' }, user })
+
+    const read = await payload.findByID({
+      id: post.id,
+      collection: postsSlug,
+      depth: 1,
+      overrideAccess: false,
+      user,
+    })
+
+    const createdBy = read.createdBy as { relationTo: string; value: { id: number | string } }
+    expect(createdBy.relationTo).toBe(usersSlug)
+    expect(createdBy.value.id).toBe(user.id)
   })
 
   it('should set updatedBy on update and leave createdBy unchanged', async () => {
