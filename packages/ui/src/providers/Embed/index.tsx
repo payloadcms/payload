@@ -4,6 +4,9 @@ import React, { createContext, use, useEffect, useState } from 'react'
 import { useConfig } from '../Config/index.js'
 import { useSearchParams } from '../RouterAdapter/index.js'
 
+/**
+ * @experimental This is an experimental API and may change at any time. Use at your own risk.
+ */
 export type EmbedContext = {
   isEmbedded: boolean
 }
@@ -47,6 +50,9 @@ const resolveEmbedParam = (embedParam: null | string, fallback: boolean): boolea
   }
 }
 
+/**
+ * @experimental This component is experimental and may change or be removed in future releases. Use at your own risk.
+ */
 export const EmbedProvider: React.FC<{
   children?: React.ReactNode
   /**
@@ -77,4 +83,7 @@ export const EmbedProvider: React.FC<{
   return <Context value={{ isEmbedded }}>{children}</Context>
 }
 
+/**
+ * @experimental This is an experimental API and may change at any time. Use at your own risk.
+ */
 export const useEmbed = (): EmbedContext => use(Context) ?? initialContext
