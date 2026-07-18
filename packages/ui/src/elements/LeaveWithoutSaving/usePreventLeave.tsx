@@ -158,11 +158,15 @@ export const usePreventLeave = ({
 
   useEffect(() => {
     if (hasAccepted && cancelledURL.current) {
+      const nextURL = cancelledURL.current
+
+      cancelledURL.current = ''
+
       if (onAccept) {
         onAccept()
       }
 
-      startRouteTransition(() => router.push(cancelledURL.current))
+      startRouteTransition(() => router.push(nextURL))
     }
   }, [hasAccepted, onAccept, router, startRouteTransition])
 }
