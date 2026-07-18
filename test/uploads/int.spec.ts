@@ -31,6 +31,7 @@ import {
   focalOnlySlug,
   mediaSlug,
   mediaWithoutWriteAccessSlug,
+  noFilesRequiredSlug,
   noRestrictFileMimeTypesSlug,
   noRestrictFileTypesSlug,
   pdfOnlySlug,
@@ -719,6 +720,54 @@ describe('Collections - Uploads', () => {
   })
 
   describe('Local API', () => {
+    describe('request isolation', () => {
+      const createdUploadIDs: Array<number | string> = []
+
+      afterEach(async () => {
+        for (const id of createdUploadIDs) {
+          await payload.delete({ id, collection: noFilesRequiredSlug })
+        }
+
+        createdUploadIDs.length = 0
+      })
+
+      it('should preserve req.file when creating a document without a file', async () => {
+        const file = await getFileByPath(path.resolve(dirname, './image.png'))
+        const req = { file } as PayloadRequest
+        const doc = await payload.create({
+          collection: noFilesRequiredSlug,
+          data: {},
+          req,
+        })
+
+        createdUploadIDs.push(doc.id)
+
+        expect(req.file).toBe(file)
+        expect(doc.filename ?? null).toBeNull()
+      })
+
+      it('should preserve req.file when updating a document without a file', async () => {
+        const doc = await payload.create({
+          collection: noFilesRequiredSlug,
+          data: {},
+        })
+        const file = await getFileByPath(path.resolve(dirname, './image.png'))
+        const req = { file } as PayloadRequest
+
+        createdUploadIDs.push(doc.id)
+
+        const updatedDoc = await payload.update({
+          id: doc.id,
+          collection: noFilesRequiredSlug,
+          data: {},
+          req,
+        })
+
+        expect(req.file).toBe(file)
+        expect(updatedDoc.filename ?? null).toBeNull()
+      })
+    })
+
     describe('create', () => {
       it('should create documents when passing filePath', async () => {
         const expectedPath = path.join(dirname, './svg-only')
