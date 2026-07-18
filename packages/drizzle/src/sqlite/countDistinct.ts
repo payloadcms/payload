@@ -1,5 +1,3 @@
-import type { SQLiteSelect } from 'drizzle-orm/sqlite-core'
-
 import { count, sql } from 'drizzle-orm'
 
 import type { BaseSQLiteAdapter, CountDistinct } from './types.js'
@@ -19,7 +17,7 @@ export const countDistinct: CountDistinct = async function countDistinct(
     return Number(countResult?.[0]?.count ?? 0)
   }
 
-  let query: SQLiteSelect = db
+  let query = db
     .select({
       count: sql`COUNT(1) OVER()`,
     })
@@ -27,7 +25,7 @@ export const countDistinct: CountDistinct = async function countDistinct(
     .where(where)
     .groupBy(column ?? this.tables[tableName].id)
     .limit(1)
-    .$dynamic() as unknown as SQLiteSelect
+    .$dynamic()
 
   joins.forEach(({ type, condition, table }) => {
     query = query[type ?? 'leftJoin'](table, condition)
@@ -37,7 +35,7 @@ export const countDistinct: CountDistinct = async function countDistinct(
   // COUNT(*) doesn't work for this well in this case, as it also counts joined tables.
   // SELECT (COUNT DISTINCT id) has a very slow performance on large tables.
   // Instead, COUNT (GROUP BY id) can be used which is still slower than COUNT(*) but acceptable.
-  const countResult = await query.execute()
+  const countResult = await query
 
   return Number(countResult?.[0]?.count ?? 0)
 }
