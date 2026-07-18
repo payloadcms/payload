@@ -1,3 +1,4 @@
+import type { IncomingHttpHeaders } from 'http'
 import type { AddressInfo } from 'net'
 import type { CollectionSlug, Payload, PayloadRequest, UploadInstructions } from 'payload'
 
@@ -1050,6 +1051,8 @@ describe('Collections - Uploads', () => {
           req: {
             headers: new Headers({
               cookie: testCookies,
+              origin: 'https://payloadcms.com',
+              'sec-fetch-site': 'same-origin',
             }),
           },
         })
@@ -1060,11 +1063,13 @@ describe('Collections - Uploads', () => {
         expect(cookieHeader).not.toContain('payload-token=123')
         expect(cookieHeader).not.toContain('payload-something=789')
         expect(cookieHeader).toContain('other-cookie=456')
+        expect(options.headers.origin).toBeUndefined()
+        expect(options.headers['sec-fetch-site']).toBeUndefined()
 
         fetchSpy.mockRestore()
       })
 
-      it('getExternalFile should not filter out payload cookies when externalFileHeaderFilter is not defined and the URL is not external', async () => {
+      it('should preserve authentication headers for relative and absolute same-server URLs', async () => {
         const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
           '; ',
         )
@@ -1080,6 +1085,72 @@ describe('Collections - Uploads', () => {
 
         const port = (server.address() as AddressInfo).port
         const baseUrl = `http://localhost:${port}`
+        const requestOrigin = 'https://admin.example.com'
+        const originalServerURL = payload.config.serverURL
+        payload.config.serverURL = baseUrl
+
+        try {
+          const req = await createPayloadRequest({
+            config: payload.config,
+            request: new Request(baseUrl, {
+              headers: new Headers({
+                cookie: testCookies,
+                origin: requestOrigin,
+                'sec-fetch-site': 'same-origin',
+              }),
+            }),
+          })
+
+          const urls = ['/api/media/image.png', `${baseUrl}/api/media/image.png`]
+          for (const url of urls) {
+            await getExternalFile({
+              data: { url },
+              req,
+              uploadConfig: { skipSafeFetch: true },
+            })
+          }
+
+          for (const [index, [, options]] of fetchSpy.mock.calls.entries()) {
+            const cookieHeader = options.headers.cookie
+
+            expect(fetchSpy.mock.calls[index]![0]).toBe(`${baseUrl}/api/media/image.png`)
+            expect(cookieHeader).toContain('payload-token=123')
+            expect(cookieHeader).toContain('payload-something=789')
+            expect(cookieHeader).toContain('other-cookie=456')
+            expect(options.headers.origin).toBe(requestOrigin)
+            expect(options.headers['sec-fetch-site']).toBe('same-origin')
+          }
+        } finally {
+          fetchSpy.mockRestore()
+          payload.config.serverURL = originalServerURL
+          await new Promise((res) => server.close(res))
+        }
+      })
+
+      it('should strip authentication headers from a cross-origin redirect', async () => {
+        const testCookies = ['payload-token=123', 'other-cookie=456', 'payload-something=789'].join(
+          '; ',
+        )
+        let externalRequestHeaders: IncomingHttpHeaders | undefined
+
+        const externalServer = createServer((req, res) => {
+          externalRequestHeaders = req.headers
+          res.writeHead(200, { 'Content-Type': 'application/json' })
+          res.end(JSON.stringify({ ok: true }))
+        })
+        await new Promise((res) => externalServer.listen(0, undefined, undefined, res))
+
+        const externalPort = (externalServer.address() as AddressInfo).port
+        const redirectServer = createServer((_req, res) => {
+          res.writeHead(302, { Location: `http://localhost:${externalPort}/image.png` })
+          res.end()
+        })
+        await new Promise((res) => redirectServer.listen(0, undefined, undefined, res))
+
+        const redirectPort = (redirectServer.address() as AddressInfo).port
+        const baseUrl = `http://localhost:${redirectPort}`
+        const originalServerURL = payload.config.serverURL
+        payload.config.serverURL = baseUrl
 
         const req = await createPayloadRequest({
           config: payload.config,
@@ -1087,25 +1158,28 @@ describe('Collections - Uploads', () => {
             headers: new Headers({
               cookie: testCookies,
               origin: baseUrl,
+              'sec-fetch-site': 'same-origin',
             }),
           }),
         })
 
-        await getExternalFile({
-          data: { url: '/api/media/image.png' },
-          req,
-          uploadConfig: { skipSafeFetch: true },
-        })
+        try {
+          await getExternalFile({
+            data: { url: `${baseUrl}/api/media/image.png` },
+            req,
+            uploadConfig: { skipSafeFetch: true },
+          })
 
-        const [[, options]] = fetchSpy.mock.calls
-        const cookieHeader = options.headers.cookie
-
-        expect(cookieHeader).toContain('payload-token=123')
-        expect(cookieHeader).toContain('payload-something=789')
-        expect(cookieHeader).toContain('other-cookie=456')
-
-        fetchSpy.mockRestore()
-        await new Promise((res) => server.close(res))
+          expect(externalRequestHeaders!.cookie).not.toContain('payload-token=123')
+          expect(externalRequestHeaders!.cookie).not.toContain('payload-something=789')
+          expect(externalRequestHeaders!.cookie).toContain('other-cookie=456')
+          expect(externalRequestHeaders!.origin).toBeUndefined()
+          expect(externalRequestHeaders!['sec-fetch-site']).toBeUndefined()
+        } finally {
+          payload.config.serverURL = originalServerURL
+          await new Promise((res) => redirectServer.close(res))
+          await new Promise((res) => externalServer.close(res))
+        }
       })
 
       it('should keep all cookies when externalFileHeaderFilter is defined', async () => {
