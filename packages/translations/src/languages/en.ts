@@ -471,6 +471,7 @@ export const enTranslations = {
     selectAllRows: 'Select all rows',
     selectedCount: '{{count}} {{label}} selected',
     selectLabel: 'Select {{label}}',
+    selectRow: 'Select row: {{title}}',
     selectValue: 'Select a value',
     settings: 'Settings',
     showAllLabel: 'Show all {{label}}',

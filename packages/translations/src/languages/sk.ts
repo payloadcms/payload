@@ -468,6 +468,7 @@ export const skTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Vybrať všetky riadky',
     selectedCount: 'Vybrané {{count}} {{label}}',
     selectLabel: 'Vyberte {{label}}',
+    selectRow: undefined,
     selectValue: 'Vybrať hodnotu',
     settings: 'Nastavenia',
     showAllLabel: 'Zobraziť všetky {{label}}',

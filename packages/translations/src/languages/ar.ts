@@ -461,6 +461,7 @@ export const arTranslations: DefaultTranslationsObject = {
     selectAllRows: 'حدد جميع الصفوف',
     selectedCount: 'تم تحديد {{count}} {{label}}',
     selectLabel: 'حدد {{label}}',
+    selectRow: undefined,
     selectValue: 'اختيار قيمة',
     settings: 'الإعدادات',
     showAllLabel: 'عرض كل {{label}}',

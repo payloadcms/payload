@@ -472,6 +472,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     selectAllRows: 'すべての行を選択します',
     selectedCount: '{{count}}つの{{label}}を選択中',
     selectLabel: '{{label}}を選択してください',
+    selectRow: undefined,
     selectValue: '値を選択',
     settings: '設定',
     showAllLabel: 'すべての{{label}}を表示する',

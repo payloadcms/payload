@@ -473,6 +473,7 @@ export const idTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Pilih semua baris',
     selectedCount: '{{count}} {{label}} dipilih',
     selectLabel: 'Pilih {{label}}',
+    selectRow: undefined,
     selectValue: 'Pilih nilai',
     settings: 'Pengaturan',
     showAllLabel: 'Tampilkan semua {{label}}',

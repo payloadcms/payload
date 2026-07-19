@@ -448,6 +448,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     selectAllRows: '选择所有行',
     selectedCount: '已选择 {{count}} 个 {{label}}',
     selectLabel: '选择 {{label}}',
+    selectRow: undefined,
     selectValue: '选择一个值',
     settings: '设置',
     showAllLabel: '显示所有 {{label}}',

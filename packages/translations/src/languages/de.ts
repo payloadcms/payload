@@ -481,6 +481,7 @@ export const deTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Alle Zeilen auswählen',
     selectedCount: '{{count}} {{label}} ausgewählt',
     selectLabel: '{{label}} auswählen',
+    selectRow: undefined,
     selectValue: 'Wert auswählen',
     settings: 'Einstellungen',
     showAllLabel: 'Alle {{label}} anzeigen',
