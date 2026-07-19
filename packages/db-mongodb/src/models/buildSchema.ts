@@ -64,6 +64,12 @@ const formatDefaultValue = (field: FieldAffectingData) =>
     ? field.defaultValue
     : undefined
 
+const stripSchemaDefault = (schema: SchemaTypeOptions<any>): SchemaTypeOptions<any> => {
+  const { default: _default, ...schemaWithoutDefault } = schema
+
+  return schemaWithoutDefault
+}
+
 const formatBaseSchema = ({
   buildSchemaOptions,
   field,
@@ -111,11 +117,13 @@ const localizeSchema = (
     localization &&
     Array.isArray(localization.locales)
   ) {
+    const localeSubSchema = stripSchemaDefault(schema)
+
     return {
       type: localization.localeCodes.reduce(
         (localeSchema, locale) => ({
           ...localeSchema,
-          [locale]: schema,
+          [locale]: localeSubSchema,
         }),
         {
           _id: false,
