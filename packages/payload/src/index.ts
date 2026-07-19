@@ -1447,6 +1447,7 @@ export type {
   AfterLogoutHook as CollectionAfterLogoutHook,
   AfterMeHook as CollectionAfterMeHook,
   AfterOperationHook as CollectionAfterOperationHook,
+  AfterPasswordResetHook as CollectionAfterPasswordResetHook,
   AfterReadHook as CollectionAfterReadHook,
   AfterRefreshHook as CollectionAfterRefreshHook,
   AuthCollection,
