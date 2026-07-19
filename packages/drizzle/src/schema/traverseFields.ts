@@ -150,6 +150,9 @@ export const traverseFields = ({
       targetIndexes = localesIndexes
     }
 
+    const isLocaleColumn = targetTable === localesColumns
+    const columnWithDefault = (column: RawColumn) => withDefault(column, field, isLocaleColumn)
+
     if (
       (field.unique || field.index || ['relationship', 'upload'].includes(field.type)) &&
       !['array', 'blocks', 'group'].includes(field.type) &&
@@ -372,13 +375,10 @@ export const traverseFields = ({
       }
       case 'blocks': {
         if (adapter.blocksAsJSON) {
-          targetTable[fieldName] = withDefault(
-            {
-              name: columnName,
-              type: 'jsonb',
-            },
-            field,
-          )
+          targetTable[fieldName] = columnWithDefault({
+            name: columnName,
+            type: 'jsonb',
+          })
           break
         }
 
@@ -609,13 +609,10 @@ export const traverseFields = ({
         break
       }
       case 'checkbox': {
-        targetTable[fieldName] = withDefault(
-          {
-            name: columnName,
-            type: 'boolean',
-          },
-          field,
-        )
+        targetTable[fieldName] = columnWithDefault({
+          name: columnName,
+          type: 'boolean',
+        })
 
         break
       }
@@ -623,28 +620,22 @@ export const traverseFields = ({
       case 'code':
       case 'email':
       case 'textarea': {
-        targetTable[fieldName] = withDefault(
-          {
-            name: columnName,
-            type: 'varchar',
-          },
-          field,
-        )
+        targetTable[fieldName] = columnWithDefault({
+          name: columnName,
+          type: 'varchar',
+        })
 
         break
       }
 
       case 'date': {
-        targetTable[fieldName] = withDefault(
-          {
-            name: columnName,
-            type: 'timestamp',
-            mode: 'string',
-            precision: 3,
-            withTimezone: true,
-          },
-          field,
-        )
+        targetTable[fieldName] = columnWithDefault({
+          name: columnName,
+          type: 'timestamp',
+          mode: 'string',
+          precision: 3,
+          withTimezone: true,
+        })
 
         break
       }
@@ -710,13 +701,10 @@ export const traverseFields = ({
 
       case 'json':
       case 'richText': {
-        targetTable[fieldName] = withDefault(
-          {
-            name: columnName,
-            type: 'jsonb',
-          },
-          field,
-        )
+        targetTable[fieldName] = columnWithDefault({
+          name: columnName,
+          type: 'jsonb',
+        })
 
         break
       }
@@ -744,26 +732,20 @@ export const traverseFields = ({
             )
           }
         } else {
-          targetTable[fieldName] = withDefault(
-            {
-              name: columnName,
-              type: 'numeric',
-            },
-            field,
-          )
+          targetTable[fieldName] = columnWithDefault({
+            name: columnName,
+            type: 'numeric',
+          })
         }
 
         break
       }
 
       case 'point': {
-        targetTable[fieldName] = withDefault(
-          {
-            name: columnName,
-            type: 'geometry',
-          },
-          field,
-        )
+        targetTable[fieldName] = columnWithDefault({
+          name: columnName,
+          type: 'geometry',
+        })
 
         break
       }
@@ -912,15 +894,12 @@ export const traverseFields = ({
             },
           }
         } else {
-          targetTable[fieldName] = withDefault(
-            {
-              name: columnName,
-              type: 'enum',
-              enumName,
-              options,
-            },
-            field,
-          )
+          targetTable[fieldName] = columnWithDefault({
+            name: columnName,
+            type: 'enum',
+            enumName,
+            options,
+          })
         }
         break
       }
@@ -1014,13 +993,10 @@ export const traverseFields = ({
             )
           }
         } else {
-          targetTable[fieldName] = withDefault(
-            {
-              name: columnName,
-              type: 'varchar',
-            },
-            field,
-          )
+          targetTable[fieldName] = columnWithDefault({
+            name: columnName,
+            type: 'varchar',
+          })
         }
         break
       }

@@ -10,6 +10,7 @@ import { type RequestContext, validateBlocksFilterOptions } from '../../../index
 import { deepMergeWithSourceArrays } from '../../../utilities/deepMerge.js'
 import { getTranslatedLabel } from '../../../utilities/getTranslatedLabel.js'
 import { fieldAffectsData, fieldShouldBeLocalized, tabHasName } from '../../config/types.js'
+import { getDefaultValue } from '../../getDefaultValue.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from './getExistingRowDoc.js'
 import { traverseFields } from './traverseFields.js'
@@ -266,18 +267,57 @@ export const promise = async ({
 
     // Push merge locale action if applicable
     if (localization && fieldShouldBeLocalized({ field, parentIsLocalized })) {
-      mergeLocaleActions.push(() => {
+      const incomingFieldKeys = req.context.incomingFieldKeys as Set<string> | undefined
+      const fieldWasProvided = incomingFieldKeys
+        ? incomingFieldKeys.has(field.name!)
+        : Object.prototype.hasOwnProperty.call(data, field.name!)
+
+      mergeLocaleActions.push(async () => {
         const localeData: Record<string, unknown> = {}
 
-        for (const locale of localization.localeCodes) {
-          const fieldValue =
-            locale === req.locale
-              ? siblingData[field.name!]
-              : siblingDocWithLocales?.[field.name!]?.[locale]
+        if (operation === 'update' && !fieldWasProvided) {
+          delete siblingData[field.name!]
 
-          // update locale value if it's not undefined
-          if (typeof fieldValue !== 'undefined') {
-            localeData[locale] = fieldValue
+          // Partial locale update: preserve existing values for other locales only.
+          // Do not write defaults or fallback-filled values into the active locale.
+          for (const locale of localization.localeCodes) {
+            if (locale === operationLocale) {
+              continue
+            }
+
+            const fieldValue = siblingDocWithLocales?.[field.name!]?.[locale]
+
+            if (typeof fieldValue !== 'undefined') {
+              localeData[locale] = fieldValue
+            }
+          }
+        } else {
+          for (const locale of localization.localeCodes) {
+            let fieldValue =
+              locale === operationLocale
+                ? siblingData[field.name!]
+                : siblingDocWithLocales?.[field.name!]?.[locale]
+
+            if (
+              locale === operationLocale &&
+              operation === 'create' &&
+              typeof fieldValue === 'undefined' &&
+              'defaultValue' in field &&
+              typeof field.defaultValue !== 'undefined' &&
+              !req.context?.isRestoringVersion
+            ) {
+              fieldValue = await getDefaultValue({
+                defaultValue: field.defaultValue,
+                locale: operationLocale,
+                req,
+                user: req.user,
+              })
+            }
+
+            // update locale value if it's not undefined
+            if (typeof fieldValue !== 'undefined') {
+              localeData[locale] = fieldValue
+            }
           }
         }
 
