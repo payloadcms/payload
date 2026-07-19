@@ -479,6 +479,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Selecteer alle rijen',
     selectedCount: '{{count}} {{label}} geselecteerd',
     selectLabel: 'Selecteer {{label}}',
+    selectRow: undefined,
     selectValue: 'Selecteer een waarde',
     settings: 'Instellingen',
     showAllLabel: 'Toon alle {{label}}',

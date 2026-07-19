@@ -474,6 +474,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Velg alle rader',
     selectedCount: '{{count}} {{label}} valgt',
     selectLabel: 'Velg {{label}}',
+    selectRow: undefined,
     selectValue: 'Velg en verdi',
     settings: 'Innstillinger',
     showAllLabel: 'Vis alle {{label}}',

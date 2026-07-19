@@ -474,6 +474,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Selecione todas as linhas',
     selectedCount: '{{count}} {{label}} selecionado',
     selectLabel: 'Selecione {{label}}',
+    selectRow: undefined,
     selectValue: 'Selecione um valor',
     settings: 'Configurações',
     showAllLabel: 'Mostre todos {{label}}',

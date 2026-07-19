@@ -477,6 +477,7 @@ export const myTranslations: DefaultTranslationsObject = {
     selectAllRows: 'အားလုံးကိုရွေးချယ်ပါ',
     selectedCount: '{{count}} {{label}} ကို ရွေးထားသည်။',
     selectLabel: '{{label}} ရွေးချယ်ပါ',
+    selectRow: undefined,
     selectValue: 'တစ်ခုခုကို ရွေးချယ်ပါ။',
     settings: 'ဆက်တင်များ',
     showAllLabel: '{{label}} အားလုံး ပြပါ',

@@ -467,6 +467,7 @@ export const csTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Vyberte všechny řádky',
     selectedCount: 'Vybráno {{count}} {{label}}',
     selectLabel: 'Vyberte {{label}}',
+    selectRow: undefined,
     selectValue: 'Vyberte hodnotu',
     settings: 'Nastavení',
     showAllLabel: 'Zobrazit všechny {{label}}',

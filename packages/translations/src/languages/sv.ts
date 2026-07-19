@@ -473,6 +473,7 @@ export const svTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Välj alla rader',
     selectedCount: '{{count}} {{label}} har valts',
     selectLabel: 'Välj {{label}}',
+    selectRow: undefined,
     selectValue: 'Välj ett värde',
     settings: 'Inställningar',
     showAllLabel: 'Visa alla {{label}}',

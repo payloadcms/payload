@@ -477,6 +477,7 @@ export const huTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Válassza ki az összes sort',
     selectedCount: '{{count}} {{label}} kiválasztva',
     selectLabel: 'Válassza ki a(z) {{label}} opciót',
+    selectRow: undefined,
     selectValue: 'Válasszon ki egy értéket',
     settings: 'Beállítások',
     showAllLabel: 'Mutasd az összes {{címke}}',
