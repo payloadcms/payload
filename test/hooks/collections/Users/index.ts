@@ -4,6 +4,7 @@ import { AuthenticationError } from 'payload'
 
 import { devUser, regularUser } from '../../../credentials.js'
 import { afterLoginHook } from './afterLoginHook.js'
+import { afterPasswordResetHook } from './afterPasswordResetHook.js'
 import { meHook } from './meHook.js'
 import { refreshHook } from './refreshHook.js'
 
@@ -47,10 +48,11 @@ const Users: CollectionConfig = {
     },
   ],
   hooks: {
+    afterLogin: [afterLoginHook],
+    afterPasswordReset: [afterPasswordResetHook],
+    beforeLogin: [beforeLoginHook],
     me: [meHook],
     refresh: [refreshHook],
-    afterLogin: [afterLoginHook],
-    beforeLogin: [beforeLoginHook],
   },
   versions: false,
 }
