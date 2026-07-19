@@ -252,13 +252,11 @@ export const renderTable = ({
         hidden: true,
       },
       Heading: <SelectAll />,
-      renderedCells: (data?.docs || []).map((row, i) => (
-        <SelectRow
-          key={i}
-          rowData={row}
-          selectRowLabel={getSelectRowLabel({ i18n, rowData: row, useAsTitle })}
-        />
-      )),
+      renderedCells: (data?.docs || []).map((doc, i) => {
+        const titleValue = useAsTitle ? (doc[useAsTitle] ?? doc.id) : doc.id
+        const rowLabel = i18n.t('general:selectRow', { title: String(titleValue) })
+        return <SelectRow key={i} rowData={doc} rowLabel={rowLabel} />
+      }),
     } as Column)
   }
 
