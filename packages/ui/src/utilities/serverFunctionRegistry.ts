@@ -6,6 +6,7 @@ import { buildFormStateHandler } from './buildFormState.js'
 import { buildTableStateHandler } from './buildTableState.js'
 import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'
 import { schedulePublishHandler } from './schedulePublishHandler.js'
+import { slugifyHandler } from './slugify.js'
 
 /**
  * Framework-agnostic server function handlers shared across all adapters.
@@ -23,5 +24,6 @@ export const sharedServerFunctions: Record<string, ServerFunction<any, any>> = {
   'render-document': renderDocumentHandler,
   'render-list': renderListHandler,
   'schedule-publish': schedulePublishHandler,
+  slugify: slugifyHandler,
   'table-state': buildTableStateHandler,
 }
