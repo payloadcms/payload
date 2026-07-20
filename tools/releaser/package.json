@@ -31,6 +31,8 @@
     "list-published": "tsx src/lib/getPackageRegistryVersions.ts",
     "publish-prerelease": "tsx src/publish-prerelease.ts",
     "release": "tsx src/release.ts",
+    "release-bump": "tsx src/release-bump.ts",
+    "release-ci": "tsx src/release-ci.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
