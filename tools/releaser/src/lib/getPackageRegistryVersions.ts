@@ -1,5 +1,6 @@
 import chalk from 'chalk'
 import pLimit from 'p-limit'
+import { pathToFileURL } from 'url'
 
 import { getPackageDetails } from './getPackageDetails.js'
 import { packagePublishList } from './publishList.js'
@@ -56,6 +57,10 @@ export const getPackageRegistryVersions = async (): Promise<void> => {
   console.log(results.sort().join('\n'))
 }
 
-if (import.meta.url === new URL(import.meta.url).href) {
+// Run the registry-version report only when invoked directly (e.g. `pnpm
+// list-published`), never as a side effect of importing this module for
+// `isVersionPublished`. The prior guard compared import.meta.url to itself, which
+// is always true, so any importer triggered the full report + network fetches.
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   await getPackageRegistryVersions()
 }
