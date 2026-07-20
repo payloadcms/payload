@@ -8,31 +8,19 @@ import type {
 import { renderTabHandler } from '../elements/Nav/SidebarTabs/renderTabServerFn.js'
 import { _internal_renderFieldHandler } from '../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
 import { getDefaultLayoutHandler, renderWidgetHandler } from '../views/Dashboard/serverFunctions.js'
-import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
 import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
-import { renderListHandler } from '../views/List/handleServerFunction.js'
-import { buildFormStateHandler } from './buildFormState.js'
-import { buildTableStateHandler } from './buildTableState.js'
-import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'
 import { initReq } from './initReq.js'
-import { schedulePublishHandler } from './schedulePublishHandler.js'
-import { slugifyHandler } from './slugify.js'
+import { sharedServerFunctions } from './serverFunctionRegistry.js'
 import { switchLanguageHandler } from './switchLanguageHandler.js'
 
 const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
-  'copy-data-from-locale': copyDataFromLocaleHandler,
-  'form-state': buildFormStateHandler,
+  ...sharedServerFunctions,
   'get-default-layout': getDefaultLayoutHandler,
-  'render-document': renderDocumentHandler,
   'render-document-slots': renderDocumentSlotsHandler,
   'render-field': _internal_renderFieldHandler,
-  'render-list': renderListHandler,
   'render-tab': renderTabHandler,
   'render-widget': renderWidgetHandler,
-  'schedule-publish': schedulePublishHandler,
-  slugify: slugifyHandler,
   'switch-language': switchLanguageHandler,
-  'table-state': buildTableStateHandler,
 }
 
 /**
