@@ -6,6 +6,7 @@ import { Link } from '../../elements/Link/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { IDLabel } from '../IDLabel/index.js'
 import './index.css'
 
@@ -29,6 +30,7 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
 
   const { id, collectionSlug, globalSlug, isInitializing } = useDocumentInfo()
   const { title: titleFromContext } = useDocumentTitle()
+  const { t } = useTranslation()
   const {
     config: {
       routes: { admin: adminRoute },
@@ -38,6 +40,8 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
   const title = titleFromProps || titleFromContext || fallback
 
   const idAsTitle = title === id
+
+  const isPlaceholder = !titleFromProps && !fallback && title === t('general:untitled')
 
   const Tag = element
 
@@ -54,7 +58,12 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
 
   return (
     <Tag
-      className={[className, baseClass, idAsTitle && `${baseClass}--has-id`]
+      className={[
+        className,
+        baseClass,
+        idAsTitle && `${baseClass}--has-id`,
+        isPlaceholder && `${baseClass}--placeholder`,
+      ]
         .filter(Boolean)
         .join(' ')}
       data-doc-id={id}
