@@ -372,6 +372,7 @@ export const daTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}} hvor',
     globals: 'Globale',
     goBack: 'Gå tilbage',
+    gotIt: 'Forstået',
     groupByLabel: 'Gruppér efter {{label}}',
     hideSidebar: 'Skjul sidepanel',
     import: 'Import',
@@ -599,6 +600,15 @@ export const daTranslations: DefaultTranslationsObject = {
     sizes: 'Størrelse',
     sizesFor: 'Størrelse for {{label}}',
     width: 'Bredde',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Kunne ikke gemme dokument',
+    documentLimitReached:
+      'Du har nået din dokumentgrænse. Slet nogle eksisterende dokumenter for at fortsætte med at oprette nye.',
+    reviewCollection: 'Gennemse {{label}}',
+    unableToCreateDocument: 'Kan ikke oprette dokument. Lagergrænsen er nået.',
+    unableToSaveDocumentTooLarge: 'Kan ikke gemme dokument, teksten er for stor',
+    unableToUpload: 'Kan ikke uploade. Frigør plads for at fortsætte.',
   },
   validation: {
     emailAddress: 'Indtast venligst en gyldig e-mailadresse.',

@@ -379,6 +379,7 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     filterWhere: '{{label}} যেখানে ফিল্টার করুন',
     globals: 'গ্লোবালগুলি',
     goBack: 'পিছনে যান',
+    gotIt: 'বুঝেছি',
     groupByLabel: '{{label}} অনুযায়ী গ্রুপ করুন',
     hideSidebar: 'সাইডবার লুকান',
     import: 'ইম্পোর্ট করুন',
@@ -607,6 +608,15 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     sizes: 'আকারগুলি',
     sizesFor: '{{label}} এর জন্য আকারগুলি',
     width: 'প্রস্থ',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'ডকুমেন্ট সংরক্ষণ করা যায়নি',
+    documentLimitReached:
+      'আপনার document সীমায় পৌঁছেছেন। তৈরি করতে থাকলে কিছু বিদ্যমান document মুছে ফেলুন।',
+    reviewCollection: '{{label}} পর্যালোচনা করুন',
+    unableToCreateDocument: 'ডকুমেন্ট তৈরি করা যাচ্ছে না। সংরক্ষণ সীমা অতিক্রম করা হয়েছে।',
+    unableToSaveDocumentTooLarge: 'নথিটি সংরক্ষণ করা সম্ভব নয়, কারণ পাঠ্যটি অত্যন্ত বৃহৎ।',
+    unableToUpload: 'আপলোড করা যাচ্ছে না। চালিয়ে যেতে স্থান খালি করুন।',
   },
   validation: {
     emailAddress: 'একটি বৈধ ইমেইল ঠিকানা লিখুন।',

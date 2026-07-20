@@ -377,6 +377,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     filterWhere: 'Где фильтровать',
     globals: 'Глобальные',
     goBack: 'Назад',
+    gotIt: 'Понял',
     groupByLabel: 'Группировать по {{label}}',
     hideSidebar: 'Скрыть боковую панель',
     import: 'Импорт',
@@ -604,6 +605,15 @@ export const ruTranslations: DefaultTranslationsObject = {
     sizes: 'Размеры',
     sizesFor: 'Размеры для {{label}}',
     width: 'Ширина',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Не удалось сохранить документ',
+    documentLimitReached:
+      'Вы достигли лимита документов. Удалите некоторые существующие документы, чтобы продолжить создание.',
+    reviewCollection: 'Просмотреть {{label}}',
+    unableToCreateDocument: 'Невозможно создать документ. Превышен лимит хранилища.',
+    unableToSaveDocumentTooLarge: 'Не удалось сохранить документ, текст слишком большой',
+    unableToUpload: 'Не удалось загрузить. Освободите место для продолжения.',
   },
   validation: {
     emailAddress: 'Пожалуйста, введите корректный адрес email.',

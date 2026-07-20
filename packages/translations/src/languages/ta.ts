@@ -374,6 +374,7 @@ export const taTranslations: DefaultTranslationsObject = {
     filterWhere: '{{label}}-ஐ வடிகட்டு',
     globals: 'பொதுவானவை',
     goBack: 'மீண்டும் செல்',
+    gotIt: 'புரிந்தேன்',
     groupByLabel: '{{label}}-ஆல் குழுபடுத்து',
     hideSidebar: 'பக்கப்பட்டியை மறைக்கவும்',
     import: 'இறக்குமதி',
@@ -601,6 +602,15 @@ export const taTranslations: DefaultTranslationsObject = {
     sizes: 'அளவுகள்',
     sizesFor: '{{label}} க்கான அளவுகள்',
     width: 'அகலம்',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'டாக்குமெண்ட் சேமிக்க முடியவில்லை',
+    documentLimitReached:
+      'நீங்கள் உங்கள் Document வரம்பை அடைந்துள்ளீர்கள். தொடர்ந்தும் உருவாக்க, சில புதிய Documents-இனை உருவாக்கும் முன், இருப்பிலுள்ள சில Documents-ஐ நீக்கவும்.',
+    reviewCollection: '{{label}}-ஐ மதிப்பாய்வு செய்யவும்',
+    unableToCreateDocument: 'ஆவணத்தை உருவாக்க முடியவில்லை. சேமிப்பு வரம்பு எட்டப்பட்டுள்ளது.',
+    unableToSaveDocumentTooLarge: 'ஆவணத்தை சேமிக்க முடியவில்லை, உரை மிகப்பெரியது',
+    unableToUpload: 'பதிவேற்ற முடியவில்லை. தொடர வேண்டுமெனில் இடத்தை காலியாக்குங்கள்.',
   },
   validation: {
     emailAddress: 'சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்.',

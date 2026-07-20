@@ -373,6 +373,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     filterWhere: 'Филтрирай {{label}} където',
     globals: 'Глобални',
     goBack: 'Върни се',
+    gotIt: 'Разбрах.',
     groupByLabel: 'Групирай по {{label}}',
     hideSidebar: 'Скрийте страничната лента',
     import: 'Внос',
@@ -599,6 +600,15 @@ export const bgTranslations: DefaultTranslationsObject = {
     sizes: 'Големини',
     sizesFor: 'Размери за {{label}}',
     width: 'Ширина',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Неуспешно запазване на документа',
+    documentLimitReached:
+      'Достигнахте лимита на вашите документи. Изтрийте някои съществуващи документи, за да продължите да създавате.',
+    reviewCollection: 'Прегледайте {{label}}',
+    unableToCreateDocument: 'Неуспешно създаване на документ. Достигнат е лимитът за съхранение.',
+    unableToSaveDocumentTooLarge: 'Неуспешно запазване на документа, текстът е твърде голям.',
+    unableToUpload: 'Неуспешно качване. Освободете място, за да продължите.',
   },
   validation: {
     emailAddress: 'Моля, въведи валиден имейл адрес.',

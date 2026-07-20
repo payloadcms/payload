@@ -364,6 +364,7 @@ export const arTranslations: DefaultTranslationsObject = {
     filterWhere: 'تصفية {{label}} حيث',
     globals: 'عامة',
     goBack: 'العودة',
+    gotIt: 'تم الاستلام',
     groupByLabel: 'التجميع حسب {{label}}',
     hideSidebar: 'إخفاء الشريط الجانبي',
     import: 'استيراد',
@@ -587,6 +588,15 @@ export const arTranslations: DefaultTranslationsObject = {
     sizes: 'الاحجام',
     sizesFor: 'أحجام لـ {{label}}',
     width: 'العرض',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'تعذر حفظ المستند',
+    documentLimitReached:
+      'لقد وصلت إلى الحد الأقصى لعدد المستندات المسموح به. يرجى حذف بعض المستندات الحالية لمواصلة الإنشاء.',
+    reviewCollection: 'مراجعة {{label}}',
+    unableToCreateDocument: 'غير قادر على إنشاء مستند. تم الوصول إلى الحد الأقصى للسعة التخزينية.',
+    unableToSaveDocumentTooLarge: 'تعذّر حفظ المستند، النص كبير جدًا',
+    unableToUpload: 'غير قادر على التحميل. يرجى إفراغ بعض المساحة للمتابعة.',
   },
   validation: {
     emailAddress: 'يرجى إدخال عنوان بريد إلكتروني صحيح.',

@@ -354,6 +354,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     filterWhere: '过滤 {{label}}',
     globals: '全局',
     goBack: '返回',
+    gotIt: '明白',
     groupByLabel: '按 {{label}} 分组',
     hideSidebar: '隐藏侧边栏',
     import: '导入',
@@ -573,6 +574,14 @@ export const zhTranslations: DefaultTranslationsObject = {
     sizes: '尺寸',
     sizesFor: '{{label}} 的尺寸',
     width: '宽度',
+  },
+  usageLimits: {
+    couldNotSaveDocument: '无法保存文档',
+    documentLimitReached: '您已达到文档数量上限。请删除部分现有文档以继续创建。',
+    reviewCollection: '审核 {{label}}',
+    unableToCreateDocument: '无法创建文档。已达到存储限制。',
+    unableToSaveDocumentTooLarge: '无法保存文档，文本过大',
+    unableToUpload: '无法上传。请释放空间以继续操作。',
   },
   validation: {
     emailAddress: '请输入一个有效的电子邮件地址。',

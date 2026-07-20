@@ -1,33 +1,18 @@
-/**
- * Content API "cloud limit" enforcement errors, surfaced to the admin UI:
- * a modal for the document-count limit, and toasts for the data-size and asset-storage
- * limits. Each is keyed off the stable `code` the Content API returns.
- *
- * TODO: Two upstream dependencies must ship for this to fire end-to-end, and this should be re-verified against real
- * Content API errors afterwards:
- *   1. The @payloadcms/figma plugin must preserve the Content API error `code`/status
- *      instead of flattening it into a generic Error (currently masked to a 500).
- *   2. The plugin's document writes must reach the enforcing Content API endpoints
- *      (document-count + data-size are only enforced on the v1 write pipeline today).
- */
+import type { ClientTranslationKeys } from '@payloadcms/translations'
+
 export const cloudLimitErrorCodes = {
   assetStorage: 'cloud_limit.cms_assets_bytes_exceeded',
   documentCount: 'cloud_limit.document_count_exceeded',
   documentDataSize: 'cloud_limit.per_document_data_bytes_exceeded',
 } as const
 
-/** TODO: Add translations */
-export const cloudLimitToastMessages: Record<string, string> = {
-  [cloudLimitErrorCodes.assetStorage]: 'Unable to upload. Free up space to continue.',
-  [cloudLimitErrorCodes.documentDataSize]: 'Unable to save document, text is too large',
+export const cloudLimitToastMessageKeys: Partial<Record<string, ClientTranslationKeys>> = {
+  [cloudLimitErrorCodes.assetStorage]: 'usageLimits:unableToUpload',
+  [cloudLimitErrorCodes.documentDataSize]: 'usageLimits:unableToSaveDocumentTooLarge',
 }
 
-/**
- * Toast copy for the document-count limit. Shown instead of the modal when autosave is
- * enabled, since an autosaving document has no explicit save action to retry.
- */
-export const cloudLimitDocumentCountToastMessage =
-  'Unable to create document. Storage limit reached.'
+export const cloudLimitDocumentCountToastMessageKey: ClientTranslationKeys =
+  'usageLimits:unableToCreateDocument'
 
 export const cloudLimitDocumentCountModalSlug = 'cloud-limit-document-count'
 

@@ -371,6 +371,7 @@ export const slTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtriraj {{label}} kjer',
     globals: 'Globalne nastavitve',
     goBack: 'Nazaj',
+    gotIt: 'Razumem',
     groupByLabel: 'Razvrsti po {{label}}',
     hideSidebar: 'Skrij stransko vrstico',
     import: 'Uvoz',
@@ -597,6 +598,15 @@ export const slTranslations: DefaultTranslationsObject = {
     sizes: 'Velikosti',
     sizesFor: 'Velikosti za {{label}}',
     width: 'Širina',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Ni bilo mogoče shraniti dokumenta',
+    documentLimitReached:
+      'Dosegli ste svojo omejitev dokumentov. Izbrišite nekaj obstoječih dokumentov, da boste lahko nadaljevali z ustvarjanjem.',
+    reviewCollection: 'Preglejte {{label}}',
+    unableToCreateDocument: 'Ni mogoče ustvariti dokumenta. Dosežena je omejitev shranjevanja.',
+    unableToSaveDocumentTooLarge: 'Shranjevanje dokumenta ni mogoče, besedilo je preobsežno.',
+    unableToUpload: 'Nalaganje ni mogoče. Sprostite prostor za nadaljevanje.',
   },
   validation: {
     emailAddress: 'Vnesite veljaven e-poštni naslov.',

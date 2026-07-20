@@ -377,6 +377,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtruoti {{label}}, kur',
     globals: 'Globalai',
     goBack: 'Grįžkite',
+    gotIt: 'Supratau',
     groupByLabel: 'Grupuoti pagal {{label}}',
     hideSidebar: 'Slėpti šoninę juostą',
     import: 'Importas',
@@ -601,6 +602,15 @@ export const ltTranslations: DefaultTranslationsObject = {
     sizes: 'Dydžiai',
     sizesFor: 'Dydžiai skirti {{label}}',
     width: 'Plotis',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Nepavyko išsaugoti dokumento',
+    documentLimitReached:
+      'Jūs pasiekėte savo dokumentų limitą. Ištrinkite kai kuriuos esamus dokumentus, kad galėtumėte toliau kurti.',
+    reviewCollection: 'Peržiūrėti {{label}}',
+    unableToCreateDocument: 'Nepavyko sukurti dokumento. Pasiekta saugojimo riba.',
+    unableToSaveDocumentTooLarge: 'Nepavyko išsaugoti dokumento, tekstas yra per didelis',
+    unableToUpload: 'Nepavyko įkelti. Atlaisvinkite vietos, kad galėtumėte tęsti.',
   },
   validation: {
     emailAddress: 'Įveskite galiojantį el. pašto adresą.',

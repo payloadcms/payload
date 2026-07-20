@@ -379,6 +379,7 @@ export const huTranslations: DefaultTranslationsObject = {
     filterWhere: 'Szűrő {{label}} ahol',
     globals: 'Globálisok',
     goBack: 'Vissza',
+    gotIt: 'Értettem',
     groupByLabel: 'Csoportosítás {{label}} szerint',
     hideSidebar: 'Oldalsáv elrejtése',
     import: 'Behozatal',
@@ -605,6 +606,15 @@ export const huTranslations: DefaultTranslationsObject = {
     sizes: 'Méretek',
     sizesFor: 'Méretek a {{címke}} számára',
     width: 'Szélesség',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'A dokumentum mentése nem sikerült.',
+    documentLimitReached:
+      'Elérte a dokumentumlimitjét. Töröljön néhány meglévő dokumentumot, hogy folytathassa az új dokumentumok létrehozását.',
+    reviewCollection: 'Felülvizsgálat {{label}}',
+    unableToCreateDocument: 'Nem sikerült létrehozni a dokumentumot. A tárhelykorlát elérve.',
+    unableToSaveDocumentTooLarge: 'Nem sikerült elmenteni a dokumentumot, a szöveg túl hosszú.',
+    unableToUpload: 'Nem sikerült feltölteni. Szabadítson fel tárhelyet a folytatáshoz.',
   },
   validation: {
     emailAddress: 'Kérjük, adjon meg egy érvényes e-mail címet.',

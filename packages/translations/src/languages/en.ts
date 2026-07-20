@@ -374,6 +374,7 @@ export const enTranslations = {
     filterWhere: 'Filter {{label}} where',
     globals: 'Globals',
     goBack: 'Go back',
+    gotIt: 'Got it',
     groupByLabel: 'Group by {{label}}',
     hideSidebar: 'Hide sidebar',
     import: 'Import',
@@ -599,6 +600,15 @@ export const enTranslations = {
     sizes: 'Sizes',
     sizesFor: 'Sizes for {{label}}',
     width: 'Width',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Couldn’t save document',
+    documentLimitReached:
+      'You have reached your document limit. Delete some existing documents in order to keep creating.',
+    reviewCollection: 'Review {{label}}',
+    unableToCreateDocument: 'Unable to create document. Storage limit reached.',
+    unableToSaveDocumentTooLarge: 'Unable to save document, text is too large',
+    unableToUpload: 'Unable to upload. Free up space to continue.',
   },
   validation: {
     emailAddress: 'Please enter a valid email address.',

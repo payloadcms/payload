@@ -384,6 +384,7 @@ export const frTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrer {{label}} où',
     globals: 'Globals(es)',
     goBack: 'Retourner',
+    gotIt: 'Compris',
     groupByLabel: 'Regrouper par {{label}}',
     hideSidebar: 'Masquer la barre latérale',
     import: 'Importation',
@@ -612,6 +613,16 @@ export const frTranslations: DefaultTranslationsObject = {
     sizes: 'Tailles',
     sizesFor: 'Tailles pour {{label}}',
     width: 'Largeur',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Impossible d’enregistrer le document',
+    documentLimitReached:
+      'Vous avez atteint la limite de vos documents. Supprimez certains documents existants afin de pouvoir continuer à en créer.',
+    reviewCollection: 'Revoir {{label}}',
+    unableToCreateDocument: 'Impossible de créer le document. Limite de stockage atteinte.',
+    unableToSaveDocumentTooLarge:
+      'Impossible d’enregistrer le document, le texte est trop volumineux',
+    unableToUpload: 'Impossible de téléverser. Libérez de l’espace pour continuer.',
   },
   validation: {
     emailAddress: 'S’il vous plaît, veuillez entrer une adresse e-mail valide.',

@@ -375,6 +375,7 @@ export const idTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}} di mana',
     globals: 'Global',
     goBack: 'Kembali',
+    gotIt: 'Dimengerti',
     groupByLabel: 'Kelompokkan berdasarkan {{label}}',
     hideSidebar: 'Sembunyikan bilah samping',
     import: 'Impor',
@@ -603,6 +604,15 @@ export const idTranslations: DefaultTranslationsObject = {
     sizes: 'Ukuran',
     sizesFor: 'Ukuran untuk {{label}}',
     width: 'Lebar',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Tidak dapat menyimpan dokumen',
+    documentLimitReached:
+      'Anda telah mencapai batas dokumen Anda. Hapus beberapa dokumen yang ada untuk dapat terus membuat dokumen baru.',
+    reviewCollection: 'Tinjau {{label}}',
+    unableToCreateDocument: 'Tidak dapat membuat dokumen. Batas penyimpanan telah tercapai.',
+    unableToSaveDocumentTooLarge: 'Tidak dapat menyimpan dokumen, teks terlalu besar',
+    unableToUpload: 'Tidak dapat mengunggah. Kosongkan ruang untuk melanjutkan.',
   },
   validation: {
     emailAddress: 'Harap masukkan alamat email yang valid.',

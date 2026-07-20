@@ -373,6 +373,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrēt {{label}} kur',
     globals: 'Globālie',
     goBack: 'Doties atpakaļ',
+    gotIt: 'Sapratu',
     groupByLabel: 'Grupēt pēc {{label}}',
     hideSidebar: 'Paslēpt sānjoslu',
     import: 'Imports',
@@ -598,6 +599,15 @@ export const lvTranslations: DefaultTranslationsObject = {
     sizes: 'Izmēri',
     sizesFor: 'Izmēri priekš {{label}}',
     width: 'Platums',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Neizdevās saglabāt dokumentu',
+    documentLimitReached:
+      'Jūs esat sasniedzis savu dokumentu limitu. Dzēsiet dažus esošos dokumentus, lai varētu turpināt veidot jaunus.',
+    reviewCollection: 'Pārskatīt {{label}}',
+    unableToCreateDocument: 'Neizdevās izveidot dokumentu. Ir sasniegts krātuves limits.',
+    unableToSaveDocumentTooLarge: 'Neizdevās saglabāt dokumentu, teksts ir pārāk liels',
+    unableToUpload: 'Nevar augšupielādēt. Atbrīvojiet vietu, lai turpinātu.',
   },
   validation: {
     emailAddress: 'Lūdzu, ievadiet derīgu e-pasta adresi.',

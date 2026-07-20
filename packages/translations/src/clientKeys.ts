@@ -300,6 +300,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:filterWhere',
   'general:globals',
   'general:goBack',
+  'general:gotIt',
   'general:groupByLabel',
   'general:enhancedContrastMode',
   'general:hideSidebar',
@@ -505,6 +506,13 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'upload:fileSize',
   'upload:noFile',
   'upload:download',
+
+  'usageLimits:couldNotSaveDocument',
+  'usageLimits:documentLimitReached',
+  'usageLimits:reviewCollection',
+  'usageLimits:unableToCreateDocument',
+  'usageLimits:unableToSaveDocumentTooLarge',
+  'usageLimits:unableToUpload',
 
   'validation:emailAddress',
   'validation:enterNumber',

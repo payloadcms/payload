@@ -380,6 +380,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}} waar',
     globals: 'Globalen',
     goBack: 'Ga terug',
+    gotIt: 'Begrepen',
     groupByLabel: 'Groepeer op {{label}}',
     hideSidebar: 'Zijbalk verbergen',
     import: 'Importeren',
@@ -607,6 +608,15 @@ export const nlTranslations: DefaultTranslationsObject = {
     sizes: 'Groottes',
     sizesFor: 'Maten voor {{label}}',
     width: 'Breedte',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Kon het document niet opslaan',
+    documentLimitReached:
+      'U heeft uw documentlimiet bereikt. Verwijder enkele bestaande documenten om door te kunnen gaan met het aanmaken.',
+    reviewCollection: 'Beoordeel {{label}}',
+    unableToCreateDocument: 'Kan geen document aanmaken. Opslaglimiet bereikt.',
+    unableToSaveDocumentTooLarge: 'Kan het document niet opslaan, de tekst is te groot',
+    unableToUpload: 'Kan niet uploaden. Maak ruimte vrij om door te gaan.',
   },
   validation: {
     emailAddress: 'Voer een geldig e-mailadres in.',

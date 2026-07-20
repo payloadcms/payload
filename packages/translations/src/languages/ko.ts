@@ -371,6 +371,7 @@ export const koTranslations: DefaultTranslationsObject = {
     filterWhere: '{{label}} 필터링 조건',
     globals: '글로벌',
     goBack: '돌아가기',
+    gotIt: '알겠습니다.',
     groupByLabel: '{{label}}로 그룹화',
     hideSidebar: '사이드바 숨기기',
     import: '수입',
@@ -596,6 +597,15 @@ export const koTranslations: DefaultTranslationsObject = {
     sizes: '크기',
     sizesFor: '{{label}} 크기',
     width: '너비',
+  },
+  usageLimits: {
+    couldNotSaveDocument: '문서를 저장할 수 없습니다.',
+    documentLimitReached:
+      '문서 한도에 도달하셨습니다. 계속해서 생성하려면 기존 문서 일부를 삭제해 주시기 바랍니다.',
+    reviewCollection: '{{label}} 검토',
+    unableToCreateDocument: '문서를 생성할 수 없습니다. 저장 용량 한도에 도달했습니다.',
+    unableToSaveDocumentTooLarge: '문서를 저장할 수 없습니다. 텍스트가 너무 큽니다.',
+    unableToUpload: '업로드할 수 없습니다. 계속하려면 공간을 확보하십시오.',
   },
   validation: {
     emailAddress: '유효한 이메일 주소를 입력하세요.',

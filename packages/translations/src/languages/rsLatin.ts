@@ -373,6 +373,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}} gde',
     globals: 'Globali',
     goBack: 'Vrati se',
+    gotIt: 'Razumem',
     groupByLabel: 'Grupiši po {{label}}',
     hideSidebar: 'Sakrij bočnu traku',
     import: 'Uvoz',
@@ -599,6 +600,15 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     sizes: 'Veličine',
     sizesFor: 'Veličine za {{label}}',
     width: 'Širina',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Nije bilo moguće sačuvati dokument',
+    documentLimitReached:
+      'Dostigli ste ograničenje za broj dokumenata. Obrišite postojeće dokumente kako biste mogli nastaviti sa kreiranjem.',
+    reviewCollection: 'Pregledajte {{label}}',
+    unableToCreateDocument: 'Nije moguće kreirati dokument. Dostignut je limit skladišta.',
+    unableToSaveDocumentTooLarge: 'Nije moguće sačuvati dokument, tekst je prevelik',
+    unableToUpload: 'Nije moguće otpremiti. Oslobodite prostor da biste nastavili.',
   },
   validation: {
     emailAddress: 'Molimo Vas unesite validnu email adresu.',

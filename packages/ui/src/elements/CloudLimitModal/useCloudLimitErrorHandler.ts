@@ -6,10 +6,11 @@ import { toast } from 'sonner'
 
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import {
-  cloudLimitDocumentCountToastMessage,
+  cloudLimitDocumentCountToastMessageKey,
   cloudLimitErrorCodes,
-  cloudLimitToastMessages,
+  cloudLimitToastMessageKeys,
   formatCloudLimitDocumentCountModalSlug,
 } from './shared.js'
 
@@ -19,6 +20,7 @@ export function useCloudLimitErrorHandler(): {
 } {
   const { openModal } = useModal()
   const { docConfig } = useDocumentInfo()
+  const { t } = useTranslation()
   const editDepth = useEditDepth()
 
   const documentCountModalSlug = formatCloudLimitDocumentCountModalSlug(editDepth)
@@ -27,15 +29,19 @@ export function useCloudLimitErrorHandler(): {
     (code: string): void => {
       if (code === cloudLimitErrorCodes.documentCount) {
         if (hasAutosaveEnabled(docConfig)) {
-          toast.info(cloudLimitDocumentCountToastMessage)
+          toast.info(t(cloudLimitDocumentCountToastMessageKey))
         } else {
           openModal(documentCountModalSlug)
         }
-      } else if (cloudLimitToastMessages[code]) {
-        toast.info(cloudLimitToastMessages[code])
+      } else {
+        const messageKey = cloudLimitToastMessageKeys[code]
+
+        if (messageKey) {
+          toast.info(t(messageKey))
+        }
       }
     },
-    [docConfig, openModal, documentCountModalSlug],
+    [docConfig, openModal, documentCountModalSlug, t],
   )
 
   return { documentCountModalSlug, showCloudLimitError }

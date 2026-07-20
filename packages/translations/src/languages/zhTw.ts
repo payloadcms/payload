@@ -352,6 +352,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     filterWhere: '篩選 {{label}}，條件為',
     globals: '全域',
     goBack: '返回',
+    gotIt: '了解',
     groupByLabel: '依 {{label}} 分組',
     hideSidebar: '隱藏側邊欄',
     import: '匯入',
@@ -571,6 +572,14 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     sizes: '尺寸',
     sizesFor: '{{label}} 的尺寸',
     width: '寬度',
+  },
+  usageLimits: {
+    couldNotSaveDocument: '無法儲存文件',
+    documentLimitReached: '您已達到文件上限。請刪除部分現有文件以繼續建立新文件。',
+    reviewCollection: '檢閱 {{label}}',
+    unableToCreateDocument: '無法建立文件。已達到儲存上限。',
+    unableToSaveDocumentTooLarge: '無法儲存文件，文字內容過大',
+    unableToUpload: '無法上傳。請釋放空間以繼續。',
   },
   validation: {
     emailAddress: '請輸入有效的電子郵件地址。',

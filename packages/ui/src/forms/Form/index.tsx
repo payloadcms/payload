@@ -488,8 +488,7 @@ export const Form: React.FC<FormProps> = (props) => {
           contextRef.current = { ...contextRef.current } // triggers rerender of all components that subscribe to form
 
           // Content API "cloud limit" errors returned in the save response (doc-count, data-size).
-          // TODO: verify once the @payloadcms/figma plugin
-          // preserves the error code/status and its writes reach the enforcing v1 endpoints.
+          // TODO: verify once the @payloadcms/figma plugin preserves the error code/status
           const cloudLimitCode = getCloudLimitErrorCode(json)
           if (cloudLimitCode) {
             handleCloudLimitError(cloudLimitCode)

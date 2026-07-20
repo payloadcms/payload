@@ -379,6 +379,7 @@ export const roTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrează {{label}} unde',
     globals: 'Globale',
     goBack: 'Înapoi',
+    gotIt: 'Am înțeles',
     groupByLabel: 'Grupare după {{label}}',
     hideSidebar: 'Ascunde bara laterală',
     import: 'Import',
@@ -605,6 +606,15 @@ export const roTranslations: DefaultTranslationsObject = {
     sizes: 'Dimensiuni',
     sizesFor: 'Mărimi pentru {{label}}',
     width: 'Lățime',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Nu s-a putut salva documentul',
+    documentLimitReached:
+      'Ați atins limita de documente. Ștergeți unele documente existente pentru a putea continua crearea.',
+    reviewCollection: 'Revizuire {{label}}',
+    unableToCreateDocument: 'Nu se poate crea documentul. Limita de stocare a fost atinsă.',
+    unableToSaveDocumentTooLarge: 'Nu se poate salva documentul, textul este prea lung.',
+    unableToUpload: 'Nu se poate încărca. Eliberați spațiu pentru a continua.',
   },
   validation: {
     emailAddress: 'Vă rugăm să introduceți o adresă de email validă.',

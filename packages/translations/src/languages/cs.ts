@@ -369,6 +369,7 @@ export const csTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrovat {{label}} kde',
     globals: 'Globální',
     goBack: 'Vrátit se',
+    gotIt: 'Rozumím',
     groupByLabel: 'Seskupit podle {{label}}',
     hideSidebar: 'Skrýt postranní panel',
     import: 'Import',
@@ -595,6 +596,15 @@ export const csTranslations: DefaultTranslationsObject = {
     sizes: 'Velikosti',
     sizesFor: 'Velikosti pro {{label}}',
     width: 'Šířka',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Dokument se nepodařilo uložit',
+    documentLimitReached:
+      'Dosáhli jste limitu dokumentů. Pro pokračování ve vytváření smažte některé stávající dokumenty.',
+    reviewCollection: 'Zkontrolujte {{label}}',
+    unableToCreateDocument: 'Nelze vytvořit dokument. Byla dosažena kapacita úložiště.',
+    unableToSaveDocumentTooLarge: 'Nelze uložit dokument, text je příliš rozsáhlý.',
+    unableToUpload: 'Nelze nahrát. Uvolněte místo pro pokračování.',
   },
   validation: {
     emailAddress: 'Zadejte prosím platnou e-mailovou adresu.',

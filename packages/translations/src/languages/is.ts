@@ -371,6 +371,7 @@ export const isTranslations: DefaultTranslationsObject = {
     filterWhere: 'Sía {{label}} þar sem',
     globals: 'Einstakir hlutir',
     goBack: 'Til baka',
+    gotIt: 'Fannst',
     groupByLabel: 'Flokka eftir {{label}}',
     hideSidebar: 'Felaðu hliðarstiku',
     import: 'Flytja inn',
@@ -597,6 +598,15 @@ export const isTranslations: DefaultTranslationsObject = {
     sizes: 'Stærðir',
     sizesFor: 'Stærðir fyrir {{label}}',
     width: 'Breidd',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Ekki tókst að vista skjalið',
+    documentLimitReached:
+      'Þú hefur náð hámarksfjölda skjala. Vinsamlegast eyttu einhverjum núverandi skjölum til að geta haldið áfram að búa til ný.',
+    reviewCollection: 'Yfirlit {{label}}',
+    unableToCreateDocument: 'Ekki hægt að búa til skjal. Geymslupláss er fullnýtt.',
+    unableToSaveDocumentTooLarge: 'Ekki hægt að vista skjal, textinn er of stór',
+    unableToUpload: 'Ekki tókst að hlaða upp. Hreinsið til að halda áfram.',
   },
   validation: {
     emailAddress: 'Vinsamlegast settu inn gilt netfang.',

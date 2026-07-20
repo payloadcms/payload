@@ -373,6 +373,7 @@ export const skTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrovat kde je {{label}}',
     globals: 'Globalné',
     goBack: 'Vrátiť sa',
+    gotIt: 'Rozumiem',
     groupByLabel: 'Zoskupiť podľa {{label}}',
     hideSidebar: 'Skryť bočný panel',
     import: 'Dovoz',
@@ -596,6 +597,15 @@ export const skTranslations: DefaultTranslationsObject = {
     sizes: 'Veľkosti',
     sizesFor: 'Veľkosti pre {{label}}',
     width: 'Šírka',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Dokument sa nepodarilo uložiť',
+    documentLimitReached:
+      'Dosiahli ste svoj limit dokumentov. Odstráňte niektoré existujúce dokumenty, aby ste mohli pokračovať v tvorbe.',
+    reviewCollection: 'Skontrolovať {{label}}',
+    unableToCreateDocument: 'Nie je možné vytvoriť dokument. Bol dosiahnutý limit úložiska.',
+    unableToSaveDocumentTooLarge: 'Dokument nie je možné uložiť, text je príliš rozsiahly',
+    unableToUpload: 'Nie je možné nahrať. Uvoľnite miesto, aby ste mohli pokračovať.',
   },
   validation: {
     emailAddress: 'Zadajte prosím platnú e-mailovú adresu.',

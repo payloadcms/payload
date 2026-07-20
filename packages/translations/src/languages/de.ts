@@ -384,6 +384,7 @@ export const deTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}}, wo',
     globals: 'Globale Dokumente',
     goBack: 'Zurück',
+    gotIt: 'Verstanden',
     groupByLabel: 'Nach {{label}} gruppieren',
     hideSidebar: 'Seitenleiste ausblenden',
     import: 'Importieren',
@@ -612,6 +613,16 @@ export const deTranslations: DefaultTranslationsObject = {
     sizes: 'Bildgrößen',
     sizesFor: 'Bildgrößen für {{label}}',
     width: 'Breite',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Dokument konnte nicht gespeichert werden',
+    documentLimitReached:
+      'Sie haben Ihr Dokumentenlimit erreicht. Löschen Sie einige bestehende Dokumente, um weiterhin erstellen zu können.',
+    reviewCollection: '{{label}} überprüfen',
+    unableToCreateDocument: 'Dokument kann nicht erstellt werden. Speicherlimit erreicht.',
+    unableToSaveDocumentTooLarge:
+      'Dokument kann nicht gespeichert werden, der Text ist zu umfangreich.',
+    unableToUpload: 'Hochladen nicht möglich. Schaffen Sie Speicherplatz, um fortzufahren.',
   },
   validation: {
     emailAddress: 'Bitte gib eine korrekte E-Mail-Adresse an.',

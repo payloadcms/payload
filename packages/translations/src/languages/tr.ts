@@ -378,6 +378,7 @@ export const trTranslations: DefaultTranslationsObject = {
     filterWhere: '{{label}} filtrele:',
     globals: 'Globaller',
     goBack: 'Geri dön',
+    gotIt: 'Anlaşıldı',
     groupByLabel: "{{label}}'ye göre grupla",
     hideSidebar: 'Kenar çubuğunu gizle',
     import: 'İthalat',
@@ -606,6 +607,15 @@ export const trTranslations: DefaultTranslationsObject = {
     sizes: 'Boyutlar',
     sizesFor: '{{label}} için boyutlar',
     width: 'Genişlik',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Belge kaydedilemedi',
+    documentLimitReached:
+      'Belge limitinize ulaştınız. Yeni belge oluşturmaya devam edebilmek için mevcut belgelerden bazılarını silin.',
+    reviewCollection: "{{label}}'i inceleyin",
+    unableToCreateDocument: 'Belge oluşturulamıyor. Depolama sınırına ulaşıldı.',
+    unableToSaveDocumentTooLarge: 'Belge kaydedilemiyor, metin çok büyük',
+    unableToUpload: 'Yükleme yapılamıyor. Devam edebilmek için alan boşaltın.',
   },
   validation: {
     emailAddress: 'Lütfen geçerli bir e-posta adresi girin.',

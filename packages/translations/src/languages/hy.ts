@@ -374,6 +374,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     filterWhere: 'Ֆիլտրել {{label}}-ը, որտեղ',
     globals: 'Համընդհանուրներ',
     goBack: 'Հետ գնալ',
+    gotIt: 'Հասկացա',
     groupByLabel: 'Խմբավորել {{label}}-ով',
     hideSidebar: 'Թաքցնել կողային վահանակը',
     import: 'Ներմուծում',
@@ -603,6 +604,15 @@ export const hyTranslations: DefaultTranslationsObject = {
     sizes: 'Չափեր',
     sizesFor: 'Չափեր {{label}}-ի համար',
     width: 'Լայնություն',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Չհաջողվեց պահպանել փաստաթուղթը',
+    documentLimitReached:
+      'Դուք հասել եք ձեր փաստաթղթերի սահմանաչափին։ Խնդրում ենք ջնջել որոշ առկա փաստաթղթեր, որպեսզի շարունակեք ստեղծել նորեր։',
+    reviewCollection: 'Վերանայել {{label}}',
+    unableToCreateDocument: 'Անհնար է ստեղծել փաստաթուղթ։ Պահպանման սահմանաչափը ժամկետանց է։',
+    unableToSaveDocumentTooLarge: 'Հնարավոր չէ պահպանել փաստաթուղթը, տեքստը չափազանց ծավալուն է։',
+    unableToUpload: 'Հնարավոր չէ վերբեռնել։ Շարունակելու համար ազատեք տեղը։',
   },
   validation: {
     emailAddress: 'Խնդրում ենք մուտքագրել վավեր էլ. փոստի հասցե։',

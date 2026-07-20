@@ -366,6 +366,7 @@ export const faTranslations: DefaultTranslationsObject = {
     filterWhere: 'فیلتر کردن {{label}} بر اساس',
     globals: 'سراسری‌ها (Globals)',
     goBack: 'بازگشت',
+    gotIt: 'دریافت شد',
     groupByLabel: 'گروه‌بندی بر اساس {{label}}',
     hideSidebar: 'پنهان کردن نوار کناری',
     import: 'ورود اطلاعات',
@@ -590,6 +591,16 @@ export const faTranslations: DefaultTranslationsObject = {
     sizes: 'اندازه‌ها',
     sizesFor: 'اندازه‌ها برای {{label}}',
     width: 'عرض',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'ذخیره سند امکان‌پذیر نبود.',
+    documentLimitReached:
+      'شما به حد مجاز اسناد خود رسیده‌اید. برای ادامه ایجاد اسناد جدید، برخی از اسناد موجود را حذف کنید.',
+    reviewCollection: 'بازبینی {{label}}',
+    unableToCreateDocument:
+      'امکان ایجاد سند وجود ندارد. محدودیت فضای ذخیره‌سازی به پایان رسیده است.',
+    unableToSaveDocumentTooLarge: 'امکان ذخیره سند وجود ندارد، متن بیش از حد بزرگ است.',
+    unableToUpload: 'امکان بارگذاری وجود ندارد. برای ادامه، فضا را آزاد کنید.',
   },
   validation: {
     emailAddress: 'لطفاً یک آدرس ایمیل معتبر وارد کنید.',

@@ -376,6 +376,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     filterWhere: '{{label}} の絞り込み',
     globals: 'グローバル',
     goBack: '戻る',
+    gotIt: '承知しました',
     groupByLabel: '{{label}}でグループ化する',
     hideSidebar: 'サイドバーを非表示にする',
     import: 'インポート',
@@ -599,6 +600,15 @@ export const jaTranslations: DefaultTranslationsObject = {
     sizes: '容量',
     sizesFor: '{{label}}のサイズ',
     width: '横幅',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'ドキュメントを保存できませんでした',
+    documentLimitReached:
+      'ドキュメントの上限に達しました。新たに作成を続けるには、既存のドキュメントを削除してください。',
+    reviewCollection: '{{label}}を確認',
+    unableToCreateDocument: 'ドキュメントを作成できません。ストレージ上限に達しました。',
+    unableToSaveDocumentTooLarge: 'ドキュメントを保存できません。テキストが大きすぎます。',
+    unableToUpload: 'アップロードできません。続行するには容量を空けてください。',
   },
   validation: {
     emailAddress: '有効なメールアドレスを入力してください。',

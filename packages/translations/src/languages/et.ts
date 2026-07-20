@@ -371,6 +371,7 @@ export const etTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtreeri {{label}} kus',
     globals: 'Globaalsed',
     goBack: 'Mine tagasi',
+    gotIt: 'Sain aru',
     groupByLabel: 'Rühmita {{label}} järgi',
     hideSidebar: 'Peida külgriba',
     import: 'Importimine',
@@ -594,6 +595,15 @@ export const etTranslations: DefaultTranslationsObject = {
     sizes: 'Suurused',
     sizesFor: 'Suurused {{label}} jaoks',
     width: 'Laius',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Dokumenti salvestamine ebaõnnestus',
+    documentLimitReached:
+      'Olete jõudnud oma dokumentide piirini. Uute dokumentide loomiseks kustutage osa olemasolevatest dokumentidest.',
+    reviewCollection: 'Vaadake üle {{label}}',
+    unableToCreateDocument: 'Dokumendi loomine ebaõnnestus. Salvestusmahu limiit on saavutatud.',
+    unableToSaveDocumentTooLarge: 'Dokumendi salvestamine ebaõnnestus, tekst on liiga mahukas',
+    unableToUpload: 'Üleslaadimine ebaõnnestus. Jätkamiseks vabastage ruumi.',
   },
   validation: {
     emailAddress: 'Palun sisesta kehtiv e-posti aadress.',

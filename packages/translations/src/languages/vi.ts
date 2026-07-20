@@ -375,6 +375,7 @@ export const viTranslations: DefaultTranslationsObject = {
     filterWhere: 'Lọc {{label}} với điều kiện:',
     globals: 'Cấu hình chung (globals)',
     goBack: 'Quay lại',
+    gotIt: 'Đã hiểu',
     groupByLabel: 'Nhóm theo {{label}}',
     hideSidebar: 'Ẩn thanh bên',
     import: 'Nhập',
@@ -600,6 +601,15 @@ export const viTranslations: DefaultTranslationsObject = {
     sizes: 'Các độ phân giải',
     sizesFor: 'Kích thước cho {{label}}',
     width: 'Chiều rộng',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Không thể lưu tài liệu',
+    documentLimitReached:
+      'Bạn đã đạt đến giới hạn document của mình. Vui lòng xóa một số document hiện có để tiếp tục tạo mới.',
+    reviewCollection: 'Xem lại {{label}}',
+    unableToCreateDocument: 'Không thể tạo tài liệu. Đã đạt đến giới hạn lưu trữ.',
+    unableToSaveDocumentTooLarge: 'Không thể lưu tài liệu, văn bản quá lớn',
+    unableToUpload: 'Không thể tải lên. Hãy giải phóng dung lượng để tiếp tục.',
   },
   validation: {
     emailAddress: 'Địa chỉ email không hợp lệ.',

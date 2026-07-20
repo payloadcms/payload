@@ -372,6 +372,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filter {{label}} gdje',
     globals: 'Globali',
     goBack: 'Vrati se',
+    gotIt: 'Razumio sam',
     groupByLabel: 'Grupiraj po {{label}}',
     hideSidebar: 'Sakrij bočnu traku',
     import: 'Uvoz',
@@ -598,6 +599,15 @@ export const hrTranslations: DefaultTranslationsObject = {
     sizes: 'Veličine',
     sizesFor: 'Veličine za {{label}}',
     width: 'Širina',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Nije bilo moguće spremiti dokument',
+    documentLimitReached:
+      'Dostigli ste ograničenje broja dokumenata. Izbrišite neke postojeće dokumente kako biste mogli nastaviti s kreiranjem.',
+    reviewCollection: 'Pregledajte {{label}}',
+    unableToCreateDocument: 'Nije moguće stvoriti dokument. Dosegnuto je ograničenje pohrane.',
+    unableToSaveDocumentTooLarge: 'Nije moguće spremiti dokument, tekst je prevelik',
+    unableToUpload: 'Nije moguće prenijeti. Oslobodite prostor za nastavak.',
   },
   validation: {
     emailAddress: 'Molimo unesite valjanu e-mail adresu.',

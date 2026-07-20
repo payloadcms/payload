@@ -375,6 +375,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrer {{label}} der',
     globals: 'Globalt innhold',
     goBack: 'Gå tilbake',
+    gotIt: 'Forstått',
     groupByLabel: 'Grupper etter {{label}}',
     hideSidebar: 'Skjul sidepanel',
     import: 'Import',
@@ -602,6 +603,15 @@ export const nbTranslations: DefaultTranslationsObject = {
     sizes: 'Størrelser',
     sizesFor: 'Størrelser for {{label}}',
     width: 'Bredde',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Kunne ikke lagre dokument',
+    documentLimitReached:
+      'Du har nådd dokumentgrensen din. Slett noen eksisterende dokumenter for å fortsette å opprette nye.',
+    reviewCollection: 'Gjennomgå {{label}}',
+    unableToCreateDocument: 'Kan ikke opprette dokument. Lagringsgrense nådd.',
+    unableToSaveDocumentTooLarge: 'Kan ikke lagre dokumentet, teksten er for stor',
+    unableToUpload: 'Kan ikke laste opp. Frigjør plass for å fortsette.',
   },
   validation: {
     emailAddress: 'Vennligst skriv inn en gyldig e-postadresse.',

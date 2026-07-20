@@ -370,6 +370,7 @@ export const ukTranslations: DefaultTranslationsObject = {
     filterWhere: 'Де фільтрувати {{label}}',
     globals: 'Глобальні',
     goBack: 'Повернутися',
+    gotIt: 'Зрозуміло',
     groupByLabel: 'Групувати за {{label}}',
     hideSidebar: 'Сховати бічну панель',
     import: 'Імпорт',
@@ -595,6 +596,15 @@ export const ukTranslations: DefaultTranslationsObject = {
     sizes: 'Розміри',
     sizesFor: 'Розміри для {{label}}',
     width: 'Ширина',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Не вдалося зберегти документ',
+    documentLimitReached:
+      'Ви досягли ліміту документів. Видаліть деякі наявні документи, щоб мати змогу створювати нові.',
+    reviewCollection: 'Переглянути {{label}}',
+    unableToCreateDocument: 'Не вдалося створити документ. Досягнуто межі сховища.',
+    unableToSaveDocumentTooLarge: 'Неможливо зберегти документ, текст занадто великий',
+    unableToUpload: 'Не вдалося завантажити. Звільніть місце для продовження.',
   },
   validation: {
     emailAddress: 'Будь ласка, введіть коректну адресу електронної пошти.',

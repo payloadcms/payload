@@ -361,6 +361,7 @@ export const heTranslations: DefaultTranslationsObject = {
     filterWhere: 'סנן {{label}} בהם',
     globals: 'גלובלים',
     goBack: 'חזור',
+    gotIt: 'הובן',
     groupByLabel: 'קבץ לפי {{label}}',
     hideSidebar: 'הסתר סרגל צד',
     import: 'יבוא',
@@ -581,6 +582,14 @@ export const heTranslations: DefaultTranslationsObject = {
     sizes: 'גדלים',
     sizesFor: 'גדלים עבור {{label}}',
     width: 'רוחב',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'לא ניתן היה לשמור את המסמך',
+    documentLimitReached: 'הגעת למגבלת המסמכים שלך. מחק מסמכים קיימים כדי להמשיך ליצור.',
+    reviewCollection: 'סקור את {{label}}',
+    unableToCreateDocument: 'לא ניתן ליצור מסמך. הגעת למגבלת האחסון.',
+    unableToSaveDocumentTooLarge: 'לא ניתן לשמור את המסמך, הטקסט גדול מדי',
+    unableToUpload: 'לא ניתן להעלות. יש לפנות שטח אחסון כדי להמשיך.',
   },
   validation: {
     emailAddress: 'נא להזין כתובת דוא"ל תקנית.',

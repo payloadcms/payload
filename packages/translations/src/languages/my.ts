@@ -378,6 +378,7 @@ export const myTranslations: DefaultTranslationsObject = {
     filterWhere: 'နေရာတွင် စစ်ထုတ်ပါ။',
     globals: 'Globals',
     goBack: 'နောက်သို့',
+    gotIt: 'နားလည်ပါသည်',
     groupByLabel: '{{label}} ဖြင့် အုပ်စုဖွဲ့ပါ',
     hideSidebar: 'ဘေး栏ကိုလှမ်းဖွင့်ပါ',
     import: 'သွင်းကုန်',
@@ -607,6 +608,16 @@ export const myTranslations: DefaultTranslationsObject = {
     sizes: 'အရွယ်အစားများ',
     sizesFor: '{{label}} အတွက် အရွယ်အစားများ',
     width: 'အကျယ်',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'စာရွက်ကို သိမ်းပိုက်၍ မရနိုင်ပါ။',
+    documentLimitReached:
+      'သင်သည် သင်၏ Document ကန့်သတ်ချက်ကို လွန်ခဲ့ပြီ။ ဆက်လက် ပြုလုပ်လိုပါက ရှိပြီးသား Document များကို ဖျက်ပစ်ရန် လိုအပ်ပါသည်။',
+    reviewCollection: 'ပြန်လည်သုံးသပ်ရန် {{label}}',
+    unableToCreateDocument: 'စာရွက်စာတမ်း မဖန်တီးနိုင်ပါ။ သိမ်းဆည်းမှုပမာဏ အလွန်တားနေသည်။',
+    unableToSaveDocumentTooLarge:
+      'စာရွက်ကို သိမ်းဆည်း၍မရပါ၊ စာသားအရွယ်အစားသည် အလွန်ကြီးပြင်းနေပါသည်။',
+    unableToUpload: 'တင်သွင်း၍မရနိုင်ပါ။ ဆက်လက်လုပ်ဆောင်ရန် အခန်းဝင်နေရာအားလပ်အောင်ပြုလုပ်ပါ။',
   },
   validation: {
     emailAddress: 'မှန်ကန်သော အီးမေးလ်လိပ်စာကို ထည့်သွင်းပါ။',

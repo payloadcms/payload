@@ -16,9 +16,6 @@ type Props = {
   onRetry: () => void
 }
 
-/**
- * TODO: Verify against real Content API errors once the plugin/backend limit-error work is merged.
- */
 export function CloudLimitDocumentCountModal({ modalSlug, onRetry }: Props) {
   const {
     config: {
@@ -27,7 +24,7 @@ export function CloudLimitDocumentCountModal({ modalSlug, onRetry }: Props) {
     getEntityConfig,
   } = useConfig()
   const { collectionSlug } = useDocumentInfo()
-  const { i18n } = useTranslation()
+  const { i18n, t } = useTranslation()
   const { closeModal } = useModal()
 
   const collectionConfig = collectionSlug ? getEntityConfig({ collectionSlug }) : null
@@ -40,14 +37,9 @@ export function CloudLimitDocumentCountModal({ modalSlug, onRetry }: Props) {
 
   return (
     <ConfirmationModal
-      body={
-        <p>
-          You have reached your document limit. Delete some existing documents in order to keep
-          creating.
-        </p>
-      }
-      cancelLabel="Got it"
-      confirmLabel="Retry"
+      body={<p>{t('usageLimits:documentLimitReached')}</p>}
+      cancelLabel={t('general:gotIt')}
+      confirmLabel={t('general:retry')}
       footerLinkAction={
         listURL ? (
           <a
@@ -56,12 +48,12 @@ export function CloudLimitDocumentCountModal({ modalSlug, onRetry }: Props) {
             rel="noopener noreferrer"
             target="_blank"
           >
-            {`Review ${collectionLabel}`}
+            {t('usageLimits:reviewCollection', { label: collectionLabel })}
             <NewTabIcon size={16} />
           </a>
         ) : null
       }
-      heading="Couldn’t save document"
+      heading={t('usageLimits:couldNotSaveDocument')}
       modalSlug={modalSlug}
       onConfirm={() => {
         closeModal(modalSlug)

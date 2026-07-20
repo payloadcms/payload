@@ -377,6 +377,7 @@ export const azTranslations: DefaultTranslationsObject = {
     filterWhere: '{{label}} filtrlə',
     globals: 'Qloballar',
     goBack: 'Geri qayıt',
+    gotIt: 'Başa düşdüm',
     groupByLabel: '{{label}} ilə qruplaşdırın',
     hideSidebar: 'Yan paneli gizlət',
     import: 'İdxal',
@@ -605,6 +606,15 @@ export const azTranslations: DefaultTranslationsObject = {
     sizes: 'Ölçülər',
     sizesFor: '{{label}} üçün ölçülər',
     width: 'En',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Sənədi saxlamaq mümkün olmadı',
+    documentLimitReached:
+      'Sənəd limitinizə çatmısınız. Yeni sənəd yaratmağa davam etmək üçün mövcud sənədlərdən bəzilərini silin.',
+    reviewCollection: '{{label}}-i nəzərdən keçirin',
+    unableToCreateDocument: 'Sənəd yaratmaq mümkün deyil. Saxlanma limiti aşılmışdır.',
+    unableToSaveDocumentTooLarge: 'Sənədi saxlamaq mümkün deyil, mətn çox böyükdür',
+    unableToUpload: 'Yükləmə mümkün deyil. Davam etmək üçün boş yer azad edin.',
   },
   validation: {
     emailAddress: 'Xahiş edirik doğru elektron poçt ünvanını daxil edin.',

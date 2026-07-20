@@ -376,6 +376,7 @@ export const caTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtra {{label}} on',
     globals: 'Globals',
     goBack: 'Torna enrere',
+    gotIt: 'Entès',
     groupByLabel: 'Agrupa per {{label}}',
     hideSidebar: 'Amaga la barra lateral',
     import: 'Importar',
@@ -603,6 +604,15 @@ export const caTranslations: DefaultTranslationsObject = {
     sizes: 'Mides',
     sizesFor: 'Mides per a {{label}}',
     width: 'Amplada',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'No s’ha pogut desar el document',
+    documentLimitReached:
+      'Heu assolit el límit de documents. Suprimiu alguns documents existents per poder continuar creant-ne.',
+    reviewCollection: 'Revisió {{label}}',
+    unableToCreateDocument: "No es pot crear el document. S'ha assolit el límit d'emmagatzematge.",
+    unableToSaveDocumentTooLarge: 'No es pot desar el document, el text és massa gran',
+    unableToUpload: 'No es pot carregar. Allibereu espai per continuar.',
   },
   validation: {
     emailAddress: 'Si us plau, introdueix una adreça de correu electrònic vàlida.',

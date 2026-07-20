@@ -374,6 +374,7 @@ export const svTranslations: DefaultTranslationsObject = {
     filterWhere: 'Filtrera {{label}} där',
     globals: 'Globala',
     goBack: 'Gå tillbaka',
+    gotIt: 'Uppfattat',
     groupByLabel: 'Gruppera efter {{label}}',
     hideSidebar: 'Dölj sidofält',
     import: 'Importera',
@@ -601,6 +602,15 @@ export const svTranslations: DefaultTranslationsObject = {
     sizes: 'Storlekar',
     sizesFor: 'Storlekar för {{label}}',
     width: 'Bredd',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'Kunde inte spara dokument',
+    documentLimitReached:
+      'Du har nått din dokumentgräns. Ta bort några befintliga dokument för att fortsätta skapa.',
+    reviewCollection: 'Granska {{label}}',
+    unableToCreateDocument: 'Det går inte att skapa dokument. Lagringsgränsen har uppnåtts.',
+    unableToSaveDocumentTooLarge: 'Det går inte att spara dokumentet, texten är för stor',
+    unableToUpload: 'Det gick inte att ladda upp. Frigör utrymme för att fortsätta.',
   },
   validation: {
     emailAddress: 'Vänligen ange en giltig e-postadress.',

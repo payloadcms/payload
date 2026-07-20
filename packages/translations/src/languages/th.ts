@@ -367,6 +367,7 @@ export const thTranslations: DefaultTranslationsObject = {
     filterWhere: 'กรอง {{label}} เฉพาะ',
     globals: 'Globals',
     goBack: 'กลับไป',
+    gotIt: 'รับทราบ',
     groupByLabel: 'จัดกลุ่มตาม {{label}}',
     hideSidebar: 'ซ่อนแถบด้านข้าง',
     import: 'นำเข้า',
@@ -589,6 +590,15 @@ export const thTranslations: DefaultTranslationsObject = {
     sizes: 'ขนาด',
     sizesFor: 'ขนาดสำหรับ {{label}}',
     width: 'ความกว้าง',
+  },
+  usageLimits: {
+    couldNotSaveDocument: 'ไม่สามารถบันทึก Document ได้',
+    documentLimitReached:
+      'คุณได้ถึงขีดจำกัดของ Document แล้ว กรุณาลบ Document ที่มีอยู่บางส่วนเพื่อดำเนินการสร้างต่อ',
+    reviewCollection: 'ตรวจสอบ {{label}}',
+    unableToCreateDocument: 'ไม่สามารถสร้าง Document ได้ เนื่องจากเกินขีดจำกัดการจัดเก็บข้อมูล',
+    unableToSaveDocumentTooLarge: 'ไม่สามารถบันทึก Document ได้ เนื่องจากข้อความมีขนาดใหญ่เกินไป',
+    unableToUpload: 'ไม่สามารถอัปโหลดได้ กรุณาเพิ่มพื้นที่ว่างเพื่อดำเนินการต่อ',
   },
   validation: {
     emailAddress: 'กรุณาระบุอีเมลที่ถูกต้อง',
