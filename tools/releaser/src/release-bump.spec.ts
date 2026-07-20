@@ -47,7 +47,7 @@ describe('runReleaseBump', () => {
     expect(deps.workspace.bumpVersion).not.toHaveBeenCalled()
   })
 
-  it('should allow a canary -> beta transition', async () => {
+  it('should pass the requested preid through to bumpVersion (not hardcode canary)', async () => {
     const deps = makeDeps({
       workspace: {
         bumpVersion: vi.fn(async () => '4.0.0-beta.0'),
