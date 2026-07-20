@@ -494,7 +494,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       return false
     }
 
-    const docID = mostRecentUpdate.doc.id
+    const docID = mostRecentUpdate.doc?.id
 
     let isMatchingUpdate = false
     if (mostRecentUpdate.operation === 'update') {
