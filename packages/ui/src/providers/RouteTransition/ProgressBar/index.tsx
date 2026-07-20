@@ -53,6 +53,14 @@ export const ProgressBar = () => {
 
       shownAtRef.current = null
 
+      // Force a visible value here, at normal priority. For fast client
+      // navigations (e.g. TanStack routing that settles in a single round-trip)
+      // the growing render above — driven by the optimistic `isTransitioning`
+      // flag — is discarded before it paints, so the bar would otherwise only
+      // flash to 100% at the tail. Setting it now guarantees the bar is on
+      // screen for the whole `remaining` window before completing.
+      setProgressToShow((prev) => Math.max(prev ?? 0, initialProgress))
+
       completeTimerID = setTimeout(() => {
         setProgressToShow(1)
 
