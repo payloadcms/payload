@@ -96,7 +96,7 @@ describe('runReleaseCi', () => {
     expect(deps.workspace.build).not.toHaveBeenCalled()
   })
 
-  it('should refuse an unsupported prerelease line instead of defaulting to latest', async () => {
+  it('should refuse an unsupported prerelease line', async () => {
     const deps = makeDeps({
       workspace: {
         build: vi.fn(async () => {}),
