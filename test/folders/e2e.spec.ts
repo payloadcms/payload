@@ -36,6 +36,8 @@ const dirname = path.dirname(filename)
 
 test.describe('Folders', () => {
   let page: Page
+  let payload: Awaited<ReturnType<typeof initPayloadE2ENoConfig>>['payload']
+  let draftsURL: AdminUrlUtil
   let postURL: AdminUrlUtil
   let OmittedFromBrowseBy: AdminUrlUtil
   let serverURL: string
@@ -44,8 +46,10 @@ test.describe('Folders', () => {
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
 
-    const { serverURL: serverFromInit } = await initPayloadE2ENoConfig({ dirname })
-    serverURL = serverFromInit
+    const initResult = await initPayloadE2ENoConfig({ dirname })
+    payload = initResult.payload
+    serverURL = initResult.serverURL
+    draftsURL = new AdminUrlUtil(serverURL, 'drafts')
     postURL = new AdminUrlUtil(serverURL, postSlug)
     OmittedFromBrowseBy = new AdminUrlUtil(serverURL, omittedFromBrowseBySlug)
 
@@ -491,6 +495,51 @@ test.describe('Folders', () => {
     test('should create folder from By Folder view', async () => {
       await page.goto(postURL.byFolder)
       await createFolder({ folderName: 'New Folder From Collection', folderType: ['Posts'], page })
+    })
+
+    test('should show the draft title instead of the published title in By Folder view', async () => {
+      const folder = await payload.create({
+        collection: 'payload-folders',
+        data: {
+          name: 'Draft Titles Folder',
+          folderType: ['drafts'],
+        },
+        overrideAccess: true,
+      })
+
+      const doc = await payload.create({
+        collection: 'drafts',
+        data: {
+          folder: folder.id,
+          title: 'Published Title',
+          _status: 'published',
+        },
+        overrideAccess: true,
+      })
+
+      await payload.update({
+        collection: 'drafts',
+        id: doc.id,
+        data: {
+          title: 'Draft Title',
+        },
+        draft: true,
+        overrideAccess: true,
+      })
+
+      await page.goto(draftsURL.byFolder)
+      await clickFolderCard({ folderName: 'Draft Titles Folder', page, doubleClick: true })
+
+      await expect(
+        page.locator('.folder-file-card__name', {
+          hasText: 'Draft Title',
+        }),
+      ).toBeVisible()
+      await expect(
+        page.locator('.folder-file-card__name', {
+          hasText: 'Published Title',
+        }),
+      ).toBeHidden()
     })
   })
 
