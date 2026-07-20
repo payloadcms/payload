@@ -38,9 +38,9 @@ type CreateServerFunctionHandlerArgs = {
  * Factory for the framework-agnostic `handleServerFunctions` entry point.
  *
  * All adapters dispatch from the shared registry (`sharedServerFunctions`) and
- * differ only in the three injected hooks below — `initReq`, `augmentArgs`, and
- * `transformResult` — so there is a single dispatch implementation and the
- * handler sets cannot drift between frameworks.
+ * differ only in the two injected hooks below — `initReq` and `transformResult`
+ * — so there is a single dispatch implementation and the handler sets cannot
+ * drift between frameworks.
  */
 export const createServerFunctionHandler = ({
   initReq,
