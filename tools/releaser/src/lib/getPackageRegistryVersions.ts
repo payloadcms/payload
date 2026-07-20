@@ -6,6 +6,33 @@ import { packagePublishList } from './publishList.js'
 
 const npmRequestLimit = pLimit(40)
 
+/**
+ * Checks whether a specific `name@version` is published to the npm registry.
+ * `GET /{name}/{version}` returns 200 when published and 404 when not. Any other
+ * status (5xx, 429, etc.) throws rather than being conflated with "not published",
+ * so callers can distinguish a genuine absence from a transient registry failure.
+ */
+export const isVersionPublished = async ({
+  fetchImpl = fetch,
+  name,
+  version,
+}: {
+  fetchImpl?: typeof fetch
+  name: string
+  version: string
+}): Promise<boolean> => {
+  const res = await fetchImpl(`https://registry.npmjs.org/${name}/${version}`)
+  if (res.ok) {
+    return true
+  }
+  if (res.status === 404) {
+    return false
+  }
+  throw new Error(
+    `Failed to check ${name}@${version} on the npm registry: ${res.status} ${res.statusText}`,
+  )
+}
+
 export const getPackageRegistryVersions = async (): Promise<void> => {
   const packageDetails = await getPackageDetails(packagePublishList)
 

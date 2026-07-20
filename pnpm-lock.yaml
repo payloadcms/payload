@@ -2645,9 +2645,6 @@ importers:
       minimist:
         specifier: 1.2.8
         version: 1.2.8
-      open:
-        specifier: ^10.1.0
-        version: 10.2.0
       p-limit:
         specifier: ^5.0.0
         version: 5.0.0
