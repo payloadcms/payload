@@ -84,6 +84,29 @@ test.describe('Folders', () => {
       await folderButton.click()
       await expectNoResultsAndCreateFolderButton({ page })
     })
+
+    test('should prefill current collection when creating folder from move drawer root state', async () => {
+      await page.goto(postURL.create)
+      await createPostWithNoFolder()
+
+      const folderPill = page.locator('.doc-controls .move-doc-to-folder', { hasText: 'No Folder' })
+      await folderPill.click()
+
+      const createFolderButton = page.getByRole('button', { name: 'Create folder' })
+      await createFolderButton.click()
+
+      const drawer = page.locator('dialog .collection-edit--payload-folders')
+      const selectLocator = drawer.locator('#field-folderType')
+
+      await expect(drawer).toBeVisible()
+      await expect
+        .poll(async () => {
+          const options = await getSelectInputValue<true>({ multiSelect: true, selectLocator })
+
+          return options
+        })
+        .toEqual(['Posts'])
+    })
   })
 
   test.describe('Creating folders', () => {
@@ -254,8 +277,10 @@ test.describe('Folders', () => {
       await expect(postButton).toBeVisible()
       await postButton.click()
 
-      const drawer = page.locator('dialog#create-document--no-results-new-doc-in-folder-drawer')
+      const drawer = page.locator('[id^=doc-drawer_posts_]').first()
       const titleInput = drawer.locator('input[name="title"]')
+
+      await expect(drawer).toBeVisible()
       await titleInput.fill('Document Created From Folder')
       await drawer.getByRole('button', { name: 'Save', exact: true }).click()
 
@@ -289,17 +314,19 @@ test.describe('Folders', () => {
 
       await clickFolderCard({ folderName: 'Autosave Folder', page, doubleClick: true })
 
-      const createDocumentButton = page.locator('.create-new-doc-in-folder__popup-button', {
+      const createNewDropdown = page.locator('.create-new-doc-in-folder__popup-button', {
         hasText: 'Create document',
       })
+      await createNewDropdown.click()
+
       const autosaveButton = page.locator('.popup__content .popup-button-list__button', {
         hasText: 'Autosave',
       })
-      const drawer = page.locator('dialog#create-document--no-results-new-doc-in-folder-drawer')
-      const titleInput = drawer.locator('#field-title')
-
-      await createDocumentButton.click()
       await autosaveButton.click()
+
+      const drawer = page.locator('[id^=doc-drawer_autosave_]').first()
+      const documentCards = page.locator('.folder-file-card')
+      const titleInput = drawer.locator('#field-title')
       await expect(drawer).toBeVisible()
       await titleInput.fill('Autosave Draft From Folder')
 
@@ -307,6 +334,9 @@ test.describe('Folders', () => {
 
       await expect(drawer).toBeVisible()
       await expect(titleInput).toHaveValue('Autosave Draft From Folder')
+      await drawer.locator('.doc-drawer__header-close').click()
+      await expect(drawer).toBeHidden()
+      await expect(documentCards).toHaveCount(1)
     })
 
     test('should keep autosave drawer open after autosave when creating from collection folder view', async () => {
@@ -317,7 +347,8 @@ test.describe('Folders', () => {
       const createDocumentButton = page.locator('.create-new-doc-in-folder__button', {
         hasText: 'Create document',
       })
-      const drawer = page.locator('dialog#create-document--no-results-new-doc-in-folder-drawer')
+      const drawer = page.locator('[id^=doc-drawer_autosave_]').first()
+      const documentCards = page.locator('.folder-file-card')
       const titleInput = drawer.locator('#field-title')
 
       await createDocumentButton.click()
@@ -328,8 +359,10 @@ test.describe('Folders', () => {
 
       await expect(drawer).toBeVisible()
       await expect(titleInput).toHaveValue('Autosave Draft From Collection Folder')
+      await drawer.locator('.doc-drawer__header-close').click()
+      await expect(drawer).toBeHidden()
+      await expect(documentCards).toHaveCount(1)
     })
-
     test('should create nested folder from folder view', async () => {
       await page.goto(formatAdminURL({ adminRoute, path: '/browse-by-folder', serverURL }))
       await createFolder({ folderName: 'Parent Folder', page })
