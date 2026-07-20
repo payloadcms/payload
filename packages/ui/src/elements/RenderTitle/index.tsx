@@ -28,7 +28,7 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
   const { className, element = 'h1', fallback, renderAsLink, title: titleFromProps } = props
 
   const { id, collectionSlug, globalSlug, isInitializing } = useDocumentInfo()
-  const { isPlaceholder: titleIsPlaceholder, title: titleFromContext } = useDocumentTitle()
+  const { isPlaceholder, title: titleFromContext } = useDocumentTitle()
   const {
     config: {
       routes: { admin: adminRoute },
@@ -39,7 +39,7 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
 
   const idAsTitle = title === id
 
-  const isPlaceholder = !titleFromProps && titleIsPlaceholder
+  const showPlaceholder = !titleFromProps && isPlaceholder
 
   const Tag = element
 
@@ -60,7 +60,7 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
         className,
         baseClass,
         idAsTitle && `${baseClass}--has-id`,
-        isPlaceholder && `${baseClass}--placeholder`,
+        showPlaceholder && `${baseClass}--placeholder`,
       ]
         .filter(Boolean)
         .join(' ')}
