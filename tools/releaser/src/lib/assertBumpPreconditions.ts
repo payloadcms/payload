@@ -1,11 +1,12 @@
 import semver from 'semver'
 
-import { isPinnedMajor, PINNED_MAJOR } from './pinnedMajor.js'
+import type { Preid } from './preids.js'
 
-export const PREIDS = ['beta', 'canary'] as const
+import { isPinnedMajor, PINNED_MAJOR } from './pinnedMajor.js'
+import { isPreid, PREIDS } from './preids.js'
+
 export const PRERELEASE_BUMPS = ['premajor', 'preminor', 'prepatch', 'prerelease'] as const
 
-export type Preid = (typeof PREIDS)[number]
 export type PrereleaseBump = (typeof PRERELEASE_BUMPS)[number]
 
 type BumpPreconditions = {
@@ -63,8 +64,6 @@ export function assertBumpPreconditions(
     throw new Error('GITHUB_TOKEN env var is required')
   }
 }
-
-const isPreid = (value: string): value is Preid => (PREIDS as readonly string[]).includes(value)
 
 const isPrereleaseBump = (value: string): value is PrereleaseBump =>
   (PRERELEASE_BUMPS as readonly string[]).includes(value)

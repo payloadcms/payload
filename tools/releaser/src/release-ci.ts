@@ -16,10 +16,11 @@ import { pathToFileURL } from 'url'
 
 import type { Workspace } from './lib/getWorkspace.js'
 
-import { findChangelogBaseTag, lineFromVersion } from './lib/findChangelogBaseTag.js'
+import { findChangelogBaseTag } from './lib/findChangelogBaseTag.js'
 import { isVersionPublished } from './lib/getPackageRegistryVersions.js'
 import { getWorkspace } from './lib/getWorkspace.js'
 import { PINNED_MAJOR, pinnedMajorTagGlob } from './lib/pinnedMajor.js'
+import { isPreid, PREIDS } from './lib/preids.js'
 import { createDraftGitHubRelease } from './utils/createDraftGitHubRelease.js'
 import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 
@@ -71,18 +72,19 @@ export const runReleaseCi = async ({
     )
   }
 
-  const line = lineFromVersion(version)
-  if (line === 'latest') {
+  // Fail closed: only the allowlisted prerelease lines may publish. A stable
+  // version (no preid) or an unsupported line (e.g. internal) must throw rather
+  // than default to the production 'latest' dist-tag.
+  const preid = semver.prerelease(version)?.[0]
+  if (!isPreid(preid)) {
     throw new Error(
-      `Stable ('latest') publishes are not supported by this flow; version ${version} has no beta/canary prerelease id.`,
+      `Refusing to publish ${version}: prerelease line must be one of ${PREIDS.join(', ')} (got ${preid ?? 'none'}).`,
     )
   }
-  const tag = line // narrowed to 'beta' | 'canary'
+  const tag = preid // narrowed to 'beta' | 'canary'
 
   log(`\n  Publishing ${version} to dist-tag '${tag}'${dryRun ? ' (dry-run)' : ''}\n`)
 
-  // Generate release notes before building/publishing so a changelog failure aborts
-  // cleanly instead of stranding a run that has already shipped packages to npm.
   const fromVersion = await findChangelogBaseTag({ version })
   const { releaseNotes, releaseUrl } = await generateReleaseNotes({
     fromVersion,

@@ -92,8 +92,22 @@ describe('runReleaseCi', () => {
       },
     })
 
-    await expect(runReleaseCi({ deps, dryRun: false })).rejects.toThrow(/not supported/)
+    await expect(runReleaseCi({ deps, dryRun: false })).rejects.toThrow(/prerelease line must be/)
     expect(deps.workspace.build).not.toHaveBeenCalled()
+  })
+
+  it('should refuse an unsupported prerelease line instead of defaulting to latest', async () => {
+    const deps = makeDeps({
+      workspace: {
+        build: vi.fn(async () => {}),
+        publish: vi.fn(async () => {}),
+        version: vi.fn(async () => '4.1.0-internal.abc1234'),
+      },
+    })
+
+    await expect(runReleaseCi({ deps, dryRun: false })).rejects.toThrow(/prerelease line must be/)
+    expect(deps.workspace.build).not.toHaveBeenCalled()
+    expect(deps.workspace.publish).not.toHaveBeenCalled()
   })
 
   it('should skip build, publish, and draft in dry-run but still generate notes', async () => {
