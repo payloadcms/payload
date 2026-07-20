@@ -31,8 +31,8 @@ import {
   draftWithUploadCloudStorageCollectionSlug,
   draftWithUploadCollectionSlug,
   localizedCollectionSlug,
-  nestedArraySelectCollectionSlug,
   localizedGlobalSlug,
+  nestedArraySelectCollectionSlug,
   versionCollectionSlug,
 } from './slugs.js'
 
@@ -1930,7 +1930,63 @@ describe('Versions', () => {
           },
         })
 
+        expect(docs).toHaveLength(1)
         expect(docs[0]).toBeDefined()
+
+        await cleanupDocuments({
+          collectionSlugs: [draftCollectionSlug],
+          payload,
+        })
+      })
+
+      it('should not produce duplicate latest=true rows on same-second writes', async () => {
+        // Reproduces the bug from #17216: autosave writes within the same
+        // second used to keep both rows with latest=true because the
+        // updatedAt < guard was strict and couldn't match same-second rows.
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'test',
+            title: 'test',
+          },
+        })
+
+        // Force two writes that share the same updatedAt timestamp
+        const now = new Date().toISOString()
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: { title: 'first' },
+          draft: true,
+          updatedAt: now,
+        })
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: { title: 'second' },
+          draft: true,
+          updatedAt: now,
+        })
+
+        const { docs } = await payload.findVersions({
+          collection: draftCollectionSlug,
+          where: {
+            and: [
+              {
+                parent: {
+                  equals: doc.id,
+                },
+              },
+              {
+                latest: {
+                  equals: true,
+                },
+              },
+            ],
+          },
+        })
+
+        expect(docs).toHaveLength(1)
 
         await cleanupDocuments({
           collectionSlugs: [draftCollectionSlug],
