@@ -623,9 +623,11 @@ describe('Block fields', () => {
       const field = page.locator('#field-blocks')
       const row = field.locator('#blocks-row-0')
       const rowTextInput = row.locator('#field-blocks__0__text')
+      const richTextEditor = row.locator('#field-blocks__0__richText [contenteditable="true"]')
 
       const textVal = 'row one copy'
       await rowTextInput.fill(textVal)
+      await expect(richTextEditor).toBeVisible()
 
       await copyPasteField({
         page,
@@ -645,6 +647,7 @@ describe('Block fields', () => {
       })
 
       await expect(rowTextInput).toHaveValue(textVal)
+      await expect(richTextEditor).toBeVisible()
     })
 
     test('should copy a block row and paste into a field with the same schema', async () => {
