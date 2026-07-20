@@ -6,7 +6,6 @@ import { Link } from '../../elements/Link/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
-import { useTranslation } from '../../providers/Translation/index.js'
 import { IDLabel } from '../IDLabel/index.js'
 import './index.css'
 
@@ -29,8 +28,7 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
   const { className, element = 'h1', fallback, renderAsLink, title: titleFromProps } = props
 
   const { id, collectionSlug, globalSlug, isInitializing } = useDocumentInfo()
-  const { title: titleFromContext } = useDocumentTitle()
-  const { t } = useTranslation()
+  const { isPlaceholder: titleIsPlaceholder, title: titleFromContext } = useDocumentTitle()
   const {
     config: {
       routes: { admin: adminRoute },
@@ -41,7 +39,7 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
 
   const idAsTitle = title === id
 
-  const isPlaceholder = !id && !titleFromProps && title === t('general:untitled')
+  const isPlaceholder = !titleFromProps && titleIsPlaceholder
 
   const Tag = element
 
