@@ -1,7 +1,7 @@
 @layer payload-default {
   .relationship--multi-value-label {
     display: flex;
-    padding-inline-start: var(--spacer-2);
+    padding-inline-start: calc((var(--spacer-1) + var(--spacer-2)) / 2); /* 6px */
     gap: var(--spacer-1);
   }
 
