@@ -81,14 +81,8 @@ export const runReleaseCi = async ({
 
   log(`\n  Publishing ${version} to dist-tag '${tag}'${dryRun ? ' (dry-run)' : ''}\n`)
 
-  if (dryRun) {
-    log(`[dry-run] would build all packages`)
-    log(`[dry-run] would publish all packages to dist-tag '${tag}'`)
-  } else {
-    await workspace.build()
-    await workspace.publish({ dryRun, tag })
-  }
-
+  // Generate release notes before building/publishing so a changelog failure aborts
+  // cleanly instead of stranding a run that has already shipped packages to npm.
   const fromVersion = await findChangelogBaseTag({ version })
   const { releaseNotes, releaseUrl } = await generateReleaseNotes({
     fromVersion,
@@ -97,9 +91,14 @@ export const runReleaseCi = async ({
   log(`Release URL: ${releaseUrl}`)
 
   if (dryRun) {
+    log(`[dry-run] would build all packages`)
+    log(`[dry-run] would publish all packages to dist-tag '${tag}'`)
     log(`[dry-run] would create/upsert draft GitHub release for v${version}`)
     return
   }
+
+  await workspace.build()
+  await workspace.publish({ dryRun, tag })
 
   const { releaseUrl: draftUrl } = await createDraftGitHubRelease({
     branch: 'main',

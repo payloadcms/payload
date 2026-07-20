@@ -41,8 +41,10 @@ describe('runReleaseCi', () => {
       tag: 'v4.0.0-canary.10',
     })
 
+    const notesOrder = deps.generateReleaseNotes.mock.invocationCallOrder[0]
     const buildOrder = deps.workspace.build.mock.invocationCallOrder[0]
     const publishOrder = deps.workspace.publish.mock.invocationCallOrder[0]
+    expect(buildOrder).toBeGreaterThan(notesOrder)
     expect(publishOrder).toBeGreaterThan(buildOrder)
   })
 
