@@ -1,5 +1,5 @@
 /**
- * Publish-workflow entry point (P2). Reads the committed version from the checked-out
+ * Publish-workflow entry point. Reads the committed version from the checked-out
  * tag, builds, publishes to npm (fail-fast, idempotent, topological order), then
  * generates release notes and upserts a DRAFT GitHub release. No version bump — the
  * bump workflow already committed and tagged the version this run publishes.
@@ -49,7 +49,7 @@ export const runReleaseCi = async ({
 
   const version = await workspace.version()
 
-  // Major-version guard (D19): defense-in-depth against a non-v4 tag reaching this
+  // Major-version guard: defense-in-depth against a non-v4 tag reaching this
   // flow. A v3 beta would otherwise pass the dist-tag classifier and mis-publish.
   if (semver.major(version) !== 4) {
     throw new Error(`release-ci is pinned to v4; refusing to publish version ${version}.`)

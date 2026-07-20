@@ -1,5 +1,5 @@
 /**
- * Bump-workflow entry point (P2 of the dispatch → tag → publish flow).
+ * Bump-workflow entry point in the dispatch → tag → publish release flow.
  *
  * Computes the next prerelease version from main's committed version, commits it,
  * tags it, and pushes HEAD:main + the tag (with a rebase-retry loop). It does NOT
