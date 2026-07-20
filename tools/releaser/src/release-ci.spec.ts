@@ -9,6 +9,7 @@ const baseDeps = () => ({
     releaseNotes: 'notes',
     releaseUrl: 'https://gh/new',
   })),
+  hasGithubToken: true,
   log: vi.fn(),
   workspace: {
     build: vi.fn(async () => {}),
@@ -57,6 +58,14 @@ describe('runReleaseCi', () => {
     await runReleaseCi({ deps, dryRun: false })
 
     expect(deps.workspace.publish).toHaveBeenCalledWith({ dryRun: false, tag: 'beta' })
+  })
+
+  it('should refuse before building when GITHUB_TOKEN is missing', async () => {
+    const deps = makeDeps({ hasGithubToken: false })
+
+    await expect(runReleaseCi({ deps, dryRun: false })).rejects.toThrow(/GITHUB_TOKEN/)
+    expect(deps.workspace.build).not.toHaveBeenCalled()
+    expect(deps.workspace.publish).not.toHaveBeenCalled()
   })
 
   it('should refuse a non-v4 version before building (major guard)', async () => {

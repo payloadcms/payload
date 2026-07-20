@@ -1,5 +1,7 @@
 import semver from 'semver'
 
+import { isPinnedMajor, PINNED_MAJOR } from './pinnedMajor.js'
+
 export const PREIDS = ['beta', 'canary'] as const
 export const PRERELEASE_BUMPS = ['premajor', 'preminor', 'prepatch', 'prerelease'] as const
 
@@ -35,9 +37,9 @@ export function assertBumpPreconditions(
     throw new Error(`Releases must be run from 'main'. Current branch: ${args.branch}.`)
   }
 
-  if (!/^4\./.test(args.version)) {
+  if (!isPinnedMajor(args.version)) {
     throw new Error(
-      `Expected a v4.x version; package.json version is ${args.version}. This flow is pinned to v4 during the beta phase.`,
+      `Expected a v${PINNED_MAJOR}.x version; package.json version is ${args.version}. This flow is pinned to v${PINNED_MAJOR} during the beta phase.`,
     )
   }
 

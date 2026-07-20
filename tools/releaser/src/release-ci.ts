@@ -19,6 +19,7 @@ import type { Workspace } from './lib/getWorkspace.js'
 import { findChangelogBaseTag, lineFromVersion } from './lib/findChangelogBaseTag.js'
 import { isVersionPublished } from './lib/getPackageRegistryVersions.js'
 import { getWorkspace } from './lib/getWorkspace.js'
+import { PINNED_MAJOR, pinnedMajorTagGlob } from './lib/pinnedMajor.js'
 import { createDraftGitHubRelease } from './utils/createDraftGitHubRelease.js'
 import { generateReleaseNotes } from './utils/generateReleaseNotes.js'
 
@@ -33,6 +34,7 @@ type ReleaseCiDeps = {
     fromVersion?: string
     toVersion?: string
   }) => Promise<{ releaseNotes: string; releaseUrl: string }>
+  hasGithubToken: boolean
   log: (message: string) => void
   workspace: Pick<Workspace, 'build' | 'publish' | 'version'>
 }
@@ -44,15 +46,29 @@ export const runReleaseCi = async ({
   deps: ReleaseCiDeps
   dryRun: boolean
 }): Promise<void> => {
-  const { createDraftGitHubRelease, findChangelogBaseTag, generateReleaseNotes, log, workspace } =
-    deps
+  const {
+    createDraftGitHubRelease,
+    findChangelogBaseTag,
+    generateReleaseNotes,
+    hasGithubToken,
+    log,
+    workspace,
+  } = deps
+
+  // Fail fast before publishing: release notes and the draft release both need a
+  // token, so a missing one must abort up front rather than after packages ship.
+  if (!hasGithubToken) {
+    throw new Error('GITHUB_TOKEN env var is required')
+  }
 
   const version = await workspace.version()
 
-  // Major-version guard: defense-in-depth against a non-v4 tag reaching this
-  // flow. A v3 beta would otherwise pass the dist-tag classifier and mis-publish.
-  if (semver.major(version) !== 4) {
-    throw new Error(`release-ci is pinned to v4; refusing to publish version ${version}.`)
+  // Major-version guard: defense-in-depth against a non-pinned-major tag reaching
+  // this flow. A v3 beta would otherwise pass the dist-tag classifier and mis-publish.
+  if (semver.major(version) !== PINNED_MAJOR) {
+    throw new Error(
+      `release-ci is pinned to v${PINNED_MAJOR}; refusing to publish version ${version}.`,
+    )
   }
 
   const line = lineFromVersion(version)
@@ -98,7 +114,7 @@ async function main(): Promise<void> {
   const dryRun = Boolean(argv['dry-run'])
 
   const listTags = (): string[] =>
-    execSync(`git tag --list 'v4.*'`, { encoding: 'utf8' })
+    execSync(`git tag --list '${pinnedMajorTagGlob}'`, { encoding: 'utf8' })
       .split('\n')
       .map((line) => line.trim())
       .filter(Boolean)
@@ -109,6 +125,7 @@ async function main(): Promise<void> {
       findChangelogBaseTag: ({ version }) =>
         findChangelogBaseTag({ isPublished: isVersionPublished, listTags, version }),
       generateReleaseNotes,
+      hasGithubToken: Boolean(process.env.GITHUB_TOKEN),
       log: console.log,
       workspace: getWorkspace(),
     },
