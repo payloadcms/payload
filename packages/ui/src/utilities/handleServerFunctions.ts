@@ -16,11 +16,6 @@ type InitReq = (args: {
 
 type CreateServerFunctionHandlerArgs = {
   /**
-   * Extra fields merged into every handler's arguments, e.g. the TanStack Start
-   * adapter's `{ mode: 'rsc', renderComponent }`. Next.js omits this.
-   */
-  augmentArgs?: () => Partial<DefaultServerFunctionArgs>
-  /**
    * Framework-specific request initialization. The adapter closes over its own
    * `ServerAdapter` / request source (Next.js: `initReq` + `nextServerAdapter`;
    * TanStack Start: its `getRequest()`-based `initReq`).
@@ -48,7 +43,6 @@ type CreateServerFunctionHandlerArgs = {
  * handler sets cannot drift between frameworks.
  */
 export const createServerFunctionHandler = ({
-  augmentArgs,
   initReq,
   serverFunctions,
   transformResult,
@@ -75,7 +69,6 @@ export const createServerFunctionHandler = ({
       locale,
       permissions,
       req,
-      ...(augmentArgs ? augmentArgs() : {}),
     }
 
     const fn = extraServerFunctions?.[fnKey] || baseServerFunctions[fnKey]
