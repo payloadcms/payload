@@ -9,3 +9,4 @@
 export const CollectionCards = () => null
 export const HierarchyTypeFieldServer = () => null
 export const renderPayloadComponentOnServer = () => null
+export const RenderRSCComponent = () => null
