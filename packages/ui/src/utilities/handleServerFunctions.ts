@@ -1,51 +1,62 @@
 import type {
   DefaultServerFunctionArgs,
-  ServerAdapter,
+  ImportMap,
+  InitReqResult,
+  SanitizedConfig,
   ServerFunction,
   ServerFunctionHandler,
 } from 'payload'
 
-import { renderTabHandler } from '../elements/Nav/SidebarTabs/renderTabServerFn.js'
-import { _internal_renderFieldHandler } from '../forms/fieldSchemasToFormState/serverFunctions/renderFieldServerFn.js'
-import { getDefaultLayoutHandler, renderWidgetHandler } from '../views/Dashboard/serverFunctions.js'
-import { renderDocumentHandler } from '../views/Document/handleServerFunction.js'
-import { renderDocumentSlotsHandler } from '../views/Document/renderDocumentSlots.js'
-import { renderListHandler } from '../views/List/handleServerFunction.js'
-import { buildFormStateHandler } from './buildFormState.js'
-import { buildTableStateHandler } from './buildTableState.js'
-import { copyDataFromLocaleHandler } from './copyDataFromLocale.js'
-import { initReq } from './initReq.js'
-import { schedulePublishHandler } from './schedulePublishHandler.js'
-import { slugifyHandler } from './slugify.js'
-import { switchLanguageHandler } from './switchLanguageHandler.js'
+import { sharedServerFunctions } from './serverFunctionRegistry.js'
 
-const baseServerFunctions: Record<string, ServerFunction<any, any>> = {
-  'copy-data-from-locale': copyDataFromLocaleHandler,
-  'form-state': buildFormStateHandler,
-  'get-default-layout': getDefaultLayoutHandler,
-  'render-document': renderDocumentHandler,
-  'render-document-slots': renderDocumentSlotsHandler,
-  'render-field': _internal_renderFieldHandler,
-  'render-list': renderListHandler,
-  'render-tab': renderTabHandler,
-  'render-widget': renderWidgetHandler,
-  'schedule-publish': schedulePublishHandler,
-  slugify: slugifyHandler,
-  'switch-language': switchLanguageHandler,
-  'table-state': buildTableStateHandler,
+type InitReq = (args: {
+  configPromise: Promise<SanitizedConfig> | SanitizedConfig
+  importMap: ImportMap
+}) => Promise<InitReqResult>
+
+type CreateServerFunctionHandlerArgs = {
+  /**
+   * Extra fields merged into every handler's arguments, e.g. the TanStack Start
+   * adapter's `{ mode: 'rsc', renderComponent }`. Next.js omits this.
+   */
+  augmentArgs?: () => Partial<DefaultServerFunctionArgs>
+  /**
+   * Framework-specific request initialization. The adapter closes over its own
+   * `ServerAdapter` / request source (Next.js: `initReq` + `nextServerAdapter`;
+   * TanStack Start: its `getRequest()`-based `initReq`).
+   */
+  initReq: InitReq
+  /**
+   * Additional handlers registered alongside `sharedServerFunctions`. Reserved
+   * for adapter-specific functions; today both adapters run the shared set only.
+   */
+  serverFunctions?: Record<string, ServerFunction<any, any>>
+  /**
+   * Post-processes each handler's return value before it goes over the wire.
+   * The TanStack Start adapter passes `serializeForRsc` to convert React
+   * elements into RSC handles; Next.js ships them natively and omits this.
+   */
+  transformResult?: (result: unknown) => Promise<unknown> | unknown
 }
 
 /**
- * Factory for the framework-agnostic `handleServerFunctions` entry point. The
- * caller (a framework adapter, e.g. `@payloadcms/next`) supplies the
- * `ServerAdapter` once, and the returned handler can be wired directly into
- * the framework's server-action dispatcher.
+ * Factory for the framework-agnostic `handleServerFunctions` entry point.
+ *
+ * All adapters dispatch from the shared registry (`sharedServerFunctions`) and
+ * differ only in the three injected hooks below — `initReq`, `augmentArgs`, and
+ * `transformResult` — so there is a single dispatch implementation and the
+ * handler sets cannot drift between frameworks.
  */
 export const createServerFunctionHandler = ({
-  serverAdapter,
-}: {
-  serverAdapter: ServerAdapter
-}): ServerFunctionHandler => {
+  augmentArgs,
+  initReq,
+  serverFunctions,
+  transformResult,
+}: CreateServerFunctionHandlerArgs): ServerFunctionHandler => {
+  const baseServerFunctions: Record<string, ServerFunction<any, any>> = serverFunctions
+    ? { ...sharedServerFunctions, ...serverFunctions }
+    : sharedServerFunctions
+
   return async (args) => {
     const {
       name: fnKey,
@@ -55,12 +66,7 @@ export const createServerFunctionHandler = ({
       serverFunctions: extraServerFunctions,
     } = args
 
-    const { cookies, locale, permissions, req } = await initReq({
-      configPromise,
-      importMap,
-      key: 'RootLayout',
-      serverAdapter,
-    })
+    const { cookies, locale, permissions, req } = await initReq({ configPromise, importMap })
 
     const augmentedArgs: DefaultServerFunctionArgs = {
       ...fnArgs,
@@ -69,6 +75,7 @@ export const createServerFunctionHandler = ({
       locale,
       permissions,
       req,
+      ...(augmentArgs ? augmentArgs() : {}),
     }
 
     const fn = extraServerFunctions?.[fnKey] || baseServerFunctions[fnKey]
@@ -77,6 +84,8 @@ export const createServerFunctionHandler = ({
       throw new Error(`Unknown Server Function: ${fnKey}`)
     }
 
-    return fn(augmentedArgs)
+    const result = await fn(augmentedArgs)
+
+    return transformResult ? await transformResult(result) : result
   }
 }
