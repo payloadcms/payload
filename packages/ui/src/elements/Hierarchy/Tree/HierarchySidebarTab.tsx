@@ -60,23 +60,32 @@ export const HierarchySidebarTab: React.FC<
   const { setSelectedFilters: setSelectedFiltersContext, treeRefreshKeys } = useHierarchy()
   const sidebarTabs = useSidebarTabs()
 
+  const resolvedParentFieldName = parentFieldName ?? 'parent'
+  const currentParentParam = searchParams.get(resolvedParentFieldName)
+
   // When refreshTree(slug) is called from the list view (e.g. after mutations), reload this tab.
   // Always reload regardless of active state so inactive tabs are fresh when switched to.
+  // The render-tab server function runs with a fresh request that lacks the client's URL query,
+  // so forward the current selected parent id — otherwise the reload can't tell which node is
+  // being viewed and rebuilds the tree from preference state.
   const tabSlug = `hierarchy-${hierarchyCollectionSlug}`
   const treeRefreshKey = treeRefreshKeys.get(hierarchyCollectionSlug) ?? 0
   const prevTreeRefreshKeyRef = useRef(treeRefreshKey)
   useEffect(() => {
     if (prevTreeRefreshKeyRef.current !== treeRefreshKey) {
       prevTreeRefreshKeyRef.current = treeRefreshKey
-      sidebarTabs?.reloadTabContent(tabSlug)
+      sidebarTabs?.reloadTabContent(tabSlug, {
+        searchParams: currentParentParam
+          ? { [resolvedParentFieldName]: currentParentParam }
+          : undefined,
+      })
     }
-  }, [treeRefreshKey, sidebarTabs, tabSlug])
+  }, [treeRefreshKey, sidebarTabs, tabSlug, currentParentParam, resolvedParentFieldName])
 
   // Only highlight selected node when this tab is active
-  const parentParam = searchParams.get(parentFieldName ?? 'parent')
   const isActiveTab = sidebarTabs?.activeTabSlug === tabSlug
   const selectedNodeId = isActiveTab
-    ? (parentParam ?? selectedNodeIdFromServer ?? undefined)
+    ? (currentParentParam ?? selectedNodeIdFromServer ?? undefined)
     : undefined
 
   const baseFilterKey = baseFilter ? JSON.stringify(baseFilter) : ''
@@ -91,17 +100,16 @@ export const HierarchySidebarTab: React.FC<
 
   const handleNavigateToParent = useCallback(
     ({ id }: { id: number | string }) => {
-      const queryParam = parentFieldName ?? 'parent'
       const url = formatAdminURL({
         adminRoute,
-        path: `/collections/${hierarchyCollectionSlug}/hierarchy?${queryParam}=${id}`,
+        path: `/collections/${hierarchyCollectionSlug}/hierarchy?${resolvedParentFieldName}=${id}`,
       })
       startRouteTransition(() => {
         router.push(url)
         router.refresh()
       })
     },
-    [adminRoute, hierarchyCollectionSlug, parentFieldName, router, startRouteTransition],
+    [adminRoute, hierarchyCollectionSlug, resolvedParentFieldName, router, startRouteTransition],
   )
   return (
     <>
