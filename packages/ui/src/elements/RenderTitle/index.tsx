@@ -41,7 +41,7 @@ export const RenderTitle: React.FC<RenderTitleProps> = (props) => {
 
   const idAsTitle = title === id
 
-  const isPlaceholder = !titleFromProps && !fallback && title === t('general:untitled')
+  const isPlaceholder = !id && !titleFromProps && title === t('general:untitled')
 
   const Tag = element
 
