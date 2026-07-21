@@ -55,6 +55,9 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
       - name: Bump
-        run: pnpm release-bump --preid ${{ inputs.preid }} --bump ${{ inputs.bump }} ${{ inputs.dry_run && '--dry-run' || '' }}
+        run: pnpm release-bump --preid "$PREID" --bump "$BUMP" ${DRY_RUN_FLAG:-}
         env:
+          PREID: ${{ inputs.preid }}
+          BUMP: ${{ inputs.bump }}
+          DRY_RUN_FLAG: ${{ inputs.dry_run && '--dry-run' || '' }}
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
