@@ -15,7 +15,7 @@ import { fileInputSchema, resolveFile } from './fileInput.js'
 import { formatCollectionError } from './formatCollectionError.js'
 
 const DEFAULT_DESCRIPTION =
-  'Create one or more documents in any collection. Each document can have different data or a file. Files can use a URL, base64, or an upload prepared by getUploadInstructions.'
+  'Create one or more documents. Each can have different data or a file. Prefer uploadReference after upload, externalURL for URLs, or base64 for small local files.'
 
 export const createDocumentsTool = defineCollectionTool({
   access: (args) =>
