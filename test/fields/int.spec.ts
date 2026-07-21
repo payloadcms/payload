@@ -62,6 +62,7 @@ describe('Fields', () => {
       slug: 'users',
       credentials: devUser,
     })
+
     user = await payload.login({
       collection: 'users',
       data: {
@@ -82,6 +83,7 @@ describe('Fields', () => {
       for (const id of created) {
         await payload.delete({ collection: 'slug-fields', id })
       }
+
       created.length = 0
     })
 
@@ -90,6 +92,7 @@ describe('Fields', () => {
         collection: 'slug-fields',
         data: { title: 'My First Post' },
       })
+
       created.push(doc.id)
       expect(doc.slug).toBe('my-first-post')
     })
@@ -108,6 +111,7 @@ describe('Fields', () => {
         collection: 'slug-fields',
         data: { title: 'Original Title' },
       })
+
       created.push(doc.id)
 
       const updated = await payload.update({
@@ -115,6 +119,7 @@ describe('Fields', () => {
         id: doc.id,
         data: { title: 'Changed Title', slug: 'manual-value' },
       })
+
       expect(updated.slug).toBe('manual-value')
 
       const again = await payload.update({
@@ -122,6 +127,7 @@ describe('Fields', () => {
         id: doc.id,
         data: { title: 'Changed Title Again' },
       })
+
       expect(again.slug).toBe('manual-value')
     })
 
@@ -131,6 +137,7 @@ describe('Fields', () => {
         data: { title: 'Title', localizedTitle: 'English Title' },
         locale: 'en',
       })
+
       created.push(doc.id)
       expect(doc.localizedSlug).toBe('english-title')
 
@@ -140,6 +147,7 @@ describe('Fields', () => {
         data: { localizedTitle: 'Titulo Espanol' },
         locale: 'es',
       })
+
       expect(es.localizedSlug).toBe('titulo-espanol')
 
       const allLocales = await payload.findByID({
@@ -147,6 +155,7 @@ describe('Fields', () => {
         id: doc.id,
         locale: 'all',
       })
+
       const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
       expect(localizedSlug.en).toBe('english-title')
       expect(localizedSlug.es).toBe('titulo-espanol')
@@ -159,36 +168,41 @@ describe('Fields', () => {
         for (const id of created) {
           await payload.delete({ collection: 'slug-autosave', id })
         }
+
         created.length = 0
       })
 
-      it('should NOT generate a slug on the initial draft (req 1)', async () => {
+      it('should generate a slug freely on draft create', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
           draft: true,
           data: { title: 'Draft One' },
         })
+
         created.push(draft.id)
-        expect(draft.slug == null || draft.slug === '').toBe(true)
+        expect(draft.slug).toBe('draft-one')
       })
 
-      it('should keep an explicit slug the user typed on the initial draft', async () => {
+      it('should keep an explicit slug the user typed on draft create', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
           draft: true,
           data: { title: 'Draft One', slug: 'user-typed' },
         })
+
         created.push(draft.id)
         expect(draft.slug).toBe('user-typed')
       })
 
-      it('should generate once content exists on a subsequent autosave', async () => {
+      it('should leave the slug empty when the initial draft has no source yet', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
           draft: true,
-          data: { title: 'Draft One' },
+          data: { title: '' },
         })
+
         created.push(draft.id)
+        expect(draft.slug == null || draft.slug === '').toBe(true)
 
         const updated = await payload.update({
           collection: 'slug-autosave',
@@ -199,7 +213,36 @@ describe('Fields', () => {
         expect(updated.slug).toBe('draft-one-updated')
       })
 
-      it('should keep an admin overwrite across subsequent autosaves (req 2)', async () => {
+      it('should keep tracking the source freely across autosaves until publish', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+
+        created.push(draft.id)
+        expect(draft.slug).toBe('draft-one')
+
+        const second = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Draft Two' },
+        })
+
+        expect(second.slug).toBe('draft-two')
+
+        const third = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Draft Three' },
+        })
+
+        expect(third.slug).toBe('draft-three')
+      })
+
+      it('should keep an admin overwrite across subsequent autosaves', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
           draft: true,
@@ -259,6 +302,70 @@ describe('Fields', () => {
           data: { _status: 'published', title: 'Title Changed After Publish' },
         })
         expect(afterPublish.slug).toBe('publishable-title')
+      })
+    })
+
+    describe('drafts without autosave', () => {
+      const created: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of created) {
+          await payload.delete({ collection: 'slug-draft', id })
+        }
+        created.length = 0
+      })
+
+      it('should generate a slug on draft create', async () => {
+        const draft = await payload.create({
+          collection: 'slug-draft',
+          draft: true,
+          data: { title: 'First Title' },
+        })
+        created.push(draft.id)
+        expect(draft.slug).toBe('first-title')
+      })
+
+      it('should lock a derived slug across subsequent draft saves', async () => {
+        const draft = await payload.create({
+          collection: 'slug-draft',
+          draft: true,
+          data: { title: 'First Title' },
+        })
+        created.push(draft.id)
+        expect(draft.slug).toBe('first-title')
+
+        const second = await payload.update({
+          collection: 'slug-draft',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Second Title' },
+        })
+        expect(second.slug).toBe('first-title')
+
+        const published = await payload.update({
+          collection: 'slug-draft',
+          id: draft.id,
+          data: { _status: 'published', title: 'Published Title' },
+        })
+        expect(published.slug).toBe('first-title')
+      })
+
+      it('should lock a user-provided slug across subsequent draft saves', async () => {
+        const draft = await payload.create({
+          collection: 'slug-draft',
+          draft: true,
+          data: { title: 'First Title', slug: 'user-typed' },
+        })
+        created.push(draft.id)
+        expect(draft.slug).toBe('user-typed')
+
+        const second = await payload.update({
+          collection: 'slug-draft',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Second Title' },
+        })
+        expect(second.slug).toBe('user-typed')
       })
     })
   })

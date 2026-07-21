@@ -64,22 +64,22 @@ export type SupportedTimezones =
   | 'UTC';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_3E252BA3".
+ * via the `definition` "LexicalNodes_C9A2CDC8".
  */
-export type LexicalNodes_3E252BA3 =
+export type LexicalNodes_C9A2CDC8 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_3E252BA3>
+  | SerializedParagraphNode<LexicalNodes_C9A2CDC8>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_3E252BA3>
+  | SerializedHeadingNode<LexicalNodes_C9A2CDC8>
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_3E252BA3>
-  | SerializedListNode<LexicalNodes_3E252BA3>
-  | SerializedListItemNode<LexicalNodes_3E252BA3>
-  | SerializedAutoLinkNode<LexicalNodes_3E252BA3, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_3E252BA3, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_C9A2CDC8>
+  | SerializedListNode<LexicalNodes_C9A2CDC8>
+  | SerializedListItemNode<LexicalNodes_C9A2CDC8>
+  | SerializedAutoLinkNode<LexicalNodes_C9A2CDC8, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_C9A2CDC8, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -106,6 +106,7 @@ export type LexicalNodes_3E252BA3 =
       | 'select-fields'
       | 'slug-fields'
       | 'slug-autosave'
+      | 'slug-draft'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -122,17 +123,17 @@ export type LexicalNodes_3E252BA3 =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_C8D96449".
+ * via the `definition` "LexicalNodes_1E2BD65E".
  */
-export type LexicalNodes_C8D96449 =
+export type LexicalNodes_1E2BD65E =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_C8D96449>
+  | SerializedParagraphNode<LexicalNodes_1E2BD65E>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_C8D96449>
+  | SerializedQuoteNode<LexicalNodes_1E2BD65E>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -159,6 +160,7 @@ export type LexicalNodes_C8D96449 =
       | 'select-fields'
       | 'slug-fields'
       | 'slug-autosave'
+      | 'slug-draft'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -173,11 +175,11 @@ export type LexicalNodes_C8D96449 =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_C8D96449, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_C8D96449, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_C8D96449>
-  | SerializedListItemNode<LexicalNodes_C8D96449>
-  | SerializedHeadingNode<LexicalNodes_C8D96449>;
+  | SerializedAutoLinkNode<LexicalNodes_1E2BD65E, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_1E2BD65E, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_1E2BD65E>
+  | SerializedListItemNode<LexicalNodes_1E2BD65E>
+  | SerializedHeadingNode<LexicalNodes_1E2BD65E>;
 
 export interface Config {
   auth: {
@@ -214,6 +216,7 @@ export interface Config {
     'select-fields': SelectField;
     'slug-fields': SlugField;
     'slug-autosave': SlugAutosave;
+    'slug-draft': SlugDraft;
     'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
     'text-fields': TextField;
@@ -258,6 +261,7 @@ export interface Config {
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
     'slug-autosave': SlugAutosaveSelect<false> | SlugAutosaveSelect<true>;
+    'slug-draft': SlugDraftSelect<false> | SlugDraftSelect<true>;
     'tabs-fields-2': TabsFields2Select<false> | TabsFields2Select<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
@@ -406,7 +410,7 @@ export interface ArrayField {
     text: string;
     anotherText?: string | null;
     localizedText?: string | null;
-    richTextField?: LexicalRichText<LexicalNodes_3E252BA3> | null;
+    richTextField?: LexicalRichText<LexicalNodes_C9A2CDC8> | null;
     subArray?:
       | {
           text?: string | null;
@@ -573,7 +577,7 @@ export interface BlockField {
  */
 export interface ContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_C8D96449> | null;
+  richText?: LexicalRichText<LexicalNodes_1E2BD65E> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -645,7 +649,7 @@ export interface TabsBlock {
  */
 export interface LocalizedContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_C8D96449> | null;
+  richText?: LexicalRichText<LexicalNodes_1E2BD65E> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedContent';
@@ -1060,7 +1064,7 @@ export interface ConditionalLogic {
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
   customServerFieldWithCondition?: string | null;
-  conditionalRichText?: LexicalRichText<LexicalNodes_3E252BA3> | null;
+  conditionalRichText?: LexicalRichText<LexicalNodes_C9A2CDC8> | null;
   userConditional?: string | null;
   parentGroup?: {
     enableParentGroupFields?: boolean | null;
@@ -1763,6 +1767,18 @@ export interface SlugAutosave {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-draft".
+ */
+export interface SlugDraft {
+  id: string;
+  title?: string | null;
+  slug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tabs-fields-2".
  */
 export interface TabsFields2 {
@@ -2170,6 +2186,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'slug-autosave';
         value: string | SlugAutosave;
+      } | null)
+    | ({
+        relationTo: 'slug-draft';
+        value: string | SlugDraft;
       } | null)
     | ({
         relationTo: 'tabs-fields-2';
@@ -3544,6 +3564,17 @@ export interface SlugAutosaveSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-draft_select".
+ */
+export interface SlugDraftSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "tabs-fields-2_select".
  */
 export interface TabsFields2Select<T extends boolean = true> {
@@ -3935,6 +3966,7 @@ export interface CollectionQueryWidget {
       | 'select-fields'
       | 'slug-fields'
       | 'slug-autosave'
+      | 'slug-draft'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -3995,6 +4027,7 @@ export interface ActivityWidget {
           | 'select-fields'
           | 'slug-fields'
           | 'slug-autosave'
+          | 'slug-draft'
           | 'tabs-fields-2'
           | 'tabs-fields'
           | 'text-fields'

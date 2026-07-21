@@ -4,7 +4,6 @@ import type { Slugify } from './types.js'
 
 import { hasAutosaveEnabled } from '../../../utilities/getVersionsConfig.js'
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
-import { countVersions } from './countVersions.js'
 
 type Args = {
   name: string
@@ -14,12 +13,23 @@ type Args = {
 
 /**
  * Field `beforeChange` hook for the native `slug` field. Returns the slug value.
+ * - The slug value is derived from the `useAsSlug` source field,
+ *   but can be manually overridden by the admin.
+ * - To protect live URLs, the slug is frozen after initial generation
+ *   unless the admin explicitly overwrites it.
  *
- * Auto-tracking is derived statelessly: the slug follows its source while it is
- * empty or still equals `slugify(storedSource)`. Once it diverges (the admin
- * overwrites it), it freezes — and stays frozen, because the stored value keeps
- * differing from `slugify(source)`. Re-aligning (the UI generate button) resumes
- * tracking.
+ * This is expressed as follows:
+ *
+ * Non-versioned and versioned-but-non-autosave collections:
+ * - On create, generate from the source, keeping an explicitly provided value.
+ * - On update, regenerate only while the stored slug is empty.
+ * - Freeze on the first non-empty value, whether generated or manually provided.
+ *
+ * Autosave drafts:
+ * - On every draft save (create and autosave) before publish, generate freely — a new
+ *   document gets a natural, live-updating slug while the admin is still entering content.
+ * - Freeze on the first manual overwrite or the first publish. A mid-draft overwrite wins
+ *   immediately and is preserved across later autosaves.
  */
 export const generateSlug =
   ({ name, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
@@ -34,20 +44,16 @@ export const generateSlug =
     const entity = collection || global!
 
     if (operation === 'create') {
-      // Autosave drafts: do not auto-generate on the initial draft — the user is still entering content.
-      // Keep the explicit non-slugified value (if any); generation begins on a later autosave.
-      if (hasAutosaveEnabled(entity) && data?._status === 'draft') {
-        return value || null
-      }
-
-      // Keep an explicitly provided slug; otherwise generate from the source.
+      // Generate from the source (keeping an explicitly provided slug). On an autosave
+      // collection the initial draft is created empty, so this yields an empty slug and
+      // begins tracking as soon as content is entered.
       return await slugify(value || source)
     }
 
     const storedSlug = originalDoc?.[name]
     const originalSource = originalDoc?.[useAsSlug]
 
-    // User explicitly edited the slug (or cleared the value): respect it.
+    // User explicitly edited the slug (or cleared the value) this save: respect it.
     if (value !== undefined && value !== storedSlug) {
       return value
     }
@@ -65,24 +71,11 @@ export const generateSlug =
       return storedSlug || (await slugify(source))
     }
 
-    // Autosave / drafts
-    const priorVersions = await countVersions({
-      collectionSlug: collection?.slug,
-      globalSlug: global?.slug,
-      parentID: originalDoc?.id,
-      req,
-    })
-
-    // Do not generate on the very first draft (no prior version yet).
-    if (priorVersions === 0) {
-      return storedSlug ?? null
-    }
-
-    // Stabilize after publish to protect live URLs.
+    // Autosave drafts: freeze once the document has been published to protect the live URL.
     if (data?._status === 'published' || originalDoc?._status === 'published') {
       return storedSlug
     }
 
-    // Still auto-tracking an unpublished draft with content.
+    // Still an unpublished draft — keep tracking the source freely.
     return source ? await slugify(source) : null
   }
