@@ -53,3 +53,5 @@ bash tools/e2e-pr-assets/check.sh
   - Disable auto-open behavior with `E2E_GITHUB_AUTO_LOGIN=0`.
 - `e2e-attach-pr` cleans `/tmp/payload-e2e-before|after.{mp4,webm,png}` after a successful PR body update by default.
   - Disable media cleanup with `E2E_MEDIA_AUTO_CLEANUP=0`.
+- `e2e-convert-video` trims the initial blank lead-in by default and can extend that trim automatically when the first meaningful scene change happens later than the standard 1-second startup buffer.
+- If `h264_videotoolbox` is available but fails during conversion, `e2e-convert-video` automatically retries with `libx264`.

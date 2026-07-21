@@ -167,7 +167,7 @@ fi
 ```
 
 - `e2e-attach-pr` is idempotent: it replaces the prior generated media block instead of duplicating it.
-- Video conversion records at full viewport size, trims the initial blank Playwright frame by default, and auto-compresses to fit GitHub upload constraints when needed.
+- Video conversion records at full viewport size, trims the initial blank Playwright lead-in by default (including longer startup blanks when a later first scene is detected), and auto-compresses to fit GitHub upload constraints when needed.
 - If `e2e-convert-video` fails with `h264_videotoolbox`, retry conversion with `libx264` instead of re-recording. Hardware H.264 availability is not the same as hardware H.264 reliability.
 - Video mode is complete only when the PR body contains `github.com/user-attachments/assets` video links. `.webm` links or raw `.mp4` links are failed video-mode results.
 - Media artifacts are stored in `/tmp` and are automatically removed after `e2e-attach-pr` completes by default. Disable with `E2E_MEDIA_AUTO_CLEANUP=0`.
