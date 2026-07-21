@@ -409,6 +409,7 @@ export interface PayloadJob {
   waitUntil?: string | null;
   processingToken?: string | null;
   processingUntil?: string | null;
+  processingToken?: string | null;
   /**
    * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
    */
@@ -558,6 +559,7 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   waitUntil?: T;
   processingToken?: T;
   processingUntil?: T;
+  processingToken?: T;
   concurrencyKey?: T;
   updatedAt?: T;
   createdAt?: T;

@@ -633,8 +633,8 @@ export type UpdateJobsArgs = {
 /**
  * Updates jobs matching the provided `where` condition.
  *
- * Job claims must only update jobs that are still not processing.
- * When a `processingToken` is provided, only jobs updated with that token may be returned.
+ * Implementations must apply `where` when writing each document, not only when first selecting
+ * documents, so a worker can only update jobs that it still owns.
  */
 export type UpdateJobs = (args: UpdateJobsArgs) => Promise<Job[] | null>
 
