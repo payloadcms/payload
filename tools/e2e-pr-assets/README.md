@@ -43,6 +43,7 @@ Before recording, create a temporary local `recording-plan.md` outside the repo 
 - State exactly what must be proven in card view and in list view.
 - Mirror the same `Before` / `After` plan in a top-of-file comment in any temporary `scenario.mjs`.
 - When attaching media, pass the plan to `e2e-attach-pr --plan-file ...` so the `Before` and `After` notes become hidden HTML comments below the matching headings.
+- In those hidden comments, call out the verdict explicitly: `Before` should name the incorrect result, and `After` should name the correct result.
 
 ## Notes
 
@@ -64,5 +65,6 @@ Before recording, create a temporary local `recording-plan.md` outside the repo 
 - `e2e-attach-pr` cleans `/tmp/payload-e2e-before|after.{mp4,webm,png}` after a successful PR body update by default.
   - Disable media cleanup with `E2E_MEDIA_AUTO_CLEANUP=0`.
 - `e2e-attach-pr --plan-file /path/to/recording-plan.md` copies the plan's `Before` and `After` sections into hidden HTML comments in the PR body, directly below the visible `### Before` and `### After` headings.
+- Prefer final proof lines like `Show the document card with the published title. (Incorrect, should be draft title)` and `Show the document card with the draft title. (Correct, shows draft title)` so the hidden comments explain the bug/fix clearly in edit mode.
 - `e2e-convert-video` trims the initial blank lead-in by default and can extend that trim automatically when the first meaningful scene change happens later than the standard 1-second startup buffer.
 - If `h264_videotoolbox` is available but fails during conversion, `e2e-convert-video` automatically retries with `libx264`.

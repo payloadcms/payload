@@ -42,6 +42,7 @@ The plan must have separate `Before` and `After` sections and should answer:
 - What proof must be visible at the end of the `After` run
 - What must be shown in card view
 - What must be shown in list view
+- Which final visible result is incorrect in `Before` and which final visible result is correct in `After`
 
 Use this template:
 
@@ -51,12 +52,14 @@ Use this template:
 ## Before
 - Steps:
 - Final visible proof:
+  - Include the incorrect outcome explicitly, for example: `Show the document card with the published title. (Incorrect, should be draft title)`
 - Card view must show:
 - List view must show:
 
 ## After
 - Steps:
 - Final visible proof:
+  - Include the correct outcome explicitly, for example: `Show the document card with the draft title. (Correct, shows draft title)`
 - Card view must show:
 - List view must show:
 ```
@@ -190,6 +193,7 @@ export default async function scenario({ baseURL, cursor, expect, label, page, r
 - `urls=$(e2e-upload-github-attachments <pr-number> <owner/repo> /tmp/payload-e2e-before.mp4 /tmp/payload-e2e-after.mp4)`
 - `e2e-attach-pr <pr-number> <owner/repo> --mode video --before-url "$(jq -r .before <<<"$urls")" --after-url "$(jq -r .after <<<"$urls")" --plan-file /path/to/recording-plan.md`
 - `e2e-attach-pr` copies the `Before` and `After` sections from the plan file into hidden HTML comments directly below the visible `### Before` and `### After` headings.
+- In those hidden comments, make the final visible proof line explicit: `Before` should call out the incorrect result and `After` should call out the correct result.
 - Video mode is not complete until the PR body uses `github.com/user-attachments/assets` URLs.
 
 ## Screenshot Mode Workflow
@@ -217,6 +221,7 @@ fi
 
 - `e2e-attach-pr` is idempotent: it replaces the prior generated media block instead of duplicating it.
 - The recording plan remains a local, temporary planning artifact. When attaching media, pass it to `e2e-attach-pr --plan-file ...` so the `Before` and `After` notes land in hidden PR-body comments instead of visible reviewer-facing text.
+- When the PR is demonstrating a bug and its fix, the hidden `Before` comment should name the incorrect outcome and the hidden `After` comment should name the correct outcome.
 - Video conversion records at full viewport size, trims the initial blank Playwright lead-in by default (including longer startup blanks when a later first scene is detected), and auto-compresses to fit GitHub upload constraints when needed.
 - If `e2e-convert-video` fails with `h264_videotoolbox`, retry conversion with `libx264` instead of re-recording. Hardware H.264 availability is not the same as hardware H.264 reliability.
 - Video mode is complete only when the PR body contains `github.com/user-attachments/assets` video links. `.webm` links or raw `.mp4` links are failed video-mode results.
