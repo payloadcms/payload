@@ -237,6 +237,7 @@ export async function loadAdminPage({
       config: Promise.resolve(config),
       importMap,
       initReq: boundInitReq,
+      key: splat ?? '',
       notFound,
       // `segments` is intentionally `undefined` for the admin root (`/admin`),
       // matching Next's optional catch-all; `renderRoot` handles it at runtime.
