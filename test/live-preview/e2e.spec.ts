@@ -324,17 +324,36 @@ describe('Live Preview', () => {
     await expect(previewButton).toBeHidden()
   })
 
-  test('collection — preview button links to preview URL in a new tab', async () => {
+  test('collection — preview button copies the preview URL to the clipboard', async () => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
     await goToCollectionLivePreview(page, pagesURLUtil)
 
     const previewButton = page.locator('#preview-button')
     await expect(previewButton).toBeVisible()
 
-    await expect(previewButton).toHaveAttribute('target', '_blank')
-    await expect(previewButton).toHaveAttribute('href', /\/live-preview/)
-
     await previewButton.hover()
-    await expect(page.locator('#preview-button ~ .tooltip--show')).toHaveText('Preview')
+    await expect(page.locator('#preview-button ~ .tooltip--show')).toHaveText('Copy')
+
+    await previewButton.click()
+    await expect(page.locator('#preview-button ~ .tooltip--show')).toHaveText('Copied')
+    await expect
+      .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+      .toMatch(/\/live-preview/)
+  })
+
+  test('collection — cmd/ctrl + click opens the preview URL in a new tab', async () => {
+    await goToCollectionLivePreview(page, pagesURLUtil)
+
+    const previewButton = page.locator('#preview-button')
+    await expect(previewButton).toBeVisible()
+
+    const [newTab] = await Promise.all([
+      context.waitForEvent('page'),
+      previewButton.click({ modifiers: ['ControlOrMeta'] }),
+    ])
+
+    await expect.poll(() => newTab.url()).toMatch(/\/live-preview/)
+    await newTab.close()
   })
 
   test('collection — retains static URL across edits', async () => {

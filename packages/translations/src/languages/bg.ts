@@ -442,7 +442,6 @@ export const bgTranslations: DefaultTranslationsObject = {
     perPage: 'На страница: {{limit}}',
     perPageLabel: 'На страница:',
     presets: 'Предварително зададени настройки',
-    preview: 'Преглед',
     previous: 'Предишен',
     reindex: 'Преиндексиране',
     reindexingAll: 'Преиндексиране на всички {{collections}}.',

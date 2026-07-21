@@ -439,7 +439,6 @@ export const ukTranslations: DefaultTranslationsObject = {
     perPage: 'На сторінці: {{limit}}',
     perPageLabel: 'На сторінку:',
     presets: 'Попередньо налаштовані параметри',
-    preview: 'Попередній перегляд',
     previous: 'Попередній',
     reindex: 'Повторне індексування',
     reindexingAll: 'Перебудова індексів для всіх {{collections}}.',

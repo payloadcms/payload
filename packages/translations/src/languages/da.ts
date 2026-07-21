@@ -441,7 +441,6 @@ export const daTranslations: DefaultTranslationsObject = {
     perPage: 'Per side: {{limit}}',
     perPageLabel: 'Pr. side:',
     presets: 'Forudindstillinger',
-    preview: 'Forhåndsvisning',
     previous: 'Tidligere',
     reindex: 'Genindekser',
     reindexingAll: 'Genindekserer alle {{collections}}.',

@@ -434,7 +434,6 @@ export const thTranslations: DefaultTranslationsObject = {
     perPage: 'จำนวนต่อหน้า: {{limit}}',
     perPageLabel: 'ต่อหน้า:',
     presets: 'ชุดค่าล่วงหน้า',
-    preview: 'ดูตัวอย่าง',
     previous: 'ก่อนหน้านี้',
     reindex: 'จัดทำดัชนีใหม่',
     reindexingAll: 'กำลังทำการจัดทำดัชนีใหม่ทั้งหมดใน {{collections}}.',

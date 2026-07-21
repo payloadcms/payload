@@ -447,7 +447,6 @@ export const itTranslations: DefaultTranslationsObject = {
     perPage: 'Per Pagina: {{limit}}',
     perPageLabel: 'Per pagina:',
     presets: 'Preimpostazioni',
-    preview: 'Anteprima',
     previous: 'Precedente',
     reindex: 'Reindicizza',
     reindexingAll: "Rifacendo l'indice di tutte le {{collections}}.",

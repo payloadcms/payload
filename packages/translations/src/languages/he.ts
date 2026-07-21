@@ -427,7 +427,6 @@ export const heTranslations: DefaultTranslationsObject = {
     perPage: '{{limit}} בכל עמוד',
     perPageLabel: 'לכל עמוד:',
     presets: 'הגדרות מראש',
-    preview: 'תצוגה מקדימה',
     previous: 'קודם',
     reindex: 'החזרת אינדקס',
     reindexingAll: 'החזרת אינדקס לכל {{collections}}.',

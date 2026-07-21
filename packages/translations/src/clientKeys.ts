@@ -366,7 +366,6 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:perPage',
   'general:perPageLabel',
   'general:presets',
-  'general:preview',
   'general:previous',
   'general:reindex',
   'general:reindexingAll',

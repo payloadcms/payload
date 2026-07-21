@@ -418,7 +418,6 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     perPage: '每頁顯示：{{limit}}',
     perPageLabel: '每頁顯示：',
     presets: '預設值',
-    preview: '預覽',
     previous: '上一頁',
     reindex: '重新索引',
     reindexingAll: '正在重新索引 {{collections}}。',

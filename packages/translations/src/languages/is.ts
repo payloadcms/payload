@@ -439,7 +439,6 @@ export const isTranslations: DefaultTranslationsObject = {
     perPage: 'Á síðu: {{limit}}',
     perPageLabel: 'Á síðunni:',
     presets: 'Forsnið',
-    preview: 'Forskoðun',
     previous: 'Fyrri',
     reindex: 'Endursetja leitargrunn',
     reindexingAll: 'Endursetja leitargrunn fyrir allar {{collections}}.',

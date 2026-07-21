@@ -444,7 +444,6 @@ export const nbTranslations: DefaultTranslationsObject = {
     perPage: 'Per side: {{limit}}',
     perPageLabel: 'Per side:',
     presets: 'Forhåndsinnstillinger',
-    preview: 'Forhåndsvisning',
     previous: 'Forrige',
     reindex: 'Reindekser',
     reindexingAll: 'Reindekserer alle {{collections}}.',

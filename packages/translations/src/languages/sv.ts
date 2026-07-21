@@ -443,7 +443,6 @@ export const svTranslations: DefaultTranslationsObject = {
     perPage: 'Per Sida: {{limit}}',
     perPageLabel: 'Per sida:',
     presets: 'Förinställningar',
-    preview: 'Förhandsgranska',
     previous: 'Föregående',
     reindex: 'Omindexera',
     reindexingAll: 'Omindexerar alla {{collections}}...',

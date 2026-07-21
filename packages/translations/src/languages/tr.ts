@@ -447,7 +447,6 @@ export const trTranslations: DefaultTranslationsObject = {
     perPage: 'Sayfa başına: {{limit}}',
     perPageLabel: 'Sayfa başına:',
     presets: 'Ön ayarlar',
-    preview: 'Önizleme',
     previous: 'Önceki',
     reindex: 'Yeniden İndeksle',
     reindexingAll: 'Tüm {{collections}} yeniden dizine alınıyor.',

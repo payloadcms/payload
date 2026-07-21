@@ -444,7 +444,6 @@ export const ptTranslations: DefaultTranslationsObject = {
     perPage: 'Itens por Página: {{limit}}',
     perPageLabel: 'Por página:',
     presets: 'Predefinições',
-    preview: 'Visualizar',
     previous: 'Anterior',
     reindex: 'Reindexar',
     reindexingAll: 'Reindexando todas as {{collections}}.',

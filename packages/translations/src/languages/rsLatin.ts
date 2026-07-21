@@ -442,7 +442,6 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     perPage: 'Po stranici: {{limit}}',
     perPageLabel: 'Po stranici:',
     presets: 'Predlošci',
-    preview: 'Pregled',
     previous: 'Prethodni',
     reindex: 'Reindeksiraj',
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',

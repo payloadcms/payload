@@ -434,7 +434,6 @@ export const faTranslations: DefaultTranslationsObject = {
     perPage: 'تعداد در هر صفحه: {{limit}}',
     perPageLabel: 'در هر صفحه:',
     presets: 'پیش‌تنظیم‌ها',
-    preview: 'پیش‌نمایش',
     previous: 'قبلی',
     reindex: 'ایندکس مجدد',
     reindexingAll: 'در حال ایندکس مجدد همه {{collections}}...',
