@@ -23,7 +23,7 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
 ## Core features
 
 - Streamable HTTP transport at `/api/mcp` for local and remote clients, using Payload auth when provided
-- Stable discovery and CRUD tools for configured collections and globals (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `getUploadInstructions`, `getGlobalSchema`, `findGlobal`, `updateGlobal`) - filtered by Payload access and configurable with simple keys like `tools: { delete: false }`
+- Stable discovery and CRUD tools for configured collections and globals (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocuments`, `updateDocument`, `deleteDocuments`, `getUploadInstructions`, `getGlobalSchema`, `findGlobal`, `updateGlobal`) - filtered by Payload access and configurable with simple keys like `tools: { delete: false }`
 - Auth-enabled collections expose opt-in `login`, `auth`, `forgotPassword`, `resetPassword`, `unlock`, `verify` tools
 - Define your own `tools`, `prompts`, and `resources` with full TypeScript inference via `defineTool` / `defineCollectionTool` / `defineGlobalTool` / `definePrompt`
 - Gate tools, prompts, and resources with code-level `access` callbacks while Payload access control still protects the underlying documents
@@ -67,7 +67,7 @@ This development URL skips access control. Outside development, remove
 `overrideAccess=true` and [send Payload authorization](#authorization). If your
 client does not support HTTP natively, see [Connecting MCP clients](#connecting-mcp-clients).
 
-That's it - every collection and global is now available through the generic MCP tools. For example, call `getConfigInfo` to see available slugs, inspect a collection with `getCollectionSchema`, then create a document with `createDocument`.
+That's it - every collection and global is now available through the generic MCP tools. For example, call `getConfigInfo` to see available slugs, inspect a collection with `getCollectionSchema`, then create one or more documents with `createDocuments`.
 
 ### Uploading files
 
@@ -83,7 +83,7 @@ Payload
 MCP client
   -> sends the original file using the HTTP request
      or calls the MCP tool named by the provider instruction
-  -> calls createDocument or updateDocument with { source: "uploadReference", file: <returned file> }
+  -> calls createDocuments or updateDocument with { source: "uploadReference", file: <returned file> }
 
 Payload
   -> runs normal file validation, image processing, hooks, and document creation
@@ -91,7 +91,7 @@ Payload
 
 When supported by the storage adapter, the HTTP request uploads directly to the storage provider and bypasses Payload. Otherwise, it uploads to temporary storage through Payload. Named provider instructions tell the client to call an MCP tool with the returned name; if that tool is not installed, the upload is unsupported.
 
-The program running the MCP client must be able to read the local file and send its bytes. A remote Payload server cannot read a path on the caller's computer, and the file should not be converted to base64 for `createDocument` or `updateDocument`.
+The program running the MCP client must be able to read the local file and send its bytes. A remote Payload server cannot read a path on the caller's computer, and the file should not be converted to base64 for `createDocuments` or `updateDocument`.
 
 ### Configuring per-collection tools
 
@@ -115,7 +115,7 @@ mcpPlugin({
       },
     },
     media: {
-      // Read-only: only `findDocuments` and `updateDocument` remain
+      // Disable document creation and deletion; updates remain available
       tools: {
         create: false,
         delete: false,
@@ -183,11 +183,26 @@ The `tools` map keys can be:
 - A built-in key (`getCollectionSchema`, `getUploadInstructions` on upload collections, `find`, `create`, `update`, `delete`, plus auth tool names on auth collections): set to `false` to disable, or to an override object `{ access?, description?, overrideResponse? }`. Auth tools also accept `true` to enable with no overrides.
 - A custom name: a value produced by `defineCollectionTool(...)`.
 
+The `create` key controls `createDocuments`, which handles both single and
+multi-document requests.
+
 `getConfigInfo` is always registered as a top-level tool. It returns the collection and global slugs visible to the current MCP client.
 
 ### Per-global options
 
 `globals[slug]` accepts the same shape, but the built-in keys are limited to `getGlobalSchema`, `find`, and `update` (globals are singletons; create / delete don't apply).
+
+### Creating documents
+
+`createDocuments` accepts a `documents` array with at least one item. Each item
+has its own `data` and optional `file`. Options such as `depth`, `draft`,
+`locale`, `fallbackLocale`, and `select` apply to the whole request.
+
+Documents are created one at a time through Payload's Local API. The operation
+is best-effort: a failed item does not roll back successful items. Results and
+errors include their original zero-based input index so failed items can be
+retried without creating successful items again. The tool has no fixed item
+limit, but normal request-size and execution-time limits still apply.
 
 ## Uploading files
 
@@ -643,7 +658,7 @@ Prompt and resource handlers receive `req`, but not `authorizedMCP`.
 
 ## Reducing token usage with `select`
 
-The built-in `findDocuments`, `findGlobal`, `createDocument`, `updateDocument`, and `updateGlobal` tools accept an optional `select` parameter. It limits which fields come back, which significantly reduces token usage on large documents.
+The built-in `findDocuments`, `findGlobal`, `createDocuments`, `updateDocument`, and `updateGlobal` tools accept an optional `select` parameter. It limits which fields come back, which significantly reduces token usage on large documents.
 
 `select` follows [Payload's Select API](https://payloadcms.com/docs/queries/select) syntax - set a field to `true` to include it:
 
@@ -738,7 +753,7 @@ Each hook receives:
 | `input`    | The parsed input passed to the tool.                                             |
 | `req`      | The current Payload request.                                                     |
 | `response` | The response returned by the previous response override or `afterToolCall` hook. |
-| `toolName` | The registered MCP tool name, such as `createDocument` or `getConfigInfo`.       |
+| `toolName` | The registered MCP tool name, such as `createDocuments` or `getConfigInfo`.      |
 
 ## Payload collection hooks
 
