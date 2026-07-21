@@ -1,0 +1,60 @@
+name: release-bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      preid:
+        description: Prerelease identifier
+        type: choice
+        options:
+          - canary
+          - beta
+        default: canary
+      bump:
+        description: Semver bump
+        type: choice
+        options:
+          - prerelease
+          - prepatch
+          - preminor
+          - premajor
+        default: prerelease
+      dry_run:
+        description: 'Dry run: log git commands, push nothing'
+        type: boolean
+        default: false
+
+env:
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+
+concurrency:
+  group: release-bump
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    name: release-bump
+    if: github.repository_owner == 'payloadcms'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      - name: Mint App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Bump
+        run: pnpm release-bump --preid ${{ inputs.preid }} --bump ${{ inputs.bump }} ${{ inputs.dry_run && '--dry-run' || '' }}
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
