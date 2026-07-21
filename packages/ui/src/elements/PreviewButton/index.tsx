@@ -21,7 +21,6 @@ export function PreviewButton(_props: PreviewButtonClientProps) {
         return
       }
 
-      // Cmd/Ctrl + click opens the preview URL in a new tab
       if (event.metaKey || event.ctrlKey) {
         window.open(previewURL, '_blank', 'noopener,noreferrer')
         return
