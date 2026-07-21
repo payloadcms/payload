@@ -262,6 +262,12 @@ describe('@payloadcms/plugin-mcp', () => {
         (plugin) => plugin.slug === '@payloadcms/plugin-mcp',
       ) as any
       const pluginItems = plugin.sanitizedOptions.items
+      const rollToolKeys = pluginItems
+        .filter((item: any) => item.type === 'collectionTool' && item.collectionSlug === 'rolls')
+        .map((item: any) => item.configKey)
+
+      expect(rollToolKeys).toContain('create')
+      expect(rollToolKeys).not.toContain('createMany')
 
       const getConfigInfo = toolsByName['getConfigInfo']
       expect(getConfigInfo).toBeDefined()
@@ -288,6 +294,9 @@ describe('@payloadcms/plugin-mcp', () => {
         openWorldHint: false,
         readOnlyHint: false,
       })
+
+      const createDocuments = toolsByName['createDocuments']
+      expect(createDocuments).toBeDefined()
 
       const findDocuments = toolsByName['findDocuments']
       expect(findDocuments).toBeDefined()
@@ -494,6 +503,17 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(createDocument.inputSchema.properties.locale).toBeDefined()
       expect(createDocument.inputSchema.properties.select).toBeDefined()
       expect(createDocument.inputSchema.properties.select.type).toBe('object')
+
+      // The bulk tool keeps batch-wide options at the top level and per-document data/files together.
+      expect(createDocuments.inputSchema.required).toContain('documents')
+      expect(createDocuments.inputSchema.properties.documents).toMatchObject({
+        minItems: 1,
+        type: 'array',
+      })
+      expect(createDocuments.inputSchema.properties.documents.maxItems).toBeUndefined()
+      expect(createDocuments.inputSchema.properties.documents.items.required).toContain('data')
+      expect(createDocuments.inputSchema.properties.documents.items.properties.file).toBeDefined()
+      expect(createDocuments.inputSchema.properties.depth).toBeDefined()
 
       // Find tool: no `data` wrapper, just metadata fields
       expect(findDocuments.inputSchema).toBeDefined()
@@ -933,6 +953,102 @@ describe('@payloadcms/plugin-mcp', () => {
       expect(responseText).toContain('"title":"Test Post"')
       expect(responseText).toContain('"content":"Content for test post."')
       expect(overrideText).toContain('Override MCP response for Posts!')
+    })
+
+    it('should create multiple documents and keep stable indexes for partial failures', async ({
+      mcp,
+    }) => {
+      const apiKey = await getApiKey()
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
+          collectionSlug: 'posts',
+          documents: [
+            { data: { content: 'First bulk content', title: 'First bulk post' } },
+            { data: { content: 'Missing the required title' } },
+            { data: { content: 'Third bulk content', title: 'Third bulk post' } },
+          ],
+        },
+        name: 'createDocuments',
+      })
+      const result = getToolDoc<{
+        docs: Array<{ doc: { id: number | string; title: string }; index: number }>
+        errors: Array<{ index: number; message: string }>
+      }>(callResponse)
+
+      createdPostIDs.push(...result.docs.map(({ doc }) => doc.id))
+
+      expect(callResponse.isError).not.toBe(true)
+      expect(result.docs).toEqual([
+        {
+          doc: expect.objectContaining({ title: expect.stringContaining('First bulk post') }),
+          index: 0,
+        },
+        {
+          doc: expect.objectContaining({ title: expect.stringContaining('Third bulk post') }),
+          index: 2,
+        },
+      ])
+      expect(result.errors).toEqual([expect.objectContaining({ index: 1 })])
+    })
+
+    it('should create multiple upload documents with different files', async ({ mcp }) => {
+      const [png, jpeg] = await Promise.all([
+        readFile(path.resolve(dirname, '../uploads/image.png')),
+        readFile(path.resolve(dirname, '../uploads/image.jpg')),
+      ])
+      const apiKey = await getApiKey()
+      const client = await mcp.connect(apiKey)
+      const callResponse = await client.callTool({
+        arguments: {
+          collectionSlug: 'media',
+          documents: [
+            {
+              data: { alt: 'First bulk upload' },
+              file: {
+                data: png.toString('base64'),
+                mimeType: 'image/png',
+                name: 'mcp-bulk-first.png',
+                source: 'base64',
+              },
+            },
+            {
+              data: { alt: 'Second bulk upload' },
+              file: {
+                data: jpeg.toString('base64'),
+                mimeType: 'image/jpeg',
+                name: 'mcp-bulk-second.jpg',
+                source: 'base64',
+              },
+            },
+          ],
+        },
+        name: 'createDocuments',
+      })
+      const result = getToolDoc<{
+        docs: Array<{ doc: { id: number | string }; index: number }>
+        errors: Array<{ index: number; message: string }>
+      }>(callResponse)
+
+      createdMediaIDs.push(...result.docs.map(({ doc }) => doc.id))
+
+      const [storedPNG, storedJPEG] = await Promise.all(
+        result.docs.map(({ doc }) => payload.findByID({ collection: 'media', id: doc.id })),
+      )
+
+      expect(result.errors).toEqual([])
+      expect(storedPNG).toMatchObject({
+        alt: 'First bulk upload',
+        filename: 'mcp-bulk-first.png',
+        filesize: png.length,
+        mimeType: 'image/png',
+      })
+      expect(storedJPEG).toMatchObject({
+        alt: 'Second bulk upload',
+        filename: 'mcp-bulk-second.jpg',
+        filesize: jpeg.length,
+        mimeType: 'image/jpeg',
+      })
     })
 
     it('should create an upload document from a URL', async ({ mcp }) => {

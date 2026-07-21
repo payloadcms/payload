@@ -25,7 +25,7 @@ This plugin adds [Model Context Protocol](https://modelcontextprotocol.io/docs/g
 - Two transports out of the box:
   - **HTTP** at `/api/mcp` - for remote clients, using Payload auth when provided
   - **stdio** via the `payload-mcp` bin - for local AI clients spawning a child process
-- Stable discovery and CRUD tools for configured collections and globals (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `updateDocument`, `deleteDocuments`, `getUploadInstructions`, `getGlobalSchema`, `findGlobal`, `updateGlobal`) - filtered by Payload access and configurable with simple keys like `tools: { delete: false }`
+- Stable discovery and CRUD tools for configured collections and globals (`getConfigInfo`, `getCollectionSchema`, `findDocuments`, `createDocument`, `createDocuments`, `updateDocument`, `deleteDocuments`, `getUploadInstructions`, `getGlobalSchema`, `findGlobal`, `updateGlobal`) - filtered by Payload access and configurable with simple keys like `tools: { delete: false }`
 - Auth-enabled collections expose opt-in `login`, `auth`, `forgotPassword`, `resetPassword`, `unlock`, `verify` tools
 - Define your own `tools`, `prompts`, and `resources` with full TypeScript inference via `defineTool` / `defineCollectionTool` / `defineGlobalTool` / `definePrompt`
 - Gate tools, prompts, and resources with code-level `access` callbacks while Payload access control still protects the underlying documents
@@ -127,7 +127,7 @@ mcpPlugin({
       },
     },
     media: {
-      // Read-only: only `findDocuments` and `updateDocument` remain
+      // Disable document creation and deletion; updates remain available
       tools: {
         create: false,
         delete: false,
@@ -192,8 +192,11 @@ authenticated user, provide an override object with `access: () => true`.
 
 The `tools` map keys can be:
 
-- A built-in key (`getCollectionSchema`, `getUploadInstructions` on upload collections, `find`, `create`, `update`, `delete`, plus auth tool names on auth collections): set to `false` to disable, or to an override object `{ access?, description?, overrideResponse? }`. Auth tools also accept `true` to enable with no overrides.
+- A built-in key (`getCollectionSchema`, `getUploadInstructions` on upload collections, `find`, `create`, `createMany`, `update`, `delete`, plus auth tool names on auth collections): set to `false` to disable, or to an override object `{ access?, description?, overrideResponse? }`. Auth tools also accept `true` to enable with no overrides.
 - A custom name: a value produced by `defineCollectionTool(...)`.
+
+The `create` and `createMany` keys configure their corresponding singular or
+bulk tool independently.
 
 `getConfigInfo` is always registered as a top-level tool. It returns the collection and global slugs visible to the current MCP client.
 
@@ -735,7 +738,7 @@ Prompt and resource handlers receive `req`, but not `authorizedMCP`.
 
 ## Reducing token usage with `select`
 
-The built-in `findDocuments`, `findGlobal`, `createDocument`, `updateDocument`, and `updateGlobal` tools accept an optional `select` parameter. It limits which fields come back, which significantly reduces token usage on large documents.
+The built-in `findDocuments`, `findGlobal`, `createDocument`, `createDocuments`, `updateDocument`, and `updateGlobal` tools accept an optional `select` parameter. It limits which fields come back, which significantly reduces token usage on large documents.
 
 `select` follows [Payload's Select API](https://payloadcms.com/docs/queries/select) syntax - set a field to `true` to include it:
 
