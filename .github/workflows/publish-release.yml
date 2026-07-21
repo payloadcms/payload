@@ -1,0 +1,55 @@
+name: publish-release
+
+on:
+  push:
+    tags:
+      - 'v4.*'
+
+env:
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+
+concurrency:
+  group: publish-release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: publish-release-${{ github.ref_name }}
+    if: github.repository_owner == 'payloadcms'
+    runs-on: ubuntu-24.04
+    environment: release
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Mint App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+      - name: Checkout tag
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Publish
+        run: pnpm release-ci
+        env:
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
+          NPM_CONFIG_PROVENANCE: true
+      - name: Notify Slack on failure
+        if: failure()
+        run: |
+          curl -fsS -X POST https://slack.com/api/chat.postMessage \
+            -H "Authorization: Bearer $SLACK_TOKEN" \
+            -H 'Content-type: application/json; charset=utf-8' \
+            --data "$(printf '{"channel":"%s","text":"🚨 publish-release failed for %s — %s/%s/actions/runs/%s"}' \
+              "$SLACK_CHANNEL" "$GITHUB_REF_NAME" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")"
+        env:
+          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
+          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
