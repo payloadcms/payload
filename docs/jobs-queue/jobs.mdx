@@ -210,6 +210,7 @@ Each job document contains:
   hasError: false,              // True if job failed
   totalTried: 1,                // Number of attempts
   processingUntil: null,        // Future date while a worker owns the job
+  processingToken: null,        // Internal token for the current owner
   taskStatus: {                 // Status of each task (for workflows)
     sendEmail: {
       '1': {
@@ -227,7 +228,7 @@ Each job document contains:
 }
 ```
 
-Payload increments `totalTried` after each attempt. While the handler runs, Payload automatically renews `processingUntil`. If the worker disappears and the lease expires, the next jobs runner call counts the abandoned attempt and recovers the job using its existing retry and backoff configuration.
+Payload increments `totalTried` after each attempt. While the handler runs, Payload automatically renews `processingUntil`. The claim also gets a `processingToken`, and worker updates only succeed while that token still matches. If the worker disappears and the lease expires, the next jobs runner call counts the abandoned attempt and recovers the job using its existing retry and backoff configuration.
 
 #### Access Control
 

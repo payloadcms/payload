@@ -527,4 +527,4 @@ concurrency: {
 
 - **No concurrency key = no restrictions:** Jobs without a concurrency configuration run in parallel as before.
 
-- **Pending jobs wait:** Jobs that can't run due to concurrency constraints remain in the queue without a `processingUntil` lease and will be picked up on subsequent runs.
+- **Pending jobs wait:** Jobs that can't run due to concurrency constraints remain in the queue without a `processingUntil` lease or `processingToken` and will be picked up on subsequent runs.

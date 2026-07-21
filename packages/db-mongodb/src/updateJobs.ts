@@ -134,7 +134,10 @@ export const updateJobs: UpdateJobs = async function updateMany(
 
       const candidateIDs = candidates.map((candidate) => candidate._id)
 
-      if (typeof data.processingToken === 'string') {
+      if (
+        typeof data.processingToken === 'string' &&
+        typeof data.processingUntil === 'string'
+      ) {
         /**
          * `processingToken` identifies this claim update. `processing: true` cannot, because every
          * worker writes the same value. The token lets us reliably find the jobs this update won.
@@ -152,6 +155,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
         const claimedJobsQuery = {
           _id: { $in: candidateIDs },
           processingToken: { $eq: data.processingToken },
+          processingUntil: { $eq: data.processingUntil },
         }
 
         result = await Model.find(claimedJobsQuery, {}, { ...findOptions, sort })

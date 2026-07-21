@@ -863,7 +863,7 @@ The default `updateJobs` implementation has been removed because it could not sa
 
 ### Jobs now use renewable processing leases
 
-The permanent `processing` checkbox has been replaced by an indexed `processingUntil` date. Payload renews this lease while a worker is alive and recovers it through the normal jobs runner after it expires.
+The permanent `processing` checkbox has been replaced by an indexed `processingUntil` date and a hidden `processingToken`. Payload renews the lease while a worker is alive, uses the token to reject writes from a previous owner, and recovers expired jobs through the normal jobs runner.
 
 Before migrating the database, stop all v3 job runners. Pending jobs should have an empty `processingUntil`. Migrate unfinished v3 rows with `processing: true` to an already-expired `processingUntil`; the v4 runner will count that abandoned attempt and apply its retry rules. Do not run v3 and v4 job workers at the same time.
 

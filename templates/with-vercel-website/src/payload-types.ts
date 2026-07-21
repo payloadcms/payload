@@ -961,6 +961,7 @@ export interface PayloadJob {
   queue?: string | null;
   waitUntil?: string | null;
   processingUntil?: string | null;
+  processingToken?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1584,6 +1585,7 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   queue?: T;
   waitUntil?: T;
   processingUntil?: T;
+  processingToken?: T;
   updatedAt?: T;
   createdAt?: T;
 }

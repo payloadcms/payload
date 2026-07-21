@@ -4,6 +4,7 @@ import {
   _internal_resetJobSystemGlobals,
   createLocalReq,
   Forbidden,
+  type JobLog,
   type JobTaskStatus,
   type Payload,
   type User,
@@ -1138,6 +1139,7 @@ describe('Queues - Payload', () => {
         id: job.id,
         collection: 'payload-jobs',
         data: {
+          processingToken: 'expired-worker',
           processingUntil: new Date(Date.now() - 1000).toISOString(),
           totalTried: 0,
         },
@@ -1151,6 +1153,7 @@ describe('Queues - Payload', () => {
       })
 
       expect(recoveredJob.completedAt).toBeTruthy()
+      expect(recoveredJob.processingToken).toBeFalsy()
       expect(recoveredJob.processingUntil).toBeFalsy()
       expect(recoveredJob.totalTried).toBe(2)
     })
@@ -1181,6 +1184,7 @@ describe('Queues - Payload', () => {
 
       expect(failedJob.error).toMatchObject({ name: 'JobProcessingTimeoutError' })
       expect(failedJob.hasError).toBe(true)
+      expect(failedJob.processingToken).toBeFalsy()
       expect(failedJob.processingUntil).toBeFalsy()
       expect(failedJob.totalTried).toBe(1)
     })
@@ -1197,6 +1201,7 @@ describe('Queues - Payload', () => {
         id: job.id,
         collection: 'payload-jobs',
         data: {
+          processingToken: 'active-worker',
           processingUntil: new Date(Date.now() + 60_000).toISOString(),
           totalTried: 0,
         },
@@ -1209,6 +1214,7 @@ describe('Queues - Payload', () => {
       })
 
       expect(activeJob.completedAt).toBeFalsy()
+      expect(activeJob.processingToken).toBe('active-worker')
       expect(activeJob.processingUntil).toBeTruthy()
       expect(activeJob.totalTried).toBe(0)
       expect(result.noJobsRemaining).toBe(true)
@@ -1238,11 +1244,79 @@ describe('Queues - Payload', () => {
       })
 
       await runPromise
+      const completedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
       payload.config.jobs.processingLeaseDuration = originalLeaseDuration
 
+      expect(initiallyRunningJob.processingToken).toBeTruthy()
+      expect(renewedJob.processingToken).toBe(initiallyRunningJob.processingToken)
       expect(new Date(renewedJob.processingUntil!).getTime()).toBeGreaterThan(
         new Date(initiallyRunningJob.processingUntil!).getTime(),
       )
+      expect(completedJob.processingToken).toBeFalsy()
+      expect(completedJob.processingUntil).toBeFalsy()
+    })
+
+    it('should atomically claim a job once and fence the previous owner', async () => {
+      const job = await payload.jobs.queue({
+        input: { message: 'claim once' },
+        task: 'CreateSimple',
+      })
+      const processingUntil = new Date(Date.now() + 60_000).toISOString()
+
+      const claim = (processingToken: string) =>
+        payload.db.updateJobs({
+          data: { processingToken, processingUntil },
+          limit: 1,
+          returning: true,
+          where: {
+            and: [{ id: { equals: job.id } }, { processingUntil: { exists: false } }],
+          },
+        })
+
+      const claims = await Promise.all([claim('worker-a'), claim('worker-b')])
+      const winningClaims = claims.flatMap((result) => result ?? [])
+
+      expect(winningClaims).toHaveLength(1)
+
+      const processingToken = winningClaims[0]!.processingToken
+      const replacementToken = 'replacement-worker'
+      await payload.db.updateJobs({
+        data: { processingToken: replacementToken, processingUntil },
+        id: job.id,
+        returning: false,
+      })
+
+      const now = new Date().toISOString()
+      const staleLog: JobLog = {
+        id: 'stale-log',
+        completedAt: now,
+        executedAt: now,
+        input: {},
+        output: {},
+        state: 'succeeded',
+        taskID: 'stale-task',
+        taskSlug: 'CreateSimple',
+      }
+      const staleUpdate = await payload.db.updateJobs({
+        data: { hasError: true, log: { $push: staleLog }, updatedAt: null },
+        limit: 1,
+        returning: true,
+        where: {
+          and: [{ id: { equals: job.id } }, { processingToken: { equals: processingToken } }],
+        },
+      })
+      const claimedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+
+      expect(staleUpdate ?? []).toHaveLength(0)
+      expect(claimedJob.hasError).toBe(false)
+      expect(claimedJob.log?.some(({ id }) => id === staleLog.id)).toBe(false)
+      expect(claimedJob.processingToken).toBe(replacementToken)
     })
   })
 
@@ -1793,6 +1867,7 @@ describe('Queues - Payload', () => {
       depth: 0,
     })
     expect(jobAfterRunProcessing.processingUntil).toBeTruthy()
+    expect(jobAfterRunProcessing.processingToken).toBeTruthy()
 
     // Should be in processing - cancel job
     await payload.jobs.cancelByID({
@@ -1815,6 +1890,7 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.hasError).toBe(true)
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
+    expect(jobAfterRun.processingToken).toBeFalsy()
     expect(jobAfterRun.processingUntil).toBeFalsy()
 
     // Ensure job is not retried
@@ -1858,6 +1934,7 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.hasError).toBe(true)
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
+    expect(jobAfterRun.processingToken).toBeFalsy()
     expect(jobAfterRun.processingUntil).toBeFalsy()
   })
 

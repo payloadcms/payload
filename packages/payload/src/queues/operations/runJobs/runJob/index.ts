@@ -6,7 +6,12 @@ import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
 import { handleTaskError } from '../../../errors/handleTaskError.js'
 import { handleWorkflowError } from '../../../errors/handleWorkflowError.js'
-import { JobCancelledError, TaskError, WorkflowError } from '../../../errors/index.js'
+import {
+  JobCancelledError,
+  JobLeaseLostError,
+  TaskError,
+  WorkflowError,
+} from '../../../errors/index.js'
 import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getRunTaskFunction } from './getRunTaskFunction.js'
 
@@ -50,8 +55,8 @@ export const runJob = async ({
       tasks: getRunTaskFunction(job, workflowConfig, req, false, updateJob),
     })
   } catch (error) {
-    if (error instanceof JobCancelledError) {
-      throw error // Job cancellation is handled in a top-level error handler, as higher up code may themselves throw this error
+    if (error instanceof JobCancelledError || error instanceof JobLeaseLostError) {
+      throw error // Job cancellation and lease loss are handled by the top-level runner.
     }
     if (error instanceof TaskError) {
       const { hasFinalError } = await handleTaskError({

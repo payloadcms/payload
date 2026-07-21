@@ -1240,7 +1240,8 @@ export interface PayloadJob {
   taskSlug?: ('inline' | 'createCollectionExport' | 'createCollectionImport') | null;
   queue?: string | null;
   waitUntil?: string | null;
-  processing?: boolean | null;
+  processingUntil?: string | null;
+  processingToken?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -2109,7 +2110,8 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   taskSlug?: T;
   queue?: T;
   waitUntil?: T;
-  processing?: T;
+  processingUntil?: T;
+  processingToken?: T;
   updatedAt?: T;
   createdAt?: T;
 }
