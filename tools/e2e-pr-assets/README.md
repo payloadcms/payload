@@ -34,6 +34,15 @@ The install script links helper commands into `~/.local/bin` (or `$XDG_BIN_HOME`
 bash tools/e2e-pr-assets/check.sh
 ```
 
+## Recording Plan
+
+Before recording, create a temporary local `recording-plan.md` outside the repo with separate `Before` and `After` sections.
+
+- Keep this plan out of the PR body.
+- List the visible step order for each pass.
+- State exactly what must be proven in card view and in list view.
+- Mirror the same `Before` / `After` plan in a top-of-file comment in any temporary `scenario.mjs`.
+
 ## Notes
 
 - The scripts are repository-local and can be versioned/reviewed via PR.
