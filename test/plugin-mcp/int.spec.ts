@@ -1257,10 +1257,10 @@ describe('@payloadcms/plugin-mcp', () => {
         name: 'uploadToTestProvider',
         type: 'dispatch',
       })
+      expect(response.content[0].text).toContain('Call "uploadToTestProvider" with file and data')
       expect(response.content[0].text).toContain(
-        'Call the local MCP tool named "uploadToTestProvider" with the file and data',
+        '{ source: "uploadReference", file: instructions.file }',
       )
-      expect(response.content[0].text).toContain('{ source: "uploadReference", file }')
       await expect(
         client.callTool({ arguments: {}, name: 'uploadToTestProvider' }),
       ).rejects.toThrow()
