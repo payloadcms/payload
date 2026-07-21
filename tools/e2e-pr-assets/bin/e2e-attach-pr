@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
-# e2e-attach-pr <pr_number> <owner/repo> [--mode video|screenshot]
-# Uploads before/after media and appends them to the PR body.
+# e2e-attach-pr <pr_number> <owner/repo> [--mode video|screenshot] [--plan-file /path/to/recording-plan.md]
+# Uploads before/after media and appends them to the PR body, optionally
+# adding hidden Before/After plan comments copied from a recording plan file.
 # Requires: gh CLI (authenticated), jq
 
 set -euo pipefail
@@ -10,6 +11,7 @@ REPO="${2:-}"
 MODE="video"
 BEFORE_URL_OVERRIDE=""
 AFTER_URL_OVERRIDE=""
+PLAN_FILE=""
 AUTO_CLEANUP_MEDIA="${E2E_MEDIA_AUTO_CLEANUP:-1}"
 
 shift 2 || true
@@ -27,16 +29,20 @@ while [[ $# -gt 0 ]]; do
       AFTER_URL_OVERRIDE="${2:-}"
       shift 2
       ;;
+    --plan-file)
+      PLAN_FILE="${2:-}"
+      shift 2
+      ;;
     *)
       echo "Unknown option: $1" >&2
-      echo "Usage: e2e-attach-pr <pr_number> <owner/repo> [--mode video|screenshot] [--before-url URL --after-url URL]" >&2
+      echo "Usage: e2e-attach-pr <pr_number> <owner/repo> [--mode video|screenshot] [--before-url URL --after-url URL] [--plan-file /path/to/recording-plan.md]" >&2
       exit 1
       ;;
   esac
 done
 
 if [[ -z "$PR" || -z "$REPO" ]]; then
-  echo "Usage: e2e-attach-pr <pr_number> <owner/repo> [--mode video|screenshot] [--before-url URL --after-url URL]" >&2
+  echo "Usage: e2e-attach-pr <pr_number> <owner/repo> [--mode video|screenshot] [--before-url URL --after-url URL] [--plan-file /path/to/recording-plan.md]" >&2
   exit 1
 fi
 
@@ -58,6 +64,89 @@ if [[ -n "$BEFORE_URL_OVERRIDE" || -n "$AFTER_URL_OVERRIDE" ]]; then
     fi
   fi
 fi
+
+if [[ -n "$PLAN_FILE" && ! -f "$PLAN_FILE" ]]; then
+  echo "Error: plan file not found: $PLAN_FILE" >&2
+  exit 1
+fi
+
+extract_plan_section() {
+  local section_heading="$1"
+  local plan_file="$2"
+
+  awk -v heading="$section_heading" '
+    BEGIN {
+      capture = 0
+      found = 0
+    }
+    $0 ~ "^#{1,6}[[:space:]]+" heading "[[:space:]]*$" {
+      capture = 1
+      found = 1
+      next
+    }
+    capture && $0 ~ "^#{1,6}[[:space:]]+" {
+      capture = 0
+    }
+    capture {
+      print
+    }
+    END {
+      if (!found) {
+        exit 2
+      }
+    }
+  ' "$plan_file"
+}
+
+trim_section_text() {
+  awk '
+    NR == 1 {
+      lines[NR] = $0
+      next
+    }
+    {
+      lines[NR] = $0
+    }
+    END {
+      start = 1
+      while (start <= NR && lines[start] ~ /^[[:space:]]*$/) {
+        start++
+      }
+
+      end = NR
+      while (end >= start && lines[end] ~ /^[[:space:]]*$/) {
+        end--
+      }
+
+      for (i = start; i <= end; i++) {
+        print lines[i]
+      }
+    }
+  '
+}
+
+build_plan_comment() {
+  local label="$1"
+  local plan_file="$2"
+
+  if [[ -z "$plan_file" ]]; then
+    return
+  fi
+
+  local section_text=""
+
+  if ! section_text="$(extract_plan_section "$label" "$plan_file" | trim_section_text)"; then
+    echo "Error: plan file must include a '${label}' markdown heading" >&2
+    exit 1
+  fi
+
+  if [[ -z "$section_text" ]]; then
+    echo "Error: plan file section '${label}' must not be empty" >&2
+    exit 1
+  fi
+
+  printf '<!--\n%s\n-->' "$section_text"
+}
 
 upload_asset() {
   local label=$1
@@ -156,12 +245,17 @@ else
   AFTER_VALUE="![after]($AFTER_URL)"
 fi
 
+BEFORE_PLAN_COMMENT="$(build_plan_comment "Before" "$PLAN_FILE")"
+AFTER_PLAN_COMMENT="$(build_plan_comment "After" "$PLAN_FILE")"
+
 BEFORE_AFTER_BLOCK=$(cat <<EOF
 <!-- e2e-pr-media:start -->
 ### Before
+${BEFORE_PLAN_COMMENT}
 $BEFORE_VALUE
 
 ### After
+${AFTER_PLAN_COMMENT}
 $AFTER_VALUE
 <!-- e2e-pr-media:end -->
 EOF

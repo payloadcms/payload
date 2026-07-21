@@ -38,10 +38,11 @@ bash tools/e2e-pr-assets/check.sh
 
 Before recording, create a temporary local `recording-plan.md` outside the repo with separate `Before` and `After` sections.
 
-- Keep this plan out of the PR body.
+- Keep this plan out of the visible PR body.
 - List the visible step order for each pass.
 - State exactly what must be proven in card view and in list view.
 - Mirror the same `Before` / `After` plan in a top-of-file comment in any temporary `scenario.mjs`.
+- When attaching media, pass the plan to `e2e-attach-pr --plan-file ...` so the `Before` and `After` notes become hidden HTML comments below the matching headings.
 
 ## Notes
 
@@ -62,5 +63,6 @@ Before recording, create a temporary local `recording-plan.md` outside the repo 
   - Disable auto-open behavior with `E2E_GITHUB_AUTO_LOGIN=0`.
 - `e2e-attach-pr` cleans `/tmp/payload-e2e-before|after.{mp4,webm,png}` after a successful PR body update by default.
   - Disable media cleanup with `E2E_MEDIA_AUTO_CLEANUP=0`.
+- `e2e-attach-pr --plan-file /path/to/recording-plan.md` copies the plan's `Before` and `After` sections into hidden HTML comments in the PR body, directly below the visible `### Before` and `### After` headings.
 - `e2e-convert-video` trims the initial blank lead-in by default and can extend that trim automatically when the first meaningful scene change happens later than the standard 1-second startup buffer.
 - If `h264_videotoolbox` is available but fails during conversion, `e2e-convert-video` automatically retries with `libx264`.

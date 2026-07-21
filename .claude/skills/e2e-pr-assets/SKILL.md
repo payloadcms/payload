@@ -11,10 +11,12 @@ Captures and attaches **Before/After** media to the PR body in this format:
 
 ### Before
 
+<!-- hidden plan comment copied from the local Before section -->
 <media>
 
 ### After
 
+<!-- hidden plan comment copied from the local After section -->
 <media>
 
 Supports two modes:
@@ -30,7 +32,7 @@ Before recording any media, write a temporary local plan outside the repo, for e
 
 - `~/.copilot/session-state/<session>/recordings/pr-<pr-number>/recording-plan.md`
 
-This plan is for the agent and should stay **out of the PR body**. GitHub PR bodies are only for the final attached media block, not planning notes.
+This plan is for the agent first. Its `Before` and `After` section contents may be copied into the final PR body only as hidden HTML comments under the matching headings, so reviewers do not see them unless they inspect the PR body in edit mode.
 
 The plan must have separate `Before` and `After` sections and should answer:
 
@@ -186,7 +188,8 @@ export default async function scenario({ baseURL, cursor, expect, label, page, r
 11. Attach the returned user-attachment URLs to the PR body:
 
 - `urls=$(e2e-upload-github-attachments <pr-number> <owner/repo> /tmp/payload-e2e-before.mp4 /tmp/payload-e2e-after.mp4)`
-- `e2e-attach-pr <pr-number> <owner/repo> --mode video --before-url "$(jq -r .before <<<"$urls")" --after-url "$(jq -r .after <<<"$urls")"`
+- `e2e-attach-pr <pr-number> <owner/repo> --mode video --before-url "$(jq -r .before <<<"$urls")" --after-url "$(jq -r .after <<<"$urls")" --plan-file /path/to/recording-plan.md`
+- `e2e-attach-pr` copies the `Before` and `After` sections from the plan file into hidden HTML comments directly below the visible `### Before` and `### After` headings.
 - Video mode is not complete until the PR body uses `github.com/user-attachments/assets` URLs.
 
 ## Screenshot Mode Workflow
@@ -213,7 +216,7 @@ fi
 ```
 
 - `e2e-attach-pr` is idempotent: it replaces the prior generated media block instead of duplicating it.
-- The recording plan is a local, temporary planning artifact. Keep those notes out of the PR body; use them to shape the scenario and validate the visible proof before recording.
+- The recording plan remains a local, temporary planning artifact. When attaching media, pass it to `e2e-attach-pr --plan-file ...` so the `Before` and `After` notes land in hidden PR-body comments instead of visible reviewer-facing text.
 - Video conversion records at full viewport size, trims the initial blank Playwright lead-in by default (including longer startup blanks when a later first scene is detected), and auto-compresses to fit GitHub upload constraints when needed.
 - If `e2e-convert-video` fails with `h264_videotoolbox`, retry conversion with `libx264` instead of re-recording. Hardware H.264 availability is not the same as hardware H.264 reliability.
 - Video mode is complete only when the PR body contains `github.com/user-attachments/assets` video links. `.webm` links or raw `.mp4` links are failed video-mode results.
