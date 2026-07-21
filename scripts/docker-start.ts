@@ -24,6 +24,7 @@ const portHint = (profile: string) => {
 
 const PROFILES = [
   { name: 'postgres', label: 'PostgreSQL + read replica', hint: portHint('postgres') },
+  { name: 'mssql', label: 'SQL Server', hint: portHint('mssql') },
   { name: 'mongodb', label: 'MongoDB Community + mongot', hint: portHint('mongodb') },
   { name: 'mongodb-atlas', label: 'MongoDB Atlas Local', hint: portHint('mongodb-atlas') },
   {

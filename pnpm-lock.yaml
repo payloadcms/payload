@@ -129,7 +129,7 @@ importers:
         version: 1.0.0-rc.4
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.16.3)(zod@4.3.6)
+        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.7)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(mssql@11.0.1)(pg@8.16.3)(zod@4.3.6)
       escape-html:
         specifier: ^1.0.3
         version: 1.0.3
@@ -354,7 +354,7 @@ importers:
         version: 1.0.0-rc.4
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.4.3)
+        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.7)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(mssql@11.0.1)(pg@8.20.0)(zod@4.4.3)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -412,6 +412,46 @@ importers:
         specifier: workspace:*
         version: link:../payload
 
+  packages/db-mssql:
+    dependencies:
+      '@payloadcms/drizzle':
+        specifier: workspace:*
+        version: link:../drizzle
+      console-table-printer:
+        specifier: 2.15.0
+        version: 2.15.0
+      drizzle-kit:
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4
+      drizzle-orm:
+        specifier: 1.0.0-rc.4
+        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.7)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(mssql@11.0.1)(pg@8.20.0)(zod@4.4.3)
+      mssql:
+        specifier: 11.0.1
+        version: 11.0.1
+      prompts:
+        specifier: 2.4.2
+        version: 2.4.2
+      to-snake-case:
+        specifier: 1.0.0
+        version: 1.0.0
+      uuid:
+        specifier: 14.0.0
+        version: 14.0.0
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@types/mssql':
+        specifier: 9.1.7
+        version: 9.1.7
+      '@types/to-snake-case':
+        specifier: 1.0.0
+        version: 1.0.0
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+
   packages/db-postgres:
     dependencies:
       '@payloadcms/drizzle':
@@ -428,7 +468,7 @@ importers:
         version: 1.0.0-rc.4
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.4.3)
+        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.7)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(mssql@11.0.1)(pg@8.20.0)(zod@4.4.3)
       pg:
         specifier: 8.20.0
         version: 8.20.0
@@ -474,7 +514,7 @@ importers:
         version: 1.0.0-rc.4
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.4.3)
+        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.7)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(mssql@11.0.1)(pg@8.20.0)(zod@4.4.3)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -514,7 +554,7 @@ importers:
         version: 1.0.0-rc.4
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.4.3)
+        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.7)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(mssql@11.0.1)(pg@8.20.0)(zod@4.4.3)
       pg:
         specifier: 8.20.0
         version: 8.20.0
@@ -557,7 +597,7 @@ importers:
         version: 2.0.3
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.4.3)
+        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.7)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(mssql@11.0.1)(pg@8.20.0)(zod@4.4.3)
       prompts:
         specifier: 2.4.2
         version: 2.4.2
@@ -574,12 +614,18 @@ importers:
       '@payloadcms/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
+      '@types/mssql':
+        specifier: 9.1.7
+        version: 9.1.7
       '@types/pg':
         specifier: 8.20.0
         version: 8.20.0
       '@types/to-snake-case':
         specifier: 1.0.0
         version: 1.0.0
+      mssql:
+        specifier: 11.0.1
+        version: 11.0.1
       payload:
         specifier: workspace:*
         version: link:../payload
@@ -2364,6 +2410,9 @@ importers:
       '@payloadcms/db-mongodb':
         specifier: workspace:*
         version: link:../packages/db-mongodb
+      '@payloadcms/db-mssql':
+        specifier: workspace:*
+        version: link:../packages/db-mssql
       '@payloadcms/db-postgres':
         specifier: workspace:*
         version: link:../packages/db-postgres
@@ -2540,7 +2589,7 @@ importers:
         version: 1.0.0-rc.4
       drizzle-orm:
         specifier: 1.0.0-rc.4
-        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.16.3)(zod@4.3.6)
+        version: 1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.7)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(mssql@11.0.1)(pg@8.16.3)(zod@4.3.6)
       escape-html:
         specifier: 1.0.3
         version: 1.0.3
@@ -3082,6 +3131,10 @@ packages:
     peerDependencies:
       playwright-core: '>= 1.0.0'
 
+  '@azure-rest/core-client@2.8.0':
+    resolution: {integrity: sha512-F1ybHeN+++QhyFCF/ehLUEvrOB6fehPdFBFtGdj0C3B2lpQ9zkPiO5JDgsqc6IfjuUe6b3dAbXK0a7+VgSGfhw==}
+    engines: {node: '>=22.0.0'}
+
   '@azure/abort-controller@1.1.0':
     resolution: {integrity: sha512-TrRLIoSQVzfAJX9H1JeFjzAoDGcoK1IYX1UImfceTZpsyYfWr09Ss1aHW1y5TrrR3iq6RZLBwJ3E24uwPhwahw==}
     engines: {node: '>=12.0.0'}
@@ -3129,9 +3182,33 @@ packages:
     resolution: {integrity: sha512-xcNRHqCoSp4AunOALEae6A8f3qATb83gSrm31Iqb01OzblvC3/W/bfXozcq78EzIdzZzuH1bZ2NvRR0TdX709w==}
     engines: {node: '>=20.0.0'}
 
+  '@azure/identity@4.13.1':
+    resolution: {integrity: sha512-5C/2WD5Vb1lHnZS16dNQRPMjN6oV/Upba+C9nBIs15PmOi6A3ZGs4Lr2u60zw4S04gi+u3cEXiqTVP7M4Pz3kw==}
+    engines: {node: '>=20.0.0'}
+
+  '@azure/keyvault-common@2.1.0':
+    resolution: {integrity: sha512-aCDidWuKY06LWQ4x7/8TIXK6iRqTaRWRL3t7T+LC+j1b07HtoIsOxP/tU90G4jCSBn5TAyUTCtA4MS/y5Hudaw==}
+    engines: {node: '>=20.0.0'}
+
+  '@azure/keyvault-keys@4.10.2':
+    resolution: {integrity: sha512-VmUSLbXRAbSzDD8grXHGPaknYs0SKr3yuf6U+d4XMpX4XuVYskNqbTTwXce0zR1LyxfTZm9rWEBcvs3vdYwCmQ==}
+    engines: {node: '>=20.0.0'}
+
   '@azure/logger@1.3.0':
     resolution: {integrity: sha512-fCqPIfOcLE+CGqGPd66c8bZpwAji98tZ4JI9i/mlTNTlsIWslCfpg48s/ypyLxZTump5sypjrKn2/kY7q8oAbA==}
     engines: {node: '>=20.0.0'}
+
+  '@azure/msal-browser@5.17.1':
+    resolution: {integrity: sha512-zBhRGzABKSI7hfWh5EaZmril5ybZ7imBN1qEZl5sDTaelr+l8SnPjZO50Q4dnKnm347YPIlBMSnXKZyh3Yu5DQ==}
+    engines: {node: '>=0.8.0'}
+
+  '@azure/msal-common@16.11.2':
+    resolution: {integrity: sha512-yDhtBOGDCdK9ipQ9g3+wmlMEPnZx2pXaDicDd9jYyR1L+7lEbvEohTDmF5qejZDutZY3m9pWPxeYxzNC701A2w==}
+    engines: {node: '>=0.8.0'}
+
+  '@azure/msal-node@5.4.1':
+    resolution: {integrity: sha512-yqgoyOIMCH7TNaSLMBTP+4LUlbMMf1zgC8nzOFG95lmW82CmsAEtUT0J93e4BdqDcnX5qle/9X+yb7A8Mw9M0g==}
+    engines: {node: '>=20'}
 
   '@azure/storage-blob@12.33.0':
     resolution: {integrity: sha512-2SX8oP8PyblUcAFZSg39c8Ls+tFjavM6sBeV+qpw33mRzRhI/5hrFJmJ/x0H9xx5l6ECPvgSP8uPxqTeVbHNIA==}
@@ -5280,6 +5357,12 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.9':
     resolution: {integrity: sha512-3Belt6tdc8bPgAtbcmdtNJlirVoTmEb5e2gC94PnkwEW9jI6CAHUeoG85tjWP5WquqfavoMtMwiG4P926ZKKuQ==}
+
+  '@js-joda/core@5.7.0':
+    resolution: {integrity: sha512-WBu4ULVVxySLLzK1Ppq+OdfP+adRS4ntmDQT915rzDJ++i95gc2jZkM5B6LWEAwN3lGXpfie3yPABozdD3K3Vg==}
+
+  '@js-joda/core@6.1.0':
+    resolution: {integrity: sha512-H8NTMRDJqad/leyv/D/A3kSOsf5/58Ydj4DJGDyaCWk9OU/zuZOLhndVffJgQjsgrn5GC0znHMHie7TfvPPG4w==}
 
   '@js-temporal/polyfill@0.5.1':
     resolution: {integrity: sha512-hloP58zRVCRSpgDxmqCWJNlizAlUgJFqG2ypq79DCvyv9tHjRYMDOcPFjzfl/A1/YxDvRCZz8wvZvmapQnKwFQ==}
@@ -8039,6 +8122,9 @@ packages:
     resolution: {integrity: sha512-uhOeFyxLcU41HzvrxsGpiWdcMbScY1EDgbZ5K7DVRMYInbLYWAC0EA/kx9wXAoSM8q82bUG2hRl8+EAjE6XAbA==}
     engines: {node: '>=20.19'}
 
+  '@tediousjs/connection-string@0.5.0':
+    resolution: {integrity: sha512-7qSgZbincDDDFyRweCIEvZULFAw5iz/DeunhvuxpL31nfntX3P4Yd4HkHBRg9H8CdqY1e5WFN1PZIz/REL9MVQ==}
+
   '@testing-library/dom@10.4.1':
     resolution: {integrity: sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg==}
     engines: {node: '>=18'}
@@ -8255,6 +8341,9 @@ packages:
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
 
+  '@types/mssql@9.1.7':
+    resolution: {integrity: sha512-eIOEe78nuSW5KctDHImDhLZ9a+jV/z/Xs5RBhcG/jrk+YWqhdNmzBmHVWV7aWQ5fW+jbIGtX6Ph+bbVqfhzafg==}
+
   '@types/mysql@2.15.26':
     resolution: {integrity: sha512-DSLCOXhkvfS5WNNPbfn2KdICAmk8lLc+/PNvnPnF7gOdMZCxopXduqv0OQ13y/yA/zXTSikZZqVgybUxOEg6YQ==}
 
@@ -8309,6 +8398,9 @@ packages:
 
   '@types/react@19.2.14':
     resolution: {integrity: sha512-ilcTH/UniCkMdtexkoCN0bI7pMcJDvmQFPvuPvmEaYA/NSfFTAgdUSLAoVjaRJm7+6PvcM+q1zYOwS4wTYMF9w==}
+
+  '@types/readable-stream@4.0.24':
+    resolution: {integrity: sha512-NRvUNC/JFGPJvqdAfEve8oginbM6V08u5NzLWpG8MwA2kTPOLnqk+wpwuPT+mp3aUsxyuT6m2gnrPuHYCruzEg==}
 
   '@types/request@2.48.13':
     resolution: {integrity: sha512-FGJ6udDNUCjd19pp0Q3iTiDkwhYup7J8hpMW9c4k53NrccQFFWKRho6hvtPPEhnXWKvukfwAlB6DbDz4yhH5Gg==}
@@ -9324,6 +9416,9 @@ packages:
 
   bl@4.1.0:
     resolution: {integrity: sha512-1W07cM9gS6DcLperZfFSj+bWLtaPGSOHWhPiGzXmvVJbRLdG82sH/Kn8EtW1VqWVA54AKf2h5k5BbnIbwF3h6w==}
+
+  bl@6.1.6:
+    resolution: {integrity: sha512-jLsPgN/YSvPUg9UX0Kd73CXpm2Psg9FxMeCSXnk3WBO3CMT10JMwijubhGfHCnFu6TPn1ei3b975dxv7K2pWVg==}
 
   blake3-wasm@2.1.5:
     resolution: {integrity: sha512-F1+K8EbfOZE49dtoPtmxUQrpXaBIl3ICvasLh+nJta0xkz+9kF/7uet9fLnwKqhDrmj6g+6K3Tw9yQPUg2ka5g==}
@@ -11397,6 +11492,10 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  iconv-lite@0.6.3:
+    resolution: {integrity: sha512-4fCk79wshMdzMp2rH06qWrJE4iolqLhCUH+OiuIgU++RB0+94NlDL81atO7GX55uUKueo0txHNtvEyI6D7WdMw==}
+    engines: {node: '>=0.10.0'}
+
   iconv-lite@0.7.3:
     resolution: {integrity: sha512-IKXpvIzjnC9XTAUbVBcMfGS0EPaIXtW6v+zr+RRp+hqULEpo0owZax6wyRwPOJbWbzjYspQwusTsfVr0ifh4uQ==}
     engines: {node: '>=0.10.0'}
@@ -11767,6 +11866,9 @@ packages:
 
   js-cookie@3.0.8:
     resolution: {integrity: sha512-yeJd4aNAdYZQjaon2bpD/Gb0B/omw7HQOsynXXcOiWVCacbBcPlgn8S/d1X6blFSaHao7ozqtW7NZW19xpCtIw==}
+
+  js-md4@0.3.2:
+    resolution: {integrity: sha512-/GDnfQYsltsjRswQhN9fhv3EMw2sCpUdrdxyWDOUK7eyD++r3gRhzgiQgc/x4MAv2i1iuQ4lxO5mvqM3vj4bwA==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -12564,6 +12666,11 @@ packages:
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
 
+  mssql@11.0.1:
+    resolution: {integrity: sha512-KlGNsugoT90enKlR8/G36H0kTxPthDhmtNUCwEHvgRza5Cjpjoj+P2X6eMpFUDN7pFrJZsKadL4x990G8RBE1w==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   nanoid@3.3.15:
     resolution: {integrity: sha512-y7Wygv/7mEOvxTuEQDB8StXdMRBWf1kR/tlhAzBRUFkB2jfcLOAxO/SHmOO2zgz1pVgK29/kyupn059/bCHdjA==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -12576,6 +12683,9 @@ packages:
     resolution: {integrity: sha512-PHI5f1O0EP5xJ9gQmFGMS6IZcrVvTjpXjz7Na41gTE7eE2hK11lg04CECCYEEjdc17EV4DO+fkGEtt7TpTaTiQ==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
     hasBin: true
+
+  native-duplexpair@1.0.0:
+    resolution: {integrity: sha512-E7QQoM+3jvNtlmyfqRZ0/U75VFgCls+fSkbml2MpgWkWyz3ox8Y58gNhfuziuQYGNNQAbFZJQck55LHCnCK6CA==}
 
   natural-compare-lite@1.4.0:
     resolution: {integrity: sha512-Tj+HTDSJJKaZnfiuw+iaF9skdPpTo2GtEly5JHnWV/hfv2Qj/9RKsGISQtLh2ox3l5EAGw487hnBee0sIJ6v2g==}
@@ -14072,6 +14182,9 @@ packages:
     resolution: {integrity: sha512-UcjcJOWknrNkF6PLX83qcHM6KHgVKNkV62Y8a5uYDVv9ydGQVwAHMKqHdJje1VTWpljG0WYpCDhrCdAOYH4TWg==}
     engines: {node: '>= 10.x'}
 
+  sprintf-js@1.1.3:
+    resolution: {integrity: sha512-Oo+0REFV59/rz3gfJNKQiBlwfHaSESl1pcGyABQsnnIfWOFt6JNj5gCog2U6MLZ//IGYD+nA8nI+mTShREReaA==}
+
   srvx@0.11.21:
     resolution: {integrity: sha512-GWTHjKMeekX8CwJf4VU9Oo6mJpSGaflGMddbCvR+Cmmh9sslRMiGbAoqqZacE0r1ncARh6buCEETr2W52F8b1w==}
     engines: {node: '>=20.16.0'}
@@ -14365,6 +14478,18 @@ packages:
   tar@7.5.19:
     resolution: {integrity: sha512-4LeEWl96twnS2Q7Bz4MGqgazLqO+hJN63GZxXoIqh1T3VweYD997gbU1ItNsQafqqXTXd5WFyFdReLtwvRBNiw==}
     engines: {node: '>=18'}
+
+  tarn@3.1.2:
+    resolution: {integrity: sha512-3RTvqKZcK/17jnJ8rMKFXbyNogywTs1z0gVPPwFsJGX46rkmUHOdIaSQ/aVO1rS7nH+soiXiWk7rvUXxndm8Dg==}
+    engines: {node: '>=8.0.0'}
+
+  tedious@18.6.2:
+    resolution: {integrity: sha512-g7jC56o3MzLkE3lHkaFe2ZdOVFBahq5bsB60/M4NYUbocw/MCrS89IOEQUFr+ba6pb8ZHczZ/VqCyYeYq0xBAg==}
+    engines: {node: '>=18'}
+
+  tedious@20.0.0:
+    resolution: {integrity: sha512-bTR0aou0Ghucf0ytvZUJjnKHGKDV8tT57jPYtEkSpfTWFe++4uR1wxJLQ4mh5wlSvAYXzmgBxbI0vaE56qigXw==}
+    engines: {node: '>=22'}
 
   teeny-request@9.0.0:
     resolution: {integrity: sha512-resvxdc6Mgb7YEThw6G6bExlXKkv6+YbuzGg9xuXxSgxJF7Ozs+o8Y9+2R3sArdWdW8nOokoQb1yrpFB0pQK2g==}
@@ -16069,6 +16194,17 @@ snapshots:
       axe-core: 4.11.0
       playwright-core: 1.59.1
 
+  '@azure-rest/core-client@2.8.0':
+    dependencies:
+      '@azure/abort-controller': 2.1.2
+      '@azure/core-auth': 1.10.1
+      '@azure/core-rest-pipeline': 1.24.0
+      '@azure/core-tracing': 1.3.1
+      '@typespec/ts-http-runtime': 0.3.6
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - supports-color
+
   '@azure/abort-controller@1.1.0':
     dependencies:
       tslib: 2.8.1
@@ -16145,12 +16281,68 @@ snapshots:
       fast-xml-parser: 5.9.3
       tslib: 2.8.1
 
+  '@azure/identity@4.13.1':
+    dependencies:
+      '@azure/abort-controller': 2.1.2
+      '@azure/core-auth': 1.10.1
+      '@azure/core-client': 1.10.2
+      '@azure/core-rest-pipeline': 1.24.0
+      '@azure/core-tracing': 1.3.1
+      '@azure/core-util': 1.13.1
+      '@azure/logger': 1.3.0
+      '@azure/msal-browser': 5.17.1
+      '@azure/msal-node': 5.4.1
+      open: 10.2.0
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - supports-color
+
+  '@azure/keyvault-common@2.1.0':
+    dependencies:
+      '@azure-rest/core-client': 2.8.0
+      '@azure/abort-controller': 2.1.2
+      '@azure/core-auth': 1.10.1
+      '@azure/core-rest-pipeline': 1.24.0
+      '@azure/core-tracing': 1.3.1
+      '@azure/core-util': 1.13.1
+      '@azure/logger': 1.3.0
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - supports-color
+
+  '@azure/keyvault-keys@4.10.2':
+    dependencies:
+      '@azure-rest/core-client': 2.8.0
+      '@azure/abort-controller': 2.1.2
+      '@azure/core-auth': 1.10.1
+      '@azure/core-lro': 2.7.2
+      '@azure/core-paging': 1.6.2
+      '@azure/core-rest-pipeline': 1.24.0
+      '@azure/core-tracing': 1.3.1
+      '@azure/core-util': 1.13.1
+      '@azure/keyvault-common': 2.1.0
+      '@azure/logger': 1.3.0
+      tslib: 2.8.1
+    transitivePeerDependencies:
+      - supports-color
+
   '@azure/logger@1.3.0':
     dependencies:
       '@typespec/ts-http-runtime': 0.3.6
       tslib: 2.8.1
     transitivePeerDependencies:
       - supports-color
+
+  '@azure/msal-browser@5.17.1':
+    dependencies:
+      '@azure/msal-common': 16.11.2
+
+  '@azure/msal-common@16.11.2': {}
+
+  '@azure/msal-node@5.4.1':
+    dependencies:
+      '@azure/msal-common': 16.11.2
+      jsonwebtoken: 9.0.1
 
   '@azure/storage-blob@12.33.0':
     dependencies:
@@ -18195,6 +18387,10 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@js-joda/core@5.7.0': {}
+
+  '@js-joda/core@6.1.0': {}
 
   '@js-temporal/polyfill@0.5.1':
     dependencies:
@@ -21471,6 +21667,8 @@ snapshots:
 
   '@tanstack/virtual-file-routes@1.162.0': {}
 
+  '@tediousjs/connection-string@0.5.0': {}
+
   '@testing-library/dom@10.4.1':
     dependencies:
       '@babel/code-frame': 7.29.7
@@ -21711,6 +21909,14 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
+  '@types/mssql@9.1.7':
+    dependencies:
+      '@types/node': 24.12.3
+      tarn: 3.1.2
+      tedious: 20.0.0
+    transitivePeerDependencies:
+      - supports-color
+
   '@types/mysql@2.15.26':
     dependencies:
       '@types/node': 24.12.3
@@ -21778,6 +21984,10 @@ snapshots:
   '@types/react@19.2.14':
     dependencies:
       csstype: 3.2.3
+
+  '@types/readable-stream@4.0.24':
+    dependencies:
+      '@types/node': 24.12.3
 
   '@types/request@2.48.13':
     dependencies:
@@ -22930,6 +23140,13 @@ snapshots:
       inherits: 2.0.4
       readable-stream: 3.6.2
 
+  bl@6.1.6:
+    dependencies:
+      '@types/readable-stream': 4.0.24
+      buffer: 6.0.3
+      inherits: 2.0.4
+      readable-stream: 4.7.0
+
   blake3-wasm@2.1.5: {}
 
   body-parser@2.3.0:
@@ -23635,27 +23852,31 @@ snapshots:
       get-tsconfig: 4.14.0
       jiti: 2.7.0
 
-  drizzle-orm@1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.16.3)(zod@4.3.6):
+  drizzle-orm@1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.7)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(mssql@11.0.1)(pg@8.16.3)(zod@4.3.6):
     optionalDependencies:
       '@cloudflare/workers-types': 4.20260218.0
       '@libsql/client': 0.14.0(bufferutil@4.1.0)
       '@opentelemetry/api': 1.9.1
       '@types/better-sqlite3': 7.6.13
+      '@types/mssql': 9.1.7
       '@types/pg': 8.20.0
       '@vercel/postgres': 0.10.0
       better-sqlite3: 11.10.0
+      mssql: 11.0.1
       pg: 8.16.3
       zod: 4.3.6
 
-  drizzle-orm@1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(pg@8.20.0)(zod@4.4.3):
+  drizzle-orm@1.0.0-rc.4(@cloudflare/workers-types@4.20260218.0)(@libsql/client@0.14.0(bufferutil@4.1.0))(@opentelemetry/api@1.9.1)(@types/better-sqlite3@7.6.13)(@types/mssql@9.1.7)(@types/pg@8.20.0)(@vercel/postgres@0.10.0)(better-sqlite3@11.10.0)(mssql@11.0.1)(pg@8.20.0)(zod@4.4.3):
     optionalDependencies:
       '@cloudflare/workers-types': 4.20260218.0
       '@libsql/client': 0.14.0(bufferutil@4.1.0)
       '@opentelemetry/api': 1.9.1
       '@types/better-sqlite3': 7.6.13
+      '@types/mssql': 9.1.7
       '@types/pg': 8.20.0
       '@vercel/postgres': 0.10.0
       better-sqlite3: 11.10.0
+      mssql: 11.0.1
       pg: 8.20.0
       zod: 4.4.3
 
@@ -25434,6 +25655,10 @@ snapshots:
 
   husky@9.0.11: {}
 
+  iconv-lite@0.6.3:
+    dependencies:
+      safer-buffer: 2.1.2
+
   iconv-lite@0.7.3:
     dependencies:
       safer-buffer: 2.1.2
@@ -25767,6 +25992,8 @@ snapshots:
   js-base64@3.8.0: {}
 
   js-cookie@3.0.8: {}
+
+  js-md4@0.3.2: {}
 
   js-tokens@4.0.0: {}
 
@@ -26674,11 +26901,24 @@ snapshots:
 
   ms@2.1.3: {}
 
+  mssql@11.0.1:
+    dependencies:
+      '@tediousjs/connection-string': 0.5.0
+      commander: 11.1.0
+      debug: 4.4.3
+      rfdc: 1.4.1
+      tarn: 3.1.2
+      tedious: 18.6.2
+    transitivePeerDependencies:
+      - supports-color
+
   nanoid@3.3.15: {}
 
   napi-build-utils@2.0.0: {}
 
   napi-postinstall@0.3.4: {}
+
+  native-duplexpair@1.0.0: {}
 
   natural-compare-lite@1.4.0: {}
 
@@ -28393,6 +28633,8 @@ snapshots:
 
   split2@4.2.0: {}
 
+  sprintf-js@1.1.3: {}
+
   srvx@0.11.21: {}
 
   stable-hash@0.0.4: {}
@@ -28766,6 +29008,38 @@ snapshots:
       minipass: 7.1.3
       minizlib: 3.1.0
       yallist: 5.0.0
+
+  tarn@3.1.2: {}
+
+  tedious@18.6.2:
+    dependencies:
+      '@azure/core-auth': 1.10.1
+      '@azure/identity': 4.13.1
+      '@azure/keyvault-keys': 4.10.2
+      '@js-joda/core': 5.7.0
+      '@types/node': 24.12.3
+      bl: 6.1.6
+      iconv-lite: 0.6.3
+      js-md4: 0.3.2
+      native-duplexpair: 1.0.0
+      sprintf-js: 1.1.3
+    transitivePeerDependencies:
+      - supports-color
+
+  tedious@20.0.0:
+    dependencies:
+      '@azure/core-auth': 1.10.1
+      '@azure/identity': 4.13.1
+      '@azure/keyvault-keys': 4.10.2
+      '@js-joda/core': 6.1.0
+      '@types/node': 24.12.3
+      bl: 6.1.6
+      iconv-lite: 0.7.3
+      js-md4: 0.3.2
+      native-duplexpair: 1.0.0
+      sprintf-js: 1.1.3
+    transitivePeerDependencies:
+      - supports-color
 
   teeny-request@9.0.0:
     dependencies:

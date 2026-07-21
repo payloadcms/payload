@@ -38,6 +38,7 @@ async function main() {
     : [
         'payload',
         'db-mongodb',
+        'db-mssql',
         'db-postgres',
         'db-d1-sqlite',
         'db-sqlite',

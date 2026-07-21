@@ -7,6 +7,7 @@ import type { DrizzleAdapter } from '../types.js'
 import { buildQuery } from '../queries/buildQuery.js'
 import { selectDistinct } from '../queries/selectDistinct.js'
 import { transform } from '../transform/read/index.js'
+import { applyPagination } from '../utilities/applyPagination.js'
 import {
   getNameFromDrizzleTable,
   getTableNameFromColumn,
@@ -133,7 +134,7 @@ export const findMany = async function find({
       }),
     )
 
-    selectDistinctResult = await groupQuery.offset(offset).limit(limit)
+    selectDistinctResult = await applyPagination(adapter, groupQuery, { limit, offset })
   } else {
     selectDistinctResult = await selectDistinct({
       adapter,
@@ -148,7 +149,7 @@ export const findMany = async function find({
         if (orderBy) {
           query = query.orderBy(() => orderBy.map(({ column, order }) => order(column)))
         }
-        return query.offset(offset).limit(limit)
+        return applyPagination(adapter, query, { limit, offset })
       },
       selectFields,
       tableName,

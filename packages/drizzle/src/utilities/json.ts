@@ -12,6 +12,11 @@ export function jsonAgg(adapter: DrizzleAdapter, expression: SQL) {
     return sql`coalesce(json_group_array(${expression}), '[]')`
   }
 
+  if (adapter.name === 'mssql') {
+    // SQL Server has no json_agg. Concatenate the per-row JSON objects into a JSON array string.
+    return sql`coalesce('[' + string_agg(convert(nvarchar(max), ${expression}), ',') + ']', '[]')`
+  }
+
   return sql`coalesce(json_agg(${expression}), '[]'::json)`
 }
 
@@ -40,6 +45,18 @@ export function jsonBuildObject<T extends Record<string, Column | SQL>>(
 
   if (adapter.name === 'sqlite') {
     return sql`json_object(${sql.join(chunks)})`
+  }
+
+  if (adapter.name === 'mssql') {
+    // SQL Server builds JSON objects via `FOR JSON PATH`: `SELECT <value> AS [key], ...`.
+    const mssqlChunks: SQL[] = []
+    Object.entries(shape).forEach(([key, value]) => {
+      if (mssqlChunks.length > 0) {
+        mssqlChunks.push(sql.raw(','))
+      }
+      mssqlChunks.push(sql`${value} AS ${sql.raw(`[${key}]`)}`)
+    })
+    return sql`(select ${sql.join(mssqlChunks)} for json path, without_array_wrapper, include_null_values)`
   }
 
   return sql`json_build_object(${sql.join(chunks)})`

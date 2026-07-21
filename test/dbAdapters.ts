@@ -15,7 +15,7 @@ type DbAdapter = {
   /** TCP port. Presence (with `host`) ⇒ assertDbReachable probes the adapter. */
   port?: number
   /** docker-compose service profile for `pnpm docker:start <profile>`. */
-  profile?: 'mongodb' | 'mongodb-atlas' | 'postgres'
+  profile?: 'mongodb' | 'mongodb-atlas' | 'mssql' | 'postgres'
   /** Adapter source written into databaseAdapter.js by codegen. */
   source: string
 }
@@ -45,6 +45,13 @@ const POSTGRES_REPLICA = {
   envVar: 'POSTGRES_REPLICA_URL',
   host: 'localhost',
   port: 5434,
+} as const
+const MSSQL = {
+  envVar: 'MSSQL_URL',
+  host: 'localhost',
+  port: 1433,
+  label: 'SQL Server',
+  profile: 'mssql',
 } as const
 
 const mongoUrlBlock = (e: { envVar: string; host: string; port: number }) => `
@@ -191,6 +198,17 @@ export const dbAdapters = {
     readReplicas: [
       process.env.${POSTGRES_REPLICA.envVar} || 'postgres://payload:payload@${POSTGRES_REPLICA.host}:${POSTGRES_REPLICA.port}/payload',
     ],
+  })`,
+  },
+  mssql: {
+    ...MSSQL,
+    source: `
+  import { mssqlAdapter } from '@payloadcms/db-mssql'
+
+  export const databaseAdapter = mssqlAdapter({
+    pool: {
+      connectionString: process.env.MSSQL_URL || 'sqlserver://localhost:1433;database=payload;user=sa;password=Payload1234;trustServerCertificate=true',
+    },
   })`,
   },
   'content-api': {

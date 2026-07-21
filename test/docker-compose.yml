@@ -80,6 +80,30 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  # ── SQL Server 2022 (MSSQL) ─────────────────────────────────
+  # Connection: sqlserver://localhost:1433;database=payload;user=sa;password=Payload1234;trustServerCertificate=true
+  mssql:
+    profiles: [all, mssql]
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mssql-payload-test
+    ports:
+      - '1433:1433'
+    environment:
+      ACCEPT_EULA: 'Y'
+      MSSQL_SA_PASSWORD: Payload1234
+      MSSQL_PID: Developer
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "Payload1234" -C -Q "SELECT 1" || exit 1',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+    restart: unless-stopped
+
   # ── MongoDB Community 8.2 (replica set + search) ────────────
   # Connection: mongodb://payload:payload@localhost:27018/payload?authSource=admin&directConnection=true&replicaSet=rs0
   mongodb:

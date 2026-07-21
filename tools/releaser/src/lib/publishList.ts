@@ -21,6 +21,7 @@ export const packagePublishList = [
   // DB Adapters
   'drizzle',
   'db-mongodb',
+  'db-mssql',
   'db-postgres',
   'db-sqlite',
   'db-d1-sqlite',

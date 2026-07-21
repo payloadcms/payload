@@ -39,6 +39,7 @@
     "@payloadcms/admin-bar": "workspace:*",
     "@payloadcms/db-d1-sqlite": "workspace:*",
     "@payloadcms/db-mongodb": "workspace:*",
+    "@payloadcms/db-mssql": "workspace:*",
     "@payloadcms/db-postgres": "workspace:*",
     "@payloadcms/db-sqlite": "workspace:*",
     "@payloadcms/db-vercel-postgres": "workspace:*",

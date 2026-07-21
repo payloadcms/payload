@@ -546,6 +546,12 @@ export const traverseFields = ({
                       `(select jsonb_agg(${tableName}.value) from ${tableName} where ${tableName}.parent_id = ${parentTable}.id)`,
                     )
                     .as(path)
+                } else if (adapter.name === 'mssql') {
+                  selectFields[path] = sql
+                    .raw(
+                      `(select coalesce('[' + string_agg('"' + string_escape(convert(nvarchar(max), ${tableName}.value), 'json') + '"', ',') + ']', '[]') from ${tableName} where ${tableName}.parent_id = ${parentTable}.id)`,
+                    )
+                    .as(path)
                 } else {
                   selectFields[path] = sql
                     .raw(
@@ -574,6 +580,8 @@ export const traverseFields = ({
                 // SQLite doesn't require explicit type casting for UNION queries
                 if (path === 'deletedAt' && adapter.name === 'postgres') {
                   selectFields[path] = sql`null::timestamp with time zone`.as(path)
+                } else if (path === 'deletedAt' && adapter.name === 'mssql') {
+                  selectFields[path] = sql`cast(null as datetime2)`.as(path)
                 } else {
                   selectFields[path] = sql`null`.as(path)
                 }
@@ -828,7 +836,9 @@ export const traverseFields = ({
       }
 
       case 'point': {
-        if (adapter.name === 'sqlite') {
+        // Neither SQLite nor SQL Server have native point/PostGIS support; the value is stored
+        // as JSON and selected like any other column.
+        if (adapter.name === 'sqlite' || adapter.name === 'mssql') {
           break
         }
 

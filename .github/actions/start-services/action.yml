@@ -3,13 +3,16 @@ description: Starts storage and database services for tests
 
 inputs:
   database:
-    description: 'Database type: mongodb, mongodb-atlas, cosmosdb, documentdb, firestore, postgres, postgres-custom-schema, postgres-uuid, postgres-uuidv7, postgres-read-replica, postgres-read-replicas, vercel-postgres-read-replica, sqlite, sqlite-uuid, sqlite-uuidv7, supabase, d1'
+    description: 'Database type: mongodb, mongodb-atlas, cosmosdb, documentdb, firestore, postgres, postgres-custom-schema, postgres-uuid, postgres-uuidv7, postgres-read-replica, postgres-read-replicas, vercel-postgres-read-replica, sqlite, sqlite-uuid, sqlite-uuidv7, supabase, mssql, d1'
     required: true
 
 outputs:
   POSTGRES_URL:
     description: PostgreSQL connection URL
     value: ${{ steps.postgres.outputs.url }}
+  MSSQL_URL:
+    description: SQL Server connection URL
+    value: ${{ steps.mssql.outputs.url }}
   MONGODB_URL:
     description: MongoDB connection URL
     value: ${{ steps.mongodb.outputs.url }}
@@ -78,6 +81,19 @@ runs:
         done
         docker compose -f test/docker-compose.yml --profile postgres up -d --wait
         echo "url=postgresql://payload:payload@localhost:5433/payload" >> $GITHUB_OUTPUT
+
+    - name: Start SQL Server
+      id: mssql
+      if: startsWith(inputs.database, 'mssql')
+      shell: bash
+      run: |
+        for i in 1 2 3; do
+          docker compose -f test/docker-compose.yml --profile mssql pull && break
+          echo "Pull attempt $i/3 for 'mssql' profile failed, retrying in 10s..."
+          sleep 10
+        done
+        docker compose -f test/docker-compose.yml --profile mssql up -d --wait
+        echo "url=sqlserver://localhost:1433;database=payload;user=sa;password=Payload1234;trustServerCertificate=true" >> $GITHUB_OUTPUT
 
     - name: Export PostgreSQL replica URL
       if: contains(fromJSON('["postgres-read-replica", "postgres-read-replicas", "vercel-postgres-read-replica"]'), inputs.database)

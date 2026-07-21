@@ -25,6 +25,11 @@
       "types": "./src/index.ts",
       "default": "./src/index.ts"
     },
+    "./mssql": {
+      "import": "./src/exports/mssql.ts",
+      "types": "./src/exports/mssql.ts",
+      "default": "./src/exports/mssql.ts"
+    },
     "./postgres": {
       "import": "./src/exports/postgres.ts",
       "types": "./src/exports/postgres.ts",
@@ -62,8 +67,10 @@
   "devDependencies": {
     "@libsql/client": "0.14.0",
     "@payloadcms/eslint-config": "workspace:*",
+    "@types/mssql": "9.1.7",
     "@types/pg": "8.20.0",
     "@types/to-snake-case": "1.0.0",
+    "mssql": "11.0.1",
     "payload": "workspace:*"
   },
   "peerDependencies": {
@@ -75,6 +82,11 @@
         "import": "./dist/index.js",
         "types": "./dist/index.d.ts",
         "default": "./dist/index.js"
+      },
+      "./mssql": {
+        "import": "./dist/exports/mssql.js",
+        "types": "./dist/exports/mssql.d.ts",
+        "default": "./dist/exports/mssql.js"
       },
       "./postgres": {
         "import": "./dist/exports/postgres.js",

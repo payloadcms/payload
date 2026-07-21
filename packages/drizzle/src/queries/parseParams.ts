@@ -148,6 +148,20 @@ export function parseParams({
                     break
                   }
 
+                  if (adapter.name === 'mssql') {
+                    const constraint = adapter.createJSONQuery({
+                      column: table[columnName],
+                      operator,
+                      pathSegments,
+                      treatAsArray: field.type === 'richText' ? ['children'] : undefined,
+                      treatRootAsArray: field.type === 'richText',
+                      value: val,
+                    })
+
+                    constraints.push(sql.raw(constraint))
+                    break
+                  }
+
                   const segments = pathSegments.slice(1)
                   segments.unshift(table[columnName].name)
 

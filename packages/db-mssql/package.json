@@ -1,0 +1,124 @@
+{
+  "name": "@payloadcms/db-mssql",
+  "version": "4.0.0-beta.0",
+  "description": "The officially supported Microsoft SQL Server database adapter for Payload",
+  "homepage": "https://payloadcms.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/payloadcms/payload.git",
+    "directory": "packages/db-mssql"
+  },
+  "license": "MIT",
+  "author": "Payload <dev@payloadcms.com> (https://payloadcms.com)",
+  "maintainers": [
+    {
+      "name": "Payload",
+      "email": "info@payloadcms.com",
+      "url": "https://payloadcms.com"
+    }
+  ],
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "require": "./src/index.ts",
+      "types": "./src/index.ts"
+    },
+    "./migration-utils": {
+      "import": "./src/exports/migration-utils.ts",
+      "require": "./src/exports/migration-utils.ts",
+      "types": "./src/exports/migration-utils.ts"
+    },
+    "./drizzle": {
+      "import": "./src/drizzle-proxy/index.ts",
+      "types": "./src/drizzle-proxy/index.ts",
+      "default": "./src/drizzle-proxy/index.ts"
+    },
+    "./drizzle/mssql-core": {
+      "import": "./src/drizzle-proxy/mssql-core.ts",
+      "types": "./src/drizzle-proxy/mssql-core.ts",
+      "default": "./src/drizzle-proxy/mssql-core.ts"
+    },
+    "./drizzle/node-mssql": {
+      "import": "./src/drizzle-proxy/node-mssql.ts",
+      "types": "./src/drizzle-proxy/node-mssql.ts",
+      "default": "./src/drizzle-proxy/node-mssql.ts"
+    },
+    "./drizzle/relations": {
+      "import": "./src/drizzle-proxy/relations.ts",
+      "types": "./src/drizzle-proxy/relations.ts",
+      "default": "./src/drizzle-proxy/relations.ts"
+    }
+  },
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "files": [
+    "dist",
+    "mock.js"
+  ],
+  "scripts": {
+    "build": "pnpm build:swc && pnpm build:types",
+    "build:debug": "pnpm build",
+    "build:swc": "swc ./src -d ./dist --config-file .swcrc --strip-leading-paths",
+    "build:types": "tsc --emitDeclarationOnly --outDir dist",
+    "clean": "rimraf -g {dist,*.tsbuildinfo}",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
+  },
+  "dependencies": {
+    "@payloadcms/drizzle": "workspace:*",
+    "console-table-printer": "2.15.0",
+    "drizzle-kit": "1.0.0-rc.4",
+    "drizzle-orm": "1.0.0-rc.4",
+    "mssql": "11.0.1",
+    "prompts": "2.4.2",
+    "to-snake-case": "1.0.0",
+    "uuid": "14.0.0"
+  },
+  "devDependencies": {
+    "@payloadcms/eslint-config": "workspace:*",
+    "@types/mssql": "9.1.7",
+    "@types/to-snake-case": "1.0.0",
+    "payload": "workspace:*"
+  },
+  "peerDependencies": {
+    "payload": "workspace:*"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": {
+        "import": "./dist/index.js",
+        "require": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      },
+      "./migration-utils": {
+        "import": "./dist/exports/migration-utils.js",
+        "require": "./dist/exports/migration-utils.js",
+        "types": "./dist/exports/migration-utils.d.ts"
+      },
+      "./drizzle": {
+        "import": "./dist/drizzle-proxy/index.js",
+        "types": "./dist/drizzle-proxy/index.d.ts",
+        "default": "./dist/drizzle-proxy/index.js"
+      },
+      "./drizzle/mssql-core": {
+        "import": "./dist/drizzle-proxy/mssql-core.js",
+        "types": "./dist/drizzle-proxy/mssql-core.d.ts",
+        "default": "./dist/drizzle-proxy/mssql-core.js"
+      },
+      "./drizzle/node-mssql": {
+        "import": "./dist/drizzle-proxy/node-mssql.js",
+        "types": "./dist/drizzle-proxy/node-mssql.d.ts",
+        "default": "./dist/drizzle-proxy/node-mssql.js"
+      },
+      "./drizzle/relations": {
+        "import": "./dist/drizzle-proxy/relations.js",
+        "types": "./dist/drizzle-proxy/relations.d.ts",
+        "default": "./dist/drizzle-proxy/relations.js"
+      }
+    },
+    "main": "./dist/index.js",
+    "types": "./dist/index.d.ts"
+  }
+}

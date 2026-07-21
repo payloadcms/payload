@@ -24,6 +24,13 @@ export const migrationTableExists = async (
         AND name = 'payload_migrations';`
   }
 
+  if (adapter.name === 'mssql') {
+    statement = `SELECT CASE
+                          WHEN OBJECT_ID(N'payload_migrations', N'U') IS NOT NULL THEN 1
+                          ELSE 0
+                        END AS [exists];`
+  }
+
   const result = await adapter.execute({
     drizzle: db ?? adapter.drizzle,
     raw: statement,
