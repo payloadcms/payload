@@ -57,16 +57,24 @@ export const mcpDataset: EvalCase[] = [
 
       expect(storedFile).toEqual(sourceFile)
       const createCalls = audit.filter(
-        (event) => event.type === 'mcp-tool-call' && event.name === 'createDocument',
+        (event) => event.type === 'mcp-tool-call' && event.name === 'createDocuments',
       )
       const createCall = createCalls[0]
 
       expect(createCalls).toHaveLength(1)
       expect(createCall?.input).toMatchObject({
         collectionSlug: 'media',
-        file: { source: 'base64' },
+        documents: [
+          {
+            data: { alt: 'Local checklist icon' },
+            file: { source: 'base64' },
+          },
+        ],
       })
-      expect(createCall?.response.doc?.id).toBe(media!.id)
+      expect(createCall?.response.doc).toMatchObject({
+        docs: [{ doc: { id: media!.id }, index: 0 }],
+        errors: [],
+      })
 
       return scoreMCPExecution({
         audit,
@@ -175,6 +183,46 @@ export const mcpDataset: EvalCase[] = [
       return scoreMCPExecution({
         audit,
         optimalModificationAttempts: 1,
+        optimalToolCalls: 2,
+        requiredPayloadOperation: { slug: 'posts', kind: 'mutation' },
+        transcript,
+      })
+    },
+  },
+  {
+    bootConfig: true,
+    category: 'mcp',
+    configPath: 'mcp/shared',
+    input:
+      'Create two posts in one request: one titled "First bulk MCP post" and one titled "Second bulk MCP post".',
+    verify: async ({ audit, expect, payload, transcript }) => {
+      const { docs } = await payload.find({
+        collection: 'posts',
+        sort: 'title',
+        where: {
+          title: { in: ['First bulk MCP post', 'Second bulk MCP post'] },
+        },
+      })
+      const createCalls = audit.filter(
+        (event) => event.type === 'mcp-tool-call' && event.name === 'createDocuments',
+      )
+
+      expect(docs.map(({ title }) => title)).toEqual([
+        'First bulk MCP post',
+        'Second bulk MCP post',
+      ])
+      expect(createCalls).toHaveLength(1)
+      expect(createCalls[0]?.input).toMatchObject({
+        collectionSlug: 'posts',
+        documents: [
+          { data: { title: 'First bulk MCP post' } },
+          { data: { title: 'Second bulk MCP post' } },
+        ],
+      })
+
+      return scoreMCPExecution({
+        audit,
+        optimalModificationAttempts: 2,
         optimalToolCalls: 2,
         requiredPayloadOperation: { slug: 'posts', kind: 'mutation' },
         transcript,
