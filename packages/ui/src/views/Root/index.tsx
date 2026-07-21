@@ -44,12 +44,6 @@ export type RenderRootArgs = {
   config: Promise<SanitizedConfig>
   importMap: ImportMap
   initReq: InitReqFn
-  /** Framework notFound implementation (e.g. next/navigation notFound). Called before req is available. */
-  notFound: () => never
-  params: Promise<{ segments: string[] }>
-  /** Framework redirect implementation (e.g. next/navigation redirect). Called before req is available. */
-  redirect: (url: string) => never
-  searchParams: Promise<{ [key: string]: string | string[] }>
   /**
    * Optional React `key` applied to the rendered view (not the surrounding admin
    * template/nav). Adapters whose router reconciles a single RSC payload in place
@@ -60,7 +54,13 @@ export type RenderRootArgs = {
    * Left `undefined` by Next.js, whose App Router already remounts the page
    * segment while its layout (nav) persists.
    */
-  viewRemountKey?: string
+  key?: string
+  /** Framework notFound implementation (e.g. next/navigation notFound). Called before req is available. */
+  notFound: () => never
+  params: Promise<{ segments: string[] }>
+  /** Framework redirect implementation (e.g. next/navigation redirect). Called before req is available. */
+  redirect: (url: string) => never
+  searchParams: Promise<{ [key: string]: string | string[] }>
 }
 
 export const renderRoot = async ({
@@ -68,11 +68,11 @@ export const renderRoot = async ({
   config: configPromise,
   importMap,
   initReq,
+  key,
   notFound,
   params: paramsPromise,
   redirect,
   searchParams: searchParamsPromise,
-  viewRemountKey,
 }: RenderRootArgs) => {
   const config = await configPromise
 
@@ -348,15 +348,10 @@ export const renderRoot = async ({
     } satisfies AdminViewServerPropsOnly,
   })
 
-  // When an adapter supplies `viewRemountKey`, wrap the view in a keyed boundary
-  // so it remounts on route change while the surrounding template/nav reconciles
-  // in place. `key={undefined}` (Next.js) is a no-op, preserving prior behavior.
-  const KeyedView =
-    viewRemountKey !== undefined ? (
-      <React.Fragment key={viewRemountKey}>{RenderedView}</React.Fragment>
-    ) : (
-      RenderedView
-    )
+  // Wrap the view in a keyed boundary so it remounts on route change while the
+  // surrounding template/nav reconciles in place. `key={undefined}` (Next.js) is
+  // a no-op, preserving prior behavior.
+  const KeyedView = <React.Fragment key={key}>{RenderedView}</React.Fragment>
 
   return (
     <PageConfigProvider config={clientConfig}>

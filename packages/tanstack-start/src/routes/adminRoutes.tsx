@@ -28,13 +28,8 @@ const runLoader = async (load: AdminLoad, splat: string, searchStr: string) => {
 }
 
 function AdminPage() {
-  // RSC Flight payload — render in place (no outer `key`) so the persistent
-  // template (nav sidebar, header) reconciles across navigations instead of
-  // remounting and flashing. The per-route remount that resets view-scoped
-  // client providers (e.g. `DocumentInfoProvider`) is applied server-side to the
-  // *view* subtree only, via `renderRoot`'s `viewRemountKey` — see
-  // `loadAdminPage`. Keyed there rather than here so the nav survives while the
-  // view swaps, mirroring Next's layout-persists/page-remounts segment semantics.
+  // Note: React key intentionally omitted here so the persistent template (nav, header) doesn't remount and flash on navigation.
+  // The per-route view key is attached server-side to the view subtree instead, via `renderRoot`'s `key` in `loadAdminPage`.
   const data = useLoaderData({ strict: false })
   return <Fragment>{data?.rscPayload}</Fragment>
 }
