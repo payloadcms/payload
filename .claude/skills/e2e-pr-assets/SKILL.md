@@ -28,11 +28,15 @@ This project bundle has no required sub-skills. It requires the helper scripts i
 
 - `gh` authenticated for the target repo
 - `pnpm` + project deps installed
+- `node_modules` present for the target worktree/repo
 - `jq` installed
 - For video mode: `ffmpeg`, `ffprobe`, `bc`
 - From repo root, run a check-first bootstrap:
   - `bash tools/e2e-pr-assets/check.sh`
   - If check fails, run `bash tools/e2e-pr-assets/install.sh`, then rerun `bash tools/e2e-pr-assets/check.sh`
+- Before relying on `e2e-run --record`, inspect the repo's Playwright config:
+  - If the config hardcodes `video: 'off'` or otherwise ignores `PLAYWRIGHT_VIDEO`, do not spend time fighting the suite recorder.
+  - Prefer `e2e-run-script` for video capture in that case.
 - Helper commands installed by the bundle:
   - `e2e-infer-suite`
   - `e2e-run`
@@ -75,6 +79,8 @@ Use this path when the relevant e2e suite is noisy, has unrelated fields, or wou
 
 Use this path when the committed e2e suite is too CI-focused, too brittle for evidence, or would require adding video-only behavior to tests. The user should describe the evidence they want; the agent writes the scenario.
 
+Prefer this path early when the goal is explanatory evidence, not just pass/fail proof. If the video needs to clearly tell a story in the UI, use a scenario instead of forcing the committed suite to double as a demo.
+
 1. Infer the suite/config context from the PR:
    - `e2e-infer-suite <pr-number> <owner/repo> --repo <repo-root>`
 2. Generate a temporary scenario script outside the repo, for example:
@@ -89,14 +95,18 @@ export default async function scenario({ baseURL, cursor, expect, label, page, r
 }
 ```
 
-4. Dry-run and iterate until the script works:
+4. If the scenario mutates document data outside the open edit view, avoid stale-data modal churn:
+   - Prefer seeding and local API mutations before opening the document page when possible.
+   - If you must mutate via local API while the document page is already open, reload the page before continuing visible interactions.
+
+5. Dry-run and iterate until the script works:
    - `e2e-run-script <scenario.mjs> --repo <repo-root> --label before --base-url http://localhost:3000`
-5. Record before/after:
+6. Record before/after:
    - `e2e-run-script <scenario.mjs> --repo <repo-root> --label before --record`
    - `e2e-convert-video before`
    - `e2e-run-script <scenario.mjs> --repo <repo-root> --label after --record`
    - `e2e-convert-video after`
-6. Continue with MP4 verification and GitHub attachment upload below.
+7. Continue with MP4 verification and GitHub attachment upload below.
 
 ### Existing committed e2e suite
 
@@ -109,6 +119,7 @@ export default async function scenario({ baseURL, cursor, expect, label, page, r
 4. Record before (unless already cached and no re-record requested):
    - `e2e-run <suite> --record --label before --repo <repo-root>`
    - `e2e-convert-video before`
+   - If no fresh `.webm` is produced, stop assuming the suite recorder works in this repo and switch to `e2e-run-script`.
 5. Apply fix.
 6. Dry-run after (no recording) and confirm it passes:
    - `e2e-run <suite> --repo <repo-root>`
@@ -157,6 +168,8 @@ fi
 
 - `e2e-attach-pr` is idempotent: it replaces the prior generated media block instead of duplicating it.
 - Video conversion records at full viewport size, trims the initial blank Playwright frame by default, and auto-compresses to fit GitHub upload constraints when needed.
+- If `e2e-convert-video` fails with `h264_videotoolbox`, retry conversion with `libx264` instead of re-recording. Hardware H.264 availability is not the same as hardware H.264 reliability.
 - Video mode is complete only when the PR body contains `github.com/user-attachments/assets` video links. `.webm` links or raw `.mp4` links are failed video-mode results.
 - Media artifacts are stored in `/tmp` and are automatically removed after `e2e-attach-pr` completes by default. Disable with `E2E_MEDIA_AUTO_CLEANUP=0`.
+- Payload dev/test commands may rewrite `tsconfig.base.json` aliases such as `@payload-config`. After recording, restore that drift before finalizing.
 - Never store PR evidence media in repository branches such as `.github/e2e-assets/...` or `e2e-assets-<pr>`. Those commits pollute the PR timeline and file list. If GitHub attachment upload fails, fix the upload flow instead of committing media files.
