@@ -13,25 +13,23 @@ type Args = {
 
 /**
  * Field `beforeChange` hook for the native `slug` field. Returns the slug value.
+ * - The slug value is derived from the `useAsSlug` source field,
+ *   but can be manually overridden by the admin.
+ * - To protect live URLs, the slug is frozen after initial generation
+ *   unless the admin explicitly overwrites it.
  *
- * Auto-tracking is derived statelessly — there is no persisted "generate" flag.
- * The slug follows its source while it is empty or still equals `slugify(storedSource)`;
- * once it diverges (the admin overwrites it) it freezes, and stays frozen because the
- * stored value keeps differing from `slugify(source)`. Re-aligning (the UI generate
- * button) resumes tracking.
+ * This is expressed as follows:
+ *
+ * Non-versioned and versioned-but-non-autosave collections:
+ * - On create, generate from the source, keeping an explicitly provided value.
+ * - On update, regenerate only while the stored slug is empty.
+ * - Freeze on the first non-empty value, whether generated or manually provided.
  *
  * Autosave drafts:
- * - The slug generates **freely on every draft save** (create and autosave) so a new
+ * - On every draft save (create and autosave) before publish, generate freely — a new
  *   document gets a natural, live-updating slug while the admin is still entering content.
- * - It **freezes on the first publish** (and on every save thereafter) to protect the
- *   now-live URL from silently changing.
- * - A manual overwrite mid-draft wins immediately and is preserved across later
- *   autosaves via the stateless latch above — publish is not required to lock a custom value.
- *
- * This intentionally does **not** gate generation on version count. "Free until first
- * publish, unless manually overwritten" is expressed purely from `_status` and the
- * stored-vs-source comparison, which is both simpler and correct regardless of how many
- * draft versions have accumulated.
+ * - Freeze on the first manual overwrite or the first publish. A mid-draft overwrite wins
+ *   immediately and is preserved across later autosaves.
  */
 export const generateSlug =
   ({ name, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
