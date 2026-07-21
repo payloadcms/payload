@@ -304,6 +304,70 @@ describe('Fields', () => {
         expect(afterPublish.slug).toBe('publishable-title')
       })
     })
+
+    describe('drafts without autosave', () => {
+      const created: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of created) {
+          await payload.delete({ collection: 'slug-draft', id })
+        }
+        created.length = 0
+      })
+
+      it('should generate a slug on draft create', async () => {
+        const draft = await payload.create({
+          collection: 'slug-draft',
+          draft: true,
+          data: { title: 'First Title' },
+        })
+        created.push(draft.id)
+        expect(draft.slug).toBe('first-title')
+      })
+
+      it('should lock a derived slug across subsequent draft saves', async () => {
+        const draft = await payload.create({
+          collection: 'slug-draft',
+          draft: true,
+          data: { title: 'First Title' },
+        })
+        created.push(draft.id)
+        expect(draft.slug).toBe('first-title')
+
+        const second = await payload.update({
+          collection: 'slug-draft',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Second Title' },
+        })
+        expect(second.slug).toBe('first-title')
+
+        const published = await payload.update({
+          collection: 'slug-draft',
+          id: draft.id,
+          data: { _status: 'published', title: 'Published Title' },
+        })
+        expect(published.slug).toBe('first-title')
+      })
+
+      it('should lock a user-provided slug across subsequent draft saves', async () => {
+        const draft = await payload.create({
+          collection: 'slug-draft',
+          draft: true,
+          data: { title: 'First Title', slug: 'user-typed' },
+        })
+        created.push(draft.id)
+        expect(draft.slug).toBe('user-typed')
+
+        const second = await payload.update({
+          collection: 'slug-draft',
+          id: draft.id,
+          draft: true,
+          data: { title: 'Second Title' },
+        })
+        expect(second.slug).toBe('user-typed')
+      })
+    })
   })
 
   describe('text', () => {
