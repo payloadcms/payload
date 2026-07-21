@@ -444,15 +444,25 @@ test.describe('Hierarchy Sidebar', () => {
         }
       })
 
-      test('should keep autosave drawer open when creating from a folder hierarchy view', async () => {
+      test('should keep autosave drawer open when creating an allowed document in a folder hierarchy', async () => {
         test.setTimeout(TEST_TIMEOUT_LONG)
         organizationTitle = `Autosave Organization ${Date.now()}`
 
+        const multiTypeFolders = await payload.find({
+          collection: 'folders',
+          limit: 1,
+          where: { name: { equals: 'Orgs and Products' } },
+        })
+        const multiTypeFolder = multiTypeFolders.docs[0]
+
         await page.goto(organizationsURL.list)
-        await page.goto(foldersURL.hierarchy)
+        await page.goto(`${foldersURL.hierarchy}?parentFolder=${multiTypeFolder.id}`)
 
         const listControls = page.locator('.hierarchy-list__controls')
         await listControls.getByRole('button', { name: 'Create New' }).first().click()
+
+        await expect(page.getByRole('button', { name: 'Organization', exact: true })).toBeVisible()
+        await expect(page.getByRole('button', { name: 'Product', exact: true })).toBeVisible()
         await page.getByRole('button', { name: 'Organization', exact: true }).click()
 
         const drawer = page.locator('#hierarchy-create-folders')
@@ -465,13 +475,14 @@ test.describe('Hierarchy Sidebar', () => {
           .poll(async () => {
             const autosavedOrganizations = await payload.find({
               collection: 'organizations',
+              depth: 0,
               draft: true,
               where: { title: { equals: organizationTitle } },
             })
 
-            return autosavedOrganizations.totalDocs
+            return autosavedOrganizations.docs[0]?.parentFolder
           })
-          .toBe(1)
+          .toBe(multiTypeFolder.id)
 
         await expect(drawer).toBeVisible()
         await expect(titleInput).toHaveValue(organizationTitle)
