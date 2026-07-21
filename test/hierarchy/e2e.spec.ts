@@ -429,6 +429,57 @@ test.describe('Hierarchy Sidebar', () => {
       }
     })
 
+    test.describe('Autosave create drawer', () => {
+      let organizationTitle: string
+
+      test.afterEach(async () => {
+        const createdOrganizations = await payload.find({
+          collection: 'organizations',
+          draft: true,
+          where: { title: { equals: organizationTitle } },
+        })
+
+        for (const organization of createdOrganizations.docs) {
+          await payload.delete({ id: organization.id, collection: 'organizations' })
+        }
+      })
+
+      test('should keep autosave drawer open when creating from a folder hierarchy view', async () => {
+        test.setTimeout(TEST_TIMEOUT_LONG)
+        organizationTitle = `Autosave Organization ${Date.now()}`
+
+        await page.goto(organizationsURL.list)
+        await page.goto(foldersURL.hierarchy)
+
+        const listControls = page.locator('.hierarchy-list__controls')
+        await listControls.getByRole('button', { name: 'Create New' }).first().click()
+        await page.getByRole('button', { name: 'Organization', exact: true }).click()
+
+        const drawer = page.locator('#hierarchy-create-folders')
+        const titleInput = drawer.locator('#field-title')
+
+        await expect(drawer).toBeVisible()
+        await titleInput.fill(organizationTitle)
+
+        await expect
+          .poll(async () => {
+            const autosavedOrganizations = await payload.find({
+              collection: 'organizations',
+              draft: true,
+              where: { title: { equals: organizationTitle } },
+            })
+
+            return autosavedOrganizations.totalDocs
+          })
+          .toBe(1)
+
+        await expect(drawer).toBeVisible()
+        await expect(titleInput).toHaveValue(organizationTitle)
+        await drawer.locator('.doc-drawer__header-close').click()
+        await expect(drawer).toBeHidden()
+      })
+    })
+
     test('should show filter button when collectionSpecific is configured', async () => {
       await page.goto(foldersURL.list)
       await openNav(page)
