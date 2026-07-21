@@ -494,7 +494,32 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
       return false
     }
 
-    const docID = mostRecentUpdate.doc?.id
+    // Delete events only carry the deleted `id` (no `doc`), whereas create/update events
+    // carry the full `doc`. Resolve from both so the delete branch below can match.
+    const docID = mostRecentUpdate.doc?.id ?? mostRecentUpdate.id
+
+    // A document referenced by this field, deleted elsewhere (e.g. via the DeleteDocument
+    // event), should be removed from the value — otherwise it keeps showing as if it existed.
+    if (mostRecentUpdate.operation === 'delete') {
+      if (hasMany === true) {
+        const currentValue = Array.isArray(value) ? value : [value]
+        const valuesToSet = currentValue.filter((option: ValueWithRelation) => {
+          return !(option.value === docID && option.relationTo === mostRecentUpdate.entitySlug)
+        })
+
+        if (valuesToSet.length !== currentValue.length) {
+          onChange(valuesToSet)
+        }
+      } else if (
+        hasMany === false &&
+        value?.value === docID &&
+        value?.relationTo === mostRecentUpdate.entitySlug
+      ) {
+        onChange(null)
+      }
+
+      return
+    }
 
     let isMatchingUpdate = false
     if (mostRecentUpdate.operation === 'update') {

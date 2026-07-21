@@ -282,6 +282,23 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     }
 
     lastHandledEventRef.current = event
+
+    // Skip the refetch when the current data already reflects this event — e.g. this
+    // table's own drawer already applied it optimistically via onDrawerSave/onDrawerDelete,
+    // or a fresh mount already loaded data that includes it. Otherwise saving/deleting from
+    // this table's own drawer (which also emits a matching event) would render a second time.
+    const eventDocID = event.doc?.id ?? event.id
+    const existingDoc = data?.docs?.find((doc) => doc.id === eventDocID)
+
+    const isAlreadyReflected =
+      event.operation === 'delete'
+        ? !existingDoc
+        : Boolean(existingDoc) && existingDoc.updatedAt === event.updatedAt
+
+    if (isAlreadyReflected) {
+      return
+    }
+
     void renderTable()
   })
 
