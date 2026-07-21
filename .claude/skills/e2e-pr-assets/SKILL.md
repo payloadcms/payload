@@ -180,6 +180,7 @@ export default async function scenario({ baseURL, cursor, expect, label, page, r
 9. Verify MP4 outputs before attaching:
    - `/tmp/payload-e2e-before.mp4` and `/tmp/payload-e2e-after.mp4` exist and are non-empty.
    - `ffprobe` reports `codec_name=h264` for both.
+   - Inspect the first decoded frame of each MP4 when the opening poster matters. The first visible frame should already be meaningful UI, not a white loading spinner or blank transition frame.
    - Do not attach `.webm` files; GitHub does not render them inline in PR bodies.
    - Do not use raw GitHub, release asset, or Git LFS URLs for video mode; GitHub treats them as normal links.
    - Do not switch to screenshots unless the user explicitly changes the requested mode.
@@ -223,6 +224,7 @@ fi
 - The recording plan remains a local, temporary planning artifact. When attaching media, pass it to `e2e-attach-pr --plan-file ...` so the `Before` and `After` notes land in hidden PR-body comments instead of visible reviewer-facing text.
 - When the PR is demonstrating a bug and its fix, the hidden `Before` comment should name the incorrect outcome and the hidden `After` comment should name the correct outcome.
 - Video conversion records at full viewport size, trims the initial blank Playwright lead-in by default (including longer startup blanks when a later first scene is detected), and auto-compresses to fit GitHub upload constraints when needed.
+- If the opening poster is important, inspect the first decoded MP4 frame before upload rather than assuming the trim is visually correct.
 - If `e2e-convert-video` fails with `h264_videotoolbox`, retry conversion with `libx264` instead of re-recording. Hardware H.264 availability is not the same as hardware H.264 reliability.
 - Video mode is complete only when the PR body contains `github.com/user-attachments/assets` video links. `.webm` links or raw `.mp4` links are failed video-mode results.
 - Media artifacts are stored in `/tmp` and are automatically removed after `e2e-attach-pr` completes by default. Disable with `E2E_MEDIA_AUTO_CLEANUP=0`.

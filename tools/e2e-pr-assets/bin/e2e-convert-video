@@ -36,19 +36,22 @@ done
 echo "Converting $INPUT -> $OUTPUT ..."
 
 encode_with_videotoolbox() {
-  ffmpeg -nostdin -ss "$TRIM_START_SECONDS" -i "$INPUT" -c:v h264_videotoolbox -b:v 3200k -pix_fmt yuv420p -movflags +faststart "$OUTPUT" -y -loglevel error
+  ffmpeg -nostdin -i "$INPUT" -ss "$TRIM_START_SECONDS" -c:v h264_videotoolbox -b:v 3200k -pix_fmt yuv420p -movflags +faststart "$OUTPUT" -y -loglevel error
 }
 
 encode_with_libx264() {
-  ffmpeg -nostdin -ss "$TRIM_START_SECONDS" -i "$INPUT" -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p -movflags +faststart "$OUTPUT" -y -loglevel error
+  ffmpeg -nostdin -i "$INPUT" -ss "$TRIM_START_SECONDS" -c:v libx264 -preset fast -crf 18 -pix_fmt yuv420p -movflags +faststart "$OUTPUT" -y -loglevel error
 }
 
 detect_trim_start_seconds() {
+  local detected_scene_output
   local detected_scene
-  detected_scene="$(
+
+  detected_scene_output="$(
     ffprobe -v error -f lavfi "movie=${INPUT},select=gt(scene\\,${SCENE_THRESHOLD})" \
-      -show_entries frame=pts_time -of csv=p=0 2>/dev/null | head -1
+      -show_entries frame=pts_time -of csv=p=0 2>/dev/null || true
   )"
+  detected_scene="$(printf '%s\n' "$detected_scene_output" | sed -n '1p')"
 
   if [[ ! "$detected_scene" =~ ^[0-9]+([.][0-9]+)?$ ]]; then
     return 0
@@ -103,8 +106,8 @@ if [[ "$SIZE" -gt "$MAX_BYTES" ]]; then
   DURATION=$(ffprobe -v error -show_entries format=duration -of csv=p=0 "$OUTPUT")
   BITRATE=$(echo "scale=0; $TARGET_MB * 8192 / $DURATION" | bc)
 
-  ffmpeg -ss "$TRIM_START_SECONDS" -i "$INPUT" -c:v libx264 -b:v "${BITRATE}k" -pix_fmt yuv420p -pass 1 -f mp4 /dev/null -y -loglevel error
-  ffmpeg -ss "$TRIM_START_SECONDS" -i "$INPUT" -c:v libx264 -b:v "${BITRATE}k" -pix_fmt yuv420p -pass 2 -movflags +faststart "$OUTPUT" -y -loglevel error
+  ffmpeg -i "$INPUT" -ss "$TRIM_START_SECONDS" -c:v libx264 -b:v "${BITRATE}k" -pix_fmt yuv420p -pass 1 -f mp4 /dev/null -y -loglevel error
+  ffmpeg -i "$INPUT" -ss "$TRIM_START_SECONDS" -c:v libx264 -b:v "${BITRATE}k" -pix_fmt yuv420p -pass 2 -movflags +faststart "$OUTPUT" -y -loglevel error
   rm -f ffmpeg2pass-0.log ffmpeg2pass-0.log.mbtree
 
   FINAL_SIZE=$(stat -f%z "$OUTPUT" 2>/dev/null || stat -c%s "$OUTPUT")
