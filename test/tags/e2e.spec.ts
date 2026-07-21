@@ -118,8 +118,12 @@ test.describe('Tags', () => {
 
   test.afterAll(async () => {
     for (const id of createdTagIds) {
-      await payload.delete({ id, collection: tagsSlug }).catch(() => {})
+      await payload.delete({ id, collection: tagsSlug })
     }
+  })
+
+  test.afterEach(async () => {
+    await page.unrouteAll()
   })
 
   test.describe('sidebar tree refresh', () => {
@@ -146,21 +150,17 @@ test.describe('Tags', () => {
         await route.continue()
       })
 
-      try {
-        const tree = await openTagsTree()
-        await expandNode(tree, rootName)
-        await expandNode(tree, level1)
-        await expandNode(tree, level2)
-        await expandNode(tree, level3)
+      const tree = await openTagsTree()
+      await expandNode(tree, rootName)
+      await expandNode(tree, level1)
+      await expandNode(tree, level2)
+      await expandNode(tree, level3)
 
-        await enterParent(tree, level3)
+      await enterParent(tree, level3)
 
-        await createChildTag(childName)
+      await createChildTag(childName)
 
-        await expect(tree.getByText(childName)).toBeVisible()
-      } finally {
-        await page.unrouteAll()
-      }
+      await expect(tree.getByText(childName)).toBeVisible()
     })
   })
 })

@@ -69,21 +69,32 @@ export const HierarchySidebarTab: React.FC<
   // so forward the current selected parent id — otherwise the reload can't tell which node is
   // being viewed and rebuilds the tree from preference state.
   const tabSlug = `hierarchy-${hierarchyCollectionSlug}`
+  const isActiveTab = sidebarTabs?.activeTabSlug === tabSlug
   const treeRefreshKey = treeRefreshKeys.get(hierarchyCollectionSlug) ?? 0
   const prevTreeRefreshKeyRef = useRef(treeRefreshKey)
   useEffect(() => {
     if (prevTreeRefreshKeyRef.current !== treeRefreshKey) {
       prevTreeRefreshKeyRef.current = treeRefreshKey
+      // Only forward the selected parent id when this tab is active. currentParentParam
+      // reflects the global URL search params, so an inactive tab could otherwise pick up
+      // another hierarchy collection's value if they share the same parentFieldName.
       sidebarTabs?.reloadTabContent(tabSlug, {
-        searchParams: currentParentParam
-          ? { [resolvedParentFieldName]: currentParentParam }
-          : undefined,
+        searchParams:
+          isActiveTab && currentParentParam
+            ? { [resolvedParentFieldName]: currentParentParam }
+            : undefined,
       })
     }
-  }, [treeRefreshKey, sidebarTabs, tabSlug, currentParentParam, resolvedParentFieldName])
+  }, [
+    treeRefreshKey,
+    sidebarTabs,
+    tabSlug,
+    isActiveTab,
+    currentParentParam,
+    resolvedParentFieldName,
+  ])
 
   // Only highlight selected node when this tab is active
-  const isActiveTab = sidebarTabs?.activeTabSlug === tabSlug
   const selectedNodeId = isActiveTab
     ? (currentParentParam ?? selectedNodeIdFromServer ?? undefined)
     : undefined

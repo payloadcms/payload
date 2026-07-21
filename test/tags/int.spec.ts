@@ -1,6 +1,8 @@
 import type { Payload } from 'payload'
 
+import { renderTabHandler } from '@payloadcms/ui/rsc'
 import path from 'path'
+import { renderToStaticMarkup } from 'react-dom/server'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
@@ -101,6 +103,74 @@ describe('Tags Helpers', () => {
       )
 
       expect((tagField as any)?.hasMany).toBe(true)
+    })
+  })
+  describe('render-tab searchParams precedence', () => {
+    const tabSlug = 'precedence-tab'
+
+    const getForwardedSearchParams = ({
+      query,
+      searchParams,
+    }: {
+      query?: Record<string, unknown>
+      searchParams?: Record<string, unknown>
+    }): unknown => {
+      let forwardedSearchParams: unknown
+
+      const Content = (props: { searchParams?: unknown }) => {
+        forwardedSearchParams = props.searchParams
+        return null
+      }
+
+      const args = {
+        req: {
+          i18n: {},
+          locale: undefined,
+          payload: {
+            config: {
+              admin: {
+                components: { sidebar: { tabs: [{ slug: tabSlug, components: { Content } }] } },
+              },
+            },
+            importMap: payload.importMap,
+            logger: payload.logger,
+          },
+          query,
+          routeParams: {},
+          user: { id: 'user-1' },
+        },
+        searchParams,
+        tabSlug,
+      } as unknown as Parameters<typeof renderTabHandler>[0]
+
+      const { component } = renderTabHandler(args)
+      renderToStaticMarkup(component)
+
+      return forwardedSearchParams
+    }
+
+    it('should forward the provided searchParams to the rendered tab', () => {
+      const forwarded = getForwardedSearchParams({
+        query: { parent: 'from-query' },
+        searchParams: { parent: 'from-args' },
+      })
+
+      expect(forwarded).toEqual({ parent: 'from-args' })
+    })
+
+    it('should fall back to req.query when searchParams is undefined', () => {
+      const forwarded = getForwardedSearchParams({ query: { parent: 'from-query' } })
+
+      expect(forwarded).toEqual({ parent: 'from-query' })
+    })
+
+    it('should use an explicitly empty searchParams object instead of falling back to req.query', () => {
+      const forwarded = getForwardedSearchParams({
+        query: { parent: 'from-query' },
+        searchParams: {},
+      })
+
+      expect(forwarded).toEqual({})
     })
   })
 })
