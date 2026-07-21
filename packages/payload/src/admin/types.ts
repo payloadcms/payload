@@ -599,7 +599,6 @@ export type {
   ServerFunctionClientArgs,
   ServerFunctionConfig,
   ServerFunctionHandler,
-  ServerFunctionMode,
   SlugifyServerFunctionArgs,
 } from './functions/index.js'
 

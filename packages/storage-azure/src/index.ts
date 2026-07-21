@@ -6,10 +6,8 @@ import type {
 import type { Config, StorageAdapter, UploadCollectionSlug } from 'payload'
 
 import { cloudStoragePlugin } from '@payloadcms/plugin-cloud-storage'
-import { initClientUploads } from '@payloadcms/plugin-cloud-storage/utilities'
 
 import { createAzureAdapter } from './adapter.js'
-import { getGenerateSignedURLHandler } from './generateSignedURL.js'
 import { getStorageClient as getStorageClientFunc } from './utils/getStorageClient.js'
 
 export type AzureStorageOptions = {
@@ -107,24 +105,6 @@ export const azureStorage: AzureStorageFactory = (
       })
 
     const isPluginDisabled = azureStorageOptions.enabled === false
-
-    initClientUploads({
-      clientHandler: '@payloadcms/storage-azure/client#AzureClientUploadHandler',
-      collections: azureStorageOptions.collections,
-      config: incomingConfig,
-      enabled: !isPluginDisabled && Boolean(azureStorageOptions.clientUploads),
-      serverHandler: getGenerateSignedURLHandler({
-        access:
-          typeof azureStorageOptions.clientUploads === 'object'
-            ? azureStorageOptions.clientUploads.access
-            : undefined,
-        collections: azureStorageOptions.collections,
-        containerName: azureStorageOptions.containerName,
-        getStorageClient,
-        useCompositePrefixes: azureStorageOptions.useCompositePrefixes,
-      }),
-      serverHandlerPath: '/storage-azure-generate-signed-url',
-    })
 
     if (isPluginDisabled) {
       return incomingConfig

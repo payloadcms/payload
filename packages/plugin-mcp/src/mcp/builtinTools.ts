@@ -20,6 +20,7 @@ import { findVersionsTool } from './builtin/collections/findVersionsTool.js'
 import { getCollectionSchemaTool } from './builtin/collections/getCollectionSchemaTool.js'
 import { restoreVersionTool } from './builtin/collections/restoreVersionTool.js'
 import { updateDocumentTool } from './builtin/collections/updateTool.js'
+import { getUploadInstructionsTool } from './builtin/collections/uploadInstructionsTool.js'
 import { getConfigInfoTool } from './builtin/getConfigInfoTool.js'
 import { countGlobalVersionsTool } from './builtin/globals/countVersionsTool.js'
 import { findGlobalTool } from './builtin/globals/findTool.js'
@@ -32,6 +33,7 @@ import { updateGlobalTool } from './builtin/globals/updateTool.js'
 type CollectionBuiltin = {
   mcpName: string
   requiresDuplicateEnabled?: boolean
+  requiresUpload?: boolean
   requiresVersions?: boolean
   tool: CollectionTool
 }
@@ -70,6 +72,11 @@ export const COLLECTION_BUILTINS = {
   },
   findVersions: { mcpName: 'findVersions', requiresVersions: true, tool: findVersionsTool },
   getCollectionSchema: { mcpName: 'getCollectionSchema', tool: getCollectionSchemaTool },
+  getUploadInstructions: {
+    mcpName: 'getUploadInstructions',
+    requiresUpload: true,
+    tool: getUploadInstructionsTool,
+  },
   restoreVersion: { mcpName: 'restoreVersion', requiresVersions: true, tool: restoreVersionTool },
   update: { mcpName: 'updateDocument', tool: updateDocumentTool },
 } satisfies Record<string, CollectionBuiltin>

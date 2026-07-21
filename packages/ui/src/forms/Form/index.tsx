@@ -582,22 +582,12 @@ export const Form: React.FC<FormProps> = (props) => {
         const handler = getUploadHandler({ collectionSlug })
 
         if (typeof handler === 'function') {
-          let filename = file.name
-          const clientUploadContext = await handler({
-            docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
-            file,
-            updateFilename: (value) => {
-              filename = value
-            },
-          })
-
-          file = JSON.stringify({
-            clientUploadContext,
-            collectionSlug,
-            filename,
-            mimeType: file.type,
-            size: file.size,
-          })
+          file = JSON.stringify(
+            await handler({
+              docPrefix: typeof data?.prefix === 'string' ? data.prefix : undefined,
+              file,
+            }),
+          )
         }
       }
 

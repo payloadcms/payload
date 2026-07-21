@@ -4,6 +4,7 @@ import type { SlugFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Button } from '../../elements/Button/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
@@ -61,13 +62,20 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
 
       const valueToSlugify = getDataByPath(useAsSlug)
 
-      const formattedSlug = await slugify({
-        collectionSlug,
-        data: getData(),
-        globalSlug,
-        path: fieldPath,
-        valueToSlugify,
-      })
+      let formattedSlug: null | string | undefined
+
+      try {
+        formattedSlug = await slugify({
+          collectionSlug,
+          data: getData(),
+          globalSlug,
+          path: fieldPath,
+          valueToSlugify,
+        })
+      } catch (_err) {
+        toast.error(t('error:unspecific'))
+        return
+      }
 
       if (formattedSlug === null || formattedSlug === undefined) {
         setValue('')
@@ -91,6 +99,7 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
       collectionSlug,
       globalSlug,
       fieldPath,
+      t,
     ],
   )
 

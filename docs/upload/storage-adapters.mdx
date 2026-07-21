@@ -18,7 +18,7 @@ Payload offers additional storage adapters to handle file uploads. These adapter
 
 ## Configuration
 
-Storage adapters are registered under the top-level `storage` key in your Payload config. This placement ensures that upload hooks, static file handlers, and presigned-URL endpoints are wired up before any plugin modifies the config.
+Storage adapters are registered under the top-level `storage` key in your Payload config. This placement ensures that upload hooks, static file handlers, and upload instructions are wired up before any plugin modifies the config.
 
 ```ts
 import { s3Storage } from '@payloadcms/storage-s3'
@@ -46,6 +46,27 @@ npx @payloadcms/codemod --transform migrate-storage-adapters-to-config
 
 </Banner>
 
+## Upload Instructions
+
+By default, the Admin includes the file in the normal document create or update request. When an adapter's upload instructions provide a better browser upload flow, the Admin uses them instead:
+
+```text
+Admin
+  -> asks POST /api/upload-instructions how to upload this file
+
+Payload
+  -> checks access and file limits
+  -> returns the storage adapter's instructions
+
+Admin
+  -> follows the returned instructions
+  -> creates or updates the document with the completed upload metadata
+```
+
+With `clientUploads` enabled, S3, Azure, and GCS upload directly to storage instead of through Payload. Providers that need their own SDK return a named instruction handled by their Admin helper. R2 uses the same flow to split the file into smaller requests, even though Payload still handles each chunk.
+
+The upload-instructions endpoint is also available for every upload collection. Other clients, including MCP, can use it when they cannot attach a file to the document request. Without direct provider instructions, Payload returns a temporary upload URL instead. Both paths still run normal validation, image processing, and hooks during document creation.
+
 ## Vercel Blob Storage
 
 [`@payloadcms/storage-vercel-blob`](https://www.npmjs.com/package/@payloadcms/storage-vercel-blob)
@@ -61,7 +82,7 @@ pnpm add @payloadcms/storage-vercel-blob
 - Configure the `collections` object to specify which collections should use the Vercel Blob adapter. The slug _must_ match one of your existing collection slugs.
 - Ensure you have `BLOB_READ_WRITE_TOKEN` set in your Vercel environment variables. This is usually set by Vercel automatically after adding blob storage to your project.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
-- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client.
+- When deploying to Vercel, server uploads are limited to 4.5MB. Set `clientUploads` to `true` to use upload instructions and send files directly to Vercel Blob.
 
 ```ts
 import { vercelBlobStorage } from '@payloadcms/storage-vercel-blob'
@@ -96,7 +117,7 @@ export default buildConfig({
 | `addRandomSuffix`      | Add a random suffix to the uploaded file name in Vercel Blob storage                     | `false`                       |
 | `cacheControlMaxAge`   | Cache-Control max-age in seconds                                                         | `365 * 24 * 60 * 60` (1 Year) |
 | `token`                | Vercel Blob storage read/write token                                                     | `''`                          |
-| `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.                            |                               |
+| `clientUploads`        | Upload directly to Vercel Blob instead of through Payload.                               |                               |
 | `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it. | `false`                       |
 
 ## S3 Storage
@@ -114,7 +135,7 @@ pnpm add @payloadcms/storage-s3
 - Configure the `collections` object to specify which collections should use the S3 Storage adapter. The slug _must_ match one of your existing collection slugs.
 - The `config` object can be any [`S3ClientConfig`](https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/client/s3) object (from [`@aws-sdk/client-s3`](https://github.com/aws/aws-sdk-js-v3)). _This is highly dependent on your AWS setup_. Check the AWS documentation for more information.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
-- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client. You must allow CORS PUT method for the bucket to your website.
+- When deploying to Vercel, server uploads are limited to 4.5MB. Set `clientUploads` to `true` to use upload instructions and send files directly to S3. You must allow CORS `PUT` requests from your website.
 - Configure `signedDownloads` (either globally or per-collection in `collections`) to use [presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html) for files downloading. This can improve performance for large files (like videos) while still respecting your access control. Additionally, with `signedDownloads.shouldUseSignedURL` you can specify a condition whether Payload should use a presigned URL, if you want to use this feature only for specific files.
 - You can conditionally enable the plugin using the `enabled` option. For example, `enabled: Boolean(process.env.S3_BUCKET)` skips the plugin in local development when credentials are not set.
 
@@ -164,7 +185,7 @@ export default buildConfig({
 | `bucket`               | The name of the S3 bucket                                                                |             |
 | `config`               | `S3ClientConfig` object passed to the AWS SDK client                                     |             |
 | `acl`                  | Access control list for uploaded files (e.g. `'public-read'`)                            | `undefined` |
-| `clientUploads`        | Do uploads directly on the client to bypass Vercel's 4.5MB server limit                  |             |
+| `clientUploads`        | Upload directly to S3 instead of through Payload.                                        |             |
 | `signedDownloads`      | Use presigned URLs for file downloads. Can be overridden per collection                  |             |
 | `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it. | `false`     |
 
@@ -245,7 +266,7 @@ pnpm add @payloadcms/storage-azure
 
 - Configure the `collections` object to specify which collections should use the Azure Blob adapter. The slug _must_ match one of your existing collection slugs.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
-- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client.
+- When deploying to Vercel, server uploads are limited to 4.5MB. Set `clientUploads` to `true` to use upload instructions and send files directly to Azure.
 
 <Banner type="warning">
   **`clientUploads` and CORS:** Client uploads use the Azure Blob SDK, which
@@ -303,7 +324,7 @@ export default buildConfig({
 | `baseURL`              | Base URL for the Azure Blob storage account                                              |         |
 | `connectionString`     | Azure Blob storage connection string                                                     |         |
 | `containerName`        | Azure Blob storage container name                                                        |         |
-| `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.                            |         |
+| `clientUploads`        | Upload directly to Azure instead of through Payload.                                     |         |
 | `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it. | `false` |
 
 ## Google Cloud Storage
@@ -320,7 +341,7 @@ pnpm add @payloadcms/storage-gcs
 
 - Configure the `collections` object to specify which collections should use the Google Cloud Storage adapter. The slug _must_ match one of your existing collection slugs.
 - When enabled, this package will automatically set `disableLocalStorage` to `true` for each collection.
-- When deploying to Vercel, server uploads are limited with 4.5MB. Set `clientUploads` to `true` to do uploads directly on the client. You must allow CORS PUT method for the bucket to your website.
+- When deploying to Vercel, server uploads are limited to 4.5MB. Set `clientUploads` to `true` to use upload instructions and send files directly to GCS. You must allow CORS `PUT` requests from your website.
 
 ```ts
 import { gcsStorage } from '@payloadcms/storage-gcs'
@@ -356,7 +377,7 @@ export default buildConfig({
 | `bucket`               | The name of the bucket to use                                                                       |           |
 | `options`              | Google Cloud Storage client configuration. See [Docs](https://github.com/googleapis/nodejs-storage) |           |
 | `acl`                  | Access control list for files that are uploaded                                                     | `Private` |
-| `clientUploads`        | Do uploads directly on the client to bypass limits on Vercel.                                       |           |
+| `clientUploads`        | Upload directly to GCS instead of through Payload.                                                  |           |
 | `useCompositePrefixes` | Combine collection prefix with document prefix instead of document prefix overriding it.            | `false`   |
 
 ## R2 Storage
@@ -424,8 +445,11 @@ export interface GeneratedAdapter {
   name: string
   onInit?: () => void
   staticHandler: StaticHandler
+  uploadInstructions?: UploadInstructionsCapability
 }
 ```
+
+When providing upload instructions, set `uploadInstructions.useInAdmin` to `true` when the Admin panel should use them instead of attaching the whole file to the document request. This is useful for direct-to-storage uploads and for flows such as chunked uploads that still pass through Payload.
 
 ```ts
 import { buildConfig } from 'payload'

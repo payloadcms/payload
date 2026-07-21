@@ -10,7 +10,7 @@ import type {
 import type { ClientField } from '../../fields/config/client.js'
 import type { ClientHierarchyConfig } from '../../hierarchy/types.js'
 import type { Payload } from '../../types/index.js'
-import type { SanitizedUploadConfig } from '../../uploads/types.js'
+import type { SanitizedUploadConfig, UploadInstructionsCapability } from '../../uploads/types.js'
 import type { SanitizedCollectionConfig } from './types.js'
 
 import { createClientFields } from '../../fields/config/client.js'
@@ -41,8 +41,13 @@ export type ServerOnlyUploadProperties = keyof Pick<
   | 'externalFileHeaderFilter'
   | 'handlers'
   | 'modifyResponseHeaders'
+  | 'uploadInstructions'
   | 'withMetadata'
 >
+
+type ClientUploadConfig = {
+  uploadInstructions: Pick<UploadInstructionsCapability, 'useInAdmin'>
+} & Omit<SanitizedUploadConfig, 'uploadInstructions'>
 
 export type ClientCollectionConfig = {
   admin: {
@@ -69,9 +74,10 @@ export type ClientCollectionConfig = {
     plural: StaticLabel
     singular: StaticLabel
   }
+  upload: ClientUploadConfig
 } & Omit<
   SanitizedCollectionConfig,
-  'admin' | 'auth' | 'fields' | 'hierarchy' | 'labels' | ServerOnlyCollectionProperties
+  'admin' | 'auth' | 'fields' | 'hierarchy' | 'labels' | 'upload' | ServerOnlyCollectionProperties
 >
 
 const serverOnlyCollectionProperties: Partial<ServerOnlyCollectionProperties>[] = [
@@ -96,6 +102,7 @@ const serverOnlyUploadProperties: Partial<ServerOnlyUploadProperties>[] = [
   'externalFileHeaderFilter',
   'handlers',
   'modifyResponseHeaders',
+  'uploadInstructions',
   'withMetadata',
 ]
 
@@ -276,7 +283,11 @@ export const createClientCollectionConfig = ({
           break
         }
 
-        clientCollection.upload = {} as SanitizedUploadConfig
+        clientCollection.upload = {
+          uploadInstructions: {
+            useInAdmin: collection.upload.uploadInstructions?.useInAdmin ?? false,
+          },
+        } as ClientUploadConfig
 
         for (const uploadKey in collection.upload) {
           if (serverOnlyUploadProperties.includes(uploadKey as any)) {
