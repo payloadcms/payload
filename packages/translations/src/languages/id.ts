@@ -444,6 +444,7 @@ export const idTranslations: DefaultTranslationsObject = {
     perPage: 'Per Halaman: {{limit}}',
     perPageLabel: 'Per halaman:',
     presets: 'Prasetel',
+    preview: 'Pratinjau',
     previous: 'Sebelumnya',
     reindex: 'Indeks Ulang',
     reindexingAll: 'Mengindeks ulang semua {{collections}}.',

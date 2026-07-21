@@ -442,6 +442,7 @@ export const enTranslations = {
     perPage: 'Per Page: {{limit}}',
     perPageLabel: 'Per page:',
     presets: 'Presets',
+    preview: 'Preview',
     previous: 'Previous',
     reindex: 'Reindex',
     reindexingAll: 'Reindexing all {{collections}}.',

@@ -448,6 +448,7 @@ export const roTranslations: DefaultTranslationsObject = {
     perPage: 'Pe pagină: {{limit}}',
     perPageLabel: 'Pe pagină:',
     presets: 'Presetări',
+    preview: 'Previzualizare',
     previous: 'Anterior',
     reindex: 'Reindexare',
     reindexingAll: 'Reindexarea tuturor {{collections}}.',

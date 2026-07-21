@@ -442,6 +442,7 @@ export const plTranslations: DefaultTranslationsObject = {
     perPage: 'Na stronę: {{limit}}',
     perPageLabel: 'Na stronę:',
     presets: 'Ustawienia wstępne',
+    preview: 'Podgląd',
     previous: 'Poprzedni',
     reindex: 'Ponowne indeksowanie',
     reindexingAll: 'Ponowne indeksowanie wszystkich {{collections}}.',

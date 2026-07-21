@@ -440,6 +440,7 @@ export const slTranslations: DefaultTranslationsObject = {
     perPage: 'Na stran: {{limit}}',
     perPageLabel: 'Na stran:',
     presets: 'Prednastavitve',
+    preview: 'Predogled',
     previous: 'Prejšnji',
     reindex: 'Reindeksiraj',
     reindexingAll: 'Ponovno indeksiranje vseh {{collections}}.',

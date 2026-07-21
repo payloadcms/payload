@@ -446,6 +446,7 @@ export const ruTranslations: DefaultTranslationsObject = {
     perPage: 'На странице: {{limit}}',
     perPageLabel: 'На страницу:',
     presets: 'Предустановки',
+    preview: 'Предпросмотр',
     previous: 'Предыдущий',
     reindex: 'Переиндексировать',
     reindexingAll: 'Переиндексирование всех {{collections}}.',

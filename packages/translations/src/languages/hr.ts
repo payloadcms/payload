@@ -441,6 +441,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     perPage: 'Po stranici: {{limit}}',
     perPageLabel: 'Po stranici:',
     presets: 'Predlošci',
+    preview: 'Pregled',
     previous: 'Prethodni',
     reindex: 'Ponovno indeksiraj',
     reindexingAll: 'Ponovno indeksiranje svih {{collections}}.',

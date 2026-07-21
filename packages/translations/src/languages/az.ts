@@ -446,6 +446,7 @@ export const azTranslations: DefaultTranslationsObject = {
     perPage: 'Hər səhifədə: {{limit}}',
     perPageLabel: 'Səhifə başına:',
     presets: 'Ön ayarlar',
+    preview: 'Ön baxış',
     previous: 'Əvvəlki',
     reindex: 'Yenidən indekslə',
     reindexingAll: 'Bütün {{collections}} yenidən indekslənir.',

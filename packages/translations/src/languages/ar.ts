@@ -431,6 +431,7 @@ export const arTranslations: DefaultTranslationsObject = {
     perPage: 'لكلّ صفحة: {{limit}}',
     perPageLabel: 'لكل صفحة:',
     presets: 'الإعدادات المسبقة',
+    preview: 'معاينة',
     previous: 'سابق',
     reindex: 'إعادة الفهرسة',
     reindexingAll: 'جاري إعادة فهرسة جميع {{collections}}.',

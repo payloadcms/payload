@@ -446,6 +446,7 @@ export const caTranslations: DefaultTranslationsObject = {
     perPage: 'Per pagian: {{limit}}',
     perPageLabel: 'Per pàgina:',
     presets: 'Predefinits',
+    preview: 'Previsualització',
     previous: 'Previ',
     reindex: 'Reindexa',
     reindexingAll: 'Reindexa tots el {{collections}}.',

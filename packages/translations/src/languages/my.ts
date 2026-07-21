@@ -448,6 +448,7 @@ export const myTranslations: DefaultTranslationsObject = {
     perPage: 'စာမျက်နှာ အလိုက်: {{limit}}',
     perPageLabel: 'တစ်အုပ်စာမျက်နှာ။',
     presets: 'ကြိုတင်သတ်မှတ်ချက်များ',
+    preview: 'ကြိုတင်ကြည့်ရှုခြင်း',
     previous: 'ယခင်',
     reindex: 'ပြန်လည်အညွှန်းပြုလုပ်ပါ',
     reindexingAll: 'အပေါ် {{collections}} အားလုံးကို ထပ်လိပ်နေပါသည်။',

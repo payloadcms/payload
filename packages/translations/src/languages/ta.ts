@@ -443,6 +443,7 @@ export const taTranslations: DefaultTranslationsObject = {
     perPage: 'ஒரு பக்கத்தில்: {{limit}}',
     perPageLabel: 'ஒரு பக்கம்:',
     presets: 'முன்னமைப்புகள்',
+    preview: 'முன்னோட்டம்',
     previous: 'முந்தையது',
     reindex: 'மறுஅட்டவணை',
     reindexingAll: 'அனைத்து {{collections}} மறுஅட்டவணை செய்யப்படுகிறது.',

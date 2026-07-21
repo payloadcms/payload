@@ -445,6 +445,7 @@ export const ltTranslations: DefaultTranslationsObject = {
     perPage: 'Puslapyje: {{limit}}',
     perPageLabel: 'Puslapyje:',
     presets: 'Išankstiniai nustatymai',
+    preview: 'Peržiūra',
     previous: 'Ankstesnis',
     reindex: 'Perindeksuoti',
     reindexingAll: 'Perindeksuojamos visos {{collections}}.',

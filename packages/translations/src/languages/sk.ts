@@ -440,6 +440,7 @@ export const skTranslations: DefaultTranslationsObject = {
     perPage: 'Na stránku: {{limit}}',
     perPageLabel: 'Na stránku:',
     presets: 'Prednastavenia',
+    preview: 'Náhľad',
     previous: 'Predchádzajúci',
     reindex: 'Reindexovať',
     reindexingAll: 'Znova sa indexujú všetky {{collections}}.',

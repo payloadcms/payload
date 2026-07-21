@@ -444,6 +444,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     perPage: '表示件数: {{limit}}',
     perPageLabel: '1ページあたり：',
     presets: 'プリセット',
+    preview: 'プレビュー',
     previous: '前の',
     reindex: '再インデックス',
     reindexingAll: 'すべての{{collections}}を再インデックスしています。',

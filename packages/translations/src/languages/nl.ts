@@ -449,6 +449,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     perPage: 'Per pagina: {{limit}}',
     perPageLabel: 'Per pagina:',
     presets: 'Voorinstellingen',
+    preview: 'Voorbeeldweergave',
     previous: 'Vorige',
     reindex: 'Herindexeren',
     reindexingAll: 'Bezig met het opnieuw indexeren van alle {{collections}}.',

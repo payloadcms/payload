@@ -453,6 +453,7 @@ export const deTranslations: DefaultTranslationsObject = {
     perPage: 'Pro Seite: {{limit}}',
     perPageLabel: 'Pro Seite:',
     presets: 'Voreinstellungen',
+    preview: 'Vorschau',
     previous: 'Vorherige',
     reindex: 'Neuindizieren',
     reindexingAll: 'Alle {{collections}} werden neu indiziert.',

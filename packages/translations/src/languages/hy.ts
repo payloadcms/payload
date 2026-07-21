@@ -443,6 +443,7 @@ export const hyTranslations: DefaultTranslationsObject = {
     perPage: 'Էջում՝ {{limit}}',
     perPageLabel: 'Մեկ էջի համար:',
     presets: 'Կանխադրվածներ',
+    preview: 'Նախադիտում',
     previous: 'Նախորդ',
     reindex: 'Վերաինդեքսավորել',
     reindexingAll: 'Վերաինդեքսավորվում են բոլոր {{collections}}-ները։',

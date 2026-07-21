@@ -439,6 +439,7 @@ export const etTranslations: DefaultTranslationsObject = {
     perPage: 'Lehel: {{limit}}',
     perPageLabel: 'Lehekülje kohta:',
     presets: 'Eelseaded',
+    preview: 'Eelvaade',
     previous: 'Eelmine',
     reindex: 'Indekseeri uuesti',
     reindexingAll: 'Indekseerin uuesti kõik {{collections}}.',

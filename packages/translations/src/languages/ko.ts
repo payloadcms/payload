@@ -440,6 +440,7 @@ export const koTranslations: DefaultTranslationsObject = {
     perPage: '페이지당 개수: {{limit}}',
     perPageLabel: '페이지당:',
     presets: '프리셋',
+    preview: '미리보기',
     previous: '이전',
     reindex: '재인덱싱',
     reindexingAll: '모든 {{collections}}를 다시 인덱싱하는 중입니다.',

@@ -442,6 +442,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     perPage: 'Lapas ieraksti: {{limit}}',
     perPageLabel: 'Vienā lapā:',
     presets: 'Iepriekšiestatījumi',
+    preview: 'Priekšskatījums',
     previous: 'Iepriekšējais',
     reindex: 'Pārindeksēt',
     reindexingAll: 'Pārindeksē visus {{collections}}.',

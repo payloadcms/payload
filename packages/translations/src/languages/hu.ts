@@ -447,6 +447,7 @@ export const huTranslations: DefaultTranslationsObject = {
     perPage: 'Oldalanként: {{limit}}',
     perPageLabel: 'Oldalanként:',
     presets: 'Előbeállítások',
+    preview: 'Előnézet',
     previous: 'Előző',
     reindex: 'Újraindexelés',
     reindexingAll: 'Az összes {{collections}} újraindexálása folyamatban.',

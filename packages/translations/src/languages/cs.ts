@@ -438,6 +438,7 @@ export const csTranslations: DefaultTranslationsObject = {
     perPage: 'Na stránku: {{limit}}',
     perPageLabel: 'Na stránku:',
     presets: 'Předvolby',
+    preview: 'Náhled',
     previous: 'Předchozí',
     reindex: 'Přeindexovat',
     reindexingAll: 'Přeindexování všech {{collections}}.',

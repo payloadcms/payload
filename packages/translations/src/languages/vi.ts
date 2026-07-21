@@ -444,6 +444,7 @@ export const viTranslations: DefaultTranslationsObject = {
     perPage: 'Hiển thị mỗi trang: {{limit}}',
     perPageLabel: 'Mỗi trang:',
     presets: 'Các thiết lập sẵn',
+    preview: 'Xem trước',
     previous: 'Trước đó',
     reindex: 'Tái lập chỉ mục',
     reindexingAll: 'Đang tái lập chỉ mục tất cả {{collections}}.',

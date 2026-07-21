@@ -324,6 +324,19 @@ describe('Live Preview', () => {
     await expect(previewButton).toBeHidden()
   })
 
+  test('collection — preview button links to preview URL in a new tab', async () => {
+    await goToCollectionLivePreview(page, pagesURLUtil)
+
+    const previewButton = page.locator('#preview-button')
+    await expect(previewButton).toBeVisible()
+
+    await expect(previewButton).toHaveAttribute('target', '_blank')
+    await expect(previewButton).toHaveAttribute('href', /\/live-preview/)
+
+    await previewButton.hover()
+    await expect(page.locator('#preview-button ~ .tooltip--show')).toHaveText('Preview')
+  })
+
   test('collection — retains static URL across edits', async () => {
     const util = new AdminUrlUtil(serverURL, 'static-url')
     await page.goto(util.create)
