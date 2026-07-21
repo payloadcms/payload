@@ -3298,6 +3298,13 @@ describe('@payloadcms/plugin-import-export', () => {
       expect(draftPage.title).toBe(`Upsert Test ${timestamp} Updated`)
       expect(draftPage.excerpt).toBe('updated')
 
+      // Pages has no defaultVersionStatus override, so it falls back to 'published' -
+      // the update is expected to apply directly to the published version too.
+      expect(publishedPage).toBeDefined()
+      expect(publishedPage._status).toBe('published')
+      expect(publishedPage.title).toBe(`Upsert Test ${timestamp} Updated`)
+      expect(publishedPage.excerpt).toBe('updated')
+
       const newPages = await payload.find({
         collection: 'pages',
         where: {
@@ -6195,6 +6202,75 @@ describe('@payloadcms/plugin-import-export', () => {
               { title: { equals: 'Default Draft Config Override Test' } },
             ],
           },
+        })
+      })
+
+      it('should preserve the published version and create a draft when updating with defaultVersionStatus draft', async () => {
+        const timestamp = Date.now()
+        const existingDoc = await payload.create({
+          collection: 'posts-imports-only',
+          draft: false,
+          data: {
+            title: `Draft Status Update Test ${timestamp}`,
+            _status: 'published',
+          },
+        })
+
+        const csvContent =
+          'id,title\n' + `${existingDoc.id},"Draft Status Update Test ${timestamp} Updated"`
+        const csvBuffer = Buffer.from(csvContent)
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'posts-imports-only',
+            importMode: 'update',
+            matchField: 'id',
+          },
+          file: {
+            data: csvBuffer,
+            mimetype: 'text/csv',
+            name: 'draft-status-update-test.csv',
+            size: csvBuffer.length,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.updated).toBe(1)
+        expect(importDoc.summary?.issues).toBe(0)
+
+        // The row omitted `_status`, so the plugin's `defaultVersionStatus: 'draft'`
+        // config for this collection should apply - the published version must stay
+        // untouched and the incoming data should land in a new draft version instead.
+        const publishedDoc = await payload.findByID({
+          collection: 'posts-imports-only',
+          id: existingDoc.id,
+          draft: false,
+        })
+
+        expect(publishedDoc._status).toBe('published')
+        expect(publishedDoc.title).toBe(`Draft Status Update Test ${timestamp}`)
+
+        const draftDoc = await payload.findByID({
+          collection: 'posts-imports-only',
+          id: existingDoc.id,
+          draft: true,
+        })
+
+        expect(draftDoc._status).toBe('draft')
+        expect(draftDoc.title).toBe(`Draft Status Update Test ${timestamp} Updated`)
+
+        await payload.delete({
+          collection: 'posts-imports-only',
+          id: existingDoc.id,
         })
       })
     })
