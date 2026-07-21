@@ -800,7 +800,7 @@ export const RelationshipInput: React.FC<RelationshipInputProps> = (props) => {
                   if (!option) {
                     return undefined
                   }
-                  return hasMany && Array.isArray(relationTo)
+                  return Array.isArray(relationTo)
                     ? `${option.relationTo}_${option.value}`
                     : (option.value as string)
                 }}
