@@ -163,7 +163,7 @@ export default buildConfigWithDefaults({
         },
         rolls: {
           tools: {
-            createMany: false,
+            create: false,
           },
         },
       },

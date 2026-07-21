@@ -15,9 +15,9 @@ import { fileInputSchema, resolveFile } from './fileInput.js'
 import { formatCollectionError } from './formatCollectionError.js'
 
 const DEFAULT_DESCRIPTION =
-  'Create a document in any collection. Files can use a URL, base64, or an upload prepared by getUploadInstructions.'
+  'Create one or more documents in any collection. Each document can have different data or a file. Files can use a URL, base64, or an upload prepared by getUploadInstructions.'
 
-export const createDocumentTool = defineCollectionTool({
+export const createDocumentsTool = defineCollectionTool({
   access: (args) =>
     defaultAccess(args) && Boolean(args.permissions?.collections?.[args.collectionSlug]?.create),
   annotations: {
@@ -25,15 +25,10 @@ export const createDocumentTool = defineCollectionTool({
     idempotentHint: false,
     openWorldHint: false,
     readOnlyHint: false,
-    title: 'Create Document',
+    title: 'Create Documents',
   },
   description: DEFAULT_DESCRIPTION,
   input: z.object({
-    data: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'The document fields to create. Only include fields permitted by the schema returned by getCollectionSchema.',
-      ),
     depth: z
       .number()
       .int()
@@ -42,6 +37,19 @@ export const createDocumentTool = defineCollectionTool({
       .describe('How many levels deep to populate relationships in response')
       .optional()
       .default(0),
+    documents: z
+      .array(
+        z.object({
+          data: z
+            .record(z.string(), z.unknown())
+            .describe(
+              'The document fields to create. Only include fields permitted by the schema returned by getCollectionSchema.',
+            ),
+          file: fileInputSchema.optional(),
+        }),
+      )
+      .min(1)
+      .describe('The documents to create, in order'),
     draft: z
       .boolean()
       .describe(
@@ -53,11 +61,10 @@ export const createDocumentTool = defineCollectionTool({
       .string()
       .describe('Optional: fallback locale code to use when requested locale is not available')
       .optional(),
-    file: fileInputSchema.optional(),
     locale: z
       .string()
       .describe(
-        'Optional: locale code to create the document in (e.g., "en", "es"). Defaults to the default locale',
+        'Optional: locale code to create the documents in (e.g., "en", "es"). Defaults to the default locale',
       )
       .optional(),
     select: z
@@ -70,52 +77,92 @@ export const createDocumentTool = defineCollectionTool({
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
+  const { depth, documents, draft, fallbackLocale, locale, select } = input
 
-  const { data, depth, draft, fallbackLocale, file: fileInput, locale, select } = input
-
-  logger.info(
-    `Creating document in collection: ${collectionSlug}${locale ? ` with locale: ${locale}` : ''}`,
-  )
+  logger.info(`Creating ${documents.length} documents in collection: ${collectionSlug}`)
 
   try {
     const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
-    const inputData = stripVirtualFields(data, virtualFieldNames)
-    const validationError = validateCollectionData({ collectionSlug, data: inputData, req })
+    const docs: Array<{ doc: Record<string, unknown>; index: number }> = []
+    const errors: Array<{ index: number; message: string }> = []
+    let validationSchema: Record<string, unknown> | undefined
 
-    if (validationError) {
-      return validationError
+    for (const [index, document] of documents.entries()) {
+      try {
+        const inputData = stripVirtualFields(document.data, virtualFieldNames)
+        const validationError = validateCollectionData({ collectionSlug, data: inputData, req })
+
+        if (validationError) {
+          const firstContent = validationError.content[0]
+          const validationContent = validationError.structuredContent as
+            | Record<string, unknown>
+            | undefined
+          const schema = validationContent?.schema
+
+          if (!validationSchema && schema && typeof schema === 'object') {
+            validationSchema = schema as Record<string, unknown>
+          }
+
+          errors.push({
+            index,
+            message:
+              firstContent?.type === 'text'
+                ? (firstContent.text.split('\n\nUse this schema')[0] ?? 'Invalid document data')
+                : 'Invalid document data',
+          })
+          continue
+        }
+
+        const parsedData = transformPointDataToPayload(inputData)
+        const file = await resolveFile({ collectionSlug, input: document.file, req })
+        const result = await payload.create({
+          collection: collectionSlug,
+          data: parsedData,
+          depth,
+          draft,
+          overrideAccess: authorizedMCP.overrideAccess,
+          req,
+          ...(file ? { file } : {}),
+          ...(locale ? { locale } : {}),
+          ...(fallbackLocale ? { fallbackLocale } : {}),
+          ...(select ? { select: select as SelectType } : {}),
+        })
+
+        docs.push({ doc: result as Record<string, unknown>, index })
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown error'
+
+        logger.error(`Error creating document at index ${index} in ${collectionSlug}: ${message}`)
+        errors.push({ index, message })
+      }
     }
 
-    const parsedData = transformPointDataToPayload(inputData)
-    const file = await resolveFile({ collectionSlug, input: fileInput, req })
+    const batchResult = { docs, errors }
+    const retryMessage = errors.length > 0 ? '\nRetry failed indexes only.' : ''
+    const schemaMessage = validationSchema
+      ? `\n\nUse this schema for data:\n\`\`\`json\n${JSON.stringify(validationSchema)}\n\`\`\``
+      : ''
+    const structuredContent = validationSchema
+      ? { ...batchResult, schema: validationSchema }
+      : batchResult
 
-    const result = await payload.create({
-      collection: collectionSlug,
-      data: parsedData,
-      depth,
-      draft,
-      overrideAccess: authorizedMCP.overrideAccess,
-      req,
-      ...(file ? { file } : {}),
-      ...(locale ? { locale } : {}),
-      ...(fallbackLocale ? { fallbackLocale } : {}),
-      ...(select ? { select: select as SelectType } : {}),
-    })
-
-    logger.info(`Successfully created document in ${collectionSlug} with ID: ${result.id}`)
+    logger.info(`Created ${docs.length} of ${documents.length} documents in ${collectionSlug}`)
 
     return {
       content: [
         {
           type: 'text',
-          text: `Document created successfully in collection "${collectionSlug}"!\nCreated document:\n\`\`\`json\n${JSON.stringify(result)}\n\`\`\``,
+          text: `Created ${docs.length} of ${documents.length} documents in collection "${collectionSlug}".${retryMessage}\nResults:\n\`\`\`json\n${JSON.stringify(batchResult)}\n\`\`\`${schemaMessage}`,
         },
       ],
-      doc: result as Record<string, unknown>,
+      doc: structuredContent as unknown as Record<string, unknown>,
+      isError: docs.length === 0 && errors.length > 0,
+      structuredContent,
     }
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-    logger.error(`Error creating document in ${collectionSlug}: ${errorMessage}`)
+    const message = error instanceof Error ? error.message : 'Unknown error'
+
+    logger.error(`Error creating documents in ${collectionSlug}: ${message}`)
     return formatCollectionError({ action: 'creating', collectionSlug, error, req })
   }
 })

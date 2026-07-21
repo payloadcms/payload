@@ -19,7 +19,7 @@ export const getUploadInstructionsTool = defineCollectionTool({
     title: 'Get Upload Instructions',
   },
   description:
-    'Prepare a file upload before createDocument or updateDocument. Pass file metadata only, without base64 or file contents.',
+    'Prepare a file upload before createDocuments or updateDocument. Pass file metadata only, without base64 or file contents.',
   input: z.object({
     docPrefix: z.string().describe('Optional document folder or prefix').optional(),
     filename: z.string().describe('The original file name'),
@@ -37,8 +37,8 @@ export const getUploadInstructionsTool = defineCollectionTool({
 
     const nextStep =
       instructions.type === 'http'
-        ? 'Send the exact file bytes using request, then pass { source: "uploadReference", file } to createDocument or updateDocument.'
-        : `Call the local MCP tool named "${instructions.name}" with the file and data, then pass { source: "uploadReference", file } to createDocument or updateDocument.`
+        ? 'Send the exact file bytes using request, then pass { source: "uploadReference", file } to createDocuments or updateDocument.'
+        : `Call the local MCP tool named "${instructions.name}" with the file and data, then pass { source: "uploadReference", file } to createDocuments or updateDocument.`
 
     return {
       content: [
