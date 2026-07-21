@@ -174,6 +174,14 @@ describe('List View', () => {
   })
 
   describe('list view table', () => {
+    test('should render row select checkboxes with accessible names', async () => {
+      const rowCheckboxes = page.locator(`${tableRowLocator} .select-row__checkbox input`)
+
+      await expect(rowCheckboxes).toHaveCount(2)
+      await expect(page.getByRole('checkbox', { name: 'Select post1' })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: 'Select post2' })).toBeVisible()
+    })
+
     test('should link second cell', async () => {
       const { id } = await createPost()
       await page.reload()

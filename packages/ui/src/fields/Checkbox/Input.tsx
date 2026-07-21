@@ -11,6 +11,8 @@ import { LineIcon } from '../../icons/Line/index.js'
 
 export type CheckboxInputProps = {
   readonly AfterInput?: React.ReactNode
+  readonly 'aria-label'?: string
+  readonly 'aria-labelledby'?: string
   readonly BeforeInput?: React.ReactNode
   readonly checked?: boolean
   readonly className?: string
@@ -40,6 +42,8 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   id: idFromProps,
   name,
   AfterInput,
+  'aria-label': ariaLabelFromProps,
+  'aria-labelledby': ariaLabelledByFromProps,
   BeforeInput,
   checked,
   className,
@@ -59,6 +63,8 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   const [showTooltip, setShowTooltip] = useState(false)
   const fallbackID = useId()
   const id = idFromProps || fallbackID
+  const ariaLabel = ariaLabelFromProps || undefined
+  const ariaLabelledBy = ariaLabelledByFromProps || (ariaLabel ? undefined : name)
 
   useEffect(() => {
     setIsHydrated(true)
@@ -85,8 +91,8 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
       <div className={`${inputBaseClass}__wrap`}>
         <div className={`${inputBaseClass}__input`}>
           <input
-            aria-label=""
-            aria-labelledby={name}
+            aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledBy}
             checked={Boolean(checked)}
             disabled={readOnly}
             id={id}
