@@ -197,6 +197,8 @@ export interface Condition {
   id: string;
   showField?: boolean | null;
   conditionalCustomField?: string | null;
+  conditionalRowField?: string | null;
+  conditionalCollapsibleField?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -378,6 +380,8 @@ export interface AutosavePostsSelect<T extends boolean = true> {
 export interface ConditionsSelect<T extends boolean = true> {
   showField?: T;
   conditionalCustomField?: T;
+  conditionalRowField?: T;
+  conditionalCollapsibleField?: T;
   updatedAt?: T;
   createdAt?: T;
 }

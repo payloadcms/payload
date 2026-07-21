@@ -9,7 +9,13 @@ import type { Relationship } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
-import { multiTenantPostsSlug, relationshipsSlug, tenantsSlug, usersSlug } from './shared.js'
+import {
+  menuSlug,
+  multiTenantPostsSlug,
+  relationshipsSlug,
+  tenantsSlug,
+  usersSlug,
+} from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -291,6 +297,31 @@ describe('@payloadcms/plugin-multi-tenant', () => {
       await payload.delete({ id: tenantA.id, collection: tenantsSlug })
       await payload.delete({ id: tenantB.id, collection: tenantsSlug })
     })
+  })
+
+  describe('tenant cleanup on delete', () => {
+    it('should delete a tenant that has a global collection document without hanging', async () => {
+      const tenant = await payload.create({
+        collection: tenantsSlug,
+        data: { name: 'Cleanup Tenant', domain: 'cleanup-tenant.test' },
+      })
+
+      await payload.create({
+        collection: menuSlug,
+        data: { tenant: tenant.id, title: 'Cleanup Menu' },
+      })
+
+      const deletedTenant = await payload.delete({ id: tenant.id, collection: tenantsSlug })
+
+      expect(deletedTenant.id).toBe(tenant.id)
+
+      const remainingTenants = await payload.find({
+        collection: tenantsSlug,
+        where: { id: { equals: tenant.id } },
+      })
+
+      expect(remainingTenants.docs).toHaveLength(0)
+    }, 20000)
   })
 
   describe('hasMany tenant field filtering', () => {

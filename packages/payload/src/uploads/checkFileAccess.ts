@@ -3,6 +3,8 @@ import type { PayloadRequest, Where } from '../types/index.js'
 
 import { executeAccess } from '../auth/executeAccess.js'
 import { Forbidden } from '../errors/Forbidden.js'
+import { hasDraftsEnabled } from '../utilities/getVersionsConfig.js'
+import { appendVersionToQueryKey } from '../versions/drafts/appendVersionToQueryKey.js'
 
 export const checkFileAccess = async ({
   collection,
@@ -48,16 +50,38 @@ export const checkFileAccess = async ({
       })
     }
 
+    const where: Where = { and: [filenameCondition, ...constraints] }
+
     const doc = await req.payload.db.findOne({
       collection: config.slug,
       req,
-      where: { and: [filenameCondition, ...constraints] },
+      where,
     })
 
-    if (!doc) {
-      throw new Forbidden(req.t)
+    if (doc) {
+      return doc
     }
 
-    return doc
+    // Queries the version collection if `hasDraftsEnabled` is true:
+    //
+    // The base collection row only reflects the most recently committed
+    // (published) state. When a file is reuploaded on a draft, the new
+    // filename is written to the latest *version*, while the base row still
+    // points at the previously committed filename. The findOne above therefore
+    // misses the draft-only filename and access is wrongly denied.
+    if (hasDraftsEnabled(config)) {
+      const { docs } = await req.payload.db.queryDrafts({
+        collection: config.slug,
+        limit: 1,
+        req,
+        where: appendVersionToQueryKey(where),
+      })
+
+      if (docs[0]) {
+        return docs[0]
+      }
+    }
+
+    throw new Forbidden(req.t)
   }
 }

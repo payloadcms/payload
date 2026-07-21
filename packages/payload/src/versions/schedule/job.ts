@@ -46,8 +46,15 @@ export const getSchedulePublishTask = ({
       }
 
       if (input.doc) {
+        // input.doc.value is always a string (#10481); coerce back to the real ID type.
+        const idType =
+          req.payload.collections[input.doc.relationTo]?.customIDType ??
+          req.payload.db?.defaultIDType ??
+          'text'
+        const id = idType === 'number' ? Number(input.doc.value) : input.doc.value
+
         await req.payload.update({
-          id: input.doc.value,
+          id,
           collection: input.doc.relationTo,
           data: {
             _status,

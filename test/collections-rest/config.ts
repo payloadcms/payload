@@ -281,6 +281,17 @@ export default buildConfigWithDefaults({
       ],
       disableBulkEdit: true,
     },
+    {
+      slug: 'disabled-bulk-delete-docs',
+      fields: [
+        {
+          name: 'text',
+          type: 'text',
+        },
+      ],
+      disableBulkDelete: true,
+      versions: false,
+    },
     LargeDocuments,
   ],
   bodyParser: {

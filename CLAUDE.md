@@ -250,4 +250,4 @@ Examples:
 - LLMS.txt: <https://payloadcms.com/llms.txt>
 - LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
 - Node version: ^18.20.2 || >=20.9.0
-- pnpm version: ^10.27.0
+- pnpm version: ^11.9.0
