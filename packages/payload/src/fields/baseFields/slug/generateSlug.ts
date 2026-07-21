@@ -4,7 +4,6 @@ import type { Slugify } from './types.js'
 
 import { hasAutosaveEnabled } from '../../../utilities/getVersionsConfig.js'
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
-import { countVersions } from './countVersions.js'
 
 type Args = {
   name: string
@@ -15,11 +14,24 @@ type Args = {
 /**
  * Field `beforeChange` hook for the native `slug` field. Returns the slug value.
  *
- * Auto-tracking is derived statelessly: the slug follows its source while it is
- * empty or still equals `slugify(storedSource)`. Once it diverges (the admin
- * overwrites it), it freezes — and stays frozen, because the stored value keeps
- * differing from `slugify(source)`. Re-aligning (the UI generate button) resumes
- * tracking.
+ * Auto-tracking is derived statelessly — there is no persisted "generate" flag.
+ * The slug follows its source while it is empty or still equals `slugify(storedSource)`;
+ * once it diverges (the admin overwrites it) it freezes, and stays frozen because the
+ * stored value keeps differing from `slugify(source)`. Re-aligning (the UI generate
+ * button) resumes tracking.
+ *
+ * Autosave drafts:
+ * - The slug generates **freely on every draft save** (create and autosave) so a new
+ *   document gets a natural, live-updating slug while the admin is still entering content.
+ * - It **freezes on the first publish** (and on every save thereafter) to protect the
+ *   now-live URL from silently changing.
+ * - A manual overwrite mid-draft wins immediately and is preserved across later
+ *   autosaves via the stateless latch above — publish is not required to lock a custom value.
+ *
+ * This intentionally does **not** gate generation on version count. "Free until first
+ * publish, unless manually overwritten" is expressed purely from `_status` and the
+ * stored-vs-source comparison, which is both simpler and correct regardless of how many
+ * draft versions have accumulated.
  */
 export const generateSlug =
   ({ name, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
@@ -34,20 +46,16 @@ export const generateSlug =
     const entity = collection || global!
 
     if (operation === 'create') {
-      // Autosave drafts: do not auto-generate on the initial draft — the user is still entering content.
-      // Keep the explicit non-slugified value (if any); generation begins on a later autosave.
-      if (hasAutosaveEnabled(entity) && data?._status === 'draft') {
-        return value || null
-      }
-
-      // Keep an explicitly provided slug; otherwise generate from the source.
+      // Generate from the source (keeping an explicitly provided slug). On an autosave
+      // collection the initial draft is created empty, so this yields an empty slug and
+      // begins tracking as soon as content is entered.
       return await slugify(value || source)
     }
 
     const storedSlug = originalDoc?.[name]
     const originalSource = originalDoc?.[useAsSlug]
 
-    // User explicitly edited the slug (or cleared the value): respect it.
+    // User explicitly edited the slug (or cleared the value) this save: respect it.
     if (value !== undefined && value !== storedSlug) {
       return value
     }
@@ -65,24 +73,11 @@ export const generateSlug =
       return storedSlug || (await slugify(source))
     }
 
-    // Autosave / drafts
-    const priorVersions = await countVersions({
-      collectionSlug: collection?.slug,
-      globalSlug: global?.slug,
-      parentID: originalDoc?.id,
-      req,
-    })
-
-    // Do not generate on the very first draft (no prior version yet).
-    if (priorVersions === 0) {
-      return storedSlug ?? null
-    }
-
-    // Stabilize after publish to protect live URLs.
+    // Autosave drafts: freeze once the document has been published to protect the live URL.
     if (data?._status === 'published' || originalDoc?._status === 'published') {
       return storedSlug
     }
 
-    // Still auto-tracking an unpublished draft with content.
+    // Still an unpublished draft — keep tracking the source freely.
     return source ? await slugify(source) : null
   }

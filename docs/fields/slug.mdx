@@ -50,7 +50,7 @@ The slug auto-generates from the `useAsSlug` field and tracks it until an editor
 - The slug continues to track the source field on save as long as it has not been manually changed. Once an editor unlocks and edits the slug, it is frozen and no longer regenerates — this protects live URLs from changing unexpectedly.
 - Editors can re-generate the slug on-demand from the Admin Panel, which re-aligns it with the source field.
 
-For [autosave-enabled](../versions/autosave) documents, the slug does not generate on the initial draft (so it does not lock to empty or partial content while the document is being written), begins generating on subsequent autosaves, and stabilizes once the document is published.
+For [autosave-enabled](../versions/autosave) documents, the slug generates freely on every draft save — including the initial create — so a new document gets a natural, live-updating slug while it is being written. It freezes on the first publish (and stays frozen thereafter) to protect the now-live URL from changing unexpectedly. Manually overwriting the slug mid-draft locks it immediately, without needing to publish first.
 
 ## Custom Slugify Function
 
