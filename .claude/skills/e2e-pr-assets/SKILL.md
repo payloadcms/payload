@@ -161,10 +161,12 @@ export default async function scenario({
   page,
   record,
   repoRoot,
+  video,
 }) {
   // Seed data, log in, navigate the admin UI, and perform the exact evidence flow.
   // Optional: await cursor?.moveTo('#important-field') before pausing for emphasis.
   // Optional: const newTab = await browserContext.waitForEvent('page')
+  // Optional: await video?.waitForPage(newTab)
   // Optional: await keyboardOverlay?.show('Custom action')
 }
 ```
@@ -185,11 +187,13 @@ export default async function scenario({
 
 ### New-tab behaviors
 
-The current `e2e-run-script` recorder captures page content, not the browser tab strip or browser chrome. That means it can prove that a new tab event happened, but it cannot literally show the tab appearing in the browser UI.
+`e2e-run-script` can now stitch together page-content recordings across multiple tabs/pages in the same scenario. It still does not capture the browser tab strip or browser chrome, so it cannot literally show the tab appearing in the browser UI.
 
 For new-tab evidence:
 
 - Detect the new tab with `browserContext.waitForEvent('page')`.
+- If you will interact with the opened page in the recording, wait for recorder setup with `video.waitForPage(newPage)` before continuing.
+- Keep a short proof-beat pause on the opened page so the destination is readable in the stitched output.
 - Verify the opened page URL or visible content matches the expected destination.
 - Return focus to the original page if that page's final state is the reviewer-facing proof.
 - Use a short custom overlay such as `New tab opened` only after the scenario has actually observed the new page event.

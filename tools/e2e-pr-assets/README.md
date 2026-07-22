@@ -57,11 +57,13 @@ If a scenario feels too fast, prefer rewriting the flow or adding 2-4 short proo
 
 ## New-tab behaviors
 
-The current `e2e-run-script` recorder captures page content, not the browser tab strip or browser chrome. That means it can verify that a new tab opened, but it cannot literally show the tab appearing in the browser UI.
+`e2e-run-script` can now stitch together page-content recordings across multiple tabs/pages in the same scenario. It still cannot capture the browser tab strip or browser chrome, so it cannot literally show the tab appearing in the browser UI.
 
 For new-tab proof:
 
 - detect the new page with `browserContext.waitForEvent('page')`
+- if you will interact with that page in the recording, wait for recorder setup with `video.waitForPage(newPage)`
+- keep a short proof-beat pause on the opened page so the destination is readable in the stitched output
 - verify the destination URL or visible content
 - use a small overlay such as `New tab opened` only after the page event is observed
 - do not fake the behavior by navigating the current page in-place
@@ -88,7 +90,7 @@ For new-tab proof:
 - `e2e-attach-pr --plan-file /path/to/recording-plan.md` copies the plan's `Before` and `After` sections into hidden HTML comments in the PR body, directly below the visible `### Before` and `### After` headings.
 - Prefer final proof lines like `Show the document card with the published title. (Incorrect, should be draft title)` and `Show the document card with the draft title. (Correct, shows draft title)` so the hidden comments explain the bug/fix clearly in edit mode.
 - If the first scenario technically proves the behavior but reads too fast, prefer rewriting the flow or adding proof-beat pauses over making the whole recording uniformly slow.
-- If the behavior opens a new browser tab, remember that the current recorder cannot show the browser tab strip itself. Prove the event through `browserContext.waitForEvent('page')`, the opened page destination, and a small overlay if needed.
+- If the behavior opens a new browser tab, remember that the recorder can stitch the page-content clips but still cannot show the browser tab strip itself. Prove the event through `browserContext.waitForEvent('page')`, `video.waitForPage(newPage)` when needed, the opened page destination, and a small overlay if needed.
 - `e2e-convert-video` trims the initial blank lead-in by default and can extend that trim automatically when the first meaningful scene change happens later than the standard 1-second startup buffer.
 - When the opening poster matters, inspect the first decoded MP4 frame after conversion and before upload. The first frame should already be meaningful UI, not a white loading spinner or blank transition frame.
 - If `h264_videotoolbox` is available but fails during conversion, `e2e-convert-video` automatically retries with `libx264`.
