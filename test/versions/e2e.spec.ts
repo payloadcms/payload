@@ -1596,9 +1596,6 @@ describe('Versions', () => {
       const popper = page.locator('.react-datepicker-popper')
       await expect(popper).toBeVisible()
 
-      // The calendar is portaled to a dedicated container appended to the document body,
-      // escaping the drawer's `.drawer__content-children` (which caps its height with
-      // `overflow-y: auto`) so it isn't clipped when it renders near the bottom of the drawer.
       const portalInfo = await popper.evaluate((el) => ({
         isInsideDrawerScroll: el.closest('.drawer__content-children') !== null,
         isInsidePortal: el.closest('#date-time-picker-portal') !== null,
