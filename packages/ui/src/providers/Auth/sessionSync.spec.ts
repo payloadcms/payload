@@ -540,6 +540,41 @@ describe('AuthProvider session synchronization', () => {
     )
   })
 
+  it('should apply the later response from overlapping refresh requests', async () => {
+    const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
+    const firstSession = createFutureSession({ expiresInMs: 120_000, token: 'first-token' })
+    const secondSession = createFutureSession({ expiresInMs: 180_000, token: 'second-token' })
+    let resolveFirstRefresh: ((value: ReturnType<typeof createResponse>) => void) | undefined
+    let resolveSecondRefresh: ((value: ReturnType<typeof createResponse>) => void) | undefined
+    const firstResponse = new Promise<ReturnType<typeof createResponse>>((resolve) => {
+      resolveFirstRefresh = resolve
+    })
+    const secondResponse = new Promise<ReturnType<typeof createResponse>>((resolve) => {
+      resolveSecondRefresh = resolve
+    })
+
+    await renderProvider({ session: initialSession })
+    apiMocks.post.mockReturnValueOnce(firstResponse).mockReturnValueOnce(secondResponse)
+
+    const firstRefresh = authContext?.refreshCookieAsync()
+    const secondRefresh = authContext?.refreshCookieAsync()
+
+    resolveFirstRefresh?.(createResponse({ session: firstSession }))
+    await act(async () => {
+      await firstRefresh
+    })
+
+    expect(authContext?.token).toBe('first-token')
+
+    resolveSecondRefresh?.(createResponse({ session: secondSession }))
+    await act(async () => {
+      await secondRefresh
+    })
+
+    expect(authContext?.token).toBe('second-token')
+    expect(authContext?.tokenExpirationMs).toBe(secondSession.exp * 1000)
+  })
+
   it('should ignore a deferred refreshCookie success after remote expiration', async () => {
     vi.useFakeTimers()
     const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
@@ -640,6 +675,59 @@ describe('AuthProvider session synchronization', () => {
 
     expect(authContext?.token).toBe('remote-token')
     expect(authContext?.tokenExpirationMs).toBe(remoteSession.exp * 1000)
+  })
+
+  it('should apply the later response from overlapping storage-triggered user requests', async () => {
+    vi.stubGlobal('BroadcastChannel', undefined)
+    const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
+    const firstSession = createFutureSession({ expiresInMs: 120_000, token: 'first-token' })
+    const secondSession = createFutureSession({ expiresInMs: 180_000, token: 'second-token' })
+    let resolveFirstFetch: ((value: ReturnType<typeof createResponse>) => void) | undefined
+    let resolveSecondFetch: ((value: ReturnType<typeof createResponse>) => void) | undefined
+    const firstResponse = new Promise<ReturnType<typeof createResponse>>((resolve) => {
+      resolveFirstFetch = resolve
+    })
+    const secondResponse = new Promise<ReturnType<typeof createResponse>>((resolve) => {
+      resolveSecondFetch = resolve
+    })
+
+    await renderProvider({ session: initialSession })
+    apiMocks.get.mockClear()
+    apiMocks.get.mockReturnValueOnce(firstResponse).mockReturnValueOnce(secondResponse)
+
+    act(() => {
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          key: 'payload:auth-session:refresh',
+          newValue: JSON.stringify({ sentAt: 500, sourceID: 'remote-a' }),
+        }),
+      )
+      window.dispatchEvent(
+        new StorageEvent('storage', {
+          key: 'payload:auth-session:refresh',
+          newValue: JSON.stringify({ sentAt: 600, sourceID: 'remote-b' }),
+        }),
+      )
+    })
+
+    expect(apiMocks.get).toHaveBeenCalledTimes(2)
+
+    resolveFirstFetch?.(createResponse({ session: firstSession }))
+    await act(async () => {
+      await firstResponse
+      await Promise.resolve()
+    })
+
+    expect(authContext?.token).toBe('first-token')
+
+    resolveSecondFetch?.(createResponse({ session: secondSession }))
+    await act(async () => {
+      await secondResponse
+      await Promise.resolve()
+    })
+
+    expect(authContext?.token).toBe('second-token')
+    expect(authContext?.tokenExpirationMs).toBe(secondSession.exp * 1000)
   })
 
   it('should apply a remote refresh without rebroadcasting it', async () => {

@@ -159,14 +159,18 @@ export function AuthProvider({
     closeAllModals()
   }, [adminRoute, closeAllModals, loginRoute, router, startRouteTransition])
 
-  const revokeTokenAndExpire = useCallback(() => {
-    sessionGenerationRef.current += 1
+  const clearUserInMemory = useCallback(() => {
     setUserInMemory(null)
     setTokenInMemory(undefined)
     setTokenExpirationMs(undefined)
     tokenExpirationMsRef.current = undefined
     clearTimeout(refreshTokenTimeoutRef.current)
   }, [])
+
+  const revokeTokenAndExpire = useCallback(() => {
+    sessionGenerationRef.current += 1
+    clearUserInMemory()
+  }, [clearUserInMemory])
 
   // Handler for reminder timeout - uses useEffectEvent to capture latest autoRefresh value
   const handleReminderTimeout = useEffectEvent(() => {
@@ -177,7 +181,7 @@ export function AuthProvider({
     }
   })
 
-  const setNewUser = useCallback(
+  const applyUserResponse = useCallback(
     (userResponse: null | UserWithToken) => {
       clearTimeout(reminderTimeoutRef.current)
       clearTimeout(forceLogOutTimeoutRef.current)
@@ -185,7 +189,6 @@ export function AuthProvider({
       if (userResponse?.user) {
         const nextTokenExpirationMs = userResponse.exp * 1000
 
-        sessionGenerationRef.current += 1
         setUserInMemory(userResponse.user)
         setTokenInMemory(userResponse.token ?? userResponse.refreshedToken)
         setTokenExpirationMs(nextTokenExpirationMs)
@@ -220,10 +223,18 @@ export function AuthProvider({
           }, expiresInMs)
         }
       } else {
-        revokeTokenAndExpire()
+        clearUserInMemory()
       }
     },
-    [redirectToInactivityRoute, revokeTokenAndExpire],
+    [clearUserInMemory, redirectToInactivityRoute, revokeTokenAndExpire],
+  )
+
+  const setNewUser = useCallback(
+    (userResponse: null | UserWithToken) => {
+      sessionGenerationRef.current += 1
+      applyUserResponse(userResponse)
+    },
+    [applyUserResponse],
   )
 
   const refreshCookie = useCallback(
@@ -260,7 +271,7 @@ export function AuthProvider({
                 return
               }
 
-              setNewUser(json)
+              applyUserResponse(json)
               sessionSyncRef.current?.publish({ type: 'session-refreshed', session: json })
             } else {
               if (sessionGenerationRef.current !== requestGeneration) {
@@ -274,7 +285,7 @@ export function AuthProvider({
                 })
               }
 
-              setNewUser(null)
+              applyUserResponse(null)
               redirectToInactivityRoute()
             }
           } catch (e) {
@@ -285,9 +296,9 @@ export function AuthProvider({
     },
     [
       apiRoute,
+      applyUserResponse,
       i18n.language,
       redirectToInactivityRoute,
-      setNewUser,
       tokenExpirationMs,
       userSlug,
       forceLogoutBufferMs,
@@ -321,9 +332,7 @@ export function AuthProvider({
           }
 
           if (!skipSetUser) {
-            setNewUser(json)
-          } else {
-            sessionGenerationRef.current += 1
+            applyUserResponse(json)
           }
           sessionSyncRef.current?.publish({ type: 'session-refreshed', session: json })
           return json.user
@@ -341,7 +350,7 @@ export function AuthProvider({
             })
           }
 
-          setNewUser(null)
+          applyUserResponse(null)
           redirectToInactivityRoute()
         }
       } catch (e) {
@@ -349,7 +358,7 @@ export function AuthProvider({
       }
       return null
     },
-    [apiRoute, i18n.language, redirectToInactivityRoute, setNewUser, userSlug, user],
+    [apiRoute, applyUserResponse, i18n.language, redirectToInactivityRoute, userSlug, user],
   )
 
   const logOut = useCallback(async () => {
@@ -437,7 +446,7 @@ export function AuthProvider({
           return null
         }
 
-        setNewUser(json)
+        applyUserResponse(json)
         return json?.user || null
       }
 
@@ -445,13 +454,13 @@ export function AuthProvider({
         return null
       }
 
-      setNewUser(null)
+      applyUserResponse(null)
     } catch (e) {
       toast.error(`Fetching user failed: ${e.message}`)
     }
 
     return null
-  }, [apiRoute, userSlug, i18n.language, setNewUser])
+  }, [apiRoute, applyUserResponse, userSlug, i18n.language])
 
   const refreshCookieEvent = useEffectEvent(refreshCookie)
   const markActivity = React.useMemo<MarkSessionActivity>(() => {
