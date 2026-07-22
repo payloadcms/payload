@@ -275,16 +275,21 @@ const results = await payload.jobs.runByID({
 
 ## Processing Leases
 
-Running jobs are owned through a renewable `processingUntil` lease and an internal `processingToken`. Payload claims eligible jobs with an atomic database update, then renews the lease while the worker is alive. Every worker update must still match the token, so a worker that lost ownership cannot overwrite the new attempt.
+Running jobs are owned through a renewable `processingUntil` lease and an internal `processingToken`. Payload renews the lease while the worker is alive. Every worker update must match the token and start while enough lease time remains for the configured safety buffer.
 
-If the worker is killed, a later jobs runner call recovers the expired job and applies its existing retry configuration. Multiple runners can safely race for the same job because only one atomic claim succeeds.
+If the worker is killed, a later jobs runner call recovers the expired job and applies its existing retry configuration.
 
-The default lease duration is two minutes. You can change it globally:
+By default, Payload only starts a worker update when more than 30 seconds remain on its lease. This safety buffer gives the update time to finish before the lease expires and another worker can recover the job. If too little time remains, the update is rejected and the job is recovered after the lease expires.
+
+The default lease duration is two minutes and the default safety buffer is 30 seconds. You can change both globally:
 
 ```ts
 export default buildConfig({
   jobs: {
-    processingLeaseDuration: 5 * 60 * 1000,
+    processingLease: {
+      duration: 5 * 60 * 1000,
+      safetyBuffer: 60 * 1000,
+    },
     tasks: [
       // your tasks here
     ],
@@ -292,7 +297,11 @@ export default buildConfig({
 })
 ```
 
-This is not a maximum job runtime. Healthy long-running jobs keep renewing their leases. Expiry does not start a new process by itself, so serverless deployments must continue calling the jobs runner from a cron or another callback system.
+`processingLease.safetyBuffer` must be non-negative and less than `processingLease.duration`. Set it to `0` only when your database adapter checks ownership and performs the update atomically, as the MongoDB adapter does.
+
+The buffer should be longer than a normal job database update. It is a safety window for adapters that read and write separately, not a task timeout. Healthy long-running jobs keep renewing their leases and can run longer than `processingLease.duration`.
+
+Expiry does not start a new process by itself, so serverless deployments must continue calling the jobs runner from a cron or another callback system.
 
 ## Processing Order
 

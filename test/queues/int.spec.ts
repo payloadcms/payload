@@ -1127,6 +1127,10 @@ describe('Queues - Payload', () => {
   })
 
   describe('processing leases', () => {
+    it('should use a 30-second lease safety buffer by default', () => {
+      expect(payload.config.jobs.processingLease.safetyBuffer).toBe(30_000)
+    })
+
     it('should recover an expired job using its existing retry configuration', async () => {
       payload.config.jobs.deleteJobOnComplete = false
 
@@ -1222,8 +1226,10 @@ describe('Queues - Payload', () => {
 
     it('should renew the lease while a job is running', async () => {
       payload.config.jobs.deleteJobOnComplete = false
-      const originalLeaseDuration = payload.config.jobs.processingLeaseDuration
-      payload.config.jobs.processingLeaseDuration = 300
+      const originalLeaseDuration = payload.config.jobs.processingLease.duration
+      const originalSafetyBuffer = payload.config.jobs.processingLease.safetyBuffer
+      payload.config.jobs.processingLease.duration = 300
+      payload.config.jobs.processingLease.safetyBuffer = 50
 
       const job = await payload.jobs.queue({
         input: {},
@@ -1248,7 +1254,8 @@ describe('Queues - Payload', () => {
         id: job.id,
         collection: 'payload-jobs',
       })
-      payload.config.jobs.processingLeaseDuration = originalLeaseDuration
+      payload.config.jobs.processingLease.duration = originalLeaseDuration
+      payload.config.jobs.processingLease.safetyBuffer = originalSafetyBuffer
 
       expect(initiallyRunningJob.processingToken).toBeTruthy()
       expect(renewedJob.processingToken).toBe(initiallyRunningJob.processingToken)
@@ -1257,6 +1264,47 @@ describe('Queues - Payload', () => {
       )
       expect(completedJob.processingToken).toBeFalsy()
       expect(completedJob.processingUntil).toBeFalsy()
+    })
+
+    it('should stop updating inside the lease safety buffer and recover later', async () => {
+      payload.config.jobs.deleteJobOnComplete = false
+      const originalLeaseDuration = payload.config.jobs.processingLease.duration
+      const originalSafetyBuffer = payload.config.jobs.processingLease.safetyBuffer
+      const job = await payload.jobs.queue({
+        input: {},
+        workflow: 'longRunning',
+      })
+
+      try {
+        payload.config.jobs.processingLease.duration = 300
+        payload.config.jobs.processingLease.safetyBuffer = 250
+
+        await payload.jobs.run({ silent: true })
+
+        const jobAfterSafetyBuffer = await payload.findByID({
+          id: job.id,
+          collection: 'payload-jobs',
+        })
+
+        expect(jobAfterSafetyBuffer.completedAt).toBeFalsy()
+        expect(jobAfterSafetyBuffer.log).toHaveLength(0)
+        expect(jobAfterSafetyBuffer.processingToken).toBeTruthy()
+      } finally {
+        payload.config.jobs.processingLease.duration = originalLeaseDuration
+        payload.config.jobs.processingLease.safetyBuffer = originalSafetyBuffer
+      }
+
+      await payload.jobs.run({ silent: true })
+
+      const recoveredJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+
+      expect(recoveredJob.completedAt).toBeTruthy()
+      expect(recoveredJob.processingToken).toBeFalsy()
+      expect(recoveredJob.processingUntil).toBeFalsy()
+      expect(recoveredJob.totalTried).toBe(2)
     })
 
     it('should prevent a previous owner from updating a job after ownership changes', async () => {

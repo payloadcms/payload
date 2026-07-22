@@ -22,6 +22,9 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
     }
 
     const now = getCurrentDate()
+    const minimumProcessingUntil = new Date(
+      now.getTime() + req.payload.config.jobs.processingLease.safetyBuffer,
+    ).toISOString()
     const isCancelling = Boolean((jobData.error as Record<string, unknown> | undefined)?.cancelled)
     const isSettling = jobData.processingUntil === null
     const data = {
@@ -37,7 +40,7 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
         and: [
           { id: { equals: job.id } },
           { processingToken: { equals: processingToken } },
-          { processingUntil: { greater_than: now.toISOString() } },
+          { processingUntil: { greater_than: minimumProcessingUntil } },
         ],
       },
     })
