@@ -174,10 +174,49 @@ describe('List View', () => {
   })
 
   describe('list view table', () => {
+    const fallbackDocumentIDs: (number | string)[] = []
+
+    test.afterEach(async () => {
+      for (const id of fallbackDocumentIDs) {
+        await payload.delete({
+          id,
+          collection: listViewSelectAPISlug,
+        })
+      }
+      fallbackDocumentIDs.length = 0
+    })
+
     test('should render row select checkboxes with accessible names', async () => {
       const rowCheckboxes = page.locator(`${tableRowLocator} .select-row__checkbox input`)
 
       await expect(rowCheckboxes).toHaveCount(2)
+      await expect(page.getByRole('checkbox', { name: 'Select post1' })).toBeVisible()
+      await expect(page.getByRole('checkbox', { name: 'Select post2' })).toBeVisible()
+    })
+
+    test('should use the document ID in the accessible name when useAsTitle is not configured', async () => {
+      const doc = await payload.create({
+        collection: listViewSelectAPISlug,
+        data: {
+          title: 'Fallback test title',
+        },
+      })
+      fallbackDocumentIDs.push(doc.id)
+      const selectAPIUrl = new AdminUrlUtil(serverURL, listViewSelectAPISlug)
+
+      await page.goto(selectAPIUrl.list)
+      await expect(page.getByRole('checkbox', { name: `Select ${doc.id}` })).toBeVisible()
+    })
+
+    test('should use useAsTitle in the accessible name when its column is hidden', async () => {
+      await toggleColumn(page, {
+        columnLabel: 'Title',
+        columnName: 'title',
+        targetState: 'off',
+      })
+      await page.reload()
+
+      await expect(page.locator('#heading-title')).toBeHidden()
       await expect(page.getByRole('checkbox', { name: 'Select post1' })).toBeVisible()
       await expect(page.getByRole('checkbox', { name: 'Select post2' })).toBeVisible()
     })
