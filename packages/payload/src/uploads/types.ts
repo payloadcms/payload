@@ -60,7 +60,7 @@ export type GenerateImageName = (args: {
   width: number
 }) => string
 
-export type ImageSize = {
+type ImageSizeBase = {
   /**
    * Admin UI options that control how this image size appears in list views.
    */
@@ -80,15 +80,21 @@ export type ImageSize = {
     }
   }
   /**
-   * @deprecated prefer position
-   */
-  crop?: string // comes from sharp package
-  formatOptions?: ImageUploadFormatOptions
-  /**
    * Generate a custom name for the file of this image size.
    */
   generateImageName?: GenerateImageName
   name: string
+}
+
+/**
+ * Image size options implemented by Payload's default Sharp image processor.
+ */
+export type SharpImageSizeOptions = {
+  /**
+   * @deprecated prefer position
+   */
+  crop?: string // comes from sharp package
+  formatOptions?: ImageUploadFormatOptions
   trimOptions?: ImageUploadTrimOptions
   /**
    * When an uploaded image is smaller than the defined image size, we have 3 options:
@@ -101,6 +107,28 @@ export type ImageSize = {
    */
   withoutEnlargement?: ResizeOptions['withoutEnlargement']
 } & Omit<ResizeOptions, 'withoutEnlargement'>
+
+/**
+ * Interface to be module-augmented by image processing providers.
+ *
+ * When no provider is registered, ImageSize uses SharpImageSizeOptions.
+ * When providers are registered, ImageSize uses their registered options instead.
+ *
+ * @example
+ * declare module 'payload' {
+ *   interface RegisteredImageSizeOptions {
+ *     myProvider: MyProviderImageSizeOptions
+ *   }
+ * }
+ */
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type -- Intentionally empty so image processing providers can augment it.
+export interface RegisteredImageSizeOptions {}
+
+type ImageSizeOptions = keyof RegisteredImageSizeOptions extends never
+  ? SharpImageSizeOptions
+  : RegisteredImageSizeOptions[keyof RegisteredImageSizeOptions]
+
+export type ImageSize = ImageSizeBase & ImageSizeOptions
 
 export type GetAdminThumbnail = (args: { doc: Record<string, unknown> }) => false | null | string
 

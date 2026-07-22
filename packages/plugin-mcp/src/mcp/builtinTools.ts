@@ -10,7 +10,7 @@ import {
 } from './builtin/collections/authTools.js'
 import { countDocumentsTool } from './builtin/collections/countTool.js'
 import { countVersionsTool } from './builtin/collections/countVersionsTool.js'
-import { createDocumentTool } from './builtin/collections/createTool.js'
+import { createDocumentsTool } from './builtin/collections/createTool.js'
 import { deleteDocumentsTool } from './builtin/collections/deleteTool.js'
 import { duplicateDocumentTool } from './builtin/collections/duplicateTool.js'
 import { findDistinctTool } from './builtin/collections/findDistinctTool.js'
@@ -56,7 +56,7 @@ export const TOOL_BUILTINS = {
 export const COLLECTION_BUILTINS = {
   count: { mcpName: 'countDocuments', tool: countDocumentsTool },
   countVersions: { mcpName: 'countVersions', requiresVersions: true, tool: countVersionsTool },
-  create: { mcpName: 'createDocument', tool: createDocumentTool },
+  create: { mcpName: 'createDocuments', tool: createDocumentsTool },
   delete: { mcpName: 'deleteDocuments', tool: deleteDocumentsTool },
   duplicate: {
     mcpName: 'duplicateDocument',

@@ -128,6 +128,29 @@ describe('General', () => {
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
   })
 
+  describe('inactivity route', () => {
+    test('should redirect to admin when reaching the inactivity route while still authenticated', async () => {
+      // With auto-login enabled, the AuthProvider re-authenticates the user, so a request
+      // to the inactivity route arrives already logged in. Previously this rendered the
+      // logout loading overlay indefinitely — the user should instead be sent back to the
+      // route they were headed to (via the `redirect` param) rather than getting stuck.
+      const redirectTo = formatAdminURL({ adminRoute, path: '/collections/posts' })
+
+      await page.goto(
+        formatAdminURL({
+          adminRoute,
+          path: `${customAdminRoutes.inactivity!}?redirect=${encodeURIComponent(redirectTo)}`,
+          serverURL,
+        }),
+      )
+
+      await expect(page).toHaveURL(new RegExp(`${redirectTo}$`))
+      await expect(page.locator('.collection-list')).toBeVisible()
+      await expect(page.locator('.loading-overlay')).toBeHidden()
+      await expect(page).not.toHaveURL(/custom-inactivity/)
+    })
+  })
+
   describe('metadata', () => {
     describe('root title and description', () => {
       test('should render custom page title suffix', async () => {
