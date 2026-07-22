@@ -63,6 +63,10 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
             })}
             className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => void handleSortChange(desc)}
+            title={t('general:sortByLabelDirection', {
+              direction: t('general:descending'),
+              label,
+            })}
             type="button"
           >
             <ChevronIcon size={16} />
@@ -74,6 +78,10 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
             })}
             className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => void handleSortChange(asc)}
+            title={t('general:sortByLabelDirection', {
+              direction: t('general:ascending'),
+              label,
+            })}
             type="button"
           >
             <ChevronIcon direction="up" size={16} />
