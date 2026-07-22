@@ -289,6 +289,12 @@ export type Context = {
   getDataByPath: GetDataByPath
   getField: GetField
   getFields: GetFields
+  /**
+   * Returns the next value from the form's monotonic sequence clock. Used to tag local field edits
+   * (`valueSequence`) and value-accepting submits (`requestSequence`) so `mergeServerFormState` can
+   * reject server responses that predate the field's current value.
+   */
+  getNextSequence: () => number
   getSiblingData: GetSiblingData
   initializing: boolean
   /**

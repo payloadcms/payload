@@ -189,10 +189,13 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const prevFormState = useRef(formState)
 
-  // Monotonic counter tagging each value-accepting submit (e.g. autosave). Threaded through to
-  // `mergeServerFormState` so a stale, out-of-order response cannot overwrite a value that a later
-  // request already wrote.
-  const submitSequenceRef = useRef(0)
+  // Monotonic clock shared by local field edits and value-accepting submits (autosave). Each field
+  // records the sequence of its last write in `valueSequence`; `mergeServerFormState` then rejects
+  // any server response whose `requestSequence` predates the field's current value — covering both
+  // stale, out-of-order responses and values the user edited since the request was issued.
+  const sequenceRef = useRef(0)
+
+  const getNextSequence = useCallback(() => ++sequenceRef.current, [])
 
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
@@ -290,7 +293,7 @@ export const Form: React.FC<FormProps> = (props) => {
       ) {
         effectiveAcceptValues = {
           ...acceptValues,
-          requestSequence: ++submitSequenceRef.current,
+          requestSequence: getNextSequence(),
         }
       }
 
@@ -572,6 +575,7 @@ export const Form: React.FC<FormProps> = (props) => {
       disableValidationOnSubmit,
       disabled,
       dispatchFields,
+      getNextSequence,
       handleResponse,
       method,
       onSubmit,
@@ -786,6 +790,7 @@ export const Form: React.FC<FormProps> = (props) => {
   contextRef.current.validateForm = validateForm
   contextRef.current.createFormData = createFormData
   contextRef.current.setModified = setModified
+  contextRef.current.getNextSequence = getNextSequence
   contextRef.current.setProcessing = setProcessing
   contextRef.current.setBackgroundProcessing = setBackgroundProcessing
 

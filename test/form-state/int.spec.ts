@@ -783,7 +783,7 @@ describe('Form State', () => {
     const currentState: Record<string, FieldState> = {
       title: {
         ...title,
-        isModified: true, // This is critical, this is what we're testing
+        valueSequence: 5, // locally edited — critical: explicit save must override it anyway
       },
       computedTitle: {
         value: 'Test Post (computed on the client)',
@@ -866,7 +866,7 @@ describe('Form State', () => {
       ...incomingStateFromServer,
       title: {
         ...incomingStateFromServer.title,
-        isModified: true,
+        valueSequence: 5,
       },
       array: {
         ...incomingStateFromServer.array,
@@ -876,17 +876,13 @@ describe('Form State', () => {
   })
 
   it('should not accept values from the server if they have been modified locally since the request was made, e.g. `overrideLocalChanges: false` on autosave', () => {
-    const title: FieldState = {
-      value: 'Test Post (modified on the client 1)',
-      initialValue: 'Test Post',
-      valid: true,
-      passesCondition: true,
-    }
-
     const currentState: Record<string, FieldState> = {
       title: {
-        ...title,
-        isModified: true,
+        value: 'Test Post (modified on the client 1)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+        valueSequence: 5, // locally edited after the in-flight request (sequence 3) was issued
       },
       computedTitle: {
         value: 'Test Post',
@@ -912,18 +908,28 @@ describe('Form State', () => {
     }
 
     const newState = mergeServerFormState({
-      acceptValues: { overrideLocalChanges: false },
+      acceptValues: { overrideLocalChanges: false, requestSequence: 3 },
       currentState,
       incomingState: incomingStateFromServer,
     })
 
     expect(newState).toStrictEqual({
-      ...currentState,
+      // Rejected: the local edit (sequence 5) is newer than the request (sequence 3).
       title: {
-        ...currentState.title,
-        isModified: true,
+        value: 'Test Post (modified on the client 1)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+        valueSequence: 5,
       },
-      computedTitle: incomingStateFromServer.computedTitle, // This field was not modified locally, so should be updated from the server
+      // Accepted: not edited locally, so the server value wins and is stamped with the request sequence.
+      computedTitle: {
+        value: 'Test Post (modified on the server)',
+        initialValue: 'Test Post',
+        valid: true,
+        passesCondition: true,
+        valueSequence: 3,
+      },
     })
   })
 

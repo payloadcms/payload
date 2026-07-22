@@ -109,10 +109,10 @@ export const mergeServerFormState = ({
      * If it's a new field added by the server, always accept the value.
      * Otherwise:
      *   a. accept all values when explicitly requested, e.g. on submit
-     *   b. only accept values for unmodified fields, e.g. on autosave — and, when the request is
-     *      tagged with a sequence, only if this response is not older than the one that last
-     *      wrote the field. Autosave responses can resolve out of order; without this guard a
-     *      straggler from an earlier request would clobber a value a later request already set.
+     *   b. on autosave, accept the value only if this response is not older than the write that
+     *      last set the field. Both local edits and prior responses stamp the field's
+     *      `valueSequence`, so this one check covers a stale, out-of-order autosave response as
+     *      well as a value the user has edited since the request was issued.
      */
     let shouldAcceptValue =
       incomingField.addedByServer ||
@@ -121,7 +121,6 @@ export const mergeServerFormState = ({
         acceptValues !== null &&
         // Note: Must be explicitly `false`, allow `null` or `undefined` to mean true
         acceptValues.overrideLocalChanges === false &&
-        !currentState[path]?.isModified &&
         (requestSequence === undefined ||
           requestSequence >= (currentState[path]?.valueSequence ?? 0)))
 
