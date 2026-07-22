@@ -20,6 +20,7 @@ import {
   createSessionActivityTracker,
   registerSessionActivityListeners,
 } from './sessionActivity.js'
+import { createAuthSessionSync } from './sessionSync.js'
 
 export type UserWithToken<T = AuthenticatedUser> = {
   /** seconds until expiration */
@@ -102,7 +103,7 @@ export function AuthProvider({
     admin: {
       autoLogin,
       autoRefresh,
-      routes: { inactivity: logoutInactivityRoute },
+      routes: { inactivity: logoutInactivityRoute, login: loginRoute },
       user: userSlug,
     },
     routes: { admin: adminRoute, api: apiRoute },
@@ -118,10 +119,14 @@ export function AuthProvider({
   const [permissions, setPermissions] = useState<SanitizedPermissions>(initialPermissions)
   const [forceLogoutBufferMs, setForceLogoutBufferMs] = useState<number>(120_000)
   const [fetchedUserOnMount, setFetchedUserOnMount] = useState(false)
+  const [sessionSyncSourceID] = useState(createSessionSyncSourceID)
 
   const refreshTokenTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
   const reminderTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
   const forceLogOutTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
+  const knownTokenExpirationMsRef = React.useRef<number>(undefined)
+  const sessionSyncRef = React.useRef<null | ReturnType<typeof createAuthSessionSync>>(null)
+  const tokenExpirationMsRef = React.useRef<number>(undefined)
 
   const id = user?.id
   const isAuthenticated = Boolean(user)
@@ -140,10 +145,24 @@ export function AuthProvider({
     closeAllModals()
   }, [router, adminRoute, logoutInactivityRoute, closeAllModals, startRouteTransition])
 
+  const redirectToLoginRoute = useCallback(() => {
+    startRouteTransition(() =>
+      router.replace(
+        formatAdminURL({
+          adminRoute,
+          path: loginRoute,
+        }),
+      ),
+    )
+
+    closeAllModals()
+  }, [adminRoute, closeAllModals, loginRoute, router, startRouteTransition])
+
   const revokeTokenAndExpire = useCallback(() => {
     setUserInMemory(null)
     setTokenInMemory(undefined)
     setTokenExpirationMs(undefined)
+    tokenExpirationMsRef.current = undefined
     clearTimeout(refreshTokenTimeoutRef.current)
   }, [])
 
@@ -162,14 +181,18 @@ export function AuthProvider({
       clearTimeout(forceLogOutTimeoutRef.current)
 
       if (userResponse?.user) {
+        const nextTokenExpirationMs = userResponse.exp * 1000
+
         setUserInMemory(userResponse.user)
         setTokenInMemory(userResponse.token ?? userResponse.refreshedToken)
-        setTokenExpirationMs(userResponse.exp * 1000)
-
-        const expiresInMs = Math.max(
-          0,
-          Math.min((userResponse.exp ?? 0) * 1000 - Date.now(), maxTimeoutMs),
+        setTokenExpirationMs(nextTokenExpirationMs)
+        knownTokenExpirationMsRef.current = Math.max(
+          knownTokenExpirationMsRef.current ?? 0,
+          nextTokenExpirationMs,
         )
+        tokenExpirationMsRef.current = nextTokenExpirationMs
+
+        const expiresInMs = Math.max(0, Math.min(nextTokenExpirationMs - Date.now(), maxTimeoutMs))
 
         if (expiresInMs) {
           const nextForceLogoutBufferMs = Math.min(60_000, expiresInMs / 2)
@@ -181,6 +204,14 @@ export function AuthProvider({
           )
 
           forceLogOutTimeoutRef.current = setTimeout(() => {
+            if (tokenExpirationMsRef.current !== nextTokenExpirationMs) {
+              return
+            }
+
+            sessionSyncRef.current?.publish({
+              type: 'session-expired',
+              expiredTokenAt: nextTokenExpirationMs,
+            })
             revokeTokenAndExpire()
             redirectToInactivityRoute()
           }, expiresInMs)
@@ -201,6 +232,8 @@ export function AuthProvider({
       const expiresInMs = Math.max(0, (tokenExpirationMs ?? 0) - Date.now())
 
       if (forceRefresh || (tokenExpirationMs && expiresInMs < forceLogoutBufferMs * 2)) {
+        const handledExpiration = tokenExpirationMsRef.current
+
         clearTimeout(refreshTokenTimeoutRef.current)
         refreshTokenTimeoutRef.current = setTimeout(async () => {
           try {
@@ -219,7 +252,19 @@ export function AuthProvider({
             if (request.status === 200) {
               const json: UserWithToken = await request.json()
               setNewUser(json)
+              sessionSyncRef.current?.publish({ type: 'session-refreshed', session: json })
             } else {
+              if (tokenExpirationMsRef.current !== handledExpiration) {
+                return
+              }
+
+              if (handledExpiration !== undefined) {
+                sessionSyncRef.current?.publish({
+                  type: 'session-expired',
+                  expiredTokenAt: handledExpiration,
+                })
+              }
+
               setNewUser(null)
               redirectToInactivityRoute()
             }
@@ -243,6 +288,8 @@ export function AuthProvider({
 
   const refreshCookieAsync = useCallback(
     async (skipSetUser?: boolean): Promise<AuthenticatedUser | null> => {
+      const handledExpiration = tokenExpirationMsRef.current
+
       try {
         const request = await requests.post(
           formatAdminURL({
@@ -261,10 +308,22 @@ export function AuthProvider({
           if (!skipSetUser) {
             setNewUser(json)
           }
+          sessionSyncRef.current?.publish({ type: 'session-refreshed', session: json })
           return json.user
         }
 
         if (user) {
+          if (tokenExpirationMsRef.current !== handledExpiration) {
+            return null
+          }
+
+          if (handledExpiration !== undefined) {
+            sessionSyncRef.current?.publish({
+              type: 'session-expired',
+              expiredTokenAt: handledExpiration,
+            })
+          }
+
           setNewUser(null)
           redirectToInactivityRoute()
         }
@@ -277,6 +336,8 @@ export function AuthProvider({
   )
 
   const logOut = useCallback(async () => {
+    sessionSyncRef.current?.publish({ type: 'session-logged-out' })
+
     try {
       if (user && user.collection) {
         setNewUser(null)
@@ -351,6 +412,8 @@ export function AuthProvider({
         setNewUser(json)
         return json?.user || null
       }
+
+      setNewUser(null)
     } catch (e) {
       toast.error(`Fetching user failed: ${e.message}`)
     }
@@ -382,6 +445,39 @@ export function AuthProvider({
   }, [isAuthenticated, markActivity])
 
   const fetchFullUserEvent = useEffectEvent(fetchFullUser)
+  const handleRemoteSessionExpired = useEffectEvent(() => {
+    setNewUser(null)
+    redirectToInactivityRoute()
+  })
+  const handleRemoteSessionLoggedOut = useEffectEvent(() => {
+    setNewUser(null)
+    redirectToLoginRoute()
+  })
+  const handleRemoteSessionRefreshed = useEffectEvent((session: UserWithToken) => {
+    setNewUser(session)
+  })
+
+  useEffect(() => {
+    const sessionSync = createAuthSessionSync({
+      fetchFullUser: fetchFullUserEvent,
+      getTokenExpirationMs: () => knownTokenExpirationMsRef.current,
+      onSessionExpired: handleRemoteSessionExpired,
+      onSessionLoggedOut: handleRemoteSessionLoggedOut,
+      onSessionRefreshed: handleRemoteSessionRefreshed,
+      sourceID: sessionSyncSourceID,
+    })
+
+    sessionSyncRef.current = sessionSync
+
+    return () => {
+      if (sessionSyncRef.current === sessionSync) {
+        sessionSyncRef.current = null
+      }
+
+      sessionSync.cleanup()
+    }
+  }, [sessionSyncSourceID])
+
   useEffect(() => {
     async function fetchUserOnMount() {
       await fetchFullUserEvent()
@@ -433,3 +529,7 @@ export function AuthProvider({
 }
 
 export const useAuth = <T = AuthenticatedUser,>(): AuthContext<T> => use(Context) as AuthContext<T>
+
+function createSessionSyncSourceID(): string {
+  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
+}
