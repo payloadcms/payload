@@ -38,8 +38,6 @@ import {
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
 import { mergeLocalizedData } from '../../../utilities/mergeLocalizedData.js'
-import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
-import { getLocalizedDraftStatus } from '../../../versions/drafts/getLocalizedDraftStatus.js'
 import { hasNonLocalizedDataChanged } from '../../../versions/drafts/hasNonLocalizedDataChanged.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
@@ -293,6 +291,55 @@ export const updateDocument = async <
     }
   }
 
+  const shouldDraftAllLocales =
+    isSavingDraft &&
+    config.localization &&
+    hasLocalizeStatusEnabled(collectionConfig) &&
+    hasNonLocalizedDataChanged({
+      after: mergeLocalizedData({
+        configBlockReferences: config.blocks,
+        dataWithLocales: result,
+        docWithLocales,
+        fields: collectionConfig.fields,
+        selectedLocales: config.localization.localeCodes,
+      }),
+      before: docWithLocales,
+      configBlockReferences: config.blocks,
+      fields: collectionConfig.fields,
+    })
+
+  if (shouldDraftAllLocales && config.localization) {
+    if (!result._status || typeof result._status !== 'object' || Array.isArray(result._status)) {
+      result._status = {}
+    }
+
+    for (const localeCode of config.localization.localeCodes) {
+      ;(result._status as Record<string, unknown>)[localeCode] = 'draft'
+    }
+  } else if (isSavingDraft && config.localization && hasLocalizeStatusEnabled(collectionConfig)) {
+    const existingStatus =
+      docWithLocales._status &&
+      typeof docWithLocales._status === 'object' &&
+      !Array.isArray(docWithLocales._status)
+        ? docWithLocales._status
+        : {}
+
+    if (locale === 'all') {
+      const statusByLocale = { ...existingStatus }
+
+      for (const localeCode of config.localization.localeCodes) {
+        statusByLocale[localeCode] = 'draft'
+      }
+
+      result._status = statusByLocale
+    } else {
+      result._status = {
+        ...existingStatus,
+        [locale]: 'draft',
+      }
+    }
+  }
+
   if (config.localization && collectionConfig.versions) {
     let snapshotData: JsonObject | undefined
     let currentDoc
@@ -318,25 +365,6 @@ export const updateDocument = async <
         for (const localeCode of accessibleLocaleCodes) {
           result._status[localeCode] = unpublishAllLocales ? 'draft' : 'published'
         }
-      } else if (isSavingDraft) {
-        const shouldDraftAllLocales = hasNonLocalizedDataChanged({
-          after: mergeLocalizedData({
-            configBlockReferences: config.blocks,
-            dataWithLocales: result,
-            docWithLocales,
-            fields: collectionConfig.fields,
-            selectedLocales: config.localization.localeCodes,
-          }),
-          before: docWithLocales,
-          configBlockReferences: config.blocks,
-          fields: collectionConfig.fields,
-        })
-
-        result._status = getLocalizedDraftStatus({
-          existingStatus: shouldDraftAllLocales ? result._status : docWithLocales._status,
-          locale: shouldDraftAllLocales ? 'all' : locale,
-          localeCodes: config.localization.localeCodes,
-        })
       } else if (
         !isSavingDraft &&
         result._status &&
