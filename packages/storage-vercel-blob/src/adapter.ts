@@ -75,6 +75,7 @@ export function createVercelBlobAdapter({
             token: await generateClientTokenFromReadWriteToken({
               addRandomSuffix,
               allowedContentTypes: mimeType ? [mimeType] : undefined,
+              allowOverwrite: true,
               cacheControlMaxAge,
               maximumSizeInBytes: filesize,
               pathname: resolved.fileKey,

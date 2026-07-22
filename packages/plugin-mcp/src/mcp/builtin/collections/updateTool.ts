@@ -17,7 +17,7 @@ import { fileInputSchema, resolveFile } from './fileInput.js'
 import { formatCollectionError } from './formatCollectionError.js'
 
 const DEFAULT_DESCRIPTION =
-  'Update documents in any collection. Files can use a URL, base64, or an upload prepared by getUploadInstructions.'
+  'Update documents. Prefer uploadReference after upload, externalURL for URLs, or base64 for small local files.'
 
 export const updateDocumentTool = defineCollectionTool({
   access: (args) =>

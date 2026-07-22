@@ -30,12 +30,12 @@ export const fileInputSchema = z
       url: z.url().describe('The http or https URL to download'),
     }),
     z.object({
-      file: uploadFileSchema.describe('The file value returned by getUploadInstructions'),
+      file: uploadFileSchema.describe('getUploadInstructions file field post-upload'),
       source: z.literal('uploadReference'),
     }),
   ])
   .describe(
-    'A file for an upload collection. Use externalURL for an online file, base64 for local file bytes, or uploadReference after following getUploadInstructions. Usage of getUploadInstructions and uploadReference is recommended.',
+    'A file for an upload collection. Prefer uploadReference after its upload succeeds; use base64 only for small local files or externalURL for an online file.',
   )
 
 type FileInput = z.infer<typeof fileInputSchema>
@@ -54,7 +54,17 @@ export async function resolveFile({
   }
 
   if (input.source === 'uploadReference') {
-    return getFileFromUploadInstructions({ collectionSlug, file: input.file, req })
+    try {
+      return await getFileFromUploadInstructions({ collectionSlug, file: input.file, req })
+    } catch (error) {
+      if (error instanceof Error && error.message === 'Staged upload was not found.') {
+        throw new APIError(
+          'Staged upload not found. Complete the upload action first, or use base64 for small local files.',
+          400,
+        )
+      }
+      throw error
+    }
   }
 
   const uploadConfig = req.payload.collections[collectionSlug]?.config.upload
