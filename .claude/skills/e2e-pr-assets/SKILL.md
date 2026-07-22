@@ -90,6 +90,19 @@ Do not start recording until the plan is specific enough that another agent coul
 
 ## Video Mode Workflow
 
+### Pacing and proof beats
+
+Keep the overall recording brisk. Do not slow every interaction just to make the video feel deliberate.
+
+Instead, add short, intentional pauses only around the moments the reviewer must actually read:
+
+- Pause briefly after the important UI state first appears.
+- Pause briefly before the key action if the current visible state is the thing being compared.
+- Pause briefly after the result appears so the reviewer can confirm it.
+- If a tooltip, toggler state, badge, or title matters, make sure it is stable for at least one readable beat before moving on.
+
+As a rule of thumb, prefer 2-4 targeted proof-beat pauses over globally slowing the whole scenario.
+
 ### Preferred: focused `_community` evidence fixture
 
 Use this path when the relevant e2e suite is noisy, has unrelated fields, or would make the evidence harder to understand. The goal is a minimal admin surface that shows only the behavior the PR fixes.
@@ -126,6 +139,8 @@ Use this path when the committed e2e suite is too CI-focused, too brittle for ev
 
 Prefer this path early when the goal is explanatory evidence, not just pass/fail proof. If the video needs to clearly tell a story in the UI, use a scenario instead of forcing the committed suite to double as a demo.
 
+If the existing e2e test is technically correct but visually too fast, too indirect, or too easy to misread, use that test to understand the behavior and then write a reviewer-facing scenario for the recording.
+
 1. Infer the suite/config context from the PR:
    - `e2e-infer-suite <pr-number> <owner/repo> --repo <repo-root>`
 2. Write the local recording plan described above.
@@ -136,9 +151,21 @@ Prefer this path early when the goal is explanatory evidence, not just pass/fail
 4. The scenario must export a function:
 
 ```js
-export default async function scenario({ baseURL, cursor, expect, label, page, record, repoRoot }) {
+export default async function scenario({
+  baseURL,
+  browserContext,
+  cursor,
+  expect,
+  keyboardOverlay,
+  label,
+  page,
+  record,
+  repoRoot,
+}) {
   // Seed data, log in, navigate the admin UI, and perform the exact evidence flow.
   // Optional: await cursor?.moveTo('#important-field') before pausing for emphasis.
+  // Optional: const newTab = await browserContext.waitForEvent('page')
+  // Optional: await keyboardOverlay?.show('Custom action')
 }
 ```
 
@@ -155,6 +182,19 @@ export default async function scenario({ baseURL, cursor, expect, label, page, r
    - `e2e-run-script <scenario.mjs> --repo <repo-root> --label after --record`
    - `e2e-convert-video after`
 8. Continue with MP4 verification and GitHub attachment upload below.
+
+### New-tab behaviors
+
+The current `e2e-run-script` recorder captures page content, not the browser tab strip or browser chrome. That means it can prove that a new tab event happened, but it cannot literally show the tab appearing in the browser UI.
+
+For new-tab evidence:
+
+- Detect the new tab with `browserContext.waitForEvent('page')`.
+- Verify the opened page URL or visible content matches the expected destination.
+- Return focus to the original page if that page's final state is the reviewer-facing proof.
+- Use a short custom overlay such as `New tab opened` only after the scenario has actually observed the new page event.
+
+Do not fake new-tab behavior by silently navigating the current page in-place just to make the video easier to understand.
 
 ### Existing committed e2e suite
 
@@ -223,6 +263,8 @@ fi
 - `e2e-attach-pr` is idempotent: it replaces the prior generated media block instead of duplicating it.
 - The recording plan remains a local, temporary planning artifact. When attaching media, pass it to `e2e-attach-pr --plan-file ...` so the `Before` and `After` notes land in hidden PR-body comments instead of visible reviewer-facing text.
 - When the PR is demonstrating a bug and its fix, the hidden `Before` comment should name the incorrect outcome and the hidden `After` comment should name the correct outcome.
+- If the first scenario technically proves the behavior but reads too fast, rewrite the scenario instead of adding blanket delays everywhere. Prefer targeted pauses around proof beats.
+- If the behavior under test opens a new browser tab, remember that the current recorder cannot show the browser tab strip itself. Prove the event through `browserContext.waitForEvent('page')`, the opened page destination, and a small explicit overlay if needed.
 - Video conversion records at full viewport size, trims the initial blank Playwright lead-in by default (including longer startup blanks when a later first scene is detected), and auto-compresses to fit GitHub upload constraints when needed.
 - If the opening poster is important, inspect the first decoded MP4 frame before upload rather than assuming the trim is visually correct.
 - If `e2e-convert-video` fails with `h264_videotoolbox`, retry conversion with `libx264` instead of re-recording. Hardware H.264 availability is not the same as hardware H.264 reliability.
