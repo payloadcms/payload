@@ -20,6 +20,10 @@ resolve_script_dir() {
 SCRIPT_DIR="$(resolve_script_dir)"
 REPO_ROOT="$(cd -- "${SCRIPT_DIR}/../../.." && pwd)"
 
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/../lib/config.sh"
+e2e_load_config
+
 PR="${1:-}"
 REPO="${2:-}"
 POSITIONAL_PROFILE="${3:-}"

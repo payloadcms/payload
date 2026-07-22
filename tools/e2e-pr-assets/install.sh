@@ -32,6 +32,7 @@ mkdir -p "${BIN_TARGET_DIR}"
 SCRIPTS=(
   e2e-attach-pr
   e2e-capture-screenshot
+  e2e-configure
   e2e-convert-video
   e2e-ensure-github-auth
   e2e-github-login-profile

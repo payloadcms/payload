@@ -6,6 +6,23 @@
 
 set -euo pipefail
 
+resolve_script_dir() {
+  local source="${BASH_SOURCE[0]}"
+  while [[ -h "$source" ]]; do
+    local dir
+    dir="$(cd -P "$(dirname "$source")" && pwd)"
+    source="$(readlink "$source")"
+    [[ "$source" != /* ]] && source="${dir}/${source}"
+  done
+  cd -P "$(dirname "$source")" && pwd
+}
+
+SCRIPT_DIR="$(resolve_script_dir)"
+
+# shellcheck source=/dev/null
+source "${SCRIPT_DIR}/../lib/config.sh"
+e2e_load_config
+
 PR="${1:-}"
 REPO="${2:-}"
 MODE="video"

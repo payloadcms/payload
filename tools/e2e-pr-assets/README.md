@@ -6,6 +6,7 @@ This folder packages the `e2e-pr-assets` skill and its helper scripts so teammat
 
 - Project skill: `.claude/skills/e2e-pr-assets/SKILL.md`
 - Helper scripts: `tools/e2e-pr-assets/bin/e2e-*`
+- Shared config loader: `tools/e2e-pr-assets/lib/config.sh`
 - Bootstrap scripts:
   - `tools/e2e-pr-assets/install.sh`
   - `tools/e2e-pr-assets/check.sh`
@@ -27,6 +28,20 @@ bash tools/e2e-pr-assets/check.sh
 ```
 
 The install script links helper commands into `~/.local/bin` (or `$XDG_BIN_HOME`) and validates prerequisites.
+
+## Configure defaults
+
+For repeat use, create a local config file instead of retyping environment variables:
+
+```bash
+e2e-configure
+e2e-configure --set GITHUB_BROWSER_PROFILE /path/to/github-profile
+e2e-configure --set E2E_GITHUB_AUTO_REMOVE_PROFILE 0
+```
+
+This writes `~/.config/e2e-pr-assets/config` by default, or `$XDG_CONFIG_HOME/e2e-pr-assets/config` when `XDG_CONFIG_HOME` is set.
+
+Environment variables still override config values for one-off runs, so commands like `E2E_MEDIA_AUTO_CLEANUP=0 e2e-attach-pr ...` continue to work.
 
 ## Validate manually
 
@@ -84,6 +99,7 @@ For new-tab proof:
   - Browser auth profile defaults to `/tmp/github-upload-profile`.
   - Temporary browser profile is removed automatically after upload flow unless explicitly disabled.
   - Temporary media artifacts are removed automatically after `e2e-attach-pr` updates the PR body.
+- Persistent defaults can be stored in `~/.config/e2e-pr-assets/config` via `e2e-configure`.
 - `e2e-ensure-github-auth` is the proactive auth check:
   - Use it before recording to confirm the selected browser profile is already signed in for the target PR.
   - If not signed in, it opens `e2e-github-login-profile` immediately and waits for sign-in detection before returning.
@@ -94,6 +110,7 @@ For new-tab proof:
   - If the selected browser profile is already signed in to GitHub, upload proceeds immediately.
   - If not signed in, it opens `e2e-github-login-profile`, waits for manual sign-in detection, then retries upload once automatically.
   - On completion (success/failure), it removes temporary profile directories by default for security.
+  - Configure repeat-use defaults with `e2e-configure --set ...`; explicit env vars still take precedence.
   - Override profile with `GITHUB_BROWSER_PROFILE=/path/to/profile`.
   - Disable auto-removal with `E2E_GITHUB_AUTO_REMOVE_PROFILE=0`.
   - For non-temporary custom paths, removal is skipped unless `E2E_GITHUB_FORCE_REMOVE_PROFILE=1`.

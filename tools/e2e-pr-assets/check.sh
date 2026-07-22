@@ -27,6 +27,7 @@ require_cmd python3
 SCRIPTS=(
   e2e-attach-pr
   e2e-capture-screenshot
+  e2e-configure
   e2e-convert-video
   e2e-ensure-github-auth
   e2e-github-login-profile
@@ -43,6 +44,11 @@ for script_name in "${SCRIPTS[@]}"; do
     missing=1
   fi
 done
+
+if [[ ! -f "${REPO_ROOT}/tools/e2e-pr-assets/lib/config.sh" ]]; then
+  echo "Missing shared config helper: ${REPO_ROOT}/tools/e2e-pr-assets/lib/config.sh" >&2
+  missing=1
+fi
 
 if ! gh auth status >/dev/null 2>&1; then
   echo "Warning: gh is not authenticated. Run: gh auth login" >&2

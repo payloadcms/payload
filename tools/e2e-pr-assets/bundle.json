@@ -11,6 +11,7 @@
   "scripts": [
     "tools/e2e-pr-assets/bin/e2e-attach-pr",
     "tools/e2e-pr-assets/bin/e2e-capture-screenshot",
+    "tools/e2e-pr-assets/bin/e2e-configure",
     "tools/e2e-pr-assets/bin/e2e-convert-video",
     "tools/e2e-pr-assets/bin/e2e-ensure-github-auth",
     "tools/e2e-pr-assets/bin/e2e-github-login-profile",
