@@ -974,7 +974,7 @@ describe('Queues - Payload', () => {
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(after?.id).toBe(id)
-    expect(after?.processing).toBe(false)
+    expect(after?.processingUntil).toBeFalsy()
     expect(after?.processingToken).toBeFalsy()
   })
 
@@ -994,7 +994,7 @@ describe('Queues - Payload', () => {
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(after?.id).toBe(id)
-    expect(after?.processing).toBe(false)
+    expect(after?.processingUntil).toBeFalsy()
     expect(after?.processingToken).toBeFalsy()
   })
 
