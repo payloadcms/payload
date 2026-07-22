@@ -17,7 +17,7 @@ export const SelectRow: React.FC<{
     _userEditing?: User
     id: number | string
   }
-  selectRowLabel?: string
+  selectRowLabel: string
 }> = ({ rowData, selectRowLabel }) => {
   const { user } = useAuth()
   const { selected, setSelection } = useSelection()
@@ -31,7 +31,7 @@ export const SelectRow: React.FC<{
 
   return (
     <CheckboxInput
-      aria-label={selectRowLabel || `Select ${rowData.id}`}
+      aria-label={selectRowLabel}
       checked={Boolean(selected.get(rowData.id))}
       className={[baseClass, `${baseClass}__checkbox`].join(' ')}
       onToggle={() => setSelection(rowData.id)}
