@@ -125,7 +125,16 @@ export function AuthProvider({
   const refreshTokenTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
   const reminderTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
   const forceLogOutTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
+  const authRequestQueueRef = React.useRef<Promise<void>>(Promise.resolve())
+  const authRequestSequenceRef = React.useRef(0)
   const knownTokenExpirationMsRef = React.useRef<number>(undefined)
+  const pendingAuthInvalidationRef = React.useRef<
+    | {
+        generation: number
+        run: () => void
+      }
+    | undefined
+  >(undefined)
   const refreshRequestRef = React.useRef<
     | {
         generation: number
@@ -239,10 +248,45 @@ export function AuthProvider({
 
   const setNewUser = useCallback(
     (userResponse: null | UserWithToken) => {
+      pendingAuthInvalidationRef.current = undefined
       sessionGenerationRef.current += 1
       applyUserResponse(userResponse)
     },
     [applyUserResponse],
+  )
+
+  const enqueueAuthRequest = useCallback(
+    <Result,>(
+      request: ({ hasQueuedRequest }: { hasQueuedRequest: () => boolean }) => Promise<Result>,
+    ): Promise<Result> => {
+      const requestSequence = ++authRequestSequenceRef.current
+      const runRequest = async (): Promise<Result> => {
+        const result = await request({
+          hasQueuedRequest: () => requestSequence < authRequestSequenceRef.current,
+        })
+
+        if (requestSequence === authRequestSequenceRef.current) {
+          const pendingAuthInvalidation = pendingAuthInvalidationRef.current
+
+          pendingAuthInvalidationRef.current = undefined
+
+          if (pendingAuthInvalidation?.generation === sessionGenerationRef.current) {
+            pendingAuthInvalidation.run()
+          }
+        }
+
+        return result
+      }
+      const queuedRequest = authRequestQueueRef.current.then(runRequest, runRequest)
+
+      authRequestQueueRef.current = queuedRequest.then(
+        () => undefined,
+        () => undefined,
+      )
+
+      return queuedRequest
+    },
+    [],
   )
 
   const refreshSession = useCallback(
@@ -255,53 +299,71 @@ export function AuthProvider({
         return activeRequest.promise
       }
 
-      const refreshPromise = (async (): Promise<AuthenticatedUser | null> => {
-        try {
-          const request = await requests.post(
-            formatAdminURL({
-              apiRoute,
-              path: `/${userSlug}/refresh-token${isActivityRefresh ? '?refresh' : ''}`,
-            }),
-            {
-              headers: {
-                'Accept-Language': i18n.language,
-              },
-            },
-          )
-
+      const refreshPromise = enqueueAuthRequest(
+        async ({ hasQueuedRequest }): Promise<AuthenticatedUser | null> => {
           if (sessionGenerationRef.current !== requestGeneration) {
             return null
           }
 
-          if (request.status === 200) {
-            const json: UserWithToken = await request.json()
+          try {
+            const request = await requests.post(
+              formatAdminURL({
+                apiRoute,
+                path: `/${userSlug}/refresh-token${isActivityRefresh ? '?refresh' : ''}`,
+              }),
+              {
+                headers: {
+                  'Accept-Language': i18n.language,
+                },
+              },
+            )
 
             if (sessionGenerationRef.current !== requestGeneration) {
               return null
             }
 
-            setNewUser(json)
-            sessionSyncRef.current?.publish({ type: 'session-refreshed', session: json })
-            return json.user
-          }
+            if (request.status === 200) {
+              const json: UserWithToken = await request.json()
 
-          if (user) {
-            if (handledExpiration !== undefined) {
-              sessionSyncRef.current?.publish({
-                type: 'session-expired',
-                expiredTokenAt: handledExpiration,
-              })
+              if (sessionGenerationRef.current !== requestGeneration) {
+                return null
+              }
+
+              pendingAuthInvalidationRef.current = undefined
+              applyUserResponse(json)
+              sessionSyncRef.current?.publish({ type: 'session-refreshed', session: json })
+              return json.user
             }
 
-            setNewUser(null)
-            redirectToInactivityRoute()
-          }
-        } catch (e) {
-          toast.error(`Refreshing token failed: ${e.message}`)
-        }
+            if (user) {
+              const invalidateSession = () => {
+                if (handledExpiration !== undefined) {
+                  sessionSyncRef.current?.publish({
+                    type: 'session-expired',
+                    expiredTokenAt: handledExpiration,
+                  })
+                }
 
-        return null
-      })()
+                applyUserResponse(null)
+                redirectToInactivityRoute()
+              }
+
+              if (hasQueuedRequest()) {
+                pendingAuthInvalidationRef.current = {
+                  generation: requestGeneration,
+                  run: invalidateSession,
+                }
+              } else {
+                invalidateSession()
+              }
+            }
+          } catch (e) {
+            toast.error(`Refreshing token failed: ${e.message}`)
+          }
+
+          return null
+        },
+      )
 
       refreshRequestRef.current = { generation: requestGeneration, promise: refreshPromise }
       void refreshPromise.finally(() => {
@@ -312,7 +374,15 @@ export function AuthProvider({
 
       return refreshPromise
     },
-    [apiRoute, i18n.language, redirectToInactivityRoute, setNewUser, userSlug, user],
+    [
+      apiRoute,
+      applyUserResponse,
+      enqueueAuthRequest,
+      i18n.language,
+      redirectToInactivityRoute,
+      userSlug,
+      user,
+    ],
   )
 
   const refreshCookie = useCallback(
@@ -399,50 +469,58 @@ export function AuthProvider({
     [apiRoute, i18n],
   )
 
-  const fetchFullUserResult = React.useCallback(async (): Promise<
+  const fetchFullUserResult = React.useCallback((): Promise<
     AuthSessionResyncResult<AuthenticatedUser>
   > => {
     const requestGeneration = sessionGenerationRef.current
 
-    try {
-      const request = await requests.get(
-        formatAdminURL({
-          apiRoute,
-          path: `/${userSlug}/me`,
-        }),
-        {
-          credentials: 'include',
-          headers: {
-            'Accept-Language': i18n.language,
-          },
-        },
-      )
-
-      if (request.status !== 200) {
-        return { status: 'indeterminate' }
-      }
-
-      const json: null | UserWithToken = await request.json()
-
+    return enqueueAuthRequest(async () => {
       if (sessionGenerationRef.current !== requestGeneration) {
         return { status: 'indeterminate' }
       }
 
-      if (json?.user) {
-        applyUserResponse(json)
+      try {
+        const request = await requests.get(
+          formatAdminURL({
+            apiRoute,
+            path: `/${userSlug}/me`,
+          }),
+          {
+            credentials: 'include',
+            headers: {
+              'Accept-Language': i18n.language,
+            },
+          },
+        )
 
-        return { status: 'authenticated', user: json.user }
+        if (request.status !== 200) {
+          return { status: 'indeterminate' }
+        }
+
+        const json: null | UserWithToken = await request.json()
+
+        if (sessionGenerationRef.current !== requestGeneration) {
+          return { status: 'indeterminate' }
+        }
+
+        if (json?.user) {
+          pendingAuthInvalidationRef.current = undefined
+          applyUserResponse(json)
+
+          return { status: 'authenticated', user: json.user }
+        }
+
+        pendingAuthInvalidationRef.current = undefined
+        applyUserResponse(null)
+
+        return { status: 'unauthenticated' }
+      } catch (e) {
+        toast.error(`Fetching user failed: ${e.message}`)
       }
 
-      setNewUser(null)
-
-      return { status: 'unauthenticated' }
-    } catch (e) {
-      toast.error(`Fetching user failed: ${e.message}`)
-    }
-
-    return { status: 'indeterminate' }
-  }, [apiRoute, applyUserResponse, i18n.language, setNewUser, userSlug])
+      return { status: 'indeterminate' }
+    })
+  }, [apiRoute, applyUserResponse, enqueueAuthRequest, i18n.language, userSlug])
 
   const fetchFullUser = React.useCallback(async (): Promise<AuthenticatedUser | null> => {
     const result = await fetchFullUserResult()

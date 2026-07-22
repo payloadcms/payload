@@ -382,6 +382,96 @@ describe('createAuthSessionSync receiving', () => {
     expect(secondState).toBe('logged-out')
   })
 
+  it('should converge on the fresher session when equal-time refresh and expiration arrive in opposite orders', () => {
+    let firstState = 'initial'
+    let secondState = 'initial'
+    const refreshMessage = createMessage({
+      sentAt: 550,
+      session: createSession({ expirationMs: 40_000, token: 'fresh-token' }),
+      sourceID: 'refresh-tab',
+      type: 'session-refreshed',
+    })
+    const expirationMessage = createMessage({
+      expiredTokenAt: 30_000,
+      sentAt: 550,
+      sourceID: 'expiration-tab',
+      type: 'session-expired',
+    })
+
+    createSync({
+      localExpirationMs: 20_000,
+      onSessionExpired: () => {
+        firstState = 'expired'
+      },
+      onSessionRefreshed: () => {
+        firstState = 'refreshed'
+      },
+      sourceID: 'first-local-tab',
+    })
+    const firstChannel = getBroadcastChannel()
+    createSync({
+      localExpirationMs: 20_000,
+      onSessionExpired: () => {
+        secondState = 'expired'
+      },
+      onSessionRefreshed: () => {
+        secondState = 'refreshed'
+      },
+      sourceID: 'second-local-tab',
+    })
+    const secondChannel = getBroadcastChannel()
+
+    firstChannel.emit(expirationMessage)
+    firstChannel.emit(refreshMessage)
+    secondChannel.emit(refreshMessage)
+    secondChannel.emit(expirationMessage)
+
+    expect(firstState).toBe('refreshed')
+    expect(secondState).toBe('refreshed')
+  })
+
+  it('should converge on the fresher refresh when equal-time refreshes arrive in opposite orders', () => {
+    let firstToken: string | undefined
+    let secondToken: string | undefined
+    const staleMessage = createMessage({
+      sentAt: 575,
+      session: createSession({ expirationMs: 30_000, token: 'stale-token' }),
+      sourceID: 'source-z',
+      type: 'session-refreshed',
+    })
+    const freshMessage = createMessage({
+      sentAt: 575,
+      session: createSession({ expirationMs: 40_000, token: 'fresh-token' }),
+      sourceID: 'source-a',
+      type: 'session-refreshed',
+    })
+
+    createSync({
+      localExpirationMs: 20_000,
+      onSessionRefreshed: (session) => {
+        firstToken = session.token
+      },
+      sourceID: 'first-local-tab',
+    })
+    const firstChannel = getBroadcastChannel()
+    createSync({
+      localExpirationMs: 20_000,
+      onSessionRefreshed: (session) => {
+        secondToken = session.token
+      },
+      sourceID: 'second-local-tab',
+    })
+    const secondChannel = getBroadcastChannel()
+
+    firstChannel.emit(staleMessage)
+    firstChannel.emit(freshMessage)
+    secondChannel.emit(freshMessage)
+    secondChannel.emit(staleMessage)
+
+    expect(firstToken).toBe('fresh-token')
+    expect(secondToken).toBe('fresh-token')
+  })
+
   it('should converge on the source ID winner for equal-time refreshes', () => {
     let firstToken: string | undefined
     let secondToken: string | undefined
@@ -569,12 +659,10 @@ describe('createAuthSessionSync transport failures', () => {
     expect(() => sync.publish({ type: 'session-logged-out' })).not.toThrow()
   })
 
-  it('should downgrade a failed channel and resynchronize a storage peer', async () => {
-    vi.stubGlobal('BroadcastChannel', undefined)
+  it('should downgrade a failed publisher and resynchronize a peer with a healthy channel', async () => {
     const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' })
 
     createSync({ fetchFullUser, sourceID: 'storage-peer' })
-    vi.stubGlobal('BroadcastChannel', MockBroadcastChannel)
     const addEventListener = vi.spyOn(window, 'addEventListener')
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
     const publisher = createSync({ sourceID: 'channel-publisher' })
@@ -626,13 +714,13 @@ describe('createAuthSessionSync transport failures', () => {
   })
 
   it('should preserve local auth when the downgrade listener cannot be installed', () => {
+    vi.spyOn(window, 'addEventListener').mockImplementation(() => {
+      throw new Error('storage events unavailable')
+    })
     const sync = createSync()
     const failedChannel = getBroadcastChannel()
     failedChannel.postMessage.mockImplementationOnce(() => {
       throw new Error('channel closed')
-    })
-    vi.spyOn(window, 'addEventListener').mockImplementationOnce(() => {
-      throw new Error('storage events unavailable')
     })
 
     expect(() =>
@@ -967,15 +1055,18 @@ describe('AuthProvider session synchronization', () => {
         }),
       )
     })
+    await act(async () => Promise.resolve())
 
-    expect(apiMocks.get).toHaveBeenCalledTimes(2)
+    expect(apiMocks.get).toHaveBeenCalledOnce()
 
     resolveFirstFetch?.(createResponse({ session: firstSession }))
     await act(async () => {
       await firstResponse
       await Promise.resolve()
+      await Promise.resolve()
     })
 
+    expect(apiMocks.get).toHaveBeenCalledTimes(2)
     expect(authContext?.token).toBe('first-token')
 
     resolveSecondFetch?.(createResponse({ session: secondSession }))
@@ -1008,20 +1099,61 @@ describe('AuthProvider session synchronization', () => {
 
     dispatchStorageRefresh({ sentAt: 700, sourceID: 'remote-a' })
     dispatchStorageRefresh({ sentAt: 800, sourceID: 'remote-b' })
+    await act(async () => Promise.resolve())
+
+    expect(apiMocks.get).toHaveBeenCalledOnce()
 
     resolveSecondFetch?.(createResponse({ session: secondSession }))
-    await act(async () => {
-      await secondResponse
-      await Promise.resolve()
-    })
     resolveFirstFetch?.(createResponse({ session: firstSession }))
     await act(async () => {
       await firstResponse
       await Promise.resolve()
+      await Promise.resolve()
     })
 
-    expect(authContext?.token).toBe('first-token')
-    expect(authContext?.tokenExpirationMs).toBe(firstSession.exp * 1000)
+    expect(apiMocks.get).toHaveBeenCalledTimes(2)
+    expect(authContext?.token).toBe('second-token')
+    expect(authContext?.tokenExpirationMs).toBe(secondSession.exp * 1000)
+  })
+
+  it('should apply an authenticated user request after an older refresh rejection', async () => {
+    const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
+    const authenticatedSession = createFutureSession({
+      expiresInMs: 120_000,
+      token: 'authenticated-token',
+    })
+    let resolveFetch: ((value: ReturnType<typeof createResponse>) => void) | undefined
+    let resolveRefresh: ((value: { status: number }) => void) | undefined
+    const fetchResponse = new Promise<ReturnType<typeof createResponse>>((resolve) => {
+      resolveFetch = resolve
+    })
+    const refreshResponse = new Promise<{ status: number }>((resolve) => {
+      resolveRefresh = resolve
+    })
+
+    await renderProvider({ session: initialSession })
+    apiMocks.get.mockClear()
+    apiMocks.post.mockReturnValueOnce(refreshResponse)
+    apiMocks.get.mockReturnValueOnce(fetchResponse)
+
+    const refreshPromise = authContext?.refreshCookieAsync()
+    const fetchPromise = authContext?.fetchFullUser()
+    await act(async () => Promise.resolve())
+
+    expect(apiMocks.post).toHaveBeenCalledOnce()
+    expect(apiMocks.get).not.toHaveBeenCalled()
+
+    resolveFetch?.(createResponse({ session: authenticatedSession }))
+    resolveRefresh?.({ status: 401 })
+    await act(async () => {
+      await refreshPromise
+      await fetchPromise
+    })
+
+    expect(apiMocks.get).toHaveBeenCalledOnce()
+    expect(authContext?.token).toBe('authenticated-token')
+    expect(authContext?.user).toEqual(authenticatedSession.user)
+    expect(routerMocks.replace).not.toHaveBeenCalled()
   })
 
   it('should preserve a refreshed session when an older user request confirms no user', async () => {
@@ -1036,13 +1168,13 @@ describe('AuthProvider session synchronization', () => {
     apiMocks.get.mockReturnValueOnce(fetchResponse)
     apiMocks.post.mockResolvedValueOnce(createResponse({ session: refreshedSession }))
     const fetchPromise = authContext?.fetchFullUser()
+    await act(async () => Promise.resolve())
+    const refreshPromise = authContext?.refreshCookieAsync()
 
-    await act(async () => {
-      await authContext?.refreshCookieAsync()
-    })
     resolveFetch?.(createResponse({ session: { exp: 0, user: null } as unknown as UserWithToken }))
     await act(async () => {
       await fetchPromise
+      await refreshPromise
     })
 
     expect(authContext?.token).toBe('fresh-token')
@@ -1063,13 +1195,13 @@ describe('AuthProvider session synchronization', () => {
       createResponse({ session: { exp: 0, user: null } as unknown as UserWithToken }),
     )
     const refreshPromise = authContext?.refreshCookieAsync()
+    await act(async () => Promise.resolve())
+    const fetchPromise = authContext?.fetchFullUser()
 
-    await act(async () => {
-      await authContext?.fetchFullUser()
-    })
     resolveRefresh?.(createResponse({ session: staleSession }))
     await act(async () => {
       await refreshPromise
+      await fetchPromise
     })
 
     expect(authContext?.user).toBeNull()

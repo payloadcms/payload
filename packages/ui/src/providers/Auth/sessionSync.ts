@@ -53,6 +53,7 @@ type StorageRefreshNotification = {
 }
 
 type LifecycleOrder = {
+  affectedExpirationMs: number
   precedence: number
   sentAt: number
   sourceID: string
@@ -99,17 +100,11 @@ export function createAuthSessionSync({
       return
     }
 
-    const isEqualTimeConflict = latestLifecycleOrder?.sentAt === lifecycleOrder.sentAt
-
     if (data.type === 'session-refreshed') {
       const receivedExpirationMs = data.session.exp * 1000
       const localExpirationMs = getTokenExpirationMs()
 
-      if (
-        !isEqualTimeConflict &&
-        localExpirationMs !== undefined &&
-        receivedExpirationMs < localExpirationMs
-      ) {
+      if (localExpirationMs !== undefined && receivedExpirationMs < localExpirationMs) {
         return
       }
 
@@ -121,11 +116,7 @@ export function createAuthSessionSync({
     if (data.type === 'session-expired') {
       const localExpirationMs = getTokenExpirationMs()
 
-      if (
-        !isEqualTimeConflict &&
-        localExpirationMs !== undefined &&
-        localExpirationMs > data.expiredTokenAt
-      ) {
+      if (localExpirationMs !== undefined && localExpirationMs > data.expiredTokenAt) {
         return
       }
 
@@ -172,9 +163,7 @@ export function createAuthSessionSync({
     }
   }
 
-  if (!channel) {
-    installStorageFallback()
-  }
+  installStorageListener()
 
   return {
     cleanup: () => {
@@ -238,7 +227,7 @@ export function createAuthSessionSync({
   function downgradeToStorage(): void {
     closeChannel(channel)
     channel = undefined
-    installStorageFallback()
+    installStorageListener()
   }
 
   function getNextLifecycleTimestamp({ event }: { event?: AuthSessionSyncEvent } = {}): number {
@@ -253,7 +242,7 @@ export function createAuthSessionSync({
     return nextTimestamp
   }
 
-  function installStorageFallback(): void {
+  function installStorageListener(): void {
     if (isStorageListenerInstalled) {
       return
     }
@@ -357,6 +346,17 @@ function compareLifecycleOrders({
     return first.sentAt - second.sentAt
   }
 
+  const isFirstLogout = first.precedence === 2
+  const isSecondLogout = second.precedence === 2
+
+  if (isFirstLogout !== isSecondLogout) {
+    return isFirstLogout ? 1 : -1
+  }
+
+  if (first.affectedExpirationMs !== second.affectedExpirationMs) {
+    return first.affectedExpirationMs - second.affectedExpirationMs
+  }
+
   if (first.precedence !== second.precedence) {
     return first.precedence - second.precedence
   }
@@ -372,6 +372,12 @@ function getLifecycleOrder(
   event: { sentAt: number; sourceID: string } & AuthSessionSyncEvent,
 ): LifecycleOrder {
   return {
+    affectedExpirationMs:
+      event.type === 'session-refreshed'
+        ? event.session.exp * 1000
+        : event.type === 'session-expired'
+          ? event.expiredTokenAt
+          : 0,
     precedence: event.type === 'session-logged-out' ? 2 : event.type === 'session-expired' ? 1 : 0,
     sentAt: event.sentAt,
     sourceID: event.sourceID,
