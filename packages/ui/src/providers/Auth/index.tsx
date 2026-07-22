@@ -8,6 +8,7 @@ import React, { createContext, use, useCallback, useEffect, useState } from 'rea
 import { toast } from 'sonner'
 
 import type { MarkSessionActivity } from './sessionActivity.js'
+import type { AuthSessionResyncResult } from './sessionSync.js'
 
 import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
@@ -125,6 +126,13 @@ export function AuthProvider({
   const reminderTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
   const forceLogOutTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
   const knownTokenExpirationMsRef = React.useRef<number>(undefined)
+  const refreshRequestRef = React.useRef<
+    | {
+        generation: number
+        promise: Promise<AuthenticatedUser | null>
+      }
+    | undefined
+  >(undefined)
   const sessionGenerationRef = React.useRef(0)
   const sessionSyncRef = React.useRef<null | ReturnType<typeof createAuthSessionSync>>(null)
   const tokenExpirationMsRef = React.useRef<number>(undefined)
@@ -237,6 +245,76 @@ export function AuthProvider({
     [applyUserResponse],
   )
 
+  const refreshSession = useCallback(
+    ({ isActivityRefresh }: { isActivityRefresh: boolean }): Promise<AuthenticatedUser | null> => {
+      const handledExpiration = tokenExpirationMsRef.current
+      const requestGeneration = sessionGenerationRef.current
+      const activeRequest = refreshRequestRef.current
+
+      if (activeRequest?.generation === requestGeneration) {
+        return activeRequest.promise
+      }
+
+      const refreshPromise = (async (): Promise<AuthenticatedUser | null> => {
+        try {
+          const request = await requests.post(
+            formatAdminURL({
+              apiRoute,
+              path: `/${userSlug}/refresh-token${isActivityRefresh ? '?refresh' : ''}`,
+            }),
+            {
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+            },
+          )
+
+          if (sessionGenerationRef.current !== requestGeneration) {
+            return null
+          }
+
+          if (request.status === 200) {
+            const json: UserWithToken = await request.json()
+
+            if (sessionGenerationRef.current !== requestGeneration) {
+              return null
+            }
+
+            setNewUser(json)
+            sessionSyncRef.current?.publish({ type: 'session-refreshed', session: json })
+            return json.user
+          }
+
+          if (user) {
+            if (handledExpiration !== undefined) {
+              sessionSyncRef.current?.publish({
+                type: 'session-expired',
+                expiredTokenAt: handledExpiration,
+              })
+            }
+
+            setNewUser(null)
+            redirectToInactivityRoute()
+          }
+        } catch (e) {
+          toast.error(`Refreshing token failed: ${e.message}`)
+        }
+
+        return null
+      })()
+
+      refreshRequestRef.current = { generation: requestGeneration, promise: refreshPromise }
+      void refreshPromise.finally(() => {
+        if (refreshRequestRef.current?.promise === refreshPromise) {
+          refreshRequestRef.current = undefined
+        }
+      })
+
+      return refreshPromise
+    },
+    [apiRoute, i18n.language, redirectToInactivityRoute, setNewUser, userSlug, user],
+  )
+
   const refreshCookie = useCallback(
     (forceRefresh?: boolean) => {
       if (!id) {
@@ -246,119 +324,18 @@ export function AuthProvider({
       const expiresInMs = Math.max(0, (tokenExpirationMs ?? 0) - Date.now())
 
       if (forceRefresh || (tokenExpirationMs && expiresInMs < forceLogoutBufferMs * 2)) {
-        const handledExpiration = tokenExpirationMsRef.current
-        const requestGeneration = sessionGenerationRef.current
-
         clearTimeout(refreshTokenTimeoutRef.current)
-        refreshTokenTimeoutRef.current = setTimeout(async () => {
-          try {
-            const request = await requests.post(
-              formatAdminURL({
-                apiRoute,
-                path: `/${userSlug}/refresh-token?refresh`,
-              }),
-              {
-                headers: {
-                  'Accept-Language': i18n.language,
-                },
-              },
-            )
-
-            if (request.status === 200) {
-              const json: UserWithToken = await request.json()
-
-              if (sessionGenerationRef.current !== requestGeneration) {
-                return
-              }
-
-              applyUserResponse(json)
-              sessionSyncRef.current?.publish({ type: 'session-refreshed', session: json })
-            } else {
-              if (sessionGenerationRef.current !== requestGeneration) {
-                return
-              }
-
-              if (handledExpiration !== undefined) {
-                sessionSyncRef.current?.publish({
-                  type: 'session-expired',
-                  expiredTokenAt: handledExpiration,
-                })
-              }
-
-              applyUserResponse(null)
-              redirectToInactivityRoute()
-            }
-          } catch (e) {
-            toast.error(e.message)
-          }
+        refreshTokenTimeoutRef.current = setTimeout(() => {
+          void refreshSession({ isActivityRefresh: true })
         }, 1000)
       }
     },
-    [
-      apiRoute,
-      applyUserResponse,
-      i18n.language,
-      redirectToInactivityRoute,
-      tokenExpirationMs,
-      userSlug,
-      forceLogoutBufferMs,
-      id,
-    ],
+    [forceLogoutBufferMs, id, refreshSession, tokenExpirationMs],
   )
 
   const refreshCookieAsync = useCallback(
-    async (skipSetUser?: boolean): Promise<AuthenticatedUser | null> => {
-      const handledExpiration = tokenExpirationMsRef.current
-      const requestGeneration = sessionGenerationRef.current
-
-      try {
-        const request = await requests.post(
-          formatAdminURL({
-            apiRoute,
-            path: `/${userSlug}/refresh-token`,
-          }),
-          {
-            headers: {
-              'Accept-Language': i18n.language,
-            },
-          },
-        )
-
-        if (request.status === 200) {
-          const json: UserWithToken = await request.json()
-
-          if (sessionGenerationRef.current !== requestGeneration) {
-            return null
-          }
-
-          if (!skipSetUser) {
-            applyUserResponse(json)
-          }
-          sessionSyncRef.current?.publish({ type: 'session-refreshed', session: json })
-          return json.user
-        }
-
-        if (user) {
-          if (sessionGenerationRef.current !== requestGeneration) {
-            return null
-          }
-
-          if (handledExpiration !== undefined) {
-            sessionSyncRef.current?.publish({
-              type: 'session-expired',
-              expiredTokenAt: handledExpiration,
-            })
-          }
-
-          applyUserResponse(null)
-          redirectToInactivityRoute()
-        }
-      } catch (e) {
-        toast.error(`Refreshing token failed: ${e.message}`)
-      }
-      return null
-    },
-    [apiRoute, applyUserResponse, i18n.language, redirectToInactivityRoute, userSlug, user],
+    (): Promise<AuthenticatedUser | null> => refreshSession({ isActivityRefresh: false }),
+    [refreshSession],
   )
 
   const logOut = useCallback(async () => {
@@ -422,7 +399,9 @@ export function AuthProvider({
     [apiRoute, i18n],
   )
 
-  const fetchFullUser = React.useCallback(async () => {
+  const fetchFullUserResult = React.useCallback(async (): Promise<
+    AuthSessionResyncResult<AuthenticatedUser>
+  > => {
     const requestGeneration = sessionGenerationRef.current
 
     try {
@@ -439,28 +418,37 @@ export function AuthProvider({
         },
       )
 
-      if (request.status === 200) {
-        const json: UserWithToken = await request.json()
-
-        if (sessionGenerationRef.current !== requestGeneration) {
-          return null
-        }
-
-        applyUserResponse(json)
-        return json?.user || null
+      if (request.status !== 200) {
+        return { status: 'indeterminate' }
       }
+
+      const json: null | UserWithToken = await request.json()
 
       if (sessionGenerationRef.current !== requestGeneration) {
-        return null
+        return { status: 'indeterminate' }
       }
 
-      applyUserResponse(null)
+      if (json?.user) {
+        applyUserResponse(json)
+
+        return { status: 'authenticated', user: json.user }
+      }
+
+      setNewUser(null)
+
+      return { status: 'unauthenticated' }
     } catch (e) {
       toast.error(`Fetching user failed: ${e.message}`)
     }
 
-    return null
-  }, [apiRoute, applyUserResponse, userSlug, i18n.language])
+    return { status: 'indeterminate' }
+  }, [apiRoute, applyUserResponse, i18n.language, setNewUser, userSlug])
+
+  const fetchFullUser = React.useCallback(async (): Promise<AuthenticatedUser | null> => {
+    const result = await fetchFullUserResult()
+
+    return result.status === 'authenticated' ? result.user : null
+  }, [fetchFullUserResult])
 
   const refreshCookieEvent = useEffectEvent(refreshCookie)
   const markActivity = React.useMemo<MarkSessionActivity>(() => {
@@ -486,6 +474,7 @@ export function AuthProvider({
   }, [isAuthenticated, markActivity])
 
   const fetchFullUserEvent = useEffectEvent(fetchFullUser)
+  const fetchFullUserResultEvent = useEffectEvent(fetchFullUserResult)
   const handleRemoteSessionExpired = useEffectEvent(() => {
     setNewUser(null)
     redirectToInactivityRoute()
@@ -497,14 +486,18 @@ export function AuthProvider({
   const handleRemoteSessionRefreshed = useEffectEvent((session: UserWithToken) => {
     setNewUser(session)
   })
+  const handleStorageSessionUnauthenticated = useEffectEvent(() => {
+    redirectToInactivityRoute()
+  })
 
   useEffect(() => {
     const sessionSync = createAuthSessionSync({
-      fetchFullUser: fetchFullUserEvent,
+      fetchFullUser: fetchFullUserResultEvent,
       getTokenExpirationMs: () => knownTokenExpirationMsRef.current,
       onSessionExpired: handleRemoteSessionExpired,
       onSessionLoggedOut: handleRemoteSessionLoggedOut,
       onSessionRefreshed: handleRemoteSessionRefreshed,
+      onSessionResyncUnauthenticated: handleStorageSessionUnauthenticated,
       sourceID: sessionSyncSourceID,
     })
 

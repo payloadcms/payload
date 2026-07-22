@@ -32,10 +32,28 @@ export type AuthSessionSyncEvent =
       type: 'session-logged-out'
     }
 
+export type AuthSessionResyncResult<T = unknown> =
+  | {
+      status: 'authenticated'
+      user: T
+    }
+  | {
+      status: 'indeterminate'
+    }
+  | {
+      status: 'unauthenticated'
+    }
+
 const authSessionSyncChannelName = 'payload-auth-session'
 const authSessionSyncStorageKey = 'payload:auth-session:refresh'
 
 type StorageRefreshNotification = {
+  sentAt: number
+  sourceID: string
+}
+
+type LifecycleOrder = {
+  precedence: number
   sentAt: number
   sourceID: string
 }
@@ -47,40 +65,55 @@ export function createAuthSessionSync({
   onSessionExpired,
   onSessionLoggedOut,
   onSessionRefreshed,
+  onSessionResyncUnauthenticated,
   sourceID,
 }: {
-  fetchFullUser: () => Promise<unknown>
+  fetchFullUser: () => Promise<AuthSessionResyncResult>
   getTokenExpirationMs: () => number | undefined
   now?: () => number
   onSessionExpired: (expiredTokenAt: number) => void
   onSessionLoggedOut: () => void
   onSessionRefreshed: (session: UserWithToken) => void
+  onSessionResyncUnauthenticated: () => void
   sourceID: string
 }): {
   cleanup: () => void
   publish: (event: AuthSessionSyncEvent) => void
   publishStorageRefresh: () => void
 } {
-  let latestLifecycleAt = Number.NEGATIVE_INFINITY
+  let channel: BroadcastChannel | undefined
+  let isStorageListenerInstalled = false
+  let latestLifecycleOrder: LifecycleOrder | undefined
 
   const receiveMessage = ({ data }: MessageEvent<unknown>) => {
+    if (!isAuthSessionSyncMessage(data) || data.sourceID === sourceID) {
+      return
+    }
+
+    const lifecycleOrder = getLifecycleOrder(data)
+
     if (
-      !isAuthSessionSyncMessage(data) ||
-      data.sourceID === sourceID ||
-      data.sentAt < latestLifecycleAt
+      latestLifecycleOrder &&
+      compareLifecycleOrders({ first: lifecycleOrder, second: latestLifecycleOrder }) <= 0
     ) {
       return
     }
+
+    const isEqualTimeConflict = latestLifecycleOrder?.sentAt === lifecycleOrder.sentAt
 
     if (data.type === 'session-refreshed') {
       const receivedExpirationMs = data.session.exp * 1000
       const localExpirationMs = getTokenExpirationMs()
 
-      if (localExpirationMs !== undefined && receivedExpirationMs < localExpirationMs) {
+      if (
+        !isEqualTimeConflict &&
+        localExpirationMs !== undefined &&
+        receivedExpirationMs < localExpirationMs
+      ) {
         return
       }
 
-      latestLifecycleAt = data.sentAt
+      latestLifecycleOrder = lifecycleOrder
       onSessionRefreshed(data.session)
       return
     }
@@ -88,16 +121,20 @@ export function createAuthSessionSync({
     if (data.type === 'session-expired') {
       const localExpirationMs = getTokenExpirationMs()
 
-      if (localExpirationMs !== undefined && localExpirationMs > data.expiredTokenAt) {
+      if (
+        !isEqualTimeConflict &&
+        localExpirationMs !== undefined &&
+        localExpirationMs > data.expiredTokenAt
+      ) {
         return
       }
 
-      latestLifecycleAt = data.sentAt
+      latestLifecycleOrder = lifecycleOrder
       onSessionExpired(data.expiredTokenAt)
       return
     }
 
-    latestLifecycleAt = data.sentAt
+    latestLifecycleOrder = lifecycleOrder
     onSessionLoggedOut()
   }
 
@@ -112,58 +149,61 @@ export function createAuthSessionSync({
       return
     }
 
-    void fetchFullUser().catch(() => undefined)
+    void fetchFullUser()
+      .then((result) => {
+        if (result.status === 'unauthenticated') {
+          onSessionResyncUnauthenticated()
+        }
+      })
+      .catch(() => undefined)
   }
 
-  let channel: BroadcastChannel | undefined
-
   if (typeof BroadcastChannel === 'function') {
+    let nextChannel: BroadcastChannel | undefined
+
     try {
-      const nextChannel = new BroadcastChannel(authSessionSyncChannelName)
+      nextChannel = new BroadcastChannel(authSessionSyncChannelName)
 
       nextChannel.addEventListener('message', receiveMessage)
       channel = nextChannel
     } catch {
+      closeChannel(nextChannel)
       channel = undefined
     }
   }
 
   if (!channel) {
-    window.addEventListener('storage', receiveStorageRefresh)
+    installStorageFallback()
   }
 
   return {
     cleanup: () => {
-      if (channel) {
-        try {
-          channel.removeEventListener('message', receiveMessage)
-        } catch {
-          // Synchronization cleanup is best-effort.
-        }
+      closeChannel(channel)
+      channel = undefined
 
-        try {
-          channel.close()
-        } catch {
-          // Synchronization cleanup is best-effort.
-        }
-      } else {
+      if (isStorageListenerInstalled) {
         try {
           window.removeEventListener('storage', receiveStorageRefresh)
         } catch {
           // Synchronization cleanup is best-effort.
         }
+
+        isStorageListenerInstalled = false
       }
     },
     publish: (event) => {
-      const sentAt = getNextLifecycleTimestamp()
+      const sentAt = getNextLifecycleTimestamp({ event })
+      const message = { ...event, sentAt, sourceID } as AuthSessionSyncMessage
+
+      latestLifecycleOrder = getLifecycleOrder(message)
 
       if (channel) {
         try {
-          channel.postMessage({ ...event, sentAt, sourceID } as AuthSessionSyncMessage)
+          channel.postMessage(message)
+          return
         } catch {
-          // Local authentication must continue when cross-tab publication fails.
+          downgradeToStorage()
         }
-        return
       }
 
       if (event.type !== 'session-logged-out') {
@@ -177,13 +217,53 @@ export function createAuthSessionSync({
     },
   }
 
-  function getNextLifecycleTimestamp(): number {
-    const currentTime = now()
-    const nextTimestamp = currentTime > latestLifecycleAt ? currentTime : latestLifecycleAt + 1
+  function closeChannel(channelToClose: BroadcastChannel | undefined): void {
+    if (!channelToClose) {
+      return
+    }
 
-    latestLifecycleAt = nextTimestamp
+    try {
+      channelToClose.removeEventListener('message', receiveMessage)
+    } catch {
+      // Synchronization cleanup is best-effort.
+    }
+
+    try {
+      channelToClose.close()
+    } catch {
+      // Synchronization cleanup is best-effort.
+    }
+  }
+
+  function downgradeToStorage(): void {
+    closeChannel(channel)
+    channel = undefined
+    installStorageFallback()
+  }
+
+  function getNextLifecycleTimestamp({ event }: { event?: AuthSessionSyncEvent } = {}): number {
+    const currentTime = now()
+    const latestSentAt = latestLifecycleOrder?.sentAt ?? Number.NEGATIVE_INFINITY
+    const nextTimestamp = currentTime > latestSentAt ? currentTime : latestSentAt + 1
+
+    if (event) {
+      latestLifecycleOrder = getLifecycleOrder({ ...event, sentAt: nextTimestamp, sourceID })
+    }
 
     return nextTimestamp
+  }
+
+  function installStorageFallback(): void {
+    if (isStorageListenerInstalled) {
+      return
+    }
+
+    try {
+      window.addEventListener('storage', receiveStorageRefresh)
+      isStorageListenerInstalled = true
+    } catch {
+      // Local authentication must continue when storage events are unavailable.
+    }
   }
 
   function publishStorageNotification({ sentAt }: { sentAt: number }): void {
@@ -211,6 +291,7 @@ function isAuthSessionSyncMessage(value: unknown): value is AuthSessionSyncMessa
     typeof value.sourceID !== 'string' ||
     !('sentAt' in value) ||
     typeof value.sentAt !== 'number' ||
+    !Number.isFinite(value.sentAt) ||
     !('type' in value)
   ) {
     return false
@@ -221,7 +302,11 @@ function isAuthSessionSyncMessage(value: unknown): value is AuthSessionSyncMessa
   }
 
   if (value.type === 'session-expired') {
-    return 'expiredTokenAt' in value && typeof value.expiredTokenAt === 'number'
+    return (
+      'expiredTokenAt' in value &&
+      typeof value.expiredTokenAt === 'number' &&
+      Number.isFinite(value.expiredTokenAt)
+    )
   }
 
   if (value.type === 'session-refreshed') {
@@ -231,6 +316,7 @@ function isAuthSessionSyncMessage(value: unknown): value is AuthSessionSyncMessa
       typeof value.session === 'object' &&
       'exp' in value.session &&
       typeof value.session.exp === 'number' &&
+      Number.isFinite(value.session.exp) &&
       'user' in value.session
     )
   }
@@ -247,6 +333,7 @@ function parseStorageRefreshNotification(value: string): null | StorageRefreshNo
       typeof notification === 'object' &&
       'sentAt' in notification &&
       typeof notification.sentAt === 'number' &&
+      Number.isFinite(notification.sentAt) &&
       'sourceID' in notification &&
       typeof notification.sourceID === 'string'
     ) {
@@ -257,4 +344,36 @@ function parseStorageRefreshNotification(value: string): null | StorageRefreshNo
   }
 
   return null
+}
+
+function compareLifecycleOrders({
+  first,
+  second,
+}: {
+  first: LifecycleOrder
+  second: LifecycleOrder
+}): number {
+  if (first.sentAt !== second.sentAt) {
+    return first.sentAt - second.sentAt
+  }
+
+  if (first.precedence !== second.precedence) {
+    return first.precedence - second.precedence
+  }
+
+  if (first.sourceID === second.sourceID) {
+    return 0
+  }
+
+  return first.sourceID > second.sourceID ? 1 : -1
+}
+
+function getLifecycleOrder(
+  event: { sentAt: number; sourceID: string } & AuthSessionSyncEvent,
+): LifecycleOrder {
+  return {
+    precedence: event.type === 'session-logged-out' ? 2 : event.type === 'session-expired' ? 1 : 0,
+    sentAt: event.sentAt,
+    sourceID: event.sourceID,
+  }
 }
