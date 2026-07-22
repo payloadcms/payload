@@ -6,6 +6,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { ErrorFieldsCollection } from './collections/ErrorFields/index.js'
 import { PrevValue } from './collections/PrevValue/index.js'
 import { PrevValueRelation } from './collections/PrevValueRelation/index.js'
+import { TabErrorReset } from './collections/TabErrorReset/index.js'
 import Uploads from './collections/Upload/index.js'
 import { ValidateDraftsOff } from './collections/ValidateDraftsOff/index.js'
 import { ValidateDraftsOn } from './collections/ValidateDraftsOn/index.js'
@@ -27,6 +28,7 @@ export default buildConfigWithDefaults({
     ValidateDraftsOnAndAutosave,
     PrevValue,
     PrevValueRelation,
+    TabErrorReset,
   ],
   globals: [GlobalValidateDraftsOn],
   onInit: async (payload) => {
