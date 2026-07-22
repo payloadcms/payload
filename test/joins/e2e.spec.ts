@@ -519,6 +519,61 @@ describe('Join Field', () => {
     await expect(siblingField.locator('tbody tr td', { hasText: exactText(title) })).toBeHidden()
   })
 
+  test('should refresh sibling polymorphic join tables when a document is deleted through another polymorphic join table', async () => {
+    const title = 'Poly Sibling Delete Post'
+
+    // Seed a post linked to this category so it appears in both polymorphic tables.
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title,
+        category: categoryID as string,
+      },
+    })
+
+    await page.goto(categoriesURL.edit(categoryID))
+
+    const actingField = page.locator('#field-polymorphicJoin.field-type.join')
+    const siblingField = page.locator('#field-polymorphicJoinNoRowTypes.field-type.join')
+    await expect(actingField).toBeVisible()
+    await expect(siblingField).toBeVisible()
+
+    // The seeded post appears in both polymorphic tables.
+    await expect(actingField.locator('tbody tr td', { hasText: exactText(title) })).toBeVisible()
+    await expect(siblingField.locator('tbody tr td', { hasText: exactText(title) })).toBeVisible()
+
+    // Delete the post through the acting table's own row drawer.
+    const editRow = actingField.locator('tbody tr', { hasText: title })
+    await expect(editRow).toBeVisible()
+    const editButton = editRow.locator('button.drawer-link__doc-drawer-toggler').first()
+    await expect(editButton).toBeVisible()
+    await editButton.click()
+
+    const editDrawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(editDrawer).toBeVisible()
+
+    const popupButton = editDrawer.locator('.doc-controls__popup .popup__trigger-wrap button')
+    await expect(popupButton).toBeVisible()
+    await popupButton.click()
+
+    const deleteButton = page.locator('.popup__content #action-delete')
+    await expect(deleteButton).toBeVisible()
+    await deleteButton.click()
+
+    const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
+    await expect(deleteConfirmModal).toBeVisible()
+    const confirmDeleteButton = deleteConfirmModal.locator('button[data-dialog-action="confirm"]')
+    await expect(confirmDeleteButton).toBeVisible()
+    await confirmDeleteButton.click()
+    await expect(editDrawer).toBeHidden()
+
+    // Removed from the acting table (optimistic) and the sibling polymorphic table
+    // (cross-table event). The sibling removal is what regresses without the poly-aware
+    // `{ relationTo, value }` lookup.
+    await expect(actingField.locator('tbody tr td', { hasText: exactText(title) })).toBeHidden()
+    await expect(siblingField.locator('tbody tr td', { hasText: exactText(title) })).toBeHidden()
+  })
+
   test('should edit joined document and update relationship table', async () => {
     await page.goto(categoriesURL.edit(categoryID))
 

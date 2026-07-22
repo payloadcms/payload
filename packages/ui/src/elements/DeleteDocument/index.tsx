@@ -115,17 +115,19 @@ export const DeleteDocument: React.FC<Props> = (props) => {
           }) || json.message,
         )
 
-        // Notify other surfaces (e.g. sibling join/relationship tables) so they can
-        // refresh. A trashed document also disappears from default queries, so both
-        // permanent deletes and trashing report as a `delete` event.
-        reportUpdate({
+        // A trashed document also disappears from default queries, so both permanent
+        // deletes and trashing report as a `delete` event.
+        const deleteEvent = {
           id,
           entitySlug: collectionSlug,
-          operation: 'delete',
+          operation: 'delete' as const,
           updatedAt: new Date().toISOString(),
-        })
+        }
 
         if (redirectAfterDelete) {
+          // Navigating away tears this surface down, so just notify other surfaces.
+          reportUpdate(deleteEvent)
+
           return startRouteTransition(() =>
             router.push(formatAdminURL({ adminRoute, path: `/collections/${collectionSlug}` })),
           )
@@ -134,6 +136,8 @@ export const DeleteDocument: React.FC<Props> = (props) => {
         if (typeof onDelete === 'function') {
           await onDelete({ id, collectionConfig })
         }
+
+        reportUpdate(deleteEvent)
 
         return
       }

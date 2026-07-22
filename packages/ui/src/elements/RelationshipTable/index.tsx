@@ -290,12 +290,19 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     // or a fresh mount already loaded data that includes it. Otherwise saving/deleting from
     // this table's own drawer (which also emits a matching event) would render a second time.
     const eventDocID = event.doc?.id ?? event.id
-    const existingDoc = data?.docs?.find((doc) => doc.id === eventDocID)
+
+    const existingDoc = isPolymorphic
+      ? data?.docs?.find(
+          (doc) => doc.relationTo === event.entitySlug && doc.value?.id === eventDocID,
+        )
+      : data?.docs?.find((doc) => doc.id === eventDocID)
+
+    const existingUpdatedAt = isPolymorphic ? existingDoc?.value?.updatedAt : existingDoc?.updatedAt
 
     const isAlreadyReflected =
       event.operation === 'delete'
         ? !existingDoc
-        : Boolean(existingDoc) && existingDoc.updatedAt === event.updatedAt
+        : Boolean(existingDoc) && existingUpdatedAt === event.updatedAt
 
     if (isAlreadyReflected) {
       return
