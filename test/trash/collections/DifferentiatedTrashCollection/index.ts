@@ -2,6 +2,13 @@ import type { CollectionConfig } from 'payload'
 
 export const differentiatedTrashCollectionSlug = 'differentiated-trash-collection'
 
+/**
+ * Captures the `id` argument received by the `delete` access control function
+ * on the most recent invocation, so tests can assert it was passed through
+ * for soft-delete (trash) attempts.
+ */
+export let lastDeleteAccessID: number | string | undefined
+
 export const DifferentiatedTrashCollection: CollectionConfig = {
   slug: differentiatedTrashCollectionSlug,
   admin: {
@@ -19,7 +26,9 @@ export const DifferentiatedTrashCollection: CollectionConfig = {
    * - Admins: Can both trash and permanently delete
    */
   access: {
-    delete: ({ req: { user }, data }) => {
+    delete: ({ id, req: { user }, data }) => {
+      lastDeleteAccessID = id
+
       // Not logged in - no access
       if (!user) {
         return false

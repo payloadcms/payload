@@ -10,7 +10,10 @@ import type { DifferentiatedTrashCollection, Post, RestrictedCollection } from '
 import { idToString } from '../__helpers/shared/idToString.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser, regularUser } from '../credentials.js'
-import { differentiatedTrashCollectionSlug } from './collections/DifferentiatedTrashCollection/index.js'
+import {
+  differentiatedTrashCollectionSlug,
+  lastDeleteAccessID,
+} from './collections/DifferentiatedTrashCollection/index.js'
 import { pagesSlug } from './collections/Pages/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 import { restrictedCollectionSlug } from './collections/RestrictedCollection/index.js'
@@ -195,6 +198,7 @@ describe('trash', () => {
         })
 
         expect(trashedDoc.deletedAt).toBeDefined()
+        expect(lastDeleteAccessID).toBe(doc.id)
       })
 
       it('should allow admin to trash (soft-delete) a document', async () => {
