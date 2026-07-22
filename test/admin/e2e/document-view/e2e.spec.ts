@@ -766,6 +766,28 @@ describe('Document View', () => {
 
       await expect(status).toContainText('Published')
     })
+
+    test('should not show stale data modal after repeatedly publishing active locale', async () => {
+      await page.goto(localizedURL.create)
+
+      // Create and publish the active locale
+      await page.locator('#field-title').fill('Version 1')
+      await saveDocAndAssert(page)
+
+      // Publish the active locale again
+      await page.locator('#field-title').fill('Version 2')
+      await saveDocAndAssert(page)
+
+      // Editing triggers the stale check — but only the current user has touched the
+      // document, so the modal must not appear
+      await page.locator('#field-title').fill('Version 3')
+
+      // Wait for the debounced stale check to run
+      // eslint-disable-next-line payload/no-wait-function
+      await wait(1000)
+
+      await expect(page.locator('.document-stale-data')).toBeHidden()
+    })
   })
 
   describe('reserved field names', () => {
