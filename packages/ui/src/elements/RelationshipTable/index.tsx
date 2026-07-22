@@ -43,6 +43,7 @@ type RelationshipTableComponentProps = {
   readonly initialData?: PaginatedDocs
   readonly initialDrawerData?: DocumentDrawerProps['initialData']
   readonly Label?: React.ReactNode
+  readonly onDataChange?: (data: PaginatedDocs) => void
   readonly parent?: {
     collectionSlug: CollectionSlug
     id: number | string
@@ -66,6 +67,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     initialData: initialDataFromProps,
     initialDrawerData,
     Label,
+    onDataChange,
     parent,
     relationTo,
   } = props
@@ -122,17 +124,30 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
 
   const { getTableState } = useServerFunctions()
 
-  const renderTable = useCallback(
-    async (data?: PaginatedDocs) => {
+  const getTableStateForQuery = useCallback(
+    async ({
+      data,
+      page,
+      shouldUseInteractiveQuery = true,
+    }: {
+      data?: PaginatedDocs
+      page?: number
+      shouldUseInteractiveQuery?: boolean
+    } = {}) => {
+      const interactiveQuery = shouldUseInteractiveQuery ? query : undefined
       const newQuery: ListQuery = {
         limit: field?.defaultLimit || collectionConfig?.admin?.pagination?.defaultLimit,
         sort: field.defaultSort || collectionConfig?.defaultSort,
-        ...(query || {}),
-        where: { ...(query?.where || {}) },
+        ...(interactiveQuery || {}),
+        where: { ...(interactiveQuery?.where || {}) },
       }
 
       if (filterOptions) {
         newQuery.where = hoistQueryParamsToAnd(newQuery.where, filterOptions)
+      }
+
+      if (typeof page === 'number') {
+        newQuery.page = page
       }
 
       // map columns from string[] to CollectionPreferences['columns']
@@ -148,11 +163,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           ? !field.admin.disableRowTypes
           : Array.isArray(relationTo)
 
-      const {
-        data: newData,
-        state: newColumnState,
-        Table: NewTable,
-      } = await getTableState({
+      return getTableState({
         collectionSlug: relationTo,
         columns: transformColumnsToPreferences(query?.columns) || defaultColumns,
         data,
@@ -166,11 +177,6 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         renderRowTypes,
         tableAppearance: 'condensed',
       })
-
-      setData(newData)
-      setTable(NewTable)
-      setColumnState(newColumnState)
-      setIsLoadingTable(false)
     },
     [
       field.defaultLimit,
@@ -190,6 +196,38 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     ],
   )
 
+  const applyTableStateResult = useCallback((result: Awaited<ReturnType<typeof getTableState>>) => {
+    if (!result || !('Table' in result) || !result.data) {
+      setIsLoadingTable(false)
+      return
+    }
+
+    const { data: newData, state: newColumnState, Table: NewTable } = result
+
+    setData(newData)
+    setTable(NewTable)
+    setColumnState(newColumnState)
+    setIsLoadingTable(false)
+
+    return newData
+  }, [])
+
+  const renderTable = useCallback(
+    async (data?: PaginatedDocs) => {
+      const result = await getTableStateForQuery({ data })
+
+      return applyTableStateResult(result)
+    },
+    [applyTableStateResult, getTableStateForQuery],
+  )
+
+  const getCanonicalTableState = useCallback(async () => {
+    return getTableStateForQuery({
+      page: 1,
+      shouldUseInteractiveQuery: false,
+    })
+  }, [getTableStateForQuery])
+
   const handleTableRender = useEffectEvent((query: ListQuery, disableTable: boolean) => {
     if (!disableTable && (!Table || query)) {
       void renderTable()
@@ -201,7 +239,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
   }, [query, disableTable])
 
   const onDrawerSave = useCallback<DocumentDrawerProps['onSave']>(
-    ({ doc, operation }) => {
+    async ({ doc, operation }) => {
       if (operation === 'create') {
         closeDrawer()
       }
@@ -217,23 +255,54 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
         withNewOrUpdatedData.docs = [doc, ...data.docs]
       }
 
-      void renderTable(withNewOrUpdatedData)
+      const canonicalTableState = await getCanonicalTableState()
+      const formData =
+        canonicalTableState && 'Table' in canonicalTableState ? canonicalTableState.data : undefined
+
+      if (query || !formData) {
+        await renderTable(withNewOrUpdatedData)
+      } else {
+        applyTableStateResult(canonicalTableState)
+      }
+
+      if (formData) {
+        onDataChange?.(formData)
+      }
     },
-    [data?.docs, renderTable, closeDrawer],
+    [
+      data?.docs,
+      renderTable,
+      closeDrawer,
+      getCanonicalTableState,
+      onDataChange,
+      query,
+      applyTableStateResult,
+    ],
   )
 
   const onDrawerDelete = useCallback<DocumentDrawerProps['onDelete']>(
-    (args) => {
+    async (args) => {
       const newDocs = data.docs.filter((doc) => doc.id !== args.id)
 
-      void renderTable({
-        ...data,
-        docs: newDocs,
-      })
+      const canonicalTableState = await getCanonicalTableState()
+      const formData =
+        canonicalTableState && 'Table' in canonicalTableState ? canonicalTableState.data : undefined
 
+      if (query || !formData) {
+        await renderTable({
+          ...data,
+          docs: newDocs,
+        })
+      } else {
+        applyTableStateResult(canonicalTableState)
+      }
+
+      if (formData) {
+        onDataChange?.(formData)
+      }
       setCurrentDrawerID(undefined)
     },
-    [data, renderTable],
+    [data, renderTable, getCanonicalTableState, onDataChange, query, applyTableStateResult],
   )
 
   const onDrawerOpen = useCallback<OnDrawerOpen>((id, collectionSlug) => {

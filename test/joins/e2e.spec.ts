@@ -17,6 +17,7 @@ import {
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
 import { navigateToDoc } from '../__helpers/e2e/navigateToDoc.js'
+import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -42,6 +43,7 @@ let client: RESTClient
 const { beforeAll, beforeEach, describe } = test
 
 describe('Join Field', () => {
+  const createdPostTitles: string[] = []
   let page: Page
   let categoriesURL: AdminUrlUtil
   let foldersURL: AdminUrlUtil
@@ -104,6 +106,21 @@ describe('Join Field', () => {
 
     const folder = await payload.find({ collection: 'folders', sort: 'createdAt', depth: 0 })
     rootParentID = folder.docs[0]!.id
+  })
+
+  test.afterEach(async () => {
+    for (const title of createdPostTitles) {
+      await payload.delete({
+        collection: postsSlug,
+        where: {
+          title: {
+            equals: title,
+          },
+        },
+      })
+    }
+
+    createdPostTitles.length = 0
   })
 
   test('should populate joined relationships in table cells of list view', async () => {
@@ -405,6 +422,41 @@ describe('Join Field', () => {
         hasText: exactText('Test Post 4'),
       }),
     ).toBeVisible()
+  })
+
+  test('should refresh functional filterOptions when a joined document is created', async () => {
+    const postTitle = 'Post created from join field'
+
+    createdPostTitles.push(postTitle)
+
+    await page.goto(categoriesURL.edit(categoryID))
+
+    const saveButton = page.locator('#action-save')
+    const joinField = page.locator('#field-relatedPosts.field-type.join')
+
+    await expect(saveButton).toBeDisabled()
+    await expect(joinField).toBeVisible()
+
+    const addButton = joinField.locator('.relationship-table__actions button.doc-drawer__toggler', {
+      hasText: exactText('Add new'),
+    })
+
+    await addButton.click()
+
+    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+
+    await expect(drawer).toBeVisible()
+    await drawer.locator('#field-title').fill(postTitle)
+    await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] button#action-save')
+    await expect(drawer).toBeHidden()
+
+    const defaultPostField = page.locator('#field-defaultPost')
+
+    await defaultPostField.locator('.rs__control').click()
+    await expect(
+      getSelectMenu({ page }).locator('.rs__option', { hasText: exactText(postTitle) }),
+    ).toBeVisible()
+    await expect(saveButton).toBeDisabled()
   })
 
   test('should edit joined document and update relationship table', async () => {
