@@ -236,6 +236,11 @@
       "types": "./src/utilities/getLanguageDir.ts",
       "default": "./src/utilities/getLanguageDir.ts"
     },
+    "./utilities/getRequestEmbed": {
+      "import": "./src/utilities/getRequestEmbed.ts",
+      "types": "./src/utilities/getRequestEmbed.ts",
+      "default": "./src/utilities/getRequestEmbed.ts"
+    },
     "./utilities/getRequestTheme": {
       "import": "./src/utilities/getRequestTheme.ts",
       "types": "./src/utilities/getRequestTheme.ts",

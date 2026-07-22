@@ -4,6 +4,7 @@ import type { ImportMap, LanguageOptions, SanitizedConfig, ServerProps } from 'p
 import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
+import { getRequestEmbed } from '@payloadcms/ui/utilities/getRequestEmbed'
 import { getRequestTheme } from '@payloadcms/ui/utilities/getRequestTheme'
 import { Outlet } from '@tanstack/react-router'
 import { applyLocaleFiltering } from 'payload/shared'
@@ -11,7 +12,6 @@ import { createElement } from 'react'
 
 import type { RootLayoutData } from './index.js'
 
-import { getRequestEmbed } from '../../utilities/getRequestEmbed.js'
 import { initReq } from '../../utilities/initReq.server.js'
 
 export type GetLayoutDataArgs = {
