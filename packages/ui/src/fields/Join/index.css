@@ -13,6 +13,15 @@
     gap: var(--spacer-2);
   }
 
+  .field-type.join .relationship-table__header {
+    flex-wrap: wrap;
+    row-gap: var(--spacer-1);
+  }
+
+  .field-type.join .join__description {
+    flex-basis: 100%;
+  }
+
   .field-type.join .relationship-table__header h4 {
     margin: 0;
     font-family: var(--text-body-large-strong-font-family);
