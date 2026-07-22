@@ -41,6 +41,15 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
 
   const isSorted = sort === asc || sort === desc
 
+  const descLabel = t('general:sortByLabelDirection', {
+    direction: t('general:descending'),
+    label,
+  })
+  const ascLabel = t('general:sortByLabelDirection', {
+    direction: t('general:ascending'),
+    label,
+  })
+
   return (
     <div
       className={[
@@ -57,31 +66,19 @@ export const SortColumn: React.FC<SortColumnProps> = (props) => {
       {!disable && (
         <div className={`${baseClass}__buttons`}>
           <button
-            aria-label={t('general:sortByLabelDirection', {
-              direction: t('general:descending'),
-              label,
-            })}
+            aria-label={descLabel}
             className={[...descClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => void handleSortChange(desc)}
-            title={t('general:sortByLabelDirection', {
-              direction: t('general:descending'),
-              label,
-            })}
+            title={descLabel}
             type="button"
           >
             <ChevronIcon size={16} />
           </button>
           <button
-            aria-label={t('general:sortByLabelDirection', {
-              direction: t('general:ascending'),
-              label,
-            })}
+            aria-label={ascLabel}
             className={[...ascClasses, `${baseClass}__button`].filter(Boolean).join(' ')}
             onClick={() => void handleSortChange(asc)}
-            title={t('general:sortByLabelDirection', {
-              direction: t('general:ascending'),
-              label,
-            })}
+            title={ascLabel}
             type="button"
           >
             <ChevronIcon direction="up" size={16} />
