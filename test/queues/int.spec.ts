@@ -785,6 +785,42 @@ describe('Queues - Payload', () => {
     expect(workersThatRanTheJob).toHaveLength(1)
   })
 
+  it('should run a job only once when multiple workers run the same job by ID', async () => {
+    _internal_jobSystemGlobals.shouldAutoRun = false
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const message = 'run once by ID with multiple workers'
+    const job = await payload.jobs.queue({
+      input: {
+        message,
+      },
+      task: 'CreateSimple',
+    })
+
+    const workerCount = 10
+    const results = await Promise.all(
+      Array.from({ length: workerCount }, () =>
+        payload.jobs.runByID({
+          id: job.id,
+          silent: true,
+        }),
+      ),
+    )
+
+    const createdDocuments = await payload.find({
+      collection: 'simple',
+      where: {
+        title: {
+          equals: message,
+        },
+      },
+    })
+    expect(createdDocuments.totalDocs).toBe(1)
+
+    const workersThatRanTheJob = results.filter((result) => result.jobStatus?.[job.id])
+    expect(workersThatRanTheJob).toHaveLength(1)
+  })
+
   it('ensure jobs run in FIFO order by default', async () => {
     await payload.jobs.queue({
       workflow: 'inlineTaskTestDelayed',
