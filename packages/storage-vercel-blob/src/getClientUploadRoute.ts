@@ -34,6 +34,7 @@ export const getClientUploadRoute =
 
           return Promise.resolve({
             addRandomSuffix,
+            allowOverwrite: true,
             cacheControlMaxAge,
           })
         },
