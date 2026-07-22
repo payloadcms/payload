@@ -36,7 +36,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
     timestamps: true,
   })
 
-  let query = await buildQuery({
+  const query = await buildQuery({
     adapter: this,
     collectionSlug: collectionConfig.slug,
     fields: collectionConfig.flattenedFields,
@@ -105,20 +105,52 @@ export const updateJobs: UpdateJobs = async function updateMany(
         const doc = await Model.findOneAndUpdate(query, updateData, findOptions)
         result = doc ? [doc] : []
       }
-    } else {
-      if (typeof limit === 'number' && limit > 0) {
-        const documentsToUpdate = await Model.find(
-          query,
-          {},
-          { ...findOptions, limit, projection: { _id: 1 }, sort },
-        )
-        if (documentsToUpdate.length === 0) {
+    } else if (typeof limit === 'number' && limit > 0) {
+      const candidates = await Model.find(
+        query,
+        {},
+        { ...findOptions, limit, projection: { _id: 1 }, sort },
+      )
+
+      if (candidates.length === 0) {
+        return null
+      }
+
+      const candidateIDs = candidates.map((candidate) => candidate._id)
+
+      if (typeof data.processingToken === 'string') {
+        /**
+         * `processingToken` identifies this claim update. `processing: true` cannot, because every
+         * worker writes the same value. The token lets us reliably find the jobs this update won.
+         */
+        const claimQuery = {
+          $and: [query, { _id: { $in: candidateIDs } }],
+        }
+
+        await Model.updateMany(claimQuery, updateData, baseOptions)
+
+        if (returning === false) {
           return null
         }
 
-        query = { _id: { $in: documentsToUpdate.map((doc) => doc._id) } }
-      }
+        const claimedJobsQuery = {
+          _id: { $in: candidateIDs },
+          processingToken: { $eq: data.processingToken },
+        }
 
+        result = await Model.find(claimedJobsQuery, {}, { ...findOptions, sort })
+      } else {
+        const limitedUpdateQuery = { _id: { $in: candidateIDs } }
+
+        await Model.updateMany(limitedUpdateQuery, updateData, baseOptions)
+
+        if (returning === false) {
+          return null
+        }
+
+        result = await Model.find(limitedUpdateQuery, {}, { ...findOptions, sort })
+      }
+    } else {
       await Model.updateMany(query, updateData, baseOptions)
 
       if (returning === false) {
