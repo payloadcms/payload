@@ -992,10 +992,16 @@ describe('createAuthSessionSync storage fallback', () => {
     expect(receivedSession).toBeNull()
   })
 
-  it('should not resynchronize a healthy peer twice for one logout lifecycle', async () => {
+  it('should not repeat healthy-peer logout notification after cookie reconciliation', async () => {
     const fetchFullUser = vi.fn().mockResolvedValue({ status: 'unauthenticated' })
     const onSessionLoggedOut = vi.fn()
-    const receiver = createSync({ fetchFullUser, onSessionLoggedOut, sourceID: 'receiver-tab' })
+    const onSessionResyncUnauthenticated = vi.fn()
+    const receiver = createSync({
+      fetchFullUser,
+      onSessionLoggedOut,
+      onSessionResyncUnauthenticated,
+      sourceID: 'receiver-tab',
+    })
     const receiverChannel = getBroadcastChannel()
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
     const publisher = createSync({ now: () => 500, sourceID: 'publisher-tab' })
@@ -1009,18 +1015,23 @@ describe('createAuthSessionSync storage fallback', () => {
     await Promise.resolve()
 
     expect(onSessionLoggedOut).toHaveBeenCalledOnce()
-    expect(fetchFullUser).not.toHaveBeenCalled()
+    expect(fetchFullUser).toHaveBeenCalledOnce()
+    expect(onSessionResyncUnauthenticated).not.toHaveBeenCalled()
 
     receiver.cleanup()
   })
 
   it('should resynchronize a settled logout after an intervening peer refresh', async () => {
     const fetchFullUser = vi.fn().mockResolvedValue({ status: 'unauthenticated' })
+    let sessionCleared = true
     const onSessionLoggedOut = vi.fn()
-    const onSessionRefreshed = vi.fn()
+    const onSessionRefreshed = vi.fn(() => {
+      sessionCleared = false
+    })
     const onSessionResyncUnauthenticated = vi.fn()
     const receiver = createSync({
       fetchFullUser,
+      isSessionCleared: () => sessionCleared,
       onSessionLoggedOut,
       onSessionRefreshed,
       onSessionResyncUnauthenticated,
@@ -1127,6 +1138,7 @@ describe('createAuthSessionSync transport failures', () => {
     const onSessionResyncUnauthenticated = vi.fn()
     const downgraded = createSync({
       fetchFullUser,
+      isSessionCleared: () => false,
       now: () => 100,
       onSessionResyncUnauthenticated,
       sourceID: 'downgraded-tab',
@@ -2195,6 +2207,88 @@ describe('AuthProvider session synchronization', () => {
     expect(channel.postMessage).not.toHaveBeenCalled()
   })
 
+  it('should resynchronize a settled remote logout after a local relogin', async () => {
+    const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
+    const reloginSession = createFutureSession({ expiresInMs: 120_000, token: 'relogin-token' })
+
+    await renderProvider({ session: initialSession })
+    apiMocks.get.mockClear()
+    const channel = getBroadcastChannel()
+
+    await act(async () => {
+      channel.emit(
+        createMessage({
+          sentAt: 500,
+          sourceID: 'remote-tab',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+        }),
+      )
+    })
+    act(() => authContext?.setUser(reloginSession))
+
+    expect(authContext?.token).toBe('relogin-token')
+
+    apiMocks.get.mockResolvedValueOnce(
+      createResponse({ session: { exp: 0, user: null } as unknown as UserWithToken }),
+    )
+    routerMocks.replace.mockClear()
+    dispatchStorageRefresh({
+      affectedExpirationMs: 0,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      sentAt: 600,
+      settlesSentAt: 500,
+      sourceID: 'remote-tab',
+    })
+    await act(async () => {
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    expect(apiMocks.get).toHaveBeenCalledOnce()
+    expect(authContext?.user).toBeNull()
+    expect(authContext?.token).toBeUndefined()
+    expect(routerMocks.replace).toHaveBeenCalledWith(expect.stringContaining('/logout-inactivity'))
+  })
+
+  it('should restore the shared session when a remote logout does not clear its cookie', async () => {
+    const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'surviving-token' })
+
+    await renderProvider({ session: initialSession })
+    apiMocks.get.mockClear()
+    const channel = getBroadcastChannel()
+
+    await act(async () => {
+      channel.emit(
+        createMessage({
+          sentAt: 500,
+          sourceID: 'remote-tab',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+        }),
+      )
+    })
+
+    expect(authContext?.user).toBeNull()
+
+    apiMocks.get.mockResolvedValueOnce(createResponse({ session: initialSession }))
+    routerMocks.replace.mockClear()
+    dispatchStorageRefresh({
+      affectedExpirationMs: 0,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      sentAt: 600,
+      settlesSentAt: 500,
+      sourceID: 'remote-tab',
+    })
+    await act(async () => {
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    expect(apiMocks.get).toHaveBeenCalledOnce()
+    expect(authContext?.token).toBe('surviving-token')
+    expect(authContext?.user).toEqual(initialSession.user)
+    expect(routerMocks.replace).not.toHaveBeenCalled()
+  })
+
   it('should ignore a stale force-logout callback after a newer session arrives', async () => {
     vi.useFakeTimers()
     const scheduledCallbacks: Array<{ callback: () => void; timeout: number }> = []
@@ -2363,17 +2457,25 @@ function createMessage(
 function dispatchStorageRefresh({
   affectedExpirationMs,
   sentAt,
+  settlesSentAt,
   sourceID,
   type,
 }: {
   affectedExpirationMs: number
   sentAt: number
+  settlesSentAt?: number
   sourceID: string
   type: AuthSessionSyncEventType
 }): void {
   const notification =
     type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
-      ? { affectedExpirationMs, sentAt, settlesSentAt: sentAt - 1, sourceID, type }
+      ? {
+          affectedExpirationMs,
+          sentAt,
+          settlesSentAt: settlesSentAt ?? sentAt - 1,
+          sourceID,
+          type,
+        }
       : { affectedExpirationMs, sentAt, sourceID, type }
 
   act(() => {
@@ -2432,6 +2534,7 @@ function createFutureSession({
 
 function createSync({
   fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' } as const),
+  isSessionCleared = () => true,
   localExpirationMs,
   now,
   onSessionExpired = vi.fn(),
@@ -2441,6 +2544,7 @@ function createSync({
   sourceID = 'local-tab',
 }: {
   fetchFullUser?: () => Promise<AuthSessionResyncResult>
+  isSessionCleared?: () => boolean
   localExpirationMs?: number
   now?: () => number
   onSessionExpired?: (expiredTokenAt: number) => void
@@ -2452,6 +2556,7 @@ function createSync({
   const sync = createAuthSessionSync({
     fetchFullUser,
     getTokenExpirationMs: () => localExpirationMs,
+    isSessionCleared,
     now,
     onSessionExpired,
     onSessionLoggedOut,

@@ -96,6 +96,7 @@ type LifecycleOrder = AuthSessionSyncPublication
 export function createAuthSessionSync({
   fetchFullUser,
   getTokenExpirationMs,
+  isSessionCleared,
   now = Date.now,
   onSessionExpired,
   onSessionLoggedOut,
@@ -105,6 +106,7 @@ export function createAuthSessionSync({
 }: {
   fetchFullUser: (options: AuthSessionResyncOptions) => Promise<AuthSessionResyncResult>
   getTokenExpirationMs: () => number | undefined
+  isSessionCleared: () => boolean
   now?: () => number
   onSessionExpired: (expiredTokenAt: number) => void
   onSessionLoggedOut: () => void
@@ -191,17 +193,8 @@ export function createAuthSessionSync({
       return
     }
 
-    const settlesAppliedLogout =
-      notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT &&
-      latestLifecycleOrder?.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT &&
-      latestLifecycleOrder.sentAt === notification.settlesSentAt &&
-      latestLifecycleOrder.sourceID === notification.sourceID
-
-    if (settlesAppliedLogout) {
-      pendingStorageLifecycleOrder = undefined
-      latestLifecycleOrder = notification
-      return
-    }
+    const shouldSuppressUnauthenticatedCallback =
+      notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT && isSessionCleared()
 
     pendingStorageLifecycleOrder = notification
     latestLifecycleOrder = notification
@@ -232,7 +225,10 @@ export function createAuthSessionSync({
             sentAt: notification.sentAt,
             sourceID: notification.sourceID,
           }
-          onSessionResyncUnauthenticated()
+
+          if (!shouldSuppressUnauthenticatedCallback) {
+            onSessionResyncUnauthenticated()
+          }
         }
       })
       .catch(() => undefined)
