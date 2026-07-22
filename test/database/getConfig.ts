@@ -97,8 +97,8 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: 'simple',
-      // Authorship adds a polymorphic relationship (`_rels`) that changes raw SQL query counts;
-      // disabled here so the postgres-logs adapter benchmark measures upsertRow in isolation.
+      // Disabled: authorship adds a `_rels` field that defeats the single-call `RETURNING`
+      // fast path this collection's postgres-logs benchmark measures.
       authorship: false,
       fields: [
         {
@@ -139,8 +139,8 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: postsSlug,
-      // Authorship adds a polymorphic relationship (`_rels`) that changes raw SQL query counts;
-      // disabled here so the postgres-logs adapter benchmark measures upsertRow in isolation.
+      // Disabled: authorship's createdBy/updatedBy FK-link to a real user, which breaks
+      // the postgres-logs benchmark counts and the transaction tests that use a synthetic user.
       authorship: false,
       fields: [
         {
