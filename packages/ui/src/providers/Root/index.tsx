@@ -45,7 +45,7 @@ type Props = {
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
-  readonly embed: boolean
+  readonly embed?: boolean
   readonly fallbackLang: I18nOptions['fallbackLanguage']
   readonly highContrastMode: boolean
   readonly isNavOpen?: boolean
