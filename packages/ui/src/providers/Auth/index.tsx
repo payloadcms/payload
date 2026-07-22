@@ -125,6 +125,7 @@ export function AuthProvider({
   const reminderTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
   const forceLogOutTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
   const knownTokenExpirationMsRef = React.useRef<number>(undefined)
+  const sessionGenerationRef = React.useRef(0)
   const sessionSyncRef = React.useRef<null | ReturnType<typeof createAuthSessionSync>>(null)
   const tokenExpirationMsRef = React.useRef<number>(undefined)
 
@@ -159,6 +160,7 @@ export function AuthProvider({
   }, [adminRoute, closeAllModals, loginRoute, router, startRouteTransition])
 
   const revokeTokenAndExpire = useCallback(() => {
+    sessionGenerationRef.current += 1
     setUserInMemory(null)
     setTokenInMemory(undefined)
     setTokenExpirationMs(undefined)
@@ -183,6 +185,7 @@ export function AuthProvider({
       if (userResponse?.user) {
         const nextTokenExpirationMs = userResponse.exp * 1000
 
+        sessionGenerationRef.current += 1
         setUserInMemory(userResponse.user)
         setTokenInMemory(userResponse.token ?? userResponse.refreshedToken)
         setTokenExpirationMs(nextTokenExpirationMs)
@@ -233,6 +236,7 @@ export function AuthProvider({
 
       if (forceRefresh || (tokenExpirationMs && expiresInMs < forceLogoutBufferMs * 2)) {
         const handledExpiration = tokenExpirationMsRef.current
+        const requestGeneration = sessionGenerationRef.current
 
         clearTimeout(refreshTokenTimeoutRef.current)
         refreshTokenTimeoutRef.current = setTimeout(async () => {
@@ -251,10 +255,15 @@ export function AuthProvider({
 
             if (request.status === 200) {
               const json: UserWithToken = await request.json()
+
+              if (sessionGenerationRef.current !== requestGeneration) {
+                return
+              }
+
               setNewUser(json)
               sessionSyncRef.current?.publish({ type: 'session-refreshed', session: json })
             } else {
-              if (tokenExpirationMsRef.current !== handledExpiration) {
+              if (sessionGenerationRef.current !== requestGeneration) {
                 return
               }
 
@@ -289,6 +298,7 @@ export function AuthProvider({
   const refreshCookieAsync = useCallback(
     async (skipSetUser?: boolean): Promise<AuthenticatedUser | null> => {
       const handledExpiration = tokenExpirationMsRef.current
+      const requestGeneration = sessionGenerationRef.current
 
       try {
         const request = await requests.post(
@@ -305,15 +315,22 @@ export function AuthProvider({
 
         if (request.status === 200) {
           const json: UserWithToken = await request.json()
+
+          if (sessionGenerationRef.current !== requestGeneration) {
+            return null
+          }
+
           if (!skipSetUser) {
             setNewUser(json)
+          } else {
+            sessionGenerationRef.current += 1
           }
           sessionSyncRef.current?.publish({ type: 'session-refreshed', session: json })
           return json.user
         }
 
         if (user) {
-          if (tokenExpirationMsRef.current !== handledExpiration) {
+          if (sessionGenerationRef.current !== requestGeneration) {
             return null
           }
 
@@ -336,7 +353,9 @@ export function AuthProvider({
   )
 
   const logOut = useCallback(async () => {
-    sessionSyncRef.current?.publish({ type: 'session-logged-out' })
+    const sessionSync = sessionSyncRef.current
+
+    sessionSync?.publish({ type: 'session-logged-out' })
 
     try {
       if (user && user.collection) {
@@ -350,6 +369,8 @@ export function AuthProvider({
       }
     } catch (_) {
       // fail silently and log the user out in state
+    } finally {
+      sessionSync?.publishStorageRefresh()
     }
 
     return true
@@ -393,6 +414,8 @@ export function AuthProvider({
   )
 
   const fetchFullUser = React.useCallback(async () => {
+    const requestGeneration = sessionGenerationRef.current
+
     try {
       const request = await requests.get(
         formatAdminURL({
@@ -409,8 +432,17 @@ export function AuthProvider({
 
       if (request.status === 200) {
         const json: UserWithToken = await request.json()
+
+        if (sessionGenerationRef.current !== requestGeneration) {
+          return null
+        }
+
         setNewUser(json)
         return json?.user || null
+      }
+
+      if (sessionGenerationRef.current !== requestGeneration) {
+        return null
       }
 
       setNewUser(null)

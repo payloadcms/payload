@@ -59,9 +59,16 @@ export function createAuthSessionSync({
 }): {
   cleanup: () => void
   publish: (event: AuthSessionSyncEvent) => void
+  publishStorageRefresh: () => void
 } {
+  let latestLifecycleAt = Number.NEGATIVE_INFINITY
+
   const receiveMessage = ({ data }: MessageEvent<unknown>) => {
-    if (!isAuthSessionSyncMessage(data) || data.sourceID === sourceID) {
+    if (
+      !isAuthSessionSyncMessage(data) ||
+      data.sourceID === sourceID ||
+      data.sentAt < latestLifecycleAt
+    ) {
       return
     }
 
@@ -73,6 +80,7 @@ export function createAuthSessionSync({
         return
       }
 
+      latestLifecycleAt = data.sentAt
       onSessionRefreshed(data.session)
       return
     }
@@ -84,10 +92,12 @@ export function createAuthSessionSync({
         return
       }
 
+      latestLifecycleAt = data.sentAt
       onSessionExpired(data.expiredTokenAt)
       return
     }
 
+    latestLifecycleAt = data.sentAt
     onSessionLoggedOut()
   }
 
@@ -108,34 +118,88 @@ export function createAuthSessionSync({
   let channel: BroadcastChannel | undefined
 
   if (typeof BroadcastChannel === 'function') {
-    channel = new BroadcastChannel(authSessionSyncChannelName)
-    channel.addEventListener('message', receiveMessage)
-  } else {
+    try {
+      const nextChannel = new BroadcastChannel(authSessionSyncChannelName)
+
+      nextChannel.addEventListener('message', receiveMessage)
+      channel = nextChannel
+    } catch {
+      channel = undefined
+    }
+  }
+
+  if (!channel) {
     window.addEventListener('storage', receiveStorageRefresh)
   }
 
   return {
     cleanup: () => {
       if (channel) {
-        channel.removeEventListener('message', receiveMessage)
-        channel.close()
+        try {
+          channel.removeEventListener('message', receiveMessage)
+        } catch {
+          // Synchronization cleanup is best-effort.
+        }
+
+        try {
+          channel.close()
+        } catch {
+          // Synchronization cleanup is best-effort.
+        }
       } else {
-        window.removeEventListener('storage', receiveStorageRefresh)
+        try {
+          window.removeEventListener('storage', receiveStorageRefresh)
+        } catch {
+          // Synchronization cleanup is best-effort.
+        }
       }
     },
     publish: (event) => {
-      const sentAt = now()
+      const sentAt = getNextLifecycleTimestamp()
 
       if (channel) {
-        channel.postMessage({ ...event, sentAt, sourceID } as AuthSessionSyncMessage)
+        try {
+          channel.postMessage({ ...event, sentAt, sourceID } as AuthSessionSyncMessage)
+        } catch {
+          // Local authentication must continue when cross-tab publication fails.
+        }
         return
       }
 
-      const notification: StorageRefreshNotification = { sentAt, sourceID }
-
-      localStorage.setItem(authSessionSyncStorageKey, JSON.stringify(notification))
-      localStorage.removeItem(authSessionSyncStorageKey)
+      if (event.type !== 'session-logged-out') {
+        publishStorageNotification({ sentAt })
+      }
     },
+    publishStorageRefresh: () => {
+      if (!channel) {
+        publishStorageNotification({ sentAt: getNextLifecycleTimestamp() })
+      }
+    },
+  }
+
+  function getNextLifecycleTimestamp(): number {
+    const currentTime = now()
+    const nextTimestamp = currentTime > latestLifecycleAt ? currentTime : latestLifecycleAt + 1
+
+    latestLifecycleAt = nextTimestamp
+
+    return nextTimestamp
+  }
+
+  function publishStorageNotification({ sentAt }: { sentAt: number }): void {
+    const notification: StorageRefreshNotification = { sentAt, sourceID }
+
+    try {
+      localStorage.setItem(authSessionSyncStorageKey, JSON.stringify(notification))
+    } catch {
+      // Local authentication must continue when storage is unavailable.
+    }
+
+    try {
+      localStorage.removeItem(authSessionSyncStorageKey)
+    } catch {
+      // Local authentication must continue when storage is unavailable.
+    }
   }
 }
 
