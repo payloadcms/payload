@@ -115,7 +115,8 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
   const now = getCurrentDate()
-  const { processingLeaseDuration } = jobsConfig
+  const { duration: processingLeaseDuration, safetyBuffer: processingLeaseSafetyBuffer } =
+    jobsConfig.processingLease
   const processingToken = uuid()
   const scope: Where[] = [
     {
@@ -299,7 +300,17 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         req,
         returning: false,
         where: {
-          and: [{ id: { in: releaseIds } }, { processingToken: { equals: processingToken } }],
+          and: [
+            { id: { in: releaseIds } },
+            { processingToken: { equals: processingToken } },
+            {
+              processingUntil: {
+                greater_than: new Date(
+                  getCurrentDate().getTime() + processingLeaseSafetyBuffer,
+                ).toISOString(),
+              },
+            },
+          ],
         },
       })
     }
@@ -500,6 +511,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   const stopHeartbeat = startProcessingLeaseHeartbeat({
     activeClaims,
     processingLeaseDuration,
+    processingLeaseSafetyBuffer,
     processingToken,
     req,
     silent,
@@ -688,12 +700,14 @@ function getRetriesConfig({
 function startProcessingLeaseHeartbeat({
   activeClaims,
   processingLeaseDuration,
+  processingLeaseSafetyBuffer,
   processingToken,
   req,
   silent,
 }: {
   activeClaims: Set<number | string>
   processingLeaseDuration: number
+  processingLeaseSafetyBuffer: number
   processingToken: string
   req: PayloadRequest
   silent: RunJobsSilent
@@ -715,6 +729,9 @@ function startProcessingLeaseHeartbeat({
 
   const renewLeases = async () => {
     const now = getCurrentDate()
+    const minimumProcessingUntil = new Date(
+      now.getTime() + processingLeaseSafetyBuffer,
+    ).toISOString()
     const processingUntil = new Date(now.getTime() + processingLeaseDuration).toISOString()
 
     try {
@@ -728,7 +745,7 @@ function startProcessingLeaseHeartbeat({
             { completedAt: { exists: false } },
             { hasError: { not_equals: true } },
             { processingToken: { equals: processingToken } },
-            { processingUntil: { greater_than: now.toISOString() } },
+            { processingUntil: { greater_than: minimumProcessingUntil } },
           ],
         },
       })

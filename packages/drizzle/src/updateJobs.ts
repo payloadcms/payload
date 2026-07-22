@@ -1,13 +1,12 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateJobs, Where } from 'payload'
 
-import { and, eq, inArray, isNull } from 'drizzle-orm'
+import { and, inArray, isNull } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
-import { buildQuery } from './queries/buildQuery.js'
 import { transformForWrite } from './transform/write/index.js'
 import { upsertRow } from './upsertRow/index.js'
 import { shouldUseOptimizedUpsertRow } from './upsertRow/shouldUseOptimizedUpsertRow.js'
@@ -115,31 +114,10 @@ export const updateJobs: UpdateJobs = async function updateMany(
     return jobs.docs.filter((job) => claimedIDs.has(job.id)).map((job) => ({ ...job, ...data }))
   }
 
-  const { joins, where: parsedWhere } = buildQuery({
-    adapter: this,
-    fields: collection.flattenedFields,
-    tableName,
-    where: whereToUse,
-  })
   const results = []
 
   // TODO: We need to batch this to reduce the amount of db calls. This can get very slow if we are updating a lot of rows.
   for (const job of jobs.docs) {
-    if (!joins.length) {
-      // The caller's transaction keeps this row locked while upsertRow writes nested job data.
-      const _db = db as LibSQLDatabase
-      const table = this.tables[tableName]
-      const ownedRows = await _db
-        .update(table)
-        .set({ id: table.id })
-        .where(and(eq(table.id, job.id), parsedWhere))
-        .returning({ id: table.id })
-
-      if (!ownedRows.length) {
-        continue
-      }
-    }
-
     const updateData = useOptimizedUpsertRow
       ? data
       : {

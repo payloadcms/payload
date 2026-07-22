@@ -87,10 +87,16 @@ export type SanitizedJobsConfig = {
    * This property is automatically set during sanitization.
    */
   enabled?: boolean
-  /**
-   * How long a job remains claimed without a successful lease renewal.
-   */
-  processingLeaseDuration: number
+  processingLease: {
+    /**
+     * How long a job remains claimed without a successful lease renewal.
+     */
+    duration: number
+    /**
+     * Minimum time that must remain on a lease before a worker starts an update.
+     */
+    safetyBuffer: number
+  }
   /**
    * If set to `true`, at least one task or workflow has scheduling enabled.
    * This property is automatically set during sanitization.
@@ -101,7 +107,7 @@ export type SanitizedJobsConfig = {
    * This property is automatically set during sanitization.
    */
   stats?: boolean
-} & Omit<JobsConfig, 'processingLeaseDuration'>
+} & Omit<JobsConfig, 'processingLease'>
 export type JobsConfig = {
   /**
    * Specify access control to determine who can interact with jobs.
@@ -156,13 +162,25 @@ export type JobsConfig = {
    * a new collection.
    */
   jobsCollectionOverrides?: (args: { defaultJobsCollection: CollectionConfig }) => CollectionConfig
-  /**
-   * How long a job remains claimed without a successful lease renewal.
-   * This is not a maximum job runtime; active jobs renew their lease automatically.
-   *
-   * @default 120000 (2 minutes)
-   */
-  processingLeaseDuration?: number
+  processingLease?: {
+    /**
+     * How long a job remains claimed without a successful lease renewal.
+     * This is not a maximum job runtime; active jobs renew their lease automatically.
+     *
+     * @default 120000 (2 minutes)
+     */
+    duration?: number
+    /**
+     * Minimum time that must remain on a lease before a worker starts an update. This gives the
+     * update time to finish before another worker can recover the job.
+     *
+     * Set this to `0` if your database adapter applies the ownership check and update atomically.
+     * It must be less than `duration`.
+     *
+     * @default 30000 (30 seconds)
+     */
+    safetyBuffer?: number
+  }
   /**
    * Adjust the job processing order using a Payload sort string. This can be set globally or per queue.
    *

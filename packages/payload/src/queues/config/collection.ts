@@ -13,10 +13,21 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
   jobsConfig,
 ) => {
   if (
-    !Number.isFinite(jobsConfig.processingLeaseDuration) ||
-    jobsConfig.processingLeaseDuration <= 0
+    !Number.isFinite(jobsConfig.processingLease.duration) ||
+    jobsConfig.processingLease.duration <= 0
   ) {
-    throw new Error('jobs.processingLeaseDuration must be a positive number')
+    throw new Error('jobs.processingLease.duration must be a positive number')
+  }
+  if (
+    !Number.isFinite(jobsConfig.processingLease.safetyBuffer) ||
+    jobsConfig.processingLease.safetyBuffer < 0
+  ) {
+    throw new Error('jobs.processingLease.safetyBuffer must be a non-negative number')
+  }
+  if (jobsConfig.processingLease.safetyBuffer >= jobsConfig.processingLease.duration) {
+    throw new Error(
+      'jobs.processingLease.safetyBuffer must be less than jobs.processingLease.duration',
+    )
   }
 
   const workflowSlugs: Set<string> = new Set()
