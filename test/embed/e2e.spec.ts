@@ -8,7 +8,7 @@ import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { embedCookieName } from './shared.js'
+import { embedCookieName, themeCookieName } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -66,5 +66,34 @@ test.describe('embed mode', () => {
     await page.goto(`${url.admin}?embed=false`)
     await expect(userMenu()).toBeVisible()
     await expect.poll(getEmbedCookie).toBeUndefined()
+  })
+
+  test('applies the ?theme= param and persists it in a cookie', async () => {
+    const getRenderedTheme = () =>
+      page.evaluate(() => document.documentElement.getAttribute('data-theme'))
+
+    const getThemeCookie = async () =>
+      (await context.cookies()).find((cookie) => cookie.name === themeCookieName)
+
+    // No param and no cookie: server renders the default theme.
+    await page.goto(url.admin)
+    expect(await getRenderedTheme()).toBe('light')
+    expect(await getThemeCookie()).toBeUndefined()
+
+    // ?theme=dark applies the theme and writes the cookie. The root layout
+    // cannot see search params (same constraint documented in
+    // getRequestEmbed.ts), so this is applied client-side after mount and the
+    // cookie write is not immediate -- poll for both.
+    await page.goto(`${url.admin}?theme=dark`)
+    await expect.poll(getRenderedTheme).toBe('dark')
+    await expect.poll(getThemeCookie).toMatchObject({ value: 'dark' })
+
+    // Navigating to a different page without the param keeps the theme via the cookie.
+    await page.goto(url.account)
+    expect(await getRenderedTheme()).toBe('dark')
+
+    // An invalid ?theme= value is ignored; the cookie-derived theme still applies.
+    await page.goto(`${url.admin}?theme=neon`)
+    expect(await getRenderedTheme()).toBe('dark')
   })
 })
