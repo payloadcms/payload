@@ -1581,6 +1581,34 @@ describe('Versions', () => {
       })
     })
 
+    test('should not clip the calendar popup inside the schedule publish drawer', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('scheduled publish positioning')
+      await page.locator('#field-description').fill('scheduled publish positioning description')
+
+      await saveDocAndAssert(page)
+      await page.locator('#schedule-publish-button').click()
+
+      await expect(page.locator('.drawer__header')).toBeVisible()
+
+      await page.locator('.date-time-picker input').click()
+
+      const popper = page.locator('.react-datepicker-popper')
+      await expect(popper).toBeVisible()
+
+      // The calendar is portaled to a dedicated container appended to the document body,
+      // escaping the drawer's `.drawer__content-children` (which caps its height with
+      // `overflow-y: auto`) so it isn't clipped when it renders near the bottom of the drawer.
+      const portalInfo = await popper.evaluate((el) => ({
+        isInsideDrawerScroll: el.closest('.drawer__content-children') !== null,
+        isInsidePortal: el.closest('#date-time-picker-portal') !== null,
+      }))
+      expect(portalInfo.isInsideDrawerScroll).toBe(false)
+      expect(portalInfo.isInsidePortal).toBe(true)
+
+      await expect(popper).toBeInViewport()
+    })
+
     test('can still schedule publish once autosave is triggered', async () => {
       await page.goto(autosaveURL.create)
       await page.locator('#field-title').fill('scheduled publish')
