@@ -1,6 +1,4 @@
 'use client'
-import type { PreviewButtonClientProps } from 'payload'
-
 import React, { useCallback, useState } from 'react'
 
 import { LinkIcon } from '../../icons/Link/index.js'
@@ -9,7 +7,7 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 
-export function PreviewButton(_props: PreviewButtonClientProps) {
+export function PreviewButton() {
   const { previewURL } = usePreviewURL()
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
