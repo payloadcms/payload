@@ -582,6 +582,40 @@ describe('createAuthSessionSync storage fallback', () => {
     expect(fetchFullUser).toHaveBeenCalledOnce()
   })
 
+  it('should order broadcast messages around an in-flight storage resync', async () => {
+    let resolveFetchFullUser: ((result: AuthSessionResyncResult) => void) | undefined
+    const fetchFullUser = vi.fn(
+      () =>
+        new Promise<AuthSessionResyncResult>((resolve) => {
+          resolveFetchFullUser = resolve
+        }),
+    )
+    const onSessionLoggedOut = vi.fn()
+
+    createSync({ fetchFullUser, onSessionLoggedOut })
+    const channel = getBroadcastChannel()
+
+    dispatchStorageRefresh({ sentAt: 500, sourceID: 'storage-tab' })
+    channel.emit(
+      createMessage({ sentAt: 400, sourceID: 'older-channel-tab', type: 'session-logged-out' }),
+    )
+
+    expect(fetchFullUser).toHaveBeenCalledOnce()
+    expect(onSessionLoggedOut).not.toHaveBeenCalled()
+
+    resolveFetchFullUser?.({
+      expirationMs: 30_000,
+      status: 'authenticated',
+      user: { collection: 'users', id: '1' },
+    })
+    await Promise.resolve()
+    channel.emit(
+      createMessage({ sentAt: 600, sourceID: 'newer-channel-tab', type: 'session-logged-out' }),
+    )
+
+    expect(onSessionLoggedOut).toHaveBeenCalledOnce()
+  })
+
   it('should defer the storage logout notification until post-settlement resync', () => {
     vi.stubGlobal('BroadcastChannel', undefined)
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
@@ -605,7 +639,11 @@ describe('createAuthSessionSync storage fallback', () => {
       receivedSession = sharedCookieSession
 
       return receivedSession
-        ? { status: 'authenticated' as const, user: receivedSession.user }
+        ? {
+            expirationMs: receivedSession.exp * 1000,
+            status: 'authenticated' as const,
+            user: receivedSession.user,
+          }
         : { status: 'unauthenticated' as const }
     })
 
@@ -1156,6 +1194,71 @@ describe('AuthProvider session synchronization', () => {
     expect(routerMocks.replace).not.toHaveBeenCalled()
   })
 
+  it('should reject a queued refresh using the authenticated session established before execution', async () => {
+    const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
+    const authenticatedSession = createFutureSession({
+      expiresInMs: 120_000,
+      token: 'authenticated-token',
+    })
+
+    await renderProvider({ session: initialSession })
+    apiMocks.get.mockClear()
+    apiMocks.get.mockResolvedValueOnce(createResponse({ session: authenticatedSession }))
+    apiMocks.post.mockResolvedValueOnce({ status: 401 })
+    const channel = getBroadcastChannel()
+    channel.postMessage.mockClear()
+
+    const fetchPromise = authContext?.fetchFullUser()
+    const refreshPromise = authContext?.refreshCookieAsync()
+
+    await act(async () => {
+      await fetchPromise
+      await refreshPromise
+    })
+
+    expect(channel.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        expiredTokenAt: authenticatedSession.exp * 1000,
+        type: 'session-expired',
+      }),
+    )
+    expect(authContext?.user).toBeNull()
+    expect(routerMocks.replace).toHaveBeenCalledWith(expect.stringContaining('/logout-inactivity'))
+  })
+
+  it('should not suppress a queued refresh rejection after a user request authenticates', async () => {
+    const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
+    const authenticatedSession = createFutureSession({
+      expiresInMs: 120_000,
+      token: 'authenticated-token',
+    })
+
+    await renderProvider({ session: initialSession })
+    act(() => authContext?.setUser(null))
+    apiMocks.get.mockClear()
+    apiMocks.get.mockResolvedValueOnce(createResponse({ session: authenticatedSession }))
+    apiMocks.post.mockResolvedValueOnce({ status: 401 })
+    const channel = getBroadcastChannel()
+    channel.postMessage.mockClear()
+
+    const fetchPromise = authContext?.fetchFullUser()
+    const refreshPromise = authContext?.refreshCookieAsync()
+
+    await act(async () => {
+      await fetchPromise
+      await refreshPromise
+    })
+
+    expect(channel.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        expiredTokenAt: authenticatedSession.exp * 1000,
+        type: 'session-expired',
+      }),
+    )
+    expect(authContext?.user).toBeNull()
+    expect(routerMocks.replace).toHaveBeenCalledWith(expect.stringContaining('/logout-inactivity'))
+  })
+
   it('should preserve a refreshed session when an older user request confirms no user', async () => {
     const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
     const refreshedSession = createFutureSession({ expiresInMs: 120_000, token: 'fresh-token' })
@@ -1445,6 +1548,29 @@ describe('AuthProvider session synchronization', () => {
     })
 
     expect(setItem).toHaveBeenCalledOnce()
+  })
+
+  it('should ignore delayed storage resync after a newer local logout', async () => {
+    const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
+
+    await renderProvider({ session: initialSession })
+    apiMocks.get.mockClear()
+    apiMocks.post.mockResolvedValueOnce({ status: 200 })
+
+    await act(async () => {
+      await authContext?.logOut()
+    })
+
+    apiMocks.get.mockResolvedValueOnce(createResponse({ session: initialSession }))
+    dispatchStorageRefresh({ sentAt: 400, sourceID: 'delayed-storage-tab' })
+    await act(async () => {
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    expect(apiMocks.get).not.toHaveBeenCalled()
+    expect(authContext?.user).toBeNull()
+    expect(authContext?.token).toBeUndefined()
   })
 
   it('should publish a runtime storage downgrade only after logout settles', async () => {

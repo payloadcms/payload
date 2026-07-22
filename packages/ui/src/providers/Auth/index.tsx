@@ -145,6 +145,7 @@ export function AuthProvider({
   const sessionGenerationRef = React.useRef(0)
   const sessionSyncRef = React.useRef<null | ReturnType<typeof createAuthSessionSync>>(null)
   const tokenExpirationMsRef = React.useRef<number>(undefined)
+  const userRef = React.useRef<AuthenticatedUser | null>(initialUser)
 
   const id = user?.id
   const isAuthenticated = Boolean(user)
@@ -177,6 +178,7 @@ export function AuthProvider({
   }, [adminRoute, closeAllModals, loginRoute, router, startRouteTransition])
 
   const clearUserInMemory = useCallback(() => {
+    userRef.current = null
     setUserInMemory(null)
     setTokenInMemory(undefined)
     setTokenExpirationMs(undefined)
@@ -206,6 +208,7 @@ export function AuthProvider({
       if (userResponse?.user) {
         const nextTokenExpirationMs = userResponse.exp * 1000
 
+        userRef.current = userResponse.user
         setUserInMemory(userResponse.user)
         setTokenInMemory(userResponse.token ?? userResponse.refreshedToken)
         setTokenExpirationMs(nextTokenExpirationMs)
@@ -291,7 +294,6 @@ export function AuthProvider({
 
   const refreshSession = useCallback(
     ({ isActivityRefresh }: { isActivityRefresh: boolean }): Promise<AuthenticatedUser | null> => {
-      const handledExpiration = tokenExpirationMsRef.current
       const requestGeneration = sessionGenerationRef.current
       const activeRequest = refreshRequestRef.current
 
@@ -304,6 +306,9 @@ export function AuthProvider({
           if (sessionGenerationRef.current !== requestGeneration) {
             return null
           }
+
+          const handledExpiration = tokenExpirationMsRef.current
+          const handledUser = userRef.current
 
           try {
             const request = await requests.post(
@@ -335,7 +340,7 @@ export function AuthProvider({
               return json.user
             }
 
-            if (user) {
+            if (handledUser) {
               const invalidateSession = () => {
                 if (handledExpiration !== undefined) {
                   sessionSyncRef.current?.publish({
@@ -381,7 +386,6 @@ export function AuthProvider({
       i18n.language,
       redirectToInactivityRoute,
       userSlug,
-      user,
     ],
   )
 
@@ -507,7 +511,11 @@ export function AuthProvider({
           pendingAuthInvalidationRef.current = undefined
           applyUserResponse(json)
 
-          return { status: 'authenticated', user: json.user }
+          return {
+            expirationMs: json.exp * 1000,
+            status: 'authenticated',
+            user: json.user,
+          }
         }
 
         pendingAuthInvalidationRef.current = undefined

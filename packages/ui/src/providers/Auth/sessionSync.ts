@@ -34,6 +34,7 @@ export type AuthSessionSyncEvent =
 
 export type AuthSessionResyncResult<T = unknown> =
   | {
+      expirationMs: number
       status: 'authenticated'
       user: T
     }
@@ -52,12 +53,21 @@ type StorageRefreshNotification = {
   sourceID: string
 }
 
-type LifecycleOrder = {
+type ConfirmedLifecycleOrder = {
   affectedExpirationMs: number
+  kind: 'confirmed'
   precedence: number
   sentAt: number
   sourceID: string
 }
+
+type LifecycleOrder =
+  | {
+      kind: 'storage-barrier'
+      sentAt: number
+      sourceID: string
+    }
+  | ConfirmedLifecycleOrder
 
 export function createAuthSessionSync({
   fetchFullUser,
@@ -140,9 +150,40 @@ export function createAuthSessionSync({
       return
     }
 
+    const storageBarrier = getStorageBarrier(notification)
+
+    if (
+      latestLifecycleOrder &&
+      compareLifecycleOrders({ first: storageBarrier, second: latestLifecycleOrder }) <= 0
+    ) {
+      return
+    }
+
+    latestLifecycleOrder = storageBarrier
+
     void fetchFullUser()
       .then((result) => {
+        if (latestLifecycleOrder !== storageBarrier) {
+          return
+        }
+
+        if (result.status === 'authenticated') {
+          latestLifecycleOrder = getConfirmedLifecycleOrder({
+            affectedExpirationMs: result.expirationMs,
+            precedence: 0,
+            sentAt: notification.sentAt,
+            sourceID: notification.sourceID,
+          })
+          return
+        }
+
         if (result.status === 'unauthenticated') {
+          latestLifecycleOrder = getConfirmedLifecycleOrder({
+            affectedExpirationMs: 0,
+            precedence: 2,
+            sentAt: notification.sentAt,
+            sourceID: notification.sourceID,
+          })
           onSessionResyncUnauthenticated()
         }
       })
@@ -346,6 +387,10 @@ function compareLifecycleOrders({
     return first.sentAt - second.sentAt
   }
 
+  if (first.kind === 'storage-barrier' || second.kind === 'storage-barrier') {
+    return compareSourceIDs({ first: first.sourceID, second: second.sourceID })
+  }
+
   const isFirstLogout = first.precedence === 2
   const isSecondLogout = second.precedence === 2
 
@@ -361,17 +406,13 @@ function compareLifecycleOrders({
     return first.precedence - second.precedence
   }
 
-  if (first.sourceID === second.sourceID) {
-    return 0
-  }
-
-  return first.sourceID > second.sourceID ? 1 : -1
+  return compareSourceIDs({ first: first.sourceID, second: second.sourceID })
 }
 
 function getLifecycleOrder(
   event: { sentAt: number; sourceID: string } & AuthSessionSyncEvent,
 ): LifecycleOrder {
-  return {
+  return getConfirmedLifecycleOrder({
     affectedExpirationMs:
       event.type === 'session-refreshed'
         ? event.session.exp * 1000
@@ -381,5 +422,32 @@ function getLifecycleOrder(
     precedence: event.type === 'session-logged-out' ? 2 : event.type === 'session-expired' ? 1 : 0,
     sentAt: event.sentAt,
     sourceID: event.sourceID,
+  })
+}
+
+function compareSourceIDs({ first, second }: { first: string; second: string }): number {
+  if (first === second) {
+    return 0
   }
+
+  return first > second ? 1 : -1
+}
+
+function getConfirmedLifecycleOrder({
+  affectedExpirationMs,
+  precedence,
+  sentAt,
+  sourceID,
+}: Omit<ConfirmedLifecycleOrder, 'kind'>): ConfirmedLifecycleOrder {
+  return {
+    affectedExpirationMs,
+    kind: 'confirmed',
+    precedence,
+    sentAt,
+    sourceID,
+  }
+}
+
+function getStorageBarrier(notification: StorageRefreshNotification): LifecycleOrder {
+  return { ...notification, kind: 'storage-barrier' }
 }
