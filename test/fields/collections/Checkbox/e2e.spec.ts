@@ -74,6 +74,18 @@ describe('Checkboxes', () => {
     await expect(page.locator('table > tbody > tr')).toHaveCount(1)
   })
 
+  test('should apply the checkbox-specific position override to the field-error tooltip', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-checkboxRequiresTrue').click()
+    await page.locator('#action-save').click({ delay: 100 })
+
+    const tooltip = page.locator('.tooltip--show', { hasText: 'This field is required.' })
+    await expect(tooltip).toBeVisible()
+
+    const right = await tooltip.evaluate((el) => getComputedStyle(el).right)
+    expect(parseFloat(right)).toBeCloseTo(-8, 0)
+  })
+
   describe.skip('A11y', () => {
     test('Edit view should have no accessibility violations', async ({}, testInfo) => {
       await page.goto(url.create)

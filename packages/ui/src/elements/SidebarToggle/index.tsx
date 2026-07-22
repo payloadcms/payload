@@ -23,7 +23,14 @@ export const SidebarToggle: React.FC<{
       role="presentation"
     >
       <SidebarIcon />
-      <Tooltip alignCaret="left" delay={300} position="bottom" show={showTooltip} staticPositioning>
+      <Tooltip
+        alignCaret="left"
+        className={`${baseClass}__tooltip`}
+        delay={300}
+        position="bottom"
+        show={showTooltip}
+        staticPositioning
+      >
         {label}
       </Tooltip>
     </div>

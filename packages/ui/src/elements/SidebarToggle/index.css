@@ -27,19 +27,10 @@
     }
   }
 
-  .sidebar-toggle .tooltip {
+  .sidebar-toggle__tooltip.tooltip {
     left: 0;
     top: 100%;
     bottom: auto;
     transform: translate3d(0, var(--spacer-1), 0);
-  }
-
-  .sidebar-toggle .tooltip::after {
-    top: 0;
-    left: var(--spacer-3);
-    bottom: auto;
-    transform: translate3d(-50%, -100%, 0);
-    border-bottom: var(--caret-size) solid var(--color-bg-inverse);
-    border-top: none;
   }
 }

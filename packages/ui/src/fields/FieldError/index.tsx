@@ -10,9 +10,10 @@ import './index.css'
 
 const baseClass = 'field-error'
 
-export const FieldError: React.FC<GenericErrorProps> = (props) => {
+export const FieldError: React.FC<{ className?: string } & GenericErrorProps> = (props) => {
   const {
     alignCaret = 'right',
+    className,
     message: messageFromProps,
     path,
     showError: showErrorFromProps,
@@ -28,7 +29,12 @@ export const FieldError: React.FC<GenericErrorProps> = (props) => {
 
   if (showMessage && message?.length) {
     return (
-      <Tooltip alignCaret={alignCaret} className={baseClass} delay={0} staticPositioning>
+      <Tooltip
+        alignCaret={alignCaret}
+        className={[baseClass, className].filter(Boolean).join(' ')}
+        delay={0}
+        staticPositioning
+      >
         {message}
       </Tooltip>
     )

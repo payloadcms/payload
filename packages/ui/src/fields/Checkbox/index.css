@@ -1,15 +1,15 @@
 @layer payload-default {
   .checkbox {
     position: relative;
+  }
 
-    .tooltip:not([aria-hidden='true']) {
-      left: auto;
-      right: calc(-1 * var(--spacer-2));
-      position: absolute;
-      transform: translateY(calc(var(--caret-size) * -1));
-      margin-bottom: 0.2em;
-      max-width: fit-content;
-    }
+  .checkbox__field-error.tooltip:not([aria-hidden='true']) {
+    left: auto;
+    right: calc(-1 * var(--spacer-2));
+    position: absolute;
+    transform: translateY(calc(var(--caret-size) * -1));
+    margin-bottom: 0.2em;
+    max-width: fit-content;
   }
 
   .checkbox-input {
