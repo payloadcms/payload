@@ -57,6 +57,21 @@ import { initContextState } from './initContextState.js'
 
 const baseClass = 'form'
 
+/**
+ * Removes client-only bookkeeping from a serialized form state before it is sent to the server.
+ * `valueSequence` is used purely on the client to reject stale, out-of-order responses in
+ * `mergeServerFormState` — shipping it would bloat every field on every form-state request for no
+ * server-side purpose. Mutates and returns the passed (already-copied) state.
+ */
+const stripClientOnlyFieldState = (formState: FormState): FormState => {
+  for (const path in formState) {
+    if (formState[path] && 'valueSequence' in formState[path]) {
+      delete formState[path].valueSequence
+    }
+  }
+  return formState
+}
+
 export const Form: React.FC<FormProps> = (props) => {
   const { id, collectionSlug, docConfig, docPermissions, getDocPreferences, globalSlug } =
     useDocumentInfo()
@@ -174,6 +189,11 @@ export const Form: React.FC<FormProps> = (props) => {
 
   const prevFormState = useRef(formState)
 
+  // Monotonic counter tagging each value-accepting submit (e.g. autosave). Threaded through to
+  // `mergeServerFormState` so a stale, out-of-order response cannot overwrite a value that a later
+  // request already wrote.
+  const submitSequenceRef = useRef(0)
+
   const validateForm = useCallback(async () => {
     const validatedFieldState = {}
     let isValid = true
@@ -260,6 +280,20 @@ export const Form: React.FC<FormProps> = (props) => {
 
       const disableToast = disableSuccessStatusFromArgs ?? disableSuccessStatus
 
+      // Tag value-accepting submits (autosave, `overrideLocalChanges: false`) with a sequence in
+      // send order, so `mergeServerFormState` can reject responses that resolve out of order.
+      let effectiveAcceptValues = acceptValues
+      if (
+        typeof acceptValues === 'object' &&
+        acceptValues !== null &&
+        acceptValues.overrideLocalChanges === false
+      ) {
+        effectiveAcceptValues = {
+          ...acceptValues,
+          requestSequence: ++submitSequenceRef.current,
+        }
+      }
+
       if (disabled) {
         if (e) {
           e.preventDefault()
@@ -311,11 +345,10 @@ export const Form: React.FC<FormProps> = (props) => {
 
       const data = reduceFieldsToValues(contextRef.current.fields, true)
 
-      const serializableFormState = deepCopyObjectSimpleWithoutReactComponents(
-        contextRef.current.fields,
-        {
+      const serializableFormState = stripClientOnlyFieldState(
+        deepCopyObjectSimpleWithoutReactComponents(contextRef.current.fields, {
           excludeFiles: true,
-        },
+        }),
       )
 
       // Execute server side validations
@@ -438,7 +471,7 @@ export const Form: React.FC<FormProps> = (props) => {
             if (newFormState) {
               dispatchFields({
                 type: 'MERGE_SERVER_STATE',
-                acceptValues,
+                acceptValues: effectiveAcceptValues,
                 prevStateRef: prevFormState,
                 serverState: newFormState,
               })
@@ -827,9 +860,11 @@ export const Form: React.FC<FormProps> = (props) => {
         for (const onChangeFn of onChange) {
           // Edit view default onChange is in packages/ui/src/views/Edit/index.tsx. This onChange usually sends a form state request
           serverState = await onChangeFn({
-            formState: deepCopyObjectSimpleWithoutReactComponents(formState, {
-              excludeFiles: true,
-            }),
+            formState: stripClientOnlyFieldState(
+              deepCopyObjectSimpleWithoutReactComponents(formState, {
+                excludeFiles: true,
+              }),
+            ),
             submitted,
           })
         }

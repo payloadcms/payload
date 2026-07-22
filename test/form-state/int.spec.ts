@@ -967,6 +967,62 @@ describe('Form State', () => {
     expect(newState['array.1.text']?.value).toBe('B text')
   })
 
+  it('should not accept a stale autosave response older than the value already applied (sequence guard)', () => {
+    /**
+     * Regression test for the stale server-computed slug bug.
+     * Autosave responses can resolve out of order. A later request (sequence 2) has already
+     * written the correct slug; a straggler from an earlier request (sequence 1) then arrives
+     * carrying a slug computed from a stale, partial title. Because the slug field auto-tracks its
+     * source and is never marked `isModified`, the old `!isModified` guard alone would accept it,
+     * clobbering the field back to the stale value. The sequence guard must reject it.
+     */
+    const currentState: FormState = {
+      title: { value: 'alpha bravo', initialValue: '' },
+      slug: {
+        value: 'alpha-bravo', // written by the newer (sequence 2) response
+        initialValue: '',
+        valueSequence: 2,
+      },
+    }
+
+    const staleServerState: FormState = {
+      title: { value: 'alpha', initialValue: '' },
+      slug: { value: 'alpha', initialValue: '' }, // computed from the older, partial title
+    }
+
+    const newState = mergeServerFormState({
+      acceptValues: { overrideLocalChanges: false, requestSequence: 1 },
+      currentState,
+      incomingState: staleServerState,
+    })
+
+    expect(newState.slug?.value).toBe('alpha-bravo')
+    expect(newState.slug?.valueSequence).toBe(2)
+  })
+
+  it('should accept an autosave response newer than the value already applied (sequence guard)', () => {
+    const currentState: FormState = {
+      slug: {
+        value: 'alpha',
+        initialValue: '',
+        valueSequence: 1,
+      },
+    }
+
+    const newerServerState: FormState = {
+      slug: { value: 'alpha-bravo-charlie', initialValue: '' },
+    }
+
+    const newState = mergeServerFormState({
+      acceptValues: { overrideLocalChanges: false, requestSequence: 2 },
+      currentState,
+      incomingState: newerServerState,
+    })
+
+    expect(newState.slug?.value).toBe('alpha-bravo-charlie')
+    expect(newState.slug?.valueSequence).toBe(2)
+  })
+
   it('should preserve client row data after reorder during autosave', () => {
     /**
      * User reorders [A, B] → [B, A] during autosave.

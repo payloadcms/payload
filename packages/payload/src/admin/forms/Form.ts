@@ -88,6 +88,14 @@ export type FieldState = {
   valid?: boolean
   validate?: Validate
   value?: unknown
+  /**
+   * The monotonic request sequence of the server response that last wrote this field's `value`.
+   * Used to reject stale, out-of-order autosave responses in `mergeServerFormState` — a response
+   * older than the sequence recorded here must not overwrite the value a newer response set.
+   *
+   * @experimental This property is experimental and may change in the future. Use at your own risk.
+   */
+  valueSequence?: number
 }
 
 export type FieldStateWithoutComponents = Omit<FieldState, 'customComponents'>
