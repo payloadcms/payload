@@ -1,4 +1,4 @@
-import type { BrowserContext, Page } from '@playwright/test'
+import type { BrowserContext, Page, Request, Response } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -582,4 +582,404 @@ describe('Auth', () => {
       await expect(page.locator('.nav')).toBeVisible()
     })
   })
+
+  describe('session activity', () => {
+    let sessionContext: BrowserContext
+    let sessionPage: Page
+    let usersURL: AdminUrlUtil
+
+    beforeEach(async ({ browser }) => {
+      sessionContext = await browser.newContext()
+      sessionPage = await sessionContext.newPage()
+      initPageConsoleErrorCatch(sessionPage)
+      usersURL = new AdminUrlUtil(serverURL, slug)
+
+      await sessionPage.clock.install({ time: Date.now() })
+      await login({ page: sessionPage, serverURL })
+      await sessionPage.goto(usersURL.account)
+      await expect(sessionPage.locator('#token-expiration-ms')).toHaveText(/^\d+$/)
+    })
+
+    test.afterEach(async () => {
+      await sessionPage.close()
+      const hasTokenCookie = (await sessionContext.cookies()).some(
+        (cookie) => cookie.name === 'payload-token',
+      )
+
+      if (hasTokenCookie) {
+        await sessionContext.request.post(`${apiURL}/${slug}/logout`)
+      }
+
+      await sessionContext.close()
+    })
+
+    test('should refresh a session after pointerdown near the refresh window', async () => {
+      const tokenExpirationMs = await readTokenExpirationMs(sessionPage)
+
+      await advanceToRemainingSessionTime({
+        page: sessionPage,
+        remainingMs: 90_000,
+        tokenExpirationMs,
+      })
+
+      const refreshResponse = await expectActivityRefresh({
+        activity: () => sessionPage.dispatchEvent('body', 'pointerdown'),
+        page: sessionPage,
+      })
+
+      expect(refreshResponse.status()).toBe(200)
+    })
+
+    test('should refresh a session after selecting collection checkboxes without saving', async () => {
+      const tokenExpirationMs = await readTokenExpirationMs(sessionPage)
+
+      await sessionPage.goto(usersURL.list)
+      const selectAll = sessionPage.locator('input#select-all')
+      await expect(selectAll).toBeVisible()
+      await advanceToRemainingSessionTime({
+        page: sessionPage,
+        remainingMs: 90_000,
+        tokenExpirationMs,
+      })
+
+      await expectActivityRefresh({
+        activity: async () => {
+          await selectAll.check()
+          await expect(selectAll).toBeChecked()
+        },
+        page: sessionPage,
+      })
+    })
+
+    test('should refresh a session after repeatedly opening and closing document drawers', async () => {
+      const tokenExpirationMs = await readTokenExpirationMs(sessionPage)
+      const relationshipsURL = new AdminUrlUtil(serverURL, 'relationsCollection')
+
+      await sessionPage.goto(relationshipsURL.create)
+      const addUserButton = sessionPage.locator(
+        '#rel-add-new button.relationship-add-new__add-button.doc-drawer__toggler',
+      )
+      const documentDrawer = sessionPage.locator('[id^="doc-drawer_users_1_"]').last()
+      await expect(addUserButton).toBeVisible()
+      await advanceToRemainingSessionTime({
+        page: sessionPage,
+        remainingMs: 90_000,
+        tokenExpirationMs,
+      })
+
+      await expectActivityRefresh({
+        activity: async () => {
+          for (let index = 0; index < 3; index++) {
+            await addUserButton.click()
+            await expect(documentDrawer).toBeVisible()
+            await documentDrawer.locator('button.doc-drawer__header-close').click()
+            await expect(documentDrawer).toBeHidden()
+          }
+        },
+        page: sessionPage,
+      })
+    })
+
+    test('should refresh a session after client-side route activity near expiration', async () => {
+      const tokenExpirationMs = await readTokenExpirationMs(sessionPage)
+      const usersNavLink = sessionPage.locator('a[href$="/admin/collections/users"]').first()
+
+      await expect(usersNavLink).toBeVisible()
+      await advanceToRemainingSessionTime({
+        page: sessionPage,
+        remainingMs: 90_000,
+        tokenExpirationMs,
+      })
+
+      await expectActivityRefresh({
+        activity: async () => {
+          await usersNavLink.evaluate((element: HTMLAnchorElement) => element.click())
+          await sessionPage.waitForURL(usersURL.list)
+          await expect(sessionPage.locator('input#select-all')).toBeVisible()
+        },
+        page: sessionPage,
+      })
+    })
+
+    test('should deduplicate many activity events dispatched inside five seconds', async () => {
+      const tokenExpirationMs = await readTokenExpirationMs(sessionPage)
+      const refreshRequests: Request[] = []
+      const recordRefreshRequest = (request: Request) => {
+        if (isActivityRefreshRequest(request)) {
+          refreshRequests.push(request)
+        }
+      }
+
+      sessionPage.on('request', recordRefreshRequest)
+      await advanceToRemainingSessionTime({
+        page: sessionPage,
+        remainingMs: 90_000,
+        tokenExpirationMs,
+      })
+
+      await expectActivityRefresh({
+        activity: () => dispatchManySessionActivityEvents(sessionPage),
+        page: sessionPage,
+      })
+      await dispatchManySessionActivityEvents(sessionPage)
+      await sessionPage.clock.fastForward(3_998)
+
+      expect(refreshRequests).toHaveLength(1)
+      sessionPage.off('request', recordRefreshRequest)
+    })
+  })
+
+  describe('session synchronization', () => {
+    let activePage: Page
+    let sessionContext: BrowserContext
+    let usersURL: AdminUrlUtil
+
+    beforeEach(async ({ browser }) => {
+      sessionContext = await browser.newContext()
+      activePage = await sessionContext.newPage()
+      initPageConsoleErrorCatch(activePage)
+      usersURL = new AdminUrlUtil(serverURL, slug)
+
+      await activePage.clock.install({ time: Date.now() })
+      await login({ page: activePage, serverURL })
+      await activePage.goto(usersURL.account)
+      await expect(activePage.locator('#token-expiration-ms')).toHaveText(/^\d+$/)
+    })
+
+    test.afterEach(async () => {
+      await Promise.all(sessionContext.pages().map((contextPage) => contextPage.close()))
+      const hasTokenCookie = (await sessionContext.cookies()).some(
+        (cookie) => cookie.name === 'payload-token',
+      )
+
+      if (hasTokenCookie) {
+        await sessionContext.request.post(`${apiURL}/${slug}/logout`)
+      }
+
+      await sessionContext.close()
+    })
+
+    test('should propagate a refreshed session expiration to a second page', async () => {
+      const secondPage = await openAuthenticatedPage({
+        context: sessionContext,
+        url: usersURL.account,
+      })
+      const previousExpirationMs = await readTokenExpirationMs(secondPage)
+
+      await waitForServerClockAfterTokenIssue(previousExpirationMs)
+      await refreshSessionFromDebugButton(activePage)
+
+      await expect
+        .poll(() => readTokenExpirationMs(secondPage))
+        .toBeGreaterThan(previousExpirationMs)
+      await expect(secondPage.locator('.nav')).toBeVisible()
+    })
+
+    test('should propagate session expiration to a second page', async () => {
+      const secondPage = await openAuthenticatedPage({
+        context: sessionContext,
+        url: usersURL.account,
+      })
+      const tokenExpirationMs = await readTokenExpirationMs(activePage)
+      const expiredRefreshResponse = activePage.waitForResponse((response) =>
+        isActivityRefreshRequest(response.request()),
+      )
+
+      expect((await sessionContext.request.post(`${apiURL}/${slug}/logout`)).status()).toBe(200)
+      await advanceToRemainingSessionTime({
+        page: activePage,
+        remainingMs: 58_000,
+        tokenExpirationMs,
+      })
+      expect((await expiredRefreshResponse).status()).toBe(403)
+
+      await expect(activePage).toHaveURL(/\/admin\/logout-inactivity/)
+      await expect(secondPage).toHaveURL(/\/admin\/logout-inactivity/)
+      await expect(activePage.locator('.nav')).toBeHidden()
+      await expect(secondPage.locator('.nav')).toBeHidden()
+    })
+
+    test('should propagate explicit logout to a second page', async () => {
+      const secondPage = await openAuthenticatedPage({
+        context: sessionContext,
+        url: usersURL.account,
+      })
+
+      await activePage.locator('.user-menu__trigger').click()
+      await activePage.locator('a[href$="/logout"]').click()
+
+      await expect(activePage).toHaveURL(/\/admin\/login/)
+      await expect(secondPage).toHaveURL(/\/admin\/login/)
+      await expect(activePage.locator('.login')).toBeVisible()
+      await expect(secondPage.locator('.login')).toBeVisible()
+    })
+
+    test('should ignore stale expiration after a newer cross-tab refresh', async () => {
+      const secondPage = await openAuthenticatedPage({
+        context: sessionContext,
+        url: usersURL.account,
+      })
+      const previousExpirationMs = await readTokenExpirationMs(secondPage)
+
+      await waitForServerClockAfterTokenIssue(previousExpirationMs)
+      await refreshSessionFromDebugButton(activePage)
+      await expect
+        .poll(() => readTokenExpirationMs(secondPage))
+        .toBeGreaterThan(previousExpirationMs)
+      const refreshedExpirationMs = await readTokenExpirationMs(secondPage)
+
+      await dispatchStaleExpirationMessage({
+        expiredTokenAt: previousExpirationMs,
+        page: secondPage,
+      })
+
+      await expect(secondPage.locator('#token-expiration-ms')).toHaveText(
+        String(refreshedExpirationMs),
+      )
+      await expect(secondPage).toHaveURL(usersURL.account)
+      await expect(secondPage.locator('.nav')).toBeVisible()
+    })
+  })
 })
+
+const sessionTokenLifetimeMs = 7_200_000
+
+async function advanceToRemainingSessionTime({
+  page,
+  remainingMs,
+  tokenExpirationMs,
+}: {
+  page: Page
+  remainingMs: number
+  tokenExpirationMs: number
+}): Promise<void> {
+  const now = await page.evaluate(() => Date.now())
+  const durationMs = tokenExpirationMs - now - remainingMs
+
+  expect(durationMs).toBeGreaterThanOrEqual(0)
+  await page.clock.fastForward(durationMs)
+}
+
+async function dispatchManySessionActivityEvents(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    for (let index = 0; index < 10; index++) {
+      window.dispatchEvent(new PointerEvent('pointerdown'))
+      window.dispatchEvent(new KeyboardEvent('keydown'))
+      window.dispatchEvent(new InputEvent('input'))
+      window.dispatchEvent(new WheelEvent('wheel'))
+    }
+  })
+}
+
+async function dispatchStaleExpirationMessage({
+  expiredTokenAt,
+  page,
+}: {
+  expiredTokenAt: number
+  page: Page
+}): Promise<void> {
+  await page.evaluate(async (expiredTokenAtFromTest) => {
+    const markerSourceID = `e2e-marker-${crypto.randomUUID()}`
+    const observer = new BroadcastChannel('payload-auth-session')
+    const sender = new BroadcastChannel('payload-auth-session')
+
+    await new Promise<void>((resolve) => {
+      observer.addEventListener('message', function onMessage(event) {
+        if (event.data?.sourceID === markerSourceID) {
+          observer.removeEventListener('message', onMessage)
+          observer.close()
+          sender.close()
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+        }
+      })
+
+      sender.postMessage({
+        type: 'session-expired',
+        expiredTokenAt: expiredTokenAtFromTest,
+        sentAt: Date.now() + 100_000,
+        sourceID: `e2e-stale-${crypto.randomUUID()}`,
+      })
+      sender.postMessage({
+        type: 'e2e-delivery-marker',
+        sentAt: Date.now() + 100_001,
+        sourceID: markerSourceID,
+      })
+    })
+  }, expiredTokenAt)
+}
+
+async function expectActivityRefresh({
+  activity,
+  page,
+}: {
+  activity: () => Promise<unknown>
+  page: Page
+}): Promise<Response> {
+  const refreshResponse = page.waitForResponse((response) =>
+    isActivityRefreshRequest(response.request()),
+  )
+
+  await activity()
+  await page.clock.fastForward(1_001)
+  const response = await refreshResponse
+
+  expect(response.status()).toBe(200)
+
+  return response
+}
+
+function isActivityRefreshRequest(request: Request): boolean {
+  const requestURL = new URL(request.url())
+
+  return (
+    request.method() === 'POST' &&
+    requestURL.pathname.endsWith(`/api/${slug}/refresh-token`) &&
+    requestURL.searchParams.has('refresh')
+  )
+}
+
+async function openAuthenticatedPage({
+  context,
+  url,
+}: {
+  context: BrowserContext
+  url: string
+}): Promise<Page> {
+  const authenticatedPage = await context.newPage()
+
+  initPageConsoleErrorCatch(authenticatedPage)
+  await authenticatedPage.goto(url)
+  await expect(authenticatedPage.locator('#token-expiration-ms')).toHaveText(/^\d+$/)
+
+  return authenticatedPage
+}
+
+async function readTokenExpirationMs(page: Page): Promise<number> {
+  const expirationText = await page.locator('#token-expiration-ms').textContent()
+  const expirationMs = Number(expirationText)
+
+  expect(expirationMs).toBeGreaterThan(0)
+
+  return expirationMs
+}
+
+async function refreshSessionFromDebugButton(page: Page): Promise<void> {
+  const refreshResponse = page.waitForResponse((response) => {
+    const requestURL = new URL(response.url())
+
+    return (
+      response.request().method() === 'POST' &&
+      requestURL.pathname.endsWith(`/api/${slug}/refresh-token`) &&
+      !requestURL.searchParams.has('refresh')
+    )
+  })
+
+  await page.locator('#refresh-auth-cookie').click()
+  expect((await refreshResponse).status()).toBe(200)
+}
+
+async function waitForServerClockAfterTokenIssue(tokenExpirationMs: number): Promise<void> {
+  const tokenIssuedAtMs = tokenExpirationMs - sessionTokenLifetimeMs
+
+  await expect.poll(() => Date.now()).toBeGreaterThan(tokenIssuedAtMs + 1_000)
+}
