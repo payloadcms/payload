@@ -1,10 +1,81 @@
-import { describe, expect, it, vi } from 'vitest'
+// @vitest-environment jsdom
+import React, { act } from 'react'
+import { createRoot } from 'react-dom/client'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { AuthProvider } from './index.js'
 import {
   createSessionActivityTracker,
   registerSessionActivityListeners,
   sessionActivityThrottleMs,
 } from './sessionActivity.js'
+;(
+  globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }
+).IS_REACT_ACT_ENVIRONMENT = true
+
+const apiMocks = vi.hoisted(() => ({
+  get: vi.fn(),
+  post: vi.fn(),
+}))
+const pathnameState = vi.hoisted(() => ({ value: '/first' }))
+let renderedContainer: HTMLElement | undefined
+let renderedRoot: ReturnType<typeof createRoot> | undefined
+
+vi.mock('@faceless-ui/modal', () => ({
+  useModal: () => ({ closeAllModals: vi.fn(), openModal: vi.fn() }),
+}))
+
+vi.mock('payload/shared', () => ({
+  formatAdminURL: ({ apiRoute, path }: { apiRoute: string; path: string }) => `${apiRoute}${path}`,
+}))
+
+vi.mock('sonner', () => ({
+  toast: { error: vi.fn() },
+}))
+
+vi.mock('../../elements/StayLoggedIn/index.js', () => ({
+  stayLoggedInModalSlug: 'stay-logged-in',
+}))
+
+vi.mock('../../providers/Translation/index.js', () => ({
+  useTranslation: () => ({ i18n: { language: 'en' } }),
+}))
+
+vi.mock('../../utilities/api.js', () => ({
+  requests: apiMocks,
+}))
+
+vi.mock('../Config/index.js', () => ({
+  useConfig: () => ({
+    config: {
+      admin: {
+        autoRefresh: true,
+        routes: { inactivity: '/logout' },
+        user: 'users',
+      },
+      routes: { admin: '/admin', api: '/api' },
+    },
+  }),
+}))
+
+vi.mock('../RouterAdapter/index.js', () => ({
+  usePathname: () => pathnameState.value,
+  useRouter: () => ({ replace: vi.fn() }),
+}))
+
+vi.mock('../RouteTransition/index.js', () => ({
+  useRouteTransition: () => ({ startRouteTransition: vi.fn() }),
+}))
+
+afterEach(() => {
+  act(() => renderedRoot?.unmount())
+  renderedContainer?.remove()
+  renderedContainer = undefined
+  renderedRoot = undefined
+  vi.useRealTimers()
+  vi.clearAllMocks()
+  pathnameState.value = '/first'
+})
 
 describe('createSessionActivityTracker', () => {
   it('should process the first activity immediately', () => {
@@ -113,6 +184,58 @@ describe('registerSessionActivityListeners', () => {
       expect.any(Function),
       true,
     )
+  })
+})
+
+describe('AuthProvider session activity', () => {
+  it('should share one throttle between browser activity and pathname changes', async () => {
+    vi.useFakeTimers()
+
+    const user = { collection: 'users', id: '1' }
+    const userResponse = {
+      exp: Math.floor((Date.now() + 10_000) / 1000),
+      token: 'token',
+      user,
+    }
+    apiMocks.get.mockResolvedValue({
+      json: async () => userResponse,
+      status: 200,
+    })
+    apiMocks.post.mockResolvedValue({
+      json: async () => userResponse,
+      status: 200,
+    })
+
+    const renderAuthProvider = () =>
+      React.createElement(AuthProvider, { user: user as never }, React.createElement('div'))
+
+    renderedContainer = document.createElement('div')
+    document.body.append(renderedContainer)
+    renderedRoot = createRoot(renderedContainer)
+
+    await act(async () => {
+      renderedRoot?.render(renderAuthProvider())
+    })
+
+    await act(async () => {})
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(sessionActivityThrottleMs + 1)
+      window.dispatchEvent(new Event('pointerdown'))
+      await vi.advanceTimersByTimeAsync(1_000)
+    })
+
+    expect(apiMocks.post).toHaveBeenCalledTimes(1)
+
+    pathnameState.value = '/second'
+    await act(async () => {
+      renderedRoot?.render(renderAuthProvider())
+    })
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1_000)
+    })
+
+    expect(apiMocks.post).toHaveBeenCalledTimes(1)
   })
 })
 

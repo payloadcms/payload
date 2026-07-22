@@ -7,6 +7,8 @@ import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
+import type { MarkSessionActivity } from './sessionActivity.js'
+
 import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
@@ -14,6 +16,10 @@ import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
 import { usePathname, useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
+import {
+  createSessionActivityTracker,
+  registerSessionActivityListeners,
+} from './sessionActivity.js'
 
 export type UserWithToken<T = AuthenticatedUser> = {
   /** seconds until expiration */
@@ -118,6 +124,7 @@ export function AuthProvider({
   const forceLogOutTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
 
   const id = user?.id
+  const isAuthenticated = Boolean(user)
 
   const redirectToInactivityRoute = useCallback(() => {
     const baseAdminRoute = formatAdminURL({ adminRoute, path: '' })
@@ -352,10 +359,27 @@ export function AuthProvider({
   }, [apiRoute, userSlug, i18n.language, setNewUser])
 
   const refreshCookieEvent = useEffectEvent(refreshCookie)
+  const markActivity = React.useMemo<MarkSessionActivity>(() => {
+    if (id === undefined) {
+      return () => false
+    }
+
+    return createSessionActivityTracker({
+      onActivity: () => refreshCookieEvent(),
+    })
+  }, [id])
+
   useEffect(() => {
-    // when location changes, refresh cookie
-    refreshCookieEvent()
-  }, [pathname])
+    markActivity('route')
+  }, [pathname, markActivity])
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      return
+    }
+
+    return registerSessionActivityListeners({ document, markActivity, window })
+  }, [isAuthenticated, markActivity])
 
   const fetchFullUserEvent = useEffectEvent(fetchFullUser)
   useEffect(() => {
