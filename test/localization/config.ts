@@ -467,6 +467,16 @@ export default buildConfigWithDefaults({
           type: 'text',
         },
       ],
+      slug: 'global-copy-test',
+    },
+    {
+      fields: [
+        {
+          name: 'text',
+          localized: true,
+          type: 'text',
+        },
+      ],
       slug: globalWithDraftsSlug,
       versions: {
         drafts: {
