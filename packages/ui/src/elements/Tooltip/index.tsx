@@ -1,30 +1,12 @@
 'use client'
-import React, { useCallback, useEffect, useLayoutEffect, useState } from 'react'
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 import { useIntersect } from '../../hooks/useIntersect.js'
 import './index.css'
 
 // Breathing room (px) between a shifted tooltip and its clipping edge. Maps to `--spacer-1`.
 const EDGE_GUTTER = 4
-
-const getClipBoundary = (el: HTMLElement | null): DOMRect | null => {
-  let current = el?.parentElement || null
-
-  while (current) {
-    const { overflowX } = window.getComputedStyle(current)
-    if (
-      overflowX === 'auto' ||
-      overflowX === 'clip' ||
-      overflowX === 'hidden' ||
-      overflowX === 'scroll'
-    ) {
-      return current.getBoundingClientRect()
-    }
-    current = current.parentElement
-  }
-
-  return null
-}
 
 export type Props = {
   alignCaret?: 'center' | 'left' | 'right'
@@ -73,9 +55,15 @@ export const Tooltip: React.FC<Props> = (props) => {
   } = props
 
   const [show, setShow] = React.useState(showFromProps)
+  const [isMounted, setIsMounted] = useState(showFromProps)
   const [position, setPosition] = React.useState<'bottom' | 'left' | 'right' | 'top'>('top')
   const [shiftX, setShiftX] = useState(0)
   const [maxWidth, setMaxWidth] = useState<null | number>(null)
+  const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null)
+
+  // A hidden marker rendered where the tooltip used to live in the DOM, so its
+  // parent can be used as the anchor for the portaled tooltip below.
+  const anchorMarkerRef = useRef<HTMLSpanElement>(null)
 
   const [ref, intersectionEntry, node] = useIntersect(
     {
@@ -126,8 +114,7 @@ export const Tooltip: React.FC<Props> = (props) => {
     }
 
     const rect = node.getBoundingClientRect()
-    const boundary =
-      boundingRef?.current?.getBoundingClientRect() ?? getClipBoundary(node) ?? undefined
+    const boundary = boundingRef?.current?.getBoundingClientRect()
     const leftEdge = (boundary?.left ?? 0) + EDGE_GUTTER
     const rightEdge = (boundary?.right ?? window.innerWidth) - EDGE_GUTTER
     const available = rightEdge - leftEdge
@@ -166,9 +153,60 @@ export const Tooltip: React.FC<Props> = (props) => {
     }
   }, [show, computeShift])
 
-  // The first aside is always on top. The purpose of that is that it can reliably be used for the interaction observer (as it's not moving around), to calculate the position of the actual tooltip.
+  // Keep the tooltip mounted for the duration of its fade-out transition so the
+  // portal doesn't disappear abruptly when `show` flips back to false.
+  useEffect(() => {
+    if (show) {
+      setIsMounted(true)
+      return
+    }
+
+    // Matches the `.tooltip--show` opacity transition duration.
+    const timeoutID = setTimeout(() => setIsMounted(false), 200)
+
+    return () => {
+      clearTimeout(timeoutID)
+    }
+  }, [show])
+
+  const updateAnchorRect = useCallback(() => {
+    const anchor = anchorMarkerRef.current?.parentElement
+
+    if (!anchor) {
+      return
+    }
+
+    const rect = anchor.getBoundingClientRect()
+
+    // A hidden ancestor (e.g. an inactive tab panel) collapses the anchor to an
+    // all-zero rect. Treat that as "no anchor" so the portal doesn't render pinned
+    // to the viewport's top-left corner.
+    setAnchorRect(rect.width || rect.height ? rect : null)
+  }, [])
+
+  // While mounted, keep the portaled tooltip's fixed anchor aligned to the trigger
+  // element as the page or an overflow container scrolls or resizes.
+  useLayoutEffect(() => {
+    if (!isMounted) {
+      return
+    }
+
+    updateAnchorRect()
+    window.addEventListener('scroll', updateAnchorRect, true)
+    window.addEventListener('resize', updateAnchorRect)
+
+    return () => {
+      window.removeEventListener('scroll', updateAnchorRect, true)
+      window.removeEventListener('resize', updateAnchorRect)
+    }
+  }, [isMounted, updateAnchorRect])
+
+  // The measuring aside is always on top. The purpose of that is that it can reliably be used for
+  // the interaction observer (as it's not moving around), to calculate the position of the actual
+  // tooltip. The marker span stands in for it as the portal's anchor when staticPositioning is set.
   return (
     <React.Fragment>
+      <span aria-hidden="true" ref={anchorMarkerRef} style={{ display: 'none' }} />
       {!staticPositioning && (
         <aside
           aria-hidden="true"
@@ -182,32 +220,47 @@ export const Tooltip: React.FC<Props> = (props) => {
           <div className="tooltip-content">{children}</div>
         </aside>
       )}
-      <aside
-        className={[
-          'tooltip',
-          className,
-          show && 'tooltip--show',
-          maxWidth && 'tooltip--wrap',
-          `tooltip--caret-${alignCaret}`,
-          `tooltip--position-${positionFromProps || position}`,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        style={
-          {
-            ...(maxWidth ? { '--tooltip-max-width': `${maxWidth}px` } : {}),
-            ...(shiftX
-              ? {
-                  '--tooltip-caret-x': `${-shiftX}px`,
-                  '--tooltip-x': `calc(-50% + ${shiftX}px)`,
-                }
-              : {}),
-          } as React.CSSProperties
-        }
-      >
-        <TooltipCaret />
-        <div className="tooltip-content">{children}</div>
-      </aside>
+      {isMounted &&
+        anchorRect &&
+        createPortal(
+          <div
+            className="tooltip__portal-anchor"
+            style={{
+              height: anchorRect.height,
+              left: anchorRect.left,
+              top: anchorRect.top,
+              width: anchorRect.width,
+            }}
+          >
+            <aside
+              className={[
+                'tooltip',
+                className,
+                show && 'tooltip--show',
+                maxWidth && 'tooltip--wrap',
+                `tooltip--caret-${alignCaret}`,
+                `tooltip--position-${positionFromProps || position}`,
+              ]
+                .filter(Boolean)
+                .join(' ')}
+              style={
+                {
+                  ...(maxWidth ? { '--tooltip-max-width': `${maxWidth}px` } : {}),
+                  ...(shiftX
+                    ? {
+                        '--tooltip-caret-x': `${-shiftX}px`,
+                        '--tooltip-x': `calc(-50% + ${shiftX}px)`,
+                      }
+                    : {}),
+                } as React.CSSProperties
+              }
+            >
+              <TooltipCaret />
+              <div className="tooltip-content">{children}</div>
+            </aside>
+          </div>,
+          document.body,
+        )}
     </React.Fragment>
   )
 }

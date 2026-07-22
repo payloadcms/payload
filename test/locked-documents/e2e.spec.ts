@@ -173,6 +173,17 @@ describe('Locked Documents', () => {
       await expect(page.locator('.table .row-2 .locked svg.icon--lock')).toBeVisible()
     })
 
+    test('should show tooltip with editing user when hovering the lock icon on a document row', async () => {
+      await page.goto(postsUrl.list)
+
+      const lockIcon = page.locator('.table .row-2 .locked')
+      await lockIcon.hover()
+
+      await expect(
+        page.locator('.tooltip--show', { hasText: exactText(`${user2.email} is editing`) }),
+      ).toBeVisible()
+    })
+
     test('should not show lock icon on document row if unlocked', async () => {
       await page.goto(postsUrl.list)
 

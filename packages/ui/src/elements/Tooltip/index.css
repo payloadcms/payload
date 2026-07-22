@@ -1,4 +1,12 @@
 @layer payload-default {
+  /* Fixed-position anchor mirroring the trigger's rect, so the portaled tooltip
+   * (escaping ancestor `overflow` clipping) can position against it. */
+  .tooltip__portal-anchor {
+    position: fixed;
+    z-index: var(--z-portal-element);
+    pointer-events: none;
+  }
+
   .tooltip {
     --caret-width: 15px;
     --caret-height: 7px;

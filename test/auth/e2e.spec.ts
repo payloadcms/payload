@@ -253,7 +253,7 @@ describe('Auth', () => {
         // should fail to save without confirm password
         await page.locator('#action-save').click()
         await expect(
-          page.locator('.field-type.confirm-password .tooltip--show', {
+          page.locator('.tooltip--show', {
             hasText: exactText('This field is required.'),
           }),
         ).toBeVisible()
@@ -262,7 +262,7 @@ describe('Auth', () => {
         await page.locator('#field-confirm-password').fill('wrong password')
         await page.locator('#action-save').click()
         await expect(
-          page.locator('.field-type.confirm-password .tooltip--show', {
+          page.locator('.tooltip--show', {
             hasText: exactText('Passwords do not match.'),
           }),
         ).toBeVisible()
@@ -283,7 +283,7 @@ describe('Auth', () => {
         // should fail to save without confirm password
         await page.locator('#action-save').click({ delay: 100 })
         await expect(
-          page.locator('.field-type.confirm-password .tooltip--show', {
+          page.locator('.tooltip--show', {
             hasText: exactText('This field is required.'),
           }),
         ).toBeVisible()
