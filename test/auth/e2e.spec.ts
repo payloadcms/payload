@@ -644,7 +644,22 @@ describe('Auth', () => {
 
       await expectActivityRefresh({
         activity: async () => {
-          await selectAll.check()
+          const observedEvents = await selectAll.evaluate((element: HTMLInputElement) => {
+            const eventTypes = ['input', 'pointerdown'] as const
+            const observed: string[] = []
+            const recordEvent = (event: Event) => observed.push(event.type)
+
+            eventTypes.forEach((eventType) => window.addEventListener(eventType, recordEvent, true))
+            element.click()
+            eventTypes.forEach((eventType) =>
+              window.removeEventListener(eventType, recordEvent, true),
+            )
+
+            return observed
+          })
+
+          expect(observedEvents).toContain('input')
+          expect(observedEvents).not.toContain('pointerdown')
           await expect(selectAll).toBeChecked()
         },
         page: sessionPage,
@@ -776,22 +791,31 @@ describe('Auth', () => {
     })
 
     test('should propagate session expiration to a second page', async () => {
-      const secondPage = await openAuthenticatedPage({
-        context: sessionContext,
-        url: usersURL.account,
-      })
       const tokenExpirationMs = await readTokenExpirationMs(activePage)
+      const activeRefreshRequests = observeActivityRefreshRequests(activePage)
+
+      await advanceToRemainingSessionTime({
+        page: activePage,
+        remainingMs: 61_000,
+        tokenExpirationMs,
+      })
+
+      const secondPage = await sessionContext.newPage()
+      const secondPageRefreshRequests = observeActivityRefreshRequests(secondPage)
+
+      initPageConsoleErrorCatch(secondPage)
+      await secondPage.goto(usersURL.account)
+      await expect(secondPage.locator('#token-expiration-ms')).toHaveText(/^\d+$/)
+
       const expiredRefreshResponse = activePage.waitForResponse((response) =>
         isActivityRefreshRequest(response.request()),
       )
 
       expect((await sessionContext.request.post(`${apiURL}/${slug}/logout`)).status()).toBe(200)
-      await advanceToRemainingSessionTime({
-        page: activePage,
-        remainingMs: 58_000,
-        tokenExpirationMs,
-      })
+      await activePage.clock.fastForward(2_001)
       expect((await expiredRefreshResponse).status()).toBe(403)
+      expect(activeRefreshRequests).toHaveLength(1)
+      expect(secondPageRefreshRequests).toHaveLength(0)
 
       await expect(activePage).toHaveURL(/\/admin\/logout-inactivity/)
       await expect(secondPage).toHaveURL(/\/admin\/logout-inactivity/)
@@ -936,6 +960,18 @@ function isActivityRefreshRequest(request: Request): boolean {
     requestURL.pathname.endsWith(`/api/${slug}/refresh-token`) &&
     requestURL.searchParams.has('refresh')
   )
+}
+
+function observeActivityRefreshRequests(page: Page): Request[] {
+  const requests: Request[] = []
+
+  page.on('request', (request) => {
+    if (isActivityRefreshRequest(request)) {
+      requests.push(request)
+    }
+  })
+
+  return requests
 }
 
 async function openAuthenticatedPage({
