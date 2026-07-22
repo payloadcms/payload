@@ -183,9 +183,33 @@ export const restoreVersionOperation = async <
 
     req.context.isRestoringVersion = true
 
+    // Validation runs against the default locale, so we need a request with an
+    // overridden `locale`/`fallbackLocale`. `req` is the incoming web `Request`,
+    // whose `headers` and `url` are getters backed by private class fields.
+    // Deriving an object via `Object.create(req)` leaves those getters on the
+    // prototype, so reading them later (e.g. in `createLocalReq` while validating
+    // a relationship field's `filterOptions`) invokes them with the wrong
+    // receiver and throws `Cannot read private member #... from an object whose
+    // class did not declare it`. Copy the resolved values as own data properties
+    // so they don't delegate to the private-field getters.
     const reqWithValidationLocale = Object.assign(Object.create(req), req, {
       fallbackLocale: null,
       locale: validationLocale,
+    })
+
+    Object.defineProperties(reqWithValidationLocale, {
+      headers: {
+        configurable: true,
+        enumerable: true,
+        value: req.headers,
+        writable: true,
+      },
+      url: {
+        configurable: true,
+        enumerable: true,
+        value: req.url,
+        writable: true,
+      },
     })
 
     let data = await beforeValidate({
