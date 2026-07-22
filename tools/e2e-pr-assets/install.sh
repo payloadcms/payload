@@ -33,6 +33,7 @@ SCRIPTS=(
   e2e-attach-pr
   e2e-capture-screenshot
   e2e-convert-video
+  e2e-ensure-github-auth
   e2e-github-login-profile
   e2e-infer-suite
   e2e-run

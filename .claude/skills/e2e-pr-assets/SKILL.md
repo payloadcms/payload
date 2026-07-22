@@ -79,11 +79,15 @@ Do not start recording until the plan is specific enough that another agent coul
 - Before relying on `e2e-run --record`, inspect the repo's Playwright config:
   - If the config hardcodes `video: 'off'` or otherwise ignores `PLAYWRIGHT_VIDEO`, do not spend time fighting the suite recorder.
   - Prefer `e2e-run-script` for video capture in that case.
+- Before spending time recording, proactively ensure GitHub browser auth for the target PR:
+  - `e2e-ensure-github-auth <pr-number> <owner/repo> --repo <repo-root>`
+  - If the selected browser profile is not signed in, this opens the login flow immediately so the workflow is not interrupted later during upload.
 - Helper commands installed by the bundle:
   - `e2e-infer-suite`
   - `e2e-run`
   - `e2e-run-script`
   - `e2e-convert-video`
+  - `e2e-ensure-github-auth`
   - `e2e-upload-github-attachments`
   - `e2e-capture-screenshot`
   - `e2e-attach-pr`
@@ -229,6 +233,8 @@ Do not fake new-tab behavior by silently navigating the current page in-place ju
    - Do not use raw GitHub, release asset, or Git LFS URLs for video mode; GitHub treats them as normal links.
    - Do not switch to screenshots unless the user explicitly changes the requested mode.
 10. Upload through GitHub's attachment UI to get `https://github.com/user-attachments/assets/...` URLs:
+   - If you have not already done the up-front auth check in this session, run:
+     - `e2e-ensure-github-auth <pr-number> <owner/repo> --repo <repo-root>`
    - `e2e-upload-github-attachments <pr-number> <owner/repo> /tmp/payload-e2e-before.mp4 /tmp/payload-e2e-after.mp4`
    - If the configured browser profile is not signed in, the script automatically opens the login flow, waits for manual sign-in detection, then retries upload once.
    - Optional profile override: `GITHUB_BROWSER_PROFILE=/path/to/profile`

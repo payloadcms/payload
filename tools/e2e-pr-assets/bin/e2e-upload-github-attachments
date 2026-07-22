@@ -60,6 +60,8 @@ if [[ ! -f "$BEFORE_FILE" || ! -f "$AFTER_FILE" ]]; then
   exit 1
 fi
 
+"${SCRIPT_DIR}/e2e-ensure-github-auth" "$PR" "$REPO" "$BROWSER_PROFILE" --repo "$REPO_ROOT"
+
 cleanup_profile() {
   if [[ "$AUTO_REMOVE_PROFILE" != "1" ]]; then
     return

@@ -34,6 +34,14 @@ The install script links helper commands into `~/.local/bin` (or `$XDG_BIN_HOME`
 bash tools/e2e-pr-assets/check.sh
 ```
 
+Before spending time recording media, proactively ensure the GitHub browser profile is signed in for the target PR:
+
+```bash
+e2e-ensure-github-auth <pr-number> <owner/repo> --repo /path/to/repo
+```
+
+If the selected browser profile is unsigned, the helper opens the login flow immediately so the upload step does not interrupt the workflow later.
+
 ## Recording Plan
 
 Before recording, create a temporary local `recording-plan.md` outside the repo with separate `Before` and `After` sections.
@@ -76,8 +84,13 @@ For new-tab proof:
   - Browser auth profile defaults to `/tmp/github-upload-profile`.
   - Temporary browser profile is removed automatically after upload flow unless explicitly disabled.
   - Temporary media artifacts are removed automatically after `e2e-attach-pr` updates the PR body.
+- `e2e-ensure-github-auth` is the proactive auth check:
+  - Use it before recording to confirm the selected browser profile is already signed in for the target PR.
+  - If not signed in, it opens `e2e-github-login-profile` immediately and waits for sign-in detection before returning.
+  - Add `--check-only` to fail fast without opening the login flow.
 - `e2e-upload-github-attachments` is check-first for auth:
   - Uses an ephemeral profile by default: `/tmp/github-upload-profile`.
+  - Calls `e2e-ensure-github-auth` at the start so missing GitHub sign-in is discovered before upload begins.
   - If the selected browser profile is already signed in to GitHub, upload proceeds immediately.
   - If not signed in, it opens `e2e-github-login-profile`, waits for manual sign-in detection, then retries upload once automatically.
   - On completion (success/failure), it removes temporary profile directories by default for security.
