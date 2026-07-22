@@ -8,7 +8,7 @@ import React, { createContext, use, useCallback, useEffect, useState } from 'rea
 import { toast } from 'sonner'
 
 import type { MarkSessionActivity } from './sessionActivity.js'
-import type { AuthSessionResyncResult } from './sessionSync.js'
+import type { AuthSessionResyncOptions, AuthSessionResyncResult } from './sessionSync.js'
 
 import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
@@ -21,7 +21,7 @@ import {
   createSessionActivityTracker,
   registerSessionActivityListeners,
 } from './sessionActivity.js'
-import { createAuthSessionSync } from './sessionSync.js'
+import { AUTH_SESSION_SYNC_EVENT_TYPES, createAuthSessionSync } from './sessionSync.js'
 
 export type UserWithToken<T = AuthenticatedUser> = {
   /** seconds until expiration */
@@ -235,7 +235,7 @@ export function AuthProvider({
             }
 
             sessionSyncRef.current?.publish({
-              type: 'session-expired',
+              type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
               expiredTokenAt: nextTokenExpirationMs,
             })
             revokeTokenAndExpire()
@@ -336,7 +336,10 @@ export function AuthProvider({
 
               pendingAuthInvalidationRef.current = undefined
               applyUserResponse(json)
-              sessionSyncRef.current?.publish({ type: 'session-refreshed', session: json })
+              sessionSyncRef.current?.publish({
+                type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+                session: json,
+              })
               return json.user
             }
 
@@ -344,7 +347,7 @@ export function AuthProvider({
               const invalidateSession = () => {
                 if (handledExpiration !== undefined) {
                   sessionSyncRef.current?.publish({
-                    type: 'session-expired',
+                    type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
                     expiredTokenAt: handledExpiration,
                   })
                 }
@@ -414,8 +417,9 @@ export function AuthProvider({
 
   const logOut = useCallback(async () => {
     const sessionSync = sessionSyncRef.current
+    const logoutEvent = { type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT } as const
 
-    sessionSync?.publish({ type: 'session-logged-out' })
+    const logoutPublication = sessionSync?.publish(logoutEvent)
 
     try {
       if (user && user.collection) {
@@ -430,7 +434,11 @@ export function AuthProvider({
     } catch (_) {
       // fail silently and log the user out in state
     } finally {
-      sessionSync?.publishStorageRefresh()
+      setNewUser(null)
+
+      if (logoutPublication?.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT) {
+        sessionSync?.publishStorageRefresh(logoutPublication)
+      }
     }
 
     return true
@@ -473,62 +481,66 @@ export function AuthProvider({
     [apiRoute, i18n],
   )
 
-  const fetchFullUserResult = React.useCallback((): Promise<
-    AuthSessionResyncResult<AuthenticatedUser>
-  > => {
-    const requestGeneration = sessionGenerationRef.current
+  const fetchFullUserResult = React.useCallback(
+    ({ isCurrent }: Partial<AuthSessionResyncOptions> = {}): Promise<
+      AuthSessionResyncResult<AuthenticatedUser>
+    > => {
+      const requestGeneration = sessionGenerationRef.current
+      const canCommit = () =>
+        sessionGenerationRef.current === requestGeneration && (!isCurrent || isCurrent())
 
-    return enqueueAuthRequest(async () => {
-      if (sessionGenerationRef.current !== requestGeneration) {
-        return { status: 'indeterminate' }
-      }
+      return enqueueAuthRequest(async () => {
+        if (!canCommit()) {
+          return { status: 'indeterminate' }
+        }
 
-      try {
-        const request = await requests.get(
-          formatAdminURL({
-            apiRoute,
-            path: `/${userSlug}/me`,
-          }),
-          {
-            credentials: 'include',
-            headers: {
-              'Accept-Language': i18n.language,
+        try {
+          const request = await requests.get(
+            formatAdminURL({
+              apiRoute,
+              path: `/${userSlug}/me`,
+            }),
+            {
+              credentials: 'include',
+              headers: {
+                'Accept-Language': i18n.language,
+              },
             },
-          },
-        )
+          )
 
-        if (request.status !== 200) {
-          return { status: 'indeterminate' }
-        }
-
-        const json: null | UserWithToken = await request.json()
-
-        if (sessionGenerationRef.current !== requestGeneration) {
-          return { status: 'indeterminate' }
-        }
-
-        if (json?.user) {
-          pendingAuthInvalidationRef.current = undefined
-          applyUserResponse(json)
-
-          return {
-            expirationMs: json.exp * 1000,
-            status: 'authenticated',
-            user: json.user,
+          if (request.status !== 200) {
+            return { status: 'indeterminate' }
           }
+
+          const json: null | UserWithToken = await request.json()
+
+          if (!canCommit()) {
+            return { status: 'indeterminate' }
+          }
+
+          if (json?.user) {
+            pendingAuthInvalidationRef.current = undefined
+            applyUserResponse(json)
+
+            return {
+              expirationMs: json.exp * 1000,
+              status: 'authenticated',
+              user: json.user,
+            }
+          }
+
+          applyUserResponse(null)
+
+          return { status: 'unauthenticated' }
+        } catch (e) {
+          toast.error(`Fetching user failed: ${e.message}`)
         }
 
-        pendingAuthInvalidationRef.current = undefined
-        applyUserResponse(null)
-
-        return { status: 'unauthenticated' }
-      } catch (e) {
-        toast.error(`Fetching user failed: ${e.message}`)
-      }
-
-      return { status: 'indeterminate' }
-    })
-  }, [apiRoute, applyUserResponse, enqueueAuthRequest, i18n.language, userSlug])
+        return { status: 'indeterminate' }
+      })
+    },
+    [apiRoute, applyUserResponse, enqueueAuthRequest, i18n.language, userSlug],
+  )
 
   const fetchFullUser = React.useCallback(async (): Promise<AuthenticatedUser | null> => {
     const result = await fetchFullUserResult()

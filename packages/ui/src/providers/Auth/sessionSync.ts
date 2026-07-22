@@ -1,36 +1,49 @@
 import type { UserWithToken } from './index.js'
 
+export const AUTH_SESSION_SYNC_EVENT_TYPES = {
+  EXPIRED: 'session-expired',
+  LOGGED_OUT: 'session-logged-out',
+  REFRESHED: 'session-refreshed',
+} as const
+
+export type AuthSessionSyncEventType =
+  (typeof AUTH_SESSION_SYNC_EVENT_TYPES)[keyof typeof AUTH_SESSION_SYNC_EVENT_TYPES]
+
 export type AuthSessionSyncMessage =
   | {
       expiredTokenAt: number
       sentAt: number
       sourceID: string
-      type: 'session-expired'
+      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED
     }
   | {
       sentAt: number
       session: UserWithToken
       sourceID: string
-      type: 'session-refreshed'
+      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
     }
   | {
       sentAt: number
       sourceID: string
-      type: 'session-logged-out'
+      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
     }
 
 export type AuthSessionSyncEvent =
   | {
       expiredTokenAt: number
-      type: 'session-expired'
+      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED
     }
   | {
       session: UserWithToken
-      type: 'session-refreshed'
+      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
     }
   | {
-      type: 'session-logged-out'
+      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
     }
+
+export type AuthSessionResyncOptions = {
+  isCurrent: () => boolean
+}
 
 export type AuthSessionResyncResult<T = unknown> =
   | {
@@ -48,26 +61,37 @@ export type AuthSessionResyncResult<T = unknown> =
 const authSessionSyncChannelName = 'payload-auth-session'
 const authSessionSyncStorageKey = 'payload:auth-session:refresh'
 
-type StorageRefreshNotification = {
-  sentAt: number
-  sourceID: string
-}
-
-type ConfirmedLifecycleOrder = {
-  affectedExpirationMs: number
-  kind: 'confirmed'
-  precedence: number
-  sentAt: number
-  sourceID: string
-}
-
-type LifecycleOrder =
+export type AuthSessionSyncPublication =
   | {
-      kind: 'storage-barrier'
+      affectedExpirationMs: 0
       sentAt: number
       sourceID: string
+      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
     }
-  | ConfirmedLifecycleOrder
+  | {
+      affectedExpirationMs: number
+      sentAt: number
+      sourceID: string
+      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED
+    }
+  | {
+      affectedExpirationMs: number
+      sentAt: number
+      sourceID: string
+      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
+    }
+
+type AuthSessionLogoutPublication = Extract<
+  AuthSessionSyncPublication,
+  { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT }
+>
+
+type StorageRefreshNotification =
+  | ({ settlesSentAt: number } & AuthSessionLogoutPublication)
+  | Extract<AuthSessionSyncPublication, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED }>
+  | Extract<AuthSessionSyncPublication, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED }>
+
+type LifecycleOrder = AuthSessionSyncPublication
 
 export function createAuthSessionSync({
   fetchFullUser,
@@ -79,7 +103,7 @@ export function createAuthSessionSync({
   onSessionResyncUnauthenticated,
   sourceID,
 }: {
-  fetchFullUser: () => Promise<AuthSessionResyncResult>
+  fetchFullUser: (options: AuthSessionResyncOptions) => Promise<AuthSessionResyncResult>
   getTokenExpirationMs: () => number | undefined
   now?: () => number
   onSessionExpired: (expiredTokenAt: number) => void
@@ -89,12 +113,14 @@ export function createAuthSessionSync({
   sourceID: string
 }): {
   cleanup: () => void
-  publish: (event: AuthSessionSyncEvent) => void
-  publishStorageRefresh: () => void
+  publish: (event: AuthSessionSyncEvent) => AuthSessionSyncPublication
+  publishStorageRefresh: (publication: AuthSessionLogoutPublication) => void
 } {
   let channel: BroadcastChannel | undefined
+  let isActive = true
   let isStorageListenerInstalled = false
   let latestLifecycleOrder: LifecycleOrder | undefined
+  let pendingStorageLifecycleOrder: LifecycleOrder | undefined
 
   const receiveMessage = ({ data }: MessageEvent<unknown>) => {
     if (!isAuthSessionSyncMessage(data) || data.sourceID === sourceID) {
@@ -102,15 +128,20 @@ export function createAuthSessionSync({
     }
 
     const lifecycleOrder = getLifecycleOrder(data)
+    const lifecycleComparison = latestLifecycleOrder
+      ? compareLifecycleOrders({ first: lifecycleOrder, second: latestLifecycleOrder })
+      : undefined
+    const resolvesPendingStorageBarrier =
+      lifecycleComparison === 0 && pendingStorageLifecycleOrder === latestLifecycleOrder
 
     if (
-      latestLifecycleOrder &&
-      compareLifecycleOrders({ first: lifecycleOrder, second: latestLifecycleOrder }) <= 0
+      lifecycleComparison !== undefined &&
+      (lifecycleComparison < 0 || (lifecycleComparison === 0 && !resolvesPendingStorageBarrier))
     ) {
       return
     }
 
-    if (data.type === 'session-refreshed') {
+    if (data.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
       const receivedExpirationMs = data.session.exp * 1000
       const localExpirationMs = getTokenExpirationMs()
 
@@ -118,23 +149,26 @@ export function createAuthSessionSync({
         return
       }
 
+      pendingStorageLifecycleOrder = undefined
       latestLifecycleOrder = lifecycleOrder
       onSessionRefreshed(data.session)
       return
     }
 
-    if (data.type === 'session-expired') {
+    if (data.type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
       const localExpirationMs = getTokenExpirationMs()
 
       if (localExpirationMs !== undefined && localExpirationMs > data.expiredTokenAt) {
         return
       }
 
+      pendingStorageLifecycleOrder = undefined
       latestLifecycleOrder = lifecycleOrder
       onSessionExpired(data.expiredTokenAt)
       return
     }
 
+    pendingStorageLifecycleOrder = undefined
     latestLifecycleOrder = lifecycleOrder
     onSessionLoggedOut()
   }
@@ -150,40 +184,54 @@ export function createAuthSessionSync({
       return
     }
 
-    const storageBarrier = getStorageBarrier(notification)
-
     if (
       latestLifecycleOrder &&
-      compareLifecycleOrders({ first: storageBarrier, second: latestLifecycleOrder }) <= 0
+      compareLifecycleOrders({ first: notification, second: latestLifecycleOrder }) <= 0
     ) {
       return
     }
 
-    latestLifecycleOrder = storageBarrier
+    const settlesAppliedLogout =
+      notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT &&
+      latestLifecycleOrder?.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT &&
+      latestLifecycleOrder.sentAt === notification.settlesSentAt &&
+      latestLifecycleOrder.sourceID === notification.sourceID
 
-    void fetchFullUser()
+    if (settlesAppliedLogout) {
+      pendingStorageLifecycleOrder = undefined
+      latestLifecycleOrder = notification
+      return
+    }
+
+    pendingStorageLifecycleOrder = notification
+    latestLifecycleOrder = notification
+    const isCurrent = () => isActive && latestLifecycleOrder === notification
+
+    void fetchFullUser({ isCurrent })
       .then((result) => {
-        if (latestLifecycleOrder !== storageBarrier) {
+        if (!isCurrent()) {
           return
         }
 
         if (result.status === 'authenticated') {
-          latestLifecycleOrder = getConfirmedLifecycleOrder({
+          pendingStorageLifecycleOrder = undefined
+          latestLifecycleOrder = {
+            type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
             affectedExpirationMs: result.expirationMs,
-            precedence: 0,
             sentAt: notification.sentAt,
             sourceID: notification.sourceID,
-          })
+          }
           return
         }
 
         if (result.status === 'unauthenticated') {
-          latestLifecycleOrder = getConfirmedLifecycleOrder({
+          pendingStorageLifecycleOrder = undefined
+          latestLifecycleOrder = {
+            type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
             affectedExpirationMs: 0,
-            precedence: 2,
             sentAt: notification.sentAt,
             sourceID: notification.sourceID,
-          })
+          }
           onSessionResyncUnauthenticated()
         }
       })
@@ -208,6 +256,8 @@ export function createAuthSessionSync({
 
   return {
     cleanup: () => {
+      isActive = false
+      pendingStorageLifecycleOrder = undefined
       closeChannel(channel)
       channel = undefined
 
@@ -222,28 +272,37 @@ export function createAuthSessionSync({
       }
     },
     publish: (event) => {
-      const sentAt = getNextLifecycleTimestamp({ event })
-      const message = { ...event, sentAt, sourceID } as AuthSessionSyncMessage
+      const sentAt = getNextLifecycleTimestamp()
+      const message = createAuthSessionSyncMessage({ event, sentAt, sourceID })
+      const lifecycleOrder = getLifecycleOrder(message)
 
-      latestLifecycleOrder = getLifecycleOrder(message)
+      pendingStorageLifecycleOrder = undefined
+      latestLifecycleOrder = lifecycleOrder
 
       if (channel) {
         try {
           channel.postMessage(message)
-          return
         } catch {
           downgradeToStorage()
         }
       }
 
-      if (event.type !== 'session-logged-out') {
-        publishStorageNotification({ sentAt })
+      if (lifecycleOrder.type !== AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT) {
+        publishStorageNotification({ notification: lifecycleOrder })
       }
+
+      return lifecycleOrder
     },
-    publishStorageRefresh: () => {
-      if (!channel) {
-        publishStorageNotification({ sentAt: getNextLifecycleTimestamp() })
+    publishStorageRefresh: (publication) => {
+      const notification: StorageRefreshNotification = {
+        ...publication,
+        sentAt: getNextLifecycleTimestamp(),
+        settlesSentAt: publication.sentAt,
       }
+
+      pendingStorageLifecycleOrder = undefined
+      latestLifecycleOrder = notification
+      publishStorageNotification({ notification })
     },
   }
 
@@ -271,16 +330,11 @@ export function createAuthSessionSync({
     installStorageListener()
   }
 
-  function getNextLifecycleTimestamp({ event }: { event?: AuthSessionSyncEvent } = {}): number {
+  function getNextLifecycleTimestamp(): number {
     const currentTime = now()
     const latestSentAt = latestLifecycleOrder?.sentAt ?? Number.NEGATIVE_INFINITY
-    const nextTimestamp = currentTime > latestSentAt ? currentTime : latestSentAt + 1
 
-    if (event) {
-      latestLifecycleOrder = getLifecycleOrder({ ...event, sentAt: nextTimestamp, sourceID })
-    }
-
-    return nextTimestamp
+    return currentTime > latestSentAt ? currentTime : latestSentAt + 1
   }
 
   function installStorageListener(): void {
@@ -296,9 +350,11 @@ export function createAuthSessionSync({
     }
   }
 
-  function publishStorageNotification({ sentAt }: { sentAt: number }): void {
-    const notification: StorageRefreshNotification = { sentAt, sourceID }
-
+  function publishStorageNotification({
+    notification,
+  }: {
+    notification: StorageRefreshNotification
+  }): void {
     try {
       localStorage.setItem(authSessionSyncStorageKey, JSON.stringify(notification))
     } catch {
@@ -327,11 +383,11 @@ function isAuthSessionSyncMessage(value: unknown): value is AuthSessionSyncMessa
     return false
   }
 
-  if (value.type === 'session-logged-out') {
+  if (value.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT) {
     return true
   }
 
-  if (value.type === 'session-expired') {
+  if (value.type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
     return (
       'expiredTokenAt' in value &&
       typeof value.expiredTokenAt === 'number' &&
@@ -339,7 +395,7 @@ function isAuthSessionSyncMessage(value: unknown): value is AuthSessionSyncMessa
     )
   }
 
-  if (value.type === 'session-refreshed') {
+  if (value.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
     return (
       'session' in value &&
       Boolean(value.session) &&
@@ -361,13 +417,53 @@ function parseStorageRefreshNotification(value: string): null | StorageRefreshNo
     if (
       notification &&
       typeof notification === 'object' &&
+      'affectedExpirationMs' in notification &&
+      typeof notification.affectedExpirationMs === 'number' &&
+      Number.isFinite(notification.affectedExpirationMs) &&
       'sentAt' in notification &&
       typeof notification.sentAt === 'number' &&
       Number.isFinite(notification.sentAt) &&
       'sourceID' in notification &&
-      typeof notification.sourceID === 'string'
+      typeof notification.sourceID === 'string' &&
+      'type' in notification &&
+      isAuthSessionSyncEventType(notification.type)
     ) {
-      return notification as StorageRefreshNotification
+      const lifecycleOrder = {
+        affectedExpirationMs: notification.affectedExpirationMs,
+        sentAt: notification.sentAt,
+        sourceID: notification.sourceID,
+      }
+
+      if (notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
+        if ('settlesSentAt' in notification) {
+          return null
+        }
+
+        return { ...lifecycleOrder, type: notification.type }
+      }
+
+      if (notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
+        if ('settlesSentAt' in notification) {
+          return null
+        }
+
+        return { ...lifecycleOrder, type: notification.type }
+      }
+
+      if (
+        notification.affectedExpirationMs === 0 &&
+        'settlesSentAt' in notification &&
+        typeof notification.settlesSentAt === 'number' &&
+        Number.isFinite(notification.settlesSentAt)
+      ) {
+        return {
+          type: notification.type,
+          affectedExpirationMs: 0,
+          sentAt: notification.sentAt,
+          settlesSentAt: notification.settlesSentAt,
+          sourceID: notification.sourceID,
+        }
+      }
     }
   } catch {
     // Ignore storage writes that do not belong to session synchronization.
@@ -387,12 +483,8 @@ function compareLifecycleOrders({
     return first.sentAt - second.sentAt
   }
 
-  if (first.kind === 'storage-barrier' || second.kind === 'storage-barrier') {
-    return compareSourceIDs({ first: first.sourceID, second: second.sourceID })
-  }
-
-  const isFirstLogout = first.precedence === 2
-  const isSecondLogout = second.precedence === 2
+  const isFirstLogout = first.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
+  const isSecondLogout = second.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
 
   if (isFirstLogout !== isSecondLogout) {
     return isFirstLogout ? 1 : -1
@@ -402,8 +494,11 @@ function compareLifecycleOrders({
     return first.affectedExpirationMs - second.affectedExpirationMs
   }
 
-  if (first.precedence !== second.precedence) {
-    return first.precedence - second.precedence
+  const firstPrecedence = getLifecyclePrecedence(first.type)
+  const secondPrecedence = getLifecyclePrecedence(second.type)
+
+  if (firstPrecedence !== secondPrecedence) {
+    return firstPrecedence - secondPrecedence
   }
 
   return compareSourceIDs({ first: first.sourceID, second: second.sourceID })
@@ -412,17 +507,48 @@ function compareLifecycleOrders({
 function getLifecycleOrder(
   event: { sentAt: number; sourceID: string } & AuthSessionSyncEvent,
 ): LifecycleOrder {
-  return getConfirmedLifecycleOrder({
-    affectedExpirationMs:
-      event.type === 'session-refreshed'
-        ? event.session.exp * 1000
-        : event.type === 'session-expired'
-          ? event.expiredTokenAt
-          : 0,
-    precedence: event.type === 'session-logged-out' ? 2 : event.type === 'session-expired' ? 1 : 0,
+  const lifecycleMetadata = {
     sentAt: event.sentAt,
     sourceID: event.sourceID,
-  })
+  }
+
+  if (event.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
+    return {
+      type: event.type,
+      affectedExpirationMs: event.session.exp * 1000,
+      ...lifecycleMetadata,
+    }
+  }
+
+  if (event.type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
+    return {
+      type: event.type,
+      affectedExpirationMs: event.expiredTokenAt,
+      ...lifecycleMetadata,
+    }
+  }
+
+  return { type: event.type, affectedExpirationMs: 0, ...lifecycleMetadata }
+}
+
+function createAuthSessionSyncMessage({
+  event,
+  sentAt,
+  sourceID,
+}: {
+  event: AuthSessionSyncEvent
+  sentAt: number
+  sourceID: string
+}): AuthSessionSyncMessage {
+  if (event.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
+    return { type: event.type, sentAt, session: event.session, sourceID }
+  }
+
+  if (event.type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
+    return { type: event.type, expiredTokenAt: event.expiredTokenAt, sentAt, sourceID }
+  }
+
+  return { type: event.type, sentAt, sourceID }
 }
 
 function compareSourceIDs({ first, second }: { first: string; second: string }): number {
@@ -433,21 +559,14 @@ function compareSourceIDs({ first, second }: { first: string; second: string }):
   return first > second ? 1 : -1
 }
 
-function getConfirmedLifecycleOrder({
-  affectedExpirationMs,
-  precedence,
-  sentAt,
-  sourceID,
-}: Omit<ConfirmedLifecycleOrder, 'kind'>): ConfirmedLifecycleOrder {
-  return {
-    affectedExpirationMs,
-    kind: 'confirmed',
-    precedence,
-    sentAt,
-    sourceID,
+function getLifecyclePrecedence(type: AuthSessionSyncEventType): number {
+  if (type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
+    return 1
   }
+
+  return type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT ? 2 : 0
 }
 
-function getStorageBarrier(notification: StorageRefreshNotification): LifecycleOrder {
-  return { ...notification, kind: 'storage-barrier' }
+function isAuthSessionSyncEventType(value: unknown): value is AuthSessionSyncEventType {
+  return Object.values(AUTH_SESSION_SYNC_EVENT_TYPES).some((eventType) => eventType === value)
 }

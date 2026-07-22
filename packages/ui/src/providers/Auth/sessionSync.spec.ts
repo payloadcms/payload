@@ -4,10 +4,14 @@ import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { AuthContext, UserWithToken } from './index.js'
-import type { AuthSessionResyncResult, AuthSessionSyncMessage } from './sessionSync.js'
+import type {
+  AuthSessionResyncResult,
+  AuthSessionSyncEventType,
+  AuthSessionSyncMessage,
+} from './sessionSync.js'
 
 import { AuthProvider, useAuth } from './index.js'
-import { createAuthSessionSync } from './sessionSync.js'
+import { AUTH_SESSION_SYNC_EVENT_TYPES, createAuthSessionSync } from './sessionSync.js'
 ;(
   globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }
 ).IS_REACT_ACT_ENVIRONMENT = true
@@ -110,38 +114,38 @@ describe('createAuthSessionSync publishing', () => {
     const session = createSession({ expirationMs: 20_000, token: 'refreshed-token' })
     const sync = createSync({ now: () => 123 })
 
-    sync.publish({ session, type: 'session-refreshed' })
+    sync.publish({ session, type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED })
 
     expect(getBroadcastChannel().postMessage).toHaveBeenCalledWith({
       session,
       sourceID: 'local-tab',
       sentAt: 123,
-      type: 'session-refreshed',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
   })
 
   it('should publish expired sessions with the handled expiration', () => {
     const sync = createSync({ now: () => 456 })
 
-    sync.publish({ expiredTokenAt: 20_000, type: 'session-expired' })
+    sync.publish({ expiredTokenAt: 20_000, type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED })
 
     expect(getBroadcastChannel().postMessage).toHaveBeenCalledWith({
       expiredTokenAt: 20_000,
       sourceID: 'local-tab',
       sentAt: 456,
-      type: 'session-expired',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
     })
   })
 
   it('should publish explicit logout events', () => {
     const sync = createSync({ now: () => 789 })
 
-    sync.publish({ type: 'session-logged-out' })
+    sync.publish({ type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT })
 
     expect(getBroadcastChannel().postMessage).toHaveBeenCalledWith({
       sourceID: 'local-tab',
       sentAt: 789,
-      type: 'session-logged-out',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
     })
   })
 })
@@ -153,7 +157,11 @@ describe('createAuthSessionSync receiving', () => {
 
     createSync({ localExpirationMs: 20_000, onSessionRefreshed })
     getBroadcastChannel().emit(
-      createMessage({ session, sourceID: 'remote-tab', type: 'session-refreshed' }),
+      createMessage({
+        session,
+        sourceID: 'remote-tab',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      }),
     )
 
     expect(onSessionRefreshed).toHaveBeenCalledWith(session)
@@ -164,7 +172,11 @@ describe('createAuthSessionSync receiving', () => {
 
     createSync({ localExpirationMs: 20_000, onSessionExpired })
     getBroadcastChannel().emit(
-      createMessage({ expiredTokenAt: 20_000, sourceID: 'remote-tab', type: 'session-expired' }),
+      createMessage({
+        expiredTokenAt: 20_000,
+        sourceID: 'remote-tab',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
+      }),
     )
 
     expect(onSessionExpired).toHaveBeenCalledWith(20_000)
@@ -175,7 +187,7 @@ describe('createAuthSessionSync receiving', () => {
 
     createSync({ onSessionLoggedOut })
     getBroadcastChannel().emit(
-      createMessage({ sourceID: 'remote-tab', type: 'session-logged-out' }),
+      createMessage({ sourceID: 'remote-tab', type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT }),
     )
 
     expect(onSessionLoggedOut).toHaveBeenCalledOnce()
@@ -192,17 +204,19 @@ describe('createAuthSessionSync receiving', () => {
       createMessage({
         session: createSession({ expirationMs: 30_000 }),
         sourceID: 'local-tab',
-        type: 'session-refreshed',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
       }),
     )
     channel.emit(
       createMessage({
         expiredTokenAt: 30_000,
         sourceID: 'local-tab',
-        type: 'session-expired',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
       }),
     )
-    channel.emit(createMessage({ sourceID: 'local-tab', type: 'session-logged-out' }))
+    channel.emit(
+      createMessage({ sourceID: 'local-tab', type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT }),
+    )
 
     expect(onSessionRefreshed).not.toHaveBeenCalled()
     expect(onSessionExpired).not.toHaveBeenCalled()
@@ -217,7 +231,7 @@ describe('createAuthSessionSync receiving', () => {
       createMessage({
         session: createSession({ expirationMs: 30_000 }),
         sourceID: 'remote-tab',
-        type: 'session-refreshed',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
       }),
     )
 
@@ -229,7 +243,11 @@ describe('createAuthSessionSync receiving', () => {
 
     createSync({ localExpirationMs: 40_000, onSessionExpired })
     getBroadcastChannel().emit(
-      createMessage({ expiredTokenAt: 30_000, sourceID: 'remote-tab', type: 'session-expired' }),
+      createMessage({
+        expiredTokenAt: 30_000,
+        sourceID: 'remote-tab',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
+      }),
     )
 
     expect(onSessionExpired).not.toHaveBeenCalled()
@@ -246,7 +264,7 @@ describe('createAuthSessionSync receiving', () => {
         expiredTokenAt: 20_000,
         sentAt: 200,
         sourceID: 'remote-a',
-        type: 'session-expired',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
       }),
     )
     channel.emit(
@@ -254,7 +272,7 @@ describe('createAuthSessionSync receiving', () => {
         sentAt: 100,
         session: createSession({ expirationMs: 30_000 }),
         sourceID: 'remote-b',
-        type: 'session-refreshed',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
       }),
     )
 
@@ -268,13 +286,19 @@ describe('createAuthSessionSync receiving', () => {
 
     createSync({ localExpirationMs: 20_000, onSessionLoggedOut, onSessionRefreshed })
     const channel = getBroadcastChannel()
-    channel.emit(createMessage({ sentAt: 300, sourceID: 'remote-a', type: 'session-logged-out' }))
+    channel.emit(
+      createMessage({
+        sentAt: 300,
+        sourceID: 'remote-a',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      }),
+    )
     channel.emit(
       createMessage({
         sentAt: 200,
         session: createSession({ expirationMs: 30_000 }),
         sourceID: 'remote-b',
-        type: 'session-refreshed',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
       }),
     )
 
@@ -290,9 +314,20 @@ describe('createAuthSessionSync receiving', () => {
     createSync({ localExpirationMs: 20_000, onSessionLoggedOut, onSessionRefreshed })
     const channel = getBroadcastChannel()
     channel.emit(
-      createMessage({ sentAt: 400, session, sourceID: 'remote-a', type: 'session-refreshed' }),
+      createMessage({
+        sentAt: 400,
+        session,
+        sourceID: 'remote-a',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      }),
     )
-    channel.emit(createMessage({ sentAt: 300, sourceID: 'remote-b', type: 'session-logged-out' }))
+    channel.emit(
+      createMessage({
+        sentAt: 300,
+        sourceID: 'remote-b',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      }),
+    )
 
     expect(onSessionRefreshed).toHaveBeenCalledWith(session)
     expect(onSessionLoggedOut).not.toHaveBeenCalled()
@@ -306,14 +341,19 @@ describe('createAuthSessionSync receiving', () => {
     createSync({ localExpirationMs: 20_000, onSessionExpired, onSessionRefreshed })
     const channel = getBroadcastChannel()
     channel.emit(
-      createMessage({ sentAt: 400, session, sourceID: 'remote-a', type: 'session-refreshed' }),
+      createMessage({
+        sentAt: 400,
+        session,
+        sourceID: 'remote-a',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      }),
     )
     channel.emit(
       createMessage({
         expiredTokenAt: 40_000,
         sentAt: 300,
         sourceID: 'remote-b',
-        type: 'session-expired',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
       }),
     )
 
@@ -327,10 +367,14 @@ describe('createAuthSessionSync receiving', () => {
 
     sync.publish({
       session: createSession({ expirationMs: 30_000 }),
-      type: 'session-refreshed',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
     getBroadcastChannel().emit(
-      createMessage({ sentAt: 400, sourceID: 'remote-tab', type: 'session-logged-out' }),
+      createMessage({
+        sentAt: 400,
+        sourceID: 'remote-tab',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      }),
     )
 
     expect(onSessionLoggedOut).not.toHaveBeenCalled()
@@ -344,12 +388,12 @@ describe('createAuthSessionSync receiving', () => {
       sentAt: 500,
       session: refreshedSession,
       sourceID: 'refresh-tab',
-      type: 'session-refreshed',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
     const logoutMessage = createMessage({
       sentAt: 500,
       sourceID: 'logout-tab',
-      type: 'session-logged-out',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
     })
 
     createSync({
@@ -389,13 +433,13 @@ describe('createAuthSessionSync receiving', () => {
       sentAt: 550,
       session: createSession({ expirationMs: 40_000, token: 'fresh-token' }),
       sourceID: 'refresh-tab',
-      type: 'session-refreshed',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
     const expirationMessage = createMessage({
       expiredTokenAt: 30_000,
       sentAt: 550,
       sourceID: 'expiration-tab',
-      type: 'session-expired',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
     })
 
     createSync({
@@ -437,13 +481,13 @@ describe('createAuthSessionSync receiving', () => {
       sentAt: 575,
       session: createSession({ expirationMs: 30_000, token: 'stale-token' }),
       sourceID: 'source-z',
-      type: 'session-refreshed',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
     const freshMessage = createMessage({
       sentAt: 575,
       session: createSession({ expirationMs: 40_000, token: 'fresh-token' }),
       sourceID: 'source-a',
-      type: 'session-refreshed',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
 
     createSync({
@@ -479,13 +523,13 @@ describe('createAuthSessionSync receiving', () => {
       sentAt: 600,
       session: createSession({ expirationMs: 30_000, token: 'lower-source-token' }),
       sourceID: 'source-a',
-      type: 'session-refreshed',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
     const higherSourceMessage = createMessage({
       sentAt: 600,
       session: createSession({ expirationMs: 30_000, token: 'higher-source-token' }),
       sourceID: 'source-z',
-      type: 'session-refreshed',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
 
     createSync({
@@ -523,7 +567,7 @@ describe('createAuthSessionSync receiving', () => {
       createMessage({
         sentAt: Number.NaN,
         sourceID: 'remote-a',
-        type: 'session-logged-out',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
       }),
     )
     channel.emit(
@@ -531,7 +575,7 @@ describe('createAuthSessionSync receiving', () => {
         expiredTokenAt: Number.POSITIVE_INFINITY,
         sentAt: 700,
         sourceID: 'remote-b',
-        type: 'session-expired',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
       }),
     )
     channel.emit(
@@ -539,7 +583,7 @@ describe('createAuthSessionSync receiving', () => {
         sentAt: 800,
         session: createSession({ expirationMs: Number.NEGATIVE_INFINITY }),
         sourceID: 'remote-c',
-        type: 'session-refreshed',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
       }),
     )
 
@@ -556,14 +600,40 @@ describe('createAuthSessionSync storage fallback', () => {
     const session = createSession({ expirationMs: 20_000, token: 'sensitive-token' })
     const sync = createSync({ now: () => 123 })
 
-    sync.publish({ session, type: 'session-refreshed' })
+    sync.publish({ session, type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED })
 
     const [key, value] = setItem.mock.calls[0] as [string, string]
 
     expect(key).toMatch(/payload.*auth.*session/i)
-    expect(JSON.parse(value)).toEqual({ sentAt: 123, sourceID: 'local-tab' })
+    expect(JSON.parse(value)).toEqual({
+      affectedExpirationMs: 20_000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 123,
+      sourceID: 'local-tab',
+    })
     expect(value).not.toContain('sensitive-token')
     expect(value).not.toContain('user')
+  })
+
+  it('should reject logout settlement metadata on a refresh notification', async () => {
+    const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' })
+
+    createSync({ fetchFullUser })
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: 'payload:auth-session:refresh',
+        newValue: JSON.stringify({
+          affectedExpirationMs: 20_000,
+          sentAt: 100,
+          settlesSentAt: 50,
+          sourceID: 'remote-tab',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+        }),
+      }),
+    )
+    await Promise.resolve()
+
+    expect(fetchFullUser).not.toHaveBeenCalled()
   })
 
   it('should fetch the session from the shared cookie after a storage notification', async () => {
@@ -573,7 +643,10 @@ describe('createAuthSessionSync storage fallback', () => {
     createSync({ fetchFullUser })
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
     const publisher = createSync({ now: () => 123, sourceID: 'remote-tab' })
-    publisher.publishStorageRefresh()
+    publisher.publish({
+      session: createSession({ expirationMs: 20_000 }),
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+    })
     const [key, newValue] = setItem.mock.calls.at(-1) as [string, string]
 
     window.dispatchEvent(new StorageEvent('storage', { key, newValue }))
@@ -595,9 +668,18 @@ describe('createAuthSessionSync storage fallback', () => {
     createSync({ fetchFullUser, onSessionLoggedOut })
     const channel = getBroadcastChannel()
 
-    dispatchStorageRefresh({ sentAt: 500, sourceID: 'storage-tab' })
+    dispatchStorageRefresh({
+      affectedExpirationMs: 30_000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 500,
+      sourceID: 'storage-tab',
+    })
     channel.emit(
-      createMessage({ sentAt: 400, sourceID: 'older-channel-tab', type: 'session-logged-out' }),
+      createMessage({
+        sentAt: 400,
+        sourceID: 'older-channel-tab',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      }),
     )
 
     expect(fetchFullUser).toHaveBeenCalledOnce()
@@ -610,10 +692,255 @@ describe('createAuthSessionSync storage fallback', () => {
     })
     await Promise.resolve()
     channel.emit(
-      createMessage({ sentAt: 600, sourceID: 'newer-channel-tab', type: 'session-logged-out' }),
+      createMessage({
+        sentAt: 600,
+        sourceID: 'newer-channel-tab',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      }),
     )
 
     expect(onSessionLoggedOut).toHaveBeenCalledOnce()
+  })
+
+  it('should let equal-time logout outrank an earlier higher-source Storage refresh', async () => {
+    const fetchFullUser = vi.fn().mockResolvedValue({
+      expirationMs: 40_000,
+      status: 'authenticated',
+      user: { collection: 'users', id: '1' },
+    })
+    const onSessionLoggedOut = vi.fn()
+
+    createSync({ fetchFullUser, onSessionLoggedOut })
+    const channel = getBroadcastChannel()
+
+    dispatchStorageRefresh({
+      affectedExpirationMs: 40_000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 500,
+      sourceID: 'source-z',
+    })
+    channel.emit(
+      createMessage({
+        sentAt: 500,
+        sourceID: 'source-a',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      }),
+    )
+    await Promise.resolve()
+
+    expect(fetchFullUser).toHaveBeenCalledOnce()
+    expect(onSessionLoggedOut).toHaveBeenCalledOnce()
+  })
+
+  it('should reject a later higher-source Storage refresh after equal-time logout', async () => {
+    const fetchFullUser = vi.fn().mockResolvedValue({
+      expirationMs: 40_000,
+      status: 'authenticated',
+      user: { collection: 'users', id: '1' },
+    })
+    const onSessionLoggedOut = vi.fn()
+
+    createSync({ fetchFullUser, onSessionLoggedOut })
+    const channel = getBroadcastChannel()
+
+    channel.emit(
+      createMessage({
+        sentAt: 500,
+        sourceID: 'source-a',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      }),
+    )
+    dispatchStorageRefresh({
+      affectedExpirationMs: 40_000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 500,
+      sourceID: 'source-z',
+    })
+    await Promise.resolve()
+
+    expect(onSessionLoggedOut).toHaveBeenCalledOnce()
+    expect(fetchFullUser).not.toHaveBeenCalled()
+  })
+
+  it('should reject a later higher-source Broadcast refresh with an older expiration', async () => {
+    const fetchFullUser = vi.fn().mockResolvedValue({
+      expirationMs: 40_000,
+      status: 'authenticated',
+      user: { collection: 'users', id: '1' },
+    })
+    const onSessionRefreshed = vi.fn()
+
+    createSync({ fetchFullUser, localExpirationMs: 20_000, onSessionRefreshed })
+    const channel = getBroadcastChannel()
+
+    dispatchStorageRefresh({
+      affectedExpirationMs: 40_000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 500,
+      sourceID: 'source-a',
+    })
+    channel.emit(
+      createMessage({
+        sentAt: 500,
+        session: createSession({ expirationMs: 30_000, token: 'stale-token' }),
+        sourceID: 'source-z',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      }),
+    )
+    await Promise.resolve()
+
+    expect(fetchFullUser).toHaveBeenCalledOnce()
+    expect(onSessionRefreshed).not.toHaveBeenCalled()
+  })
+
+  it('should accept a later lower-source Storage refresh with a newer expiration', async () => {
+    const fetchFullUser = vi.fn().mockResolvedValue({
+      expirationMs: 40_000,
+      status: 'authenticated',
+      user: { collection: 'users', id: '1' },
+    })
+    const onSessionRefreshed = vi.fn()
+
+    createSync({ fetchFullUser, localExpirationMs: 20_000, onSessionRefreshed })
+    const channel = getBroadcastChannel()
+
+    channel.emit(
+      createMessage({
+        sentAt: 500,
+        session: createSession({ expirationMs: 30_000, token: 'stale-token' }),
+        sourceID: 'source-z',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      }),
+    )
+    dispatchStorageRefresh({
+      affectedExpirationMs: 40_000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 500,
+      sourceID: 'source-a',
+    })
+    await Promise.resolve()
+
+    expect(onSessionRefreshed).toHaveBeenCalledOnce()
+    expect(fetchFullUser).toHaveBeenCalledOnce()
+  })
+
+  it('should accept a later lower-source Broadcast refresh with a newer expiration', async () => {
+    const fetchFullUser = vi.fn().mockResolvedValue({
+      expirationMs: 30_000,
+      status: 'authenticated',
+      user: { collection: 'users', id: '1' },
+    })
+    const onSessionRefreshed = vi.fn()
+
+    createSync({ fetchFullUser, localExpirationMs: 20_000, onSessionRefreshed })
+    const channel = getBroadcastChannel()
+
+    dispatchStorageRefresh({
+      affectedExpirationMs: 30_000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 500,
+      sourceID: 'source-z',
+    })
+    channel.emit(
+      createMessage({
+        sentAt: 500,
+        session: createSession({ expirationMs: 40_000, token: 'fresh-token' }),
+        sourceID: 'source-a',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      }),
+    )
+    await Promise.resolve()
+
+    expect(fetchFullUser).toHaveBeenCalledOnce()
+    expect(onSessionRefreshed).toHaveBeenCalledWith(
+      expect.objectContaining({ token: 'fresh-token' }),
+    )
+  })
+
+  it('should reject a later higher-source Storage refresh with an older expiration', async () => {
+    const fetchFullUser = vi.fn().mockResolvedValue({
+      expirationMs: 30_000,
+      status: 'authenticated',
+      user: { collection: 'users', id: '1' },
+    })
+    const onSessionRefreshed = vi.fn()
+
+    createSync({ fetchFullUser, localExpirationMs: 20_000, onSessionRefreshed })
+    const channel = getBroadcastChannel()
+
+    channel.emit(
+      createMessage({
+        sentAt: 500,
+        session: createSession({ expirationMs: 40_000, token: 'fresh-token' }),
+        sourceID: 'source-a',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      }),
+    )
+    dispatchStorageRefresh({
+      affectedExpirationMs: 30_000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 500,
+      sourceID: 'source-z',
+    })
+    await Promise.resolve()
+
+    expect(onSessionRefreshed).toHaveBeenCalledOnce()
+    expect(fetchFullUser).not.toHaveBeenCalled()
+  })
+
+  it('should let an equal BroadcastChannel refresh resolve a pending Storage barrier', async () => {
+    const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' })
+    const onSessionRefreshed = vi.fn()
+    const session = createSession({ expirationMs: 30_000, token: 'remote-token' })
+
+    createSync({ fetchFullUser, localExpirationMs: 20_000, onSessionRefreshed })
+    const channel = getBroadcastChannel()
+
+    dispatchStorageRefresh({
+      affectedExpirationMs: 30_000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 500,
+      sourceID: 'remote-tab',
+    })
+    channel.emit(
+      createMessage({
+        sentAt: 500,
+        session,
+        sourceID: 'remote-tab',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      }),
+    )
+    await Promise.resolve()
+
+    expect(fetchFullUser).toHaveBeenCalledOnce()
+    expect(onSessionRefreshed).toHaveBeenCalledWith(session)
+  })
+
+  it('should let an equal BroadcastChannel expiration resolve a pending Storage barrier', async () => {
+    const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' })
+    const onSessionExpired = vi.fn()
+
+    createSync({ fetchFullUser, localExpirationMs: 20_000, onSessionExpired })
+    const channel = getBroadcastChannel()
+
+    dispatchStorageRefresh({
+      affectedExpirationMs: 20_000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
+      sentAt: 500,
+      sourceID: 'remote-tab',
+    })
+    channel.emit(
+      createMessage({
+        expiredTokenAt: 20_000,
+        sentAt: 500,
+        sourceID: 'remote-tab',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
+      }),
+    )
+    await Promise.resolve()
+
+    expect(fetchFullUser).toHaveBeenCalledOnce()
+    expect(onSessionExpired).toHaveBeenCalledWith(20_000)
   })
 
   it('should defer the storage logout notification until post-settlement resync', () => {
@@ -621,11 +948,11 @@ describe('createAuthSessionSync storage fallback', () => {
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
     const sync = createSync()
 
-    sync.publish({ type: 'session-logged-out' })
+    const publication = sync.publish({ type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT })
 
     expect(setItem).not.toHaveBeenCalled()
 
-    sync.publishStorageRefresh()
+    sync.publishStorageRefresh(publication)
 
     expect(setItem).toHaveBeenCalledOnce()
   })
@@ -650,19 +977,84 @@ describe('createAuthSessionSync storage fallback', () => {
     createSync({ fetchFullUser })
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
     const publisher = createSync({ sourceID: 'remote-tab' })
-    publisher.publish({ type: 'session-logged-out' })
+    const publication = publisher.publish({ type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT })
 
     expect(fetchFullUser).not.toHaveBeenCalled()
     expect(receivedSession).toBe(session)
 
     sharedCookieSession = null
-    publisher.publishStorageRefresh()
+    publisher.publishStorageRefresh(publication)
     const [key, newValue] = setItem.mock.calls.at(-1) as [string, string]
     window.dispatchEvent(new StorageEvent('storage', { key, newValue }))
     await Promise.resolve()
 
     expect(fetchFullUser).toHaveBeenCalledOnce()
     expect(receivedSession).toBeNull()
+  })
+
+  it('should not resynchronize a healthy peer twice for one logout lifecycle', async () => {
+    const fetchFullUser = vi.fn().mockResolvedValue({ status: 'unauthenticated' })
+    const onSessionLoggedOut = vi.fn()
+    const receiver = createSync({ fetchFullUser, onSessionLoggedOut, sourceID: 'receiver-tab' })
+    const receiverChannel = getBroadcastChannel()
+    const setItem = vi.spyOn(Storage.prototype, 'setItem')
+    const publisher = createSync({ now: () => 500, sourceID: 'publisher-tab' })
+    const logoutEvent = { type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT } as const
+
+    const publication = publisher.publish(logoutEvent)
+    const [message] = getBroadcastChannel().postMessage.mock.calls[0] as [AuthSessionSyncMessage]
+    receiverChannel.emit(message)
+    publisher.publishStorageRefresh(publication)
+    dispatchStoredNotification(setItem)
+    await Promise.resolve()
+
+    expect(onSessionLoggedOut).toHaveBeenCalledOnce()
+    expect(fetchFullUser).not.toHaveBeenCalled()
+
+    receiver.cleanup()
+  })
+
+  it('should resynchronize a settled logout after an intervening peer refresh', async () => {
+    const fetchFullUser = vi.fn().mockResolvedValue({ status: 'unauthenticated' })
+    const onSessionLoggedOut = vi.fn()
+    const onSessionRefreshed = vi.fn()
+    const onSessionResyncUnauthenticated = vi.fn()
+    const receiver = createSync({
+      fetchFullUser,
+      onSessionLoggedOut,
+      onSessionRefreshed,
+      onSessionResyncUnauthenticated,
+      sourceID: 'receiver-tab',
+    })
+    const receiverChannel = getBroadcastChannel()
+    const setItem = vi.spyOn(Storage.prototype, 'setItem')
+    const publisher = createSync({ now: () => 500, sourceID: 'publisher-tab' })
+    const logoutPublication = publisher.publish({
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+    })
+    const [logoutMessage] = getBroadcastChannel().postMessage.mock.calls[0] as [
+      AuthSessionSyncMessage,
+    ]
+
+    receiverChannel.emit(logoutMessage)
+    receiverChannel.emit(
+      createMessage({
+        sentAt: 501,
+        session: createSession({ expirationMs: 40_000, token: 'intervening-token' }),
+        sourceID: 'peer-tab',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      }),
+    )
+    publisher.publishStorageRefresh(logoutPublication)
+    dispatchStoredNotification(setItem)
+    await Promise.resolve()
+
+    expect(onSessionLoggedOut).toHaveBeenCalledOnce()
+    expect(onSessionRefreshed).toHaveBeenCalledOnce()
+    expect(fetchFullUser).toHaveBeenCalledOnce()
+    expect(onSessionResyncUnauthenticated).toHaveBeenCalledOnce()
+
+    receiver.cleanup()
   })
 })
 
@@ -681,7 +1073,7 @@ describe('createAuthSessionSync transport failures', () => {
     const sync = createSync()
     sync.publish({
       session: createSession({ expirationMs: 20_000 }),
-      type: 'session-refreshed',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
 
     expect(addEventListener).toHaveBeenCalledWith('storage', expect.any(Function))
@@ -694,7 +1086,7 @@ describe('createAuthSessionSync transport failures', () => {
       throw new Error('channel closed')
     })
 
-    expect(() => sync.publish({ type: 'session-logged-out' })).not.toThrow()
+    expect(() => sync.publish({ type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT })).not.toThrow()
   })
 
   it('should downgrade a failed publisher and resynchronize a peer with a healthy channel', async () => {
@@ -711,7 +1103,7 @@ describe('createAuthSessionSync transport failures', () => {
 
     publisher.publish({
       session: createSession({ expirationMs: 20_000 }),
-      type: 'session-refreshed',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
 
     expect(failedChannel.removeEventListener).toHaveBeenCalledWith('message', expect.any(Function))
@@ -727,6 +1119,54 @@ describe('createAuthSessionSync transport failures', () => {
     expect(fetchFullUser).toHaveBeenCalledOnce()
   })
 
+  it('should keep a downgraded receiver synchronized with later healthy peer events', async () => {
+    const fetchFullUser = vi
+      .fn()
+      .mockResolvedValueOnce({ status: 'indeterminate' })
+      .mockResolvedValueOnce({ status: 'unauthenticated' })
+    const onSessionResyncUnauthenticated = vi.fn()
+    const downgraded = createSync({
+      fetchFullUser,
+      now: () => 100,
+      onSessionResyncUnauthenticated,
+      sourceID: 'downgraded-tab',
+    })
+    const failedChannel = getBroadcastChannel()
+    failedChannel.postMessage.mockImplementationOnce(() => {
+      throw new Error('channel closed')
+    })
+    const setItem = vi.spyOn(Storage.prototype, 'setItem')
+
+    downgraded.publish({
+      session: createSession({ expirationMs: 20_000 }),
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+    })
+    setItem.mockClear()
+
+    const healthyPublisher = createSync({ now: () => 500, sourceID: 'healthy-tab' })
+    healthyPublisher.publish({
+      session: createSession({ expirationMs: 40_000 }),
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+    })
+    expect(setItem).toHaveBeenCalledOnce()
+    dispatchStoredNotification(setItem)
+    await Promise.resolve()
+
+    expect(fetchFullUser).toHaveBeenCalledOnce()
+
+    setItem.mockClear()
+    const logoutPublication = healthyPublisher.publish({
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+    })
+    healthyPublisher.publishStorageRefresh(logoutPublication)
+    expect(setItem).toHaveBeenCalledOnce()
+    dispatchStoredNotification(setItem)
+    await Promise.resolve()
+
+    expect(fetchFullUser).toHaveBeenCalledTimes(2)
+    expect(onSessionResyncUnauthenticated).toHaveBeenCalledOnce()
+  })
+
   it('should install and remove the storage listener exactly once after channel failure', () => {
     const addEventListener = vi.spyOn(window, 'addEventListener')
     const removeEventListener = vi.spyOn(window, 'removeEventListener')
@@ -738,11 +1178,11 @@ describe('createAuthSessionSync transport failures', () => {
 
     sync.publish({
       session: createSession({ expirationMs: 20_000 }),
-      type: 'session-refreshed',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
     sync.publish({
       session: createSession({ expirationMs: 30_000 }),
-      type: 'session-refreshed',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
     sync.cleanup()
 
@@ -764,7 +1204,7 @@ describe('createAuthSessionSync transport failures', () => {
     expect(() =>
       sync.publish({
         session: createSession({ expirationMs: 20_000 }),
-        type: 'session-refreshed',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
       }),
     ).not.toThrow()
   })
@@ -779,7 +1219,7 @@ describe('createAuthSessionSync transport failures', () => {
     expect(() =>
       sync.publish({
         session: createSession({ expirationMs: 20_000 }),
-        type: 'session-refreshed',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
       }),
     ).not.toThrow()
   })
@@ -804,6 +1244,30 @@ describe('createAuthSessionSync cleanup', () => {
     sync.cleanup()
 
     expect(removeEventListener).toHaveBeenCalledWith('storage', expect.any(Function))
+  })
+
+  it('should invalidate a pending Storage resync during cleanup', async () => {
+    let resolveFetchFullUser: ((result: AuthSessionResyncResult) => void) | undefined
+    const fetchFullUser = vi.fn(
+      () =>
+        new Promise<AuthSessionResyncResult>((resolve) => {
+          resolveFetchFullUser = resolve
+        }),
+    )
+    const onSessionResyncUnauthenticated = vi.fn()
+    const sync = createSync({ fetchFullUser, onSessionResyncUnauthenticated })
+
+    dispatchStorageRefresh({
+      affectedExpirationMs: 40_000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 500,
+      sourceID: 'remote-tab',
+    })
+    sync.cleanup()
+    resolveFetchFullUser?.({ status: 'unauthenticated' })
+    await Promise.resolve()
+
+    expect(onSessionResyncUnauthenticated).not.toHaveBeenCalled()
   })
 })
 
@@ -844,7 +1308,10 @@ describe('AuthProvider session synchronization', () => {
     await act(async () => vi.advanceTimersByTimeAsync(1_000))
 
     expect(channel.postMessage).toHaveBeenCalledWith(
-      expect.objectContaining({ session: refreshedSession, type: 'session-refreshed' }),
+      expect.objectContaining({
+        session: refreshedSession,
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      }),
     )
   })
 
@@ -862,7 +1329,10 @@ describe('AuthProvider session synchronization', () => {
     })
 
     expect(channel.postMessage).toHaveBeenCalledWith(
-      expect.objectContaining({ session: refreshedSession, type: 'session-refreshed' }),
+      expect.objectContaining({
+        session: refreshedSession,
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      }),
     )
   })
 
@@ -982,7 +1452,7 @@ describe('AuthProvider session synchronization', () => {
           expiredTokenAt: initialSession.exp * 1000,
           sentAt: 200,
           sourceID: 'remote-tab',
-          type: 'session-expired',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
         }),
       )
     })
@@ -995,7 +1465,7 @@ describe('AuthProvider session synchronization', () => {
     expect(authContext?.user).toBeNull()
     expect(authContext?.token).toBeUndefined()
     expect(channel.postMessage).not.toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'session-refreshed' }),
+      expect.objectContaining({ type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED }),
     )
   })
 
@@ -1015,7 +1485,11 @@ describe('AuthProvider session synchronization', () => {
     const refreshPromise = authContext?.refreshCookieAsync()
     await act(async () => {
       channel.emit(
-        createMessage({ sentAt: 300, sourceID: 'remote-tab', type: 'session-logged-out' }),
+        createMessage({
+          sentAt: 300,
+          sourceID: 'remote-tab',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+        }),
       )
     })
     resolveRefresh?.(createResponse({ session: staleResponseSession }))
@@ -1048,7 +1522,7 @@ describe('AuthProvider session synchronization', () => {
           sentAt: 400,
           session: remoteSession,
           sourceID: 'remote-tab',
-          type: 'session-refreshed',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
         }),
       )
     })
@@ -1079,23 +1553,22 @@ describe('AuthProvider session synchronization', () => {
     apiMocks.get.mockClear()
     apiMocks.get.mockReturnValueOnce(firstResponse).mockReturnValueOnce(secondResponse)
 
-    act(() => {
-      window.dispatchEvent(
-        new StorageEvent('storage', {
-          key: 'payload:auth-session:refresh',
-          newValue: JSON.stringify({ sentAt: 500, sourceID: 'remote-a' }),
-        }),
-      )
-      window.dispatchEvent(
-        new StorageEvent('storage', {
-          key: 'payload:auth-session:refresh',
-          newValue: JSON.stringify({ sentAt: 600, sourceID: 'remote-b' }),
-        }),
-      )
+    dispatchStorageRefresh({
+      affectedExpirationMs: firstSession.exp * 1000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 500,
+      sourceID: 'remote-a',
     })
     await act(async () => Promise.resolve())
 
     expect(apiMocks.get).toHaveBeenCalledOnce()
+
+    dispatchStorageRefresh({
+      affectedExpirationMs: secondSession.exp * 1000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 600,
+      sourceID: 'remote-b',
+    })
 
     resolveFirstFetch?.(createResponse({ session: firstSession }))
     await act(async () => {
@@ -1104,8 +1577,8 @@ describe('AuthProvider session synchronization', () => {
       await Promise.resolve()
     })
 
-    expect(apiMocks.get).toHaveBeenCalledTimes(2)
-    expect(authContext?.token).toBe('first-token')
+    await vi.waitFor(() => expect(apiMocks.get).toHaveBeenCalledTimes(2))
+    expect(authContext?.token).toBe('initial-token')
 
     resolveSecondFetch?.(createResponse({ session: secondSession }))
     await act(async () => {
@@ -1135,11 +1608,22 @@ describe('AuthProvider session synchronization', () => {
     apiMocks.get.mockClear()
     apiMocks.get.mockReturnValueOnce(firstResponse).mockReturnValueOnce(secondResponse)
 
-    dispatchStorageRefresh({ sentAt: 700, sourceID: 'remote-a' })
-    dispatchStorageRefresh({ sentAt: 800, sourceID: 'remote-b' })
+    dispatchStorageRefresh({
+      affectedExpirationMs: firstSession.exp * 1000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 700,
+      sourceID: 'remote-a',
+    })
     await act(async () => Promise.resolve())
 
     expect(apiMocks.get).toHaveBeenCalledOnce()
+
+    dispatchStorageRefresh({
+      affectedExpirationMs: secondSession.exp * 1000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 800,
+      sourceID: 'remote-b',
+    })
 
     resolveSecondFetch?.(createResponse({ session: secondSession }))
     resolveFirstFetch?.(createResponse({ session: firstSession }))
@@ -1149,9 +1633,53 @@ describe('AuthProvider session synchronization', () => {
       await Promise.resolve()
     })
 
+    await vi.waitFor(() => expect(authContext?.token).toBe('second-token'))
     expect(apiMocks.get).toHaveBeenCalledTimes(2)
     expect(authContext?.token).toBe('second-token')
     expect(authContext?.tokenExpirationMs).toBe(secondSession.exp * 1000)
+  })
+
+  it('should not commit a determinate Storage response after a newer indeterminate barrier', async () => {
+    vi.stubGlobal('BroadcastChannel', undefined)
+    const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
+    const staleSession = createFutureSession({ expiresInMs: 120_000, token: 'stale-token' })
+    let resolveFirstFetch: ((value: ReturnType<typeof createResponse>) => void) | undefined
+    const firstResponse = new Promise<ReturnType<typeof createResponse>>((resolve) => {
+      resolveFirstFetch = resolve
+    })
+
+    await renderProvider({ session: initialSession })
+    apiMocks.get.mockClear()
+    apiMocks.get.mockReturnValueOnce(firstResponse).mockResolvedValueOnce({ status: 500 })
+
+    dispatchStorageRefresh({
+      affectedExpirationMs: staleSession.exp * 1000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 700,
+      sourceID: 'remote-a',
+    })
+    await act(async () => Promise.resolve())
+
+    expect(apiMocks.get).toHaveBeenCalledOnce()
+
+    dispatchStorageRefresh({
+      affectedExpirationMs: staleSession.exp * 1000 + 60_000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 800,
+      sourceID: 'remote-b',
+    })
+
+    resolveFirstFetch?.(createResponse({ session: staleSession }))
+    await act(async () => {
+      await firstResponse
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    await vi.waitFor(() => expect(apiMocks.get).toHaveBeenCalledTimes(2))
+    expect(authContext?.token).toBe('initial-token')
+    expect(authContext?.user).toEqual(initialSession.user)
+    expect(routerMocks.replace).not.toHaveBeenCalled()
   })
 
   it('should apply an authenticated user request after an older refresh rejection', async () => {
@@ -1194,6 +1722,42 @@ describe('AuthProvider session synchronization', () => {
     expect(routerMocks.replace).not.toHaveBeenCalled()
   })
 
+  it('should flush a deferred refresh rejection after a queued user request confirms no user', async () => {
+    const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
+    let resolveRefresh: ((value: { status: number }) => void) | undefined
+    const refreshResponse = new Promise<{ status: number }>((resolve) => {
+      resolveRefresh = resolve
+    })
+
+    await renderProvider({ session: initialSession })
+    apiMocks.get.mockClear()
+    apiMocks.post.mockReturnValueOnce(refreshResponse)
+    apiMocks.get.mockResolvedValueOnce(
+      createResponse({ session: { exp: 0, user: null } as unknown as UserWithToken }),
+    )
+    const channel = getBroadcastChannel()
+    channel.postMessage.mockClear()
+
+    const refreshPromise = authContext?.refreshCookieAsync()
+    const fetchPromise = authContext?.fetchFullUser()
+    resolveRefresh?.({ status: 401 })
+
+    await act(async () => {
+      await refreshPromise
+      await fetchPromise
+    })
+
+    expect(channel.postMessage).toHaveBeenCalledWith(
+      expect.objectContaining({
+        expiredTokenAt: initialSession.exp * 1000,
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
+      }),
+    )
+    expect(authContext?.user).toBeNull()
+    expect(routerMocks.replace).toHaveBeenCalledOnce()
+    expect(routerMocks.replace).toHaveBeenCalledWith(expect.stringContaining('/logout-inactivity'))
+  })
+
   it('should reject a queued refresh using the authenticated session established before execution', async () => {
     const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
     const authenticatedSession = createFutureSession({
@@ -1219,7 +1783,7 @@ describe('AuthProvider session synchronization', () => {
     expect(channel.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         expiredTokenAt: authenticatedSession.exp * 1000,
-        type: 'session-expired',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
       }),
     )
     expect(authContext?.user).toBeNull()
@@ -1252,7 +1816,7 @@ describe('AuthProvider session synchronization', () => {
     expect(channel.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         expiredTokenAt: authenticatedSession.exp * 1000,
-        type: 'session-expired',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
       }),
     )
     expect(authContext?.user).toBeNull()
@@ -1334,7 +1898,12 @@ describe('AuthProvider session synchronization', () => {
       createResponse({ session: { exp: 0, user: null } as unknown as UserWithToken }),
     )
 
-    dispatchStorageRefresh({ sentAt: 900, sourceID: 'remote-tab' })
+    dispatchStorageRefresh({
+      affectedExpirationMs: 0,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      sentAt: 900,
+      sourceID: 'remote-tab',
+    })
     await act(async () => {
       await Promise.resolve()
       await Promise.resolve()
@@ -1357,7 +1926,7 @@ describe('AuthProvider session synchronization', () => {
         createMessage({
           session: remoteSession,
           sourceID: 'remote-tab',
-          type: 'session-refreshed',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
         }),
       )
     })
@@ -1381,7 +1950,7 @@ describe('AuthProvider session synchronization', () => {
     expect(channel.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         expiredTokenAt: initialSession.exp * 1000,
-        type: 'session-expired',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
       }),
     )
   })
@@ -1406,7 +1975,7 @@ describe('AuthProvider session synchronization', () => {
         createMessage({
           session: remoteSession,
           sourceID: 'remote-tab',
-          type: 'session-refreshed',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
         }),
       )
     })
@@ -1435,7 +2004,7 @@ describe('AuthProvider session synchronization', () => {
     expect(channel.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         expiredTokenAt: initialSession.exp * 1000,
-        type: 'session-expired',
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
       }),
     )
     expect(routerMocks.replace).toHaveBeenCalledWith(expect.stringContaining('/logout-inactivity'))
@@ -1453,7 +2022,7 @@ describe('AuthProvider session synchronization', () => {
         createMessage({
           expiredTokenAt: initialSession.exp * 1000,
           sourceID: 'remote-tab',
-          type: 'session-expired',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
         }),
       )
     })
@@ -1478,7 +2047,7 @@ describe('AuthProvider session synchronization', () => {
         createMessage({
           expiredTokenAt: initialSession.exp * 1000,
           sourceID: 'remote-tab',
-          type: 'session-expired',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
         }),
       )
     })
@@ -1487,7 +2056,7 @@ describe('AuthProvider session synchronization', () => {
         createMessage({
           session: staleSession,
           sourceID: 'remote-tab',
-          type: 'session-refreshed',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
         }),
       )
     })
@@ -1514,7 +2083,7 @@ describe('AuthProvider session synchronization', () => {
     })
 
     expect(channel.postMessage).toHaveBeenCalledWith(
-      expect.objectContaining({ type: 'session-logged-out' }),
+      expect.objectContaining({ type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT }),
     )
 
     resolveLogout?.({ status: 200 })
@@ -1562,7 +2131,12 @@ describe('AuthProvider session synchronization', () => {
     })
 
     apiMocks.get.mockResolvedValueOnce(createResponse({ session: initialSession }))
-    dispatchStorageRefresh({ sentAt: 400, sourceID: 'delayed-storage-tab' })
+    dispatchStorageRefresh({
+      affectedExpirationMs: initialSession.exp * 1000,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sentAt: 400,
+      sourceID: 'delayed-storage-tab',
+    })
     await act(async () => {
       await Promise.resolve()
       await Promise.resolve()
@@ -1611,7 +2185,9 @@ describe('AuthProvider session synchronization', () => {
     channel.postMessage.mockClear()
 
     await act(async () => {
-      channel.emit(createMessage({ sourceID: 'remote-tab', type: 'session-logged-out' }))
+      channel.emit(
+        createMessage({ sourceID: 'remote-tab', type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT }),
+      )
     })
 
     expect(authContext?.user).toBeNull()
@@ -1643,7 +2219,7 @@ describe('AuthProvider session synchronization', () => {
         createMessage({
           session: remoteSession,
           sourceID: 'remote-tab',
-          type: 'session-refreshed',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
         }),
       )
     })
@@ -1719,6 +2295,37 @@ describe('AuthProvider session synchronization', () => {
     expect(channel.removeEventListener).toHaveBeenCalledWith('message', expect.any(Function))
     expect(channel.close).toHaveBeenCalledOnce()
   })
+
+  it('should not commit or navigate for a Storage response after provider unmount', async () => {
+    vi.stubGlobal('BroadcastChannel', undefined)
+    const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
+    let resolveFetch: ((value: ReturnType<typeof createResponse>) => void) | undefined
+    const fetchResponse = new Promise<ReturnType<typeof createResponse>>((resolve) => {
+      resolveFetch = resolve
+    })
+
+    await renderProvider({ session: initialSession })
+    apiMocks.get.mockClear()
+    apiMocks.get.mockReturnValueOnce(fetchResponse)
+    dispatchStorageRefresh({
+      affectedExpirationMs: 0,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      sentAt: 900,
+      sourceID: 'remote-tab',
+    })
+    await act(async () => Promise.resolve())
+
+    act(() => renderedRoot?.unmount())
+    renderedRoot = undefined
+    resolveFetch?.(createResponse({ session: { exp: 0, user: null } as unknown as UserWithToken }))
+    await act(async () => {
+      await fetchResponse
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    expect(routerMocks.replace).not.toHaveBeenCalled()
+  })
 })
 
 function CaptureAuthContext() {
@@ -1729,13 +2336,22 @@ function CaptureAuthContext() {
 
 function createMessage(
   message:
-    | (Omit<Extract<AuthSessionSyncMessage, { type: 'session-expired' }>, 'sentAt'> & {
+    | (Omit<
+        Extract<AuthSessionSyncMessage, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED }>,
+        'sentAt'
+      > & {
         sentAt?: number
       })
-    | (Omit<Extract<AuthSessionSyncMessage, { type: 'session-logged-out' }>, 'sentAt'> & {
+    | (Omit<
+        Extract<AuthSessionSyncMessage, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT }>,
+        'sentAt'
+      > & {
         sentAt?: number
       })
-    | (Omit<Extract<AuthSessionSyncMessage, { type: 'session-refreshed' }>, 'sentAt'> & {
+    | (Omit<
+        Extract<AuthSessionSyncMessage, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED }>,
+        'sentAt'
+      > & {
         sentAt?: number
       }),
 ): AuthSessionSyncMessage {
@@ -1744,14 +2360,39 @@ function createMessage(
   return { ...messageWithoutTimestamp, sentAt } as AuthSessionSyncMessage
 }
 
-function dispatchStorageRefresh({ sentAt, sourceID }: { sentAt: number; sourceID: string }): void {
+function dispatchStorageRefresh({
+  affectedExpirationMs,
+  sentAt,
+  sourceID,
+  type,
+}: {
+  affectedExpirationMs: number
+  sentAt: number
+  sourceID: string
+  type: AuthSessionSyncEventType
+}): void {
+  const notification =
+    type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
+      ? { affectedExpirationMs, sentAt, settlesSentAt: sentAt - 1, sourceID, type }
+      : { affectedExpirationMs, sentAt, sourceID, type }
+
   act(() => {
     window.dispatchEvent(
       new StorageEvent('storage', {
         key: 'payload:auth-session:refresh',
-        newValue: JSON.stringify({ sentAt, sourceID }),
+        newValue: JSON.stringify(notification),
       }),
     )
+  })
+}
+
+function dispatchStoredNotification(setItem: {
+  mock: { calls: Array<[key: string, value: string]> }
+}): void {
+  const [key, newValue] = setItem.mock.calls.at(-1) as [string, string]
+
+  act(() => {
+    window.dispatchEvent(new StorageEvent('storage', { key, newValue }))
   })
 }
 
