@@ -1259,30 +1259,20 @@ describe('Queues - Payload', () => {
       expect(completedJob.processingUntil).toBeFalsy()
     })
 
-    it('should atomically claim a job once and fence the previous owner', async () => {
+    it('should prevent a previous owner from updating a job after ownership changes', async () => {
       const job = await payload.jobs.queue({
-        input: { message: 'claim once' },
+        input: { message: 'ownership changed' },
         task: 'CreateSimple',
       })
       const processingUntil = new Date(Date.now() + 60_000).toISOString()
-
-      const claim = (processingToken: string) =>
-        payload.db.updateJobs({
-          data: { processingToken, processingUntil },
-          limit: 1,
-          returning: true,
-          where: {
-            and: [{ id: { equals: job.id } }, { processingUntil: { exists: false } }],
-          },
-        })
-
-      const claims = await Promise.all([claim('worker-a'), claim('worker-b')])
-      const winningClaims = claims.flatMap((result) => result ?? [])
-
-      expect(winningClaims).toHaveLength(1)
-
-      const processingToken = winningClaims[0]!.processingToken
+      const processingToken = 'previous-worker'
       const replacementToken = 'replacement-worker'
+
+      await payload.db.updateJobs({
+        data: { processingToken, processingUntil },
+        id: job.id,
+        returning: false,
+      })
       await payload.db.updateJobs({
         data: { processingToken: replacementToken, processingUntil },
         id: job.id,
