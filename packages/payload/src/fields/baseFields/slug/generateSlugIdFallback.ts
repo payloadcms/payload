@@ -1,7 +1,7 @@
 import type { PayloadRequest } from '../../../types/index.js'
 import type { FieldHook } from '../../config/types.js'
 
-import { ensureUniqueSlug } from './ensureUniqueSlug.js'
+import { getUniqueFieldValue } from '../../../utilities/getUniqueFieldValue.js'
 import { hasValue } from './hasValue.js'
 
 type Args = {
@@ -14,7 +14,7 @@ type Args = {
  * be set in `beforeChange`. Guarantees every doc has a slug so a lookup by slug never 404s.
  *
  * Writes with `db.updateOne` to skip the pipeline (no hook recursion, no re-validation) inside the
- * create transaction, deduped through {@link ensureUniqueSlug}. The version is written before
+ * create transaction, deduped through {@link getUniqueFieldValue}. The version is written before
  * `afterChange`, so it's patched too — the admin reads the latest version, not the main document.
  * Collections only; globals have no slug lookup to protect.
  */
@@ -31,10 +31,10 @@ export const generateSlugIdFallback =
       return value
     }
 
-    const slug = await ensureUniqueSlug({
+    const slug = await getUniqueFieldValue({
       id,
-      name,
       collection: collection.slug,
+      field: name,
       req,
       value: String(id),
     })
