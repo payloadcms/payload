@@ -1,8 +1,10 @@
 import type { Slugify } from 'payload/shared'
 
 import {
+  executeAccess,
   flattenAllFields,
   getFieldByPath,
+  getSlugFallbackValue,
   type ServerFunction,
   type SlugifyServerFunctionArgs,
   UnauthorizedError,
@@ -50,9 +52,40 @@ export const slugifyHandler: ServerFunction<
     typeof field?.custom?.slugify === 'function' ? field.custom.slugify : undefined
   ) as Slugify
 
-  const result = customSlugify
-    ? await customSlugify({ data, req, valueToSlugify })
-    : defaultSlugify(valueToSlugify)
+  const slugify = (valueToSlugify: unknown) =>
+    customSlugify
+      ? customSlugify({ data, req, valueToSlugify })
+      : defaultSlugify(valueToSlugify as string)
+
+  const result = await slugify(valueToSlugify)
+
+  if (result) {
+    return result
+  }
+
+  // No source to slugify: return the collection's `<singular>-N` fallback so the generate button
+  // can set it, mirroring the server-side create fallback. Globals have no counter fallback.
+  const collectionConfig = collectionSlug ? req.payload.collections[collectionSlug]?.config : null
+
+  // Fall back to the collection's `<singular>-N` counter when there's no source. This probes slug
+  // availability with the raw db, so enforce the collection's read access first, and only for the
+  // slug field resolved at this path — the endpoint can't be used to probe unrelated fields.
+  if (collectionConfig && field && field.type === 'slug' && 'name' in field) {
+    const canRead = await executeAccess({ disableErrors: true, req }, collectionConfig.access.read)
+
+    if (canRead) {
+      const excludeId =
+        typeof data?.id === 'string' || typeof data?.id === 'number' ? data.id : undefined
+
+      return getSlugFallbackValue({
+        id: excludeId,
+        collection: collectionConfig,
+        field: field.name,
+        req,
+        slugify,
+      })
+    }
+  }
 
   return result
 }

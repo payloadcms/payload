@@ -77,8 +77,8 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
         return
       }
 
-      // Nothing to slugify: keep the current value. The server's `<singular>-<N>` fallback can't be
-      // computed on the client, and the slug already holds one from create.
+      // Empty only comes back for globals (no counter fallback) — keep the current value. For
+      // collections the server returns the `<singular>-N` fallback when there's no source.
       if (formattedSlug === null || formattedSlug === undefined || formattedSlug === '') {
         return
       }
