@@ -896,7 +896,9 @@ export interface WorkflowSubTaskFails {
  * via the `definition` "WorkflowLongRunning".
  */
 export interface WorkflowLongRunning {
-  input?: unknown;
+  input: {
+    postTitle?: string | null;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
