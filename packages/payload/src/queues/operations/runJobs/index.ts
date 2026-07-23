@@ -351,10 +351,13 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
 
   const runSingleJob = async (
     job: Job,
-  ): Promise<{
-    id: number | string
-    result: RunJobResult
-  }> => {
+  ): Promise<
+    | {
+        id: number | string
+        result: RunJobResult
+      }
+    | null
+  > => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
@@ -378,33 +381,33 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       }
     }
 
-    if (!workflowConfig) {
-      // Permanently fail jobs whose task/workflow slug is no longer registered in config — they can never complete.
-      const errorMessage = `${job.taskSlug ? `Task '${job.taskSlug}'` : `Workflow '${job.workflowSlug}'`} is not registered in payload.config.jobs.`
-
-      if (!silent || (typeof silent === 'object' && !silent.error)) {
-        payload.logger.error({
-          msg: `Error running job ${job.workflowSlug || `Task: ${job.taskSlug}`} id: ${job.id} - ${errorMessage}`,
-        })
-      }
-
-      const updateJob = getUpdateJobFunction(job, jobReq)
-      await updateJob({
-        error: { message: errorMessage },
-        hasError: true,
-        processingUntil: null,
-        totalTried: (job.totalTried ?? 0) + 1,
-      })
-
-      return {
-        id: job.id,
-        result: {
-          status: 'error-reached-max-retries',
-        },
-      }
-    }
-
     try {
+      if (!workflowConfig) {
+        // Permanently fail jobs whose task/workflow slug is no longer registered in config — they can never complete.
+        const errorMessage = `${job.taskSlug ? `Task '${job.taskSlug}'` : `Workflow '${job.workflowSlug}'`} is not registered in payload.config.jobs.`
+
+        if (!silent || (typeof silent === 'object' && !silent.error)) {
+          payload.logger.error({
+            msg: `Error running job ${job.workflowSlug || `Task: ${job.taskSlug}`} id: ${job.id} - ${errorMessage}`,
+          })
+        }
+
+        const updateJob = getUpdateJobFunction(job, jobReq)
+        await updateJob({
+          error: { message: errorMessage },
+          hasError: true,
+          processingUntil: null,
+          totalTried: (job.totalTried ?? 0) + 1,
+        })
+
+        return {
+          id: job.id,
+          result: {
+            status: 'error-reached-max-retries',
+          },
+        }
+      }
+
       const updateJob = getUpdateJobFunction(job, jobReq)
 
       // the runner will either be passed to the config
@@ -475,6 +478,9 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         return { id: job.id, result }
       }
     } catch (error) {
+      if (error instanceof JobRunAbortedError) {
+        return null
+      }
       if (error instanceof JobCancelledError) {
         if (
           !(job.error as Record<string, unknown> | undefined)?.cancelled ||
@@ -518,33 +524,18 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     req,
     silent,
   })
-  const runSingleJobWithLease = async (job: Job) => {
-    try {
-      return await runSingleJob(job)
-    } catch (error) {
-      if (error instanceof JobRunAbortedError) {
-        if (!silent || (typeof silent === 'object' && !silent.error)) {
-          payload.logger.warn({
-            msg: `Stopped running job ${job.id} because the run was aborted.`,
-          })
-        }
-        return null
-      }
-      throw error
-    }
-  }
 
   let resultsArray: { id: number | string; result: RunJobResult }[] = []
   try {
     if (sequential) {
       for (const job of jobs) {
-        const result = await runSingleJobWithLease(job)
+        const result = await runSingleJob(job)
         if (result) {
           resultsArray.push(result)
         }
       }
     } else {
-      const jobPromises = jobs.map(runSingleJobWithLease)
+      const jobPromises = jobs.map(runSingleJob)
       resultsArray = (await Promise.all(jobPromises)).filter((result) => result !== null)
     }
   } finally {
