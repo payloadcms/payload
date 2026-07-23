@@ -323,16 +323,14 @@ export const sanitizeField = async ({
       ...(field.hooks.beforeChange || []),
     ]
 
-    // Non-localized only: the scalar id fallback can't represent a per-locale localized slug.
-    // Known limitation — a localized slug in a locale with no source stays empty; backfilling it
-    // would need per-locale read-merge-write plus locale-scoped uniqueness. Deferred.
+    // Known limitation — a localized slug in a locale with no source stays empty.
+    // Backfilling it would need per-locale read-merge-write plus locale-scoped uniqueness.
     if (!field.localized) {
       field.hooks.afterChange = [
         generateSlugIdFallback({ name: field.name }),
         ...(field.hooks.afterChange || []),
       ]
 
-      // Handle the slug on duplicate here so setDefaultBeforeDuplicate skips its ` - Copy` default.
       field.hooks.beforeDuplicate = [
         generateSlugBeforeDuplicate({ name: field.name, required: field.required }),
         ...(field.hooks.beforeDuplicate || []),

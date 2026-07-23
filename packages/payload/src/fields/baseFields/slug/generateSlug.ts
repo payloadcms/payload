@@ -13,12 +13,11 @@ type Args = {
 }
 
 /**
- * `beforeChange` hook for the native `slug` field. Fills the slug only while it's empty and never
- * rewrites one that's set, so a lagging autosave response can't clobber it with a stale value.
- *
- * Explicit input and source values are run through the field's slugify; a stored slug is returned
- * as-is (re-slugifying would mutate it behind the client's back and could corrupt a custom-slugify
- * value). An empty slug with no source is left for the id fallback in {@link generateSlugIdFallback}.
+ * `beforeChange` hook for the native `slug` field. Fills the slug only while empty and never rewrites
+ * one that's set, so a lagging autosave can't clobber it with a stale value:
+ *   - explicit input and the source field are slugified, e.g. "Hello World" → "hello-world"
+ *   - an already-set slug is preserved as-is
+ *   - empty with no source is left for the id fallback (see {@link generateSlugIdFallback})
  */
 export const generateSlug =
   ({ name, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
@@ -40,7 +39,7 @@ export const generateSlug =
       return storedSlug
     }
 
-    // On a duplicate, skip source derivation so the copy falls back to its own new id. See generateSlugBeforeDuplicate.
+    // On duplicate, skip source derivation so the copy falls back to the new doc id. See generateSlugBeforeDuplicate.
     if (consumeSlugDuplicateFallback(context, name)) {
       return undefined
     }

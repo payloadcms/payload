@@ -10,13 +10,12 @@ type Args = {
 }
 
 /**
- * `beforeDuplicate` hook for the native `slug` field. A copy can't keep the original's unique slug,
- * and the default ` - Copy` suffix isn't a valid slug and reads as if it points at the source.
+ * `beforeDuplicate` hook for the native `slug` field.
  *
- * So the copy takes its own new id: the slug is cleared and marked so the create's `beforeChange`
- * skips source derivation and the id fallback backfills it. A required slug can't defer to that
- * fallback (pre-insert validation rejects the empty value), so it dedupes the original through
- * {@link getUniqueFieldValue} instead.
+ * A copy can't reuse the original's unique slug, so it's cleared and marked — the create's
+ * `beforeChange` then skips source derivation and the copy falls back to its own new id (see
+ * {@link generateSlugIdFallback}). A required slug can't defer to that fallback (validation rejects
+ * the empty value first), so it dedupes the original value via {@link getUniqueFieldValue} instead.
  */
 export const generateSlugBeforeDuplicate =
   ({ name, required }: Args): FieldHook =>
