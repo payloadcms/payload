@@ -18,13 +18,7 @@ import {
   type SanitizedFieldsPermissions,
   type VersionField,
 } from 'payload'
-import {
-  fieldIsID,
-  fieldShouldBeLocalized,
-  getFieldPaths,
-  getUniqueListBy,
-  tabHasName,
-} from 'payload/shared'
+import { fieldIsID, fieldShouldBeLocalized, getFieldPaths, tabHasName } from 'payload/shared'
 
 import { diffComponents } from './fields/index.js'
 
@@ -463,8 +457,21 @@ const buildVersionField = ({
             (block) => typeof block !== 'string' && block.slug === fromBlockSlugToMatch,
           ) as FlattenedBlock | undefined)
 
-        if (fromBlock) {
-          fields = getUniqueListBy<Field>([...toBlock.fields, ...fromBlock.fields], 'name')
+        if (fromBlock && fromBlockSlugToMatch !== toBlock.slug) {
+          // For truly different block types:
+          // Keep toBlock's full field structure at correct positions (including unnamed fields), then append any uniquely-named fields from fromBlock.
+          // `getUniqueListBy` cannot be used here — all unnamed fields will collapse to a single entry, causing incorrect index paths.
+          const toNamedFieldNames = new Set(
+            toBlock.fields
+              .filter((f) => 'name' in f)
+              .map((f) => (f as { name: string } & Field).name),
+          )
+
+          const uniqueFromNamedFields = fromBlock.fields.filter(
+            (f) => 'name' in f && !toNamedFieldNames.has((f as { name: string } & Field).name),
+          )
+
+          fields = [...toBlock.fields, ...uniqueFromNamedFields]
         } else {
           fields = toBlock.fields
         }
