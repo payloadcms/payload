@@ -191,6 +191,7 @@ export const updateOperation = async <
     // /////////////////////////////////////
 
     data = await beforeValidate({
+      accessOperation: 'update',
       collection: null,
       context: req.context,
       data,

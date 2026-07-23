@@ -2,7 +2,12 @@ import type { RichTextAdapter } from '../../../admin/RichText.js'
 import type { SanitizedCollectionConfig, TypeWithID } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
-import type { JsonObject, JsonValue, PayloadRequest } from '../../../types/index.js'
+import type {
+  FieldAccessOperation,
+  JsonObject,
+  JsonValue,
+  PayloadRequest,
+} from '../../../types/index.js'
 import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
@@ -14,6 +19,7 @@ import { stripNullRows } from './stripNullRows.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T> = {
+  accessOperation: FieldAccessOperation
   /**
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
    */
@@ -53,6 +59,7 @@ type Args<T> = {
 
 export const promise = async <T>({
   id,
+  accessOperation,
   blockData,
   collection,
   context,
@@ -318,10 +325,10 @@ export const promise = async <T>({
     }
 
     // Execute access control
-    if (operation !== 'validate' && field.access && field.access[operation]) {
+    if (field.access && field.access[accessOperation]) {
       const result = overrideAccess
         ? true
-        : await field.access[operation](
+        : await field.access[accessOperation](
             collection
               ? {
                   id,
@@ -374,6 +381,7 @@ export const promise = async <T>({
           promises.push(
             traverseFields({
               id,
+              accessOperation,
               blockData,
               collection,
               context,
@@ -428,6 +436,7 @@ export const promise = async <T>({
             promises.push(
               traverseFields({
                 id,
+                accessOperation,
                 blockData: row,
                 collection,
                 context,
@@ -459,6 +468,7 @@ export const promise = async <T>({
     case 'row': {
       await traverseFields({
         id,
+        accessOperation,
         blockData,
         collection,
         context,
@@ -501,6 +511,7 @@ export const promise = async <T>({
 
       await traverseFields({
         id,
+        accessOperation,
         blockData,
         collection,
         context,
@@ -587,6 +598,7 @@ export const promise = async <T>({
 
       await traverseFields({
         id,
+        accessOperation,
         blockData,
         collection,
         context,
@@ -611,6 +623,7 @@ export const promise = async <T>({
     case 'tabs': {
       await traverseFields({
         id,
+        accessOperation,
         blockData,
         collection,
         context,

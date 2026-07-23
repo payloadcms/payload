@@ -194,6 +194,7 @@ export type Document = any
 
 export type Operation = 'create' | 'delete' | 'read' | 'update'
 export type FieldOperation = 'validate' | Operation
+export type FieldAccessOperation = Extract<Operation, 'create' | 'update'>
 export type VersionOperations = 'readVersions'
 export type AuthOperations = 'unlock'
 export type AllOperations = AuthOperations | Operation | VersionOperations

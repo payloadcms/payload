@@ -190,6 +190,7 @@ export const restoreVersionOperation = async <
 
     let data = await beforeValidate({
       id: parentDocID,
+      accessOperation: 'update',
       collection: collectionConfig,
       context: req.context,
       data: deepCopyObjectSimple(prevVersionDoc),
