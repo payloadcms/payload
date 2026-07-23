@@ -12,7 +12,7 @@ import React from 'react'
 
 import { importMap } from './importMap.js'
 import '@payloadcms/next/css'
-import './custom.scss'
+import './custom.css'
 
 export const generateViewport = generatePayloadViewport
 
