@@ -7,13 +7,14 @@ import type { StripeAdapterArgs } from '../index.js'
 type Props = {
   apiVersion?: Stripe.StripeConfig['apiVersion']
   appInfo?: Stripe.StripeConfig['appInfo']
+  httpClient?: Stripe.StripeConfig['httpClient']
   secretKey: StripeAdapterArgs['secretKey']
   webhooks?: StripeAdapterArgs['webhooks']
   webhookSecret: StripeAdapterArgs['webhookSecret']
 }
 
 export const webhooksEndpoint: (props: Props) => Endpoint = (props) => {
-  const { apiVersion, appInfo, secretKey, webhooks, webhookSecret } = props || {}
+  const { apiVersion, appInfo, httpClient, secretKey, webhooks, webhookSecret } = props || {}
 
   const handler: Endpoint['handler'] = async (req) => {
     let returnStatus = 200
@@ -28,6 +29,7 @@ export const webhooksEndpoint: (props: Props) => Endpoint = (props) => {
           name: 'Stripe Payload Plugin',
           url: 'https://payloadcms.com',
         },
+        httpClient,
       })
 
       const body = await req.text()
