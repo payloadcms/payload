@@ -311,6 +311,7 @@ export interface DraftPost {
   select?: ('test1' | 'test2')[] | null;
   blocksField?: Block[] | null;
   relation?: (string | null) | DraftPost;
+  relationWithFilterOptions?: (string | DraftPost)[] | null;
   restrictedToUpdate?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -1108,6 +1109,7 @@ export interface DraftPostsSelect<T extends boolean = true> {
             };
       };
   relation?: T;
+  relationWithFilterOptions?: T;
   restrictedToUpdate?: T;
   updatedAt?: T;
   createdAt?: T;

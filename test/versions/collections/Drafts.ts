@@ -124,6 +124,16 @@ const DraftPosts: CollectionConfig = {
       relationTo: draftCollectionSlug,
     },
     {
+      // `filterOptions` forces relationship validation to query the database
+      // (validateFilterOptions), which is the path that broke version restore
+      // when `req` is a real web Request. See versions int.spec restore tests.
+      name: 'relationWithFilterOptions',
+      type: 'relationship',
+      filterOptions: () => true,
+      hasMany: true,
+      relationTo: draftCollectionSlug,
+    },
+    {
       name: 'restrictedToUpdate',
       type: 'checkbox',
     },
