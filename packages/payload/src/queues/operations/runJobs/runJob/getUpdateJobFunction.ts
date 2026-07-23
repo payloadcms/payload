@@ -1,7 +1,7 @@
 import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 
-import { JobLeaseLostError } from '../../../errors/index.js'
+import { JobRunAbortedError } from '../../../errors/index.js'
 import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { updateJobs } from '../../../utilities/updateJob.js'
 
@@ -17,7 +17,7 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
     const processingToken = job.processingToken
 
     if (!processingToken) {
-      throw new JobLeaseLostError(`Job ${job.id} has no processing token`)
+      throw new JobRunAbortedError(`Job ${job.id} can no longer be updated by this runner`)
     }
 
     const minimumProcessingUntil = new Date(
@@ -39,7 +39,7 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
     const updatedJob = updatedJobs?.[0]
 
     if (!updatedJob) {
-      throw new JobLeaseLostError(`Job ${job.id} is no longer owned by this runner`)
+      throw new JobRunAbortedError(`Job ${job.id} can no longer be updated by this runner`)
     }
 
     // Update job object like this to modify the original object - that way, incoming changes (e.g. taskStatus field that will be re-generated through the hook) will be reflected in the calling function

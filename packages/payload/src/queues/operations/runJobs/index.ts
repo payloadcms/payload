@@ -10,7 +10,7 @@ import type { RunJobResult } from './runJob/index.js'
 import { Forbidden } from '../../../errors/Forbidden.js'
 import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { jobsCollectionSlug } from '../../config/collection.js'
-import { JobCancelledError, JobLeaseLostError } from '../../errors/index.js'
+import { JobRunAbortedError } from '../../errors/index.js'
 import { getCurrentDate } from '../../utilities/getCurrentDate.js'
 import { updateJobs } from '../../utilities/updateJob.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
@@ -475,7 +475,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         return { id: job.id, result }
       }
     } catch (error) {
-      if (error instanceof JobCancelledError) {
+      if (error instanceof JobRunAbortedError) {
         if (
           !(job.error as Record<string, unknown> | undefined)?.cancelled ||
           !job.hasError ||
@@ -483,8 +483,8 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
           job.completedAt ||
           job.waitUntil
         ) {
-          // When using the local API to cancel jobs, the local API will update the job data for us to ensure the job is cancelled.
-          // But when throwing a JobCancelledError within a task or workflow handler, we are responsible for updating the job data ourselves.
+          // The Local API persists cancellation itself. When a handler aborts its own run, the
+          // runner must persist the cancellation while it still owns the job.
           const updateJob = getUpdateJobFunction(job, jobReq)
           await updateJob({
             completedAt: null,
@@ -521,10 +521,10 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     try {
       return await runSingleJob(job)
     } catch (error) {
-      if (error instanceof JobLeaseLostError) {
+      if (error instanceof JobRunAbortedError) {
         if (!silent || (typeof silent === 'object' && !silent.error)) {
           payload.logger.warn({
-            msg: `Stopped running job ${job.id} because its processing lease was lost.`,
+            msg: `Stopped running job ${job.id} because the run was aborted.`,
           })
         }
         return null
