@@ -201,6 +201,11 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
     read?: Access
     readVersions?: Access
     update?: Access
+    /**
+     * Controls on-demand validation for this global.
+     * The access function receives `req.operation === 'validate'`.
+     * @see https://payloadcms.com/docs/validation/overview#access-control-and-hooks
+     */
     validate?: Access
   }
   admin?: GlobalAdminOptions

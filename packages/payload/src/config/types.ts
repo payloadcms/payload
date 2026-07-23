@@ -583,8 +583,10 @@ export type Locale = {
    */
   label: Record<string, string> | string
   /**
-   * Whether this locale must pass validation before publishing another locale.
+   * Require this locale to pass validation whenever any one locale is published.
+   * Publish-all operations validate every available locale regardless of this setting.
    * @default false
+   * @see https://payloadcms.com/docs/validation/overview#publishing-and-required-locales
    */
   required?: boolean
   /**

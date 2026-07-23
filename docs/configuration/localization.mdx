@@ -10,6 +10,9 @@ Localization is one of the most important features of a modern CMS. It allows yo
 
 With Localization, you can begin to serve personalized content to your users based on their specific language preferences, such as a multilingual website or multi-site application. There are no limits to the number of locales you can add to your Payload project.
 
+You can also [validate one or more locales without saving](../validation/overview) and require
+specific locales before publishing.
+
 To configure Localization, use the `localization` key in your [Payload Config](./overview):
 
 ```ts
@@ -93,12 +96,13 @@ The locale codes do not need to be in any specific format. It's up to you to def
 
 #### Locale Object
 
-| Option               | Description                                                                                                                               |
-| -------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| **`code`** \*        | Unique code to identify the language throughout the APIs for `locale` and `fallbackLocale`                                                |
-| **`label`**          | A string to use for the selector when choosing a language, or an object keyed on the i18n keys for different languages in use.            |
-| **`rtl`**            | A boolean that when true will make the admin UI display in Right-To-Left.                                                                 |
-| **`fallbackLocale`** | The code for this language to fallback to when properties of a document are not present. This can be a single locale or array of locales. |
+| Option               | Description                                                                                                                                                           |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`code`** \*        | Unique code to identify the language throughout the APIs for `locale` and `fallbackLocale`.                                                                           |
+| **`label`**          | A string to use for the selector when choosing a language, or an object keyed on the i18n keys for different languages in use.                                        |
+| **`rtl`**            | A boolean that when true will make the admin UI display in Right-To-Left.                                                                                             |
+| **`fallbackLocale`** | The code for this language to fallback to when properties of a document are not present. This can be a single locale or array of locales.                             |
+| **`required`**       | Require this locale to pass validation whenever any locale is published. Defaults to `false`. [More details](../validation/overview#publishing-and-required-locales). |
 
 _\* An asterisk denotes that a property is required._
 

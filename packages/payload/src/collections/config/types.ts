@@ -550,6 +550,11 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     readVersions?: Access
     unlock?: Access
     update?: Access
+    /**
+     * Controls on-demand validation for this collection.
+     * The access function receives `req.operation === 'validate'`.
+     * @see https://payloadcms.com/docs/validation/overview#access-control-and-hooks
+     */
     validate?: Access
   }
   /**

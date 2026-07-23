@@ -504,6 +504,11 @@ export interface FieldBase {
     create?: FieldAccess
     read?: FieldAccess
     update?: FieldAccess
+    /**
+     * Controls whether candidate field data participates in on-demand validation.
+     * The access function receives `req.operation === 'validate'`.
+     * @see https://payloadcms.com/docs/validation/overview#access-control-and-hooks
+     */
     validate?: FieldAccess
   }
   admin?: FieldAdmin

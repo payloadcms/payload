@@ -12,11 +12,15 @@ import { APIError } from './APIError.js'
 export const ValidationErrorName = 'ValidationError'
 
 export type ValidationFieldError = {
+  /** Configured field label, when available. */
   label?: LabelFunction | StaticLabel
+  /** Locale in which this field failed validation. */
   locale?: string
-  // The error message to display for this field
+  /** Error message to display for this field. */
   message: string
+  /** Dot-separated path to the invalid field. */
   path: string
+  /** Database table associated with the invalid field, when applicable. */
   tableName?: string
 }
 

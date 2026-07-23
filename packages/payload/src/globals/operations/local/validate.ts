@@ -22,15 +22,22 @@ import { validateOperation } from '../validate.js'
 /**
  * Options for validating a global document without persisting it.
  *
- * Global validation always simulates update. Candidate data is optional and, when provided, is
- * merged over the stored global before validation.
+ * The latest stored global is loaded and optional partial candidate data is merged over it.
+ * Access control, hooks, field access, and validators receive the first-class `validate`
+ * operation.
  */
 export type ValidateGlobalOptions<TSlug extends GlobalSlug> = {
   /** Hook context merged into `req.context` for the validation lifecycle. */
   context?: RequestContext
-  /** Optional partial data to merge over the stored global. */
+  /** Optional partial candidate data to merge over the latest stored global. */
   data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
-  /** One locale, a non-empty locale array, or every available locale. */
+  /**
+   * A locale, a non-empty locale array, or `'all'`.
+   *
+   * Each selected locale receives an independent copy of the same candidate `data`.
+   * `'all'` resolves through `localization.filterAvailableLocales` when configured. Use `null`
+   * for projects without localization.
+   */
   locale: ValidationLocaleSelector
   /**
    * Skip global and field access control.

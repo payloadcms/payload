@@ -6,6 +6,12 @@ import type { PayloadRequest } from '../types/index.js'
 import { APIError } from '../errors/index.js'
 
 // TypedLocale is narrowed by generated types, while its untyped fallback intentionally includes string.
+/**
+ * Locales accepted by collection and global on-demand validation.
+ *
+ * A non-empty array validates its unique locale codes in the order provided. `'all'` validates
+ * every locale available to the request. Projects without localization use `null`.
+ */
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type ValidationLocaleSelector = 'all' | TypedLocale | TypedLocale[]
 

@@ -29,12 +29,18 @@ import {
 import { validateOperation } from '../validate.js'
 
 /**
- * The result of validating a collection or global document without persisting it.
+ * The result of validating a collection or global document candidate without persisting it.
+ *
+ * Field validation failures are returned in this result. Access denials, invalid arguments,
+ * missing documents, and other lifecycle errors throw instead.
  */
 export type ValidationResult = {
-  /** Field validation errors. Empty when {@link valid} is `true`. */
+  /**
+   * Field validation errors, tagged with the locale that failed.
+   * Empty when {@link valid} is `true`.
+   */
   errors: ValidationFieldError[]
-  /** Whether the simulated document passed field validation. */
+  /** Whether the candidate passed field validation in every selected locale. */
   valid: boolean
 }
 
@@ -45,7 +51,13 @@ type BaseOptions<TSlug extends CollectionSlug> = {
    * Hook context merged into `req.context` for the validation lifecycle.
    */
   context?: RequestContext
-  /** One locale, a non-empty locale array, or every available locale. */
+  /**
+   * A locale, a non-empty locale array, or `'all'`.
+   *
+   * Each selected locale receives an independent copy of the same candidate `data`.
+   * `'all'` resolves through `localization.filterAvailableLocales` when configured. Use `null`
+   * for projects without localization.
+   */
   locale: ValidationLocaleSelector
   /**
    * Skip collection and field access control.
@@ -65,20 +77,24 @@ type BaseOptions<TSlug extends CollectionSlug> = {
 /**
  * Options for validating a collection document without persisting it.
  *
- * Omitting `id` simulates create and requires `data`. Supplying `id` simulates update and allows
- * `data` to be omitted or partial because stored document data is loaded first.
+ * Omitting `id` validates create candidate data. Supplying `id` loads the latest stored document
+ * and merges optional partial data over it. Access control, hooks, field access, and validators
+ * receive the first-class `validate` operation in both cases.
  */
 export type ValidateCollectionOptions<TSlug extends CollectionSlug> =
   | ({
-      /** Candidate create data. The property is required, but fields may be incomplete or invalid. */
+      /**
+       * Candidate create data. This property is required, but its fields may be incomplete or
+       * invalid so callers can inspect the returned errors.
+       */
       data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
-      /** Create simulation does not accept a document ID. */
+      /** Create candidate validation does not accept a document ID. */
       id?: never
     } & BaseOptions<TSlug>)
   | ({
-      /** Optional partial data to merge over the stored document. */
+      /** Optional partial candidate data to merge over the latest stored document. */
       data?: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
-      /** The stored document ID used for update simulation. */
+      /** ID of the stored document used as the candidate's base. */
       id: DataFromCollectionSlug<TSlug>['id']
     } & BaseOptions<TSlug>)
 

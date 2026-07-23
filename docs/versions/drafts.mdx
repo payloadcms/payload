@@ -292,6 +292,10 @@ Payload provides for an ability to schedule publishing / unpublishing events in 
 
 You can enable this functionality on both collections and globals via the `versions.drafts.schedulePublish: true` property.
 
+At execution time, a scheduled publish [revalidates the latest stored
+document](../validation/overview#publishing-and-required-locales). If validation fails, Payload
+cancels the job without changing publication state.
+
 <Banner type="warning">
   **Important:** if you are going to enable scheduled publish / unpublish, you
   need to make sure your Payload app is set up to process

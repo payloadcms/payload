@@ -1,0 +1,301 @@
+---
+title: On-demand Validation
+label: Overview
+order: 10
+desc: Validate collection and global document candidates without saving them.
+keywords: validation, local api, rest api, localization, publishing, access control, hooks, drafts
+---
+
+On-demand validation checks a collection or global document candidate without saving the candidate,
+creating a version, or writing files. Use it for workflow readiness checks, multi-locale review, and
+validation before a custom publish flow.
+
+Field validation failures are returned as a result:
+
+```ts
+import type { ValidationFieldError } from 'payload'
+
+type ValidationResult = {
+  valid: boolean
+  errors: ValidationFieldError[]
+}
+```
+
+Every error has a `path` and `message`. On-demand validation also sets `locale`; optional field
+label and table metadata may be present.
+
+Access denials, missing documents, invalid arguments, and non-validation errors thrown by hooks still
+throw normally.
+
+## Local API
+
+Use `payload.validate()` for collections and `payload.validateGlobal()` for globals. A collection
+call without `id` validates a create candidate and requires `data`. A call with `id` loads the latest
+stored document and merges optional, partial `data` over it. Global validation always loads the
+latest global and merges optional, partial `data`.
+
+```ts
+// Validate collection create data in one locale
+const createResult = await payload.validate({
+  collection: 'posts',
+  data: {
+    title: 'Launch announcement',
+  },
+  locale: 'en',
+})
+```
+
+```ts
+// Merge the same partial candidate into each selected locale
+const updateResult = await payload.validate({
+  collection: 'posts',
+  id: postID,
+  data: {
+    title: 'Ready to publish',
+  },
+  locale: ['en', 'de'],
+})
+```
+
+```ts
+// Validate every locale available to this request
+const allLocalesResult = await payload.validate({
+  collection: 'posts',
+  id: postID,
+  locale: 'all',
+})
+```
+
+```ts
+// Validate a partial global candidate
+const globalResult = await payload.validateGlobal({
+  slug: 'site-settings',
+  data: {
+    announcement: 'Maintenance starts at 22:00',
+  },
+  locale: ['en', 'es'],
+})
+```
+
+For projects without localization, pass `locale: null` to the Local API.
+
+Use `context` to add values to `req.context` for the validation lifecycle. You can also reuse a
+partial request with `req`.
+
+### Workflow readiness
+
+Validation failures do not throw a `ValidationError`. Check `valid` and use the locale, path, and
+message on each error:
+
+```ts
+const result = await payload.validate({
+  collection: 'posts',
+  id: postID,
+  locale: 'all',
+  overrideAccess: false,
+  user,
+})
+
+if (!result.valid) {
+  return {
+    ready: false,
+    issues: result.errors.map(({ locale, message, path }) => ({
+      field: path,
+      locale,
+      message,
+    })),
+  }
+}
+
+return { ready: true }
+```
+
+The Local API skips access control by default. Set `overrideAccess: false` and pass `user` or `req`
+when validation should enforce access.
+
+## REST API
+
+Validation endpoints use `POST`. Send candidate data as a JSON object and select locales with the
+required `locale` query parameter. These examples use the default `/api` base path; custom
+`routes.api` configuration changes that prefix.
+
+```ts
+// Collection create candidate
+const result = await fetch('/api/posts/validate?locale=en', {
+  method: 'POST',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    title: 'Launch announcement',
+  }),
+}).then((response) => response.json())
+```
+
+```ts
+// Collection update candidate; repeated locale parameters select multiple locales
+const result = await fetch(
+  `/api/posts/${postID}/validate?locale=en&locale=de`,
+  {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      title: 'Ready to publish',
+    }),
+  },
+).then((response) => response.json())
+```
+
+```ts
+// Global candidate
+const result = await fetch('/api/globals/site-settings/validate?locale=en', {
+  method: 'POST',
+  credentials: 'include',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    announcement: 'Maintenance starts at 22:00',
+  }),
+}).then((response) => response.json())
+```
+
+Use `?locale=all` to validate every available locale:
+
+```ts
+const result = await fetch(`/api/posts/${postID}/validate?locale=all`, {
+  method: 'POST',
+  credentials: 'include',
+}).then((response) => response.json())
+```
+
+The collection create endpoint requires an object body. The collection by-ID and global endpoints
+allow the body to be omitted, which validates the stored data unchanged.
+
+The body is always candidate document data. Authentication, access context, and other operation
+controls come from the HTTP request, not body properties.
+
+| Outcome                                    | Status |
+| ------------------------------------------ | ------ |
+| Valid or invalid field data                | `200`  |
+| Missing, unknown, or unavailable locale    | `400`  |
+| Missing or malformed required request data | `400`  |
+| Validation access denied                   | `403`  |
+| Collection document not found              | `404`  |
+
+Other errors use Payload's normal REST error handling. REST validation always enforces access
+control.
+
+## Locale semantics
+
+`locale` accepts one locale, a non-empty array, or `'all'`. Duplicate locales are removed. `'all'`
+uses the locales returned by `localization.filterAvailableLocales`, when configured. Each error is
+tagged with the locale that failed.
+
+A public multi-locale Local or REST call has one `data` payload. Payload independently merges that
+same candidate into every selected locale, then aggregates the results. If a custom interface has
+unsaved localized values for only its active locale, do not send those values as a flat
+multi-locale candidate.
+
+The built-in Admin UI handles this distinction for you: it validates the active locale with the
+current unsaved form data, then validates sibling locales with only non-localized candidate fields.
+Sibling localized values therefore come from their stored document data, or remain missing for a
+new document.
+
+Fallback locale values are disabled during on-demand validation. Missing data must pass validation
+in the locale being checked.
+
+## Publishing and required locales
+
+Use locale configuration objects to require a locale whenever any locale is published:
+
+```ts
+import { buildConfig } from 'payload'
+
+export default buildConfig({
+  localization: {
+    defaultLocale: 'en',
+    locales: [
+      { code: 'en', label: 'English' },
+      { code: 'es', label: 'Spanish', required: true },
+      { code: 'de', label: 'German' },
+    ],
+  },
+})
+```
+
+Publishing one locale validates that locale and every locale with `required: true`. Publishing all
+locales validates every available locale. If any locale is invalid, Payload throws a
+`ValidationError` before writing the document, version, or files.
+
+The default Admin Publish controls run a preflight so editors can see locale-grouped errors before
+submission. The **Validate all locales** action uses current unsaved form data and is shown only for
+localized documents when the user has `validate` permission. If you replace the default Publish
+button, your custom UI owns any preflight feedback; the server-side publish validation remains
+authoritative.
+
+Scheduled publishes revalidate the latest stored target when the job runs. An invalid target
+cancels the publish job without retrying or changing publication state. Unpublishing does not
+require publish validation.
+
+## Access control and hooks
+
+Configure `validate` access independently for collections, globals, and fields:
+
+```ts
+import type { CollectionConfig, GlobalConfig } from 'payload'
+
+export const Posts: CollectionConfig = {
+  slug: 'posts',
+  access: {
+    validate: ({ req }) => Boolean(req.user),
+  },
+  fields: [
+    {
+      name: 'internalNotes',
+      type: 'textarea',
+      access: {
+        validate: ({ req }) => Boolean(req.user),
+      },
+    },
+  ],
+}
+
+export const SiteSettings: GlobalConfig = {
+  slug: 'site-settings',
+  access: {
+    validate: ({ req }) => Boolean(req.user),
+  },
+  fields: [],
+}
+```
+
+Collection, global, and field access functions all receive the first-class
+`req.operation === 'validate'`. Field hooks, field validators, and collection/global
+`beforeValidate` and `beforeChange` hooks also receive `operation: 'validate'`. Payload never
+simulates `'create'` or `'update'` as the access operation.
+
+The validation lifecycle itself does not persist the candidate. Payload also rejects managed write
+operations that reuse the active validation request. Hooks still run, however, and can cause side
+effects through an external service, a raw database client, or a separate Payload request. Branch
+side-effecting hooks when needed:
+
+```ts
+import type { CollectionBeforeChangeHook } from 'payload'
+
+const beforeChange: CollectionBeforeChangeHook = async ({
+  data,
+  operation,
+}) => {
+  if (operation === 'validate') {
+    return data
+  }
+
+  await notifySearchIndexer(data)
+  return data
+}
+```
+
+## Current scope
+
+On-demand validation is available through the Local and REST APIs and as a localized document action
+in the Admin UI. It does not add a GraphQL validation operation, bulk Admin validation, or
+fallback-locale validation.

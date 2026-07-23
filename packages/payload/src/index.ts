@@ -755,9 +755,14 @@ export class BasePayload {
   }
 
   /**
-   * Validates a collection document for selected locales without persisting data, versions, or files.
+   * Validates a collection document candidate for selected locales without persisting data,
+   * versions, or files.
    *
-   * Omit `id` to simulate create, or provide `id` to load a stored document and simulate update.
+   * Omit `id` to validate create data, or provide `id` to merge partial candidate data over the
+   * latest stored document. Field validation failures resolve to `{ valid: false, errors }`;
+   * access, argument, lookup, and other lifecycle errors throw.
+   *
+   * @see https://payloadcms.com/docs/validation/overview#local-api
    */
   validate = async <TSlug extends CollectionSlug>(
     options: ValidateCollectionOptions<TSlug>,
@@ -766,7 +771,13 @@ export class BasePayload {
   }
 
   /**
-   * Validates a global document update for selected locales without persisting data or versions.
+   * Validates a global document candidate for selected locales without persisting data or
+   * versions.
+   *
+   * Partial candidate data is merged over the latest stored global. Field validation failures
+   * resolve to `{ valid: false, errors }`; access, argument, and other lifecycle errors throw.
+   *
+   * @see https://payloadcms.com/docs/validation/overview#local-api
    */
   validateGlobal = async <TSlug extends GlobalSlug>(
     options: ValidateGlobalOptions<TSlug>,

@@ -10,6 +10,13 @@ import {
 } from '../../utilities/parseValidationLocale.js'
 import { validateGlobalLocal } from '../operations/local/validate.js'
 
+/**
+ * Validates a global with optional partial candidate data.
+ *
+ * `POST {routes.api}/globals/{global}/validate` accepts an optional object body and requires one or
+ * more `locale` query parameters, or `locale=all`. Field validation failures return a `200`
+ * ValidationResult.
+ */
 export const validateHandler: PayloadHandler = async (req) => {
   const globalConfig = getRequestGlobal(req)
   const locale = parseValidationLocaleSelector(req.query.locale)

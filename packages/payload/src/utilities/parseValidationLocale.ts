@@ -62,6 +62,10 @@ export function parseSingleValidationLocale(locale: unknown): TypedLocale {
   return parsedLocale.locale
 }
 
+/**
+ * Parses a REST `locale` query value. Repeated query parameters are represented as an array and
+ * `locale=all` selects all locales.
+ */
 export function parseValidationLocaleSelector(locale: unknown): ValidationLocaleSelector {
   const parsedLocale = parseValidationLocale(locale)
 
@@ -77,6 +81,7 @@ export function parseValidationLocaleSelector(locale: unknown): ValidationLocale
   }
 }
 
+/** Ensures a REST validation request body is a non-null JSON object. */
 export function assertValidationData(data: unknown): asserts data is Record<string, unknown> {
   if (!data || Array.isArray(data) || typeof data !== 'object') {
     throw new APIError('Validation data must be an object.', httpStatus.BAD_REQUEST)

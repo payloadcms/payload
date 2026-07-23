@@ -13,6 +13,12 @@ import {
 } from '../../utilities/parseValidationLocale.js'
 import { validateLocal } from '../operations/local/validate.js'
 
+/**
+ * Validates collection create candidate data.
+ *
+ * `POST {routes.api}/{collection}/validate` requires an object body and one or more `locale` query
+ * parameters, or `locale=all`. Field validation failures return a `200` ValidationResult.
+ */
 export const validateHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
   const locale = parseValidationLocaleSelector(req.query.locale)
@@ -36,6 +42,13 @@ export const validateHandler: PayloadHandler = async (req) => {
   })
 }
 
+/**
+ * Validates a stored collection document with optional partial candidate data.
+ *
+ * `POST {routes.api}/{collection}/{id}/validate` accepts an optional object body and requires one
+ * or more `locale` query parameters, or `locale=all`. Field validation failures return a `200`
+ * ValidationResult.
+ */
 export const validateByIDHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
   const locale = parseValidationLocaleSelector(req.query.locale)
