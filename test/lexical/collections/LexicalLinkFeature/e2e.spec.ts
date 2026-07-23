@@ -1,37 +1,62 @@
+import type { SerializedAutoLinkNode } from '@payloadcms/richtext-lexical'
+import type {
+  SerializedEditorState,
+  SerializedParagraphNode,
+} from '@payloadcms/richtext-lexical/lexical'
+
 import { expect, test } from '@playwright/test'
-import { lexicalLinkFeatureSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, waitForFormReady } from '../../../__helpers/e2e/helpers.js'
+import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
+import type { Config, LexicalLinkFeature as LexicalLinkFeatureDoc } from '../../payload-types.js'
+
+import {
+  ensureCompilationIsDone,
+  saveDocAndAssert,
+  waitForFormReady,
+} from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { lexicalLinkFeatureSlug } from '../../slugs.js'
 import { LexicalHelpers } from '../utils.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../')
 
-const { beforeAll, beforeEach, describe } = test
+const createdIDs: Array<number | string> = []
 
-// Unlike the other suites, this one runs in parallel, as they run on the `lexical-fully-featured/create` URL and are "pure" tests
-// PLEASE do not reset the database or perform any operations that modify it in this file.
+// Unlike the other suites, this one can run on the `lexical-fully-featured/create` URL without reseeding the database.
+// Keep any database writes self-contained and clean them up in afterEach.
 // TODO: Enable parallel mode again when ensureCompilationIsDone is extracted into a playwright hook. Otherwise,
 // it runs multiple times in parallel, for each single test, which causes the tests to fail occasionally in CI.
 // test.describe.configure({ mode: 'parallel' })
 
-const { serverURL } = await initPayloadE2ENoConfig({
-  dirname,
-})
+const initResult = await initPayloadE2ENoConfig<Config>({ dirname })
+const { serverURL } = initResult
+const payload: PayloadTestSDK<Config> = initResult.payload
 
-describe('Lexical Link Feature', () => {
-  beforeAll(async ({ browser }, testInfo) => {
+test.describe('Lexical Link Feature', () => {
+  test.afterEach(async () => {
+    for (const id of createdIDs) {
+      await payload.delete({
+        id,
+        collection: lexicalLinkFeatureSlug,
+        overrideAccess: true,
+      })
+    }
+
+    createdIDs.length = 0
+  })
+
+  test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
 
     await ensureCompilationIsDone({ browser, serverURL })
   })
-  beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalLinkFeatureSlug)
     const lexical = new LexicalHelpers(page)
     await page.goto(url.create)
@@ -69,6 +94,53 @@ describe('Lexical Link Feature', () => {
     const checkboxField = lexical.drawer.locator(`[id^="field-newTab"]`)
 
     await expect(checkboxField).toBeChecked()
+  })
+
+  test('should persist configured fields on autolink nodes', async ({ page }) => {
+    const lexical = new LexicalHelpers(page)
+
+    await page.keyboard.type('https://example.com test@example.com ')
+
+    await expect(lexical.editor.locator('a')).toHaveCount(2)
+    await saveDocAndAssert(page)
+
+    const createdID = page.url().split('/').filter(Boolean).at(-1)
+
+    expect(createdID).toEqual(expect.any(String))
+    createdIDs.push(createdID as string)
+
+    await expect(async () => {
+      const doc: LexicalLinkFeatureDoc = (
+        await payload.find({
+          collection: lexicalLinkFeatureSlug,
+          depth: 0,
+          overrideAccess: true,
+          where: {
+            id: {
+              equals: createdID,
+            },
+          },
+        })
+      ).docs[0] as never
+
+      const richText: SerializedEditorState = doc.richText as SerializedEditorState
+      const paragraph = richText.root.children[0] as SerializedParagraphNode
+      const autoLinkNodes = paragraph.children.filter(
+        (node): node is SerializedAutoLinkNode => node.type === 'autolink',
+      )
+
+      expect(autoLinkNodes).toHaveLength(2)
+      expect(autoLinkNodes[0]?.fields).toMatchObject({
+        linkType: 'custom',
+        newTab: true,
+        url: 'https://example.com',
+      })
+      expect(autoLinkNodes[1]?.fields).toMatchObject({
+        linkType: 'custom',
+        newTab: true,
+        url: 'mailto:test@example.com',
+      })
+    }).toPass()
   })
 
   test('long link on right stays within editor bounds', async ({ page }) => {
@@ -110,9 +182,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -178,9 +250,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -243,9 +315,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
@@ -312,9 +384,9 @@ describe('Lexical Link Feature', () => {
           new MouseEvent('mouseover', {
             bubbles: true,
             cancelable: true,
-            view: window,
             clientX: rect.left + rect.width / 2,
             clientY: rect.top + rect.height / 2,
+            view: window,
           }),
         )
       }
