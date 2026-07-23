@@ -5,5 +5,6 @@ import { buildDynamicPredefinedJobsProcessingLeaseMigration } from '@payloadcms/
 export const dynamic: DynamicMigrationTemplate = buildDynamicPredefinedJobsProcessingLeaseMigration(
   {
     dialect: 'sqlite',
+    packageName: '@payloadcms/db-sqlite',
   },
 )
