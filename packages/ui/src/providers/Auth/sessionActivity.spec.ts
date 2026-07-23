@@ -3,7 +3,9 @@ import React, { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { AuthProvider } from './index.js'
+import type { AuthContext, UserWithToken } from './index.js'
+
+import { AuthProvider, useAuth } from './index.js'
 import {
   createSessionActivityTracker,
   registerSessionActivityListeners,
@@ -19,6 +21,7 @@ const apiMocks = vi.hoisted(() => ({
 }))
 let renderedContainer: HTMLElement | undefined
 let renderedRoot: ReturnType<typeof createRoot> | undefined
+let authContext: AuthContext | undefined
 
 vi.mock('@faceless-ui/modal', () => ({
   useModal: () => ({ closeAllModals: vi.fn(), openModal: vi.fn() }),
@@ -70,6 +73,7 @@ vi.mock('../RouteTransition/index.js', () => ({
 afterEach(() => {
   act(() => renderedRoot?.unmount())
   renderedContainer?.remove()
+  authContext = undefined
   renderedContainer = undefined
   renderedRoot = undefined
   vi.useRealTimers()
@@ -188,18 +192,78 @@ describe('AuthProvider session activity', () => {
     expect(apiMocks.post).toHaveBeenCalledTimes(1)
   })
 
-  it('should not reuse activity after a successful refresh', async () => {
+  it('should refresh for activity at the start of the refresh window after an empty checkpoint', async () => {
+    await renderAuthenticatedProvider({ tokenLifetimeMs: 300_000 })
+
+    await act(async () => vi.advanceTimersByTimeAsync(180_000))
+    window.dispatchEvent(new Event('focus'))
+    await act(async () => vi.advanceTimersByTimeAsync(1_001))
+
+    expect(apiMocks.post).toHaveBeenCalledTimes(1)
+  })
+
+  it('should cancel a pending checkpoint refresh when a new token is accepted', async () => {
     await renderAuthenticatedProvider({ tokenLifetimeMs: 300_000 })
 
     await act(async () => {
       await vi.advanceTimersByTimeAsync(120_000)
       window.dispatchEvent(new MouseEvent('mousemove'))
+      await vi.advanceTimersByTimeAsync(60_000)
+    })
+    act(() => authContext?.setUser(createFutureSession({ expiresInMs: 300_000 })))
+    await act(async () => vi.advanceTimersByTimeAsync(1_001))
+
+    expect(apiMocks.post).not.toHaveBeenCalled()
+  })
+
+  it('should not reuse activity after a successful refresh', async () => {
+    await renderAuthenticatedProvider({ tokenLifetimeMs: 300_000 })
+    apiMocks.post.mockImplementationOnce(async () => ({
+      json: async () => createFutureSession({ expiresInMs: 120_000 }),
+      status: 200,
+    }))
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(120_000)
+      window.dispatchEvent(new MouseEvent('mousemove'))
       await vi.advanceTimersByTimeAsync(61_001)
-      await vi.advanceTimersByTimeAsync(180_000)
       await vi.advanceTimersByTimeAsync(1_001)
     })
 
     expect(apiMocks.post).toHaveBeenCalledTimes(1)
+  })
+
+  it('should not recreate session timers when an activity refresh resolves after unmount', async () => {
+    let resolveRefresh:
+      | ((value: { json: () => Promise<UserWithToken>; status: number }) => void)
+      | undefined
+    const refreshResponse = new Promise<{ json: () => Promise<UserWithToken>; status: number }>(
+      (resolve) => {
+        resolveRefresh = resolve
+      },
+    )
+
+    await renderAuthenticatedProvider({ tokenLifetimeMs: 300_000 })
+    apiMocks.post.mockReturnValueOnce(refreshResponse)
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(120_000)
+      window.dispatchEvent(new MouseEvent('mousemove'))
+      await vi.advanceTimersByTimeAsync(61_001)
+    })
+    act(() => renderedRoot?.unmount())
+    renderedRoot = undefined
+    resolveRefresh?.({
+      json: async () => createFutureSession({ expiresInMs: 300_000 }),
+      status: 200,
+    })
+    await act(async () => {
+      await refreshResponse
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    expect(vi.getTimerCount()).toBe(0)
   })
 
   it('should clear the pending checkpoint on provider unmount', async () => {
@@ -243,10 +307,28 @@ async function renderAuthenticatedProvider({ tokenLifetimeMs }: { tokenLifetimeM
 
   await act(async () => {
     renderedRoot?.render(
-      React.createElement(AuthProvider, { user: user as never }, React.createElement('div')),
+      React.createElement(
+        AuthProvider,
+        { user: user as never },
+        React.createElement(CaptureAuthContext),
+      ),
     )
   })
   await act(async () => {})
+}
+
+function CaptureAuthContext() {
+  authContext = useAuth()
+
+  return null
+}
+
+function createFutureSession({ expiresInMs }: { expiresInMs: number }): UserWithToken {
+  return {
+    exp: Math.floor((Date.now() + expiresInMs) / 1000),
+    token: 'fresh-token',
+    user: { collection: 'users', id: '1' },
+  }
 }
 
 function createWindow() {

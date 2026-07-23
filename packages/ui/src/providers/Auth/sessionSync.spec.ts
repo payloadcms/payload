@@ -667,6 +667,31 @@ describe('AuthProvider session synchronization', () => {
     expect(channel.postMessage).not.toHaveBeenCalled()
   })
 
+  it('should cancel a pending activity refresh when a remote token is accepted', async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(0)
+    const initialSession = createFutureSession({ expiresInMs: 300_000, token: 'initial-token' })
+
+    await renderProvider({ session: initialSession })
+    const channel = getBroadcastChannel()
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(120_000)
+      window.dispatchEvent(new MouseEvent('mousemove'))
+      await vi.advanceTimersByTimeAsync(60_000)
+      channel.emit(
+        createMessage({
+          session: createFutureSession({ expiresInMs: 300_000, token: 'remote-token' }),
+          sourceID: 'remote-tab',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+        }),
+      )
+      await vi.advanceTimersByTimeAsync(1_001)
+    })
+
+    expect(apiMocks.post).not.toHaveBeenCalled()
+  })
+
   it('should publish expiration when a refresh response rejects the session', async () => {
     const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
 

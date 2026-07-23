@@ -211,6 +211,7 @@ export function AuthProvider({
 
       if (userResponse?.user) {
         lastSessionActivityAtRef.current = undefined
+        clearTimeout(refreshTokenTimeoutRef.current)
 
         const nextTokenExpirationMs = userResponse.exp * 1000
 
@@ -424,7 +425,7 @@ export function AuthProvider({
 
       const expiresInMs = Math.max(0, (tokenExpirationMs ?? 0) - Date.now())
 
-      if (forceRefresh || (tokenExpirationMs && expiresInMs < forceLogoutBufferMs * 2)) {
+      if (forceRefresh || (tokenExpirationMs && expiresInMs <= forceLogoutBufferMs * 2)) {
         clearTimeout(refreshTokenTimeoutRef.current)
         refreshTokenTimeoutRef.current = setTimeout(() => {
           void refreshSession({ isActivityRefresh: true })
@@ -652,6 +653,8 @@ export function AuthProvider({
   useEffect(
     () => () => {
       // remove all timeouts on unmount
+      sessionGenerationRef.current += 1
+      pendingAuthInvalidationRef.current = undefined
       clearTimeout(refreshTokenTimeoutRef.current)
       clearTimeout(reminderTimeoutRef.current)
       clearTimeout(forceLogOutTimeoutRef.current)
