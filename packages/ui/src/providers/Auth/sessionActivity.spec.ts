@@ -160,15 +160,26 @@ describe('registerSessionActivityListeners', () => {
 })
 
 describe('AuthProvider session activity', () => {
-  it('should refresh at the checkpoint after recent pre-window activity', async () => {
+  it('should refresh at the checkpoint for activity exactly one refresh window earlier', async () => {
     await renderAuthenticatedProvider({ tokenLifetimeMs: 300_000 })
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(120_000)
-      window.dispatchEvent(new MouseEvent('mousemove'))
       await vi.advanceTimersByTimeAsync(60_000)
-      await vi.advanceTimersByTimeAsync(1_001)
+      window.dispatchEvent(new MouseEvent('mousemove'))
+      await vi.advanceTimersByTimeAsync(119_999)
     })
+
+    expect(apiMocks.post).not.toHaveBeenCalled()
+
+    await act(async () => vi.advanceTimersByTimeAsync(1))
+
+    expect(apiMocks.post).not.toHaveBeenCalled()
+
+    await act(async () => vi.advanceTimersByTimeAsync(999))
+
+    expect(apiMocks.post).not.toHaveBeenCalled()
+
+    await act(async () => vi.advanceTimersByTimeAsync(1))
 
     expect(apiMocks.post).toHaveBeenCalledTimes(1)
   })
@@ -216,10 +227,29 @@ describe('AuthProvider session activity', () => {
     expect(apiMocks.post).not.toHaveBeenCalled()
   })
 
-  it('should not reuse activity after a successful refresh', async () => {
+  it('should retry an activity refresh after a rejected request and later activity', async () => {
+    await renderAuthenticatedProvider({ tokenLifetimeMs: 300_000 })
+    apiMocks.post.mockRejectedValueOnce(new Error('network unavailable'))
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(120_000)
+      window.dispatchEvent(new MouseEvent('mousemove'))
+      await vi.advanceTimersByTimeAsync(61_001)
+    })
+
+    expect(apiMocks.post).toHaveBeenCalledTimes(1)
+
+    await act(async () => vi.advanceTimersByTimeAsync(sessionActivityThrottleMs))
+    window.dispatchEvent(new MouseEvent('mousemove'))
+    await act(async () => vi.advanceTimersByTimeAsync(1_000))
+
+    expect(apiMocks.post).toHaveBeenCalledTimes(2)
+  })
+
+  it('should schedule a usable checkpoint for a token returned by a successful refresh', async () => {
     await renderAuthenticatedProvider({ tokenLifetimeMs: 300_000 })
     apiMocks.post.mockImplementationOnce(async () => ({
-      json: async () => createFutureSession({ expiresInMs: 120_000 }),
+      json: async () => createFutureSession({ expiresInMs: 600_000 }),
       status: 200,
     }))
 
@@ -231,6 +261,28 @@ describe('AuthProvider session activity', () => {
     })
 
     expect(apiMocks.post).toHaveBeenCalledTimes(1)
+
+    await act(async () => {
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    await act(async () => vi.advanceTimersByTimeAsync(358_998))
+
+    expect(apiMocks.post).toHaveBeenCalledTimes(1)
+
+    window.dispatchEvent(new MouseEvent('mousemove'))
+    await act(async () => vi.advanceTimersByTimeAsync(120_000))
+
+    expect(apiMocks.post).toHaveBeenCalledTimes(1)
+
+    await act(async () => vi.advanceTimersByTimeAsync(999))
+
+    expect(apiMocks.post).toHaveBeenCalledTimes(1)
+
+    await act(async () => vi.advanceTimersByTimeAsync(1))
+
+    expect(apiMocks.post).toHaveBeenCalledTimes(2)
   })
 
   it('should not recreate session timers when an activity refresh resolves after unmount', async () => {

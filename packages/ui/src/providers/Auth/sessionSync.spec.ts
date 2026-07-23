@@ -21,7 +21,6 @@ const apiMocks = vi.hoisted(() => ({
   post: vi.fn(),
 }))
 const routerMocks = vi.hoisted(() => ({
-  push: vi.fn(),
   replace: vi.fn(),
 }))
 
@@ -76,7 +75,6 @@ vi.mock('../Config/index.js', () => ({
 }))
 
 vi.mock('../RouterAdapter/index.js', () => ({
-  usePathname: () => '/admin',
   useRouter: () => routerMocks,
 }))
 
