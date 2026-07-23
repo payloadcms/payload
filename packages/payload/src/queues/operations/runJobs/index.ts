@@ -697,21 +697,17 @@ function getRetriesConfig({
   return jobsConfig.workflows?.find(({ slug }) => slug === job.workflowSlug)?.retries
 }
 
-function startProcessingLeaseHeartbeat({
-  activeClaims,
-  processingLeaseDuration,
-  processingLeaseSafetyBuffer,
-  processingToken,
-  req,
-  silent,
-}: {
+type ProcessingLeaseHeartbeatArgs = {
   activeClaims: Set<number | string>
   processingLeaseDuration: number
   processingLeaseSafetyBuffer: number
   processingToken: string
   req: PayloadRequest
   silent: RunJobsSilent
-}): () => void {
+}
+
+function startProcessingLeaseHeartbeat(args: ProcessingLeaseHeartbeatArgs): () => void {
+  const { activeClaims, processingLeaseDuration } = args
   const heartbeatInterval = Math.max(Math.floor(processingLeaseDuration / 3), 1)
   let isStopped = false
   let timeout: ReturnType<typeof setTimeout> | undefined
@@ -722,41 +718,9 @@ function startProcessingLeaseHeartbeat({
     }
 
     timeout = setTimeout(() => {
-      void renewLeases().finally(scheduleHeartbeat)
+      void sendHeartbeat(args).finally(scheduleHeartbeat)
     }, heartbeatInterval)
     timeout.unref?.()
-  }
-
-  const renewLeases = async () => {
-    const now = getCurrentDate()
-    const minimumProcessingUntil = new Date(
-      now.getTime() + processingLeaseSafetyBuffer,
-    ).toISOString()
-    const processingUntil = new Date(now.getTime() + processingLeaseDuration).toISOString()
-
-    try {
-      await updateJobs({
-        data: { processingUntil },
-        req,
-        returning: false,
-        where: {
-          and: [
-            { id: { in: [...activeClaims] } },
-            { completedAt: { exists: false } },
-            { hasError: { not_equals: true } },
-            { processingToken: { equals: processingToken } },
-            { processingUntil: { greater_than: minimumProcessingUntil } },
-          ],
-        },
-      })
-    } catch (error) {
-      if (!silent || (typeof silent === 'object' && !silent.error)) {
-        req.payload.logger.error({
-          err: error,
-          msg: 'Failed to renew job processing leases',
-        })
-      }
-    }
   }
 
   scheduleHeartbeat()
@@ -765,6 +729,43 @@ function startProcessingLeaseHeartbeat({
     isStopped = true
     if (timeout) {
       clearTimeout(timeout)
+    }
+  }
+}
+
+async function sendHeartbeat({
+  activeClaims,
+  processingLeaseDuration,
+  processingLeaseSafetyBuffer,
+  processingToken,
+  req,
+  silent,
+}: ProcessingLeaseHeartbeatArgs): Promise<void> {
+  const now = getCurrentDate()
+  const minimumProcessingUntil = new Date(now.getTime() + processingLeaseSafetyBuffer).toISOString()
+  const processingUntil = new Date(now.getTime() + processingLeaseDuration).toISOString()
+
+  try {
+    await updateJobs({
+      data: { processingUntil },
+      req,
+      returning: false,
+      where: {
+        and: [
+          { id: { in: [...activeClaims] } },
+          { completedAt: { exists: false } },
+          { hasError: { not_equals: true } },
+          { processingToken: { equals: processingToken } },
+          { processingUntil: { greater_than: minimumProcessingUntil } },
+        ],
+      },
+    })
+  } catch (error) {
+    if (!silent || (typeof silent === 'object' && !silent.error)) {
+      req.payload.logger.error({
+        err: error,
+        msg: 'Failed to renew job processing leases',
+      })
     }
   }
 }
