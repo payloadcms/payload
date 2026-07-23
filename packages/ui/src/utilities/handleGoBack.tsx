@@ -14,5 +14,5 @@ export const handleGoBack = ({ adminRoute, collectionSlug, router, serverURL }: 
     adminRoute,
     path: collectionSlug ? `/collections/${collectionSlug}` : '/',
   })
-  router.push(redirectRoute)
+  void router.push(redirectRoute)
 }

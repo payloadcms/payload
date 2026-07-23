@@ -71,10 +71,9 @@ export const Link: React.FC<Props> = ({
 
         const navigate = () => {
           if (replace) {
-            void router.replace(url, { scroll })
-          } else {
-            void router.push(url, { scroll })
+            return router.replace(url, { scroll })
           }
+          return router.push(url, { scroll })
         }
 
         startRouteTransition(navigate)

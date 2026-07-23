@@ -128,7 +128,7 @@ export function UnpublishManyDrawerContent(props: UnpublishManyDrawerContentProp
               })
             }
 
-            router.replace(
+            void router.replace(
               qs.stringify(
                 {
                   ...parseSearchParams(searchParams),

@@ -75,7 +75,7 @@ export const Localizer: React.FC<{
                       )
 
                       startRouteTransition(() => {
-                        router.push(url)
+                        void router.push(url)
                       })
                     }}
                   >

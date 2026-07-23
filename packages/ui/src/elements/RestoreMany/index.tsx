@@ -143,7 +143,7 @@ export const RestoreMany: React.FC<Props> = (props) => {
 
     toggleAll()
 
-    router.replace(
+    void router.replace(
       qs.stringify(
         {
           ...parseSearchParams(searchParams),

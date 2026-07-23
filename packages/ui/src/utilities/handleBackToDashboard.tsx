@@ -14,5 +14,5 @@ export const handleBackToDashboard = ({ adminRoute, router, serverURL }: BackToD
     path: '',
     serverURL,
   })
-  router.push(redirectRoute)
+  void router.push(redirectRoute)
 }

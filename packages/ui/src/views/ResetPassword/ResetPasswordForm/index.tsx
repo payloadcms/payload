@@ -40,9 +40,9 @@ export const ResetPasswordForm: React.FC<Args> = ({ token }) => {
   const onSuccess = React.useCallback(async () => {
     const user = await fetchFullUser()
     if (user) {
-      history.push(adminRoute)
+      void history.push(adminRoute)
     } else {
-      history.push(
+      void history.push(
         formatAdminURL({
           adminRoute,
           path: loginRoute,

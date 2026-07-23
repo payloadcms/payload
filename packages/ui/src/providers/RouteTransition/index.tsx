@@ -61,12 +61,18 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
   }, [isTransitioning, initiateProgress])
 
   const startRouteTransition: StartRouteTransition = useCallback(
-    (callback?: () => void) => {
+    (callback?: () => Promise<void> | void) => {
       startTransition(() => {
         setIsTransitioning(true)
 
+        // Return the callback's result so an async navigation (a returned
+        // promise) keeps the transition — and the optimistic `isTransitioning`
+        // flag — pending until navigation settles, making the progress bar
+        // track the full navigation. Routers that integrate with React
+        // transitions (Next.js) return `void` here, preserving the classic
+        // synchronous behavior.
         if (typeof callback === 'function') {
-          callback()
+          return callback()
         }
       })
     },
@@ -84,7 +90,7 @@ type RouteTransitionProps = {
   children: React.ReactNode
 }
 
-type StartRouteTransition = (callback?: () => void) => void
+type StartRouteTransition = (callback?: () => Promise<void> | void) => void
 
 type RouteTransitionContextValue = {
   isTransitioning: boolean
@@ -97,7 +103,7 @@ const RouteTransitionContext = React.createContext<RouteTransitionContextValue>(
   // Default implementation: just call the callback directly (no transition animation)
   startRouteTransition: (callback) => {
     if (typeof callback === 'function') {
-      callback()
+      void callback()
     }
   },
   transitionProgress: 0,

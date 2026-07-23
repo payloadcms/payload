@@ -119,7 +119,7 @@ export const CommandPalette: React.FC = () => {
         return
       }
       close()
-      router.push(href)
+      void router.push(href)
     },
     [close, router],
   )

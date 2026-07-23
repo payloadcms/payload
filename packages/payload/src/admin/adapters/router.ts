@@ -30,16 +30,23 @@ export type RouterAdapterRouter = {
   back: () => void
   /**
    * Navigate to a new path.
+   *
+   * May return a promise that resolves once navigation settles. Route
+   * transitions (the top loading bar) await it to stay visible for the full
+   * navigation. Adapters whose router integrates with React transitions
+   * (Next.js) can return `void` instead.
    */
-  push: (path: string, options?: { scroll?: boolean }) => void
+  push: (path: string, options?: { scroll?: boolean }) => Promise<void> | void
   /**
    * Refresh the current route.
    */
   refresh: () => void
   /**
    * Replace the current path with a new one.
+   *
+   * May return a promise that resolves once navigation settles (see {@link push}).
    */
-  replace: (path: string, options?: { scroll?: boolean }) => void
+  replace: (path: string, options?: { scroll?: boolean }) => Promise<void> | void
   /**
    * Use this property to standardize behaviors across different router implementations.
    * Set it up to sync client state to the URL without triggering a second server load.

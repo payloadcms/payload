@@ -103,10 +103,14 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
 
   const back = useCallback(() => router.history.back(), [router])
 
+  // Return the `navigate` promise (resolves once the navigation and its blocking
+  // loader settle) so `startRouteTransition` keeps the route-transition progress
+  // bar visible for the full navigation — TanStack's router drives its own
+  // internal React transition, so without awaiting this the shared optimistic
+  // `isTransitioning` flag would flip back before the new view loads.
   const push = useCallback(
-    (path: string, options?: { scroll?: boolean }) => {
-      void router.navigate({ ...toNavOptions(path), resetScroll: options?.scroll })
-    },
+    (path: string, options?: { scroll?: boolean }) =>
+      router.navigate({ ...toNavOptions(path), resetScroll: options?.scroll }),
     [router, toNavOptions],
   )
 
@@ -115,9 +119,8 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
   }, [router])
 
   const replace = useCallback(
-    (path: string, options?: { scroll?: boolean }) => {
-      void router.navigate({ ...toNavOptions(path), replace: true, resetScroll: options?.scroll })
-    },
+    (path: string, options?: { scroll?: boolean }) =>
+      router.navigate({ ...toNavOptions(path), replace: true, resetScroll: options?.scroll }),
     [router, toNavOptions],
   )
 
