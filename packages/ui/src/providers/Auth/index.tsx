@@ -15,7 +15,7 @@ import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
-import { usePathname, useRouter } from '../RouterAdapter/index.js'
+import { useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 import {
   createSessionActivityTracker,
@@ -95,7 +95,6 @@ export function AuthProvider({
   permissions: initialPermissions,
   user: initialUser,
 }: Props) {
-  const pathname = usePathname()
   const router = useRouter()
 
   const { config } = useConfig()
@@ -125,6 +124,8 @@ export function AuthProvider({
   const refreshTokenTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
   const reminderTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
   const forceLogOutTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
+  const activityCheckpointTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
+  const lastSessionActivityAtRef = React.useRef<number>(undefined)
   const authRequestQueueRef = React.useRef<Promise<void>>(Promise.resolve())
   const authRequestSequenceRef = React.useRef(0)
   const knownTokenExpirationMsRef = React.useRef<number>(undefined)
@@ -183,7 +184,9 @@ export function AuthProvider({
     setTokenInMemory(undefined)
     setTokenExpirationMs(undefined)
     tokenExpirationMsRef.current = undefined
+    lastSessionActivityAtRef.current = undefined
     clearTimeout(refreshTokenTimeoutRef.current)
+    clearTimeout(activityCheckpointTimeoutRef.current)
   }, [])
 
   const revokeTokenAndExpire = useCallback(() => {
@@ -204,8 +207,11 @@ export function AuthProvider({
     (userResponse: null | UserWithToken) => {
       clearTimeout(reminderTimeoutRef.current)
       clearTimeout(forceLogOutTimeoutRef.current)
+      clearTimeout(activityCheckpointTimeoutRef.current)
 
       if (userResponse?.user) {
+        lastSessionActivityAtRef.current = undefined
+
         const nextTokenExpirationMs = userResponse.exp * 1000
 
         userRef.current = userResponse.user
@@ -227,6 +233,24 @@ export function AuthProvider({
           reminderTimeoutRef.current = setTimeout(
             handleReminderTimeout,
             Math.max(expiresInMs - nextForceLogoutBufferMs, 0),
+          )
+
+          const refreshWindowMs = nextForceLogoutBufferMs * 2
+
+          activityCheckpointTimeoutRef.current = setTimeout(
+            () => {
+              const checkpointAt = Date.now()
+              const lastActivityAt = lastSessionActivityAtRef.current
+              const hasRecentActivity =
+                lastActivityAt !== undefined &&
+                lastActivityAt <= checkpointAt &&
+                checkpointAt - lastActivityAt <= refreshWindowMs
+
+              if (hasRecentActivity) {
+                refreshCookieEvent(true)
+              }
+            },
+            Math.max(expiresInMs - refreshWindowMs, 0),
           )
 
           forceLogOutTimeoutRef.current = setTimeout(() => {
@@ -555,20 +579,19 @@ export function AuthProvider({
     }
 
     return createSessionActivityTracker({
-      onActivity: () => refreshCookieEvent(),
+      onActivity: (_source, occurredAt) => {
+        lastSessionActivityAtRef.current = occurredAt
+        refreshCookieEvent()
+      },
     })
   }, [id])
-
-  useEffect(() => {
-    markActivity('route')
-  }, [pathname, markActivity])
 
   useEffect(() => {
     if (!isAuthenticated) {
       return
     }
 
-    return registerSessionActivityListeners({ document, markActivity, window })
+    return registerSessionActivityListeners({ markActivity, window })
   }, [isAuthenticated, markActivity])
 
   const fetchFullUserEvent = useEffectEvent(fetchFullUser)
@@ -632,6 +655,8 @@ export function AuthProvider({
       clearTimeout(refreshTokenTimeoutRef.current)
       clearTimeout(reminderTimeoutRef.current)
       clearTimeout(forceLogOutTimeoutRef.current)
+      clearTimeout(activityCheckpointTimeoutRef.current)
+      lastSessionActivityAtRef.current = undefined
     },
     [],
   )
