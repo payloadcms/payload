@@ -83,6 +83,26 @@ export default buildConfig({
 | `readReplicas`                   | An array of DB read replicas connection strings, can be used to offload read-heavy traffic.                                                                                                                             |
 | `readReplicasAfterWriteInterval` | How long (ms) after a write to keep routing reads to the primary instead of a replica. Prevents stale reads caused by replication lag. Only relevant when `readReplicas` is set. Default `2000`. Set to `0` to disable. |
 | `blocksAsJSON`                   | Store blocks as a JSON column instead of using the relational structure which can improve performance with a large amount of blocks                                                                                     |
+| `extensions`                     | An array of Postgres extension names to enable (for example `['postgis']`). Payload will create these extensions if they do not already exist.                                                                          |
+
+## PostGIS
+
+To use the [Point field](../fields/point) with Postgres, enable the [PostGIS](https://postgis.net/) extension via the `extensions` option on your database adapter. Your Postgres instance must have PostGIS available (installed on the server or included in your database image).
+
+```ts
+import { postgresAdapter } from '@payloadcms/db-postgres'
+
+export default buildConfig({
+  db: postgresAdapter({
+    pool: {
+      connectionString: process.env.DATABASE_URL,
+    },
+    extensions: ['postgis'],
+  }),
+})
+```
+
+The same `extensions` option is available on `@payloadcms/db-vercel-postgres`.
 
 ## Access to Drizzle
 
