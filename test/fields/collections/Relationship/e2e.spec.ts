@@ -705,6 +705,61 @@ describe('relationship', () => {
     await expect(firstOptionLabel).toHaveText('Seeded text document')
   })
 
+  test('should alphabetically sort options when no sortOptions is configured', async () => {
+    await loadCreatePage()
+
+    const field = page.locator('#field-relationshipHasMany')
+
+    const textFieldPromise = page.waitForResponse(/api\/text-fields/)
+    await field.click()
+    await textFieldPromise
+    await wait(400)
+
+    const options = field.locator('.rs__option')
+
+    // With default ID sort and no sortOptions, client-side alphabetical sort is enabled
+    await expect(options.first()).toHaveText('Another text document')
+    await expect(options.nth(1)).toHaveText('Seeded text document')
+  })
+
+  test('should preserve server sort order when string sortOptions is configured with non-ID field', async () => {
+    await loadCreatePage()
+
+    const field = page.locator('#field-relationshipWithStringSortOptions')
+
+    const textFieldPromise = page.waitForResponse(/api\/text-fields/)
+    await field.click()
+    await textFieldPromise
+    await wait(400)
+
+    const options = field.locator('.rs__option')
+
+    // With sortOptions: '-text', server returns descending by text field
+    // "Seeded" (S) before "Another" (A) — client-side sort is disabled
+    await expect(options.first()).toHaveText('Seeded text document')
+    await expect(options.nth(1)).toHaveText('Another text document')
+  })
+
+  test('should preserve full server sort order for non-ID sortOptions across all options', async () => {
+    await loadCreatePage()
+
+    const field = page.locator('#field-relationHasManyPolymorphic')
+
+    const textFieldPromise = page.waitForResponse(/api\/text-fields/)
+    const arrayFieldPromise = page.waitForResponse(/api\/array-fields/)
+    await field.click()
+    await textFieldPromise
+    await arrayFieldPromise
+
+    const textDocsGroup = page.locator('.rs__group-heading:has-text("Text Fields")')
+    const options = textDocsGroup.locator('+div .rs__option')
+
+    // sortOptions: { 'text-fields': '-text' } — descending by text
+    // Verify full order, not just the first option
+    await expect(options.first()).toHaveText('Seeded text document')
+    await expect(options.nth(1)).toHaveText('Another text document')
+  })
+
   test('should allow filtering by relationship field / equals', async () => {
     const textDoc = await createTextFieldDoc()
     await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
