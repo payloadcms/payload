@@ -84,14 +84,7 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
       <div>
         <RenderCustomComponent
           CustomComponent={Error}
-          Fallback={
-            <FieldError
-              alignCaret="left"
-              className={`${baseClass}__field-error`}
-              path={path}
-              showError={showError}
-            />
-          }
+          Fallback={<FieldError alignCaret="left" path={path} showError={showError} />}
         />
         <RenderCustomComponent
           CustomComponent={Label}

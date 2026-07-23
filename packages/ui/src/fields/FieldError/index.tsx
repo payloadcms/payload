@@ -5,21 +5,24 @@ import type { GenericErrorProps } from 'payload'
 import React from 'react'
 
 import { Tooltip } from '../../elements/Tooltip/index.js'
-import { useFormFields, useFormSubmitted } from '../../forms/Form/context.js'
+import { useForm, useFormFields, useFormSubmitted } from '../../forms/Form/context.js'
+import { useEditDepth } from '../../providers/EditDepth/index.js'
+import { generateFieldID } from '../../utilities/generateFieldID.js'
 import './index.css'
 
 const baseClass = 'field-error'
 
-export const FieldError: React.FC<{ className?: string } & GenericErrorProps> = (props) => {
+export const FieldError: React.FC<GenericErrorProps> = (props) => {
   const {
     alignCaret = 'right',
-    className,
     message: messageFromProps,
     path,
     showError: showErrorFromProps,
   } = props
 
   const hasSubmitted = useFormSubmitted()
+  const { uuid } = useForm()
+  const editDepth = useEditDepth()
   const field = useFormFields(([fields]) => (fields && fields?.[path]) || null)
 
   const { errorMessage, valid } = field || {}
@@ -31,8 +34,9 @@ export const FieldError: React.FC<{ className?: string } & GenericErrorProps> = 
     return (
       <Tooltip
         alignCaret={alignCaret}
-        className={[baseClass, className].filter(Boolean).join(' ')}
+        className={baseClass}
         delay={0}
+        id={generateFieldID(path, editDepth, uuid, 'field-error')}
         staticPositioning
       >
         {message}

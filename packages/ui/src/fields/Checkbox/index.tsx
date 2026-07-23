@@ -114,12 +114,7 @@ const CheckboxFieldComponent: CheckboxFieldClientComponent = (props) => {
           <RenderCustomComponent
             CustomComponent={Error}
             Fallback={
-              <FieldError
-                alignCaret={isRTL ? 'right' : 'left'}
-                className={`${baseClass}__field-error`}
-                path={path}
-                showError={showError}
-              />
+              <FieldError alignCaret={isRTL ? 'right' : 'left'} path={path} showError={showError} />
             }
           />
         }

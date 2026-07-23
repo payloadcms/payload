@@ -26,11 +26,4 @@
       outline-offset: -1px;
     }
   }
-
-  .sidebar-toggle__tooltip.tooltip {
-    left: 0;
-    top: 100%;
-    bottom: auto;
-    transform: translate3d(0, var(--spacer-1), 0);
-  }
 }

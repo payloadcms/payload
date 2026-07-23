@@ -1,26 +1,21 @@
 @layer payload-default {
-  /* Fixed-position anchor mirroring the trigger's rect, so the portaled tooltip
-   * (escaping ancestor `overflow` clipping) can position against it. */
-  .tooltip__portal-anchor {
-    position: fixed;
-    z-index: var(--z-portal-element);
-    pointer-events: none;
-  }
-
   .tooltip {
     --caret-width: 15px;
     --caret-height: 7px;
     --caret-offset: 4px;
     --caret-border-color: var(--color-border);
-    --tooltip-x: -50%;
     --tooltip-caret-x: 0px;
+    --tooltip-caret-y: 0px;
     --tooltip-max-width: none;
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: var(--z-portal-element);
+    pointer-events: none;
 
     opacity: 0;
     background-color: var(--color-bg-tooltip);
-    position: absolute;
-    z-index: 3;
-    left: 50%;
     max-width: var(--tooltip-max-width);
     padding: var(--spacer-1);
     color: var(--color-text-ontooltip);
@@ -33,6 +28,11 @@
     border-radius: var(--radius-medium);
     box-shadow: var(--elevation-300-tooltip);
     visibility: hidden;
+
+    &[data-wrap] {
+      white-space: normal;
+      overflow-wrap: break-word;
+    }
 
     &.field-error {
       background-color: var(--color-bg-danger);
@@ -57,11 +57,6 @@
     @media (max-width: 768px) {
       display: none;
     }
-  }
-
-  .tooltip--wrap {
-    white-space: normal;
-    overflow-wrap: break-word;
   }
 
   .tooltip__caret {
@@ -102,13 +97,6 @@
   }
 
   .tooltip--position-top {
-    top: 0;
-    transform: translate3d(
-      var(--tooltip-x),
-      calc(-100% - var(--caret-height) - var(--caret-offset) + 1px),
-      0
-    );
-
     .tooltip__caret {
       --color-border: var(--ramp-grey-700);
       top: calc(100% - 0.5px);
@@ -120,13 +108,6 @@
   }
 
   .tooltip--position-bottom {
-    top: 100%;
-    transform: translate3d(
-      var(--tooltip-x),
-      calc(var(--caret-height) + var(--caret-offset) - 1px),
-      0
-    );
-
     .tooltip__caret {
       bottom: calc(100% - 0.5px);
       transform: rotate(180deg);
@@ -142,28 +123,21 @@
   }
 
   .tooltip--position-left {
-    top: 50%;
-    left: 0;
-    transform: translate3d(calc(-100% - var(--caret-height) - var(--caret-offset)), -50%, 0);
-
     .tooltip__caret {
       top: calc(50% + 0.5px);
       left: calc(100% - 0.5px);
-      transform: translateY(calc(1 * var(--caret-width) / 2)) rotate(-90deg);
+      transform: translateY(calc(1 * var(--caret-width) / 2 + var(--tooltip-caret-y)))
+        rotate(-90deg);
       transform-origin: top left;
     }
   }
 
   .tooltip--position-right {
-    top: 50%;
-    left: 100%;
-    transform: translate3d(calc(var(--caret-height) + var(--caret-offset)), -50%, 0);
-
     .tooltip__caret {
       top: calc(50% + 0.5px);
       left: unset;
       right: calc(100% - 0.5px);
-      transform: translateY(calc(1 * var(--caret-width) / 2)) rotate(90deg);
+      transform: translateY(calc(1 * var(--caret-width) / 2 + var(--tooltip-caret-y))) rotate(90deg);
       transform-origin: top right;
     }
   }
