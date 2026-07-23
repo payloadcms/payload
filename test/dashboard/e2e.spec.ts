@@ -510,14 +510,14 @@ describe('Dashboard', () => {
     // Delete buttons should not be visible when not editing
     const widget = d.widgetByPos(1)
     await widget.hover()
-    await expect(widget.getByText('Delete widget')).toBeHidden()
+    await expect(d.getDeleteWidgetButton(widget)).toBeHidden()
 
     // Widgets should not have draggable attributes when not editing
     await expect(widget.locator('.draggable')).not.toHaveAttribute('aria-disabled')
 
     // verify the opposite:
     await d.setEditing()
-    await expect(widget.getByText('Delete widget')).toBeVisible()
+    await expect(d.getDeleteWidgetButton(widget)).toBeVisible()
     await expect(widget.locator('.draggable')).toHaveAttribute('aria-disabled', 'false')
   })
 
@@ -741,7 +741,10 @@ describe('Dashboard', () => {
   test('widget re-renders when query params change (= modular dashboard RSC rerenders)', async ({
     page,
   }) => {
-    test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
+    test.skip(
+      process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+      'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
+    )
     const d = new DashboardHelper(page)
     await d.setEditing()
     await d.addWidget('page query')
