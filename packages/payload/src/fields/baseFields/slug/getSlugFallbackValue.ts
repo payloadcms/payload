@@ -7,6 +7,8 @@ import { hasDraftsEnabled } from '../../../utilities/getVersionsConfig.js'
 type Args = {
   collection: SanitizedCollectionConfig
   field: string
+  /** Locale to scope the uniqueness check to, for a localized slug. */
+  locale?: string
   req: PayloadRequest
   slugify: (value: unknown) => Promise<string | undefined> | string | undefined
 }
@@ -19,6 +21,7 @@ type Args = {
 export const getSlugFallbackValue = async ({
   collection,
   field,
+  locale,
   req,
   slugify,
 }: Args): Promise<string> => {
@@ -29,6 +32,7 @@ export const getSlugFallbackValue = async ({
     collection: collection.slug,
     draftsEnabled: hasDraftsEnabled(collection),
     field,
+    locale,
     req,
     startIndex: 1,
     value: (await slugify(base)) || collection.slug,

@@ -449,6 +449,55 @@ describe('Fields', () => {
         ).rejects.toThrow()
       })
 
+      it('should fall back to <singular>-N for a source-less localized slug on a draft', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: {},
+          locale: 'en',
+        })
+        created.push(draft.id)
+        expect(draft.localizedSlug).toBe('slug-autosave-1')
+
+        // The fallback must persist to the draft version the admin reads back, and survive publish.
+        const latestDraft = await payload.findByID({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          locale: 'en',
+        })
+        expect(latestDraft.localizedSlug).toBe('slug-autosave-1')
+
+        const published = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          data: { _status: 'published' },
+          locale: 'en',
+        })
+        expect(published.localizedSlug).toBe('slug-autosave-1')
+      })
+
+      it('should fall back to a per-locale <singular>-N for localized slugs on a draft', async () => {
+        const en = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: {},
+          locale: 'en',
+        })
+        created.push(en.id)
+        expect(en.localizedSlug).toBe('slug-autosave-1')
+
+        // A different locale falls back independently — the counter is scoped per-locale.
+        const es = await payload.update({
+          collection: 'slug-autosave',
+          id: en.id,
+          draft: true,
+          data: {},
+          locale: 'es',
+        })
+        expect(es.localizedSlug).toBe('slug-autosave-1')
+      })
+
       it('should give a duplicated draft its own unique slug', async () => {
         const original = await payload.create({
           collection: 'slug-autosave',

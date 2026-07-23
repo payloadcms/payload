@@ -329,14 +329,12 @@ export const sanitizeField = async ({
     ]
 
     // Own the slug on duplicate — the copy takes a fresh `<singular>-<N>` fallback rather than the
-    // generic ` - Copy` default. A localized slug spans locales, so the copy falls through to that
-    // per-locale ` - Copy` default instead.
-    if (!field.localized) {
-      field.hooks.beforeDuplicate = [
-        generateSlugBeforeDuplicate({ name: field.name }),
-        ...(field.hooks.beforeDuplicate || []),
-      ]
-    }
+    // generic ` - Copy` default, which isn't collision-safe across repeated duplicates of the same
+    // source. Runs per-locale for a localized slug.
+    field.hooks.beforeDuplicate = [
+      generateSlugBeforeDuplicate({ name: field.name }),
+      ...(field.hooks.beforeDuplicate || []),
+    ]
   }
 
   // Array ID field
