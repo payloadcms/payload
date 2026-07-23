@@ -43,6 +43,12 @@ export default defineConfig({
         // Vite 8 / oxc reads `jsx: preserve` from the workspace tsconfig (needed by Next.js)
         // and refuses to transform JSX. Set jsx explicitly here so oxc transforms it.
         // Project vite options are NOT inherited from the root config.
+        resolve: {
+          alias: [
+            { find: /^graphql\/(.*)/, replacement: graphqlDir + '/$1' },
+            { find: /^graphql$/, replacement: path.join(graphqlDir, 'index.js') },
+          ],
+        },
         oxc: {
           jsx: {
             runtime: 'automatic',
