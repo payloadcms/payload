@@ -2,6 +2,7 @@ import type { SanitizedCollectionConfig } from '../../../collections/config/type
 import type { PayloadRequest } from '../../../types/index.js'
 
 import { getUniqueFieldValue } from '../../../utilities/getUniqueFieldValue.js'
+import { hasDraftsEnabled } from '../../../utilities/getVersionsConfig.js'
 
 type Args = {
   collection: SanitizedCollectionConfig
@@ -26,6 +27,7 @@ export const getSlugFallbackValue = async ({
 
   return getUniqueFieldValue({
     collection: collection.slug,
+    draftsEnabled: hasDraftsEnabled(collection),
     field,
     req,
     startIndex: 1,

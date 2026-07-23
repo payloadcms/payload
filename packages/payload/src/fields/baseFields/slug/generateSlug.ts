@@ -2,6 +2,10 @@ import type { TypeWithID } from '../../../collections/config/types.js'
 import type { FieldHook } from '../../config/types.js'
 import type { Slugify } from './types.js'
 
+import { ValidationError } from '../../../errors/index.js'
+import { fieldValueExists } from '../../../utilities/fieldValueExists.js'
+import { getUniqueFieldValue } from '../../../utilities/getUniqueFieldValue.js'
+import { hasDraftsEnabled } from '../../../utilities/getVersionsConfig.js'
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
 import { getSlugFallbackValue } from './getSlugFallbackValue.js'
 import { hasValue } from './hasValue.js'
@@ -33,7 +37,30 @@ export const generateSlug =
 
     // Explicit value from the client wins — normalized through the field's slugify.
     if (hasValue(value)) {
-      return await slugify(value)
+      const slugified = await slugify(value)
+
+      // An explicit slug must be unique — reject a collision rather than silently changing it
+      // (generated values below are deduped instead). Enforced here, not in validation: the DB
+      // unique index misses draft-only slugs, and draft saves skip validation but still run hooks.
+      if (
+        collection &&
+        hasValue(slugified) &&
+        (await fieldValueExists({
+          id: originalDoc?.id,
+          collection: collection.slug,
+          draftsEnabled: hasDraftsEnabled(collection),
+          field: name,
+          req,
+          value: slugified,
+        }))
+      ) {
+        throw new ValidationError(
+          { errors: [{ message: req.t('error:valueMustBeUnique'), path: name }] },
+          req.t,
+        )
+      }
+
+      return slugified
     }
 
     const storedSlug = originalDoc?.[name]
@@ -43,14 +70,27 @@ export const generateSlug =
       return storedSlug
     }
 
-    // Derive an empty slug from its source when present.
+    // Derive an empty slug from its source when present, deduped so two same-source documents don't
+    // both claim it. Localized/global slugs use a plain slugify (uniqueness there is out of scope).
     const source = data?.[useAsSlug]
+    const derived = source ? await slugify(source) : undefined
 
-    if (source) {
-      return await slugify(source)
+    if (hasValue(derived)) {
+      if (!collection || localized) {
+        return derived
+      }
+
+      return await getUniqueFieldValue({
+        id: originalDoc?.id,
+        collection: collection.slug,
+        draftsEnabled: hasDraftsEnabled(collection),
+        field: name,
+        req,
+        value: derived as string,
+      })
     }
 
-    // No source: keep a stored value, otherwise fall back to `<singular>-<N>`.
+    // No usable source: keep a stored value, otherwise fall back to `<singular>-<N>`.
     if (hasValue(storedSlug)) {
       return storedSlug
     }

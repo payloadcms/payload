@@ -1,7 +1,11 @@
-import type { PayloadRequest, Where } from '../types/index.js'
+import type { PayloadRequest } from '../types/index.js'
+
+import { fieldValueExists } from './fieldValueExists.js'
 
 type Args = {
   collection: string
+  /** Also treat a value taken by a draft-only version as unavailable. */
+  draftsEnabled?: boolean
   /** Field name to check for uniqueness. */
   field: string
   /** Exclude this doc from the check when updating; omit for a new doc. */
@@ -17,17 +21,17 @@ type Args = {
   value: string
 }
 
-// Bounded so a pathological run of taken suffixes can't loop forever; a unique index is the backstop.
+// Bounded so a pathological run of taken suffixes can't loop forever; the check below is the guard.
 const MAX_SUFFIX_ATTEMPTS = 50
 
 /**
  * Returns the first available value for `field` in `collection` — either the bare `value` or a
- * `value-N` variant. Useful when a unique field value is minted outside the operation pipeline's
- * runtime unique check.
+ * `value-N` variant. Useful when a unique field value is minted outside the operation pipeline.
  */
 export const getUniqueFieldValue = async ({
   id,
   collection,
+  draftsEnabled,
   field,
   locale,
   req,
@@ -36,13 +40,18 @@ export const getUniqueFieldValue = async ({
 }: Args): Promise<string> => {
   for (let index = startIndex; index <= startIndex + MAX_SUFFIX_ATTEMPTS; index++) {
     const candidate = index === 0 ? value : `${value}-${index}`
-    const match: Where = { [field]: { equals: candidate } }
-    const where: Where =
-      id === undefined || id === null ? match : { and: [match, { id: { not_equals: id } }] }
 
-    const existing = await req.payload.db.findOne({ collection, locale, req, where })
+    const taken = await fieldValueExists({
+      id,
+      collection,
+      draftsEnabled,
+      field,
+      locale,
+      req,
+      value: candidate,
+    })
 
-    if (!existing) {
+    if (!taken) {
       return candidate
     }
   }

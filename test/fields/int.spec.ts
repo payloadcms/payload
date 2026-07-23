@@ -186,6 +186,39 @@ describe('Fields', () => {
       expect(secondDuplicate.slug).toBe('slug-field-2')
     })
 
+    it('should reject a slug that collides with another document', async () => {
+      const first = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'First', slug: 'shared-slug' },
+      })
+      created.push(first.id)
+      expect(first.slug).toBe('shared-slug')
+
+      await expect(
+        payload.create({
+          collection: 'slug-fields',
+          data: { title: 'Second', slug: 'shared-slug' },
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should reject updating a slug to collide with another document', async () => {
+      const a = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Doc A', slug: 'doc-a' },
+      })
+      created.push(a.id)
+      const b = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Doc B', slug: 'doc-b' },
+      })
+      created.push(b.id)
+
+      await expect(
+        payload.update({ collection: 'slug-fields', id: b.id, data: { slug: 'doc-a' } }),
+      ).rejects.toThrow()
+    })
+
     describe('autosave drafts', () => {
       const created: (number | string)[] = []
 
@@ -242,6 +275,64 @@ describe('Fields', () => {
 
         expect(first.slug).toBe('slug-autosave-1')
         expect(second.slug).toBe('slug-autosave-2')
+      })
+
+      it('should reject a draft slug that collides with another draft', async () => {
+        const first = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'First', slug: 'shared-draft-slug' },
+        })
+        created.push(first.id)
+        expect(first.slug).toBe('shared-draft-slug')
+
+        await expect(
+          payload.create({
+            collection: 'slug-autosave',
+            draft: true,
+            data: { title: 'Second', slug: 'shared-draft-slug' },
+          }),
+        ).rejects.toThrow()
+      })
+
+      it('should reject updating a draft slug to collide with another draft', async () => {
+        const a = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'A', slug: 'draft-a' },
+        })
+        created.push(a.id)
+        const b = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'B', slug: 'draft-b' },
+        })
+        created.push(b.id)
+
+        await expect(
+          payload.update({
+            collection: 'slug-autosave',
+            id: b.id,
+            draft: true,
+            data: { slug: 'draft-a' },
+          }),
+        ).rejects.toThrow()
+      })
+
+      it('should give a duplicated draft its own unique slug', async () => {
+        const original = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Dup Me', slug: 'dup-me' },
+        })
+        created.push(original.id)
+        expect(original.slug).toBe('dup-me')
+
+        const duplicate = await payload.duplicate({ collection: 'slug-autosave', id: original.id })
+        created.push(duplicate.id)
+
+        expect(duplicate.slug).not.toBe('dup-me')
+        expect(duplicate.slug).toMatch(/^slug-autosave-\d+$/)
       })
 
       it('should keep an explicit slug the user typed on the initial draft', async () => {
