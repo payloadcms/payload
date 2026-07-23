@@ -179,6 +179,33 @@ describe('Fields', () => {
       expect(es.localizedSlug).toBe('shared')
     })
 
+    it('should allow one document to reuse the same slug across its own locales', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Title', localizedSlug: 'shared-across-self' },
+        locale: 'en',
+      })
+      created.push(doc.id)
+      expect(doc.localizedSlug).toBe('shared-across-self')
+
+      const es = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { localizedSlug: 'shared-across-self' },
+        locale: 'es',
+      })
+      expect(es.localizedSlug).toBe('shared-across-self')
+
+      const allLocales = await payload.findByID({
+        collection: 'slug-fields',
+        id: doc.id,
+        locale: 'all',
+      })
+      const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
+      expect(localizedSlug.en).toBe('shared-across-self')
+      expect(localizedSlug.es).toBe('shared-across-self')
+    })
+
     it('should reject a localized slug that collides within the same locale', async () => {
       const first = await payload.create({
         collection: 'slug-fields',
@@ -195,6 +222,42 @@ describe('Fields', () => {
           locale: 'es',
         }),
       ).rejects.toThrow()
+    })
+
+    it('should auto-increment a derived localized slug that collides within the same locale', async () => {
+      const first = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'First', localizedTitle: 'Shared Derived' },
+        locale: 'es',
+      })
+      created.push(first.id)
+      expect(first.localizedSlug).toBe('shared-derived')
+
+      const second = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Second', localizedTitle: 'Shared Derived' },
+        locale: 'es',
+      })
+      created.push(second.id)
+      expect(second.localizedSlug).toBe('shared-derived-1')
+    })
+
+    it('should not increment a derived localized slug shared across different locales', async () => {
+      const en = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'English', localizedTitle: 'Cross Locale' },
+        locale: 'en',
+      })
+      created.push(en.id)
+      expect(en.localizedSlug).toBe('cross-locale')
+
+      const es = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Spanish', localizedTitle: 'Cross Locale' },
+        locale: 'es',
+      })
+      created.push(es.id)
+      expect(es.localizedSlug).toBe('cross-locale')
     })
 
     it('should give a duplicate a fresh fallback slug instead of drifting from the original', async () => {

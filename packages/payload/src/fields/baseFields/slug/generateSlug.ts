@@ -25,8 +25,10 @@ type Args = {
  *   - an already-set slug is preserved as-is
  *   - empty with no source falls back to `<singular>-<N>` (see {@link getSlugFallbackValue})
  *
- * The fallback is skipped for globals (singletons) and localized slugs (per-locale uniqueness is
- * unresolved — see the slug block in field sanitization), which are left empty.
+ * Generated values dedupe against existing slugs; a localized slug is unique per-locale, so its
+ * dedupe check is scoped to the locale being written. A localized slug with no source is left empty
+ * rather than taking a `<singular>-<N>` fallback (localized slugs are optional by default), and
+ * globals have no collection to dedupe against.
  */
 export const generateSlug =
   ({ name, localized, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
@@ -82,13 +84,17 @@ export const generateSlug =
       return storedSlug
     }
 
+    // A localized slug is unique only within its locale, so every generated-value query below is
+    // scoped to the locale being written.
+    const locale = localized ? (req.locale ?? undefined) : undefined
+
     // Derive an empty slug from its source when present, deduped so two same-source documents don't
-    // both claim it. Localized/global slugs use a plain slugify (dedupe query doesn't apply).
+    // both claim it. Globals have no collection to dedupe against.
     const source = data?.[useAsSlug]
     const derived = source ? await slugify(source) : undefined
 
     if (hasValue(derived)) {
-      if (!collection || localized) {
+      if (!collection) {
         return derived
       }
 
@@ -97,12 +103,15 @@ export const generateSlug =
         collection: collection.slug,
         draftsEnabled: hasDraftsEnabled(collection),
         field: name,
+        locale,
         req,
         value: derived as string,
       })
     }
 
-    // No usable source: keep a stored value, otherwise fall back to `<singular>-<N>`.
+    // No usable source: keep a stored value, otherwise fall back to `<singular>-<N>`. A localized
+    // slug is left empty — a per-locale fallback for every locale isn't wanted, and localized slugs
+    // are optional by default.
     if (storedSlugHasValue) {
       return storedSlug
     }
