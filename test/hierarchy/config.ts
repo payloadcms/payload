@@ -181,7 +181,11 @@ export const Organizations: CollectionConfig = {
     parentFieldName: 'parent',
   },
   versions: {
-    drafts: true,
+    drafts: {
+      autosave: {
+        interval: 1000,
+      },
+    },
   },
 }
 
