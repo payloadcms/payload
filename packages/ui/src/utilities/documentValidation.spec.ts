@@ -1,4 +1,4 @@
-import type { ClientField, SanitizedLocale } from 'payload'
+import type { ClientBlock, ClientField, SanitizedLocale } from 'payload'
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -10,6 +10,7 @@ import {
   shouldShowValidateAllLocales,
   validateDocumentLocales,
 } from './documentValidation.js'
+import { traverseForLocalizedFields } from './traverseForLocalizedFields.js'
 
 const locales = [
   { code: 'en', label: 'English', required: true },
@@ -66,6 +67,24 @@ describe('document validation', () => {
         hasValidatePermission: false,
       }),
     ).toBe(false)
+  })
+
+  it('should detect localized fields inside referenced blocks', () => {
+    const fields = [
+      {
+        blocks: ['hero'],
+        name: 'layout',
+        type: 'blocks',
+      },
+    ] as ClientField[]
+    const blocksMap = {
+      hero: {
+        fields: [{ localized: true, name: 'heading', type: 'text' }],
+        slug: 'hero',
+      },
+    } as Record<string, ClientBlock>
+
+    expect(traverseForLocalizedFields(fields, { blocksMap })).toBe(true)
   })
 
   it('should select all locales for publish-all and active plus required locales otherwise', () => {

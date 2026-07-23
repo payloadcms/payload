@@ -235,7 +235,9 @@ const DocumentControlsContent: React.FC<DocumentControlsProps> = (props) => {
   const showLockedMetaIcon = user && readOnlyForIncomingUser
   const showValidateAllLocales = shouldShowValidateAllLocales({
     hasLocalization: Boolean(localization),
-    hasLocalizedFields: traverseForLocalizedFields(entityConfig?.fields ?? []),
+    hasLocalizedFields: traverseForLocalizedFields(entityConfig?.fields ?? [], {
+      blocksMap: config.blocksMap,
+    }),
     hasValidatePermission: Boolean(permissions?.validate),
   })
 

@@ -67,7 +67,10 @@ export const DocumentValidationProvider: React.FC<{ children: React.ReactNode }>
   )
 
   const fields = useMemo(() => docConfig?.fields ?? [], [docConfig?.fields])
-  const hasLocalizedFields = useMemo(() => traverseForLocalizedFields(fields), [fields])
+  const hasLocalizedFields = useMemo(
+    () => traverseForLocalizedFields(fields, { blocksMap }),
+    [blocksMap, fields],
+  )
   const targetKey = `${collectionSlug ?? ''}:${globalSlug ?? ''}:${id ?? 'create'}`
 
   const clearResult = useCallback(() => {
