@@ -68,17 +68,14 @@ export const slugifyHandler: ServerFunction<
   const collectionConfig = collectionSlug ? req.payload.collections[collectionSlug]?.config : null
 
   // Fall back to the collection's `<singular>-N` counter when there's no source. This probes slug
-  // availability with the raw db, so enforce the collection's read access first, and only for the
-  // slug field resolved at this path — the endpoint can't be used to probe unrelated fields.
+  // availability across the whole collection with the raw db, so it runs only for the slug field at
+  // this path and only when the user has unrestricted read access — a row-filtered (`Where`) result
+  // is treated as not allowed, since scoping the probe to readable rows would break uniqueness.
   if (collectionConfig && field && field.type === 'slug' && 'name' in field) {
     const canRead = await executeAccess({ disableErrors: true, req }, collectionConfig.access.read)
 
-    if (canRead) {
-      const excludeId =
-        typeof data?.id === 'string' || typeof data?.id === 'number' ? data.id : undefined
-
+    if (canRead === true) {
       return getSlugFallbackValue({
-        id: excludeId,
         collection: collectionConfig,
         field: field.name,
         req,

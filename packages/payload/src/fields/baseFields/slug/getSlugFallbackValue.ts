@@ -6,8 +6,6 @@ import { getUniqueFieldValue } from '../../../utilities/getUniqueFieldValue.js'
 type Args = {
   collection: SanitizedCollectionConfig
   field: string
-  /** Exclude this doc from the collision check, so a regenerate can reuse its own number. */
-  id?: number | string
   req: PayloadRequest
   slugify: (value: unknown) => Promise<string | undefined> | string | undefined
 }
@@ -18,7 +16,6 @@ type Args = {
  * plain string, otherwise the collection slug. See {@link getUniqueFieldValue}.
  */
 export const getSlugFallbackValue = async ({
-  id,
   collection,
   field,
   req,
@@ -28,7 +25,6 @@ export const getSlugFallbackValue = async ({
   const base = typeof singularLabel === 'string' ? singularLabel : collection.slug
 
   return getUniqueFieldValue({
-    id,
     collection: collection.slug,
     field,
     req,
