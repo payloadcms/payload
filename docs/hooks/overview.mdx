@@ -101,7 +101,7 @@ Awaited (blocking): If your hook returns a Promise (for example, if it’s decla
 
 Non-blocking (sometimes called “fire-and-forget”): If your hook does not return a Promise (returns nothing), Payload will not wait for it to finish. This can be useful for side-effects that don’t affect the outcome of the operation, but keep in mind that any work started this way might continue after the request has already completed.
 
-**Declaring a function with async does not make it “synchronous.” The async keyword simply makes the function return a Promise automatically — which is why Payload then awaits it.**
+**Declaring a function with async does not make it “asynchronous.” The async keyword simply makes the function return a Promise automatically — which is why Payload then awaits it.**
 
 <Banner type="success">
   **Tip:** If your hook executes a long-running task that doesn't affect the
