@@ -80,7 +80,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
 
-  if (typeof limit === 'number' && isInitialJobClaim(data)) {
+  if (isInitialJobClaim(data)) {
     const _db = db as LibSQLDatabase
     const table = this.tables[tableName]
     const { row } = transformForWrite({

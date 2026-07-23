@@ -27,10 +27,7 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
     ).toISOString()
     const isCancelling = Boolean((jobData.error as Record<string, unknown> | undefined)?.cancelled)
     const isSettling = jobData.processingUntil === null
-    const data = {
-      ...jobData,
-      processingToken: isSettling ? null : processingToken,
-    }
+    const data = isSettling ? { ...jobData, processingToken: null } : jobData
     const updatedJobs = await updateJobs({
       data,
       limit: 1,

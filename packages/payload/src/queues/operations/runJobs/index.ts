@@ -736,7 +736,7 @@ function startProcessingLeaseHeartbeat({
 
     try {
       await updateJobs({
-        data: { processingToken, processingUntil },
+        data: { processingUntil },
         req,
         returning: false,
         where: {
