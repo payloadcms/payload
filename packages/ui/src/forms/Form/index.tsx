@@ -280,11 +280,11 @@ export const Form: React.FC<FormProps> = (props) => {
       const hasFormSubmitAction =
         actionArg || typeof action === 'string' || typeof action === 'function'
 
-      if (redirect || disableToast || !hasFormSubmitAction || Boolean(onNonFieldError)) {
+      if (redirect || disableToast || !hasFormSubmitAction) {
         // Do not show submitting toast, as the promise toast may never disappear under these conditions.
         // Instead, make successToast() or errorToast() throw toast.success / toast.error
         successToast = (data) => toast.success(data)
-        errorToast = (data) => { if (data) toast.error(data) }
+        errorToast = (data) => toast.error(data)
       } else {
         toast.promise(promise, {
           error: (data) => {
