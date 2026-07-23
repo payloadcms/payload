@@ -13,7 +13,6 @@ type BaseArgs = {
 }
 
 type ArgsByID = {
-  claimBefore?: never
   id: number | string
   limit?: never
   sort?: never
@@ -21,7 +20,6 @@ type ArgsByID = {
 }
 
 type ArgsWhere = {
-  claimBefore?: string
   id?: never
   limit?: number
   sort?: Sort
@@ -47,7 +45,6 @@ export async function updateJob(args: ArgsByID & BaseArgs) {
  */
 export async function updateJobs({
   id,
-  claimBefore,
   data,
   limit: limitArg,
   req,
@@ -82,7 +79,6 @@ export async function updateJobs({
         returning,
       }
     : {
-        claimBefore,
         data,
         limit,
         req: jobReq,

@@ -114,7 +114,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   const now = getCurrentDate()
   const { duration: processingLeaseDuration, safetyBuffer: processingLeaseSafetyBuffer } =
     jobsConfig.processingLease
-  const claimBefore = now.toISOString()
+  const nowISOString = now.toISOString()
   const processingUntil = new Date(now.getTime() + processingLeaseDuration).toISOString()
   const processingToken = uuid()
   const and: Where[] = [
@@ -131,7 +131,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     {
       or: [
         { processingUntil: { exists: false } },
-        { processingUntil: { less_than_equal: claimBefore } },
+        { processingUntil: { less_than_equal: nowISOString } },
       ],
     },
     {
@@ -143,7 +143,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         },
         {
           waitUntil: {
-            less_than: claimBefore,
+            less_than: nowISOString,
           },
         },
       ],
@@ -180,7 +180,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       },
       where: {
         and: [
-          { processingUntil: { greater_than: claimBefore } },
+          { processingUntil: { greater_than: nowISOString } },
           { concurrencyKey: { exists: true } },
         ],
       },
@@ -215,7 +215,6 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
 
   if (id) {
     const updatedDocs = await updateJobs({
-      claimBefore,
       data: {
         processingToken,
         processingUntil,
@@ -250,7 +249,6 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       defaultProcessingOrder = processingOrderConfig
     }
     const updatedDocs = await updateJobs({
-      claimBefore,
       data: {
         processingToken,
         processingUntil,
