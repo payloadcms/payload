@@ -215,6 +215,21 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
       trash: false,
     })
 
+    // /////////////////////////////////////
+    // afterPasswordReset - Collection
+    // /////////////////////////////////////
+
+    if (collectionConfig.hooks?.afterPasswordReset?.length) {
+      for (const hook of collectionConfig.hooks.afterPasswordReset) {
+        await hook({
+          collection: args.collection.config,
+          context: req.context,
+          req,
+          user: fullUser,
+        })
+      }
+    }
+
     if (shouldCommit) {
       await commitTransaction(req)
     }

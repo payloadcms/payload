@@ -56,6 +56,7 @@ export const CollectionWithHooks: CollectionConfig = {
     afterRefresh: [(args) => {...}],
     afterMe: [(args) => {...}],
     afterForgotPassword: [(args) => {...}],
+    afterPasswordReset: [(args) => {...}],
     refresh: [(args) => {...}],
     me: [(args) => {...}],
   },
@@ -477,6 +478,30 @@ The following arguments are provided to the `afterForgotPassword` hook:
 | **`args`**       | The arguments passed into the operation.                                              |
 | **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against. |
 | **`context`**    | Custom context passed between hooks. [More details](./context).                       |
+
+### afterPasswordReset
+
+For [Auth-enabled Collections](../authentication/overview), this hook runs after successful `resetPassword` operations. Returned values are discarded.
+
+```ts
+import type { CollectionAfterPasswordResetHook } from 'payload'
+
+const afterPasswordResetHook: CollectionAfterPasswordResetHook = async ({
+  req,
+  user,
+}) => {
+  // Log the password reset activity for the user.
+}
+```
+
+The following arguments are provided to the `afterPasswordReset` hook:
+
+| Option           | Description                                                                                                                                           |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`collection`** | The [Collection](../configuration/collections) in which this Hook is running against.                                                                 |
+| **`context`**    | Custom context passed between hooks. [More details](./context).                                                                                       |
+| **`req`**        | The [Web Request](https://developer.mozilla.org/en-US/docs/Web/API/Request) object. This is mocked for [Local API](../local-api/overview) operations. |
+| **`user`**       | The user whose password was reset.                                                                                                                    |
 
 ### refresh
 

@@ -352,6 +352,14 @@ export type AfterForgotPasswordHook = (args: {
   context: RequestContext
 }) => any
 
+export type AfterPasswordResetHook<T extends TypeWithID = any> = (args: {
+  /** The collection which this hook is being run on */
+  collection: SanitizedCollectionConfig
+  context: RequestContext
+  req: PayloadRequest
+  user: T
+}) => any
+
 export type EnableFoldersOptions = {
   // Displays the folder collection and parentFolder field in the document view
   debug?: boolean
@@ -648,6 +656,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     afterLogout?: AfterLogoutHook[]
     afterMe?: AfterMeHook[]
     afterOperation?: AfterOperationHook<TSlug>[]
+    afterPasswordReset?: AfterPasswordResetHook[]
     afterRead?: AfterReadHook[]
     afterRefresh?: AfterRefreshHook[]
     beforeChange?: BeforeChangeHook[]
