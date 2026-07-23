@@ -1,4 +1,4 @@
-import type { DrizzleAdapter, Operators } from '@payloadcms/drizzle'
+import type { DrizzleAdapter, GetIdentifier, Operators } from '@payloadcms/drizzle'
 import type { DatabaseAdapterObj, Payload } from 'payload'
 
 import {
@@ -10,6 +10,7 @@ import {
   countVersions,
   create,
   createBlocksToJsonMigrator,
+  createGetIdentifier,
   createGlobal,
   createGlobalVersion,
   createSchemaGenerator,
@@ -145,6 +146,7 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
         columnToCodeConverter,
         corePackageSuffix: 'sqlite-core',
         defaultOutputFile: args.generateSchemaOutputFile,
+        extraConfigReturnType: 'SQLiteTableExtraConfigValue',
         tableImport: 'sqliteTable',
       }),
       idType: sqliteIDType,
@@ -203,9 +205,14 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       findOne,
       findVersions,
       foreignKeys: new Set(),
+      getIdentifier: (() => {
+        throw new Error('getIdentifier was called before adapter initialization completed')
+      }) as GetIdentifier,
+      identifiers: new Set<string>(),
       indexes: new Set<string>(),
       init,
       insert,
+      maxIdentifierLength: Infinity,
       migrate,
       migrateDown,
       migrateFresh,
@@ -220,12 +227,15 @@ export function sqliteAdapter(args: Args): DatabaseAdapterObj<SQLiteAdapter> {
       requireDrizzleKit,
       resolveInitializing,
       rollbackTransaction,
+      shouldCompressIdentifiers: false,
       updateGlobal,
       updateGlobalVersion,
       updateOne,
       updateVersion,
       upsert,
     })
+
+    adapter.getIdentifier = createGetIdentifier(adapter as unknown as DrizzleAdapter)
 
     adapter.blocksToJsonMigrator = createBlocksToJsonMigrator({
       adapter: adapter as unknown as DrizzleAdapter,
