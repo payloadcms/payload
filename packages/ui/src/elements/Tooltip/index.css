@@ -41,7 +41,7 @@
     }
 
     .tooltip-content {
-      overflow: hidden;
+      overflow-x: hidden;
       text-overflow: ellipsis;
       width: 100%;
     }
