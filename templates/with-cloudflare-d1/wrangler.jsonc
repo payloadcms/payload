@@ -20,7 +20,7 @@
       "binding": "D1",
       "database_id": "DATABASE_ID",
       "database_name": "my-app",
-      "remote": true,
+      "remote": false,
     },
   ],
   "services": [
