@@ -23,14 +23,14 @@ export function reduceFormStateByPath({
       continue
     }
 
-    const { customComponents: _, validate: __, ...field } = formState[key]
+    const { customComponents: _, lastRenderedPath: __, validate: ___, ...field } = formState[key]
 
     if (Array.isArray(field.rows)) {
       field.rows = field.rows.map((row) => {
         if (!row || typeof row !== 'object') {
           return row
         }
-        const { customComponents: _, ...serializableRow } = row
+        const { customComponents: _, lastRenderedPath: __, ...serializableRow } = row
         return serializableRow
       })
     }
