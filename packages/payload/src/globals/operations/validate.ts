@@ -1,12 +1,15 @@
 import type { DeepPartial } from 'ts-essentials'
 
+import type { TypeWithID } from '../../collections/config/types.js'
 import type { ValidationResult } from '../../collections/operations/local/validate.js'
+import type { AccessResult } from '../../config/types.js'
 import type { GlobalSlug, JsonObject } from '../../index.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { DataFromGlobalSlug, SanitizedGlobalConfig } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
-import { ValidationError } from '../../errors/index.js'
+import { hasWhereAccessResult } from '../../auth/types.js'
+import { Forbidden, ValidationError } from '../../errors/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
@@ -46,33 +49,19 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
   const accessResult = !overrideAccess
     ? await executeAccess({ data: incomingData, req }, globalConfig.access.validate)
     : true
-  const where: Where = overrideAccess ? undefined! : (accessResult as Where)
-  let storedGlobal = await req.payload.db.findGlobal({
+  const storedGlobal = await resolveValidationGlobalSource({
     slug,
-    locale: req.locale!,
+    accessResult,
+    draft,
+    globalConfig,
+    overrideAccess,
     req,
-    where,
   })
 
-  let docWithLocales: JsonObject = {}
+  const docWithLocales: JsonObject = deepCopyObjectSimple(storedGlobal)
 
-  if (storedGlobal) {
-    if (draft && globalConfig.versions?.drafts) {
-      storedGlobal = await replaceWithDraftIfAvailable({
-        accessResult,
-        doc: storedGlobal,
-        entity: globalConfig,
-        entityType: 'global',
-        overrideAccess,
-        req,
-      })
-    }
-
-    docWithLocales = deepCopyObjectSimple(storedGlobal)
-
-    if (docWithLocales._id) {
-      delete docWithLocales._id
-    }
+  if (docWithLocales._id) {
+    delete docWithLocales._id
   }
 
   const originalDoc = flattenDataByLocale({
@@ -163,4 +152,77 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
     errors: [],
     valid: true,
   }
+}
+
+async function resolveValidationGlobalSource({
+  slug,
+  accessResult,
+  draft,
+  globalConfig,
+  overrideAccess,
+  req,
+}: {
+  accessResult: AccessResult
+  draft: boolean
+  globalConfig: SanitizedGlobalConfig
+  overrideAccess: boolean
+  req: PayloadRequest
+  slug: string
+}): Promise<JsonObject> {
+  const accessWhere = overrideAccess ? undefined : (accessResult as Where)
+  const accessibleMain = await req.payload.db.findGlobal({
+    slug,
+    locale: req.locale!,
+    req,
+    where: accessWhere,
+  })
+  const hasAccessibleMain = hasGlobalSource(accessibleMain)
+  const accessibleBase = hasAccessibleMain ? accessibleMain : { globalType: slug }
+  // Global version lookups are slug-scoped; the shared helper's ID constraint applies to collections.
+  const accessibleSource =
+    draft && globalConfig.versions?.drafts
+      ? await replaceWithDraftIfAvailable({
+          accessResult,
+          doc: accessibleBase as JsonObject & TypeWithID,
+          entity: globalConfig,
+          entityType: 'global',
+          overrideAccess,
+          req,
+        })
+      : accessibleBase
+
+  if (hasAccessibleMain || accessibleSource !== accessibleBase) {
+    return accessibleSource
+  }
+
+  if (hasWhereAccessResult(accessResult)) {
+    const unrestrictedMain = await req.payload.db.findGlobal({
+      slug,
+      locale: req.locale!,
+      req,
+    })
+    const hasUnrestrictedMain = hasGlobalSource(unrestrictedMain)
+    const unrestrictedBase = hasUnrestrictedMain ? unrestrictedMain : { globalType: slug }
+    const unrestrictedSource =
+      draft && globalConfig.versions?.drafts
+        ? await replaceWithDraftIfAvailable({
+            accessResult: true,
+            doc: unrestrictedBase as JsonObject & TypeWithID,
+            entity: globalConfig,
+            entityType: 'global',
+            overrideAccess: true,
+            req,
+          })
+        : unrestrictedBase
+
+    if (hasUnrestrictedMain || unrestrictedSource !== unrestrictedBase) {
+      throw new Forbidden(req.t)
+    }
+  }
+
+  return {}
+}
+
+function hasGlobalSource(source: JsonObject | null | undefined): source is JsonObject {
+  return Boolean(source && Object.keys(source).length > 0)
 }

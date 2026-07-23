@@ -16,13 +16,16 @@ import {
   clearValidationEvents,
   getLocalePassRequestCount,
   getMaximumActiveLocalePasses,
+  globalValidationSourceEvents,
   hookEvents,
   isolationEvents,
   localePassEvents,
   permissionOperationEvents,
   publishCollectionSlug,
   publishGlobalSlug,
+  validationAccessSourceGlobalSlug,
   validationCollectionSlug,
+  validationDraftSourceGlobalSlug,
   validationGlobalSlug,
   validationPublishUploadsDir,
   validationPublishUploadsSlug,
@@ -48,6 +51,24 @@ describe('validate Local API', () => {
         location: [-0.12, 51.5],
         summary: 'stored global summary',
         title: 'Stored global title',
+      },
+      locale: 'en',
+    })
+    await payload.updateGlobal({
+      slug: validationDraftSourceGlobalSlug,
+      data: {
+        _status: 'draft',
+        scope: 'draft-visible',
+        title: 'Draft-only title',
+      },
+      draft: true,
+      locale: 'en',
+    })
+    await payload.updateGlobal({
+      slug: validationAccessSourceGlobalSlug,
+      data: {
+        scope: 'stored-private',
+        title: 'Stored private title',
       },
       locale: 'en',
     })
@@ -836,6 +857,91 @@ describe('validate Local API', () => {
   })
 
   describe('globals', () => {
+    it('should load a draft-only global only when draft validation is requested', async () => {
+      const versionsBefore = await payload.countGlobalVersions({
+        global: validationDraftSourceGlobalSlug,
+      })
+
+      const draftResult = await payload.validateGlobal({
+        slug: validationDraftSourceGlobalSlug,
+        draft: true,
+        locale: 'en',
+      })
+      const defaultResult = await payload.validateGlobal({
+        slug: validationDraftSourceGlobalSlug,
+        locale: 'en',
+      })
+      const mainResult = await payload.validateGlobal({
+        slug: validationDraftSourceGlobalSlug,
+        draft: false,
+        locale: 'en',
+      })
+      const versionsAfter = await payload.countGlobalVersions({
+        global: validationDraftSourceGlobalSlug,
+      })
+
+      expect(draftResult).toEqual({
+        errors: [],
+        valid: true,
+      })
+      expect(defaultResult).toMatchObject({
+        errors: expect.arrayContaining([
+          expect.objectContaining({
+            locale: 'en',
+            path: 'title',
+          }),
+        ]),
+        valid: false,
+      })
+      expect(mainResult).toEqual(defaultResult)
+      expect(versionsAfter).toEqual(versionsBefore)
+    })
+
+    it('should resolve an access-constrained draft when no matching main global exists', async () => {
+      const req = {
+        operation: 'read',
+      } satisfies Partial<PayloadRequest>
+
+      const result = await payload.validateGlobal({
+        slug: validationDraftSourceGlobalSlug,
+        context: {
+          validationScope: 'draft-visible',
+        },
+        draft: true,
+        locale: 'en',
+        overrideAccess: false,
+        req,
+      })
+
+      expect(result).toEqual({
+        errors: [],
+        valid: true,
+      })
+      expect(globalValidationSourceEvents).toEqual([validationDraftSourceGlobalSlug])
+      expect(req.operation).toBe('read')
+    })
+
+    it('should reject a Where policy that filters out the persisted main global', async () => {
+      await expect(
+        payload.validateGlobal({
+          slug: validationAccessSourceGlobalSlug,
+          context: {
+            validationScope: 'candidate-public',
+          },
+          data: {
+            scope: 'candidate-public',
+            title: 'Valid candidate title',
+          },
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+      })
+
+      expect(globalValidationSourceEvents).toEqual([])
+    })
+
     it('should ignore internal projection flags passed to the public global validate API', async () => {
       const result = await payload.validateGlobal({
         slug: validationGlobalSlug,

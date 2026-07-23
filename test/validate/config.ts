@@ -20,6 +20,8 @@ const dirname = path.dirname(filename)
 
 export const validationCollectionSlug = 'validation-items'
 export const validationGlobalSlug = 'validation-settings'
+export const validationDraftSourceGlobalSlug = 'validation-draft-source-settings'
+export const validationAccessSourceGlobalSlug = 'validation-access-source-settings'
 export const publishCollectionSlug = 'validation-publish-items'
 export const publishGlobalSlug = 'validation-publish-settings'
 export const writeTargetsSlug = 'validation-write-targets'
@@ -40,6 +42,7 @@ type HookEvent = {
 
 export const hookEvents: HookEvent[] = []
 export const accessEvents: string[] = []
+export const globalValidationSourceEvents: string[] = []
 export const permissionOperationEvents: {
   entity: 'collection' | 'global'
   observedOperation: string | undefined
@@ -74,6 +77,7 @@ let maximumActiveLocalePasses = 0
 
 export function clearValidationEvents(): void {
   accessEvents.length = 0
+  globalValidationSourceEvents.length = 0
   hookEvents.length = 0
   isolationEvents.length = 0
   localePassEvents.length = 0
@@ -624,6 +628,82 @@ const validationGlobal: GlobalConfig = {
   versions: false,
 }
 
+const getValidationSourceAccess: NonNullable<GlobalConfig['access']>['validate'] = ({ req }) => {
+  const validationScope = req.context.validationScope
+
+  return typeof validationScope === 'string'
+    ? {
+        scope: {
+          equals: validationScope,
+        },
+      }
+    : false
+}
+
+const validationDraftSourceGlobal: GlobalConfig = {
+  slug: validationDraftSourceGlobalSlug,
+  access: {
+    validate: getValidationSourceAccess,
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'scope',
+      type: 'text',
+      required: true,
+    },
+  ],
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        globalValidationSourceEvents.push(validationDraftSourceGlobalSlug)
+        return data
+      },
+    ],
+  },
+  versions: {
+    drafts: {
+      validate: false,
+    },
+  },
+}
+
+const validationAccessSourceGlobal: GlobalConfig = {
+  slug: validationAccessSourceGlobalSlug,
+  access: {
+    validate: getValidationSourceAccess,
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'scope',
+      type: 'text',
+      required: true,
+    },
+  ],
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        globalValidationSourceEvents.push(validationAccessSourceGlobalSlug)
+        return data
+      },
+    ],
+  },
+  versions: {
+    drafts: {
+      validate: false,
+    },
+  },
+}
+
 const publishCollection: CollectionConfig = {
   slug: publishCollectionSlug,
   access: {
@@ -928,7 +1008,12 @@ export default buildConfigWithDefaults({
       },
     },
   ],
-  globals: [validationGlobal, publishGlobal],
+  globals: [
+    validationGlobal,
+    validationDraftSourceGlobal,
+    validationAccessSourceGlobal,
+    publishGlobal,
+  ],
   jobs: {
     deleteJobOnComplete: false,
   },
