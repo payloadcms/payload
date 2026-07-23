@@ -9,7 +9,7 @@ import { Types } from 'mongoose'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 
@@ -34,6 +34,48 @@ describe('localizeStatus migration', () => {
       await payload.db.destroy()
     }
   })
+
+  // SQL-adapter only: the bug is a Postgres FROM-clause error in the join ORDER BY, which
+  // cannot occur on MongoDB (no SQL join subquery there).
+  describe.skipIf(process.env.PAYLOAD_DATABASE === 'mongodb')(
+    'querying a joined localized draft collection',
+    () => {
+      const createdOrgIDs: Array<number | string> = []
+
+      afterEach(async () => {
+        for (const id of createdOrgIDs) {
+          await payload.delete({ id, collection: 'joinOrgs' })
+        }
+        createdOrgIDs.length = 0
+      })
+
+      // Used to throw `invalid reference to FROM-clause entry for table "_r_v"` on Postgres
+      // because the join subquery's ORDER BY referenced the un-aliased version table.
+      it('should not throw when the joined collection sorts by a localized field', async () => {
+        const org = await payload.create({
+          collection: 'joinOrgs',
+          data: { title: 'Acme' },
+          locale: 'en',
+        })
+        createdOrgIDs.push(org.id)
+
+        await payload.create({
+          collection: 'joinRepos',
+          data: { org: org.id, title: 'repo-a' },
+          locale: 'en',
+        })
+
+        const result = await payload.find({
+          collection: 'joinOrgs',
+          draft: true,
+          locale: 'en',
+        })
+
+        expect(result.docs).toHaveLength(1)
+        expect(result.docs[0]?.repos?.docs).toHaveLength(1)
+      })
+    },
+  )
 
   describe.skipIf(process.env.PAYLOAD_DATABASE !== 'postgres')('PostgreSQL', () => {
     // Reset both test collections to their pre-migration database shape before every

@@ -78,6 +78,7 @@ export const buildOrderBy = ({
     try {
       const { columnName: sortTableColumnName, table: sortTable } = getTableColumnFromPath({
         adapter,
+        aliasTable,
         collectionPath: sortProperty,
         fields,
         joins,
