@@ -7,6 +7,7 @@ import path from 'path'
 
 import type { CliArgs } from './types.js'
 
+import { applyYesDefaults } from './lib/apply-yes-defaults.js'
 import { configurePayloadConfig } from './lib/configure-payload-config.js'
 import { createProject } from './lib/create-project.js'
 import { parseExample } from './lib/examples.js'
@@ -43,7 +44,6 @@ export class Main {
         '--agent': String,
         '--branch': String,
         '--db': String,
-        '--db-accept-recommended': Boolean,
         '--db-connection-string': String,
         '--example': String,
         '--help': Boolean,
@@ -73,6 +73,7 @@ export class Main {
         '--beta': Boolean,
         '--debug': Boolean,
         '--dry-run': Boolean,
+        '--yes': Boolean,
 
         // Aliases
         '-a': '--agent',
@@ -81,6 +82,7 @@ export class Main {
         '-h': '--help',
         '-n': '--name',
         '-t': '--template',
+        '-y': '--yes',
       },
       { permissive: true },
     )
@@ -105,6 +107,8 @@ export class Main {
         helpMessage()
         process.exit(0)
       }
+
+      applyYesDefaults(this.args, getValidTemplates())
 
       // eslint-disable-next-line no-console
       console.log('\n')
@@ -133,10 +137,12 @@ export class Main {
       // Upgrade Payload in existing project
       if (isPayloadInstalled && nextConfigPath) {
         p.log.warn(`Payload installation detected in current project.`)
-        const shouldUpdate = await p.confirm({
-          initialValue: false,
-          message: chalk.bold(`Upgrade Payload in this project?`),
-        })
+        const shouldUpdate = this.args['--yes']
+          ? true
+          : await p.confirm({
+              initialValue: false,
+              message: chalk.bold(`Upgrade Payload in this project?`),
+            })
 
         if (!p.isCancel(shouldUpdate) && shouldUpdate) {
           const { message, success: updateSuccess } = await updatePayloadInProject(
@@ -170,10 +176,12 @@ export class Main {
           chalk.bold(`${chalk.bgBlack(` ${figures.triangleUp} Next.js `)} project detected!`),
         )
 
-        const proceed = await p.confirm({
-          initialValue: true,
-          message: chalk.bold(`Install ${chalk.green('Payload')} in this project?`),
-        })
+        const proceed = this.args['--yes']
+          ? true
+          : await p.confirm({
+              initialValue: true,
+              message: chalk.bold(`Install ${chalk.green('Payload')} in this project?`),
+            })
         if (p.isCancel(proceed) || !proceed) {
           p.outro(feedbackOutro())
           process.exit(0)
