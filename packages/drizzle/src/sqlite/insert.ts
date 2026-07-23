@@ -11,7 +11,7 @@ export const insert: Insert = async function (
   // Batch insert if limitedBoundParameters: true
   if (this.limitedBoundParameters && Array.isArray(values)) {
     const results: Record<string, unknown>[] = []
-    const colsPerRow = Object.keys(values[0]).length
+    const colsPerRow = values.reduce((max, row) => Math.max(max, Object.keys(row).length), 1)
     const maxParams = 100
     const maxRowsPerBatch = Math.max(1, Math.floor(maxParams / colsPerRow))
 
