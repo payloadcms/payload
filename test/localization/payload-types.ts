@@ -191,11 +191,15 @@ export interface Config {
     'global-array': GlobalArray;
     'global-text': GlobalText;
     'global-drafts': GlobalDraft;
+    'localized-global-for-copy': LocalizedGlobalForCopy;
   };
   globalsSelect: {
     'global-array': GlobalArraySelect<false> | GlobalArraySelect<true>;
     'global-text': GlobalTextSelect<false> | GlobalTextSelect<true>;
     'global-drafts': GlobalDraftsSelect<false> | GlobalDraftsSelect<true>;
+    'localized-global-for-copy':
+      | LocalizedGlobalForCopySelect<false>
+      | LocalizedGlobalForCopySelect<true>;
   };
   locale: 'xx' | 'en' | 'es' | 'pt' | 'ar' | 'hu';
   widgets: {
@@ -1861,6 +1865,19 @@ export interface GlobalDraft {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-global-for-copy".
+ */
+export interface LocalizedGlobalForCopy {
+  id: string;
+  title?: string | null;
+  group?: {
+    subtitle?: string | null;
+  };
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "global-array_select".
  */
 export interface GlobalArraySelect<T extends boolean = true> {
@@ -1891,6 +1908,21 @@ export interface GlobalTextSelect<T extends boolean = true> {
 export interface GlobalDraftsSelect<T extends boolean = true> {
   text?: T;
   _status?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-global-for-copy_select".
+ */
+export interface LocalizedGlobalForCopySelect<T extends boolean = true> {
+  title?: T;
+  group?:
+    | T
+    | {
+        subtitle?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
