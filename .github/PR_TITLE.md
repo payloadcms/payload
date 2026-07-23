@@ -1,0 +1,1 @@
+fix(ui): add Cmd/Ctrl+Click and Shift+Click to open items in new tab (#15837)  
