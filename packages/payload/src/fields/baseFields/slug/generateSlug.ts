@@ -7,6 +7,7 @@ import { fieldValueExists } from '../../../utilities/fieldValueExists.js'
 import { getUniqueFieldValue } from '../../../utilities/getUniqueFieldValue.js'
 import { hasDraftsEnabled } from '../../../utilities/getVersionsConfig.js'
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
+import { consumeSlugDuplicateFallback } from './duplicateContext.js'
 import { getSlugFallbackValue } from './getSlugFallbackValue.js'
 import { hasValue } from './hasValue.js'
 
@@ -29,19 +30,27 @@ type Args = {
  */
 export const generateSlug =
   ({ name, localized, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
-  async ({ collection, data, operation, originalDoc, req, value }) => {
+  async ({ collection, context, data, operation, originalDoc, req, value }) => {
     const slugify = (valueToSlugify: unknown) =>
       customSlugify
         ? customSlugify({ data: (data ?? {}) as TypeWithID, req, valueToSlugify })
         : defaultSlugify(valueToSlugify as string)
 
-    // Explicit value from the client wins — normalized through the field's slugify.
+    // A duplicated document takes a fresh `<singular>-<N>` fallback — not the original's slug, not a
+    // source-derived one — and skips the explicit-collision check below (see
+    // generateSlugBeforeDuplicate).
+    if (collection && !localized && consumeSlugDuplicateFallback(context, name)) {
+      return await getSlugFallbackValue({ collection, field: name, req, slugify })
+    }
+
+    // Explicit value from the client wins — normalized through the field's slugify. It must be
+    // unique: reject a collision rather than silently changing it (generated values below dedupe
+    // instead). Enforced here, not in validation — the DB unique index misses draft-only slugs, and
+    // draft saves skip validation but still run hooks. A localized slug is unique only within its
+    // locale, so the check is scoped to the one being written.
     if (hasValue(value)) {
       const slugified = await slugify(value)
 
-      // An explicit slug must be unique — reject a collision rather than silently changing it
-      // (generated values below are deduped instead). Enforced here, not in validation: the DB
-      // unique index misses draft-only slugs, and draft saves skip validation but still run hooks.
       if (
         collection &&
         hasValue(slugified) &&
@@ -50,8 +59,6 @@ export const generateSlug =
           collection: collection.slug,
           draftsEnabled: hasDraftsEnabled(collection),
           field: name,
-          // A localized slug is only unique within its locale, so scope the check to the one
-          // being written — otherwise the same value in another locale reads as a collision.
           locale: localized ? (req.locale ?? undefined) : undefined,
           req,
           value: slugified,
@@ -76,7 +83,7 @@ export const generateSlug =
     }
 
     // Derive an empty slug from its source when present, deduped so two same-source documents don't
-    // both claim it. Localized/global slugs use a plain slugify (uniqueness there is out of scope).
+    // both claim it. Localized/global slugs use a plain slugify (dedupe query doesn't apply).
     const source = data?.[useAsSlug]
     const derived = source ? await slugify(source) : undefined
 

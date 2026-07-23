@@ -333,7 +333,7 @@ export const sanitizeField = async ({
     // unresolved) and fall through to that default.
     if (!field.localized) {
       field.hooks.beforeDuplicate = [
-        generateSlugBeforeDuplicate({ name: field.name, slugify: field.slugify }),
+        generateSlugBeforeDuplicate({ name: field.name }),
         ...(field.hooks.beforeDuplicate || []),
       ]
     }
