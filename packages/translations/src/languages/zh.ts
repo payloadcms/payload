@@ -575,6 +575,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     width: '宽度',
   },
   validation: {
+    documentInvalid: '请修复以下问题。',
+    documentValid: '所有选定的Locale均有效。',
     emailAddress: '请输入一个有效的电子邮件地址。',
     enterNumber: '请输入一个有效的数字。',
     fieldHasNo: '这个字段没有 {{label}}',
@@ -591,6 +593,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: '经度必须在-180和180之间。',
     notValidDate: '「{{value}}」不是一个有效的日期。',
     required: '该字段为必填项目。',
+    requiredLocale: '必填',
     requiresAtLeast: '该字段至少需要 {{count}} 个 {{label}}。',
     requiresNoMoreThan: '该字段要求不超过 {{count}} 个 {{label}}。',
     requiresTwoNumbers: '该字段需要两个数字。',
@@ -598,6 +601,8 @@ export const zhTranslations: DefaultTranslationsObject = {
     timezoneRequired: '需要选择一个时区。',
     trueOrFalse: '此项仅可选择"是"或"否"。',
     username: '请输入一个有效的用户名。可包含字母，数字，连字符，句点和下划线。',
+    validateAllLocales: '验证所有Locale',
+    validationResults: '验证结果',
     validUploadID: '该字段不是有效的上传 ID。',
   },
   version: {

@@ -605,6 +605,8 @@ export const idTranslations: DefaultTranslationsObject = {
     width: 'Lebar',
   },
   validation: {
+    documentInvalid: 'Perbaiki masalah-masalah berikut.',
+    documentValid: 'Semua Locale yang dipilih valid.',
     emailAddress: 'Harap masukkan alamat email yang valid.',
     enterNumber: 'Harap masukkan nomor yang valid.',
     fieldHasNo: 'Isian ini tidak memiliki {{label}}',
@@ -621,6 +623,7 @@ export const idTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Garis bujur harus berada di antara -180 dan 180.',
     notValidDate: '"{{value}}" bukan tanggal yang valid.',
     required: 'Isian ini wajib diisi.',
+    requiredLocale: 'Wajib',
     requiresAtLeast: 'Isian ini membutuhkan setidaknya {{count}} {{label}}.',
     requiresNoMoreThan: 'Isian ini membutuhkan tidak lebih dari {{count}} {{label}}.',
     requiresTwoNumbers: 'Isian ini membutuhkan dua angka.',
@@ -629,6 +632,8 @@ export const idTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Isian ini hanya bisa sama dengan benar atau salah.',
     username:
       'Harap masukkan nama pengguna yang valid. Dapat berisi huruf, angka, tanda hubung, titik, dan garis bawah.',
+    validateAllLocales: 'Validasi semua Locale',
+    validationResults: 'Hasil validasi',
     validUploadID: 'Isian ini bukan ID unggahan yang valid.',
   },
   version: {

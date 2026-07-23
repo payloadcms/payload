@@ -600,6 +600,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     width: 'Ширина',
   },
   validation: {
+    documentInvalid: 'Ispravite sledeće probleme.',
+    documentValid: 'Svi izabrani jezici su validni.',
     emailAddress: 'Молимо Вас унесите валидну емаил адресу.',
     enterNumber: 'Молимо Вас унесите валидан број.',
     fieldHasNo: 'Ово поље нема {{label}}',
@@ -616,6 +618,7 @@ export const rsTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Дужина мора бити између -180 и 180.',
     notValidDate: '"{{value}}" није валидан датум.',
     required: 'Ово поље је обавезно.',
+    requiredLocale: 'Obavezno',
     requiresAtLeast: 'Ово поље захтева минимално {{count}} {{label}}.',
     requiresNoMoreThan: 'Ово поље захтева не више од {{count}} {{label}}.',
     requiresTwoNumbers: 'Ово поље захтева два броја.',
@@ -624,6 +627,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Ово поље може бити само тачно или нетачно',
     username:
       'Molimo unesite važeće korisničko ime. Može sadržati slova, brojeve, crtice, tačke i donje crte.',
+    validateAllLocales: 'Validirajte sve jezike',
+    validationResults: 'Rezultati validacije',
     validUploadID: 'Ово поље не садржи валидан ИД преноса.',
   },
   version: {

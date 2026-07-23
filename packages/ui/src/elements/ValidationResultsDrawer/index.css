@@ -1,0 +1,40 @@
+@layer payload-default {
+  .validation-results__content {
+    padding-block: var(--gutter-h);
+  }
+
+  .validation-results__valid {
+    color: var(--theme-success-500);
+  }
+
+  .validation-results__locale {
+    margin-block-start: var(--base);
+
+    h3 {
+      align-items: center;
+      display: flex;
+      gap: calc(var(--base) / 2);
+      margin: 0 0 calc(var(--base) / 2);
+    }
+
+    ul {
+      display: grid;
+      gap: calc(var(--base) / 2);
+      margin: 0;
+      padding-inline-start: var(--base);
+    }
+
+    li {
+      display: grid;
+      gap: calc(var(--base) / 4);
+    }
+  }
+
+  .validation-results__required {
+    background: var(--theme-elevation-100);
+    border-radius: var(--style-radius-s);
+    font-size: 0.75em;
+    font-weight: normal;
+    padding: calc(var(--base) / 8) calc(var(--base) / 4);
+  }
+}

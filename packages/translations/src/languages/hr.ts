@@ -600,6 +600,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     width: 'Širina',
   },
   validation: {
+    documentInvalid: 'Ispravite sljedeće probleme.',
+    documentValid: 'Svi odabrani jezici su valjani.',
     emailAddress: 'Molimo unesite valjanu e-mail adresu.',
     enterNumber: 'Molimo unesite valjani broj.',
     fieldHasNo: 'Ovo polje nema {{label}}',
@@ -616,6 +618,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Geografska dužina mora biti između -180 i 180.',
     notValidDate: '"{{value}}" nije valjan datum.',
     required: 'Ovo polje je obvezno.',
+    requiredLocale: 'Obavezno',
     requiresAtLeast: 'Ovo polje zahtjeva minimalno {{count}} {{label}}.',
     requiresNoMoreThan: 'Ovo polje zahtjeva ne više od {{count}} {{label}}.',
     requiresTwoNumbers: 'Ovo polje zahtjeva dva broja.',
@@ -624,6 +627,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Ovo polje može biti samo točno ili netočno',
     username:
       'Unesite važeće korisničko ime. Može sadržavati slova, brojeve, crtice, točke i donje crte.',
+    validateAllLocales: 'Potvrdite sve locale',
+    validationResults: 'Rezultati validacije',
     validUploadID: 'Ovo polje nije valjani ID prijenosa.',
   },
   version: {

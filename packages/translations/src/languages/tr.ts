@@ -608,6 +608,8 @@ export const trTranslations: DefaultTranslationsObject = {
     width: 'Genişlik',
   },
   validation: {
+    documentInvalid: 'Aşağıdaki sorunları düzeltin.',
+    documentValid: 'Tüm seçili Locale’ler geçerlidir.',
     emailAddress: 'Lütfen geçerli bir e-posta adresi girin.',
     enterNumber: 'Lütfen geçerli bir sayı girin.',
     fieldHasNo: 'Bu alanda {{label}} girili değil.',
@@ -624,6 +626,7 @@ export const trTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Boylam -180 ile 180 arasında olmalıdır.',
     notValidDate: '"{{value}}" geçerli bir tarih değil.',
     required: 'Bu alan gereklidir.',
+    requiredLocale: 'Zorunlu',
     requiresAtLeast: 'Bu alan en az {{count}} adet {{label}} gerektirmektedir.',
     requiresNoMoreThan: 'Bu alana {{count}} adetten fazla {{label}} girilemez.',
     requiresTwoNumbers: 'Bu alana en az iki rakam girilmesi zorunludur.',
@@ -632,6 +635,8 @@ export const trTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Bu alan yalnızca doğru ve yanlış olabilir.',
     username:
       'Lütfen geçerli bir kullanıcı adı girin. Harfler, numaralar, kısa çizgiler, noktalar ve alt çizgiler içerebilir.',
+    validateAllLocales: "Tüm Locale'leri doğrulayın",
+    validationResults: 'Doğrulama sonuçları',
     validUploadID: "'Bu alan geçerli bir karşıya yükleme ID'sine sahip değil.'",
   },
   version: {

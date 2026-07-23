@@ -599,6 +599,8 @@ export const slTranslations: DefaultTranslationsObject = {
     width: 'Širina',
   },
   validation: {
+    documentInvalid: 'Odpravite naslednje težave.',
+    documentValid: 'Vsi izbrani jeziki so veljavni.',
     emailAddress: 'Vnesite veljaven e-poštni naslov.',
     enterNumber: 'Vnesite veljavno številko.',
     fieldHasNo: 'To polje nima {{label}}',
@@ -615,6 +617,7 @@ export const slTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Zemljepisna dolžina mora biti med -180 in 180.',
     notValidDate: '"{{value}}" ni veljaven datum.',
     required: 'To polje je obvezno.',
+    requiredLocale: 'Obvezno',
     requiresAtLeast: 'To polje zahteva vsaj {{count}} {{label}}.',
     requiresNoMoreThan: 'To polje zahteva največ {{count}} {{label}}.',
     requiresTwoNumbers: 'To polje zahteva dve številki.',
@@ -623,6 +626,8 @@ export const slTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'To polje je lahko samo enako true ali false.',
     username:
       'Vnesite veljavno uporabniško ime. Lahko vsebuje črke, številke, vezaje, pike in podčrtaje.',
+    validateAllLocales: 'Potrdite vse jezike',
+    validationResults: 'Rezultati validacije',
     validUploadID: 'To polje ni veljaven ID nalaganja.',
   },
   version: {

@@ -604,6 +604,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     width: 'Largura',
   },
   validation: {
+    documentInvalid: 'Corrija os seguintes problemas.',
+    documentValid: 'Todos os idiomas selecionados são válidos.',
     emailAddress: 'Por favor, insira um endereço de email válido.',
     enterNumber: 'Por favor, insira um número válido.',
     fieldHasNo: 'Esse campo não contém {{label}}',
@@ -620,6 +622,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'A longitude deve estar entre -180 e 180.',
     notValidDate: '"{{value}}" não é uma data válida.',
     required: 'Esse campo é obrigatório.',
+    requiredLocale: 'Obrigatório',
     requiresAtLeast: 'Esse campo requer no máximo {{count}} {{label}}.',
     requiresNoMoreThan: 'Esse campo requer pelo menos {{count}} {{label}}.',
     requiresTwoNumbers: 'Esse campo requer dois números.',
@@ -628,6 +631,8 @@ export const ptTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Esse campo pode ser apenas verdadeiro (true) ou falso (false)',
     username:
       'Por favor, insira um nome de usuário válido. Pode conter letras, números, hifens, pontos e sublinhados.',
+    validateAllLocales: 'Validar todos os idiomas',
+    validationResults: 'Resultados da validação',
     validUploadID: "'Esse campo não é um ID de upload válido.'",
   },
   version: {

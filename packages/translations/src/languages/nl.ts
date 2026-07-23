@@ -609,6 +609,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     width: 'Breedte',
   },
   validation: {
+    documentInvalid: 'Los de volgende problemen op.',
+    documentValid: 'Alle geselecteerde talen zijn geldig.',
     emailAddress: 'Voer een geldig e-mailadres in.',
     enterNumber: 'Voer een geldig nummer in.',
     fieldHasNo: 'Dit veld heeft geen {{label}}',
@@ -625,6 +627,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Lengtegraad moet tussen -180 en 180 liggen.',
     notValidDate: '"{{value}}" is geen geldige datum.',
     required: 'Dit veld is verplicht.',
+    requiredLocale: 'Vereist',
     requiresAtLeast: 'Dit veld vereist minstens {{count}} {{label}}.',
     requiresNoMoreThan: 'Dit veld vereist niet meer dan {{count}} {{label}}.',
     requiresTwoNumbers: 'Dit veld vereist twee nummers.',
@@ -633,6 +636,8 @@ export const nlTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Dit veld kan alleen waar of onwaar zijn.',
     username:
       'Voer een geldige gebruikersnaam in. Kan letters, cijfers, koppeltekens, punten en underscores bevatten.',
+    validateAllLocales: 'Valideer alle talen',
+    validationResults: 'Validatieresultaten',
     validUploadID: 'Dit veld is geen geldige upload-ID.',
   },
   version: {

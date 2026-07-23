@@ -607,6 +607,8 @@ export const roTranslations: DefaultTranslationsObject = {
     width: 'Lățime',
   },
   validation: {
+    documentInvalid: 'Remediați următoarele probleme.',
+    documentValid: 'Toate localele selectate sunt valide.',
     emailAddress: 'Vă rugăm să introduceți o adresă de email validă.',
     enterNumber: 'Vă rugăm să introduceți un număr valid.',
     fieldHasNo: 'Acest câmp nu are un {{label}}',
@@ -626,6 +628,7 @@ export const roTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Longitudinea trebuie să fie între -180 și 180.',
     notValidDate: '"{{value}}" nu este o dată valabilă.',
     required: 'Acest câmp este obligatoriu.',
+    requiredLocale: 'Obligatoriu',
     requiresAtLeast: 'Acest domeniu necesită cel puțin {{count}} {{label}}.',
     requiresNoMoreThan: 'Acest câmp nu necesită mai mult de {{count}} {{label}}.',
     requiresTwoNumbers: 'Acest câmp necesită două numere.',
@@ -635,6 +638,8 @@ export const roTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Acest câmp poate fi doar egal cu true sau false.',
     username:
       'Vă rugăm să introduceți un nume de utilizator valid. Poate conține litere, numere, cratime, puncte și sublinieri.',
+    validateAllLocales: 'Validați toate limbile',
+    validationResults: 'Rezultatele validării',
     validUploadID: 'Acest câmp nu este un ID de încărcare valid.',
   },
   version: {

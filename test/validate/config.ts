@@ -13,6 +13,7 @@ import { fileURLToPath } from 'url'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { uploadFiles } from '../../packages/payload/src/uploads/uploadFiles.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
+import { devUser } from '../credentials.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -23,6 +24,9 @@ export const publishCollectionSlug = 'validation-publish-items'
 export const publishGlobalSlug = 'validation-publish-settings'
 export const writeTargetsSlug = 'validation-write-targets'
 export const validationUploadsSlug = 'validation-uploads'
+export const validationAdminCollectionSlug = 'validation-admin-items'
+export const validationDeniedCollectionSlug = 'validation-denied-items'
+export const validationNonLocalizedCollectionSlug = 'validation-non-localized-items'
 export const validationUploadsDir = path.resolve(dirname, 'validation-uploads')
 
 type HookEvent = {
@@ -613,8 +617,58 @@ const publishGlobal: GlobalConfig = {
   },
 }
 
+const validationAdminCollection: CollectionConfig = {
+  slug: validationAdminCollectionSlug,
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      localized: true,
+      required: true,
+    },
+    {
+      name: 'summary',
+      type: 'text',
+      required: true,
+    },
+  ],
+  versions: {
+    drafts: {
+      validate: false,
+    },
+  },
+}
+
+const validationDeniedCollection: CollectionConfig = {
+  slug: validationDeniedCollectionSlug,
+  access: {
+    validate: () => false,
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      localized: true,
+    },
+  ],
+}
+
+const validationNonLocalizedCollection: CollectionConfig = {
+  slug: validationNonLocalizedCollectionSlug,
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
+  ],
+}
+
 export default buildConfigWithDefaults({
   admin: {
+    autoLogin: {
+      email: devUser.email,
+      password: devUser.password,
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
@@ -622,6 +676,9 @@ export default buildConfigWithDefaults({
   collections: [
     validationCollection,
     publishCollection,
+    validationAdminCollection,
+    validationDeniedCollection,
+    validationNonLocalizedCollection,
     {
       slug: writeTargetsSlug,
       fields: [
@@ -674,5 +731,18 @@ export default buildConfigWithDefaults({
         label: 'French',
       },
     ],
+  },
+  onInit: async (payload) => {
+    if (process.env.NODE_ENV === 'test') {
+      return
+    }
+
+    await payload.create({
+      collection: 'users',
+      data: {
+        email: devUser.email,
+        password: devUser.password,
+      },
+    })
   },
 })

@@ -604,6 +604,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     width: 'Bredde',
   },
   validation: {
+    documentInvalid: 'Løs følgende problemer.',
+    documentValid: 'Alle valgte språk er gyldige.',
     emailAddress: 'Vennligst skriv inn en gyldig e-postadresse.',
     enterNumber: 'Vennligst skriv inn et gyldig tall.',
     fieldHasNo: 'Dette feltet har ingen {{label}}',
@@ -620,6 +622,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Lengdegrad må være mellom -180 og 180.',
     notValidDate: '"{{value}}" er ikke en gyldig dato.',
     required: 'Dette feltet er påkrevd.',
+    requiredLocale: 'Obligatorisk',
     requiresAtLeast: 'Dette feltet krever minst {{count}} {{label}}.',
     requiresNoMoreThan: 'Dette feltet krever maksimalt {{count}} {{label}}.',
     requiresTwoNumbers: 'Dette feltet krever to tall.',
@@ -628,6 +631,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Dette feltet kan bare være likt true eller false.',
     username:
       'Vennligst oppgi et gyldig brukernavn. Kan inneholde bokstaver, nummer, bindestreker, punktum og understrek.',
+    validateAllLocales: 'Valider alle språk',
+    validationResults: 'Valideringsresultater',
     validUploadID: 'Dette feltet er ikke en gyldig opplastings-ID.',
   },
   version: {

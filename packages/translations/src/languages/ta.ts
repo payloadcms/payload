@@ -603,6 +603,8 @@ export const taTranslations: DefaultTranslationsObject = {
     width: 'அகலம்',
   },
   validation: {
+    documentInvalid: 'பின்வரும் சிக்கல்களை சரிசெய்க.',
+    documentValid: 'தேர்ந்தெடுக்கப்பட்ட அனைத்து Locale-களும் செல்லுபடியாக உள்ளன.',
     emailAddress: 'சரியான மின்னஞ்சல் முகவரியை உள்ளிடவும்.',
     enterNumber: 'சரியான எண் ஒன்றை உள்ளிடவும்.',
     fieldHasNo: 'இந்த புலத்தில் {{label}} இல்லை',
@@ -620,6 +622,7 @@ export const taTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'தீர்க்கக் கூறு -180 மற்றும் 180 இடையே இருக்க வேண்டும்.',
     notValidDate: '"{{value}}" ஒரு சரியான தேதி அல்ல.',
     required: 'இந்த புலம் அவசியம்.',
+    requiredLocale: 'தேவையானது',
     requiresAtLeast: 'இந்த புலம் குறைந்தது {{count}} {{label}} தேவைப்படுகிறது.',
     requiresNoMoreThan: 'இந்த புலம் அதிகபட்சம் {{count}} {{label}} மட்டுமே அனுமதிக்கிறது.',
     requiresTwoNumbers: 'இந்த புலத்தில் இரண்டு எண்கள் தேவை.',
@@ -629,6 +632,8 @@ export const taTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'இந்த புலம் true அல்லது false ஆக மட்டுமே இருக்க வேண்டும்.',
     username:
       'சரியான பயனர் பெயரை உள்ளிடவும். எழுத்துக்கள், எண்கள், ஹைஃபன்கள், புள்ளிகள் மற்றும் அடிக்கோடுகள் இருக்கலாம்.',
+    validateAllLocales: 'எல்லா Locale-களையும் சரிபார்க்கவும்',
+    validationResults: 'சரிபார்ப்பு முடிவுகள்',
     validUploadID: 'இந்த புலம் சரியான பதிவேற்ற ID அல்ல.',
   },
   version: {

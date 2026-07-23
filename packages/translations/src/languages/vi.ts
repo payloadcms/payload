@@ -602,6 +602,8 @@ export const viTranslations: DefaultTranslationsObject = {
     width: 'Chiều rộng',
   },
   validation: {
+    documentInvalid: 'Khắc phục các vấn đề sau.',
+    documentValid: 'Tất cả các locale được chọn đều hợp lệ.',
     emailAddress: 'Địa chỉ email không hợp lệ.',
     enterNumber: 'Vui lòng nhập số.',
     fieldHasNo: 'Field này không có: {{label}}',
@@ -618,6 +620,7 @@ export const viTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Kinh độ phải nằm giữa -180 và 180.',
     notValidDate: '"{{value}}" không phải là một ngày (date) hợp lệ.',
     required: 'Trường này là bắt buộc.',
+    requiredLocale: 'Bắt buộc',
     requiresAtLeast: 'Trường này cần tối thiểu {{count}} {{label}}.',
     requiresNoMoreThan: 'Trường này không thể vượt quá {{count}} {{label}}.',
     requiresTwoNumbers: 'Trường này cần tối thiểu 2 chữ số.',
@@ -626,6 +629,8 @@ export const viTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Trường này chỉ có thể chứa giá trị đúng hoặc sai.',
     username:
       'Vui lòng nhập một tên người dùng hợp lệ. Có thể chứa các chữ cái, số, dấu gạch ngang, dấu chấm và dấu gạch dưới.',
+    validateAllLocales: 'Xác thực tất cả các Locale',
+    validationResults: 'Kết quả xác thực',
     validUploadID: "'Field này không chứa ID tải lên hợp lệ.'",
   },
   version: {

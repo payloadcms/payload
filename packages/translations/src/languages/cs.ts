@@ -597,6 +597,8 @@ export const csTranslations: DefaultTranslationsObject = {
     width: 'Šířka',
   },
   validation: {
+    documentInvalid: 'Opravte následující problémy.',
+    documentValid: 'Všechny vybrané lokalizace jsou platné.',
     emailAddress: 'Zadejte prosím platnou e-mailovou adresu.',
     enterNumber: 'Zadejte prosím platné číslo.',
     fieldHasNo: 'Toto pole nemá {{label}}',
@@ -613,6 +615,7 @@ export const csTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Zeměpisná délka musí být mezi -180 a 180.',
     notValidDate: '"{{value}}" není platné datum.',
     required: 'Toto pole je povinné.',
+    requiredLocale: 'Povinné',
     requiresAtLeast: 'Toto pole vyžaduje alespoň {{count}} {{label}}.',
     requiresNoMoreThan: 'Toto pole vyžaduje ne více než {{count}} {{label}}.',
     requiresTwoNumbers: 'Toto pole vyžaduje dvě čísla.',
@@ -621,6 +624,8 @@ export const csTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'Toto pole může být rovno pouze true nebo false.',
     username:
       'Prosím, zadejte platné uživatelské jméno. Může obsahovat písmena, čísla, pomlčky, tečky a podtržítka.',
+    validateAllLocales: 'Ověřit všechny jazyky',
+    validationResults: 'Výsledky validace',
     validUploadID: 'Toto pole není platné ID pro odeslání.',
   },
   version: {

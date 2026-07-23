@@ -591,6 +591,8 @@ export const thTranslations: DefaultTranslationsObject = {
     width: 'ความกว้าง',
   },
   validation: {
+    documentInvalid: 'โปรดแก้ไขปัญหาต่อไปนี้',
+    documentValid: 'ภาษาทั้งหมดที่เลือกมีความถูกต้อง',
     emailAddress: 'กรุณาระบุอีเมลที่ถูกต้อง',
     enterNumber: 'กรุณาระบุตัวเลขที่ถูกต้อง',
     fieldHasNo: 'ช่องนี้ไม่มี {{label}}',
@@ -607,6 +609,7 @@ export const thTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'ลองจิจูดต้องอยู่ระหว่าง -180 และ 180.',
     notValidDate: 'วันที่ "{{value}}" ไม่ถูกต้อง',
     required: 'จำเป็นต้องระบุค่า',
+    requiredLocale: 'จำเป็น',
     requiresAtLeast: 'ต้องมีอย่างน้อย {{count}} {{label}}',
     requiresNoMoreThan: 'ห้ามมีเกิน {{count}} {{label}}',
     requiresTwoNumbers: 'ต้องมีตัวเลข 2 ค่า',
@@ -614,6 +617,8 @@ export const thTranslations: DefaultTranslationsObject = {
     timezoneRequired: 'ต้องการเขตเวลา',
     trueOrFalse: 'เป็นได้แค่ "ใช่" หรือ "ไม่ใช่"',
     username: 'กรุณาใส่ชื่อผู้ใช้ที่ถูกต้อง สามารถมีตัวอักษร ตัวเลข ขีดกลาง จุด และขีดล่าง',
+    validateAllLocales: 'ตรวจสอบความถูกต้องของทุก Locale',
+    validationResults: 'ผลการตรวจสอบความถูกต้อง',
     validUploadID: 'ไม่ใช่ ID ของการอัปโหลดที่ถูกต้อง',
   },
   version: {

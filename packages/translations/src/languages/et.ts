@@ -596,6 +596,8 @@ export const etTranslations: DefaultTranslationsObject = {
     width: 'Laius',
   },
   validation: {
+    documentInvalid: 'Parandage järgmised probleemid.',
+    documentValid: 'Kõik valitud töökeeled on kehtivad.',
     emailAddress: 'Palun sisesta kehtiv e-posti aadress.',
     enterNumber: 'Palun sisesta kehtiv number.',
     fieldHasNo: 'Sellel väljal pole {{label}}',
@@ -612,6 +614,7 @@ export const etTranslations: DefaultTranslationsObject = {
     longitudeOutOfBounds: 'Pikkuskraad peab olema vahemikus -180 kuni 180.',
     notValidDate: '"{{value}}" ei ole kehtiv kuupäev.',
     required: 'See väli on kohustuslik.',
+    requiredLocale: 'Nõutav',
     requiresAtLeast: 'See väli nõuab vähemalt {{count}} {{label}}.',
     requiresNoMoreThan: 'See väli ei tohi sisaldada rohkem kui {{count}} {{label}}.',
     requiresTwoNumbers: 'See väli nõuab kahte numbrit.',
@@ -620,6 +623,8 @@ export const etTranslations: DefaultTranslationsObject = {
     trueOrFalse: 'See väli saab olla ainult tõene või väär.',
     username:
       'Palun sisesta kehtiv kasutajanimi. Võib sisaldada tähti, numbreid, sidekriipse, punkte ja alakriipse.',
+    validateAllLocales: 'Kinnita kõik keeled',
+    validationResults: 'Valideerimistulemused',
     validUploadID: 'See väli ei ole kehtiv üleslaadimise ID.',
   },
   version: {
