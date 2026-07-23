@@ -1,3 +1,4 @@
+import { spawn } from 'node:child_process'
 import path from 'path'
 import {
   _internal_jobSystemGlobals,
@@ -10,10 +11,11 @@ import {
 } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
+import { it } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
@@ -1132,6 +1134,110 @@ describe('Queues - Payload', () => {
   })
 
   describe('worker recovery', () => {
+    // The child process can share the file-backed SQLite test database.
+    it(
+      'should recover a job after its worker process is killed',
+      { db: (type) => type.startsWith('sqlite') },
+      async () => {
+        _internal_jobSystemGlobals.shouldAutoRun = false
+        payload.config.jobs.deleteJobOnComplete = false
+
+        const postTitle = 'created after a worker process crash'
+        const job = await payload.jobs.queue({
+          input: {
+            postTitle,
+          },
+          workflow: 'longRunning',
+        })
+
+        const worker = spawn(
+          process.execPath,
+          [
+            '--no-deprecation',
+            '--import',
+            '@swc-node/register/esm-register',
+            path.resolve(dirname, 'crashWorker.ts'),
+            JSON.stringify(job.id),
+          ],
+          {
+            cwd: path.resolve(dirname, '../..'),
+            env: {
+              ...process.env,
+              CRASH_WORKER_LEASE_DURATION: '1000',
+              CRASH_WORKER_LEASE_SAFETY_BUFFER: '100',
+              PAYLOAD_DROP_DATABASE: 'false',
+              SEED_IN_CONFIG_ONINIT: 'false',
+            },
+            stdio: ['ignore', 'ignore', 'pipe'],
+          },
+        )
+
+        let workerErrorOutput = ''
+
+        worker.stderr.on('data', (data) => {
+          workerErrorOutput += data.toString()
+        })
+
+        const workerExit = new Promise<{
+          code: null | number
+          signal: NodeJS.Signals | null
+        }>((resolve) => {
+          worker.once('exit', (code, signal) => {
+            resolve({ code, signal })
+          })
+        })
+
+        try {
+          let processingUntil: null | string | undefined
+
+          for (let attempt = 0; attempt < 200 && !processingUntil; attempt += 1) {
+            if (worker.exitCode !== null || worker.signalCode !== null) {
+              throw new Error(`Worker exited before claiming the job.\n${workerErrorOutput}`)
+            }
+
+            const currentJob = await payload.findByID({
+              id: job.id,
+              collection: 'payload-jobs',
+            })
+
+            processingUntil = currentJob.processingUntil
+            await wait(50)
+          }
+
+          expect(processingUntil).toBeTruthy()
+          expect(worker.kill('SIGKILL')).toBe(true)
+          expect((await workerExit).signal).toBe('SIGKILL')
+
+          const millisecondsUntilRecovery = new Date(processingUntil!).getTime() - Date.now() + 100
+          await wait(Math.max(millisecondsUntilRecovery, 0))
+
+          const replacementWorkerResult = await payload.jobs.runByID({
+            id: job.id,
+            silent: true,
+          })
+          const completedJob = await payload.findByID({
+            id: job.id,
+            collection: 'payload-jobs',
+          })
+          const createdPosts = await payload.find({
+            collection: 'posts',
+            where: { title: { equals: postTitle } },
+          })
+
+          expect(replacementWorkerResult.jobStatus?.[job.id]?.status).toBe('success')
+          expect(createdPosts.totalDocs).toBe(1)
+          expect(completedJob.completedAt).toBeTruthy()
+          expect(completedJob.hasError).toBe(false)
+          expect(completedJob.totalTried).toBe(1)
+        } finally {
+          if (worker.exitCode === null && worker.signalCode === null) {
+            worker.kill('SIGKILL')
+            await workerExit
+          }
+        }
+      },
+    )
+
     it('should let only one replacement worker recover a job after its original worker stops responding', async () => {
       _internal_jobSystemGlobals.shouldAutoRun = false
       payload.config.jobs.deleteJobOnComplete = false
