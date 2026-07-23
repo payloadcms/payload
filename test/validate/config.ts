@@ -117,7 +117,7 @@ const validationCollection: CollectionConfig = {
   access: {
     validate: ({ req }) => {
       accessEvents.push('collection')
-      return req.context.allowValidation === true
+      return req.payloadAPI === 'REST' || req.context.allowValidation === true
     },
   },
   fields: [
@@ -227,7 +227,7 @@ const validationGlobal: GlobalConfig = {
   access: {
     validate: ({ req }) => {
       accessEvents.push('global')
-      return req.context.allowValidation === true
+      return req.payloadAPI === 'REST' || req.context.allowValidation === true
     },
   },
   fields: [

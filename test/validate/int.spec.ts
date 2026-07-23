@@ -5,6 +5,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   accessEvents,
@@ -18,13 +20,14 @@ import {
 } from './config.js'
 
 let payload: Payload
+let restClient: NextRESTClient
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 describe('validate Local API', () => {
   beforeAll(async () => {
-    ;({ payload } = await initPayloadInt(dirname))
+    ;({ payload, restClient } = await initPayloadInt(dirname))
 
     await payload.updateGlobal({
       slug: validationGlobalSlug,
@@ -410,6 +413,221 @@ describe('validate Local API', () => {
       ).rejects.toThrow('global validation hook failure')
 
       expect(req.operation).toBe('create')
+    })
+  })
+
+  describe('REST API', () => {
+    it('should return invalid collection create validation without creating a document', async () => {
+      const response = await restClient.POST(`/${validationCollectionSlug}/validate?locale=en`, {
+        body: JSON.stringify({
+          summary: 'candidate summary',
+          title: '',
+        }),
+      })
+      const result = await response.json()
+
+      expect(response.status).toBe(200)
+      expect(result).toMatchObject({
+        errors: [
+          {
+            locale: 'en',
+            path: 'title',
+          },
+        ],
+        valid: false,
+      })
+      expect(await payload.count({ collection: validationCollectionSlug })).toEqual({
+        totalDocs: 0,
+      })
+    })
+
+    it('should return valid collection create validation', async () => {
+      const response = await restClient.POST(`/${validationCollectionSlug}/validate?locale=en`, {
+        body: JSON.stringify({
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        }),
+      })
+
+      expect(response.status).toBe(200)
+      await expect(response.json()).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+    })
+
+    it('should return 400 for missing or empty locales and malformed data', async () => {
+      const missingLocale = await restClient.POST(`/${validationCollectionSlug}/validate`, {
+        body: JSON.stringify({
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        }),
+      })
+      const emptyLocale = await restClient.POST(`/${validationCollectionSlug}/validate?locale=`, {
+        body: JSON.stringify({
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        }),
+      })
+      const malformedData = await restClient.POST(
+        `/${validationCollectionSlug}/validate?locale=en`,
+        {
+          body: JSON.stringify([]),
+        },
+      )
+      const malformedJSON = await restClient.POST(
+        `/${validationCollectionSlug}/validate?locale=en`,
+        {
+          body: '{ invalid json',
+        },
+      )
+
+      expect(missingLocale.status).toBe(400)
+      expect(emptyLocale.status).toBe(400)
+      expect(malformedData.status).toBe(400)
+      expect(malformedJSON.status).toBe(400)
+    })
+
+    it('should merge by-ID validation data without persisting it', async () => {
+      const stored = await payload.create({
+        collection: validationCollectionSlug,
+        data: {
+          location: [-0.12, 51.5],
+          summary: 'stored summary',
+          title: 'Stored title',
+        },
+        locale: 'en',
+      })
+      const response = await restClient.POST(
+        `/${validationCollectionSlug}/${stored.id}/validate?locale=en`,
+        {
+          body: JSON.stringify({
+            summary: 'candidate summary',
+          }),
+        },
+      )
+      const afterValidation = await payload.findByID({
+        id: stored.id,
+        collection: validationCollectionSlug,
+        locale: 'en',
+      })
+
+      expect(response.status).toBe(200)
+      await expect(response.json()).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+      expect(afterValidation).toMatchObject({
+        location: [-0.12, 51.5],
+        summary: 'stored summary',
+        title: 'Stored title',
+      })
+    })
+
+    it('should validate global data without persisting it', async () => {
+      const response = await restClient.POST(
+        `/globals/${validationGlobalSlug}/validate?locale=en`,
+        {
+          body: JSON.stringify({
+            title: '',
+          }),
+        },
+      )
+      const afterValidation = await payload.findGlobal({
+        slug: validationGlobalSlug,
+        locale: 'en',
+      })
+
+      expect(response.status).toBe(200)
+      await expect(response.json()).resolves.toMatchObject({
+        errors: [
+          {
+            locale: 'en',
+            path: 'title',
+          },
+        ],
+        valid: false,
+      })
+      expect(afterValidation.title).toBe('Stored global title')
+    })
+
+    it('should return valid global validation without persisting it', async () => {
+      const response = await restClient.POST(
+        `/globals/${validationGlobalSlug}/validate?locale=en`,
+        {
+          body: JSON.stringify({
+            summary: 'candidate summary',
+          }),
+        },
+      )
+
+      expect(response.status).toBe(200)
+      await expect(response.json()).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+    })
+
+    it('should deny validation when access.validate returns false', async () => {
+      const collection = payload.collections[validationCollectionSlug]!
+      const validate = collection.config.access.validate
+
+      collection.config.access.validate = () => false
+
+      const response = await restClient.POST(`/${validationCollectionSlug}/validate?locale=en`, {
+        body: JSON.stringify({
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        }),
+      })
+
+      collection.config.access.validate = validate
+
+      expect(response.status).toBe(403)
+    })
+
+    it('should ignore body attempts to alter access, context, or the validation operation', async () => {
+      const collection = payload.collections[validationCollectionSlug]!
+      const validate = collection.config.access.validate
+
+      collection.config.access.validate = () => false
+
+      const deniedResponse = await restClient.POST(
+        `/${validationCollectionSlug}/validate?locale=en`,
+        {
+          body: JSON.stringify({
+            context: { allowValidation: true },
+            operation: 'create',
+            overrideAccess: true,
+            req: { operation: 'create' },
+            summary: 'candidate summary',
+            title: 'Candidate title',
+            user: { id: 'admin' },
+          }),
+        },
+      )
+
+      collection.config.access.validate = validate
+
+      const allowedResponse = await restClient.POST(
+        `/${validationCollectionSlug}/validate?locale=en`,
+        {
+          body: JSON.stringify({
+            operation: 'create',
+            summary: 'candidate summary',
+            title: 'Candidate title',
+          }),
+        },
+      )
+
+      expect(deniedResponse.status).toBe(403)
+      expect(allowedResponse.status).toBe(200)
+      expect(
+        hookEvents.every(
+          ({ operation, requestOperation }) =>
+            operation === 'validate' && requestOperation === 'validate',
+        ),
+      ).toBe(true)
     })
   })
 
