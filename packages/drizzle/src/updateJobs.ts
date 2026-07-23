@@ -14,9 +14,16 @@ import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 import { markWrite } from './utilities/readAfterWrite.js'
 
+const isInitialJobClaim = (data: Record<string, unknown>): boolean =>
+  typeof data.processingToken === 'string' &&
+  typeof data.processingUntil === 'string' &&
+  Object.keys(data).every(
+    (field) => field === 'processingToken' || field === 'processingUntil' || field === 'updatedAt',
+  )
+
 export const updateJobs: UpdateJobs = async function updateMany(
   this: DrizzleAdapter,
-  { id, claimBefore, data, limit: limitArg, req, returning, sort: sortArg, where: whereArg },
+  { id, data, limit: limitArg, req, returning, sort: sortArg, where: whereArg },
 ) {
   if (
     !(data?.log as object[])?.length &&
@@ -73,10 +80,13 @@ export const updateJobs: UpdateJobs = async function updateMany(
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
 
-  // Recheck lease expiry in the write so only one runner wins the claim.
-  if (claimBefore) {
+  if (isInitialJobClaim(data)) {
+    // Atomically claim jobs so multiple workers cannot pick up the same job.
+    // We don't need FOR UPDATE SKIP LOCKED here because of the compare-and-swap-style update using processingUntil and processingToken.
+    // The first update makes the where clause fail for other workers, so they cannot claim the same job.
     const _db = db as LibSQLDatabase
     const table = this.tables[tableName]
+    const now = new Date().toISOString()
     const { row } = transformForWrite({
       adapter: this,
       data,
@@ -96,7 +106,7 @@ export const updateJobs: UpdateJobs = async function updateMany(
       .where(
         and(
           inArray(table.id, jobIDs),
-          or(isNull(table.processingUntil), lte(table.processingUntil, claimBefore)),
+          or(isNull(table.processingUntil), lte(table.processingUntil, now)),
         ),
       )
       .returning({ id: table.id })
