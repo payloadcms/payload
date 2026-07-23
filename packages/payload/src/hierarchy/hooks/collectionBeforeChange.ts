@@ -1,11 +1,7 @@
 /**
- * beforeChange Hook Responsibilities:
+ * General hierarchy beforeChange hook responsibilities:
  * - Validate circular references when parent changes
- * - Prevent moving a folder into its own subfolder
- *
- * Does NOT handle:
- * - Tree structure (no stored tree anymore)
- * - Path computation (done in afterRead)
+ * - Prevent moving a document into its own descendant chain
  */
 
 import type {
@@ -15,16 +11,39 @@ import type {
   PayloadRequest,
 } from '../../index.js'
 
+import { collectionBeforeChangeStored } from './stored/collectionBeforeChange.js'
+
 type Args = {
   /**
    * The name of the field that contains the parent document ID
    */
   parentFieldName: string
+  pathStrategy: 'stored' | 'virtual'
+  slugPathFieldName: string
+  titleFieldName: string
+  titlePathFieldName: string
 }
 
-export const hierarchyCollectionBeforeChange =
-  ({ parentFieldName }: Args): CollectionBeforeChangeHook =>
-  async ({ collection, data, operation, originalDoc, req }) => {
+export const collectionBeforeChange = ({
+  parentFieldName,
+  pathStrategy,
+  slugPathFieldName,
+  titleFieldName,
+  titlePathFieldName,
+}: Args): CollectionBeforeChangeHook => {
+  const storedBeforeChangeHook =
+    pathStrategy === 'stored'
+      ? collectionBeforeChangeStored({
+          parentFieldName,
+          slugPathFieldName,
+          titleFieldName,
+          titlePathFieldName,
+        })
+      : undefined
+
+  return async (args) => {
+    const { collection, data, operation, originalDoc, req } = args
+
     // Determine the new parent ID
     const newParentID =
       data[parentFieldName] !== undefined ? data[parentFieldName] : originalDoc?.[parentFieldName]
@@ -49,41 +68,32 @@ export const hierarchyCollectionBeforeChange =
       await validateNoCircularReference({
         collection,
         currentDocId: originalDoc?.id,
+        parentFieldName,
         parentId,
         req,
       })
     }
 
-    return data
+    return storedBeforeChangeHook ? await storedBeforeChangeHook(args) : data
   }
+}
 
 /**
- * Walks up the parent chain to detect true circular references (loops).
- * Does NOT throw when moving into a child - that case is handled by afterChange
- * which will automatically reparent the child.
+ * Walks up the parent chain to detect cycles.
  */
 async function validateNoCircularReference({
   collection,
   currentDocId,
+  parentFieldName,
   parentId,
   req,
 }: {
   collection: CollectionConfig
   currentDocId: number | string
+  parentFieldName: string
   parentId: number | string
   req: PayloadRequest
 }) {
-  const parentFieldName =
-    collection.hierarchy && collection.hierarchy !== true
-      ? collection.hierarchy.parentFieldName
-      : undefined
-
-  if (!parentFieldName) {
-    return
-  }
-
-  const fieldName = parentFieldName
-
   async function checkAncestor(
     ancestorId: number | string,
     visitedNodes: Set<string> = new Set(),
@@ -111,11 +121,11 @@ async function validateNoCircularReference({
         depth: 0,
         req,
         select: {
-          [fieldName]: true,
+          [parentFieldName]: true,
         },
       })) as JsonObject
 
-      const nextParent = ancestor?.[fieldName]
+      const nextParent = ancestor?.[parentFieldName]
 
       if (!nextParent) {
         return // No parent, end of chain

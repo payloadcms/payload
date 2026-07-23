@@ -71,6 +71,7 @@ export interface Config {
     departments: Department;
     divisions: Division;
     folders: Folder;
+    'localized-title-field-pages': LocalizedTitleFieldPage;
     organizations: Organization;
     pages: Page;
     products: Product;
@@ -87,6 +88,7 @@ export interface Config {
     departments: DepartmentsSelect<false> | DepartmentsSelect<true>;
     divisions: DivisionsSelect<false> | DivisionsSelect<true>;
     folders: FoldersSelect<false> | FoldersSelect<true>;
+    'localized-title-field-pages': LocalizedTitleFieldPagesSelect<false> | LocalizedTitleFieldPagesSelect<true>;
     organizations: OrganizationsSelect<false> | OrganizationsSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
@@ -98,7 +100,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: ('false' | 'none' | 'null') | false | null | ('en' | 'es' | 'de') | ('en' | 'es' | 'de')[];
   globals: {};
@@ -106,6 +108,8 @@ export interface Config {
   locale: 'en' | 'es' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -136,8 +140,8 @@ export interface UserAuthOperations {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: string;
-  parent?: (string | null) | Category;
+  id: number;
+  parent?: (number | null) | Category;
   name: string;
   updatedAt: string;
   createdAt: string;
@@ -149,8 +153,8 @@ export interface Category {
  * via the `definition` "departments".
  */
 export interface Department {
-  id: string;
-  parentDept?: (string | null) | Department;
+  id: number;
+  parentDept?: (number | null) | Department;
   deptName: string;
   updatedAt: string;
   createdAt: string;
@@ -162,8 +166,8 @@ export interface Department {
  * via the `definition` "divisions".
  */
 export interface Division {
-  id: string;
-  parent?: (string | null) | Division;
+  id: number;
+  parent?: (number | null) | Division;
   title: string;
   updatedAt: string;
   createdAt: string;
@@ -175,8 +179,8 @@ export interface Division {
  * via the `definition` "folders".
  */
 export interface Folder {
-  id: string;
-  parentFolder?: (string | null) | Folder;
+  id: number;
+  parentFolder?: (number | null) | Folder;
   name: string;
   updatedAt: string;
   createdAt: string;
@@ -186,14 +190,28 @@ export interface Folder {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-title-field-pages".
+ */
+export interface LocalizedTitleFieldPage {
+  id: number;
+  parent?: (number | null) | LocalizedTitleFieldPage;
+  fallbackTitle: string;
+  localizedTitle: string;
+  updatedAt: string;
+  createdAt: string;
+  _h_slugPath?: string | null;
+  _h_titlePath?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "organizations".
  */
 export interface Organization {
-  id: string;
-  parent?: (string | null) | Organization;
+  id: number;
+  parent?: (number | null) | Organization;
   title: string;
   content?: string | null;
-  parentFolder?: (string | null) | Folder;
+  parentFolder?: (number | null) | Folder;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -205,8 +223,8 @@ export interface Organization {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: string;
-  parent?: (string | null) | Page;
+  id: number;
+  parent?: (number | null) | Page;
   title: string;
   slug?: string | null;
   updatedAt: string;
@@ -219,11 +237,11 @@ export interface Page {
  * via the `definition` "products".
  */
 export interface Product {
-  id: string;
-  parent?: (string | null) | Product;
+  id: number;
+  parent?: (number | null) | Product;
   name: string;
   description?: string | null;
-  parentFolder?: (string | null) | Folder;
+  parentFolder?: (number | null) | Folder;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -235,8 +253,8 @@ export interface Product {
  * via the `definition` "regions".
  */
 export interface Region {
-  id: string;
-  parent?: (string | null) | Region;
+  id: number;
+  parent?: (number | null) | Region;
   name: string;
   updatedAt: string;
   createdAt: string;
@@ -248,7 +266,7 @@ export interface Region {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -265,7 +283,7 @@ export interface PayloadKv {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -290,48 +308,52 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
       } | null)
     | ({
         relationTo: 'departments';
-        value: string | Department;
+        value: number | Department;
       } | null)
     | ({
         relationTo: 'divisions';
-        value: string | Division;
+        value: number | Division;
       } | null)
     | ({
         relationTo: 'folders';
-        value: string | Folder;
+        value: number | Folder;
+      } | null)
+    | ({
+        relationTo: 'localized-title-field-pages';
+        value: number | LocalizedTitleFieldPage;
       } | null)
     | ({
         relationTo: 'organizations';
-        value: string | Organization;
+        value: number | Organization;
       } | null)
     | ({
         relationTo: 'pages';
-        value: string | Page;
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'products';
-        value: string | Product;
+        value: number | Product;
       } | null)
     | ({
         relationTo: 'regions';
-        value: string | Region;
+        value: number | Region;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -341,10 +363,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -364,7 +386,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -418,6 +440,19 @@ export interface FoldersSelect<T extends boolean = true> {
   _h_slugPath?: T;
   _h_titlePath?: T;
   allowedTypes?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "localized-title-field-pages_select".
+ */
+export interface LocalizedTitleFieldPagesSelect<T extends boolean = true> {
+  parent?: T;
+  fallbackTitle?: T;
+  localizedTitle?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _h_slugPath?: T;
+  _h_titlePath?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -545,6 +580,62 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'categories'
+      | 'departments'
+      | 'divisions'
+      | 'folders'
+      | 'localized-title-field-pages'
+      | 'organizations'
+      | 'pages'
+      | 'products'
+      | 'regions'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'categories'
+          | 'departments'
+          | 'divisions'
+          | 'folders'
+          | 'localized-title-field-pages'
+          | 'organizations'
+          | 'pages'
+          | 'products'
+          | 'regions'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

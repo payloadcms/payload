@@ -16,6 +16,7 @@ import { useEffectEvent } from '../../../hooks/useEffectEvent.js'
 import { TagIcon } from '../../../icons/Tag/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useHierarchy } from '../../../providers/Hierarchy/index.js'
+import { useLocale } from '../../../providers/Locale/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
 import { DialogBody, DialogHeader, DialogModal } from '../../Dialog/index.js'
@@ -55,6 +56,7 @@ export const HierarchyModalContent = function HierarchyModalContent({
   useAsTitle,
 }: { ref?: React.RefObject<HierarchyModalContentRef | null> } & HierarchyModalContentProps) {
   const { i18n, t } = useTranslation()
+  const { code: locale } = useLocale()
   // NOTE: Do NOT use useModal() here - it causes re-renders when any modal state changes
   // Use closeModal prop instead which already handles closing the modal
   const {
@@ -103,6 +105,7 @@ export const HierarchyModalContent = function HierarchyModalContent({
         api,
         collectionSlug: hierarchyCollectionSlug,
         itemId,
+        locale,
         parentFieldName: parentFieldName_internal,
         serverURL,
       })

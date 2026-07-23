@@ -1,52 +1,57 @@
 import type { CollectionConfig } from '../collections/config/types.js'
 
-import { hierarchyCollectionAfterRead } from './hooks/collectionAfterRead.js'
-import { hierarchyCollectionBeforeChange } from './hooks/collectionBeforeChange.js'
-import { hierarchyCollectionBeforeDelete } from './hooks/collectionBeforeDelete.js'
-import { hierarchyCollectionBeforeOperation } from './hooks/collectionBeforeOperation.js'
-import { findFieldByName, findUseAsTitleField } from './utils/findUseAsTitle.js'
+import { collectionBeforeChange } from './hooks/collectionBeforeChange.js'
+import { collectionBeforeDelete } from './hooks/collectionBeforeDelete.js'
+import { collectionAfterChangeStored } from './hooks/stored/collectionAfterChange.js'
+import { collectionAfterReadVirtual } from './hooks/virtual/collectionAfterRead.js'
+import { collectionBeforeOperationVirtual } from './hooks/virtual/collectionBeforeOperation.js'
 
 export const addHierarchyToCollection = ({
   collectionConfig,
+  isPathLocalized,
   parentFieldName,
+  pathStrategy,
   slugFieldName,
   slugPathFieldName,
+  titleFieldName,
   titlePathFieldName,
 }: {
   collectionConfig: CollectionConfig
+  isPathLocalized: boolean
   parentFieldName: string
+  pathStrategy: 'stored' | 'virtual'
   slugFieldName?: string
   slugPathFieldName: string
+  titleFieldName: string
   titlePathFieldName: string
 }) => {
-  const { titleFieldName } = findUseAsTitleField(collectionConfig)
-  // Verify slug field exists if configured
-  const slugFieldInfo = slugFieldName ? findFieldByName(collectionConfig, slugFieldName) : undefined
-  const validatedSlugFieldName = slugFieldInfo ? slugFieldName : undefined
-
-  // Add virtual path fields (computed in afterRead)
+  // Add path fields. Virtual strategy computes these on read, stored strategy persists them.
   collectionConfig.fields.push(
     {
       name: slugPathFieldName,
       type: 'text',
       admin: {
+        position: 'sidebar',
         readOnly: true,
         // hidden: true,
       },
       index: true,
       label: 'Slug Path',
-      virtual: true,
+      localized: isPathLocalized || undefined,
+      virtual: pathStrategy === 'virtual',
     },
     {
       name: titlePathFieldName,
       type: 'text',
       admin: {
+        position: 'sidebar',
         readOnly: true,
         // hidden: true,
       },
       index: true,
       label: 'Title Path',
-      virtual: true,
+      localized: isPathLocalized || undefined,
+      virtual: pathStrategy === 'virtual',
     },
   )
 
@@ -61,27 +66,56 @@ export const addHierarchyToCollection = ({
 
   collectionConfig.hooks = {
     ...(collectionConfig.hooks || {}),
-    afterRead: [
-      ...(collectionConfig.hooks?.afterRead || []),
-      hierarchyCollectionAfterRead({ parentFieldName, slugPathFieldName, titlePathFieldName }),
-    ],
+    afterChange:
+      pathStrategy === 'stored'
+        ? [
+            ...(collectionConfig.hooks?.afterChange || []),
+            collectionAfterChangeStored({
+              isPathLocalized,
+              parentFieldName,
+              slugPathFieldName,
+              titlePathFieldName,
+            }),
+          ]
+        : collectionConfig.hooks?.afterChange || [],
+    afterRead:
+      pathStrategy === 'virtual'
+        ? [
+            ...(collectionConfig.hooks?.afterRead || []),
+            collectionAfterReadVirtual({
+              isPathLocalized,
+              parentFieldName,
+              slugPathFieldName,
+              titlePathFieldName,
+            }),
+          ]
+        : collectionConfig.hooks?.afterRead || [],
     beforeChange: [
       ...(collectionConfig.hooks?.beforeChange || []),
-      hierarchyCollectionBeforeChange({ parentFieldName }),
-    ],
-    beforeDelete: [
-      ...(collectionConfig.hooks?.beforeDelete || []),
-      hierarchyCollectionBeforeDelete({ parentFieldName }),
-    ],
-    beforeOperation: [
-      ...(collectionConfig.hooks?.beforeOperation || []),
-      hierarchyCollectionBeforeOperation({
+      collectionBeforeChange({
         parentFieldName,
-        slugFieldName: validatedSlugFieldName,
+        pathStrategy,
         slugPathFieldName,
         titleFieldName,
         titlePathFieldName,
       }),
     ],
+    beforeDelete: [
+      ...(collectionConfig.hooks?.beforeDelete || []),
+      collectionBeforeDelete({ parentFieldName }),
+    ],
+    beforeOperation:
+      pathStrategy === 'virtual'
+        ? [
+            ...(collectionConfig.hooks?.beforeOperation || []),
+            collectionBeforeOperationVirtual({
+              parentFieldName,
+              slugFieldName,
+              slugPathFieldName,
+              titleFieldName,
+              titlePathFieldName,
+            }),
+          ]
+        : collectionConfig.hooks?.beforeOperation || [],
   }
 }

@@ -16,10 +16,17 @@ export function findUseAsTitleField(collectionConfig: CollectionConfig): {
 export function findFieldByName(
   collectionConfig: CollectionConfig,
   fieldName: string,
-): { fieldName: string; localized: boolean } | undefined {
+): { localized: boolean; titleFieldName: string } | undefined {
+  if (fieldName === 'id') {
+    return {
+      localized: false,
+      titleFieldName: fieldName,
+    }
+  }
+
   try {
     const result = iterateFields({ fields: collectionConfig.fields, titleFieldName: fieldName })
-    return { fieldName: result.titleFieldName, localized: result.localized }
+    return result
   } catch {
     return undefined
   }

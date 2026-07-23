@@ -12,8 +12,10 @@ import {
   getHierarchyFieldName,
   HIERARCHY_SLUG_PATH_FIELD,
   HIERARCHY_TITLE_PATH_FIELD,
+  HIERARCHY_TITLE_PATH_SEPARATOR,
 } from './constants.js'
 import { ensureSafeCollectionsChange } from './hooks/ensureSafeCollectionsChange.js'
+import { findFieldByName, findUseAsTitleField } from './utils/findUseAsTitle.js'
 
 /**
  * Sanitizes hierarchy configuration for a single collection.
@@ -88,6 +90,8 @@ export const sanitizeHierarchyCollection = (
     collectionConfig.hierarchy.slugPathFieldName || HIERARCHY_SLUG_PATH_FIELD
   const titlePathFieldName =
     collectionConfig.hierarchy.titlePathFieldName || HIERARCHY_TITLE_PATH_FIELD
+  const titlePathSeparator =
+    collectionConfig.hierarchy.titlePathSeparator ?? HIERARCHY_TITLE_PATH_SEPARATOR
   const allowHasMany = collectionConfig.hierarchy.allowHasMany ?? DEFAULT_ALLOW_HAS_MANY
   const rawCollectionSpecific = collectionConfig.hierarchy.collectionSpecific
   const collectionSpecific: { fieldName: string } | false =
@@ -99,6 +103,7 @@ export const sanitizeHierarchyCollection = (
   const joinField = collectionConfig.hierarchy.joinField
     ? collectionConfig.hierarchy.joinField
     : undefined
+  const pathStrategy = collectionConfig.hierarchy.pathStrategy ?? 'virtual'
   const slugify =
     collectionConfig.hierarchy.slugify ?? ((text: string) => defaultSlugify(text) ?? '')
   const treeLimit = collectionConfig.hierarchy.admin?.treeLimit ?? DEFAULT_HIERARCHY_TREE_LIMIT
@@ -106,13 +111,31 @@ export const sanitizeHierarchyCollection = (
   const smallIconComponent = collectionConfig.hierarchy.admin?.components?.SmallIcon
 
   const slugField = collectionConfig.hierarchy.slugField
+  const titleField = collectionConfig.hierarchy.titleField
+  const titleFieldNameToUse = titleField ?? collectionConfig.admin?.useAsTitle
+  const titleFieldInfo = titleFieldNameToUse
+    ? findFieldByName(collectionConfig, titleFieldNameToUse)
+    : findUseAsTitleField(collectionConfig)
+
+  if (!titleFieldInfo) {
+    throw new Error(
+      `The hierarchy title field "${titleFieldNameToUse}" was not found in collection "${collectionConfig.slug}"`,
+    )
+  }
+
+  const slugFieldInfo = slugField ? findFieldByName(collectionConfig, slugField) : undefined
+  const resolvedSlugField = slugFieldInfo ? slugField : undefined
+  const isPathLocalized = Boolean(titleFieldInfo.localized || slugFieldInfo?.localized)
 
   // Apply hierarchy to collection (adds fields and hooks)
   addHierarchyToCollection({
     collectionConfig,
+    isPathLocalized,
     parentFieldName: collectionConfig.hierarchy.parentFieldName,
-    slugFieldName: slugField,
+    pathStrategy,
+    slugFieldName: resolvedSlugField,
     slugPathFieldName,
+    titleFieldName: titleFieldInfo.titleFieldName,
     titlePathFieldName,
   })
 
@@ -154,10 +177,13 @@ export const sanitizeHierarchyCollection = (
     collectionSpecific,
     joinField,
     parentFieldName,
+    pathStrategy,
     relatedCollections: {},
     slugField,
     slugify,
     slugPathFieldName,
+    titleField,
     titlePathFieldName,
+    titlePathSeparator,
   }
 }
