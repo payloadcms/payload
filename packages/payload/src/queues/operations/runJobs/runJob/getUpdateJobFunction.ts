@@ -21,15 +21,12 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
       throw new JobLeaseLostError(`Job ${job.id} has no processing token`)
     }
 
-    const now = getCurrentDate()
     const minimumProcessingUntil = new Date(
-      now.getTime() + req.payload.config.jobs.processingLease.safetyBuffer,
+      getCurrentDate().getTime() + req.payload.config.jobs.processingLease.safetyBuffer,
     ).toISOString()
     const isCancelling = Boolean((jobData.error as Record<string, unknown> | undefined)?.cancelled)
-    const isSettling = jobData.processingUntil === null
-    const data = isSettling ? { ...jobData, processingToken: null } : jobData
     const updatedJobs = await updateJobs({
-      data,
+      data: jobData.processingUntil === null ? { ...jobData, processingToken: null } : jobData,
       limit: 1,
       req,
       returning: true,
@@ -41,7 +38,8 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
         ],
       },
     })
-    const updatedJob = updatedJobs?.[0]
+    let updatedJob = updatedJobs?.[0]
+    const didUpdateJob = Boolean(updatedJob)
 
     if (!updatedJob) {
       const currentJob = await req.payload.db.findOne<Job>({
@@ -51,41 +49,40 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
       })
 
       if (currentJob) {
-        mergeJob({ job, updatedJob: currentJob })
+        updatedJob = currentJob
       }
+    }
 
-      if ((currentJob?.error as Record<string, unknown> | undefined)?.cancelled) {
-        if (isCancelling && currentJob) {
-          return currentJob
-        }
-        throw new JobCancelledError(`Job ${job.id} was cancelled`)
-      }
-
+    if (!updatedJob) {
       throw new JobLeaseLostError(`Job ${job.id} is no longer owned by this runner`)
     }
 
-    mergeJob({ job, updatedJob })
+    // Update job object like this to modify the original object - that way, incoming changes (e.g. taskStatus field that will be re-generated through the hook) will be reflected in the calling function
+    for (const key in updatedJob) {
+      if (key === 'log') {
+        // Add all new log entries to the original job.log object. Do not delete any existing log entries.
+        // Do not update existing log entries, as existing log entries should be immutable.
+        for (const logEntry of updatedJob?.log ?? []) {
+          if (!job.log || !job.log.some((entry) => entry.id === logEntry.id)) {
+            ;(job.log ??= []).push(logEntry)
+          }
+        }
+      } else {
+        ;(job as any)[key] = updatedJob[key as keyof Job]
+      }
+    }
 
-    if (!isCancelling && (updatedJob?.error as Record<string, unknown>)?.cancelled) {
-      throw new JobCancelledError(`Job ${job.id} was cancelled`)
+    if ((updatedJob?.error as Record<string, unknown>)?.cancelled) {
+      if (!isCancelling) {
+        throw new JobCancelledError(`Job ${job.id} was cancelled`)
+      }
+      return updatedJob
+    }
+
+    if (!didUpdateJob) {
+      throw new JobLeaseLostError(`Job ${job.id} is no longer owned by this runner`)
     }
 
     return updatedJob
-  }
-}
-
-function mergeJob({ job, updatedJob }: { job: Job; updatedJob: Job }): void {
-  // Modify the original object so incoming changes, including the generated taskStatus, are reflected in the calling function.
-  for (const key in updatedJob) {
-    if (key === 'log') {
-      // Logs are immutable. Add new entries without replacing entries already held in memory.
-      for (const logEntry of updatedJob.log ?? []) {
-        if (!job.log || !job.log.some((entry) => entry.id === logEntry.id)) {
-          ;(job.log ??= []).push(logEntry)
-        }
-      }
-    } else {
-      ;(job as any)[key] = updatedJob[key as keyof Job]
-    }
   }
 }
