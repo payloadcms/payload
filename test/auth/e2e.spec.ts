@@ -629,12 +629,19 @@ describe('Auth', () => {
         tokenExpirationMs,
       })
 
+      const refreshResponse = sessionPage.waitForResponse((response) =>
+        isActivityRefreshRequest(response.request()),
+      )
+
       await sessionPage.dispatchEvent('body', 'mousemove')
       expect(refreshRequests).toHaveLength(0)
-      await sessionPage.clock.fastForward(60_001)
+      await sessionPage.clock.fastForward(59_999)
+      expect(refreshRequests).toHaveLength(0)
+      await sessionPage.clock.fastForward(2)
       await sessionPage.clock.fastForward(1_001)
 
       expect(refreshRequests).toHaveLength(1)
+      expect((await refreshResponse).status()).toBe(200)
       sessionPage.off('request', recordRefreshRequest)
     })
 
