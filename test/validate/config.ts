@@ -4,6 +4,9 @@ import path from 'path'
 import { saveVersion } from 'payload'
 import { fileURLToPath } from 'url'
 
+// Direct internal import intentionally exercises the upload write guard.
+// eslint-disable-next-line payload/no-relative-monorepo-imports
+import { uploadFiles } from '../../packages/payload/src/uploads/uploadFiles.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -78,18 +81,16 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
     case 'upload': {
       const fileData = Buffer.from('must not be uploaded')
 
-      await req.payload.create({
-        collection: validationUploadsSlug,
-        data: {},
-        disableTransaction: true,
-        file: {
-          name: 'blocked.txt',
-          data: fileData,
-          mimetype: 'text/plain',
-          size: fileData.length,
-        },
+      await uploadFiles(
+        req.payload,
+        [
+          {
+            buffer: fileData,
+            path: path.join(validationUploadsDir, 'blocked.txt'),
+          },
+        ],
         req,
-      })
+      )
       break
     }
 
@@ -171,6 +172,14 @@ const validationCollection: CollectionConfig = {
       required: true,
     },
     {
+      name: 'location',
+      type: 'point',
+      validate: (value) =>
+        value === undefined || (Array.isArray(value) && value.length === 2)
+          ? true
+          : 'Location must use the public point tuple representation',
+    },
+    {
       name: 'writeAttempt',
       type: 'select',
       options: ['create', 'delete', 'update', 'upload', 'version'],
@@ -189,6 +198,11 @@ const validationCollection: CollectionConfig = {
           operation,
           requestOperation: req.operation,
         })
+
+        if (req.context.throwValidationHook === true) {
+          throw new Error('collection validation hook failure')
+        }
+
         return data
       },
       runWriteAttempt,
@@ -228,6 +242,14 @@ const validationGlobal: GlobalConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'location',
+      type: 'point',
+      validate: (value) =>
+        value === undefined || (Array.isArray(value) && value.length === 2)
+          ? true
+          : 'Location must use the public point tuple representation',
+    },
   ],
   hooks: {
     beforeChange: [
@@ -238,6 +260,11 @@ const validationGlobal: GlobalConfig = {
           operation,
           requestOperation: req.operation,
         })
+
+        if (req.context.throwValidationHook === true) {
+          throw new Error('global validation hook failure')
+        }
+
         return data
       },
     ],

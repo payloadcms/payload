@@ -25,7 +25,20 @@ export type Arguments<TSlug extends CollectionSlug> = {
   req: PayloadRequest
 }
 
-export async function validateOperation<TSlug extends CollectionSlug>({
+export async function validateOperation<TSlug extends CollectionSlug>(
+  args: Arguments<TSlug>,
+): Promise<ValidationResult> {
+  const previousOperation = args.req.operation
+  args.req.operation = 'validate'
+
+  try {
+    return await validateOperationWithScopedRequest(args)
+  } finally {
+    args.req.operation = previousOperation
+  }
+}
+
+async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>({
   id,
   collection,
   data: incomingData,
@@ -33,8 +46,6 @@ export async function validateOperation<TSlug extends CollectionSlug>({
   req,
 }: Arguments<TSlug>): Promise<ValidationResult> {
   const collectionConfig = collection.config
-
-  req.operation = 'validate'
 
   const accessResult = !overrideAccess
     ? await executeAccess({ id, data: incomingData, req }, collectionConfig.access.validate)

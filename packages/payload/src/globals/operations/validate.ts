@@ -21,15 +21,26 @@ export type Arguments<TSlug extends GlobalSlug> = {
   slug: string
 }
 
-export async function validateOperation<TSlug extends GlobalSlug>({
+export async function validateOperation<TSlug extends GlobalSlug>(
+  args: Arguments<TSlug>,
+): Promise<ValidationResult> {
+  const previousOperation = args.req.operation
+  args.req.operation = 'validate'
+
+  try {
+    return await validateOperationWithScopedRequest(args)
+  } finally {
+    args.req.operation = previousOperation
+  }
+}
+
+async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
   slug,
   data: incomingData,
   globalConfig,
   overrideAccess,
   req,
 }: Arguments<TSlug>): Promise<ValidationResult> {
-  req.operation = 'validate'
-
   const accessResult = !overrideAccess
     ? await executeAccess({ data: incomingData, req }, globalConfig.access.validate)
     : true

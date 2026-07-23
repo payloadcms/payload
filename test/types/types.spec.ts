@@ -159,6 +159,12 @@ describe('Types testing', () => {
         collection: 'pages',
         locale: null,
       })
+      expect(payload.validate).type.not.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        fallbackLocale: null,
+        locale: null,
+      })
       expect<{
         collection: 'pages'
         data: Record<never, never>
@@ -173,6 +179,11 @@ describe('Types testing', () => {
         locale: null,
       })
       expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
+        locale: null,
+      })
+      expect(payload.validateGlobal).type.not.toBeCallableWith({
+        fallbackLocale: null,
         slug: 'menu',
         locale: null,
       })

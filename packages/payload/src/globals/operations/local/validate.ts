@@ -23,8 +23,6 @@ export type ValidateGlobalOptions<TSlug extends GlobalSlug> = {
   context?: RequestContext
   /** Optional partial data to merge over the stored global. */
   data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
-  /** A fallback locale used while constructing the validation request. */
-  fallbackLocale?: false | TypedLocale
   /** The single locale to validate. Arrays and `'all'` are not accepted. */
   locale: TypedLocale
   /**
@@ -56,7 +54,13 @@ export async function validateGlobalLocal<TSlug extends GlobalSlug>(
     throw new APIError(`The global with slug ${String(slug)} can't be found. Validate Operation.`)
   }
 
-  const req = await createLocalReq(options as CreateLocalReqOptions, payload)
+  const req = await createLocalReq(
+    {
+      ...(options as CreateLocalReqOptions),
+      fallbackLocale: false,
+    },
+    payload,
+  )
 
   return validateOperation({
     slug,

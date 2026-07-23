@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { Payload, PayloadRequest } from 'payload'
 
 import fs from 'fs/promises'
 import path from 'path'
@@ -29,6 +29,7 @@ describe('validate Local API', () => {
     await payload.updateGlobal({
       slug: validationGlobalSlug,
       data: {
+        location: [-0.12, 51.5],
         summary: 'stored global summary',
         title: 'Stored global title',
       },
@@ -67,6 +68,9 @@ describe('validate Local API', () => {
 
   describe('collections', () => {
     it('should return field errors for invalid create data without creating a document', async () => {
+      const req = {
+        operation: 'update',
+      } satisfies Partial<PayloadRequest>
       const result = await payload.validate({
         collection: validationCollectionSlug,
         data: {
@@ -74,6 +78,7 @@ describe('validate Local API', () => {
           title: '',
         },
         locale: 'en',
+        req,
       })
 
       expect(result).toMatchObject({
@@ -88,9 +93,13 @@ describe('validate Local API', () => {
       expect(await payload.count({ collection: validationCollectionSlug })).toEqual({
         totalDocs: 0,
       })
+      expect(req.operation).toBe('update')
     })
 
     it('should return a successful result for valid create data', async () => {
+      const req = {
+        operation: 'read',
+      } satisfies Partial<PayloadRequest>
       const result = await payload.validate({
         collection: validationCollectionSlug,
         data: {
@@ -98,12 +107,14 @@ describe('validate Local API', () => {
           title: 'Candidate title',
         },
         locale: 'en',
+        req,
       })
 
       expect(result).toEqual({
         errors: [],
         valid: true,
       })
+      expect(req.operation).toBe('read')
     })
 
     it('should run validation hooks in order with the validate operation and unchanged context', async () => {
@@ -181,6 +192,7 @@ describe('validate Local API', () => {
       const stored = await payload.create({
         collection: validationCollectionSlug,
         data: {
+          location: [-0.12, 51.5],
           summary: 'stored summary',
           title: 'Stored title',
         },
@@ -206,12 +218,43 @@ describe('validate Local API', () => {
         valid: true,
       })
       expect(afterValidation).toMatchObject({
+        location: [-0.12, 51.5],
         summary: 'stored summary',
         title: 'Stored title',
       })
     })
 
+    it('should validate a partial update with an unchanged stored point representation', async () => {
+      const stored = await payload.create({
+        collection: validationCollectionSlug,
+        data: {
+          location: [-73.9857, 40.7484],
+          summary: 'stored summary',
+          title: 'Stored title',
+        },
+        locale: 'en',
+      })
+
+      const result = await payload.validate({
+        id: stored.id,
+        collection: validationCollectionSlug,
+        data: {
+          summary: 'candidate summary',
+        },
+        locale: 'en',
+      })
+
+      expect(result).toEqual({
+        errors: [],
+        valid: true,
+      })
+    })
+
     it('should execute first-class collection validation access and throw on denial', async () => {
+      const req = {
+        operation: 'delete',
+      } satisfies Partial<PayloadRequest>
+
       await expect(
         payload.validate({
           collection: validationCollectionSlug,
@@ -221,23 +264,52 @@ describe('validate Local API', () => {
           },
           locale: 'en',
           overrideAccess: false,
+          req,
         }),
       ).rejects.toMatchObject({
         status: 403,
       })
 
       expect(accessEvents).toEqual(['collection'])
+      expect(req.operation).toBe('delete')
+    })
+
+    it('should restore the caller request operation after a collection hook throws', async () => {
+      const req = {
+        operation: 'create',
+      } satisfies Partial<PayloadRequest>
+
+      await expect(
+        payload.validate({
+          collection: validationCollectionSlug,
+          context: {
+            throwValidationHook: true,
+          },
+          data: {
+            summary: 'candidate summary',
+            title: 'Candidate title',
+          },
+          locale: 'en',
+          req,
+        }),
+      ).rejects.toThrow('collection validation hook failure')
+
+      expect(req.operation).toBe('create')
     })
   })
 
   describe('globals', () => {
     it('should validate valid partial global data without persisting it', async () => {
+      const req = {
+        operation: 'read',
+      } satisfies Partial<PayloadRequest>
       const result = await payload.validateGlobal({
         slug: validationGlobalSlug,
         data: {
           summary: 'candidate summary',
         },
         locale: 'en',
+        req,
       })
       const afterValidation = await payload.findGlobal({
         slug: validationGlobalSlug,
@@ -249,18 +321,24 @@ describe('validate Local API', () => {
         valid: true,
       })
       expect(afterValidation).toMatchObject({
+        location: [-0.12, 51.5],
         summary: 'stored global summary',
         title: 'Stored global title',
       })
+      expect(req.operation).toBe('read')
     })
 
     it('should return errors for invalid partial global data without persisting it', async () => {
+      const req = {
+        operation: 'update',
+      } satisfies Partial<PayloadRequest>
       const result = await payload.validateGlobal({
         slug: validationGlobalSlug,
         data: {
           title: '',
         },
         locale: 'en',
+        req,
       })
       const afterValidation = await payload.findGlobal({
         slug: validationGlobalSlug,
@@ -277,20 +355,61 @@ describe('validate Local API', () => {
         valid: false,
       })
       expect(afterValidation.title).toBe('Stored global title')
+      expect(req.operation).toBe('update')
+    })
+
+    it('should validate partial global data with an unchanged stored point representation', async () => {
+      const result = await payload.validateGlobal({
+        slug: validationGlobalSlug,
+        data: {
+          summary: 'candidate summary',
+        },
+        locale: 'en',
+      })
+
+      expect(result).toEqual({
+        errors: [],
+        valid: true,
+      })
     })
 
     it('should execute first-class global validation access and throw on denial', async () => {
+      const req = {
+        operation: 'delete',
+      } satisfies Partial<PayloadRequest>
+
       await expect(
         payload.validateGlobal({
           slug: validationGlobalSlug,
           locale: 'en',
           overrideAccess: false,
+          req,
         }),
       ).rejects.toMatchObject({
         status: 403,
       })
 
       expect(accessEvents).toEqual(['global'])
+      expect(req.operation).toBe('delete')
+    })
+
+    it('should restore the caller request operation after a global hook throws', async () => {
+      const req = {
+        operation: 'create',
+      } satisfies Partial<PayloadRequest>
+
+      await expect(
+        payload.validateGlobal({
+          slug: validationGlobalSlug,
+          context: {
+            throwValidationHook: true,
+          },
+          locale: 'en',
+          req,
+        }),
+      ).rejects.toThrow('global validation hook failure')
+
+      expect(req.operation).toBe('create')
     })
   })
 
@@ -338,6 +457,8 @@ describe('validate Local API', () => {
     })
 
     it('should reject an upload that reuses the validation request before a row or file is written', async () => {
+      await fs.mkdir(validationUploadsDir, { recursive: true })
+
       await expect(runWriteAttempt('upload')).rejects.toThrow(
         'Payload writes are not allowed during validation',
       )

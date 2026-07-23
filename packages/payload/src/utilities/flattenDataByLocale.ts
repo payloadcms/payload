@@ -14,8 +14,9 @@ type Args = {
 }
 
 /**
- * Returns a copy of stored locale-keyed data flattened to one locale without running after-read
- * hooks, access control, sanitization, or population.
+ * Returns a copy of stored locale-keyed data flattened to one locale and converts field storage
+ * representations needed by validators, without running after-read hooks, access control,
+ * sanitization, or population.
  */
 export function flattenDataByLocale({
   configBlockReferences,
@@ -62,6 +63,11 @@ function flattenFields({
           value: data[field.name],
         })
       }
+
+      data[field.name] = transformStoredFieldValue({
+        field,
+        value: data[field.name],
+      })
 
       const fieldValue = data[field.name]
       const nestedParentIsLocalized = parentIsLocalized || Boolean(field.localized)
@@ -179,6 +185,29 @@ function flattenFields({
         }
         break
     }
+  }
+}
+
+function transformStoredFieldValue({ field, value }: { field: Field; value: unknown }): unknown {
+  switch (field.type) {
+    case 'point': {
+      if (Array.isArray(value)) {
+        return value
+      }
+
+      if (value && typeof value === 'object') {
+        const coordinates = (value as Record<string, unknown>).coordinates
+
+        if (Array.isArray(coordinates) && coordinates.length === 2) {
+          return coordinates
+        }
+      }
+
+      return undefined
+    }
+
+    default:
+      return value
   }
 }
 

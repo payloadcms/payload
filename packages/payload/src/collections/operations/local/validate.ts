@@ -40,10 +40,6 @@ type BaseOptions<TSlug extends CollectionSlug> = {
    */
   context?: RequestContext
   /**
-   * A fallback locale used while constructing the validation request.
-   */
-  fallbackLocale?: false | TypedLocale
-  /**
    * The single locale to validate. Arrays and `'all'` are not accepted by this operation.
    */
   locale: TypedLocale
@@ -104,7 +100,13 @@ export async function validateLocal<TSlug extends CollectionSlug>(
     )
   }
 
-  const req = await createLocalReq(options as CreateLocalReqOptions, payload)
+  const req = await createLocalReq(
+    {
+      ...(options as CreateLocalReqOptions),
+      fallbackLocale: false,
+    },
+    payload,
+  )
 
   return validateOperation({
     id,
