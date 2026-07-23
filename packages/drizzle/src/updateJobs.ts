@@ -1,14 +1,25 @@
+import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateJobs, Where } from 'payload'
 
+import { and, eq, inArray } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
 import { findMany } from './find/findMany.js'
+import { transformForWrite } from './transform/write/index.js'
 import { upsertRow } from './upsertRow/index.js'
 import { shouldUseOptimizedUpsertRow } from './upsertRow/shouldUseOptimizedUpsertRow.js'
 import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
+import { markWrite } from './utilities/readAfterWrite.js'
+
+const isInitialJobClaim = (data: Record<string, unknown>): boolean =>
+  data.processing === true &&
+  typeof data.processingToken === 'string' &&
+  Object.keys(data).every(
+    (field) => field === 'processing' || field === 'processingToken' || field === 'updatedAt',
+  )
 
 export const updateJobs: UpdateJobs = async function updateMany(
   this: DrizzleAdapter,
@@ -68,6 +79,40 @@ export const updateJobs: UpdateJobs = async function updateMany(
   }
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
+
+  if (isInitialJobClaim(data)) {
+    const _db = db as LibSQLDatabase
+    const table = this.tables[tableName]
+    const { row } = transformForWrite({
+      adapter: this,
+      data,
+      enableAtomicWrites: true,
+      fields: collection.flattenedFields,
+      tableName,
+    })
+
+    if (typeof row.updatedAt === 'undefined' || row.updatedAt === null) {
+      delete row.updatedAt
+    }
+
+    const jobIDs = jobs.docs.map((job) => job.id)
+    const claimedRows = await _db
+      .update(table)
+      .set(row)
+      .where(and(inArray(table.id, jobIDs), eq(table.processing, false)))
+      .returning({ id: table.id })
+
+    if (claimedRows.length) {
+      markWrite(this)
+    }
+
+    if (returning === false) {
+      return null
+    }
+
+    const claimedIDs = new Set(claimedRows.map(({ id }) => id))
+    return jobs.docs.filter((job) => claimedIDs.has(job.id)).map((job) => ({ ...job, ...data }))
+  }
 
   const results = []
 
