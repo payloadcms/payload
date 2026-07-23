@@ -103,6 +103,15 @@ describe('Fields', () => {
       expect(doc.slug).toBe('custom-slug')
     })
 
+    it('should slugify an unnormalized explicit value', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'My First Post', slug: 'Hello World' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('hello-world')
+    })
+
     it('should freeze a diverged slug on update', async () => {
       const doc = await payload.create({
         collection: 'slug-fields',
@@ -152,6 +161,22 @@ describe('Fields', () => {
       expect(localizedSlug.es).toBe('titulo-espanol')
     })
 
+    it('should dedupe the slug with a valid suffix when duplicating', async () => {
+      const original = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'My First Post' },
+      })
+      created.push(original.id)
+      expect(original.slug).toBe('my-first-post')
+
+      const duplicate = await payload.duplicate({
+        collection: 'slug-fields',
+        id: original.id,
+      })
+      created.push(duplicate.id)
+      expect(duplicate.slug).toBe('my-first-post-1')
+    })
+
     describe('autosave drafts', () => {
       const created: (number | string)[] = []
 
@@ -162,33 +187,44 @@ describe('Fields', () => {
         created.length = 0
       })
 
-      it('should NOT generate a slug on the initial draft (req 1)', async () => {
+      it('should generate the slug from the source on a draft create', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
           draft: true,
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
-        expect(draft.slug == null || draft.slug === '').toBe(true)
+        expect(draft.slug).toBe('draft-one')
       })
 
-      it('should allow multiple empty-slug drafts without a unique collision', async () => {
+      it('should fall back to the id when a draft is created with no source', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: {},
+        })
+        created.push(draft.id)
+        expect(draft.slug).toBe(String(draft.id))
+      })
+
+      it('should give each source-less draft its own id slug without colliding', async () => {
         const first = await payload.create({
           collection: 'slug-autosave',
           draft: true,
-          data: { title: 'Draft One' },
+          data: {},
         })
         created.push(first.id)
 
         const second = await payload.create({
           collection: 'slug-autosave',
           draft: true,
-          data: { title: 'Draft Two' },
+          data: {},
         })
         created.push(second.id)
 
-        expect(first.slug == null || first.slug === '').toBe(true)
-        expect(second.slug == null || second.slug === '').toBe(true)
+        expect(first.slug).toBe(String(first.id))
+        expect(second.slug).toBe(String(second.id))
+        expect(first.slug).not.toBe(second.slug)
       })
 
       it('should keep an explicit slug the user typed on the initial draft', async () => {
@@ -201,13 +237,14 @@ describe('Fields', () => {
         expect(draft.slug).toBe('user-typed')
       })
 
-      it('should generate once content exists on a subsequent autosave', async () => {
+      it('should freeze the slug across subsequent autosaves once set', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
           draft: true,
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
+        expect(draft.slug).toBe('draft-one')
 
         const updated = await payload.update({
           collection: 'slug-autosave',
@@ -215,10 +252,10 @@ describe('Fields', () => {
           draft: true,
           data: { title: 'Draft One Updated' },
         })
-        expect(updated.slug).toBe('draft-one-updated')
+        expect(updated.slug).toBe('draft-one')
       })
 
-      it('should keep an admin overwrite across subsequent autosaves (req 2)', async () => {
+      it('should keep an admin overwrite across subsequent autosaves', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
           draft: true,
@@ -250,13 +287,14 @@ describe('Fields', () => {
         expect(afterMoreEdits.slug).toBe('human-chosen-slug')
       })
 
-      it('should stabilize the slug after publish', async () => {
+      it('should not change an already-set slug on publish or after', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
           draft: true,
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
+        expect(draft.slug).toBe('draft-one')
 
         await payload.update({
           collection: 'slug-autosave',
@@ -270,14 +308,14 @@ describe('Fields', () => {
           id: draft.id,
           data: { _status: 'published', title: 'Publishable Title' },
         })
-        expect(published.slug).toBe('publishable-title')
+        expect(published.slug).toBe('draft-one')
 
         const afterPublish = await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
           data: { _status: 'published', title: 'Title Changed After Publish' },
         })
-        expect(afterPublish.slug).toBe('publishable-title')
+        expect(afterPublish.slug).toBe('draft-one')
       })
     })
   })

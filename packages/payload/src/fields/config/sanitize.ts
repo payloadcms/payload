@@ -23,6 +23,8 @@ import { validateTimezones } from '../../utilities/validateTimezones.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { generateSlug } from '../baseFields/slug/generateSlug.js'
+import { generateSlugBeforeDuplicate } from '../baseFields/slug/generateSlugBeforeDuplicate.js'
+import { generateSlugIdFallback } from '../baseFields/slug/generateSlugIdFallback.js'
 import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
 import { defaultTimezones } from '../baseFields/timezone/defaultTimezones.js'
 import { getFieldPaths } from '../getFieldPaths.js'
@@ -285,12 +287,17 @@ export const sanitizeField = async ({
       )
     }
 
+    // Not required by default: the value is system-guaranteed after create (derived from the
+    // source, or backfilled from the id), so requiring it would reject the deferred-empty slug
+    // during pre-insert validation, before the id fallback in afterChange can run.
     if (typeof field.required === 'undefined') {
-      field.required = true
+      field.required = false
     }
+
     if (typeof field.unique === 'undefined') {
       field.unique = true
     }
+
     if (typeof field.index === 'undefined') {
       field.index = true
     }
@@ -311,10 +318,26 @@ export const sanitizeField = async ({
     if (!field.hooks) {
       field.hooks = {}
     }
+
     field.hooks.beforeChange = [
       generateSlug({ name: field.name, slugify: field.slugify, useAsSlug }),
       ...(field.hooks.beforeChange || []),
     ]
+
+    // The id fallback backfills a single scalar slug; a localized slug is a per-locale value
+    // that a bare id string cannot represent, so it relies on source generation instead.
+    if (!field.localized) {
+      field.hooks.afterChange = [
+        generateSlugIdFallback({ name: field.name }),
+        ...(field.hooks.afterChange || []),
+      ]
+
+      // Dedupe the slug on duplicate here so setDefaultBeforeDuplicate skips its ` - Copy` default.
+      field.hooks.beforeDuplicate = [
+        generateSlugBeforeDuplicate({ name: field.name }),
+        ...(field.hooks.beforeDuplicate || []),
+      ]
+    }
   }
 
   // Array ID field
