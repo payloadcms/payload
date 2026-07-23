@@ -21,7 +21,7 @@ import { initReq } from '../../utilities/initReq.js'
 import { NestProviders } from './NestProviders.js'
 import { getViewportMeta } from './viewport.js'
 // eslint-disable-next-line payload/no-imports-from-self -- Self-import via package path ensures consumer's bundler resolves the full SCSS chain (design tokens, preflight, etc.) in prod builds
-import '@payloadcms/ui/scss/app.scss'
+import '@payloadcms/ui/css/app.css'
 
 type Font = {
   className?: string
