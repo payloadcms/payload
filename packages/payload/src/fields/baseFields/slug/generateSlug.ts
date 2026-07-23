@@ -65,8 +65,10 @@ export const generateSlug =
 
     const storedSlug = originalDoc?.[name]
 
+    const storedSlugHasValue = hasValue(storedSlug)
+
     // On update, preserve a slug that is already set — only fill it while empty.
-    if (operation !== 'create' && hasValue(storedSlug)) {
+    if (operation !== 'create' && storedSlugHasValue) {
       return storedSlug
     }
 
@@ -91,7 +93,7 @@ export const generateSlug =
     }
 
     // No usable source: keep a stored value, otherwise fall back to `<singular>-<N>`.
-    if (hasValue(storedSlug)) {
+    if (storedSlugHasValue) {
       return storedSlug
     }
 
