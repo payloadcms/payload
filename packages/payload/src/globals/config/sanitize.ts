@@ -3,6 +3,10 @@ import type { SanitizedDrafts } from '../../versions/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
+import {
+  getAuthorshipFields,
+  sanitizeAuthorship,
+} from '../../fields/baseFields/authorship/index.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
@@ -78,6 +82,44 @@ export const sanitizeGlobal = async (
 
   // Sanitize fields
   const validRelationships = _validRelationships ?? config.collections?.map((c) => c.slug) ?? []
+
+  // Resolve authorship config to its canonical form and inject the
+  // createdBy / updatedBy relationship fields before sanitizing fields.
+  const authorship = sanitizeAuthorship(global.authorship)
+  global.authorship = authorship
+
+  if (authorship.createdBy || authorship.updatedBy) {
+    const authCollections = (config.collections ?? [])
+      .filter((collectionConfig) => collectionConfig.auth)
+      .map((collectionConfig) => collectionConfig.slug)
+
+    let hasCreatedBy = false
+    let hasUpdatedBy = false
+
+    global.fields.some((field) => {
+      if (fieldAffectsData(field)) {
+        if (field.name === 'createdBy') {
+          hasCreatedBy = true
+        }
+
+        if (field.name === 'updatedBy') {
+          hasUpdatedBy = true
+        }
+      }
+
+      return hasCreatedBy && hasUpdatedBy
+    })
+
+    global.fields.push(
+      ...getAuthorshipFields({
+        authCollections,
+        authorship: {
+          createdBy: authorship.createdBy && !hasCreatedBy,
+          updatedBy: authorship.updatedBy && !hasUpdatedBy,
+        },
+      }),
+    )
+  }
 
   global.fields = await sanitizeFields({
     config,

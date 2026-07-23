@@ -648,14 +648,14 @@ describe('Auth', () => {
             body: JSON.stringify({ value: { data: 'admin-sensitive' } }),
             headers: { Authorization: `JWT ${token}` },
           })
-          createdIDs.push(((await adminPref.json()) as any).doc.id)
+          createdIDs.push((await adminPref.json()).doc.id)
 
           // Create and verify public user
           const userRes = await restClient.POST(`/${publicUsersSlug}`, {
             body: JSON.stringify({ email: 'crosscollection@test.com', password: 'test123!' }),
             headers: { Authorization: `JWT ${token}` },
           })
-          publicUserId = ((await userRes.json()) as any).doc.id
+          publicUserId = (await userRes.json()).doc.id
 
           const user = await payload.findByID({
             collection: publicUsersSlug,
@@ -668,14 +668,14 @@ describe('Auth', () => {
           const login = await restClient.POST(`/${publicUsersSlug}/login`, {
             body: JSON.stringify({ email: 'crosscollection@test.com', password: 'test123!' }),
           })
-          publicUserToken = ((await login.json()) as any).token
+          publicUserToken = (await login.json()).token
 
           // Public user creates preference
           const publicPref = await restClient.POST(`/payload-preferences/${publicKey}`, {
             body: JSON.stringify({ value: { data: 'public-data' } }),
             headers: { Authorization: `JWT ${publicUserToken}` },
           })
-          createdIDs.push(((await publicPref.json()) as any).doc.id)
+          createdIDs.push((await publicPref.json()).doc.id)
         })
 
         afterAll(async () => {
@@ -1106,6 +1106,8 @@ describe('Auth', () => {
         .map((field) => (field as FieldAffectingData).name)
 
       expect(authFields).toMatchObject([
+        'createdBy',
+        'updatedBy',
         'updatedAt',
         'createdAt',
         'email',

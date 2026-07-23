@@ -97,6 +97,9 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: 'simple',
+      // Disabled: authorship adds a `_rels` field that defeats the single-call `RETURNING`
+      // fast path this collection's postgres-logs benchmark measures.
+      authorship: false,
       fields: [
         {
           type: 'text',
@@ -136,6 +139,9 @@ export const getConfig: () => Partial<Config> = () => ({
     },
     {
       slug: postsSlug,
+      // Disabled: authorship's createdBy/updatedBy FK-link to a real user, which breaks
+      // the postgres-logs benchmark counts and the transaction tests that use a synthetic user.
+      authorship: false,
       fields: [
         {
           name: 'title',

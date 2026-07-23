@@ -27,6 +27,7 @@ describe('configToJSONSchema', () => {
               ],
             },
           ],
+          authorship: false,
           timestamps: false,
           versions: false,
         },
@@ -85,6 +86,7 @@ describe('configToJSONSchema', () => {
             { name: 'author', type: 'relationship', relationTo: 'authors' },
             { name: 'categories', type: 'relationship', hasMany: true, relationTo: 'categories' },
           ],
+          authorship: false,
         },
       ],
       typescript: { generateInputTypes: true },
@@ -175,10 +177,7 @@ describe('configToJSONSchema', () => {
       collections: [{ slug: 'posts', fields: [{ name: 'title', type: 'text' }] }],
       typescript: { generateInputTypes: true },
     }
-    const { jsonSchema: enabledSchema } = configToJSONSchema(
-      await sanitizeConfig(enabled),
-      'text',
-    )
+    const { jsonSchema: enabledSchema } = configToJSONSchema(await sanitizeConfig(enabled), 'text')
     expect(enabledSchema?.$defs?.posts_input).toBeDefined()
     expect(enabledSchema?.properties?.collectionsInput).toBeDefined()
   })
@@ -312,6 +311,7 @@ describe('configToJSONSchema', () => {
               ],
             },
           ],
+          authorship: false,
           timestamps: false,
           versions: false,
         },
@@ -472,6 +472,7 @@ describe('configToJSONSchema', () => {
               ],
             },
           ],
+          authorship: false,
           timestamps: false,
           versions: false,
         },
@@ -548,6 +549,7 @@ describe('configToJSONSchema', () => {
               },
             },
           ],
+          authorship: false,
           timestamps: false,
           versions: false,
         },
@@ -605,6 +607,7 @@ describe('configToJSONSchema', () => {
               blocks: [sharedBlock],
             },
           ],
+          authorship: false,
           timestamps: false,
           versions: false,
         },
