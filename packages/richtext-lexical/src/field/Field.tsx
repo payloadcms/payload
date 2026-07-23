@@ -223,7 +223,7 @@ const RichTextComponent: React.FC<
                 editorConfig={editorConfig}
                 fieldProps={props}
                 isSmallWidthViewport={isSmallWidthViewport}
-                key={JSON.stringify({ path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010)
+                key={JSON.stringify({ disabled, path, rerenderProviderKey })} // makes sure lexical is completely re-rendered when initialValue changes, bypassing the lexical-internal value memoization. That way, external changes to the form will update the editor. More infos in PR description (https://github.com/payloadcms/payload/pull/5010). Also re-render when `disabled` changes, since Lexical's readOnly mode is only applied on initialization and does not otherwise react to prop updates (e.g. a data-dependent field-level `access` function whose sibling values changed).
                 onChange={handleChange}
                 readOnly={disabled}
                 rtl={rtl}

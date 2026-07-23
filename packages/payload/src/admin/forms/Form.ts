@@ -80,6 +80,13 @@ export type FieldState = {
    */
   lastRenderedPath?: string
   passesCondition?: boolean
+  /**
+   * The read-only state the field was last rendered with, derived from its computed permissions.
+   * Used to detect when a field's permissions have changed since its last render (e.g. a data-dependent
+   * `field.access` function whose sibling field values changed), so that its custom components can be
+   * re-rendered with the correct `readOnly` prop even when `renderAllFields` is false.
+   */
+  readOnly?: boolean
   rows?: Row[]
   /**
    * The result of running `field.filterOptions` on select fields.
