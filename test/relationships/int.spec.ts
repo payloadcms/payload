@@ -1709,6 +1709,40 @@ describe('Relationships', () => {
   })
 
   describe('Polymorphic Relationships', () => {
+    it('should return no documents for an empty in query on a polymorphic relationship', async () => {
+      const movie = await payload.create({
+        collection: 'movies',
+        data: {
+          name: 'Empty in query movie',
+        },
+      })
+      const relationship = await payload.create({
+        collection: polymorphicRelationshipsSlug,
+        data: {
+          polymorphic: {
+            relationTo: 'movies',
+            value: movie.id,
+          },
+        },
+      })
+
+      try {
+        const result = await payload.find({
+          collection: polymorphicRelationshipsSlug,
+          where: {
+            'polymorphic.value': {
+              in: [],
+            },
+          },
+        })
+
+        expect(result.docs).toHaveLength(0)
+      } finally {
+        await payload.delete({ id: relationship.id, collection: polymorphicRelationshipsSlug })
+        await payload.delete({ id: movie.id, collection: 'movies' })
+      }
+    })
+
     it('should allow REST querying on polymorphic relationships', async () => {
       const movie = await payload.create({
         collection: 'movies',

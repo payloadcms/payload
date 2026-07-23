@@ -727,6 +727,7 @@ export const getTableColumnFromPath = ({
 
                 if (
                   Array.isArray(value) &&
+                  value.length > 0 &&
                   value.every((val) => typeof val === 'number') &&
                   idTypeTextOrUuid
                 ) {
@@ -749,6 +750,7 @@ export const getTableColumnFromPath = ({
 
                 if (
                   Array.isArray(value) &&
+                  value.length > 0 &&
                   idType === 'uuid' &&
                   hasCustomCollectionWithCustomID &&
                   !value.some((val) => uuidValidate(val))
