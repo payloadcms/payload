@@ -161,7 +161,7 @@ describe('Fields', () => {
       expect(localizedSlug.es).toBe('titulo-espanol')
     })
 
-    it('should give a duplicate its own id slug instead of drifting from the original', async () => {
+    it('should give a duplicate a fresh fallback slug instead of drifting from the original', async () => {
       const original = await payload.create({
         collection: 'slug-fields',
         data: { title: 'My First Post' },
@@ -175,9 +175,15 @@ describe('Fields', () => {
       })
       created.push(duplicate.id)
 
-      // The copy falls back to its own new id, not `my-first-post-1`.
-      expect(duplicate.slug).toBe(String(duplicate.id))
-      expect(duplicate.slug).not.toBe(original.slug)
+      // The copy takes a fresh `<singular>-N` fallback, not `my-first-post-1`.
+      expect(duplicate.slug).toBe('slug-field-1')
+
+      const secondDuplicate = await payload.duplicate({
+        collection: 'slug-fields',
+        id: original.id,
+      })
+      created.push(secondDuplicate.id)
+      expect(secondDuplicate.slug).toBe('slug-field-2')
     })
 
     describe('autosave drafts', () => {
@@ -200,26 +206,26 @@ describe('Fields', () => {
         expect(draft.slug).toBe('draft-one')
       })
 
-      it('should fall back to the id when a draft is created with no source', async () => {
+      it('should fall back to <singular>-N when a draft is created with no source', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
           draft: true,
           data: {},
         })
         created.push(draft.id)
-        expect(draft.slug).toBe(String(draft.id))
+        expect(draft.slug).toBe('slug-autosave-1')
 
-        // The admin reads the latest draft version, not the create response, so the id must be
-        // persisted there too.
+        // The admin reads the latest draft version, not the create response, so the fallback must
+        // be persisted there too.
         const latestDraft = await payload.findByID({
           collection: 'slug-autosave',
           id: draft.id,
           draft: true,
         })
-        expect(latestDraft.slug).toBe(String(draft.id))
+        expect(latestDraft.slug).toBe('slug-autosave-1')
       })
 
-      it('should give each source-less draft its own id slug without colliding', async () => {
+      it('should give each source-less draft the next fallback without colliding', async () => {
         const first = await payload.create({
           collection: 'slug-autosave',
           draft: true,
@@ -234,9 +240,8 @@ describe('Fields', () => {
         })
         created.push(second.id)
 
-        expect(first.slug).toBe(String(first.id))
-        expect(second.slug).toBe(String(second.id))
-        expect(first.slug).not.toBe(second.slug)
+        expect(first.slug).toBe('slug-autosave-1')
+        expect(second.slug).toBe('slug-autosave-2')
       })
 
       it('should keep an explicit slug the user typed on the initial draft', async () => {

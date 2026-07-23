@@ -9,6 +9,11 @@ type Args = {
   /** Locale to scope the check to, for localized fields. */
   locale?: string
   req: PayloadRequest
+  /**
+   * Index the search starts from. `0` (default) tries the bare `value` first, then `value-1`, …
+   * `1` always suffixes: `value-1`, `value-2`, … — useful for a counter that reads as `value-N`.
+   */
+  startIndex?: number
   value: string
 }
 
@@ -16,8 +21,9 @@ type Args = {
 const MAX_SUFFIX_ATTEMPTS = 50
 
 /**
- * Returns `value`, or the first free `value-N`, so it's unique for `field` in `collection`. Useful
- * when a unique field value is minted outside the operation pipeline's runtime unique check.
+ * Returns the first available value for `field` in `collection` — either the bare `value` or a
+ * `value-N` variant. Useful when a unique field value is minted outside the operation pipeline's
+ * runtime unique check.
  */
 export const getUniqueFieldValue = async ({
   id,
@@ -25,12 +31,11 @@ export const getUniqueFieldValue = async ({
   field,
   locale,
   req,
+  startIndex = 0,
   value,
 }: Args): Promise<string> => {
-  let candidate = value
-  let attempt = 0
-
-  while (attempt < MAX_SUFFIX_ATTEMPTS) {
+  for (let index = startIndex; index <= startIndex + MAX_SUFFIX_ATTEMPTS; index++) {
+    const candidate = index === 0 ? value : `${value}-${index}`
     const match: Where = { [field]: { equals: candidate } }
     const where: Where =
       id === undefined || id === null ? match : { and: [match, { id: { not_equals: id } }] }
@@ -40,10 +45,7 @@ export const getUniqueFieldValue = async ({
     if (!existing) {
       return candidate
     }
-
-    attempt += 1
-    candidate = `${value}-${attempt}`
   }
 
-  return candidate
+  return `${value}-${startIndex + MAX_SUFFIX_ATTEMPTS}`
 }

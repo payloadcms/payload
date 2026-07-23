@@ -3,10 +3,11 @@ import type { FieldHook } from '../../config/types.js'
 import type { Slugify } from './types.js'
 
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
-import { consumeSlugDuplicateFallback } from './duplicateContext.js'
+import { getSlugFallbackValue } from './getSlugFallbackValue.js'
 import { hasValue } from './hasValue.js'
 
 type Args = {
+  localized?: boolean
   name: string
   slugify?: Slugify
   useAsSlug: string
@@ -17,11 +18,14 @@ type Args = {
  * one that's set, so a lagging autosave can't clobber it with a stale value:
  *   - explicit input and the source field are slugified, e.g. "Hello World" → "hello-world"
  *   - an already-set slug is preserved as-is
- *   - empty with no source is left for the id fallback (see {@link generateSlugIdFallback})
+ *   - empty with no source falls back to `<singular>-<N>` (see {@link getSlugFallbackValue})
+ *
+ * The fallback is skipped for globals (singletons) and localized slugs (per-locale uniqueness is
+ * unresolved — see the slug block in field sanitization), which are left empty.
  */
 export const generateSlug =
-  ({ name, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
-  async ({ context, data, operation, originalDoc, req, value }) => {
+  ({ name, localized, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
+  async ({ collection, data, operation, originalDoc, req, value }) => {
     const slugify = (valueToSlugify: unknown) =>
       customSlugify
         ? customSlugify({ data: (data ?? {}) as TypeWithID, req, valueToSlugify })
@@ -39,18 +43,21 @@ export const generateSlug =
       return storedSlug
     }
 
-    // On duplicate, skip source derivation so the copy falls back to the new doc id. See generateSlugBeforeDuplicate.
-    if (consumeSlugDuplicateFallback(context, name)) {
+    // Derive an empty slug from its source when present.
+    const source = data?.[useAsSlug]
+
+    if (source) {
+      return await slugify(source)
+    }
+
+    // No source: keep a stored value, otherwise fall back to `<singular>-<N>`.
+    if (hasValue(storedSlug)) {
+      return storedSlug
+    }
+
+    if (!collection || localized) {
       return undefined
     }
 
-    // Derive an empty slug from its source when present; otherwise leave it empty
-    // (on create, the id fallback in afterChange backfills it).
-    const source = data?.[useAsSlug]
-
-    if (!source) {
-      return storedSlug ?? undefined
-    }
-
-    return await slugify(source)
+    return await getSlugFallbackValue({ collection, field: name, req, slugify })
   }

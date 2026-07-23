@@ -37,7 +37,7 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
 
   const { i18n, t } = useTranslation()
 
-  const { id, collectionSlug, globalSlug } = useDocumentInfo()
+  const { collectionSlug, globalSlug } = useDocumentInfo()
 
   const { slugify } = useServerFunctions()
 
@@ -77,11 +77,10 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
         return
       }
 
-      // No source to slugify: fall back to the document id, mirroring the server-side create
-      // fallback so a cleared slug regenerates to the id instead of going blank. Globals are
-      // singletons with no slug-based lookup, so they have no id fallback.
+      // Nothing to slugify: keep the current value. The server's `<singular>-<N>` fallback can't be
+      // computed on the client, and the slug already holds one from create.
       if (formattedSlug === null || formattedSlug === undefined || formattedSlug === '') {
-        formattedSlug = !globalSlug && id !== null && id !== undefined ? String(id) : ''
+        return
       }
 
       /**
@@ -100,7 +99,6 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
       getDataByPath,
       collectionSlug,
       globalSlug,
-      id,
       fieldPath,
       t,
     ],

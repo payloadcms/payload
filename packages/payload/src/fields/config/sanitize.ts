@@ -24,7 +24,6 @@ import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { generateSlug } from '../baseFields/slug/generateSlug.js'
 import { generateSlugBeforeDuplicate } from '../baseFields/slug/generateSlugBeforeDuplicate.js'
-import { generateSlugIdFallback } from '../baseFields/slug/generateSlugIdFallback.js'
 import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
 import { defaultTimezones } from '../baseFields/timezone/defaultTimezones.js'
 import { getFieldPaths } from '../getFieldPaths.js'
@@ -320,20 +319,21 @@ export const sanitizeField = async ({
     }
 
     field.hooks.beforeChange = [
-      generateSlug({ name: field.name, slugify: field.slugify, useAsSlug }),
+      generateSlug({
+        name: field.name,
+        localized: field.localized,
+        slugify: field.slugify,
+        useAsSlug,
+      }),
       ...(field.hooks.beforeChange || []),
     ]
 
-    // Known limitation — a localized slug in a locale with no source stays empty.
-    // Backfilling it would need per-locale read-merge-write plus locale-scoped uniqueness.
+    // Own the slug on duplicate — the copy takes a fresh `<singular>-<N>` fallback rather than the
+    // generic ` - Copy` default. Localized slugs aren't handled here (per-locale uniqueness is
+    // unresolved) and fall through to that default.
     if (!field.localized) {
-      field.hooks.afterChange = [
-        generateSlugIdFallback({ name: field.name }),
-        ...(field.hooks.afterChange || []),
-      ]
-
       field.hooks.beforeDuplicate = [
-        generateSlugBeforeDuplicate({ name: field.name }),
+        generateSlugBeforeDuplicate({ name: field.name, slugify: field.slugify }),
         ...(field.hooks.beforeDuplicate || []),
       ]
     }

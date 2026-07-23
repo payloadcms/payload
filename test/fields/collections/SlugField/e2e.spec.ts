@@ -104,20 +104,19 @@ describe('SlugField', () => {
     await expect(page.locator('#field-slug')).toHaveValue('this-should-have-regenerated')
   })
 
-  test('should regenerate an empty slug to the document id', async () => {
+  test('should keep the current slug when regenerating with no source', async () => {
     await page.goto(url.create)
-    await page.locator('#field-title').fill('Doc with id fallback')
+    await page.locator('#field-title').fill('Keep on empty regenerate')
 
     await saveDocAndAssert(page)
+    await expect(page.locator('#field-slug')).toHaveValue('keep-on-empty-regenerate')
 
-    const id = page.url().match(/\/slug-fields\/([^/?#]+)/)?.[1]
-    expect(id).toBeTruthy()
-
-    // With no source left to slugify, regenerating falls back to the document id.
+    // Nothing to slugify: regenerating is a no-op — the server-side `<singular>-N` fallback can't be
+    // computed on the client, so the existing slug is kept rather than blanked.
     await page.locator('#field-title').fill('')
     await regenerateSlug('slug')
 
-    await expect(page.locator('#field-slug')).toHaveValue(id!)
+    await expect(page.locator('#field-slug')).toHaveValue('keep-on-empty-regenerate')
   })
 
   test('custom values should be kept', async () => {
