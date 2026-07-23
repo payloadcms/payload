@@ -36,7 +36,7 @@ type PublishOpts = {
   tag?: 'beta' | 'canary' | 'internal' | 'internal-debug' | 'latest'
 }
 
-type Workspace = {
+export type Workspace = {
   version: () => Promise<string>
   bumpVersion: (type: PackageReleaseType, opts?: { preid?: 'beta' | 'canary' }) => Promise<string>
   build: (opts?: { debug?: boolean }) => Promise<void>
