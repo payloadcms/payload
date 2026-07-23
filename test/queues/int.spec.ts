@@ -1195,12 +1195,19 @@ describe('Queues - Payload', () => {
               throw new Error(`Worker exited before claiming the job.\n${workerErrorOutput}`)
             }
 
-            const currentJob = await payload.findByID({
-              id: job.id,
-              collection: 'payload-jobs',
-            })
+            try {
+              const currentJob = await payload.findByID({
+                id: job.id,
+                collection: 'payload-jobs',
+              })
 
-            processingUntil = currentJob.processingUntil
+              processingUntil = currentJob.processingUntil
+            } catch (error) {
+              if (!(error instanceof Error) || !error.message.includes('database is locked')) {
+                throw error
+              }
+            }
+
             await wait(50)
           }
 
