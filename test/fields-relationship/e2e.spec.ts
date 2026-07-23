@@ -599,6 +599,39 @@ describe('Relationship Field', () => {
       const options = getSelectMenu({ page })
       await expect(options).toContainText('truth')
     })
+
+    test('should not clear the open menu when `filterOptions` reference changes', async () => {
+      await payload.create({ collection: relationWithTitleSlug, data: { name: 'stays-visible-1' } })
+      await payload.create({ collection: relationWithTitleSlug, data: { name: 'stays-visible-2' } })
+      await payload.create({ collection: relationWithTitleSlug, data: { name: 'stays-visible-3' } })
+
+      await loadCreatePage()
+
+      // Open the polymorphic hasMany relationship and wait for its options to load.
+      const initialLoad = page.waitForResponse(/\/api\/relation-with-title/)
+      await page.locator('#field-relationshipManyFiltered .rs__control').click()
+      await initialLoad
+
+      const menu = getSelectMenu({ page })
+      await expect(menu.locator('.rs__option').first()).toBeVisible()
+      expect(await menu.locator('.rs__option').count()).toBeGreaterThan(1)
+
+      // Serve empty results for any subsequent option (re)fetch, so options can only
+      // remain visible if they were never cleared
+      await page.route(/\/api\/relation-with-title/, (route) =>
+        route.fulfill({
+          body: JSON.stringify({ docs: [], hasNextPage: false, nextPage: null, totalDocs: 0 }),
+          contentType: 'application/json',
+          status: 200,
+        }),
+      )
+
+      await menu.locator('.rs__option').first().click()
+
+      await wait(1500)
+
+      await expect(menu.locator('.rs__option').first()).toBeVisible()
+    })
   })
 
   test('should allow docs with same ID but different collections to be selectable', async () => {
