@@ -1,7 +1,7 @@
 import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 
-import { JobRunAbortedError } from '../../../errors/index.js'
+import { JobCancelledError, JobRunAbortedError } from '../../../errors/index.js'
 import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { updateJobs } from '../../../utilities/updateJob.js'
 
@@ -10,6 +10,7 @@ export type UpdateJobFunction = (jobData: Partial<Job>) => Promise<Job>
 /**
  * Helper for updating a job that does the following, additionally to updating the job:
  * - Merges incoming data from the updated job into the original job object
+ * - Throws a `JobCancelledError` if another process cancelled the job.
  * - Stops updates after this worker loses the job's lease.
  */
 export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFunction {
@@ -55,6 +56,13 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
       } else {
         ;(job as any)[key] = updatedJob[key as keyof Job]
       }
+    }
+
+    if (
+      (updatedJob.error as Record<string, unknown>)?.cancelled &&
+      !(jobData.error as Record<string, unknown> | undefined)?.cancelled
+    ) {
+      throw new JobCancelledError(`Job ${job.id} was cancelled`)
     }
 
     return updatedJob

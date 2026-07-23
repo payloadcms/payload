@@ -362,10 +362,10 @@ handler: async ({ input, req }) => {
 
 #### Preventing Job Retries
 
-From within a task or workflow handler, you can prevent the entire job from being retried by throwing a `JobRunAbortedError`:
+From within a task or workflow handler, you can prevent the entire job from being retried by throwing a `JobCancelledError`:
 
 ```ts
-throw new JobRunAbortedError('Job was cancelled')
+throw new JobCancelledError('Job was cancelled')
 ```
 
 #### Accessing Failure Information

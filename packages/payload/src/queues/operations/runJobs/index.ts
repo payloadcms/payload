@@ -10,7 +10,7 @@ import type { RunJobResult } from './runJob/index.js'
 import { Forbidden } from '../../../errors/Forbidden.js'
 import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { jobsCollectionSlug } from '../../config/collection.js'
-import { JobRunAbortedError } from '../../errors/index.js'
+import { JobCancelledError, JobRunAbortedError } from '../../errors/index.js'
 import { getCurrentDate } from '../../utilities/getCurrentDate.js'
 import { updateJobs } from '../../utilities/updateJob.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
@@ -475,7 +475,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         return { id: job.id, result }
       }
     } catch (error) {
-      if (error instanceof JobRunAbortedError) {
+      if (error instanceof JobCancelledError) {
         if (
           !(job.error as Record<string, unknown> | undefined)?.cancelled ||
           !job.hasError ||
