@@ -615,22 +615,27 @@ describe('Auth', () => {
 
     test('should refresh at the checkpoint after recent mouse movement', async () => {
       const tokenExpirationMs = await readTokenExpirationMs(sessionPage)
+      const refreshRequests: Request[] = []
+      const recordRefreshRequest = (request: Request) => {
+        if (isActivityRefreshRequest(request)) {
+          refreshRequests.push(request)
+        }
+      }
 
+      sessionPage.on('request', recordRefreshRequest)
       await advanceToRemainingSessionTime({
         page: sessionPage,
         remainingMs: 180_000,
         tokenExpirationMs,
       })
 
-      const refreshResponse = sessionPage.waitForResponse((response) =>
-        isActivityRefreshRequest(response.request()),
-      )
-
       await sessionPage.dispatchEvent('body', 'mousemove')
+      expect(refreshRequests).toHaveLength(0)
       await sessionPage.clock.fastForward(60_001)
       await sessionPage.clock.fastForward(1_001)
 
-      expect((await refreshResponse).status()).toBe(200)
+      expect(refreshRequests).toHaveLength(1)
+      sessionPage.off('request', recordRefreshRequest)
     })
 
     test('should refresh after window focus inside the refresh window', async () => {
