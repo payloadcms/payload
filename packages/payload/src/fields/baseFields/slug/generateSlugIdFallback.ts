@@ -20,6 +20,10 @@ type Args = {
  * with the document. Because the pipeline's runtime uniqueness check is skipped, uniqueness is
  * enforced via {@link ensureUniqueSlug}, with the field's unique index as the final guard.
  *
+ * On a versioned collection the current version is written before `afterChange` runs, so it still
+ * holds the empty slug — the admin (and autosave) read the latest version, not the main document.
+ * The latest version is therefore patched in place too, so the slug is present wherever it is read.
+ *
  * Only collections are backfilled; globals are singletons with no slug-based lookup to protect.
  */
 export const generateSlugIdFallback =
@@ -51,5 +55,61 @@ export const generateSlugIdFallback =
       returning: false,
     })
 
+    if (collection.versions) {
+      await patchLatestVersionSlug({ id, name, slug, collection: collection.slug, req })
+    }
+
     return slug
   }
+
+/**
+ * Merges the backfilled slug into the latest version's stored document, leaving every other field
+ * untouched. `db.updateVersion` replaces the whole `version` object, so the current version must be
+ * read first and spread back with only the slug changed.
+ */
+const patchLatestVersionSlug = async ({
+  id,
+  name,
+  slug,
+  collection,
+  req,
+}: {
+  collection: string
+  id: number | string
+  name: string
+  req: Parameters<FieldHook>[0]['req']
+  slug: string
+}): Promise<void> => {
+  const { docs } = await req.payload.db.findVersions({
+    collection,
+    limit: 1,
+    pagination: false,
+    req,
+    sort: '-updatedAt',
+    where: { parent: { equals: id } },
+  })
+
+  const latest = docs[0]
+
+  if (
+    !latest ||
+    (latest.version?.[name] !== undefined &&
+      latest.version?.[name] !== null &&
+      latest.version?.[name] !== '')
+  ) {
+    return
+  }
+
+  await req.payload.db.updateVersion({
+    id: latest.id,
+    collection,
+    req,
+    versionData: {
+      createdAt: latest.createdAt,
+      latest: latest.latest,
+      parent: latest.parent,
+      updatedAt: latest.updatedAt,
+      version: { ...latest.version, [name]: slug },
+    },
+  })
+}

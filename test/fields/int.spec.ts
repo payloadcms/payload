@@ -205,6 +205,15 @@ describe('Fields', () => {
         })
         created.push(draft.id)
         expect(draft.slug).toBe(String(draft.id))
+
+        // The admin reads the latest draft version, not the create response, so the id must be
+        // persisted there too.
+        const latestDraft = await payload.findByID({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+        })
+        expect(latestDraft.slug).toBe(String(draft.id))
       })
 
       it('should give each source-less draft its own id slug without colliding', async () => {
