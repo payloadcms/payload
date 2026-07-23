@@ -188,6 +188,26 @@ const validationCollection: CollectionConfig = {
       name: 'targetID',
       type: 'text',
     },
+    {
+      name: 'user',
+      type: 'json',
+    },
+    {
+      name: 'req',
+      type: 'json',
+    },
+    {
+      name: 'context',
+      type: 'json',
+    },
+    {
+      name: 'overrideAccess',
+      type: 'checkbox',
+    },
+    {
+      name: 'operation',
+      type: 'text',
+    },
   ],
   hooks: {
     beforeChange: [

@@ -488,6 +488,27 @@ describe('validate Local API', () => {
       expect(malformedJSON.status).toBe(400)
     })
 
+    it('should return 400 for repeated and all locale selectors', async () => {
+      const repeatedLocale = await restClient.POST(
+        `/${validationCollectionSlug}/validate?locale=en&locale=es`,
+        {
+          body: JSON.stringify({
+            summary: 'candidate summary',
+            title: 'Candidate title',
+          }),
+        },
+      )
+      const allLocales = await restClient.POST(`/${validationCollectionSlug}/validate?locale=all`, {
+        body: JSON.stringify({
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        }),
+      })
+
+      expect(repeatedLocale.status).toBe(400)
+      expect(allLocales.status).toBe(400)
+    })
+
     it('should merge by-ID validation data without persisting it', async () => {
       const stored = await payload.create({
         collection: validationCollectionSlug,
@@ -586,48 +607,68 @@ describe('validate Local API', () => {
       expect(response.status).toBe(403)
     })
 
-    it('should ignore body attempts to alter access, context, or the validation operation', async () => {
+    it('should keep body control-shaped fields as data without changing trusted access inputs', async () => {
       const collection = payload.collections[validationCollectionSlug]!
       const validate = collection.config.access.validate
+      const accessRequests: unknown[] = []
 
-      collection.config.access.validate = () => false
+      collection.config.access.validate = ({ data, req }) => {
+        accessRequests.push({
+          context: req.context,
+          data,
+          operation: req.operation,
+          user: req.user,
+        })
+
+        return (
+          req.user?.email === 'trusted@example.com' &&
+          req.context.allowValidation === true &&
+          req.operation === 'validate'
+        )
+      }
 
       const deniedResponse = await restClient.POST(
         `/${validationCollectionSlug}/validate?locale=en`,
         {
           body: JSON.stringify({
             context: { allowValidation: true },
-            operation: 'create',
+            operation: 'validate',
             overrideAccess: true,
-            req: { operation: 'create' },
+            req: {
+              context: { allowValidation: true },
+              operation: 'validate',
+              user: { email: 'trusted@example.com' },
+            },
             summary: 'candidate summary',
             title: 'Candidate title',
-            user: { id: 'admin' },
+            user: { email: 'trusted@example.com' },
           }),
         },
       )
 
       collection.config.access.validate = validate
 
-      const allowedResponse = await restClient.POST(
-        `/${validationCollectionSlug}/validate?locale=en`,
+      expect(deniedResponse.status).toBe(403)
+      expect(accessRequests).toEqual([
         {
-          body: JSON.stringify({
-            operation: 'create',
+          context: {},
+          data: {
+            context: { allowValidation: true },
+            operation: 'validate',
+            overrideAccess: true,
+            req: {
+              context: { allowValidation: true },
+              operation: 'validate',
+              user: { email: 'trusted@example.com' },
+            },
             summary: 'candidate summary',
             title: 'Candidate title',
-          }),
+            user: { email: 'trusted@example.com' },
+          },
+          operation: 'validate',
+          user: null,
         },
-      )
-
-      expect(deniedResponse.status).toBe(403)
-      expect(allowedResponse.status).toBe(200)
-      expect(
-        hookEvents.every(
-          ({ operation, requestOperation }) =>
-            operation === 'validate' && requestOperation === 'validate',
-        ),
-      ).toBe(true)
+      ])
     })
   })
 
