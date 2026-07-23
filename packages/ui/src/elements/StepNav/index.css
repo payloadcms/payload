@@ -2,15 +2,19 @@
   .step-nav {
     display: flex;
     align-items: center;
+    min-width: 0;
     font-family: var(--text-body-medium-font-family);
     font-size: var(--text-body-medium-font-size);
     font-weight: var(--text-body-medium-font-weight);
     line-height: var(--text-body-medium-line-height);
     letter-spacing: var(--text-body-medium-letter-spacing);
     color: var(--color-text);
+    -webkit-user-select: none;
+    user-select: none;
 
     &::after {
       content: ' ';
+      flex-shrink: 0;
       position: sticky;
       top: 0;
       right: 0;
@@ -21,6 +25,7 @@
     a {
       display: flex;
       align-items: center;
+      min-width: 0;
       text-decoration: none;
       border-radius: var(--button-radius);
 
@@ -28,31 +33,76 @@
         cursor: pointer;
       }
     }
+  }
 
-    span {
-      max-width: calc(var(--spacer-6) * 4);
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
+  .step-nav__item {
+    max-width: calc(var(--spacer-6) * 4);
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
 
-      &:has(.dashboard-breadcrumb-dropdown, .dashboard-breadcrumb-dropdown__editing) {
-        max-width: none;
-        overflow: visible;
-        white-space: normal;
-      }
+  .step-nav__item .btn__content {
+    min-width: 0;
+  }
+
+  .step-nav__item .btn__label {
+    min-width: 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+
+  .step-nav__item:not(.step-nav__last) {
+    flex-shrink: 0;
+  }
+
+  .step-nav__last {
+    min-width: var(--spacer-5);
+    max-width: none;
+    color: var(--color-text-secondary);
+  }
+
+  .step-nav__item:has(.dashboard-breadcrumb-dropdown, .dashboard-breadcrumb-dropdown__editing) {
+    max-width: none;
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .step-nav__collapsed {
+    flex-shrink: 0;
+  }
+
+  .step-nav__collapsed-toggle {
+    padding: 0 var(--spacer-1);
+    color: var(--color-text-tertiary);
+  }
+
+  .step-nav__measurer-clip {
+    position: absolute;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+  }
+
+  .step-nav__measurer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: inline-flex;
+    padding-right: var(--spacer-3);
+
+    .step-nav__item {
+      max-width: none;
     }
   }
 
   .step-nav__separator {
     color: var(--color-text-tertiary);
     width: var(--spacer-2);
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-  }
-
-  .step-nav__last {
-    color: var(--color-text-secondary);
   }
 
   .step-nav__item:not(.btn),
