@@ -879,6 +879,47 @@ test.describe('Bulk Edit', () => {
     await expect(beforeInputB).toHaveCount(1)
     await expect(beforeInputB).toBeVisible()
   })
+
+  test('should render selected field even when admin.condition depends on unselected sibling data', async () => {
+    await deleteAllPosts()
+
+    const updatedValue = 'Updated conditional bulk field'
+    const { id } = await createPost({ title: 'Conditional Post' })
+
+    await page.goto(postsUrl.list)
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    await selectInput({
+      selectLocator: modal.locator('.field-select'),
+      options: ['Conditional Bulk Edit Field'],
+      multiSelect: true,
+    })
+
+    const conditionalField = modal.locator('#field-conditionalBulkEditField')
+    await expect(conditionalField).toBeVisible()
+
+    await conditionalField.fill(updatedValue)
+    await modal.locator('.form-submit button[type="submit"].edit-many__publish').click()
+
+    await expect(page.locator('.payload-toast-container .toast-success')).toContainText(
+      'Updated 1 Post successfully.',
+    )
+
+    const updatedDocQuery = await payload.find({
+      collection: postsSlug,
+      where: {
+        id: {
+          equals: id,
+        },
+      },
+      depth: 0,
+    })
+    const updatedDoc = updatedDocQuery.docs[0]
+
+    expect((updatedDoc as any)?.conditionalBulkEditField).toBe(updatedValue)
+  })
 })
 
 async function selectFieldToEdit(
