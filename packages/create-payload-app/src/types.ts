@@ -96,4 +96,4 @@ export type NextConfigType = 'cjs' | 'esm' | 'ts'
 
 export type StorageAdapterType = (typeof ALL_STORAGE_ADAPTERS)[number]
 
-export type AgentType = 'claude' | 'codex' | 'cursor'
+export type AgentType = 'claude' | 'codex' | 'cursor' | 'github-copilot'
