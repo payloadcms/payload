@@ -134,6 +134,8 @@ export type BuildTableStateArgs = {
 export type SlugifyServerFunctionArgs = {
   collectionSlug?: CollectionSlug
   globalSlug?: GlobalSlug
+  /** Current document id, excluded from the uniqueness check so a regenerate can reuse its own value. */
+  id?: number | string
   /** Active admin locale, so a localized slug's fallback is deduped within the right locale. */
   locale?: string
   path?: FieldPaths['path']

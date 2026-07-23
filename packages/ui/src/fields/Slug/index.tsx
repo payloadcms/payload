@@ -38,7 +38,7 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
 
   const { i18n, t } = useTranslation()
 
-  const { collectionSlug, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const { slugify } = useServerFunctions()
 
@@ -69,6 +69,7 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
 
       try {
         formattedSlug = await slugify({
+          id: id ?? undefined,
           collectionSlug,
           data: getData(),
           globalSlug,
@@ -101,6 +102,7 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
       getData,
       slugify,
       getDataByPath,
+      id,
       collectionSlug,
       globalSlug,
       locale,

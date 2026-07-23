@@ -347,6 +347,53 @@ describe('Fields', () => {
       expect(regenerated).not.toBe(takenSlug)
     })
 
+    it('should dedupe a source-derived slug on regenerate, matching the next save', async () => {
+      const first = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Shared Regen' },
+      })
+      created.push(first.id)
+      expect(first.slug).toBe('shared-regen')
+
+      const req = await createLocalReq({ user: user.user }, payload)
+
+      // Regenerating from a source that slugifies to a taken slug must bump it, not hand back the
+      // duplicate — otherwise the next save throws a uniqueness error.
+      const regenerated = await slugifyHandler({
+        collectionSlug: 'slug-fields',
+        data: {},
+        path: 'slug',
+        req,
+        valueToSlugify: 'Shared Regen',
+      })
+
+      expect(regenerated).toBe('shared-regen-1')
+    })
+
+    it('should let a document reuse its own slug on regenerate via the excluded id', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Own Slug' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('own-slug')
+
+      const req = await createLocalReq({ user: user.user }, payload)
+
+      // Excluding the current doc means regenerating its own unchanged source reuses the value rather
+      // than bumping past it.
+      const regenerated = await slugifyHandler({
+        id: doc.id,
+        collectionSlug: 'slug-fields',
+        data: {},
+        path: 'slug',
+        req,
+        valueToSlugify: 'Own Slug',
+      })
+
+      expect(regenerated).toBe('own-slug')
+    })
+
     describe('autosave drafts', () => {
       const created: (number | string)[] = []
 

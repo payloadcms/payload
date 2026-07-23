@@ -1608,6 +1608,7 @@ export type { ValidationFieldError } from './errors/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 export { getSlugFallbackValue } from './fields/baseFields/slug/getSlugFallbackValue.js'
+export { getUniqueSlugValue } from './fields/baseFields/slug/getUniqueSlugValue.js'
 
 export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 

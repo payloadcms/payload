@@ -4,6 +4,7 @@ import {
   executeAccess,
   getFieldByPath,
   getSlugFallbackValue,
+  getUniqueSlugValue,
   type ServerFunction,
   type SlugifyServerFunctionArgs,
   UnauthorizedError,
@@ -25,7 +26,7 @@ export const slugifyHandler: ServerFunction<
   SlugifyServerFunctionArgs,
   Promise<ReturnType<Slugify>>
 > = async (args) => {
-  const { collectionSlug, data, globalSlug, locale, path, req, valueToSlugify } = args
+  const { id, collectionSlug, data, globalSlug, locale, path, req, valueToSlugify } = args
 
   if (!req.user) {
     throw new UnauthorizedError()
@@ -58,34 +59,50 @@ export const slugifyHandler: ServerFunction<
 
   const result = await slugify(valueToSlugify)
 
-  if (result) {
+  const collectionConfig = collectionSlug ? req.payload.collections[collectionSlug]?.config : null
+
+  // Uniqueness dedupe only applies to a collection's slug field. Globals have no collection to
+  // dedupe against, so their result is returned as-is.
+  if (!collectionConfig || !field || field.type !== 'slug' || !('name' in field)) {
     return result
   }
 
-  // No source to slugify: return the collection's `<singular>-N` fallback so the generate button
-  // can set it, mirroring the server-side create fallback. Globals have no counter fallback.
-  const collectionConfig = collectionSlug ? req.payload.collections[collectionSlug]?.config : null
+  // Probing reads across the whole collection with the raw db, so require unrestricted read access —
+  // a row-filtered (`Where`) result is treated as not allowed, since scoping the probe to readable
+  // rows would break uniqueness.
+  const canRead = await executeAccess({ disableErrors: true, req }, collectionConfig.access.read)
 
-  // Fall back to the collection's `<singular>-N` counter when there's no source. This probes slug
-  // availability across the whole collection with the raw db, so it runs only for the slug field at
-  // this path and only when the user has unrestricted read access — a row-filtered (`Where`) result
-  // is treated as not allowed, since scoping the probe to readable rows would break uniqueness.
-  if (collectionConfig && field && field.type === 'slug' && 'name' in field) {
-    const canRead = await executeAccess({ disableErrors: true, req }, collectionConfig.access.read)
-
-    if (canRead === true) {
-      return getSlugFallbackValue({
-        collection: collectionConfig,
-        field: field.name,
-        // A localized slug is unique per-locale, so scope the fallback probe to the current locale —
-        // otherwise it dedupes against the default locale and can hand back a colliding value. The
-        // client passes the active admin locale; fall back to the request's own locale.
-        locale: field.localized ? (locale ?? req.locale ?? undefined) : undefined,
-        req,
-        slugify,
-      })
-    }
+  if (canRead !== true) {
+    return result
   }
 
-  return result
+  // A localized slug is unique per-locale, so scope the probe to the current locale — otherwise it
+  // dedupes against the default locale and can hand back a colliding value. The client passes the
+  // active admin locale; fall back to the request's own locale.
+  const localeToScope = field.localized ? (locale ?? req.locale ?? undefined) : undefined
+
+  // The current doc is excluded so a regenerate can reuse its own value rather than bump past it.
+  const excludeId = typeof id === 'string' || typeof id === 'number' ? id : undefined
+
+  // A source resolved to a value: dedupe it the same way the next save would, so the generate button
+  // can't hand back a slug that's already taken. With no source, return the `<singular>-N` fallback.
+  if (result) {
+    return getUniqueSlugValue({
+      id: excludeId,
+      collection: collectionConfig,
+      field: field.name,
+      locale: localeToScope,
+      req,
+      value: result,
+    })
+  }
+
+  return getSlugFallbackValue({
+    id: excludeId,
+    collection: collectionConfig,
+    field: field.name,
+    locale: localeToScope,
+    req,
+    slugify,
+  })
 }
