@@ -149,9 +149,11 @@ export type WhereField = {
 }
 
 export type Where = {
-  [key: string]: Where[] | WhereField
+  [key: string]: Where | Where[] | WhereField
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   and?: Where[]
+  // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
+  not?: Where
   // @ts-expect-error - vestiges of when tsconfig was not strict. Feel free to improve
   or?: Where[]
 }

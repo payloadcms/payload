@@ -23,6 +23,11 @@ export const sanitizeWhereQuery = ({
       continue
     }
 
+    if (key.toLowerCase() === 'not' && typeof value === 'object' && !Array.isArray(value)) {
+      sanitizeWhereQuery({ fields, payload, where: value as Where })
+      continue
+    }
+
     const paths = key.split('.')
     let pathHasChanged = false
 
