@@ -58,11 +58,16 @@ export const validateOptions: (props?: Props) => Validate =
       const existingOptions: (number | string)[][] = []
 
       variants.forEach((variant: any) => {
-        existingOptions.push(variant.options)
+        if (Array.isArray(variant?.options)) {
+          existingOptions.push(variant.options)
+        }
       })
 
       const exists = existingOptions.some(
-        (combo) => combo.length === values.length && combo.every((val) => values.includes(val)),
+        (combo) =>
+          Array.isArray(combo) &&
+          combo.length === values.length &&
+          combo.every((val) => values.includes(val)),
       )
 
       if (exists) {
