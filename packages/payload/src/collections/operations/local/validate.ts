@@ -91,7 +91,28 @@ export async function validateLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: ValidateCollectionOptions<TSlug>,
 ): Promise<ValidationResult> {
-  return validateLocalWithDataLocale(payload, options)
+  const publicOptions = {
+    collection: options.collection,
+    context: options.context,
+    draft: options.draft,
+    locale: options.locale,
+    overrideAccess: options.overrideAccess,
+    req: options.req,
+    user: options.user,
+  }
+
+  if (options.id === undefined) {
+    return validateLocalWithDataLocale(payload, {
+      ...publicOptions,
+      data: options.data,
+    })
+  }
+
+  return validateLocalWithDataLocale(payload, {
+    ...publicOptions,
+    id: options.id,
+    data: options.data,
+  })
 }
 
 export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(

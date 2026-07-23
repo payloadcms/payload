@@ -122,10 +122,11 @@ export const createOperation = async <
 
     let { data } = args
 
-    // For creates there is no existing doc — always publish all locales when not a draft.
+    // Explicit publish-all intent wins; otherwise new non-drafts publish all applicable locales.
     const publishAllLocales =
-      !draft &&
-      (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true))
+      publishAllLocalesArg === true ||
+      (!draft &&
+        (publishAllLocalesArg ?? (hasLocalizeStatusEnabled(collectionConfig) ? false : true)))
     const isSavingDraft = Boolean(draft && hasDraftsEnabled(collectionConfig) && !publishAllLocales)
 
     if (isSavingDraft) {
@@ -178,9 +179,12 @@ export const createOperation = async <
     data = newFileData
 
     const isCreatingTrashedDocument = Boolean(
-      collectionConfig.trash && data._status !== 'published' && data.deletedAt,
+      !publishAllLocales &&
+        collectionConfig.trash &&
+        data._status !== 'published' &&
+        data.deletedAt,
     )
-    const isUnpublishMetadataOperation = data._status === 'draft'
+    const isUnpublishMetadataOperation = !publishAllLocales && data._status === 'draft'
 
     if (
       !isSavingDraft &&

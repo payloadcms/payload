@@ -104,9 +104,10 @@ export const updateDocument = async <
 }: SharedUpdateDocumentArgs<TSlug>): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   const password = data?.password
   const publishAllLocales =
-    !draftArg &&
-    (publishAllLocalesArg ??
-      (hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all' ? false : true))
+    publishAllLocalesArg === true ||
+    (!draftArg &&
+      (publishAllLocalesArg ??
+        (hasLocalizeStatusEnabled(collectionConfig) && locale !== 'all' ? false : true)))
   const unpublishAllLocales =
     typeof unpublishAllLocalesArg === 'string'
       ? unpublishAllLocalesArg === 'true'
@@ -155,11 +156,13 @@ export const updateDocument = async <
   })
   const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
   const isTrashMetadataOperation = Boolean(
-    collectionConfig.trash &&
+    !publishAllLocales &&
+      collectionConfig.trash &&
       data?._status !== 'published' &&
       (data?.deletedAt || isRestoringDraftFromTrash),
   )
-  const isUnpublishMetadataOperation = unpublishAllLocales || data?._status === 'draft'
+  const isUnpublishMetadataOperation =
+    unpublishAllLocales || (!publishAllLocales && data?._status === 'draft')
 
   if (
     hasDraftsEnabled(collectionConfig) &&

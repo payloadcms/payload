@@ -108,9 +108,10 @@ export const updateOperation = async <
     let { data } = args
 
     const publishAllLocales =
-      !draftArg &&
-      (publishAllLocalesArg ??
-        (hasLocalizeStatusEnabled(globalConfig) && locale !== 'all' ? false : true))
+      publishAllLocalesArg === true ||
+      (!draftArg &&
+        (publishAllLocalesArg ??
+          (hasLocalizeStatusEnabled(globalConfig) && locale !== 'all' ? false : true)))
     const unpublishAllLocales =
       typeof unpublishAllLocalesArg === 'string'
         ? unpublishAllLocalesArg === 'true'
@@ -192,7 +193,8 @@ export const updateOperation = async <
       req,
     })
 
-    const isUnpublishMetadataOperation = unpublishAllLocales || data._status === 'draft'
+    const isUnpublishMetadataOperation =
+      unpublishAllLocales || (!publishAllLocales && data._status === 'draft')
 
     if (hasDraftsEnabled(globalConfig) && !isSavingDraft && !isUnpublishMetadataOperation) {
       const validationResult = await validateGlobalLocalWithDataLocale(payload, {

@@ -53,7 +53,16 @@ export async function validateGlobalLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: ValidateGlobalOptions<TSlug>,
 ): Promise<ValidationResult> {
-  return validateGlobalLocalWithDataLocale(payload, options)
+  return validateGlobalLocalWithDataLocale(payload, {
+    slug: options.slug,
+    context: options.context,
+    data: options.data,
+    draft: options.draft,
+    locale: options.locale,
+    overrideAccess: options.overrideAccess,
+    req: options.req,
+    user: options.user,
+  })
 }
 
 export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug>(

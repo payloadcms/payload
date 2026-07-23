@@ -119,6 +119,51 @@ describe('validate Local API', () => {
       })
     })
 
+    it('should ignore internal projection flags passed to the public collection validate API', async () => {
+      const stored = await payload.create({
+        collection: validationCollectionSlug,
+        data: {
+          summary: 'stored summary',
+          title: 'Stored title',
+        },
+        locale: 'en',
+      })
+
+      const result = await payload.validate({
+        id: stored.id,
+        collection: validationCollectionSlug,
+        data: {
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        },
+        locale: ['en', 'es'],
+        validationDataLocale: 'en',
+      } as never)
+
+      expect(result).toEqual({
+        errors: [],
+        valid: true,
+      })
+    })
+
+    it('should ignore internal trash-source flags passed to the public collection validate API', async () => {
+      const stored = await seedPublishCollection({
+        de: 'German optional',
+        deletedAt: new Date().toISOString(),
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+
+      await expect(
+        payload.validate({
+          id: stored.id,
+          collection: publishCollectionSlug,
+          locale: 'en',
+          validationTrash: true,
+        } as never),
+      ).rejects.toThrow(/not found/i)
+    })
+
     it('should resolve all to every available locale through locale filtering', async () => {
       const result = await payload.validate({
         collection: validationCollectionSlug,
@@ -536,6 +581,23 @@ describe('validate Local API', () => {
   })
 
   describe('globals', () => {
+    it('should ignore internal projection flags passed to the public global validate API', async () => {
+      const result = await payload.validateGlobal({
+        slug: validationGlobalSlug,
+        data: {
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        },
+        locale: ['en', 'es'],
+        validationDataLocale: 'en',
+      } as never)
+
+      expect(result).toEqual({
+        errors: [],
+        valid: true,
+      })
+    })
+
     it('should isolate mutable access data and request state between global locale passes', async () => {
       const candidateData = {
         isolation: { marker: 'caller' },
@@ -1070,6 +1132,282 @@ describe('validate Local API', () => {
   })
 
   describe('publish enforcement', () => {
+    it('should block collection create publish-all when status is draft without persisting', async () => {
+      await expect(
+        payload.create({
+          collection: publishCollectionSlug,
+          data: {
+            ...getPublishCollectionLocaleData({ title: 'English candidate' }),
+            _status: 'draft',
+          },
+          locale: 'en',
+          publishAllLocales: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+
+      const documents = await payload.find({
+        collection: publishCollectionSlug,
+        draft: true,
+        limit: 1,
+        locale: 'all',
+      })
+
+      expect(documents.totalDocs).toBe(0)
+    })
+
+    it('should block collection create publish-all when draft saving is requested', async () => {
+      await expect(
+        payload.create({
+          collection: publishCollectionSlug,
+          data: getPublishCollectionLocaleData({ title: 'English candidate' }),
+          draft: true,
+          locale: 'en',
+          publishAllLocales: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+
+      const documents = await payload.find({
+        collection: publishCollectionSlug,
+        draft: true,
+        limit: 1,
+        locale: 'all',
+      })
+
+      expect(documents.totalDocs).toBe(0)
+    })
+
+    it('should block collection publish-all when status is draft without changing status', async () => {
+      const draft = await seedPublishCollection({
+        de: '',
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          data: {
+            _status: 'draft',
+            title: 'English candidate',
+          },
+          locale: 'en',
+          publishAllLocales: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+
+      const latestDraft = await payload.findByID({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        draft: true,
+        locale: 'all',
+      })
+
+      expect(latestDraft._status).toMatchObject({
+        de: 'draft',
+        en: 'draft',
+        es: 'draft',
+      })
+    })
+
+    it('should block collection publish-all when draft saving is requested', async () => {
+      const draft = await seedPublishCollection({
+        de: '',
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          data: {
+            title: 'English candidate',
+          },
+          draft: true,
+          locale: 'en',
+          publishAllLocales: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+
+      const latestDraft = await payload.findByID({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        draft: true,
+        locale: 'all',
+      })
+
+      expect(latestDraft._status).toMatchObject({
+        de: 'draft',
+        en: 'draft',
+        es: 'draft',
+      })
+    })
+
+    it('should block global publish-all when status is draft without changing status', async () => {
+      await seedPublishGlobal({
+        de: '',
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+
+      await expect(
+        payload.updateGlobal({
+          slug: publishGlobalSlug,
+          data: {
+            _status: 'draft',
+            title: 'English candidate',
+          },
+          locale: 'en',
+          publishAllLocales: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+
+      const latestDraft = await payload.findGlobal({
+        slug: publishGlobalSlug,
+        draft: true,
+        locale: 'all',
+      })
+
+      expect(latestDraft._status).toMatchObject({
+        de: 'draft',
+        en: 'draft',
+        es: 'draft',
+      })
+    })
+
+    it('should block global publish-all when draft saving is requested', async () => {
+      await seedPublishGlobal({
+        de: '',
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+
+      await expect(
+        payload.updateGlobal({
+          slug: publishGlobalSlug,
+          data: {
+            title: 'English candidate',
+          },
+          draft: true,
+          locale: 'en',
+          publishAllLocales: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+
+      const latestDraft = await payload.findGlobal({
+        slug: publishGlobalSlug,
+        draft: true,
+        locale: 'all',
+      })
+
+      expect(latestDraft._status).toMatchObject({
+        de: 'draft',
+        en: 'draft',
+        es: 'draft',
+      })
+    })
+
+    it('should block publish-all from a trashed source when status is omitted', async () => {
+      const draft = await seedPublishCollection({
+        de: '',
+        deletedAt: new Date().toISOString(),
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          data: {
+            title: 'English candidate',
+          },
+          locale: 'en',
+          publishAllLocales: true,
+          trash: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+
+      const latestDraft = await payload.findByID({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        draft: true,
+        locale: 'all',
+        trash: true,
+      })
+
+      expect(latestDraft.deletedAt).toBeTruthy()
+      expect(latestDraft._status).toMatchObject({
+        de: 'draft',
+        en: 'draft',
+        es: 'draft',
+      })
+    })
+
     it('should not apply flat localized object candidates to a required sibling locale', async () => {
       const omittedFields: PublishCollectionLocalizedField[] = [
         'localizedArray',
