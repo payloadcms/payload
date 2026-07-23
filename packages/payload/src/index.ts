@@ -1573,6 +1573,7 @@ export type {
   UpsertArgs,
 } from './database/types.js'
 export type { DynamicMigrationTemplate } from './database/types.js'
+export type { MigrateResult, MigrationCreateResult } from './database/types.js'
 export type { EmailAdapter as PayloadEmailAdapter, SendEmailOptions } from './email/types.js'
 
 export {
