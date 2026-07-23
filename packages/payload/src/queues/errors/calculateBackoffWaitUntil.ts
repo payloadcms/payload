@@ -3,15 +3,13 @@ import type { RetryConfig } from '../config/types/taskTypes.js'
 import { getCurrentDate } from '../utilities/getCurrentDate.js'
 
 export function calculateBackoffWaitUntil({
-  currentDate,
   retriesConfig,
   totalTried,
 }: {
-  currentDate?: Date
   retriesConfig: number | RetryConfig
   totalTried: number
 }): Date {
-  const now = currentDate ?? getCurrentDate()
+  const now = getCurrentDate()
   let waitUntil: Date = now
 
   if (typeof retriesConfig === 'object') {

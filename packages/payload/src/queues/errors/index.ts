@@ -49,8 +49,4 @@ export class JobCancelledError extends Error {
   }
 }
 
-export class JobLeaseLostError extends Error {
-  constructor(message: string) {
-    super(message)
-  }
-}
+export class JobLeaseLostError extends Error {}

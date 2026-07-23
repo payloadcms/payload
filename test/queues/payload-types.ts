@@ -407,7 +407,6 @@ export interface PayloadJob {
     | null;
   queue?: string | null;
   waitUntil?: string | null;
-  processingToken?: string | null;
   processingUntil?: string | null;
   processingToken?: string | null;
   /**
@@ -557,7 +556,6 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   taskSlug?: T;
   queue?: T;
   waitUntil?: T;
-  processingToken?: T;
   processingUntil?: T;
   processingToken?: T;
   concurrencyKey?: T;

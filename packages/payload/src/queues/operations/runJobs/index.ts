@@ -2,8 +2,6 @@ import { v4 as uuid } from 'uuid'
 
 import type { Job } from '../../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
-import type { SanitizedJobsConfig } from '../../config/types/index.js'
-import type { RetryConfig } from '../../config/types/taskTypes.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
 import type { WorkflowConfig, WorkflowHandler } from '../../config/types/workflowTypes.js'
 import type { RunJobsSilent } from '../../localAPI.js'
@@ -12,7 +10,6 @@ import type { RunJobResult } from './runJob/index.js'
 import { Forbidden } from '../../../errors/Forbidden.js'
 import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { jobsCollectionSlug } from '../../config/collection.js'
-import { calculateBackoffWaitUntil } from '../../errors/calculateBackoffWaitUntil.js'
 import { JobCancelledError, JobLeaseLostError } from '../../errors/index.js'
 import { getCurrentDate } from '../../utilities/getCurrentDate.js'
 import { updateJobs } from '../../utilities/updateJob.js'
@@ -117,8 +114,10 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   const now = getCurrentDate()
   const { duration: processingLeaseDuration, safetyBuffer: processingLeaseSafetyBuffer } =
     jobsConfig.processingLease
+  const claimBefore = now.toISOString()
+  const processingUntil = new Date(now.getTime() + processingLeaseDuration).toISOString()
   const processingToken = uuid()
-  const scope: Where[] = [
+  const and: Where[] = [
     {
       completedAt: {
         exists: false,
@@ -129,10 +128,30 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         not_equals: true,
       },
     },
+    {
+      or: [
+        { processingUntil: { exists: false } },
+        { processingUntil: { less_than_equal: claimBefore } },
+      ],
+    },
+    {
+      or: [
+        {
+          waitUntil: {
+            exists: false,
+          },
+        },
+        {
+          waitUntil: {
+            less_than: claimBefore,
+          },
+        },
+      ],
+    },
   ]
 
   if (!id && allQueues !== true) {
-    scope.push({
+    and.push({
       queue: {
         equals: queue ?? 'default',
       },
@@ -140,28 +159,13 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   }
 
   if (whereFromProps) {
-    scope.push(whereFromProps)
+    and.push(whereFromProps)
   }
 
   if (id) {
-    scope.push({ id: { equals: id } })
+    and.push({ id: { equals: id } })
   }
 
-  await recoverExpiredJobs({
-    jobsConfig,
-    limit: id ? 1 : limit,
-    now,
-    req,
-    scope,
-  })
-
-  const and: Where[] = [
-    ...scope,
-    { processingUntil: { exists: false } },
-    {
-      or: [{ waitUntil: { exists: false } }, { waitUntil: { less_than_equal: now.toISOString() } }],
-    },
-  ]
   // Only enforce concurrency controls if the feature is enabled
   if (jobsConfig.enableConcurrencyControl) {
     // Find currently running jobs with concurrency keys to enforce exclusive concurrency
@@ -176,7 +180,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       },
       where: {
         and: [
-          { processingUntil: { greater_than: now.toISOString() } },
+          { processingUntil: { greater_than: claimBefore } },
           { concurrencyKey: { exists: true } },
         ],
       },
@@ -205,15 +209,16 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
+  // Claim jobs before running them so another worker cannot pick up the same jobs.
+  // `processingToken` identifies which jobs were claimed by this runner.
   let jobs: Job[] = []
 
   if (id) {
     const updatedDocs = await updateJobs({
+      claimBefore,
       data: {
         processingToken,
-        processingUntil: new Date(
-          getCurrentDate().getTime() + processingLeaseDuration,
-        ).toISOString(),
+        processingUntil,
       },
       limit: 1,
       req,
@@ -245,11 +250,10 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       defaultProcessingOrder = processingOrderConfig
     }
     const updatedDocs = await updateJobs({
+      claimBefore,
       data: {
         processingToken,
-        processingUntil: new Date(
-          getCurrentDate().getTime() + processingLeaseDuration,
-        ).toISOString(),
+        processingUntil,
       },
       limit,
       req,
@@ -296,7 +300,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     if (jobsToRelease.length > 0) {
       const releaseIds = jobsToRelease.map((job) => job.id)
       await updateJobs({
-        data: { processingToken: null, processingUntil: null },
+        data: { processingUntil: null },
         req,
         returning: false,
         where: {
@@ -345,19 +349,18 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     })
   }
 
-  type SingleJobResult = {
+  const successfullyCompletedJobs: (number | string)[] = []
+
+  const runSingleJob = async (
+    job: Job,
+  ): Promise<{
     id: number | string
     result: RunJobResult
-  }
-
-  const successfullyCompletedJobs: { completedAt: string; id: number | string }[] = []
-
-  const runSingleJob = async (job: Job): Promise<SingleJobResult> => {
+  }> => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }
     const jobReq = isolateObjectProperty(req, 'transactionID')
-    const updateClaimedJob = getUpdateJobFunction(job, jobReq)
 
     let workflowConfig: undefined | WorkflowConfig = undefined
 
@@ -387,7 +390,8 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         })
       }
 
-      await updateClaimedJob({
+      const updateJob = getUpdateJobFunction(job, jobReq)
+      await updateJob({
         error: { message: errorMessage },
         hasError: true,
         processingUntil: null,
@@ -403,6 +407,8 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
 
     try {
+      const updateJob = getUpdateJobFunction(job, jobReq)
+
       // the runner will either be passed to the config
       // OR it will be a path, which we will need to import via eval to avoid
       // Next.js compiler dynamic import expression errors
@@ -422,7 +428,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
             payload.logger.error(errorMessage)
           }
 
-          await updateClaimedJob({
+          await updateJob({
             error: {
               error: errorMessage,
             },
@@ -444,13 +450,13 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
           job,
           req: jobReq,
           silent,
-          updateJob: updateClaimedJob,
+          updateJob,
           workflowConfig,
           workflowHandler,
         })
 
-        if (result.status === 'success' && job.completedAt) {
-          successfullyCompletedJobs.push({ id: job.id, completedAt: job.completedAt })
+        if (result.status === 'success') {
+          successfullyCompletedJobs.push(job.id)
         }
 
         return { id: job.id, result }
@@ -459,21 +465,18 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
           job,
           req: jobReq,
           silent,
-          updateJob: updateClaimedJob,
+          updateJob,
           workflowConfig,
           workflowHandler,
         })
 
-        if (result.status === 'success' && job.completedAt) {
-          successfullyCompletedJobs.push({ id: job.id, completedAt: job.completedAt })
+        if (result.status === 'success') {
+          successfullyCompletedJobs.push(job.id)
         }
 
         return { id: job.id, result }
       }
     } catch (error) {
-      if (error instanceof JobLeaseLostError) {
-        throw error
-      }
       if (error instanceof JobCancelledError) {
         if (
           !(job.error as Record<string, unknown> | undefined)?.cancelled ||
@@ -484,7 +487,8 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         ) {
           // When using the local API to cancel jobs, the local API will update the job data for us to ensure the job is cancelled.
           // But when throwing a JobCancelledError within a task or workflow handler, we are responsible for updating the job data ourselves.
-          await updateClaimedJob({
+          const updateJob = getUpdateJobFunction(job, jobReq)
+          await updateJob({
             completedAt: null,
             error: {
               cancelled: true,
@@ -507,16 +511,15 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
-  const activeClaims = new Set(jobs.map((job) => job.id))
   const stopHeartbeat = startProcessingLeaseHeartbeat({
-    activeClaims,
+    jobIDs: jobs.map((job) => job.id),
     processingLeaseDuration,
     processingLeaseSafetyBuffer,
     processingToken,
     req,
     silent,
   })
-  const runSingleJobWithLease = async (job: Job): Promise<null | SingleJobResult> => {
+  const runSingleJobWithLease = async (job: Job) => {
     try {
       return await runSingleJob(job)
     } catch (error) {
@@ -529,12 +532,10 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         return null
       }
       throw error
-    } finally {
-      activeClaims.delete(job.id)
     }
   }
 
-  let resultsArray: SingleJobResult[] = []
+  let resultsArray: { id: number | string; result: RunJobResult }[] = []
   try {
     if (sequential) {
       for (const job of jobs) {
@@ -545,9 +546,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       }
     } else {
       const jobPromises = jobs.map(runSingleJobWithLease)
-      resultsArray = (await Promise.all(jobPromises)).filter(
-        (result): result is SingleJobResult => result !== null,
-      )
+      resultsArray = (await Promise.all(jobPromises)).filter((result) => result !== null)
     }
   } finally {
     stopHeartbeat()
@@ -557,18 +556,13 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     try {
       await payload.db.deleteMany({
         collection: jobsCollectionSlug,
-        where: {
-          or: successfullyCompletedJobs.map(({ id, completedAt }): Where => {
-            const and: Where[] = [{ id: { equals: id } }, { completedAt: { equals: completedAt } }]
-            return { and }
-          }),
-        },
+        where: { id: { in: successfullyCompletedJobs } },
       })
     } catch (err) {
       if (!silent || (typeof silent === 'object' && !silent.error)) {
         payload.logger.error({
           err,
-          msg: `Failed to delete jobs ${successfullyCompletedJobs.map(({ id }) => id).join(', ')} on complete`,
+          msg: `Failed to delete jobs ${successfullyCompletedJobs.join(', ')} on complete`,
         })
       }
     }
@@ -599,106 +593,8 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   }
 }
 
-async function recoverExpiredJobs({
-  jobsConfig,
-  limit,
-  now,
-  req,
-  scope,
-}: {
-  jobsConfig: SanitizedJobsConfig
-  limit: number
-  now: Date
-  req: PayloadRequest
-  scope: Where[]
-}): Promise<void> {
-  const expiredJobs = await req.payload.db.find({
-    collection: jobsCollectionSlug,
-    limit,
-    pagination: false,
-    req,
-    where: {
-      and: [
-        ...scope,
-        { processingUntil: { exists: true } },
-        { processingUntil: { less_than_equal: now.toISOString() } },
-      ],
-    },
-  })
-
-  await Promise.all(
-    (expiredJobs.docs as Job[]).map(async (job) => {
-      if (!job.processingUntil) {
-        return
-      }
-
-      const retriesConfig = getRetriesConfig({ job, jobsConfig })
-      const maxRetries =
-        typeof retriesConfig === 'object' ? (retriesConfig.attempts ?? 0) : (retriesConfig ?? 0)
-      const hasFinalError = job.totalTried >= maxRetries
-      let waitUntil: null | string = null
-
-      if (!hasFinalError && retriesConfig) {
-        const calculatedWaitUntil = calculateBackoffWaitUntil({
-          currentDate: new Date(job.processingUntil),
-          retriesConfig,
-          totalTried: job.totalTried,
-        })
-
-        if (calculatedWaitUntil > now) {
-          waitUntil = calculatedWaitUntil.toISOString()
-        }
-      }
-
-      const error = {
-        name: 'JobProcessingTimeoutError',
-        message: `Job processing lease expired at ${job.processingUntil}`,
-      }
-
-      const processingTokenCondition = job.processingToken
-        ? { processingToken: { equals: job.processingToken } }
-        : { processingToken: { exists: false } }
-      await updateJobs({
-        data: {
-          error: hasFinalError ? error : null,
-          hasError: hasFinalError,
-          processingToken: null,
-          processingUntil: null,
-          totalTried: (job.totalTried ?? 0) + 1,
-          waitUntil,
-        },
-        limit: 1,
-        req,
-        returning: false,
-        where: {
-          and: [
-            { id: { equals: job.id } },
-            processingTokenCondition,
-            { processingUntil: { equals: job.processingUntil } },
-            { processingUntil: { less_than_equal: now.toISOString() } },
-          ],
-        },
-      })
-    }),
-  )
-}
-
-function getRetriesConfig({
-  job,
-  jobsConfig,
-}: {
-  job: Job
-  jobsConfig: SanitizedJobsConfig
-}): number | RetryConfig | undefined {
-  if (job.taskSlug) {
-    return jobsConfig.tasks?.find(({ slug }) => slug === job.taskSlug)?.retries
-  }
-
-  return jobsConfig.workflows?.find(({ slug }) => slug === job.workflowSlug)?.retries
-}
-
 type ProcessingLeaseHeartbeatArgs = {
-  activeClaims: Set<number | string>
+  jobIDs: (number | string)[]
   processingLeaseDuration: number
   processingLeaseSafetyBuffer: number
   processingToken: string
@@ -707,13 +603,13 @@ type ProcessingLeaseHeartbeatArgs = {
 }
 
 function startProcessingLeaseHeartbeat(args: ProcessingLeaseHeartbeatArgs): () => void {
-  const { activeClaims, processingLeaseDuration } = args
+  const { processingLeaseDuration } = args
   const heartbeatInterval = Math.max(Math.floor(processingLeaseDuration / 3), 1)
   let isStopped = false
   let timeout: ReturnType<typeof setTimeout> | undefined
 
   const scheduleHeartbeat = () => {
-    if (isStopped || activeClaims.size === 0) {
+    if (isStopped) {
       return
     }
 
@@ -734,7 +630,7 @@ function startProcessingLeaseHeartbeat(args: ProcessingLeaseHeartbeatArgs): () =
 }
 
 async function sendHeartbeat({
-  activeClaims,
+  jobIDs,
   processingLeaseDuration,
   processingLeaseSafetyBuffer,
   processingToken,
@@ -752,9 +648,7 @@ async function sendHeartbeat({
       returning: false,
       where: {
         and: [
-          { id: { in: [...activeClaims] } },
-          { completedAt: { exists: false } },
-          { hasError: { not_equals: true } },
+          { id: { in: jobIDs } },
           { processingToken: { equals: processingToken } },
           { processingUntil: { greater_than: minimumProcessingUntil } },
         ],

@@ -617,24 +617,29 @@ export type UpdateJobsArgs = {
   returning?: boolean
 } & (
   | {
-      id: number | string
-      limit?: never
-      sort?: never
-      where?: never
-    }
-  | {
+      /**
+       * Recheck that a job has no lease or an expired lease before writing its claim.
+       */
+      claimBefore?: string
       id?: never
       limit?: number
       sort?: Sort
       where: Where
+    }
+  | {
+      claimBefore?: never
+      id: number | string
+      limit?: never
+      sort?: never
+      where?: never
     }
 )
 
 /**
  * Updates jobs matching the provided `where` condition.
  *
- * Implementations must apply `where` when writing each document, not only when first selecting
- * documents, so a worker can only update jobs that it still owns.
+ * Job claims must only update jobs whose lease is missing or expired at `claimBefore`.
+ * When a `processingToken` is provided, only jobs updated with that token may be returned.
  */
 export type UpdateJobs = (args: UpdateJobsArgs) => Promise<Job[] | null>
 

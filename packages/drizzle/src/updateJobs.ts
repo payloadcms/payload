@@ -1,7 +1,7 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { UpdateJobs, Where } from 'payload'
 
-import { and, inArray, isNull } from 'drizzle-orm'
+import { and, inArray, isNull, lte, or } from 'drizzle-orm'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
@@ -14,16 +14,9 @@ import { getPrimaryDb } from './utilities/getPrimaryDb.js'
 import { getTransaction } from './utilities/getTransaction.js'
 import { markWrite } from './utilities/readAfterWrite.js'
 
-const isInitialJobClaim = (data: Record<string, unknown>): boolean =>
-  typeof data.processingToken === 'string' &&
-  typeof data.processingUntil === 'string' &&
-  Object.keys(data).every(
-    (field) => field === 'processingToken' || field === 'processingUntil' || field === 'updatedAt',
-  )
-
 export const updateJobs: UpdateJobs = async function updateMany(
   this: DrizzleAdapter,
-  { id, data, limit: limitArg, req, returning, sort: sortArg, where: whereArg },
+  { id, claimBefore, data, limit: limitArg, req, returning, sort: sortArg, where: whereArg },
 ) {
   if (
     !(data?.log as object[])?.length &&
@@ -80,7 +73,8 @@ export const updateJobs: UpdateJobs = async function updateMany(
 
   const db = getPrimaryDb(this, await getTransaction(this, req))
 
-  if (isInitialJobClaim(data)) {
+  // Recheck lease expiry in the write so only one runner wins the claim.
+  if (claimBefore) {
     const _db = db as LibSQLDatabase
     const table = this.tables[tableName]
     const { row } = transformForWrite({
@@ -99,7 +93,12 @@ export const updateJobs: UpdateJobs = async function updateMany(
     const claimedRows = await _db
       .update(table)
       .set(row)
-      .where(and(inArray(table.id, jobIDs), isNull(table.processingUntil)))
+      .where(
+        and(
+          inArray(table.id, jobIDs),
+          or(isNull(table.processingUntil), lte(table.processingUntil, claimBefore)),
+        ),
+      )
       .returning({ id: table.id })
 
     if (claimedRows.length) {

@@ -863,9 +863,9 @@ The default `updateJobs` implementation has been removed because it could not sa
 
 ### Jobs: crashed workers are recovered with processing leases
 
-The permanent `processing` flag on `payload-jobs` has been replaced by a renewable `processingUntil` lease. If a worker exits, the next jobs runner call recovers the job after its lease expires and applies its existing retry configuration.
+The permanent `processing` flag on `payload-jobs` has been replaced by a renewable `processingUntil` lease. If a worker exits, a later jobs runner call can claim the job after its lease expires. Worker crashes do not consume the job's handler retry configuration.
 
-Worker updates use a 30-second safety buffer by default, so an update only starts when enough lease time remains for it to finish before recovery. Configure the lease with `jobs.processingLease.duration` and `jobs.processingLease.safetyBuffer`.
+Worker updates use a 30-second safety buffer by default, so an update only starts when enough lease time remains for it to finish before another claim. Configure the lease with `jobs.processingLease.duration` and `jobs.processingLease.safetyBuffer`.
 
 Existing SQL databases need a migration that replaces `processing` with the nullable, indexed `processingUntil` column. MongoDB does not require a migration.
 

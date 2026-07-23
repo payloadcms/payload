@@ -228,7 +228,7 @@ Each job document contains:
 }
 ```
 
-Payload increments `totalTried` after each attempt. While the handler runs, Payload automatically renews `processingUntil`. The claim also gets a `processingToken`, and worker updates only start while that token still matches and enough lease time remains for the configured safety buffer. If the worker disappears and the lease expires, the next jobs runner call counts the abandoned attempt and recovers the job using its existing retry and backoff configuration.
+Payload increments `totalTried` after each completed attempt. While the handler runs, Payload automatically renews `processingUntil`. The claim also gets a `processingToken`, and worker updates only start while that token still matches and enough lease time remains for the configured safety buffer. If the worker disappears, the lease expires and a later jobs runner call can claim the job again. A crashed worker does not increment `totalTried` or consume a handler retry.
 
 #### Access Control
 

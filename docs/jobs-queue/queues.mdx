@@ -277,9 +277,9 @@ const results = await payload.jobs.runByID({
 
 Running jobs are owned through a renewable `processingUntil` lease and an internal `processingToken`. Payload renews the lease while the worker is alive. Every worker update must match the token and start while enough lease time remains for the configured safety buffer.
 
-If the worker is killed, a later jobs runner call recovers the expired job and applies its existing retry configuration.
+If the worker is killed, its lease eventually expires and a later jobs runner call can claim the job with a new token. A worker crash does not consume the job's retry configuration; retries and backoff still apply normally when a handler reports an error.
 
-By default, Payload only starts a worker update when more than 30 seconds remain on its lease. This safety buffer gives the update time to finish before the lease expires and another worker can recover the job. If too little time remains, the update is rejected and the job is recovered after the lease expires.
+By default, Payload only starts a worker update when more than 30 seconds remain on its lease. This safety buffer gives the update time to finish before the lease expires and another worker can claim the job. If too little time remains, the update is rejected and the job becomes claimable after the lease expires.
 
 The default lease duration is two minutes and the default safety buffer is 30 seconds. You can change both globally:
 
@@ -657,7 +657,7 @@ jobsCollectionOverrides: ({ defaultJobsCollection }) => ({
 Look for jobs with:
 
 - `processingUntil` in the future → A worker currently owns the job
-- `processingUntil` in the past → The worker may have crashed; the next runner call will recover it
+- `processingUntil` in the past → The worker may have crashed; the next runner call can claim it
 - `processingToken` set → Internal identity of the worker that owns the current lease
 - `hasError: true` → Check the `log` field for errors
 - `completedAt: null` → Job hasn't run yet
