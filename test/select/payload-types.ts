@@ -77,6 +77,7 @@ export interface Config {
     upload: Upload;
     rels: Rel;
     'relationships-blocks': RelationshipsBlock;
+    'relationships-array': RelationshipsArray;
     'custom-ids': CustomId;
     users: User;
     'payload-kv': PayloadKv;
@@ -96,6 +97,7 @@ export interface Config {
     upload: UploadSelect<false> | UploadSelect<true>;
     rels: RelsSelect<false> | RelsSelect<true>;
     'relationships-blocks': RelationshipsBlocksSelect<false> | RelationshipsBlocksSelect<true>;
+    'relationships-array': RelationshipsArraySelect<false> | RelationshipsArraySelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -116,6 +118,9 @@ export interface Config {
     'force-select-global': ForceSelectGlobalSelect<false> | ForceSelectGlobalSelect<true>;
   };
   locale: 'en' | 'de';
+  widgets: {
+    collections: CollectionsWidget;
+  };
   user: User;
   jobs: {
     tasks: unknown;
@@ -491,6 +496,22 @@ export interface RelationshipsBlock {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-array".
+ */
+export interface RelationshipsArray {
+  id: string;
+  array?:
+    | {
+        hasMany?: (string | Rel)[] | null;
+        hasOne?: (string | null) | Rel;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-ids".
  */
 export interface CustomId {
@@ -589,6 +610,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relationships-blocks';
         value: string | RelationshipsBlock;
+      } | null)
+    | ({
+        relationTo: 'relationships-array';
+        value: string | RelationshipsArray;
       } | null)
     | ({
         relationTo: 'custom-ids';
@@ -978,6 +1003,21 @@ export interface RelationshipsBlocksSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-array_select".
+ */
+export interface RelationshipsArraySelect<T extends boolean = true> {
+  array?:
+    | T
+    | {
+        hasMany?: T;
+        hasOne?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-ids_select".
  */
 export interface CustomIdsSelect<T extends boolean = true> {
@@ -1105,6 +1145,16 @@ export interface ForceSelectGlobalSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   globalType?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

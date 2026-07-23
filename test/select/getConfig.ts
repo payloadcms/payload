@@ -66,6 +66,29 @@ export const getConfig: () => Partial<Config> = () => ({
         },
       ],
     },
+    {
+      slug: 'relationships-array',
+      fields: [
+        {
+          type: 'array',
+          name: 'array',
+          fields: [
+            {
+              type: 'relationship',
+              name: 'hasMany',
+              relationTo: 'rels',
+              hasMany: true,
+            },
+            {
+              type: 'relationship',
+              name: 'hasOne',
+              relationTo: 'rels',
+            },
+          ],
+        },
+      ],
+      versions: false,
+    },
     CustomID,
     UsersCollection,
   ],
