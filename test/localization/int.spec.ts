@@ -1450,6 +1450,44 @@ describe('Localization', () => {
         expect(allLocales.localizedCheckbox.es).toBeFalsy()
       })
 
+      it('should pass the current locale to beforeDuplicate field hooks for each locale', async () => {
+        const localizedPost = await payload.create({
+          collection: localizedPostsSlug,
+          data: {
+            localizedHookLocale: 'src',
+            title: englishTitle,
+          },
+          locale: defaultLocale,
+        })
+
+        const id = localizedPost.id.toString()
+
+        await payload.update({
+          id,
+          collection: localizedPostsSlug,
+          data: {
+            localizedHookLocale: 'src',
+          },
+          locale: spanishLocale,
+        })
+
+        const result = await payload.duplicate({
+          id,
+          collection: localizedPostsSlug,
+          locale: defaultLocale,
+        })
+
+        const allLocales = await payload.findByID({
+          id: result.id,
+          collection: localizedPostsSlug,
+          locale: 'all',
+        })
+
+        // Each locale's beforeDuplicate hook must run with its own req.locale
+        expect(allLocales.localizedHookLocale.en).toStrictEqual(`src-${defaultLocale}`)
+        expect(allLocales.localizedHookLocale.es).toStrictEqual(`src-${spanishLocale}`)
+      })
+
       it('should duplicate with localized blocks', async () => {
         // This test covers a few things:
         // 1. make sure we can duplicate localized blocks
