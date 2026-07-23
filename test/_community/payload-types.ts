@@ -62,24 +62,24 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_FCB16F2F".
+ * via the `definition` "LexicalNodes_C0124FAC".
  */
-export type LexicalNodes_FCB16F2F =
+export type LexicalNodes_C0124FAC =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_FCB16F2F>
+  | SerializedParagraphNode<LexicalNodes_C0124FAC>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'media'>
-  | SerializedQuoteNode<LexicalNodes_FCB16F2F>
+  | SerializedQuoteNode<LexicalNodes_C0124FAC>
   | SerializedRelationshipNode<
       'posts' | 'payload-kv' | 'users' | 'payload-locked-documents' | 'payload-preferences' | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_FCB16F2F, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_FCB16F2F, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_FCB16F2F>
-  | SerializedListItemNode<LexicalNodes_FCB16F2F>
-  | SerializedHeadingNode<LexicalNodes_FCB16F2F>;
+  | SerializedAutoLinkNode<LexicalNodes_C0124FAC, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_C0124FAC, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_C0124FAC>
+  | SerializedListItemNode<LexicalNodes_C0124FAC>
+  | SerializedHeadingNode<LexicalNodes_C0124FAC>;
 
 export interface Config {
   auth: {
@@ -106,7 +106,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: number;
+    defaultIDType: string;
   };
   fallbackLocale: null;
   globals: {
@@ -150,9 +150,9 @@ export interface UserAuthOperations {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: number;
+  id: string;
   title?: string | null;
-  content?: LexicalRichText<LexicalNodes_FCB16F2F> | null;
+  content?: LexicalRichText<LexicalNodes_C0124FAC> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -161,7 +161,7 @@ export interface Post {
  * via the `definition` "media".
  */
 export interface Media {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -205,7 +205,7 @@ export interface Media {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: number;
+  id: string;
   key: string;
   data:
     | {
@@ -222,7 +222,7 @@ export interface PayloadKv {
  * via the `definition` "users".
  */
 export interface User {
-  id: number;
+  id: string;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -247,24 +247,24 @@ export interface User {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: number;
+  id: string;
   document?:
     | ({
         relationTo: 'posts';
-        value: number | Post;
+        value: string | Post;
       } | null)
     | ({
         relationTo: 'media';
-        value: number | Media;
+        value: string | Media;
       } | null)
     | ({
         relationTo: 'users';
-        value: number | User;
+        value: string | User;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -274,10 +274,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: number;
+  id: string;
   user: {
     relationTo: 'users';
-    value: number | User;
+    value: string | User;
   };
   key?: string | null;
   value?:
@@ -297,7 +297,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: number;
+  id: string;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -431,7 +431,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "menu".
  */
 export interface Menu {
-  id: number;
+  id: string;
   globalText?: string | null;
   updatedAt?: string | null;
   createdAt?: string | null;
