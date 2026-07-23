@@ -286,6 +286,15 @@ describe('Fields', () => {
       expect(secondDuplicate.slug).toBe('slug-field-2')
     })
 
+    it('should derive from the source when an explicit value slugifies to nothing', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Fallthrough Title', slug: '!!!' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('fallthrough-title')
+    })
+
     it('should reject a slug that collides with another document', async () => {
       const first = await payload.create({
         collection: 'slug-fields',
@@ -431,6 +440,16 @@ describe('Fields', () => {
           draft: true,
         })
         expect(latestDraft.slug).toBe('slug-autosave-1')
+      })
+
+      it('should fall back when the explicit value slugifies to nothing and there is no source', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { slug: '!!!' },
+        })
+        created.push(draft.id)
+        expect(draft.slug).toBe('slug-autosave-1')
       })
 
       it('should give each source-less draft the next fallback without colliding', async () => {

@@ -51,30 +51,32 @@ export const generateSlug =
     // Explicit value from the client wins — normalized through the field's slugify. It must be
     // unique: reject a collision rather than silently changing it (generated values below dedupe
     // instead). Enforced here, not in validation — the DB unique index misses draft-only slugs, and
-    // draft saves skip validation but still run hooks.
+    // draft saves skip validation but still run hooks. A value that slugifies to nothing (e.g. "!!!")
+    // isn't a usable slug, so fall through to the source/fallback rather than store an empty one.
     if (hasValue(value)) {
       const slugified = await slugify(value)
 
-      if (
-        collection &&
-        hasValue(slugified) &&
-        (await fieldValueExists({
-          id: originalDoc?.id,
-          collection: collection.slug,
-          draftsEnabled: hasDraftsEnabled(collection),
-          field: name,
-          locale,
-          req,
-          value: slugified,
-        }))
-      ) {
-        throw new ValidationError(
-          { errors: [{ message: req.t('error:valueMustBeUnique'), path: name }] },
-          req.t,
-        )
-      }
+      if (hasValue(slugified)) {
+        if (
+          collection &&
+          (await fieldValueExists({
+            id: originalDoc?.id,
+            collection: collection.slug,
+            draftsEnabled: hasDraftsEnabled(collection),
+            field: name,
+            locale,
+            req,
+            value: slugified,
+          }))
+        ) {
+          throw new ValidationError(
+            { errors: [{ message: req.t('error:valueMustBeUnique'), path: name }] },
+            req.t,
+          )
+        }
 
-      return slugified
+        return slugified
+      }
     }
 
     const storedSlug = originalDoc?.[name]
