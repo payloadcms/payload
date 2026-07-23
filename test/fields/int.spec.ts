@@ -3345,6 +3345,38 @@ describe('Fields', () => {
       )
     })
 
+    it('should reject blocks without a blockType', async () => {
+      await expect(
+        payload.create({
+          collection: blockFieldsSlug,
+          data: {
+            blocks: [
+              {
+                blockName: 'content',
+                text: 'Will not be saved',
+              },
+            ],
+          } as any,
+        }),
+      ).rejects.toThrow('The following field is invalid: Blocks > Block 1 (unknown)')
+    })
+
+    it('should reject blocks with an unknown blockType', async () => {
+      await expect(
+        payload.create({
+          collection: blockFieldsSlug,
+          data: {
+            blocks: [
+              {
+                blockType: 'unknownBlock',
+                text: 'Will not be saved',
+              },
+            ],
+          } as any,
+        }),
+      ).rejects.toThrow('The following field is invalid: Blocks > Block 1 (unknownBlock)')
+    })
+
     // TODO: re-enable on sqlite once the drizzle sqlite adapter's createJSONQuery supports
     // lexical's `{root: {children: [...]}}` shape
     it(
