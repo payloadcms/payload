@@ -10,9 +10,10 @@ import type { DataFromGlobalSlug, DraftFlagFromGlobalSlug } from '../../config/t
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
-import { filterDataToSelectedLocales } from '../../../utilities/filterDataToSelectedLocales.js'
+import { projectNonLocalizedData } from '../../../utilities/projectNonLocalizedData.js'
 import {
   cloneValidationRequest,
+  cloneValidationValue,
   resolveValidationLocales,
   runValidationLocalePasses,
 } from '../../../utilities/resolveValidationLocales.js'
@@ -73,10 +74,10 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
 
   const baseReq = await createLocalReq(
     {
-      context: options.context,
+      context: cloneValidationValue(options.context),
       fallbackLocale: false,
       req: cloneValidationRequest(options.req),
-      user: options.user ?? undefined,
+      user: cloneValidationValue(options.user) ?? undefined,
     },
     payload,
   )
@@ -95,15 +96,15 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
         },
         payload,
       )
+      const validationCandidateData = cloneValidationValue(data)
       const validationData =
-        validationDataLocale && validationLocale !== validationDataLocale && data
-          ? filterDataToSelectedLocales({
+        validationDataLocale && validationLocale !== validationDataLocale && validationCandidateData
+          ? projectNonLocalizedData({
               configBlockReferences: payload.config.blocks,
-              docWithLocales: data as JsonObject,
+              data: validationCandidateData as JsonObject,
               fields: globalConfig.fields,
-              selectedLocales: [],
             })
-          : data
+          : validationCandidateData
 
       return validateOperation({
         slug,

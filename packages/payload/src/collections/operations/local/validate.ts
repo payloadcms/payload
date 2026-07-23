@@ -19,9 +19,10 @@ import type {
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
-import { filterDataToSelectedLocales } from '../../../utilities/filterDataToSelectedLocales.js'
+import { projectNonLocalizedData } from '../../../utilities/projectNonLocalizedData.js'
 import {
   cloneValidationRequest,
+  cloneValidationValue,
   resolveValidationLocales,
   runValidationLocalePasses,
 } from '../../../utilities/resolveValidationLocales.js'
@@ -83,6 +84,7 @@ export type ValidateCollectionOptions<TSlug extends CollectionSlug> =
 
 type InternalValidateCollectionOptions<TSlug extends CollectionSlug> = {
   validationDataLocale?: string
+  validationTrash?: boolean
 } & ValidateCollectionOptions<TSlug>
 
 export async function validateLocal<TSlug extends CollectionSlug>(
@@ -103,6 +105,7 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
     locale,
     overrideAccess = true,
     validationDataLocale,
+    validationTrash,
   } = options
 
   if (locale === undefined) {
@@ -123,10 +126,10 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
 
   const baseReq = await createLocalReq(
     {
-      context: options.context,
+      context: cloneValidationValue(options.context),
       fallbackLocale: false,
       req: cloneValidationRequest(options.req),
-      user: options.user ?? undefined,
+      user: cloneValidationValue(options.user) ?? undefined,
     },
     payload,
   )
@@ -145,15 +148,15 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
         },
         payload,
       )
+      const validationCandidateData = cloneValidationValue(data)
       const validationData =
-        validationDataLocale && validationLocale !== validationDataLocale && data
-          ? filterDataToSelectedLocales({
+        validationDataLocale && validationLocale !== validationDataLocale && validationCandidateData
+          ? projectNonLocalizedData({
               configBlockReferences: payload.config.blocks,
-              docWithLocales: data as JsonObject,
+              data: validationCandidateData as JsonObject,
               fields: collection.config.fields,
-              selectedLocales: [],
             })
-          : data
+          : validationCandidateData
 
       return validateOperation({
         id,
@@ -161,6 +164,7 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
         data: validationData,
         overrideAccess,
         req,
+        trash: validationTrash,
       })
     },
   })

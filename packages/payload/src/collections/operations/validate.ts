@@ -23,6 +23,7 @@ export type Arguments<TSlug extends CollectionSlug> = {
   id?: number | string
   overrideAccess: boolean
   req: PayloadRequest
+  trash?: boolean
 }
 
 export async function validateOperation<TSlug extends CollectionSlug>(
@@ -44,6 +45,7 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
   data: incomingData,
   overrideAccess,
   req,
+  trash,
 }: Arguments<TSlug>): Promise<ValidationResult> {
   const collectionConfig = collection.config
 
@@ -57,7 +59,7 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
   if (id !== undefined) {
     const where = appendNonTrashedFilter({
       enableTrash: collectionConfig.trash,
-      trash: false,
+      trash: Boolean(trash),
       where: combineQueries({ id: { equals: id } }, accessResult),
     })
     const query: FindOneArgs = {

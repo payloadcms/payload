@@ -177,7 +177,17 @@ export const createOperation = async <
 
     data = newFileData
 
-    if (!isSavingDraft && hasDraftsEnabled(collectionConfig)) {
+    const isCreatingTrashedDocument = Boolean(
+      collectionConfig.trash && data._status !== 'published' && data.deletedAt,
+    )
+    const isUnpublishMetadataOperation = data._status === 'draft'
+
+    if (
+      !isSavingDraft &&
+      !isCreatingTrashedDocument &&
+      !isUnpublishMetadataOperation &&
+      hasDraftsEnabled(collectionConfig)
+    ) {
       const validationResult = await validateLocalWithDataLocale(payload, {
         collection: collectionConfig.slug,
         data,

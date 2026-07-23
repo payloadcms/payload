@@ -192,7 +192,9 @@ export const updateOperation = async <
       req,
     })
 
-    if (hasDraftsEnabled(globalConfig) && !isSavingDraft && !unpublishAllLocales) {
+    const isUnpublishMetadataOperation = unpublishAllLocales || data._status === 'draft'
+
+    if (hasDraftsEnabled(globalConfig) && !isSavingDraft && !isUnpublishMetadataOperation) {
       const validationResult = await validateGlobalLocalWithDataLocale(payload, {
         slug: globalConfig.slug,
         data,

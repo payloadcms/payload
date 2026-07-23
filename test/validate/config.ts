@@ -34,6 +34,22 @@ type HookEvent = {
 
 export const hookEvents: HookEvent[] = []
 export const accessEvents: string[] = []
+export const isolationEvents: {
+  candidateMarker: unknown
+  contextMarker: unknown
+  headerMarker: null | string
+  locale: string | undefined
+  queryMarker: unknown
+  requestDataMarker: unknown
+  responseHeaderMarker: null | string
+  routeMarker: unknown
+  source: 'collection' | 'global'
+  userMarker: unknown
+}[] = []
+export const validationRuntimeIdentityEvents: {
+  payload: PayloadRequest['payload']
+  transactionID: PayloadRequest['transactionID']
+}[] = []
 const localePassRequests = new Set<PayloadRequest>()
 export const localePassEvents: {
   localeAtEnd?: string
@@ -47,10 +63,12 @@ let maximumActiveLocalePasses = 0
 export function clearValidationEvents(): void {
   accessEvents.length = 0
   hookEvents.length = 0
+  isolationEvents.length = 0
   localePassEvents.length = 0
   localePassRequests.clear()
   activeLocalePasses = 0
   maximumActiveLocalePasses = 0
+  validationRuntimeIdentityEvents.length = 0
 }
 
 export function getLocalePassRequestCount(): number {
@@ -68,6 +86,54 @@ function recordHook({ context, hook, operation, requestOperation }: HookEvent): 
     operation,
     requestOperation,
   })
+}
+
+function getIsolationMarker(value: unknown): unknown {
+  return (value as { isolation?: { marker?: unknown } } | null | undefined)?.isolation?.marker
+}
+
+async function recordAndMutateIsolationState({
+  data,
+  req,
+  source,
+}: {
+  data: unknown
+  req: PayloadRequest
+  source: 'collection' | 'global'
+}): Promise<void> {
+  if (req.context.trackMutableIsolation !== true) {
+    return
+  }
+
+  isolationEvents.push({
+    candidateMarker: getIsolationMarker(data),
+    contextMarker: getIsolationMarker(req.context),
+    headerMarker: req.headers.get('x-validation-isolation'),
+    locale: req.locale,
+    queryMarker: getIsolationMarker(req.query),
+    requestDataMarker: getIsolationMarker(req.data),
+    responseHeaderMarker: req.responseHeaders?.get('x-validation-isolation') ?? null,
+    routeMarker: getIsolationMarker(req.routeParams),
+    source,
+    userMarker: getIsolationMarker(req.user),
+  })
+  validationRuntimeIdentityEvents.push({
+    payload: req.payload,
+    transactionID: req.transactionID,
+  })
+
+  if (req.locale === 'en') {
+    ;(data as { isolation: { marker: string } }).isolation.marker = 'mutated'
+    ;(req.context.isolation as { marker: string }).marker = 'mutated'
+    ;(req.data!.isolation as { marker: string }).marker = 'mutated'
+    req.headers.set('x-validation-isolation', 'mutated')
+    ;(req.query.isolation as { marker: string }).marker = 'mutated'
+    req.responseHeaders!.set('x-validation-isolation', 'mutated')
+    ;(req.routeParams!.isolation as { marker: string }).marker = 'mutated'
+    ;(req.user as unknown as { isolation: { marker: string } }).isolation.marker = 'mutated'
+
+    await new Promise((resolve) => setTimeout(resolve, 25))
+  }
 }
 
 const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, req }) => {
@@ -143,8 +209,9 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
 const validationCollection: CollectionConfig = {
   slug: validationCollectionSlug,
   access: {
-    validate: ({ req }) => {
+    validate: async ({ data, req }) => {
       accessEvents.push('collection')
+      await recordAndMutateIsolationState({ data, req, source: 'collection' })
       return req.payloadAPI === 'REST' || req.context.allowValidation === true
     },
   },
@@ -300,8 +367,9 @@ const validationCollection: CollectionConfig = {
 const validationGlobal: GlobalConfig = {
   slug: validationGlobalSlug,
   access: {
-    validate: ({ req }) => {
+    validate: async ({ data, req }) => {
       accessEvents.push('global')
+      await recordAndMutateIsolationState({ data, req, source: 'global' })
       return req.payloadAPI === 'REST' || req.context.allowValidation === true
     },
   },
@@ -367,7 +435,99 @@ const publishCollection: CollectionConfig = {
       localized: true,
       required: true,
     },
+    {
+      name: 'localizedGroup',
+      type: 'group',
+      fields: [
+        {
+          name: 'value',
+          type: 'text',
+          required: true,
+        },
+      ],
+      localized: true,
+    },
+    {
+      name: 'localizedJSON',
+      type: 'json',
+      localized: true,
+      required: true,
+    },
+    {
+      name: 'localizedRichText',
+      type: 'richText',
+      localized: true,
+      required: true,
+    },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          name: 'localizedTab',
+          fields: [
+            {
+              name: 'value',
+              type: 'text',
+              required: true,
+            },
+          ],
+          label: 'Localized tab',
+          localized: true,
+        },
+      ],
+    },
+    {
+      name: 'localizedArray',
+      type: 'array',
+      fields: [
+        {
+          name: 'value',
+          type: 'text',
+          required: true,
+        },
+      ],
+      localized: true,
+      minRows: 1,
+      required: true,
+    },
+    {
+      name: 'localizedBlocks',
+      type: 'blocks',
+      blocks: [
+        {
+          slug: 'validationBlock',
+          fields: [
+            {
+              name: 'value',
+              type: 'text',
+              required: true,
+            },
+          ],
+        },
+      ],
+      localized: true,
+      minRows: 1,
+      required: true,
+    },
+    {
+      name: 'nested',
+      type: 'group',
+      fields: [
+        {
+          name: 'localizedJSON',
+          type: 'json',
+          localized: true,
+          required: true,
+        },
+        {
+          name: 'shared',
+          type: 'text',
+          required: true,
+        },
+      ],
+    },
   ],
+  trash: true,
   versions: {
     drafts: {
       validate: false,
@@ -381,6 +541,12 @@ const publishGlobal: GlobalConfig = {
     {
       name: 'title',
       type: 'text',
+      localized: true,
+      required: true,
+    },
+    {
+      name: 'localizedJSON',
+      type: 'json',
       localized: true,
       required: true,
     },

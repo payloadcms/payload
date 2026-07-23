@@ -1,5 +1,6 @@
 import type { Payload, PayloadRequest } from 'payload'
 
+import { buildEditorState } from '@payloadcms/richtext-lexical'
 import fs from 'fs/promises'
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -14,11 +15,13 @@ import {
   getLocalePassRequestCount,
   getMaximumActiveLocalePasses,
   hookEvents,
+  isolationEvents,
   localePassEvents,
   publishCollectionSlug,
   publishGlobalSlug,
   validationCollectionSlug,
   validationGlobalSlug,
+  validationRuntimeIdentityEvents,
   validationUploadsDir,
   validationUploadsSlug,
   writeTargetsSlug,
@@ -54,6 +57,7 @@ describe('validate Local API', () => {
       payload.delete({
         collection: publishCollectionSlug,
         disableTransaction: true,
+        trash: true,
         where: { id: { exists: true } },
       }),
       payload.delete({
@@ -216,6 +220,88 @@ describe('validate Local API', () => {
             operationAtStart === 'validate',
         ),
       ).toBe(true)
+    })
+
+    it('should isolate mutable access data and request state between collection locale passes', async () => {
+      const candidateData = {
+        isolation: { marker: 'caller' },
+        summary: 'candidate summary',
+        title: 'Candidate title',
+      }
+      const context = {
+        allowValidation: true,
+        isolation: { marker: 'caller' },
+        trackMutableIsolation: true,
+      }
+      const requestData = { isolation: { marker: 'caller' } }
+      const query = { isolation: { marker: 'caller' } }
+      const routeParams = { isolation: { marker: 'caller' } }
+      const user = {
+        id: 'validation-user',
+        collection: validationCollectionSlug,
+        isolation: { marker: 'caller' },
+      }
+      const transactionID = Promise.resolve('validation-transaction')
+      const req = {
+        data: requestData,
+        headers: new Headers({ 'x-validation-isolation': 'caller' }),
+        query,
+        responseHeaders: new Headers({ 'x-validation-isolation': 'caller' }),
+        routeParams,
+        transactionID,
+      } satisfies Partial<PayloadRequest>
+
+      const result = await payload.validate({
+        collection: validationCollectionSlug,
+        context,
+        data: candidateData,
+        locale: ['en', 'es'],
+        overrideAccess: false,
+        req,
+        user: user as never,
+      })
+
+      expect(result.valid).toBe(true)
+      expect(isolationEvents).toEqual([
+        {
+          candidateMarker: 'caller',
+          contextMarker: 'caller',
+          headerMarker: 'caller',
+          locale: 'en',
+          queryMarker: 'caller',
+          requestDataMarker: 'caller',
+          responseHeaderMarker: 'caller',
+          routeMarker: 'caller',
+          source: 'collection',
+          userMarker: 'caller',
+        },
+        {
+          candidateMarker: 'caller',
+          contextMarker: 'caller',
+          headerMarker: 'caller',
+          locale: 'es',
+          queryMarker: 'caller',
+          requestDataMarker: 'caller',
+          responseHeaderMarker: 'caller',
+          routeMarker: 'caller',
+          source: 'collection',
+          userMarker: 'caller',
+        },
+      ])
+      expect(candidateData.isolation.marker).toBe('caller')
+      expect(context.isolation.marker).toBe('caller')
+      expect(requestData.isolation.marker).toBe('caller')
+      expect(query.isolation.marker).toBe('caller')
+      expect(req.headers.get('x-validation-isolation')).toBe('caller')
+      expect(req.responseHeaders.get('x-validation-isolation')).toBe('caller')
+      expect(routeParams.isolation.marker).toBe('caller')
+      expect(user.isolation.marker).toBe('caller')
+      expect(
+        validationRuntimeIdentityEvents.every(
+          (event) => event.payload === payload && event.transactionID === transactionID,
+        ),
+      ).toBe(true)
+      expect(req.transactionID).toBe(transactionID)
     })
 
     it('should return field errors for invalid create data without creating a document', async () => {
@@ -450,6 +536,80 @@ describe('validate Local API', () => {
   })
 
   describe('globals', () => {
+    it('should isolate mutable access data and request state between global locale passes', async () => {
+      const candidateData = {
+        isolation: { marker: 'caller' },
+        summary: 'candidate summary',
+        title: 'Candidate title',
+      }
+      const context = {
+        allowValidation: true,
+        isolation: { marker: 'caller' },
+        trackMutableIsolation: true,
+      }
+      const requestData = { isolation: { marker: 'caller' } }
+      const query = { isolation: { marker: 'caller' } }
+      const routeParams = { isolation: { marker: 'caller' } }
+      const user = {
+        id: 'validation-user',
+        collection: validationCollectionSlug,
+        isolation: { marker: 'caller' },
+      }
+      const req = {
+        data: requestData,
+        headers: new Headers({ 'x-validation-isolation': 'caller' }),
+        query,
+        responseHeaders: new Headers({ 'x-validation-isolation': 'caller' }),
+        routeParams,
+      } satisfies Partial<PayloadRequest>
+
+      const result = await payload.validateGlobal({
+        slug: validationGlobalSlug,
+        context,
+        data: candidateData,
+        locale: ['en', 'es'],
+        overrideAccess: false,
+        req,
+        user: user as never,
+      })
+
+      expect(result.valid).toBe(true)
+      expect(isolationEvents.map(({ locale, source }) => ({ locale, source }))).toEqual([
+        { locale: 'en', source: 'global' },
+        { locale: 'es', source: 'global' },
+      ])
+      expect(
+        isolationEvents.every(
+          ({
+            candidateMarker,
+            contextMarker,
+            headerMarker,
+            queryMarker,
+            requestDataMarker,
+            responseHeaderMarker,
+            routeMarker,
+            userMarker,
+          }) =>
+            candidateMarker === 'caller' &&
+            contextMarker === 'caller' &&
+            headerMarker === 'caller' &&
+            queryMarker === 'caller' &&
+            requestDataMarker === 'caller' &&
+            responseHeaderMarker === 'caller' &&
+            routeMarker === 'caller' &&
+            userMarker === 'caller',
+        ),
+      ).toBe(true)
+      expect(candidateData.isolation.marker).toBe('caller')
+      expect(context.isolation.marker).toBe('caller')
+      expect(requestData.isolation.marker).toBe('caller')
+      expect(query.isolation.marker).toBe('caller')
+      expect(req.headers.get('x-validation-isolation')).toBe('caller')
+      expect(req.responseHeaders.get('x-validation-isolation')).toBe('caller')
+      expect(routeParams.isolation.marker).toBe('caller')
+      expect(user.isolation.marker).toBe('caller')
+    })
+
     it('should validate valid partial global data without persisting it', async () => {
       const req = {
         operation: 'read',
@@ -910,6 +1070,174 @@ describe('validate Local API', () => {
   })
 
   describe('publish enforcement', () => {
+    it('should not apply flat localized object candidates to a required sibling locale', async () => {
+      const omittedFields: PublishCollectionLocalizedField[] = [
+        'localizedArray',
+        'localizedBlocks',
+        'localizedGroup',
+        'localizedJSON',
+        'localizedRichText',
+        'localizedTab',
+        'nested.localizedJSON',
+      ]
+      const draft = await seedPublishCollection({
+        de: 'German optional',
+        en: 'English draft',
+        es: 'Spanish required',
+        omit: {
+          es: omittedFields,
+        },
+      })
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          data: {
+            ...getPublishCollectionLocaleData({ title: 'English published' }),
+            _status: 'published',
+          },
+          locale: 'en',
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining(
+            [
+              'localizedArray',
+              'localizedBlocks',
+              'localizedGroup.value',
+              'localizedJSON',
+              'localizedRichText',
+              'localizedTab.value',
+              'nested.localizedJSON',
+            ].map((path) =>
+              expect.objectContaining({
+                locale: 'es',
+                path,
+              }),
+            ),
+          ),
+        },
+      })
+    })
+
+    it('should not apply a flat localized JSON candidate to a required global sibling locale', async () => {
+      await seedPublishGlobal({
+        de: 'German optional',
+        en: 'English draft',
+        es: 'Spanish required',
+        omitLocalizedJSON: {
+          es: true,
+        },
+      })
+
+      await expect(
+        payload.updateGlobal({
+          slug: publishGlobalSlug,
+          data: {
+            ...getPublishGlobalLocaleData({ title: 'English published' }),
+            _status: 'published',
+          },
+          locale: 'en',
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'es',
+              path: 'localizedJSON',
+            }),
+          ]),
+        },
+      })
+    })
+
+    it('should bypass required-locale publish validation when trashing a draft', async () => {
+      const draft = await seedPublishCollection({
+        de: 'German optional',
+        en: 'English draft',
+        es: '',
+      })
+      const deletedAt = new Date().toISOString()
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          data: {
+            deletedAt,
+          },
+          locale: 'en',
+        }),
+      ).resolves.toMatchObject({
+        deletedAt,
+      })
+    })
+
+    it('should bypass required-locale publish validation when restoring a trashed draft', async () => {
+      const draft = await seedPublishCollection({
+        de: 'German optional',
+        deletedAt: new Date().toISOString(),
+        en: 'English draft',
+        es: '',
+      })
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          data: {
+            deletedAt: null,
+          },
+          locale: 'en',
+          trash: true,
+        }),
+      ).resolves.toMatchObject({
+        deletedAt: null,
+      })
+    })
+
+    it('should bypass required-locale publish validation for collection unpublish metadata', async () => {
+      const draft = await seedPublishCollection({
+        de: 'German optional',
+        en: 'English draft',
+        es: '',
+      })
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          data: {
+            _status: 'draft',
+          },
+          locale: 'en',
+        }),
+      ).resolves.toMatchObject({
+        _status: 'draft',
+      })
+    })
+
+    it('should bypass required-locale publish validation for global unpublish metadata', async () => {
+      await seedPublishGlobal({
+        de: 'German optional',
+        en: 'English draft',
+        es: '',
+      })
+
+      await expect(
+        payload.updateGlobal({
+          slug: publishGlobalSlug,
+          data: {
+            _status: 'draft',
+          },
+          locale: 'en',
+        }),
+      ).resolves.toMatchObject({
+        _status: 'draft',
+      })
+    })
+
     it('should block collection publish when a required locale is invalid without changing status', async () => {
       const draft = await seedPublishCollection({
         de: '',
@@ -1164,11 +1492,67 @@ async function runWriteAttempt(
   })
 }
 
-async function seedPublishCollection({ de, en, es }: { de: string; en: string; es: string }) {
+type PublishCollectionLocalizedField =
+  | 'localizedArray'
+  | 'localizedBlocks'
+  | 'localizedGroup'
+  | 'localizedJSON'
+  | 'localizedRichText'
+  | 'localizedTab'
+  | 'nested.localizedJSON'
+
+function getPublishCollectionLocaleData({
+  omit = [],
+  title,
+}: {
+  omit?: PublishCollectionLocalizedField[]
+  title: string
+}): Record<string, unknown> {
+  const data: Record<string, unknown> = {
+    localizedArray: [{ value: `${title} array` }],
+    localizedBlocks: [{ blockType: 'validationBlock', value: `${title} block` }],
+    localizedGroup: { value: `${title} group` },
+    localizedJSON: { value: `${title} JSON` },
+    localizedRichText: buildEditorState({ text: `${title} rich text` }),
+    localizedTab: { value: `${title} tab` },
+    nested: {
+      localizedJSON: { value: `${title} nested JSON` },
+      shared: 'shared value',
+    },
+    title,
+  }
+
+  for (const field of omit) {
+    if (field === 'nested.localizedJSON') {
+      delete (data.nested as Record<string, unknown>).localizedJSON
+    } else if (field === 'localizedArray' || field === 'localizedBlocks') {
+      data[field] = []
+    } else {
+      delete data[field]
+    }
+  }
+
+  return data
+}
+
+async function seedPublishCollection({
+  de,
+  deletedAt,
+  en,
+  es,
+  omit,
+}: {
+  de: string
+  deletedAt?: string
+  en: string
+  es: string
+  omit?: Partial<Record<'de' | 'en' | 'es', PublishCollectionLocalizedField[]>>
+}) {
   const draft = await payload.create({
     collection: publishCollectionSlug,
     data: {
-      title: en,
+      ...getPublishCollectionLocaleData({ omit: omit?.en, title: en }),
+      ...(deletedAt ? { deletedAt } : {}),
     },
     draft: true,
     locale: 'en',
@@ -1177,26 +1561,47 @@ async function seedPublishCollection({ de, en, es }: { de: string; en: string; e
   await payload.update({
     id: draft.id,
     collection: publishCollectionSlug,
-    data: {
-      title: es,
-    },
+    data: getPublishCollectionLocaleData({ omit: omit?.es, title: es }),
     draft: true,
     locale: 'es',
+    trash: Boolean(deletedAt),
   })
   await payload.update({
     id: draft.id,
     collection: publishCollectionSlug,
-    data: {
-      title: de,
-    },
+    data: getPublishCollectionLocaleData({ omit: omit?.de, title: de }),
     draft: true,
     locale: 'de',
+    trash: Boolean(deletedAt),
   })
 
   return draft
 }
 
-async function seedPublishGlobal({ de, en, es }: { de: string; en: string; es: string }) {
+function getPublishGlobalLocaleData({
+  includeLocalizedJSON = true,
+  title,
+}: {
+  includeLocalizedJSON?: boolean
+  title: string
+}): Record<string, unknown> {
+  return {
+    localizedJSON: includeLocalizedJSON ? { value: `${title} JSON` } : null,
+    title,
+  }
+}
+
+async function seedPublishGlobal({
+  de,
+  en,
+  es,
+  omitLocalizedJSON,
+}: {
+  de: string
+  en: string
+  es: string
+  omitLocalizedJSON?: Partial<Record<'de' | 'en' | 'es', boolean>>
+}) {
   await payload.updateGlobal({
     slug: publishGlobalSlug,
     data: {},
@@ -1204,25 +1609,28 @@ async function seedPublishGlobal({ de, en, es }: { de: string; en: string; es: s
   })
   await payload.updateGlobal({
     slug: publishGlobalSlug,
-    data: {
+    data: getPublishGlobalLocaleData({
+      includeLocalizedJSON: !omitLocalizedJSON?.en,
       title: en,
-    },
+    }),
     draft: true,
     locale: 'en',
   })
   await payload.updateGlobal({
     slug: publishGlobalSlug,
-    data: {
+    data: getPublishGlobalLocaleData({
+      includeLocalizedJSON: !omitLocalizedJSON?.es,
       title: es,
-    },
+    }),
     draft: true,
     locale: 'es',
   })
   await payload.updateGlobal({
     slug: publishGlobalSlug,
-    data: {
+    data: getPublishGlobalLocaleData({
+      includeLocalizedJSON: !omitLocalizedJSON?.de,
       title: de,
-    },
+    }),
     draft: true,
     locale: 'de',
   })

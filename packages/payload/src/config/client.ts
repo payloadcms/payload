@@ -306,6 +306,8 @@ export const createClientConfig = ({
                   clientLocale.label = locale.label
                 }
 
+                clientLocale.required = locale.required
+
                 if (locale.rtl) {
                   clientLocale.rtl = locale.rtl
                 }

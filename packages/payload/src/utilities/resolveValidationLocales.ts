@@ -10,6 +10,14 @@ import { APIError } from '../errors/index.js'
 export type ValidationLocaleSelector = 'all' | TypedLocale | TypedLocale[]
 
 const validationLocaleConcurrency = 3
+const sharedValidationRequestProperties = new Set([
+  'i18n',
+  'payload',
+  'server',
+  'signal',
+  't',
+  'transactionID',
+])
 
 export async function resolveValidationLocales({
   locale,
@@ -115,22 +123,135 @@ export function cloneValidationRequest(
     return {}
   }
 
-  const { payloadDataLoader: _payloadDataLoader, ...requestProperties } = request
-  const clonedRequest = {
-    ...requestProperties,
-    context: { ...(request.context ?? {}) },
+  const clonedRequest: Record<string, unknown> = {}
+
+  for (const [key, value] of Object.entries(request)) {
+    if (key === 'payloadDataLoader') {
+      continue
+    }
+
+    clonedRequest[key] = sharedValidationRequestProperties.has(key)
+      ? value
+      : cloneValidationValue(value)
+  }
+
+  Object.assign(clonedRequest, {
+    context: cloneValidationValue(request.context ?? {}),
+    data: cloneValidationValue(request.data),
+    file: cloneValidationValue(request.file),
+    files: cloneValidationValue(request.files),
+    hash: request.hash,
     headers: request.headers ? new Headers(request.headers) : undefined,
     host: request.host,
+    href: request.href,
     method: request.method,
     origin: request.origin,
     pathname: request.pathname,
+    payloadUploadSizes: cloneValidationValue(request.payloadUploadSizes),
+    port: request.port,
     protocol: request.protocol,
-    query: { ...(request.query ?? {}) },
-    routeParams: { ...(request.routeParams ?? {}) },
+    query: cloneValidationValue(request.query ?? {}),
+    responseHeaders: request.responseHeaders ? new Headers(request.responseHeaders) : undefined,
+    routeParams: cloneValidationValue(request.routeParams ?? {}),
+    search: request.search,
     searchParams: request.searchParams ? new URLSearchParams(request.searchParams) : undefined,
     signal: request.signal,
     url: request.url,
-  } as Partial<PayloadRequest>
+    user: cloneValidationValue(request.user),
+  })
 
-  return clonedRequest
+  return clonedRequest as Partial<PayloadRequest>
+}
+
+export function cloneValidationValue<T>(value: T, cache = new WeakMap<object, unknown>()): T {
+  if ((typeof value !== 'object' && typeof value !== 'function') || value === null) {
+    return value
+  }
+
+  if (typeof value === 'function' || value instanceof Promise) {
+    return value
+  }
+
+  const objectValue = value as object
+  const cachedValue = cache.get(objectValue)
+
+  if (cachedValue) {
+    return cachedValue as T
+  }
+
+  if (value instanceof Headers) {
+    return new Headers(value) as T
+  }
+
+  if (value instanceof URLSearchParams) {
+    return new URLSearchParams(value) as T
+  }
+
+  if (value instanceof URL) {
+    return new URL(value) as T
+  }
+
+  if (value instanceof Date) {
+    return new Date(value) as T
+  }
+
+  if (value instanceof RegExp) {
+    return new RegExp(value.source, value.flags) as T
+  }
+
+  if (value instanceof ArrayBuffer) {
+    return value.slice(0) as T
+  }
+
+  if (ArrayBuffer.isView(value)) {
+    if (Buffer.isBuffer(value)) {
+      return Buffer.from(value) as T
+    }
+
+    if (value instanceof DataView) {
+      return new DataView(value.buffer.slice(0), value.byteOffset, value.byteLength) as T
+    }
+
+    return new (value.constructor as new (input: typeof value) => typeof value)(value)
+  }
+
+  if (value instanceof Map) {
+    const clonedMap = new Map()
+    cache.set(objectValue, clonedMap)
+    for (const [key, mapValue] of value) {
+      clonedMap.set(cloneValidationValue(key, cache), cloneValidationValue(mapValue, cache))
+    }
+    return clonedMap as T
+  }
+
+  if (value instanceof Set) {
+    const clonedSet = new Set()
+    cache.set(objectValue, clonedSet)
+    for (const setValue of value) {
+      clonedSet.add(cloneValidationValue(setValue, cache))
+    }
+    return clonedSet as T
+  }
+
+  if (typeof Blob !== 'undefined' && value instanceof Blob) {
+    return value
+  }
+
+  const clonedValue: Record<PropertyKey, unknown> | unknown[] = Array.isArray(value)
+    ? []
+    : Object.create(Object.getPrototypeOf(value))
+  cache.set(objectValue, clonedValue)
+
+  for (const key of Reflect.ownKeys(value)) {
+    const descriptor = Object.getOwnPropertyDescriptor(value, key)
+
+    if (descriptor?.enumerable) {
+      ;(clonedValue as Record<PropertyKey, unknown>)[key] = cloneValidationValue(
+        (value as Record<PropertyKey, unknown>)[key],
+        cache,
+      )
+    }
+  }
+
+  return clonedValue as T
 }

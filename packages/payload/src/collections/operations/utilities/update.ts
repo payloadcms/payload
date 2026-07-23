@@ -153,8 +153,20 @@ export const updateDocument = async <
     req,
     showHiddenFields: true,
   })
+  const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
+  const isTrashMetadataOperation = Boolean(
+    collectionConfig.trash &&
+      data?._status !== 'published' &&
+      (data?.deletedAt || isRestoringDraftFromTrash),
+  )
+  const isUnpublishMetadataOperation = unpublishAllLocales || data?._status === 'draft'
 
-  if (hasDraftsEnabled(collectionConfig) && !isSavingDraft && !unpublishAllLocales) {
+  if (
+    hasDraftsEnabled(collectionConfig) &&
+    !isSavingDraft &&
+    !isTrashMetadataOperation &&
+    !isUnpublishMetadataOperation
+  ) {
     const validationResult = await validateLocalWithDataLocale(payload, {
       id,
       collection: collectionConfig.slug,
@@ -172,6 +184,7 @@ export const updateDocument = async <
           : config.localization
             ? config.localization.defaultLocale
             : undefined,
+      validationTrash: Boolean(originalDoc?.deletedAt),
     })
 
     if (!validationResult.valid) {
@@ -186,8 +199,6 @@ export const updateDocument = async <
       )
     }
   }
-
-  const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
 
   if (collectionConfig.auth) {
     ensureUsernameOrEmail<TSlug>({
