@@ -1201,6 +1201,12 @@ export type SelectFieldClient = {
   Pick<SelectField, 'hasMany' | 'interfaceName' | 'options' | 'type'>
 
 type SharedRelationshipProperties = {
+  /**
+   * Defines the behavior when the referenced document is deleted.
+   * Only applied in SQL databases (Postgres, SQLite). No-op on MongoDB.
+   * @default 'set-null'
+   */
+  cascade?: 'delete' | 'set-null'
   filterOptions?: FilterOptions
   /**
    * Sets a maximum population depth for this field, regardless of the remaining depth when this field is reached.
