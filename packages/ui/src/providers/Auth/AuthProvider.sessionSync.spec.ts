@@ -8,10 +8,10 @@ import { AuthProvider, useAuth } from './index.js'
 import {
   createFutureSession,
   createMessage,
-  dispatchStorageRefresh,
+  dispatchStorageNotification,
   getBroadcastChannel,
   resetMockBroadcastChannels,
-} from './sessionSync.test.js'
+} from '../../../test/sessionSync.js'
 import { AUTH_SESSION_SYNC_EVENT_TYPES } from './sessionSync.js'
 ;(
   globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT: boolean }
@@ -154,34 +154,32 @@ describe('AuthProvider refresh synchronization', () => {
     )
   })
 
-  it('should coalesce refresh requests before successful responses can settle in reverse', async () => {
+  it('should share one in-flight request between concurrent refreshCookieAsync calls', async () => {
     const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
-    const firstSession = createFutureSession({ expiresInMs: 120_000, token: 'first-token' })
-    const secondSession = createFutureSession({ expiresInMs: 180_000, token: 'second-token' })
-    let resolveFirstRefresh: ((value: ReturnType<typeof createResponse>) => void) | undefined
-    let resolveSecondRefresh: ((value: ReturnType<typeof createResponse>) => void) | undefined
-    const firstResponse = new Promise<ReturnType<typeof createResponse>>((resolve) => {
-      resolveFirstRefresh = resolve
-    })
-    const secondResponse = new Promise<ReturnType<typeof createResponse>>((resolve) => {
-      resolveSecondRefresh = resolve
+    const refreshedSession = createFutureSession({ expiresInMs: 120_000, token: 'fresh-token' })
+    let resolveRefresh: ((value: ReturnType<typeof createResponse>) => void) | undefined
+    const refreshResponse = new Promise<ReturnType<typeof createResponse>>((resolve) => {
+      resolveRefresh = resolve
     })
 
     await renderProvider({ session: initialSession })
-    apiMocks.post.mockReturnValueOnce(firstResponse).mockReturnValueOnce(secondResponse)
+    apiMocks.post.mockReturnValueOnce(refreshResponse)
 
     const firstRefresh = authContext?.refreshCookieAsync()
     const secondRefresh = authContext?.refreshCookieAsync()
 
-    resolveSecondRefresh?.(createResponse({ session: secondSession }))
-    resolveFirstRefresh?.(createResponse({ session: firstSession }))
+    expect(secondRefresh).toBe(firstRefresh)
+    await act(async () => Promise.resolve())
+
+    expect(apiMocks.post).toHaveBeenCalledOnce()
+
+    resolveRefresh?.(createResponse({ session: refreshedSession }))
     await act(async () => {
       await Promise.all([firstRefresh, secondRefresh])
     })
 
-    expect(apiMocks.post).toHaveBeenCalledOnce()
-    expect(authContext?.token).toBe('first-token')
-    expect(authContext?.tokenExpirationMs).toBe(firstSession.exp * 1000)
+    expect(authContext?.token).toBe('fresh-token')
+    expect(authContext?.tokenExpirationMs).toBe(refreshedSession.exp * 1000)
   })
 
   it('should ignore a deferred refreshCookie success after remote expiration', async () => {
@@ -251,7 +249,7 @@ describe('AuthProvider refresh synchronization', () => {
     apiMocks.get.mockReturnValueOnce(firstResponse).mockReturnValueOnce(secondResponse)
 
     act(() =>
-      dispatchStorageRefresh({
+      dispatchStorageNotification({
         affectedExpirationMs: firstSession.exp * 1000,
         type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
         sentAt: 500,
@@ -263,7 +261,7 @@ describe('AuthProvider refresh synchronization', () => {
     expect(apiMocks.get).toHaveBeenCalledOnce()
 
     act(() =>
-      dispatchStorageRefresh({
+      dispatchStorageNotification({
         affectedExpirationMs: secondSession.exp * 1000,
         type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
         sentAt: 600,
@@ -482,7 +480,7 @@ describe('AuthProvider expiration and logout synchronization', () => {
     )
     routerMocks.replace.mockClear()
     act(() =>
-      dispatchStorageRefresh({
+      dispatchStorageNotification({
         affectedExpirationMs: 0,
         type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
         sentAt: 600,
@@ -523,7 +521,7 @@ describe('AuthProvider expiration and logout synchronization', () => {
     apiMocks.get.mockResolvedValueOnce(createResponse({ session: initialSession }))
     routerMocks.replace.mockClear()
     act(() =>
-      dispatchStorageRefresh({
+      dispatchStorageNotification({
         affectedExpirationMs: 0,
         type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
         sentAt: 600,
@@ -544,7 +542,7 @@ describe('AuthProvider expiration and logout synchronization', () => {
 })
 
 describe('AuthProvider session synchronization cleanup', () => {
-  it('should not commit or navigate for a Storage response after provider unmount', async () => {
+  it('should not navigate for a Storage response after provider unmount', async () => {
     vi.stubGlobal('BroadcastChannel', undefined)
     const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
     let resolveFetch: ((value: ReturnType<typeof createResponse>) => void) | undefined
@@ -556,7 +554,7 @@ describe('AuthProvider session synchronization cleanup', () => {
     apiMocks.get.mockClear()
     apiMocks.get.mockReturnValueOnce(fetchResponse)
     act(() =>
-      dispatchStorageRefresh({
+      dispatchStorageNotification({
         affectedExpirationMs: 0,
         type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
         sentAt: 900,

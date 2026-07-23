@@ -645,7 +645,7 @@ describe('Auth', () => {
       sessionPage.off('request', recordRefreshRequest)
     })
 
-    test('should refresh after window focus inside the refresh window', async () => {
+    test('should refresh after window focus at the refresh-window boundary', async () => {
       const tokenExpirationMs = await readTokenExpirationMs(sessionPage)
 
       await advanceToRemainingSessionTime({

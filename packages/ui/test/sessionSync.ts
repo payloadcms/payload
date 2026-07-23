@@ -1,9 +1,22 @@
 import { vi } from 'vitest'
 
-import type { UserWithToken } from './index.js'
-import type { AuthSessionSyncEventType, AuthSessionSyncMessage } from './sessionSync.js'
+import type { UserWithToken } from '../src/providers/Auth/index.js'
+import type {
+  AuthSessionSyncMessage,
+  AuthSessionSyncPublication,
+} from '../src/providers/Auth/sessionSync.js'
 
-import { AUTH_SESSION_SYNC_EVENT_TYPES } from './sessionSync.js'
+import { AUTH_SESSION_SYNC_EVENT_TYPES } from '../src/providers/Auth/sessionSync.js'
+
+type StorageNotification =
+  | ({
+      settlesSentAt?: number
+    } & Extract<
+      AuthSessionSyncPublication,
+      { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT }
+    >)
+  | Extract<AuthSessionSyncPublication, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED }>
+  | Extract<AuthSessionSyncPublication, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED }>
 
 export class MockBroadcastChannel {
   static instances: MockBroadcastChannel[] = []
@@ -88,13 +101,7 @@ export function createMessage(
   return { ...messageWithoutTimestamp, sentAt } as AuthSessionSyncMessage
 }
 
-export function dispatchStorageRefresh(notification: {
-  affectedExpirationMs: number
-  sentAt: number
-  settlesSentAt?: number
-  sourceID: string
-  type: AuthSessionSyncEventType
-}): void {
+export function dispatchStorageNotification(notification: StorageNotification): void {
   const message =
     notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
       ? {

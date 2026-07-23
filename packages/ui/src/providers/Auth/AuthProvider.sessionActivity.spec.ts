@@ -12,11 +12,12 @@ const fiveMinuteTokenMs = 300_000
 const tenMinuteTokenMs = 600_000
 const refreshWindowMs = 120_000
 const refreshDebounceMs = 1_000
+const millisecondsPerSecond = 1_000
 const initialCheckpointAtMs = fiveMinuteTokenMs - refreshWindowMs
 const initialRefreshRequestAtMs = initialCheckpointAtMs + refreshDebounceMs + 1
 const refreshedTokenCheckpointAtMs =
-  Math.floor((initialRefreshRequestAtMs + tenMinuteTokenMs) / refreshDebounceMs) *
-    refreshDebounceMs -
+  Math.floor((initialRefreshRequestAtMs + tenMinuteTokenMs) / millisecondsPerSecond) *
+    millisecondsPerSecond -
   refreshWindowMs
 const refreshedTokenActivityAtMs = refreshedTokenCheckpointAtMs - refreshWindowMs
 
@@ -97,7 +98,7 @@ describe('AuthProvider session activity', () => {
 
     dispatchMousemove()
     await advanceSessionBy(initialCheckpointAtMs)
-    await advancePastRefreshDebounce()
+    await advanceToRefreshDebounceBoundary()
     await advanceSessionBy(1)
 
     expect(apiMocks.post).not.toHaveBeenCalled()
@@ -110,7 +111,7 @@ describe('AuthProvider session activity', () => {
     dispatchMousemove()
     await advanceSessionBy(initialCheckpointAtMs - refreshWindowMs)
     act(() => authContext?.setUser(createFutureSession({ expiresInMs: fiveMinuteTokenMs })))
-    await advancePastRefreshDebounce()
+    await advanceToRefreshDebounceBoundary()
     await advanceSessionBy(1)
 
     expect(apiMocks.post).not.toHaveBeenCalled()
@@ -123,14 +124,14 @@ describe('AuthProvider session activity', () => {
     await advanceSessionBy(refreshWindowMs)
     dispatchMousemove()
     await advanceSessionBy(initialCheckpointAtMs - refreshWindowMs)
-    await advancePastRefreshDebounce()
+    await advanceToRefreshDebounceBoundary()
     await advanceSessionBy(1)
 
     expect(apiMocks.post).toHaveBeenCalledTimes(1)
 
     await advanceSessionBy(sessionActivityThrottleMs)
     dispatchMousemove()
-    await advancePastRefreshDebounce()
+    await advanceToRefreshDebounceBoundary()
 
     expect(apiMocks.post).toHaveBeenCalledTimes(2)
   })
@@ -145,9 +146,9 @@ describe('AuthProvider session activity', () => {
     await advanceSessionBy(refreshWindowMs)
     dispatchMousemove()
     await advanceSessionBy(initialCheckpointAtMs - refreshWindowMs)
-    await advancePastRefreshDebounce()
+    await advanceToRefreshDebounceBoundary()
     await advanceSessionBy(1)
-    await advancePastRefreshDebounce()
+    await advanceToRefreshDebounceBoundary()
     await advanceSessionBy(1)
 
     expect(apiMocks.post).toHaveBeenCalledTimes(1)
@@ -191,7 +192,7 @@ describe('AuthProvider session activity', () => {
     await advanceSessionBy(refreshWindowMs)
     dispatchMousemove()
     await advanceSessionBy(initialCheckpointAtMs - refreshWindowMs)
-    await advancePastRefreshDebounce()
+    await advanceToRefreshDebounceBoundary()
     await advanceSessionBy(1)
     act(() => renderedRoot?.unmount())
     renderedRoot = undefined
@@ -216,7 +217,7 @@ describe('AuthProvider session activity', () => {
     act(() => renderedRoot?.unmount())
     renderedRoot = undefined
     await advanceSessionBy(initialCheckpointAtMs - refreshWindowMs)
-    await advancePastRefreshDebounce()
+    await advanceToRefreshDebounceBoundary()
     await advanceSessionBy(1)
 
     expect(apiMocks.post).not.toHaveBeenCalled()
@@ -235,7 +236,7 @@ function dispatchMousemove(): void {
   window.dispatchEvent(new MouseEvent('mousemove'))
 }
 
-async function advancePastRefreshDebounce(): Promise<void> {
+async function advanceToRefreshDebounceBoundary(): Promise<void> {
   await advanceSessionBy(refreshDebounceMs)
 }
 
@@ -245,7 +246,7 @@ async function renderAuthenticatedProvider({ tokenLifetimeMs }: { tokenLifetimeM
 
   const user = { collection: 'users', id: '1' }
   const createResponse = () => ({
-    exp: Math.floor((Date.now() + tokenLifetimeMs) / 1000),
+    exp: Math.floor((Date.now() + tokenLifetimeMs) / millisecondsPerSecond),
     token: 'token',
     user,
   })
@@ -283,7 +284,7 @@ function CaptureAuthContext() {
 
 function createFutureSession({ expiresInMs }: { expiresInMs: number }): UserWithToken {
   return {
-    exp: Math.floor((Date.now() + expiresInMs) / 1000),
+    exp: Math.floor((Date.now() + expiresInMs) / millisecondsPerSecond),
     token: 'fresh-token',
     user: { collection: 'users', id: '1' },
   }

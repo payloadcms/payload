@@ -8,10 +8,10 @@ import { AUTH_SESSION_SYNC_EVENT_TYPES, createAuthSessionSync } from './sessionS
 import {
   createMessage,
   createSession,
-  dispatchStorageRefresh,
+  dispatchStorageNotification,
   getBroadcastChannel,
   resetMockBroadcastChannels,
-} from './sessionSync.test.js'
+} from '../../../test/sessionSync.js'
 
 const sessionSyncCleanups: Array<() => void> = []
 
@@ -236,7 +236,7 @@ describe('createAuthSessionSync storage fallback', () => {
     createSync({ fetchFullUser, localExpirationMs: 20_000, onSessionRefreshed })
     const channel = getBroadcastChannel()
 
-    dispatchStorageRefresh({
+    dispatchStorageNotification({
       affectedExpirationMs: 30_000,
       type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
       sentAt: 500,
@@ -348,7 +348,7 @@ describe('createAuthSessionSync cleanup', () => {
     const onSessionResyncUnauthenticated = vi.fn()
     const sync = createSync({ fetchFullUser, onSessionResyncUnauthenticated })
 
-    dispatchStorageRefresh({
+    dispatchStorageNotification({
       affectedExpirationMs: 40_000,
       type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
       sentAt: 500,
