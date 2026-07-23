@@ -93,15 +93,19 @@ describe('Radio', () => {
     ).toBeVisible()
   })
 
-  test('should apply the radio-group-specific position override to the field-error tooltip', async () => {
+  test('should portal the field-error tooltip next to the radio group when invalid', async () => {
     await page.goto(url.create)
     await page.locator('#action-save').click({ delay: 100 })
 
     const tooltip = page.locator('.tooltip--show', { hasText: 'This field is required.' })
     await expect(tooltip).toBeVisible()
 
-    const position = await tooltip.evaluate((el) => getComputedStyle(el).position)
-    expect(position).toBe('static')
+    const isPortaledToBody = await tooltip.evaluate((el) => el.parentElement === document.body)
+    expect(isPortaledToBody).toBe(true)
+
+    const tooltipBox = await tooltip.boundingBox()
+    const radioGroupBox = await page.locator('#field-radio').boundingBox()
+    expect(Math.abs((tooltipBox?.x ?? 0) - (radioGroupBox?.x ?? 0))).toBeLessThan(200)
   })
 
   describe.skip('A11y', () => {

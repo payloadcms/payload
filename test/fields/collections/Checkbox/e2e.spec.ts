@@ -74,7 +74,7 @@ describe('Checkboxes', () => {
     await expect(page.locator('table > tbody > tr')).toHaveCount(1)
   })
 
-  test('should apply the checkbox-specific position override to the field-error tooltip', async () => {
+  test('should portal the field-error tooltip next to the checkbox when invalid', async () => {
     await page.goto(url.create)
     await page.locator('#field-checkboxRequiresTrue').click()
     await page.locator('#action-save').click({ delay: 100 })
@@ -82,8 +82,12 @@ describe('Checkboxes', () => {
     const tooltip = page.locator('.tooltip--show', { hasText: 'This field is required.' })
     await expect(tooltip).toBeVisible()
 
-    const right = await tooltip.evaluate((el) => getComputedStyle(el).right)
-    expect(parseFloat(right)).toBeCloseTo(-8, 0)
+    const isPortaledToBody = await tooltip.evaluate((el) => el.parentElement === document.body)
+    expect(isPortaledToBody).toBe(true)
+
+    const tooltipBox = await tooltip.boundingBox()
+    const checkboxBox = await page.locator('#field-checkboxRequiresTrue').boundingBox()
+    expect(Math.abs((tooltipBox?.x ?? 0) - (checkboxBox?.x ?? 0))).toBeLessThan(200)
   })
 
   describe.skip('A11y', () => {

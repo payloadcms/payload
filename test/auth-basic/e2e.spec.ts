@@ -50,16 +50,14 @@ const createFirstUser = async ({
   await page.locator('#field-email').fill(devUser.email)
   await page.locator('#field-password').fill(devUser.password)
   await page.locator('.form-submit > button').click()
-  await expect(page.locator('.field-type.confirm-password .field-error')).toHaveText(
-    'This field is required.',
-  )
+  await expect(page.locator('#field-error-confirm-password')).toHaveText('This field is required.')
 
   // make them match, but does not pass password validation
   await page.locator('#field-email').fill(devUser.email)
   await page.locator('#field-password').fill('12')
   await page.locator('#field-confirm-password').fill('12')
   await page.locator('.form-submit > button').click()
-  await expect(page.locator('.field-type.password .field-error')).toHaveText(
+  await expect(page.locator('#field-error-password')).toHaveText(
     'This value must be longer than the minimum length of 3 characters.',
   )
 
