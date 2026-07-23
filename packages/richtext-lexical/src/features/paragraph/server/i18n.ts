@@ -73,6 +73,10 @@ export const i18n: Partial<GenericLanguages> = {
     label: '문단',
     label2: '일반 텍스트',
   },
+  ms: {
+    label: 'Perenggan',
+    label2: 'Teks biasa',
+  },
   my: {
     label: 'Perenggan',
     label2: 'ပုံမှန်စာသား',
