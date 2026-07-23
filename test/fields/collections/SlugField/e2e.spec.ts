@@ -104,6 +104,22 @@ describe('SlugField', () => {
     await expect(page.locator('#field-slug')).toHaveValue('this-should-have-regenerated')
   })
 
+  test('should regenerate an empty slug to the document id', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-title').fill('Doc with id fallback')
+
+    await saveDocAndAssert(page)
+
+    const id = page.url().match(/\/slug-fields\/([^/?#]+)/)?.[1]
+    expect(id).toBeTruthy()
+
+    // With no source left to slugify, regenerating falls back to the document id.
+    await page.locator('#field-title').fill('')
+    await regenerateSlug('slug')
+
+    await expect(page.locator('#field-slug')).toHaveValue(id!)
+  })
+
   test('custom values should be kept', async () => {
     await page.goto(url.create)
     await page.locator('#field-title').fill('Test title with custom slug')

@@ -175,6 +175,14 @@ describe('Fields', () => {
       })
       created.push(duplicate.id)
       expect(duplicate.slug).toBe('my-first-post-1')
+
+      // A second duplicate must skip the taken -1 and increment the suffix.
+      const secondDuplicate = await payload.duplicate({
+        collection: 'slug-fields',
+        id: original.id,
+      })
+      created.push(secondDuplicate.id)
+      expect(secondDuplicate.slug).toBe('my-first-post-2')
     })
 
     describe('autosave drafts', () => {

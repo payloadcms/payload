@@ -3,6 +3,7 @@ import type { FieldHook } from '../../config/types.js'
 import type { Slugify } from './types.js'
 
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
+import { hasValue } from './hasValue.js'
 
 type Args = {
   name: string
@@ -38,19 +39,14 @@ export const generateSlug =
         : defaultSlugify(valueToSlugify as string)
 
     // Explicit value from the client wins — normalized through the field's slugify.
-    if (value !== undefined && value !== null && value !== '') {
+    if (hasValue(value)) {
       return await slugify(value)
     }
 
     const storedSlug = originalDoc?.[name]
 
     // On update, preserve a slug that is already set — only fill it while empty.
-    if (
-      operation !== 'create' &&
-      storedSlug !== undefined &&
-      storedSlug !== null &&
-      storedSlug !== ''
-    ) {
+    if (operation !== 'create' && hasValue(storedSlug)) {
       return storedSlug
     }
 

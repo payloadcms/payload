@@ -1,6 +1,7 @@
 import type { FieldHook } from '../../config/types.js'
 
 import { ensureUniqueSlug } from './ensureUniqueSlug.js'
+import { hasValue } from './hasValue.js'
 
 type Args = {
   name: string
@@ -19,7 +20,7 @@ type Args = {
 export const generateSlugBeforeDuplicate =
   ({ name }: Args): FieldHook =>
   async ({ collection, req, value }) => {
-    if (!collection || value === undefined || value === null || value === '') {
+    if (!collection || !hasValue(value)) {
       return undefined
     }
 

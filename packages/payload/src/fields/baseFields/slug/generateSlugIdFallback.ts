@@ -1,6 +1,8 @@
+import type { PayloadRequest } from '../../../types/index.js'
 import type { FieldHook } from '../../config/types.js'
 
 import { ensureUniqueSlug } from './ensureUniqueSlug.js'
+import { hasValue } from './hasValue.js'
 
 type Args = {
   name: string
@@ -29,7 +31,7 @@ type Args = {
 export const generateSlugIdFallback =
   ({ name }: Args): FieldHook =>
   async ({ collection, operation, originalDoc, req, value }) => {
-    if (operation !== 'create' || (value !== undefined && value !== null && value !== '')) {
+    if (operation !== 'create' || hasValue(value)) {
       return value
     }
 
@@ -77,7 +79,7 @@ const patchLatestVersionSlug = async ({
   collection: string
   id: number | string
   name: string
-  req: Parameters<FieldHook>[0]['req']
+  req: PayloadRequest
   slug: string
 }): Promise<void> => {
   const { docs } = await req.payload.db.findVersions({
@@ -91,12 +93,7 @@ const patchLatestVersionSlug = async ({
 
   const latest = docs[0]
 
-  if (
-    !latest ||
-    (latest.version?.[name] !== undefined &&
-      latest.version?.[name] !== null &&
-      latest.version?.[name] !== '')
-  ) {
+  if (!latest || hasValue(latest.version?.[name])) {
     return
   }
 
