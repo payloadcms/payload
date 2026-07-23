@@ -21,6 +21,7 @@ import { Button } from '../Button/index.js'
 import { Condition } from './Condition/index.js'
 import './index.css'
 import { fieldTypeConditions, getValidFieldOperators } from './field-types.js'
+import { resolveWhereValue } from './resolveWhereValue.js'
 
 const baseClass = 'where-builder'
 
@@ -267,7 +268,7 @@ export const WhereBuilder: React.FC<WhereBuilderProps> = (props) => {
                   const operator =
                     (Object.keys(condition?.[fieldPath] || {})?.[0] as Operator) || undefined
 
-                  const value = condition?.[fieldPath]?.[operator] || undefined
+                  const value = resolveWhereValue(condition?.[fieldPath]?.[operator])
 
                   const isFirstCondition = orIndex === 0 && andIndex === 0
                   const join: 'and' | 'or' = andIndex === 0 ? 'or' : 'and'
