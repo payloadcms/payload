@@ -877,8 +877,6 @@ pnpm payload migrate:create --file @payloadcms/db-postgres/jobs-processing-lease
 
 Replace `@payloadcms/db-postgres` with `@payloadcms/db-vercel-postgres`, `@payloadcms/db-sqlite`, or `@payloadcms/db-d1-sqlite` when using one of those adapters. The migration keeps custom table, schema, and index names. Any old job with `processing: true` receives an expired lease so a jobs runner can recover it.
 
-MongoDB does not need a schema migration. You can optionally generate the same predefined migration with `@payloadcms/db-mongodb` to remove the old field and index.
-
 ### Jobs: the `state` field on task return values has been removed ([#16416](https://github.com/payloadcms/payload/pull/16416))
 
 Job task handlers and `inlineTask` callbacks can no longer use the `state` field to signal success or failure. Both shapes were deprecated in v3 and are now removed from tasks and inline tasks.
