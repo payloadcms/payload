@@ -13,6 +13,7 @@ type BaseArgs = {
 }
 
 type ArgsByID = {
+  claimBefore?: never
   id: number | string
   limit?: never
   sort?: never
@@ -20,6 +21,7 @@ type ArgsByID = {
 }
 
 type ArgsWhere = {
+  claimBefore?: string
   id?: never
   limit?: number
   sort?: Sort
@@ -45,6 +47,7 @@ export async function updateJob(args: ArgsByID & BaseArgs) {
  */
 export async function updateJobs({
   id,
+  claimBefore,
   data,
   limit: limitArg,
   req,
@@ -62,6 +65,10 @@ export async function updateJobs({
         : undefined,
   }
 
+  if (data.processingUntil === null) {
+    data.processingToken = null
+  }
+
   if (typeof data.updatedAt === 'undefined') {
     // Ensure updatedAt date is always updated
     data.updatedAt = getCurrentDate().toISOString()
@@ -75,6 +82,7 @@ export async function updateJobs({
         returning,
       }
     : {
+        claimBefore,
         data,
         limit,
         req: jobReq,
@@ -83,18 +91,10 @@ export async function updateJobs({
         where: where as Where,
       }
 
-  let updatedJobs: Job[] | null
-  try {
-    updatedJobs = await req.payload.db.updateJobs(args)
+  const updatedJobs: Job[] | null = await req.payload.db.updateJobs(args)
 
-    if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
-      await req.payload.db.commitTransaction(jobReq.transactionID)
-    }
-  } catch (error) {
-    if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
-      await req.payload.db.rollbackTransaction(jobReq.transactionID)
-    }
-    throw error
+  if (req.payload.db.name !== 'mongoose' && jobReq.transactionID) {
+    await req.payload.db.commitTransaction(jobReq.transactionID)
   }
 
   if (returning === false || !updatedJobs?.length) {

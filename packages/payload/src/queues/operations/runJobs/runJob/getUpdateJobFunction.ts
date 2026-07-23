@@ -1,8 +1,7 @@
 import type { Job } from '../../../../index.js'
 import type { PayloadRequest } from '../../../../types/index.js'
 
-import { jobsCollectionSlug } from '../../../config/collection.js'
-import { JobCancelledError, JobLeaseLostError } from '../../../errors/index.js'
+import { JobLeaseLostError } from '../../../errors/index.js'
 import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { updateJobs } from '../../../utilities/updateJob.js'
 
@@ -11,7 +10,7 @@ export type UpdateJobFunction = (jobData: Partial<Job>) => Promise<Job>
 /**
  * Helper for updating a job that does the following, additionally to updating the job:
  * - Merges incoming data from the updated job into the original job object
- * - Handles job cancellation by throwing a `JobCancelledError` if the job was cancelled.
+ * - Stops updates after this worker loses the job's lease.
  */
 export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFunction {
   return async (jobData) => {
@@ -24,9 +23,8 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
     const minimumProcessingUntil = new Date(
       getCurrentDate().getTime() + req.payload.config.jobs.processingLease.safetyBuffer,
     ).toISOString()
-    const isCancelling = Boolean((jobData.error as Record<string, unknown> | undefined)?.cancelled)
     const updatedJobs = await updateJobs({
-      data: jobData.processingUntil === null ? { ...jobData, processingToken: null } : jobData,
+      data: jobData,
       limit: 1,
       req,
       returning: true,
@@ -38,20 +36,7 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
         ],
       },
     })
-    let updatedJob = updatedJobs?.[0]
-    const didUpdateJob = Boolean(updatedJob)
-
-    if (!updatedJob) {
-      const currentJob = await req.payload.db.findOne<Job>({
-        collection: jobsCollectionSlug,
-        req,
-        where: { id: { equals: job.id } },
-      })
-
-      if (currentJob) {
-        updatedJob = currentJob
-      }
-    }
+    const updatedJob = updatedJobs?.[0]
 
     if (!updatedJob) {
       throw new JobLeaseLostError(`Job ${job.id} is no longer owned by this runner`)
@@ -70,17 +55,6 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
       } else {
         ;(job as any)[key] = updatedJob[key as keyof Job]
       }
-    }
-
-    if ((updatedJob?.error as Record<string, unknown>)?.cancelled) {
-      if (!isCancelling) {
-        throw new JobCancelledError(`Job ${job.id} was cancelled`)
-      }
-      return updatedJob
-    }
-
-    if (!didUpdateJob) {
-      throw new JobLeaseLostError(`Job ${job.id} is no longer owned by this runner`)
     }
 
     return updatedJob
