@@ -1,4 +1,4 @@
-import { JobRunAbortedError, type WorkflowConfig } from 'payload'
+import { JobCancelledError, type WorkflowConfig } from 'payload'
 
 export const selfCancelWorkflow: WorkflowConfig<'selfCancel'> = {
   slug: 'selfCancel',
@@ -13,7 +13,7 @@ export const selfCancelWorkflow: WorkflowConfig<'selfCancel'> = {
   retries: 4,
   handler: ({ job }) => {
     if (job.input.shouldCancel) {
-      throw new JobRunAbortedError('Job was cancelled')
+      throw new JobCancelledError('Job was cancelled')
     }
     throw new Error('Failed, not cancelled')
   },

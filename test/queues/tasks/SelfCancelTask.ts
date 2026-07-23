@@ -1,4 +1,4 @@
-import { JobRunAbortedError, type TaskConfig } from 'payload'
+import { JobCancelledError, type TaskConfig } from 'payload'
 
 export const SelfCancelTask: TaskConfig<'SelfCancel'> = {
   slug: 'SelfCancel',
@@ -15,7 +15,7 @@ export const SelfCancelTask: TaskConfig<'SelfCancel'> = {
   handler: ({ input }) => {
     if (input.shouldCancel) {
       console.log('222throwing error')
-      throw new JobRunAbortedError('Task was cancelled')
+      throw new JobCancelledError('Task was cancelled')
     }
     throw new Error('Failed, not cancelled')
   },

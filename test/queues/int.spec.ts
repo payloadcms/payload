@@ -1936,7 +1936,7 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.processingUntil).toBeFalsy()
   })
 
-  it('ensure jobs can cancel themselves by throwing a JobRunAbortedError in workflow handler', async () => {
+  it('ensure jobs can cancel themselves by throwing a JobCancelledError in workflow handler', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 
     /**
@@ -1991,7 +1991,7 @@ describe('Queues - Payload', () => {
     })
 
     /**
-     * Now, verify the behavior when the job is cancelled by throwing a JobRunAbortedError in workflow handler
+     * Now, verify the behavior when the job is cancelled by throwing a JobCancelledError in workflow handler
      */
     {
       const job = await payload.jobs.queue({
@@ -2033,7 +2033,7 @@ describe('Queues - Payload', () => {
     }
   })
 
-  it('ensure jobs can cancel themselves by throwing a JobRunAbortedError in task handler', async () => {
+  it('ensure jobs can cancel themselves by throwing a JobCancelledError in task handler', async () => {
     payload.config.jobs.deleteJobOnComplete = false
 
     /**
@@ -2088,7 +2088,7 @@ describe('Queues - Payload', () => {
     })
 
     /**
-     * Now, verify the behavior when the job is cancelled by throwing a JobRunAbortedError in task handler
+     * Now, verify the behavior when the job is cancelled by throwing a JobCancelledError in task handler
      */
     {
       const job = await payload.jobs.queue({

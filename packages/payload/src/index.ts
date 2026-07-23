@@ -1895,7 +1895,7 @@ export type {
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
 
-export { JobRunAbortedError } from './queues/errors/index.js'
+export { JobCancelledError } from './queues/errors/index.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
 export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
 
