@@ -1161,6 +1161,37 @@ importers:
         specifier: 18.3.0
         version: 18.3.0(@types/node@24.12.3)
 
+  packages/plugin-exif:
+    dependencies:
+      exifr:
+        specifier: ^7.1.3
+        version: 7.1.3
+      react:
+        specifier: 19.2.6
+        version: 19.2.6
+      react-dom:
+        specifier: 19.2.6
+        version: 19.2.6(react@19.2.6)
+    devDependencies:
+      '@payloadcms/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@payloadcms/ui':
+        specifier: workspace:*
+        version: link:../ui
+      '@types/react':
+        specifier: 19.2.14
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: 19.2.3
+        version: 19.2.3(@types/react@19.2.14)
+      payload:
+        specifier: workspace:*
+        version: link:../payload
+      sharp:
+        specifier: 0.32.6
+        version: 0.32.6
+
   packages/plugin-form-builder:
     dependencies:
       '@payloadcms/translations':
@@ -2415,6 +2446,9 @@ importers:
       '@payloadcms/plugin-ecommerce':
         specifier: workspace:*
         version: link:../packages/plugin-ecommerce
+      '@payloadcms/plugin-exif':
+        specifier: workspace:*
+        version: link:../packages/plugin-exif
       '@payloadcms/plugin-form-builder':
         specifier: workspace:*
         version: link:../packages/plugin-form-builder
@@ -10944,6 +10978,9 @@ packages:
   execa@8.0.1:
     resolution: {integrity: sha512-VyhnebXciFV2DESc+p6B+y0LjSm0krU4OgJN44qFAhBY0TJ+1V61tYD2+wHusZ6F9n5K+vl8k0sTy7PEfV4qpg==}
     engines: {node: '>=16.17'}
+
+  exifr@7.1.3:
+    resolution: {integrity: sha512-g/aje2noHivrRSLbAUtBPWFbxKdKhgj/xr1vATDdUXPOFYJlQ62Ft0oy+72V6XLIpDJfHs6gXLbBLAolqOXYRw==}
 
   expand-template@2.0.3:
     resolution: {integrity: sha512-XYfuKMvj4O35f/pOXLObndIRvyQ+/+6AhODh+OKWj9S9498pHHn/IMszH+gt0fBCRWMNfk1ZSp5x3AifmnI2vg==}
@@ -24977,6 +25014,8 @@ snapshots:
       onetime: 6.0.0
       signal-exit: 4.1.0
       strip-final-newline: 3.0.0
+
+  exifr@7.1.3: {}
 
   expand-template@2.0.3: {}
 
