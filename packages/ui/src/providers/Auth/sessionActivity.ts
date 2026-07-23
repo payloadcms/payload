@@ -1,10 +1,4 @@
-export type SessionActivitySource =
-  | 'input'
-  | 'keydown'
-  | 'pointerdown'
-  | 'route'
-  | 'visibility'
-  | 'wheel'
+export type SessionActivitySource = 'focus' | 'mousemove'
 
 export type MarkSessionActivity = (source: SessionActivitySource) => boolean
 
@@ -36,39 +30,21 @@ export function createSessionActivityTracker({
 }
 
 export function registerSessionActivityListeners({
-  document,
   markActivity,
   window,
 }: {
-  document: Document
   markActivity: MarkSessionActivity
   window: Window
 }): () => void {
-  const pointerdownListener = () => markActivity('pointerdown')
-  const keydownListener = () => markActivity('keydown')
-  const inputListener = () => markActivity('input')
-  const wheelListener = () => markActivity('wheel')
-  const visibilitychangeListener = () => {
-    if (document.visibilityState === 'visible') {
-      markActivity('visibility')
-    }
-  }
-  const wheelListenerOptions = {
-    capture: true,
-    passive: true,
-  }
+  const focusListener = () => markActivity('focus')
+  const mousemoveListener = () => markActivity('mousemove')
+  const mousemoveListenerOptions = { capture: true, passive: true }
 
-  window.addEventListener('pointerdown', pointerdownListener, true)
-  window.addEventListener('keydown', keydownListener, true)
-  window.addEventListener('input', inputListener, true)
-  window.addEventListener('wheel', wheelListener, wheelListenerOptions)
-  document.addEventListener('visibilitychange', visibilitychangeListener, true)
+  window.addEventListener('focus', focusListener, true)
+  window.addEventListener('mousemove', mousemoveListener, mousemoveListenerOptions)
 
   return () => {
-    window.removeEventListener('pointerdown', pointerdownListener, true)
-    window.removeEventListener('keydown', keydownListener, true)
-    window.removeEventListener('input', inputListener, true)
-    window.removeEventListener('wheel', wheelListener, wheelListenerOptions)
-    document.removeEventListener('visibilitychange', visibilitychangeListener, true)
+    window.removeEventListener('focus', focusListener, true)
+    window.removeEventListener('mousemove', mousemoveListener, mousemoveListenerOptions)
   }
 }
