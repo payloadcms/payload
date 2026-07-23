@@ -2,7 +2,7 @@
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/payloadcms/payload/tree/main/templates/with-cloudflare-d1)
 
-**This can only be deployed on Paid Workers right now due to size limits.** This template comes configured with the bare minimum to get started on anything you need.
+**This template fits within the Cloudflare Workers free-tier 3 MiB size limit** (~2.6 MiB gzip as shipped, measured with `wrangler deploy`). It comes configured with the bare minimum to get started on anything you need.
 
 ## Quick start
 
@@ -102,6 +102,17 @@ If you see "Failed to publish diagnostic channel message" errors in your observa
 
 Cloudflare Workers runs in an [isolated environment that cannot access private IP ranges](https://developers.cloudflare.com/workers-vpc/examples/route-across-private-services/) by default, providing built-in SSRF protection. This makes `skipSafeFetch` safe to use.
 
+## OG image generation
+
+Payload ships an endpoint (`/api/og`) that generates dynamic Open Graph images for social sharing via `@vercel/og`. On Cloudflare Workers, `@vercel/og` works through compatibility patches in the OpenNext adapter (`@opennextjs/cloudflare`), but it adds ~744 KiB gzip to the Worker bundle — pushing the template from ~2.6 MiB to ~3.3 MiB gzip, over the free-tier 3 MiB limit.
+
+This template disables the feature and replaces the endpoint module with a stub to stay within the free-tier limit:
+
+- `admin.meta.defaultOGImageType: 'off'` in `src/payload.config.ts`
+- The endpoint module is aliased to `stubs/payload-og-endpoint.js` in `next.config.ts`, so `@vercel/og` never enters the Worker bundle
+
+To re-enable OG image generation, remove the alias from `next.config.ts` and remove `defaultOGImageType` from `src/payload.config.ts`. The feature works on Workers via OpenNext's compatibility patches, but the bundle will exceed the free-tier 3 MiB limit — a Paid Workers plan is required.
+
 ## Known issues
 
 ### GraphQL
@@ -110,9 +121,9 @@ We are currently waiting on some issues with GraphQL to be [fixed upstream in Wo
 
 ### Worker size limits
 
-We currently recommend deploying this template to the Paid Workers plan due to bundle [size limits](https://developers.cloudflare.com/workers/platform/limits/#worker-size) of 3mb. We're actively trying to reduce our bundle footprint over time to better meet this metric.
+This template fits within the Cloudflare Workers free-tier [3 MiB compressed size limit](https://developers.cloudflare.com/workers/platform/limits/#worker-size) — ~2.6 MiB gzip total upload as shipped (`wrangler deploy`), leaving ~450 KiB of headroom. Part of how it fits is [disabling the `@vercel/og` endpoint](#og-image-generation), which adds ~744 KiB gzip when enabled.
 
-This also applies to your own code, in the case of importing a lot of libraries you may find yourself limited by the bundle.
+This also applies to your own code: importing large libraries (or re-enabling OG image generation) can push your bundle over the free-tier limit, in which case you'll need a Paid Workers plan.
 
 ## Questions
 

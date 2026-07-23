@@ -20,7 +20,7 @@
       "binding": "D1",
       "database_id": "DATABASE_ID",
       "database_name": "my-app",
-      "remote": true,
+      "remote": false,
     },
   ],
   "services": [
@@ -41,6 +41,9 @@
     //   "bucket_name": "<BUCKET_NAME>",
     // },
   ],
+  "observability": {
+    "enabled": true,
+  },
 
   // Here's how to configure an additional environment
   // It can be deployed with `CLOUDFLARE_ENV=staging pnpm run deploy`
