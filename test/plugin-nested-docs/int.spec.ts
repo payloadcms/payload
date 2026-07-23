@@ -193,6 +193,84 @@ describe('@payloadcms/plugin-nested-docs', () => {
     })
   })
 
+  describe('circular references', () => {
+    const createdPageIDs: (number | string)[] = []
+
+    afterEach(async () => {
+      for (const id of [...createdPageIDs].reverse()) {
+        await payload.delete({ collection: 'pages', id })
+      }
+      createdPageIDs.length = 0
+    })
+
+    it('should throw an error when setting a page as its own parent', async () => {
+      const page = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Self Parent',
+          slug: 'self-parent',
+        },
+      })
+
+      createdPageIDs.push(page.id)
+
+      await expect(
+        payload.update({
+          collection: 'pages',
+          id: page.id,
+          data: {
+            parent: page.id,
+          },
+        }),
+      ).rejects.toThrow(/[Cc]ircular/)
+    })
+
+    it('should throw an error when creating a circular parent chain', async () => {
+      const pageA = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Circle A',
+          slug: 'circle-a',
+        },
+      })
+
+      createdPageIDs.push(pageA.id)
+
+      const pageB = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Circle B',
+          slug: 'circle-b',
+          parent: pageA.id,
+        },
+      })
+
+      createdPageIDs.push(pageB.id)
+
+      const pageC = await payload.create({
+        collection: 'pages',
+        data: {
+          title: 'Circle C',
+          slug: 'circle-c',
+          parent: pageB.id,
+        },
+      })
+
+      createdPageIDs.push(pageC.id)
+
+      // Setting A's parent to C creates a cycle: A -> C -> B -> A
+      await expect(
+        payload.update({
+          collection: 'pages',
+          id: pageA.id,
+          data: {
+            parent: pageC.id,
+          },
+        }),
+      ).rejects.toThrow(/[Cc]ircular/)
+    })
+  })
+
   describe('versions', () => {
     const createdPageIDs: (number | string)[] = []
 
