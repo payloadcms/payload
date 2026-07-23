@@ -527,6 +527,20 @@ const publishCollection: CollectionConfig = {
       ],
     },
   ],
+  hooks: {
+    beforeChange: [
+      ({ data, operation, req }) => {
+        if (req.context.promoteDraftToPublished === true && operation !== 'validate') {
+          return {
+            ...data,
+            _status: 'published',
+          }
+        }
+
+        return data
+      },
+    ],
+  },
   trash: true,
   versions: {
     drafts: {
@@ -551,6 +565,20 @@ const publishGlobal: GlobalConfig = {
       required: true,
     },
   ],
+  hooks: {
+    beforeChange: [
+      ({ data, operation, req }) => {
+        if (req.context.promoteDraftToPublished === true && operation !== 'validate') {
+          return {
+            ...data,
+            _status: 'published',
+          }
+        }
+
+        return data
+      },
+    ],
+  },
   versions: {
     drafts: {
       validate: false,

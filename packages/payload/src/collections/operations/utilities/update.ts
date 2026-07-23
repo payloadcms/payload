@@ -38,6 +38,7 @@ import {
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
+import { isPostHookPublishIntent } from '../../../utilities/isPostHookPublishIntent.js'
 import { resolvePublishLocales } from '../../../utilities/resolvePublishLocales.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
 import { validateLocalWithDataLocale } from '../local/validate.js'
@@ -155,53 +156,6 @@ export const updateDocument = async <
     showHiddenFields: true,
   })
   const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
-  const isTrashMetadataOperation = Boolean(
-    !publishAllLocales &&
-      collectionConfig.trash &&
-      data?._status !== 'published' &&
-      (data?.deletedAt || isRestoringDraftFromTrash),
-  )
-  const isUnpublishMetadataOperation =
-    unpublishAllLocales || (!publishAllLocales && data?._status === 'draft')
-
-  if (
-    hasDraftsEnabled(collectionConfig) &&
-    !isSavingDraft &&
-    !isTrashMetadataOperation &&
-    !isUnpublishMetadataOperation
-  ) {
-    const validationResult = await validateLocalWithDataLocale(payload, {
-      id,
-      collection: collectionConfig.slug,
-      data,
-      locale: resolvePublishLocales({
-        locale,
-        localization: config.localization,
-        publishAllLocales,
-      }),
-      overrideAccess,
-      req,
-      validationDataLocale:
-        locale !== 'all'
-          ? locale
-          : config.localization
-            ? config.localization.defaultLocale
-            : undefined,
-      validationTrash: Boolean(originalDoc?.deletedAt),
-    })
-
-    if (!validationResult.valid) {
-      throw new ValidationError(
-        {
-          id,
-          collection: collectionConfig.slug,
-          errors: validationResult.errors,
-          req,
-        },
-        req.t,
-      )
-    }
-  }
 
   if (collectionConfig.auth) {
     ensureUsernameOrEmail<TSlug>({
@@ -325,6 +279,48 @@ export const updateDocument = async <
   // /////////////////////////////////////
 
   let result: JsonObject = await beforeChange(beforeChangeArgs)
+
+  if (
+    hasDraftsEnabled(collectionConfig) &&
+    isPostHookPublishIntent({
+      locale,
+      publishAllLocales,
+      status: result._status,
+      unpublishAllLocales,
+    })
+  ) {
+    const validationResult = await validateLocalWithDataLocale(payload, {
+      id,
+      collection: collectionConfig.slug,
+      data: result,
+      locale: resolvePublishLocales({
+        locale,
+        localization: config.localization,
+        publishAllLocales,
+      }),
+      overrideAccess,
+      req,
+      validationDataLocale:
+        locale !== 'all'
+          ? locale
+          : config.localization
+            ? config.localization.defaultLocale
+            : undefined,
+      validationTrash: Boolean(originalDoc?.deletedAt),
+    })
+
+    if (!validationResult.valid) {
+      throw new ValidationError(
+        {
+          id,
+          collection: collectionConfig.slug,
+          errors: validationResult.errors,
+          req,
+        },
+        req.t,
+      )
+    }
+  }
 
   if (
     config.localization &&

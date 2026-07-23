@@ -37,6 +37,7 @@ import {
   hasLocalizeStatusEnabled,
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
+import { isPostHookPublishIntent } from '../../utilities/isPostHookPublishIntent.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolvePublishLocales } from '../../utilities/resolvePublishLocales.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
@@ -178,50 +179,6 @@ export const createOperation = async <
 
     data = newFileData
 
-    const isCreatingTrashedDocument = Boolean(
-      !publishAllLocales &&
-        collectionConfig.trash &&
-        data._status !== 'published' &&
-        data.deletedAt,
-    )
-    const isUnpublishMetadataOperation = !publishAllLocales && data._status === 'draft'
-
-    if (
-      !isSavingDraft &&
-      !isCreatingTrashedDocument &&
-      !isUnpublishMetadataOperation &&
-      hasDraftsEnabled(collectionConfig)
-    ) {
-      const validationResult = await validateLocalWithDataLocale(payload, {
-        collection: collectionConfig.slug,
-        data,
-        locale: resolvePublishLocales({
-          locale: locale ?? null,
-          localization: config.localization,
-          publishAllLocales,
-        }),
-        overrideAccess,
-        req,
-        validationDataLocale:
-          locale && locale !== 'all'
-            ? locale
-            : config.localization
-              ? config.localization.defaultLocale
-              : undefined,
-      })
-
-      if (!validationResult.valid) {
-        throw new ValidationError(
-          {
-            collection: collectionConfig.slug,
-            errors: validationResult.errors,
-            req,
-          },
-          req.t,
-        )
-      }
-    }
-
     // /////////////////////////////////////
     // beforeValidate - Fields
     // /////////////////////////////////////
@@ -289,6 +246,44 @@ export const createOperation = async <
       req,
       skipValidation: isSavingDraft && !hasDraftValidationEnabled(collectionConfig),
     })
+
+    if (
+      hasDraftsEnabled(collectionConfig) &&
+      isPostHookPublishIntent({
+        locale: locale ?? (config.localization ? config.localization.defaultLocale : undefined),
+        publishAllLocales,
+        status: dataWithLocales._status,
+      })
+    ) {
+      const validationResult = await validateLocalWithDataLocale(payload, {
+        collection: collectionConfig.slug,
+        data: dataWithLocales,
+        locale: resolvePublishLocales({
+          locale: locale ?? null,
+          localization: config.localization,
+          publishAllLocales,
+        }),
+        overrideAccess,
+        req,
+        validationDataLocale:
+          locale && locale !== 'all'
+            ? locale
+            : config.localization
+              ? config.localization.defaultLocale
+              : undefined,
+      })
+
+      if (!validationResult.valid) {
+        throw new ValidationError(
+          {
+            collection: collectionConfig.slug,
+            errors: validationResult.errors,
+            req,
+          },
+          req.t,
+        )
+      }
+    }
 
     // When locale='all' or when beforeChange doesn't convert the string (e.g. no locale hook ran),
     // the localized _status remains a plain string. Expand it to a per-locale object so MongoDB
