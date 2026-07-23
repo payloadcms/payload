@@ -337,9 +337,9 @@ export const sanitizeField = async ({
         ...(field.hooks.afterChange || []),
       ]
 
-      // Dedupe the slug on duplicate here so setDefaultBeforeDuplicate skips its ` - Copy` default.
+      // Handle the slug on duplicate here so setDefaultBeforeDuplicate skips its ` - Copy` default.
       field.hooks.beforeDuplicate = [
-        generateSlugBeforeDuplicate({ name: field.name }),
+        generateSlugBeforeDuplicate({ name: field.name, required: field.required }),
         ...(field.hooks.beforeDuplicate || []),
       ]
     }

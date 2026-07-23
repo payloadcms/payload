@@ -161,7 +161,7 @@ describe('Fields', () => {
       expect(localizedSlug.es).toBe('titulo-espanol')
     })
 
-    it('should dedupe the slug with a valid suffix when duplicating', async () => {
+    it('should give a duplicate its own id slug instead of drifting from the original', async () => {
       const original = await payload.create({
         collection: 'slug-fields',
         data: { title: 'My First Post' },
@@ -174,7 +174,26 @@ describe('Fields', () => {
         id: original.id,
       })
       created.push(duplicate.id)
-      expect(duplicate.slug).toBe('my-first-post-1')
+
+      // The non-required slug falls back to the duplicate's own new id, not `my-first-post-1`.
+      expect(duplicate.slug).toBe(String(duplicate.id))
+      expect(duplicate.slug).not.toBe(original.slug)
+    })
+
+    it('should dedupe a required slug with an incrementing suffix when duplicating', async () => {
+      const original = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'My First Post' },
+      })
+      created.push(original.id)
+      expect(original.customSlugify).toBe('MY FIRST POST')
+
+      const duplicate = await payload.duplicate({
+        collection: 'slug-fields',
+        id: original.id,
+      })
+      created.push(duplicate.id)
+      expect(duplicate.customSlugify).toBe('MY FIRST POST-1')
 
       // A second duplicate must skip the taken -1 and increment the suffix.
       const secondDuplicate = await payload.duplicate({
@@ -182,7 +201,7 @@ describe('Fields', () => {
         id: original.id,
       })
       created.push(secondDuplicate.id)
-      expect(secondDuplicate.slug).toBe('my-first-post-2')
+      expect(secondDuplicate.customSlugify).toBe('MY FIRST POST-2')
     })
 
     describe('autosave drafts', () => {

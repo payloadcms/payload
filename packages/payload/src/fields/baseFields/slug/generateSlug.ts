@@ -3,6 +3,7 @@ import type { FieldHook } from '../../config/types.js'
 import type { Slugify } from './types.js'
 
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
+import { consumeSlugDuplicateFallback } from './duplicateContext.js'
 import { hasValue } from './hasValue.js'
 
 type Args = {
@@ -32,7 +33,7 @@ type Args = {
  */
 export const generateSlug =
   ({ name, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
-  async ({ data, operation, originalDoc, req, value }) => {
+  async ({ context, data, operation, originalDoc, req, value }) => {
     const slugify = (valueToSlugify: unknown) =>
       customSlugify
         ? customSlugify({ data: (data ?? {}) as TypeWithID, req, valueToSlugify })
@@ -48,6 +49,12 @@ export const generateSlug =
     // On update, preserve a slug that is already set — only fill it while empty.
     if (operation !== 'create' && hasValue(storedSlug)) {
       return storedSlug
+    }
+
+    // On a duplicate, skip source derivation so the copy falls back to its own new id rather than a
+    // drifting slug derived from the source it shares with the original. See generateSlugBeforeDuplicate.
+    if (consumeSlugDuplicateFallback(context, name)) {
+      return undefined
     }
 
     // Derive an empty slug from its source when present; otherwise leave it empty
