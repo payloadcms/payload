@@ -13,6 +13,7 @@ import { getLanguageDir } from '@payloadcms/ui/utilities/getLanguageDir'
 import React from 'react'
 import '@payloadcms/ui/scss/app.scss'
 
+import { TanStackDevCompileStatusAdapter } from '../../elements/DevCompileStatus/index.js'
 import { TanStackRouterAdapter } from '../../elements/RouterAdapter/index.js'
 
 export type RootLayoutData = {
@@ -55,6 +56,7 @@ export function RootLayout({ children, data, serverFunction }: RootLayoutProps) 
         <RootProvider
           config={data.clientConfig}
           dateFNSKey={data.dateFNSKey}
+          DevCompileStatusAdapter={TanStackDevCompileStatusAdapter}
           embed={data.isEmbedded}
           fallbackLang={data.fallbackLang as AcceptedLanguages}
           highContrastMode={false}
