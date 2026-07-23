@@ -1,0 +1,148 @@
+name: publish-template-with-postgres-image
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/docker/with-postgres/**
+      - .github/workflows/publish-template-with-postgres-image.yml
+      - templates/with-postgres/**
+  release:
+    types:
+      - published
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: Git ref to build (optional)
+        required: false
+        default: ''
+      push:
+        description: Push image to GHCR
+        required: false
+        type: boolean
+        default: true
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name == 'release' && github.event.release.tag_name || inputs.ref || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/payload-with-postgres
+  TEMPLATE_PATH: templates/with-postgres
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Determine ref and push mode
+        id: vars
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          ref_to_build="${GITHUB_REF}"
+          should_push="true"
+          publish_latest="false"
+          publish_version="false"
+          publish_main="false"
+
+          if [ "${GITHUB_EVENT_NAME}" = "release" ]; then
+            ref_to_build="${{ github.event.release.tag_name }}"
+            publish_latest="true"
+            publish_version="true"
+          elif [ "${GITHUB_EVENT_NAME}" = "push" ]; then
+            publish_main="true"
+          elif [ -n "${{ inputs.ref }}" ]; then
+            ref_to_build="${{ inputs.ref }}"
+          fi
+
+          if [ "${GITHUB_EVENT_NAME}" = "workflow_dispatch" ] && [ "${{ inputs.push }}" != "true" ]; then
+            should_push="false"
+          fi
+
+          echo "ref_to_build=${ref_to_build}" >> "${GITHUB_OUTPUT}"
+          echo "should_push=${should_push}" >> "${GITHUB_OUTPUT}"
+          echo "publish_latest=${publish_latest}" >> "${GITHUB_OUTPUT}"
+          echo "publish_version=${publish_version}" >> "${GITHUB_OUTPUT}"
+          echo "publish_main=${publish_main}" >> "${GITHUB_OUTPUT}"
+
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ steps.vars.outputs.ref_to_build }}
+
+      - name: Gather template metadata
+        id: metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          short_sha="$(git rev-parse --short=12 HEAD)"
+          source_sha="$(git rev-parse HEAD)"
+          created_at="$(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+          version="$(jq -r '.dependencies.payload // .dependencies["@payloadcms/next"] // empty' "${TEMPLATE_PATH}/package.json")"
+
+          version="${version#^}"
+          version="${version#v}"
+
+          if [ -z "${version}" ]; then
+            echo "Failed to determine template version from ${TEMPLATE_PATH}/package.json" >&2
+            exit 1
+          fi
+
+          echo "short_sha=${short_sha}" >> "${GITHUB_OUTPUT}"
+          echo "source_sha=${source_sha}" >> "${GITHUB_OUTPUT}"
+          echo "created_at=${created_at}" >> "${GITHUB_OUTPUT}"
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: ${{ steps.vars.outputs.should_push == 'true' }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate Docker metadata
+        id: docker-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable=${{ steps.vars.outputs.publish_latest == 'true' }}
+            type=raw,value=${{ steps.metadata.outputs.version }},enable=${{ steps.vars.outputs.publish_version == 'true' }}
+            type=raw,value=${{ steps.metadata.outputs.version }}-${{ steps.metadata.outputs.short_sha }},enable=${{ steps.vars.outputs.publish_version == 'true' }}
+            type=raw,value=main,enable=${{ steps.vars.outputs.publish_main == 'true' }}
+            type=sha,prefix=sha-
+          labels: |
+            org.opencontainers.image.title=payload-with-postgres
+            org.opencontainers.image.description=Official Docker image for the payloadcms/payload with-postgres template
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.url=https://github.com/${{ github.repository }}/tree/${{ steps.vars.outputs.ref_to_build }}/${{ env.TEMPLATE_PATH }}
+            org.opencontainers.image.version=${{ steps.metadata.outputs.version }}
+            org.opencontainers.image.revision=${{ steps.metadata.outputs.source_sha }}
+            org.opencontainers.image.created=${{ steps.metadata.outputs.created_at }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./.github/docker/with-postgres/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: ${{ steps.vars.outputs.should_push == 'true' }}
+          tags: ${{ steps.docker-meta.outputs.tags }}
+          labels: ${{ steps.docker-meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
