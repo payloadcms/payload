@@ -483,8 +483,9 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
           job.completedAt ||
           job.waitUntil
         ) {
-          // The Local API persists cancellation itself. When a handler aborts its own run, the
-          // runner must persist the cancellation while it still owns the job.
+          // When using the local API to cancel jobs, the local API will update the job data for us to ensure the job is cancelled.
+          // But when throwing a JobCancelledError within a task or workflow handler, we are responsible for updating the job data ourselves.
+          // Use the lease-protected getUpdateJobFunction so an old worker cannot cancel the job after another worker claims it.
           const updateJob = getUpdateJobFunction(job, jobReq)
           await updateJob({
             completedAt: null,
