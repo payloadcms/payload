@@ -20,7 +20,7 @@ import type {
 } from '../../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
-import { JobCancelledError, JobLeaseLostError, TaskError } from '../../../errors/index.js'
+import { JobRunAbortedError, TaskError } from '../../../errors/index.js'
 import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getTaskHandlerFromConfig } from './importHandlerPath.js'
 
@@ -147,8 +147,8 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           })
         )?.output
       } catch (err: any) {
-        if (err instanceof JobCancelledError || err instanceof JobLeaseLostError) {
-          // Job cancellation and lease loss are handled by the top-level runner.
+        if (err instanceof JobRunAbortedError) {
+          // Job run aborts are handled by the top-level runner.
           throw err
         }
         throw new TaskError({

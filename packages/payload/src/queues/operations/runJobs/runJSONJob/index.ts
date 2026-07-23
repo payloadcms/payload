@@ -7,7 +7,7 @@ import type { UpdateJobFunction } from '../runJob/getUpdateJobFunction.js'
 import type { JobRunStatus } from '../runJob/index.js'
 
 import { handleWorkflowError } from '../../../errors/handleWorkflowError.js'
-import { JobLeaseLostError, WorkflowError } from '../../../errors/index.js'
+import { JobRunAbortedError, WorkflowError } from '../../../errors/index.js'
 import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getRunTaskFunction } from '../runJob/getRunTaskFunction.js'
 
@@ -79,7 +79,7 @@ export const runJSONJob = async ({
       }),
     )
   } catch (error) {
-    if (error instanceof JobLeaseLostError) {
+    if (error instanceof JobRunAbortedError) {
       throw error
     }
 

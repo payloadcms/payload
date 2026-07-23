@@ -40,13 +40,8 @@ export class WorkflowError extends Error {
 }
 
 /**
- * Throw this error from within a task or workflow handler to cancel the job.
- * Unlike failing a job (e.g. by throwing any other error), a cancelled job will not be retried.
+ * Stops the current job run.
+ * Payload throws this when a worker can no longer update a job. Task and workflow handlers can
+ * also throw it to cancel a job without retrying it.
  */
-export class JobCancelledError extends Error {
-  constructor(message: string) {
-    super(message)
-  }
-}
-
-export class JobLeaseLostError extends Error {}
+export class JobRunAbortedError extends Error {}
