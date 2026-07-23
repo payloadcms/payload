@@ -1,4 +1,3 @@
-export { migrateJobsProcessingLease } from '../predefinedMigrations/migrateJobsProcessingLease.js'
 export {
   localizeStatus,
   migrateLocalizeStatus,
