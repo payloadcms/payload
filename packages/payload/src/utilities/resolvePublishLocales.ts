@@ -6,7 +6,7 @@ type Args = {
   publishAllLocales: boolean
 }
 
-export type PublishLocaleSelector = 'all' | (null | string)[]
+export type PublishLocaleSelector = 'all' | [null | string, ...(null | string)[]]
 
 export function resolvePublishLocales({
   locale,
@@ -27,5 +27,5 @@ export function resolvePublishLocales({
     }
   }
 
-  return [...new Set(locales)]
+  return [...new Set(locales)] as [null | string, ...(null | string)[]]
 }

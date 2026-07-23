@@ -3,6 +3,8 @@ import type { Payload, PayloadRequest } from 'payload'
 import { buildEditorState } from '@payloadcms/richtext-lexical'
 import fs from 'fs/promises'
 import path from 'path'
+import { createLocalReq, getFileByPath } from 'payload'
+import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
@@ -17,10 +19,13 @@ import {
   hookEvents,
   isolationEvents,
   localePassEvents,
+  permissionOperationEvents,
   publishCollectionSlug,
   publishGlobalSlug,
   validationCollectionSlug,
   validationGlobalSlug,
+  validationPublishUploadsDir,
+  validationPublishUploadsSlug,
   validationRuntimeIdentityEvents,
   validationUploadsDir,
   validationUploadsSlug,
@@ -71,6 +76,11 @@ describe('validate Local API', () => {
         where: { id: { exists: true } },
       }),
       payload.delete({
+        collection: validationPublishUploadsSlug,
+        disableTransaction: true,
+        where: { id: { exists: true } },
+      }),
+      payload.delete({
         collection: writeTargetsSlug,
         disableTransaction: true,
         where: { id: { exists: true } },
@@ -82,6 +92,7 @@ describe('validate Local API', () => {
       }),
     ])
     await fs.rm(validationUploadsDir, { force: true, recursive: true })
+    await fs.rm(validationPublishUploadsDir, { force: true, recursive: true })
   })
 
   afterAll(async () => {
@@ -89,6 +100,152 @@ describe('validate Local API', () => {
   })
 
   describe('collections', () => {
+    it('should isolate operation-sensitive entity and nested field permission discovery', async () => {
+      const req = await createLocalReq(
+        {
+          context: {
+            allowValidation: true,
+          },
+        },
+        payload,
+      )
+      req.operation = 'update'
+
+      const authResult = await payload.auth({
+        headers: new Headers(),
+        req,
+      })
+
+      expect(authResult.permissions.collections?.[validationCollectionSlug]).toMatchObject({
+        fields: true,
+        validate: true,
+      })
+      expect(authResult.permissions.globals?.[validationGlobalSlug]).toMatchObject({
+        fields: true,
+        validate: true,
+      })
+
+      const collectionPermissions = await getEntityPermissions({
+        blockReferencesPermissions: {},
+        entity: payload.collections[validationCollectionSlug]!.config,
+        entityType: 'collection',
+        fetchData: false,
+        operations: ['validate'],
+        req,
+      })
+      const globalPermissions = await getEntityPermissions({
+        blockReferencesPermissions: {},
+        entity: payload.globals.config.find(({ slug }) => slug === validationGlobalSlug)!,
+        entityType: 'global',
+        fetchData: false,
+        operations: ['validate'],
+        req,
+      })
+
+      expect(collectionPermissions).toMatchObject({
+        fields: {
+          permissionProbe: {
+            fields: {
+              content: {
+                blocks: {
+                  permissionProbeBlock: {
+                    fields: {
+                      nested: {
+                        validate: {
+                          permission: true,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              nested: {
+                validate: {
+                  permission: true,
+                },
+              },
+            },
+          },
+        },
+        validate: {
+          permission: true,
+        },
+      })
+      expect(globalPermissions).toMatchObject({
+        fields: {
+          permissionProbe: {
+            fields: {
+              nested: {
+                validate: {
+                  permission: true,
+                },
+              },
+            },
+          },
+        },
+        validate: {
+          permission: true,
+        },
+      })
+      expect(permissionOperationEvents).not.toHaveLength(0)
+      expect(permissionOperationEvents).toSatisfy((events: typeof permissionOperationEvents) =>
+        events.every(({ observedOperation, operation }) => observedOperation === operation),
+      )
+      expect(req.operation).toBe('update')
+
+      clearValidationEvents()
+
+      await expect(
+        payload.validate({
+          collection: validationCollectionSlug,
+          data: {
+            permissionProbe: {
+              content: [
+                {
+                  blockType: 'permissionProbeBlock',
+                  nested: 'collection block',
+                },
+              ],
+              nested: 'collection nested',
+            },
+            summary: 'collection summary',
+            title: 'Collection title',
+          },
+          locale: 'en',
+          overrideAccess: false,
+          req,
+        }),
+      ).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+      await expect(
+        payload.validateGlobal({
+          slug: validationGlobalSlug,
+          data: {
+            permissionProbe: {
+              nested: 'global nested',
+            },
+          },
+          locale: 'en',
+          overrideAccess: false,
+          req,
+        }),
+      ).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+      expect(
+        permissionOperationEvents.filter(({ operation }) => operation === 'validate'),
+      ).not.toHaveLength(0)
+      expect(
+        permissionOperationEvents
+          .filter(({ operation }) => operation === 'validate')
+          .every(({ observedOperation }) => observedOperation === 'validate'),
+      ).toBe(true)
+      expect(req.operation).toBe('update')
+    })
+
     it('should expose required localization metadata after config sanitization', () => {
       expect(payload.config.localization && payload.config.localization.locales).toMatchObject([
         { code: 'en', required: false },
@@ -1384,6 +1541,142 @@ describe('validate Local API', () => {
   })
 
   describe('publish enforcement', () => {
+    it('should preserve upload files and persisted state when replacement publish validation fails', async () => {
+      const originalFile = await getFileByPath(path.resolve(dirname, '../uploads/image.png'))
+      originalFile.name = 'validation-published-original.png'
+
+      const draft = await payload.create({
+        collection: validationPublishUploadsSlug,
+        data: {
+          _status: 'draft',
+          title: 'English title',
+        },
+        draft: true,
+        file: originalFile,
+        locale: 'en',
+      })
+
+      await payload.update({
+        id: draft.id,
+        collection: validationPublishUploadsSlug,
+        data: {
+          _status: 'draft',
+          title: 'Spanish title',
+        },
+        draft: true,
+        locale: 'es',
+      })
+      await payload.update({
+        id: draft.id,
+        collection: validationPublishUploadsSlug,
+        data: {
+          _status: 'published',
+          title: 'English title',
+        },
+        locale: 'en',
+      })
+      await payload.update({
+        id: draft.id,
+        collection: validationPublishUploadsSlug,
+        data: {
+          _status: 'draft',
+          title: '',
+        },
+        draft: true,
+        locale: 'es',
+      })
+
+      const mainBefore = await payload.findByID({
+        id: draft.id,
+        collection: validationPublishUploadsSlug,
+        locale: 'all',
+      })
+      const draftBefore = await payload.findByID({
+        id: draft.id,
+        collection: validationPublishUploadsSlug,
+        draft: true,
+        locale: 'all',
+      })
+      const versionsBefore = await payload.countVersions({
+        collection: validationPublishUploadsSlug,
+        where: {
+          parent: {
+            equals: draft.id,
+          },
+        },
+      })
+      const filenamesBefore = (await fs.readdir(validationPublishUploadsDir)).sort()
+      const fileContentsBefore = new Map(
+        await Promise.all(
+          filenamesBefore.map(async (filename) => [
+            filename,
+            await fs.readFile(path.join(validationPublishUploadsDir, filename)),
+          ]),
+        ),
+      )
+
+      expect(filenamesBefore).toEqual(
+        expect.arrayContaining([mainBefore.filename, mainBefore.sizes.thumbnail.filename]),
+      )
+
+      const replacementFile = await getFileByPath(path.resolve(dirname, '../uploads/small.png'))
+      replacementFile.name = 'validation-rejected-replacement.png'
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: validationPublishUploadsSlug,
+          data: {
+            _status: 'published',
+            title: 'Replacement title',
+          },
+          file: replacementFile,
+          locale: 'en',
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'es',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+
+      const mainAfter = await payload.findByID({
+        id: draft.id,
+        collection: validationPublishUploadsSlug,
+        locale: 'all',
+      })
+      const draftAfter = await payload.findByID({
+        id: draft.id,
+        collection: validationPublishUploadsSlug,
+        draft: true,
+        locale: 'all',
+      })
+      const versionsAfter = await payload.countVersions({
+        collection: validationPublishUploadsSlug,
+        where: {
+          parent: {
+            equals: draft.id,
+          },
+        },
+      })
+      const filenamesAfter = (await fs.readdir(validationPublishUploadsDir)).sort()
+
+      expect(mainAfter).toEqual(mainBefore)
+      expect(draftAfter).toEqual(draftBefore)
+      expect(versionsAfter).toEqual(versionsBefore)
+      expect(filenamesAfter).toEqual(filenamesBefore)
+
+      for (const [filename, contents] of fileContentsBefore) {
+        await expect(
+          fs.readFile(path.join(validationPublishUploadsDir, filename)),
+        ).resolves.toEqual(contents)
+      }
+    })
+
     it('should block collection create when a hook promotes a draft to published', async () => {
       await expect(
         payload.create({

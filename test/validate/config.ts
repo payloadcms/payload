@@ -24,10 +24,12 @@ export const publishCollectionSlug = 'validation-publish-items'
 export const publishGlobalSlug = 'validation-publish-settings'
 export const writeTargetsSlug = 'validation-write-targets'
 export const validationUploadsSlug = 'validation-uploads'
+export const validationPublishUploadsSlug = 'validation-publish-uploads'
 export const validationAdminCollectionSlug = 'validation-admin-items'
 export const validationDeniedCollectionSlug = 'validation-denied-items'
 export const validationNonLocalizedCollectionSlug = 'validation-non-localized-items'
 export const validationUploadsDir = path.resolve(dirname, 'validation-uploads')
+export const validationPublishUploadsDir = path.resolve(dirname, 'validation-publish-uploads')
 
 type HookEvent = {
   context: Record<string, unknown>
@@ -38,6 +40,12 @@ type HookEvent = {
 
 export const hookEvents: HookEvent[] = []
 export const accessEvents: string[] = []
+export const permissionOperationEvents: {
+  entity: 'collection' | 'global'
+  observedOperation: string | undefined
+  operation: string
+  source: 'entity' | 'field'
+}[] = []
 export const isolationEvents: {
   candidateMarker: unknown
   contextMarker: unknown
@@ -72,6 +80,7 @@ export function clearValidationEvents(): void {
   localePassRequests.clear()
   activeLocalePasses = 0
   maximumActiveLocalePasses = 0
+  permissionOperationEvents.length = 0
   validationRuntimeIdentityEvents.length = 0
 }
 
@@ -94,6 +103,27 @@ function recordHook({ context, hook, operation, requestOperation }: HookEvent): 
 
 function getIsolationMarker(value: unknown): unknown {
   return (value as { isolation?: { marker?: unknown } } | null | undefined)?.isolation?.marker
+}
+
+function recordPermissionOperation({
+  entity,
+  operation,
+  req,
+  source,
+}: {
+  entity: 'collection' | 'global'
+  operation: string
+  req: PayloadRequest
+  source: 'entity' | 'field'
+}): boolean {
+  permissionOperationEvents.push({
+    entity,
+    observedOperation: req.operation,
+    operation,
+    source,
+  })
+
+  return req.operation === operation
 }
 
 async function recordAndMutateIsolationState({
@@ -213,10 +243,50 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
 const validationCollection: CollectionConfig = {
   slug: validationCollectionSlug,
   access: {
+    create: ({ req }) => {
+      recordPermissionOperation({
+        entity: 'collection',
+        operation: 'create',
+        req,
+        source: 'entity',
+      })
+      return true
+    },
+    delete: ({ req }) => {
+      recordPermissionOperation({
+        entity: 'collection',
+        operation: 'delete',
+        req,
+        source: 'entity',
+      })
+      return true
+    },
+    read: ({ req }) => {
+      recordPermissionOperation({ entity: 'collection', operation: 'read', req, source: 'entity' })
+      return true
+    },
+    update: ({ req }) => {
+      recordPermissionOperation({
+        entity: 'collection',
+        operation: 'update',
+        req,
+        source: 'entity',
+      })
+      return true
+    },
     validate: async ({ data, req }) => {
       accessEvents.push('collection')
+      const hasValidationOperation = recordPermissionOperation({
+        entity: 'collection',
+        operation: 'validate',
+        req,
+        source: 'entity',
+      })
       await recordAndMutateIsolationState({ data, req, source: 'collection' })
-      return req.payloadAPI === 'REST' || req.context.allowValidation === true
+      return (
+        hasValidationOperation &&
+        (req.payloadAPI === 'REST' || req.context.allowValidation === true)
+      )
     },
   },
   fields: [
@@ -307,6 +377,76 @@ const validationCollection: CollectionConfig = {
       name: 'operation',
       type: 'text',
     },
+    {
+      name: 'permissionProbe',
+      type: 'group',
+      fields: [
+        {
+          name: 'nested',
+          type: 'text',
+          access: {
+            create: ({ req }) => {
+              recordPermissionOperation({
+                entity: 'collection',
+                operation: 'create',
+                req,
+                source: 'field',
+              })
+              return true
+            },
+            read: ({ req }) => {
+              recordPermissionOperation({
+                entity: 'collection',
+                operation: 'read',
+                req,
+                source: 'field',
+              })
+              return true
+            },
+            update: ({ req }) => {
+              recordPermissionOperation({
+                entity: 'collection',
+                operation: 'update',
+                req,
+                source: 'field',
+              })
+              return true
+            },
+            validate: ({ req }) =>
+              recordPermissionOperation({
+                entity: 'collection',
+                operation: 'validate',
+                req,
+                source: 'field',
+              }),
+          },
+        },
+        {
+          name: 'content',
+          type: 'blocks',
+          blocks: [
+            {
+              slug: 'permissionProbeBlock',
+              fields: [
+                {
+                  name: 'nested',
+                  type: 'text',
+                  access: {
+                    validate: ({ req }) =>
+                      recordPermissionOperation({
+                        entity: 'collection',
+                        operation: 'validate',
+                        req,
+                        source: 'field',
+                      }),
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
   ],
   hooks: {
     beforeChange: [
@@ -371,10 +511,27 @@ const validationCollection: CollectionConfig = {
 const validationGlobal: GlobalConfig = {
   slug: validationGlobalSlug,
   access: {
+    read: ({ req }) => {
+      recordPermissionOperation({ entity: 'global', operation: 'read', req, source: 'entity' })
+      return true
+    },
+    update: ({ req }) => {
+      recordPermissionOperation({ entity: 'global', operation: 'update', req, source: 'entity' })
+      return true
+    },
     validate: async ({ data, req }) => {
       accessEvents.push('global')
+      const hasValidationOperation = recordPermissionOperation({
+        entity: 'global',
+        operation: 'validate',
+        req,
+        source: 'entity',
+      })
       await recordAndMutateIsolationState({ data, req, source: 'global' })
-      return req.payloadAPI === 'REST' || req.context.allowValidation === true
+      return (
+        hasValidationOperation &&
+        (req.payloadAPI === 'REST' || req.context.allowValidation === true)
+      )
     },
   },
   fields: [
@@ -396,6 +553,43 @@ const validationGlobal: GlobalConfig = {
         value === undefined || (Array.isArray(value) && value.length === 2)
           ? true
           : 'Location must use the public point tuple representation',
+    },
+    {
+      name: 'permissionProbe',
+      type: 'group',
+      fields: [
+        {
+          name: 'nested',
+          type: 'text',
+          access: {
+            read: ({ req }) => {
+              recordPermissionOperation({
+                entity: 'global',
+                operation: 'read',
+                req,
+                source: 'field',
+              })
+              return true
+            },
+            update: ({ req }) => {
+              recordPermissionOperation({
+                entity: 'global',
+                operation: 'update',
+                req,
+                source: 'field',
+              })
+              return true
+            },
+            validate: ({ req }) =>
+              recordPermissionOperation({
+                entity: 'global',
+                operation: 'validate',
+                req,
+                source: 'field',
+              }),
+          },
+        },
+      ],
     },
   ],
   hooks: {
@@ -703,6 +897,35 @@ export default buildConfigWithDefaults({
         staticDir: validationUploadsDir,
       },
       versions: false,
+    },
+    {
+      slug: validationPublishUploadsSlug,
+      access: {
+        validate: () => true,
+      },
+      fields: [
+        {
+          name: 'title',
+          type: 'text',
+          localized: true,
+          required: true,
+        },
+      ],
+      upload: {
+        imageSizes: [
+          {
+            name: 'thumbnail',
+            height: 64,
+            width: 64,
+          },
+        ],
+        staticDir: validationPublishUploadsDir,
+      },
+      versions: {
+        drafts: {
+          validate: false,
+        },
+      },
     },
   ],
   globals: [validationGlobal, publishGlobal],

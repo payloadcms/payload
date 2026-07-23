@@ -207,10 +207,18 @@ describe('Types testing', () => {
     })
 
     test('should accept multi-locale selectors without exposing concurrency controls', () => {
+      const mutableLocales: [null, ...null[]] = [null]
+      const readonlyLocales = [null] as const
+
       expect(payload.validate).type.toBeCallableWith({
         collection: 'pages',
         data: {},
-        locale: [null],
+        locale: mutableLocales,
+      })
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: readonlyLocales,
       })
       expect(payload.validate).type.toBeCallableWith({
         collection: 'pages',
@@ -219,7 +227,11 @@ describe('Types testing', () => {
       })
       expect(payload.validateGlobal).type.toBeCallableWith({
         slug: 'menu',
-        locale: [null],
+        locale: mutableLocales,
+      })
+      expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
+        locale: readonlyLocales,
       })
       expect(payload.validateGlobal).type.toBeCallableWith({
         slug: 'menu',
@@ -236,6 +248,14 @@ describe('Types testing', () => {
         concurrency: 4,
         locale: 'all',
       })
+
+      const invalidOptions: ValidateCollectionOptions<'pages'> = {
+        collection: 'pages',
+        data: {},
+        // @ts-expect-error Type '[]' is not assignable to type 'ValidationLocaleSelector'.
+        locale: [],
+      }
+      expect(invalidOptions).type.toBe<ValidateCollectionOptions<'pages'>>()
     })
   })
 

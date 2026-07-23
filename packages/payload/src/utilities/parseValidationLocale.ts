@@ -74,7 +74,7 @@ export function parseValidationLocaleSelector(locale: unknown): ValidationLocale
       return 'all'
 
     case 'multiple':
-      return parsedLocale.locales
+      return parsedLocale.locales as [TypedLocale, ...TypedLocale[]]
 
     case 'single':
       return parsedLocale.locale

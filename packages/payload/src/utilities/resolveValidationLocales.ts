@@ -13,8 +13,12 @@ import { APIError } from '../errors/index.js'
  * every locale available to the request. Projects without localization use `null` in the Local
  * API or `locale=all` in the REST API.
  */
-// eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
-export type ValidationLocaleSelector = 'all' | TypedLocale | TypedLocale[]
+/* eslint-disable @typescript-eslint/no-redundant-type-constituents */
+export type ValidationLocaleSelector =
+  | 'all'
+  | readonly [TypedLocale, ...TypedLocale[]]
+  | TypedLocale
+/* eslint-enable @typescript-eslint/no-redundant-type-constituents */
 
 const validationLocaleConcurrency = 3
 const sharedValidationRequestProperties = new Set([

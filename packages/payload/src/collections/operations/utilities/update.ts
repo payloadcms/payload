@@ -168,27 +168,12 @@ export const updateDocument = async <
     })
   }
 
-  // /////////////////////////////////////
-  // Delete any associated files
-  // /////////////////////////////////////
-
   // When saving a draft on a document whose latest version is published, the file
   // referenced by docWithLocales is still actively used by the published main document.
-  // Deleting it here would break the published document's file even though no publish
+  // Deleting it during the update would break the published document's file even though no publish
   // is happening. Only skip deletion in this case; when the latest version is already a
   // draft, it is safe to delete the old draft file as it is being replaced.
   const isDraftOverPublished = isSavingDraft && docWithLocales._status === 'published'
-
-  if (!isDraftOverPublished) {
-    await deleteAssociatedFiles({
-      collectionConfig,
-      config,
-      doc: docWithLocales,
-      files: filesToUpload,
-      overrideDelete: false,
-      req,
-    })
-  }
 
   // /////////////////////////////////////
   // beforeValidate - Fields
@@ -222,14 +207,6 @@ export const updateDocument = async <
           req,
         })) || data
     }
-  }
-
-  // /////////////////////////////////////
-  // Write files to local storage
-  // /////////////////////////////////////
-
-  if (!collectionConfig.upload.disableLocalStorage) {
-    await uploadFiles(payload, filesToUpload, req)
   }
 
   // /////////////////////////////////////
@@ -321,6 +298,23 @@ export const updateDocument = async <
         req.t,
       )
     }
+  }
+
+  // File deletion and writes must occur after the final post-hook publication validation barrier.
+  // Validation failures leave both the persisted upload and local files untouched.
+  if (!isDraftOverPublished) {
+    await deleteAssociatedFiles({
+      collectionConfig,
+      config,
+      doc: docWithLocales,
+      files: filesToUpload,
+      overrideDelete: false,
+      req,
+    })
+  }
+
+  if (!collectionConfig.upload.disableLocalStorage) {
+    await uploadFiles(payload, filesToUpload, req)
   }
 
   if (
