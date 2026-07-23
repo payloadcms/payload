@@ -266,9 +266,14 @@ export const generateFileData = async <T>({
     if (!overwriteExistingFiles) {
       // Extract prefix if present (added by plugin-cloud-storage)
       const prefix = (data as Record<string, unknown>)?.prefix as string | undefined
+      // On update, exclude the current document from the collision check so its
+      // own filename is not treated as taken (prevents spurious `-1` suffix).
+      const docId =
+        operation === 'update' ? (originalDoc as Record<string, unknown>)?.id as number | string | undefined : undefined
       fsSafeName = await getSafeFileName({
         collectionSlug: collectionConfig.slug,
         desiredFilename: fsSafeName,
+        docId,
         prefix,
         req,
         staticPath: staticPath!,
