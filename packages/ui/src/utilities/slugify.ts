@@ -2,7 +2,6 @@ import type { Slugify } from 'payload/shared'
 
 import {
   executeAccess,
-  flattenAllFields,
   getFieldByPath,
   getSlugFallbackValue,
   type ServerFunction,
@@ -44,7 +43,7 @@ export const slugifyHandler: ServerFunction<
 
   const { field } = getFieldByPath({
     config: req.payload.config,
-    fields: flattenAllFields({ fields: docConfig.fields }),
+    fields: docConfig.flattenedFields,
     path,
   })
 
