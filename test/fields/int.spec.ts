@@ -2,8 +2,9 @@ import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 import type { Payload, ValidationError } from 'payload'
 
+import { slugifyHandler } from '@payloadcms/ui/utilities/slugify'
 import path from 'path'
-import { reload } from 'payload'
+import { createLocalReq, reload } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
@@ -316,6 +317,34 @@ describe('Fields', () => {
       await expect(
         payload.update({ collection: 'slug-fields', id: b.id, data: { slug: 'doc-a' } }),
       ).rejects.toThrow()
+    })
+
+    // The regen button calls the slugify server function directly, which has its own fallback path
+    // separate from the beforeChange hook. It must scope the source-less `<singular>-N` fallback to
+    // the active locale, or it hands back a slug already taken in that locale.
+    it('should regenerate a source-less localized slug to a locale-unique fallback', async () => {
+      const taken = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Taken' },
+        locale: 'es',
+      })
+      created.push(taken.id)
+      const takenSlug = taken.localizedSlug as string
+      expect(takenSlug).toMatch(/^slug-field-\d+$/)
+
+      const req = await createLocalReq({ user: user.user }, payload)
+
+      const regenerated = await slugifyHandler({
+        collectionSlug: 'slug-fields',
+        data: {},
+        locale: 'es',
+        path: 'localizedSlug',
+        req,
+        valueToSlugify: '',
+      })
+
+      expect(regenerated).toMatch(/^slug-field-\d+$/)
+      expect(regenerated).not.toBe(takenSlug)
     })
 
     describe('autosave drafts', () => {
