@@ -287,10 +287,11 @@ export const sanitizeField = async ({
       )
     }
 
-    // Not required by default: the value is guaranteed after create (source-derived or id fallback),
-    // and requiring it would reject the deferred-empty slug before the fallback runs.
+    // Required by default so the admin marks the slug as required. The value is always populated by
+    // the field hooks (source or id fallback), and validations.slug permits empty so the fallback
+    // isn't blocked before it runs.
     if (typeof field.required === 'undefined') {
-      field.required = false
+      field.required = true
     }
 
     if (typeof field.unique === 'undefined') {
@@ -332,7 +333,7 @@ export const sanitizeField = async ({
       ]
 
       field.hooks.beforeDuplicate = [
-        generateSlugBeforeDuplicate({ name: field.name, required: field.required }),
+        generateSlugBeforeDuplicate({ name: field.name }),
         ...(field.hooks.beforeDuplicate || []),
       ]
     }

@@ -104,13 +104,10 @@ export const text: TextFieldValidation = (
 
 export type SlugFieldValidation = Validate<string, unknown, unknown, SlugField>
 
-export const slug: SlugFieldValidation = (value, { req: { t }, required }) => {
-  if (required && !value) {
-    return t('validation:required')
-  }
-
-  return true
-}
+// A slug is always populated by the field's hooks (source-derived or the id fallback), so an empty
+// value is never a user error — `required` only drives the admin asterisk, not validation. See
+// generateSlugIdFallback.
+export const slug: SlugFieldValidation = () => true
 
 export type PasswordFieldValidation = Validate<string, unknown, unknown, TextField>
 
