@@ -1,42 +1,54 @@
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
+import type { CollectionConfig } from 'payload'
+
 import { fileURLToPath } from 'node:url'
 import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { MediaCollection } from './collections/Media/index.js'
-import { PostsCollection, postsSlug } from './collections/Posts/index.js'
-import { MenuGlobal } from './globals/Menu/index.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+export const usersSlug = 'users'
+
+export const UsersCollection: CollectionConfig = {
+  slug: usersSlug,
+  admin: {
+    useAsTitle: 'displayName',
+  },
+  auth: {
+    useSessions: true,
+  },
+  fields: [
+    {
+      name: 'displayName',
+      type: 'text',
+      defaultValue: '[placeholder]',
+      localized: true,
+      required: true,
+    },
+  ],
+}
+
 export default buildConfigWithDefaults({
-  // ...extend config here
-  collections: [PostsCollection, MediaCollection],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
     },
+    user: usersSlug,
   },
-  editor: lexicalEditor({}),
-  globals: [
-    // ...add more globals here
-    MenuGlobal,
-  ],
+  collections: [UsersCollection],
+  localization: {
+    defaultLocale: 'en',
+    locales: ['en', 'es'],
+  },
   onInit: async (payload) => {
     await payload.create({
-      collection: 'users',
+      collection: usersSlug,
       data: {
+        displayName: 'Test User',
         email: devUser.email,
         password: devUser.password,
-      },
-    })
-
-    await payload.create({
-      collection: postsSlug,
-      data: {
-        title: 'example post',
       },
     })
   },

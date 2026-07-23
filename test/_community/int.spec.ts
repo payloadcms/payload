@@ -1,76 +1,70 @@
-import type { Payload } from 'payload'
+import type { Payload, TypedUser } from 'payload'
 
 import path from 'path'
+import { createLocalReq } from 'payload'
+import { addSessionToUser } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-
-import { devUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
-import { postsSlug } from './collections/Posts/index.js'
+import { usersSlug } from './config.js'
 
 let payload: Payload
-let token: string
-let restClient: NextRESTClient
 
-const { email, password } = devUser
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
-describe('_Community Tests', () => {
-  // --__--__--__--__--__--__--__--__--__
-  // Boilerplate test setup/teardown
-  // --__--__--__--__--__--__--__--__--__
+const describeMongoDB = process.env.PAYLOAD_DATABASE === 'mongodb' ? describe : describe.skip
+
+describeMongoDB('addSessionToUser with localized auth fields', () => {
   beforeAll(async () => {
-    const initialized = await initPayloadInt(dirname)
-    ;({ payload, restClient } = initialized)
-
-    const data = await restClient
-      .POST('/users/login', {
-        body: JSON.stringify({
-          email,
-          password,
-        }),
-      })
-      .then((res) => res.json())
-
-    token = data.token
+    ;({ payload } = await initPayloadInt(dirname))
   })
 
   afterAll(async () => {
     await payload.destroy()
   })
 
-  // --__--__--__--__--__--__--__--__--__
-  // You can run tests against the local API or the REST API
-  // use the tests below as a guide
-  // --__--__--__--__--__--__--__--__--__
-
-  it('local API example', async () => {
-    const newPost = await payload.create({
-      collection: postsSlug,
-      data: {
-        title: 'LOCAL API EXAMPLE',
-      },
-      context: {},
+  it('adds a session when the user document has flattened localized fields', async () => {
+    const {
+      docs: [userDoc],
+    } = await payload.find({
+      collection: usersSlug,
+      limit: 1,
     })
 
-    expect(newPost.title).toEqual('LOCAL API EXAMPLE')
-  })
+    expect(userDoc).toBeDefined()
+    expect(typeof userDoc.displayName).toBe('string')
 
-  it('rest API example', async () => {
-    const data = await restClient
-      .POST(`/${postsSlug}`, {
-        body: JSON.stringify({
-          title: 'REST API EXAMPLE',
-        }),
-        headers: {
-          Authorization: `JWT ${token}`,
-        },
-      })
-      .then((res) => res.json())
+    const user = await payload.findByID({
+      id: userDoc.id,
+      collection: usersSlug,
+    })
 
-    expect(data.doc.title).toEqual('REST API EXAMPLE')
+    expect(typeof user.displayName).toBe('string')
+
+    const req = await createLocalReq({}, payload)
+    const collectionConfig = payload.collections[usersSlug].config
+
+    const userForSession: TypedUser = {
+      ...user,
+      collection: usersSlug,
+    }
+
+    const { sid } = await addSessionToUser({
+      collectionConfig,
+      payload,
+      req,
+      user: userForSession,
+    })
+
+    expect(sid).toBeDefined()
+
+    const userAfter = await payload.findByID({
+      id: userDoc.id,
+      collection: usersSlug,
+    })
+
+    expect(userAfter.sessions?.some((session) => session.id === sid)).toBe(true)
   })
 })
