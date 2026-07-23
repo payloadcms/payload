@@ -1760,7 +1760,9 @@ describe('Uploads', () => {
       // It should already be active (no need to navigate).
 
       // Should show "A file name is required" error message
-      await expect(page.locator('#field-error-filename')).toContainText('A file name is required')
+      await expect(page.locator('[id^="field-error-filename"]')).toContainText(
+        'A file name is required',
+      )
 
       // Filename field should be empty (as we cleared it)
       await expect(bulkUploadModal.locator('#field-filemanager-filename')).toHaveValue('')

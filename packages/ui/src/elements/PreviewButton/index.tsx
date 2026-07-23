@@ -46,7 +46,7 @@ export function PreviewButton(props: PreviewButtonClientProps) {
         id="preview-button"
         onClick={handleClick}
       />
-      <Tooltip delay={0} show={hovered || copied}>
+      <Tooltip delay={0} id="preview-button-tooltip" show={hovered || copied}>
         {label}
       </Tooltip>
     </span>

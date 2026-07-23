@@ -553,7 +553,7 @@ describe('Dashboard', () => {
     await page.waitForTimeout(500)
     await drawer.getByRole('button', { name: 'Save Changes' }).click()
 
-    await expect(page.locator('#field-error-title')).toBeVisible()
+    await expect(page.locator('[id^="field-error-title"]')).toBeVisible()
     await expect(drawer).toBeVisible()
 
     await titleInput.fill('Valid Title')
@@ -604,7 +604,7 @@ describe('Dashboard', () => {
     await page.waitForTimeout(500)
     await drawer.getByRole('button', { name: 'Save Changes' }).click()
 
-    await expect(page.locator('#field-error-description')).toContainText(
+    await expect(page.locator('[id^="field-error-description"]')).toContainText(
       'Description must be at least 10 characters',
     )
     await expect(drawer).toBeVisible()
