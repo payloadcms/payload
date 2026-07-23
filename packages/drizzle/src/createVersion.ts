@@ -76,9 +76,8 @@ export async function createVersion<T extends JsonObject = JsonObject>(
       sql: sql`
         UPDATE ${table}
         SET latest = false
-        WHERE ${table.id} != ${result.id}
+        WHERE ${table.id} < ${result.id}
           AND ${table.parent} = ${parent}
-          AND ${table.updatedAt} < ${result.updatedAt || updatedAt}
       `,
     })
   }
