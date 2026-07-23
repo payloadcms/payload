@@ -161,6 +161,42 @@ describe('Fields', () => {
       expect(localizedSlug.es).toBe('titulo-espanol')
     })
 
+    it('should allow the same localized slug value in different locales', async () => {
+      const en = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Title', localizedSlug: 'shared' },
+        locale: 'en',
+      })
+      created.push(en.id)
+      expect(en.localizedSlug).toBe('shared')
+
+      const es = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Titulo', localizedSlug: 'shared' },
+        locale: 'es',
+      })
+      created.push(es.id)
+      expect(es.localizedSlug).toBe('shared')
+    })
+
+    it('should reject a localized slug that collides within the same locale', async () => {
+      const first = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'First', localizedSlug: 'shared-localized' },
+        locale: 'es',
+      })
+      created.push(first.id)
+      expect(first.localizedSlug).toBe('shared-localized')
+
+      await expect(
+        payload.create({
+          collection: 'slug-fields',
+          data: { title: 'Second', localizedSlug: 'shared-localized' },
+          locale: 'es',
+        }),
+      ).rejects.toThrow()
+    })
+
     it('should give a duplicate a fresh fallback slug instead of drifting from the original', async () => {
       const original = await payload.create({
         collection: 'slug-fields',
@@ -315,6 +351,37 @@ describe('Fields', () => {
             id: b.id,
             draft: true,
             data: { slug: 'draft-a' },
+          }),
+        ).rejects.toThrow()
+      })
+
+      it('should allow the same localized draft slug across locales but reject within a locale', async () => {
+        const en = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { localizedTitle: 'One', localizedSlug: 'shared-draft-localized' },
+          locale: 'en',
+        })
+        created.push(en.id)
+        expect(en.localizedSlug).toBe('shared-draft-localized')
+
+        // Same value in a different locale is fine — uniqueness is per-locale.
+        const es = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { localizedTitle: 'Uno', localizedSlug: 'shared-draft-localized' },
+          locale: 'es',
+        })
+        created.push(es.id)
+        expect(es.localizedSlug).toBe('shared-draft-localized')
+
+        // Same value in the same locale collides.
+        await expect(
+          payload.create({
+            collection: 'slug-autosave',
+            draft: true,
+            data: { localizedTitle: 'Two', localizedSlug: 'shared-draft-localized' },
+            locale: 'en',
           }),
         ).rejects.toThrow()
       })

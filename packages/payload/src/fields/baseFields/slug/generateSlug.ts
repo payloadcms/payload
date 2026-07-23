@@ -50,6 +50,9 @@ export const generateSlug =
           collection: collection.slug,
           draftsEnabled: hasDraftsEnabled(collection),
           field: name,
+          // A localized slug is only unique within its locale, so scope the check to the one
+          // being written — otherwise the same value in another locale reads as a collision.
+          locale: localized ? (req.locale ?? undefined) : undefined,
           req,
           value: slugified,
         }))

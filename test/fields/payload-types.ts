@@ -1757,6 +1757,8 @@ export interface SlugAutosave {
   id: string;
   title?: string | null;
   slug: string;
+  localizedTitle?: string | null;
+  localizedSlug: string;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -3538,6 +3540,8 @@ export interface SlugFieldsSelect<T extends boolean = true> {
 export interface SlugAutosaveSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  localizedTitle?: T;
+  localizedSlug?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
