@@ -1,6 +1,3 @@
-/**
- * A slug value counts as present only when it is a non-empty value. `null`, `undefined`, and the
- * empty string all mean "no slug yet" — the trigger for source generation or the id fallback.
- */
+/** A slug counts as set only when non-empty; `null`/`undefined`/`''` all mean "no slug yet". */
 export const hasValue = (value: unknown): boolean =>
   value !== undefined && value !== null && value !== ''

@@ -2,22 +2,20 @@ import type { PayloadRequest, Where } from '../../../types/index.js'
 
 type Args = {
   collection: string
-  /** Exclude this document from the collision check (the doc being updated). Omit when the value is for a new document. */
+  /** Exclude this doc from the check when updating; omit for a new doc. */
   id?: number | string
   name: string
   req: PayloadRequest
   value: string
 }
 
-// Bounded so a pathological run of squatted suffixes can't loop forever; the field's
-// unique index is the ultimate backstop if every attempt is somehow taken.
+// Bounded so a pathological run of taken suffixes can't loop forever; the unique index is the backstop.
 const MAX_SUFFIX_ATTEMPTS = 50
 
 /**
- * Returns `value` if no other document in `collection` already uses it for the `name` slug field,
- * otherwise the first free `value-N` variant. Shared by every path that must mint a unique slug
- * outside the operation pipeline's runtime unique check — the id fallback on create and the
- * `beforeDuplicate` hook — so both dedupe identically. The unique index remains the final guard.
+ * Returns `value`, or the first free `value-N`, so it's unique for the `name` slug in `collection`.
+ * Used where a slug is minted outside the pipeline's runtime unique check (the id fallback and
+ * `beforeDuplicate`); the unique index is the final guard.
  */
 export const ensureUniqueSlug = async ({
   id,

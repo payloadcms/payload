@@ -3,10 +3,8 @@ import type { RequestContext } from '../../../index.js'
 const CONTEXT_KEY = '_slugDuplicateFallbackFields'
 
 /**
- * Bridges the duplicate flow across two hooks that run in the same request. `beforeDuplicate` marks
- * a slug field here; the `beforeChange` that runs when the copy is created reads the mark and skips
- * source derivation, so the copy falls back to its own new id instead of a drifting `<original>-N`
- * slug that looks like it belongs to the source document.
+ * Bridges the two hooks in a duplicate: `beforeDuplicate` marks a slug field, and the copy's
+ * `beforeChange` reads the mark to skip source derivation so the copy falls back to its own new id.
  */
 export const markSlugForDuplicateFallback = (context: RequestContext, name: string): void => {
   const fields = (context[CONTEXT_KEY] as Record<string, boolean> | undefined) ?? {}

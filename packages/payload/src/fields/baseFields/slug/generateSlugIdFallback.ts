@@ -9,24 +9,14 @@ type Args = {
 }
 
 /**
- * `afterChange` hook for the native `slug` field.
+ * `afterChange` hook for the native `slug` field. Backfills the document id as the slug when a
+ * document is created with no value and no source — the id doesn't exist until insert, so it can't
+ * be set in `beforeChange`. Guarantees every doc has a slug so a lookup by slug never 404s.
  *
- * Backfills the document id as the slug when a document is created without one — no explicit value
- * and no source to derive from. This guarantees every document has a slug the moment it exists, so a
- * frontend lookup by slug never 404s against a freshly created doc.
- *
- * The id is used because it exists only after the row is inserted (so it is unavailable in
- * `beforeChange`) and is inherently unique and url-safe. The write goes through `db.updateOne`, which
- * bypasses the operation pipeline: it neither re-runs field hooks (no recursion into this hook) nor
- * re-validates, and it shares the create transaction via `req` so the backfill commits atomically
- * with the document. Because the pipeline's runtime uniqueness check is skipped, uniqueness is
- * enforced via {@link ensureUniqueSlug}, with the field's unique index as the final guard.
- *
- * On a versioned collection the current version is written before `afterChange` runs, so it still
- * holds the empty slug — the admin (and autosave) read the latest version, not the main document.
- * The latest version is therefore patched in place too, so the slug is present wherever it is read.
- *
- * Only collections are backfilled; globals are singletons with no slug-based lookup to protect.
+ * Writes with `db.updateOne` to skip the pipeline (no hook recursion, no re-validation) inside the
+ * create transaction, deduped through {@link ensureUniqueSlug}. The version is written before
+ * `afterChange`, so it's patched too — the admin reads the latest version, not the main document.
+ * Collections only; globals have no slug lookup to protect.
  */
 export const generateSlugIdFallback =
   ({ name }: Args): FieldHook =>
@@ -65,9 +55,8 @@ export const generateSlugIdFallback =
   }
 
 /**
- * Merges the backfilled slug into the latest version's stored document, leaving every other field
- * untouched. `db.updateVersion` replaces the whole `version` object, so the current version must be
- * read first and spread back with only the slug changed.
+ * Merges the slug into the latest version. `db.updateVersion` replaces the whole `version` object,
+ * so it's read first and spread back with only the slug changed.
  */
 const patchLatestVersionSlug = async ({
   id,

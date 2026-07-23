@@ -13,23 +13,12 @@ type Args = {
 }
 
 /**
- * `beforeChange` hook for the native `slug` field.
+ * `beforeChange` hook for the native `slug` field. Fills the slug only while it's empty and never
+ * rewrites one that's set, so a lagging autosave response can't clobber it with a stale value.
  *
- * The slug is only ever filled while empty — never regenerated over a value that is already set:
- * - an explicit value from the client wins, normalized through the field's slugify (so `Hello World`
- *   sent by the API is stored as `hello-world`);
- * - an empty slug is derived from its source field (on create, or when a new locale is added on
- *   update); and
- * - a slug that is already set is preserved verbatim.
- *
- * Slugify runs only on the value provided this request (explicit input or source) — deterministic,
- * idempotent normalization. A stored slug is never re-slugified: that would rewrite it behind the
- * client's back (reviving the out-of-order autosave overwrite) and would corrupt a value minted by a
- * custom slugify if run through the default one.
- *
- * When a slug is still empty on create and has no source to derive from, it is left empty here and
- * backfilled from the document id in the `afterChange` hook (the id does not exist until the row is
- * inserted). See {@link generateSlugIdFallback}.
+ * Explicit input and source values are run through the field's slugify; a stored slug is returned
+ * as-is (re-slugifying would mutate it behind the client's back and could corrupt a custom-slugify
+ * value). An empty slug with no source is left for the id fallback in {@link generateSlugIdFallback}.
  */
 export const generateSlug =
   ({ name, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
@@ -51,8 +40,7 @@ export const generateSlug =
       return storedSlug
     }
 
-    // On a duplicate, skip source derivation so the copy falls back to its own new id rather than a
-    // drifting slug derived from the source it shares with the original. See generateSlugBeforeDuplicate.
+    // On a duplicate, skip source derivation so the copy falls back to its own new id. See generateSlugBeforeDuplicate.
     if (consumeSlugDuplicateFallback(context, name)) {
       return undefined
     }

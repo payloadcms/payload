@@ -287,9 +287,8 @@ export const sanitizeField = async ({
       )
     }
 
-    // Not required by default: the value is system-guaranteed after create (derived from the
-    // source, or backfilled from the id), so requiring it would reject the deferred-empty slug
-    // during pre-insert validation, before the id fallback in afterChange can run.
+    // Not required by default: the value is guaranteed after create (source-derived or id fallback),
+    // and requiring it would reject the deferred-empty slug before the fallback runs.
     if (typeof field.required === 'undefined') {
       field.required = false
     }
@@ -324,13 +323,9 @@ export const sanitizeField = async ({
       ...(field.hooks.beforeChange || []),
     ]
 
-    // The id fallback and duplicate dedupe are applied to non-localized slugs only. A localized
-    // slug is a per-locale value that the scalar id fallback cannot represent, so it relies on
-    // source generation per locale.
-    //
-    // Known limitation: a localized slug in a locale that has no source value stays empty (no id
-    // fallback). Backfilling it would need a per-locale read-merge-write across the main document
-    // and every version, plus locale-scoped uniqueness — deferred until a real use case needs it.
+    // Non-localized only: the scalar id fallback can't represent a per-locale localized slug.
+    // Known limitation — a localized slug in a locale with no source stays empty; backfilling it
+    // would need per-locale read-merge-write plus locale-scoped uniqueness. Deferred.
     if (!field.localized) {
       field.hooks.afterChange = [
         generateSlugIdFallback({ name: field.name }),
