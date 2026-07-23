@@ -170,8 +170,10 @@ export type HookOperationType =
   | 'resetPassword'
   | 'restoreVersion'
   | 'update'
+  | 'validate'
 
 type CreateOrUpdateOperation = Extract<HookOperationType, 'create' | 'update'>
+type CreateUpdateOrValidateOperation = Extract<HookOperationType, 'create' | 'update' | 'validate'>
 
 export type BeforeOperationHook<TOperationGeneric extends CollectionSlug = string> = (
   arg: BeforeOperationArg<TOperationGeneric>,
@@ -189,7 +191,7 @@ export type BeforeValidateHook<T extends TypeWithID = any> = (args: {
   /**
    * Hook operation being performed
    */
-  operation: CreateOrUpdateOperation
+  operation: CreateUpdateOrValidateOperation
   /**
    * Original document before change
    *
@@ -207,7 +209,7 @@ export type BeforeChangeHook<T extends TypeWithID = any> = (args: {
   /**
    * Hook operation being performed
    */
-  operation: CreateOrUpdateOperation
+  operation: CreateUpdateOrValidateOperation
   /**
    * Original document before change
    *

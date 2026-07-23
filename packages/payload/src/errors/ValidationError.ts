@@ -13,6 +13,7 @@ export const ValidationErrorName = 'ValidationError'
 
 export type ValidationFieldError = {
   label?: LabelFunction | StaticLabel
+  locale?: string
   // The error message to display for this field
   message: string
   path: string

@@ -195,6 +195,7 @@ export const restoreVersionOperation = async <T extends TypeWithVersion<T> = any
             data: result,
             doc: result,
             global: globalConfig,
+            operation: 'update',
             overrideAccess,
             previousDoc,
             req,

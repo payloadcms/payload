@@ -29,7 +29,7 @@ type Args<T> = {
   fieldIndex: number
   global: null | SanitizedGlobalConfig
   id?: number | string
-  operation: 'create' | 'update'
+  operation: 'create' | 'update' | 'validate'
   overrideAccess: boolean
   parentIndexPath: string
   parentIsLocalized: boolean
@@ -318,7 +318,7 @@ export const promise = async <T>({
     }
 
     // Execute access control
-    if (field.access && field.access[operation]) {
+    if (operation !== 'validate' && field.access && field.access[operation]) {
       const result = overrideAccess
         ? true
         : await field.access[operation](

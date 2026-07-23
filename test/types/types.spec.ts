@@ -2,10 +2,17 @@ import type { SerializedEditorState } from '@payloadcms/richtext-lexical/lexical
 import type {
   AuthenticatedUser,
   BulkOperationResult,
+  CollectionAfterChangeHook,
+  CollectionBeforeChangeHook,
+  CollectionBeforeValidateHook,
   CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
+  FieldHookArgs,
   GeneratedTypes,
+  GlobalAfterChangeHook,
+  GlobalBeforeChangeHook,
+  GlobalBeforeValidateHook,
   JoinQuery,
   MeOperationResult,
   PaginatedDocs,
@@ -15,6 +22,8 @@ import type {
   TypedCollectionSelect,
   TypeWithVersion,
   UntypedPayloadTypes,
+  Validate,
+  ValidationFieldError,
   Where,
 } from 'payload'
 
@@ -79,6 +88,37 @@ import type {
 } from './payload-types.js'
 
 describe('Types testing', () => {
+  describe('validate operation types', () => {
+    test('should expose validate only to validation lifecycle types', () => {
+      expect<{
+        locale?: string
+        message: string
+        path: string
+      }>().type.toBeAssignableTo<ValidationFieldError>()
+      expect<'validate'>().type.toBeAssignableTo<PayloadRequest['operation']>()
+      expect<'validate'>().type.toBeAssignableTo<FieldHookArgs['operation']>()
+      expect<'validate'>().type.toBeAssignableTo<Parameters<Validate>[1]['operation']>()
+      expect<'validate'>().type.toBeAssignableTo<
+        Parameters<CollectionBeforeValidateHook>[0]['operation']
+      >()
+      expect<'validate'>().type.toBeAssignableTo<
+        Parameters<CollectionBeforeChangeHook>[0]['operation']
+      >()
+      expect<'validate'>().type.not.toBeAssignableTo<
+        Parameters<CollectionAfterChangeHook>[0]['operation']
+      >()
+      expect<'validate'>().type.toBeAssignableTo<
+        Parameters<GlobalBeforeValidateHook>[0]['operation']
+      >()
+      expect<'validate'>().type.toBeAssignableTo<
+        Parameters<GlobalBeforeChangeHook>[0]['operation']
+      >()
+      expect<'validate'>().type.not.toBeAssignableTo<
+        Parameters<GlobalAfterChangeHook>[0]['operation']
+      >()
+    })
+  })
+
   describe('authenticated user', () => {
     test('should use AuthenticatedUser for request and me operation users', () => {
       expect<PayloadRequest['user']>().type.toBe<AuthenticatedUser | null>()

@@ -71,6 +71,8 @@ export type BeforeValidateHook = (args: {
   data?: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: 'update' | 'validate'
   originalDoc?: any
   /**
    * Whether access control is being overridden for this operation
@@ -84,6 +86,8 @@ export type BeforeChangeHook = (args: {
   data: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: 'update' | 'validate'
   originalDoc?: any
   /**
    * Whether access control is being overridden for this operation
@@ -98,6 +102,8 @@ export type AfterChangeHook = (args: {
   doc: any
   /** The global which this hook is being run on */
   global: SanitizedGlobalConfig
+  /** Hook operation being performed. */
+  operation: 'update'
   /**
    * Whether access control is being overridden for this operation
    */

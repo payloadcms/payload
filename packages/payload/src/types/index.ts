@@ -130,6 +130,8 @@ export interface PayloadRequest
     Partial<Request>,
     PayloadRequestData {
   headers: Request['headers']
+  /** The active Payload operation. */
+  operation?: FieldOperation
 }
 
 export type { Operator }
@@ -191,6 +193,7 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
 export type Document = any
 
 export type Operation = 'create' | 'delete' | 'read' | 'update'
+export type FieldOperation = 'validate' | Operation
 export type VersionOperations = 'readVersions'
 export type AuthOperations = 'unlock'
 export type AllOperations = AuthOperations | Operation | VersionOperations
