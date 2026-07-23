@@ -90,7 +90,10 @@ export { createSchemaGenerator } from './utilities/createSchemaGenerator.js'
 export { executeSchemaHooks } from './utilities/executeSchemaHooks.js'
 export { extendDrizzleTable } from './utilities/extendDrizzleTable.js'
 export { hasLocalesTable } from './utilities/hasLocalesTable.js'
-export { buildDynamicPredefinedJobsProcessingLeaseMigration } from './utilities/jobsProcessingLeaseMigration.js'
+export {
+  buildDynamicPredefinedJobsProcessingLeaseMigration,
+  migrateJobsProcessingLease,
+} from './utilities/jobsProcessingLeaseMigration.js'
 export { pushDevSchema } from './utilities/pushDevSchema.js'
 export { validateExistingBlockIsIdentical } from './utilities/validateExistingBlockIsIdentical.js'
 import { findMigrationDir as payloadFindMigrationDir } from 'payload'
