@@ -263,7 +263,7 @@ function Content({
               id: null,
               name: (
                 <span className={`${baseClass}__folder-breadcrumbs-root`}>
-                  <ColoredFolderIcon />
+                  <ColoredFolderIcon key="folder-icon" />
                   {t('folder:folders')}
                 </span>
               ),
