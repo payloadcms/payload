@@ -36,7 +36,8 @@ import { validateOperation } from '../validate.js'
  */
 export type ValidationResult = {
   /**
-   * Field validation errors, tagged with the locale that failed.
+   * Field validation errors. Errors from localized passes are tagged with the locale that failed;
+   * non-localized validation may omit the locale.
    * Empty when {@link valid} is `true`.
    */
   errors: ValidationFieldError[]
@@ -77,9 +78,10 @@ type BaseOptions<TSlug extends CollectionSlug> = {
 /**
  * Options for validating a collection document without persisting it.
  *
- * Omitting `id` validates create candidate data. Supplying `id` loads the latest stored document
- * and merges optional partial data over it. Access control, hooks, field access, and validators
- * receive the first-class `validate` operation in both cases.
+ * Omitting `id` validates create candidate data. Supplying `id` loads the stored main document by
+ * default. Set `draft: true` to use the newest available draft version, falling back to the main
+ * document. Optional partial data is merged over that base. Access control, hooks, field access,
+ * and validators receive the first-class `validate` operation in both cases.
  */
 export type ValidateCollectionOptions<TSlug extends CollectionSlug> =
   | ({
@@ -92,7 +94,7 @@ export type ValidateCollectionOptions<TSlug extends CollectionSlug> =
       id?: never
     } & BaseOptions<TSlug>)
   | ({
-      /** Optional partial candidate data to merge over the latest stored document. */
+      /** Optional partial candidate data to merge over the selected stored document. */
       data?: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
       /** ID of the stored document used as the candidate's base. */
       id: DataFromCollectionSlug<TSlug>['id']
@@ -139,6 +141,7 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
     id,
     collection: collectionSlug,
     data,
+    draft = false,
     locale,
     overrideAccess = true,
     validationDataLocale,
@@ -199,6 +202,7 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
         id,
         collection,
         data: validationData,
+        draft,
         overrideAccess,
         req,
         trash: validationTrash,

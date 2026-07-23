@@ -293,6 +293,7 @@ export const updateDocument = async <
       id,
       collection: collectionConfig.slug,
       data: result,
+      draft: true,
       locale: resolvePublishLocales({
         locale,
         localization: config.localization,

@@ -10,7 +10,8 @@ import { APIError } from '../errors/index.js'
  * Locales accepted by collection and global on-demand validation.
  *
  * A non-empty array validates its unique locale codes in the order provided. `'all'` validates
- * every locale available to the request. Projects without localization use `null`.
+ * every locale available to the request. Projects without localization use `null` in the Local
+ * API or `locale=all` in the REST API.
  */
 // eslint-disable-next-line @typescript-eslint/no-redundant-type-constituents
 export type ValidationLocaleSelector = 'all' | TypedLocale | TypedLocale[]

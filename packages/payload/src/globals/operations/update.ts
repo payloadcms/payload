@@ -282,6 +282,7 @@ export const updateOperation = async <
       const validationResult = await validateGlobalLocalWithDataLocale(payload, {
         slug: globalConfig.slug,
         data: result,
+        draft: true,
         locale: resolvePublishLocales({
           locale: locale ?? null,
           localization: payload.config.localization,

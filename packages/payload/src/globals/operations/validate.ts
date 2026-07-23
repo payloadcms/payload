@@ -11,10 +11,11 @@ import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { flattenDataByLocale } from '../../utilities/flattenDataByLocale.js'
-import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
+import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
 export type Arguments<TSlug extends GlobalSlug> = {
   data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
+  draft: boolean
   globalConfig: SanitizedGlobalConfig
   overrideAccess: boolean
   req: PayloadRequest
@@ -37,6 +38,7 @@ export async function validateOperation<TSlug extends GlobalSlug>(
 async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
   slug,
   data: incomingData,
+  draft,
   globalConfig,
   overrideAccess,
   req,
@@ -45,19 +47,28 @@ async function validateOperationWithScopedRequest<TSlug extends GlobalSlug>({
     ? await executeAccess({ data: incomingData, req }, globalConfig.access.validate)
     : true
   const where: Where = overrideAccess ? undefined! : (accessResult as Where)
-  const globalVersionResult = await getLatestGlobalVersion({
+  let storedGlobal = await req.payload.db.findGlobal({
     slug,
-    config: globalConfig,
     locale: req.locale!,
-    payload: req.payload,
     req,
     where,
   })
 
   let docWithLocales: JsonObject = {}
 
-  if (globalVersionResult?.global) {
-    docWithLocales = deepCopyObjectSimple(globalVersionResult.global)
+  if (storedGlobal) {
+    if (draft && globalConfig.versions?.drafts) {
+      storedGlobal = await replaceWithDraftIfAvailable({
+        accessResult,
+        doc: storedGlobal,
+        entity: globalConfig,
+        entityType: 'global',
+        overrideAccess,
+        req,
+      })
+    }
+
+    docWithLocales = deepCopyObjectSimple(storedGlobal)
 
     if (docWithLocales._id) {
       delete docWithLocales._id

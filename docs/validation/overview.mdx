@@ -21,8 +21,8 @@ type ValidationResult = {
 }
 ```
 
-Every error has a `path` and `message`. On-demand validation also sets `locale`; optional field
-label and table metadata may be present.
+Every error has a `path` and `message`. Errors from localized validation passes also set `locale`;
+non-localized validation may omit it. Optional field label and table metadata may be present.
 
 Access denials, missing documents, invalid arguments, and non-validation errors thrown by hooks still
 throw normally.
@@ -30,9 +30,10 @@ throw normally.
 ## Local API
 
 Use `payload.validate()` for collections and `payload.validateGlobal()` for globals. A collection
-call without `id` validates a create candidate and requires `data`. A call with `id` loads the latest
-stored document and merges optional, partial `data` over it. Global validation always loads the
-latest global and merges optional, partial `data`.
+call without `id` validates a create candidate and requires `data`. For collection by-ID and global
+validation, the stored main or published document is the base by default. Set `draft: true` to use
+the newest available draft version instead, falling back to the main document when no draft exists.
+Optional, partial `data` is merged over that base.
 
 ```ts
 // Validate collection create data in one locale
@@ -62,6 +63,7 @@ const updateResult = await payload.validate({
 const allLocalesResult = await payload.validate({
   collection: 'posts',
   id: postID,
+  draft: true,
   locale: 'all',
 })
 ```
@@ -77,7 +79,8 @@ const globalResult = await payload.validateGlobal({
 })
 ```
 
-For projects without localization, pass `locale: null` to the Local API.
+For projects without localization, pass `locale: null` to the Local API or use `?locale=all` with
+the REST API.
 
 Use `context` to add values to `req.context` for the validation lifecycle. You can also reuse a
 partial request with `req`.
@@ -168,7 +171,8 @@ const result = await fetch(`/api/posts/${postID}/validate?locale=all`, {
 ```
 
 The collection create endpoint requires an object body. The collection by-ID and global endpoints
-allow the body to be omitted, which validates the stored data unchanged.
+allow the body to be omitted. Those endpoints use the newest available draft as their base,
+falling back to the main document when no draft exists.
 
 The body is always candidate document data. Authentication, access context, and other operation
 controls come from the HTTP request, not body properties.
@@ -187,8 +191,9 @@ control.
 ## Locale semantics
 
 `locale` accepts one locale, a non-empty array, or `'all'`. Duplicate locales are removed. `'all'`
-uses the locales returned by `localization.filterAvailableLocales`, when configured. Each error is
-tagged with the locale that failed.
+uses the locales returned by `localization.filterAvailableLocales`, when configured. Errors from
+localized validation passes are tagged with the locale that failed; non-localized validation may
+omit `locale`.
 
 A public multi-locale Local or REST call has one `data` payload. Payload independently merges that
 same candidate into every selected locale, then aggregates the results. If a custom interface has
@@ -269,9 +274,9 @@ export const SiteSettings: GlobalConfig = {
 ```
 
 Collection, global, and field access functions all receive the first-class
-`req.operation === 'validate'`. Field hooks, field validators, and collection/global
-`beforeValidate` and `beforeChange` hooks also receive `operation: 'validate'`. Payload never
-simulates `'create'` or `'update'` as the access operation.
+`req.operation === 'validate'`. Field `beforeValidate` and `beforeChange` hooks, field validators,
+and collection/global `beforeValidate` and `beforeChange` hooks also receive
+`operation: 'validate'`. Payload never simulates `'create'` or `'update'` as the access operation.
 
 The validation lifecycle itself does not persist the candidate. Payload also rejects managed write
 operations that reuse the active validation request. Hooks still run, however, and can cause side

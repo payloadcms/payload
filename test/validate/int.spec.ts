@@ -511,6 +511,99 @@ describe('validate Local API', () => {
       })
     })
 
+    it('should use the published collection as the validation base unless draft is true', async () => {
+      const draft = await seedPublishCollection({
+        de: 'German optional',
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+
+      await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        data: {
+          _status: 'published',
+          title: 'English published',
+        },
+        locale: 'en',
+      })
+      await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        data: {
+          title: '',
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      const versionsBefore = await payload.countVersions({
+        collection: publishCollectionSlug,
+        where: {
+          parent: {
+            equals: draft.id,
+          },
+        },
+      })
+      const defaultResult = await payload.validate({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        locale: 'en',
+      })
+      const publishedResult = await payload.validate({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        draft: false,
+        locale: 'en',
+      })
+      const draftResult = await payload.validate({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        draft: true,
+        locale: 'en',
+      })
+      const publishedAfter = await payload.findByID({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        locale: 'en',
+      })
+      const draftAfter = await payload.findByID({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        draft: true,
+        locale: 'en',
+      })
+      const versionsAfter = await payload.countVersions({
+        collection: publishCollectionSlug,
+        where: {
+          parent: {
+            equals: draft.id,
+          },
+        },
+      })
+
+      expect(defaultResult).toEqual({
+        errors: [],
+        valid: true,
+      })
+      expect(publishedResult).toEqual({
+        errors: [],
+        valid: true,
+      })
+      expect(draftResult).toMatchObject({
+        errors: [
+          {
+            locale: 'en',
+            path: 'title',
+          },
+        ],
+        valid: false,
+      })
+      expect(publishedAfter.title).toBe('English published')
+      expect(draftAfter.title).toBe('')
+      expect(versionsAfter).toEqual(versionsBefore)
+    })
+
     it('should validate a partial update with an unchanged stored point representation', async () => {
       const stored = await payload.create({
         collection: validationCollectionSlug,
@@ -751,6 +844,81 @@ describe('validate Local API', () => {
       })
     })
 
+    it('should use the published global as the validation base unless draft is true', async () => {
+      await seedPublishGlobal({
+        de: 'German optional',
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+      await payload.updateGlobal({
+        slug: publishGlobalSlug,
+        data: {
+          _status: 'published',
+          title: 'English published',
+        },
+        locale: 'en',
+      })
+      await payload.updateGlobal({
+        slug: publishGlobalSlug,
+        data: {
+          title: '',
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      const versionsBefore = await payload.countGlobalVersions({
+        global: publishGlobalSlug,
+      })
+      const defaultResult = await payload.validateGlobal({
+        slug: publishGlobalSlug,
+        locale: 'en',
+      })
+      const publishedResult = await payload.validateGlobal({
+        slug: publishGlobalSlug,
+        draft: false,
+        locale: 'en',
+      })
+      const draftResult = await payload.validateGlobal({
+        slug: publishGlobalSlug,
+        draft: true,
+        locale: 'en',
+      })
+      const publishedAfter = await payload.findGlobal({
+        slug: publishGlobalSlug,
+        locale: 'en',
+      })
+      const draftAfter = await payload.findGlobal({
+        slug: publishGlobalSlug,
+        draft: true,
+        locale: 'en',
+      })
+      const versionsAfter = await payload.countGlobalVersions({
+        global: publishGlobalSlug,
+      })
+
+      expect(defaultResult).toEqual({
+        errors: [],
+        valid: true,
+      })
+      expect(publishedResult).toEqual({
+        errors: [],
+        valid: true,
+      })
+      expect(draftResult).toMatchObject({
+        errors: [
+          {
+            locale: 'en',
+            path: 'title',
+          },
+        ],
+        valid: false,
+      })
+      expect(publishedAfter.title).toBe('English published')
+      expect(draftAfter.title).toBe('')
+      expect(versionsAfter).toEqual(versionsBefore)
+    })
+
     it('should execute first-class global validation access and throw on denial', async () => {
       const req = {
         operation: 'delete',
@@ -889,6 +1057,85 @@ describe('validate Local API', () => {
       await expect(allLocales.json()).resolves.toEqual({
         errors: [],
         valid: true,
+      })
+    })
+
+    it('should use the latest collection draft as the REST validation base', async () => {
+      const draft = await seedPublishCollection({
+        de: 'German optional',
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+
+      await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        data: {
+          _status: 'published',
+          title: 'English published',
+        },
+        locale: 'en',
+      })
+      await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        data: {
+          title: '',
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      const response = await restClient.POST(
+        `/${publishCollectionSlug}/${draft.id}/validate?locale=en`,
+      )
+
+      expect(response.status).toBe(200)
+      await expect(response.json()).resolves.toMatchObject({
+        errors: [
+          {
+            locale: 'en',
+            path: 'title',
+          },
+        ],
+        valid: false,
+      })
+    })
+
+    it('should use the latest global draft as the REST validation base', async () => {
+      await seedPublishGlobal({
+        de: 'German optional',
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+      await payload.updateGlobal({
+        slug: publishGlobalSlug,
+        data: {
+          _status: 'published',
+          title: 'English published',
+        },
+        locale: 'en',
+      })
+      await payload.updateGlobal({
+        slug: publishGlobalSlug,
+        data: {
+          title: '',
+        },
+        draft: true,
+        locale: 'en',
+      })
+
+      const response = await restClient.POST(`/globals/${publishGlobalSlug}/validate?locale=en`)
+
+      expect(response.status).toBe(200)
+      await expect(response.json()).resolves.toMatchObject({
+        errors: [
+          {
+            locale: 'en',
+            path: 'title',
+          },
+        ],
+        valid: false,
       })
     })
 

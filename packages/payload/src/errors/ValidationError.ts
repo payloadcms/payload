@@ -14,7 +14,7 @@ export const ValidationErrorName = 'ValidationError'
 export type ValidationFieldError = {
   /** Configured field label, when available. */
   label?: LabelFunction | StaticLabel
-  /** Locale in which this field failed validation. */
+  /** Locale for a localized validation pass. Omitted for non-localized validation. */
   locale?: string
   /** Error message to display for this field. */
   message: string

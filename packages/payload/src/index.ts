@@ -758,9 +758,10 @@ export class BasePayload {
    * Validates a collection document candidate for selected locales without persisting data,
    * versions, or files.
    *
-   * Omit `id` to validate create data, or provide `id` to merge partial candidate data over the
-   * latest stored document. Field validation failures resolve to `{ valid: false, errors }`;
-   * access, argument, lookup, and other lifecycle errors throw.
+   * Omit `id` to validate create data. With `id`, the stored main document is the default base;
+   * `draft: true` selects the newest available draft version and falls back to the main document.
+   * Partial candidate data is merged over that base. Field validation failures resolve to
+   * `{ valid: false, errors }`; access, argument, lookup, and other lifecycle errors throw.
    *
    * @see https://payloadcms.com/docs/validation/overview#local-api
    */
@@ -774,8 +775,10 @@ export class BasePayload {
    * Validates a global document candidate for selected locales without persisting data or
    * versions.
    *
-   * Partial candidate data is merged over the latest stored global. Field validation failures
-   * resolve to `{ valid: false, errors }`; access, argument, and other lifecycle errors throw.
+   * The stored main global is the default base; `draft: true` selects the newest available draft
+   * version and falls back to the main global. Partial candidate data is merged over that base.
+   * Field validation failures resolve to `{ valid: false, errors }`; access, argument, and other
+   * lifecycle errors throw.
    *
    * @see https://payloadcms.com/docs/validation/overview#local-api
    */

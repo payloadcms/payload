@@ -22,14 +22,15 @@ import { validateOperation } from '../validate.js'
 /**
  * Options for validating a global document without persisting it.
  *
- * The latest stored global is loaded and optional partial candidate data is merged over it.
- * Access control, hooks, field access, and validators receive the first-class `validate`
+ * The stored main global is loaded by default. Set `draft: true` to use the newest available draft
+ * version, falling back to the main global. Optional partial candidate data is merged over that
+ * base. Access control, hooks, field access, and validators receive the first-class `validate`
  * operation.
  */
 export type ValidateGlobalOptions<TSlug extends GlobalSlug> = {
   /** Hook context merged into `req.context` for the validation lifecycle. */
   context?: RequestContext
-  /** Optional partial candidate data to merge over the latest stored global. */
+  /** Optional partial candidate data to merge over the selected stored global. */
   data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
   /**
    * A locale, a non-empty locale array, or `'all'`.
@@ -77,6 +78,7 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
   options: InternalValidateGlobalOptions<TSlug>,
 ): Promise<ValidationResult> {
   const { slug, data, locale, overrideAccess = true, validationDataLocale } = options
+  const { draft = false } = options
 
   if (locale === undefined) {
     throw new APIError('Validation requires a locale.', httpStatus.BAD_REQUEST)
@@ -125,6 +127,7 @@ export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug
       return validateOperation({
         slug,
         data: validationData,
+        draft,
         globalConfig,
         overrideAccess,
         req,

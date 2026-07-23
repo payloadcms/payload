@@ -46,7 +46,8 @@ export const validateHandler: PayloadHandler = async (req) => {
  * Validates a stored collection document with optional partial candidate data.
  *
  * `POST {routes.api}/{collection}/{id}/validate` accepts an optional object body and requires one
- * or more `locale` query parameters, or `locale=all`. Field validation failures return a `200`
+ * or more `locale` query parameters, or `locale=all`. The newest available draft is used as the
+ * base, falling back to the main document. Field validation failures return a `200`
  * ValidationResult.
  */
 export const validateByIDHandler: PayloadHandler = async (req) => {
@@ -61,6 +62,7 @@ export const validateByIDHandler: PayloadHandler = async (req) => {
     id,
     collection: collection.config.slug,
     data: req.data,
+    draft: true,
     locale,
     overrideAccess: false,
     req,

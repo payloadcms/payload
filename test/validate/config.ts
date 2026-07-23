@@ -432,6 +432,9 @@ const validationGlobal: GlobalConfig = {
 
 const publishCollection: CollectionConfig = {
   slug: publishCollectionSlug,
+  access: {
+    validate: () => true,
+  },
   fields: [
     {
       name: 'title',
@@ -581,6 +584,9 @@ const publishCollection: CollectionConfig = {
 
 const publishGlobal: GlobalConfig = {
   slug: publishGlobalSlug,
+  access: {
+    validate: () => true,
+  },
   fields: [
     {
       name: 'title',

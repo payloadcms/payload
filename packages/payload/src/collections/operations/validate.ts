@@ -15,11 +15,12 @@ import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { flattenDataByLocale } from '../../utilities/flattenDataByLocale.js'
-import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVersion.js'
+import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
 export type Arguments<TSlug extends CollectionSlug> = {
   collection: Collection
   data?: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
+  draft: boolean
   id?: number | string
   overrideAccess: boolean
   req: PayloadRequest
@@ -43,6 +44,7 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
   id,
   collection,
   data: incomingData,
+  draft,
   overrideAccess,
   req,
   trash,
@@ -69,21 +71,26 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
       where,
     }
 
-    const storedDocument = await getLatestCollectionVersion<
+    let storedDocument = await req.payload.db.findOne<
       RequiredDataFromCollectionSlug<TSlug> & TypeWithID
-    >({
-      id,
-      config: collectionConfig,
-      payload: req.payload,
-      query,
-      req,
-    })
+    >({ ...query, req })
 
     if (!storedDocument && hasWherePolicy) {
       throw new Forbidden(req.t)
     }
     if (!storedDocument) {
       throw new NotFound(req.t)
+    }
+
+    if (draft && collectionConfig.versions?.drafts) {
+      storedDocument = await replaceWithDraftIfAvailable({
+        accessResult,
+        doc: storedDocument,
+        entity: collectionConfig,
+        entityType: 'collection',
+        overrideAccess,
+        req,
+      })
     }
 
     docWithLocales = deepCopyObjectSimple(storedDocument)
