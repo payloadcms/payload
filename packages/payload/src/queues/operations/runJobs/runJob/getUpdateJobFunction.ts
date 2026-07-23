@@ -33,6 +33,9 @@ export function getUpdateJobFunction(job: Job, req: PayloadRequest): UpdateJobFu
         and: [
           { id: { equals: job.id } },
           { processingToken: { equals: processingToken } },
+          // Do not update this job if the lease expired.
+          // Append safety buffer, as, depending on the db adapter, the update itself
+          // may not be atomic, and another worker may have claimed the job before this update finishes.
           { processingUntil: { greater_than: minimumProcessingUntil } },
         ],
       },
