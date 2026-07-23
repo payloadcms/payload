@@ -8,6 +8,18 @@ keywords: admin, customization, routes, folder structure, import map, configurat
 
 Payload is flexible about where your Admin Panel lives within your Next.js application. You can customize routes, move folders, and organize your project structure to match your application's needs.
 
+<Banner type="info">
+  This guide uses **Next.js App Router** file conventions — the `(payload)`
+  route group, `layout.tsx`, and `route.ts` handlers. On [TanStack
+  Start](https://tanstack.com/start/latest), the equivalent files are the
+  `_payload` pathless layout route and its route files (`admin.$.tsx`,
+  `admin.index.tsx`, `api.$.ts`), and routes are configured through the
+  `payloadPlugin` Vite plugin rather than moving a route-group folder. See
+  [Project Structure](./overview#project-structure) for the TanStack Start
+  layout. The `routes` and `admin.routes` config options below apply to both
+  frameworks.
+</Banner>
+
 ## Common Use Cases
 
 - **Custom admin routes** - Change `/admin` to `/dashboard`, `/cms`, etc.

@@ -46,12 +46,26 @@ Adding Payload to an existing Next.js app is super straightforward. You can eith
 
 If you don't have a Next.js app already, but you still want to start a project from a blank Next.js app, you can create a new Next.js app using `npx create-next-app` - and then just follow the steps below to install Payload.
 
+<Banner type="info">
+  The steps below target the **Next.js App Router**. Payload's Admin Panel also
+  runs on [TanStack Start](https://tanstack.com/start/latest) via the
+  `@payloadcms/tanstack-start` package — the differences are called out inline
+  where they apply. See [Project Structure](../admin/overview#project-structure)
+  for the TanStack Start file layout.
+</Banner>
+
 #### 1. Install the relevant packages
 
 First, you'll want to add the required Payload packages to your project:
 
 ```bash
 pnpm i payload @payloadcms/next
+```
+
+If you are running the Admin Panel on TanStack Start, install `@payloadcms/tanstack-start` in place of `@payloadcms/next`:
+
+```bash
+pnpm i payload @payloadcms/tanstack-start
 ```
 
 You'll also likely want to install the following optional packages:
@@ -153,6 +167,14 @@ You can do this in one of two ways:
 2. Give your Next.js config the `.mjs` file extension
 
 In either case, all `require`s and `export`s in your `next.config` file will need to be converted to `import` / `export` if they are not set up that way already.
+
+<Banner type="info">
+  **TanStack Start:** there is no `next.config` step. TanStack Start builds with
+  [Vite](https://vite.dev), so Payload integrates through the `payloadPlugin`
+  Vite plugin exported from `@payloadcms/tanstack-start/vite`, which wraps the
+  `tanstackStart`, React, and RSC Vite plugins. Add it to your `vite.config`
+  instead of wrapping a Next.js config.
+</Banner>
 
 #### 4. Create a Payload Config and add it to your TypeScript config
 

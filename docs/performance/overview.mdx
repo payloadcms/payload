@@ -202,7 +202,7 @@ import { Button } from '@payloadcms/ui'
 
 Everything mentioned above applies to local development as well, but there are a few additional steps you can take to optimize your local development experience.
 
-### Enable Turbopack
+### Enable Turbopack (Next.js)
 
 In Next.js 16, turbopack is enabled by default, unless you explicitly disabled it using the `--webpack` flag.
 
@@ -215,6 +215,8 @@ In Next.js 15, add `--turbo` to your dev script to significantly speed up your l
   }
 }
 ```
+
+On TanStack Start there is no equivalent flag — it builds with [Vite](https://vite.dev), which already uses fast, esbuild-based dev transforms by default.
 
 ### Only bundle server packages in production
 
@@ -238,3 +240,5 @@ const nextConfig = {
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })
 ```
+
+This option is Next.js-specific. TanStack Start uses Vite, which does not bundle server packages into the client, so no equivalent setting is needed.
