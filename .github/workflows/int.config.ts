@@ -3,6 +3,7 @@ import { createIntConfig } from './utilities/int-matrix.ts'
 createIntConfig({
   databases: [
     'mongodb',
+    'mongodb-uuid',
     'mongodb-atlas',
     'documentdb',
     'cosmosdb',

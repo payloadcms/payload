@@ -37,6 +37,7 @@ export default buildConfig({
 | `connectOptions`                  | Customize MongoDB connection options. Payload will connect to your MongoDB database using default options which you can override and extend to include all the [options](https://mongoosejs.com/docs/connections.html#options) available to mongoose.                                                        |
 | `collectionsSchemaOptions`        | Customize Mongoose schema options for collections.                                                                                                                                                                                                                                                           |
 | `disableIndexHints`               | Set to true to disable hinting to MongoDB to use 'id' as index. This is currently done when counting documents for pagination, as it increases the speed of the count function used in that query. Disabling this optimization might fix some problems with AWS DocumentDB. Defaults to false                |
+| `idType`                          | The ID type used for the auto-generated `_id` of collections that don't define a [custom ID field](../fields/overview#custom-id-fields). One of `'objectId'`, `'uuid'`, `'text'`, `'number'`, or `'bigint'`. Defaults to `'objectId'` (MongoDB's native `ObjectId`). See [Setting a custom ID type](#setting-a-custom-id-type). |
 | `migrationDir`                    | Customize the directory that migrations are stored.                                                                                                                                                                                                                                                          |
 | `transactionOptions`              | An object with configuration properties used in [transactions](https://www.mongodb.com/docs/manual/core/transactions/) or `false` which will disable the use of transactions.                                                                                                                                |
 | `collation`                       | Enable language-specific string comparison with customizable options. Available on MongoDB 3.4+. Defaults locale to "en". Example: `{ strength: 3 }`. For a full list of collation options and their definitions, see the [MongoDB documentation](https://www.mongodb.com/docs/manual/reference/collation/). |
@@ -47,6 +48,36 @@ export default buildConfig({
 | `useBigIntForNumberIDs`           | Set to `true` to use `BigInt` for custom ID fields of type `'number'`. Useful for databases that don't support `double` or `int32` IDs. Defaults to `false`.                                                                                                                                                 |
 | `useJoinAggregations`             | Set to `false` to disable join aggregations (which use correlated subqueries) and instead populate join fields via multiple `find` queries. Defaults to `true`.                                                                                                                                              |
 | `usePipelineInSortLookup`         | Set to `false` to disable the use of `pipeline` in the `$lookup` aggregation in sorting. Defaults to `true`.                                                                                                                                                                                                 |
+
+## Setting a custom ID type
+
+By default, MongoDB stores each document's `_id` as a native [`ObjectId`](https://www.mongodb.com/docs/manual/reference/method/ObjectId/). You can change the type used for the auto-generated ID of every collection that doesn't define its own [custom ID field](../fields/overview#custom-id-fields) with the `idType` option. It accepts `'objectId'` (the default), `'uuid'`, `'text'`, `'number'`, or `'bigint'`.
+
+This is most commonly used to store IDs as `UUID`s. Unlike generating a UUID yourself in a custom `id` field of type `text` (which is stored as a 36-byte string), `idType: 'uuid'` stores the value as MongoDB's native 16-byte binary UUID, which is more compact and more performant.
+
+```ts
+import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+export default buildConfig({
+  // Your config goes here
+  collections: [
+    // Collections go here
+  ],
+  db: mongooseAdapter({
+    url: process.env.DATABASE_URL,
+    // Use UUIDs for the ID of every collection without a custom ID field
+    idType: 'uuid',
+  }),
+})
+```
+
+<Banner type="warning">
+  `idType` only applies to collections that rely on the auto-generated `_id`.
+  Collections that define a [custom ID
+  field](../fields/overview#custom-id-fields) always use that field's type. This
+  option should be set once, before creating any documents — changing it on a
+  database that already has data will break lookups against the existing IDs.
+</Banner>
 
 ## Access to Mongoose models
 

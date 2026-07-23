@@ -37,13 +37,19 @@ export const create: Create = async function create(
       data._id = customID
     }
   } else if (this.allowIDOnCreate && data.id) {
-    try {
-      data._id = new Types.ObjectId(data.id as string)
-    } catch (error) {
-      this.payload.logger.error(
-        `It appears you passed ID to create operation data but it cannot be sanitized to ObjectID, value - ${JSON.stringify(data.id)}`,
-      )
-      throw error
+    // With a non-ObjectId adapter-wide `idType` (e.g. UUID), pass the value through and
+    // let Mongoose cast it to the schema's `_id` type.
+    if (this.idType && this.idType !== 'objectId') {
+      data._id = data.id
+    } else {
+      try {
+        data._id = new Types.ObjectId(data.id as string)
+      } catch (error) {
+        this.payload.logger.error(
+          `It appears you passed ID to create operation data but it cannot be sanitized to ObjectID, value - ${JSON.stringify(data.id)}`,
+        )
+        throw error
+      }
     }
   }
 
