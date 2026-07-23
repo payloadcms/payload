@@ -29,7 +29,10 @@ import type {
   TypeWithVersion,
   UntypedPayloadTypes,
   Validate,
+  ValidateCollectionOptions,
+  ValidateGlobalOptions,
   ValidationFieldError,
+  ValidationResult,
   Where,
 } from 'payload'
 
@@ -140,6 +143,56 @@ describe('Types testing', () => {
       expect<CollectionPermission>().type.toHaveProperty('validate')
       expect<GlobalPermission>().type.toHaveProperty('validate')
       expect<FieldPermissions>().type.toHaveProperty('validate')
+    })
+
+    test('should require collection create data and a locale', () => {
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: null,
+      })
+      expect(payload.validate).type.not.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+      })
+      expect(payload.validate).type.not.toBeCallableWith({
+        collection: 'pages',
+        locale: null,
+      })
+      expect<{
+        collection: 'pages'
+        data: Record<never, never>
+        locale: null
+      }>().type.toBeAssignableTo<ValidateCollectionOptions<'pages'>>()
+    })
+
+    test('should allow collection update and global validation data to be omitted', () => {
+      expect(payload.validate).type.toBeCallableWith({
+        id: 'document-id',
+        collection: 'pages',
+        locale: null,
+      })
+      expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
+        locale: null,
+      })
+      expect<{
+        locale: null
+        slug: 'menu'
+      }>().type.toBeAssignableTo<ValidateGlobalOptions<'menu'>>()
+      expect(
+        payload.validate({
+          collection: 'pages',
+          data: {},
+          locale: null,
+        }),
+      ).type.toBe<Promise<ValidationResult>>()
+      expect(
+        payload.validateGlobal({
+          slug: 'menu',
+          locale: null,
+        }),
+      ).type.toBe<Promise<ValidationResult>>()
     })
   })
 

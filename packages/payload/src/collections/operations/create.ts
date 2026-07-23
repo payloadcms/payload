@@ -28,6 +28,7 @@ import { saveVersion } from '../../index.js'
 import { generateFileData } from '../../uploads/generateFileData.js'
 import { unlinkTempFiles } from '../../uploads/unlinkTempFiles.js'
 import { uploadFiles } from '../../uploads/uploadFiles.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import {
   hasDraftsEnabled,
@@ -67,6 +68,8 @@ export const createOperation = async <
   incomingArgs: Arguments<TSlug>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
+
+  assertNoValidationWrite(args.req)
 
   try {
     const shouldCommit = !args.disableTransaction && (await initTransaction(args.req))

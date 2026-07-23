@@ -22,6 +22,7 @@ import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
@@ -60,6 +61,8 @@ export const updateOperation = async <
 >(
   args: Args<TSlug>,
 ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
+  assertNoValidationWrite(args.req)
+
   const {
     slug,
     autosave,
