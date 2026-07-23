@@ -3608,6 +3608,7 @@ describe('Versions', () => {
             relationTo: draftCollectionSlug,
             value: draft.id,
           },
+          locale: 'en',
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),
@@ -3652,6 +3653,7 @@ describe('Versions', () => {
             relationTo: draftCollectionSlug,
             value: draft.id,
           },
+          locale: 'en',
           user: user.id,
         },
         task: 'schedulePublish',
@@ -3835,6 +3837,7 @@ describe('Versions', () => {
       await payload.jobs.queue({
         input: {
           global: draftGlobalSlug,
+          locale: 'en',
         },
         task: 'schedulePublish',
         waitUntil: new Date(currentDate.getTime() + 3000),

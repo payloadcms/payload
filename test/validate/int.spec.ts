@@ -75,6 +75,11 @@ describe('validate Local API', () => {
         disableTransaction: true,
         where: { id: { exists: true } },
       }),
+      payload.delete({
+        collection: 'payload-jobs',
+        disableTransaction: true,
+        where: { id: { exists: true } },
+      }),
     ])
     await fs.rm(validationUploadsDir, { force: true, recursive: true })
   })
@@ -1915,6 +1920,343 @@ describe('validate Local API', () => {
 
       expect(latestDraft._status.en).toBe('draft')
     })
+
+    describe('scheduled publish', () => {
+      it('should cancel invalid collection publish-all jobs with safe locale details and no retry', async () => {
+        const draft = await seedPublishCollection({
+          de: 'German initially valid',
+          en: 'private English scheduled value',
+          es: 'Spanish required',
+          fr: 'French optional',
+        })
+        const job = await payload.jobs.queue({
+          input: {
+            doc: {
+              relationTo: publishCollectionSlug,
+              value: draft.id.toString(),
+            },
+          },
+          task: 'schedulePublish',
+        })
+
+        await payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          data: getPublishCollectionLocaleData({ title: '' }),
+          draft: true,
+          locale: 'de',
+        })
+
+        const firstRun = await payload.jobs.run({ silent: true })
+        const failedJob = await payload.findByID({
+          id: job.id,
+          collection: 'payload-jobs',
+          depth: 0,
+        })
+        const error = failedJob.error as { cancelled?: boolean; message?: string }
+
+        expect(firstRun.jobStatus?.[job.id]?.status).toBe('error-reached-max-retries')
+        expect(failedJob.hasError).toBe(true)
+        expect(error.cancelled).toBe(true)
+        expect(error.message).toContain('[de] title')
+        expect(error.message).not.toContain('private English scheduled value')
+
+        const secondRun = await payload.jobs.run({ silent: true })
+        const jobAfterSecondRun = await payload.findByID({
+          id: job.id,
+          collection: 'payload-jobs',
+          depth: 0,
+        })
+        const latestDraft = await payload.findByID({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          draft: true,
+          locale: 'all',
+        })
+
+        expect(secondRun.jobStatus).toBeUndefined()
+        expect(jobAfterSecondRun.totalTried).toBe(failedJob.totalTried)
+        expect(latestDraft._status).toMatchObject({
+          de: 'draft',
+          en: 'draft',
+          es: 'draft',
+        })
+      })
+
+      it('should publish every collection locale when a publish-all job is valid', async () => {
+        const draft = await seedPublishCollection({
+          de: 'German optional',
+          en: 'English scheduled',
+          es: 'Spanish required',
+          fr: 'French optional',
+        })
+        const job = await payload.jobs.queue({
+          input: {
+            doc: {
+              relationTo: publishCollectionSlug,
+              value: draft.id.toString(),
+            },
+          },
+          task: 'schedulePublish',
+        })
+
+        const result = await payload.jobs.run({ silent: true })
+        const published = await payload.findByID({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          draft: true,
+          locale: 'all',
+        })
+        const completedJob = await payload.findByID({
+          id: job.id,
+          collection: 'payload-jobs',
+          depth: 0,
+        })
+
+        expect(result.jobStatus?.[job.id]?.status).toBe('success')
+        expect(completedJob.hasError).toBe(false)
+        expect(published._status).toMatchObject({
+          de: 'published',
+          en: 'published',
+          es: 'published',
+          fr: 'published',
+        })
+      })
+
+      it('should validate the current and required collection locales but skip optional siblings', async () => {
+        const draft = await seedPublishCollection({
+          de: '',
+          en: 'English scheduled',
+          es: 'Spanish required',
+          fr: '',
+        })
+        const job = await payload.jobs.queue({
+          input: {
+            doc: {
+              relationTo: publishCollectionSlug,
+              value: draft.id.toString(),
+            },
+            locale: 'en',
+          },
+          task: 'schedulePublish',
+        })
+
+        const result = await payload.jobs.run({ silent: true })
+        const published = await payload.findByID({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          draft: true,
+          locale: 'all',
+        })
+
+        expect(result.jobStatus?.[job.id]?.status).toBe('success')
+        expect(published._status).toMatchObject({
+          de: 'draft',
+          en: 'published',
+          es: 'draft',
+          fr: 'draft',
+        })
+      })
+
+      it('should cancel a current-locale collection job when a required locale is invalid', async () => {
+        const draft = await seedPublishCollection({
+          de: 'German optional',
+          en: 'English scheduled',
+          es: '',
+        })
+        const job = await payload.jobs.queue({
+          input: {
+            doc: {
+              relationTo: publishCollectionSlug,
+              value: draft.id.toString(),
+            },
+            locale: 'en',
+          },
+          task: 'schedulePublish',
+        })
+
+        await payload.jobs.run({ silent: true })
+
+        const failedJob = await payload.findByID({
+          id: job.id,
+          collection: 'payload-jobs',
+          depth: 0,
+        })
+        const error = failedJob.error as { cancelled?: boolean; message?: string }
+
+        expect(error.cancelled).toBe(true)
+        expect(error.message).toContain('[es] title')
+      })
+
+      it('should cancel invalid global publish-all jobs', async () => {
+        await seedPublishGlobal({
+          de: 'German initially valid',
+          en: 'private English global value',
+          es: 'Spanish required',
+          fr: 'French optional',
+        })
+        const job = await payload.jobs.queue({
+          input: {
+            global: publishGlobalSlug,
+          },
+          task: 'schedulePublish',
+        })
+
+        await payload.updateGlobal({
+          slug: publishGlobalSlug,
+          data: getPublishGlobalLocaleData({ title: '' }),
+          draft: true,
+          locale: 'de',
+        })
+
+        await payload.jobs.run({ silent: true })
+
+        const failedJob = await payload.findByID({
+          id: job.id,
+          collection: 'payload-jobs',
+          depth: 0,
+        })
+        const error = failedJob.error as { cancelled?: boolean; message?: string }
+        const latestDraft = await payload.findGlobal({
+          slug: publishGlobalSlug,
+          draft: true,
+          locale: 'all',
+        })
+
+        expect(error.cancelled).toBe(true)
+        expect(error.message).toContain('[de] title')
+        expect(error.message).not.toContain('private English global value')
+        expect(latestDraft._status).toMatchObject({
+          de: 'draft',
+          en: 'draft',
+          es: 'draft',
+        })
+      })
+
+      it('should publish every global locale when a publish-all job is valid', async () => {
+        await seedPublishGlobal({
+          de: 'German optional',
+          en: 'English scheduled',
+          es: 'Spanish required',
+          fr: 'French optional',
+        })
+        const job = await payload.jobs.queue({
+          input: {
+            global: publishGlobalSlug,
+          },
+          task: 'schedulePublish',
+        })
+
+        const result = await payload.jobs.run({ silent: true })
+        const published = await payload.findGlobal({
+          slug: publishGlobalSlug,
+          draft: true,
+          locale: 'all',
+        })
+        const completedJob = await payload.findByID({
+          id: job.id,
+          collection: 'payload-jobs',
+          depth: 0,
+        })
+
+        expect(result.jobStatus?.[job.id]?.status).toBe('success')
+        expect(completedJob.hasError).toBe(false)
+        expect(published._status).toMatchObject({
+          de: 'published',
+          en: 'published',
+          es: 'published',
+          fr: 'published',
+        })
+      })
+
+      it('should validate the current and required global locales but skip optional siblings', async () => {
+        await seedPublishGlobal({
+          de: '',
+          en: 'English scheduled',
+          es: 'Spanish required',
+          fr: '',
+        })
+        const job = await payload.jobs.queue({
+          input: {
+            global: publishGlobalSlug,
+            locale: 'en',
+          },
+          task: 'schedulePublish',
+        })
+
+        const result = await payload.jobs.run({ silent: true })
+        const published = await payload.findGlobal({
+          slug: publishGlobalSlug,
+          draft: true,
+          locale: 'all',
+        })
+
+        expect(result.jobStatus?.[job.id]?.status).toBe('success')
+        expect(published._status).toMatchObject({
+          de: 'draft',
+          en: 'published',
+          es: 'draft',
+          fr: 'draft',
+        })
+      })
+
+      it('should cancel a current-locale global job when a required locale is invalid', async () => {
+        await seedPublishGlobal({
+          de: 'German optional',
+          en: 'English scheduled',
+          es: '',
+        })
+        const job = await payload.jobs.queue({
+          input: {
+            global: publishGlobalSlug,
+            locale: 'en',
+          },
+          task: 'schedulePublish',
+        })
+
+        await payload.jobs.run({ silent: true })
+
+        const failedJob = await payload.findByID({
+          id: job.id,
+          collection: 'payload-jobs',
+          depth: 0,
+        })
+        const error = failedJob.error as { cancelled?: boolean; message?: string }
+
+        expect(error.cancelled).toBe(true)
+        expect(error.message).toContain('[es] title')
+      })
+
+      it('should preserve normal queue error handling for transient validation failures', async () => {
+        const draft = await seedPublishCollection({
+          de: 'German optional',
+          en: 'throw transient scheduled error',
+          es: 'Spanish required',
+        })
+        const job = await payload.jobs.queue({
+          input: {
+            doc: {
+              relationTo: publishCollectionSlug,
+              value: draft.id.toString(),
+            },
+            locale: 'en',
+          },
+          task: 'schedulePublish',
+        })
+
+        const result = await payload.jobs.run({ silent: true })
+        const failedJob = await payload.findByID({
+          id: job.id,
+          collection: 'payload-jobs',
+          depth: 0,
+        })
+        const error = failedJob.error as { cancelled?: boolean; message?: string }
+
+        expect(result.jobStatus?.[job.id]?.status).toBe('error-reached-max-retries')
+        expect(error.cancelled).toBe(false)
+        expect(error.message).toContain('transient scheduled validation error')
+      })
+    })
   })
 })
 
@@ -1992,12 +2334,14 @@ async function seedPublishCollection({
   deletedAt,
   en,
   es,
+  fr,
   omit,
 }: {
   de: string
   deletedAt?: string
   en: string
   es: string
+  fr?: string
   omit?: Partial<Record<'de' | 'en' | 'es', PublishCollectionLocalizedField[]>>
 }) {
   const draft = await payload.create({
@@ -2026,6 +2370,16 @@ async function seedPublishCollection({
     locale: 'de',
     trash: Boolean(deletedAt),
   })
+  if (fr !== undefined) {
+    await payload.update({
+      id: draft.id,
+      collection: publishCollectionSlug,
+      data: getPublishCollectionLocaleData({ title: fr }),
+      draft: true,
+      locale: 'fr',
+      trash: Boolean(deletedAt),
+    })
+  }
 
   return draft
 }
@@ -2047,11 +2401,13 @@ async function seedPublishGlobal({
   de,
   en,
   es,
+  fr,
   omitLocalizedJSON,
 }: {
   de: string
   en: string
   es: string
+  fr?: string
   omitLocalizedJSON?: Partial<Record<'de' | 'en' | 'es', boolean>>
 }) {
   await payload.updateGlobal({
@@ -2086,4 +2442,14 @@ async function seedPublishGlobal({
     draft: true,
     locale: 'de',
   })
+  if (fr !== undefined) {
+    await payload.updateGlobal({
+      slug: publishGlobalSlug,
+      data: getPublishGlobalLocaleData({
+        title: fr,
+      }),
+      draft: true,
+      locale: 'fr',
+    })
+  }
 }

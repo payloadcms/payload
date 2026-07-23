@@ -540,10 +540,20 @@ const publishCollection: CollectionConfig = {
         return data
       },
     ],
+    beforeValidate: [
+      ({ data, operation }) => {
+        if (operation === 'validate' && data?.title === 'throw transient scheduled error') {
+          throw new Error('transient scheduled validation error')
+        }
+
+        return data
+      },
+    ],
   },
   trash: true,
   versions: {
     drafts: {
+      schedulePublish: true,
       validate: false,
     },
   },
@@ -581,6 +591,7 @@ const publishGlobal: GlobalConfig = {
   },
   versions: {
     drafts: {
+      schedulePublish: true,
       validate: false,
     },
   },
@@ -616,6 +627,9 @@ export default buildConfigWithDefaults({
     },
   ],
   globals: [validationGlobal, publishGlobal],
+  jobs: {
+    deleteJobOnComplete: false,
+  },
   localization: {
     defaultLocale: 'en',
     filterAvailableLocales: ({ locales, req }) => {
