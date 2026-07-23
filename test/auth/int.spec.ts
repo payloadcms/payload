@@ -188,6 +188,62 @@ describe('Auth', () => {
       })
     })
 
+    it('should preserve both sessions when two logins race concurrently', async () => {
+      const testEmail = 'concurrent-login-test@example.com'
+      const testPassword = 'test123'
+
+      const testUser = await payload.create({
+        collection: slug,
+        data: {
+          email: testEmail,
+          password: testPassword,
+          roles: ['user'],
+        },
+      })
+
+      // Fire two logins simultaneously — before the fix, whichever committed
+      // last would overwrite the other's session, leaving one token orphaned.
+      const [res1, res2] = await Promise.all([
+        restClient.POST(`/${slug}/login`, {
+          body: JSON.stringify({ email: testEmail, password: testPassword }),
+        }),
+        restClient.POST(`/${slug}/login`, {
+          body: JSON.stringify({ email: testEmail, password: testPassword }),
+        }),
+      ])
+
+      const [data1, data2]: any[] = await Promise.all([res1.json(), res2.json()])
+
+      expect(res1.status).toBe(200)
+      expect(res2.status).toBe(200)
+      expect(data1.token).toBeDefined()
+      expect(data2.token).toBeDefined()
+
+      // Both /me requests must succeed — if a session was overwritten, one
+      // would return 401/403.
+      const [me1, me2] = await Promise.all([
+        restClient.GET(`/${slug}/me`, {
+          headers: { Authorization: `JWT ${data1.token}` },
+        }),
+        restClient.GET(`/${slug}/me`, {
+          headers: { Authorization: `JWT ${data2.token}` },
+        }),
+      ])
+
+      expect(me1.status).toBe(200)
+      expect(me2.status).toBe(200)
+
+      // Both sessions must be stored on the user record.
+      const userAfter: any = await payload.findByID({
+        id: testUser.id,
+        collection: slug,
+      })
+      expect(userAfter.sessions?.length).toBeGreaterThanOrEqual(2)
+
+      // Clean up
+      await payload.delete({ id: testUser.id, collection: slug })
+    })
+
     describe('logged in', () => {
       let token: string | undefined
       let loggedInUser: undefined | User
