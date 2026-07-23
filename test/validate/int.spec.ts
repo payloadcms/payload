@@ -2227,6 +2227,54 @@ describe('validate Local API', () => {
         expect(error.message).toContain('[es] title')
       })
 
+      it('should cancel validation errors thrown by scheduled validation hooks without retrying', async () => {
+        const draft = await seedPublishCollection({
+          de: 'German optional',
+          en: 'throw scheduled validation error',
+          es: 'Spanish required',
+        })
+        const job = await payload.jobs.queue({
+          input: {
+            doc: {
+              relationTo: publishCollectionSlug,
+              value: draft.id.toString(),
+            },
+            locale: 'en',
+          },
+          task: 'schedulePublish',
+        })
+
+        const firstRun = await payload.jobs.run({ silent: true })
+        const failedJob = await payload.findByID({
+          id: job.id,
+          collection: 'payload-jobs',
+          depth: 0,
+        })
+        const error = failedJob.error as { cancelled?: boolean; message?: string }
+        const latestDraft = await payload.findByID({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          draft: true,
+          locale: 'all',
+        })
+
+        expect(firstRun.jobStatus?.[job.id]?.status).toBe('error-reached-max-retries')
+        expect(error.cancelled).toBe(true)
+        expect(error.message).toContain('[en] title: Scheduled validation hook rejected the title')
+        expect(error.message).not.toContain('throw scheduled validation error')
+        expect(latestDraft._status.en).toBe('draft')
+
+        const secondRun = await payload.jobs.run({ silent: true })
+        const jobAfterSecondRun = await payload.findByID({
+          id: job.id,
+          collection: 'payload-jobs',
+          depth: 0,
+        })
+
+        expect(secondRun.jobStatus).toBeUndefined()
+        expect(jobAfterSecondRun.totalTried).toBe(failedJob.totalTried)
+      })
+
       it('should preserve normal queue error handling for transient validation failures', async () => {
         const draft = await seedPublishCollection({
           de: 'German optional',

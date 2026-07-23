@@ -6,7 +6,7 @@ import type {
 } from 'payload'
 
 import path from 'path'
-import { saveVersion } from 'payload'
+import { saveVersion, ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
 
 // Direct internal import intentionally exercises the upload write guard.
@@ -541,7 +541,23 @@ const publishCollection: CollectionConfig = {
       },
     ],
     beforeValidate: [
-      ({ data, operation }) => {
+      ({ data, operation, req }) => {
+        if (operation === 'validate' && data?.title === 'throw scheduled validation error') {
+          throw new ValidationError(
+            {
+              errors: [
+                {
+                  locale: req.locale ?? undefined,
+                  message: 'Scheduled validation hook rejected the title',
+                  path: 'title',
+                },
+              ],
+              req,
+            },
+            req.t,
+          )
+        }
+
         if (operation === 'validate' && data?.title === 'throw transient scheduled error') {
           throw new Error('transient scheduled validation error')
         }

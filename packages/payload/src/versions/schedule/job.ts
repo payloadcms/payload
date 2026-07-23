@@ -30,6 +30,20 @@ function throwScheduledPublishValidationError(
   throw new JobCancelledError(`Scheduled publish validation failed: ${details}`)
 }
 
+async function runWithScheduledPublishValidationErrorHandling<T>(
+  operation: () => Promise<T>,
+): Promise<T> {
+  try {
+    return await operation()
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      throwScheduledPublishValidationError(error.data.errors)
+    }
+
+    throw error
+  }
+}
+
 export const getSchedulePublishTask = ({
   adminUserSlug,
   collections,
@@ -62,33 +76,37 @@ export const getSchedulePublishTask = ({
       })
 
       if (input.doc) {
+        const collectionSlug = input.doc.relationTo
+
         // input.doc.value is always a string (#10481); coerce back to the real ID type.
         const idType =
-          req.payload.collections[input.doc.relationTo]?.customIDType ??
+          req.payload.collections[collectionSlug]?.customIDType ??
           req.payload.db?.defaultIDType ??
           'text'
         const id = idType === 'number' ? Number(input.doc.value) : input.doc.value
 
         if (_status === 'published') {
-          const validationResult = await req.payload.validate({
-            id,
-            collection: input.doc.relationTo,
-            draft: true,
-            locale: publishLocales,
-            overrideAccess: user === null,
-            req,
-            user,
-          })
+          const validationResult = await runWithScheduledPublishValidationErrorHandling(() =>
+            req.payload.validate({
+              id,
+              collection: collectionSlug,
+              draft: true,
+              locale: publishLocales,
+              overrideAccess: user === null,
+              req,
+              user,
+            }),
+          )
 
           if (!validationResult.valid) {
             throwScheduledPublishValidationError(validationResult.errors)
           }
         }
 
-        try {
-          await req.payload.update({
+        await runWithScheduledPublishValidationErrorHandling(() =>
+          req.payload.update({
             id,
-            collection: input.doc.relationTo,
+            collection: collectionSlug,
             data: {
               _status,
             },
@@ -98,35 +116,33 @@ export const getSchedulePublishTask = ({
             publishAllLocales: _status === 'published' && isPublishAllLocales,
             req,
             user,
-          })
-        } catch (error) {
-          if (error instanceof ValidationError) {
-            throwScheduledPublishValidationError(error.data.errors)
-          }
-
-          throw error
-        }
+          }),
+        )
       }
 
       if (input.global) {
+        const globalSlug = input.global
+
         if (_status === 'published') {
-          const validationResult = await req.payload.validateGlobal({
-            slug: input.global,
-            draft: true,
-            locale: publishLocales,
-            overrideAccess: user === null,
-            req,
-            user,
-          })
+          const validationResult = await runWithScheduledPublishValidationErrorHandling(() =>
+            req.payload.validateGlobal({
+              slug: globalSlug,
+              draft: true,
+              locale: publishLocales,
+              overrideAccess: user === null,
+              req,
+              user,
+            }),
+          )
 
           if (!validationResult.valid) {
             throwScheduledPublishValidationError(validationResult.errors)
           }
         }
 
-        try {
-          await req.payload.updateGlobal({
-            slug: input.global,
+        await runWithScheduledPublishValidationErrorHandling(() =>
+          req.payload.updateGlobal({
+            slug: globalSlug,
             data: {
               _status,
             },
@@ -136,14 +152,8 @@ export const getSchedulePublishTask = ({
             publishAllLocales: _status === 'published' && isPublishAllLocales,
             req,
             user,
-          })
-        } catch (error) {
-          if (error instanceof ValidationError) {
-            throwScheduledPublishValidationError(error.data.errors)
-          }
-
-          throw error
-        }
+          }),
+        )
       }
 
       return {
