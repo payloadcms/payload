@@ -25,7 +25,7 @@ export const slugifyHandler: ServerFunction<
   SlugifyServerFunctionArgs,
   Promise<ReturnType<Slugify>>
 > = async (args) => {
-  const { collectionSlug, data, globalSlug, path, req, valueToSlugify } = args
+  const { collectionSlug, data, globalSlug, locale, path, req, valueToSlugify } = args
 
   if (!req.user) {
     throw new UnauthorizedError()
@@ -77,6 +77,10 @@ export const slugifyHandler: ServerFunction<
       return getSlugFallbackValue({
         collection: collectionConfig,
         field: field.name,
+        // A localized slug is unique per-locale, so scope the fallback probe to the current locale —
+        // otherwise it dedupes against the default locale and can hand back a colliding value. The
+        // client passes the active admin locale; fall back to the request's own locale.
+        locale: field.localized ? (locale ?? req.locale ?? undefined) : undefined,
         req,
         slugify,
       })

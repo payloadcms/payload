@@ -134,5 +134,7 @@ export type BuildTableStateArgs = {
 export type SlugifyServerFunctionArgs = {
   collectionSlug?: CollectionSlug
   globalSlug?: GlobalSlug
+  /** Active admin locale, so a localized slug's fallback is deduped within the right locale. */
+  locale?: string
   path?: FieldPaths['path']
 } & Omit<Parameters<Slugify>[0], 'req'>

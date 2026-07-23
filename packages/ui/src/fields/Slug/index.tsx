@@ -17,6 +17,7 @@ import { LockIcon } from '../../icons/Lock/index.js'
 import { LockOpenIcon } from '../../icons/LockOpen/index.js'
 import { RefreshIcon } from '../../icons/Refresh/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'
@@ -40,6 +41,8 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
   const { collectionSlug, globalSlug } = useDocumentInfo()
 
   const { slugify } = useServerFunctions()
+
+  const { code: locale } = useLocale()
 
   const {
     path: fieldPath,
@@ -69,6 +72,7 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
           collectionSlug,
           data: getData(),
           globalSlug,
+          locale,
           path: fieldPath,
           valueToSlugify,
         })
@@ -99,6 +103,7 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
       getDataByPath,
       collectionSlug,
       globalSlug,
+      locale,
       fieldPath,
       t,
     ],
