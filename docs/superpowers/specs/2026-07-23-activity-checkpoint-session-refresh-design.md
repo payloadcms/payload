@@ -54,6 +54,20 @@ This intentionally provides checkpoint-based sliding behavior rather than promis
 - Preserve the force-logout timer and inactivity navigation.
 - Do not persist activity in React state, browser storage, or across tabs.
 
+## Obsolete Code Removal
+
+Remove code that existed only for the discarded activity model rather than leaving dormant compatibility paths:
+
+- remove `input`, `keydown`, `pointerdown`, `route`, `visibility`, and `wheel` from `SessionActivitySource`;
+- remove their listener callbacks and listener options;
+- remove pathname observation and its activity effect from `AuthProvider`, including imports that become unused;
+- remove test helpers and assertions that dispatch or inspect the discarded signals;
+- remove the checkbox, drawer, and route-activity E2E cases rather than rewriting them to produce mouse movement;
+- replace the old multi-event E2E helper with a focused repeated-mouse-movement helper;
+- remove any timer, ref, callback, or mock that becomes unused after the new checkpoint flow is implemented.
+
+Keep code that remains necessary for cross-tab session synchronization, token-expiration assertions, request serialization, or the new checkpoint tests. The final change should not retain dead branches for the superseded behavior.
+
 ## Testing
 
 Unit coverage should prove:
@@ -72,8 +86,6 @@ End-to-end coverage should prove:
 - focusing the window inside the refresh window causes a refresh;
 - repeated mouse movement does not create duplicate requests;
 - existing cross-tab refresh, expiration, and logout behavior remains unchanged.
-
-Remove browser tests whose only purpose was to prove that checkbox selection, drawer interaction, or route changes count as activity.
 
 ## Backport
 
