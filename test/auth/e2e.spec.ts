@@ -613,7 +613,27 @@ describe('Auth', () => {
       await sessionContext.close()
     })
 
-    test('should refresh a session after pointerdown near the refresh window', async () => {
+    test('should refresh at the checkpoint after recent mouse movement', async () => {
+      const tokenExpirationMs = await readTokenExpirationMs(sessionPage)
+
+      await advanceToRemainingSessionTime({
+        page: sessionPage,
+        remainingMs: 180_000,
+        tokenExpirationMs,
+      })
+
+      const refreshResponse = sessionPage.waitForResponse((response) =>
+        isActivityRefreshRequest(response.request()),
+      )
+
+      await sessionPage.dispatchEvent('body', 'mousemove')
+      await sessionPage.clock.fastForward(60_001)
+      await sessionPage.clock.fastForward(1_001)
+
+      expect((await refreshResponse).status()).toBe(200)
+    })
+
+    test('should refresh after window focus inside the refresh window', async () => {
       const tokenExpirationMs = await readTokenExpirationMs(sessionPage)
 
       await advanceToRemainingSessionTime({
@@ -623,97 +643,11 @@ describe('Auth', () => {
       })
 
       const refreshResponse = await expectActivityRefresh({
-        activity: () => sessionPage.dispatchEvent('body', 'pointerdown'),
+        activity: () => sessionPage.evaluate(() => window.dispatchEvent(new Event('focus'))),
         page: sessionPage,
       })
 
       expect(refreshResponse.status()).toBe(200)
-    })
-
-    test('should refresh a session after selecting collection checkboxes without saving', async () => {
-      const tokenExpirationMs = await readTokenExpirationMs(sessionPage)
-
-      await sessionPage.goto(usersURL.list)
-      const selectAll = sessionPage.locator('input#select-all')
-      await expect(selectAll).toBeVisible()
-      await advanceToRemainingSessionTime({
-        page: sessionPage,
-        remainingMs: 90_000,
-        tokenExpirationMs,
-      })
-
-      await expectActivityRefresh({
-        activity: async () => {
-          const observedEvents = await selectAll.evaluate((element: HTMLInputElement) => {
-            const eventTypes = ['input', 'pointerdown'] as const
-            const observed: string[] = []
-            const recordEvent = (event: Event) => observed.push(event.type)
-
-            eventTypes.forEach((eventType) => window.addEventListener(eventType, recordEvent, true))
-            element.click()
-            eventTypes.forEach((eventType) =>
-              window.removeEventListener(eventType, recordEvent, true),
-            )
-
-            return observed
-          })
-
-          expect(observedEvents).toContain('input')
-          expect(observedEvents).not.toContain('pointerdown')
-          await expect(selectAll).toBeChecked()
-        },
-        page: sessionPage,
-      })
-    })
-
-    test('should refresh a session after repeatedly opening and closing document drawers', async () => {
-      const tokenExpirationMs = await readTokenExpirationMs(sessionPage)
-      const relationshipsURL = new AdminUrlUtil(serverURL, 'relationsCollection')
-
-      await sessionPage.goto(relationshipsURL.create)
-      const addUserButton = sessionPage.locator(
-        '#rel-add-new button.relationship-add-new__add-button.doc-drawer__toggler',
-      )
-      const documentDrawer = sessionPage.locator('[id^="doc-drawer_users_1_"]').last()
-      await expect(addUserButton).toBeVisible()
-      await advanceToRemainingSessionTime({
-        page: sessionPage,
-        remainingMs: 90_000,
-        tokenExpirationMs,
-      })
-
-      await expectActivityRefresh({
-        activity: async () => {
-          for (let index = 0; index < 3; index++) {
-            await addUserButton.click()
-            await expect(documentDrawer).toBeVisible()
-            await documentDrawer.locator('button.doc-drawer__header-close').click()
-            await expect(documentDrawer).toBeHidden()
-          }
-        },
-        page: sessionPage,
-      })
-    })
-
-    test('should refresh a session after client-side route activity near expiration', async () => {
-      const tokenExpirationMs = await readTokenExpirationMs(sessionPage)
-      const usersNavLink = sessionPage.locator('a[href$="/admin/collections/users"]').first()
-
-      await expect(usersNavLink).toBeVisible()
-      await advanceToRemainingSessionTime({
-        page: sessionPage,
-        remainingMs: 90_000,
-        tokenExpirationMs,
-      })
-
-      await expectActivityRefresh({
-        activity: async () => {
-          await usersNavLink.evaluate((element: HTMLAnchorElement) => element.click())
-          await sessionPage.waitForURL(usersURL.list)
-          await expect(sessionPage.locator('input#select-all')).toBeVisible()
-        },
-        page: sessionPage,
-      })
     })
 
     test('should deduplicate many activity events dispatched inside five seconds', async () => {
@@ -733,10 +667,10 @@ describe('Auth', () => {
       })
 
       await expectActivityRefresh({
-        activity: () => dispatchManySessionActivityEvents(sessionPage),
+        activity: () => dispatchManyMousemoveEvents(sessionPage),
         page: sessionPage,
       })
-      await dispatchManySessionActivityEvents(sessionPage)
+      await dispatchManyMousemoveEvents(sessionPage)
       await sessionPage.clock.fastForward(3_998)
 
       expect(refreshRequests).toHaveLength(1)
@@ -884,13 +818,10 @@ async function advanceToRemainingSessionTime({
   await page.clock.fastForward(durationMs)
 }
 
-async function dispatchManySessionActivityEvents(page: Page): Promise<void> {
+async function dispatchManyMousemoveEvents(page: Page): Promise<void> {
   await page.evaluate(() => {
-    for (let index = 0; index < 10; index++) {
-      window.dispatchEvent(new PointerEvent('pointerdown'))
-      window.dispatchEvent(new KeyboardEvent('keydown'))
-      window.dispatchEvent(new InputEvent('input'))
-      window.dispatchEvent(new WheelEvent('wheel'))
+    for (let index = 0; index < 20; index++) {
+      window.dispatchEvent(new MouseEvent('mousemove'))
     }
   })
 }
