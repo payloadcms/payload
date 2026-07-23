@@ -1182,10 +1182,12 @@ describe('General', () => {
       await expect(page.locator('#action-duplicate')).toBeHidden()
     })
 
-    test('should properly close leave-without-saving modal after clicking leave-anyway button', async () => {
+    test('should allow subsequent navigation after clicking leave-anyway button', async () => {
       const { id } = await createPost()
+
       await page.goto(postsUrl.edit(id))
       const title = 'title'
+
       await page.locator('#field-title').fill(title)
       await saveDocHotkeyAndAssert(page)
       await expect(page.locator('#field-title')).toHaveValue(title)
@@ -1204,6 +1206,12 @@ describe('General', () => {
 
       // Assert that the class on the modal container changes to 'payload__modal-container--exitDone'
       await expect(modalContainer).toHaveClass(/payload__modal-container--exitDone/)
+
+      await page.waitForURL((url) => url.pathname === new URL(postsUrl.list).pathname)
+      await page.locator('#create-new-doc').click()
+
+      await expect(page.locator('#field-title')).toBeVisible()
+      await expect(page).toHaveURL(postsUrl.create)
     })
   })
 
