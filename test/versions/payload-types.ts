@@ -62,30 +62,31 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_E98BC274".
+ * via the `definition` "LexicalNodes_55A1DAD6".
  */
-export type LexicalNodes_E98BC274 =
+export type LexicalNodes_55A1DAD6 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_E98BC274>
+  | SerializedParagraphNode<LexicalNodes_55A1DAD6>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_E98BC274>
+  | SerializedHeadingNode<LexicalNodes_55A1DAD6>
   | SerializedUploadNode<'draft-with-upload'>
   | SerializedUploadNode<'draft-with-upload-cloud-storage'>
   | SerializedUploadNode<'media', LexicalUploadFields_1AB4670B>
   | SerializedUploadNode<'media2'>
-  | SerializedQuoteNode<LexicalNodes_E98BC274>
-  | SerializedListNode<LexicalNodes_E98BC274>
-  | SerializedListItemNode<LexicalNodes_E98BC274>
-  | SerializedAutoLinkNode<LexicalNodes_E98BC274, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_E98BC274, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_55A1DAD6>
+  | SerializedListNode<LexicalNodes_55A1DAD6>
+  | SerializedListItemNode<LexicalNodes_55A1DAD6>
+  | SerializedAutoLinkNode<LexicalNodes_55A1DAD6, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_55A1DAD6, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'disable-publish'
       | 'posts'
       | 'autosave-posts'
       | 'autosave-with-draft-button-posts'
       | 'autosave-multi-select-posts'
+      | 'nested-array-select'
       | 'autosave-with-validate-posts'
       | 'draft-posts'
       | 'drafts-no-read-versions'
@@ -118,6 +119,7 @@ export interface Config {
     'autosave-posts': AutosavePost;
     'autosave-with-draft-button-posts': AutosaveWithDraftButtonPost;
     'autosave-multi-select-posts': AutosaveMultiSelectPost;
+    'nested-array-select': NestedArraySelect;
     'autosave-with-validate-posts': AutosaveWithValidatePost;
     'draft-posts': DraftPost;
     'drafts-no-read-versions': DraftsNoReadVersion;
@@ -149,6 +151,7 @@ export interface Config {
     'autosave-posts': AutosavePostsSelect<false> | AutosavePostsSelect<true>;
     'autosave-with-draft-button-posts': AutosaveWithDraftButtonPostsSelect<false> | AutosaveWithDraftButtonPostsSelect<true>;
     'autosave-multi-select-posts': AutosaveMultiSelectPostsSelect<false> | AutosaveMultiSelectPostsSelect<true>;
+    'nested-array-select': NestedArraySelectSelect<false> | NestedArraySelectSelect<true>;
     'autosave-with-validate-posts': AutosaveWithValidatePostsSelect<false> | AutosaveWithValidatePostsSelect<true>;
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     'drafts-no-read-versions': DraftsNoReadVersionsSelect<false> | DraftsNoReadVersionsSelect<true>;
@@ -253,6 +256,7 @@ export interface DisablePublish {
 export interface Post {
   id: string;
   relationToAutosaves?: (string | null) | AutosavePost;
+  relationToAutosavesWithDrawer?: (string | null) | AutosavePost;
   relationToVersions?: (string | null) | VersionPost;
   relationToDrafts?: (string | null) | DraftPost;
   updatedAt: string;
@@ -267,7 +271,7 @@ export interface AutosavePost {
   title: string;
   relationship?: (string | null) | Post;
   computedTitle?: string | null;
-  richText?: LexicalRichText<LexicalNodes_E98BC274> | null;
+  richText?: LexicalRichText<LexicalNodes_55A1DAD6> | null;
   json?:
     | {
         [k: string]: unknown;
@@ -346,6 +350,27 @@ export interface AutosaveMultiSelectPost {
   id: string;
   title: string;
   tag?: ('blog' | 'essay' | 'portfolio')[] | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-array-select".
+ */
+export interface NestedArraySelect {
+  id: string;
+  outer?:
+    | {
+        inner?:
+          | {
+              days?: ('monday' | 'tuesday' | 'wednesday')[] | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -565,8 +590,8 @@ export interface Diff {
       )[]
     | null;
   zeroDepthRelationship?: (string | null) | User;
-  richtext?: LexicalRichText<LexicalNodes_E98BC274> | null;
-  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_E98BC274> | null;
+  richtext?: LexicalRichText<LexicalNodes_55A1DAD6> | null;
+  richtextWithCustomDiff?: LexicalRichText<LexicalNodes_55A1DAD6> | null;
   textInRow?: string | null;
   textCannotRead?: string | null;
   select?: ('option1' | 'option2') | null;
@@ -900,6 +925,10 @@ export interface PayloadLockedDocument {
         value: string | AutosaveMultiSelectPost;
       } | null)
     | ({
+        relationTo: 'nested-array-select';
+        value: string | NestedArraySelect;
+      } | null)
+    | ({
         relationTo: 'autosave-with-validate-posts';
         value: string | AutosaveWithValidatePost;
       } | null)
@@ -1029,6 +1058,7 @@ export interface DisablePublishSelect<T extends boolean = true> {
  */
 export interface PostsSelect<T extends boolean = true> {
   relationToAutosaves?: T;
+  relationToAutosavesWithDrawer?: T;
   relationToVersions?: T;
   relationToDrafts?: T;
   updatedAt?: T;
@@ -1072,6 +1102,26 @@ export interface AutosaveWithDraftButtonPostsSelect<T extends boolean = true> {
 export interface AutosaveMultiSelectPostsSelect<T extends boolean = true> {
   title?: T;
   tag?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "nested-array-select_select".
+ */
+export interface NestedArraySelectSelect<T extends boolean = true> {
+  outer?:
+    | T
+    | {
+        inner?:
+          | T
+          | {
+              days?: T;
+              id?: T;
+            };
+        id?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
   _status?: T;
@@ -1753,6 +1803,7 @@ export interface CollectionQueryWidget {
       | 'autosave-posts'
       | 'autosave-with-draft-button-posts'
       | 'autosave-multi-select-posts'
+      | 'nested-array-select'
       | 'autosave-with-validate-posts'
       | 'draft-posts'
       | 'drafts-no-read-versions'
@@ -1799,6 +1850,7 @@ export interface ActivityWidget {
           | 'autosave-posts'
           | 'autosave-with-draft-button-posts'
           | 'autosave-multi-select-posts'
+          | 'nested-array-select'
           | 'autosave-with-validate-posts'
           | 'draft-posts'
           | 'drafts-no-read-versions'
