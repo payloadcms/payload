@@ -24,6 +24,7 @@ import type {
 
 import { ensureUsernameOrEmail } from '../../../auth/ensureUsernameOrEmail.js'
 import { generatePasswordSaltHash } from '../../../auth/strategies/local/generatePasswordSaltHash.js'
+import { ValidationError } from '../../../errors/index.js'
 import { afterChange } from '../../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../../fields/hooks/beforeChange/index.js'
@@ -37,7 +38,9 @@ import {
   hasDraftValidationEnabled,
   hasLocalizeStatusEnabled,
 } from '../../../utilities/getVersionsConfig.js'
+import { resolvePublishLocales } from '../../../utilities/resolvePublishLocales.js'
 import { buildLocalizedPublishData } from '../../../versions/buildSingleLocalePublishData.js'
+import { validateLocalWithDataLocale } from '../local/validate.js'
 export type SharedUpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave: boolean
   collectionConfig: SanitizedCollectionConfig
@@ -150,6 +153,39 @@ export const updateDocument = async <
     req,
     showHiddenFields: true,
   })
+
+  if (hasDraftsEnabled(collectionConfig) && !isSavingDraft && !unpublishAllLocales) {
+    const validationResult = await validateLocalWithDataLocale(payload, {
+      id,
+      collection: collectionConfig.slug,
+      data,
+      locale: resolvePublishLocales({
+        locale,
+        localization: config.localization,
+        publishAllLocales,
+      }),
+      overrideAccess,
+      req,
+      validationDataLocale:
+        locale !== 'all'
+          ? locale
+          : config.localization
+            ? config.localization.defaultLocale
+            : undefined,
+    })
+
+    if (!validationResult.valid) {
+      throw new ValidationError(
+        {
+          id,
+          collection: collectionConfig.slug,
+          errors: validationResult.errors,
+          req,
+        },
+        req.t,
+      )
+    }
+  }
 
   const isRestoringDraftFromTrash = Boolean(originalDoc?.deletedAt) && data?._status !== 'published'
 

@@ -6,13 +6,13 @@ import { getRequestGlobal } from '../../utilities/getRequestEntity.js'
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import {
   assertValidationData,
-  parseSingleValidationLocale,
+  parseValidationLocaleSelector,
 } from '../../utilities/parseValidationLocale.js'
 import { validateGlobalLocal } from '../operations/local/validate.js'
 
 export const validateHandler: PayloadHandler = async (req) => {
   const globalConfig = getRequestGlobal(req)
-  const locale = parseSingleValidationLocale(req.query.locale)
+  const locale = parseValidationLocaleSelector(req.query.locale)
 
   if (req.data !== undefined) {
     assertValidationData(req.data)

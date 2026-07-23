@@ -20,6 +20,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
+import { ValidationError } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -37,9 +38,11 @@ import {
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolvePublishLocales } from '../../utilities/resolvePublishLocales.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
+import { validateLocalWithDataLocale } from './local/validate.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
@@ -173,6 +176,37 @@ export const createOperation = async <
     })
 
     data = newFileData
+
+    if (!isSavingDraft && hasDraftsEnabled(collectionConfig)) {
+      const validationResult = await validateLocalWithDataLocale(payload, {
+        collection: collectionConfig.slug,
+        data,
+        locale: resolvePublishLocales({
+          locale: locale ?? null,
+          localization: config.localization,
+          publishAllLocales,
+        }),
+        overrideAccess,
+        req,
+        validationDataLocale:
+          locale && locale !== 'all'
+            ? locale
+            : config.localization
+              ? config.localization.defaultLocale
+              : undefined,
+      })
+
+      if (!validationResult.valid) {
+        throw new ValidationError(
+          {
+            collection: collectionConfig.slug,
+            errors: validationResult.errors,
+            req,
+          },
+          req.t,
+        )
+      }
+    }
 
     // /////////////////////////////////////
     // beforeValidate - Fields

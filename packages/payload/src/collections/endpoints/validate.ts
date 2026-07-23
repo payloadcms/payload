@@ -9,13 +9,13 @@ import {
 import { headersWithCors } from '../../utilities/headersWithCors.js'
 import {
   assertValidationData,
-  parseSingleValidationLocale,
+  parseValidationLocaleSelector,
 } from '../../utilities/parseValidationLocale.js'
 import { validateLocal } from '../operations/local/validate.js'
 
 export const validateHandler: PayloadHandler = async (req) => {
   const collection = getRequestCollection(req)
-  const locale = parseSingleValidationLocale(req.query.locale)
+  const locale = parseValidationLocaleSelector(req.query.locale)
 
   assertValidationData(req.data)
 
@@ -38,7 +38,7 @@ export const validateHandler: PayloadHandler = async (req) => {
 
 export const validateByIDHandler: PayloadHandler = async (req) => {
   const { id, collection } = getRequestCollectionWithID(req)
-  const locale = parseSingleValidationLocale(req.query.locale)
+  const locale = parseValidationLocaleSelector(req.query.locale)
 
   if (req.data !== undefined) {
     assertValidationData(req.data)

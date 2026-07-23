@@ -11,7 +11,12 @@ import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   accessEvents,
   clearValidationEvents,
+  getLocalePassRequestCount,
+  getMaximumActiveLocalePasses,
   hookEvents,
+  localePassEvents,
+  publishCollectionSlug,
+  publishGlobalSlug,
   validationCollectionSlug,
   validationGlobalSlug,
   validationUploadsDir,
@@ -47,6 +52,11 @@ describe('validate Local API', () => {
   afterEach(async () => {
     await Promise.all([
       payload.delete({
+        collection: publishCollectionSlug,
+        disableTransaction: true,
+        where: { id: { exists: true } },
+      }),
+      payload.delete({
         collection: validationCollectionSlug,
         disableTransaction: true,
         where: { id: { exists: true } },
@@ -70,6 +80,144 @@ describe('validate Local API', () => {
   })
 
   describe('collections', () => {
+    it('should expose required localization metadata after config sanitization', () => {
+      expect(payload.config.localization && payload.config.localization.locales).toMatchObject([
+        { code: 'en', required: false },
+        { code: 'es', required: true },
+        { code: 'de', required: false },
+        { code: 'fr', required: false },
+      ])
+    })
+
+    it('should validate explicit locales and tag only the invalid locale', async () => {
+      const stored = await payload.create({
+        collection: validationCollectionSlug,
+        data: {
+          summary: 'stored summary',
+          title: 'English title',
+        },
+        locale: 'en',
+      })
+      const result = await payload.validate({
+        id: stored.id,
+        collection: validationCollectionSlug,
+        locale: ['en', 'es'],
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            locale: 'es',
+            path: 'title',
+          },
+        ],
+        valid: false,
+      })
+    })
+
+    it('should resolve all to every available locale through locale filtering', async () => {
+      const result = await payload.validate({
+        collection: validationCollectionSlug,
+        context: {
+          availableLocaleCodes: ['en', 'de'],
+          trackLocalePasses: true,
+        },
+        data: {
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        },
+        locale: 'all',
+      })
+
+      expect(result).toEqual({
+        errors: [],
+        valid: true,
+      })
+      expect(localePassEvents.map(({ localeAtStart }) => localeAtStart)).toEqual(['en', 'de'])
+    })
+
+    it('should deduplicate explicit locales in deterministic order', async () => {
+      const result = await payload.validate({
+        collection: validationCollectionSlug,
+        context: {
+          trackLocalePasses: true,
+        },
+        data: {
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        },
+        locale: ['es', 'en', 'es'],
+      })
+
+      expect(result.valid).toBe(true)
+      expect(localePassEvents.map(({ localeAtStart }) => localeAtStart)).toEqual(['es', 'en'])
+    })
+
+    it('should reject empty, unknown, and unavailable locale selectors', async () => {
+      await expect(
+        payload.validate({
+          collection: validationCollectionSlug,
+          data: {
+            summary: 'candidate summary',
+            title: 'Candidate title',
+          },
+          locale: [],
+        }),
+      ).rejects.toThrow('Validation requires a locale')
+
+      await expect(
+        payload.validate({
+          collection: validationCollectionSlug,
+          data: {
+            summary: 'candidate summary',
+            title: 'Candidate title',
+          },
+          locale: ['en', 'unknown'],
+        } as never),
+      ).rejects.toThrow('unknown')
+
+      await expect(
+        payload.validate({
+          collection: validationCollectionSlug,
+          context: {
+            availableLocaleCodes: ['en'],
+          },
+          data: {
+            summary: 'candidate summary',
+            title: 'Candidate title',
+          },
+          locale: ['en', 'es'],
+        }),
+      ).rejects.toThrow('es')
+    })
+
+    it('should cap concurrent locale passes at three with isolated request state', async () => {
+      const result = await payload.validate({
+        collection: validationCollectionSlug,
+        context: {
+          trackLocalePasses: true,
+        },
+        data: {
+          summary: 'candidate summary',
+          title: 'Candidate title',
+        },
+        locale: 'all',
+      })
+
+      expect(result.valid).toBe(true)
+      expect(getMaximumActiveLocalePasses()).toBe(3)
+      expect(getLocalePassRequestCount()).toBe(4)
+      expect(localePassEvents).toHaveLength(4)
+      expect(
+        localePassEvents.every(
+          ({ localeAtEnd, localeAtStart, operationAtEnd, operationAtStart }) =>
+            localeAtEnd === `mutated-${localeAtStart}` &&
+            operationAtEnd === 'update' &&
+            operationAtStart === 'validate',
+        ),
+      ).toBe(true)
+    })
+
     it('should return field errors for invalid create data without creating a document', async () => {
       const req = {
         operation: 'update',
@@ -488,7 +636,7 @@ describe('validate Local API', () => {
       expect(malformedJSON.status).toBe(400)
     })
 
-    it('should return 400 for repeated and all locale selectors', async () => {
+    it('should accept repeated and all locale selectors', async () => {
       const repeatedLocale = await restClient.POST(
         `/${validationCollectionSlug}/validate?locale=en&locale=es`,
         {
@@ -505,8 +653,16 @@ describe('validate Local API', () => {
         }),
       })
 
-      expect(repeatedLocale.status).toBe(400)
-      expect(allLocales.status).toBe(400)
+      expect(repeatedLocale.status).toBe(200)
+      await expect(repeatedLocale.json()).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+      expect(allLocales.status).toBe(200)
+      await expect(allLocales.json()).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
     })
 
     it('should merge by-ID validation data without persisting it', async () => {
@@ -752,6 +908,234 @@ describe('validate Local API', () => {
       expect(versionsAfter).toEqual(versionsBefore)
     })
   })
+
+  describe('publish enforcement', () => {
+    it('should block collection publish when a required locale is invalid without changing status', async () => {
+      const draft = await seedPublishCollection({
+        de: '',
+        en: 'English draft',
+        es: '',
+      })
+      const versionsBefore = await payload.countVersions({
+        collection: publishCollectionSlug,
+        where: {
+          parent: {
+            equals: draft.id,
+          },
+        },
+      })
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          data: {
+            _status: 'published',
+            title: 'English published',
+          },
+          locale: 'en',
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: [
+            {
+              locale: 'es',
+              path: 'title',
+            },
+          ],
+        },
+      })
+
+      const latestDraft = await payload.findByID({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        draft: true,
+        locale: 'all',
+      })
+      const versionsAfter = await payload.countVersions({
+        collection: publishCollectionSlug,
+        where: {
+          parent: {
+            equals: draft.id,
+          },
+        },
+      })
+
+      expect(latestDraft._status.en).toBe('draft')
+      expect(versionsAfter).toEqual(versionsBefore)
+    })
+
+    it('should allow collection publish when only an optional non-current locale is invalid', async () => {
+      const draft = await seedPublishCollection({
+        de: '',
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+
+      await payload.update({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        data: {
+          _status: 'published',
+          title: 'English published',
+        },
+        locale: 'en',
+      })
+
+      const published = await payload.findByID({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        draft: true,
+        locale: 'all',
+      })
+
+      expect(published._status.en).toBe('published')
+    })
+
+    it('should block collection publish-all when an optional locale is invalid', async () => {
+      const draft = await seedPublishCollection({
+        de: '',
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          data: {
+            _status: 'published',
+            title: 'English published',
+          },
+          locale: 'en',
+          publishAllLocales: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+
+      const latestDraft = await payload.findByID({
+        id: draft.id,
+        collection: publishCollectionSlug,
+        draft: true,
+        locale: 'all',
+      })
+
+      expect(latestDraft._status.en).toBe('draft')
+    })
+
+    it('should block global publish when a required locale is invalid without changing status', async () => {
+      await seedPublishGlobal({
+        de: '',
+        en: 'English draft',
+        es: '',
+      })
+      const versionsBefore = await payload.countGlobalVersions({
+        global: publishGlobalSlug,
+      })
+
+      await expect(
+        payload.updateGlobal({
+          slug: publishGlobalSlug,
+          data: {
+            _status: 'published',
+            title: 'English published',
+          },
+          locale: 'en',
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: [
+            {
+              locale: 'es',
+              path: 'title',
+            },
+          ],
+        },
+      })
+
+      const latestDraft = await payload.findGlobal({
+        slug: publishGlobalSlug,
+        draft: true,
+        locale: 'all',
+      })
+      const versionsAfter = await payload.countGlobalVersions({
+        global: publishGlobalSlug,
+      })
+
+      expect(latestDraft._status.en).toBe('draft')
+      expect(versionsAfter).toEqual(versionsBefore)
+    })
+
+    it('should allow global publish when only an optional non-current locale is invalid', async () => {
+      await seedPublishGlobal({
+        de: '',
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+
+      await payload.updateGlobal({
+        slug: publishGlobalSlug,
+        data: {
+          _status: 'published',
+          title: 'English published',
+        },
+        locale: 'en',
+      })
+
+      const published = await payload.findGlobal({
+        slug: publishGlobalSlug,
+        draft: true,
+        locale: 'all',
+      })
+
+      expect(published._status.en).toBe('published')
+    })
+
+    it('should block global publish-all when an optional locale is invalid', async () => {
+      await seedPublishGlobal({
+        de: '',
+        en: 'English draft',
+        es: 'Spanish required',
+      })
+
+      await expect(
+        payload.updateGlobal({
+          slug: publishGlobalSlug,
+          data: {
+            _status: 'published',
+            title: 'English published',
+          },
+          locale: 'en',
+          publishAllLocales: true,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'de',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+
+      const latestDraft = await payload.findGlobal({
+        slug: publishGlobalSlug,
+        draft: true,
+        locale: 'all',
+      })
+
+      expect(latestDraft._status.en).toBe('draft')
+    })
+  })
 })
 
 async function createWriteTarget() {
@@ -777,5 +1161,69 @@ async function runWriteAttempt(
       writeAttempt,
     },
     locale: 'en',
+  })
+}
+
+async function seedPublishCollection({ de, en, es }: { de: string; en: string; es: string }) {
+  const draft = await payload.create({
+    collection: publishCollectionSlug,
+    data: {
+      title: en,
+    },
+    draft: true,
+    locale: 'en',
+  })
+
+  await payload.update({
+    id: draft.id,
+    collection: publishCollectionSlug,
+    data: {
+      title: es,
+    },
+    draft: true,
+    locale: 'es',
+  })
+  await payload.update({
+    id: draft.id,
+    collection: publishCollectionSlug,
+    data: {
+      title: de,
+    },
+    draft: true,
+    locale: 'de',
+  })
+
+  return draft
+}
+
+async function seedPublishGlobal({ de, en, es }: { de: string; en: string; es: string }) {
+  await payload.updateGlobal({
+    slug: publishGlobalSlug,
+    data: {},
+    unpublishAllLocales: true,
+  })
+  await payload.updateGlobal({
+    slug: publishGlobalSlug,
+    data: {
+      title: en,
+    },
+    draft: true,
+    locale: 'en',
+  })
+  await payload.updateGlobal({
+    slug: publishGlobalSlug,
+    data: {
+      title: es,
+    },
+    draft: true,
+    locale: 'es',
+  })
+  await payload.updateGlobal({
+    slug: publishGlobalSlug,
+    data: {
+      title: de,
+    },
+    draft: true,
+    locale: 'de',
   })
 }

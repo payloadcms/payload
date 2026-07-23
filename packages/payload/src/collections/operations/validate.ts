@@ -94,7 +94,15 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
     locale: req.locale!,
   })
 
-  let data = deepCopyObjectSimple(incomingData ?? {})
+  let data = flattenDataByLocale({
+    configBlockReferences: req.payload.config.blocks,
+    docWithLocales: deepCopyObjectSimple(incomingData ?? {}) as JsonObject,
+    fields: collectionConfig.fields,
+    locale: req.locale!,
+    localeCodes: req.payload.config.localization
+      ? req.payload.config.localization.localeCodes
+      : undefined,
+  })
 
   data = await beforeValidate({
     id,
@@ -152,7 +160,10 @@ async function validateOperationWithScopedRequest<TSlug extends CollectionSlug>(
   } catch (error) {
     if (error instanceof ValidationError) {
       return {
-        errors: error.data.errors,
+        errors: error.data.errors.map((validationError) => ({
+          ...validationError,
+          locale: req.locale ?? undefined,
+        })),
         valid: false,
       }
     }

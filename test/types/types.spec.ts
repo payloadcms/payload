@@ -205,6 +205,38 @@ describe('Types testing', () => {
         }),
       ).type.toBe<Promise<ValidationResult>>()
     })
+
+    test('should accept multi-locale selectors without exposing concurrency controls', () => {
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: [null],
+      })
+      expect(payload.validate).type.toBeCallableWith({
+        collection: 'pages',
+        data: {},
+        locale: 'all',
+      })
+      expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
+        locale: [null],
+      })
+      expect(payload.validateGlobal).type.toBeCallableWith({
+        slug: 'menu',
+        locale: 'all',
+      })
+      expect(payload.validate).type.not.toBeCallableWith({
+        collection: 'pages',
+        concurrency: 4,
+        data: {},
+        locale: 'all',
+      })
+      expect(payload.validateGlobal).type.not.toBeCallableWith({
+        slug: 'menu',
+        concurrency: 4,
+        locale: 'all',
+      })
+    })
   })
 
   describe('authenticated user', () => {

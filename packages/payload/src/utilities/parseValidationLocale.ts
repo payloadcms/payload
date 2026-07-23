@@ -1,6 +1,7 @@
 import { status as httpStatus } from 'http-status'
 
 import type { TypedLocale } from '../index.js'
+import type { ValidationLocaleSelector } from './resolveValidationLocales.js'
 
 import { APIError } from '../errors/index.js'
 
@@ -59,6 +60,21 @@ export function parseSingleValidationLocale(locale: unknown): TypedLocale {
   }
 
   return parsedLocale.locale
+}
+
+export function parseValidationLocaleSelector(locale: unknown): ValidationLocaleSelector {
+  const parsedLocale = parseValidationLocale(locale)
+
+  switch (parsedLocale.type) {
+    case 'all':
+      return 'all'
+
+    case 'multiple':
+      return parsedLocale.locales
+
+    case 'single':
+      return parsedLocale.locale
+  }
 }
 
 export function assertValidationData(data: unknown): asserts data is Record<string, unknown> {

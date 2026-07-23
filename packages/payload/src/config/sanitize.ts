@@ -274,6 +274,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       ).locales.map((locale) => ({
         code: locale,
         label: locale,
+        required: false,
         rtl: false,
         toString: () => locale,
       }))
@@ -285,6 +286,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         config.localization as LocalizationConfigWithLabels
       ).locales.map((locale) => ({
         ...locale,
+        required: locale.required ?? false,
         toString: () => locale.code,
       }))
     }

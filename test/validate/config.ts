@@ -1,4 +1,9 @@
-import type { CollectionBeforeChangeHook, CollectionConfig, GlobalConfig } from 'payload'
+import type {
+  CollectionBeforeChangeHook,
+  CollectionConfig,
+  GlobalConfig,
+  PayloadRequest,
+} from 'payload'
 
 import path from 'path'
 import { saveVersion } from 'payload'
@@ -14,6 +19,8 @@ const dirname = path.dirname(filename)
 
 export const validationCollectionSlug = 'validation-items'
 export const validationGlobalSlug = 'validation-settings'
+export const publishCollectionSlug = 'validation-publish-items'
+export const publishGlobalSlug = 'validation-publish-settings'
 export const writeTargetsSlug = 'validation-write-targets'
 export const validationUploadsSlug = 'validation-uploads'
 export const validationUploadsDir = path.resolve(dirname, 'validation-uploads')
@@ -27,10 +34,31 @@ type HookEvent = {
 
 export const hookEvents: HookEvent[] = []
 export const accessEvents: string[] = []
+const localePassRequests = new Set<PayloadRequest>()
+export const localePassEvents: {
+  localeAtEnd?: string
+  localeAtStart: string | undefined
+  operationAtEnd?: string
+  operationAtStart: string | undefined
+}[] = []
+let activeLocalePasses = 0
+let maximumActiveLocalePasses = 0
 
 export function clearValidationEvents(): void {
   accessEvents.length = 0
   hookEvents.length = 0
+  localePassEvents.length = 0
+  localePassRequests.clear()
+  activeLocalePasses = 0
+  maximumActiveLocalePasses = 0
+}
+
+export function getLocalePassRequestCount(): number {
+  return localePassRequests.size
+}
+
+export function getMaximumActiveLocalePasses(): number {
+  return maximumActiveLocalePasses
 }
 
 function recordHook({ context, hook, operation, requestOperation }: HookEvent): void {
@@ -228,13 +256,40 @@ const validationCollection: CollectionConfig = {
       runWriteAttempt,
     ],
     beforeValidate: [
-      ({ context, data, operation, req }) => {
+      async ({ context, data, operation, req }) => {
         recordHook({
           context,
           hook: 'collectionBeforeValidate',
           operation,
           requestOperation: req.operation,
         })
+
+        if (req.context.trackLocalePasses === true) {
+          const localeAtStart = req.locale
+          const operationAtStart = req.operation
+
+          localePassRequests.add(req)
+          activeLocalePasses += 1
+          maximumActiveLocalePasses = Math.max(maximumActiveLocalePasses, activeLocalePasses)
+          const localePassEvent: (typeof localePassEvents)[number] = {
+            localeAtStart,
+            operationAtStart,
+          }
+          localePassEvents.push(localePassEvent)
+
+          req.locale = `mutated-${localeAtStart}`
+          req.operation = 'update'
+
+          await new Promise((resolve) => setTimeout(resolve, 25))
+
+          localePassEvent.localeAtEnd = req.locale
+          localePassEvent.operationAtEnd = req.operation
+
+          req.locale = localeAtStart
+          req.operation = operationAtStart
+          activeLocalePasses -= 1
+        }
+
         return data
       },
     ],
@@ -303,6 +358,40 @@ const validationGlobal: GlobalConfig = {
   versions: false,
 }
 
+const publishCollection: CollectionConfig = {
+  slug: publishCollectionSlug,
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      localized: true,
+      required: true,
+    },
+  ],
+  versions: {
+    drafts: {
+      validate: false,
+    },
+  },
+}
+
+const publishGlobal: GlobalConfig = {
+  slug: publishGlobalSlug,
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      localized: true,
+      required: true,
+    },
+  ],
+  versions: {
+    drafts: {
+      validate: false,
+    },
+  },
+}
+
 export default buildConfigWithDefaults({
   admin: {
     importMap: {
@@ -311,6 +400,7 @@ export default buildConfigWithDefaults({
   },
   collections: [
     validationCollection,
+    publishCollection,
     {
       slug: writeTargetsSlug,
       fields: [
@@ -331,9 +421,34 @@ export default buildConfigWithDefaults({
       versions: false,
     },
   ],
-  globals: [validationGlobal],
+  globals: [validationGlobal, publishGlobal],
   localization: {
     defaultLocale: 'en',
-    locales: ['en', 'es'],
+    filterAvailableLocales: ({ locales, req }) => {
+      const availableLocaleCodes = req.context.availableLocaleCodes as string[] | undefined
+
+      return availableLocaleCodes
+        ? locales.filter(({ code }) => availableLocaleCodes.includes(code))
+        : locales
+    },
+    locales: [
+      {
+        code: 'en',
+        label: 'English',
+      },
+      {
+        code: 'es',
+        label: 'Spanish',
+        required: true,
+      },
+      {
+        code: 'de',
+        label: 'German',
+      },
+      {
+        code: 'fr',
+        label: 'French',
+      },
+    ],
   },
 })

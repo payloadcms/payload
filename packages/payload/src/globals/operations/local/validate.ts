@@ -3,13 +3,19 @@ import type { DeepPartial } from 'ts-essentials'
 import { status as httpStatus } from 'http-status'
 
 import type { ValidationResult } from '../../../collections/operations/local/validate.js'
-import type { GlobalSlug, Payload, RequestContext, TypedLocale, User } from '../../../index.js'
+import type { GlobalSlug, JsonObject, Payload, RequestContext, User } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { ValidationLocaleSelector } from '../../../utilities/resolveValidationLocales.js'
 import type { DataFromGlobalSlug, DraftFlagFromGlobalSlug } from '../../config/types.js'
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { filterDataToSelectedLocales } from '../../../utilities/filterDataToSelectedLocales.js'
+import {
+  cloneValidationRequest,
+  resolveValidationLocales,
+  runValidationLocalePasses,
+} from '../../../utilities/resolveValidationLocales.js'
 import { validateOperation } from '../validate.js'
 
 /**
@@ -23,8 +29,8 @@ export type ValidateGlobalOptions<TSlug extends GlobalSlug> = {
   context?: RequestContext
   /** Optional partial data to merge over the stored global. */
   data?: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
-  /** The single locale to validate. Arrays and `'all'` are not accepted. */
-  locale: TypedLocale
+  /** One locale, a non-empty locale array, or every available locale. */
+  locale: ValidationLocaleSelector
   /**
    * Skip global and field access control.
    * @default true
@@ -38,13 +44,24 @@ export type ValidateGlobalOptions<TSlug extends GlobalSlug> = {
   user?: null | User
 } & DraftFlagFromGlobalSlug<TSlug>
 
+type InternalValidateGlobalOptions<TSlug extends GlobalSlug> = {
+  validationDataLocale?: string
+} & ValidateGlobalOptions<TSlug>
+
 export async function validateGlobalLocal<TSlug extends GlobalSlug>(
   payload: Payload,
   options: ValidateGlobalOptions<TSlug>,
 ): Promise<ValidationResult> {
-  const { slug, data, locale, overrideAccess = true } = options
+  return validateGlobalLocalWithDataLocale(payload, options)
+}
 
-  if (locale === undefined || locale === 'all' || Array.isArray(locale)) {
+export async function validateGlobalLocalWithDataLocale<TSlug extends GlobalSlug>(
+  payload: Payload,
+  options: InternalValidateGlobalOptions<TSlug>,
+): Promise<ValidationResult> {
+  const { slug, data, locale, overrideAccess = true, validationDataLocale } = options
+
+  if (locale === undefined) {
     throw new APIError('Validation requires a locale.', httpStatus.BAD_REQUEST)
   }
 
@@ -54,19 +71,53 @@ export async function validateGlobalLocal<TSlug extends GlobalSlug>(
     throw new APIError(`The global with slug ${String(slug)} can't be found. Validate Operation.`)
   }
 
-  const req = await createLocalReq(
+  const baseReq = await createLocalReq(
     {
-      ...(options as CreateLocalReqOptions),
+      context: options.context,
       fallbackLocale: false,
+      req: cloneValidationRequest(options.req),
+      user: options.user ?? undefined,
     },
     payload,
   )
-
-  return validateOperation({
-    slug,
-    data,
-    globalConfig,
-    overrideAccess,
-    req,
+  const locales = await resolveValidationLocales({
+    locale,
+    req: baseReq,
   })
+  const results = await runValidationLocalePasses({
+    locales,
+    validate: async (validationLocale) => {
+      const req = await createLocalReq(
+        {
+          fallbackLocale: false,
+          locale: validationLocale ?? undefined,
+          req: cloneValidationRequest(baseReq),
+        },
+        payload,
+      )
+      const validationData =
+        validationDataLocale && validationLocale !== validationDataLocale && data
+          ? filterDataToSelectedLocales({
+              configBlockReferences: payload.config.blocks,
+              docWithLocales: data as JsonObject,
+              fields: globalConfig.fields,
+              selectedLocales: [],
+            })
+          : data
+
+      return validateOperation({
+        slug,
+        data: validationData,
+        globalConfig,
+        overrideAccess,
+        req,
+      })
+    },
+  })
+  const errors = results.flatMap((result) => result.errors)
+
+  return {
+    errors,
+    valid: errors.length === 0,
+  }
 }

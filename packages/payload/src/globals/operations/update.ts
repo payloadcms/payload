@@ -17,6 +17,7 @@ import type {
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { ValidationError } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -33,11 +34,13 @@ import {
 } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { resolvePublishLocales } from '../../utilities/resolvePublishLocales.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
+import { validateGlobalLocalWithDataLocale } from './local/validate.js'
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
@@ -188,6 +191,37 @@ export const updateOperation = async <
       overrideLock,
       req,
     })
+
+    if (hasDraftsEnabled(globalConfig) && !isSavingDraft && !unpublishAllLocales) {
+      const validationResult = await validateGlobalLocalWithDataLocale(payload, {
+        slug: globalConfig.slug,
+        data,
+        locale: resolvePublishLocales({
+          locale: locale ?? null,
+          localization: payload.config.localization,
+          publishAllLocales,
+        }),
+        overrideAccess,
+        req,
+        validationDataLocale:
+          locale && locale !== 'all'
+            ? locale
+            : payload.config.localization
+              ? payload.config.localization.defaultLocale
+              : undefined,
+      })
+
+      if (!validationResult.valid) {
+        throw new ValidationError(
+          {
+            errors: validationResult.errors,
+            global: globalConfig.slug,
+            req,
+          },
+          req.t,
+        )
+      }
+    }
 
     // /////////////////////////////////////
     // beforeValidate - Fields

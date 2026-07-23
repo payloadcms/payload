@@ -10,6 +10,7 @@ type Args = {
   docWithLocales: JsonObject
   fields: Field[]
   locale: string
+  localeCodes?: string[]
   parentIsLocalized?: boolean
 }
 
@@ -23,6 +24,7 @@ export function flattenDataByLocale({
   docWithLocales,
   fields,
   locale,
+  localeCodes,
   parentIsLocalized = false,
 }: Args): JsonObject {
   const result = deepCopyObjectSimple(docWithLocales)
@@ -32,6 +34,7 @@ export function flattenDataByLocale({
     data: result,
     fields,
     locale,
+    localeCodes,
     parentIsLocalized,
   })
 
@@ -43,6 +46,7 @@ type FlattenFieldsArgs = {
   data: JsonObject
   fields: Field[]
   locale: string
+  localeCodes?: string[]
   parentIsLocalized: boolean
 }
 
@@ -51,6 +55,7 @@ function flattenFields({
   data,
   fields,
   locale,
+  localeCodes,
   parentIsLocalized,
 }: FlattenFieldsArgs): void {
   for (const field of fields) {
@@ -60,6 +65,7 @@ function flattenFields({
       if (isLocalized) {
         data[field.name] = getLocaleValue({
           locale,
+          localeCodes,
           value: data[field.name],
         })
       }
@@ -82,6 +88,7 @@ function flattenFields({
                   data: row,
                   fields: field.fields,
                   locale,
+                  localeCodes,
                   parentIsLocalized: nestedParentIsLocalized,
                 })
               }
@@ -112,6 +119,7 @@ function flattenFields({
                   data: row,
                   fields: block.fields,
                   locale,
+                  localeCodes,
                   parentIsLocalized: nestedParentIsLocalized,
                 })
               }
@@ -127,6 +135,7 @@ function flattenFields({
               data: fieldValue,
               fields: field.fields,
               locale,
+              localeCodes,
               parentIsLocalized: nestedParentIsLocalized,
             })
           }
@@ -146,6 +155,7 @@ function flattenFields({
           data,
           fields: field.fields,
           locale,
+          localeCodes,
           parentIsLocalized,
         })
         break
@@ -158,6 +168,7 @@ function flattenFields({
             if (isLocalized) {
               data[tab.name] = getLocaleValue({
                 locale,
+                localeCodes,
                 value: data[tab.name],
               })
             }
@@ -170,6 +181,7 @@ function flattenFields({
                 data: tabData,
                 fields: tab.fields,
                 locale,
+                localeCodes,
                 parentIsLocalized: parentIsLocalized || Boolean(tab.localized),
               })
             }
@@ -179,6 +191,7 @@ function flattenFields({
               data,
               fields: tab.fields,
               locale,
+              localeCodes,
               parentIsLocalized,
             })
           }
@@ -211,9 +224,21 @@ function transformStoredFieldValue({ field, value }: { field: Field; value: unkn
   }
 }
 
-function getLocaleValue({ locale, value }: { locale: string; value: unknown }): unknown {
+function getLocaleValue({
+  locale,
+  localeCodes,
+  value,
+}: {
+  locale: string
+  localeCodes?: string[]
+  value: unknown
+}): unknown {
   if (value && typeof value === 'object' && !Array.isArray(value)) {
-    return (value as Record<string, unknown>)[locale]
+    const objectValue = value as Record<string, unknown>
+    const isLocaleMap =
+      !localeCodes || Object.keys(objectValue).some((key) => localeCodes.includes(key))
+
+    return isLocaleMap ? objectValue[locale] : value
   }
 
   return value

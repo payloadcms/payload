@@ -583,6 +583,11 @@ export type Locale = {
    */
   label: Record<string, string> | string
   /**
+   * Whether this locale must pass validation before publishing another locale.
+   * @default false
+   */
+  required?: boolean
+  /**
    * if true, defaults textAligmnent on text fields to RTL
    */
   rtl?: boolean
@@ -642,6 +647,12 @@ export type LocalizationConfigWithLabels = Prettify<
   } & BaseLocalizationConfig
 >
 
+export type SanitizedLocale = Prettify<
+  {
+    required: boolean
+  } & Locale
+>
+
 export type SanitizedLocalizationConfig = Prettify<
   {
     /**
@@ -649,7 +660,8 @@ export type SanitizedLocalizationConfig = Prettify<
      * @example `["en", "es", "fr", "nl", "de", "jp"]`
      */
     localeCodes: string[]
-  } & LocalizationConfigWithLabels
+    locales: SanitizedLocale[]
+  } & Omit<LocalizationConfigWithLabels, 'locales'>
 >
 
 /**

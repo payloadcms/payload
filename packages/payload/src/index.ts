@@ -755,7 +755,7 @@ export class BasePayload {
   }
 
   /**
-   * Validates a collection document for one locale without persisting data, versions, or files.
+   * Validates a collection document for selected locales without persisting data, versions, or files.
    *
    * Omit `id` to simulate create, or provide `id` to load a stored document and simulate update.
    */
@@ -766,7 +766,7 @@ export class BasePayload {
   }
 
   /**
-   * Validates a global document update for one locale without persisting data or versions.
+   * Validates a global document update for selected locales without persisting data or versions.
    */
   validateGlobal = async <TSlug extends GlobalSlug>(
     options: ValidateGlobalOptions<TSlug>,

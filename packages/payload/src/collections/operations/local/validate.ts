@@ -6,12 +6,11 @@ import type {
   CollectionSlug,
   Payload,
   RequestContext,
-  TypedLocale,
   User,
   ValidationFieldError,
 } from '../../../index.js'
-import type { PayloadRequest } from '../../../types/index.js'
-import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
+import type { JsonObject, PayloadRequest } from '../../../types/index.js'
+import type { ValidationLocaleSelector } from '../../../utilities/resolveValidationLocales.js'
 import type {
   DataFromCollectionSlug,
   DraftFlagFromCollectionSlug,
@@ -20,6 +19,12 @@ import type {
 
 import { APIError } from '../../../errors/index.js'
 import { createLocalReq } from '../../../utilities/createLocalReq.js'
+import { filterDataToSelectedLocales } from '../../../utilities/filterDataToSelectedLocales.js'
+import {
+  cloneValidationRequest,
+  resolveValidationLocales,
+  runValidationLocalePasses,
+} from '../../../utilities/resolveValidationLocales.js'
 import { validateOperation } from '../validate.js'
 
 /**
@@ -39,10 +44,8 @@ type BaseOptions<TSlug extends CollectionSlug> = {
    * Hook context merged into `req.context` for the validation lifecycle.
    */
   context?: RequestContext
-  /**
-   * The single locale to validate. Arrays and `'all'` are not accepted by this operation.
-   */
-  locale: TypedLocale
+  /** One locale, a non-empty locale array, or every available locale. */
+  locale: ValidationLocaleSelector
   /**
    * Skip collection and field access control.
    * @default true
@@ -78,13 +81,31 @@ export type ValidateCollectionOptions<TSlug extends CollectionSlug> =
       id: DataFromCollectionSlug<TSlug>['id']
     } & BaseOptions<TSlug>)
 
+type InternalValidateCollectionOptions<TSlug extends CollectionSlug> = {
+  validationDataLocale?: string
+} & ValidateCollectionOptions<TSlug>
+
 export async function validateLocal<TSlug extends CollectionSlug>(
   payload: Payload,
   options: ValidateCollectionOptions<TSlug>,
 ): Promise<ValidationResult> {
-  const { id, collection: collectionSlug, data, locale, overrideAccess = true } = options
+  return validateLocalWithDataLocale(payload, options)
+}
 
-  if (locale === undefined || locale === 'all' || Array.isArray(locale)) {
+export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
+  payload: Payload,
+  options: InternalValidateCollectionOptions<TSlug>,
+): Promise<ValidationResult> {
+  const {
+    id,
+    collection: collectionSlug,
+    data,
+    locale,
+    overrideAccess = true,
+    validationDataLocale,
+  } = options
+
+  if (locale === undefined) {
     throw new APIError('Validation requires a locale.', httpStatus.BAD_REQUEST)
   }
 
@@ -100,19 +121,53 @@ export async function validateLocal<TSlug extends CollectionSlug>(
     )
   }
 
-  const req = await createLocalReq(
+  const baseReq = await createLocalReq(
     {
-      ...(options as CreateLocalReqOptions),
+      context: options.context,
       fallbackLocale: false,
+      req: cloneValidationRequest(options.req),
+      user: options.user ?? undefined,
     },
     payload,
   )
-
-  return validateOperation({
-    id,
-    collection,
-    data,
-    overrideAccess,
-    req,
+  const locales = await resolveValidationLocales({
+    locale,
+    req: baseReq,
   })
+  const results = await runValidationLocalePasses({
+    locales,
+    validate: async (validationLocale) => {
+      const req = await createLocalReq(
+        {
+          fallbackLocale: false,
+          locale: validationLocale ?? undefined,
+          req: cloneValidationRequest(baseReq),
+        },
+        payload,
+      )
+      const validationData =
+        validationDataLocale && validationLocale !== validationDataLocale && data
+          ? filterDataToSelectedLocales({
+              configBlockReferences: payload.config.blocks,
+              docWithLocales: data as JsonObject,
+              fields: collection.config.fields,
+              selectedLocales: [],
+            })
+          : data
+
+      return validateOperation({
+        id,
+        collection,
+        data: validationData,
+        overrideAccess,
+        req,
+      })
+    },
+  })
+  const errors = results.flatMap((result) => result.errors)
+
+  return {
+    errors,
+    valid: errors.length === 0,
+  }
 }
