@@ -650,7 +650,7 @@ describe('Auth', () => {
 
       await advanceToRemainingSessionTime({
         page: sessionPage,
-        remainingMs: 90_000,
+        remainingMs: 120_000,
         tokenExpirationMs,
       })
 
