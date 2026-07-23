@@ -324,8 +324,13 @@ export const sanitizeField = async ({
       ...(field.hooks.beforeChange || []),
     ]
 
-    // The id fallback backfills a single scalar slug; a localized slug is a per-locale value
-    // that a bare id string cannot represent, so it relies on source generation instead.
+    // The id fallback and duplicate dedupe are applied to non-localized slugs only. A localized
+    // slug is a per-locale value that the scalar id fallback cannot represent, so it relies on
+    // source generation per locale.
+    //
+    // Known limitation: a localized slug in a locale that has no source value stays empty (no id
+    // fallback). Backfilling it would need a per-locale read-merge-write across the main document
+    // and every version, plus locale-scoped uniqueness — deferred until a real use case needs it.
     if (!field.localized) {
       field.hooks.afterChange = [
         generateSlugIdFallback({ name: field.name }),
