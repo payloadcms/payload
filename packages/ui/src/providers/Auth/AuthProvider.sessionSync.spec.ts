@@ -28,6 +28,7 @@ const routerMocks = vi.hoisted(() => ({
 let authContext: AuthContext | undefined
 let renderedContainer: HTMLElement | undefined
 let renderedRoot: ReturnType<typeof createRoot> | undefined
+const activityRefreshDebounceMs = 1_000
 
 vi.mock('@faceless-ui/modal', () => ({
   useModal: () => ({ closeAllModals: vi.fn(), openModal: vi.fn() }),
@@ -105,8 +106,16 @@ afterEach(() => {
 describe('AuthProvider refresh synchronization', () => {
   it('should publish a refresh after refreshCookie succeeds', async () => {
     vi.useFakeTimers()
-    const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
-    const refreshedSession = createFutureSession({ expiresInMs: 120_000, token: 'fresh-token' })
+    const initialSessionLifetimeMs = 60_000
+    const refreshedSessionLifetimeMs = 120_000
+    const initialSession = createFutureSession({
+      expiresInMs: initialSessionLifetimeMs,
+      token: 'initial-token',
+    })
+    const refreshedSession = createFutureSession({
+      expiresInMs: refreshedSessionLifetimeMs,
+      token: 'fresh-token',
+    })
 
     await renderProvider({ session: initialSession })
     apiMocks.post.mockResolvedValueOnce(createResponse({ session: refreshedSession }))
@@ -114,7 +123,7 @@ describe('AuthProvider refresh synchronization', () => {
     channel.postMessage.mockClear()
 
     act(() => authContext?.refreshCookie(true))
-    await act(async () => vi.advanceTimersByTimeAsync(1_000))
+    await act(async () => advanceSessionBy({ milliseconds: activityRefreshDebounceMs }))
 
     expect(channel.postMessage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -177,8 +186,16 @@ describe('AuthProvider refresh synchronization', () => {
 
   it('should ignore a deferred refreshCookie success after remote expiration', async () => {
     vi.useFakeTimers()
-    const initialSession = createFutureSession({ expiresInMs: 60_000, token: 'initial-token' })
-    const staleResponseSession = createFutureSession({ expiresInMs: 120_000, token: 'stale-token' })
+    const initialSessionLifetimeMs = 60_000
+    const staleResponseSessionLifetimeMs = 120_000
+    const initialSession = createFutureSession({
+      expiresInMs: initialSessionLifetimeMs,
+      token: 'initial-token',
+    })
+    const staleResponseSession = createFutureSession({
+      expiresInMs: staleResponseSessionLifetimeMs,
+      token: 'stale-token',
+    })
     let resolveRefresh: ((value: ReturnType<typeof createResponse>) => void) | undefined
     const refreshResponse = new Promise<ReturnType<typeof createResponse>>((resolve) => {
       resolveRefresh = resolve
@@ -190,7 +207,7 @@ describe('AuthProvider refresh synchronization', () => {
     channel.postMessage.mockClear()
 
     act(() => authContext?.refreshCookie(true))
-    act(() => vi.advanceTimersByTime(1_000))
+    await act(async () => advanceSessionBy({ milliseconds: activityRefreshDebounceMs }))
     await act(async () => {})
     await act(async () => {
       channel.emit(
@@ -337,23 +354,33 @@ describe('AuthProvider remote session synchronization', () => {
   it('should cancel a pending activity refresh when a remote token is accepted', async () => {
     vi.useFakeTimers()
     vi.setSystemTime(0)
-    const initialSession = createFutureSession({ expiresInMs: 300_000, token: 'initial-token' })
+    const sessionLifetimeMs = 300_000
+    const activityCheckpointLeadInMs = 120_000
+    const activityCheckpointDelayMs = 60_000
+    const pastActivityRefreshDebounceMs = activityRefreshDebounceMs + 1
+    const initialSession = createFutureSession({
+      expiresInMs: sessionLifetimeMs,
+      token: 'initial-token',
+    })
 
     await renderProvider({ session: initialSession })
     const channel = getBroadcastChannel()
 
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(120_000)
+      await advanceSessionBy({ milliseconds: activityCheckpointLeadInMs })
       window.dispatchEvent(new MouseEvent('mousemove'))
-      await vi.advanceTimersByTimeAsync(60_000)
+      await advanceSessionBy({ milliseconds: activityCheckpointDelayMs })
       channel.emit(
         createMessage({
-          session: createFutureSession({ expiresInMs: 300_000, token: 'remote-token' }),
+          session: createFutureSession({
+            expiresInMs: sessionLifetimeMs,
+            token: 'remote-token',
+          }),
           sourceID: 'remote-tab',
           type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
         }),
       )
-      await vi.advanceTimersByTimeAsync(1_001)
+      await advanceSessionBy({ milliseconds: pastActivityRefreshDebounceMs })
     })
 
     expect(apiMocks.post).not.toHaveBeenCalled()
@@ -580,4 +607,8 @@ async function renderProvider({ session }: { session: UserWithToken }) {
     )
   })
   await act(async () => {})
+}
+
+async function advanceSessionBy({ milliseconds }: { milliseconds: number }): Promise<void> {
+  await vi.advanceTimersByTimeAsync(milliseconds)
 }
