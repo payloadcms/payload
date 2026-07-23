@@ -550,6 +550,7 @@ export type CollectionConfig<TSlug extends CollectionSlug = any> = {
     readVersions?: Access
     unlock?: Access
     update?: Access
+    validate?: Access
   }
   /**
    * Collection admin options

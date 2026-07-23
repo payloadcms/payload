@@ -201,6 +201,7 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
     read?: Access
     readVersions?: Access
     update?: Access
+    validate?: Access
   }
   admin?: GlobalAdminOptions
   /** Extension point to add your custom data. Server only. */

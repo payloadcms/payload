@@ -1,12 +1,11 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
-import type { FieldAccessOperation, JsonObject, PayloadRequest } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 
 import { type RequestContext } from '../../../index.js'
 import { traverseFields } from './traverseFields.js'
 
 type Args<T extends JsonObject> = {
-  accessOperation: FieldAccessOperation
   collection: null | SanitizedCollectionConfig
   context: RequestContext
   data: T
@@ -29,7 +28,6 @@ type Args<T extends JsonObject> = {
  */
 export const beforeValidate = async <T extends JsonObject>({
   id,
-  accessOperation,
   collection,
   context,
   data: incomingData,
@@ -41,7 +39,6 @@ export const beforeValidate = async <T extends JsonObject>({
 }: Args<T>): Promise<T> => {
   await traverseFields({
     id,
-    accessOperation,
     collection,
     context,
     data: incomingData,

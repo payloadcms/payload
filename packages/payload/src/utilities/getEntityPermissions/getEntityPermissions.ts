@@ -58,9 +58,10 @@ const topLevelCollectionPermissions = [
   'read',
   'readVersions',
   'update',
+  'validate',
   'unlock',
 ]
-const topLevelGlobalPermissions = ['read', 'readVersions', 'update']
+const topLevelGlobalPermissions = ['read', 'readVersions', 'update', 'validate']
 
 /**
  * Build up permissions object for an entity (collection or global).

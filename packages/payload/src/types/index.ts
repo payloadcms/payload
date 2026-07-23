@@ -192,9 +192,8 @@ export type JoinQuery<TSlug extends CollectionSlug = string> =
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type Document = any
 
-export type Operation = 'create' | 'delete' | 'read' | 'update'
-export type FieldOperation = 'validate' | Operation
-export type FieldAccessOperation = Extract<Operation, 'create' | 'update'>
+export type Operation = 'create' | 'delete' | 'read' | 'update' | 'validate'
+export type FieldOperation = Operation
 export type VersionOperations = 'readVersions'
 export type AuthOperations = 'unlock'
 export type AllOperations = AuthOperations | Operation | VersionOperations

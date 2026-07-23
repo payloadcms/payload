@@ -1,13 +1,12 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
 import type { SanitizedGlobalConfig } from '../../../globals/config/types.js'
 import type { RequestContext } from '../../../index.js'
-import type { FieldAccessOperation, JsonObject, PayloadRequest } from '../../../types/index.js'
+import type { JsonObject, PayloadRequest } from '../../../types/index.js'
 import type { Field, TabAsField } from '../../config/types.js'
 
 import { promise } from './promise.js'
 
 type Args<T> = {
-  accessOperation: FieldAccessOperation
   /**
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
    */
@@ -41,7 +40,6 @@ type Args<T> = {
 
 export const traverseFields = async <T>({
   id,
-  accessOperation,
   blockData,
   collection,
   context,
@@ -65,7 +63,6 @@ export const traverseFields = async <T>({
     promises.push(
       promise({
         id,
-        accessOperation,
         blockData,
         collection,
         context,

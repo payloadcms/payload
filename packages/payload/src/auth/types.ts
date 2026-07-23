@@ -20,6 +20,7 @@ export type BlockPermissions = {
   fields: FieldsPermissions
   read: Permission
   update: Permission
+  validate: Permission
 }
 
 export type SanitizedBlockPermissions =
@@ -44,6 +45,7 @@ export type FieldPermissions = {
   fields?: FieldsPermissions
   read?: Permission
   update?: Permission
+  validate?: Permission
 }
 
 export type SanitizedFieldPermissions =
@@ -53,6 +55,7 @@ export type SanitizedFieldPermissions =
       fields?: SanitizedFieldsPermissions
       read: true
       update: true
+      validate: true
     }
   | true
 
@@ -71,6 +74,7 @@ export type CollectionPermission = {
   // Auth-enabled Collections only
   unlock?: Permission
   update?: Permission
+  validate?: Permission
 }
 
 export type SanitizedCollectionPermission = {
@@ -82,6 +86,7 @@ export type SanitizedCollectionPermission = {
   // Auth-enabled Collections only
   unlock?: true
   update?: true
+  validate?: true
 }
 
 export type GlobalPermission = {
@@ -89,6 +94,7 @@ export type GlobalPermission = {
   read?: Permission
   readVersions?: Permission
   update?: Permission
+  validate?: Permission
 }
 
 export type SanitizedGlobalPermission = {
@@ -96,6 +102,7 @@ export type SanitizedGlobalPermission = {
   read?: true
   readVersions?: true
   update?: true
+  validate?: true
 }
 
 export type DocumentPermissions = CollectionPermission | GlobalPermission

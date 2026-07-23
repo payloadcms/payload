@@ -13,6 +13,7 @@ export const defaults: Partial<CollectionConfig> = {
     read: defaultAccess,
     unlock: defaultAccess,
     update: defaultAccess,
+    validate: defaultAccess,
   },
   admin: {
     components: {},
@@ -61,6 +62,7 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
     read: defaultAccess,
     unlock: defaultAccess,
     update: defaultAccess,
+    validate: defaultAccess,
     ...(collection.access || {}),
   }
 

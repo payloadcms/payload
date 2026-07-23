@@ -5,14 +5,20 @@ import type {
   CollectionAfterChangeHook,
   CollectionBeforeChangeHook,
   CollectionBeforeValidateHook,
+  CollectionConfig,
+  CollectionPermission,
   CollectionSlug,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
+  Field,
   FieldHookArgs,
+  FieldPermissions,
   GeneratedTypes,
   GlobalAfterChangeHook,
   GlobalBeforeChangeHook,
   GlobalBeforeValidateHook,
+  GlobalConfig,
+  GlobalPermission,
   JoinQuery,
   MeOperationResult,
   PaginatedDocs,
@@ -116,6 +122,24 @@ describe('Types testing', () => {
       expect<'validate'>().type.not.toBeAssignableTo<
         Parameters<GlobalAfterChangeHook>[0]['operation']
       >()
+      expect<CollectionConfig>().type.toBeAssignableFrom<{
+        access: { validate: () => true }
+        fields: []
+        slug: 'posts'
+      }>()
+      expect<GlobalConfig>().type.toBeAssignableFrom<{
+        access: { validate: () => true }
+        fields: []
+        slug: 'settings'
+      }>()
+      expect<Field>().type.toBeAssignableFrom<{
+        access: { validate: () => true }
+        name: 'title'
+        type: 'text'
+      }>()
+      expect<CollectionPermission>().type.toHaveProperty('validate')
+      expect<GlobalPermission>().type.toHaveProperty('validate')
+      expect<FieldPermissions>().type.toHaveProperty('validate')
     })
   })
 

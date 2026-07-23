@@ -192,7 +192,6 @@ export const updateDocument = async <
 
   data = await beforeValidate<DeepPartial<DataFromCollectionSlug<TSlug>>>({
     id,
-    accessOperation: 'update',
     collection: collectionConfig,
     context: req.context,
     data,

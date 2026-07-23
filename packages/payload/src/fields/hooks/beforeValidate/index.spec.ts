@@ -6,19 +6,18 @@ import type { Field } from '../../config/types.js'
 import { beforeValidate } from './index.js'
 
 describe('beforeValidate', () => {
-  it('should apply the selected field access policy while hooks receive validate', async () => {
+  it('should apply the validate field access policy while hooks receive validate', async () => {
     const hookOperations: string[] = []
     const accessOperations: string[] = []
     const data = { title: 'restricted' }
 
     await beforeValidate({
-      accessOperation: 'update',
       collection: {
         fields: [
           {
             access: {
-              update: () => {
-                accessOperations.push('update')
+              validate: () => {
+                accessOperations.push('validate')
                 return false
               },
             },
@@ -44,7 +43,7 @@ describe('beforeValidate', () => {
     })
 
     expect(hookOperations).toEqual(['validate'])
-    expect(accessOperations).toEqual(['update'])
+    expect(accessOperations).toEqual(['validate'])
     expect(data).toEqual({})
   })
 })

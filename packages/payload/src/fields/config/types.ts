@@ -504,6 +504,7 @@ export interface FieldBase {
     create?: FieldAccess
     read?: FieldAccess
     update?: FieldAccess
+    validate?: FieldAccess
   }
   admin?: FieldAdmin
   /** Extension point to add your custom data. Server only. */
@@ -1667,6 +1668,7 @@ export type JoinField = {
     create?: never
     read?: FieldAccess
     update?: never
+    validate?: never
   }
   admin?: {
     allowCreate?: boolean
