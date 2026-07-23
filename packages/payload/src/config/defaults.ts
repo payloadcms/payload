@@ -66,7 +66,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
       ...(config.jobs?.access || {}),
     },
     processingLease: {
-      duration: config.jobs?.processingLease?.duration ?? 2 * 60 * 1000,
+      duration: config.jobs?.processingLease?.duration ?? 20 * 60 * 1000,
       safetyBuffer: config.jobs?.processingLease?.safetyBuffer ?? 30 * 1000,
     },
   } as JobsConfig

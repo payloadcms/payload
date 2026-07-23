@@ -86,14 +86,17 @@ export type ProcessingLeaseConfig = {
    * How long a job remains claimed without a successful lease renewal.
    * This is not a maximum job runtime; active jobs renew their lease automatically.
    *
-   * @default 120000 (2 minutes)
+   * @default 1200000 (20 minutes)
    */
   duration?: number
   /**
-   * Minimum time that must remain on a lease before a worker starts an update. This gives the
+   * Minimum time that must remain on a lease before a worker **starts** an update. This gives the
    * update time to finish before another worker can claim the job.
    *
    * Set this to `0` if your database adapter applies the ownership check and update atomically.
+   * If the database update itself is not atomic, increase this value, as another worker
+   * may claim the job before the update finishes.
+   *
    * It must be less than `duration`.
    *
    * @default 30000 (30 seconds)
