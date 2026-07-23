@@ -1203,7 +1203,12 @@ describe('Queues - Payload', () => {
 
               processingUntil = currentJob.processingUntil
             } catch (error) {
-              if (!(error instanceof Error) || !error.message.includes('database is locked')) {
+              const cause = error instanceof Error ? error.cause : undefined
+              const isDatabaseLocked =
+                (error instanceof Error && error.message.includes('database is locked')) ||
+                (cause instanceof Error && cause.message.includes('database is locked'))
+
+              if (!isDatabaseLocked) {
                 throw error
               }
             }
