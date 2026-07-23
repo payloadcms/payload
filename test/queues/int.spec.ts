@@ -25,6 +25,10 @@ const dirname = path.dirname(filename)
 
 describe('Queues - Payload', () => {
   let payload: Payload
+  let processingLeaseDefaults: {
+    duration: number
+    safetyBuffer: number
+  }
   let restClient: NextRESTClient
   let token: string
   let user: User
@@ -32,6 +36,7 @@ describe('Queues - Payload', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(dirname))
+    processingLeaseDefaults = { ...payload.config.jobs.processingLease }
   })
 
   afterAll(async () => {
@@ -48,6 +53,7 @@ describe('Queues - Payload', () => {
 
   afterEach(() => {
     _internal_resetJobSystemGlobals()
+    Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
   })
 
   beforeEach(async () => {
@@ -1125,196 +1131,201 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.processingUntil).toBeFalsy()
   })
 
-  describe('processing leases', () => {
-    it('should claim an expired lease once and leave an active lease alone', async () => {
+  describe('worker recovery', () => {
+    it('should let only one replacement worker recover a job after its original worker stops responding', async () => {
       _internal_jobSystemGlobals.shouldAutoRun = false
       payload.config.jobs.deleteJobOnComplete = false
-
-      const message = 'claimed after lease expiry'
-      const expiredJob = await payload.jobs.queue({
-        input: { message },
-        queue: 'lease-claim',
-        task: 'CreateSimpleRetries0',
-      })
-      const activeJob = await payload.jobs.queue({
-        input: { message: 'already owned' },
-        queue: 'lease-claim',
-        task: 'CreateSimple',
-      })
-
-      await payload.update({
-        id: expiredJob.id,
-        collection: 'payload-jobs',
-        data: {
-          processingToken: 'expired-worker',
-          processingUntil: new Date(Date.now() - 1000).toISOString(),
-          totalTried: 0,
-        },
-      })
-      await payload.update({
-        id: activeJob.id,
-        collection: 'payload-jobs',
-        data: {
-          processingToken: 'active-worker',
-          processingUntil: new Date(Date.now() + 60_000).toISOString(),
-          totalTried: 0,
-        },
-      })
-
-      const results = await Promise.all(
-        Array.from({ length: 10 }, () =>
-          payload.jobs.run({ limit: 1, queue: 'lease-claim', silent: true }),
-        ),
-      )
-
-      const claimedJob = await payload.findByID({
-        id: expiredJob.id,
-        collection: 'payload-jobs',
-      })
-      const unchangedActiveJob = await payload.findByID({
-        id: activeJob.id,
-        collection: 'payload-jobs',
-      })
-      const createdDocuments = await payload.find({
-        collection: 'simple',
-        where: { title: { equals: message } },
-      })
-      const workersThatRanTheJob = results.filter((result) => result.jobStatus?.[expiredJob.id])
-
-      expect(createdDocuments.totalDocs).toBe(1)
-      expect(workersThatRanTheJob).toHaveLength(1)
-      expect(claimedJob.completedAt).toBeTruthy()
-      expect(claimedJob.hasError).toBe(false)
-      expect(claimedJob.processingToken).toBeFalsy()
-      expect(claimedJob.processingUntil).toBeFalsy()
-      expect(claimedJob.totalTried).toBe(1)
-      expect(unchangedActiveJob.completedAt).toBeFalsy()
-      expect(unchangedActiveJob.processingToken).toBe('active-worker')
-      expect(unchangedActiveJob.processingUntil).toBeTruthy()
-      expect(unchangedActiveJob.totalTried).toBe(0)
-    })
-
-    it('should renew the lease while a job is running', async () => {
-      expect(payload.config.jobs.processingLease.duration).toBe(20 * 60 * 1000)
-      expect(payload.config.jobs.processingLease.safetyBuffer).toBe(30_000)
-      payload.config.jobs.deleteJobOnComplete = false
-      const originalLeaseDuration = payload.config.jobs.processingLease.duration
-      const originalSafetyBuffer = payload.config.jobs.processingLease.safetyBuffer
+      // Short lease (shorter than 500ms task delay in longRunning workflow) to simulate lease expiry
       payload.config.jobs.processingLease.duration = 300
-      payload.config.jobs.processingLease.safetyBuffer = 50
+      payload.config.jobs.processingLease.safetyBuffer = 250
 
+      const postTitle = 'created by the replacement worker'
       const job = await payload.jobs.queue({
-        input: {},
+        input: { postTitle },
+        queue: 'worker-recovery',
         workflow: 'longRunning',
       })
-      const runPromise = payload.jobs.run({ silent: true })
-
-      await wait(100)
-      const initiallyRunningJob = await payload.findByID({
-        id: job.id,
-        collection: 'payload-jobs',
+      const originalWorker = payload.jobs.run({
+        queue: 'worker-recovery',
+        silent: true,
       })
 
+      // Wait until the first worker starts, then let its short lease expire as if it stopped.
+      await expect
+        .poll(
+          async () =>
+            (
+              await payload.findByID({
+                id: job.id,
+                collection: 'payload-jobs',
+              })
+            ).processingToken,
+        )
+        .toBeTruthy()
       await wait(350)
-      const renewedJob = await payload.findByID({
-        id: job.id,
-        collection: 'payload-jobs',
-      })
+      // Give the replacement worker the normal lease so it can finish the long-running job.
+      Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
 
-      await runPromise
+      const replacementWorkers = await Promise.all(
+        Array.from({ length: 10 }, () =>
+          payload.jobs.run({
+            limit: 1,
+            queue: 'worker-recovery',
+            silent: true,
+          }),
+        ),
+      )
+      const originalWorkerResult = await originalWorker
+
       const completedJob = await payload.findByID({
         id: job.id,
         collection: 'payload-jobs',
       })
-      payload.config.jobs.processingLease.duration = originalLeaseDuration
-      payload.config.jobs.processingLease.safetyBuffer = originalSafetyBuffer
-
-      expect(initiallyRunningJob.processingToken).toBeTruthy()
-      expect(renewedJob.processingToken).toBe(initiallyRunningJob.processingToken)
-      expect(new Date(renewedJob.processingUntil!).getTime()).toBeGreaterThan(
-        new Date(initiallyRunningJob.processingUntil!).getTime(),
+      const createdPosts = await payload.find({
+        collection: 'posts',
+        where: { title: { equals: postTitle } },
+      })
+      const workersThatRecoveredTheJob = replacementWorkers.filter(
+        (result) => result.jobStatus?.[job.id],
       )
-      expect(completedJob.processingToken).toBeFalsy()
-      expect(completedJob.processingUntil).toBeFalsy()
+
+      expect(originalWorkerResult.jobStatus?.[job.id]).toBeUndefined()
+      expect(workersThatRecoveredTheJob).toHaveLength(1)
+      expect(workersThatRecoveredTheJob[0]?.jobStatus?.[job.id]?.status).toBe('success')
+      expect(createdPosts.totalDocs).toBe(1)
+      expect(completedJob.completedAt).toBeTruthy()
+      expect(completedJob.hasError).toBe(false)
+      expect(completedJob.totalTried).toBe(1)
     })
 
-    it('should stop updating inside the lease safety buffer and be claimed again later', async () => {
+    it('should not let another worker pick up a healthy long-running job', async () => {
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      expect(payload.config.jobs.processingLease.duration).toBe(20 * 60 * 1000)
+      expect(payload.config.jobs.processingLease.safetyBuffer).toBe(30_000)
       payload.config.jobs.deleteJobOnComplete = false
-      const originalLeaseDuration = payload.config.jobs.processingLease.duration
-      const originalSafetyBuffer = payload.config.jobs.processingLease.safetyBuffer
+      payload.config.jobs.processingLease.duration = 600
+      payload.config.jobs.processingLease.safetyBuffer = 50
+
+      const postTitle = 'created by the healthy worker'
       const job = await payload.jobs.queue({
-        input: {},
+        input: { postTitle },
+        workflow: 'longRunning',
+      })
+      const firstWorker = payload.jobs.run({ silent: true })
+
+      await expect
+        .poll(
+          async () =>
+            (
+              await payload.findByID({
+                id: job.id,
+                collection: 'payload-jobs',
+              })
+            ).processingToken,
+        )
+        .toBeTruthy()
+      // Wait longer than the original lease. Heartbeats must keep the first worker active.
+      await wait(900)
+
+      const secondWorkerResult = await payload.jobs.run({ silent: true })
+      const firstWorkerResult = await firstWorker
+      const completedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+      const createdPosts = await payload.find({
+        collection: 'posts',
+        where: { title: { equals: postTitle } },
+      })
+      Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
+
+      expect(secondWorkerResult.jobStatus?.[job.id]).toBeUndefined()
+      expect(firstWorkerResult.jobStatus?.[job.id]?.status).toBe('success')
+      expect(createdPosts.totalDocs).toBe(1)
+      expect(completedJob.completedAt).toBeTruthy()
+      expect(completedJob.totalTried).toBe(1)
+    })
+
+    it('should recover an interrupted job without consuming a retry', async () => {
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      payload.config.jobs.deleteJobOnComplete = false
+      payload.config.jobs.processingLease.duration = 300
+      payload.config.jobs.processingLease.safetyBuffer = 250
+
+      const postTitle = 'created after retry-free recovery'
+      const job = await payload.jobs.queue({
+        input: { postTitle },
         workflow: 'longRunning',
       })
 
-      try {
-        payload.config.jobs.processingLease.duration = 300
-        payload.config.jobs.processingLease.safetyBuffer = 250
+      const unresponsiveWorkerResult = await payload.jobs.run({ silent: true })
+      // Give the replacement worker the normal lease so it can finish the long-running job.
+      Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
+      const replacementWorkerResult = await payload.jobs.run({ silent: true })
 
-        await payload.jobs.run({ silent: true })
-
-        const jobAfterSafetyBuffer = await payload.findByID({
-          id: job.id,
-          collection: 'payload-jobs',
-        })
-
-        expect(jobAfterSafetyBuffer.completedAt).toBeFalsy()
-        expect(jobAfterSafetyBuffer.log).toHaveLength(0)
-        expect(jobAfterSafetyBuffer.processingToken).toBeTruthy()
-      } finally {
-        payload.config.jobs.processingLease.duration = originalLeaseDuration
-        payload.config.jobs.processingLease.safetyBuffer = originalSafetyBuffer
-      }
-
-      await payload.jobs.run({ silent: true })
-
-      const reclaimedJob = await payload.findByID({
+      const completedJob = await payload.findByID({
         id: job.id,
         collection: 'payload-jobs',
       })
+      const createdPosts = await payload.find({
+        collection: 'posts',
+        where: { title: { equals: postTitle } },
+      })
 
-      expect(reclaimedJob.completedAt).toBeTruthy()
-      expect(reclaimedJob.processingToken).toBeFalsy()
-      expect(reclaimedJob.processingUntil).toBeFalsy()
-      expect(reclaimedJob.totalTried).toBe(1)
+      expect(unresponsiveWorkerResult.jobStatus?.[job.id]).toBeUndefined()
+      expect(replacementWorkerResult.jobStatus?.[job.id]?.status).toBe('success')
+      expect(createdPosts.totalDocs).toBe(1)
+      expect(completedJob.completedAt).toBeTruthy()
+      expect(completedJob.hasError).toBe(false)
+      expect(completedJob.totalTried).toBe(1)
     })
 
-    it('should prevent a previous owner from updating a job after ownership changes', async () => {
+    it('should ignore task results from a timed-out worker after another worker recovers the job', async () => {
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      payload.config.jobs.deleteJobOnComplete = false
+      payload.config.jobs.processingLease.duration = 300
+      payload.config.jobs.processingLease.safetyBuffer = 250
+
+      const postTitle = 'created after ignoring stale task results'
       const job = await payload.jobs.queue({
-        input: { message: 'ownership changed' },
-        task: 'CreateSimple',
+        input: { postTitle },
+        workflow: 'longRunning',
       })
-      const processingUntil = new Date(Date.now() + 60_000).toISOString()
-      const processingToken = 'previous-worker'
-      const replacementToken = 'replacement-worker'
+      const timedOutWorker = payload.jobs.run({ silent: true })
 
-      await payload.db.updateJobs({
-        id: job.id,
-        data: { processingToken, processingUntil },
-        returning: false,
-      })
-      await payload.db.updateJobs({
-        id: job.id,
-        data: { processingToken: replacementToken, processingUntil },
-        returning: false,
-      })
+      await expect
+        .poll(
+          async () =>
+            (
+              await payload.findByID({
+                id: job.id,
+                collection: 'payload-jobs',
+              })
+            ).processingToken,
+        )
+        .toBeTruthy()
+      await wait(350)
+      // Give the replacement worker the normal lease so it can finish the long-running job.
+      Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
 
-      const staleUpdate = await payload.db.updateJobs({
-        data: { hasError: true },
-        limit: 1,
-        returning: true,
-        where: {
-          and: [{ id: { equals: job.id } }, { processingToken: { equals: processingToken } }],
-        },
-      })
-      const claimedJob = await payload.findByID({
+      const replacementWorkerResult = await payload.jobs.run({ silent: true })
+      const timedOutWorkerResult = await timedOutWorker
+      const completedJob = await payload.findByID({
         id: job.id,
         collection: 'payload-jobs',
       })
+      const createdPosts = await payload.find({
+        collection: 'posts',
+        where: { title: { equals: postTitle } },
+      })
 
-      expect(staleUpdate ?? []).toHaveLength(0)
-      expect(claimedJob.hasError).toBe(false)
-      expect(claimedJob.processingToken).toBe(replacementToken)
+      expect(timedOutWorkerResult.jobStatus?.[job.id]).toBeUndefined()
+      expect(replacementWorkerResult.jobStatus?.[job.id]?.status).toBe('success')
+      expect(createdPosts.totalDocs).toBe(1)
+      expect(completedJob.log).toHaveLength(4)
+      expect(new Set(completedJob.log?.map(({ taskID }) => taskID)).size).toBe(4)
+      expect(completedJob.completedAt).toBeTruthy()
+      expect(completedJob.hasError).toBe(false)
     })
   })
 
