@@ -1195,6 +1195,7 @@ describe('Queues - Payload', () => {
     })
 
     it('should renew the lease while a job is running', async () => {
+      expect(payload.config.jobs.processingLease.duration).toBe(20 * 60 * 1000)
       expect(payload.config.jobs.processingLease.safetyBuffer).toBe(30_000)
       payload.config.jobs.deleteJobOnComplete = false
       const originalLeaseDuration = payload.config.jobs.processingLease.duration

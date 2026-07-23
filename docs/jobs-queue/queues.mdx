@@ -281,7 +281,7 @@ If the worker is killed, its lease eventually expires and a later jobs runner ca
 
 By default, Payload only starts a worker update when more than 30 seconds remain on its lease. This safety buffer gives the update time to finish before the lease expires and another worker can claim the job. If too little time remains, the update is rejected and the job becomes claimable after the lease expires.
 
-The default lease duration is two minutes and the default safety buffer is 30 seconds. You can change both globally:
+The default lease duration is 20 minutes and the default safety buffer is 30 seconds. You can change both globally:
 
 ```ts
 export default buildConfig({
