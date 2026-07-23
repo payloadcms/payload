@@ -1,0 +1,10 @@
+import type { DynamicMigrationTemplate } from 'payload'
+
+import { buildDynamicPredefinedJobsProcessingLeaseMigration } from '@payloadcms/drizzle'
+
+export const dynamic: DynamicMigrationTemplate = buildDynamicPredefinedJobsProcessingLeaseMigration(
+  {
+    dialect: 'sqlite',
+    packageName: '@payloadcms/db-d1-sqlite',
+  },
+)
