@@ -30,6 +30,7 @@ import { useThrottledEffect } from '../../hooks/useThrottledEffect.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useFormErrorHandler } from '../../providers/FormErrorHandler/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useOperation } from '../../providers/Operation/index.js'
 import { useRouter } from '../../providers/RouterAdapter/index.js'
@@ -95,6 +96,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const { code: locale } = useLocale()
   const { i18n, t } = useTranslation()
   const { refreshCookie, user } = useAuth()
+  const onNonFieldError = useFormErrorHandler()
   const operation = useOperation()
   const { queueTask } = useQueue()
 
@@ -278,11 +280,11 @@ export const Form: React.FC<FormProps> = (props) => {
       const hasFormSubmitAction =
         actionArg || typeof action === 'string' || typeof action === 'function'
 
-      if (redirect || disableToast || !hasFormSubmitAction) {
+      if (redirect || disableToast || !hasFormSubmitAction || Boolean(onNonFieldError)) {
         // Do not show submitting toast, as the promise toast may never disappear under these conditions.
         // Instead, make successToast() or errorToast() throw toast.success / toast.error
         successToast = (data) => toast.success(data)
-        errorToast = (data) => toast.error(data)
+        errorToast = (data) => { if (data) toast.error(data) }
       } else {
         toast.promise(promise, {
           error: (data) => {
@@ -511,6 +513,9 @@ export const Form: React.FC<FormProps> = (props) => {
             })
 
             nonFieldErrors.forEach((err) => {
+              if (onNonFieldError?.(err)) {
+                return
+              }
               errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
             })
 
@@ -551,6 +556,7 @@ export const Form: React.FC<FormProps> = (props) => {
       waitForAutocomplete,
       setModified,
       setSubmitted,
+      onNonFieldError,
     ],
   )
 
