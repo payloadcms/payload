@@ -52,7 +52,7 @@ describePostgres('queues - postgres logs', () => {
         jobStatus: { '1': { status: 'success' } },
         remainingJobsFromQueried: 0,
       })
-      expect(consoleCount).toHaveBeenCalledTimes(16) // Includes ownership checks before task and completion updates.
+      expect(consoleCount).toHaveBeenCalledTimes(16)
       consoleCount.mockRestore()
     })
   })
