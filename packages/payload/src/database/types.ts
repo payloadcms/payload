@@ -103,6 +103,10 @@ export interface BaseDatabaseAdapter {
    */
   migrateFresh: (args: { forceAcceptWarning?: boolean }) => Promise<void>
   /**
+   * Check if there are any changes that require a migration
+   */
+  migrateHasChanges: () => Promise<boolean>
+  /**
    * Run all migration down functions before running up
    */
   migrateRefresh: () => Promise<void>
@@ -110,6 +114,7 @@ export interface BaseDatabaseAdapter {
    * Run all migrate down functions
    */
   migrateReset: () => Promise<void>
+
   /**
    * Read the current state of migrations and output the result to show which have been run
    */
