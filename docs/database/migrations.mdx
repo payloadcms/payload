@@ -268,6 +268,89 @@ This will require that your build pipeline can connect to your database, and it 
 
 If it fails, the deployment will be rejected. But now, with your build script set up to run your migrations, you will be all set! Next time you deploy, your CI will execute the required migrations for you, and your database will be caught up with the shape that your Payload Config requires.
 
+## Renaming relationship and upload fields
+
+When you rename most field types in your Payload Config, `migrate:create` generates the SQL needed to preserve existing data under the new name—for example, renaming a text column on the main collection table.
+
+**Relationship and upload fields behave differently** depending on how they store data:
+
+| Field configuration                                 | Where data is stored                 | Auto-migration on rename                         |
+| --------------------------------------------------- | ------------------------------------ | ------------------------------------------------ |
+| `hasMany: true` or polymorphic (`relationTo` array) | `{collection}_rels` junction table   | **No** — existing rows keep the old `path` value |
+| `hasMany: false` (single relationship)              | Foreign key column on the main table | **Yes** — handled like other column renames      |
+
+For `hasMany` and polymorphic relationship fields (and the same patterns for upload fields), Payload stores related document IDs in a `{collection}_rels` table. Each row includes a `path` column that identifies which field the relationship belongs to—for example, `owners` or `meta.featuredPosts`.
+
+When you rename such a field from `owners` to `owners2`, Payload does **not** automatically update existing `path` values in `{collection}_rels`. The generated migration updates your schema, but previously saved relationships will appear missing in the Admin UI until the `path` values are migrated manually.
+
+<Banner type="warning">
+  After renaming a `hasMany` or polymorphic relationship/upload field, you must
+  manually migrate existing rows in the `{collection}_rels` table (Postgres and
+  SQLite) or update documents directly (MongoDB).
+</Banner>
+
+### Manual migration example (Postgres / SQLite)
+
+Given a `reports` collection with a `hasMany` relationship field renamed from `owners` to `owners2`:
+
+```ts
+{
+  slug: 'reports',
+  fields: [
+    {
+      name: 'owners2', // renamed from 'owners'
+      type: 'relationship',
+      relationTo: 'users',
+      hasMany: true,
+    },
+  ],
+}
+```
+
+After running your schema migration, update existing relationship rows:
+
+```sql
+UPDATE reports_rels
+SET path = 'owners2'
+WHERE path = 'owners';
+```
+
+For nested fields, `path` uses dot notation. Renaming a field inside a group from `meta.authors` to `meta.writers` would look like:
+
+```sql
+UPDATE posts_rels
+SET path = 'meta.writers'
+WHERE path = 'meta.authors';
+```
+
+You can add this SQL to a custom migration file created with `payload migrate:create` and edit before running, or run it as a one-off against your database.
+
+```ts
+import { type MigrateUpArgs, sql } from '@payloadcms/db-postgres'
+
+export async function up({ db }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql`
+    UPDATE reports_rels
+    SET path = 'owners2'
+    WHERE path = 'owners'
+  `)
+}
+
+export async function down({ db }: MigrateUpArgs): Promise<void> {
+  await db.execute(sql`
+    UPDATE reports_rels
+    SET path = 'owners'
+    WHERE path = 'owners2'
+  `)
+}
+```
+
+For SQLite, import from `@payloadcms/db-sqlite` instead.
+
+### MongoDB
+
+MongoDB stores `hasMany` relationship values directly on the document rather than in a separate `_rels` table. Renaming the field in your config does not rename the key on existing documents. Write a migration using the Local API or MongoDB driver to copy values from the old field name to the new one, then remove the old key.
+
 ## Running migrations in production
 
 In certain cases, you might want to run migrations at runtime when the server starts. Running them during build time may be impossible due to not having access to your database connection while building or similar reasoning.
