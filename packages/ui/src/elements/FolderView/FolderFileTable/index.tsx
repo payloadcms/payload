@@ -118,7 +118,7 @@ export function FolderFileTable({ showRelationCell = true }: Props) {
                 if (index === 0) {
                   return (
                     <span className={`${baseClass}__cell-with-icon`} key={`${itemKey}-${name}`}>
-                      <ColoredFolderIcon />
+                      <ColoredFolderIcon key="folder-icon" />
                       {cellValue}
                     </span>
                   )

@@ -174,7 +174,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
           ? {
               label: (
                 <div className={`${baseClass}__step-nav-icon-label`} key="root">
-                  <ColoredFolderIcon />
+                  <ColoredFolderIcon key="folder-icon" />
                   {getTranslation(labels?.plural, i18n)}
                 </div>
               ),
@@ -203,7 +203,7 @@ function CollectionFolderViewInContext(props: CollectionFolderViewInContextProps
                     })
                   }}
                 >
-                  <ColoredFolderIcon />
+                  <ColoredFolderIcon key="folder-icon" />
                   {getTranslation(labels?.plural, i18n)}
                 </DroppableBreadcrumb>
               ),

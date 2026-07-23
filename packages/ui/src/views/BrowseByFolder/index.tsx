@@ -174,7 +174,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
           ? {
               label: (
                 <div className={`${baseClass}__step-nav-icon-label`} key="root">
-                  <ColoredFolderIcon />
+                  <ColoredFolderIcon key="folder-icon" />
                   {t('folder:browseByFolder')}
                 </div>
               ),
@@ -196,7 +196,7 @@ function BrowseByFolderViewInContext(props: BrowseByFolderViewInContextProps) {
                     })
                   }}
                 >
-                  <ColoredFolderIcon />
+                  <ColoredFolderIcon key="folder-icon" />
                   {t('folder:browseByFolder')}
                 </DroppableBreadcrumb>
               ),
