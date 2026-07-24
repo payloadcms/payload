@@ -42,6 +42,7 @@ describe('registerSessionActivityListeners', () => {
       window: activityWindow.window,
     })
 
+    expect(activityWindow.addedListeners).toHaveLength(2)
     expect(activityWindow.addedListeners).toEqual([
       { listener: expect.any(Function), options: true, type: 'focus' },
       {
@@ -53,6 +54,7 @@ describe('registerSessionActivityListeners', () => {
 
     cleanup()
 
+    expect(activityWindow.removedListeners).toHaveLength(2)
     expect(activityWindow.removedListeners).toEqual(activityWindow.addedListeners)
   })
 })
@@ -70,14 +72,14 @@ function createWindow() {
         listener: EventListenerOrEventListenerObject | null,
         options?: AddEventListenerOptions | boolean,
       ) => {
-        registerListener({ listener, options, registrations: addedListeners, type })
+        addedListeners.push({ listener, options, type })
       },
       removeEventListener: (
         type: string,
         listener: EventListenerOrEventListenerObject | null,
         options?: EventListenerOptions | boolean,
       ) => {
-        registerListener({ listener, options, registrations: removedListeners, type })
+        removedListeners.push({ listener, options, type })
       },
     } as unknown as Window,
   }
@@ -86,21 +88,5 @@ function createWindow() {
 type ListenerRegistration = {
   listener: EventListenerOrEventListenerObject | null
   options: AddEventListenerOptions | EventListenerOptions | boolean | undefined
-  type: 'focus' | 'mousemove'
-}
-
-function registerListener({
-  listener,
-  options,
-  registrations,
-  type,
-}: {
-  listener: EventListenerOrEventListenerObject | null
-  options: AddEventListenerOptions | EventListenerOptions | boolean | undefined
-  registrations: ListenerRegistration[]
   type: string
-}): void {
-  if (type === 'focus' || type === 'mousemove') {
-    registrations.push({ listener, options, type })
-  }
 }
