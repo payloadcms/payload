@@ -3,6 +3,7 @@ import { RootLayout as UIRootLayout } from '@payloadcms/ui/layouts'
 import { Inter, Roboto_Mono } from 'next/font/google'
 import React from 'react'
 
+import { NextDevCompileStatusAdapter } from './devCompileStatusAdapter.js'
 import { NextRouterAdapter } from './router.js'
 import { nextServerAdapter } from './server.js'
 // SCSS import lives here (not in `@payloadcms/ui`) so the esbuild bundle that produces
@@ -34,13 +35,18 @@ export { metadata } from '@payloadcms/ui/layouts'
 
 type Props = Omit<
   React.ComponentProps<typeof UIRootLayout>,
-  'additionalDependencyChecks' | 'fonts' | 'RouterAdapter' | 'serverAdapter'
+  | 'additionalDependencyChecks'
+  | 'DevCompileStatusAdapter'
+  | 'fonts'
+  | 'RouterAdapter'
+  | 'serverAdapter'
 >
 
 export const RootLayout = (props: Props) => (
   <UIRootLayout
     {...props}
     additionalDependencyChecks={nextDependencyChecks}
+    DevCompileStatusAdapter={NextDevCompileStatusAdapter}
     fonts={[
       { className: inter.className, variable: inter.variable },
       { className: robotoMono.className, variable: robotoMono.variable },

@@ -225,6 +225,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:no',
   'general:columns',
   'general:columnToSort',
+  'general:compiling',
   'general:confirm',
   'general:confirmCopy',
   'general:confirmDeletion',

@@ -1,4 +1,5 @@
 export type * from './cookies.js'
+export type * from './devCompileStatus.js'
 export type * from './devReload.js'
 export type * from './render.js'
 export type * from './router.js'

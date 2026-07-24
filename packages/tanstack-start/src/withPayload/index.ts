@@ -21,6 +21,7 @@ import {
   serverOnlyClientSpecifiers,
 } from './importProtection.js'
 import { clientModuleResolution } from './workarounds/clientModuleResolution.js'
+import { payloadDevCompileStatus } from './workarounds/devCompileStatus.js'
 import { payloadDevTransforms } from './workarounds/devTransforms.js'
 import { reactDomServerInRsc } from './workarounds/reactDomServerInRsc.js'
 import { ssrStripDistStyleImports } from './workarounds/stripDistStyleImports.js'
@@ -207,6 +208,7 @@ export function withPayload(
         reactDomServerInRsc(),
         stubPrettierInClient(),
         payloadDevTransforms(),
+        payloadDevCompileStatus(),
       ],
       resolve: {
         alias: [{ find: '@payload-config', replacement: path.resolve(payloadConfigPath) }],
