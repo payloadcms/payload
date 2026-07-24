@@ -47,9 +47,21 @@ export const deleteOne: DeleteOne = async function deleteOne(
   })
 
   if (selectDistinctResult?.[0]?.id) {
-    docToDelete = await db.query[tableName].findFirst({
-      where: { RAW: (table) => eq(table.id, selectDistinctResult[0].id) },
+    // Build the full relational query (with sub-table `with` clauses for localized fields,
+    // relationships, etc.) and filter by the resolved primary key. A bare `findFirst({ where })`
+    // would omit those sub-tables, dropping localized/related field data from the deleted doc.
+    const findManyArgs = buildFindManyArgs({
+      adapter: this,
+      depth: 0,
+      fields: collection.flattenedFields,
+      joinQuery: false,
+      select,
+      tableName,
     })
+
+    findManyArgs.where = { RAW: (table) => eq(table.id, selectDistinctResult[0].id) }
+
+    docToDelete = await db.query[tableName].findFirst(findManyArgs)
   } else if (!selectDistinctResult) {
     const findManyArgs = buildFindManyArgs({
       adapter: this,

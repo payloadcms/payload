@@ -1,6 +1,8 @@
 import type { DrizzleAdapter } from '@payloadcms/drizzle'
 import type { Payload } from 'payload'
 
+import { getTableName } from 'drizzle-orm'
+
 import { isMongoose } from '../isMongoose.js'
 
 export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
@@ -28,14 +30,14 @@ export async function resetDB(_payload: Payload, collectionSlugs: string[]) {
 
     // Deleting the schema causes issues when restoring the database from a snapshot later on. That's why we only delete the table data here,
     // To avoid having to re-create any table schemas / indexes / whatever
-    const schema = db.drizzle._.schema
-    if (!schema) {
+    const tables = db.tables
+    if (!tables) {
       return
     }
 
-    const queries = Object.values(schema)
-      .map((table: any) => {
-        return `DELETE FROM ${db.schemaName ? db.schemaName + '.' : ''}${table.dbName};`
+    const queries = Object.values(tables)
+      .map((table) => {
+        return `DELETE FROM ${db.schemaName ? db.schemaName + '.' : ''}${getTableName(table)};`
       })
       .join('')
 

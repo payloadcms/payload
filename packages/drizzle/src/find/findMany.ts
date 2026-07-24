@@ -138,6 +138,10 @@ export const findMany = async function find({
     selectDistinctResult = await selectDistinct({
       adapter,
       db,
+      // findMany selects the unique primary key, so DISTINCT is only needed to dedupe rows
+      // multiplied by joins. Without joins it's redundant and would break ORDER BY on expressions
+      // Postgres requires in the select list (e.g. the `near` distance sort).
+      disableDistinct: joins.length === 0,
       // RQB v2 aliases the base table in `db.query`, which breaks the raw SQL `where`/`orderBy`
       // Payload builds against real table names. Resolving the ordered IDs up front via a manual
       // select (which keeps real table names) sidesteps that, so the relational fetch below only
