@@ -609,19 +609,6 @@ describe('General', () => {
       await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(anchorHref)
     })
 
-    test('dashboard — should navigate to collection', async () => {
-      await page.goto(postsUrl.admin)
-      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
-      await wait(1000)
-      const anchor = page.locator(`.card-${postsCollectionSlug} a.card__click`)
-      const anchorHref = await anchor.getAttribute('href')
-      await anchor.click()
-      // flaky
-      // eslint-disable-next-line playwright/no-wait-for-timeout
-      await page.waitForTimeout(1000)
-      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain(anchorHref)
-    })
-
     test('nav — should collapse and expand collection groups', async () => {
       await page.goto(postsUrl.admin)
       await openNav(page)
@@ -751,12 +738,8 @@ describe('General', () => {
 
     test('should replace history when adding query params to the URL and not push a new entry', async () => {
       await page.goto(postsUrl.admin)
-      // Wait for hydration - otherwise playwright clicks the card early and nothing happens
-      await wait(1000)
-      await page.locator('.collections__card-list .card__click').first().click()
-      // flaky
-      // eslint-disable-next-line playwright/no-wait-for-timeout
-      await page.waitForTimeout(1000)
+      await openNav(page)
+      await page.locator(`#nav-${postsCollectionSlug}`).click()
       // wait for the search params to get injected into the URL
       const escapedAdminURL = postsUrl.admin.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
       const pattern = new RegExp(`${escapedAdminURL}/collections/[^?]+\\?.*limit=[^&]+`)
@@ -773,12 +756,6 @@ describe('General', () => {
       await expect(page.locator('#nav-hidden-global')).toBeHidden()
     })
 
-    test('dashboard — should not show hidden collections and globals', async () => {
-      await page.goto(postsUrl.admin)
-      await expect(page.locator('#card-hidden-collection')).toBeHidden()
-      await expect(page.locator('#card-hidden-global')).toBeHidden()
-    })
-
     test('routing — should 404 on hidden collections and globals', async () => {
       await page.goto(postsUrl.collection('hidden-collection'))
       await expect(page.locator('.not-found')).toContainText('Nothing found')
@@ -790,12 +767,6 @@ describe('General', () => {
       await page.goto(notInViewUrl.admin)
       await expect(page.locator('#nav-not-in-view-collection')).toBeHidden()
       await expect(page.locator('#nav-global-not-in-view-global')).toBeHidden()
-    })
-
-    test('dashboard — should not show group: false collections and globals', async () => {
-      await page.goto(notInViewUrl.admin)
-      await expect(page.locator('#card-not-in-view-collection')).toBeHidden()
-      await expect(page.locator('#card-not-in-view-global')).toBeHidden()
     })
 
     test('routing — should not 404 on group: false collections and globals', async () => {
@@ -1271,7 +1242,8 @@ describe('General', () => {
         uploadThroughput: (500 * 1024) / 8,
       })
 
-      await page.locator('.collections__card-list .card').first().click()
+      await openNav(page)
+      await page.locator(`#nav-${postsCollectionSlug}`).click()
       await expect(page.locator('.progress-bar')).toBeVisible()
 
       // Reset network conditions

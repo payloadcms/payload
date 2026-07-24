@@ -204,11 +204,6 @@ const addDefaultDashboardWidgets = async ({
   const dashboard: DashboardConfig = (adminConfig.dashboard ??= { widgets: [] })
 
   dashboard.widgets.push({
-    slug: 'collections',
-    Component: '@payloadcms/ui/rsc#CollectionCards',
-    minWidth: 'full',
-  })
-  dashboard.widgets.push({
     slug: 'collection-query',
     Component: '@payloadcms/ui/rsc#CollectionQueryWidget',
     fields: await sanitizeFields({
@@ -237,8 +232,8 @@ const addDefaultDashboardWidgets = async ({
   })
   dashboard.defaultLayout ??= [
     {
-      widgetSlug: 'collections',
-      width: 'full',
+      widgetSlug: 'activity',
+      width: 'small',
     } satisfies WidgetInstance,
   ]
 }

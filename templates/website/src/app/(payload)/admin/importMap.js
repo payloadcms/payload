@@ -27,8 +27,6 @@ import { default as default_1a7510af427896d367a49dbf838d2de6 } from '@/component
 import { default as default_8a7ab0eb7ab5c511aba12e68480bfe5e } from '@/components/BeforeLogin'
 import { FolderIcon as FolderIcon_3817bf644402e67bfe6577f60ef982de } from '@payloadcms/ui'
 import { HierarchySidebarTabServer as HierarchySidebarTabServer_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
-import { CollectionCards as CollectionCards_ab83ff7e88da8d3530831f296ec4756a } from '@payloadcms/ui/rsc'
-
 /** @type import('payload').ImportMap */
 export const importMap = {
   '@payloadcms/ui#NullField': NullField_3817bf644402e67bfe6577f60ef982de,
@@ -79,5 +77,4 @@ export const importMap = {
   '@payloadcms/ui#FolderIcon': FolderIcon_3817bf644402e67bfe6577f60ef982de,
   '@payloadcms/ui/rsc#HierarchySidebarTabServer':
     HierarchySidebarTabServer_ab83ff7e88da8d3530831f296ec4756a,
-  '@payloadcms/ui/rsc#CollectionCards': CollectionCards_ab83ff7e88da8d3530831f296ec4756a,
 }
