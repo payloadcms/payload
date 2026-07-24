@@ -126,7 +126,6 @@ observable session state:
 - `login()` performs the real provider login flow and records the original cookie and expiration;
 - `advanceBy(duration)` advances the provider and all browser clocks together;
 - `moveMouse(page)` uses Playwright's mouse API;
-- `focus(page)` activates the page with `bringToFront`;
 - `openTab()` creates a page in the shared browser context at the current scenario time;
 - `readExpiration(page)` reads the admin's rendered session expiration;
 - `expectLoggedIn(page)` checks authenticated admin UI and `/me`;
@@ -138,6 +137,11 @@ The helper must not intercept or fulfill auth requests, expose `AuthProvider` ca
 synthetic focus or mouse events, or construct `BroadcastChannel` or `StorageEvent` messages.
 Assertions and the important ordering of actions remain visible in each test.
 
+Headless Chromium does not model real tab lifecycle changes for this suite: `bringToFront`, CDP
+target activation, and keyboard tab switching leave both pages visible and emit neither a trusted
+`focus` event nor `visibilitychange`. The focus listener therefore remains covered at the focused
+unit boundary. The E2E suite must not simulate the missing browser lifecycle event.
+
 ## End-to-End Scenarios
 
 The dedicated suite should prove:
@@ -145,14 +149,12 @@ The dedicated suite should prove:
 1. A user logs in with a finite token, moves the mouse before the refresh window, refreshes at the
    checkpoint, receives a rotated cookie with a later expiration, and remains logged in past the
    original expiration.
-2. Bringing a page to the front inside the refresh window refreshes the token and keeps the admin
-   authenticated past the original expiration.
-3. With no activity, advancing to expiration logs the admin out and `/me` no longer returns a user.
-4. If the provider session expires or is revoked before refresh, the next real refresh is rejected
+2. With no activity, advancing to expiration logs the admin out and `/me` no longer returns a user.
+3. If the provider session expires or is revoked before refresh, the next real refresh is rejected
    and the admin logs out.
-5. Refreshing in one tab rotates the shared cookie, updates the second tab to the same expiration,
+4. Refreshing in one tab rotates the shared cookie, updates the second tab to the same expiration,
    and keeps both tabs authenticated past the original expiration.
-6. Explicit logout in one tab invalidates the provider session and logs out the other tab.
+5. Explicit logout in one tab invalidates the provider session and logs out the other tab.
 
 Each scenario asserts user-visible admin state, the real HTTP result, and token state where
 applicable. Token rotation is proven by comparing HTTP-only cookie values and confirming the old
@@ -178,7 +180,7 @@ Move the session-specific browser scenarios out of the general auth E2E file int
 custom-strategy suite. Replace them rather than keeping both versions. Remove test-only debug
 controls and helpers when the dedicated suite no longer uses them.
 
-The final inventory should be driven by the six user scenarios and the focused protocol units, not
+The final inventory should be driven by the five real-browser scenarios and the focused protocol units, not
 by preserving the previous test count.
 
 ## Backport
