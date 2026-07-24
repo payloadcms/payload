@@ -263,7 +263,7 @@ export const ScheduleDrawer: React.FC<Props> = ({
   }, [upcoming, fetchUpcoming])
 
   const minTime = useMemo(() => {
-    if (date && isToday(date)) {
+    if (!date || isToday(date)) {
       return new Date()
     }
 
@@ -306,6 +306,11 @@ export const ScheduleDrawer: React.FC<Props> = ({
             minDate={new Date()}
             minTime={minTime}
             onChange={(e) => onChangeDate(e)}
+            overrides={{
+              onChangeRaw: (event) => {
+                event?.preventDefault()
+              },
+            }}
             pickerAppearance="dayAndTime"
             readOnly={processing}
             timeFormat={schedulePublishConfig?.timeFormat}
