@@ -747,6 +747,80 @@ describe('Queues - Payload', () => {
     expect(durations[3]).toBeGreaterThan(2400)
   })
 
+  it('should run a job only once when multiple workers poll the same queue', async () => {
+    _internal_jobSystemGlobals.shouldAutoRun = false
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const message = 'run once with multiple workers'
+    const job = await payload.jobs.queue({
+      input: {
+        message,
+      },
+      queue: 'multi-worker',
+      task: 'CreateSimple',
+    })
+
+    const workerCount = 10
+    const results = await Promise.all(
+      Array.from({ length: workerCount }, () =>
+        payload.jobs.run({
+          queue: 'multi-worker',
+          silent: true,
+          limit: 1,
+        }),
+      ),
+    )
+
+    const createdDocuments = await payload.find({
+      collection: 'simple',
+      where: {
+        title: {
+          equals: message,
+        },
+      },
+    })
+    expect(createdDocuments.totalDocs).toBe(1)
+
+    const workersThatRanTheJob = results.filter((result) => result.jobStatus?.[job.id])
+    expect(workersThatRanTheJob).toHaveLength(1)
+  })
+
+  it('should run a job only once when multiple workers run the same job by ID', async () => {
+    _internal_jobSystemGlobals.shouldAutoRun = false
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const message = 'run once by ID with multiple workers'
+    const job = await payload.jobs.queue({
+      input: {
+        message,
+      },
+      task: 'CreateSimple',
+    })
+
+    const workerCount = 10
+    const results = await Promise.all(
+      Array.from({ length: workerCount }, () =>
+        payload.jobs.runByID({
+          id: job.id,
+          silent: true,
+        }),
+      ),
+    )
+
+    const createdDocuments = await payload.find({
+      collection: 'simple',
+      where: {
+        title: {
+          equals: message,
+        },
+      },
+    })
+    expect(createdDocuments.totalDocs).toBe(1)
+
+    const workersThatRanTheJob = results.filter((result) => result.jobStatus?.[job.id])
+    expect(workersThatRanTheJob).toHaveLength(1)
+  })
+
   it('ensure jobs run in FIFO order by default', async () => {
     await payload.jobs.queue({
       workflow: 'inlineTaskTestDelayed',
@@ -899,6 +973,8 @@ describe('Queues - Payload', () => {
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(after?.id).toBe(id)
+    expect(after?.processing).toBe(false)
+    expect(after?.processingToken).toBeFalsy()
   })
 
   it('should respect deleteJobOnComplete false configuration', async () => {
@@ -917,6 +993,8 @@ describe('Queues - Payload', () => {
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(after?.id).toBe(id)
+    expect(after?.processing).toBe(false)
+    expect(after?.processingToken).toBeFalsy()
   })
 
   it('can queue single tasks', async () => {

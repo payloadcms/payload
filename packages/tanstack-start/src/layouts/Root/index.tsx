@@ -19,6 +19,7 @@ export type RootLayoutData = {
   clientConfig: ClientConfig
   dateFNSKey: I18nClient['dateFNSKey']
   fallbackLang: string
+  isEmbedded: boolean
   isNavOpen: boolean
   languageCode: string
   languageOptions: LanguageOptions
@@ -54,6 +55,7 @@ export function RootLayout({ children, data, serverFunction }: RootLayoutProps) 
         <RootProvider
           config={data.clientConfig}
           dateFNSKey={data.dateFNSKey}
+          embed={data.isEmbedded}
           fallbackLang={data.fallbackLang as AcceptedLanguages}
           highContrastMode={false}
           isNavOpen={data.isNavOpen}
