@@ -57,7 +57,6 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.i18n = config.i18n ?? {}
   config.jobs = {
     deleteJobOnComplete: true,
-    depth: 0,
     ...(config.jobs || {}),
     access: {
       cancel: defaultAccess,
@@ -65,7 +64,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
       run: defaultAccess,
       ...(config.jobs?.access || {}),
     },
-  } as JobsConfig
+  }
   config.localization = config.localization ?? false
   config.maxDepth = config.maxDepth ?? 10
   config.routes = {
