@@ -4,12 +4,15 @@ import { expect } from '@playwright/test'
 
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import {
+  AUTH_SESSION_TEST_ADMIN_ROUTES,
   AUTH_SESSION_TEST_ROUTES,
   authSessionExpirationSelector,
+  authSessionRefreshEndpointPathname,
   authSessionUsersSlug,
+  type LoggedOutRoute,
 } from './shared.js'
 
-export type LoggedOutRoute = 'inactivity' | 'login'
+export type { LoggedOutRoute } from './shared.js'
 
 export type AuthSessionCookie = Awaited<ReturnType<BrowserContext['cookies']>>[number]
 
@@ -78,9 +81,7 @@ export async function createSessionScenario({
       await expect(page.locator('.nav')).toBeVisible()
     },
     async expectLoggedOut({ page, route }) {
-      await expect(page).toHaveURL(
-        route === 'inactivity' ? /\/admin\/logout-inactivity/ : /\/admin\/login/,
-      )
+      await expect(page).toHaveURL(`${url.admin}${AUTH_SESSION_TEST_ADMIN_ROUTES[route]}`)
     },
     async focus({ awayPage, page }) {
       await awayPage.bringToFront()
@@ -138,7 +139,7 @@ export async function createSessionScenario({
 
         return (
           response.request().method() === 'POST' &&
-          requestURL.pathname === `/api/${authSessionUsersSlug}/refresh-token` &&
+          requestURL.pathname === authSessionRefreshEndpointPathname &&
           requestURL.searchParams.has('refresh')
         )
       })

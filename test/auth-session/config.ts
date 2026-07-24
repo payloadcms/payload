@@ -13,6 +13,7 @@ import {
   rotateProviderSession,
 } from './authFixture.js'
 import {
+  AUTH_SESSION_TEST_ADMIN_ROUTES,
   authSessionStrategyName,
   authSessionTokenLifetimeMs,
   authSessionUsersSlug,
@@ -67,6 +68,7 @@ export default buildConfigWithDefaults(
       importMap: {
         baseDir: path.resolve(dirname),
       },
+      routes: AUTH_SESSION_TEST_ADMIN_ROUTES,
       user: authSessionUsersSlug,
     },
     collections: [authSessionUsers],
