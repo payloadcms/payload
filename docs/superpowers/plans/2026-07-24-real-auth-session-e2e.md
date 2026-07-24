@@ -670,7 +670,6 @@ pnpm vitest --run --project unit \
 **Files:**
 
 - Review: `docs/superpowers/specs/2026-07-23-activity-checkpoint-session-refresh-design.md`
-- Review: `docs/superpowers/plans/2026-07-23-activity-checkpoint-session-refresh.md`
 - Review: all files changed from `main`
 
 **Verification:**
