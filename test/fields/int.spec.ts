@@ -245,6 +245,49 @@ describe('Fields', () => {
       ).rejects.toThrow()
     })
 
+    it('should scope localized uniqueness per locale across documents', async () => {
+      // Doc A: en `my-slug`, es `my-slugo`.
+      const a = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'A', localizedSlug: 'my-slug' },
+        locale: 'en',
+      })
+      created.push(a.id)
+      await payload.update({
+        collection: 'slug-fields',
+        id: a.id,
+        data: { localizedSlug: 'my-slugo' },
+        locale: 'es',
+      })
+
+      // Doc B may take `my-slug` in es — it matches A's en value, but the es namespace is free.
+      const b = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'B', localizedSlug: 'my-slug' },
+        locale: 'es',
+      })
+      created.push(b.id)
+
+      const aLocales = (
+        await payload.findByID({ collection: 'slug-fields', id: a.id, locale: 'all' })
+      ).localizedSlug as unknown as Record<string, string>
+      const bLocales = (
+        await payload.findByID({ collection: 'slug-fields', id: b.id, locale: 'all' })
+      ).localizedSlug as unknown as Record<string, string>
+      expect(aLocales.en).toBe('my-slug')
+      expect(aLocales.es).toBe('my-slugo')
+      expect(bLocales.es).toBe('my-slug')
+
+      // But B cannot take `my-slugo` in es — that collides with A within the es namespace.
+      await expect(
+        payload.create({
+          collection: 'slug-fields',
+          data: { title: 'C', localizedSlug: 'my-slugo' },
+          locale: 'es',
+        }),
+      ).rejects.toThrow()
+    })
+
     it('should auto-increment a derived localized slug that collides within the same locale', async () => {
       const first = await payload.create({
         collection: 'slug-fields',
