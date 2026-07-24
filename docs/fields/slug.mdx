@@ -35,22 +35,27 @@ export const ExampleCollection: CollectionConfig = {
 
 The Slug Field defaults `required`, `unique`, and `index` to `true`, and renders in the `sidebar`. In addition to the standard [field options](./overview#field-options), it exposes:
 
-| Option         | Description                                                                                                                             |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `useAsSlug` \* | **Required.** The name of the top-level field to generate the slug from (e.g. `'title'`). This field must exist in the same collection. |
-| `slugify`      | Override the default slugify function. [More details](#custom-slugify-function).                                                        |
+| Option      | Description                                                                                                                         |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `useAsSlug` | Optional. The name of the top-level field to generate the slug from (e.g. `'title'`). This field must exist in the same collection. |
+| `slugify`   | Optional. Override the default slugify function. [More details](#custom-slugify-function).                                          |
 
 Because `slug` is a standard named field, customize it with the usual field properties directly — `label`, `localized`, `required`, `unique` (set `false` to drop the unique index, e.g. for a per-tenant compound index), `index`, `defaultValue`, and `admin` (including `admin.position`).
 
 ## Generation
 
-The slug auto-generates from the `useAsSlug` field and tracks it until an editor takes over:
+The slug is static: it fills once while empty and is preserved thereafter, so editing the source field later never rewrites it — this protects live URLs from changing unexpectedly.
 
-- On create, the slug generates from the source field unless a value is provided explicitly.
-- The slug continues to track the source field on save as long as it has not been manually changed. Once an editor unlocks and edits the slug, it is frozen and no longer regenerates — this protects live URLs from changing unexpectedly.
-- Editors can re-generate the slug on-demand from the Admin Panel, which re-aligns it with the source field.
+- On create, an empty slug is derived from the `useAsSlug` source field, if any. With no source value (or no `useAsSlug` configured), it falls back to `<singular>-<N>`, where `N` is the first available integer (e.g. `posts-1`). The slug is therefore always present the moment the document is created.
+- An explicit value always wins and is normalized through [`slugify`](#custom-slugify-function) (e.g. `Hello World` → `hello-world`). It must be unique — a collision is rejected rather than silently changed.
+- Once set, the slug is never regenerated automatically. Editors can unlock the field to edit it directly, or re-generate it on-demand from the Admin Panel.
+- Generated values are deduped against existing documents so two never claim the same slug.
 
-For [autosave-enabled](../versions/autosave) documents, the slug does not generate on the initial draft (so it does not lock to empty or partial content while the document is being written), begins generating on subsequent autosaves, and stabilizes once the document is published.
+Because the slug is guaranteed to exist on create, [autosave-enabled](../versions/autosave) documents get a stable slug on the initial draft — before a title is typed — which live preview needs to load the document by its slug.
+
+### Localization
+
+A localized slug is unique per locale: the same value can be reused across a document's own locales, but not across documents within one locale. Every locale is seeded on create, so switching locales never lands on a blank slug, and generation is locale-aware when the source is localized.
 
 ## Custom Slugify Function
 
