@@ -28,7 +28,7 @@ import { getTableAlias } from './getTableAlias.js'
 
 type Constraint = {
   columnName: string
-  table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+  table: PgTableWithColumns<any>
   value: unknown
 }
 
@@ -43,12 +43,12 @@ type TableColumn = {
   getNotNullColumnByValue?: (val: unknown) => string
   pathSegments?: string[]
   rawColumn?: SQL
-  table: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+  table: PgTableWithColumns<any>
 }
 
 type Args = {
   adapter: DrizzleAdapter
-  aliasTable?: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+  aliasTable?: PgTableWithColumns<any>
   collectionPath: string
   columnPrefix?: string
   constraintPath?: string
@@ -56,7 +56,7 @@ type Args = {
   fields: FlattenedField[]
   joins: BuildQueryJoinAliases
   locale?: string
-  parentAliasTable?: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+  parentAliasTable?: PgTableWithColumns<any>
   parentIsLocalized: boolean
   pathSegments: string[]
   rootTableName?: string
@@ -378,11 +378,12 @@ export const getTableColumnFromPath = ({
             (e) => e.queryPath === `${constraintPath}${field.name}._rels`,
           )
 
-          const aliasRelationshipTable = (existingTable?.table ??
+          const aliasRelationshipTable =
+            existingTable?.table ??
             getTableAlias({
               adapter,
               tableName: relationTableName,
-            }).newAliasTable) as PgTableWithColumns<any>
+            }).newAliasTable
 
           const relationshipField = getFieldByPath({
             fields: adapter.payload.collections[field.collection].config.flattenedFields,
@@ -433,11 +434,12 @@ export const getTableColumnFromPath = ({
             (e) => e.queryPath === `${constraintPath}${field.name}`,
           )
 
-          const relationshipTable = (existingMainTable?.table ??
+          const relationshipTable =
+            existingMainTable?.table ??
             getTableAlias({
               adapter,
               tableName: relationshipTableName,
-            }).newAliasTable) as PgTableWithColumns<any>
+            }).newAliasTable
 
           if (!existingMainTable) {
             joins.push({
@@ -507,10 +509,7 @@ export const getTableColumnFromPath = ({
             })
 
             joins.push({
-              condition: eq(
-                (newAliasTable as PgTableWithColumns<any>).id,
-                arrayAliasTable._parentID,
-              ),
+              condition: eq(newAliasTable.id, arrayAliasTable._parentID),
               queryPath: `${constraintPath}${field.name}`,
               table: newAliasTable,
             })
@@ -570,9 +569,9 @@ export const getTableColumnFromPath = ({
 
           const existingTable = joins.find((e) => e.queryPath === `${constraintPath}${field.name}`)
 
-          const table = (existingTable?.table ??
-            getTableAlias({ adapter, tableName: newTableName })
-              .newAliasTable) as PgTableWithColumns<any>
+          const table =
+            existingTable?.table ??
+            getTableAlias({ adapter, tableName: newTableName }).newAliasTable
 
           const joinConstraints = [
             eq(adapter.tables[rootTableName].id, table.parent),
@@ -620,7 +619,7 @@ export const getTableColumnFromPath = ({
 
           const existingJoin = joins.find((e) => e.queryPath === `${constraintPath}.${field.name}`)
 
-          let aliasRelationshipTable: PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+          let aliasRelationshipTable: PgTableWithColumns<any>
           let aliasRelationshipTableName: string
           if (existingJoin) {
             aliasRelationshipTable = existingJoin.table
