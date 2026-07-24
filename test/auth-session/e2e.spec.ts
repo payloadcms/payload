@@ -108,6 +108,21 @@ test.describe('Auth session', () => {
     await scenario.expectLoggedIn(secondPage)
   })
 
+  test('should revoke the provider session and log out both tabs on explicit logout', async () => {
+    const firstPage = await scenario.login()
+    const secondPage = await scenario.openTab()
+    const originalCookie = await scenario.readTokenCookie()
+
+    expect(originalCookie).toBeDefined()
+
+    await scenario.logout(firstPage)
+
+    await scenario.expectLoggedOut({ page: firstPage, route: 'login' })
+    await scenario.expectLoggedOut({ page: secondPage, route: 'login' })
+    await scenario.expectProviderSessionRevoked({ token: originalCookie?.value ?? '' })
+    expect(await scenario.readTokenCookie()).toBeUndefined()
+  })
+
   // eslint-disable-next-line playwright/expect-expect -- assertions are delegated to expectLoggedOut.
   test('should expire and log out without activity', async () => {
     const page = await scenario.login()

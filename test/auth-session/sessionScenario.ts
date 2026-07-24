@@ -21,6 +21,7 @@ export type SessionScenario = {
   close: () => Promise<void>
   expectLoggedIn: (page: Page) => Promise<void>
   expectLoggedOut: (args: { page: Page; route: LoggedOutRoute }) => Promise<void>
+  expectProviderSessionRevoked: (args: { token: string }) => Promise<void>
   login: () => Promise<Page>
   logout: (page: Page) => Promise<void>
   moveMouse: (page: Page) => Promise<void>
@@ -129,6 +130,24 @@ export async function createSessionScenario({
           return result.user
         })
         .toBeNull()
+    },
+    async expectProviderSessionRevoked({ token }) {
+      const response = await context.request.get(`${serverURL}/api/${authSessionUsersSlug}/me`, {
+        headers: {
+          cookie: `payload-token=${token}`,
+        },
+      })
+      const result = (await response.json()) as
+        | {
+            exp: number
+            user: { id: number | string }
+          }
+        | {
+            user: null
+          }
+
+      expect(response.status()).toBe(200)
+      expect(result.user).toBeNull()
     },
     async login() {
       const response = await context.request.post(
