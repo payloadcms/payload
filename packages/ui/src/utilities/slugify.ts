@@ -4,7 +4,8 @@ import {
   executeAccess,
   getFieldByPath,
   getSlugFallbackValue,
-  getUniqueSlugValue,
+  getUniqueFieldValue,
+  hasDraftsEnabled,
   type ServerFunction,
   type SlugifyServerFunctionArgs,
   UnauthorizedError,
@@ -87,9 +88,10 @@ export const slugifyHandler: ServerFunction<
   // A source resolved to a value: dedupe it the same way the next save would, so the generate button
   // can't hand back a slug that's already taken. With no source, return the `<singular>-N` fallback.
   if (result) {
-    return getUniqueSlugValue({
+    return getUniqueFieldValue({
       id: excludeId,
-      collection: collectionConfig,
+      collection: collectionConfig.slug,
+      draftsEnabled: hasDraftsEnabled(collectionConfig),
       field: field.name,
       locale: localeToScope,
       req,

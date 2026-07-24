@@ -1608,7 +1608,6 @@ export type { ValidationFieldError } from './errors/index.js'
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
 export { getSlugFallbackValue } from './fields/baseFields/slug/getSlugFallbackValue.js'
-export { getUniqueSlugValue } from './fields/baseFields/slug/getUniqueSlugValue.js'
 
 export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 
@@ -1962,6 +1961,8 @@ export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes
 export { getFieldByPath } from './utilities/getFieldByPath.js'
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { getRequestLanguage } from './utilities/getRequestLanguage.js'
+export { getUniqueFieldValue } from './utilities/getUniqueFieldValue.js'
+export { hasDraftsEnabled } from './utilities/getVersionsConfig.js'
 export { handleEndpoints } from './utilities/handleEndpoints.js'
 export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'
