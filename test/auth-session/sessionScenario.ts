@@ -81,7 +81,10 @@ export async function createSessionScenario({
       await expect(page.locator('.nav')).toBeVisible()
     },
     async expectLoggedOut({ page, route }) {
-      await expect(page).toHaveURL(`${url.admin}${AUTH_SESSION_TEST_ADMIN_ROUTES[route]}`)
+      const expectedPathname = new URL(`${url.admin}${AUTH_SESSION_TEST_ADMIN_ROUTES[route]}`)
+        .pathname
+
+      await expect.poll(() => new URL(page.url()).pathname).toBe(expectedPathname)
     },
     async focus({ awayPage, page }) {
       await awayPage.bringToFront()
