@@ -63,29 +63,123 @@ Remove code that existed only for the discarded activity model rather than leavi
 - remove pathname observation and its activity effect from `AuthProvider`, including imports that become unused;
 - remove test helpers and assertions that dispatch or inspect the discarded signals;
 - remove the checkbox, drawer, and route-activity E2E cases rather than rewriting them to produce mouse movement;
-- replace the old multi-event E2E helper with a focused repeated-mouse-movement helper;
+- remove the old multi-event E2E helper;
 - remove any timer, ref, callback, or mock that becomes unused after the new checkpoint flow is implemented.
 
 Keep code that remains necessary for cross-tab session synchronization, token-expiration assertions, request serialization, or the new checkpoint tests. The final change should not retain dead branches for the superseded behavior.
 
-## Testing
+## End-to-End Auth Fixture
 
-Unit coverage should prove:
+Session behavior should be verified through a dedicated test configuration rather than mocked
+`AuthProvider` dependencies or hand-built browser messages. The fixture represents an OAuth-like
+identity provider through Payload's actual custom-auth-strategy interface.
 
-- focus and mouse movement are the only registered browser activity listeners;
-- activity timestamp updates remain throttled to once per five seconds;
-- pre-window recent activity triggers exactly one refresh at the checkpoint;
-- old activity does not trigger the checkpoint;
-- activity inside the refresh window schedules a refresh;
-- a successful refresh clears activity and schedules the next checkpoint;
-- cleanup removes listeners and checkpoint timers.
+The fixture uses:
 
-End-to-end coverage should prove:
+- a dedicated admin auth collection with local authentication disabled, provider sessions enabled
+  by the fixture, and a five-minute virtual token lifetime;
+- an opaque token stored in the real HTTP-only `payload-token` cookie;
+- a server-side test session store mapping each token to a user and expiration;
+- a custom `AuthStrategyFunction` that reads the cookie, rejects missing, revoked, or expired
+  sessions, and returns the corresponding Payload user;
+- a custom login endpoint that creates the provider session and sets the cookie;
+- a collection `me` hook that returns the provider session expiration;
+- a collection `refresh` hook that rotates the opaque token, invalidates the old token, extends the
+  expiration, and returns `setCookie: true`;
+- an `afterLogout` hook that invalidates the provider session;
+- reset and clock endpoints available only in the dedicated test configuration.
 
-- mouse movement recorded before the refresh window causes a later checkpoint refresh;
-- focusing the window inside the refresh window causes a refresh;
-- repeated mouse movement does not create duplicate requests;
-- existing cross-tab refresh, expiration, and logout behavior remains unchanged.
+The login, `/me`, `/refresh-token`, and `/logout` requests remain real. Payload's request
+authentication, admin `AuthProvider`, cookie handling, refresh scheduling, routing, and
+`BroadcastChannel` synchronization run without replacement.
+
+The custom strategy alone is insufficient because a strategy only authenticates an incoming
+request. The `me` and `refresh` hooks are required to expose and rotate an opaque provider token
+without falling back to decoding or issuing a local JWT.
+
+## Shared Virtual Time
+
+The test does not wait for the configured token lifetime in wall-clock time. A shared test clock
+controls the provider session store, and each open Playwright page installs its clock at the same
+timestamp.
+
+The scenario helper advances time in this order:
+
+1. Advance the provider clock through its real test-only HTTP endpoint.
+2. Advance every registered Playwright page by the same duration.
+3. Wait for the timers and resulting network requests to settle.
+
+New tabs install their Playwright clock at the scenario's current time before navigating. This
+keeps token expiration, activity checkpoints, force-logout timers, and cross-tab comparisons on one
+timeline. The token lifetime can remain human-readable, such as five minutes, because advancing it
+takes milliseconds rather than five real minutes.
+
+Payload's cookie expiration may use the process wall clock; the custom strategy treats the provider
+session store as the authentication authority. The cookie must remain present long enough for the
+test, while the strategy decides whether its opaque value is current, expired, or revoked.
+
+## Scenario Helper
+
+Provide a small helper local to the dedicated E2E suite. Its API describes user actions and
+observable session state:
+
+- `login()` performs the real provider login flow and records the original cookie and expiration;
+- `advanceBy(duration)` advances the provider and all browser clocks together;
+- `moveMouse(page)` uses Playwright's mouse API;
+- `focus(page)` activates the page with `bringToFront`;
+- `openTab()` creates a page in the shared browser context at the current scenario time;
+- `readExpiration(page)` reads the admin's rendered session expiration;
+- `expectLoggedIn(page)` checks authenticated admin UI and `/me`;
+- `expectLoggedOut(page)` checks the login or inactivity UI and unauthenticated `/me`;
+- `waitForRefresh(page)` observes the real refresh request and response;
+- `readTokenCookie()` reads the HTTP-only cookie through Playwright for rotation assertions.
+
+The helper must not intercept or fulfill auth requests, expose `AuthProvider` callbacks, dispatch
+synthetic focus or mouse events, or construct `BroadcastChannel` or `StorageEvent` messages.
+Assertions and the important ordering of actions remain visible in each test.
+
+## End-to-End Scenarios
+
+The dedicated suite should prove:
+
+1. A user logs in with a finite token, moves the mouse before the refresh window, refreshes at the
+   checkpoint, receives a rotated cookie with a later expiration, and remains logged in past the
+   original expiration.
+2. Bringing a page to the front inside the refresh window refreshes the token and keeps the admin
+   authenticated past the original expiration.
+3. With no activity, advancing to expiration logs the admin out and `/me` no longer returns a user.
+4. If the provider session expires or is revoked before refresh, the next real refresh is rejected
+   and the admin logs out.
+5. Refreshing in one tab rotates the shared cookie, updates the second tab to the same expiration,
+   and keeps both tabs authenticated past the original expiration.
+6. Explicit logout in one tab invalidates the provider session and logs out the other tab.
+
+Each scenario asserts user-visible admin state, the real HTTP result, and token state where
+applicable. Token rotation is proven by comparing HTTP-only cookie values and confirming the old
+token no longer authenticates.
+
+## Unit-Test Boundary
+
+Keep unit coverage only for deterministic behavior that cannot become more real by running it in a
+browser:
+
+- the five-second leading activity throttle;
+- registration and cleanup of focus and mouse-movement listeners;
+- stale token event rejection and equal-time event ordering;
+- storage fallback privacy and transport downgrade;
+- coordinator cleanup while a storage resynchronization is pending.
+
+Do not retain mocked React-provider suites. Do not reproduce message-ordering tests by injecting raw
+protocol messages into Playwright.
+
+## Test Migration
+
+Move the session-specific browser scenarios out of the general auth E2E file into the dedicated
+custom-strategy suite. Replace them rather than keeping both versions. Remove test-only debug
+controls and helpers when the dedicated suite no longer uses them.
+
+The final inventory should be driven by the six user scenarios and the focused protocol units, not
+by preserving the previous test count.
 
 ## Backport
 
