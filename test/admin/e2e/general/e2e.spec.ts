@@ -1127,6 +1127,27 @@ describe('General', () => {
       await expect(page.locator('#field-description')).toHaveValue(description)
     })
 
+    test('should show submitting toast while creating', async () => {
+      const postsAPIURL = `${serverURL}/api/posts?*`
+
+      await page.route(postsAPIURL, async (route) => {
+        if (route.request().method() === 'POST') {
+          await wait(1000)
+        }
+
+        await route.continue()
+      })
+
+      await page.goto(postsUrl.create)
+      await page.locator('#field-title').fill(title)
+      await page.locator('#action-save').click()
+
+      await expect(page.locator('.payload-toast-container')).toContainText('Submitting...')
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
+
+      await page.unroute(postsAPIURL)
+    })
+
     test('should read existing', async () => {
       const { id } = await createPost()
       await page.goto(postsUrl.edit(id))
