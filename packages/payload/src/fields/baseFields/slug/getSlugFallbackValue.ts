@@ -16,9 +16,10 @@ type Args = {
 }
 
 /**
- * The slug a document falls back to when it has no source to derive from: `<singular>-<N>`, where
- * `N` is the first available integer. Uses the collection's singular label when it resolves to a
- * plain string, otherwise the collection slug. See {@link getUniqueFieldValue}.
+ * The slug a document falls back to when it has no source to derive from, e.g. `useAsSlug` is empty or missing.
+ * The fallback is unique within the collection and locale, so two documents never claim the same value.
+ * The format is: `<singular>-<N>`, where `N` is the first available integer. Uses the collection's singular
+ * label when it resolves to a plain string, otherwise the collection slug. See {@link getUniqueFieldValue}.
  */
 export const getSlugFallbackValue = async ({
   id,

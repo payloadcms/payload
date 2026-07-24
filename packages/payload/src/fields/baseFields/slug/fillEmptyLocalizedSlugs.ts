@@ -22,7 +22,7 @@ type Args = {
  * `<singular>-<N>` only when that locale has no source. Both are deduped within the locale, so one
  * document never claims another's per-locale value.
  *
- * Runs after field `beforeChange`, mirroring the localized `_status` expansion — the slug field hook
+ * Runs after field `beforeChange` (similar to the localized `_status` treatment). The slug field hook
  * only sees the active locale, so the other locales are filled here at the operation level. A slug
  * is static once set, so this is create-only; per-locale edits afterward stay scoped to their locale.
  */

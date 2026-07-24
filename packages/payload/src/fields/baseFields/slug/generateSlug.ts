@@ -19,11 +19,13 @@ type Args = {
 }
 
 /**
- * `beforeChange` hook for the native `slug` field. Fills the slug only while empty and never rewrites
- * one that's set, so a lagging autosave can't clobber it with a stale value:
+ * `beforeChange` hook for the native `slug` field.
+ *
+ * Fills the slug only while empty and never rewrites one that's set, so a lagging autosave can't
+ * clobber it with a stale value:
+ *   - empty with no source falls back to `<singular>-<N>`, e.g. `posts-1` (see {@link getSlugFallbackValue})
  *   - explicit input and the source field are slugified, e.g. "Hello World" → "hello-world"
  *   - an already-set slug is preserved as-is
- *   - empty with no source falls back to `<singular>-<N>` (see {@link getSlugFallbackValue})
  *
  * Generated values dedupe against existing slugs; a localized slug is unique per-locale, so its
  * dedupe and fallback are scoped to the locale being written. Globals have no collection to dedupe
@@ -41,18 +43,18 @@ export const generateSlug =
     // to the locale being written.
     const locale = localized ? (req.locale ?? undefined) : undefined
 
-    // A duplicated document takes a fresh `<singular>-<N>` fallback — not the original's slug, not a
-    // source-derived one — and skips the explicit-collision check below (see
-    // generateSlugBeforeDuplicate).
+    // A duplicated document:
+    //  - Takes a fresh `<singular>-<N>` fallback — not the original's slug, not a source-derived one
+    //  - Skips the explicit-collision check below (see generateSlugBeforeDuplicate).
     if (collection && consumeSlugDuplicateFallback(context, name)) {
       return await getSlugFallbackValue({ collection, field: name, locale, req, slugify })
     }
 
-    // Explicit value from the client wins — normalized through the field's slugify. It must be
-    // unique: reject a collision rather than silently changing it (generated values below dedupe
-    // instead). Enforced here, not in validation — the DB unique index misses draft-only slugs, and
-    // draft saves skip validation but still run hooks. A value that slugifies to nothing (e.g. "!!!")
-    // isn't a usable slug, so fall through to the source/fallback rather than store an empty one.
+    // Explicit value from the client wins — normalized through the field's slugify.
+    // It must be unique: reject a collision rather than silently changing it,
+    // only generated values are automatically deduped.
+    // A value that slugifies to nothing (e.g. "!!!") isn't a usable slug,
+    // so fall through to the source/fallback rather than store an empty one.
     if (hasValue(value)) {
       const slugified = await slugify(value)
 
@@ -88,8 +90,9 @@ export const generateSlug =
       return storedSlug
     }
 
-    // Derive an empty slug from its source when present, deduped so two same-source documents don't
-    // both claim it. Globals have no collection to dedupe against.
+    // Derive an empty slug from its source, when present.
+    // Dedupe so two documents don't both claim it if they have the same source value.
+    // Globals have no collection to dedupe against.
     const source = data?.[useAsSlug]
     const derived = source ? await slugify(source) : undefined
 
