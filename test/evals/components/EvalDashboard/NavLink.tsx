@@ -22,7 +22,6 @@ const navItemStyle = (hovered: boolean): React.CSSProperties => ({
   gap: '8px',
   padding: '6px 10px',
   textDecoration: 'none',
-  transition: 'background 0.15s',
 })
 
 function InternalNavItem({

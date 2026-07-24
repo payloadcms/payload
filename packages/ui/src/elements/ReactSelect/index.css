@@ -18,9 +18,6 @@
       line-height: var(--text-body-medium-line-height);
       -webkit-appearance: none;
       appearance: none;
-      transition-property: box-shadow, background-color;
-      transition-duration: 100ms;
-      transition-timing-function: cubic-bezier(0, 0.2, 0.2, 1);
       height: auto;
       padding-block: calc(var(--spacer-1) + 1px);
       padding-inline: var(--field-padding-inline) var(--spacer-5);

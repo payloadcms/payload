@@ -11,7 +11,6 @@
     color: var(--color-icon);
     cursor: pointer;
     outline: none;
-    transition: background-color 100ms ease;
 
     &:hover {
       background: var(--color-bg-hover);
