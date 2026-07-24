@@ -237,6 +237,10 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
       {
         name: 'processingToken',
         type: 'text',
+        admin: {
+          hidden: true,
+          readOnly: true,
+        },
       },
       // Only add concurrencyKey field if concurrency control is enabled
       ...(jobsConfig.enableConcurrencyControl

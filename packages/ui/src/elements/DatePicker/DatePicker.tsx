@@ -95,6 +95,7 @@ const DatePicker: React.FC<Props> = (props) => {
     onChange,
     placeholderText,
     popperPlacement: 'bottom-start',
+    portalId: 'date-time-picker-portal',
     previousMonthButtonLabel: <ChevronIcon direction="left" />,
     previousYearButtonLabel: '‹',
     selected: value && new Date(value),

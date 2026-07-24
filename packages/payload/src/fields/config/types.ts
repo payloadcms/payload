@@ -687,9 +687,10 @@ export type SlugField = {
   type: 'slug'
   /**
    * Name of the sibling field whose value the slug is generated from, e.g. `'title'`.
-   * Required — there is no default, since a collection may not have a `title` field.
+   * Optional — when omitted, the slug is taken from an explicit value or falls back to a
+   * unique `<singular>-<N>`, so there is no source to derive from.
    */
-  useAsSlug: string
+  useAsSlug?: string
   validate?: TextFieldSingleValidation
 } & Omit<FieldBase, 'validate'>
 

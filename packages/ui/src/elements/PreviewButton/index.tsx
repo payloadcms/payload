@@ -1,6 +1,4 @@
 'use client'
-import type { PreviewButtonClientProps } from 'payload'
-
 import React, { useCallback, useState } from 'react'
 
 import { LinkIcon } from '../../icons/Link/index.js'
@@ -9,18 +7,28 @@ import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Tooltip } from '../Tooltip/index.js'
 
-export function PreviewButton(props: PreviewButtonClientProps) {
+export function PreviewButton() {
   const { previewURL } = usePreviewURL()
   const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   const [hovered, setHovered] = useState(false)
 
-  const handleClick = useCallback(async () => {
-    if (previewURL) {
+  const handleClick = useCallback(
+    async (event: React.MouseEvent<HTMLButtonElement>) => {
+      if (!previewURL) {
+        return
+      }
+
+      if (event.metaKey || event.ctrlKey) {
+        window.open(previewURL, '_blank', 'noopener,noreferrer')
+        return
+      }
+
       await navigator.clipboard.writeText(previewURL)
       setCopied(true)
-    }
-  }, [previewURL])
+    },
+    [previewURL],
+  )
 
   if (!previewURL) {
     return null
