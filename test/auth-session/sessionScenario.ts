@@ -42,19 +42,11 @@ export async function createSessionScenario({
   const context = await browser.newContext()
   const url = new AdminUrlUtil(serverURL, authSessionUsersSlug)
   let nowMs = Date.now()
-  let clockPage: Page | undefined
   let isMouseAtFirstPosition = false
 
-  const createPage = async (): Promise<Page> => {
-    const page = await context.newPage()
+  await context.clock.install({ time: nowMs })
 
-    if (!clockPage) {
-      clockPage = page
-      await page.clock.install({ time: nowMs })
-    }
-
-    return page
-  }
+  const createPage = (): Promise<Page> => context.newPage()
 
   const resetResponse = await context.request.post(
     `${serverURL}/api${AUTH_SESSION_TEST_ROUTES.RESET}`,
@@ -75,11 +67,7 @@ export async function createSessionScenario({
       expect(response.status()).toBe(200)
       nowMs += durationMs
 
-      if (!clockPage) {
-        throw new Error('Expected a page with an installed scenario clock.')
-      }
-
-      await clockPage.clock.fastForward(durationMs)
+      await context.clock.fastForward(durationMs)
     },
     async close() {
       await context.close()

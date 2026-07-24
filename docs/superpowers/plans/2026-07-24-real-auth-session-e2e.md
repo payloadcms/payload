@@ -4,7 +4,7 @@
 
 **Goal:** Replace the timing-heavy auth-session tests in the general auth suite with a dedicated end-to-end suite that proves real opaque-cookie authentication, token rotation, activity refresh, expiration, revocation, and cross-tab convergence without intercepting network requests or dispatching synthetic browser events.
 
-**Architecture:** A dedicated `test/auth-session` Payload config uses a custom auth strategy backed by an in-memory provider session store. The browser receives an opaque HTTP-only `payload-token`; Payload's real `/me`, `/refresh-token`, and `/logout` endpoints authenticate it through the strategy, while collection hooks expose expiration, rotate it, and revoke it. A test-only HTTP clock advances the same virtual time used by the provider store, and a Playwright scenario helper advances every real page clock by the same duration.
+**Architecture:** A dedicated `test/auth-session` Payload config uses a custom auth strategy backed by an in-memory provider session store. The browser receives an opaque HTTP-only `payload-token`; Payload's real `/me`, `/refresh-token`, and `/logout` endpoints authenticate it through the strategy, while collection hooks expose expiration, rotate it, and revoke it. A test-only HTTP clock advances the same virtual time used by the provider store, and a Playwright scenario helper advances one context-wide Playwright clock by the same duration.
 
 **Tech Stack:** TypeScript, Payload custom auth strategies and collection auth hooks, React, Playwright, Playwright Clock, Vitest.
 
@@ -18,7 +18,7 @@
 - Use exported constant objects plus derived string unions for statuses, routes, and event names. Do not repeat string literals such as `'authenticated'`, `'unauthenticated'`, or route fragments across files.
 - Keep discriminated unions strict: an authenticated result must contain its session; an unauthenticated result must not.
 - Keep virtual token lifetime at five minutes (`300_000` ms), but never wait for wall-clock expiration.
-- The server clock and all open Playwright page clocks must advance through one scenario helper.
+- The server clock and the context-wide Playwright clock must advance through one scenario helper; BrowserContext clock installation covers every existing and newly opened page.
 - Do not expose provider-store internals to assertions. Test through cookies, Payload REST endpoints, and rendered admin state.
 - One E2E test covers one user-visible behavior.
 - Retain unit tests only for browser primitives and ordering/fallback branches that cannot be driven reliably through a real browser:
@@ -422,7 +422,7 @@ export type SessionScenario = {
 }
 ```
 
-`createSessionScenario` must create its own `BrowserContext`, set a single `nowMs`, reset the server fixture, install Playwright Clock before each page navigation, and track all pages. `advanceBy` must first advance the provider through the HTTP endpoint and then call `page.clock.fastForward(durationMs)` for every open page. `moveMouse` must alternate coordinates so it always produces a real movement. `waitForRefresh` must observe the real `POST /api/auth-session-users/refresh-token?refresh` response without routing or modifying it.
+`createSessionScenario` must create its own `BrowserContext`, set a single `nowMs`, reset the server fixture, and install one context-wide Playwright Clock before page navigation; BrowserContext installation covers every existing and newly opened page. `advanceBy` must first advance the provider through the HTTP endpoint, increment `nowMs`, and then call `context.clock.fastForward(durationMs)` once. `moveMouse` must alternate coordinates so it always produces a real movement. `waitForRefresh` must observe the real `POST /api/auth-session-users/refresh-token?refresh` response without routing or modifying it.
 
 Create and close one scenario per test through Playwright hooks so cleanup still runs after a failed assertion:
 

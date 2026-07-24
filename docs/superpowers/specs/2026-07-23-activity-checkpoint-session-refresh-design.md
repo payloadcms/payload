@@ -100,19 +100,20 @@ without falling back to decoding or issuing a local JWT.
 ## Shared Virtual Time
 
 The test does not wait for the configured token lifetime in wall-clock time. A shared test clock
-controls the provider session store, and each open Playwright page installs its clock at the same
-timestamp.
+controls the provider session store, and one context-wide Playwright clock installs at the same
+timestamp. BrowserContext clock installation affects every existing and newly opened page in that
+context.
 
 The scenario helper advances time in this order:
 
 1. Advance the provider clock through its real test-only HTTP endpoint.
-2. Advance every registered Playwright page by the same duration.
+2. Advance the context-wide Playwright clock once by the same duration.
 3. Wait for the timers and resulting network requests to settle.
 
-New tabs install their Playwright clock at the scenario's current time before navigating. This
-keeps token expiration, activity checkpoints, force-logout timers, and cross-tab comparisons on one
-timeline. The token lifetime can remain human-readable, such as five minutes, because advancing it
-takes milliseconds rather than five real minutes.
+New tabs inherit the installed context-wide Playwright clock before navigating. This keeps token
+expiration, activity checkpoints, force-logout timers, and cross-tab comparisons on one timeline.
+The token lifetime can remain human-readable, such as five minutes, because advancing it takes
+milliseconds rather than five real minutes.
 
 Payload's cookie expiration may use the process wall clock; the custom strategy treats the provider
 session store as the authentication authority. The cookie must remain present long enough for the
