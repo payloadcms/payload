@@ -40,7 +40,6 @@ export async function createSessionScenario({
 }): Promise<SessionScenario> {
   const context = await browser.newContext()
   const url = new AdminUrlUtil(serverURL, authSessionUsersSlug)
-  const pages = new Set<Page>()
   let nowMs = Date.now()
   let clockPage: Page | undefined
   let isMouseAtFirstPosition = false
@@ -48,8 +47,6 @@ export async function createSessionScenario({
   const createPage = async (): Promise<Page> => {
     const page = await context.newPage()
 
-    pages.add(page)
-    page.on('close', () => pages.delete(page))
     if (!clockPage) {
       clockPage = page
       await page.clock.install({ time: nowMs })
@@ -153,7 +150,6 @@ export async function createSessionScenario({
     },
     async moveMouse(page) {
       isMouseAtFirstPosition = !isMouseAtFirstPosition
-      await page.bringToFront()
       await page.mouse.move(isMouseAtFirstPosition ? 1 : 2, isMouseAtFirstPosition ? 1 : 2)
     },
     async openTab() {
