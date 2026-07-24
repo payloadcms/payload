@@ -54,7 +54,7 @@ export const withPayload = (nextConfig = {}, options = {}) => {
     devIndicators:
       nextConfig.devIndicators !== undefined
         ? nextConfig.devIndicators
-        : { position: 'bottom-right' },
+        : { position: 'bottom-left' },
     env,
     experimental: {
       ...(nextConfig.experimental || {}),

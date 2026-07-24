@@ -1,3 +1,5 @@
+import { v4 as uuid } from 'uuid'
+
 import type { Job } from '../../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
@@ -109,6 +111,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
       throw new Forbidden(req.t)
     }
   }
+  const processingToken = uuid()
   const and: Where[] = [
     {
       completedAt: {
@@ -141,7 +144,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     },
   ]
 
-  if (allQueues !== true) {
+  if (!id && allQueues !== true) {
     and.push({
       queue: {
         equals: queue ?? 'default',
@@ -151,6 +154,10 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
 
   if (whereFromProps) {
     and.push(whereFromProps)
+  }
+
+  if (id) {
+    and.push({ id: { equals: id } })
   }
 
   // Only enforce concurrency controls if the feature is enabled
@@ -193,22 +200,23 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
-  // Find all jobs and ensure we set job to processing: true as early as possible to reduce the chance of
-  // the same job being picked up by another worker
+  // Claim jobs before running them so another worker cannot pick up the same jobs.
+  // `processingToken` identifies which jobs were claimed by this runner.
   let jobs: Job[] = []
 
   if (id) {
-    // Only one job to run
-    const job = await updateJob({
-      id,
+    const updatedDocs = await updateJobs({
       data: {
         processing: true,
+        processingToken,
       },
+      limit: 1,
       req,
       returning: true,
+      where: { and },
     })
-    if (job) {
-      jobs = [job]
+    if (updatedDocs) {
+      jobs = updatedDocs
     }
   } else {
     let defaultProcessingOrder: Sort =
@@ -234,6 +242,7 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     const updatedDocs = await updateJobs({
       data: {
         processing: true,
+        processingToken,
       },
       limit,
       req,
@@ -283,7 +292,9 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
         data: { processing: false },
         req,
         returning: false,
-        where: { id: { in: releaseIds } },
+        where: {
+          and: [{ id: { in: releaseIds } }, { processingToken: { equals: processingToken } }],
+        },
       })
     }
 

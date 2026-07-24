@@ -1,8 +1,8 @@
 .eval-diff {
-  background: var(--theme-elevation-0);
-  border: 1px solid var(--theme-elevation-150);
-  border-radius: var(--style-radius-m);
-  font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  font-family: var(--font-family-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
   font-size: 0.78rem;
   line-height: 1.55;
   max-height: 600px;
@@ -23,10 +23,10 @@
 }
 
 .eval-diff__hunk-header {
-  background: var(--theme-elevation-50);
-  border-bottom: 1px solid var(--theme-elevation-150);
-  border-top: 1px solid var(--theme-elevation-150);
-  color: var(--theme-elevation-500);
+  background: var(--color-bg-secondary);
+  border-bottom: 1px solid var(--color-border);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-secondary);
   font-size: 0.7rem;
   padding: 4px 10px;
 }
@@ -52,25 +52,23 @@
   }
 }
 
-html[data-theme='dark'] .eval-diff__line {
-  &[data-line='add'] {
-    background: rgba(46, 160, 67, 0.22);
-  }
+html[data-theme='dark'] .eval-diff__line[data-line='add'] {
+  background: rgba(46, 160, 67, 0.22);
+}
 
-  &[data-line='del'] {
-    background: rgba(248, 81, 73, 0.22);
-  }
+html[data-theme='dark'] .eval-diff__line[data-line='del'] {
+  background: rgba(248, 81, 73, 0.22);
 }
 
 .eval-diff__num {
-  color: var(--theme-elevation-400);
+  color: var(--color-text-tertiary);
   text-align: right;
   user-select: none;
   padding-right: 8px;
 }
 
 .eval-diff__marker {
-  color: var(--theme-elevation-500);
+  color: var(--color-text-secondary);
   user-select: none;
 }
 
@@ -83,8 +81,10 @@ html[data-theme='dark'] .eval-diff__line {
   white-space: pre-wrap;
 }
 
-// Shiki emits both light + dark styles via CSS variables when given `themes: { light, dark }`.
-// Light is the default; in Payload's dark mode, swap to the dark variables.
+/*
+ * Shiki emits both light + dark styles via CSS variables when given `themes: { light, dark }`.
+ * Light is the default; in Payload's dark mode, swap to the dark variables.
+ */
 html[data-theme='dark'] {
   .eval-diff .shiki,
   .eval-diff .shiki span {
