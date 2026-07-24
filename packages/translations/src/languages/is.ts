@@ -468,6 +468,7 @@ export const isTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Velja allar raðir',
     selectedCount: '{{count}} {{label}} valið',
     selectLabel: 'Velja {{label}}',
+    selectRow: undefined,
     selectValue: 'Veldu gildi',
     settings: 'Stillingar',
     showAllLabel: 'Sýna allar {{label}}',

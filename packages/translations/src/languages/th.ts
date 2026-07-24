@@ -463,6 +463,7 @@ export const thTranslations: DefaultTranslationsObject = {
     selectAllRows: 'เลือกทุกแถว',
     selectedCount: 'เลือก {{count}} {{label}} แล้ว',
     selectLabel: 'เลือก {{label}}',
+    selectRow: undefined,
     selectValue: 'เลือกค่า',
     settings: 'การตั้งค่า',
     showAllLabel: 'แสดง {{label}} ทั้งหมด',

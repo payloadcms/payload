@@ -472,6 +472,7 @@ export const taTranslations: DefaultTranslationsObject = {
     selectAllRows: 'அனைத்து வரிசைகளையும் தேர்ந்தெடு',
     selectedCount: '{{count}} {{label}} தேர்ந்தெடுக்கப்பட்டது',
     selectLabel: '{{label}}-ஐத் தேர்ந்தெடு',
+    selectRow: undefined,
     selectValue: 'ஒரு மதிப்பைத் தேர்ந்தெடு',
     settings: 'அமைப்புகள்',
     showAllLabel: 'அனைத்து {{label}}-ஐக் காட்டு',

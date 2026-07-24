@@ -477,6 +477,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     selectAllRows: 'সমস্ত সারি নির্বাচন করুন',
     selectedCount: '{{count}} {{label}} নির্বাচিত হয়েছে',
     selectLabel: '{{label}} নির্বাচন করুন',
+    selectRow: undefined,
     selectValue: 'একটি মান নির্বাচন করুন',
     settings: 'সেটিংস',
     showAllLabel: 'সমস্ত {{label}} দেখান',

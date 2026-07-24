@@ -470,6 +470,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Odaberite sve redove',
     selectedCount: '{{count}} {{label}} odabrano',
     selectLabel: 'Odaberite {{label}}',
+    selectRow: undefined,
     selectValue: 'Odaberi vrijednost',
     settings: 'Postavke',
     showAllLabel: 'Prikaži sve {{label}}',

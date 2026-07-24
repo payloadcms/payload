@@ -470,6 +470,7 @@ export const plTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Wybierz wszystkie wiersze',
     selectedCount: 'Wybrano {{count}} {{label}}',
     selectLabel: 'Wybierz {{label}}',
+    selectRow: undefined,
     selectValue: 'Wybierz wartość',
     settings: 'Ustawienia',
     showAllLabel: 'Pokaż wszystkie {{label}}',

@@ -467,6 +467,7 @@ export const etTranslations: DefaultTranslationsObject = {
     selectAllRows: 'Vali kõik read',
     selectedCount: '{{count}} {{label}} valitud',
     selectLabel: 'Valige {{label}}',
+    selectRow: undefined,
     selectValue: 'Vali väärtus',
     settings: 'Seaded',
     showAllLabel: 'Näita kõiki {{label}}',
