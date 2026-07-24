@@ -104,6 +104,20 @@ describe('SlugField', () => {
     await expect(page.locator('#field-slug')).toHaveValue('this-should-have-regenerated')
   })
 
+  test('should regenerate to the fallback when there is no source', async () => {
+    await page.goto(url.create)
+    await page.locator('#field-title').fill('Regen fallback')
+
+    await saveDocAndAssert(page)
+    await expect(page.locator('#field-slug')).toHaveValue('regen-fallback')
+
+    // Clear the source; regenerating with nothing to derive from sets the `<singular>-N` fallback.
+    await page.locator('#field-title').fill('')
+    await regenerateSlug('slug')
+
+    await expect(page.locator('#field-slug')).toHaveValue('slug-field-1')
+  })
+
   test('custom values should be kept', async () => {
     await page.goto(url.create)
     await page.locator('#field-title').fill('Test title with custom slug')

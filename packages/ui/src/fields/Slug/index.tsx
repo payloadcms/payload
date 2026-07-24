@@ -17,6 +17,7 @@ import { LockIcon } from '../../icons/Lock/index.js'
 import { LockOpenIcon } from '../../icons/LockOpen/index.js'
 import { RefreshIcon } from '../../icons/Refresh/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'
@@ -37,9 +38,11 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
 
   const { i18n, t } = useTranslation()
 
-  const { collectionSlug, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const { slugify } = useServerFunctions()
+
+  const { code: locale } = useLocale()
 
   const {
     path: fieldPath,
@@ -60,15 +63,17 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
     async (e: React.MouseEvent<Element>) => {
       e.preventDefault()
 
-      const valueToSlugify = getDataByPath(useAsSlug)
+      const valueToSlugify = useAsSlug ? getDataByPath(useAsSlug) : undefined
 
       let formattedSlug: null | string | undefined
 
       try {
         formattedSlug = await slugify({
+          id: id ?? undefined,
           collectionSlug,
           data: getData(),
           globalSlug,
+          locale,
           path: fieldPath,
           valueToSlugify,
         })
@@ -77,8 +82,9 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
         return
       }
 
-      if (formattedSlug === null || formattedSlug === undefined) {
-        setValue('')
+      // Empty only comes back for globals (no counter fallback) — keep the current value. For
+      // collections the server returns the `<singular>-N` fallback when there's no source.
+      if (formattedSlug === null || formattedSlug === undefined || formattedSlug === '') {
         return
       }
 
@@ -96,8 +102,10 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
       getData,
       slugify,
       getDataByPath,
+      id,
       collectionSlug,
       globalSlug,
+      locale,
       fieldPath,
       t,
     ],

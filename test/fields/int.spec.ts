@@ -2,8 +2,9 @@ import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { IndexDirection, IndexOptions } from 'mongoose'
 import type { Payload, ValidationError } from 'payload'
 
+import { slugifyHandler } from '@payloadcms/ui/utilities/slugify'
 import path from 'path'
-import { reload } from 'payload'
+import { createLocalReq, reload } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
@@ -103,6 +104,15 @@ describe('Fields', () => {
       expect(doc.slug).toBe('custom-slug')
     })
 
+    it('should slugify an unnormalized explicit value', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'My First Post', slug: 'Hello World' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('hello-world')
+    })
+
     it('should freeze a diverged slug on update', async () => {
       const doc = await payload.create({
         collection: 'slug-fields',
@@ -125,7 +135,7 @@ describe('Fields', () => {
       expect(again.slug).toBe('manual-value')
     })
 
-    it('should generate localized slugs independently per locale', async () => {
+    it('should fill every locale of a localized slug on create', async () => {
       const doc = await payload.create({
         collection: 'slug-fields',
         data: { title: 'Title', localizedTitle: 'English Title' },
@@ -134,13 +144,53 @@ describe('Fields', () => {
       created.push(doc.id)
       expect(doc.localizedSlug).toBe('english-title')
 
-      const es = await payload.update({
+      // The other locale is seeded on create so switching locales never lands on an empty slug —
+      // with no source of its own it takes a `<singular>-N` fallback.
+      const allLocales = await payload.findByID({
         collection: 'slug-fields',
         id: doc.id,
-        data: { localizedTitle: 'Titulo Espanol' },
+        locale: 'all',
+      })
+      const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
+      expect(localizedSlug.en).toBe('english-title')
+      expect(localizedSlug.es).toMatch(/^slug-field-\d+$/)
+    })
+
+    it('should derive every locale of a localized slug from a shared non-localized source', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Hello World' },
+        locale: 'en',
+      })
+      created.push(doc.id)
+
+      // `title` is not localized, so its value applies to every locale — each derives `hello-world`
+      // rather than falling back to the counter.
+      const allLocales = await payload.findByID({
+        collection: 'slug-fields',
+        id: doc.id,
+        locale: 'all',
+      })
+      const shared = allLocales.localizedSharedSlug as unknown as Record<string, string>
+      expect(shared.en).toBe('hello-world')
+      expect(shared.es).toBe('hello-world')
+    })
+
+    it('should keep localized slugs independent when one locale is changed', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Title', localizedTitle: 'English Title' },
+        locale: 'en',
+      })
+      created.push(doc.id)
+
+      // Changing one locale's slug leaves the others untouched (a slug is static once set).
+      await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { localizedSlug: 'titulo-espanol' },
         locale: 'es',
       })
-      expect(es.localizedSlug).toBe('titulo-espanol')
 
       const allLocales = await payload.findByID({
         collection: 'slug-fields',
@@ -150,6 +200,325 @@ describe('Fields', () => {
       const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
       expect(localizedSlug.en).toBe('english-title')
       expect(localizedSlug.es).toBe('titulo-espanol')
+    })
+
+    it('should fall back to <singular>-N for a slug field with no useAsSlug source', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'No Source' },
+      })
+      created.push(doc.id)
+      expect(doc.sourcelessSlug).toMatch(/^slug-field-\d+$/)
+    })
+
+    it('should keep an explicit value on a slug field with no useAsSlug source', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'No Source', sourcelessSlug: 'Manual Value' },
+      })
+      created.push(doc.id)
+      expect(doc.sourcelessSlug).toBe('manual-value')
+    })
+
+    it('should allow the same localized slug value in different locales', async () => {
+      const en = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Title', localizedSlug: 'shared' },
+        locale: 'en',
+      })
+      created.push(en.id)
+      expect(en.localizedSlug).toBe('shared')
+
+      const es = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Titulo', localizedSlug: 'shared' },
+        locale: 'es',
+      })
+      created.push(es.id)
+      expect(es.localizedSlug).toBe('shared')
+    })
+
+    it('should allow one document to reuse the same slug across its own locales', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Title', localizedSlug: 'shared-across-self' },
+        locale: 'en',
+      })
+      created.push(doc.id)
+      expect(doc.localizedSlug).toBe('shared-across-self')
+
+      const es = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { localizedSlug: 'shared-across-self' },
+        locale: 'es',
+      })
+      expect(es.localizedSlug).toBe('shared-across-self')
+
+      const allLocales = await payload.findByID({
+        collection: 'slug-fields',
+        id: doc.id,
+        locale: 'all',
+      })
+      const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
+      expect(localizedSlug.en).toBe('shared-across-self')
+      expect(localizedSlug.es).toBe('shared-across-self')
+    })
+
+    it('should reject a localized slug that collides within the same locale', async () => {
+      const first = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'First', localizedSlug: 'shared-localized' },
+        locale: 'es',
+      })
+      created.push(first.id)
+      expect(first.localizedSlug).toBe('shared-localized')
+
+      await expect(
+        payload.create({
+          collection: 'slug-fields',
+          data: { title: 'Second', localizedSlug: 'shared-localized' },
+          locale: 'es',
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should scope localized uniqueness per locale across documents', async () => {
+      // Doc A: en `my-slug`, es `my-slugo`.
+      const a = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'A', localizedSlug: 'my-slug' },
+        locale: 'en',
+      })
+      created.push(a.id)
+      await payload.update({
+        collection: 'slug-fields',
+        id: a.id,
+        data: { localizedSlug: 'my-slugo' },
+        locale: 'es',
+      })
+
+      // Doc B may take `my-slug` in es — it matches A's en value, but the es namespace is free.
+      const b = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'B', localizedSlug: 'my-slug' },
+        locale: 'es',
+      })
+      created.push(b.id)
+
+      const aLocales = (
+        await payload.findByID({ collection: 'slug-fields', id: a.id, locale: 'all' })
+      ).localizedSlug as unknown as Record<string, string>
+      const bLocales = (
+        await payload.findByID({ collection: 'slug-fields', id: b.id, locale: 'all' })
+      ).localizedSlug as unknown as Record<string, string>
+      expect(aLocales.en).toBe('my-slug')
+      expect(aLocales.es).toBe('my-slugo')
+      expect(bLocales.es).toBe('my-slug')
+
+      // But B cannot take `my-slugo` in es — that collides with A within the es namespace.
+      await expect(
+        payload.create({
+          collection: 'slug-fields',
+          data: { title: 'C', localizedSlug: 'my-slugo' },
+          locale: 'es',
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should auto-increment a derived localized slug that collides within the same locale', async () => {
+      const first = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'First', localizedTitle: 'Shared Derived' },
+        locale: 'es',
+      })
+      created.push(first.id)
+      expect(first.localizedSlug).toBe('shared-derived')
+
+      const second = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Second', localizedTitle: 'Shared Derived' },
+        locale: 'es',
+      })
+      created.push(second.id)
+      expect(second.localizedSlug).toBe('shared-derived-1')
+    })
+
+    it('should not increment a derived localized slug shared across different locales', async () => {
+      const en = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'English', localizedTitle: 'Cross Locale' },
+        locale: 'en',
+      })
+      created.push(en.id)
+      expect(en.localizedSlug).toBe('cross-locale')
+
+      const es = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Spanish', localizedTitle: 'Cross Locale' },
+        locale: 'es',
+      })
+      created.push(es.id)
+      expect(es.localizedSlug).toBe('cross-locale')
+    })
+
+    it('should give a duplicate a fresh fallback slug instead of drifting from the original', async () => {
+      const original = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'My First Post' },
+      })
+      created.push(original.id)
+      expect(original.slug).toBe('my-first-post')
+
+      const duplicate = await payload.duplicate({
+        collection: 'slug-fields',
+        id: original.id,
+      })
+      created.push(duplicate.id)
+
+      // The copy takes a fresh `<singular>-N` fallback, not `my-first-post-1`.
+      expect(duplicate.slug).toBe('slug-field-1')
+
+      const secondDuplicate = await payload.duplicate({
+        collection: 'slug-fields',
+        id: original.id,
+      })
+      created.push(secondDuplicate.id)
+      expect(secondDuplicate.slug).toBe('slug-field-2')
+    })
+
+    it('should derive from the source when an explicit value slugifies to nothing', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Fallthrough Title', slug: '!!!' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('fallthrough-title')
+    })
+
+    it('should reject a slug that collides with another document', async () => {
+      const first = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'First', slug: 'shared-slug' },
+      })
+      created.push(first.id)
+      expect(first.slug).toBe('shared-slug')
+
+      await expect(
+        payload.create({
+          collection: 'slug-fields',
+          data: { title: 'Second', slug: 'shared-slug' },
+        }),
+      ).rejects.toThrow()
+    })
+
+    it('should reject updating a slug to collide with another document', async () => {
+      const a = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Doc A', slug: 'doc-a' },
+      })
+      created.push(a.id)
+      const b = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Doc B', slug: 'doc-b' },
+      })
+      created.push(b.id)
+
+      await expect(
+        payload.update({ collection: 'slug-fields', id: b.id, data: { slug: 'doc-a' } }),
+      ).rejects.toThrow()
+    })
+
+    it('should allow re-saving a document with its own unchanged slug', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Stable', slug: 'stable-slug' },
+      })
+      created.push(doc.id)
+
+      // Autosave resends the current slug on every tick — re-saving the same value must not trip the
+      // collision check against the document itself.
+      const updated = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { slug: 'stable-slug' },
+      })
+      expect(updated.slug).toBe('stable-slug')
+    })
+
+    // The regen button calls the slugify server function directly, which has its own fallback path
+    // separate from the beforeChange hook. It must scope the source-less `<singular>-N` fallback to
+    // the active locale, or it hands back a slug already taken in that locale.
+    it('should regenerate a source-less localized slug to a locale-unique fallback', async () => {
+      const taken = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Taken' },
+        locale: 'es',
+      })
+      created.push(taken.id)
+      const takenSlug = taken.localizedSlug as string
+      expect(takenSlug).toMatch(/^slug-field-\d+$/)
+
+      const req = await createLocalReq({ user: user.user }, payload)
+
+      const regenerated = await slugifyHandler({
+        collectionSlug: 'slug-fields',
+        data: {},
+        locale: 'es',
+        path: 'localizedSlug',
+        req,
+        valueToSlugify: '',
+      })
+
+      expect(regenerated).toMatch(/^slug-field-\d+$/)
+      expect(regenerated).not.toBe(takenSlug)
+    })
+
+    it('should dedupe a source-derived slug on regenerate, matching the next save', async () => {
+      const first = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Shared Regen' },
+      })
+      created.push(first.id)
+      expect(first.slug).toBe('shared-regen')
+
+      const req = await createLocalReq({ user: user.user }, payload)
+
+      // Regenerating from a source that slugifies to a taken slug must bump it, not hand back the
+      // duplicate — otherwise the next save throws a uniqueness error.
+      const regenerated = await slugifyHandler({
+        collectionSlug: 'slug-fields',
+        data: {},
+        path: 'slug',
+        req,
+        valueToSlugify: 'Shared Regen',
+      })
+
+      expect(regenerated).toBe('shared-regen-1')
+    })
+
+    it('should let a document reuse its own slug on regenerate via the excluded id', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Own Slug' },
+      })
+      created.push(doc.id)
+      expect(doc.slug).toBe('own-slug')
+
+      const req = await createLocalReq({ user: user.user }, payload)
+
+      // Excluding the current doc means regenerating its own unchanged source reuses the value rather
+      // than bumping past it.
+      const regenerated = await slugifyHandler({
+        id: doc.id,
+        collectionSlug: 'slug-fields',
+        data: {},
+        path: 'slug',
+        req,
+        valueToSlugify: 'Own Slug',
+      })
+
+      expect(regenerated).toBe('own-slug')
     })
 
     describe('autosave drafts', () => {
@@ -162,33 +531,220 @@ describe('Fields', () => {
         created.length = 0
       })
 
-      it('should NOT generate a slug on the initial draft (req 1)', async () => {
+      it('should generate the slug from the source on a draft create', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
           draft: true,
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
-        expect(draft.slug == null || draft.slug === '').toBe(true)
+        expect(draft.slug).toBe('draft-one')
       })
 
-      it('should allow multiple empty-slug drafts without a unique collision', async () => {
+      it('should fall back to <singular>-N when a draft is created with no source', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: {},
+        })
+        created.push(draft.id)
+        expect(draft.slug).toBe('slug-autosave-1')
+
+        // The admin reads the latest draft version, not the create response, so the fallback must
+        // be persisted there too.
+        const latestDraft = await payload.findByID({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+        })
+        expect(latestDraft.slug).toBe('slug-autosave-1')
+      })
+
+      it('should fall back when the explicit value slugifies to nothing and there is no source', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { slug: '!!!' },
+        })
+        created.push(draft.id)
+        expect(draft.slug).toBe('slug-autosave-1')
+      })
+
+      it('should give each source-less draft the next fallback without colliding', async () => {
         const first = await payload.create({
           collection: 'slug-autosave',
           draft: true,
-          data: { title: 'Draft One' },
+          data: {},
         })
         created.push(first.id)
 
         const second = await payload.create({
           collection: 'slug-autosave',
           draft: true,
-          data: { title: 'Draft Two' },
+          data: {},
         })
         created.push(second.id)
 
-        expect(first.slug == null || first.slug === '').toBe(true)
-        expect(second.slug == null || second.slug === '').toBe(true)
+        expect(first.slug).toBe('slug-autosave-1')
+        expect(second.slug).toBe('slug-autosave-2')
+      })
+
+      it('should reject a draft slug that collides with another draft', async () => {
+        const first = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'First', slug: 'shared-draft-slug' },
+        })
+        created.push(first.id)
+        expect(first.slug).toBe('shared-draft-slug')
+
+        await expect(
+          payload.create({
+            collection: 'slug-autosave',
+            draft: true,
+            data: { title: 'Second', slug: 'shared-draft-slug' },
+          }),
+        ).rejects.toThrow()
+      })
+
+      it('should reject updating a draft slug to collide with another draft', async () => {
+        const a = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'A', slug: 'draft-a' },
+        })
+        created.push(a.id)
+        const b = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'B', slug: 'draft-b' },
+        })
+        created.push(b.id)
+
+        await expect(
+          payload.update({
+            collection: 'slug-autosave',
+            id: b.id,
+            draft: true,
+            data: { slug: 'draft-a' },
+          }),
+        ).rejects.toThrow()
+      })
+
+      it('should allow the same localized draft slug across locales but reject within a locale', async () => {
+        const en = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { localizedTitle: 'One', localizedSlug: 'shared-draft-localized' },
+          locale: 'en',
+        })
+        created.push(en.id)
+        expect(en.localizedSlug).toBe('shared-draft-localized')
+
+        // Same value in a different locale is fine — uniqueness is per-locale.
+        const es = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { localizedTitle: 'Uno', localizedSlug: 'shared-draft-localized' },
+          locale: 'es',
+        })
+        created.push(es.id)
+        expect(es.localizedSlug).toBe('shared-draft-localized')
+
+        // Same value in the same locale collides.
+        await expect(
+          payload.create({
+            collection: 'slug-autosave',
+            draft: true,
+            data: { localizedTitle: 'Two', localizedSlug: 'shared-draft-localized' },
+            locale: 'en',
+          }),
+        ).rejects.toThrow()
+      })
+
+      it('should fall back to <singular>-N for a source-less localized slug on a draft', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: {},
+          locale: 'en',
+        })
+        created.push(draft.id)
+        expect(draft.localizedSlug).toBe('slug-autosave-1')
+
+        // The fallback must persist to the draft version the admin reads back, and survive publish.
+        const latestDraft = await payload.findByID({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          locale: 'en',
+        })
+        expect(latestDraft.localizedSlug).toBe('slug-autosave-1')
+
+        const published = await payload.update({
+          collection: 'slug-autosave',
+          id: draft.id,
+          data: { _status: 'published' },
+          locale: 'en',
+        })
+        expect(published.localizedSlug).toBe('slug-autosave-1')
+      })
+
+      it('should fill every locale of a localized slug on a draft create', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: {},
+          locale: 'en',
+        })
+        created.push(draft.id)
+
+        const allLocales = await payload.findByID({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          locale: 'all',
+        })
+        const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
+        expect(localizedSlug.en).toMatch(/^slug-autosave-\d+$/)
+        expect(localizedSlug.es).toMatch(/^slug-autosave-\d+$/)
+      })
+
+      it('should fall back to a per-locale <singular>-N for localized slugs on a draft', async () => {
+        const en = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: {},
+          locale: 'en',
+        })
+        created.push(en.id)
+        expect(en.localizedSlug).toBe('slug-autosave-1')
+
+        // A different locale falls back independently — the counter is scoped per-locale.
+        const es = await payload.update({
+          collection: 'slug-autosave',
+          id: en.id,
+          draft: true,
+          data: {},
+          locale: 'es',
+        })
+        expect(es.localizedSlug).toBe('slug-autosave-1')
+      })
+
+      it('should give a duplicated draft its own unique slug', async () => {
+        const original = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Dup Me', slug: 'dup-me' },
+        })
+        created.push(original.id)
+        expect(original.slug).toBe('dup-me')
+
+        const duplicate = await payload.duplicate({ collection: 'slug-autosave', id: original.id })
+        created.push(duplicate.id)
+
+        expect(duplicate.slug).not.toBe('dup-me')
+        expect(duplicate.slug).toMatch(/^slug-autosave-\d+$/)
       })
 
       it('should keep an explicit slug the user typed on the initial draft', async () => {
@@ -201,13 +757,14 @@ describe('Fields', () => {
         expect(draft.slug).toBe('user-typed')
       })
 
-      it('should generate once content exists on a subsequent autosave', async () => {
+      it('should freeze the slug across subsequent autosaves once set', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
           draft: true,
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
+        expect(draft.slug).toBe('draft-one')
 
         const updated = await payload.update({
           collection: 'slug-autosave',
@@ -215,10 +772,10 @@ describe('Fields', () => {
           draft: true,
           data: { title: 'Draft One Updated' },
         })
-        expect(updated.slug).toBe('draft-one-updated')
+        expect(updated.slug).toBe('draft-one')
       })
 
-      it('should keep an admin overwrite across subsequent autosaves (req 2)', async () => {
+      it('should keep an admin overwrite across subsequent autosaves', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
           draft: true,
@@ -250,13 +807,14 @@ describe('Fields', () => {
         expect(afterMoreEdits.slug).toBe('human-chosen-slug')
       })
 
-      it('should stabilize the slug after publish', async () => {
+      it('should not change an already-set slug on publish or after', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',
           draft: true,
           data: { title: 'Draft One' },
         })
         created.push(draft.id)
+        expect(draft.slug).toBe('draft-one')
 
         await payload.update({
           collection: 'slug-autosave',
@@ -270,14 +828,14 @@ describe('Fields', () => {
           id: draft.id,
           data: { _status: 'published', title: 'Publishable Title' },
         })
-        expect(published.slug).toBe('publishable-title')
+        expect(published.slug).toBe('draft-one')
 
         const afterPublish = await payload.update({
           collection: 'slug-autosave',
           id: draft.id,
           data: { _status: 'published', title: 'Title Changed After Publish' },
         })
-        expect(afterPublish.slug).toBe('publishable-title')
+        expect(afterPublish.slug).toBe('draft-one')
       })
     })
   })
