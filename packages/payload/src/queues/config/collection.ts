@@ -234,6 +234,14 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
         defaultValue: false,
         index: true,
       },
+      {
+        name: 'processingToken',
+        type: 'text',
+        admin: {
+          hidden: true,
+          readOnly: true,
+        },
+      },
       // Only add concurrencyKey field if concurrency control is enabled
       ...(jobsConfig.enableConcurrencyControl
         ? [
@@ -267,6 +275,7 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
         ({ data, originalDoc }) => {
           if (originalDoc?.error?.cancelled) {
             data.processing = false
+            data.processingToken = null
             data.hasError = true
             delete data.completedAt
             delete data.waitUntil

@@ -3,7 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import '@payloadcms/ui/scss/app.scss'
 // Custom admin styles for this test app — mirrors the Next test app's
 // `(payload)/custom.scss` so the shared "custom CSS" e2e passes on both adapters.
-import './custom.scss'
+import './custom.css'
 
 import { HydrationMarker } from '../components/HydrationMarker/index.js'
 import { getLayoutDataFn, serverFunctionHandler } from './_payload/server.functions.js'

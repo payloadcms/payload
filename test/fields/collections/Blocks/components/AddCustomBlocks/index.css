@@ -1,4 +1,4 @@
 .custom-blocks-field-management {
   display: flex;
-  gap: var(--base);
+  gap: var(--spacer-3);
 }
