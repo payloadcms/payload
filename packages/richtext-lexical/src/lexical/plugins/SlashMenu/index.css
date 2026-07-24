@@ -42,7 +42,6 @@
     border-radius: var(--radius-medium);
     cursor: pointer;
     gap: var(--spacer-1);
-    transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
 
     .icon {
       color: var(--color-icon-secondary);

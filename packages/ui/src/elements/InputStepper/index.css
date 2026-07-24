@@ -20,7 +20,6 @@
       background: transparent;
       color: var(--color-icon-secondary);
       cursor: pointer;
-      transition: color 100ms;
 
       &:hover:not(:disabled) {
         color: var(--color-icon);

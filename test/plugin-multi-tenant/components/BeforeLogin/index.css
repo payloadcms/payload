@@ -36,7 +36,6 @@
     background-color: var(--color-bg);
     cursor: pointer;
     text-align: left;
-    transition: all 0.2s;
   }
 
   .before-login__button:hover:not(:disabled) {

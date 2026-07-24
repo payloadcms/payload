@@ -22,7 +22,6 @@
       border-radius: var(--button-radius);
       color: var(--color-icon);
       cursor: pointer;
-      transition: background-color 100ms;
 
       &:hover {
         background: var(--color-bg-secondary-hover);
