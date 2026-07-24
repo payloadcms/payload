@@ -8,7 +8,7 @@ import { v4 as uuid } from 'uuid'
 
 import type { DrizzleAdapter } from '../types.js'
 
-type Table = PgTableWithColumns<any> | SQLiteTableWithColumns<any>
+type Table = PgTableWithColumns<any>
 export const getTableAlias = ({
   adapter,
   tableName,

@@ -31,7 +31,7 @@ export const countDistinct: CountDistinct = async function countDistinct(
     .$dynamic()
 
   joins.forEach(({ type, condition, table }) => {
-    query = query[type ?? 'leftJoin'](table as PgTableWithColumns<any>, condition)
+    query = query[type ?? 'leftJoin'](table, condition)
   })
 
   // When we have any joins, we need to count each individual ID only once.

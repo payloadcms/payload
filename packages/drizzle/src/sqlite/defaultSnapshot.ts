@@ -1,15 +1,14 @@
-import type { DrizzleSQLiteSnapshotJSON } from 'drizzle-kit/api'
+import type { DrizzleSnapshotJSON } from '../types.js'
 
-export const defaultDrizzleSnapshot: DrizzleSQLiteSnapshotJSON = {
+/**
+ * Empty baseline snapshot in the drizzle-kit v1 format (DDL-snapshot based, version 7 for SQLite).
+ * Used as the "before" state when generating the first migration.
+ */
+export const defaultDrizzleSnapshot: DrizzleSnapshotJSON = {
   id: '00000000-0000-0000-0000-000000000000',
-  _meta: {
-    columns: {},
-    tables: {},
-  },
+  ddl: [],
   dialect: 'sqlite',
-  enums: {},
-  prevId: '00000000-0000-0000-0000-00000000000',
-  tables: {},
-  version: '6',
-  views: {},
+  prevIds: [],
+  renames: [],
+  version: '7',
 }
