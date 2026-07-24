@@ -7,6 +7,7 @@ import type { Slugify } from '../../fields/baseFields/slug/types.js'
 import type {
   CollectionSlug,
   ColumnPreference,
+  DefaultDocumentIDType,
   FieldPaths,
   GlobalSlug,
   SanitizedPermissions,
@@ -134,5 +135,14 @@ export type BuildTableStateArgs = {
 export type SlugifyServerFunctionArgs = {
   collectionSlug?: CollectionSlug
   globalSlug?: GlobalSlug
+  /**
+   * Current doc ID, needed to exclude this doc from uniqueness checks.
+   * This ensures that this doc can reuse its own slug rather than bumping past itself when regenerating.
+   */
+  id?: DefaultDocumentIDType
+  /**
+   * Active admin locale, so a localized slug's fallback is deduped within the right locale.
+   */
+  locale?: Locale['code']
   path?: FieldPaths['path']
 } & Omit<Parameters<Slugify>[0], 'req'>

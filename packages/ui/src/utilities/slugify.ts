@@ -1,8 +1,11 @@
 import type { Slugify } from 'payload/shared'
 
 import {
-  flattenAllFields,
+  executeAccess,
   getFieldByPath,
+  getSlugFallbackValue,
+  getUniqueFieldValue,
+  hasDraftsEnabled,
   type ServerFunction,
   type SlugifyServerFunctionArgs,
   UnauthorizedError,
@@ -24,7 +27,7 @@ export const slugifyHandler: ServerFunction<
   SlugifyServerFunctionArgs,
   Promise<ReturnType<Slugify>>
 > = async (args) => {
-  const { collectionSlug, data, globalSlug, path, req, valueToSlugify } = args
+  const { id, collectionSlug, data, globalSlug, locale, path, req, valueToSlugify } = args
 
   if (!req.user) {
     throw new UnauthorizedError()
@@ -42,7 +45,7 @@ export const slugifyHandler: ServerFunction<
 
   const { field } = getFieldByPath({
     config: req.payload.config,
-    fields: flattenAllFields({ fields: docConfig.fields }),
+    fields: docConfig.flattenedFields,
     path,
   })
 
@@ -50,9 +53,58 @@ export const slugifyHandler: ServerFunction<
     typeof field?.custom?.slugify === 'function' ? field.custom.slugify : undefined
   ) as Slugify
 
-  const result = customSlugify
-    ? await customSlugify({ data, req, valueToSlugify })
-    : defaultSlugify(valueToSlugify)
+  const slugify = (valueToSlugify: unknown) =>
+    customSlugify
+      ? customSlugify({ data, req, valueToSlugify })
+      : defaultSlugify(valueToSlugify as string)
 
-  return result
+  const result = await slugify(valueToSlugify)
+
+  const collectionConfig = collectionSlug ? req.payload.collections[collectionSlug]?.config : null
+
+  // Uniqueness dedupe only applies to a collection's slug field. Globals have no collection to
+  // dedupe against, so their result is returned as-is.
+  if (!collectionConfig || !field || field.type !== 'slug' || !('name' in field)) {
+    return result
+  }
+
+  // Probing reads across the whole collection with the raw db, so require unrestricted read access —
+  // a row-filtered (`Where`) result is treated as not allowed, since scoping the probe to readable
+  // rows would break uniqueness.
+  const canRead = await executeAccess({ disableErrors: true, req }, collectionConfig.access.read)
+
+  if (canRead !== true) {
+    return result
+  }
+
+  // A localized slug is unique per-locale, so scope the probe to the current locale — otherwise it
+  // dedupes against the default locale and can hand back a colliding value. The client passes the
+  // active admin locale; fall back to the request's own locale.
+  const localeToScope = field.localized ? (locale ?? req.locale ?? undefined) : undefined
+
+  // The current doc is excluded so a regenerate can reuse its own value rather than bump past it.
+  const excludeId = typeof id === 'string' || typeof id === 'number' ? id : undefined
+
+  // A source resolved to a value: dedupe it the same way the next save would, so the generate button
+  // can't hand back a slug that's already taken. With no source, return the `<singular>-N` fallback.
+  if (result) {
+    return getUniqueFieldValue({
+      id: excludeId,
+      collection: collectionConfig.slug,
+      draftsEnabled: hasDraftsEnabled(collectionConfig),
+      field: field.name,
+      locale: localeToScope,
+      req,
+      value: result,
+    })
+  }
+
+  return getSlugFallbackValue({
+    id: excludeId,
+    collection: collectionConfig,
+    field: field.name,
+    locale: localeToScope,
+    req,
+    slugify,
+  })
 }

@@ -79,7 +79,6 @@
     display: flex;
     gap: var(--spacer-3);
     cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
   }
 
   .preview-sizes__sizeOption:hover {
