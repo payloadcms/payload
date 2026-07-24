@@ -54,7 +54,7 @@ for (const expected of [
   if (!pluginNames.includes(expected)) errors.push(`missing plugin: ${expected}`)
 }
 
-// The `~@payloadcms/ui/scss` tilde importer must be wired for every consumer.
+// The `~@payloadcms/...` scss tilde importer must be wired for every consumer.
 if (typeof config.css?.preprocessorOptions?.scss?.importers?.[0]?.findFileUrl !== 'function') {
   errors.push('scss tilde importer not wired')
 }

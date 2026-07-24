@@ -11,7 +11,7 @@ import type {
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getLanguageDir } from '@payloadcms/ui/utilities/getLanguageDir'
 import React from 'react'
-import '@payloadcms/ui/scss/app.scss'
+import '@payloadcms/ui/css/app.css'
 
 import { TanStackRouterAdapter } from '../../elements/RouterAdapter/index.js'
 

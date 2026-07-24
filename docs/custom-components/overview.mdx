@@ -523,18 +523,16 @@ Then to colorize your Custom Component's background, for example, you can use th
 
 ```scss
 .my-component {
-  background-color: var(--theme-elevation-500);
+  background-color: var(--color-bg-secondary);
 }
 ```
 
-Payload also exports its [SCSS](https://sass-lang.com) library for reuse which includes mixins, etc. To use this, simply import it as follows into your `.scss` file:
+Payload exposes its design tokens as global [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties), so you can consume them directly without importing anything. For example, using a breakpoint:
 
 ```scss
-@import '~@payloadcms/ui/scss';
-
 .my-component {
-  @include mid-break {
-    background-color: var(--theme-elevation-900);
+  @media (max-width: 1024px) {
+    background-color: var(--color-bg-inverse);
   }
 }
 ```

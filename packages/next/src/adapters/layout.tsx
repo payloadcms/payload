@@ -5,11 +5,11 @@ import React from 'react'
 
 import { NextRouterAdapter } from './router.js'
 import { nextServerAdapter } from './server.js'
-// SCSS import lives here (not in `@payloadcms/ui`) so the esbuild bundle that produces
-// `@payloadcms/next/css` (`dist/prod/styles.css`) can follow the SCSS chain. esbuild
-// treats `@payloadcms/ui` as external; any SCSS import inside that package is invisible
+// CSS import lives here (not in `@payloadcms/ui`) so the esbuild bundle that produces
+// `@payloadcms/next/css` (`dist/prod/styles.css`) can follow the CSS chain. esbuild
+// treats `@payloadcms/ui` as external; any CSS import inside that package is invisible
 // to it, so the import must be reachable from within `packages/next/src/`.
-import '@payloadcms/ui/scss/app.scss'
+import '@payloadcms/ui/css/app.css'
 
 const inter = Inter({
   subsets: ['latin'],

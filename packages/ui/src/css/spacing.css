@@ -16,19 +16,26 @@
     --spacing-view-bottom: var(--gutter-h);
 
     /* Breakpoints */
-    --breakpoint-m-width: 1024px;
+    --breakpoint-xs-width: 400px;
     --breakpoint-s-width: 768px;
+    --breakpoint-m-width: 1024px;
+    --breakpoint-l-width: 1440px;
   }
 
-  @media (max-width: 1024px) {
+  @media (max-width: 1440px) {
     :root {
       --gutter-h: var(--spacer-4);
     }
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     :root {
       --gutter-h: var(--spacer-3);
+    }
+  }
+
+  @media (max-width: 768px) {
+    :root {
       --spacing-field: var(--spacer-2-5);
       --spacing-view-bottom: var(--spacer-6);
     }

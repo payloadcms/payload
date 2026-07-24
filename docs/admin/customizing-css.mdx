@@ -18,7 +18,7 @@ To customize the CSS within the Admin UI, determine scope and change you'd like 
 
 Global CSS refers to the CSS that is applied to the entire [Admin Panel](./overview). This is where you can have a significant impact to the look and feel of the Admin UI through just a few lines of code.
 
-You can add your own global CSS through the root `custom.scss` file of your app. This file is loaded into the root of the Admin Panel and can be used to inject custom selectors or styles however needed.
+You can add your own global CSS through the root `custom.css` file of your app. This file is loaded into the root of the Admin Panel and can be used to inject custom selectors or styles however needed.
 
 Here is an example of how you might target the Dashboard View and change the background color:
 
@@ -49,12 +49,17 @@ To override existing styles in a way that the previous rules of specificity woul
 }
 ```
 
-## Re-using Payload SCSS variables and utilities
+## Re-using Payload CSS variables
 
-You can re-use Payload's SCSS variables and utilities in your own stylesheets by importing it from the UI package.
+Payload exposes its design tokens as global [CSS Variables](https://developer.mozilla.org/en-US/docs/Web/CSS/Using_CSS_custom_properties). These are defined globally on `:root`, so you can consume them in your own stylesheets without importing anything.
 
-```scss
-@import '~@payloadcms/ui/scss';
+```css
+@layer payload-default {
+  .my-component {
+    padding: var(--spacer-3);
+    color: var(--color-text);
+  }
+}
 ```
 
 ## CSS Library
@@ -65,25 +70,24 @@ You can also override Payload's built-in [CSS Variables](https://developer.mozil
 
 The following variables are defined and can be overridden:
 
-- [Breakpoints](https://github.com/payloadcms/payload/blob/main/packages/ui/src/scss/queries.scss)
-- [Colors](https://github.com/payloadcms/payload/blob/main/packages/ui/src/scss/colors.scss)
-  - Base color shades (white to black by default)
-  - Success / warning / error color shades
-  - Theme-specific colors (background, input background, text color, etc.)
-  - Elevation colors (used to determine how "bright" something should be when compared to the background)
-- [Sizing](https://github.com/payloadcms/payload/blob/main/packages/ui/src/scss/app.scss)
+- [Breakpoints](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/spacing.css)
+- [Colors](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/colors.css)
+  - Semantic tokens for background, text, border, and icon colors (e.g. `--color-bg`, `--color-text`, `--color-border`, `--color-icon`)
+  - Success / warning / danger color tokens
+  - The raw `--ramp-*` color palette
+- [Sizing](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css/app.css)
   - Horizontal gutter
   - Transition speeds
   - Font sizes
   - Etc.
 
-For an up-to-date, comprehensive list of all available variables, please refer to the [Source Code](https://github.com/payloadcms/payload/blob/main/packages/ui/src/scss).
+For an up-to-date, comprehensive list of all available variables, please refer to the [Source Code](https://github.com/payloadcms/payload/blob/main/packages/ui/src/css).
 
 <Banner type="warning">
-  **Warning:** If you're overriding colors or theme elevations, make sure to
-  consider how [your changes will affect dark mode](#dark-mode).
+  **Warning:** If you're overriding colors, make sure to consider how [your
+  changes will affect dark mode](#dark-mode).
 </Banner>
 
 #### Dark Mode
 
-Colors are designed to automatically adapt to theme of the [Admin Panel](./overview). By default, Payload automatically overrides all `--theme-elevation` colors and inverts all success / warning / error shades to suit dark mode. We also update some base theme variables like `--theme-bg`, `--theme-text`, etc.
+Colors are designed to automatically adapt to the theme of the [Admin Panel](./overview). All `--color-*` tokens are redefined under `[data-theme='dark']`, so semantic tokens like `--color-bg` and `--color-text`, along with the success / warning / danger colors, adjust automatically for dark mode.
