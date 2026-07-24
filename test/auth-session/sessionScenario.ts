@@ -21,7 +21,6 @@ export type SessionScenario = {
   close: () => Promise<void>
   expectLoggedIn: (page: Page) => Promise<void>
   expectLoggedOut: (args: { page: Page; route: LoggedOutRoute }) => Promise<void>
-  focus: (args: { awayPage: Page; page: Page }) => Promise<void>
   login: () => Promise<Page>
   logout: (page: Page) => Promise<void>
   moveMouse: (page: Page) => Promise<void>
@@ -79,16 +78,50 @@ export async function createSessionScenario({
     },
     async expectLoggedIn(page) {
       await expect(page.locator('.nav')).toBeVisible()
+
+      const response = await context.request.get(`${serverURL}/api/${authSessionUsersSlug}/me`)
+      const result = (await response.json()) as
+        | {
+            exp: number
+            user: { id: number | string }
+          }
+        | {
+            user: null
+          }
+
+      expect(response.status()).toBe(200)
+      expect(result.user).not.toBeNull()
+
+      if (!result.user) {
+        throw new Error('Expected /me to return an authenticated user.')
+      }
+
+      expect(result.exp).toBeGreaterThan(0)
+      expect(result.user.id).toBeDefined()
     },
     async expectLoggedOut({ page, route }) {
       const expectedPathname = new URL(`${url.admin}${AUTH_SESSION_TEST_ADMIN_ROUTES[route]}`)
         .pathname
 
       await expect.poll(() => new URL(page.url()).pathname).toBe(expectedPathname)
-    },
-    async focus({ awayPage, page }) {
-      await awayPage.bringToFront()
-      await page.bringToFront()
+      await expect(page.locator('.nav')).toBeHidden()
+      await expect
+        .poll(async () => {
+          const response = await context.request.get(`${serverURL}/api/${authSessionUsersSlug}/me`)
+          const result = (await response.json()) as
+            | {
+                exp: number
+                user: { id: number | string }
+              }
+            | {
+                user: null
+              }
+
+          expect(response.status()).toBe(200)
+
+          return result.user
+        })
+        .toBeNull()
     },
     async login() {
       const response = await context.request.post(
