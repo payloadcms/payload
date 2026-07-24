@@ -157,6 +157,22 @@ export const promise = async ({
     parentIsLocalized: parentIsLocalized!,
   })
 
+  const storedLocalizedValue =
+    fieldAffectsDataResult &&
+    shouldLocalizeField &&
+    typeof siblingDoc[field.name!] === 'object' &&
+    siblingDoc[field.name!] !== null &&
+    !Array.isArray(siblingDoc[field.name!])
+      ? (siblingDoc[field.name!] as Record<string, unknown>)
+      : null
+
+  const localeExistsInStorage = Boolean(
+    storedLocalizedValue &&
+      locale &&
+      locale !== 'all' &&
+      Object.prototype.hasOwnProperty.call(storedLocalizedValue, locale),
+  )
+
   const shouldHoistLocalizedValue: boolean = Boolean(
     flattenLocales &&
       fieldAffectsDataResult &&
@@ -405,11 +421,19 @@ export const promise = async ({
 
     // Set defaultValue on the field for globals being returned without being first created
     // or collection documents created prior to having a default.
+    // For localized fields, only apply defaults for locales that exist in storage.
+    const canApplyLocalizedDefaultValue =
+      !shouldLocalizeField ||
+      locale === 'all' ||
+      storedLocalizedValue === null ||
+      localeExistsInStorage
+
     if (
       !removedFieldValue &&
       allowDefaultValue &&
       typeof siblingDoc[field.name!] === 'undefined' &&
-      typeof field.defaultValue !== 'undefined'
+      typeof field.defaultValue !== 'undefined' &&
+      canApplyLocalizedDefaultValue
     ) {
       siblingDoc[field.name!] = await getDefaultValue({
         defaultValue: field.defaultValue,
@@ -418,6 +442,27 @@ export const promise = async ({
         user: req.user,
         value: siblingDoc[field.name!],
       })
+    }
+
+    if (
+      locale === 'all' &&
+      storedLocalizedValue &&
+      fieldAffectsDataResult &&
+      shouldLocalizeField &&
+      typeof siblingDoc[field.name!] === 'object' &&
+      siblingDoc[field.name!] !== null &&
+      !Array.isArray(siblingDoc[field.name!])
+    ) {
+      const currentValue = siblingDoc[field.name!] as Record<string, unknown>
+
+      for (const localeKey of Object.keys(currentValue)) {
+        if (
+          !Object.prototype.hasOwnProperty.call(storedLocalizedValue, localeKey) ||
+          storedLocalizedValue[localeKey] === null
+        ) {
+          delete currentValue[localeKey]
+        }
+      }
     }
 
     if (field.type === 'relationship' || field.type === 'upload' || field.type === 'join') {

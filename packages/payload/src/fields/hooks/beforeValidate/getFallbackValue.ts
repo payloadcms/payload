@@ -18,9 +18,13 @@ export async function getFallbackValue({
     if (typeof siblingDoc[field.name] !== 'undefined') {
       fallbackValue = cloneDataFromOriginalDoc(siblingDoc[field.name])
     } else if ('defaultValue' in field && typeof field.defaultValue !== 'undefined') {
+      const localization = req.payload.config.localization
+      const defaultLocale =
+        localization && typeof localization !== 'boolean' ? localization.defaultLocale : 'en'
+
       fallbackValue = await getDefaultValue({
         defaultValue: field.defaultValue,
-        locale: req.locale || '',
+        locale: req.locale || defaultLocale,
         req,
         user: req.user,
       })

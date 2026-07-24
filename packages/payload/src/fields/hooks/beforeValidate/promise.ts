@@ -6,7 +6,12 @@ import type { JsonObject, JsonValue, PayloadRequest } from '../../../types/index
 import type { Block, Field, TabAsField } from '../../config/types.js'
 
 import { MissingEditorProp } from '../../../errors/index.js'
-import { fieldAffectsData, tabHasName, valueIsValueWithRelation } from '../../config/types.js'
+import {
+  fieldAffectsData,
+  fieldShouldBeLocalized,
+  tabHasName,
+  valueIsValueWithRelation,
+} from '../../config/types.js'
 import { getFieldPaths } from '../../getFieldPaths.js'
 import { getExistingRowDoc } from '../beforeChange/getExistingRowDoc.js'
 import { getFallbackValue } from './getFallbackValue.js'
@@ -279,7 +284,14 @@ export const promise = async <T>({
       executed: false,
       value: undefined,
     }
-    if (typeof siblingData[field.name!] === 'undefined' && !req.context?.isRestoringVersion) {
+    const fieldIsLocalized = fieldShouldBeLocalized({ field, parentIsLocalized })
+    const shouldApplyLocalizedDefaultValue = !(fieldIsLocalized && operation === 'update')
+
+    if (
+      typeof siblingData[field.name!] === 'undefined' &&
+      !req.context?.isRestoringVersion &&
+      shouldApplyLocalizedDefaultValue
+    ) {
       fallbackResult.value = await getFallbackValue({ field, req, siblingDoc })
       fallbackResult.executed = true
     }
@@ -348,7 +360,11 @@ export const promise = async <T>({
       }
     }
 
-    if (typeof siblingData[field.name!] === 'undefined' && !req.context?.isRestoringVersion) {
+    if (
+      typeof siblingData[field.name!] === 'undefined' &&
+      !req.context?.isRestoringVersion &&
+      shouldApplyLocalizedDefaultValue
+    ) {
       siblingData[field.name!] = !fallbackResult.executed
         ? await getFallbackValue({ field, req, siblingDoc })
         : fallbackResult.value
