@@ -156,6 +156,26 @@ describe('Fields', () => {
       expect(localizedSlug.es).toMatch(/^slug-field-\d+$/)
     })
 
+    it('should derive every locale of a localized slug from a shared non-localized source', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Hello World' },
+        locale: 'en',
+      })
+      created.push(doc.id)
+
+      // `title` is not localized, so its value applies to every locale — each derives `hello-world`
+      // rather than falling back to the counter.
+      const allLocales = await payload.findByID({
+        collection: 'slug-fields',
+        id: doc.id,
+        locale: 'all',
+      })
+      const shared = allLocales.localizedSharedSlug as unknown as Record<string, string>
+      expect(shared.en).toBe('hello-world')
+      expect(shared.es).toBe('hello-world')
+    })
+
     it('should keep localized slugs independent when one locale is changed', async () => {
       const doc = await payload.create({
         collection: 'slug-fields',

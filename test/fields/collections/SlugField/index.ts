@@ -34,6 +34,14 @@ const SlugField: CollectionConfig = {
       required: false,
     },
     {
+      // A localized slug fed by a non-localized source — every locale shares the same source value.
+      name: 'localizedSharedSlug',
+      type: 'slug',
+      useAsSlug: 'title',
+      localized: true,
+      required: false,
+    },
+    {
       name: 'readOnlySlug',
       type: 'slug',
       useAsSlug: 'title',
