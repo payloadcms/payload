@@ -62,7 +62,7 @@ export async function updateJobs({
         : undefined,
   }
 
-  if (data.processing === false) {
+  if (data.processingUntil === null) {
     data.processingToken = null
   }
 

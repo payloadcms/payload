@@ -407,7 +407,7 @@ export interface PayloadJob {
     | null;
   queue?: string | null;
   waitUntil?: string | null;
-  processing?: boolean | null;
+  processingUntil?: string | null;
   processingToken?: string | null;
   /**
    * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
@@ -556,7 +556,7 @@ export interface PayloadJobsSelect<T extends boolean = true> {
   taskSlug?: T;
   queue?: T;
   waitUntil?: T;
-  processing?: T;
+  processingUntil?: T;
   processingToken?: T;
   concurrencyKey?: T;
   updatedAt?: T;
@@ -896,7 +896,9 @@ export interface WorkflowSubTaskFails {
  * via the `definition` "WorkflowLongRunning".
  */
 export interface WorkflowLongRunning {
-  input?: unknown;
+  input: {
+    postTitle?: string | null;
+  };
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -861,6 +861,14 @@ Payload now uses a unique `processingToken` when claiming jobs so multiple worke
 
 The default `updateJobs` implementation has been removed because it could not safely claim jobs across multiple workers. If you maintain a custom database adapter, you must now provide `updateJobs`. It must only claim jobs that still match the provided `where` condition and, when a `processingToken` is provided, return only the jobs claimed with that token. The official Payload database adapters already implement this behavior.
 
+### Jobs: crashed workers are recovered with processing leases
+
+The permanent `processing` flag on `payload-jobs` has been replaced by a renewable `processingUntil` lease. If a worker exits, a later jobs runner call can claim the job after its lease expires. Worker crashes do not consume the job's handler retry configuration.
+
+Worker updates use a 30-second safety buffer by default, so an update only starts when enough lease time remains for it to finish before another claim. Configure the lease with `jobs.processingLease.duration` and `jobs.processingLease.safetyBuffer`.
+
+Existing SQL databases need a migration that replaces `processing` with the nullable, indexed `processingUntil` column. MongoDB does not require a migration.
+
 ### Jobs: the `state` field on task return values has been removed ([#16416](https://github.com/payloadcms/payload/pull/16416))
 
 Job task handlers and `inlineTask` callbacks can no longer use the `state` field to signal success or failure. Both shapes were deprecated in v3 and are now removed from tasks and inline tasks.

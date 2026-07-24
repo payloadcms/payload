@@ -115,7 +115,7 @@ export async function handleTaskError({
       log: {
         $push: taskLogToPush,
       } as any,
-      processing: false,
+      processingUntil: null,
       totalTried: (job.totalTried ?? 0) + 1,
       waitUntil: job.waitUntil,
     })
@@ -177,7 +177,7 @@ export async function handleTaskError({
     log: {
       $push: taskLogToPush,
     } as any,
-    processing: false,
+    processingUntil: null,
     totalTried: (job.totalTried ?? 0) + 1,
     waitUntil: job.waitUntil,
   })

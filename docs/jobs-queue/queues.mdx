@@ -273,6 +273,36 @@ const results = await payload.jobs.runByID({
 })
 ```
 
+## Processing Leases
+
+Running jobs are owned through a renewable `processingUntil` lease and an internal `processingToken`. Payload renews the lease while the worker is alive. Every worker update must match the token and start while enough lease time remains for the configured safety buffer.
+
+If the worker is killed, its lease eventually expires and a later jobs runner call can claim the job with a new token. A worker crash does not consume the job's retry configuration; retries and backoff still apply normally when a handler reports an error.
+
+By default, Payload only starts a worker update when more than 30 seconds remain on its lease. This safety buffer gives the update time to finish before the lease expires and another worker can claim the job. If too little time remains, the update is rejected and the job becomes claimable after the lease expires.
+
+The default lease duration is 20 minutes and the default safety buffer is 30 seconds. You can change both globally:
+
+```ts
+export default buildConfig({
+  jobs: {
+    processingLease: {
+      duration: 5 * 60 * 1000,
+      safetyBuffer: 60 * 1000,
+    },
+    tasks: [
+      // your tasks here
+    ],
+  },
+})
+```
+
+`processingLease.safetyBuffer` must be non-negative and less than `processingLease.duration`. Set it to `0` only when your database adapter checks ownership and performs the update atomically, as the MongoDB adapter does.
+
+The buffer should be longer than a normal job database update. It is a safety window for adapters that read and write separately, not a task timeout. Healthy long-running jobs keep renewing their leases and can run longer than `processingLease.duration`.
+
+Expiry does not start a new process by itself, so serverless deployments must continue calling the jobs runner from a cron or another callback system.
+
 ## Processing Order
 
 By default, jobs are processed first in, first out (FIFO). This means that the first job added to the queue will be the first one processed. However, you can also configure the order in which jobs are processed.
@@ -626,7 +656,9 @@ jobsCollectionOverrides: ({ defaultJobsCollection }) => ({
 
 Look for jobs with:
 
-- `processing: true` but stuck → Worker may have crashed
+- `processingUntil` in the future → A worker currently owns the job
+- `processingUntil` in the past → The worker may have crashed; the next runner call can claim it
+- `processingToken` set → Internal identity of the worker that owns the current lease
 - `hasError: true` → Check the `log` field for errors
 - `completedAt: null` → Job hasn't run yet
 

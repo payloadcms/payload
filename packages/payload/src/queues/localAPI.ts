@@ -199,7 +199,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
             where: {
               and: [
                 { concurrencyKey: { equals: concurrencyKey } },
-                { processing: { equals: false } },
+                { processingUntil: { exists: false } },
                 { completedAt: { exists: false } },
               ],
             },
@@ -378,7 +378,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           cancelled: true,
         },
         hasError: true,
-        processing: false,
+        processingUntil: null,
         waitUntil: null,
       },
       req,
@@ -422,7 +422,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           cancelled: true,
         },
         hasError: true,
-        processing: false,
+        processingUntil: null,
         waitUntil: null,
       },
       req,

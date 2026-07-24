@@ -7,7 +7,11 @@ import type { UpdateJobFunction } from '../runJob/getUpdateJobFunction.js'
 import type { JobRunStatus } from '../runJob/index.js'
 
 import { handleWorkflowError } from '../../../errors/handleWorkflowError.js'
-import { WorkflowError } from '../../../errors/index.js'
+import {
+  JobCancelledError,
+  JobRunAbortedError,
+  WorkflowError,
+} from '../../../errors/index.js'
 import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getRunTaskFunction } from '../runJob/getRunTaskFunction.js'
 
@@ -79,6 +83,10 @@ export const runJSONJob = async ({
       }),
     )
   } catch (error) {
+    if (error instanceof JobCancelledError || error instanceof JobRunAbortedError) {
+      throw error
+    }
+
     const { hasFinalError } = await handleWorkflowError({
       error:
         error instanceof WorkflowError
@@ -125,7 +133,7 @@ export const runJSONJob = async ({
   if (workflowCompleted) {
     await updateJob({
       completedAt: getCurrentDate().toISOString(),
-      processing: false,
+      processingUntil: null,
       totalTried: (job.totalTried ?? 0) + 1,
     })
 
@@ -133,7 +141,7 @@ export const runJSONJob = async ({
       status: 'success',
     }
   } else {
-    // Retry the job - no need to bump processing or totalTried as this does not count as a retry. A condition of a different task might have just opened up!
+    // Retry the job - no need to bump processingUntil or totalTried as this does not count as a retry. A condition of a different task might have just opened up!
     return await runJSONJob({
       job,
       req,

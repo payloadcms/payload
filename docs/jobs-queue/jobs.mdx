@@ -209,7 +209,8 @@ Each job document contains:
   completedAt: '2024-01-15...',  // When job completed (null if pending)
   hasError: false,              // True if job failed
   totalTried: 1,                // Number of attempts
-  processing: false,            // True if currently running
+  processingUntil: null,        // Future date while a worker owns the job
+  processingToken: null,        // Internal token for the current owner
   taskStatus: {                 // Status of each task (for workflows)
     sendEmail: {
       '1': {
@@ -226,6 +227,8 @@ Each job document contains:
   ]
 }
 ```
+
+Payload increments `totalTried` after each completed attempt. While the handler runs, Payload automatically renews `processingUntil`. The claim also gets a `processingToken`, and worker updates only start while that token still matches and enough lease time remains for the configured safety buffer. If the worker disappears, the lease expires and a later jobs runner call can claim the job again. A crashed worker does not increment `totalTried` or consume a handler retry.
 
 #### Access Control
 
