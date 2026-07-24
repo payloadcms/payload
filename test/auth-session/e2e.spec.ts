@@ -54,6 +54,60 @@ test.describe('Auth session', () => {
     await scenario.expectLoggedIn(page)
   })
 
+  test('should log out when the provider revokes the opaque cookie before an activity refresh', async () => {
+    const page = await scenario.login()
+    const originalCookie = await scenario.readTokenCookie()
+
+    expect(originalCookie).toBeDefined()
+
+    await scenario.advanceBy(180_000)
+    await scenario.revoke()
+    await scenario.moveMouse(page)
+    const refreshResponse = scenario.waitForRefresh(page)
+
+    await scenario.advanceBy(1_001)
+
+    const response = await refreshResponse
+
+    expect(response.status()).toBe(403)
+    expect((await response.request().allHeaders()).cookie).toContain(
+      `payload-token=${originalCookie?.value}`,
+    )
+    expect((await scenario.readTokenCookie())?.value).toBe(originalCookie?.value)
+    await scenario.expectLoggedOut({ page, route: 'inactivity' })
+  })
+
+  test('should refresh the second tab from the first tab activity', async () => {
+    const firstPage = await scenario.login()
+    const firstOriginalExpiration = await scenario.readExpiration(firstPage)
+    const originalCookie = await scenario.readTokenCookie()
+    const secondPage = await scenario.openTab()
+    const secondOriginalExpiration = await scenario.readExpiration(secondPage)
+
+    expect(originalCookie).toBeDefined()
+    expect(secondOriginalExpiration).toBe(firstOriginalExpiration)
+
+    await scenario.advanceBy(120_000)
+    await scenario.moveMouse(firstPage)
+    await scenario.advanceBy(60_000)
+    const refreshResponse = scenario.waitForRefresh(firstPage)
+
+    await scenario.advanceBy(1_001)
+
+    expect((await refreshResponse).status()).toBe(200)
+    expect((await scenario.readTokenCookie())?.value).not.toBe(originalCookie?.value)
+
+    const firstExpiration = await scenario.readExpiration(firstPage)
+    const secondExpiration = await scenario.readExpiration(secondPage)
+
+    expect(firstExpiration).toBeGreaterThan(firstOriginalExpiration)
+    expect(secondExpiration).toBe(firstExpiration)
+
+    await scenario.advanceBy(120_000)
+    await scenario.expectLoggedIn(firstPage)
+    await scenario.expectLoggedIn(secondPage)
+  })
+
   // eslint-disable-next-line playwright/expect-expect -- assertions are delegated to expectLoggedOut.
   test('should expire and log out without activity', async () => {
     const page = await scenario.login()

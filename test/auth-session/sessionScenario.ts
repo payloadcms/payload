@@ -41,7 +41,8 @@ export async function createSessionScenario({
   const context = await browser.newContext()
   const url = new AdminUrlUtil(serverURL, authSessionUsersSlug)
   const pages = new Set<Page>()
-  const nowMs = Date.now()
+  let nowMs = Date.now()
+  let clockPage: Page | undefined
   let isMouseAtFirstPosition = false
 
   const createPage = async (): Promise<Page> => {
@@ -49,7 +50,10 @@ export async function createSessionScenario({
 
     pages.add(page)
     page.on('close', () => pages.delete(page))
-    await page.clock.install({ time: nowMs })
+    if (!clockPage) {
+      clockPage = page
+      await page.clock.install({ time: nowMs })
+    }
 
     return page
   }
@@ -71,7 +75,13 @@ export async function createSessionScenario({
       )
 
       expect(response.status()).toBe(200)
-      await Promise.all([...pages].map((page) => page.clock.fastForward(durationMs)))
+      nowMs += durationMs
+
+      if (!clockPage) {
+        throw new Error('Expected a page with an installed scenario clock.')
+      }
+
+      await clockPage.clock.fastForward(durationMs)
     },
     async close() {
       await context.close()
@@ -143,12 +153,16 @@ export async function createSessionScenario({
     },
     async moveMouse(page) {
       isMouseAtFirstPosition = !isMouseAtFirstPosition
+      await page.bringToFront()
       await page.mouse.move(isMouseAtFirstPosition ? 1 : 2, isMouseAtFirstPosition ? 1 : 2)
     },
     async openTab() {
       const page = await createPage()
 
       await page.goto(url.account)
+      await expect
+        .poll(async () => Number(await page.locator(authSessionExpirationSelector).textContent()))
+        .toBeGreaterThan(0)
 
       return page
     },
