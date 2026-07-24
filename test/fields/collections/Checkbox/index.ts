@@ -14,6 +14,13 @@ const CheckboxFields: CollectionConfig = {
       name: 'checkboxNotRequired',
       type: 'checkbox',
     },
+    {
+      name: 'checkboxRequiresTrue',
+      type: 'checkbox',
+      defaultValue: true,
+      // `required` alone won't fail on an unchecked (`false`) checkbox.
+      validate: (value) => (value ? true : 'This field is required.'),
+    },
   ],
   versions: false,
 }

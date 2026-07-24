@@ -71,7 +71,7 @@ describe('Radio', () => {
 
   test('should show i18n label while editing', async () => {
     await page.goto(url.create)
-    await expect(page.locator('label[for="field-radio"]')).toHaveText('Radio en')
+    await expect(page.locator('label[for="field-radio"]')).toHaveText('Radio en*')
   })
 
   test('should show i18n radio labels', async () => {
@@ -91,6 +91,21 @@ describe('Radio', () => {
     await expect(
       page.locator('label[for="field-radioWithJsxLabelOption-three"] svg#payload-logo'),
     ).toBeVisible()
+  })
+
+  test('should portal the field-error tooltip next to the radio group when invalid', async () => {
+    await page.goto(url.create)
+    await page.locator('#action-save').click({ delay: 100 })
+
+    const tooltip = page.locator('.tooltip--show', { hasText: 'This field is required.' })
+    await expect(tooltip).toBeVisible()
+
+    const isPortaledToBody = await tooltip.evaluate((el) => el.parentElement === document.body)
+    expect(isPortaledToBody).toBe(true)
+
+    const tooltipBox = await tooltip.boundingBox()
+    const radioGroupBox = await page.locator('#field-radio').boundingBox()
+    expect(Math.abs((tooltipBox?.x ?? 0) - (radioGroupBox?.x ?? 0))).toBeLessThan(200)
   })
 
   describe.skip('A11y', () => {

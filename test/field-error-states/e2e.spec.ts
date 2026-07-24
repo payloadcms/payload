@@ -335,7 +335,7 @@ describe('Field Error States', () => {
       await expect(
         page.locator('#field-arrayWithMinRows .banner.banner--type-danger'),
       ).toBeVisible()
-      await expect(page.locator('#field-arrayWithMinRows .field-error')).toHaveCount(0)
+      await expect(page.locator('.field-error')).toHaveCount(0)
     })
 
     test('blocks error pill should show for minRows errors before child edits', async ({
@@ -360,7 +360,7 @@ describe('Field Error States', () => {
       await expect(
         page.locator('#field-blocksWithMinRows .banner.banner--type-danger'),
       ).toBeVisible()
-      await expect(page.locator('#field-blocksWithMinRows .field-error')).toHaveCount(0)
+      await expect(page.locator('.field-error')).toHaveCount(0)
     })
   })
 

@@ -370,7 +370,7 @@ export const FileManager: React.FC<FileManagerProps> = ({
 
   return (
     <div className={[fieldBaseClass, baseClass].filter(Boolean).join(' ')}>
-      <FieldError message={errorMessage} showError={showError} />
+      <FieldError message={errorMessage} path="filename" showError={showError} />
       <div className={`${baseClass}__panel`}>
         {data?.filename && !removedFile && (
           <FileToolbar

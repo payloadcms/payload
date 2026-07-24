@@ -519,6 +519,17 @@ describe('Uploads', () => {
     await saveDocAndAssert(page)
   })
 
+  test('should show a tooltip for the remove button on an unsaved selected file', async () => {
+    await gotoAndWaitForForm(page, mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+
+    const removeButton = page.locator('.file-manager__remove')
+    await expect(removeButton).toBeVisible()
+    await removeButton.hover()
+
+    await expect(page.locator('.tooltip--show', { hasText: exactText('Cancel') })).toBeVisible()
+  })
+
   test('should remove remote URL button if pasteURL is false', async () => {
     // pasteURL option is set to false in the media collection
     await page.goto(mediaURL.create)
@@ -1749,7 +1760,9 @@ describe('Uploads', () => {
       // It should already be active (no need to navigate).
 
       // Should show "A file name is required" error message
-      await expect(bulkUploadModal.locator('.field-error')).toContainText('A file name is required')
+      await expect(page.locator('[id^="field-error-filename"]')).toContainText(
+        'A file name is required',
+      )
 
       // Filename field should be empty (as we cleared it)
       await expect(bulkUploadModal.locator('#field-filemanager-filename')).toHaveValue('')

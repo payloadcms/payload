@@ -11,11 +11,6 @@
     position: relative;
   }
 
-  .file-field .tooltip.error-message {
-    z-index: 3;
-    bottom: calc(100% - var(--spacer-2));
-  }
-
   .file-field__file-selected {
     display: flex;
   }
