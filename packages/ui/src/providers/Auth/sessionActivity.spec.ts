@@ -8,6 +8,8 @@ import {
 
 describe('createSessionActivityTracker', () => {
   it('should throttle activity for five seconds', () => {
+    expect(sessionActivityThrottleMs).toBe(5_000)
+
     let now = 100
     const onActivity = vi.fn()
     const markActivity = createSessionActivityTracker({
@@ -32,32 +34,73 @@ describe('createSessionActivityTracker', () => {
 
 describe('registerSessionActivityListeners', () => {
   it('should register and remove focus and mouse movement listeners', () => {
-    const window = createWindow()
+    const activityWindow = createWindow()
     const markActivity = vi.fn()
 
-    const cleanup = registerSessionActivityListeners({ markActivity, window })
-
-    expect(window.addEventListener).toHaveBeenCalledTimes(2)
-    expect(window.addEventListener).toHaveBeenCalledWith('focus', expect.any(Function), true)
-    expect(window.addEventListener).toHaveBeenCalledWith('mousemove', expect.any(Function), {
-      capture: true,
-      passive: true,
+    const cleanup = registerSessionActivityListeners({
+      markActivity,
+      window: activityWindow.window,
     })
+
+    expect(activityWindow.addedListeners).toEqual([
+      { listener: expect.any(Function), options: true, type: 'focus' },
+      {
+        listener: expect.any(Function),
+        options: { capture: true, passive: true },
+        type: 'mousemove',
+      },
+    ])
 
     cleanup()
 
-    expect(window.removeEventListener).toHaveBeenCalledTimes(2)
-    expect(window.removeEventListener).toHaveBeenCalledWith('focus', expect.any(Function), true)
-    expect(window.removeEventListener).toHaveBeenCalledWith('mousemove', expect.any(Function), {
-      capture: true,
-      passive: true,
-    })
+    expect(activityWindow.removedListeners).toEqual(activityWindow.addedListeners)
   })
 })
 
 function createWindow() {
+  const addedListeners: ListenerRegistration[] = []
+  const removedListeners: ListenerRegistration[] = []
+
   return {
-    addEventListener: vi.fn(),
-    removeEventListener: vi.fn(),
-  } as unknown as Window
+    addedListeners,
+    removedListeners,
+    window: {
+      addEventListener: (
+        type: string,
+        listener: EventListenerOrEventListenerObject | null,
+        options?: AddEventListenerOptions | boolean,
+      ) => {
+        registerListener({ listener, options, registrations: addedListeners, type })
+      },
+      removeEventListener: (
+        type: string,
+        listener: EventListenerOrEventListenerObject | null,
+        options?: EventListenerOptions | boolean,
+      ) => {
+        registerListener({ listener, options, registrations: removedListeners, type })
+      },
+    } as unknown as Window,
+  }
+}
+
+type ListenerRegistration = {
+  listener: EventListenerOrEventListenerObject | null
+  options: AddEventListenerOptions | EventListenerOptions | boolean | undefined
+  type: 'focus' | 'mousemove'
+}
+
+function registerListener({
+  listener,
+  options,
+  registrations,
+  type,
+}: {
+  listener: EventListenerOrEventListenerObject | null
+  options: AddEventListenerOptions | EventListenerOptions | boolean | undefined
+  registrations: ListenerRegistration[]
+  type: string
+}): void {
+  if (type === 'focus' || type === 'mousemove') {
+    registrations.push({ listener, options, type })
+  }
 }
