@@ -341,6 +341,21 @@ describe('Live Preview', () => {
       .toMatch(/\/live-preview/)
   })
 
+  test('collection — cmd/ctrl + click opens the preview URL in a new tab', async () => {
+    await goToCollectionLivePreview(page, pagesURLUtil)
+
+    const previewButton = page.locator('#preview-button')
+    await expect(previewButton).toBeVisible()
+
+    const [newTab] = await Promise.all([
+      context.waitForEvent('page'),
+      previewButton.click({ modifiers: ['ControlOrMeta'] }),
+    ])
+
+    await expect.poll(() => newTab.url()).toMatch(/\/live-preview/)
+    await newTab.close()
+  })
+
   test('collection — retains static URL across edits', async () => {
     const util = new AdminUrlUtil(serverURL, 'static-url')
     await page.goto(util.create)

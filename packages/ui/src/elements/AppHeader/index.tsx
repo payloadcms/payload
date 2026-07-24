@@ -9,6 +9,7 @@ import { LanguageIcon } from '../../icons/Language/index.js'
 import { SidebarIcon } from '../../icons/Sidebar/index.js'
 import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useEmbed } from '../../providers/Embed/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
@@ -28,6 +29,7 @@ type Props = {
 export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups }: Props) {
   const { t } = useTranslation()
   const locale = useLocale()
+  const { isEmbedded } = useEmbed()
 
   const { Actions } = useActions()
 
@@ -123,11 +125,13 @@ export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups
               />
             )}
           </div>
-          <UserMenu
-            CustomAvatar={CustomAvatar}
-            CustomLogoutButton={CustomLogoutButton}
-            settingsItemGroups={settingsItemGroups}
-          />
+          {!isEmbedded && (
+            <UserMenu
+              CustomAvatar={CustomAvatar}
+              CustomLogoutButton={CustomLogoutButton}
+              settingsItemGroups={settingsItemGroups}
+            />
+          )}
         </div>
       </div>
     </header>
