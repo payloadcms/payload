@@ -173,6 +173,7 @@ export interface TextBlock {
 export interface Tab {
   id: string;
   title?: string | null;
+  noLabelText?: string | null;
   tabTab?: {
     tabText?: string | null;
     tabTabArray?:
@@ -345,6 +346,7 @@ export interface PostsSelect<T extends boolean = true> {
  */
 export interface TabsSelect<T extends boolean = true> {
   title?: T;
+  noLabelText?: T;
   tabTab?:
     | T
     | {
