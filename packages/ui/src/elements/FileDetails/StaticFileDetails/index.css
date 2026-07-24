@@ -28,7 +28,6 @@
     border: var(--stroke-width-small) solid var(--theme-border-color);
     background: var(--theme-input-bg);
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-    transition: border 100ms cubic-bezier(0, 0.2, 0.2, 1);
   }
 
   .file-details__remove .btn__icon:not(:disabled):hover {

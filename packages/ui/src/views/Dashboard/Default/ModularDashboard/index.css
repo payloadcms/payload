@@ -66,7 +66,6 @@
 
   .widget-wrapper__controls {
     opacity: 0;
-    transition: opacity 0.2s ease;
   }
 
   .widget:focus-visible .widget-wrapper__controls,
@@ -94,10 +93,6 @@
     width: 100%;
   }
 
-  .widget-wrapper--editing .widget-wrapper__controls {
-    transition: opacity 0.2s ease;
-  }
-
   .widget-wrapper--editing:hover .widget-wrapper__controls {
     opacity: 1;
   }
@@ -123,7 +118,6 @@
     border-radius: var(--radius-small);
     cursor: pointer;
     color: var(--color-text-ondanger);
-    transition: all 0.2s ease;
 
     &:hover {
       background: var(--color-bg-danger-hover);
@@ -154,7 +148,6 @@
     border-radius: var(--radius-small);
     cursor: pointer;
     color: var(--color-bg);
-    transition: all 0.2s ease;
 
     & .icon {
       width: var(--spacer-3);
@@ -185,7 +178,6 @@
     border: none;
     border-radius: var(--radius-small);
     cursor: pointer;
-    transition: all 0.2s ease;
     font-family: var(--text-body-small-font-family);
     font-size: var(--text-body-small-font-size);
     font-weight: var(--text-body-small-font-weight);
