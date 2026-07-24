@@ -50,6 +50,10 @@ export const generateSlug =
       return await getSlugFallbackValue({ collection, field: name, locale, req, slugify })
     }
 
+    const storedSlug = originalDoc?.[name]
+
+    const storedSlugHasValue = hasValue(storedSlug)
+
     // Explicit value from the client wins — normalized through the field's slugify.
     // It must be unique: reject a collision rather than silently changing it,
     // only generated values are automatically deduped.
@@ -59,6 +63,12 @@ export const generateSlug =
       const slugified = await slugify(value)
 
       if (hasValue(slugified)) {
+        // Unchanged from what's stored — already unique, so skip the collision query. Autosave
+        // resends the current slug on every tick; without this each tick runs a needless read.
+        if (slugified === storedSlug) {
+          return storedSlug
+        }
+
         if (
           collection &&
           (await fieldValueExists({
@@ -80,10 +90,6 @@ export const generateSlug =
         return slugified
       }
     }
-
-    const storedSlug = originalDoc?.[name]
-
-    const storedSlugHasValue = hasValue(storedSlug)
 
     // On update, preserve a slug that is already set — only fill it while empty.
     if (operation !== 'create' && storedSlugHasValue) {

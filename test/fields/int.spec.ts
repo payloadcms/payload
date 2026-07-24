@@ -411,6 +411,23 @@ describe('Fields', () => {
       ).rejects.toThrow()
     })
 
+    it('should allow re-saving a document with its own unchanged slug', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Stable', slug: 'stable-slug' },
+      })
+      created.push(doc.id)
+
+      // Autosave resends the current slug on every tick — re-saving the same value must not trip the
+      // collision check against the document itself.
+      const updated = await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { slug: 'stable-slug' },
+      })
+      expect(updated.slug).toBe('stable-slug')
+    })
+
     // The regen button calls the slugify server function directly, which has its own fallback path
     // separate from the beforeChange hook. It must scope the source-less `<singular>-N` fallback to
     // the active locale, or it hands back a slug already taken in that locale.
