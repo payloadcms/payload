@@ -15,6 +15,15 @@ export type AcceptValues =
        * @default undefined
        */
       overrideLocalChanges?: boolean
+      /**
+       * Monotonic sequence of the request this server state is a response to.
+       * Autosave requests can resolve out of order; a straggler from an earlier request must not
+       * overwrite a value that a later request has already written. When provided, a server value is
+       * only accepted if `requestSequence >= currentState[path].valueSequence` (the sequence of
+       * the response that last wrote the field). Accepted values record this sequence on the field.
+       * @experimental This property is experimental and may change in the future. Use at your own risk.
+       */
+      requestSequence?: number
     }
   | boolean
 
@@ -86,6 +95,11 @@ export const mergeServerFormState = ({
 }: Args): FormState => {
   const newState = { ...currentState }
 
+  const requestSequence =
+    typeof acceptValues === 'object' && acceptValues !== null
+      ? acceptValues.requestSequence
+      : undefined
+
   for (const [path, incomingField] of Object.entries(incomingState || {})) {
     if (!(path in currentState) && !incomingField.addedByServer) {
       continue
@@ -95,7 +109,10 @@ export const mergeServerFormState = ({
      * If it's a new field added by the server, always accept the value.
      * Otherwise:
      *   a. accept all values when explicitly requested, e.g. on submit
-     *   b. only accept values for unmodified fields, e.g. on autosave
+     *   b. on autosave, accept the value only if this response is not older than the write that
+     *      last set the field. Both local edits and prior responses stamp the field's
+     *      `valueSequence`, so this one check covers a stale, out-of-order autosave response as
+     *      well as a value the user has edited since the request was issued.
      */
     let shouldAcceptValue =
       incomingField.addedByServer ||
@@ -104,7 +121,8 @@ export const mergeServerFormState = ({
         acceptValues !== null &&
         // Note: Must be explicitly `false`, allow `null` or `undefined` to mean true
         acceptValues.overrideLocalChanges === false &&
-        !currentState[path]?.isModified)
+        (requestSequence === undefined ||
+          requestSequence >= (currentState[path]?.valueSequence ?? 0)))
 
     /**
      * For array row fields, verify the row IDs match at the given index before accepting
@@ -143,6 +161,20 @@ export const mergeServerFormState = ({
     newState[path] = {
       ...currentState[path],
       ...sanitizedIncomingField,
+    }
+
+    /**
+     * Record the sequence of the response that set this value, so a later, stale response cannot
+     * overwrite it. Only stamp when the value actually changes — otherwise leave the existing
+     * sequence untouched (carried over via the spread above) to preserve the same-reference
+     * optimization for no-op merges.
+     */
+    if (
+      shouldAcceptValue &&
+      requestSequence !== undefined &&
+      !dequal(incomingField.value, currentState[path]?.value)
+    ) {
+      newState[path].valueSequence = requestSequence
     }
 
     if (

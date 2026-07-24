@@ -52,7 +52,7 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
   const { t } = useTranslation()
   const { config } = useConfig()
 
-  const { getData, getDataByPath, getSiblingData, setModified } = useForm()
+  const { getData, getDataByPath, getNextSequence, getSiblingData, setModified } = useForm()
   const documentForm = useDocumentForm()
 
   const filterOptions = field?.filterOptions
@@ -86,13 +86,15 @@ const useFieldInForm = <TValue,>(options?: Options): FieldType<TValue> => {
         disableFormData: disableFormData || (hasRows && val > 0),
         path,
         value: val,
+        // Tag this local edit so a stale, in-flight autosave response cannot overwrite it.
+        valueSequence: getNextSequence(),
       })
 
       if (!disableModifyingForm) {
         setModified(true)
       }
     },
-    [setModified, path, dispatchField, disableFormData, hasRows],
+    [setModified, path, dispatchField, disableFormData, hasRows, getNextSequence],
   )
 
   // Store result from hook as ref

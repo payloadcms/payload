@@ -407,12 +407,14 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
               'valid',
               'validate',
               'value',
+              // A local edit stamps `valueSequence`, marking this field's value as newer than any
+              // in-flight server response. See `mergeServerFormState`.
+              'valueSequence',
             ].includes(key)
           ) {
             return {
               ...field,
               [key]: value,
-              ...(key === 'value' ? { isModified: true } : {}),
             }
           }
 
@@ -424,18 +426,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
       const newState = {
         ...state,
         [action.path]: newField,
-      }
-
-      // reset `isModified` in all other fields
-      // Use destructuring instead of delete to avoid mutating field objects
-      // shared with the previous state (shallow copy shares references)
-      if ('value' in action) {
-        for (const [path, field] of Object.entries(newState)) {
-          if (path !== action.path && 'isModified' in field) {
-            const { isModified: _, ...fieldWithoutIsModified } = field
-            newState[path] = fieldWithoutIsModified as typeof field
-          }
-        }
       }
 
       return newState
