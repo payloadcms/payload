@@ -202,6 +202,24 @@ describe('Fields', () => {
       expect(localizedSlug.es).toBe('titulo-espanol')
     })
 
+    it('should fall back to <singular>-N for a slug field with no useAsSlug source', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'No Source' },
+      })
+      created.push(doc.id)
+      expect(doc.sourcelessSlug).toMatch(/^slug-field-\d+$/)
+    })
+
+    it('should keep an explicit value on a slug field with no useAsSlug source', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'No Source', sourcelessSlug: 'Manual Value' },
+      })
+      created.push(doc.id)
+      expect(doc.sourcelessSlug).toBe('manual-value')
+    })
+
     it('should allow the same localized slug value in different locales', async () => {
       const en = await payload.create({
         collection: 'slug-fields',

@@ -53,8 +53,10 @@ export const fillEmptyLocalizedSlugs = async ({
 
     // The source value for a given locale: a non-localized source is shared across all locales, a
     // localized one is read per-locale (only the locales present in this create have a value).
-    const sourceField = collection.flattenedFields.find((f) => f.name === field.useAsSlug)
-    const source = data[field.useAsSlug]
+    const sourceField = field.useAsSlug
+      ? collection.flattenedFields.find((f) => f.name === field.useAsSlug)
+      : undefined
+    const source = field.useAsSlug ? data[field.useAsSlug] : undefined
 
     const localeValues = (data[field.name] ?? {}) as Record<string, unknown>
 

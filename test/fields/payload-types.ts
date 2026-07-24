@@ -1744,7 +1744,9 @@ export interface SlugField {
   localizedTitle?: string | null;
   customSlugify: string;
   localizedSlug?: string | null;
+  localizedSharedSlug?: string | null;
   readOnlySlug?: string | null;
+  sourcelessSlug?: string | null;
   test?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -3528,7 +3530,9 @@ export interface SlugFieldsSelect<T extends boolean = true> {
   localizedTitle?: T;
   customSlugify?: T;
   localizedSlug?: T;
+  localizedSharedSlug?: T;
   readOnlySlug?: T;
+  sourcelessSlug?: T;
   test?: T;
   updatedAt?: T;
   createdAt?: T;

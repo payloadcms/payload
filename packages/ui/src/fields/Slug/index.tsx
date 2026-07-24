@@ -63,7 +63,7 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
     async (e: React.MouseEvent<Element>) => {
       e.preventDefault()
 
-      const valueToSlugify = getDataByPath(useAsSlug)
+      const valueToSlugify = useAsSlug ? getDataByPath(useAsSlug) : undefined
 
       let formattedSlug: null | string | undefined
 

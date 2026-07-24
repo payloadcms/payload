@@ -280,12 +280,6 @@ export const sanitizeField = async ({
   if (field.type === 'slug') {
     const useAsSlug = field.useAsSlug
 
-    if (!useAsSlug) {
-      throw new InvalidConfiguration(
-        `The slug field "${field.name}" is missing the required "useAsSlug" property, which must name the field to generate the slug from.`,
-      )
-    }
-
     // Required by default so the admin marks the slug as required. The value is always populated by
     // the field hooks (source or id fallback), and validations.slug permits empty so the fallback
     // isn't blocked before it runs.

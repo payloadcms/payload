@@ -15,7 +15,7 @@ type Args = {
   localized?: boolean
   name: string
   slugify?: Slugify
-  useAsSlug: string
+  useAsSlug?: string
 }
 
 /**
@@ -99,7 +99,7 @@ export const generateSlug =
     // Derive an empty slug from its source, when present.
     // Dedupe so two documents don't both claim it if they have the same source value.
     // Globals have no collection to dedupe against.
-    const source = data?.[useAsSlug]
+    const source = useAsSlug ? data?.[useAsSlug] : undefined
     const derived = source ? await slugify(source) : undefined
 
     if (hasValue(derived)) {

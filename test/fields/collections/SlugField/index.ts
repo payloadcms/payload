@@ -51,6 +51,11 @@ const SlugField: CollectionConfig = {
       },
     },
     {
+      name: 'sourcelessSlug',
+      type: 'slug',
+      required: false,
+    },
+    {
       type: 'text',
       name: 'test',
       admin: {
