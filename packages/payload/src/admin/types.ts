@@ -599,7 +599,6 @@ export type {
   ServerFunctionClientArgs,
   ServerFunctionConfig,
   ServerFunctionHandler,
-  ServerFunctionMode,
   SlugifyServerFunctionArgs,
 } from './functions/index.js'
 
@@ -728,6 +727,6 @@ export type DocumentEvent = {
   drawerSlug?: string
   entitySlug: string
   id?: number | string
-  operation: 'create' | 'update'
+  operation: 'create' | 'delete' | 'update'
   updatedAt: string
 }

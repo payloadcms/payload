@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-canary.14",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -235,6 +235,11 @@
       "import": "./src/utilities/getLanguageDir.ts",
       "types": "./src/utilities/getLanguageDir.ts",
       "default": "./src/utilities/getLanguageDir.ts"
+    },
+    "./utilities/getRequestEmbed": {
+      "import": "./src/utilities/getRequestEmbed.ts",
+      "types": "./src/utilities/getRequestEmbed.ts",
+      "default": "./src/utilities/getRequestEmbed.ts"
     },
     "./utilities/getRequestTheme": {
       "import": "./src/utilities/getRequestTheme.ts",

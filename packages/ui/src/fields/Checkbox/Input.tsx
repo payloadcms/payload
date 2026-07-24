@@ -11,8 +11,8 @@ import { LineIcon } from '../../icons/Line/index.js'
 
 export type CheckboxInputProps = {
   readonly AfterInput?: React.ReactNode
-  /** Accessible label for the checkbox input. Takes precedence over `aria-labelledby`. */
   readonly 'aria-label'?: string
+  readonly 'aria-labelledby'?: string
   readonly BeforeInput?: React.ReactNode
   readonly checked?: boolean
   readonly className?: string
@@ -42,7 +42,8 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   id: idFromProps,
   name,
   AfterInput,
-  'aria-label': ariaLabel,
+  'aria-label': ariaLabelFromProps,
+  'aria-labelledby': ariaLabelledByFromProps,
   BeforeInput,
   checked,
   className,
@@ -62,6 +63,8 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
   const [showTooltip, setShowTooltip] = useState(false)
   const fallbackID = useId()
   const id = idFromProps || fallbackID
+  const ariaLabel = ariaLabelFromProps || undefined
+  const ariaLabelledBy = ariaLabel ? undefined : ariaLabelledByFromProps || name
 
   useEffect(() => {
     setIsHydrated(true)
@@ -88,8 +91,8 @@ export const CheckboxInput: React.FC<CheckboxInputProps> = ({
       <div className={`${inputBaseClass}__wrap`}>
         <div className={`${inputBaseClass}__input`}>
           <input
-            aria-label={ariaLabel || undefined}
-            aria-labelledby={!ariaLabel && name ? name : undefined}
+            aria-label={ariaLabel}
+            aria-labelledby={ariaLabelledBy}
             checked={Boolean(checked)}
             disabled={readOnly}
             id={id}

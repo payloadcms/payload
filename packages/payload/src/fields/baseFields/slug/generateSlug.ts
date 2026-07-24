@@ -37,7 +37,10 @@ export const generateSlug =
       // Autosave drafts: do not auto-generate on the initial draft — the user is still entering content.
       // Keep the explicit non-slugified value (if any); generation begins on a later autosave.
       if (hasAutosaveEnabled(entity) && data?._status === 'draft') {
-        return value || null
+        // Leave an empty slug absent rather than `null`: the field's unique index is sparse, which
+        // skips missing values but not `null`, so multiple empty autosave drafts would otherwise
+        // collide on the unique constraint.
+        return value || undefined
       }
 
       // Keep an explicitly provided slug; otherwise generate from the source.
@@ -75,7 +78,7 @@ export const generateSlug =
 
     // Do not generate on the very first draft (no prior version yet).
     if (priorVersions === 0) {
-      return storedSlug ?? null
+      return storedSlug ?? undefined
     }
 
     // Stabilize after publish to protect live URLs.
@@ -84,5 +87,5 @@ export const generateSlug =
     }
 
     // Still auto-tracking an unpublished draft with content.
-    return source ? await slugify(source) : null
+    return source ? await slugify(source) : undefined
   }

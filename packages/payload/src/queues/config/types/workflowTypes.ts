@@ -67,6 +67,7 @@ export type BaseJob<
     scheduled?: boolean
   }
   processing?: boolean
+  processingToken?: null | string
   queue?: string
   taskSlug?: null | TaskType
   taskStatus: JobTaskStatus

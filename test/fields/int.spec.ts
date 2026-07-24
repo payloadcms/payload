@@ -172,6 +172,25 @@ describe('Fields', () => {
         expect(draft.slug == null || draft.slug === '').toBe(true)
       })
 
+      it('should allow multiple empty-slug drafts without a unique collision', async () => {
+        const first = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft One' },
+        })
+        created.push(first.id)
+
+        const second = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: { title: 'Draft Two' },
+        })
+        created.push(second.id)
+
+        expect(first.slug == null || first.slug === '').toBe(true)
+        expect(second.slug == null || second.slug === '').toBe(true)
+      })
+
       it('should keep an explicit slug the user typed on the initial draft', async () => {
         const draft = await payload.create({
           collection: 'slug-autosave',

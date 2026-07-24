@@ -3,6 +3,7 @@ import { getTranslation } from '@payloadcms/translations'
 import {
   type CollectionSlug,
   type Column,
+  type DocumentEvent,
   type JoinFieldClient,
   type ListQuery,
   type PaginatedDocs,
@@ -16,6 +17,7 @@ import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useAuth } from '../../providers/Auth/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useDocumentEvents } from '../../providers/DocumentEvents/index.js'
 import { ListQueryProvider } from '../../providers/ListQuery/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { TableColumnsProvider } from '../../providers/TableColumns/index.js'
@@ -35,6 +37,7 @@ type RelationshipTableComponentProps = {
   readonly AfterInput?: React.ReactNode
   readonly allowCreate?: boolean
   readonly BeforeInput?: React.ReactNode
+  readonly Description?: React.ReactNode
   readonly disableTable?: boolean
   readonly field: JoinFieldClient
   readonly fieldPath?: string
@@ -57,6 +60,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     AfterInput,
     allowCreate = true,
     BeforeInput,
+    Description,
     disableTable = false,
     field,
     fieldPath,
@@ -263,6 +267,54 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     }
   }, [isDrawerOpen])
 
+  // Keep this table in sync with documents created, updated, or deleted elsewhere
+  // (a sibling join table, the relationship field, or an inline drawer edit).
+  const { mostRecentUpdate } = useDocumentEvents()
+  const lastHandledEventRef = useRef<DocumentEvent | null>(null)
+
+  const handleDocumentEvent = useEffectEvent((event: DocumentEvent | null) => {
+    if (disableTable || !event || event === lastHandledEventRef.current) {
+      return
+    }
+
+    const relationSlugs = Array.isArray(relationTo) ? relationTo : [relationTo]
+
+    if (!relationSlugs.includes(event.entitySlug)) {
+      return
+    }
+
+    lastHandledEventRef.current = event
+
+    // Skip the refetch when the current data already reflects this event — e.g. this
+    // table's own drawer already applied it optimistically via onDrawerSave/onDrawerDelete,
+    // or a fresh mount already loaded data that includes it. Otherwise saving/deleting from
+    // this table's own drawer (which also emits a matching event) would render a second time.
+    const eventDocID = event.doc?.id ?? event.id
+
+    const existingDoc = isPolymorphic
+      ? data?.docs?.find(
+          (doc) => doc.relationTo === event.entitySlug && doc.value?.id === eventDocID,
+        )
+      : data?.docs?.find((doc) => doc.id === eventDocID)
+
+    const existingUpdatedAt = isPolymorphic ? existingDoc?.value?.updatedAt : existingDoc?.updatedAt
+
+    const isAlreadyReflected =
+      event.operation === 'delete'
+        ? !existingDoc
+        : Boolean(existingDoc) && existingUpdatedAt === event.updatedAt
+
+    if (isAlreadyReflected) {
+      return
+    }
+
+    void renderTable()
+  })
+
+  useEffect(() => {
+    handleDocumentEvent(mostRecentUpdate)
+  }, [mostRecentUpdate])
+
   const canCreate =
     allowCreate !== false &&
     permissions?.collections?.[isPolymorphic ? relationTo[0] : relationTo]?.create
@@ -314,6 +366,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           <div className={`${baseClass}__header`}>
             {Label}
             <div className={`${baseClass}__actions`}>{addNewButton}</div>
+            {Description}
           </div>
           {BeforeInput}
           <p>{t('general:loading')}</p>
@@ -325,6 +378,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
               <div className={`${baseClass}__header`}>
                 {Label}
                 <div className={`${baseClass}__actions`}>{addNewButton}</div>
+                {Description}
               </div>
               {BeforeInput}
               <NoListResults
@@ -384,6 +438,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                       {addNewButton}
                       {columnsButton}
                     </div>
+                    {Description}
                   </div>
                   {BeforeInput}
                   {Table}
