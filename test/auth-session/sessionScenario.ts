@@ -1,0 +1,147 @@
+import type { Browser, BrowserContext, Page, Response } from '@playwright/test'
+
+import { expect } from '@playwright/test'
+
+import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
+import {
+  AUTH_SESSION_TEST_ROUTES,
+  authSessionExpirationSelector,
+  authSessionUsersSlug,
+} from './shared.js'
+
+export type LoggedOutRoute = 'inactivity' | 'login'
+
+export type AuthSessionCookie = Awaited<ReturnType<BrowserContext['cookies']>>[number]
+
+export type SessionScenario = {
+  advanceBy: (durationMs: number) => Promise<void>
+  close: () => Promise<void>
+  expectLoggedIn: (page: Page) => Promise<void>
+  expectLoggedOut: (args: { page: Page; route: LoggedOutRoute }) => Promise<void>
+  focus: (args: { awayPage: Page; page: Page }) => Promise<void>
+  login: () => Promise<Page>
+  logout: (page: Page) => Promise<void>
+  moveMouse: (page: Page) => Promise<void>
+  openTab: () => Promise<Page>
+  readExpiration: (page: Page) => Promise<number>
+  readTokenCookie: () => Promise<AuthSessionCookie | undefined>
+  revoke: () => Promise<void>
+  waitForRefresh: (page: Page) => Promise<Response>
+}
+
+export async function createSessionScenario({
+  browser,
+  serverURL,
+}: {
+  browser: Browser
+  serverURL: string
+}): Promise<SessionScenario> {
+  const context = await browser.newContext()
+  const url = new AdminUrlUtil(serverURL, authSessionUsersSlug)
+  const pages = new Set<Page>()
+  const nowMs = Date.now()
+  let isMouseAtFirstPosition = false
+
+  const createPage = async (): Promise<Page> => {
+    const page = await context.newPage()
+
+    pages.add(page)
+    page.on('close', () => pages.delete(page))
+    await page.clock.install({ time: nowMs })
+
+    return page
+  }
+
+  const resetResponse = await context.request.post(
+    `${serverURL}/api${AUTH_SESSION_TEST_ROUTES.RESET}`,
+    {
+      data: { nowMs },
+    },
+  )
+
+  expect(resetResponse.status()).toBe(200)
+
+  return {
+    async advanceBy(durationMs) {
+      const response = await context.request.post(
+        `${serverURL}/api${AUTH_SESSION_TEST_ROUTES.ADVANCE_CLOCK}`,
+        { data: { durationMs } },
+      )
+
+      expect(response.status()).toBe(200)
+      await Promise.all([...pages].map((page) => page.clock.fastForward(durationMs)))
+    },
+    async close() {
+      await context.close()
+    },
+    async expectLoggedIn(page) {
+      await expect(page.locator('.nav')).toBeVisible()
+    },
+    async expectLoggedOut({ page, route }) {
+      await expect(page).toHaveURL(
+        route === 'inactivity' ? /\/admin\/logout-inactivity/ : /\/admin\/login/,
+      )
+    },
+    async focus({ awayPage, page }) {
+      await awayPage.bringToFront()
+      await page.bringToFront()
+    },
+    async login() {
+      const response = await context.request.post(
+        `${serverURL}/api${AUTH_SESSION_TEST_ROUTES.LOGIN}`,
+      )
+
+      expect(response.status()).toBe(200)
+
+      const page = await createPage()
+
+      await page.goto(url.account)
+      await expect(page.locator(authSessionExpirationSelector)).toBeVisible()
+
+      return page
+    },
+    async logout(page) {
+      await page.locator('.user-menu__trigger').click()
+      await page.locator('a[href$="/logout"]').click()
+    },
+    async moveMouse(page) {
+      isMouseAtFirstPosition = !isMouseAtFirstPosition
+      await page.mouse.move(isMouseAtFirstPosition ? 1 : 2, isMouseAtFirstPosition ? 1 : 2)
+    },
+    async openTab() {
+      const page = await createPage()
+
+      await page.goto(url.account)
+
+      return page
+    },
+    async readExpiration(page) {
+      const expirationMs = Number(await page.locator(authSessionExpirationSelector).textContent())
+
+      expect(expirationMs).toBeGreaterThan(0)
+
+      return expirationMs
+    },
+    async readTokenCookie() {
+      return (await context.cookies()).find((cookie) => cookie.name === 'payload-token')
+    },
+    async revoke() {
+      const response = await context.request.post(
+        `${serverURL}/api${AUTH_SESSION_TEST_ROUTES.REVOKE}`,
+      )
+
+      expect(response.status()).toBe(200)
+    },
+    waitForRefresh(page) {
+      return page.waitForResponse((response) => {
+        const requestURL = new URL(response.url())
+
+        return (
+          response.request().method() === 'POST' &&
+          requestURL.pathname === `/api/${authSessionUsersSlug}/refresh-token` &&
+          requestURL.searchParams.has('refresh')
+        )
+      })
+    },
+  }
+}
