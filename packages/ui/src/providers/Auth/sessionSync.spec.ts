@@ -111,11 +111,12 @@ describe('createAuthSessionSync', () => {
     expect(secondState).toBe('logged-out')
   })
 
-  it('should use notification-only storage fallback and resynchronize from the shared cookie', async () => {
+  it('should keep storage fallback notification-only while reconciling refresh and settling logout', async () => {
     vi.stubGlobal('BroadcastChannel', undefined)
     const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' })
+    const onSessionLoggedOut = vi.fn()
 
-    createSync({ fetchFullUser, sourceID: 'receiving-tab' })
+    createSync({ fetchFullUser, onSessionLoggedOut, sourceID: 'receiving-tab' })
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
     const publisher = createSync({ now: () => 123, sourceID: 'publishing-tab' })
 
@@ -138,6 +139,42 @@ describe('createAuthSessionSync', () => {
     await Promise.resolve()
 
     expect(fetchFullUser).toHaveBeenCalledOnce()
+
+    fetchFullUser.mockClear()
+
+    const logoutPublication = publisher.publish({
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+    })
+
+    expect(setItem).toHaveBeenCalledOnce()
+    expect(logoutPublication.type).toBe(AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT)
+
+    if (logoutPublication.type !== AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT) {
+      throw new Error('Expected a logged-out publication.')
+    }
+
+    publisher.publishStorageRefresh(logoutPublication)
+
+    const [logoutKey, logoutValue] = setItem.mock.calls[1] as [string, string]
+
+    expect(JSON.parse(logoutValue)).toEqual({
+      affectedExpirationMs: 0,
+      settlesSentAt: 124,
+      sentAt: 125,
+      sourceID: 'publishing-tab',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+    })
+    expect(logoutValue).not.toContain('sensitive-token')
+    expect(logoutValue).not.toContain('user')
+
+    window.dispatchEvent(new StorageEvent('storage', { key: logoutKey, newValue: logoutValue }))
+
+    expect(onSessionLoggedOut).toHaveBeenCalledOnce()
+    expect(fetchFullUser).not.toHaveBeenCalled()
+
+    await Promise.resolve()
+
+    expect(fetchFullUser).not.toHaveBeenCalled()
   })
 
   it('should downgrade a failed channel and resynchronize through storage', async () => {
@@ -202,7 +239,6 @@ describe('createAuthSessionSync', () => {
 
 function createSync({
   fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' } as const),
-  isSessionCleared = () => true,
   localExpirationMs,
   now,
   onSessionExpired = vi.fn(),
@@ -212,7 +248,6 @@ function createSync({
   sourceID = 'local-tab',
 }: {
   fetchFullUser?: () => Promise<AuthSessionResyncResult>
-  isSessionCleared?: () => boolean
   localExpirationMs?: number
   now?: () => number
   onSessionExpired?: (expiredTokenAt: number) => void
@@ -224,7 +259,6 @@ function createSync({
   const sync = createAuthSessionSync({
     fetchFullUser,
     getTokenExpirationMs: () => localExpirationMs,
-    isSessionCleared,
     now,
     onSessionExpired,
     onSessionLoggedOut,

@@ -658,7 +658,6 @@ export function AuthProvider({
     const sessionSync = createAuthSessionSync({
       fetchFullUser: fetchFullUserResultEvent,
       getTokenExpirationMs: () => knownTokenExpirationMsRef.current,
-      isSessionCleared: () => userRef.current === null,
       onSessionExpired: handleRemoteSessionExpired,
       onSessionLoggedOut: handleRemoteSessionLoggedOut,
       onSessionRefreshed: handleRemoteSessionRefreshed,

@@ -26,6 +26,7 @@ export type SessionScenario = {
   advanceBy: (durationMs: number) => Promise<void>
   armRefreshBarrier: (phase: AuthSessionRefreshBarrierPhase) => Promise<void>
   close: () => Promise<void>
+  disableBroadcastChannel: () => Promise<void>
   expectLoggedIn: (page: Page) => Promise<void>
   expectLoggedOut: (args: { page: Page; route: LoggedOutRoute }) => Promise<void>
   expectProviderSessionAuthenticated: (args: { token: string }) => Promise<void>
@@ -89,6 +90,14 @@ export async function createSessionScenario({
     },
     async close() {
       await context.close()
+    },
+    async disableBroadcastChannel() {
+      await context.addInitScript(() => {
+        Object.defineProperty(globalThis, 'BroadcastChannel', {
+          configurable: true,
+          value: undefined,
+        })
+      })
     },
     async expectLoggedIn(page) {
       await expect(page.locator('.nav')).toBeVisible()

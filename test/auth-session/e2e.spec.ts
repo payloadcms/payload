@@ -148,6 +148,8 @@ test.describe('Auth session', () => {
   })
 
   test('should revoke the provider session and log out both tabs on explicit logout', async () => {
+    await scenario.disableBroadcastChannel()
+
     const firstPage = await scenario.login()
     const secondPage = await scenario.openTab()
     const originalCookie = await scenario.readTokenCookie()
