@@ -135,7 +135,7 @@ describe('Fields', () => {
       expect(again.slug).toBe('manual-value')
     })
 
-    it('should generate localized slugs independently per locale', async () => {
+    it('should fill every locale of a localized slug on create', async () => {
       const doc = await payload.create({
         collection: 'slug-fields',
         data: { title: 'Title', localizedTitle: 'English Title' },
@@ -144,13 +144,33 @@ describe('Fields', () => {
       created.push(doc.id)
       expect(doc.localizedSlug).toBe('english-title')
 
-      const es = await payload.update({
+      // The other locale is seeded on create so switching locales never lands on an empty slug —
+      // with no source of its own it takes a `<singular>-N` fallback.
+      const allLocales = await payload.findByID({
         collection: 'slug-fields',
         id: doc.id,
-        data: { localizedTitle: 'Titulo Espanol' },
+        locale: 'all',
+      })
+      const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
+      expect(localizedSlug.en).toBe('english-title')
+      expect(localizedSlug.es).toMatch(/^slug-field-\d+$/)
+    })
+
+    it('should keep localized slugs independent when one locale is changed', async () => {
+      const doc = await payload.create({
+        collection: 'slug-fields',
+        data: { title: 'Title', localizedTitle: 'English Title' },
+        locale: 'en',
+      })
+      created.push(doc.id)
+
+      // Changing one locale's slug leaves the others untouched (a slug is static once set).
+      await payload.update({
+        collection: 'slug-fields',
+        id: doc.id,
+        data: { localizedSlug: 'titulo-espanol' },
         locale: 'es',
       })
-      expect(es.localizedSlug).toBe('titulo-espanol')
 
       const allLocales = await payload.findByID({
         collection: 'slug-fields',
@@ -570,6 +590,26 @@ describe('Fields', () => {
           locale: 'en',
         })
         expect(published.localizedSlug).toBe('slug-autosave-1')
+      })
+
+      it('should fill every locale of a localized slug on a draft create', async () => {
+        const draft = await payload.create({
+          collection: 'slug-autosave',
+          draft: true,
+          data: {},
+          locale: 'en',
+        })
+        created.push(draft.id)
+
+        const allLocales = await payload.findByID({
+          collection: 'slug-autosave',
+          id: draft.id,
+          draft: true,
+          locale: 'all',
+        })
+        const localizedSlug = allLocales.localizedSlug as unknown as Record<string, string>
+        expect(localizedSlug.en).toMatch(/^slug-autosave-\d+$/)
+        expect(localizedSlug.es).toMatch(/^slug-autosave-\d+$/)
       })
 
       it('should fall back to a per-locale <singular>-N for localized slugs on a draft', async () => {
