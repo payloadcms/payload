@@ -52,6 +52,9 @@ const BeforeDashboard: React.FC = () => {
         <li>
           Commit and push your changes to the repository to trigger a redeployment of your project.
         </li>
+        <li>
+          Go to <a href="/admin/collections/pages">Pages</a> and create <code>/home</code> to create your home page.
+        </li>
       </ul>
       {'Pro Tip: This block is a '}
       <a
