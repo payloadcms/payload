@@ -1,3 +1,4 @@
+import type { DefaultDocumentIDType, Locale } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 import { fieldValueExists } from './fieldValueExists.js'
@@ -9,9 +10,9 @@ type Args = {
   /** Field name to check for uniqueness. */
   field: string
   /** Exclude this doc from the check when updating; omit for a new doc. */
-  id?: number | string
+  id?: DefaultDocumentIDType
   /** Locale to scope the check to, for localized fields. */
-  locale?: string
+  locale?: Locale['code']
   req: PayloadRequest
   /**
    * Index the search starts from. `0` (default) tries the bare `value` first, then `value-1`, …

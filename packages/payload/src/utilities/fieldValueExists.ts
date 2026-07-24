@@ -1,3 +1,4 @@
+import type { DefaultDocumentIDType, Locale } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 
 type Args = {
@@ -10,8 +11,8 @@ type Args = {
   draftsEnabled?: boolean
   field: string
   /** Exclude this document, so a doc doesn't conflict with itself on update. */
-  id?: number | string
-  locale?: string
+  id?: DefaultDocumentIDType
+  locale?: Locale['code']
   req: PayloadRequest
   value: unknown
 }

@@ -1,4 +1,5 @@
 import type { SanitizedCollectionConfig } from '../../../collections/config/types.js'
+import type { DefaultDocumentIDType, Locale } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 
 import { getUniqueFieldValue } from '../../../utilities/getUniqueFieldValue.js'
@@ -8,9 +9,9 @@ type Args = {
   collection: SanitizedCollectionConfig
   field: string
   /** Exclude this doc from the check, so a regenerate can reuse its own value. */
-  id?: number | string
+  id?: DefaultDocumentIDType
   /** Locale to scope the uniqueness check to, for a localized slug. */
-  locale?: string
+  locale?: Locale['code']
   req: PayloadRequest
   slugify: (value: unknown) => Promise<string | undefined> | string | undefined
 }
