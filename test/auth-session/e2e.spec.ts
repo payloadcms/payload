@@ -15,6 +15,42 @@ const dirname = path.dirname(filename)
 let serverURL: string
 let scenario: SessionScenario
 
+async function expectExplicitLogoutToWinDelayedRefresh({
+  scenario,
+}: {
+  scenario: SessionScenario
+}): Promise<void> {
+  const firstPage = await scenario.login()
+  const secondPage = await scenario.openTab()
+  const originalCookie = await scenario.readTokenCookie()
+
+  expect(originalCookie).toBeDefined()
+
+  await scenario.armRefreshBarrier(AUTH_SESSION_REFRESH_BARRIER_PHASES.AFTER_ROTATION)
+  await scenario.advanceBy(120_000)
+  await scenario.moveMouse(firstPage)
+  await scenario.advanceBy(60_000)
+  const refreshResponse = scenario.waitForRefresh(firstPage)
+
+  await scenario.advanceBy(1_001)
+  await scenario.waitForRefreshBarrier(1)
+  await scenario.logout(secondPage)
+  await scenario.expectLoggedOut({ page: secondPage, route: 'login' })
+  await scenario.releaseRefreshBarrier()
+
+  const settledRefreshResponse = await refreshResponse
+
+  expect(settledRefreshResponse.status()).toBe(200)
+
+  const rotatedToken = await scenario.readRefreshTokenFromResponse(settledRefreshResponse)
+
+  await scenario.expectLoggedOut({ page: firstPage, route: 'login' })
+  await scenario.expectLoggedOut({ page: secondPage, route: 'login' })
+  expect(await scenario.readTokenCookie()).toBeUndefined()
+  await scenario.expectProviderSessionRevoked({ token: originalCookie?.value ?? '' })
+  await scenario.expectProviderSessionRevoked({ token: rotatedToken })
+}
+
 test.describe('Auth session', () => {
   test.beforeAll(async ({ browser }) => {
     ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
@@ -147,35 +183,21 @@ test.describe('Auth session', () => {
     await scenario.expectProviderSessionAuthenticated({ token: concurrentToken })
   })
 
-  test('should revoke the provider session and log out both tabs on explicit logout', async () => {
+  // eslint-disable-next-line playwright/expect-expect -- assertions are delegated to expectExplicitLogoutToWinDelayedRefresh.
+  test('should revoke the provider session and log out both tabs on explicit logout', async ({
+    browser,
+  }) => {
+    await test.step('healthy BroadcastChannel transport', async () => {
+      await expectExplicitLogoutToWinDelayedRefresh({ scenario })
+    })
+
+    await scenario.close()
+    scenario = await createSessionScenario({ browser, serverURL })
     await scenario.disableBroadcastChannel()
 
-    const firstPage = await scenario.login()
-    const secondPage = await scenario.openTab()
-    const originalCookie = await scenario.readTokenCookie()
-
-    expect(originalCookie).toBeDefined()
-
-    await scenario.armRefreshBarrier(AUTH_SESSION_REFRESH_BARRIER_PHASES.AFTER_ROTATION)
-    await scenario.advanceBy(120_000)
-    await scenario.moveMouse(firstPage)
-    await scenario.advanceBy(60_000)
-    const refreshResponse = scenario.waitForRefresh(firstPage)
-
-    await scenario.advanceBy(1_001)
-    await scenario.waitForRefreshBarrier(1)
-    await scenario.logout(secondPage)
-    await scenario.expectLoggedOut({ page: secondPage, route: 'login' })
-    await scenario.releaseRefreshBarrier()
-
-    const settledRefreshResponse = await refreshResponse
-    const rotatedToken = await scenario.readRefreshTokenFromResponse(settledRefreshResponse)
-
-    await scenario.expectLoggedOut({ page: firstPage, route: 'login' })
-    expect(settledRefreshResponse.status()).toBe(200)
-    await scenario.expectProviderSessionRevoked({ token: originalCookie?.value ?? '' })
-    await scenario.expectProviderSessionRevoked({ token: rotatedToken })
-    expect(await scenario.readTokenCookie()).toBeUndefined()
+    await test.step('Storage fallback transport', async () => {
+      await expectExplicitLogoutToWinDelayedRefresh({ scenario })
+    })
   })
 
   // eslint-disable-next-line playwright/expect-expect -- assertions are delegated to expectLoggedOut.
