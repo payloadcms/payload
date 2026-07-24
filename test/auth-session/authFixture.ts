@@ -6,19 +6,23 @@ import type {
   CollectionRefreshHook as RefreshHook,
 } from 'payload'
 
-import { extractJWT, generatePayloadCookie } from 'payload'
+import { extractJWT, Forbidden, generatePayloadCookie } from 'payload'
 
 import type { AuthSessionUser } from './payload-types.js'
 
+import { createProviderRefreshBarrier } from './refreshBarrier.js'
 import { createProviderSessionStore } from './sessionStore.js'
 import {
+  AUTH_SESSION_REFRESH_BARRIER_PHASES,
   AUTH_SESSION_TEST_ROUTES,
   AUTH_SESSION_TEST_STATUS,
+  type AuthSessionRefreshBarrierPhase,
   authSessionStrategyID,
   authSessionUsersSlug,
 } from './shared.js'
 
 export const providerSessionStore = createProviderSessionStore()
+const providerRefreshBarrier = createProviderRefreshBarrier()
 
 export const authenticateProviderSession: AuthStrategyFunction = async ({ headers, payload }) => {
   const lookup = providerSessionStore.read({ token: extractJWT({ headers, payload }) })
@@ -56,14 +60,22 @@ export const exposeProviderSessionExpiration: MeHook<AuthSessionUser> = ({ args,
   }
 }
 
-export const rotateProviderSession: RefreshHook<AuthSessionUser> = ({ args, user }) => {
+export const rotateProviderSession: RefreshHook<AuthSessionUser> = async ({ args, user }) => {
+  await providerRefreshBarrier.wait({
+    phase: AUTH_SESSION_REFRESH_BARRIER_PHASES.BEFORE_ROTATION,
+  })
+
   const lookup = providerSessionStore.rotate({
     token: extractJWT({ headers: args.req.headers, payload: args.req.payload }),
   })
 
   if (lookup.status === AUTH_SESSION_TEST_STATUS.UNAUTHENTICATED) {
-    return
+    throw new Forbidden(args.req.t)
   }
+
+  await providerRefreshBarrier.wait({
+    phase: AUTH_SESSION_REFRESH_BARRIER_PHASES.AFTER_ROTATION,
+  })
 
   return {
     exp: Math.floor(lookup.session.expiresAtMs / 1000),
@@ -118,6 +130,8 @@ const resetProviderSession: Endpoint = {
         { status: 400 },
       )
     }
+
+    providerRefreshBarrier.reset()
 
     return Response.json({ nowMs: providerSessionStore.reset({ nextNowMs: nowMs }) })
   },
@@ -189,9 +203,56 @@ const revokeProviderSession: Endpoint = {
   path: AUTH_SESSION_TEST_ROUTES.REVOKE,
 }
 
+function isRefreshBarrierPhase(value: unknown): value is AuthSessionRefreshBarrierPhase {
+  return Object.values(AUTH_SESSION_REFRESH_BARRIER_PHASES).some((phase) => phase === value)
+}
+
+const armProviderRefreshBarrier: Endpoint = {
+  handler: async (req) => {
+    const body: unknown = req.json ? await req.json() : req.body
+
+    if (
+      !body ||
+      typeof body !== 'object' ||
+      !('phase' in body) ||
+      !isRefreshBarrierPhase(body.phase)
+    ) {
+      return Response.json(
+        { message: 'A valid refresh barrier phase is required.' },
+        { status: 400 },
+      )
+    }
+
+    providerRefreshBarrier.arm({ phase: body.phase })
+
+    return Response.json({ phase: body.phase })
+  },
+  method: 'post',
+  path: AUTH_SESSION_TEST_ROUTES.ARM_REFRESH_BARRIER,
+}
+
+const readProviderRefreshBarrier: Endpoint = {
+  handler: () => Response.json(providerRefreshBarrier.read() ?? null),
+  method: 'get',
+  path: AUTH_SESSION_TEST_ROUTES.REFRESH_BARRIER_STATUS,
+}
+
+const releaseProviderRefreshBarrier: Endpoint = {
+  handler: () => {
+    providerRefreshBarrier.release()
+
+    return Response.json({ isReleased: true })
+  },
+  method: 'post',
+  path: AUTH_SESSION_TEST_ROUTES.RELEASE_REFRESH_BARRIER,
+}
+
 export const authSessionTestEndpoints: Endpoint[] = [
   resetProviderSession,
   loginProviderSession,
   advanceProviderSessionClock,
   revokeProviderSession,
+  armProviderRefreshBarrier,
+  readProviderRefreshBarrier,
+  releaseProviderRefreshBarrier,
 ]

@@ -128,6 +128,8 @@ export function AuthProvider({
   const lastSessionActivityAtRef = React.useRef<number>(undefined)
   const authRequestQueueRef = React.useRef<Promise<void>>(Promise.resolve())
   const authRequestSequenceRef = React.useRef(0)
+  const explicitLogoutSettlementRef = React.useRef<Promise<void>>(undefined)
+  const isExplicitLogoutPendingRef = React.useRef(false)
   const knownTokenExpirationMsRef = React.useRef<number>(undefined)
   const pendingAuthInvalidationRef = React.useRef<
     | {
@@ -322,13 +324,21 @@ export function AuthProvider({
       const requestGeneration = sessionGenerationRef.current
       const activeRequest = refreshRequestRef.current
 
+      if (isExplicitLogoutPendingRef.current) {
+        return Promise.resolve(null)
+      }
+
       if (activeRequest?.generation === requestGeneration) {
         return activeRequest.promise
       }
 
       const refreshPromise = enqueueAuthRequest(
         async ({ hasQueuedRequest }): Promise<AuthenticatedUser | null> => {
-          if (sessionGenerationRef.current !== requestGeneration) {
+          const canCommit = () =>
+            sessionGenerationRef.current === requestGeneration &&
+            !isExplicitLogoutPendingRef.current
+
+          if (!canCommit()) {
             return null
           }
 
@@ -348,14 +358,14 @@ export function AuthProvider({
               },
             )
 
-            if (sessionGenerationRef.current !== requestGeneration) {
+            if (!canCommit()) {
               return null
             }
 
             if (request.status === 200) {
               const json: UserWithToken = await request.json()
 
-              if (sessionGenerationRef.current !== requestGeneration) {
+              if (!canCommit()) {
                 return null
               }
 
@@ -440,34 +450,60 @@ export function AuthProvider({
     [refreshSession],
   )
 
+  const settleExplicitLogout = useCallback(
+    ({ collection }: { collection?: string }): Promise<void> => {
+      const activeSettlement = explicitLogoutSettlementRef.current
+
+      if (activeSettlement !== undefined) {
+        return activeSettlement
+      }
+
+      isExplicitLogoutPendingRef.current = true
+      setNewUser(null)
+
+      const settlement = enqueueAuthRequest(async () => {
+        try {
+          if (collection) {
+            await requests.post(
+              formatAdminURL({
+                apiRoute,
+                path: `/${collection}/logout`,
+              }),
+            )
+          }
+        } catch (_) {
+          // Explicit logout always clears local state, even if server revocation fails.
+        } finally {
+          isExplicitLogoutPendingRef.current = false
+        }
+      })
+
+      explicitLogoutSettlementRef.current = settlement
+      void settlement.finally(() => {
+        if (explicitLogoutSettlementRef.current === settlement) {
+          explicitLogoutSettlementRef.current = undefined
+        }
+      })
+
+      return settlement
+    },
+    [apiRoute, enqueueAuthRequest, setNewUser],
+  )
+
   const logOut = useCallback(async () => {
     const sessionSync = sessionSyncRef.current
     const logoutEvent = { type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT } as const
-
     const logoutPublication = sessionSync?.publish(logoutEvent)
+    const collection = userRef.current?.collection
 
-    try {
-      if (user && user.collection) {
-        setNewUser(null)
-        await requests.post(
-          formatAdminURL({
-            apiRoute,
-            path: `/${user.collection}/logout`,
-          }),
-        )
-      }
-    } catch (_) {
-      // fail silently and log the user out in state
-    } finally {
-      setNewUser(null)
+    await settleExplicitLogout({ collection })
 
-      if (logoutPublication?.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT) {
-        sessionSync?.publishStorageRefresh(logoutPublication)
-      }
+    if (logoutPublication?.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT) {
+      sessionSync?.publishStorageRefresh(logoutPublication)
     }
 
     return true
-  }, [apiRoute, setNewUser, user])
+  }, [settleExplicitLogout])
 
   const refreshPermissions = useCallback(
     async ({ locale }: { locale?: string } = {}) => {
@@ -512,7 +548,9 @@ export function AuthProvider({
     > => {
       const requestGeneration = sessionGenerationRef.current
       const canCommit = () =>
-        sessionGenerationRef.current === requestGeneration && (!isCurrent || isCurrent())
+        sessionGenerationRef.current === requestGeneration &&
+        !isExplicitLogoutPendingRef.current &&
+        (!isCurrent || isCurrent())
 
       return enqueueAuthRequest(async () => {
         if (!canCommit()) {
@@ -602,11 +640,15 @@ export function AuthProvider({
     redirectToInactivityRoute()
   })
   const handleRemoteSessionLoggedOut = useEffectEvent(() => {
-    setNewUser(null)
+    const collection = userRef.current?.collection
+
+    void settleExplicitLogout({ collection })
     redirectToLoginRoute()
   })
   const handleRemoteSessionRefreshed = useEffectEvent((session: UserWithToken) => {
-    setNewUser(session)
+    if (!isExplicitLogoutPendingRef.current) {
+      setNewUser(session)
+    }
   })
   const handleStorageSessionUnauthenticated = useEffectEvent(() => {
     redirectToInactivityRoute()
