@@ -4,6 +4,7 @@ import type {
   Field,
   FieldAffectingData,
   FieldSchemaMap,
+  JsonValue,
   SanitizedConfig,
 } from 'payload'
 
@@ -25,6 +26,21 @@ import { i18n } from './i18n.js'
 import { transformExtraFields } from './transformExtraFields.js'
 import { linkValidation } from './validate.js'
 
+export type { LinkFields, SerializedAutoLinkNode, SerializedLinkNode } from '../nodes/types.js'
+
+type ReservedAutoLinkFieldNames = 'doc' | 'linkType' | 'text' | 'url'
+
+export type AutoLinkFields = {
+  [K in ReservedAutoLinkFieldNames]?: never
+} & Partial<Record<string, JsonValue>>
+
+export type AutoLinksProps = {
+  /**
+   * Static, serializable field values merged into newly created auto link nodes.
+   * Reserved keys like `doc`, `linkType`, `text`, and `url` are ignored.
+   */
+  fields?: AutoLinkFields
+}
 export type ExclusiveLinkCollectionsProps =
   | {
       /**
@@ -48,6 +64,10 @@ export type ExclusiveLinkCollectionsProps =
     }
 
 export type LinkFeatureServerProps = {
+  /**
+   * Controls the fields stored on automatically-created URL and email links.
+   */
+  autoLinks?: AutoLinksProps
   /**
    * Disables the automatic creation of links from URLs pasted into the editor, as well
    * as auto link nodes.
@@ -146,6 +166,9 @@ export const LinkFeature = createServerFeature<
     return {
       ClientFeature: '@payloadcms/richtext-lexical/client#LinkFeatureClient',
       clientFeatureProps: {
+        autoLinks: {
+          fields: props.autoLinks?.fields,
+        },
         defaultLinkType,
         defaultLinkURL,
         disableAutoLinks: props.disableAutoLinks,
