@@ -4,6 +4,7 @@ import type {
   Field,
   FieldAffectingData,
   FieldSchemaMap,
+  JsonValue,
   SanitizedConfig,
 } from 'payload'
 
@@ -27,18 +28,16 @@ import { linkValidation } from './validate.js'
 
 export type { LinkFields, SerializedAutoLinkNode, SerializedLinkNode } from '../nodes/types.js'
 
+type ReservedAutoLinkFieldNames = 'doc' | 'linkType' | 'text' | 'url'
+
 export type AutoLinkFields = {
-  [k: string]: unknown
-  doc?: never
-  linkType?: never
-  newTab?: boolean
-  text?: never
-  url?: never
-}
+  [K in ReservedAutoLinkFieldNames]?: never
+} & Partial<Record<string, JsonValue>>
 
 export type AutoLinksProps = {
   /**
-   * Serializable field values merged into newly-created auto link nodes.
+   * Static, serializable field values merged into newly created auto link nodes.
+   * Reserved keys like `doc`, `linkType`, `text`, and `url` are ignored.
    */
   fields?: AutoLinkFields
 }
