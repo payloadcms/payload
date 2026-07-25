@@ -2,130 +2,80 @@ import type { TypeWithID } from '../../../collections/config/types.js'
 import type { FieldHook } from '../../config/types.js'
 import type { Slugify } from './types.js'
 
-import { ValidationError } from '../../../errors/index.js'
-import { fieldValueExists } from '../../../utilities/fieldValueExists.js'
-import { getUniqueFieldValue } from '../../../utilities/getUniqueFieldValue.js'
-import { hasDraftsEnabled } from '../../../utilities/getVersionsConfig.js'
+import { hasAutosaveEnabled } from '../../../utilities/getVersionsConfig.js'
 import { slugify as defaultSlugify } from '../../../utilities/slugify.js'
-import { consumeSlugDuplicateFallback } from './duplicateContext.js'
-import { getSlugFallbackValue } from './getSlugFallbackValue.js'
-import { hasValue } from './hasValue.js'
 
 type Args = {
-  localized?: boolean
   name: string
   slugify?: Slugify
-  useAsSlug?: string
+  useAsSlug: string
 }
 
 /**
- * `beforeChange` hook for the native `slug` field.
+ * Field `beforeChange` hook for the native `slug` field. Returns the slug value.
+ * - The slug value is derived from the `useAsSlug` source field,
+ *   but can be manually overridden by the admin.
+ * - To protect live URLs, the slug is frozen after initial generation
+ *   unless the admin explicitly overwrites it.
  *
- * Fills the slug only while empty and never rewrites one that's set, so a lagging autosave can't
- * clobber it with a stale value:
- *   - empty with no source falls back to `<singular>-<N>`, e.g. `posts-1` (see {@link getSlugFallbackValue})
- *   - explicit input and the source field are slugified, e.g. "Hello World" → "hello-world"
- *   - an already-set slug is preserved as-is
+ * This is expressed as follows:
  *
- * Generated values dedupe against existing slugs; a localized slug is unique per-locale, so its
- * dedupe and fallback are scoped to the locale being written. Globals have no collection to dedupe
- * against, so their slug is left as-is.
+ * Non-versioned and versioned-but-non-autosave collections:
+ * - On create, generate from the source, keeping an explicitly provided value.
+ * - On update, regenerate only while the stored slug is empty.
+ * - Freeze on the first non-empty value, whether generated or manually provided.
+ *
+ * Autosave drafts:
+ * - On every draft save (create and autosave) before publish, generate freely — a new
+ *   document gets a natural, live-updating slug while the admin is still entering content.
+ * - Freeze on the first manual overwrite or the first publish. A mid-draft overwrite wins
+ *   immediately and is preserved across later autosaves.
  */
 export const generateSlug =
-  ({ name, localized, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
-  async ({ collection, context, data, operation, originalDoc, req, value }) => {
+  ({ name, slugify: customSlugify, useAsSlug }: Args): FieldHook =>
+  async ({ collection, data, global, operation, originalDoc, req, value }) => {
+    const source = data?.[useAsSlug]
+
     const slugify = (valueToSlugify: unknown) =>
       customSlugify
         ? customSlugify({ data: (data ?? {}) as TypeWithID, req, valueToSlugify })
         : defaultSlugify(valueToSlugify as string)
 
-    // A localized slug is unique only within its locale, so every uniqueness query below is scoped
-    // to the locale being written.
-    const locale = localized ? (req.locale ?? undefined) : undefined
+    const entity = collection || global!
 
-    // A duplicated document:
-    //  - Takes a fresh `<singular>-<N>` fallback — not the original's slug, not a source-derived one
-    //  - Skips the explicit-collision check below (see generateSlugBeforeDuplicate).
-    if (collection && consumeSlugDuplicateFallback(context, name)) {
-      return await getSlugFallbackValue({ collection, field: name, locale, req, slugify })
+    if (operation === 'create') {
+      // Generate from the source (keeping an explicitly provided slug). On an autosave
+      // collection the initial draft is created empty, so this yields an empty slug and
+      // begins tracking as soon as content is entered.
+      return await slugify(value || source)
     }
 
     const storedSlug = originalDoc?.[name]
+    const originalSource = originalDoc?.[useAsSlug]
 
-    const storedSlugHasValue = hasValue(storedSlug)
-
-    // Explicit value from the client wins — normalized through the field's slugify.
-    // It must be unique: reject a collision rather than silently changing it,
-    // only generated values are automatically deduped.
-    // A value that slugifies to nothing (e.g. "!!!") isn't a usable slug,
-    // so fall through to the source/fallback rather than store an empty one.
-    if (hasValue(value)) {
-      const slugified = await slugify(value)
-
-      if (hasValue(slugified)) {
-        // Unchanged from what's stored — already unique, so skip the collision query. Autosave
-        // resends the current slug on every tick; without this each tick runs a needless read.
-        if (slugified === storedSlug) {
-          return storedSlug
-        }
-
-        if (
-          collection &&
-          (await fieldValueExists({
-            id: originalDoc?.id,
-            collection: collection.slug,
-            draftsEnabled: hasDraftsEnabled(collection),
-            field: name,
-            locale,
-            req,
-            value: slugified,
-          }))
-        ) {
-          throw new ValidationError(
-            { errors: [{ message: req.t('error:valueMustBeUnique'), path: name }] },
-            req.t,
-          )
-        }
-
-        return slugified
-      }
+    // User explicitly edited the slug (or cleared the value) this save: respect it.
+    if (value !== undefined && value !== storedSlug) {
+      return value
     }
 
-    // On update, preserve a slug that is already set — only fill it while empty.
-    if (operation !== 'create' && storedSlugHasValue) {
+    // No explicit edit this save. If the stored slug doesn't match what its source
+    // would generate, it was customized on an earlier save — keep it frozen.
+    const storedSlugIsCustom = storedSlug && storedSlug !== (await slugify(originalSource))
+
+    if (storedSlugIsCustom) {
       return storedSlug
     }
 
-    // Derive an empty slug from its source, when present.
-    // Dedupe so two documents don't both claim it if they have the same source value.
-    // Globals have no collection to dedupe against.
-    const source = useAsSlug ? data?.[useAsSlug] : undefined
-    const derived = source ? await slugify(source) : undefined
-
-    if (hasValue(derived)) {
-      if (!collection) {
-        return derived
-      }
-
-      return await getUniqueFieldValue({
-        id: originalDoc?.id,
-        collection: collection.slug,
-        draftsEnabled: hasDraftsEnabled(collection),
-        field: name,
-        locale,
-        req,
-        value: derived as string,
-      })
+    if (!hasAutosaveEnabled(entity)) {
+      // Non-autosave: generate once while empty, then freeze.
+      return storedSlug || (await slugify(source))
     }
 
-    // No usable source: keep a stored value, otherwise fall back to `<singular>-<N>`.
-    if (storedSlugHasValue) {
+    // Autosave drafts: freeze once the document has been published to protect the live URL.
+    if (data?._status === 'published' || originalDoc?._status === 'published') {
       return storedSlug
     }
 
-    if (!collection) {
-      return undefined
-    }
-
-    return await getSlugFallbackValue({ collection, field: name, locale, req, slugify })
+    // Still an unpublished draft — keep tracking the source freely.
+    return source ? await slugify(source) : null
   }
