@@ -1,5 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
+import { lexicalEditor } from '@payloadcms/richtext-lexical'
+
 export const postsSlug = 'posts'
 
 export const PostsCollection: CollectionConfig = {
@@ -152,6 +154,17 @@ export const PostsCollection: CollectionConfig = {
           ],
         },
       ],
+    },
+    {
+      name: 'conditionallyEditable',
+      type: 'richText',
+      access: {
+        // Only editable when the sibling `title` field is set to 'test'.
+        // Used to test that a field's readOnly state is recomputed and reflected
+        // in a re-render on every form state build, not just on save + reload.
+        update: ({ data }) => data?.title === 'test',
+      },
+      editor: lexicalEditor({}),
     },
   ],
   versions: false,

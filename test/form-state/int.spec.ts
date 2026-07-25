@@ -3,7 +3,7 @@ import type React from 'react'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import path from 'path'
-import { createLocalReq } from 'payload'
+import { createLocalReq, docAccessOperation } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
@@ -150,6 +150,7 @@ describe('Form State', () => {
         initialValue: postData.title,
         lastRenderedPath: 'title',
         addedByServer: true,
+        readOnly: true,
       },
     })
   })
@@ -235,6 +236,84 @@ describe('Form State', () => {
     expect(stateWithTitle?.['array.1.customTextField']).toHaveProperty('lastRenderedPath')
     expect(stateWithTitle?.['array.1.customTextField']).toHaveProperty('customComponents')
     expect(stateWithTitle?.['array.1.customTextField']?.customComponents?.Field).toBeDefined()
+  })
+
+  it('should re-render a field and reflect its updated readOnly state when a data-dependent field access function changes, even when renderAllFields is false', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const postData = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'not test',
+      },
+    })
+
+    // Simulates the initial full render of the document (e.g. on page load).
+    // `conditionallyEditable` has `access.update: ({ data }) => data?.title === 'test'`,
+    // so it should be read-only here since `title` is not 'test'.
+    const initialDocPermissions = await docAccessOperation({
+      id: postData.id,
+      collection: payload.collections[postsSlug],
+      data: postData,
+      req,
+    })
+
+    const { state: initialState } = await buildFormState({
+      mockRSCs: true,
+      id: postData.id,
+      collectionSlug: postsSlug,
+      data: postData,
+      docPermissions: initialDocPermissions,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: true,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    expect(initialState.conditionallyEditable?.readOnly).toBe(true)
+    expect(initialState.conditionallyEditable?.lastRenderedPath).toStrictEqual(
+      'conditionallyEditable',
+    )
+
+    // Simulates the user editing `title` to 'test' locally, without saving.
+    // This is the debounced onChange request sent while editing, with `renderAllFields: false`
+    // (as used for all onChange form state requests) - the same as the real admin UI onChange flow.
+    const updatedData = { ...postData, title: 'test' }
+
+    const updatedDocPermissions = await docAccessOperation({
+      id: postData.id,
+      collection: payload.collections[postsSlug],
+      data: updatedData,
+      req,
+    })
+
+    const { state: updatedState } = await buildFormState({
+      mockRSCs: true,
+      id: postData.id,
+      collectionSlug: postsSlug,
+      data: updatedData,
+      docPermissions: updatedDocPermissions,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      formState: initialState,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    // The field's readOnly state must reflect the new, live permission - not the stale one
+    // baked in at the last render - even though renderAllFields is false.
+    expect(updatedState.conditionallyEditable?.readOnly).toBe(false)
+    // It must have been re-rendered (received a fresh customComponents.Field), since its
+    // resolved readOnly state changed - otherwise the client would keep the stale disabled UI.
+    expect(updatedState.conditionallyEditable?.customComponents?.Field).toBeDefined()
   })
 
   it('should not render custom Field components for fields hidden by admin.condition', async () => {

@@ -238,6 +238,36 @@ export const addFieldStatePromise = async (args: AddFieldStatePromiseArgs): Prom
       return
     }
 
+    if (typeof field?.access?.update === 'function') {
+      const collection = collectionSlug
+        ? (req.payload.collections[collectionSlug]?.config ?? null)
+        : null
+      const global = globalSlug
+        ? (req.payload.globals.config.find((g) => g.slug === globalSlug) ?? null)
+        : null
+
+      // Field-level `access.update` can depend on sibling field values (e.g. only editable
+      // when another field is set to a certain value). Evaluate it here, against the live,
+      // unsaved data already available in this request, so the field's readOnly state stays
+      // in sync as the user types instead of only updating after save. This mirrors the
+      // `access.read` check above and deliberately avoids a separate permissions request,
+      // since this already runs on every debounced onChange.
+      const hasUpdatePermission = await field.access.update({
+        id,
+        blockData,
+        data: fullData,
+        req,
+        siblingData: data,
+        ...(collection ? { collection } : { global }),
+      })
+
+      fieldPermissions = (
+        fieldPermissions === true
+          ? { create: true, read: true, update: hasUpdatePermission }
+          : { ...fieldPermissions, update: hasUpdatePermission }
+      ) as SanitizedFieldPermissions
+    }
+
     const validate: Validate = 'validate' in field ? field.validate : undefined
 
     let validationResult: string | true = true
