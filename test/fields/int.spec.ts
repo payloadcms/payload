@@ -3515,6 +3515,38 @@ describe('Fields', () => {
       expect(updatedJsonFieldsDoc.json.state).toEqual({})
     })
 
+    it('should preserve nested arrays when the field is omitted from a partial update', async () => {
+      // customJSON has no jsonSchema restriction, so it can hold an arbitrary
+      // array-of-arrays shape (e.g. coordinate tuples) like the `json` field can.
+      const jsonFieldsDoc = await payload.create({
+        collection: 'json-fields',
+        data: {
+          customJSON: [
+            [1, 2],
+            [3, 4],
+          ],
+        },
+      })
+
+      expect(jsonFieldsDoc.customJSON).toEqual([
+        [1, 2],
+        [3, 4],
+      ])
+
+      const updatedJsonFieldsDoc = await payload.update({
+        id: jsonFieldsDoc.id,
+        collection: 'json-fields',
+        data: {
+          json: { foo: 'bar' },
+        },
+      })
+
+      expect(updatedJsonFieldsDoc.customJSON).toEqual([
+        [1, 2],
+        [3, 4],
+      ])
+    })
+
     describe('querying', () => {
       let fooBar
       let bazBar
