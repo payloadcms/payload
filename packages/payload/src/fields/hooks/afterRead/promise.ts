@@ -22,6 +22,25 @@ import { relationshipPopulationPromise } from './relationshipPopulationPromise.j
 import { traverseFields } from './traverseFields.js'
 import { virtualFieldPopulationPromise } from './virtualFieldPopulationPromise.js'
 
+const isEmptyStoredLocalizedEntry = (value: unknown): boolean => {
+  if (value === null || typeof value === 'undefined') {
+    return true
+  }
+
+  if (typeof value === 'object' && !Array.isArray(value)) {
+    const objectValue = value as Record<string, unknown>
+
+    return (
+      Object.keys(objectValue).length === 0 ||
+      Object.values(objectValue).every(
+        (entry) => entry === null || typeof entry === 'undefined' || entry === '',
+      )
+    )
+  }
+
+  return false
+}
+
 type Args = {
   /**
    * Data of the nearest parent block. If no parent block exists, this will be the `undefined`
@@ -170,7 +189,8 @@ export const promise = async ({
     storedLocalizedValue &&
       locale &&
       locale !== 'all' &&
-      Object.prototype.hasOwnProperty.call(storedLocalizedValue, locale),
+      Object.prototype.hasOwnProperty.call(storedLocalizedValue, locale) &&
+      !isEmptyStoredLocalizedEntry(storedLocalizedValue[locale]),
   )
 
   const shouldHoistLocalizedValue: boolean = Boolean(
@@ -235,7 +255,14 @@ export const promise = async ({
       // Fill groups with empty objects so fields with hooks within groups can populate
       // themselves virtually as necessary
       if (fieldAffectsDataResult && typeof siblingDoc[field.name] === 'undefined') {
-        siblingDoc[field.name] = {}
+        const shouldSkipEmptyGroupFill =
+          shouldLocalizeField &&
+          locale !== 'all' &&
+          (storedLocalizedValue === null || !localeExistsInStorage)
+
+        if (!shouldSkipEmptyGroupFill) {
+          siblingDoc[field.name] = {}
+        }
       }
 
       break
@@ -457,7 +484,7 @@ export const promise = async ({
       for (const localeKey of Object.keys(currentValue)) {
         if (
           !Object.prototype.hasOwnProperty.call(storedLocalizedValue, localeKey) ||
-          storedLocalizedValue[localeKey] === null
+          isEmptyStoredLocalizedEntry(storedLocalizedValue[localeKey])
         ) {
           delete currentValue[localeKey]
         }

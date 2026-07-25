@@ -3,7 +3,14 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
-import { collectionSlug, defaultLocale, spanishLocale, staticDefaultValue } from './shared.js'
+import {
+  collectionSlug,
+  defaultLocale,
+  groupNestedDefaultValue,
+  nestedLocalizedGroupDefaultValue,
+  spanishLocale,
+  staticDefaultValue,
+} from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -40,6 +47,30 @@ export default buildConfigWithDefaults({
           defaultValue: ({ locale }) => `default-${locale}`,
           localized: true,
           type: 'text',
+        },
+        {
+          name: 'myGroup',
+          fields: [
+            {
+              name: 'nestedField',
+              defaultValue: groupNestedDefaultValue,
+              type: 'text',
+            },
+          ],
+          localized: true,
+          type: 'group',
+        },
+        {
+          name: 'myNonLocalizedGroup',
+          fields: [
+            {
+              name: 'nestedLocalizedField',
+              defaultValue: nestedLocalizedGroupDefaultValue,
+              localized: true,
+              type: 'text',
+            },
+          ],
+          type: 'group',
         },
       ],
       versions: false,
