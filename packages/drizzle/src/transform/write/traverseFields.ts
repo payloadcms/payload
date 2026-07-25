@@ -550,7 +550,7 @@ export const traverseFields = ({
       ) {
         if (typeof fieldData === 'object') {
           Object.entries(fieldData).forEach(([localeKey, localeData]) => {
-            if (localeData === null) {
+            if (localeData == null) {
               relationshipsToDelete.push({
                 locale: localeKey,
                 path: relationshipPath,
@@ -571,7 +571,7 @@ export const traverseFields = ({
         }
         return
       } else if (Array.isArray(field.relationTo) || ('hasMany' in field && field.hasMany)) {
-        if (fieldData === null || (Array.isArray(fieldData) && fieldData.length === 0)) {
+        if (fieldData == null || (Array.isArray(fieldData) && fieldData.length === 0)) {
           relationshipsToDelete.push({ path: relationshipPath })
           return
         }

@@ -9,6 +9,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { APIError, Forbidden, NotFound } from '../../errors/index.js'
+import { fieldAffectsData } from '../../fields/config/types.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -94,6 +95,18 @@ export const restoreVersionOperation = async <
     }
 
     const { parent: parentDocID, version: versionToRestoreWithLocales } = rawVersionToRestore
+
+    // Ensure relationship/upload fields missing from the restored version
+    // are explicitly set to null so that database adapters clear stale values.
+    for (const field of collectionConfig.flattenedFields) {
+      if (
+        (field.type === 'relationship' || field.type === 'upload') &&
+        fieldAffectsData(field) &&
+        !(field.name in versionToRestoreWithLocales)
+      ) {
+        versionToRestoreWithLocales[field.name] = null
+      }
+    }
 
     // /////////////////////////////////////
     // Access
