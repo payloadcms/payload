@@ -1456,6 +1456,53 @@ describe('Versions', () => {
         expect(findDoc.title).toStrictEqual('updated title')
         expect(findDoc.description).toStrictEqual('updated description')
       })
+
+      it('should bulk publish more than 100 drafts without exceeding bound parameter limits', async () => {
+        // Create 120 draft documents — mirrors the D1 100-bound-parameter issue (#17493)
+        const docs = await Promise.all(
+          Array.from({ length: 120 }, (_, i) =>
+            payload.create({
+              collection: draftCollectionSlug,
+              data: {
+                description: `bulk publish description ${i}`,
+                title: `bulk publish title ${i}`,
+              },
+              draft: true,
+            }),
+          ),
+        )
+
+        const ids = docs.map((doc) => doc.id)
+
+        // Bulk publish all 120 at once using id IN (...) — this is the exact
+        // where-clause shape the admin's PublishMany sends
+        const updated = await payload.update({
+          collection: draftCollectionSlug,
+          data: {
+            _status: 'published',
+          },
+          draft: true,
+          where: {
+            id: {
+              in: ids,
+            },
+          },
+        })
+
+        expect(updated.docs).toHaveLength(120)
+        expect(updated.errors).toHaveLength(0)
+
+        // Verify they were actually published, not just returned
+        const findResult = await payload.find({
+          collection: draftCollectionSlug,
+          limit: 0,
+          where: {
+            and: [{ id: { in: ids } }, { _status: { equals: 'published' } }],
+          },
+        })
+
+        expect(findResult.totalDocs).toBe(120)
+      })
     })
 
     describe('Delete', () => {

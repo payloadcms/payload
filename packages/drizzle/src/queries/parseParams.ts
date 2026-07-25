@@ -423,7 +423,7 @@ export function parseParams({
                 if (
                   adapter.limitedBoundParameters &&
                   (operator === 'in' || operator === 'not_in') &&
-                  relationOrPath === 'id' &&
+                  (relationOrPath === 'id' || relationOrPath === 'parent') &&
                   Array.isArray(queryValue)
                 ) {
                   let isInvalid = false
