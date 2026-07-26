@@ -1,4 +1,4 @@
-import type { Page } from '@playwright/test'
+import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -30,6 +30,7 @@ const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
+let forceRenderContext: BrowserContext | undefined
 let page: Page
 let serverURL: string
 let url: AdminUrlUtil
@@ -66,6 +67,41 @@ describe('Collapsibles', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
+  test.afterEach(async () => {
+    await forceRenderContext?.close()
+    forceRenderContext = undefined
+  })
+
+  test('should force render nested fields without intersection observer callbacks', async ({
+    browser,
+  }) => {
+    forceRenderContext = await browser.newContext()
+    const forceRenderPage = await forceRenderContext.newPage()
+
+    await forceRenderPage.addInitScript(() => {
+      class NeverIntersectingObserver implements IntersectionObserver {
+        readonly root = null
+        readonly rootMargin = '0px'
+        readonly thresholds: ReadonlyArray<number> = []
+
+        disconnect(): void {}
+
+        observe(): void {}
+
+        takeRecords(): IntersectionObserverEntry[] {
+          return []
+        }
+
+        unobserve(): void {}
+      }
+
+      window.IntersectionObserver = NeverIntersectingObserver
+    })
+    await forceRenderPage.goto(url.create)
+
+    await expect(forceRenderPage.locator('#field-text')).toBeVisible()
+  })
+
   test('should render collapsible as collapsed if initCollapsed is true', async () => {
     await page.goto(url.create)
     const collapsedCollapsible = page.locator(
@@ -86,7 +122,10 @@ describe('Collapsibles', () => {
   })
 
   test('should render CollapsibleLabel using a component', async () => {
-    test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
+    test.skip(
+      process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+      'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
+    )
     const label = 'custom row label as component'
     await page.goto(url.create)
 
