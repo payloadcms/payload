@@ -26,6 +26,7 @@ describe('Untyped Payload types', () => {
     expect<Job['id']>().type.toBe<number | string>()
     expect<Job['input']>().type.toBe<object>()
     expect<Job['processingToken']>().type.toBe<null | string | undefined>()
+    expect<Job['processingUntil']>().type.toBe<null | string | undefined>()
     expect<Job['taskStatus']>().type.toBe<JobTaskStatus>()
   })
 

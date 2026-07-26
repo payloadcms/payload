@@ -243,8 +243,8 @@ export interface UntypedPayloadTypes {
          */
         scheduled?: boolean
       }
-      processing?: boolean
       processingToken?: null | string
+      processingUntil?: null | string
       queue?: string
       taskSlug?: null | StringKeyOf<UntypedPayloadTypes['jobs']['tasks']>
       taskStatus: JobTaskStatus
@@ -1633,15 +1633,9 @@ export type { ValidationFieldError } from './errors/index.js'
 
 export { baseBlockFields } from './fields/baseFields/baseBlockFields.js'
 export { baseIDField } from './fields/baseFields/baseIDField.js'
-export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
+export { getSlugFallbackValue } from './fields/baseFields/slug/getSlugFallbackValue.js'
 
-export {
-  createClientBlocks,
-  createClientField,
-  createClientFields,
-  type ServerOnlyFieldAdminProperties,
-  type ServerOnlyFieldProperties,
-} from './fields/config/client.js'
+export type { SlugFieldClientProps } from './fields/baseFields/slug/types.js'
 
 export interface FieldCustom extends Record<string, any> {}
 
@@ -1653,8 +1647,26 @@ export interface GlobalCustom extends Record<string, any> {}
 
 export interface GlobalAdminCustom extends Record<string, any> {}
 
+export {
+  createClientBlocks,
+  createClientField,
+  createClientFields,
+  type ServerOnlyFieldAdminProperties,
+  type ServerOnlyFieldProperties,
+} from './fields/config/client.js'
 export { sanitizeField, sanitizeFields } from './fields/config/sanitize.js'
+
 export type { SanitizeFieldArgs } from './fields/config/sanitize.js'
+
+export interface FieldCustom extends Record<string, any> {}
+
+export interface CollectionCustom extends Record<string, any> {}
+
+export interface CollectionAdminCustom extends Record<string, any> {}
+
+export interface GlobalCustom extends Record<string, any> {}
+
+export interface GlobalAdminCustom extends Record<string, any> {}
 
 export type {
   AdminClient,
@@ -1768,26 +1780,16 @@ export type {
   ValidateOptions,
   ValueWithRelation,
 } from './fields/config/types.js'
-
-export interface FieldCustom extends Record<string, any> {}
-
-export interface CollectionCustom extends Record<string, any> {}
-
-export interface CollectionAdminCustom extends Record<string, any> {}
-
-export interface GlobalCustom extends Record<string, any> {}
-
-export interface GlobalAdminCustom extends Record<string, any> {}
-
 export { getDefaultValue } from './fields/getDefaultValue.js'
+
 export { traverseFields as afterChangeTraverseFields } from './fields/hooks/afterChange/traverseFields.js'
-
 export { promise as afterReadPromise } from './fields/hooks/afterRead/promise.js'
-export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 
+export { traverseFields as afterReadTraverseFields } from './fields/hooks/afterRead/traverseFields.js'
 export { traverseFields as beforeChangeTraverseFields } from './fields/hooks/beforeChange/traverseFields.js'
 export { traverseFields as beforeValidateTraverseFields } from './fields/hooks/beforeValidate/traverseFields.js'
 export { sortableFieldTypes } from './fields/sortableFieldTypes.js'
+
 export { validateBlocksFilterOptions, validations } from './fields/validations.js'
 
 export type {
@@ -1821,7 +1823,6 @@ export type {
   UploadFieldValidation,
   UsernameFieldValidation,
 } from './fields/validations.js'
-
 export {
   type ClientGlobalConfig,
   createClientGlobalConfig,
@@ -1829,6 +1830,7 @@ export {
   type ServerOnlyGlobalAdminProperties,
   type ServerOnlyGlobalProperties,
 } from './globals/config/client.js'
+
 export type {
   AfterChangeHook as GlobalAfterChangeHook,
   AfterReadHook as GlobalAfterReadHook,
@@ -1841,12 +1843,11 @@ export type {
   GlobalConfig,
   SanitizedGlobalConfig,
 } from './globals/config/types.js'
-
 export { docAccessOperation as docAccessOperationGlobal } from './globals/operations/docAccess.js'
 export { findOneOperation } from './globals/operations/findOne.js'
 export { findVersionByIDOperation as findVersionByIDOperationGlobal } from './globals/operations/findVersionByID.js'
-export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
 
+export { findVersionsOperation as findVersionsOperationGlobal } from './globals/operations/findVersions.js'
 export { restoreVersionOperation as restoreVersionOperationGlobal } from './globals/operations/restoreVersion.js'
 export { updateOperation as updateOperationGlobal } from './globals/operations/update.js'
 export {
@@ -1874,8 +1875,8 @@ export type { Ancestor } from './hierarchy/utils/getAncestors.js'
 export { getAncestors } from './hierarchy/utils/getAncestors.js'
 export * from './kv/adapters/DatabaseKVAdapter.js'
 export * from './kv/adapters/InMemoryKVAdapter.js'
-export * from './kv/index.js'
 
+export * from './kv/index.js'
 export type {
   CollapsedPreferences,
   CollectionPreferences,
@@ -1909,6 +1910,7 @@ export type {
   TaskOutput,
   TaskType,
 } from './queues/config/types/taskTypes.js'
+
 export type {
   ConcurrencyConfig,
   JobLog,
@@ -1919,19 +1921,18 @@ export type {
   WorkflowHandler,
   WorkflowTypes,
 } from './queues/config/types/workflowTypes.js'
-
 export { JobCancelledError } from './queues/errors/index.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
-export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
 
+export { importHandlerPath } from './queues/operations/runJobs/runJob/importHandlerPath.js'
 export {
   _internal_jobSystemGlobals,
   _internal_resetJobSystemGlobals,
   getCurrentDate,
 } from './queues/utilities/getCurrentDate.js'
 export { getLocalI18n } from './translations/getLocalI18n.js'
-export * from './types/index.js'
 
+export * from './types/index.js'
 export { getFileByPath } from './uploads/getFileByPath.js'
 export { _internal_safeFetchGlobal } from './uploads/safeFetch.js'
 export type * from './uploads/types.js'
@@ -1985,6 +1986,8 @@ export { getCollectionIDFieldTypes } from './utilities/getCollectionIDFieldTypes
 export { getFieldByPath } from './utilities/getFieldByPath.js'
 export { getObjectDotNotation } from './utilities/getObjectDotNotation.js'
 export { getRequestLanguage } from './utilities/getRequestLanguage.js'
+export { getUniqueFieldValue } from './utilities/getUniqueFieldValue.js'
+export { hasDraftsEnabled } from './utilities/getVersionsConfig.js'
 export { handleEndpoints } from './utilities/handleEndpoints.js'
 export { headersWithCors } from './utilities/headersWithCors.js'
 export { initTransaction } from './utilities/initTransaction.js'

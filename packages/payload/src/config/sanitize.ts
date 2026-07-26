@@ -245,6 +245,12 @@ const addDefaultDashboardWidgets = async ({
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
+  const { duration, safetyBuffer } = configWithDefaults.jobs!.processingLease!
+  if (!(safetyBuffer! >= 0 && safetyBuffer! < duration!)) {
+    throw new InvalidConfiguration(
+      '`jobs.processingLease.safetyBuffer` must be non-negative and less than `jobs.processingLease.duration`.',
+    )
+  }
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
 

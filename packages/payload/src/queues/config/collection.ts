@@ -232,12 +232,12 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
         index: true,
       },
       {
-        name: 'processing',
-        type: 'checkbox',
+        name: 'processingUntil',
+        type: 'date',
         admin: {
+          date: { pickerAppearance: 'dayAndTime' },
           position: 'sidebar',
         },
-        defaultValue: false,
         index: true,
       },
       {
@@ -280,8 +280,8 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
       beforeChange: [
         ({ data, originalDoc }) => {
           if (originalDoc?.error?.cancelled) {
-            data.processing = false
             data.processingToken = null
+            data.processingUntil = null
             data.hasError = true
             delete data.completedAt
             delete data.waitUntil
