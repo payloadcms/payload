@@ -415,7 +415,7 @@ When you define a `concurrency` key:
 2. **When running:** The job runner enforces exclusive execution through two mechanisms:
 
    - It first checks which concurrency keys are currently being processed and excludes pending jobs with those keys from the query
-   - If multiple pending jobs with the same key are picked up in the same batch, only the first one (by creation order) runs - the others are released back to `processing: false` and will be picked up on subsequent runs
+   - If multiple pending jobs with the same key are picked up in the same batch, only the first one (by creation order) runs - the others have their processing lease cleared and will be picked up on subsequent runs
 
 3. **Result:** Jobs with the same concurrency key are guaranteed to run sequentially, never in parallel. All jobs are preserved and will eventually complete - they just wait their turn.
 
@@ -527,4 +527,4 @@ concurrency: {
 
 - **No concurrency key = no restrictions:** Jobs without a concurrency configuration run in parallel as before.
 
-- **Pending jobs wait:** Jobs that can't run due to concurrency constraints remain in the queue with `processing: false` and will be picked up on subsequent runs.
+- **Pending jobs wait:** Jobs that can't run due to concurrency constraints remain in the queue without a `processingUntil` lease or `processingToken` and will be picked up on subsequent runs.
