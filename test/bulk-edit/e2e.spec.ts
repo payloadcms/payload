@@ -844,6 +844,46 @@ test.describe('Bulk Edit', () => {
     await payload.delete({ collection: tabsSlug, id: doc.id })
   })
 
+  test('should fall back to the field name for fields with label: false', async () => {
+    const doc = await payload.create({
+      collection: tabsSlug,
+      data: { title: 'No Label Doc' },
+    })
+
+    await page.goto(tabsUrl.list)
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    await addListFilter({
+      page,
+      fieldLabel: 'ID',
+      operatorLabel: 'equals',
+      value: doc.id,
+    })
+
+    await page.locator('table tbody tr.row-1 input[type="checkbox"]').check()
+    await page
+      .locator('.list-selection__actions .btn', {
+        hasText: 'Edit',
+      })
+      .click()
+
+    const bulkEditForm = page.locator('form.edit-many__form')
+    await expect(bulkEditForm).toBeVisible()
+
+    await bulkEditForm.locator('.field-select .rs__control').click()
+
+    const menu = getSelectMenu({ page })
+
+    // The `label: false` field must render its humanized name, not an empty option
+    await expect(menu.locator('.rs__option', { hasText: exactText('No Label Text') })).toBeVisible()
+
+    // No option should render without text
+    const optionTexts = await menu.locator('.rs__option').allInnerTexts()
+    expect(optionTexts.every((text) => text.trim().length > 0)).toBe(true)
+
+    await payload.delete({ collection: tabsSlug, id: doc.id })
+  })
+
   test('should preserve beforeInput components when selecting multiple fields', async () => {
     await deleteAllPosts()
     await createPost({ title: 'Post 1' })

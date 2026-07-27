@@ -99,6 +99,17 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const seed = async (_payload: Payload) => {
+  // Create the admin user first so auto-login still works if a later seed step
+  // fails. Otherwise the empty users collection redirects to "Create first user".
+  await _payload.create({
+    collection: usersSlug,
+    data: {
+      email: devUser.email,
+      password: devUser.password,
+    },
+    depth: 0,
+  })
+
   const jpgPath = path.resolve(dirname, './collections/Upload/payload.jpg')
   const pngPath = path.resolve(dirname, './uploads/payload.png')
 
@@ -181,15 +192,6 @@ export const seed = async (_payload: Payload) => {
       .replace(/"\{\{TEXT_DOC_ID\}\}"/g, `${formattedTextID}`)
       .replace(/"\{\{RICH_TEXT_DOC_ID\}\}"/g, `${formattedRichTextDocID}`),
   )
-
-  await _payload.create({
-    collection: usersSlug,
-    data: {
-      email: devUser.email,
-      password: devUser.password,
-    },
-    depth: 0,
-  })
 
   await _payload.create({
     collection: lexicalFieldsSlug,

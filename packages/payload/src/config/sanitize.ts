@@ -245,6 +245,12 @@ const addDefaultDashboardWidgets = async ({
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
+  const { duration, safetyBuffer } = configWithDefaults.jobs!.processingLease!
+  if (!(safetyBuffer! >= 0 && safetyBuffer! < duration!)) {
+    throw new InvalidConfiguration(
+      '`jobs.processingLease.safetyBuffer` must be non-negative and less than `jobs.processingLease.duration`.',
+    )
+  }
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
 
@@ -509,18 +515,17 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
     if (hasScheduleProperty) {
       config.jobs.scheduling = true
-      // Add payload-jobs-stats global for tracking when a job of a specific slug was last run
-      ;(config.globals ??= []).push(
-        await sanitizeGlobal(
-          config as unknown as Config,
-          getJobStatsGlobal(config as unknown as Config),
-          richTextSanitizationPromises,
-          validRelationships,
-        ),
-      )
-
-      config.jobs.stats = true
     }
+
+    // Add payload-jobs-stats global for tracking job system metadata.
+    ;(config.globals ??= []).push(
+      await sanitizeGlobal(
+        config as unknown as Config,
+        getJobStatsGlobal(),
+        richTextSanitizationPromises,
+        validRelationships,
+      ),
+    )
 
     let defaultJobsCollection = getDefaultJobsCollection(config.jobs)
 
