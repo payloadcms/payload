@@ -367,6 +367,165 @@ describe('unflattenObject', () => {
     })
   })
 
+  describe('field names containing underscores', () => {
+    const fields: FlattenedField[] = [
+      {
+        name: 'simple',
+        type: 'text',
+      } as FlattenedField,
+      {
+        name: 'camelCase',
+        type: 'text',
+      } as FlattenedField,
+      {
+        name: 'PascalCase',
+        type: 'text',
+      } as FlattenedField,
+      {
+        name: 'with_underscores',
+        type: 'text',
+      } as FlattenedField,
+      {
+        name: '_start_with_underscore',
+        type: 'text',
+      } as FlattenedField,
+      {
+        name: 'with_numbers_1',
+        type: 'text',
+      } as FlattenedField,
+      {
+        name: 'localized_with_underscores_with_numbers_1',
+        type: 'text',
+        localized: true,
+      } as FlattenedField,
+    ]
+
+    it('should keep a snake_case field flat instead of nesting it', () => {
+      const data = {
+        vat_number: 'IT12345678901',
+      }
+
+      const result = unflattenObject({
+        data,
+        fields: [{ name: 'vat_number', type: 'text' } as FlattenedField],
+        req: mockReq,
+      })
+
+      expect(result).toEqual({
+        vat_number: 'IT12345678901',
+      })
+    })
+
+    it('should handle all permitted field name shapes at the top level', () => {
+      const data = {
+        simple: 'simple',
+        camelCase: 'camelCase',
+        PascalCase: 'PascalCase',
+        with_underscores: 'with_underscores',
+        _start_with_underscore: '_start_with_underscore',
+        with_numbers_1: 'with_numbers_1',
+        localized_with_underscores_with_numbers_1_en:
+          'localized_with_underscores_with_numbers_1_en',
+        localized_with_underscores_with_numbers_1_es:
+          'localized_with_underscores_with_numbers_1_es',
+      }
+
+      const result = unflattenObject({ data, fields, req: mockReq })
+
+      expect(result).toEqual({
+        simple: 'simple',
+        camelCase: 'camelCase',
+        PascalCase: 'PascalCase',
+        with_underscores: 'with_underscores',
+        _start_with_underscore: '_start_with_underscore',
+        with_numbers_1: 'with_numbers_1',
+        localized_with_underscores_with_numbers_1: {
+          en: 'localized_with_underscores_with_numbers_1_en',
+          es: 'localized_with_underscores_with_numbers_1_es',
+        },
+      })
+    })
+
+    it('should handle all permitted field name shapes nested in a group', () => {
+      const groupFields: FlattenedField[] = [
+        {
+          name: 'group',
+          type: 'group',
+          flattenedFields: fields,
+        } as unknown as FlattenedField,
+      ]
+
+      const data = {
+        group_simple: 'simple',
+        group_camelCase: 'camelCase',
+        group_PascalCase: 'PascalCase',
+        group_with_underscores: 'with_underscores',
+        group__start_with_underscore: '_start_with_underscore',
+        group_with_numbers_1: 'with_numbers_1',
+        group_localized_with_underscores_with_numbers_1_en:
+          'localized_with_underscores_with_numbers_1_en',
+        group_localized_with_underscores_with_numbers_1_es:
+          'localized_with_underscores_with_numbers_1_es',
+      }
+
+      const result = unflattenObject({ data, fields: groupFields, req: mockReq })
+
+      expect(result).toEqual({
+        group: {
+          simple: 'simple',
+          camelCase: 'camelCase',
+          PascalCase: 'PascalCase',
+          with_underscores: 'with_underscores',
+          _start_with_underscore: '_start_with_underscore',
+          with_numbers_1: 'with_numbers_1',
+          localized_with_underscores_with_numbers_1: {
+            en: 'localized_with_underscores_with_numbers_1_en',
+            es: 'localized_with_underscores_with_numbers_1_es',
+          },
+        },
+      })
+    })
+
+    it('should handle a snake_case field inside an array row', () => {
+      const arrayFields: FlattenedField[] = [
+        {
+          name: 'items',
+          type: 'array',
+          flattenedFields: [{ name: 'vat_number', type: 'text' }],
+        } as unknown as FlattenedField,
+      ]
+
+      const data = {
+        items_0_vat_number: 'IT12345678901',
+      }
+
+      const result = unflattenObject({ data, fields: arrayFields, req: mockReq })
+
+      expect(result).toEqual({
+        items: [{ vat_number: 'IT12345678901' }],
+      })
+    })
+
+    it('should not treat a text field named with an _id suffix as a relationship', () => {
+      const idSuffixFields: FlattenedField[] = [
+        {
+          name: 'external_id',
+          type: 'text',
+        } as FlattenedField,
+      ]
+
+      const data = {
+        external_id: 'abc-123',
+      }
+
+      const result = unflattenObject({ data, fields: idSuffixFields, req: mockReq })
+
+      expect(result).toEqual({
+        external_id: 'abc-123',
+      })
+    })
+  })
+
   describe('polymorphic relationships', () => {
     const fields: FlattenedField[] = [
       {
