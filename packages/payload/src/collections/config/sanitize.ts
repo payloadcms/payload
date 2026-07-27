@@ -147,8 +147,7 @@ export const sanitizeCollection = async (
 
   const polymorphicJoins: SanitizedJoin[] = []
 
-  // Resolve authorship config to its canonical form and inject the
-  // createdBy / updatedBy relationship fields before sanitizing fields.
+  // Inject createdBy / updatedBy (unless already defined) before sanitizing fields.
   const authorship = sanitizeAuthorship(sanitized.authorship)
   sanitized.authorship = authorship
 

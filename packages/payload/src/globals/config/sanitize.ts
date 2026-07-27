@@ -83,8 +83,7 @@ export const sanitizeGlobal = async (
   // Sanitize fields
   const validRelationships = _validRelationships ?? config.collections?.map((c) => c.slug) ?? []
 
-  // Resolve authorship config to its canonical form and inject the
-  // createdBy / updatedBy relationship fields before sanitizing fields.
+  // Inject createdBy / updatedBy (unless already defined) before sanitizing fields.
   const authorship = sanitizeAuthorship(global.authorship)
   global.authorship = authorship
 
