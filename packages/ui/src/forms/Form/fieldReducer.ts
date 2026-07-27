@@ -225,7 +225,9 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
         incomingState: serverState,
       })
 
-      prevStateRef.current = newState
+      if (prevStateRef) {
+        prevStateRef.current = newState
+      }
 
       return newState
     }
@@ -442,11 +444,6 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'UPDATE_MANY': {
-      /**
-       * The server omits `customComponents` for fields it has already rendered once, tracked via
-       * `lastRenderedPath`. Merging rather than replacing preserves those components on fields that
-       * were selected earlier - otherwise they would fall back to their default components.
-       */
       return mergeServerFormState({
         currentState: state || {},
         incomingState: action.formState,
