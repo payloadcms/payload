@@ -41,9 +41,10 @@ describe('Lexical Fully Featured - database', () => {
     const page = await browser.newPage()
     await ensureCompilationIsDone({ page, serverURL })
 
-    // Warm up the create route compilation under the long beforeAll timeout to
-    // avoid flaky timeouts in the per-test beforeEach navigation.
+    // Warm the create route once so the first per-test navigation doesn't pay the
+    // cold first-hit route render on CI's production server.
     await page.goto(new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug).create)
+    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
 
     await page.close()
   })
@@ -56,7 +57,7 @@ describe('Lexical Fully Featured - database', () => {
     url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
-    await lexical.editor.first().waitFor({ state: 'visible' })
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
 

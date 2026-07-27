@@ -36,17 +36,18 @@ describe('Lexical Fully Featured', () => {
 
     await ensureCompilationIsDone({ browser, serverURL })
 
-    // Warm up the create route compilation under the long beforeAll timeout to
-    // avoid flaky timeouts in the per-test beforeEach navigation.
+    // Warm the create route once so the first per-test navigation doesn't pay the
+    // cold first-hit route render on CI's production server.
     const page = await browser.newPage()
     await page.goto(new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug).create)
+    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
     await page.close()
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
-    await lexical.editor.first().waitFor({ state: 'visible' })
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
   test('prevent extra paragraph when inserting decorator blocks like blocks or upload node', async () => {
@@ -372,12 +373,14 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
 
     await ensureCompilationIsDone({ browser, serverURL })
 
-    // Warm up the account and create route compilation under the long beforeAll
-    // timeout to avoid flaky timeouts in the per-test beforeEach navigation.
-    const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
+    // Warm the account and create routes once so the first per-test navigation
+    // doesn't pay the cold first-hit route render on CI's production server.
     const page = await browser.newPage()
-    await page.goto(url.account)
-    await page.goto(url.create)
+    const warmURL = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
+    await page.goto(warmURL.account)
+    await page.locator('.payload-settings__language .react-select').waitFor({ state: 'visible' })
+    await page.goto(warmURL.create)
+    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
     await page.close()
   })
   beforeEach(async ({ page }) => {
@@ -389,7 +392,7 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
     await options.locator('text=עברית').click()
     await expect(page.getByText('משתמשים').first()).toBeVisible()
     await page.goto(url.create)
-    await lexical.editor.first().waitFor({ state: 'visible' })
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
   test('slash menu should be positioned correctly in RTL', async ({ page }) => {
