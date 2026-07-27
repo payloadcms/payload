@@ -521,7 +521,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     ;(config.globals ??= []).push(
       await sanitizeGlobal(
         config as unknown as Config,
-        getJobStatsGlobal(config as unknown as Config),
+        getJobStatsGlobal(),
         richTextSanitizationPromises,
         validRelationships,
       ),
