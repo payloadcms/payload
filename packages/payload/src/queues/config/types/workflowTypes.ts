@@ -39,45 +39,6 @@ export type JobLog = {
 }
 
 /**
- * @deprecated - will be made private in 4.0. Please use the `Job` type instead.
- */
-export type BaseJob<
-  TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
-> = {
-  completedAt?: null | string
-  /**
-   * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
-   */
-  concurrencyKey?: null | string
-  createdAt: string
-  error?: unknown
-  hasError?: boolean
-  id: number | string
-  input: TWorkflowSlugOrInput extends false
-    ? object
-    : TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
-      ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
-      : TWorkflowSlugOrInput
-  log?: JobLog[]
-  meta?: {
-    [key: string]: unknown
-    /**
-     * If true, this job was queued by the scheduling system.
-     */
-    scheduled?: boolean
-  }
-  processingToken?: null | string
-  processingUntil?: null | string
-  queue?: string
-  taskSlug?: null | TaskType
-  taskStatus: JobTaskStatus
-  totalTried: number
-  updatedAt: string
-  waitUntil?: null | string
-  workflowSlug?: null | WorkflowTypes
-}
-
-/**
  * @todo rename to WorkflowSlug in 4.0, similar to CollectionSlug
  */
 export type WorkflowTypes = StringKeyOf<TypedJobs['workflows']>
@@ -105,7 +66,7 @@ export type RunningJobFromTask<TTaskSlug extends keyof TypedJobs['tasks']> = {
 } & TypedCollection['payload-jobs']
 
 export type WorkflowHandler<
-  TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
+  TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object = object,
 > = (args: {
   inlineTask: RunInlineTaskFunction
   job: Job<TWorkflowSlugOrInput>
@@ -161,7 +122,7 @@ export type ConcurrencyConfig<TInput = object> =
     }
 
 export type WorkflowConfig<
-  TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
+  TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object = object,
 > = {
   /**
    * Job concurrency controls for preventing race conditions.
@@ -170,11 +131,9 @@ export type WorkflowConfig<
    * (in which case exclusive defaults to true).
    */
   concurrency?: ConcurrencyConfig<
-    TWorkflowSlugOrInput extends false
-      ? object
-      : TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
-        ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
-        : TWorkflowSlugOrInput
+    TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
+      ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
+      : TWorkflowSlugOrInput
   >
   /**
    * You can either pass a string-based path to the workflow function file, or the workflow function itself.
@@ -183,10 +142,7 @@ export type WorkflowConfig<
    * because that will avoid bundling large dependencies in your Next.js app. Passing a string path is an advanced feature
    * that may require a sophisticated build pipeline in order to work.
    */
-  handler:
-    | string
-    | WorkflowHandler<TWorkflowSlugOrInput>
-    | WorkflowJSON<TWorkflowSlugOrInput extends object ? string : TWorkflowSlugOrInput>
+  handler: string | WorkflowHandler<TWorkflowSlugOrInput> | WorkflowJSON<TWorkflowSlugOrInput>
   /**
    * Define the input field schema  - payload will generate a type for this schema.
    */

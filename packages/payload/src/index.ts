@@ -134,7 +134,7 @@ import { Cron } from 'croner'
 
 import type { ClientConfig } from './config/client.js'
 import type { KVAdapter } from './kv/index.js'
-import type { BaseJob } from './queues/config/types/workflowTypes.js'
+import type { JobLog, JobTaskStatus } from './queues/config/types/workflowTypes.js'
 import type { TypeWithVersion } from './versions/types.js'
 
 import { decrypt, encrypt } from './auth/crypto.js'
@@ -224,6 +224,35 @@ export interface UntypedPayloadTypes {
   }
   collections: {
     [slug: string]: JsonObject & TypeWithID
+    'payload-jobs': {
+      completedAt?: null | string
+      /**
+       * Used for concurrency control. Jobs with the same key are subject to exclusive/supersedes rules.
+       */
+      concurrencyKey?: null | string
+      createdAt: string
+      error?: unknown
+      hasError?: boolean
+      id: UntypedPayloadTypes['db']['defaultIDType']
+      input: object
+      log?: JobLog[]
+      meta?: {
+        [key: string]: unknown
+        /**
+         * If true, this job was queued by the scheduling system.
+         */
+        scheduled?: boolean
+      }
+      processingToken?: null | string
+      processingUntil?: null | string
+      queue?: string
+      taskSlug?: null | StringKeyOf<UntypedPayloadTypes['jobs']['tasks']>
+      taskStatus: JobTaskStatus
+      totalTried: number
+      updatedAt: string
+      waitUntil?: null | string
+      workflowSlug?: null | StringKeyOf<UntypedPayloadTypes['jobs']['workflows']>
+    }
   }
   collectionsJoins: {
     [slug: string]: {
@@ -421,27 +450,24 @@ export type AuthCollectionSlug<T extends PayloadTypesShape = PayloadTypes> = Str
 
 export type TypedJobs = PayloadTypes['jobs']
 
-// Check if payload-jobs exists in the AUGMENTED types (not the fallback with index signature)
-type HasPayloadJobsType = GeneratedTypes extends { collections: infer C }
-  ? 'payload-jobs' extends keyof C
-    ? true
-    : false
-  : false
+type JobDocument = PayloadTypes['collections'] extends {
+  'payload-jobs': infer TJob
+}
+  ? TJob
+  : UntypedPayloadTypes['collections']['payload-jobs']
 
 /**
  * Represents a job in the `payload-jobs` collection, referencing a queued workflow or task (= Job).
- * If a generated type for the `payload-jobs` collection is not available, falls back to the BaseJob type.
+ * Uses the generated collection type when available and the untyped collection fallback otherwise.
  *
- * `input` and `taksStatus` are always present here, as the job afterRead hook will always populate them.
+ * `input` and `taskStatus` are always present here, as the job afterRead hook will always populate them.
  */
-export type Job<
-  TWorkflowSlugOrInput extends false | keyof TypedJobs['workflows'] | object = false,
-> = HasPayloadJobsType extends true
-  ? {
-      input: BaseJob<TWorkflowSlugOrInput>['input']
-      taskStatus: BaseJob<TWorkflowSlugOrInput>['taskStatus']
-    } & Omit<TypedCollection['payload-jobs'], 'input' | 'taskStatus'>
-  : BaseJob<TWorkflowSlugOrInput>
+export type Job<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object = object> = {
+  input: TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
+    ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
+    : TWorkflowSlugOrInput
+  taskStatus: JobTaskStatus
+} & Omit<JobDocument, 'input' | 'taskStatus'>
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -1886,7 +1912,6 @@ export type {
 } from './queues/config/types/taskTypes.js'
 
 export type {
-  BaseJob,
   ConcurrencyConfig,
   JobLog,
   JobTaskStatus,

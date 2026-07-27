@@ -57,7 +57,6 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.i18n = config.i18n ?? {}
   config.jobs = {
     deleteJobOnComplete: true,
-    depth: 0,
     ...(config.jobs || {}),
     access: {
       cancel: defaultAccess,
@@ -69,7 +68,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
       duration: config.jobs?.processingLease?.duration ?? 20 * 60 * 1000,
       safetyBuffer: config.jobs?.processingLease?.safetyBuffer ?? 30 * 1000,
     },
-  } as JobsConfig
+  }
   config.localization = config.localization ?? false
   config.maxDepth = config.maxDepth ?? 10
   config.routes = {

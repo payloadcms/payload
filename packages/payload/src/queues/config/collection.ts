@@ -139,6 +139,12 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
         virtual: true,
       },
       {
+        // The meta field can be used to store arbitrary data about the job. The scheduling system
+        // uses `scheduled: true` to indicate that it queued the job.
+        name: 'meta',
+        type: 'json',
+      },
+      {
         type: 'tabs',
         tabs: [
           {
@@ -288,15 +294,6 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
     versions: false,
   }
 
-  if (jobsConfig.stats) {
-    // TODO: In 4.0, this should be added by default.
-    // The meta field can be used to store arbitrary data about the job. The scheduling system uses this to store
-    // `scheduled: true` to indicate that the job was queued by the scheduling system.
-    jobsCollection.fields.push({
-      name: 'meta',
-      type: 'json',
-    })
-  }
   return jobsCollection
 }
 

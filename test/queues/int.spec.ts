@@ -81,6 +81,21 @@ describe('Queues - Payload', () => {
     _internal_jobSystemGlobals.shouldAutoSchedule = true
   })
 
+  describe('default config', () => {
+    it('should always add the jobs stats global and job metadata field', () => {
+      const jobsCollection = payload.config.collections.find(({ slug }) => slug === 'payload-jobs')
+      const jobsStatsGlobal = payload.config.globals.find(
+        ({ slug }) => slug === 'payload-jobs-stats',
+      )
+      const metaField = jobsCollection?.fields.find(
+        (field) => 'name' in field && field.name === 'meta',
+      )
+
+      expect(jobsStatsGlobal).toBeDefined()
+      expect(metaField).toBeDefined()
+    })
+  })
+
   describe('access control', () => {
     it('will run access control on jobs runner run endpoint', async () => {
       const response = await restClient.GET('/payload-jobs/run?silent=true', {
