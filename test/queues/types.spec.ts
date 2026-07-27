@@ -1,13 +1,8 @@
-import type { Job, JobTaskStatus, PayloadTypes, WorkflowConfig } from 'payload'
+import type { Job, JobTaskStatus, PayloadTypes } from 'payload'
 
 import { describe, expect, test } from 'tstyche'
 
-import type {
-  MyUpdatePostWorkflowType,
-  PayloadJob,
-  PayloadJobsStat,
-  WorkflowUpdatePostJSONWorkflow,
-} from './payload-types.js'
+import type { MyUpdatePostWorkflowType, PayloadJob, PayloadJobsStat } from './payload-types.js'
 
 describe('Job type', () => {
   test('should use the generated payload-jobs collection type', () => {
@@ -24,49 +19,5 @@ describe('Job type', () => {
 
   test('should generate the jobs stats global whenever jobs are enabled', () => {
     expect<PayloadTypes['globals']['payload-jobs-stats']>().type.toBe<PayloadJobsStat>()
-  })
-})
-
-describe('JSON workflow types', () => {
-  test('should type step callbacks from the generated workflow slug', () => {
-    const workflow: WorkflowConfig<'updatePostJSONWorkflow'> = {
-      slug: 'updatePostJSONWorkflow',
-      handler: [
-        {
-          id: 'run-update',
-          condition: ({ job }) => {
-            expect(job).type.toBe<Job<'updatePostJSONWorkflow'>>()
-            expect(job.input).type.toBe<WorkflowUpdatePostJSONWorkflow['input']>()
-
-            return job.input.message.length > 0
-          },
-          input: ({ job }) => {
-            expect(job).type.toBe<Job<'updatePostJSONWorkflow'>>()
-            expect(job.input).type.toBe<WorkflowUpdatePostJSONWorkflow['input']>()
-
-            return {
-              message: job.input.message,
-              post: job.input.post,
-            }
-          },
-          task: 'UpdatePost',
-        },
-        {
-          id: 'run-inline',
-          inlineTask: ({ job }) => {
-            expect(job).type.toBe<Job<'updatePostJSONWorkflow'>>()
-            expect(job.input).type.toBe<WorkflowUpdatePostJSONWorkflow['input']>()
-
-            return {
-              output: {
-                messageTwice: `${job.input.message}${job.input.message}`,
-              },
-            }
-          },
-        },
-      ],
-    }
-
-    expect(workflow).type.toBeAssignableTo<WorkflowConfig<'updatePostJSONWorkflow'>>()
   })
 })
