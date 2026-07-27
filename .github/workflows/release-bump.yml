@@ -6,9 +6,11 @@ on:
       preid:
         description: Prerelease identifier
         type: choice
+        # 'beta' is intentionally omitted until the beta relases start,
+        # so a contributor cannot accidentally cut a beta through this flow.
+        # TODO: re-add 'beta' to these options when beta releases begin.
         options:
           - canary
-          - beta
         default: canary
       bump:
         description: Semver bump
