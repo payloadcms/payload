@@ -56,7 +56,7 @@ describe('Lexical Fully Featured - database', () => {
     url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
-    await expect(lexical.editor.first()).toBeVisible()
+    await lexical.editor.first().waitFor({ state: 'visible' })
     await lexical.editor.first().focus()
   })
 

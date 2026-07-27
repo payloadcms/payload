@@ -44,7 +44,7 @@ describe('Lexical JSX Converter', () => {
     const url = new AdminUrlUtil(serverURL, lexicalJSXConverterSlug)
     const lexical = new LexicalHelpers(page)
     await page.goto(url.create)
-    await expect(lexical.editor.first()).toBeVisible()
+    await lexical.editor.first().waitFor({ state: 'visible' })
     await lexical.editor.first().focus()
   })
 

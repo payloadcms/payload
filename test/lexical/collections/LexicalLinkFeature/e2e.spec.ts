@@ -42,7 +42,7 @@ describe('Lexical Link Feature', () => {
     const lexical = new LexicalHelpers(page)
     await page.goto(url.create)
     await waitForFormReady(page)
-    await expect(lexical.editor.first()).toBeVisible()
+    await lexical.editor.first().waitFor({ state: 'visible' })
     await lexical.editor.first().focus()
   })
 

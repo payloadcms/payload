@@ -31,6 +31,7 @@ describe('Lexical On Demand', () => {
     // Warm up the create route compilation under the long beforeAll timeout to
     // avoid flaky timeouts in the per-test beforeEach navigation.
     await page.goto(new AdminUrlUtil(serverURL, 'OnDemandForm').create)
+    await page.goto(new AdminUrlUtil(serverURL, 'OnDemandOutsideForm').create)
 
     await page.close()
   })
@@ -45,7 +46,7 @@ describe('Lexical On Demand', () => {
       const url = new AdminUrlUtil(serverURL, 'OnDemandForm')
       lexical = new LexicalHelpers(page)
       await page.goto(url.create)
-      await expect(lexical.editor.first()).toBeVisible()
+      await lexical.editor.first().waitFor({ state: 'visible' })
       await lexical.editor.first().focus()
     })
     test('lexical is rendered on demand within form', async ({ page }) => {
@@ -83,7 +84,7 @@ describe('Lexical On Demand', () => {
       const url = new AdminUrlUtil(serverURL, 'OnDemandOutsideForm')
       lexical = new LexicalHelpers(page)
       await page.goto(url.create)
-      await expect(lexical.editor.first()).toBeVisible()
+      await lexical.editor.first().waitFor({ state: 'visible' })
       await lexical.editor.first().focus()
     })
     test('lexical is rendered on demand outside form', async ({ page }) => {
