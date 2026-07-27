@@ -343,7 +343,7 @@ export interface PayloadJob {
           | 'DoNothingTask'
           | 'SelfCancel';
         taskID: string;
-        input?:
+        input:
           | {
               [k: string]: unknown;
             }
@@ -371,6 +371,24 @@ export interface PayloadJob {
           | number
           | boolean
           | null;
+        parent?: {
+          taskSlug?:
+            | (
+                | 'inline'
+                | 'UpdatePost'
+                | 'UpdatePostStep2'
+                | 'CreateSimple'
+                | 'CreateSimpleRetriesUndefined'
+                | 'CreateSimpleRetries0'
+                | 'CreateSimpleWithDuplicateMessage'
+                | 'ExternalTask'
+                | 'ThrowError'
+                | 'DoNothingTask'
+                | 'SelfCancel'
+              )
+            | null;
+          taskID?: string | null;
+        };
         id?: string | null;
       }[]
     | null;
@@ -566,6 +584,12 @@ export interface PayloadJobsSelect<T extends boolean = true> {
         output?: T;
         state?: T;
         error?: T;
+        parent?:
+          | T
+          | {
+              taskSlug?: T;
+              taskID?: T;
+            };
         id?: T;
       };
   workflowSlug?: T;

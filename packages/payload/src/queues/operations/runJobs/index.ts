@@ -167,47 +167,44 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     and.push({ id: { equals: id } })
   }
 
-  // Only enforce concurrency controls if the feature is enabled
-  if (jobsConfig.enableConcurrencyControl) {
-    // Find currently running jobs with concurrency keys to enforce exclusive concurrency
-    // Jobs with the same concurrencyKey should not run in parallel
-    const runningJobsWithConcurrency = await payload.db.find({
-      collection: jobsCollectionSlug,
-      limit: 0,
-      pagination: false,
-      req: { transactionID: undefined },
-      select: {
-        concurrencyKey: true,
-      },
-      where: {
-        and: [
-          { processingUntil: { greater_than: nowISOString } },
-          { concurrencyKey: { exists: true } },
-        ],
-      },
-    })
+  // Find currently running jobs with concurrency keys to enforce exclusive concurrency.
+  // Jobs with the same concurrencyKey should not run in parallel.
+  const runningJobsWithConcurrency = await payload.db.find({
+    collection: jobsCollectionSlug,
+    limit: 0,
+    pagination: false,
+    req: { transactionID: undefined },
+    select: {
+      concurrencyKey: true,
+    },
+    where: {
+      and: [
+        { processingUntil: { greater_than: nowISOString } },
+        { concurrencyKey: { exists: true } },
+      ],
+    },
+  })
 
-    const runningConcurrencyKeys = new Set<string>()
-    if (runningJobsWithConcurrency?.docs) {
-      for (const doc of runningJobsWithConcurrency.docs) {
-        const concurrencyKey = (doc as Job).concurrencyKey
-        if (concurrencyKey) {
-          runningConcurrencyKeys.add(concurrencyKey)
-        }
+  const runningConcurrencyKeys = new Set<string>()
+  if (runningJobsWithConcurrency?.docs) {
+    for (const doc of runningJobsWithConcurrency.docs) {
+      const concurrencyKey = (doc as Job).concurrencyKey
+      if (concurrencyKey) {
+        runningConcurrencyKeys.add(concurrencyKey)
       }
     }
+  }
 
-    // Exclude jobs whose concurrencyKey is already running
-    if (runningConcurrencyKeys.size > 0) {
-      and.push({
-        or: [
-          // Jobs without a concurrency key can always run
-          { concurrencyKey: { exists: false } },
-          // Jobs with a concurrency key that is not currently running can run
-          { concurrencyKey: { not_in: [...runningConcurrencyKeys] } },
-        ],
-      })
-    }
+  // Exclude jobs whose concurrencyKey is already running
+  if (runningConcurrencyKeys.size > 0) {
+    and.push({
+      or: [
+        // Jobs without a concurrency key can always run
+        { concurrencyKey: { exists: false } },
+        // Jobs with a concurrency key that is not currently running can run
+        { concurrencyKey: { not_in: [...runningConcurrencyKeys] } },
+      ],
+    })
   }
 
   // Claim jobs before running them so another worker cannot pick up the same jobs.
@@ -273,54 +270,51 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     }
   }
 
-  // Only handle concurrency deduplication if the feature is enabled
-  if (jobsConfig.enableConcurrencyControl) {
-    // Handle the case where multiple jobs with the same concurrencyKey were picked up in the same batch
-    // We should only run one job per concurrencyKey, release the others back to pending
-    const seenConcurrencyKeys = new Set<string>()
-    const jobsToRun: Job[] = []
-    const jobsToRelease: Job[] = []
+  // Handle the case where multiple jobs with the same concurrencyKey were picked up in the same batch.
+  // We should only run one job per concurrencyKey, releasing the others back to pending.
+  const seenConcurrencyKeys = new Set<string>()
+  const jobsToRun: Job[] = []
+  const jobsToRelease: Job[] = []
 
-    for (const job of jobs) {
-      if (job.concurrencyKey) {
-        if (seenConcurrencyKeys.has(job.concurrencyKey)) {
-          // This job has the same concurrencyKey as another job we're already running
-          jobsToRelease.push(job)
-        } else {
-          seenConcurrencyKeys.add(job.concurrencyKey)
-          jobsToRun.push(job)
-        }
+  for (const job of jobs) {
+    if (job.concurrencyKey) {
+      if (seenConcurrencyKeys.has(job.concurrencyKey)) {
+        // This job has the same concurrencyKey as another job we're already running
+        jobsToRelease.push(job)
       } else {
+        seenConcurrencyKeys.add(job.concurrencyKey)
         jobsToRun.push(job)
       }
+    } else {
+      jobsToRun.push(job)
     }
-
-    // Release duplicate concurrencyKey jobs back to pending state
-    if (jobsToRelease.length > 0) {
-      const releaseIds = jobsToRelease.map((job) => job.id)
-      await updateJobs({
-        data: { processingUntil: null },
-        req,
-        returning: false,
-        where: {
-          and: [
-            { id: { in: releaseIds } },
-            { processingToken: { equals: processingToken } },
-            {
-              processingUntil: {
-                greater_than: new Date(
-                  getCurrentDate().getTime() + processingLeaseSafetyBuffer,
-                ).toISOString(),
-              },
-            },
-          ],
-        },
-      })
-    }
-
-    // Use only the filtered jobs going forward
-    jobs = jobsToRun
   }
+
+  // Release duplicate concurrencyKey jobs back to pending state
+  if (jobsToRelease.length > 0) {
+    const releaseIds = jobsToRelease.map((job) => job.id)
+    await updateJobs({
+      data: { processingUntil: null },
+      req,
+      returning: false,
+      where: {
+        and: [
+          { id: { in: releaseIds } },
+          { processingToken: { equals: processingToken } },
+          {
+            processingUntil: {
+              greater_than: new Date(
+                getCurrentDate().getTime() + processingLeaseSafetyBuffer,
+              ).toISOString(),
+            },
+          },
+        ],
+      },
+    })
+  }
+
+  // Use only the filtered jobs going forward
+  jobs = jobsToRun
 
   if (!jobs.length) {
     return {
@@ -352,13 +346,10 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
 
   const runSingleJob = async (
     job: Job,
-  ): Promise<
-    | {
-        id: number | string
-        result: RunJobResult
-      }
-    | null
-  > => {
+  ): Promise<{
+    id: number | string
+    result: RunJobResult
+  } | null> => {
     if (!job.workflowSlug && !job.taskSlug) {
       throw new Error('Job must have either a workflowSlug or a taskSlug')
     }

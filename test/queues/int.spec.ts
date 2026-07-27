@@ -94,6 +94,29 @@ describe('Queues - Payload', () => {
       expect(jobsStatsGlobal).toBeDefined()
       expect(metaField).toBeDefined()
     })
+
+    it('should include concurrency controls and parent task logging', () => {
+      const jobsCollection = payload.config.collections.find(({ slug }) => slug === 'payload-jobs')
+      const tabsField = jobsCollection?.fields.find((field) => field.type === 'tabs')
+      const logField = tabsField?.tabs
+        .flatMap((tab) => tab.fields)
+        .find((field) => 'name' in field && field.name === 'log')
+      const inputField =
+        logField?.type === 'array'
+          ? logField.fields.find((field) => 'name' in field && field.name === 'input')
+          : undefined
+      const parentField =
+        logField?.type === 'array'
+          ? logField.fields.find((field) => 'name' in field && field.name === 'parent')
+          : undefined
+      const concurrencyKeyField = jobsCollection?.fields.find(
+        (field) => 'name' in field && field.name === 'concurrencyKey',
+      )
+
+      expect(concurrencyKeyField).toBeDefined()
+      expect(inputField).toMatchObject({ required: true })
+      expect(parentField).toBeDefined()
+    })
   })
 
   describe('access control', () => {
@@ -1942,13 +1965,16 @@ describe('Queues - Payload', () => {
     })
 
     expect(jobAfterRun?.log?.[0]?.taskID).toBe('create doc 1')
-    //expect(jobAfterRun.log[0].parent.taskID).toBe('create two docs')
-    // jobAfterRun.log[0].parent should not exist
-    expect(jobAfterRun?.log?.[0]?.parent).toBeUndefined()
+    expect(jobAfterRun?.log?.[0]?.parent).toMatchObject({
+      taskID: 'create two docs',
+      taskSlug: 'inline',
+    })
 
     expect(jobAfterRun?.log?.[1]?.taskID).toBe('create doc 2')
-    //expect(jobAfterRun.log[1].parent.taskID).toBe('create two docs')
-    expect(jobAfterRun?.log?.[1]?.parent).toBeUndefined()
+    expect(jobAfterRun?.log?.[1]?.parent).toMatchObject({
+      taskID: 'create two docs',
+      taskSlug: 'inline',
+    })
 
     expect(jobAfterRun?.log?.[2]?.taskID).toBe('create two docs')
   })

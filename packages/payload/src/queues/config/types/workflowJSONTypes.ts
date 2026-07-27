@@ -1,4 +1,4 @@
-import type { Job, TaskHandlerResult, TypedJobs } from '../../../index.js'
+import type { Job, TypedJobs } from '../../../index.js'
 import type { RetryConfig, TaskHandlerArgsNoInput } from './taskTypes.js'
 
 export type WorkflowStep<
@@ -22,9 +22,9 @@ export type WorkflowStep<
   retries?: number | RetryConfig
 } & (
   | {
-      inlineTask?: (
+      inlineTask: (
         args: TaskHandlerArgsNoInput<TWorkflowSlugOrInput>,
-      ) => Promise<TaskHandlerResult<TTaskSlug>> | TaskHandlerResult<TTaskSlug>
+      ) => { output: object } | Promise<{ output: object }>
     }
   | {
       input: (args: { job: Job<TWorkflowSlugOrInput> }) => TypedJobs['tasks'][TTaskSlug]['input']

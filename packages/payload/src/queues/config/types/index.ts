@@ -135,13 +135,6 @@ export type JobsConfig = {
      */
     run?: RunJobAccess
   }
-  /** Adds information about the parent job to the task log. This is useful for debugging and tracking the flow of tasks.
-   *
-   * In 4.0, this will default to `true`.
-   *
-   * @default false
-   */
-  addParentToTaskLog?: boolean
   /**
    * Allows you to configure cron jobs that automatically run queued jobs
    * at specified intervals. Note that this does not _queue_ new jobs - only
@@ -154,18 +147,6 @@ export type JobsConfig = {
    * Determine whether or not to delete a job after it has successfully completed.
    */
   deleteJobOnComplete?: boolean
-  /**
-   * Enable concurrency controls for workflows and tasks.
-   * When enabled, adds a `concurrencyKey` field to the jobs collection schema.
-   * This allows workflows and tasks to use the `concurrency` option to prevent race conditions.
-   *
-   * **Important:** Enabling this may require a database migration depending on your database adapter,
-   * as it adds a new indexed field to the jobs collection schema.
-   *
-   * @default false
-   * @todo In 4.0, this will default to `true`.
-   */
-  enableConcurrencyControl?: boolean
   /**
    * Override any settings on the default Jobs collection. Accepts the default collection and allows you to return
    * a new collection.

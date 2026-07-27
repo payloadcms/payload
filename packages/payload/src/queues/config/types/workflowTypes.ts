@@ -15,7 +15,7 @@ import type {
   RunTaskFunctions,
   TaskInput,
   TaskOutput,
-  TaskType,
+  TaskSlug,
 } from './taskTypes.js'
 import type { WorkflowJSON } from './workflowJSONTypes.js'
 
@@ -27,7 +27,7 @@ export type JobLog = {
    * ID added by the array field when the log is saved in the database
    */
   id: string
-  input?: Record<string, any>
+  input: Record<string, any>
   output?: Record<string, any>
   /**
    * Sub-tasks (tasks that are run within a task) will have a parent task ID
@@ -35,32 +35,12 @@ export type JobLog = {
   parent?: TaskParent
   state: 'failed' | 'succeeded'
   taskID: string
-  taskSlug: TaskType
+  taskSlug: TaskSlug
 }
 
-/**
- * @todo rename to WorkflowSlug in 4.0, similar to CollectionSlug
- */
-export type WorkflowTypes = StringKeyOf<TypedJobs['workflows']>
+export type WorkflowSlug = StringKeyOf<TypedJobs['workflows']>
 
-/**
- * @deprecated - will be removed in 4.0. Use `Job` type instead.
- */
-export type RunningJob<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object> = {
-  input: TWorkflowSlugOrInput extends keyof TypedJobs['workflows']
-    ? TypedJobs['workflows'][TWorkflowSlugOrInput]['input']
-    : TWorkflowSlugOrInput
-  taskStatus: JobTaskStatus
-} & Omit<TypedCollection['payload-jobs'], 'input' | 'taskStatus'>
-
-/**
- * @deprecated - will be removed in 4.0. Use `Job` type instead.
- */
-export type RunningJobSimple<TWorkflowInput extends object> = {
-  input: TWorkflowInput
-} & TypedCollection['payload-jobs']
-
-// Simplified version of RunningJob that doesn't break TypeScript (TypeScript seems to stop evaluating RunningJob when it's too complex)
+// Simplified job type that avoids deeply evaluating the full Job type.
 export type RunningJobFromTask<TTaskSlug extends keyof TypedJobs['tasks']> = {
   input: TypedJobs['tasks'][TTaskSlug]['input']
 } & TypedCollection['payload-jobs']
@@ -78,7 +58,7 @@ export type SingleTaskStatus<T extends keyof TypedJobs['tasks']> = {
   complete: boolean
   input: TaskInput<T>
   output: TaskOutput<T>
-  taskSlug: TaskType
+  taskSlug: TaskSlug
   totalTried: number
 }
 
@@ -87,7 +67,7 @@ export type SingleTaskStatus<T extends keyof TypedJobs['tasks']> = {
  */
 export type JobTaskStatus = {
   // Wrap in taskSlug to improve typing
-  [taskSlug in TaskType]: {
+  [taskSlug in TaskSlug]: {
     [taskID: string]: SingleTaskStatus<taskSlug>
   }
 }
