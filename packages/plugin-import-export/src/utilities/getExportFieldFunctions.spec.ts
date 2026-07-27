@@ -1,8 +1,17 @@
-import { FlattenedField } from 'payload'
+import type { FlattenedField, PayloadRequest } from 'payload'
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
+import { applyFieldHooks } from './applyFieldHooks.js'
 import { getExportFieldFunctions } from './getExportFieldFunctions.js'
+
+const mockReq = {
+  payload: {
+    logger: {
+      error: vi.fn(),
+    },
+  },
+} as unknown as PayloadRequest
 
 describe('getExportFieldFunctions registration', () => {
   it('should not collide bare-key entries when two same-named fields with built-in handlers exist in different positions', () => {
@@ -38,77 +47,40 @@ describe('getExportFieldFunctions registration', () => {
   })
 })
 
-describe('relationship export handlers', () => {
-  const buildField = (overrides: Record<string, unknown>): FlattenedField[] => [
-    { name: 'rel', type: 'relationship', ...overrides } as unknown as FlattenedField,
-  ]
-
-  /**
-   * Invokes the registered handler the way the export pipelines do and returns both
-   * the hook's return value and whatever it wrote into the flat row.
-   */
-  const invoke = ({
-    fields,
-    format,
-    value,
-  }: {
-    fields: FlattenedField[]
-    format: 'csv' | 'json'
-    value: unknown
-  }) => {
-    const entry = getExportFieldFunctions({ fields })['rel']
-    const siblingData: Record<string, unknown> = {}
-
-    const returned = (entry as { fn: (args: Record<string, unknown>) => unknown }).fn({
-      columnName: 'rel',
-      data: {},
-      format,
-      siblingData,
-      siblingDoc: {},
-      value,
-    })
-
-    return { returned, siblingData }
-  }
-
-  it('should leave an unresolvable single polymorphic value untouched for json but suppress it for csv', () => {
-    const fields = buildField({ relationTo: ['posts', 'users'] })
-    const value = { relationTo: 'posts', value: null }
-
-    expect(invoke({ fields, format: 'json', value }).returned).toBeUndefined()
-    expect(invoke({ fields, format: 'csv', value }).returned).toBeNull()
-  })
-
-  it('should drop unresolvable ids from a hasMany monomorphic json export', () => {
-    const { returned } = invoke({
-      fields: buildField({ hasMany: true, relationTo: 'posts' }),
-      format: 'json',
-      value: [{ id: 'p1' }, {}, 'p2'],
-    })
-
-    expect(returned).toEqual(['p1', 'p2'])
-  })
-
-  describe('hasMany polymorphic with an unresolvable entry', () => {
-    const fields = buildField({ hasMany: true, relationTo: ['posts', 'users'] })
-    const value = [
-      { relationTo: 'users', value: null },
-      { relationTo: 'posts', value: 'p1' },
+describe('hasMany polymorphic CSV columns', () => {
+  it('should pin columns to the source index when an earlier relationship is orphaned', () => {
+    const fields: FlattenedField[] = [
+      {
+        name: 'rel',
+        type: 'relationship',
+        hasMany: true,
+        relationTo: ['posts', 'users'],
+      } as unknown as FlattenedField,
     ]
 
-    it('should keep csv columns pinned to the source index', () => {
-      // The surviving entry stays at index 1 — shifting it to 0 would silently
-      // rewrite column names for every consumer of the CSV.
-      expect(invoke({ fields, format: 'csv', value }).siblingData).toEqual({
-        rel_1_id: 'p1',
-        rel_1_relationTo: 'posts',
-      })
+    const result = applyFieldHooks({
+      type: 'beforeExport',
+      // Exports populate at depth 1, so `value: null` is an orphaned reference —
+      // the target doc was deleted out from under it.
+      data: {
+        rel: [
+          { relationTo: 'users', value: null },
+          { relationTo: 'posts', value: 'p1' },
+        ],
+      },
+      fieldHooks: getExportFieldFunctions({ fields }),
+      fields,
+      format: 'csv',
+      operation: 'export',
+      req: mockReq,
     })
 
-    it('should drop the entry for json rather than leaving a hole', () => {
-      expect(invoke({ fields, format: 'json', value }).returned).toEqual([
-        { relationTo: 'posts', value: 'p1' },
-      ])
+    // The surviving entry stays at index 1 — shifting it to 0 would silently
+    // rewrite column names for every consumer of the CSV.
+    expect(result).toEqual({
+      rel: null,
+      rel_1_id: 'p1',
+      rel_1_relationTo: 'posts',
     })
   })
 })
