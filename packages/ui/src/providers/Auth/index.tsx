@@ -7,9 +7,9 @@ import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { MarkSessionActivity } from './sessionActivity.js'
 import type { AuthSessionResyncOptions, AuthSessionResyncResult } from './sessionSync.js'
 import type { AuthContext, UserWithToken } from './types.js'
+import type { SessionTimingController } from './useSessionTiming.js'
 
 import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
@@ -18,17 +18,12 @@ import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
 import { useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
-import {
-  createSessionActivityTracker,
-  registerSessionActivityListeners,
-} from './sessionActivity.js'
 import { AUTH_SESSION_SYNC_EVENT_TYPES, createAuthSessionSync } from './sessionSync.js'
+import { useSessionTiming } from './useSessionTiming.js'
 
 export type { AuthContext, UserWithToken } from './types.js'
 
 const Context = createContext({} as AuthContext)
-
-const maxTimeoutMs = 2147483647
 
 type Props = {
   children: React.ReactNode
@@ -63,20 +58,13 @@ export function AuthProvider({
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpirationMs, setTokenExpirationMs] = useState<number>()
   const [permissions, setPermissions] = useState<SanitizedPermissions>(initialPermissions)
-  const [forceLogoutBufferMs, setForceLogoutBufferMs] = useState<number>(120_000)
   const [fetchedUserOnMount, setFetchedUserOnMount] = useState(false)
   const [sessionSyncSourceID] = useState(createSessionSyncSourceID)
 
-  const refreshTokenTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
-  const reminderTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
-  const forceLogOutTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
-  const activityCheckpointTimeoutRef = React.useRef<ReturnType<typeof setTimeout>>(null)
-  const lastSessionActivityAtRef = React.useRef<number>(undefined)
   const authRequestQueueRef = React.useRef<Promise<void>>(Promise.resolve())
   const authRequestSequenceRef = React.useRef(0)
   const explicitLogoutSettlementRef = React.useRef<Promise<void>>(undefined)
   const isExplicitLogoutPendingRef = React.useRef(false)
-  const knownTokenExpirationMsRef = React.useRef<number>(undefined)
   const pendingAuthInvalidationRef = React.useRef<
     | {
         generation: number
@@ -93,10 +81,9 @@ export function AuthProvider({
   >(undefined)
   const sessionGenerationRef = React.useRef(0)
   const sessionSyncRef = React.useRef<null | ReturnType<typeof createAuthSessionSync>>(null)
-  const tokenExpirationMsRef = React.useRef<number>(undefined)
+  const sessionTimingRef = React.useRef<SessionTimingController>(undefined)
   const userRef = React.useRef<AuthenticatedUser | null>(initialUser)
 
-  const id = user?.id
   const isAuthenticated = Boolean(user)
 
   const redirectToInactivityRoute = useCallback(() => {
@@ -131,10 +118,7 @@ export function AuthProvider({
     setUserInMemory(null)
     setTokenInMemory(undefined)
     setTokenExpirationMs(undefined)
-    tokenExpirationMsRef.current = undefined
-    lastSessionActivityAtRef.current = undefined
-    clearTimeout(refreshTokenTimeoutRef.current)
-    clearTimeout(activityCheckpointTimeoutRef.current)
+    sessionTimingRef.current?.clear()
   }, [])
 
   const revokeTokenAndExpire = useCallback(() => {
@@ -142,84 +126,21 @@ export function AuthProvider({
     clearUserInMemory()
   }, [clearUserInMemory])
 
-  // Handler for reminder timeout - uses useEffectEvent to capture latest autoRefresh value
-  const handleReminderTimeout = useEffectEvent(() => {
-    if (autoRefresh) {
-      refreshCookieEvent()
-    } else {
-      openModal(stayLoggedInModalSlug)
-    }
-  })
-
   const applyUserResponse = useCallback(
     (userResponse: null | UserWithToken) => {
-      clearTimeout(reminderTimeoutRef.current)
-      clearTimeout(forceLogOutTimeoutRef.current)
-      clearTimeout(activityCheckpointTimeoutRef.current)
-
       if (userResponse?.user) {
-        lastSessionActivityAtRef.current = undefined
-        clearTimeout(refreshTokenTimeoutRef.current)
-
         const nextTokenExpirationMs = userResponse.exp * 1000
 
         userRef.current = userResponse.user
         setUserInMemory(userResponse.user)
         setTokenInMemory(userResponse.token ?? userResponse.refreshedToken)
         setTokenExpirationMs(nextTokenExpirationMs)
-        knownTokenExpirationMsRef.current = Math.max(
-          knownTokenExpirationMsRef.current ?? 0,
-          nextTokenExpirationMs,
-        )
-        tokenExpirationMsRef.current = nextTokenExpirationMs
-
-        const expiresInMs = Math.max(0, Math.min(nextTokenExpirationMs - Date.now(), maxTimeoutMs))
-
-        if (expiresInMs) {
-          const nextForceLogoutBufferMs = Math.min(60_000, expiresInMs / 2)
-          setForceLogoutBufferMs(nextForceLogoutBufferMs)
-
-          reminderTimeoutRef.current = setTimeout(
-            handleReminderTimeout,
-            Math.max(expiresInMs - nextForceLogoutBufferMs, 0),
-          )
-
-          const refreshWindowMs = nextForceLogoutBufferMs * 2
-
-          activityCheckpointTimeoutRef.current = setTimeout(
-            () => {
-              const checkpointAt = Date.now()
-              const lastActivityAt = lastSessionActivityAtRef.current
-              const hasRecentActivity =
-                lastActivityAt !== undefined &&
-                lastActivityAt <= checkpointAt &&
-                checkpointAt - lastActivityAt <= refreshWindowMs
-
-              if (hasRecentActivity) {
-                refreshCookieEvent(true)
-              }
-            },
-            Math.max(expiresInMs - refreshWindowMs, 0),
-          )
-
-          forceLogOutTimeoutRef.current = setTimeout(() => {
-            if (tokenExpirationMsRef.current !== nextTokenExpirationMs) {
-              return
-            }
-
-            sessionSyncRef.current?.publish({
-              type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
-              expiredTokenAt: nextTokenExpirationMs,
-            })
-            revokeTokenAndExpire()
-            redirectToInactivityRoute()
-          }, expiresInMs)
-        }
+        sessionTimingRef.current?.applyExpiration(nextTokenExpirationMs)
       } else {
         clearUserInMemory()
       }
     },
-    [clearUserInMemory, redirectToInactivityRoute, revokeTokenAndExpire],
+    [clearUserInMemory],
   )
 
   const setNewUser = useCallback(
@@ -288,7 +209,7 @@ export function AuthProvider({
             return null
           }
 
-          const handledExpiration = tokenExpirationMsRef.current
+          const handledExpiration = tokenExpirationMs
           const handledUser = userRef.current
 
           try {
@@ -369,26 +290,9 @@ export function AuthProvider({
       enqueueAuthRequest,
       i18n.language,
       redirectToInactivityRoute,
+      tokenExpirationMs,
       userSlug,
     ],
-  )
-
-  const refreshCookie = useCallback(
-    (forceRefresh?: boolean) => {
-      if (!id) {
-        return
-      }
-
-      const expiresInMs = Math.max(0, (tokenExpirationMs ?? 0) - Date.now())
-
-      if (forceRefresh || (tokenExpirationMs && expiresInMs <= forceLogoutBufferMs * 2)) {
-        clearTimeout(refreshTokenTimeoutRef.current)
-        refreshTokenTimeoutRef.current = setTimeout(() => {
-          void refreshSession({ isActivityRefresh: true })
-        }, 1000)
-      }
-    },
-    [forceLogoutBufferMs, id, refreshSession, tokenExpirationMs],
   )
 
   const refreshCookieAsync = useCallback(
@@ -557,27 +461,32 @@ export function AuthProvider({
     return result.status === 'authenticated' ? result.user : null
   }, [fetchFullUserResult])
 
-  const refreshCookieEvent = useEffectEvent(refreshCookie)
-  const markActivity = React.useMemo<MarkSessionActivity>(() => {
-    if (id === undefined) {
-      return () => false
-    }
-
-    return createSessionActivityTracker({
-      onActivity: (_source, occurredAt) => {
-        lastSessionActivityAtRef.current = occurredAt
-        refreshCookieEvent()
-      },
-    })
-  }, [id])
-
-  useEffect(() => {
-    if (!isAuthenticated) {
-      return
-    }
-
-    return registerSessionActivityListeners({ markActivity, window })
-  }, [isAuthenticated, markActivity])
+  const handleSessionExpiration = useCallback(
+    (expirationMs: number) => {
+      sessionSyncRef.current?.publish({
+        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
+        expiredTokenAt: expirationMs,
+      })
+      revokeTokenAndExpire()
+      redirectToInactivityRoute()
+    },
+    [redirectToInactivityRoute, revokeTokenAndExpire],
+  )
+  const sessionTiming = useSessionTiming({
+    isAuthenticated,
+    onActivityRefresh: () => {
+      void refreshSession({ isActivityRefresh: true })
+    },
+    onExpire: handleSessionExpiration,
+    onReminder: () => {
+      if (autoRefresh) {
+        sessionTimingRef.current?.refreshCookie()
+      } else {
+        openModal(stayLoggedInModalSlug)
+      }
+    },
+  })
+  sessionTimingRef.current = sessionTiming
 
   const fetchFullUserEvent = useEffectEvent(fetchFullUser)
   const fetchFullUserResultEvent = useEffectEvent(fetchFullUserResult)
@@ -603,7 +512,7 @@ export function AuthProvider({
   useEffect(() => {
     const sessionSync = createAuthSessionSync({
       fetchFullUser: fetchFullUserResultEvent,
-      getTokenExpirationMs: () => knownTokenExpirationMsRef.current,
+      getTokenExpirationMs: sessionTiming.getKnownExpirationMs,
       onSessionExpired: handleRemoteSessionExpired,
       onSessionLoggedOut: handleRemoteSessionLoggedOut,
       onSessionRefreshed: handleRemoteSessionRefreshed,
@@ -620,7 +529,7 @@ export function AuthProvider({
 
       sessionSync.cleanup()
     }
-  }, [sessionSyncSourceID])
+  }, [sessionSyncSourceID, sessionTiming])
 
   useEffect(() => {
     async function fetchUserOnMount() {
@@ -642,11 +551,6 @@ export function AuthProvider({
       // remove all timeouts on unmount
       sessionGenerationRef.current += 1
       pendingAuthInvalidationRef.current = undefined
-      clearTimeout(refreshTokenTimeoutRef.current)
-      clearTimeout(reminderTimeoutRef.current)
-      clearTimeout(forceLogOutTimeoutRef.current)
-      clearTimeout(activityCheckpointTimeoutRef.current)
-      lastSessionActivityAtRef.current = undefined
     },
     [],
   )
@@ -661,7 +565,7 @@ export function AuthProvider({
         fetchFullUser,
         logOut,
         permissions,
-        refreshCookie,
+        refreshCookie: sessionTiming.refreshCookie,
         refreshCookieAsync,
         refreshPermissions,
         setPermissions,
