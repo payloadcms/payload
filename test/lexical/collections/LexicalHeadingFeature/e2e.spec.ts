@@ -37,7 +37,6 @@ describe('Lexical Heading Feature', () => {
     // avoid flaky timeouts in the per-test beforeEach navigation.
     const url = new AdminUrlUtil(serverURL, lexicalHeadingFeatureSlug)
     await page.goto(url.create)
-    await expect(new LexicalHelpers(page).editor.first()).toBeVisible()
 
     await page.close()
   })

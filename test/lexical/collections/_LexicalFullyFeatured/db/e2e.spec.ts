@@ -44,7 +44,6 @@ describe('Lexical Fully Featured - database', () => {
     // Warm up the create route compilation under the long beforeAll timeout to
     // avoid flaky timeouts in the per-test beforeEach navigation.
     await page.goto(new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug).create)
-    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
 
     await page.close()
   })

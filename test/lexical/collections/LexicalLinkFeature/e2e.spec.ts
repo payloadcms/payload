@@ -35,7 +35,6 @@ describe('Lexical Link Feature', () => {
     // avoid flaky timeouts in the per-test beforeEach navigation.
     const page = await browser.newPage()
     await page.goto(new AdminUrlUtil(serverURL, lexicalLinkFeatureSlug).create)
-    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
     await page.close()
   })
   beforeEach(async ({ page }) => {

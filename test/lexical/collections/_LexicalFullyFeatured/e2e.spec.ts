@@ -40,7 +40,6 @@ describe('Lexical Fully Featured', () => {
     // avoid flaky timeouts in the per-test beforeEach navigation.
     const page = await browser.newPage()
     await page.goto(new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug).create)
-    await expect(new LexicalHelpers(page).editor.first()).toBeVisible()
     await page.close()
   })
   beforeEach(async ({ page }) => {
@@ -378,9 +377,7 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
     const page = await browser.newPage()
     await page.goto(url.account)
-    await expect(page.locator('.payload-settings__language .react-select')).toBeVisible()
     await page.goto(url.create)
-    await expect(new LexicalHelpers(page).editor.first()).toBeVisible()
     await page.close()
   })
   beforeEach(async ({ page }) => {

@@ -36,7 +36,6 @@ describe('Lexical Views Provider Default', () => {
     // avoid flaky timeouts in the per-test beforeEach navigation.
     const url = new AdminUrlUtil(serverURL, lexicalViewsProviderDefaultSlug)
     await page.goto(url.create)
-    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
 
     await page.close()
   })
