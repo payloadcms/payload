@@ -1,5 +1,11 @@
 import type { Job, TypedJobs } from '../../../index.js'
-import type { RetryConfig, TaskHandlerArgsNoInput } from './taskTypes.js'
+import type { MaybePromise } from '../../../types/index.js'
+import type {
+  RetryConfig,
+  TaskHandlerArgsNoInput,
+  TaskHandlerResult,
+  TaskInputOutput,
+} from './taskTypes.js'
 
 export type WorkflowStep<
   TTaskSlug extends keyof TypedJobs['tasks'],
@@ -24,7 +30,7 @@ export type WorkflowStep<
   | {
       inlineTask: (
         args: TaskHandlerArgsNoInput<TWorkflowSlugOrInput>,
-      ) => { output: object } | Promise<{ output: object }>
+      ) => MaybePromise<TaskHandlerResult<TaskInputOutput>>
     }
   | {
       input: (args: { job: Job<TWorkflowSlugOrInput> }) => TypedJobs['tasks'][TTaskSlug]['input']
