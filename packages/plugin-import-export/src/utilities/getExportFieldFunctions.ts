@@ -68,46 +68,70 @@ const registerExportHandler = (
       return
     }
 
-    registerHandler(({ siblingData, value }) => {
-      if (isPolymorphicRelValue(value)) {
-        const id = getPolymorphicRelId(value)
-        if (id !== undefined) {
-          siblingData[`${fullKey}_id`] = id
-          siblingData[`${fullKey}_relationTo`] = value.relationTo
-        }
+    registerHandler(({ format, siblingData, value }) => {
+      // An unresolvable relationship is suppressed for CSV, whose id/relationTo would
+      // otherwise land in sibling columns, but left untouched for JSON, which holds the
+      // source value verbatim.
+      const unresolved = format === 'json' ? undefined : null
+
+      if (!isPolymorphicRelValue(value)) {
+        return unresolved
       }
+      const id = getPolymorphicRelId(value)
+      if (id === undefined) {
+        return unresolved
+      }
+
+      if (format === 'json') {
+        return { relationTo: value.relationTo, value: id }
+      }
+      siblingData[`${fullKey}_id`] = id
+      siblingData[`${fullKey}_relationTo`] = value.relationTo
       return null
     })
     return
   }
 
   if (!Array.isArray(field.relationTo)) {
-    registerHandler(({ siblingData, value }) => {
-      if (Array.isArray(value)) {
-        value.forEach((val, i) => {
-          const id = typeof val === 'object' && val ? (val as { id: unknown }).id : val
-          siblingData[`${fullKey}_${i}_id`] = id
-        })
-        return null
+    registerHandler(({ format, siblingData, value }) => {
+      if (!Array.isArray(value)) {
+        return undefined
       }
-      return undefined
+      const ids = value.map((val) =>
+        typeof val === 'object' && val ? (val as { id: unknown }).id : val,
+      )
+      if (format === 'json') {
+        return ids.filter((id) => id !== undefined)
+      }
+      ids.forEach((id, i) => {
+        siblingData[`${fullKey}_${i}_id`] = id
+      })
+      return null
     })
     return
   }
 
-  registerHandler(({ siblingData, value }) => {
-    if (Array.isArray(value)) {
-      value.forEach((val, i) => {
-        if (isPolymorphicRelValue(val)) {
-          const id = getPolymorphicRelId(val)
-          if (id !== undefined) {
-            siblingData[`${fullKey}_${i}_id`] = id
-            siblingData[`${fullKey}_${i}_relationTo`] = val.relationTo
-          }
-        }
-      })
-      return null
+  registerHandler(({ format, siblingData, value }) => {
+    if (!Array.isArray(value)) {
+      return undefined
     }
-    return undefined
+    // `index` is carried so CSV columns stay pinned to the source position: an entry
+    // that cannot be resolved to an id leaves a gap rather than shifting its siblings.
+    const rels = value.flatMap((val, index) => {
+      if (!isPolymorphicRelValue(val)) {
+        return []
+      }
+      const id = getPolymorphicRelId(val)
+      return id === undefined ? [] : [{ id, index, relationTo: val.relationTo }]
+    })
+
+    if (format === 'json') {
+      return rels.map((rel) => ({ relationTo: rel.relationTo, value: rel.id }))
+    }
+    rels.forEach(({ id, index, relationTo }) => {
+      siblingData[`${fullKey}_${index}_id`] = id
+      siblingData[`${fullKey}_${index}_relationTo`] = relationTo
+    })
+    return null
   })
 }
