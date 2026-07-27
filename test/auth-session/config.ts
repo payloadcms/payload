@@ -14,7 +14,6 @@ import {
 } from './authFixture.js'
 import {
   AUTH_SESSION_TEST_ADMIN_ROUTES,
-  authSessionAPIRoute,
   authSessionStrategyName,
   authSessionTokenLifetimeMs,
   authSessionUsersSlug,
@@ -94,9 +93,6 @@ export default buildConfigWithDefaults(
     },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
-    },
-    routes: {
-      api: authSessionAPIRoute,
     },
   },
   { disableAutoLogin: true },

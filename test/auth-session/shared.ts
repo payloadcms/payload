@@ -31,7 +31,7 @@ export type AuthSessionRefreshBarrierPhase =
 
 export type LoggedOutRoute = keyof typeof AUTH_SESSION_TEST_ADMIN_ROUTES
 
-export const authSessionAPIRoute = '/session-api'
+export const authSessionAPIRoute = '/api'
 export const authSessionTokenLifetimeMs = 300_000
 export const authSessionUsersSlug = 'auth-session-users'
 export const authSessionStrategyName = 'test-provider'
