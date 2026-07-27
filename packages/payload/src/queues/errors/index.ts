@@ -40,6 +40,12 @@ export class WorkflowError extends Error {
 }
 
 /**
+ * Stops the current job run after this worker loses ownership.
+ * The job remains recoverable by another worker.
+ */
+export class JobRunAbortedError extends Error {}
+
+/**
  * Throw this error from within a task or workflow handler to cancel the job.
  * Unlike failing a job (e.g. by throwing any other error), a cancelled job will not be retried.
  */

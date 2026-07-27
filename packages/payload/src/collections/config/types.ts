@@ -72,7 +72,8 @@ import type {
   OperationMap,
 } from '../operations/utilities/types.js'
 
-export type DataFromCollectionSlug<TSlug extends CollectionSlug> = TypedCollection[TSlug]
+export type DataFromCollectionSlug<TSlug extends CollectionSlug> =
+  TypedCollection[string extends CollectionSlug ? CollectionSlug : TSlug]
 
 /**
  * The ID type of a given collection (e.g. `string` or `number`), taken from its generated type.

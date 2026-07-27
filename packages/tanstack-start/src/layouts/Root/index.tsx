@@ -11,7 +11,7 @@ import type {
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { getLanguageDir } from '@payloadcms/ui/utilities/getLanguageDir'
 import React from 'react'
-import '@payloadcms/ui/scss/app.scss'
+import '@payloadcms/ui/css/app.css'
 
 import { TanStackRouterAdapter } from '../../elements/RouterAdapter/index.js'
 
@@ -19,6 +19,7 @@ export type RootLayoutData = {
   clientConfig: ClientConfig
   dateFNSKey: I18nClient['dateFNSKey']
   fallbackLang: string
+  isEmbedded: boolean
   isNavOpen: boolean
   languageCode: string
   languageOptions: LanguageOptions
@@ -54,6 +55,7 @@ export function RootLayout({ children, data, serverFunction }: RootLayoutProps) 
         <RootProvider
           config={data.clientConfig}
           dateFNSKey={data.dateFNSKey}
+          embed={data.isEmbedded}
           fallbackLang={data.fallbackLang as AcceptedLanguages}
           highContrastMode={false}
           isNavOpen={data.isNavOpen}

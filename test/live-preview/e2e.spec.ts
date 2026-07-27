@@ -324,6 +324,38 @@ describe('Live Preview', () => {
     await expect(previewButton).toBeHidden()
   })
 
+  test('collection — preview button copies the preview URL to the clipboard', async () => {
+    await context.grantPermissions(['clipboard-read', 'clipboard-write'])
+    await goToCollectionLivePreview(page, pagesURLUtil)
+
+    const previewButton = page.locator('#preview-button')
+    await expect(previewButton).toBeVisible()
+
+    await previewButton.hover()
+    await expect(page.locator('#preview-button ~ .tooltip--show')).toHaveText('Copy')
+
+    await previewButton.click()
+    await expect(page.locator('#preview-button ~ .tooltip--show')).toHaveText('Copied')
+    await expect
+      .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+      .toMatch(/\/live-preview/)
+  })
+
+  test('collection — cmd/ctrl + click opens the preview URL in a new tab', async () => {
+    await goToCollectionLivePreview(page, pagesURLUtil)
+
+    const previewButton = page.locator('#preview-button')
+    await expect(previewButton).toBeVisible()
+
+    const [newTab] = await Promise.all([
+      context.waitForEvent('page'),
+      previewButton.click({ modifiers: ['ControlOrMeta'] }),
+    ])
+
+    await expect.poll(() => newTab.url()).toMatch(/\/live-preview/)
+    await newTab.close()
+  })
+
   test('collection — retains static URL across edits', async () => {
     const util = new AdminUrlUtil(serverURL, 'static-url')
     await page.goto(util.create)

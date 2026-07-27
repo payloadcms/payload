@@ -20,7 +20,7 @@ import type {
 } from '../../../config/types/workflowTypes.js'
 import type { UpdateJobFunction } from './getUpdateJobFunction.js'
 
-import { JobCancelledError, TaskError } from '../../../errors/index.js'
+import { JobCancelledError, JobRunAbortedError, TaskError } from '../../../errors/index.js'
 import { getCurrentDate } from '../../../utilities/getCurrentDate.js'
 import { getTaskHandlerFromConfig } from './importHandlerPath.js'
 
@@ -147,8 +147,8 @@ export const getRunTaskFunction = <TIsInline extends boolean>(
           })
         )?.output
       } catch (err: any) {
-        if (err instanceof JobCancelledError) {
-          // Re-throw JobCancelledError to be handled by the top-level error handler
+        if (err instanceof JobCancelledError || err instanceof JobRunAbortedError) {
+          // Job run aborts are handled by the top-level runner.
           throw err
         }
         throw new TaskError({

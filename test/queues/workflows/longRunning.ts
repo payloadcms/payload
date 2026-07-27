@@ -5,10 +5,15 @@ import type { WorkflowConfig } from 'payload'
  */
 export const longRunningWorkflow: WorkflowConfig<'longRunning'> = {
   slug: 'longRunning',
-  inputSchema: [],
+  inputSchema: [
+    {
+      name: 'postTitle',
+      type: 'text',
+    },
+  ],
   // Set to 4, to test that this job is not retried despite the workflow level retries being set to 4
   retries: 4,
-  handler: async ({ inlineTask }) => {
+  handler: async ({ inlineTask, job, req }) => {
     for (let i = 0; i < 4; i += 1) {
       await inlineTask(String(i), {
         task: async () => {
@@ -18,6 +23,16 @@ export const longRunningWorkflow: WorkflowConfig<'longRunning'> = {
             output: {},
           }
         },
+      })
+    }
+
+    if (job.input.postTitle) {
+      await req.payload.create({
+        collection: 'posts',
+        data: {
+          title: job.input.postTitle,
+        },
+        req,
       })
     }
   },

@@ -44,8 +44,10 @@ export type TaskHandlerArgs<
 /**
  * Inline tasks in JSON workflows have no input, as they can just get the input from job.taskStatus
  */
-export type TaskHandlerArgsNoInput<TWorkflowInput extends false | object = false> = {
-  job: Job<TWorkflowInput>
+export type TaskHandlerArgsNoInput<
+  TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object = object,
+> = {
+  job: Job<TWorkflowSlugOrInput>
   req: PayloadRequest
 }
 
