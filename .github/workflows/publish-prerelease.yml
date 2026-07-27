@@ -23,6 +23,7 @@ jobs:
     name: publish-prerelease-${{ github.ref_name }}-${{ github.sha }}
     permissions:
       id-token: write
+      contents: write
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
@@ -60,3 +61,15 @@ jobs:
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
+
+      - name: Tag canary release
+        if: steps.determine_release_type.outputs.release_type == 'canary' && inputs.dry_run != true
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          TAG="v${VERSION}"
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "Tag ${TAG} already exists, skipping."
+            exit 0
+          fi
+          git tag -a "${TAG}" -m "${TAG}"
+          git push origin "${TAG}"
