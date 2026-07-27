@@ -1,7 +1,6 @@
 'use client'
 import { useCallback, useEffect, useMemo, useRef } from 'react'
 
-import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import {
   createSessionActivityTracker,
   registerSessionActivityListeners,
@@ -12,6 +11,7 @@ const maxTimeoutMs = 2147483647
 export type SessionTimingController = {
   applyExpiration: (expirationMs: number) => void
   clear: () => void
+  getCurrentExpirationMs: () => number | undefined
   getKnownExpirationMs: () => number | undefined
   refreshCookie: (forceRefresh?: boolean) => void
 }
@@ -37,12 +37,13 @@ export function useSessionTiming({
   const refreshTokenTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
   const reminderTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
   const tokenExpirationMsRef = useRef<number>(undefined)
+  const callbacksRef = useRef({ onActivityRefresh, onExpire, onReminder })
 
   isAuthenticatedRef.current = isAuthenticated
 
-  const onActivityRefreshEvent = useEffectEvent(onActivityRefresh)
-  const onExpireEvent = useEffectEvent(onExpire)
-  const onReminderEvent = useEffectEvent(onReminder)
+  useEffect(() => {
+    callbacksRef.current = { onActivityRefresh, onExpire, onReminder }
+  }, [onActivityRefresh, onExpire, onReminder])
 
   const clear = useCallback(() => {
     clearTimeout(refreshTokenTimeoutRef.current)
@@ -55,26 +56,23 @@ export function useSessionTiming({
     tokenExpirationMsRef.current = undefined
   }, [])
 
-  const refreshCookie = useCallback(
-    (forceRefresh?: boolean) => {
-      if (!isAuthenticatedRef.current) {
-        return
-      }
+  const refreshCookie = useCallback((forceRefresh?: boolean) => {
+    if (!isAuthenticatedRef.current) {
+      return
+    }
 
-      const expiresInMs = Math.max(0, (tokenExpirationMsRef.current ?? 0) - Date.now())
+    const expiresInMs = Math.max(0, (tokenExpirationMsRef.current ?? 0) - Date.now())
 
-      if (
-        forceRefresh ||
-        (tokenExpirationMsRef.current && expiresInMs <= forceLogoutBufferMsRef.current * 2)
-      ) {
-        clearTimeout(refreshTokenTimeoutRef.current)
-        refreshTokenTimeoutRef.current = setTimeout(() => {
-          onActivityRefreshEvent()
-        }, 1000)
-      }
-    },
-    [onActivityRefreshEvent],
-  )
+    if (
+      forceRefresh ||
+      (tokenExpirationMsRef.current && expiresInMs <= forceLogoutBufferMsRef.current * 2)
+    ) {
+      clearTimeout(refreshTokenTimeoutRef.current)
+      refreshTokenTimeoutRef.current = setTimeout(() => {
+        callbacksRef.current.onActivityRefresh()
+      }, 1000)
+    }
+  }, [])
 
   const markActivity = useMemo(
     () =>
@@ -84,7 +82,7 @@ export function useSessionTiming({
           refreshCookie()
         },
       }),
-    [refreshCookie],
+    [],
   )
 
   const applyExpiration = useCallback(
@@ -108,7 +106,9 @@ export function useSessionTiming({
 
       forceLogoutBufferMsRef.current = forceLogoutBufferMs
       reminderTimeoutRef.current = setTimeout(
-        onReminderEvent,
+        () => {
+          callbacksRef.current.onReminder()
+        },
         Math.max(expiresInMs - forceLogoutBufferMs, 0),
       )
       activityCheckpointTimeoutRef.current = setTimeout(
@@ -128,12 +128,15 @@ export function useSessionTiming({
       )
       forceLogOutTimeoutRef.current = setTimeout(() => {
         if (tokenExpirationMsRef.current === expirationMs) {
-          onExpireEvent(expirationMs)
+          callbacksRef.current.onExpire(expirationMs)
         }
       }, expiresInMs)
     },
-    [onExpireEvent, onReminderEvent, refreshCookie],
+    [refreshCookie],
   )
+
+  const getCurrentExpirationMs = useCallback(() => tokenExpirationMsRef.current, [])
+  const getKnownExpirationMs = useCallback(() => knownExpirationMsRef.current, [])
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -159,9 +162,10 @@ export function useSessionTiming({
     () => ({
       applyExpiration,
       clear,
-      getKnownExpirationMs: () => knownExpirationMsRef.current,
+      getCurrentExpirationMs,
+      getKnownExpirationMs,
       refreshCookie,
     }),
-    [applyExpiration, clear, refreshCookie],
+    [applyExpiration, clear, getCurrentExpirationMs, getKnownExpirationMs, refreshCookie],
   )
 }

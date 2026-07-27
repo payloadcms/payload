@@ -74,6 +74,40 @@ describe('useSessionTiming', () => {
 
     expect(onExpire).toHaveBeenCalledWith(expirationMs)
   })
+
+  it('should keep its controller and activity throttle across rerenders', () => {
+    const onActivityRefresh = vi.fn()
+    const timing = renderSessionTiming({ onActivityRefresh })
+    const initialController = timing.getController()
+
+    timing.applyExpiration(Date.now() + 300_000)
+    act(() => {
+      vi.advanceTimersByTime(240_000)
+      window.dispatchEvent(new MouseEvent('mousemove'))
+    })
+    timing.rerender()
+
+    expect(timing.getController()).toBe(initialController)
+
+    act(() => {
+      vi.advanceTimersByTime(1)
+      window.dispatchEvent(new MouseEvent('mousemove'))
+      vi.advanceTimersByTime(999)
+    })
+
+    expect(onActivityRefresh).toHaveBeenCalledTimes(1)
+  })
+
+  it('should synchronously replace the current expiration', () => {
+    const timing = renderSessionTiming()
+    const firstExpirationMs = Date.now() + 300_000
+    const replacementExpirationMs = Date.now() + 600_000
+
+    timing.applyExpiration(firstExpirationMs)
+    timing.applyExpiration(replacementExpirationMs)
+
+    expect(timing.getCurrentExpirationMs()).toBe(replacementExpirationMs)
+  })
 })
 
 function renderSessionTiming({
@@ -86,7 +120,7 @@ function renderSessionTiming({
   onActivityRefresh?: () => void
   onExpire?: (expirationMs: number) => void
   onReminder?: () => void
-} = {}): SessionTimingController {
+} = {}): RenderedSessionTiming {
   let controller: SessionTimingController | undefined
   const container = document.createElement('div')
   const root = createRoot(container)
@@ -107,9 +141,30 @@ function renderSessionTiming({
     })
   })
 
-  if (!controller) {
-    throw new Error('Expected session timing controller.')
+  const getController = (): SessionTimingController => {
+    if (!controller) {
+      throw new Error('Expected session timing controller.')
+    }
+
+    return controller
   }
 
-  return controller
+  return {
+    applyExpiration: (expirationMs) => getController().applyExpiration(expirationMs),
+    clear: () => getController().clear(),
+    getController,
+    getCurrentExpirationMs: () => getController().getCurrentExpirationMs(),
+    getKnownExpirationMs: () => getController().getKnownExpirationMs(),
+    refreshCookie: (forceRefresh) => getController().refreshCookie(forceRefresh),
+    rerender: () => {
+      act(() => {
+        root.render(React.createElement(SessionTiming))
+      })
+    },
+  }
+}
+
+type RenderedSessionTiming = SessionTimingController & {
+  getController: () => SessionTimingController
+  rerender: () => void
 }

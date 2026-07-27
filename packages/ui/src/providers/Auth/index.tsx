@@ -209,7 +209,7 @@ export function AuthProvider({
             return null
           }
 
-          const handledExpiration = tokenExpirationMs
+          const handledExpiration = sessionTimingRef.current?.getCurrentExpirationMs()
           const handledUser = userRef.current
 
           try {
@@ -290,7 +290,6 @@ export function AuthProvider({
       enqueueAuthRequest,
       i18n.language,
       redirectToInactivityRoute,
-      tokenExpirationMs,
       userSlug,
     ],
   )
