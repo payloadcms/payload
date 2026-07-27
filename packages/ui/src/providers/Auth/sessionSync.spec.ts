@@ -27,9 +27,14 @@ describe('createAuthSessionSync', () => {
     const session = createSession({ expirationMs: 20_000, token: 'refreshed-token' })
     const sync = createSync({ now: () => 123 })
 
-    sync.publish({ session, type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED })
+    sync.publish({
+      refreshStartedAt: 100,
+      session,
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+    })
 
     expect(getBroadcastChannel().postMessage).toHaveBeenCalledWith({
+      refreshStartedAt: 100,
       session,
       sourceID: 'local-tab',
       sentAt: 123,
@@ -111,6 +116,68 @@ describe('createAuthSessionSync', () => {
     expect(secondState).toBe('logged-out')
   })
 
+  it('should keep logout ahead of a refresh that started earlier and published later', () => {
+    const onSessionLoggedOut = vi.fn()
+    const onSessionRefreshed = vi.fn()
+    const refreshMessage = createMessage({
+      refreshStartedAt: 100,
+      sentAt: 300,
+      session: createSession({ expirationMs: 30_000, token: 'late-refreshed-token' }),
+      sourceID: 'refresh-tab',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+    })
+    const logoutMessage = createMessage({
+      sentAt: 200,
+      sourceID: 'logout-tab',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+    })
+
+    createSync({ onSessionLoggedOut, onSessionRefreshed, sourceID: 'receiving-tab' })
+    const channel = getBroadcastChannel()
+
+    channel.emit(logoutMessage)
+    channel.emit(refreshMessage)
+
+    expect(onSessionLoggedOut).toHaveBeenCalledOnce()
+    expect(onSessionRefreshed).not.toHaveBeenCalled()
+  })
+
+  it('should ignore a late storage refresh whose request started before logout', () => {
+    vi.stubGlobal('BroadcastChannel', undefined)
+    const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' } as const)
+    const onSessionLoggedOut = vi.fn()
+
+    createSync({ fetchFullUser, onSessionLoggedOut, sourceID: 'receiving-tab' })
+
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: 'payload:auth-session:refresh',
+        newValue: JSON.stringify({
+          affectedExpirationMs: 0,
+          settlesSentAt: 200,
+          sentAt: 201,
+          sourceID: 'logout-tab',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+        }),
+      }),
+    )
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: 'payload:auth-session:refresh',
+        newValue: JSON.stringify({
+          affectedExpirationMs: 30_000,
+          refreshStartedAt: 100,
+          sentAt: 300,
+          sourceID: 'refresh-tab',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+        }),
+      }),
+    )
+
+    expect(onSessionLoggedOut).toHaveBeenCalledOnce()
+    expect(fetchFullUser).not.toHaveBeenCalled()
+  })
+
   it('should keep storage fallback notification-only while reconciling refresh and settling logout', async () => {
     vi.stubGlobal('BroadcastChannel', undefined)
     const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' })
@@ -121,6 +188,7 @@ describe('createAuthSessionSync', () => {
     const publisher = createSync({ now: () => 123, sourceID: 'publishing-tab' })
 
     publisher.publish({
+      refreshStartedAt: 100,
       session: createSession({ expirationMs: 20_000, token: 'sensitive-token' }),
       type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
@@ -128,6 +196,7 @@ describe('createAuthSessionSync', () => {
 
     expect(JSON.parse(value)).toEqual({
       affectedExpirationMs: 20_000,
+      refreshStartedAt: 100,
       type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
       sentAt: 123,
       sourceID: 'publishing-tab',
@@ -190,6 +259,7 @@ describe('createAuthSessionSync', () => {
       throw new Error('channel closed')
     })
     publisher.publish({
+      refreshStartedAt: 100,
       session: createSession({ expirationMs: 20_000 }),
       type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
     })
@@ -223,6 +293,7 @@ describe('createAuthSessionSync', () => {
         key: 'payload:auth-session:refresh',
         newValue: JSON.stringify({
           affectedExpirationMs: 40_000,
+          refreshStartedAt: 400,
           type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
           sentAt: 500,
           sourceID: 'remote-tab',
@@ -311,13 +382,20 @@ function createMessage(
         'sentAt'
       >)
     | ({
+        refreshStartedAt?: number
         sentAt?: number
       } & Omit<
         Extract<AuthSessionSyncMessage, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED }>,
-        'sentAt'
+        'refreshStartedAt' | 'sentAt'
       >),
 ): AuthSessionSyncMessage {
   const { sentAt = 100, ...messageWithoutTimestamp } = message
+
+  if (messageWithoutTimestamp.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
+    const { refreshStartedAt = sentAt, ...refreshedMessage } = messageWithoutTimestamp
+
+    return { ...refreshedMessage, refreshStartedAt, sentAt }
+  }
 
   return { ...messageWithoutTimestamp, sentAt } as AuthSessionSyncMessage
 }

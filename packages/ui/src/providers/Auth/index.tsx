@@ -98,11 +98,13 @@ export function AuthProvider({
   }
 
   function onSessionExpiration(expirationMs: number) {
+    const collection = userRef.current?.collection
+
     sessionSync.publish({
       type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
       expiredTokenAt: expirationMs,
     })
-    setNewUser(null)
+    void settleExplicitLogout({ collection })
     redirectToInactivityRoute()
   }
 
@@ -158,7 +160,9 @@ export function AuthProvider({
     fetchFullUser: (options) => fetchFullUserResult(options),
     getTokenExpirationMs: sessionTiming.getKnownExpirationMs,
     onSessionExpired: () => {
-      setNewUser(null)
+      const collection = userRef.current?.collection
+
+      void settleExplicitLogout({ collection })
       redirectToInactivityRoute()
     },
     onSessionLoggedOut: () => {
@@ -188,6 +192,7 @@ export function AuthProvider({
         const handledUser = userRef.current
 
         try {
+          const refreshStartedAt = Date.now()
           const request = await requests.post(
             formatAdminURL({
               apiRoute,
@@ -215,6 +220,7 @@ export function AuthProvider({
             applyUserResponse(json)
             sessionSync.publish({
               type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+              refreshStartedAt,
               session: json,
             })
             return json.user

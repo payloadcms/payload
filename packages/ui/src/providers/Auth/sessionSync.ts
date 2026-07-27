@@ -17,6 +17,7 @@ export type AuthSessionSyncMessage =
       type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED
     }
   | {
+      refreshStartedAt: number
       sentAt: number
       session: UserWithToken
       sourceID: string
@@ -34,6 +35,7 @@ export type AuthSessionSyncEvent =
       type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED
     }
   | {
+      refreshStartedAt: number
       session: UserWithToken
       type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
     }
@@ -70,15 +72,16 @@ export type AuthSessionSyncPublication =
     }
   | {
       affectedExpirationMs: number
+      refreshStartedAt: number
       sentAt: number
       sourceID: string
-      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED
+      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
     }
   | {
       affectedExpirationMs: number
       sentAt: number
       sourceID: string
-      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
+      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED
     }
 
 export type AuthSessionLogoutPublication = Extract<
@@ -213,6 +216,10 @@ export function createAuthSessionSync({
           latestLifecycleOrder = {
             type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
             affectedExpirationMs: result.expirationMs,
+            refreshStartedAt:
+              notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
+                ? notification.refreshStartedAt
+                : notification.sentAt,
             sentAt: notification.sentAt,
             sourceID: notification.sourceID,
           }
@@ -393,6 +400,9 @@ function isAuthSessionSyncMessage(value: unknown): value is AuthSessionSyncMessa
 
   if (value.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
     return (
+      'refreshStartedAt' in value &&
+      typeof value.refreshStartedAt === 'number' &&
+      Number.isFinite(value.refreshStartedAt) &&
       'session' in value &&
       Boolean(value.session) &&
       typeof value.session === 'object' &&
@@ -439,11 +449,20 @@ function parseStorageRefreshNotification(value: string): null | StorageRefreshNo
       }
 
       if (notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
-        if ('settlesSentAt' in notification) {
+        if (
+          'settlesSentAt' in notification ||
+          !('refreshStartedAt' in notification) ||
+          typeof notification.refreshStartedAt !== 'number' ||
+          !Number.isFinite(notification.refreshStartedAt)
+        ) {
           return null
         }
 
-        return { ...lifecycleOrder, type: notification.type }
+        return {
+          type: notification.type,
+          ...lifecycleOrder,
+          refreshStartedAt: notification.refreshStartedAt,
+        }
       }
 
       if (
@@ -475,8 +494,11 @@ function compareLifecycleOrders({
   first: LifecycleOrder
   second: LifecycleOrder
 }): number {
-  if (first.sentAt !== second.sentAt) {
-    return first.sentAt - second.sentAt
+  const firstOrderingFence = getLifecycleOrderingFence(first)
+  const secondOrderingFence = getLifecycleOrderingFence(second)
+
+  if (firstOrderingFence !== secondOrderingFence) {
+    return firstOrderingFence - secondOrderingFence
   }
 
   const isFirstLogout = first.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
@@ -484,6 +506,10 @@ function compareLifecycleOrders({
 
   if (isFirstLogout !== isSecondLogout) {
     return isFirstLogout ? 1 : -1
+  }
+
+  if (first.sentAt !== second.sentAt) {
+    return first.sentAt - second.sentAt
   }
 
   if (first.affectedExpirationMs !== second.affectedExpirationMs) {
@@ -512,6 +538,7 @@ function getLifecycleOrder(
     return {
       type: event.type,
       affectedExpirationMs: event.session.exp * 1000,
+      refreshStartedAt: event.refreshStartedAt,
       ...lifecycleMetadata,
     }
   }
@@ -537,7 +564,13 @@ function createAuthSessionSyncMessage({
   sourceID: string
 }): AuthSessionSyncMessage {
   if (event.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
-    return { type: event.type, sentAt, session: event.session, sourceID }
+    return {
+      type: event.type,
+      refreshStartedAt: event.refreshStartedAt,
+      sentAt,
+      session: event.session,
+      sourceID,
+    }
   }
 
   if (event.type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
@@ -553,6 +586,12 @@ function compareSourceIDs({ first, second }: { first: string; second: string }):
   }
 
   return first > second ? 1 : -1
+}
+
+function getLifecycleOrderingFence(order: LifecycleOrder): number {
+  return order.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
+    ? order.refreshStartedAt
+    : order.sentAt
 }
 
 function getLifecyclePrecedence(type: AuthSessionSyncEventType): number {

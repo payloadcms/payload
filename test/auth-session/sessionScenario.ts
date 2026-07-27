@@ -36,7 +36,7 @@ export type SessionScenario = {
   moveMouse: (page: Page) => Promise<void>
   openTab: () => Promise<Page>
   readExpiration: (page: Page) => Promise<number>
-  readRefreshTokenFromResponse: (response: APIResponse | Response) => Promise<string>
+  readRotatedProviderCredentialFromResponse: (response: APIResponse | Response) => Promise<string>
   readTokenCookie: () => Promise<AuthSessionCookie | undefined>
   refreshProviderSession: (args: { token: string }) => Promise<APIResponse>
   releaseRefreshBarrier: () => Promise<void>
@@ -216,7 +216,7 @@ export async function createSessionScenario({
 
       return expirationMs
     },
-    async readRefreshTokenFromResponse(response) {
+    async readRotatedProviderCredentialFromResponse(response) {
       const headers = 'allHeaders' in response ? await response.allHeaders() : response.headers()
       const setCookie = headers['set-cookie']
       const token = setCookie?.match(/(?:^|,\s*)payload-token=([^;]+)/)?.[1]

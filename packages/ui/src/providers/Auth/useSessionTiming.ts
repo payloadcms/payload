@@ -31,7 +31,7 @@ export function useSessionTiming({
   const activityCheckpointTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
   const forceLogoutBufferMsRef = useRef(120_000)
   const forceLogOutTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
-  const isAuthenticatedRef = useRef(isAuthenticated)
+  const hasActiveSessionRef = useRef(isAuthenticated)
   const knownExpirationMsRef = useRef<number>(undefined)
   const lastSessionActivityAtRef = useRef<number>(undefined)
   const refreshTokenTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
@@ -39,25 +39,12 @@ export function useSessionTiming({
   const tokenExpirationMsRef = useRef<number>(undefined)
   const callbacksRef = useRef({ onActivityRefresh, onExpire, onReminder })
 
-  isAuthenticatedRef.current = isAuthenticated
-
   useEffect(() => {
     callbacksRef.current = { onActivityRefresh, onExpire, onReminder }
   }, [onActivityRefresh, onExpire, onReminder])
 
-  const clear = useCallback(() => {
-    clearTimeout(refreshTokenTimeoutRef.current)
-    clearTimeout(reminderTimeoutRef.current)
-    clearTimeout(forceLogOutTimeoutRef.current)
-    clearTimeout(activityCheckpointTimeoutRef.current)
-    activityListenerCleanupRef.current?.()
-    activityListenerCleanupRef.current = undefined
-    lastSessionActivityAtRef.current = undefined
-    tokenExpirationMsRef.current = undefined
-  }, [])
-
   const refreshCookie = useCallback((forceRefresh?: boolean) => {
-    if (!isAuthenticatedRef.current) {
+    if (!hasActiveSessionRef.current) {
       return
     }
 
@@ -85,8 +72,42 @@ export function useSessionTiming({
     [],
   )
 
+  const installActivityListeners = useCallback(() => {
+    if (activityListenerCleanupRef.current) {
+      return
+    }
+
+    activityListenerCleanupRef.current = registerSessionActivityListeners({ markActivity, window })
+  }, [markActivity])
+
+  const removeActivityListeners = useCallback(() => {
+    const cleanup = activityListenerCleanupRef.current
+
+    if (!cleanup) {
+      return
+    }
+
+    activityListenerCleanupRef.current = undefined
+    cleanup()
+  }, [])
+
+  const clear = useCallback(() => {
+    hasActiveSessionRef.current = false
+    clearTimeout(refreshTokenTimeoutRef.current)
+    clearTimeout(reminderTimeoutRef.current)
+    clearTimeout(forceLogOutTimeoutRef.current)
+    clearTimeout(activityCheckpointTimeoutRef.current)
+    removeActivityListeners()
+    lastSessionActivityAtRef.current = undefined
+    tokenExpirationMsRef.current = undefined
+  }, [removeActivityListeners])
+
   const applyExpiration = useCallback(
     (expirationMs: number) => {
+      if (!Number.isFinite(expirationMs)) {
+        return
+      }
+
       clearTimeout(reminderTimeoutRef.current)
       clearTimeout(forceLogOutTimeoutRef.current)
       clearTimeout(activityCheckpointTimeoutRef.current)
@@ -98,8 +119,18 @@ export function useSessionTiming({
       const expiresInMs = Math.max(0, Math.min(expirationMs - Date.now(), maxTimeoutMs))
 
       if (!expiresInMs) {
+        hasActiveSessionRef.current = false
+        removeActivityListeners()
+        forceLogOutTimeoutRef.current = setTimeout(() => {
+          if (tokenExpirationMsRef.current === expirationMs) {
+            callbacksRef.current.onExpire(expirationMs)
+          }
+        }, 0)
         return
       }
+
+      hasActiveSessionRef.current = true
+      installActivityListeners()
 
       const forceLogoutBufferMs = Math.min(60_000, expiresInMs / 2)
       const refreshWindowMs = forceLogoutBufferMs * 2
@@ -132,29 +163,22 @@ export function useSessionTiming({
         }
       }, expiresInMs)
     },
-    [refreshCookie],
+    [installActivityListeners, refreshCookie, removeActivityListeners],
   )
 
   const getCurrentExpirationMs = useCallback(() => tokenExpirationMsRef.current, [])
   const getKnownExpirationMs = useCallback(() => knownExpirationMsRef.current, [])
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    hasActiveSessionRef.current = isAuthenticated
+
+    if (isAuthenticated) {
+      installActivityListeners()
       return
     }
 
-    const cleanup = registerSessionActivityListeners({ markActivity, window })
-
-    activityListenerCleanupRef.current = cleanup
-
-    return () => {
-      cleanup()
-
-      if (activityListenerCleanupRef.current === cleanup) {
-        activityListenerCleanupRef.current = undefined
-      }
-    }
-  }, [isAuthenticated, markActivity])
+    removeActivityListeners()
+  }, [installActivityListeners, isAuthenticated, removeActivityListeners])
 
   useEffect(() => clear, [clear])
 

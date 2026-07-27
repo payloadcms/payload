@@ -79,9 +79,11 @@ stay-logged-in modal. It will not own user state or make network requests.
 ### Cross-tab lifecycle
 
 Wrap `createAuthSessionSync` setup and cleanup in a small hook. The existing pure synchronization
-implementation and its discriminated event union remain unchanged. The provider supplies callbacks
-for applying refreshed sessions, settling remote logout, resynchronizing the current user, and
-navigating after invalidation.
+implementation continues to own validation and transport ordering. Its discriminated event,
+message, and publication unions require refresh-request start metadata on `REFRESHED`, allowing a
+refresh response published after logout to retain the causal order of the request that produced it.
+The provider supplies callbacks for applying refreshed sessions, settling remote logout,
+resynchronizing the current user, and navigating after invalidation.
 
 ### Provider responsibility
 
@@ -98,7 +100,8 @@ implementation details.
 
 ## Data Flow
 
-1. A login, refresh, or `/me` response is accepted through the request coordinator.
+1. A login, refresh, or `/me` response is accepted through the request coordinator. A refresh
+   captures its request-start timestamp immediately before the HTTP request.
 2. The provider applies the accepted user response to React state.
 3. The timing hook schedules reminder, activity checkpoint, and expiration work for that token.
 4. Activity records a timestamp and uses the existing debounce/refresh-window rules.
@@ -110,6 +113,10 @@ implementation details.
 
 - Network failures keep the existing toast or silent-logout behavior.
 - An explicit logout continues to win over an in-flight refresh.
+- Token expiration enters the same terminal logout settlement, capturing the auth collection before
+  local state is cleared and serializing provider revocation behind any active rotating refresh.
+- Cross-tab lifecycle order compares a refresh's request-start fence before response publication
+  time, so a pre-logout request cannot restore a session when its response publishes later.
 - Stale responses continue to be rejected by session generation.
 - A failed refresh does not invalidate a session when a newer queued auth request can establish the
   current state.
@@ -121,7 +128,11 @@ implementation details.
 - Add only small, direct coordinator tests needed to prove the extracted ordering API. They should
   describe real concurrency outcomes and avoid broad implementation-detail assertions.
 - Keep the existing focused activity and synchronization unit tests.
-- Run all five real-provider auth-session Playwright scenarios.
+- Run all five real-provider auth-session Playwright declarations. Named steps within the expiration,
+  cross-tab rotation, and explicit-logout declarations verify provider security postconditions
+  without adding top-level scenarios.
+- Provider credential inspection is limited to real `/me` revocation checks and terminal races that
+  must identify a rotated `Set-Cookie` value after the browser cookie has been cleared.
 - Run the general auth Playwright suite, test build, lint, formatting, and type checks before
   completion.
 

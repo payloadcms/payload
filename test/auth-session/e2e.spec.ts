@@ -15,7 +15,7 @@ const dirname = path.dirname(filename)
 let serverURL: string
 let scenario: SessionScenario
 
-async function expectExplicitLogoutToWinDelayedRefresh({
+async function expectTerminalLogoutToRevokeRotatedProviderCredentials({
   scenario,
 }: {
   scenario: SessionScenario
@@ -42,7 +42,8 @@ async function expectExplicitLogoutToWinDelayedRefresh({
 
   expect(settledRefreshResponse.status()).toBe(200)
 
-  const rotatedToken = await scenario.readRefreshTokenFromResponse(settledRefreshResponse)
+  const rotatedToken =
+    await scenario.readRotatedProviderCredentialFromResponse(settledRefreshResponse)
 
   await scenario.expectLoggedOut({ page: firstPage, route: 'login' })
   await scenario.expectLoggedOut({ page: secondPage, route: 'login' })
@@ -156,39 +157,42 @@ test.describe('Auth session', () => {
     await scenario.expectLoggedIn(firstPage)
     await scenario.expectLoggedIn(secondPage)
 
-    await scenario.armRefreshBarrier(AUTH_SESSION_REFRESH_BARRIER_PHASES.BEFORE_ROTATION)
-    const concurrentRefreshes = [
-      scenario.refreshProviderSession({ token: refreshedCookie?.value ?? '' }),
-      scenario.refreshProviderSession({ token: refreshedCookie?.value ?? '' }),
-    ]
+    await test.step('provider rotation accepts the shared opaque credential once', async () => {
+      await scenario.armRefreshBarrier(AUTH_SESSION_REFRESH_BARRIER_PHASES.BEFORE_ROTATION)
+      const concurrentRefreshes = [
+        scenario.refreshProviderSession({ token: refreshedCookie?.value ?? '' }),
+        scenario.refreshProviderSession({ token: refreshedCookie?.value ?? '' }),
+      ]
 
-    await scenario.waitForRefreshBarrier(2)
-    await scenario.releaseRefreshBarrier()
+      await scenario.waitForRefreshBarrier(2)
+      await scenario.releaseRefreshBarrier()
 
-    const concurrentResponses = await Promise.all(concurrentRefreshes)
-    const successfulResponse = concurrentResponses.find((response) => response.status() === 200)
-    const rejectedResponse = concurrentResponses.find((response) => response.status() === 403)
+      const concurrentResponses = await Promise.all(concurrentRefreshes)
+      const successfulResponse = concurrentResponses.find((response) => response.status() === 200)
+      const rejectedResponse = concurrentResponses.find((response) => response.status() === 403)
 
-    expect(successfulResponse).toBeDefined()
-    expect(rejectedResponse).toBeDefined()
-    expect(concurrentResponses.map((response) => response.status()).sort()).toEqual([200, 403])
+      expect(successfulResponse).toBeDefined()
+      expect(rejectedResponse).toBeDefined()
+      expect(concurrentResponses.map((response) => response.status()).sort()).toEqual([200, 403])
 
-    const successfulBody = (await successfulResponse?.json()) as Record<string, unknown>
-    const concurrentToken = await scenario.readRefreshTokenFromResponse(successfulResponse!)
+      const successfulBody = (await successfulResponse?.json()) as Record<string, unknown>
+      const concurrentCredential = (await scenario.readTokenCookie())?.value
 
-    expect(successfulBody).not.toHaveProperty('token')
-    expect(successfulBody).not.toHaveProperty('refreshedToken')
-    expect(concurrentToken).not.toContain('.')
-    await scenario.expectProviderSessionRevoked({ token: refreshedCookie?.value ?? '' })
-    await scenario.expectProviderSessionAuthenticated({ token: concurrentToken })
+      expect(successfulBody).not.toHaveProperty('token')
+      expect(successfulBody).not.toHaveProperty('refreshedToken')
+      expect(concurrentCredential).toBeDefined()
+      expect(concurrentCredential).not.toContain('.')
+      await scenario.expectProviderSessionRevoked({ token: refreshedCookie?.value ?? '' })
+      await scenario.expectProviderSessionAuthenticated({ token: concurrentCredential ?? '' })
+    })
   })
 
-  // eslint-disable-next-line playwright/expect-expect -- assertions are delegated to expectExplicitLogoutToWinDelayedRefresh.
+  // eslint-disable-next-line playwright/expect-expect -- assertions are delegated to expectTerminalLogoutToRevokeRotatedProviderCredentials.
   test('should revoke the provider session and log out both tabs on explicit logout', async ({
     browser,
   }) => {
     await test.step('healthy BroadcastChannel transport', async () => {
-      await expectExplicitLogoutToWinDelayedRefresh({ scenario })
+      await expectTerminalLogoutToRevokeRotatedProviderCredentials({ scenario })
     })
 
     await scenario.close()
@@ -196,16 +200,50 @@ test.describe('Auth session', () => {
     await scenario.disableBroadcastChannel()
 
     await test.step('Storage fallback transport', async () => {
-      await expectExplicitLogoutToWinDelayedRefresh({ scenario })
+      await expectTerminalLogoutToRevokeRotatedProviderCredentials({ scenario })
     })
   })
 
-  // eslint-disable-next-line playwright/expect-expect -- assertions are delegated to expectLoggedOut.
-  test('should expire and log out without activity', async () => {
-    const page = await scenario.login()
+  test('should settle inactivity expiration and revoke a refresh rotated before expiration', async ({
+    browser,
+  }) => {
+    await test.step('idle expiration without an active refresh', async () => {
+      const page = await scenario.login()
 
-    await scenario.advanceBy(authSessionTokenLifetimeMs + 1)
+      await scenario.advanceBy(authSessionTokenLifetimeMs + 1)
 
-    await scenario.expectLoggedOut({ page, route: 'inactivity' })
+      await scenario.expectLoggedOut({ page, route: 'inactivity' })
+    })
+
+    await scenario.close()
+    scenario = await createSessionScenario({ browser, serverURL })
+
+    await test.step('expiration after provider rotation revokes the rotated credential', async () => {
+      const page = await scenario.login()
+      const originalCookie = await scenario.readTokenCookie()
+
+      expect(originalCookie).toBeDefined()
+
+      await scenario.armRefreshBarrier(AUTH_SESSION_REFRESH_BARRIER_PHASES.AFTER_ROTATION)
+      await scenario.advanceBy(120_000)
+      await scenario.moveMouse(page)
+      await scenario.advanceBy(60_000)
+      const refreshResponse = scenario.waitForRefresh(page)
+
+      await scenario.advanceBy(1_001)
+      await scenario.waitForRefreshBarrier(1)
+      await scenario.advanceBy(authSessionTokenLifetimeMs - 181_001 + 1)
+      await scenario.expectLoggedOut({ page, route: 'inactivity' })
+      await scenario.releaseRefreshBarrier()
+
+      const settledRefreshResponse = await refreshResponse
+      const rotatedToken =
+        await scenario.readRotatedProviderCredentialFromResponse(settledRefreshResponse)
+
+      expect(settledRefreshResponse.status()).toBe(200)
+      await expect.poll(async () => scenario.readTokenCookie()).toBeUndefined()
+      await scenario.expectProviderSessionRevoked({ token: originalCookie?.value ?? '' })
+      await scenario.expectProviderSessionRevoked({ token: rotatedToken })
+    })
   })
 })

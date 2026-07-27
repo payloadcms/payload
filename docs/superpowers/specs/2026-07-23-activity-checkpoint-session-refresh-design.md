@@ -133,10 +133,22 @@ observable session state:
 - `expectLoggedOut(page)` checks the login or inactivity UI and unauthenticated `/me`;
 - `waitForRefresh(page)` observes the real refresh request and response;
 - `readTokenCookie()` reads the HTTP-only cookie through Playwright for rotation assertions.
+- `readRotatedProviderCredentialFromResponse(response)` reads the opaque value from the real
+  refresh response's `Set-Cookie` header only when terminal settlement has already cleared the
+  browser cookie and the test must prove that exact rotated provider credential was revoked;
+- `expectProviderSessionAuthenticated()` and `expectProviderSessionRevoked()` make scoped, real
+  `/me` requests with an opaque provider credential to verify provider rotation and revocation
+  postconditions.
 
 The helper must not intercept or fulfill auth requests, expose `AuthProvider` callbacks, dispatch
 synthetic focus or mouse events, or construct `BroadcastChannel` or `StorageEvent` messages.
 Assertions and the important ordering of actions remain visible in each test.
+
+Direct provider credential requests and response-cookie inspection are verification probes against
+the real provider implementation. They are not substitutes for browser behavior: user-visible
+state, the shared cookie jar, and normal `/me` behavior remain the primary assertions. Response
+cookie inspection is confined to terminal logout/expiration races where the browser cookie is
+correctly gone before the test can identify the rotated credential that also must be revoked.
 
 Headless Chromium does not model real tab lifecycle changes for this suite: `bringToFront`, CDP
 target activation, and keyboard tab switching leave both pages visible and emit neither a trusted
@@ -151,15 +163,23 @@ The dedicated suite should prove:
    checkpoint, receives a rotated cookie with a later expiration, and remains logged in past the
    original expiration.
 2. With no activity, advancing to expiration logs the admin out and `/me` no longer returns a user.
+   A named subcase holds an activity refresh after provider rotation, crosses the original
+   expiration, releases the response, and proves terminal expiration clears the cookie and revokes
+   both the original and rotated provider credentials.
 3. If the provider session expires or is revoked before refresh, the next real refresh is rejected
    and the admin logs out.
 4. Refreshing in one tab rotates the shared cookie, updates the second tab to the same expiration,
-   and keeps both tabs authenticated past the original expiration.
-5. Explicit logout in one tab invalidates the provider session and logs out the other tab.
+   and keeps both tabs authenticated past the original expiration. A named provider-verification
+   step sends two real concurrent refreshes with that same opaque credential, proving it is
+   single-use, revoked after rotation, and replaced by exactly one authenticated credential.
+5. Explicit logout in one tab invalidates the provider session and logs out the other tab over both
+   transports. The refresh is held after provider rotation so the single terminal-logout behavior
+   also proves the original and rotated credentials are revoked after settlement.
 
 Each scenario asserts user-visible admin state, the real HTTP result, and token state where
 applicable. Token rotation is proven by comparing HTTP-only cookie values and confirming the old
-token no longer authenticates.
+token no longer authenticates. Named `test.step` subcases keep these provider invariants within the
+five top-level scenario declarations.
 
 ## Unit-Test Boundary
 
