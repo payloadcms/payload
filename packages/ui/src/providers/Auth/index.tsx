@@ -18,7 +18,8 @@ import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
 import { useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
-import { AUTH_SESSION_SYNC_EVENT_TYPES, createAuthSessionSync } from './sessionSync.js'
+import { AUTH_SESSION_SYNC_EVENT_TYPES } from './sessionSync.js'
+import { useSessionSync } from './useSessionSync.js'
 import { useSessionTiming } from './useSessionTiming.js'
 
 export type { AuthContext, UserWithToken } from './types.js'
@@ -59,7 +60,6 @@ export function AuthProvider({
   const [tokenExpirationMs, setTokenExpirationMs] = useState<number>()
   const [permissions, setPermissions] = useState<SanitizedPermissions>(initialPermissions)
   const [fetchedUserOnMount, setFetchedUserOnMount] = useState(false)
-  const [sessionSyncSourceID] = useState(createSessionSyncSourceID)
 
   const authRequestQueueRef = React.useRef<Promise<void>>(Promise.resolve())
   const authRequestSequenceRef = React.useRef(0)
@@ -80,7 +80,6 @@ export function AuthProvider({
     | undefined
   >(undefined)
   const sessionGenerationRef = React.useRef(0)
-  const sessionSyncRef = React.useRef<null | ReturnType<typeof createAuthSessionSync>>(null)
   const sessionTimingRef = React.useRef<SessionTimingController>(undefined)
   const userRef = React.useRef<AuthenticatedUser | null>(initialUser)
 
@@ -151,6 +150,29 @@ export function AuthProvider({
     },
     [applyUserResponse],
   )
+
+  const sessionSync = useSessionSync({
+    fetchFullUser: (options) => fetchFullUserResult(options),
+    getTokenExpirationMs: () => sessionTimingRef.current?.getKnownExpirationMs(),
+    onSessionExpired: () => {
+      setNewUser(null)
+      redirectToInactivityRoute()
+    },
+    onSessionLoggedOut: () => {
+      const collection = userRef.current?.collection
+
+      void settleExplicitLogout({ collection })
+      redirectToLoginRoute()
+    },
+    onSessionRefreshed: (session) => {
+      if (!isExplicitLogoutPendingRef.current) {
+        setNewUser(session)
+      }
+    },
+    onSessionResyncUnauthenticated: () => {
+      redirectToInactivityRoute()
+    },
+  })
 
   const enqueueAuthRequest = useCallback(
     <Result,>(
@@ -238,7 +260,7 @@ export function AuthProvider({
 
               pendingAuthInvalidationRef.current = undefined
               applyUserResponse(json)
-              sessionSyncRef.current?.publish({
+              sessionSync.publish({
                 type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
                 session: json,
               })
@@ -248,7 +270,7 @@ export function AuthProvider({
             if (handledUser) {
               const invalidateSession = () => {
                 if (handledExpiration !== undefined) {
-                  sessionSyncRef.current?.publish({
+                  sessionSync.publish({
                     type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
                     expiredTokenAt: handledExpiration,
                   })
@@ -290,6 +312,7 @@ export function AuthProvider({
       enqueueAuthRequest,
       i18n.language,
       redirectToInactivityRoute,
+      sessionSync,
       userSlug,
     ],
   )
@@ -340,19 +363,18 @@ export function AuthProvider({
   )
 
   const logOut = useCallback(async () => {
-    const sessionSync = sessionSyncRef.current
     const logoutEvent = { type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT } as const
-    const logoutPublication = sessionSync?.publish(logoutEvent)
+    const logoutPublication = sessionSync.publish(logoutEvent)
     const collection = userRef.current?.collection
 
     await settleExplicitLogout({ collection })
 
     if (logoutPublication?.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT) {
-      sessionSync?.publishStorageRefresh(logoutPublication)
+      sessionSync.publishStorageRefresh(logoutPublication)
     }
 
     return true
-  }, [settleExplicitLogout])
+  }, [sessionSync, settleExplicitLogout])
 
   const refreshPermissions = useCallback(
     async ({ locale }: { locale?: string } = {}) => {
@@ -462,14 +484,14 @@ export function AuthProvider({
 
   const handleSessionExpiration = useCallback(
     (expirationMs: number) => {
-      sessionSyncRef.current?.publish({
+      sessionSync.publish({
         type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
         expiredTokenAt: expirationMs,
       })
       revokeTokenAndExpire()
       redirectToInactivityRoute()
     },
-    [redirectToInactivityRoute, revokeTokenAndExpire],
+    [redirectToInactivityRoute, revokeTokenAndExpire, sessionSync],
   )
   const sessionTiming = useSessionTiming({
     isAuthenticated,
@@ -488,47 +510,6 @@ export function AuthProvider({
   sessionTimingRef.current = sessionTiming
 
   const fetchFullUserEvent = useEffectEvent(fetchFullUser)
-  const fetchFullUserResultEvent = useEffectEvent(fetchFullUserResult)
-  const handleRemoteSessionExpired = useEffectEvent(() => {
-    setNewUser(null)
-    redirectToInactivityRoute()
-  })
-  const handleRemoteSessionLoggedOut = useEffectEvent(() => {
-    const collection = userRef.current?.collection
-
-    void settleExplicitLogout({ collection })
-    redirectToLoginRoute()
-  })
-  const handleRemoteSessionRefreshed = useEffectEvent((session: UserWithToken) => {
-    if (!isExplicitLogoutPendingRef.current) {
-      setNewUser(session)
-    }
-  })
-  const handleStorageSessionUnauthenticated = useEffectEvent(() => {
-    redirectToInactivityRoute()
-  })
-
-  useEffect(() => {
-    const sessionSync = createAuthSessionSync({
-      fetchFullUser: fetchFullUserResultEvent,
-      getTokenExpirationMs: sessionTiming.getKnownExpirationMs,
-      onSessionExpired: handleRemoteSessionExpired,
-      onSessionLoggedOut: handleRemoteSessionLoggedOut,
-      onSessionRefreshed: handleRemoteSessionRefreshed,
-      onSessionResyncUnauthenticated: handleStorageSessionUnauthenticated,
-      sourceID: sessionSyncSourceID,
-    })
-
-    sessionSyncRef.current = sessionSync
-
-    return () => {
-      if (sessionSyncRef.current === sessionSync) {
-        sessionSyncRef.current = null
-      }
-
-      sessionSync.cleanup()
-    }
-  }, [sessionSyncSourceID, sessionTiming])
 
   useEffect(() => {
     async function fetchUserOnMount() {
@@ -580,7 +561,3 @@ export function AuthProvider({
 }
 
 export const useAuth = <T = AuthenticatedUser,>(): AuthContext<T> => use(Context) as AuthContext<T>
-
-function createSessionSyncSourceID(): string {
-  return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
-}

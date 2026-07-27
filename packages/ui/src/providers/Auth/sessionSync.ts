@@ -81,7 +81,7 @@ export type AuthSessionSyncPublication =
       type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
     }
 
-type AuthSessionLogoutPublication = Extract<
+export type AuthSessionLogoutPublication = Extract<
   AuthSessionSyncPublication,
   { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT }
 >
