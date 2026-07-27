@@ -40,6 +40,12 @@ describe('Lexical Fully Featured - database', () => {
 
     const page = await browser.newPage()
     await ensureCompilationIsDone({ page, serverURL })
+
+    // Warm up the create route compilation under the long beforeAll timeout to
+    // avoid flaky timeouts in the per-test beforeEach navigation.
+    await page.goto(new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug).create)
+    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
+
     await page.close()
   })
   beforeEach(async ({ page }) => {
@@ -102,7 +108,10 @@ describe('Lexical Fully Featured - database', () => {
     test('ensure auto upload by copy & pasting image works when pasting from website', async ({
       page,
     }) => {
-      test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
+      )
       await page.goto(url.admin + '/custom-image')
       await page.keyboard.press('Meta+A')
       await page.keyboard.press('Control+A')

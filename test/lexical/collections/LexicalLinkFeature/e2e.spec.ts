@@ -1,5 +1,4 @@
 import { expect, test } from '@playwright/test'
-import { lexicalLinkFeatureSlug } from '../../slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -7,6 +6,7 @@ import { ensureCompilationIsDone, waitForFormReady } from '../../../__helpers/e2
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
+import { lexicalLinkFeatureSlug } from '../../slugs.js'
 import { LexicalHelpers } from '../utils.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -30,6 +30,13 @@ describe('Lexical Link Feature', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
 
     await ensureCompilationIsDone({ browser, serverURL })
+
+    // Warm up the create route compilation under the long beforeAll timeout to
+    // avoid flaky timeouts in the per-test beforeEach navigation.
+    const page = await browser.newPage()
+    await page.goto(new AdminUrlUtil(serverURL, lexicalLinkFeatureSlug).create)
+    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
+    await page.close()
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalLinkFeatureSlug)

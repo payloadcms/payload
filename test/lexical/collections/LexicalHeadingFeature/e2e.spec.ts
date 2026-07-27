@@ -32,6 +32,13 @@ describe('Lexical Heading Feature', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     const page = await browser.newPage()
     await ensureCompilationIsDone({ page, serverURL })
+
+    // Warm up the create route compilation under the long beforeAll timeout to
+    // avoid flaky timeouts in the per-test beforeEach navigation.
+    const url = new AdminUrlUtil(serverURL, lexicalHeadingFeatureSlug)
+    await page.goto(url.create)
+    await expect(new LexicalHelpers(page).editor.first()).toBeVisible()
+
     await page.close()
   })
   beforeEach(async ({ page }) => {

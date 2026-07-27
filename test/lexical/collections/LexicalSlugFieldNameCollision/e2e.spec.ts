@@ -33,6 +33,12 @@ describe('Lexical: collection slug equals top-level field name', () => {
 
     const page = await browser.newPage()
     await ensureCompilationIsDone({ page, serverURL })
+
+    // Warm up the create route compilation under the long beforeAll timeout to
+    // avoid flaky timeouts in the per-test beforeEach navigation.
+    await page.goto(new AdminUrlUtil(serverURL, lexicalSlugFieldNameCollisionSlug).create)
+    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
+
     await page.close()
   })
 
