@@ -1457,3 +1457,36 @@ Because the `payload-mcp-api-keys` collection config was removed, run your norma
 By default, MCP items require an authenticated user. Built-in collection and global tools also include Payload permission checks in their default `access` callbacks. If you provide an `access` callback for a built-in tool, it replaces the default callback.
 
 **Dependencies.** The plugin now builds on `@modelcontextprotocol/server` instead of `@modelcontextprotocol/sdk` + `mcp-handler`, and moved to `zod` v4. If your custom tools import `zod` directly, make sure it resolves to v4.
+
+### `@payloadcms/ui/scss` export removed and legacy `--theme-*` tokens retired
+
+The Admin UI styles were migrated from SCSS to plain CSS. The `@payloadcms/ui/scss` package export and its SCSS source files have been removed, and the legacy `--theme-*` CSS variables were retired in favor of semantic `--color-*` tokens and the raw `--ramp-*` color palette.
+
+**Stylesheet imports.** SCSS partials and mixins are gone. All design tokens are now global CSS variables on `:root`, so custom stylesheets no longer need to import anything to consume them — remove any `@import '~@payloadcms/ui/scss';` line. If you referenced the package export directly, use the CSS export instead:
+
+```diff
+- @import '~@payloadcms/ui/scss';
+```
+
+```diff
+- @payloadcms/ui/scss
++ @payloadcms/ui/css
+
+- @payloadcms/ui/scss/app.scss
++ @payloadcms/ui/css/app.css
+```
+
+**Token renames.** The `--theme-*` variables were replaced by semantic `--color-*` tokens. Update any custom CSS that referenced them:
+
+```diff
+  .my-component {
+-   background-color: var(--theme-bg);
+-   color: var(--theme-text);
++   background-color: var(--color-bg);
++   color: var(--color-text);
+  }
+```
+
+The `--theme-elevation-*` scale was removed. Use the semantic `--color-*` tokens (e.g. `--color-bg`, `--color-text`, `--color-border`, `--color-icon`) or the raw `--ramp-*` palette instead. See [Customizing CSS](../admin/customizing-css) for the full list of available tokens.
+
+Any custom component `.scss` files you authored should be renamed to `.css` and updated to plain CSS syntax — Payload no longer ships a SCSS toolchain.
