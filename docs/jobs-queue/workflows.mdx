@@ -349,12 +349,6 @@ When multiple jobs operate on the same resource, race conditions can occur. For 
 
 The `concurrency` option allows you to prevent this by ensuring that jobs with the same "key" run exclusively (one at a time).
 
-<Banner type="warning">
-  **Important:** Concurrency controls add an indexed `concurrencyKey` field to
-  your jobs collection schema and may require a database migration depending on
-  your database adapter.
-</Banner>
-
 Add the `concurrency` option to your workflow configuration:
 
 ```ts
