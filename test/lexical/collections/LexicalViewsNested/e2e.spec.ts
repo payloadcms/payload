@@ -31,6 +31,13 @@ describe('Lexical Views Nested', () => {
 
     const page = await browser.newPage()
     await ensureCompilationIsDone({ page, serverURL })
+
+    // Warm up the create route compilation under the long beforeAll timeout to
+    // avoid flaky timeouts in the per-test beforeEach navigation.
+    const url = new AdminUrlUtil(serverURL, lexicalViewsNestedSlug)
+    await page.goto(url.create)
+    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
+
     await page.close()
   })
 
