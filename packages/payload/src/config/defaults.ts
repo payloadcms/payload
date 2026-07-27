@@ -68,7 +68,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
       duration: config.jobs?.processingLease?.duration ?? 20 * 60 * 1000,
       safetyBuffer: config.jobs?.processingLease?.safetyBuffer ?? 30 * 1000,
     },
-  } as JobsConfig
+  }
   config.localization = config.localization ?? false
   config.maxDepth = config.maxDepth ?? 10
   config.routes = {
