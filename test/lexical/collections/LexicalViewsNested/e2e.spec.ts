@@ -31,12 +31,6 @@ describe('Lexical Views Nested', () => {
 
     const page = await browser.newPage()
     await ensureCompilationIsDone({ page, serverURL })
-
-    // Warm the create route once so the first per-test navigation doesn't pay the
-    // cold first-hit route render on CI's production server.
-    await page.goto(new AdminUrlUtil(serverURL, lexicalViewsNestedSlug).create)
-    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
-
     await page.close()
   })
 

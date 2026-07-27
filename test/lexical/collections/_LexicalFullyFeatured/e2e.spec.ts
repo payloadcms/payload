@@ -35,13 +35,6 @@ describe('Lexical Fully Featured', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     await ensureCompilationIsDone({ browser, serverURL })
-
-    // Warm the create route once so the first per-test navigation doesn't pay the
-    // cold first-hit route render on CI's production server.
-    const page = await browser.newPage()
-    await page.goto(new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug).create)
-    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
-    await page.close()
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
@@ -372,16 +365,6 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     await ensureCompilationIsDone({ browser, serverURL })
-
-    // Warm the account and create routes once so the first per-test navigation
-    // doesn't pay the cold first-hit route render on CI's production server.
-    const page = await browser.newPage()
-    const warmURL = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
-    await page.goto(warmURL.account)
-    await page.locator('.payload-settings__language .react-select').waitFor({ state: 'visible' })
-    await page.goto(warmURL.create)
-    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
-    await page.close()
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)

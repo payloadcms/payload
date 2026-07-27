@@ -30,13 +30,6 @@ describe('Lexical Link Feature', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
 
     await ensureCompilationIsDone({ browser, serverURL })
-
-    // Warm the create route once so the first per-test navigation doesn't pay the
-    // cold first-hit route render on CI's production server.
-    const page = await browser.newPage()
-    await page.goto(new AdminUrlUtil(serverURL, lexicalLinkFeatureSlug).create)
-    await new LexicalHelpers(page).editor.first().waitFor({ state: 'visible' })
-    await page.close()
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalLinkFeatureSlug)
