@@ -21,7 +21,6 @@ jobs:
     environment: release
     permissions:
       id-token: write
-      contents: write
     steps:
       - name: Mint App token
         id: app-token
