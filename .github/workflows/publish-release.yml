@@ -42,14 +42,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           NPM_CONFIG_PROVENANCE: true
-      - name: Notify Slack on failure
-        if: failure()
-        run: |
-          curl -fsS -X POST https://slack.com/api/chat.postMessage \
-            -H "Authorization: Bearer $SLACK_TOKEN" \
-            -H 'Content-type: application/json; charset=utf-8' \
-            --data "$(printf '{"channel":"%s","text":"🚨 publish-release failed for %s — %s/%s/actions/runs/%s"}' \
-              "$SLACK_CHANNEL" "$GITHUB_REF_NAME" "$GITHUB_SERVER_URL" "$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")"
-        env:
-          SLACK_TOKEN: ${{ secrets.SLACK_TOKEN }}
-          SLACK_CHANNEL: ${{ secrets.SLACK_CHANNEL }}
