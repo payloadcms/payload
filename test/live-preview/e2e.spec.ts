@@ -332,10 +332,10 @@ describe('Live Preview', () => {
     await expect(previewButton).toBeVisible()
 
     await previewButton.hover()
-    await expect(page.locator('#preview-button ~ .tooltip--show')).toHaveText('Copy')
+    await expect(page.locator('#preview-button-tooltip')).toHaveText('Copy')
 
     await previewButton.click()
-    await expect(page.locator('#preview-button ~ .tooltip--show')).toHaveText('Copied')
+    await expect(page.locator('#preview-button-tooltip')).toHaveText('Copied')
     await expect
       .poll(() => page.evaluate(() => navigator.clipboard.readText()))
       .toMatch(/\/live-preview/)
