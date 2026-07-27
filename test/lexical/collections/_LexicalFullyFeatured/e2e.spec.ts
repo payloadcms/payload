@@ -35,6 +35,13 @@ describe('Lexical Fully Featured', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     await ensureCompilationIsDone({ browser, serverURL })
+
+    // Warm up the create route compilation under the long beforeAll timeout to
+    // avoid flaky timeouts in the per-test beforeEach navigation.
+    const page = await browser.newPage()
+    await page.goto(new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug).create)
+    await expect(new LexicalHelpers(page).editor.first()).toBeVisible()
+    await page.close()
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
@@ -365,6 +372,16 @@ describe('Lexical Fully Featured, admin panel in RTL', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     await ensureCompilationIsDone({ browser, serverURL })
+
+    // Warm up the account and create route compilation under the long beforeAll
+    // timeout to avoid flaky timeouts in the per-test beforeEach navigation.
+    const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
+    const page = await browser.newPage()
+    await page.goto(url.account)
+    await expect(page.locator('.payload-settings__language .react-select')).toBeVisible()
+    await page.goto(url.create)
+    await expect(new LexicalHelpers(page).editor.first()).toBeVisible()
+    await page.close()
   })
   beforeEach(async ({ page }) => {
     const url = new AdminUrlUtil(serverURL, lexicalFullyFeaturedSlug)
