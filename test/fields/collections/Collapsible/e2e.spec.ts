@@ -1,4 +1,4 @@
-import type { BrowserContext, Page } from '@playwright/test'
+import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
@@ -30,7 +30,6 @@ const { beforeAll, beforeEach, describe } = test
 
 let payload: PayloadTestSDK<Config>
 let client: RESTClient
-let forceRenderContext: BrowserContext | undefined
 let page: Page
 let serverURL: string
 let url: AdminUrlUtil
@@ -67,39 +66,18 @@ describe('Collapsibles', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test.afterEach(async () => {
-    await forceRenderContext?.close()
-    forceRenderContext = undefined
-  })
+  test('should force render nested fields outside the observer root margin', async () => {
+    await page.goto(url.create)
 
-  test('should force render nested fields without intersection observer callbacks', async ({
-    browser,
-  }) => {
-    forceRenderContext = await browser.newContext()
-    const forceRenderPage = await forceRenderContext.newPage()
+    const offscreenCollapsible = page.locator('#field-collapsible-_index-5')
+    await expect(offscreenCollapsible).toBeAttached()
 
-    await forceRenderPage.addInitScript(() => {
-      class NeverIntersectingObserver implements IntersectionObserver {
-        readonly root = null
-        readonly rootMargin = '0px'
-        readonly thresholds: ReadonlyArray<number> = []
+    const viewportHeight = await page.evaluate(() => window.innerHeight)
 
-        disconnect(): void {}
-
-        observe(): void {}
-
-        takeRecords(): IntersectionObserverEntry[] {
-          return []
-        }
-
-        unobserve(): void {}
-      }
-
-      window.IntersectionObserver = NeverIntersectingObserver
-    })
-    await forceRenderPage.goto(url.create)
-
-    await expect(forceRenderPage.locator('#field-text')).toBeVisible()
+    await expect
+      .poll(() => offscreenCollapsible.evaluate((element) => element.getBoundingClientRect().top))
+      .toBeGreaterThan(viewportHeight + 1000)
+    await expect(page.locator('#field-forceRenderedText')).toBeAttached()
   })
 
   test('should render collapsible as collapsed if initCollapsed is true', async () => {
