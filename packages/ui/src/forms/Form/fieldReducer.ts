@@ -444,10 +444,13 @@ export function fieldReducer(state: FormState, action: FieldAction): FormState {
     }
 
     case 'UPDATE_MANY': {
-      return mergeServerFormState({
-        currentState: state || {},
-        incomingState: action.formState,
+      const newState = { ...state }
+
+      Object.entries(action.formState).forEach(([path, field]) => {
+        newState[path] = field
       })
+
+      return newState
     }
 
     default: {
