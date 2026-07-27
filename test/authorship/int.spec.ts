@@ -188,6 +188,103 @@ describe('Authorship', () => {
     expect(post.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
   })
 
+  it('should ignore a client-provided createdBy (no spoofing) when overrideAccess is false', async () => {
+    const created = await payload.create({
+      collection: postsSlug,
+      data: {
+        createdBy: { relationTo: adminsSlug, value: admin.id },
+        title: 'no spoof create',
+      },
+      depth: 0,
+      overrideAccess: false,
+      user: user as never,
+    })
+    createdPostIDs.push(created.id)
+
+    // Field access denies the client value; the hook stamps the real acting user.
+    expect(created.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
+  })
+
+  it('should ignore a client-provided updatedBy (no spoofing) when overrideAccess is false', async () => {
+    const post = await createPost({ data: { title: 'no spoof update' }, user })
+
+    const updated = await payload.update({
+      id: post.id,
+      collection: postsSlug,
+      data: {
+        title: 'no spoof update 2',
+        updatedBy: { relationTo: adminsSlug, value: admin.id },
+      },
+      depth: 0,
+      overrideAccess: false,
+      user: user as never,
+    })
+
+    expect(updated.updatedBy).toEqual({ relationTo: usersSlug, value: user.id })
+  })
+
+  it('should stamp updatedBy on every doc in a bulk update', async () => {
+    const post1 = await createPost({ data: { title: 'bulk a' }, user })
+    const post2 = await createPost({ data: { title: 'bulk b' }, user })
+
+    const result = await payload.update({
+      collection: postsSlug,
+      data: { title: 'bulk updated' },
+      depth: 0,
+      user: admin,
+      where: { id: { in: [post1.id, post2.id] } },
+    })
+
+    expect(result.docs).toHaveLength(2)
+    for (const doc of result.docs) {
+      expect(doc.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
+    }
+  })
+
+  it('should stamp createdBy from the duplicating user on duplicate', async () => {
+    const post = await createPost({ data: { title: 'original' }, user })
+
+    // The beforeDuplicate hook clears the copied author, so the duplicate is
+    // re-attributed to whoever performed the duplication.
+    const duplicated = await payload.duplicate({
+      id: post.id,
+      collection: postsSlug,
+      depth: 0,
+      user: admin,
+    })
+    createdPostIDs.push(duplicated.id)
+
+    expect(duplicated.createdBy).toEqual({ relationTo: adminsSlug, value: admin.id })
+    expect(duplicated.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
+  })
+
+  it('should not change updatedBy when a user logs in', async () => {
+    const email = `login-check-${Date.now()}@x.com`
+
+    const createdUser = (await payload.create({
+      collection: usersSlug,
+      data: { email, password: 'test' },
+      depth: 0,
+      user,
+    })) as never as Record<string, unknown>
+
+    await payload.login({
+      collection: usersSlug,
+      data: { email, password: 'test' },
+    })
+
+    const afterLogin = (await payload.findByID({
+      collection: usersSlug,
+      id: createdUser.id as string,
+      depth: 0,
+    })) as never as Record<string, unknown>
+
+    // Session writes on login must not bump the user's authorship metadata.
+    expect(afterLogin.updatedBy).toEqual(createdUser.updatedBy)
+
+    await payload.delete({ collection: usersSlug, id: createdUser.id as string }).catch(() => null)
+  })
+
   it('should not inject authorship fields when authorship is false', () => {
     const fields = payload.collections[noAuthorshipSlug].config.fields
     const names = fields.filter((f) => 'name' in f).map((f) => (f as { name: string }).name)

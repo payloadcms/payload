@@ -80,6 +80,16 @@ const setCreatedBy: FieldHook = ({ data, previousValue, req }) => {
   return userToRelation(req) ?? previousValue
 }
 
+// On duplicate, drop the copied value so the new document is re-attributed to the
+// duplicating user by the beforeChange hook rather than inheriting the original author.
+const clearCreatedByOnDuplicate: FieldHook = ({ siblingData }) => {
+  delete siblingData.createdBy
+}
+
+const clearUpdatedByOnDuplicate: FieldHook = ({ siblingData }) => {
+  delete siblingData.updatedBy
+}
+
 /**
  * Builds the `createdBy` / `updatedBy` fields to inject, per the sanitized `authorship` config.
  * Empty when there are no auth-enabled collections to relate to.
@@ -101,12 +111,18 @@ export const getAuthorshipFields = ({
     fields.push({
       name: 'createdBy',
       type: 'relationship',
+      // Block client writes so authorship can't be spoofed; the hook sets the value.
+      access: {
+        create: () => false,
+        update: () => false,
+      },
       admin: {
         disabled: { bulkEdit: true },
         hidden: true,
       },
       hooks: {
         beforeChange: [setCreatedBy],
+        beforeDuplicate: [clearCreatedByOnDuplicate],
       },
       label: ({ t }) => t('general:createdBy'),
       maxDepth: 1,
@@ -118,12 +134,18 @@ export const getAuthorshipFields = ({
     fields.push({
       name: 'updatedBy',
       type: 'relationship',
+      // Block client writes so authorship can't be spoofed; the hook sets the value.
+      access: {
+        create: () => false,
+        update: () => false,
+      },
       admin: {
         disabled: { bulkEdit: true },
         hidden: true,
       },
       hooks: {
         beforeChange: [setUpdatedBy],
+        beforeDuplicate: [clearUpdatedByOnDuplicate],
       },
       label: ({ t }) => t('general:updatedBy'),
       maxDepth: 1,
