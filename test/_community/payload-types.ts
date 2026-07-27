@@ -298,14 +298,6 @@ export interface PayloadLockedDocument {
     relationTo: 'users';
     value: string | User;
   };
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -329,14 +321,6 @@ export interface PayloadPreference {
     | number
     | boolean
     | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -348,14 +332,6 @@ export interface PayloadMigration {
   id: string;
   name?: string | null;
   batch?: number | null;
-  createdBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
-  updatedBy?: {
-    relationTo: 'users';
-    value: string | User;
-  } | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -466,8 +442,6 @@ export interface PayloadLockedDocumentsSelect<T extends boolean = true> {
   document?: T;
   globalSlug?: T;
   user?: T;
-  createdBy?: T;
-  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -479,8 +453,6 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
   user?: T;
   key?: T;
   value?: T;
-  createdBy?: T;
-  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -491,8 +463,6 @@ export interface PayloadPreferencesSelect<T extends boolean = true> {
 export interface PayloadMigrationsSelect<T extends boolean = true> {
   name?: T;
   batch?: T;
-  createdBy?: T;
-  updatedBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
