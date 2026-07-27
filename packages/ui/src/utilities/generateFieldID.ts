@@ -1,6 +1,11 @@
-export const generateFieldID = (path: string, editDepth: number, uuid: string) => {
+export const generateFieldID = (
+  path: string,
+  editDepth: number,
+  uuid: string,
+  prefix: string = 'field',
+) => {
   if (!path) {
     return undefined
   }
-  return `field-${path.replace(/\./g, '__')}${editDepth > 1 ? `-${editDepth}` : ''}${uuid ? `-${uuid}` : ''}`
+  return `${prefix}-${path.replace(/\./g, '__')}${editDepth > 1 ? `-${editDepth}` : ''}${uuid ? `-${uuid}` : ''}`
 }

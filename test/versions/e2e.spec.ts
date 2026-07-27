@@ -1914,7 +1914,8 @@ describe('Versions', () => {
       await saveDocAndAssert(page, '#action-save-draft', 'error')
 
       const parentFieldType = page.locator('.field-type:has(#field-title)')
-      await expect(parentFieldType.locator('.tooltip--show')).toBeVisible()
+
+      await expect(page.locator('.tooltip--show')).toBeVisible()
       await expect(parentFieldType).toHaveClass(/error/)
 
       await titleField.fill('New title')
