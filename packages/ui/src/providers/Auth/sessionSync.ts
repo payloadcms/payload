@@ -1,4 +1,4 @@
-import type { UserWithToken } from './index.js'
+import type { UserWithToken } from './types.js'
 
 export const AUTH_SESSION_SYNC_EVENT_TYPES = {
   EXPIRED: 'session-expired',

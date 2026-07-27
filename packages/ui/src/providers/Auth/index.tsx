@@ -9,6 +9,7 @@ import { toast } from 'sonner'
 
 import type { MarkSessionActivity } from './sessionActivity.js'
 import type { AuthSessionResyncOptions, AuthSessionResyncResult } from './sessionSync.js'
+import type { AuthContext, UserWithToken } from './types.js'
 
 import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
@@ -23,62 +24,7 @@ import {
 } from './sessionActivity.js'
 import { AUTH_SESSION_SYNC_EVENT_TYPES, createAuthSessionSync } from './sessionSync.js'
 
-export type UserWithToken<T = AuthenticatedUser> = {
-  /** seconds until expiration */
-  exp: number
-  refreshedToken?: string
-  token?: string
-  user: T
-}
-
-export type AuthContext<T = AuthenticatedUser> = {
-  fetchFullUser: () => Promise<null | T>
-  logOut: () => Promise<boolean>
-  /**
-   * These are the permissions for the current user from a global scope.
-   *
-   * When checking for permissions on document specific level, use the `useDocumentInfo` hook instead.
-   *
-   * @example
-   *
-   * ```tsx
-   * import { useAuth } from 'payload/ui'
-   *
-   * const MyComponent: React.FC = () => {
-   *   const { permissions } = useAuth()
-   *
-   *   if (permissions?.collections?.myCollection?.create) {
-   *     // user can create documents in 'myCollection'
-   *   }
-   *
-   *   return null
-   * }
-   * ```
-   *
-   * with useDocumentInfo:
-   *
-   * ```tsx
-   * import { useDocumentInfo } from 'payload/ui'
-   *
-   * const MyComponent: React.FC = () => {
-   *  const { docPermissions } = useDocumentInfo()
-   *  if (docPermissions?.create) {
-   *   // user can create this document
-   *  }
-   *  return null
-   * } ```
-   */
-  permissions?: SanitizedPermissions
-  refreshCookie: (forceRefresh?: boolean) => void
-  refreshCookieAsync: () => Promise<null | T>
-  refreshPermissions: () => Promise<void>
-  setPermissions: (permissions: SanitizedPermissions) => void
-  setUser: (user: null | UserWithToken<T>) => void
-  strategy?: string
-  token?: string
-  tokenExpirationMs?: number
-  user?: null | T
-}
+export type { AuthContext, UserWithToken } from './types.js'
 
 const Context = createContext({} as AuthContext)
 
