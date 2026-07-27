@@ -1,0 +1,33 @@
+@layer payload-default {
+  .import-preview-relationship {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacer-1);
+  }
+
+  .import-preview-relationship__group {
+    display: flex;
+    align-items: baseline;
+    gap: var(--spacer-2);
+  }
+
+  .import-preview-relationship__collection {
+    color: var(--field-color-label);
+    font-family: var(--text-body-small-strong-font-family);
+    font-size: var(--text-body-small-strong-font-size);
+    font-weight: var(--text-body-small-strong-font-weight);
+    letter-spacing: var(--text-body-small-strong-letter-spacing);
+    line-height: var(--text-body-small-strong-line-height);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .import-preview-relationship__more {
+    display: block;
+    color: var(--color-text-secondary);
+    font-family: var(--text-body-small-font-family);
+    font-size: var(--text-body-small-font-size);
+    font-weight: var(--text-body-small-font-weight);
+    line-height: var(--text-body-small-line-height);
+  }
+}
