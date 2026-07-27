@@ -4,6 +4,8 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
+import type { Admin, User } from './payload-types.js'
+
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
@@ -12,10 +14,11 @@ import {
   menuSlug,
   noAuthorshipSlug,
   postsSlug,
+  updatedOnlySlug,
   usersSlug,
 } from './slugs.js'
 
-type TestUser = { collection: string; id: number | string } & Record<string, unknown>
+type TestUser = { collection: string } & (Admin | User)
 
 let payload: Payload
 
@@ -33,10 +36,10 @@ const createPost = async ({ data, user }: { data: Record<string, unknown>; user?
     collection: postsSlug,
     data: data as never,
     depth: 0,
-    user: user as never,
+    user,
   })
   createdPostIDs.push(doc.id)
-  return doc as { id: number | string } & Record<string, unknown>
+  return doc
 }
 
 describe('Authorship', () => {
@@ -81,7 +84,7 @@ describe('Authorship', () => {
   })
 
   afterAll(async () => {
-    await payload.destroy()
+    await payload?.destroy()
   })
 
   it('should set createdBy and updatedBy from req.user on create', async () => {
@@ -199,6 +202,66 @@ describe('Authorship', () => {
 
     expect(names).toContain('createdBy')
     expect(names).not.toContain('updatedBy')
+  })
+
+  it('should only inject updatedBy when createdBy is disabled', () => {
+    const fields = payload.collections[updatedOnlySlug].config.fields
+    const names = fields.filter((f) => 'name' in f).map((f) => (f as { name: string }).name)
+
+    expect(names).toContain('updatedBy')
+    expect(names).not.toContain('createdBy')
+  })
+
+  it('should stamp only createdBy when updatedBy is disabled', async () => {
+    const created = await payload.create({
+      collection: createdOnlySlug,
+      data: { title: 'created' },
+      depth: 0,
+      user,
+    })
+
+    expect(created.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
+    expect(created).not.toHaveProperty('updatedBy')
+
+    const updated = await payload.update({
+      collection: createdOnlySlug,
+      id: created.id,
+      data: { title: 'updated' },
+      depth: 0,
+      user: admin,
+    })
+
+    // createdBy stays put, updatedBy is never tracked
+    expect(updated.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
+    expect(updated).not.toHaveProperty('updatedBy')
+
+    await payload.delete({ collection: createdOnlySlug, id: created.id }).catch(() => null)
+  })
+
+  it('should stamp only updatedBy when createdBy is disabled', async () => {
+    const created = await payload.create({
+      collection: updatedOnlySlug,
+      data: { title: 'created' },
+      depth: 0,
+      user,
+    })
+
+    expect(created.updatedBy).toEqual({ relationTo: usersSlug, value: user.id })
+    expect(created).not.toHaveProperty('createdBy')
+
+    const updated = await payload.update({
+      collection: updatedOnlySlug,
+      id: created.id,
+      data: { title: 'updated' },
+      depth: 0,
+      user: admin,
+    })
+
+    // updatedBy follows the latest writer, createdBy is never tracked
+    expect(updated.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
+    expect(updated).not.toHaveProperty('createdBy')
+
+    await payload.delete({ collection: updatedOnlySlug, id: created.id }).catch(() => null)
   })
 
   it('should track authorship on globals', async () => {

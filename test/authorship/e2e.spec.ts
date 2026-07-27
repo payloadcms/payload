@@ -17,7 +17,7 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { devUser } from '../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { draftPostsSlug, postsSlug, usersSlug } from './slugs.js'
+import { createdOnlySlug, draftPostsSlug, postsSlug, updatedOnlySlug, usersSlug } from './slugs.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -197,5 +197,101 @@ test.describe('Authorship', () => {
     await expect(diffs).not.toContainText(devUser.email)
 
     await restrictedContext.close()
+  })
+
+  test('shows only createdBy in the API view when updatedBy is disabled', async () => {
+    const url = new AdminUrlUtil(serverURL, createdOnlySlug)
+
+    await page.goto(url.create)
+    await page.locator('#field-title').fill('created only api')
+
+    await page.click('#action-save', { delay: 100 })
+    await expect(page.locator('.payload-toast-container')).toContainText('successfully')
+
+    await page.getByRole('link', { name: 'API' }).click()
+
+    const results = page.locator('.query-inspector__results')
+    await expect(results).toBeVisible()
+    await expect(results).toContainText('createdBy')
+    await expect(results).not.toContainText('updatedBy')
+  })
+
+  test('shows only updatedBy in the API view when createdBy is disabled', async () => {
+    const url = new AdminUrlUtil(serverURL, updatedOnlySlug)
+
+    await page.goto(url.create)
+    await page.locator('#field-title').fill('updated only api')
+    await saveDocAndAssert(page)
+
+    await page.getByRole('link', { name: 'API' }).click()
+
+    const results = page.locator('.query-inspector__results')
+    await expect(results).toBeVisible()
+    await expect(results).toContainText('updatedBy')
+    await expect(results).not.toContainText('createdBy')
+  })
+
+  test('shows only the Created By label in the version compare view when updatedBy is disabled', async () => {
+    const doc = await payload.create({
+      collection: createdOnlySlug,
+      data: { title: 'created only v1' },
+      depth: 0,
+    })
+
+    await payload.update({
+      id: doc.id,
+      collection: createdOnlySlug,
+      data: { title: 'created only v2' },
+      depth: 0,
+      draft: true,
+    })
+
+    const versions = await payload.findVersions({
+      collection: createdOnlySlug,
+      depth: 0,
+      limit: 1,
+      where: { parent: { equals: doc.id } },
+    })
+    const versionID = versions.docs[0]?.id
+
+    await page.goto(
+      `${serverURL}/admin/collections/${createdOnlySlug}/${doc.id}/versions/${versionID}?modifiedOnly=false`,
+    )
+
+    await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+    await expect(page.locator('.field-diff-label', { hasText: 'Created By' }).first()).toBeVisible()
+    await expect(page.locator('.field-diff-label', { hasText: 'Updated By' })).toHaveCount(0)
+  })
+
+  test('shows only the Updated By label in the version compare view when createdBy is disabled', async () => {
+    const doc = await payload.create({
+      collection: updatedOnlySlug,
+      data: { title: 'updated only v1' },
+      depth: 0,
+    })
+
+    await payload.update({
+      id: doc.id,
+      collection: updatedOnlySlug,
+      data: { title: 'updated only v2' },
+      depth: 0,
+      draft: true,
+    })
+
+    const versions = await payload.findVersions({
+      collection: updatedOnlySlug,
+      depth: 0,
+      limit: 1,
+      where: { parent: { equals: doc.id } },
+    })
+    const versionID = versions.docs[0]?.id
+
+    await page.goto(
+      `${serverURL}/admin/collections/${updatedOnlySlug}/${doc.id}/versions/${versionID}?modifiedOnly=false`,
+    )
+
+    await expect(page.locator('.render-field-diffs').first()).toBeVisible()
+    await expect(page.locator('.field-diff-label', { hasText: 'Updated By' }).first()).toBeVisible()
+    await expect(page.locator('.field-diff-label', { hasText: 'Created By' })).toHaveCount(0)
   })
 })

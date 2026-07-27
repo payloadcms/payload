@@ -10,6 +10,7 @@ import {
   menuSlug,
   noAuthorshipSlug,
   postsSlug,
+  updatedOnlySlug,
   usersSlug,
 } from './slugs.js'
 
@@ -78,6 +79,23 @@ export default buildConfigWithDefaults(
             type: 'text',
           },
         ],
+        versions: {
+          drafts: true,
+        },
+      },
+      {
+        // Only updatedBy tracked
+        slug: updatedOnlySlug,
+        authorship: { createdBy: false },
+        fields: [
+          {
+            name: 'title',
+            type: 'text',
+          },
+        ],
+        versions: {
+          drafts: true,
+        },
       },
     ],
     globals: [

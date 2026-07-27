@@ -74,6 +74,7 @@ export interface Config {
     'draft-posts': DraftPost;
     'no-authorship': NoAuthorship;
     'created-only': CreatedOnly;
+    'updated-only': UpdatedOnly;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -87,6 +88,7 @@ export interface Config {
     'draft-posts': DraftPostsSelect<false> | DraftPostsSelect<true>;
     'no-authorship': NoAuthorshipSelect<false> | NoAuthorshipSelect<true>;
     'created-only': CreatedOnlySelect<false> | CreatedOnlySelect<true>;
+    'updated-only': UpdatedOnlySelect<false> | UpdatedOnlySelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -321,6 +323,27 @@ export interface CreatedOnly {
       } | null);
   updatedAt: string;
   createdAt: string;
+  _status?: ('draft' | 'published') | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "updated-only".
+ */
+export interface UpdatedOnly {
+  id: string;
+  title?: string | null;
+  updatedBy?:
+    | ({
+        relationTo: 'users';
+        value: string | User;
+      } | null)
+    | ({
+        relationTo: 'admins';
+        value: string | Admin;
+      } | null);
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -387,6 +410,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'created-only';
         value: string | CreatedOnly;
+      } | null)
+    | ({
+        relationTo: 'updated-only';
+        value: string | UpdatedOnly;
       } | null);
   globalSlug?: string | null;
   user:
@@ -529,6 +556,18 @@ export interface CreatedOnlySelect<T extends boolean = true> {
   createdBy?: T;
   updatedAt?: T;
   createdAt?: T;
+  _status?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "updated-only_select".
+ */
+export interface UpdatedOnlySelect<T extends boolean = true> {
+  title?: T;
+  updatedBy?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -629,7 +668,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'users' | 'admins' | 'posts' | 'draft-posts' | 'no-authorship' | 'created-only';
+    relatedCollection: 'users' | 'admins' | 'posts' | 'draft-posts' | 'no-authorship' | 'created-only' | 'updated-only';
     where?:
       | {
           [k: string]: unknown;
@@ -651,7 +690,9 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('users' | 'admins' | 'posts' | 'draft-posts' | 'no-authorship' | 'created-only')[] | null;
+    excludedCollections?:
+      | ('users' | 'admins' | 'posts' | 'draft-posts' | 'no-authorship' | 'created-only' | 'updated-only')[]
+      | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
