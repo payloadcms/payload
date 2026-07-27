@@ -45,6 +45,24 @@ describe('createAuthSessionRequestCoordinator', () => {
     expect(runs).toBe(1)
   })
 
+  it('should prevent a queued auth operation from committing after the session advances', async () => {
+    const coordinator = createAuthSessionRequestCoordinator()
+    const operation = createDeferred<void>()
+    let canCommitAfterSettlement = true
+
+    const request = coordinator.enqueue(async ({ canCommit }) => {
+      await operation.promise
+      canCommitAfterSettlement = canCommit()
+    })
+
+    await Promise.resolve()
+    coordinator.advanceSession()
+    operation.resolve()
+    await request
+
+    expect(canCommitAfterSettlement).toBe(false)
+  })
+
   it('should settle a logout once and prevent refresh from committing', async () => {
     const coordinator = createAuthSessionRequestCoordinator()
     const logout = createDeferred<void>()

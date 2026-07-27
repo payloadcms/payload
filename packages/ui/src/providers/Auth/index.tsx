@@ -9,7 +9,6 @@ import { toast } from 'sonner'
 
 import type { AuthSessionResyncOptions, AuthSessionResyncResult } from './sessionSync.js'
 import type { AuthContext, UserWithToken } from './types.js'
-import type { SessionTimingController } from './useSessionTiming.js'
 
 import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
@@ -18,6 +17,7 @@ import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
 import { useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
+import { createAuthSessionRequestCoordinator } from './sessionRequestCoordinator.js'
 import { AUTH_SESSION_SYNC_EVENT_TYPES } from './sessionSync.js'
 import { useSessionSync } from './useSessionSync.js'
 import { useSessionTiming } from './useSessionTiming.js'
@@ -61,26 +61,7 @@ export function AuthProvider({
   const [permissions, setPermissions] = useState<SanitizedPermissions>(initialPermissions)
   const [fetchedUserOnMount, setFetchedUserOnMount] = useState(false)
 
-  const authRequestQueueRef = React.useRef<Promise<void>>(Promise.resolve())
-  const authRequestSequenceRef = React.useRef(0)
-  const explicitLogoutSettlementRef = React.useRef<Promise<void>>(undefined)
-  const isExplicitLogoutPendingRef = React.useRef(false)
-  const pendingAuthInvalidationRef = React.useRef<
-    | {
-        generation: number
-        run: () => void
-      }
-    | undefined
-  >(undefined)
-  const refreshRequestRef = React.useRef<
-    | {
-        generation: number
-        promise: Promise<AuthenticatedUser | null>
-      }
-    | undefined
-  >(undefined)
-  const sessionGenerationRef = React.useRef(0)
-  const sessionTimingRef = React.useRef<SessionTimingController>(undefined)
+  const [coordinator] = useState(createAuthSessionRequestCoordinator)
   const userRef = React.useRef<AuthenticatedUser | null>(initialUser)
 
   const isAuthenticated = Boolean(user)
@@ -112,18 +93,41 @@ export function AuthProvider({
     closeAllModals()
   }, [adminRoute, closeAllModals, loginRoute, router, startRouteTransition])
 
+  function onSessionActivityRefresh() {
+    void refreshSession({ isActivityRefresh: true })
+  }
+
+  function onSessionExpiration(expirationMs: number) {
+    sessionSync.publish({
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
+      expiredTokenAt: expirationMs,
+    })
+    setNewUser(null)
+    redirectToInactivityRoute()
+  }
+
+  function onSessionReminder() {
+    if (autoRefresh) {
+      sessionTiming.refreshCookie()
+    } else {
+      openModal(stayLoggedInModalSlug)
+    }
+  }
+
+  const sessionTiming = useSessionTiming({
+    isAuthenticated,
+    onActivityRefresh: onSessionActivityRefresh,
+    onExpire: onSessionExpiration,
+    onReminder: onSessionReminder,
+  })
+
   const clearUserInMemory = useCallback(() => {
     userRef.current = null
     setUserInMemory(null)
     setTokenInMemory(undefined)
     setTokenExpirationMs(undefined)
-    sessionTimingRef.current?.clear()
-  }, [])
-
-  const revokeTokenAndExpire = useCallback(() => {
-    sessionGenerationRef.current += 1
-    clearUserInMemory()
-  }, [clearUserInMemory])
+    sessionTiming.clear()
+  }, [sessionTiming])
 
   const applyUserResponse = useCallback(
     (userResponse: null | UserWithToken) => {
@@ -134,26 +138,25 @@ export function AuthProvider({
         setUserInMemory(userResponse.user)
         setTokenInMemory(userResponse.token ?? userResponse.refreshedToken)
         setTokenExpirationMs(nextTokenExpirationMs)
-        sessionTimingRef.current?.applyExpiration(nextTokenExpirationMs)
+        sessionTiming.applyExpiration(nextTokenExpirationMs)
       } else {
         clearUserInMemory()
       }
     },
-    [clearUserInMemory],
+    [clearUserInMemory, sessionTiming],
   )
 
   const setNewUser = useCallback(
     (userResponse: null | UserWithToken) => {
-      pendingAuthInvalidationRef.current = undefined
-      sessionGenerationRef.current += 1
+      coordinator.advanceSession()
       applyUserResponse(userResponse)
     },
-    [applyUserResponse],
+    [applyUserResponse, coordinator],
   )
 
   const sessionSync = useSessionSync({
     fetchFullUser: (options) => fetchFullUserResult(options),
-    getTokenExpirationMs: () => sessionTimingRef.current?.getKnownExpirationMs(),
+    getTokenExpirationMs: sessionTiming.getKnownExpirationMs,
     onSessionExpired: () => {
       setNewUser(null)
       redirectToInactivityRoute()
@@ -165,7 +168,7 @@ export function AuthProvider({
       redirectToLoginRoute()
     },
     onSessionRefreshed: (session) => {
-      if (!isExplicitLogoutPendingRef.current) {
+      if (!coordinator.isLogoutPending()) {
         setNewUser(session)
       }
     },
@@ -174,145 +177,83 @@ export function AuthProvider({
     },
   })
 
-  const enqueueAuthRequest = useCallback(
-    <Result,>(
-      request: ({ hasQueuedRequest }: { hasQueuedRequest: () => boolean }) => Promise<Result>,
-    ): Promise<Result> => {
-      const requestSequence = ++authRequestSequenceRef.current
-      const runRequest = async (): Promise<Result> => {
-        const result = await request({
-          hasQueuedRequest: () => requestSequence < authRequestSequenceRef.current,
-        })
-
-        if (requestSequence === authRequestSequenceRef.current) {
-          const pendingAuthInvalidation = pendingAuthInvalidationRef.current
-
-          pendingAuthInvalidationRef.current = undefined
-
-          if (pendingAuthInvalidation?.generation === sessionGenerationRef.current) {
-            pendingAuthInvalidation.run()
-          }
-        }
-
-        return result
-      }
-      const queuedRequest = authRequestQueueRef.current.then(runRequest, runRequest)
-
-      authRequestQueueRef.current = queuedRequest.then(
-        () => undefined,
-        () => undefined,
-      )
-
-      return queuedRequest
-    },
-    [],
-  )
-
   const refreshSession = useCallback(
     ({ isActivityRefresh }: { isActivityRefresh: boolean }): Promise<AuthenticatedUser | null> => {
-      const requestGeneration = sessionGenerationRef.current
-      const activeRequest = refreshRequestRef.current
+      return coordinator.refresh(async ({ canCommit, deferInvalidation, hasQueuedRequest }) => {
+        if (!canCommit()) {
+          return null
+        }
 
-      if (isExplicitLogoutPendingRef.current) {
-        return Promise.resolve(null)
-      }
+        const handledExpiration = sessionTiming.getCurrentExpirationMs()
+        const handledUser = userRef.current
 
-      if (activeRequest?.generation === requestGeneration) {
-        return activeRequest.promise
-      }
-
-      const refreshPromise = enqueueAuthRequest(
-        async ({ hasQueuedRequest }): Promise<AuthenticatedUser | null> => {
-          const canCommit = () =>
-            sessionGenerationRef.current === requestGeneration &&
-            !isExplicitLogoutPendingRef.current
+        try {
+          const request = await requests.post(
+            formatAdminURL({
+              apiRoute,
+              path: `/${userSlug}/refresh-token${isActivityRefresh ? '?refresh' : ''}`,
+            }),
+            {
+              headers: {
+                'Accept-Language': i18n.language,
+              },
+            },
+          )
 
           if (!canCommit()) {
             return null
           }
 
-          const handledExpiration = sessionTimingRef.current?.getCurrentExpirationMs()
-          const handledUser = userRef.current
-
-          try {
-            const request = await requests.post(
-              formatAdminURL({
-                apiRoute,
-                path: `/${userSlug}/refresh-token${isActivityRefresh ? '?refresh' : ''}`,
-              }),
-              {
-                headers: {
-                  'Accept-Language': i18n.language,
-                },
-              },
-            )
+          if (request.status === 200) {
+            const json: UserWithToken = await request.json()
 
             if (!canCommit()) {
               return null
             }
 
-            if (request.status === 200) {
-              const json: UserWithToken = await request.json()
-
-              if (!canCommit()) {
-                return null
-              }
-
-              pendingAuthInvalidationRef.current = undefined
-              applyUserResponse(json)
-              sessionSync.publish({
-                type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
-                session: json,
-              })
-              return json.user
-            }
-
-            if (handledUser) {
-              const invalidateSession = () => {
-                if (handledExpiration !== undefined) {
-                  sessionSync.publish({
-                    type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
-                    expiredTokenAt: handledExpiration,
-                  })
-                }
-
-                applyUserResponse(null)
-                redirectToInactivityRoute()
-              }
-
-              if (hasQueuedRequest()) {
-                pendingAuthInvalidationRef.current = {
-                  generation: requestGeneration,
-                  run: invalidateSession,
-                }
-              } else {
-                invalidateSession()
-              }
-            }
-          } catch (e) {
-            toast.error(`Refreshing token failed: ${e.message}`)
+            coordinator.clearPendingInvalidation()
+            applyUserResponse(json)
+            sessionSync.publish({
+              type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+              session: json,
+            })
+            return json.user
           }
 
-          return null
-        },
-      )
+          if (handledUser) {
+            const invalidateSession = () => {
+              if (handledExpiration !== undefined) {
+                sessionSync.publish({
+                  type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
+                  expiredTokenAt: handledExpiration,
+                })
+              }
 
-      refreshRequestRef.current = { generation: requestGeneration, promise: refreshPromise }
-      void refreshPromise.finally(() => {
-        if (refreshRequestRef.current?.promise === refreshPromise) {
-          refreshRequestRef.current = undefined
+              applyUserResponse(null)
+              redirectToInactivityRoute()
+            }
+
+            if (hasQueuedRequest()) {
+              deferInvalidation(invalidateSession)
+            } else {
+              invalidateSession()
+            }
+          }
+        } catch (e) {
+          toast.error(`Refreshing token failed: ${e.message}`)
         }
-      })
 
-      return refreshPromise
+        return null
+      })
     },
     [
       apiRoute,
       applyUserResponse,
-      enqueueAuthRequest,
+      coordinator,
       i18n.language,
       redirectToInactivityRoute,
       sessionSync,
+      sessionTiming,
       userSlug,
     ],
   )
@@ -324,42 +265,27 @@ export function AuthProvider({
 
   const settleExplicitLogout = useCallback(
     ({ collection }: { collection?: string }): Promise<void> => {
-      const activeSettlement = explicitLogoutSettlementRef.current
-
-      if (activeSettlement !== undefined) {
-        return activeSettlement
-      }
-
-      isExplicitLogoutPendingRef.current = true
-      setNewUser(null)
-
-      const settlement = enqueueAuthRequest(async () => {
-        try {
-          if (collection) {
-            await requests.post(
-              formatAdminURL({
-                apiRoute,
-                path: `/${collection}/logout`,
-              }),
-            )
+      return coordinator.settleLogout({
+        clearSession: () => {
+          setNewUser(null)
+        },
+        request: async () => {
+          try {
+            if (collection) {
+              await requests.post(
+                formatAdminURL({
+                  apiRoute,
+                  path: `/${collection}/logout`,
+                }),
+              )
+            }
+          } catch (_) {
+            // Explicit logout always clears local state, even if server revocation fails.
           }
-        } catch (_) {
-          // Explicit logout always clears local state, even if server revocation fails.
-        } finally {
-          isExplicitLogoutPendingRef.current = false
-        }
+        },
       })
-
-      explicitLogoutSettlementRef.current = settlement
-      void settlement.finally(() => {
-        if (explicitLogoutSettlementRef.current === settlement) {
-          explicitLogoutSettlementRef.current = undefined
-        }
-      })
-
-      return settlement
     },
-    [apiRoute, enqueueAuthRequest, setNewUser],
+    [apiRoute, coordinator, setNewUser],
   )
 
   const logOut = useCallback(async () => {
@@ -417,14 +343,10 @@ export function AuthProvider({
     ({ isCurrent }: Partial<AuthSessionResyncOptions> = {}): Promise<
       AuthSessionResyncResult<AuthenticatedUser>
     > => {
-      const requestGeneration = sessionGenerationRef.current
-      const canCommit = () =>
-        sessionGenerationRef.current === requestGeneration &&
-        !isExplicitLogoutPendingRef.current &&
-        (!isCurrent || isCurrent())
+      return coordinator.enqueue(async ({ canCommit }) => {
+        const canApplyResult = () => canCommit() && (!isCurrent || isCurrent())
 
-      return enqueueAuthRequest(async () => {
-        if (!canCommit()) {
+        if (!canApplyResult()) {
           return { status: 'indeterminate' }
         }
 
@@ -448,12 +370,12 @@ export function AuthProvider({
 
           const json: null | UserWithToken = await request.json()
 
-          if (!canCommit()) {
+          if (!canApplyResult()) {
             return { status: 'indeterminate' }
           }
 
           if (json?.user) {
-            pendingAuthInvalidationRef.current = undefined
+            coordinator.clearPendingInvalidation()
             applyUserResponse(json)
 
             return {
@@ -473,7 +395,7 @@ export function AuthProvider({
         return { status: 'indeterminate' }
       })
     },
-    [apiRoute, applyUserResponse, enqueueAuthRequest, i18n.language, userSlug],
+    [apiRoute, applyUserResponse, coordinator, i18n.language, userSlug],
   )
 
   const fetchFullUser = React.useCallback(async (): Promise<AuthenticatedUser | null> => {
@@ -481,33 +403,6 @@ export function AuthProvider({
 
     return result.status === 'authenticated' ? result.user : null
   }, [fetchFullUserResult])
-
-  const handleSessionExpiration = useCallback(
-    (expirationMs: number) => {
-      sessionSync.publish({
-        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
-        expiredTokenAt: expirationMs,
-      })
-      revokeTokenAndExpire()
-      redirectToInactivityRoute()
-    },
-    [redirectToInactivityRoute, revokeTokenAndExpire, sessionSync],
-  )
-  const sessionTiming = useSessionTiming({
-    isAuthenticated,
-    onActivityRefresh: () => {
-      void refreshSession({ isActivityRefresh: true })
-    },
-    onExpire: handleSessionExpiration,
-    onReminder: () => {
-      if (autoRefresh) {
-        sessionTimingRef.current?.refreshCookie()
-      } else {
-        openModal(stayLoggedInModalSlug)
-      }
-    },
-  })
-  sessionTimingRef.current = sessionTiming
 
   const fetchFullUserEvent = useEffectEvent(fetchFullUser)
 
@@ -528,11 +423,9 @@ export function AuthProvider({
 
   useEffect(
     () => () => {
-      // remove all timeouts on unmount
-      sessionGenerationRef.current += 1
-      pendingAuthInvalidationRef.current = undefined
+      coordinator.advanceSession()
     },
-    [],
+    [coordinator],
   )
 
   if (!user && !fetchedUserOnMount) {

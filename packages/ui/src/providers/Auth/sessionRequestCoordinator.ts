@@ -9,9 +9,7 @@ export type AuthRequestContext = {
 export type AuthSessionRequestCoordinator = {
   advanceSession: () => void
   clearPendingInvalidation: () => void
-  enqueue: <Result>(
-    request: (context: Pick<AuthRequestContext, 'hasQueuedRequest'>) => Promise<Result>,
-  ) => Promise<Result>
+  enqueue: <Result>(request: (context: AuthRequestContext) => Promise<Result>) => Promise<Result>
   isLogoutPending: () => boolean
   refresh: (
     request: (context: AuthRequestContext) => Promise<AuthenticatedUser | null>,
@@ -54,13 +52,16 @@ export function createAuthSessionRequestCoordinator(): AuthSessionRequestCoordin
   }
 
   const enqueue = <Result>(
-    request: ({
-      hasQueuedRequest,
-    }: Pick<AuthRequestContext, 'hasQueuedRequest'>) => Promise<Result>,
+    request: (context: AuthRequestContext) => Promise<Result>,
   ): Promise<Result> => {
+    const requestGeneration = sessionGeneration
     const requestSequence = ++authRequestSequence
     const runRequest = async (): Promise<Result> => {
       const result = await request({
+        canCommit: () => sessionGeneration === requestGeneration && !isExplicitLogoutPending,
+        deferInvalidation: (invalidate) => {
+          pendingAuthInvalidation = { generation: requestGeneration, run: invalidate }
+        },
         hasQueuedRequest: () => requestSequence < authRequestSequence,
       })
 
@@ -100,15 +101,7 @@ export function createAuthSessionRequestCoordinator(): AuthSessionRequestCoordin
       return activeRequest.promise
     }
 
-    const refreshPromise = enqueue((context) =>
-      request({
-        canCommit: () => sessionGeneration === requestGeneration && !isExplicitLogoutPending,
-        deferInvalidation: (invalidate) => {
-          pendingAuthInvalidation = { generation: requestGeneration, run: invalidate }
-        },
-        hasQueuedRequest: context.hasQueuedRequest,
-      }),
-    )
+    const refreshPromise = enqueue(request)
 
     refreshRequest = { generation: requestGeneration, promise: refreshPromise }
     void refreshPromise.then(
