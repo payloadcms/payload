@@ -855,6 +855,45 @@ If you relied on either option, remove it from your `jobs` config. If you depend
 
 The `jobsCollectionOverrides` warning that detected extra hooks and prompted users to set `runHooks` has also been removed.
 
+### Jobs: `BaseJob` has been removed
+
+The deprecated `BaseJob` type is no longer exported. Use `Job` everywhere you previously used `BaseJob`.
+
+```diff
+- import type { BaseJob } from 'payload'
++ import type { Job } from 'payload'
+
+- function processJob(job: BaseJob) {
++ function processJob(job: Job) {
+    // ...
+  }
+```
+
+`Job` now handles its own fallback. When the generated `payload-jobs` collection type exists, `Job` uses it. Otherwise, it uses the default job document from `UntypedPayloadTypes`. Consumers no longer need to choose between a generated job type and a separate fallback type.
+
+The `false` fallback used by job and workflow generics has also been removed. Omit the generic when you want the default `object` input type.
+
+```diff
+- const processJob = (job: Job<false>) => {
++ const processJob = (job: Job) => {
+    // ...
+  }
+
+- const workflow: WorkflowConfig<false> = {
++ const workflow: WorkflowConfig = {
+    slug: 'my-workflow',
+    // ...
+  }
+```
+
+Generated workflow slugs and explicit input objects continue to work as before. For example, `Job<'my-workflow'>` uses the generated workflow input, while `Job<{ message: string }>` uses the provided input type.
+
+### Jobs: stats and metadata are enabled by default
+
+When jobs are enabled, Payload now always adds the `payload-jobs-stats` global and the `meta` field on the `payload-jobs` collection. Previously, these were only added when a task or workflow used a schedule.
+
+Existing projects that use sqlite/postgres and jobs may need a database migration.
+
 ### Jobs: custom database adapters must implement `updateJobs`
 
 Payload now uses a unique `processingToken` when claiming jobs so multiple workers cannot run the same job. This adds an internal, nullable `processingToken` field to the `payload-jobs` collection. Existing SQL databases need a migration that adds this column. MongoDB does not require a migration.
