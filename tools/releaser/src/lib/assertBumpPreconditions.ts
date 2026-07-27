@@ -27,9 +27,9 @@ type ValidatedBumpPreconditions = {
 
 /**
  * Validates every bump precondition, throwing (fail-closed) on the first violation
- * so the caller aborts before any git write. Ported from the inline guards in
- * release.ts. The version must carry *a* prerelease identifier, but it need not
- * match `preid` — a canary.N → beta.0 transition is expected and allowed.
+ * so the caller aborts before any git write. The version must carry *a* prerelease
+ * identifier, but it need not match `preid` — a canary.N → beta.0 transition is
+ * expected and allowed.
  */
 export function assertBumpPreconditions(
   args: BumpPreconditions,
