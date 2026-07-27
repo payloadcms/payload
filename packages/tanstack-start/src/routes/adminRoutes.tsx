@@ -28,13 +28,10 @@ const runLoader = async (load: AdminLoad, splat: string, searchStr: string) => {
 }
 
 function AdminPage() {
-  // RSC Flight payload — render directly. Key by the loader-derived `routeKey`
-  // (not `location.pathname`, which updates before `useLoaderData` during a
-  // transition and would remount with the previous payload) so navigating to a
-  // different admin page remounts the view, mirroring Next route-segment
-  // semantics. Search params are excluded so search-only changes reconcile in place.
+  // Note: React key intentionally omitted here so the persistent template (nav, header) doesn't remount and flash on navigation.
+  // The per-route view key is attached server-side to the view subtree instead, via `renderRoot`'s `key` in `loadAdminPage`.
   const data = useLoaderData({ strict: false })
-  return <Fragment key={data?.routeKey}>{data?.rscPayload}</Fragment>
+  return <Fragment>{data?.rscPayload}</Fragment>
 }
 
 function AdminNotFound(props: { data?: { routeKey?: string; rscPayload?: ReactNode } }) {

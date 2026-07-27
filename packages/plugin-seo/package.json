@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-seo",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-canary.14",
   "description": "SEO plugin for Payload",
   "keywords": [
     "payload",

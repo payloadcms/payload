@@ -161,6 +161,11 @@ export default buildConfigWithDefaults({
             delete: false,
           },
         },
+        rolls: {
+          tools: {
+            create: false,
+          },
+        },
       },
       globals: {
         'site-settings': {

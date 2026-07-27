@@ -169,7 +169,7 @@ describe('Join Field', () => {
     const joinField = page.locator('#field-relatedPosts.field-type.join')
     await expect(joinField.locator('.relationship-table table')).toBeVisible()
     await expect(joinField.locator('.row-1 > .cell-title')).toContainText('z')
-    await expect(joinField.locator('.relationship-table-pagination')).toBeVisible()
+    await expect(joinField.locator('.paginator')).toBeVisible()
     const rows = joinField.locator('.relationship-table tbody tr')
     await expect(rows).toHaveCount(5)
   })

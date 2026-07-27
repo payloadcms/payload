@@ -35,6 +35,7 @@ type RelationshipTableComponentProps = {
   readonly AfterInput?: React.ReactNode
   readonly allowCreate?: boolean
   readonly BeforeInput?: React.ReactNode
+  readonly Description?: React.ReactNode
   readonly disableTable?: boolean
   readonly field: JoinFieldClient
   readonly fieldPath?: string
@@ -57,6 +58,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
     AfterInput,
     allowCreate = true,
     BeforeInput,
+    Description,
     disableTable = false,
     field,
     fieldPath,
@@ -314,6 +316,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
           <div className={`${baseClass}__header`}>
             {Label}
             <div className={`${baseClass}__actions`}>{addNewButton}</div>
+            {Description}
           </div>
           {BeforeInput}
           <p>{t('general:loading')}</p>
@@ -325,6 +328,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
               <div className={`${baseClass}__header`}>
                 {Label}
                 <div className={`${baseClass}__actions`}>{addNewButton}</div>
+                {Description}
               </div>
               {BeforeInput}
               <NoListResults
@@ -384,6 +388,7 @@ export const RelationshipTable: React.FC<RelationshipTableComponentProps> = (pro
                       {addNewButton}
                       {columnsButton}
                     </div>
+                    {Description}
                   </div>
                   {BeforeInput}
                   {Table}

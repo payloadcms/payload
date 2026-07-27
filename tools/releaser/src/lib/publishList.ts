@@ -64,4 +64,5 @@ export const packagePublishList = [
   // Standalone
   'create-payload-app',
   'typescript-plugin',
+  'codemod',
 ]
