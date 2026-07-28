@@ -185,6 +185,30 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 
 Run `npx @payloadcms/codemod --transform migrate-aliased-exports` to migrate automatically. Renamed types are imported using an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'`) so existing usages keep compiling — drop the alias and rename usages manually if you want to fully commit to the new name.
 
+### `DefaultValue` function variant is now typed to allow returning a `Promise` ([#17522](https://github.com/payloadcms/payload/pull/17522))
+
+The exported `DefaultValue` type's function variant previously declared a synchronous-only return type (`SerializableValue`), even though Payload has always awaited the result of a `defaultValue` function at runtime. The type now correctly reflects this and allows `Promise<SerializableValue> | SerializableValue`.
+
+**What changes:**
+
+- Field-level `defaultValue` functions can now be typed as `async` without a TypeScript error. This was always safe at runtime — only the type was too strict.
+- If you import `DefaultValue` to type your own function or variable and then call it synchronously assuming the result is never a `Promise`, you'll need to update that code to handle the `Promise` branch.
+
+```diff
+import type { DefaultValue } from 'payload'
+
+- const resolveDefault = (fn: DefaultValue, args: Args) => {
+-   const value = fn(args)
+-   return value.toString()
+- }
++ const resolveDefault = async (fn: DefaultValue, args: Args) => {
++   const value = await fn(args)
++   return value.toString()
++ }
+```
+
+If you only use `DefaultValue` to type a `defaultValue` property passed into a Collection, Global, or Field config, no changes are needed.
+
 ### User types consolidated into `User` and `AuthenticatedUser`
 
 Payload's user types have been consolidated so each one has a clear job. This completes a cleanup already planned in 3.x: `UntypedUser` was deprecated for removal in 4.0, and `TypedUser` was marked to be renamed to `User` in 4.0.
