@@ -89,10 +89,13 @@ export type AuthSessionLogoutPublication = Extract<
   { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT }
 >
 
-type StorageRefreshNotification =
+type StorageRefreshNotification = {
+  isBroadcastChannelFallback?: true
+} & (
   | ({ settlesSentAt: number } & AuthSessionLogoutPublication)
   | Extract<AuthSessionSyncPublication, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED }>
   | Extract<AuthSessionSyncPublication, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED }>
+)
 
 type LifecycleOrder = AuthSessionSyncPublication
 
@@ -184,6 +187,10 @@ export function createAuthSessionSync({
     const notification = parseStorageRefreshNotification(event.newValue)
 
     if (!notification || notification.sourceID === sourceID) {
+      return
+    }
+
+    if (channel && !notification.isBroadcastChannelFallback) {
       return
     }
 
@@ -358,8 +365,12 @@ export function createAuthSessionSync({
   }: {
     notification: StorageRefreshNotification
   }): void {
+    const storageNotification: StorageRefreshNotification = channel
+      ? notification
+      : { ...notification, isBroadcastChannelFallback: true }
+
     try {
-      localStorage.setItem(authSessionSyncStorageKey, JSON.stringify(notification))
+      localStorage.setItem(authSessionSyncStorageKey, JSON.stringify(storageNotification))
     } catch {
       // Local authentication must continue when storage is unavailable.
     }
@@ -439,13 +450,22 @@ function parseStorageRefreshNotification(value: string): null | StorageRefreshNo
         sentAt: notification.sentAt,
         sourceID: notification.sourceID,
       }
+      const isBroadcastChannelFallback =
+        'isBroadcastChannelFallback' in notification &&
+        notification.isBroadcastChannelFallback === true
+          ? true
+          : undefined
 
       if (notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
         if ('settlesSentAt' in notification) {
           return null
         }
 
-        return { ...lifecycleOrder, type: notification.type }
+        return {
+          type: notification.type,
+          ...lifecycleOrder,
+          isBroadcastChannelFallback,
+        }
       }
 
       if (notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
@@ -461,6 +481,7 @@ function parseStorageRefreshNotification(value: string): null | StorageRefreshNo
         return {
           type: notification.type,
           ...lifecycleOrder,
+          isBroadcastChannelFallback,
           refreshStartedAt: notification.refreshStartedAt,
         }
       }
@@ -474,6 +495,7 @@ function parseStorageRefreshNotification(value: string): null | StorageRefreshNo
         return {
           type: notification.type,
           affectedExpirationMs: 0,
+          isBroadcastChannelFallback,
           sentAt: notification.sentAt,
           settlesSentAt: notification.settlesSentAt,
           sourceID: notification.sourceID,

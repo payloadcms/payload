@@ -173,6 +173,28 @@ describe('createAuthSessionSync', () => {
     expect(appliedSession).toBe(refreshA.session)
   })
 
+  it('should ignore storage notifications while BroadcastChannel is healthy', async () => {
+    const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' } as const)
+
+    createSync({ fetchFullUser, sourceID: 'receiving-tab' })
+
+    window.dispatchEvent(
+      new StorageEvent('storage', {
+        key: 'payload:auth-session:refresh',
+        newValue: JSON.stringify({
+          affectedExpirationMs: 30_000,
+          refreshStartedAt: 100,
+          sentAt: 200,
+          sourceID: 'refreshing-tab',
+          type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+        }),
+      }),
+    )
+    await Promise.resolve()
+
+    expect(fetchFullUser).not.toHaveBeenCalled()
+  })
+
   it('should ignore a late storage refresh whose request started before logout', () => {
     vi.stubGlobal('BroadcastChannel', undefined)
     const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' } as const)
@@ -227,6 +249,7 @@ describe('createAuthSessionSync', () => {
 
     expect(JSON.parse(value)).toEqual({
       affectedExpirationMs: 20_000,
+      isBroadcastChannelFallback: true,
       refreshStartedAt: 100,
       type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
       sentAt: 123,
@@ -259,6 +282,7 @@ describe('createAuthSessionSync', () => {
 
     expect(JSON.parse(logoutValue)).toEqual({
       affectedExpirationMs: 0,
+      isBroadcastChannelFallback: true,
       settlesSentAt: 124,
       sentAt: 125,
       sourceID: 'publishing-tab',
