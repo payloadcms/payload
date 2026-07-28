@@ -16,11 +16,6 @@ export { SetStepNav } from './SetStepNav.js'
 
 const baseClass = 'step-nav'
 
-/**
- * Minimum number of breadcrumbs required before the middle items become
- * eligible to collapse into a "…" popup. Below this we always render inline
- * and let the last item ellipsize instead.
- */
 const minItemsToCollapse = 4
 
 const StepNav: React.FC<{
@@ -63,10 +58,8 @@ const StepNav: React.FC<{
 
   const canCollapse = !hasDashboardDropdown && stepNavItems.length >= minItemsToCollapse
 
-  // Only collapse when the fully expanded breadcrumbs can't fit the available
-  // width. A hidden measurer renders the always-expanded version so we can
-  // compare its natural width against the space the nav actually has, without
-  // the measurement feeding back into the collapsed state.
+  // Collapse only when the expanded breadcrumbs (measured via the hidden
+  // measurer) can't fit the available width.
   useEffect(() => {
     if (!canCollapse) {
       setIsCollapsed(false)
