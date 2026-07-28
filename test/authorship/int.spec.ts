@@ -142,6 +142,35 @@ describe('Authorship', () => {
     expect(updated.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
   })
 
+  it('should not change createdBy when explicitly provided on update (immutable via Local API)', async () => {
+    const post = await createPost({ data: { title: 'created' }, user })
+
+    const updated = await payload.update({
+      id: post.id,
+      collection: postsSlug,
+      data: { createdBy: { relationTo: adminsSlug, value: admin.id }, title: 'updated' },
+      depth: 0,
+      user: admin,
+    })
+
+    expect(updated.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
+  })
+
+  it('should honor an explicit updatedBy on update via Local API', async () => {
+    const post = await createPost({ data: { title: 'created' }, user })
+
+    // With overrideAccess bypassed, an explicit updatedBy is honored over the acting user.
+    const updated = await payload.update({
+      id: post.id,
+      collection: postsSlug,
+      data: { title: 'updated', updatedBy: { relationTo: adminsSlug, value: admin.id } },
+      depth: 0,
+      user,
+    })
+
+    expect(updated.updatedBy).toEqual({ relationTo: adminsSlug, value: admin.id })
+  })
+
   it('should let an explicit value in data override the system user', async () => {
     const post = await createPost({
       data: {
