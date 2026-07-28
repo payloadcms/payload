@@ -897,7 +897,7 @@ pnpm payload migrate:create --file @payloadcms/db-sqlite/jobs-v4
 pnpm payload migrate:create --file @payloadcms/db-d1-sqlite/jobs-v4
 ```
 
-The migration replaces `processing` with `processingUntil`, adds `processingToken`, adds the `meta` and indexed `concurrencyKey` columns, creates the `payload-jobs-stats` global table, adds parent task log columns, and backfills task log input before making it required. It uses your latest migration snapshot, so it preserves stats, metadata, concurrency controls, or parent logging if you had already enabled them. It also keeps custom table, schema, and index names. Any old job with `processing: true` receives an expired lease so a jobs runner can recover it.
+The migration replaces `processing` with `processingUntil`, adds `processingToken`, adds the `meta` and indexed `concurrencyKey` columns, creates the `payload-jobs-stats` global table, adds parent task log columns, and backfills task log input before making it required. It leaves stats, metadata, concurrency controls, or parent logging in place if you had already enabled them. It also keeps custom table, schema, and index names. Any old job with `processing: true` receives an expired lease so a jobs runner can recover it.
 
 MongoDB does not require a database migration for these changes.
 
