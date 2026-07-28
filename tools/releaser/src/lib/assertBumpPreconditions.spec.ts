@@ -43,6 +43,19 @@ describe('assertBumpPreconditions', () => {
     expect(() => assertBumpPreconditions({ ...valid, bump: 'major' })).toThrow(/Invalid --bump/)
   })
 
+  it('should throw for premajor, which would escape the pinned v4 line', () => {
+    expect(() => assertBumpPreconditions({ ...valid, bump: 'premajor' })).toThrow(
+      /leaves the pinned v4 line/,
+    )
+  })
+
+  it.each(['preminor', 'prepatch', 'prerelease'])(
+    'should allow %s, which stays within v4',
+    (bump) => {
+      expect(() => assertBumpPreconditions({ ...valid, bump })).not.toThrow()
+    },
+  )
+
   it('should throw when GITHUB_TOKEN is missing', () => {
     expect(() => assertBumpPreconditions({ ...valid, hasGithubToken: false })).toThrow(
       /GITHUB_TOKEN/,

@@ -19,7 +19,6 @@ on:
           - prerelease
           - prepatch
           - preminor
-          - premajor
         default: prerelease
       dry_run:
         description: 'Dry run: log git commands, push nothing'

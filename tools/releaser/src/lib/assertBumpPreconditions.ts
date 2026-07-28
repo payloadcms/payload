@@ -60,6 +60,17 @@ export function assertBumpPreconditions(
     )
   }
 
+  // Guard the *resulting* version, not just the current one: `premajor` from a v4
+  // version yields v5, which would commit a v5 tag to main and brick every later
+  // bump (they'd fail the pinned-major check above). Only bumps that stay within
+  // the pinned major are allowed during the beta phase.
+  const nextVersion = semver.inc(args.version, args.bump, undefined, args.preid)
+  if (!nextVersion || semver.major(nextVersion) !== PINNED_MAJOR) {
+    throw new Error(
+      `Bump '${args.bump}' would produce ${nextVersion ?? 'an invalid version'}, which leaves the pinned v${PINNED_MAJOR} line.`,
+    )
+  }
+
   if (!args.hasGithubToken) {
     throw new Error('GITHUB_TOKEN env var is required')
   }
