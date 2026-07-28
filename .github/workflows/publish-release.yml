@@ -3,7 +3,10 @@ name: publish-release
 on:
   push:
     tags:
-      - 'v4.*'
+      # Only the canary line publishes here; stable and internal
+      # (internal/internal-debug) tags never match.
+      # TODO: add 'v4.*-beta.*' (and other lines) when beta releases begin.
+      - 'v4.*-canary.*'
 
 env:
   DO_NOT_TRACK: 1 # Disable Turbopack telemetry
