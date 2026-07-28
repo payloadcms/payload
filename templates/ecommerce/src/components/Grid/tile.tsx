@@ -13,7 +13,11 @@ type Props = {
     position?: 'bottom' | 'center'
     title: string
   }
-  media: MediaType
+  /**
+   * May arrive as an ID when the product was populated as a nested relationship
+   * and the query depth did not reach its `meta.image`.
+   */
+  media?: (string | null) | MediaType
 }
 
 export const GridTileImage: React.FC<Props> = ({
@@ -33,7 +37,7 @@ export const GridTileImage: React.FC<Props> = ({
         },
       )}
     >
-      {props.media ? (
+      {props.media && typeof props.media === 'object' ? (
         <Media
           className={clsx('relative h-full w-full object-cover', {
             'transition duration-300 ease-in-out group-hover:scale-105': isInteractive,

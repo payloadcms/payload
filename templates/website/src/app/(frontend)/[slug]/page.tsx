@@ -98,6 +98,9 @@ const queryPageBySlug = cache(async ({ slug }: { slug: string }) => {
 
   const result = await payload.find({
     collection: 'pages',
+    // Blocks such as Archive render cards for documents embedded in this page,
+    // whose own upload and relationship fields sit two levels deep.
+    depth: 2,
     draft,
     limit: 1,
     pagination: false,

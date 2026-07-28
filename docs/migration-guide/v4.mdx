@@ -43,6 +43,21 @@ export default buildConfig({
 })
 ```
 
+Two places inherit `defaultDepth` without naming it, so they change too:
+
+- **The authenticated user on `req.user`.** Auth collections populate the user document using `auth.depth`, which falls back to `defaultDepth` when you have not set it. Access control functions and hooks that reach two relationships deep from the user, such as `user.tenant.owner`, now receive an ID instead of a document. Because access control reads this value, the failure is silent rather than an error. Set `auth.depth` explicitly on the collection if you depend on it:
+
+```diff
+export const Users: CollectionConfig = {
+  slug: 'users',
+  auth: {
++   depth: 2,
+  },
+}
+```
+
+- **`originalDoc` in the search plugin's `beforeSync`.** When localization is enabled, `@payloadcms/plugin-search` refetches the document without an explicit depth before handing it to your `beforeSync` hook. Read only first-level relationships there, or refetch yourself with the depth you need.
+
 ### Versions are now enabled by default for all collections and globals
 
 Collections and globals now have `versions: true` by default (`maxPerDoc`/`max: 100`, drafts disabled). In previous versions you had to opt in; you now opt out.
