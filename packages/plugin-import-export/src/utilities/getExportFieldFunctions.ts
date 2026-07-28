@@ -76,17 +76,18 @@ const registerExportHandler = (
     }
 
     registerHandler(({ format, siblingData, value }) => {
-      // An unresolvable relationship is suppressed for CSV, whose id/relationTo would
-      // otherwise land in sibling columns, but left untouched for JSON, which holds the
-      // source value verbatim.
-      const unresolved = format === 'json' ? undefined : null
-
+      // A shape this handler does not recognize is left untouched for JSON, which holds the
+      // source value verbatim. CSV still clears it, since its id/relationTo would otherwise
+      // land in sibling columns.
       if (!isPolymorphicRelValue(value)) {
-        return unresolved
+        return format === 'json' ? undefined : null
       }
+
+      // A recognized reference that resolves to no id is dangling, and a dangling reference
+      // cannot be imported back — clear it for both formats.
       const id = getPolymorphicRelId(value)
       if (id === undefined) {
-        return unresolved
+        return null
       }
 
       if (format === 'json') {
@@ -107,8 +108,10 @@ const registerExportHandler = (
       const ids = value.map((val) =>
         typeof val === 'object' && val ? (val as { id: unknown }).id : val,
       )
+      // A dangling reference cannot be imported back, so it is dropped rather than
+      // exported as a null the import would reject as an invalid relationship.
       if (format === 'json') {
-        return ids.filter((id) => id !== undefined)
+        return ids.filter((id) => id !== undefined && id !== null)
       }
       ids.forEach((id, i) => {
         siblingData[`${fullKey}_${i}_id`] = id

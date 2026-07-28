@@ -84,3 +84,76 @@ describe('hasMany polymorphic CSV columns', () => {
     })
   })
 })
+
+describe('dangling references in JSON exports', () => {
+  it('should drop an orphaned entry from a hasMany array rather than exporting a null', () => {
+    const fields: FlattenedField[] = [
+      {
+        name: 'rel',
+        type: 'relationship',
+        hasMany: true,
+        relationTo: 'posts',
+      } as unknown as FlattenedField,
+    ]
+
+    const result = applyFieldHooks({
+      type: 'beforeExport',
+      // Population resolves a soft-deleted target to null, which import rejects as an
+      // invalid relationship — failing the whole row rather than the one dead reference.
+      data: { rel: [null, 'p1'] },
+      fieldHooks: getExportFieldFunctions({ fields }),
+      fields,
+      format: 'json',
+      operation: 'export',
+      req: mockReq,
+    })
+
+    expect(result).toEqual({ rel: ['p1'] })
+  })
+
+  it('should clear an orphaned single polymorphic reference', () => {
+    const fields: FlattenedField[] = [
+      {
+        name: 'rel',
+        type: 'relationship',
+        relationTo: ['posts', 'users'],
+      } as unknown as FlattenedField,
+    ]
+
+    const result = applyFieldHooks({
+      type: 'beforeExport',
+      data: { rel: { relationTo: 'posts', value: null } },
+      fieldHooks: getExportFieldFunctions({ fields }),
+      fields,
+      format: 'json',
+      operation: 'export',
+      req: mockReq,
+    })
+
+    expect(result).toEqual({ rel: null })
+  })
+
+  it('should leave a shape it does not recognize untouched', () => {
+    const fields: FlattenedField[] = [
+      {
+        name: 'rel',
+        type: 'relationship',
+        relationTo: ['posts', 'users'],
+      } as unknown as FlattenedField,
+    ]
+
+    const result = applyFieldHooks({
+      type: 'beforeExport',
+      // Destroying a value this handler cannot interpret would lose data that a
+      // custom beforeExport hook or a hand-edited file may depend on.
+      data: { rel: { slug: 'not-a-relationship' } },
+      fieldHooks: getExportFieldFunctions({ fields }),
+      fields,
+      format: 'json',
+      operation: 'export',
+      req: mockReq,
+    })
+
+    expect(result).toEqual({ rel: { slug: 'not-a-relationship' } })
+  })
+})

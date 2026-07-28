@@ -4677,386 +4677,435 @@ describe('@payloadcms/plugin-import-export', () => {
       })
     })
 
-    it('should roundtrip a hasMany monomorphic relationship through CSV export/import', async () => {
-      const post1 = await payload.create({
-        collection: 'posts',
-        data: {
-          title: 'hasMany Monomorphic Post 1',
-        },
-      })
-      const post2 = await payload.create({
-        collection: 'posts',
-        data: {
-          title: 'hasMany Monomorphic Post 2',
-        },
+    describe('relationship roundtrips', () => {
+      const createdPostIDs: (number | string)[] = []
+
+      afterEach(async () => {
+        for (const id of createdPostIDs) {
+          try {
+            await payload.delete({
+              collection: 'posts',
+              id,
+            })
+          } catch {
+            // Ignore cleanup errors
+          }
+        }
+        createdPostIDs.length = 0
       })
 
-      const testPage = await payload.create({
-        collection: 'pages',
-        data: {
-          title: 'hasMany Monomorphic Roundtrip',
-          hasManyMonomorphic: [post1.id, post2.id],
-          _status: 'published',
-        },
-      })
+      it('should roundtrip a hasMany monomorphic relationship through CSV export/import', async () => {
+        const post1 = await payload.create({
+          collection: 'posts',
+          data: {
+            title: 'hasMany Monomorphic Post 1',
+          },
+        })
+        const post2 = await payload.create({
+          collection: 'posts',
+          data: {
+            title: 'hasMany Monomorphic Post 2',
+          },
+        })
 
-      const exportDoc = await payload.create({
-        collection: 'exports',
-        user,
-        data: {
-          collectionSlug: 'pages',
-          fields: ['id', 'title', 'hasManyMonomorphic'],
-          format: 'csv',
+        createdPostIDs.push(post1.id, post2.id)
+
+        const testPage = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'hasMany Monomorphic Roundtrip',
+            hasManyMonomorphic: [post1.id, post2.id],
+            _status: 'published',
+          },
+        })
+
+        const exportDoc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'hasManyMonomorphic'],
+            format: 'csv',
+            where: {
+              id: { equals: testPage.id },
+            },
+          },
+        })
+
+        await payload.jobs.run()
+
+        const exportedDoc = await payload.findByID({
+          collection: 'exports',
+          id: exportDoc.id,
+        })
+
+        const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
+        const exportedRows = await readCSV(csvPath)
+
+        // CSV keeps each relationship flattened into indexed sibling columns
+        expect(exportedRows).toEqual([
+          {
+            id: String(testPage.id),
+            title: 'hasMany Monomorphic Roundtrip',
+            hasManyMonomorphic_0_id: String(post1.id),
+            hasManyMonomorphic_1_id: String(post2.id),
+          },
+        ])
+
+        await payload.delete({
+          collection: 'pages',
+          id: testPage.id,
+        })
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: fs.readFileSync(csvPath),
+            mimetype: 'text/csv',
+            name: 'hasmany-monomorphic-roundtrip.csv',
+            size: fs.statSync(csvPath).size,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        const importedPages = await payload.find({
+          collection: 'pages',
           where: {
-            id: { equals: testPage.id },
+            title: { equals: 'hasMany Monomorphic Roundtrip' },
           },
-        },
+          depth: 0,
+        })
+        const imported = importedPages.docs[0]
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(1)
+        expect(importDoc.summary?.issues).toBe(0)
+        expect(importedPages.docs).toHaveLength(1)
+        expect(imported?.title).toBe('hasMany Monomorphic Roundtrip')
+        expect(imported?.hasManyMonomorphic).toHaveLength(2)
+        expect((imported?.hasManyMonomorphic ?? []).map(extractID)).toEqual([post1.id, post2.id])
+        // The flattened columns are consumed by the import, not carried onto the document
+        expect(imported).not.toHaveProperty('hasManyMonomorphic_0_id')
+        expect(imported).not.toHaveProperty('hasManyMonomorphic_1_id')
       })
 
-      await payload.jobs.run()
+      it('should roundtrip a hasMany monomorphic relationship through JSON export/import', async () => {
+        const post1 = await payload.create({
+          collection: 'posts',
+          data: { title: 'hasMany JSON Post 1' },
+        })
+        const post2 = await payload.create({
+          collection: 'posts',
+          data: { title: 'hasMany JSON Post 2' },
+        })
 
-      const exportedDoc = await payload.findByID({
-        collection: 'exports',
-        id: exportDoc.id,
-      })
+        createdPostIDs.push(post1.id, post2.id)
 
-      const csvPath = path.join(dirname, './uploads', exportedDoc.filename as string)
+        const testPage = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'hasMany JSON Roundtrip',
+            hasManyMonomorphic: [post1.id, post2.id],
+            _status: 'published',
+          },
+        })
 
-      await payload.delete({
-        collection: 'pages',
-        id: testPage.id,
-      })
+        const exportDoc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'hasManyMonomorphic'],
+            format: 'json',
+            where: {
+              id: { equals: testPage.id },
+            },
+          },
+        })
 
-      let importDoc = await payload.create({
-        collection: 'imports',
-        user,
-        data: {
-          collectionSlug: 'pages',
-          importMode: 'create',
-        },
-        file: {
-          data: fs.readFileSync(csvPath),
-          mimetype: 'text/csv',
-          name: 'hasmany-monomorphic-roundtrip.csv',
-          size: fs.statSync(csvPath).size,
-        },
-      })
+        await payload.jobs.run()
 
-      await payload.jobs.run()
+        const exportedDoc = await payload.findByID({
+          collection: 'exports',
+          id: exportDoc.id,
+        })
 
-      importDoc = await payload.findByID({
-        collection: 'imports',
-        id: importDoc.id,
-      })
+        const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
+        const exportedDocs = await readJSON(jsonPath)
 
-      const importedPages = await payload.find({
-        collection: 'pages',
-        where: {
-          title: { equals: 'hasMany Monomorphic Roundtrip' },
-        },
-        depth: 0,
-      })
-      const imported = importedPages.docs[0]
+        // JSON holds the relationship natively — an array of IDs, with no flattened siblings
+        expect(exportedDocs).toEqual([
+          {
+            id: testPage.id,
+            title: 'hasMany JSON Roundtrip',
+            hasManyMonomorphic: [post1.id, post2.id],
+          },
+        ])
 
-      await payload.delete({
-        collection: 'pages',
-        where: {
-          title: { equals: 'hasMany Monomorphic Roundtrip' },
-        },
-      })
-      await payload.delete({ collection: 'posts', id: post1.id })
-      await payload.delete({ collection: 'posts', id: post2.id })
+        await payload.delete({
+          collection: 'pages',
+          id: testPage.id,
+        })
 
-      expect(importDoc.status).toBe('completed')
-      expect(importDoc.summary?.imported).toBe(1)
-      expect(importDoc.summary?.issues).toBe(0)
-      expect(importedPages.docs).toHaveLength(1)
-      expect(imported?.hasManyMonomorphic).toHaveLength(2)
-      expect((imported?.hasManyMonomorphic ?? []).map(extractID)).toEqual([post1.id, post2.id])
-    })
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: fs.readFileSync(jsonPath),
+            mimetype: 'application/json',
+            name: 'hasmany-json-roundtrip.json',
+            size: fs.statSync(jsonPath).size,
+          },
+        })
 
-    it('should roundtrip a hasMany monomorphic relationship through JSON export/import', async () => {
-      const post1 = await payload.create({
-        collection: 'posts',
-        data: { title: 'hasMany JSON Post 1' },
-      })
-      const post2 = await payload.create({
-        collection: 'posts',
-        data: { title: 'hasMany JSON Post 2' },
-      })
+        await payload.jobs.run()
 
-      const testPage = await payload.create({
-        collection: 'pages',
-        data: {
-          title: 'hasMany JSON Roundtrip',
-          hasManyMonomorphic: [post1.id, post2.id],
-          _status: 'published',
-        },
-      })
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
 
-      const exportDoc = await payload.create({
-        collection: 'exports',
-        user,
-        data: {
-          collectionSlug: 'pages',
-          fields: ['id', 'title', 'hasManyMonomorphic'],
-          format: 'json',
+        const importedPages = await payload.find({
+          collection: 'pages',
           where: {
-            id: { equals: testPage.id },
+            title: { equals: 'hasMany JSON Roundtrip' },
           },
-        },
+          depth: 0,
+        })
+        const imported = importedPages.docs[0]
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(1)
+        expect(importDoc.summary?.issues).toBe(0)
+        expect(importedPages.docs).toHaveLength(1)
+        expect(imported?.title).toBe('hasMany JSON Roundtrip')
+        expect(imported?.hasManyMonomorphic).toHaveLength(2)
+        expect((imported?.hasManyMonomorphic ?? []).map(extractID)).toEqual([post1.id, post2.id])
       })
 
-      await payload.jobs.run()
+      it('should roundtrip a single polymorphic relationship through JSON export/import', async () => {
+        const post1 = await payload.create({
+          collection: 'posts',
+          data: { title: 'hasOnePolymorphic JSON Post' },
+        })
 
-      const exportedDoc = await payload.findByID({
-        collection: 'exports',
-        id: exportDoc.id,
-      })
+        createdPostIDs.push(post1.id)
 
-      const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
-
-      await payload.delete({
-        collection: 'pages',
-        id: testPage.id,
-      })
-
-      let importDoc = await payload.create({
-        collection: 'imports',
-        user,
-        data: {
-          collectionSlug: 'pages',
-          importMode: 'create',
-        },
-        file: {
-          data: fs.readFileSync(jsonPath),
-          mimetype: 'application/json',
-          name: 'hasmany-json-roundtrip.json',
-          size: fs.statSync(jsonPath).size,
-        },
-      })
-
-      await payload.jobs.run()
-
-      importDoc = await payload.findByID({
-        collection: 'imports',
-        id: importDoc.id,
-      })
-
-      const importedPages = await payload.find({
-        collection: 'pages',
-        where: {
-          title: { equals: 'hasMany JSON Roundtrip' },
-        },
-        depth: 0,
-      })
-      const imported = importedPages.docs[0]
-
-      await payload.delete({
-        collection: 'pages',
-        where: {
-          title: { equals: 'hasMany JSON Roundtrip' },
-        },
-      })
-      await payload.delete({ collection: 'posts', id: post1.id })
-      await payload.delete({ collection: 'posts', id: post2.id })
-
-      expect(importDoc.status).toBe('completed')
-      expect(importedPages.docs).toHaveLength(1)
-      expect(imported?.hasManyMonomorphic).toHaveLength(2)
-      expect((imported?.hasManyMonomorphic ?? []).map(extractID)).toEqual([post1.id, post2.id])
-    })
-
-    it('should roundtrip a single polymorphic relationship through JSON export/import', async () => {
-      const post1 = await payload.create({
-        collection: 'posts',
-        data: { title: 'hasOnePolymorphic JSON Post' },
-      })
-
-      const testPage = await payload.create({
-        collection: 'pages',
-        data: {
-          title: 'hasOnePolymorphic JSON Roundtrip',
-          hasOnePolymorphic: {
-            relationTo: 'posts',
-            value: post1.id,
+        const testPage = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'hasOnePolymorphic JSON Roundtrip',
+            hasOnePolymorphic: {
+              relationTo: 'posts',
+              value: post1.id,
+            },
+            _status: 'published',
           },
-          _status: 'published',
-        },
-      })
+        })
 
-      const exportDoc = await payload.create({
-        collection: 'exports',
-        user,
-        data: {
-          collectionSlug: 'pages',
-          fields: ['id', 'title', 'hasOnePolymorphic'],
-          format: 'json',
+        const exportDoc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'hasOnePolymorphic'],
+            format: 'json',
+            where: {
+              id: { equals: testPage.id },
+            },
+          },
+        })
+
+        await payload.jobs.run()
+
+        const exportedDoc = await payload.findByID({
+          collection: 'exports',
+          id: exportDoc.id,
+        })
+
+        const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
+        const exportedDocs = await readJSON(jsonPath)
+
+        // The `relationTo`/`value` pair survives intact rather than splitting into siblings
+        expect(exportedDocs).toEqual([
+          {
+            id: testPage.id,
+            title: 'hasOnePolymorphic JSON Roundtrip',
+            hasOnePolymorphic: { relationTo: 'posts', value: post1.id },
+          },
+        ])
+
+        await payload.delete({
+          collection: 'pages',
+          id: testPage.id,
+        })
+
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: fs.readFileSync(jsonPath),
+            mimetype: 'application/json',
+            name: 'hasone-polymorphic-json-roundtrip.json',
+            size: fs.statSync(jsonPath).size,
+          },
+        })
+
+        await payload.jobs.run()
+
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
+
+        const importedPages = await payload.find({
+          collection: 'pages',
           where: {
-            id: { equals: testPage.id },
+            title: { equals: 'hasOnePolymorphic JSON Roundtrip' },
           },
-        },
+          depth: 0,
+        })
+        const imported = importedPages.docs[0]
+
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(1)
+        expect(importDoc.summary?.issues).toBe(0)
+        expect(importedPages.docs).toHaveLength(1)
+        expect(imported?.title).toBe('hasOnePolymorphic JSON Roundtrip')
+        expect(imported?.hasOnePolymorphic).toEqual({
+          relationTo: 'posts',
+          value: post1.id,
+        })
       })
 
-      await payload.jobs.run()
+      it('should roundtrip a hasMany polymorphic relationship through JSON export/import', async () => {
+        const testUser = await payload.find({
+          collection: 'users',
+          limit: 1,
+        })
+        const post1 = await payload.create({
+          collection: 'posts',
+          data: { title: 'hasManyPolymorphic JSON Post' },
+        })
 
-      const exportedDoc = await payload.findByID({
-        collection: 'exports',
-        id: exportDoc.id,
-      })
+        createdPostIDs.push(post1.id)
 
-      const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
+        const testPage = await payload.create({
+          collection: 'pages',
+          data: {
+            title: 'hasManyPolymorphic JSON Roundtrip',
+            hasManyPolymorphic: [
+              { relationTo: 'users', value: testUser.docs[0]?.id },
+              { relationTo: 'posts', value: post1.id },
+            ],
+            _status: 'published',
+          },
+        })
 
-      await payload.delete({
-        collection: 'pages',
-        id: testPage.id,
-      })
+        const exportDoc = await payload.create({
+          collection: 'exports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            fields: ['id', 'title', 'hasManyPolymorphic'],
+            format: 'json',
+            where: {
+              id: { equals: testPage.id },
+            },
+          },
+        })
 
-      let importDoc = await payload.create({
-        collection: 'imports',
-        user,
-        data: {
-          collectionSlug: 'pages',
-          importMode: 'create',
-        },
-        file: {
-          data: fs.readFileSync(jsonPath),
-          mimetype: 'application/json',
-          name: 'hasone-polymorphic-json-roundtrip.json',
-          size: fs.statSync(jsonPath).size,
-        },
-      })
+        await payload.jobs.run()
 
-      await payload.jobs.run()
+        const exportedDoc = await payload.findByID({
+          collection: 'exports',
+          id: exportDoc.id,
+        })
 
-      importDoc = await payload.findByID({
-        collection: 'imports',
-        id: importDoc.id,
-      })
+        const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
+        const exportedDocs = await readJSON(jsonPath)
 
-      const importedPages = await payload.find({
-        collection: 'pages',
-        where: {
-          title: { equals: 'hasOnePolymorphic JSON Roundtrip' },
-        },
-        depth: 0,
-      })
-      const imported = importedPages.docs[0]
+        // Each entry keeps its own `relationTo`, so a mixed list stays unambiguous
+        expect(exportedDocs).toEqual([
+          {
+            id: testPage.id,
+            title: 'hasManyPolymorphic JSON Roundtrip',
+            hasManyPolymorphic: [
+              { relationTo: 'users', value: testUser.docs[0]?.id },
+              { relationTo: 'posts', value: post1.id },
+            ],
+          },
+        ])
 
-      await payload.delete({
-        collection: 'pages',
-        where: {
-          title: { equals: 'hasOnePolymorphic JSON Roundtrip' },
-        },
-      })
-      await payload.delete({ collection: 'posts', id: post1.id })
+        await payload.delete({
+          collection: 'pages',
+          id: testPage.id,
+        })
 
-      expect(importDoc.status).toBe('completed')
-      expect(importedPages.docs).toHaveLength(1)
-      expect(imported?.hasOnePolymorphic).toEqual({
-        relationTo: 'posts',
-        value: post1.id,
-      })
-    })
+        let importDoc = await payload.create({
+          collection: 'imports',
+          user,
+          data: {
+            collectionSlug: 'pages',
+            importMode: 'create',
+          },
+          file: {
+            data: fs.readFileSync(jsonPath),
+            mimetype: 'application/json',
+            name: 'hasmany-polymorphic-json-roundtrip.json',
+            size: fs.statSync(jsonPath).size,
+          },
+        })
 
-    it('should roundtrip a hasMany polymorphic relationship through JSON export/import', async () => {
-      const testUser = await payload.find({
-        collection: 'users',
-        limit: 1,
-      })
-      const post1 = await payload.create({
-        collection: 'posts',
-        data: { title: 'hasManyPolymorphic JSON Post' },
-      })
+        await payload.jobs.run()
 
-      const testPage = await payload.create({
-        collection: 'pages',
-        data: {
-          title: 'hasManyPolymorphic JSON Roundtrip',
-          hasManyPolymorphic: [
-            { relationTo: 'users', value: testUser.docs[0]?.id },
-            { relationTo: 'posts', value: post1.id },
-          ],
-          _status: 'published',
-        },
-      })
+        importDoc = await payload.findByID({
+          collection: 'imports',
+          id: importDoc.id,
+        })
 
-      const exportDoc = await payload.create({
-        collection: 'exports',
-        user,
-        data: {
-          collectionSlug: 'pages',
-          fields: ['id', 'title', 'hasManyPolymorphic'],
-          format: 'json',
+        const importedPages = await payload.find({
+          collection: 'pages',
           where: {
-            id: { equals: testPage.id },
+            title: { equals: 'hasManyPolymorphic JSON Roundtrip' },
           },
-        },
-      })
+          depth: 0,
+        })
+        const imported = importedPages.docs[0]
 
-      await payload.jobs.run()
-
-      const exportedDoc = await payload.findByID({
-        collection: 'exports',
-        id: exportDoc.id,
-      })
-
-      const jsonPath = path.join(dirname, './uploads', exportedDoc.filename as string)
-
-      await payload.delete({
-        collection: 'pages',
-        id: testPage.id,
-      })
-
-      let importDoc = await payload.create({
-        collection: 'imports',
-        user,
-        data: {
-          collectionSlug: 'pages',
-          importMode: 'create',
-        },
-        file: {
-          data: fs.readFileSync(jsonPath),
-          mimetype: 'application/json',
-          name: 'hasmany-polymorphic-json-roundtrip.json',
-          size: fs.statSync(jsonPath).size,
-        },
-      })
-
-      await payload.jobs.run()
-
-      importDoc = await payload.findByID({
-        collection: 'imports',
-        id: importDoc.id,
-      })
-
-      const importedPages = await payload.find({
-        collection: 'pages',
-        where: {
-          title: { equals: 'hasManyPolymorphic JSON Roundtrip' },
-        },
-        depth: 0,
-      })
-      const imported = importedPages.docs[0]
-
-      await payload.delete({
-        collection: 'pages',
-        where: {
-          title: { equals: 'hasManyPolymorphic JSON Roundtrip' },
-        },
-      })
-      await payload.delete({ collection: 'posts', id: post1.id })
-
-      expect(importDoc.status).toBe('completed')
-      expect(importedPages.docs).toHaveLength(1)
-      expect(imported?.hasManyPolymorphic).toHaveLength(2)
-      expect(imported?.hasManyPolymorphic?.[0]).toEqual({
-        relationTo: 'users',
-        value: testUser.docs[0]?.id,
-      })
-      expect(imported?.hasManyPolymorphic?.[1]).toEqual({
-        relationTo: 'posts',
-        value: post1.id,
+        expect(importDoc.status).toBe('completed')
+        expect(importDoc.summary?.imported).toBe(1)
+        expect(importDoc.summary?.issues).toBe(0)
+        expect(importedPages.docs).toHaveLength(1)
+        expect(imported?.title).toBe('hasManyPolymorphic JSON Roundtrip')
+        expect(imported?.hasManyPolymorphic).toHaveLength(2)
+        expect(imported?.hasManyPolymorphic?.[0]).toEqual({
+          relationTo: 'users',
+          value: testUser.docs[0]?.id,
+        })
+        expect(imported?.hasManyPolymorphic?.[1]).toEqual({
+          relationTo: 'posts',
+          value: post1.id,
+        })
       })
     })
 
