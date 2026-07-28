@@ -134,6 +134,8 @@ export interface Post {
   fieldWithBeforeInputA1?: string | null;
   fieldWithBeforeInputA2?: string | null;
   fieldWithBeforeInputB?: string | null;
+  fieldWithCustomField?: string | null;
+  fieldWithCustomLabel?: string | null;
   defaultValueField?: string | null;
   group?: {
     defaultValueField?: string | null;
@@ -356,6 +358,8 @@ export interface PostsSelect<T extends boolean = true> {
   fieldWithBeforeInputA1?: T;
   fieldWithBeforeInputA2?: T;
   fieldWithBeforeInputB?: T;
+  fieldWithCustomField?: T;
+  fieldWithCustomLabel?: T;
   defaultValueField?: T;
   group?:
     | T
@@ -558,6 +562,6 @@ export interface Auth {
 
 
 declare module 'payload' {
-  // @ts-ignore 
+  // @ts-ignore
   export interface GeneratedTypes extends Config {}
 }

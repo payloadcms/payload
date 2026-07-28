@@ -956,6 +956,70 @@ test.describe('Bulk Edit', () => {
     await expect(beforeInputB).toHaveCount(1)
     await expect(beforeInputB).toBeVisible()
   })
+
+  test('should preserve custom Field and Label components of previously selected fields', async () => {
+    await deleteAllPosts()
+    await createPost({ title: 'Post 1' })
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    // Select the field with a custom `Field` component first, on its own
+    await selectInput({
+      page,
+      selectLocator: modal.locator('.field-select'),
+      options: ['Field With Custom Field'],
+      multiSelect: true,
+    })
+
+    await expect(modal.locator('[data-testid="custom-field"]')).toBeVisible()
+
+    // Selecting an additional field must not reset the first field to its default component
+    await selectInput({
+      page,
+      selectLocator: modal.locator('.field-select'),
+      clear: false,
+      options: ['Field With Custom Label'],
+      multiSelect: true,
+    })
+
+    await expect(modal.locator('[data-testid="custom-label"]')).toBeVisible()
+    await expect(modal.locator('[data-testid="custom-field"]')).toBeVisible()
+  })
+
+  test('should preserve values of previously selected fields when selecting another field', async () => {
+    await deleteAllPosts()
+    await createPost({ title: 'Post 1' })
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    await selectInput({
+      page,
+      selectLocator: modal.locator('.field-select'),
+      options: ['Title'],
+      multiSelect: true,
+    })
+
+    await modal.locator('#field-title').fill('Bulk edited title')
+
+    await selectInput({
+      page,
+      selectLocator: modal.locator('.field-select'),
+      clear: false,
+      options: ['Description'],
+      multiSelect: true,
+    })
+
+    await expect(modal.locator('#field-description')).toBeVisible()
+    await expect(modal.locator('#field-title')).toHaveValue('Bulk edited title')
+  })
 })
 
 async function selectFieldToEdit(
