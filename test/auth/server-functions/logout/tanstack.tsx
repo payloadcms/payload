@@ -1,9 +1,9 @@
 'use client'
 
-import { LogoutButton } from './logout.js'
+import { LogoutButton } from './index.js'
 
 const logoutFunction = async () => {
-  const { logoutFunction } = await import('./tanstackFunctions.js')
+  const { logoutFunction } = await import('./tanstackFunction.js')
 
   return logoutFunction()
 }

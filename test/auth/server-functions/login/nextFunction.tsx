@@ -2,7 +2,7 @@
 
 import { login } from '@payloadcms/next/auth'
 
-import config from '../config.js'
+import config from '../../config.js'
 
 type LoginArgs = {
   email: string

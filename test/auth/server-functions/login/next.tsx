@@ -1,11 +1,11 @@
 'use client'
 
-import type { LoginArgs } from './login.js'
+import type { LoginArgs } from './index.js'
 
-import { LoginForm } from './login.js'
+import { LoginForm } from './index.js'
 
 const loginFunction = async (args: LoginArgs) => {
-  const { loginFunction } = await import('./loginFunction.js')
+  const { loginFunction } = await import('./nextFunction.js')
 
   return loginFunction(args)
 }

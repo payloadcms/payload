@@ -31,11 +31,11 @@ export default buildConfigWithDefaults({
       beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
       beforeLogin: [
         './BeforeLogin.js#BeforeLogin',
-        `./server-functions/login.${framework}.js#${frameworkExport}LoginForm`,
+        `./server-functions/login/${framework}.js#${frameworkExport}LoginForm`,
       ],
       header: [
-        `./server-functions/refresh.${framework}.js#${frameworkExport}RefreshToken`,
-        `./server-functions/logout.${framework}.js#${frameworkExport}LogoutButton`,
+        `./server-functions/refresh/${framework}.js#${frameworkExport}RefreshToken`,
+        `./server-functions/logout/${framework}.js#${frameworkExport}LogoutButton`,
       ],
       views: {
         'create-first-user': {

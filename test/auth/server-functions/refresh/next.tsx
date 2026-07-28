@@ -1,9 +1,9 @@
 'use client'
 
-import { RefreshToken } from './refresh.js'
+import { RefreshToken } from './index.js'
 
 const refreshFunction = async () => {
-  const { refreshFunction } = await import('./refreshFunction.js')
+  const { refreshFunction } = await import('./nextFunction.js')
 
   return refreshFunction()
 }
