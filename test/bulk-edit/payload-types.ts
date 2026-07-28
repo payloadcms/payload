@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     posts: Post;
     tabs: Tab;
+    'restricted-tabs': RestrictedTab;
     'payload-kv': PayloadKv;
     users: User;
     'payload-locked-documents': PayloadLockedDocument;
@@ -79,6 +80,7 @@ export interface Config {
   collectionsSelect: {
     posts: PostsSelect<false> | PostsSelect<true>;
     tabs: TabsSelect<false> | TabsSelect<true>;
+    'restricted-tabs': RestrictedTabsSelect<false> | RestrictedTabsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -195,6 +197,20 @@ export interface Tab {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-tabs".
+ */
+export interface RestrictedTab {
+  id: string;
+  title?: string | null;
+  noUpdate?: string | null;
+  namedTab?: {
+    namedTabText?: string | null;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -249,6 +265,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tabs';
         value: string | Tab;
+      } | null)
+    | ({
+        relationTo: 'restricted-tabs';
+        value: string | RestrictedTab;
       } | null)
     | ({
         relationTo: 'users';
@@ -374,6 +394,21 @@ export interface TabsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "restricted-tabs_select".
+ */
+export interface RestrictedTabsSelect<T extends boolean = true> {
+  title?: T;
+  noUpdate?: T;
+  namedTab?:
+    | T
+    | {
+        namedTabText?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -451,7 +486,7 @@ export interface CollectionsWidget {
 export interface CollectionQueryWidget {
   data?: {
     title?: string | null;
-    relatedCollection: 'posts' | 'tabs' | 'users';
+    relatedCollection: 'posts' | 'tabs' | 'restricted-tabs' | 'users';
     where?:
       | {
           [k: string]: unknown;
@@ -473,7 +508,7 @@ export interface CollectionQueryWidget {
  */
 export interface ActivityWidget {
   data?: {
-    excludedCollections?: ('posts' | 'tabs' | 'users')[] | null;
+    excludedCollections?: ('posts' | 'tabs' | 'restricted-tabs' | 'users')[] | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
