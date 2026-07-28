@@ -261,6 +261,11 @@
       "types": "./src/utilities/handleAuthRedirect.ts",
       "default": "./src/utilities/handleAuthRedirect.ts"
     },
+    "./auth": {
+      "import": "./src/auth/index.ts",
+      "types": "./src/auth/index.ts",
+      "default": "./src/auth/index.ts"
+    },
     "./utilities/getPreferences": {
       "import": "./src/utilities/getPreferences.ts",
       "types": "./src/utilities/getPreferences.ts",
@@ -654,6 +659,11 @@
         "import": "./dist/utilities/serverFunctionRegistry.js",
         "types": "./dist/utilities/serverFunctionRegistry.d.ts",
         "default": "./dist/utilities/serverFunctionRegistry.js"
+      },
+      "./auth": {
+        "import": "./dist/auth/index.js",
+        "types": "./dist/auth/index.d.ts",
+        "default": "./dist/auth/index.js"
       }
     },
     "main": "./dist/exports/client/index.js",
