@@ -1,0 +1,77 @@
+.auth-server-functions {
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    width: min(100%, 560px);
+  }
+
+  &__header,
+  &__section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    > * {
+      margin: 0;
+    }
+  }
+
+  &__section {
+    padding: 24px;
+    border: 1px solid GrayText;
+    border-radius: 4px;
+    background: Canvas;
+    color: CanvasText;
+  }
+
+  &__login {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    input {
+      all: revert;
+      box-sizing: border-box;
+      width: 100%;
+      font: inherit;
+    }
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  button {
+    all: revert;
+    align-self: flex-start;
+    font: inherit;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  &__action {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__error,
+  &__success {
+    margin: 0;
+  }
+
+  &__error {
+    color: #b42318;
+  }
+
+  &__success {
+    color: #067647;
+  }
+}

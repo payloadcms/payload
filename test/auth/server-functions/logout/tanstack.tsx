@@ -8,6 +8,6 @@ const logoutFunction = async () => {
   return logoutFunction()
 }
 
-export function TanStackLogoutButton() {
-  return <LogoutButton logoutFunction={logoutFunction} />
+export function TanStackLogoutButton({ loginURL }: { loginURL: string }) {
+  return <LogoutButton loginURL={loginURL} logoutFunction={logoutFunction} />
 }

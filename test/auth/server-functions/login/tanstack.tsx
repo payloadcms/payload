@@ -10,6 +10,6 @@ const loginFunction = async (args: LoginArgs) => {
   return loginFunction(args)
 }
 
-export function TanStackLoginForm() {
-  return <LoginForm loginFunction={loginFunction} />
+export function TanStackLoginForm({ dashboardURL }: { dashboardURL: string }) {
+  return <LoginForm dashboardURL={dashboardURL} loginFunction={loginFunction} />
 }

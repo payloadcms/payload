@@ -29,19 +29,16 @@ export default buildConfigWithDefaults({
     autoRefresh: true,
     components: {
       beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
-      beforeLogin: [
-        './BeforeLogin.js#BeforeLogin',
-        `./server-functions/login/${framework}.js#${frameworkExport}LoginForm`,
-      ],
-      header: [
-        `./server-functions/refresh/${framework}.js#${frameworkExport}RefreshToken`,
-        `./server-functions/logout/${framework}.js#${frameworkExport}LogoutButton`,
-      ],
+      beforeLogin: ['./BeforeLogin.js#BeforeLogin'],
       views: {
         'create-first-user': {
           Component: './CreateFirstUser.js#CreateFirstUser',
           path: '/create-first-user',
           exact: true,
+        },
+        serverFunctions: {
+          Component: `./server-functions/view/${framework}.js#${frameworkExport}ServerFunctionsView`,
+          path: '/server-functions',
         },
       },
     },

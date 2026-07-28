@@ -8,6 +8,6 @@ const logoutFunction = async () => {
   return logoutFunction()
 }
 
-export function NextLogoutButton() {
-  return <LogoutButton logoutFunction={logoutFunction} />
+export function NextLogoutButton({ loginURL }: { loginURL: string }) {
+  return <LogoutButton loginURL={loginURL} logoutFunction={logoutFunction} />
 }
