@@ -272,6 +272,40 @@ const SelectFields: CollectionConfig = {
             )
           : options,
     },
+    {
+      name: 'disallowOption2',
+      type: 'checkbox',
+    },
+    {
+      name: 'selectAsyncFilterOptions',
+      label: 'Select with async filtered options',
+      type: 'select',
+      defaultValue: 'one',
+      options: [
+        {
+          label: 'Value One',
+          value: 'one',
+        },
+        {
+          label: 'Value Two',
+          value: 'two',
+        },
+        {
+          label: 'Value Three',
+          value: 'three',
+        },
+      ],
+      filterOptions: async ({ options, data }) => {
+        // fake async lookup
+        await Promise.resolve()
+
+        return data.disallowOption2
+          ? options.filter(
+              (option) => (typeof option === 'string' ? options : option.value) !== 'one',
+            )
+          : options
+      },
+    },
   ],
 }
 

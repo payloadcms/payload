@@ -1899,6 +1899,28 @@ describe('Fields', () => {
       expect(result).toBeTruthy()
     })
 
+    it('should prevent against saving a value excluded by an async `filterOptions`', async () => {
+      await expect(
+        payload.create({
+          collection: 'select-fields',
+          data: {
+            disallowOption2: true,
+            selectAsyncFilterOptions: 'one',
+          },
+        }),
+      ).rejects.toThrow('The following field is invalid: Select with async filtered options')
+
+      const result = await payload.create({
+        collection: 'select-fields',
+        data: {
+          disallowOption2: true,
+          selectAsyncFilterOptions: 'two',
+        },
+      })
+
+      expect(result).toBeTruthy()
+    })
+
     it('should throw field error when duplicate values in hasMany select field', async () => {
       let error: undefined | ValidationError
 
