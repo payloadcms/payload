@@ -8,9 +8,9 @@ import React, { createContext, use, useCallback, useEffect, useState } from 'rea
 import { toast } from 'sonner'
 
 import type {
-  CrossTabSessionReconciliationOptions,
-  CrossTabSessionReconciliationResult,
-} from './crossTabSessionSync.js'
+  TabSessionReconciliationOptions,
+  TabSessionReconciliationResult,
+} from './tabSessionSync/index.js'
 import type { AuthContext, UserWithToken } from './types.js'
 
 import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
@@ -21,9 +21,9 @@ import { useConfig } from '../Config/index.js'
 import { useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 import { createAuthSessionRequests } from './authSessionRequests.js'
-import { CROSS_TAB_SESSION_EVENT_TYPES } from './crossTabSessionSync.js'
+import { TAB_SESSION_EVENT_TYPES } from './tabSessionSync/index.js'
 import { useAuthSessionTimers } from './useAuthSessionTimers.js'
-import { useCrossTabSessionSync } from './useCrossTabSessionSync.js'
+import { useTabSessionSync } from './useTabSessionSync.js'
 
 export type { AuthContext, UserWithToken } from './types.js'
 
@@ -103,8 +103,8 @@ export function AuthProvider({
   function onSessionExpiration(expirationMs: number) {
     const collection = userRef.current?.collection
 
-    crossTabSession.publish({
-      type: CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED,
+    tabSessionSync.publish({
+      type: TAB_SESSION_EVENT_TYPES.EXPIRED,
       expiredTokenAt: expirationMs,
     })
     void logOutSession({ collection })
@@ -159,11 +159,8 @@ export function AuthProvider({
     [authRequests, setLocalSession],
   )
 
-  const crossTabSession = useCrossTabSessionSync({
+  const tabSessionSync = useTabSessionSync({
     getTokenExpirationMs: sessionTimers.getLatestExpirationMs,
-    onCrossTabSessionUnauthenticated: () => {
-      redirectToInactivityRoute()
-    },
     onSessionExpired: () => {
       const collection = userRef.current?.collection
 
@@ -181,6 +178,9 @@ export function AuthProvider({
         authRequests.discardPendingResults()
         setLocalSession(session)
       }
+    },
+    onTabSessionUnauthenticated: () => {
+      redirectToInactivityRoute()
     },
     reconcileSession: (options) => fetchFullUserResult(options),
   })
@@ -221,8 +221,8 @@ export function AuthProvider({
             }
 
             setLocalSession(json)
-            crossTabSession.publish({
-              type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
+            tabSessionSync.publish({
+              type: TAB_SESSION_EVENT_TYPES.REFRESHED,
               refreshStartedAt,
               session: json,
             })
@@ -232,8 +232,8 @@ export function AuthProvider({
           if (handledUser) {
             const invalidateSession = () => {
               if (handledExpiration !== undefined) {
-                crossTabSession.publish({
-                  type: CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED,
+                tabSessionSync.publish({
+                  type: TAB_SESSION_EVENT_TYPES.EXPIRED,
                   expiredTokenAt: handledExpiration,
                 })
               }
@@ -254,7 +254,7 @@ export function AuthProvider({
     [
       apiRoute,
       authRequests,
-      crossTabSession,
+      tabSessionSync,
       i18n.language,
       redirectToInactivityRoute,
       sessionTimers,
@@ -295,18 +295,18 @@ export function AuthProvider({
   )
 
   const logOut = useCallback(async () => {
-    const logoutEvent = { type: CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT } as const
-    const logoutPublication = crossTabSession.publish(logoutEvent)
+    const logoutEvent = { type: TAB_SESSION_EVENT_TYPES.LOGGED_OUT } as const
+    const logoutPublication = tabSessionSync.publish(logoutEvent)
     const collection = userRef.current?.collection
 
     await logOutSession({ collection })
 
-    if (logoutPublication?.type === CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT) {
-      crossTabSession.publishLogoutSettlement(logoutPublication)
+    if (logoutPublication?.type === TAB_SESSION_EVENT_TYPES.LOGGED_OUT) {
+      tabSessionSync.publishLogoutSettlement(logoutPublication)
     }
 
     return true
-  }, [crossTabSession, logOutSession])
+  }, [tabSessionSync, logOutSession])
 
   const refreshPermissions = useCallback(
     async ({ locale }: { locale?: string } = {}) => {
@@ -346,11 +346,11 @@ export function AuthProvider({
   )
 
   const fetchFullUserResult = React.useCallback(
-    ({ isCrossTabEventStale }: Partial<CrossTabSessionReconciliationOptions> = {}): Promise<
-      CrossTabSessionReconciliationResult<AuthenticatedUser>
+    ({ isTabSessionEventStale }: Partial<TabSessionReconciliationOptions> = {}): Promise<
+      TabSessionReconciliationResult<AuthenticatedUser>
     > => {
       return authRequests.queue(async ({ acceptResult, isResultStale }) => {
-        const isResponseStale = () => isResultStale() || Boolean(isCrossTabEventStale?.())
+        const isResponseStale = () => isResultStale() || Boolean(isTabSessionEventStale?.())
 
         if (isResponseStale()) {
           return { status: 'indeterminate' }
