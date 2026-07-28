@@ -187,16 +187,6 @@ export async function loadAdminPage({
     return result
   }
 
-  const notFound = (): never => {
-    nav.type = 'notFound'
-    throw new Error('not-found')
-  }
-  const redirect = (url: string): never => {
-    nav.type = 'redirect'
-    nav.url = url
-    throw new Error(`redirect:${url}`)
-  }
-
   // Build the 404 result the route loader re-throws as TanStack `notFound()`.
   //
   // Throwing `notFound()` is the only way to set the SSR document status to 404
@@ -238,11 +228,11 @@ export async function loadAdminPage({
       importMap,
       initReq: boundInitReq,
       key: splat ?? '',
-      notFound,
+      notFound: pageServerAdapter.notFound,
       // `segments` is intentionally `undefined` for the admin root (`/admin`),
       // matching Next's optional catch-all; `renderRoot` handles it at runtime.
       params: Promise.resolve({ segments }) as Parameters<typeof renderRoot>[0]['params'],
-      redirect,
+      redirect: pageServerAdapter.redirect,
       searchParams: Promise.resolve(searchParams),
     })
 
