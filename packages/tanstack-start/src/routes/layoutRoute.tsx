@@ -5,6 +5,7 @@ import type { ComponentProps } from 'react'
 import { ProgressBar, RootProvider } from '@payloadcms/ui'
 import { Outlet, useLoaderData } from '@tanstack/react-router'
 
+import { TanStackDevCompileStatusAdapter } from '../elements/DevCompileStatus/index.js'
 import { TanStackRouterAdapter } from '../elements/RouterAdapter/index.js'
 
 /**
@@ -36,6 +37,7 @@ export function payloadLayoutRoute({
         <RootProvider
           config={data.clientConfig}
           dateFNSKey={data.dateFNSKey}
+          DevCompileStatusAdapter={TanStackDevCompileStatusAdapter}
           embed={data.isEmbedded}
           fallbackLang={data.fallbackLang}
           highContrastMode={false}

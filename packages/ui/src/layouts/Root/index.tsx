@@ -1,4 +1,5 @@
 import type {
+  DevCompileStatusAdapterComponent,
   ImportMap,
   LanguageOptions,
   SanitizedConfig,
@@ -43,6 +44,13 @@ type RootLayoutProps = {
   readonly additionalDependencyChecks?: CheckDependenciesArgs
   readonly children: React.ReactNode
   readonly config: Promise<SanitizedConfig>
+  /**
+   * Client dev-compile-status adapter. Reports whether the framework's dev server is
+   * currently compiling, to drive the admin panel's compiling indicator badge. Optional —
+   * frameworks without a meaningful compiling signal can omit this and no badge is shown
+   * (for Next.js use the `NextDevCompileStatusAdapter` exported from `@payloadcms/next`).
+   */
+  readonly DevCompileStatusAdapter?: DevCompileStatusAdapterComponent
   /**
    * Fonts to apply to the admin `<html>` element. Each entry's
    * `variable ?? className` is appended to the `<html>` class list.
@@ -96,6 +104,7 @@ export const RootLayout = (props: RootLayoutProps) => {
 const RootLayoutContent = async ({
   children,
   config: configPromise,
+  DevCompileStatusAdapter,
   fonts = [],
   head: headFromProps,
   htmlProps = {},
@@ -176,6 +185,7 @@ const RootLayoutContent = async ({
         <RootProvider
           config={clientConfig}
           dateFNSKey={req.i18n.dateFNSKey}
+          DevCompileStatusAdapter={DevCompileStatusAdapter}
           embed={embed}
           fallbackLang={config.i18n.fallbackLanguage}
           highContrastMode={highContrastMode}

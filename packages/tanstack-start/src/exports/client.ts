@@ -1,5 +1,6 @@
 'use client'
 
+export { TanStackDevCompileStatusAdapter } from '../elements/DevCompileStatus/index.js'
 export { TanStackComponentRenderer } from '../elements/RenderComponent/index.js'
 export { TanStackRouterAdapter } from '../elements/RouterAdapter/index.js'
 export {

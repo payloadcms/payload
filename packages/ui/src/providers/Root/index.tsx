@@ -2,6 +2,7 @@
 import type { I18nClient, I18nOptions, Language } from '@payloadcms/translations'
 import type {
   ClientConfig,
+  DevCompileStatusAdapterComponent,
   LanguageOptions,
   Locale,
   RouterAdapterComponent,
@@ -18,6 +19,7 @@ import React from 'react'
 import type { Theme } from '../Theme/index.js'
 
 import { CloseModalOnRouteChange } from '../../elements/CloseModalOnRouteChange/index.js'
+import { DevCompilingIndicator } from '../../elements/DevCompilingIndicator/index.js'
 import { DrawerStackProvider } from '../../elements/Drawer/index.js'
 import { LoadingOverlayProvider } from '../../elements/LoadingOverlay/index.js'
 import { NavProvider } from '../../elements/Nav/context.js'
@@ -28,6 +30,7 @@ import { WindowInfoProvider } from '../../providers/WindowInfo/index.js'
 import { AuthProvider } from '../Auth/index.js'
 import { ClientFunctionProvider } from '../ClientFunction/index.js'
 import { ConfigProvider } from '../Config/index.js'
+import { DefaultDevCompileStatusAdapter } from '../DevCompileStatus/index.js'
 import { DocumentEventsProvider } from '../DocumentEvents/index.js'
 import { EmbedProvider } from '../Embed/index.js'
 import { HierarchyProvider } from '../Hierarchy/index.js'
@@ -45,6 +48,7 @@ type Props = {
   readonly children: React.ReactNode
   readonly config: ClientConfig
   readonly dateFNSKey: Language['dateFNSKey']
+  readonly DevCompileStatusAdapter?: DevCompileStatusAdapterComponent
   readonly embed?: boolean
   readonly fallbackLang: I18nOptions['fallbackLanguage']
   readonly highContrastMode: boolean
@@ -64,6 +68,7 @@ export const RootProvider: React.FC<Props> = ({
   children,
   config,
   dateFNSKey,
+  DevCompileStatusAdapter = DefaultDevCompileStatusAdapter,
   embed,
   fallbackLang,
   highContrastMode,
@@ -125,7 +130,10 @@ export const RootProvider: React.FC<Props> = ({
                                                     // Provide stable ID to fix hydration issues: https://github.com/clauderic/dnd-kit/issues/926
                                                     id={dndContextID}
                                                   >
-                                                    {children}
+                                                    <DevCompileStatusAdapter>
+                                                      <DevCompilingIndicator />
+                                                      {children}
+                                                    </DevCompileStatusAdapter>
                                                   </DndContext>
                                                 </UploadHandlersProvider>
                                               </NavProvider>

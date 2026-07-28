@@ -290,6 +290,7 @@ export const enTranslations = {
     collections: 'Collections',
     columns: 'Columns',
     columnToSort: 'Column to Sort',
+    compiling: 'Compiling...',
     confirm: 'Confirm',
     confirmCopy: 'Confirm copy',
     confirmDeletion: 'Confirm deletion',

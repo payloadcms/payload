@@ -1,0 +1,15 @@
+@layer payload-default {
+  .dev-compiling-indicator {
+    position: fixed;
+    z-index: var(--z-modal);
+    bottom: calc(var(--base) * 0.8);
+    left: calc(var(--base) * 0.8);
+    padding: calc(var(--base) * 0.2) calc(var(--base) * 0.4);
+    border-radius: var(--style-radius-m);
+    background-color: var(--theme-elevation-800);
+    color: var(--theme-elevation-0);
+    font-size: var(--font-size-small);
+    white-space: nowrap;
+    pointer-events: none;
+  }
+}
