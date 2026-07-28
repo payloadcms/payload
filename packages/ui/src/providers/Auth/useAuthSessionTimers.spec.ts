@@ -75,6 +75,35 @@ describe('useAuthSessionTimers', () => {
     expect(onExpire).toHaveBeenCalledWith(expirationMs)
   })
 
+  it('should respect expirations beyond the maximum browser timeout', () => {
+    const onExpire = vi.fn()
+    const timers = renderAuthSessionTimers({ onExpire })
+    const thirtyDaysMs = 2_592_000_000
+    const maximumBrowserTimeoutMs = 2_147_483_647
+    const expirationMs = Date.now() + thirtyDaysMs
+
+    timers.setExpiration(expirationMs)
+
+    act(() => {
+      vi.advanceTimersByTime(maximumBrowserTimeoutMs)
+    })
+
+    expect(onExpire).not.toHaveBeenCalled()
+
+    act(() => {
+      vi.advanceTimersByTime(thirtyDaysMs - maximumBrowserTimeoutMs - 1)
+    })
+
+    expect(onExpire).not.toHaveBeenCalled()
+
+    act(() => {
+      vi.advanceTimersByTime(1)
+    })
+
+    expect(onExpire).toHaveBeenCalledOnce()
+    expect(onExpire).toHaveBeenCalledWith(expirationMs)
+  })
+
   it('should schedule expiration when the token expires exactly now', () => {
     const onActivityRefresh = vi.fn()
     const onExpire = vi.fn()
