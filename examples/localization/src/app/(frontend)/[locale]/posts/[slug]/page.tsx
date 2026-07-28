@@ -88,8 +88,6 @@ const queryPost = cache(async ({ slug, locale }: { slug: string; locale: TypedLo
 
   const result = await payload.find({
     collection: 'posts',
-    // Related post cards read `meta.image` and `categories`, which sit two
-    // levels deep from this post.
     depth: 2,
     draft,
     limit: 1,

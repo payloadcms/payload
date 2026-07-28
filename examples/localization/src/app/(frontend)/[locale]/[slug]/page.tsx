@@ -93,8 +93,6 @@ const queryPage = cache(async ({ slug, locale }: { slug: string; locale: TypedLo
 
   const result = await payload.find({
     collection: 'pages',
-    // Blocks such as Archive render cards for documents embedded in this page,
-    // whose own upload and relationship fields sit two levels deep.
     depth: 2,
     draft,
     limit: 1,

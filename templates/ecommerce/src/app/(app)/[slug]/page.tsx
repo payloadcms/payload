@@ -86,8 +86,6 @@ const queryPageBySlug = async ({ slug }: { slug: string }) => {
 
   const result = await payload.find({
     collection: 'pages',
-    // Product blocks such as Carousel and ThreeItemGrid read `meta.image` on
-    // products embedded in this page, which sits two levels deep.
     depth: 2,
     draft,
     limit: 1,

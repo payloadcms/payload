@@ -13,10 +13,7 @@ type Props = {
     position?: 'bottom' | 'center'
     title: string
   }
-  /**
-   * May arrive as an ID when the product was populated as a nested relationship
-   * and the query depth did not reach its `meta.image`.
-   */
+  /** Arrives as an ID when the query depth did not reach the product's `meta.image`. */
   media?: (string | null) | MediaType
 }
 
