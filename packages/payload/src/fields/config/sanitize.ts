@@ -23,6 +23,7 @@ import { validateTimezones } from '../../utilities/validateTimezones.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
 import { generateSlug } from '../baseFields/slug/generateSlug.js'
+import { generateSlugBeforeDuplicate } from '../baseFields/slug/generateSlugBeforeDuplicate.js'
 import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
 import { defaultTimezones } from '../baseFields/timezone/defaultTimezones.js'
 import { getFieldPaths } from '../getFieldPaths.js'
@@ -279,18 +280,17 @@ export const sanitizeField = async ({
   if (field.type === 'slug') {
     const useAsSlug = field.useAsSlug
 
-    if (!useAsSlug) {
-      throw new InvalidConfiguration(
-        `The slug field "${field.name}" is missing the required "useAsSlug" property, which must name the field to generate the slug from.`,
-      )
-    }
-
+    // Required by default so the admin marks the slug as required. The value is always populated by
+    // the field hooks (source or id fallback), and validations.slug permits empty so the fallback
+    // isn't blocked before it runs.
     if (typeof field.required === 'undefined') {
       field.required = true
     }
+
     if (typeof field.unique === 'undefined') {
       field.unique = true
     }
+
     if (typeof field.index === 'undefined') {
       field.index = true
     }
@@ -311,9 +311,23 @@ export const sanitizeField = async ({
     if (!field.hooks) {
       field.hooks = {}
     }
+
     field.hooks.beforeChange = [
-      generateSlug({ name: field.name, slugify: field.slugify, useAsSlug }),
+      generateSlug({
+        name: field.name,
+        localized: field.localized,
+        slugify: field.slugify,
+        useAsSlug,
+      }),
       ...(field.hooks.beforeChange || []),
+    ]
+
+    // Own the slug on duplicate — the copy takes a fresh `<singular>-<N>` fallback rather than the
+    // generic ` - Copy` default, which isn't collision-safe across repeated duplicates of the same
+    // source. Runs per-locale for a localized slug.
+    field.hooks.beforeDuplicate = [
+      generateSlugBeforeDuplicate({ name: field.name }),
+      ...(field.hooks.beforeDuplicate || []),
     ]
   }
 

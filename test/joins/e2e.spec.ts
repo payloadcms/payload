@@ -407,6 +407,173 @@ describe('Join Field', () => {
     ).toBeVisible()
   })
 
+  test('should refresh sibling join tables when a document is created through another join table', async () => {
+    // `relatedPosts` and `noRowTypes` are two separate join fields backed by the
+    // same relationship (collection: posts, on: 'category'). Creating a post through
+    // one table should refresh the other without a full page reload.
+    await page.goto(categoriesURL.edit(categoryID))
+
+    const actingField = page.locator('#field-relatedPosts.field-type.join')
+    const siblingField = page.locator('#field-noRowTypes.field-type.join')
+    await expect(actingField).toBeVisible()
+    await expect(siblingField).toBeVisible()
+
+    const newTitle = 'Sibling Refresh Post'
+
+    // The new document should not be present in the sibling table yet.
+    await expect(siblingField.locator('tbody tr td', { hasText: exactText(newTitle) })).toBeHidden()
+
+    const addButton = actingField.locator(
+      '.relationship-table__actions button.doc-drawer__toggler',
+      { hasText: exactText('Add new') },
+    )
+    await expect(addButton).toBeVisible()
+    await addButton.click()
+
+    const drawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(drawer).toBeVisible()
+
+    const categoryField = drawer.locator('#field-category')
+    await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 5 })
+    await expect(categoryField.locator('.relationship--single-value__text')).toHaveText('example')
+
+    const titleField = drawer.locator('#field-title')
+    await expect(titleField).toBeVisible()
+    await titleField.fill(newTitle)
+
+    await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] button#action-save')
+    await expect(drawer).toBeHidden()
+
+    // The acting table shows the new row...
+    await expect(actingField.locator('tbody tr td', { hasText: exactText(newTitle) })).toBeVisible()
+
+    // ...and the sibling join table refreshes to show it too, without a page reload.
+    await expect(
+      siblingField.locator('tbody tr td', { hasText: exactText(newTitle) }),
+    ).toBeVisible()
+  })
+
+  test('should refresh sibling join tables when a document is deleted through another join table', async () => {
+    await page.goto(categoriesURL.edit(categoryID))
+
+    const actingField = page.locator('#field-relatedPosts.field-type.join')
+    const siblingField = page.locator('#field-noRowTypes.field-type.join')
+    await expect(actingField).toBeVisible()
+    await expect(siblingField).toBeVisible()
+
+    const title = 'Sibling Delete Post'
+
+    // Create a post through the acting table so it exists in both join tables.
+    const addButton = actingField.locator(
+      '.relationship-table__actions button.doc-drawer__toggler',
+      { hasText: exactText('Add new') },
+    )
+    await expect(addButton).toBeVisible()
+    await addButton.click()
+
+    const createDrawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(createDrawer).toBeVisible()
+
+    const categoryField = createDrawer.locator('#field-category')
+    await expect(categoryField).toBeVisible({ timeout: EXPECT_TIMEOUT * 5 })
+    await expect(categoryField.locator('.relationship--single-value__text')).toHaveText('example')
+
+    const titleField = createDrawer.locator('#field-title')
+    await expect(titleField).toBeVisible()
+    await titleField.fill(title)
+
+    await saveDocAndAssert(page, '[id^=doc-drawer_posts_1_] button#action-save')
+    await expect(createDrawer).toBeHidden()
+
+    // The new row appears in both tables.
+    await expect(actingField.locator('tbody tr td', { hasText: exactText(title) })).toBeVisible()
+    await expect(siblingField.locator('tbody tr td', { hasText: exactText(title) })).toBeVisible()
+
+    // Delete the post through the acting table's own drawer.
+    const editRow = actingField.locator('tbody tr', { hasText: title })
+    await expect(editRow).toBeVisible()
+    const editButton = editRow.locator('button.drawer-link__doc-drawer-toggler').first()
+    await expect(editButton).toBeVisible()
+    await editButton.click()
+
+    const editDrawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(editDrawer).toBeVisible()
+
+    const popupButton = editDrawer.locator('.doc-controls__popup .popup__trigger-wrap button')
+    await expect(popupButton).toBeVisible()
+    await popupButton.click()
+
+    const deleteButton = page.locator('.popup__content #action-delete')
+    await expect(deleteButton).toBeVisible()
+    await deleteButton.click()
+
+    const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
+    await expect(deleteConfirmModal).toBeVisible()
+    const confirmDeleteButton = deleteConfirmModal.locator('button[data-dialog-action="confirm"]')
+    await expect(confirmDeleteButton).toBeVisible()
+    await confirmDeleteButton.click()
+    await expect(editDrawer).toBeHidden()
+
+    // Removed from the acting table (optimistic) and the sibling table (cross-table event).
+    await expect(actingField.locator('tbody tr td', { hasText: exactText(title) })).toBeHidden()
+    await expect(siblingField.locator('tbody tr td', { hasText: exactText(title) })).toBeHidden()
+  })
+
+  test('should refresh sibling polymorphic join tables when a document is deleted through another polymorphic join table', async () => {
+    const title = 'Poly Sibling Delete Post'
+
+    // Seed a post linked to this category so it appears in both polymorphic tables.
+    await payload.create({
+      collection: postsSlug,
+      data: {
+        title,
+        category: categoryID as string,
+      },
+    })
+
+    await page.goto(categoriesURL.edit(categoryID))
+
+    const actingField = page.locator('#field-polymorphicJoin.field-type.join')
+    const siblingField = page.locator('#field-polymorphicJoinNoRowTypes.field-type.join')
+    await expect(actingField).toBeVisible()
+    await expect(siblingField).toBeVisible()
+
+    // The seeded post appears in both polymorphic tables.
+    await expect(actingField.locator('tbody tr td', { hasText: exactText(title) })).toBeVisible()
+    await expect(siblingField.locator('tbody tr td', { hasText: exactText(title) })).toBeVisible()
+
+    // Delete the post through the acting table's own row drawer.
+    const editRow = actingField.locator('tbody tr', { hasText: title })
+    await expect(editRow).toBeVisible()
+    const editButton = editRow.locator('button.drawer-link__doc-drawer-toggler').first()
+    await expect(editButton).toBeVisible()
+    await editButton.click()
+
+    const editDrawer = page.locator('[id^=doc-drawer_posts_1_]')
+    await expect(editDrawer).toBeVisible()
+
+    const popupButton = editDrawer.locator('.doc-controls__popup .popup__trigger-wrap button')
+    await expect(popupButton).toBeVisible()
+    await popupButton.click()
+
+    const deleteButton = page.locator('.popup__content #action-delete')
+    await expect(deleteButton).toBeVisible()
+    await deleteButton.click()
+
+    const deleteConfirmModal = page.locator('dialog[id^="delete-"][open]')
+    await expect(deleteConfirmModal).toBeVisible()
+    const confirmDeleteButton = deleteConfirmModal.locator('button[data-dialog-action="confirm"]')
+    await expect(confirmDeleteButton).toBeVisible()
+    await confirmDeleteButton.click()
+    await expect(editDrawer).toBeHidden()
+
+    // Removed from the acting table (optimistic) and the sibling polymorphic table
+    // (cross-table event). The sibling removal is what regresses without the poly-aware
+    // `{ relationTo, value }` lookup.
+    await expect(actingField.locator('tbody tr td', { hasText: exactText(title) })).toBeHidden()
+    await expect(siblingField.locator('tbody tr td', { hasText: exactText(title) })).toBeHidden()
+  })
+
   test('should edit joined document and update relationship table', async () => {
     await page.goto(categoriesURL.edit(categoryID))
 

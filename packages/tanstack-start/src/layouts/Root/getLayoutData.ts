@@ -13,6 +13,7 @@ import type {
 import { getNavPrefs } from '@payloadcms/ui/elements/Nav/getNavPrefs'
 import { RenderServerComponent } from '@payloadcms/ui/elements/RenderServerComponent'
 import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
+import { getRequestEmbed } from '@payloadcms/ui/utilities/getRequestEmbed'
 import { getRequestTheme } from '@payloadcms/ui/utilities/getRequestTheme'
 import { Outlet } from '@tanstack/react-router'
 import { applyLocaleFiltering } from 'payload/shared'
@@ -66,6 +67,7 @@ export async function getLayoutData({
   } = await initReq({ configPromise, importMap })
 
   const theme = getRequestTheme({ config, cookies, headers })
+  const isEmbedded = getRequestEmbed({ config, cookies })
 
   const languageOptions: LanguageOptions = Object.entries(
     config.i18n.supportedLanguages || {},
@@ -129,6 +131,7 @@ export async function getLayoutData({
     clientConfig,
     dateFNSKey: req.i18n.dateFNSKey,
     fallbackLang: config.i18n.fallbackLanguage,
+    isEmbedded,
     isNavOpen: navPrefs?.open ?? true,
     languageCode,
     languageOptions,

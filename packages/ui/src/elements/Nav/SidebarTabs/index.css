@@ -29,10 +29,6 @@
     border: var(--stroke-width-small) solid transparent;
     background-color: transparent;
     color: var(--color-icon-secondary);
-    transition:
-      background-color 0.15s ease,
-      border-color 0.15s ease,
-      color 0.15s ease;
     position: relative;
 
     &:hover {
@@ -56,7 +52,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: opacity 0.15s ease;
   }
 
   /* Visually hidden but still accessible for screen readers */

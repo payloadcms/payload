@@ -1744,7 +1744,9 @@ export interface SlugField {
   localizedTitle?: string | null;
   customSlugify: string;
   localizedSlug?: string | null;
+  localizedSharedSlug?: string | null;
   readOnlySlug?: string | null;
+  sourcelessSlug?: string | null;
   test?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -1757,6 +1759,8 @@ export interface SlugAutosave {
   id: string;
   title?: string | null;
   slug: string;
+  localizedTitle?: string | null;
+  localizedSlug: string;
   updatedAt: string;
   createdAt: string;
   _status?: ('draft' | 'published') | null;
@@ -3526,7 +3530,9 @@ export interface SlugFieldsSelect<T extends boolean = true> {
   localizedTitle?: T;
   customSlugify?: T;
   localizedSlug?: T;
+  localizedSharedSlug?: T;
   readOnlySlug?: T;
+  sourcelessSlug?: T;
   test?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -3538,6 +3544,8 @@ export interface SlugFieldsSelect<T extends boolean = true> {
 export interface SlugAutosaveSelect<T extends boolean = true> {
   title?: T;
   slug?: T;
+  localizedTitle?: T;
+  localizedSlug?: T;
   updatedAt?: T;
   createdAt?: T;
   _status?: T;

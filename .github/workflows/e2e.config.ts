@@ -101,6 +101,7 @@ const nextSuites: TestConfig[] = [
   { file: 'queues', shards: 1 },
   { file: 'sort', shards: 1 },
   { file: 'server-url', shards: 1 },
+  { file: 'tags', shards: 1 },
   { file: 'trash', shards: 2 },
   { file: 'versions', shards: 3 },
   { file: 'uploads', shards: 3 },

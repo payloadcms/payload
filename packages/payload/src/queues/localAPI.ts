@@ -1,4 +1,4 @@
-import type { BaseJob, RunningJobFromTask } from './config/types/workflowTypes.js'
+import type { RunningJobFromTask } from './config/types/workflowTypes.js'
 
 import {
   createLocalReq,
@@ -56,7 +56,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
     args:
       | {
           input: TypedJobs['tasks'][TTaskOrWorkflowSlug]['input']
-          meta?: BaseJob['meta']
+          meta?: Job['meta']
           /**
            * If set to false, access control as defined in jobsConfig.access.queue will be run.
            * By default, this is true and no access control will be run.
@@ -80,7 +80,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
         }
       | {
           input: TypedJobs['workflows'][TTaskOrWorkflowSlug]['input']
-          meta?: BaseJob['meta']
+          meta?: Job['meta']
           /**
            * If set to false, access control as defined in jobsConfig.access.queue will be run.
            * By default, this is true and no access control will be run.
@@ -199,7 +199,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
             where: {
               and: [
                 { concurrencyKey: { equals: concurrencyKey } },
-                { processing: { equals: false } },
+                { processingUntil: { exists: false } },
                 { completedAt: { exists: false } },
               ],
             },
@@ -378,7 +378,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           cancelled: true,
         },
         hasError: true,
-        processing: false,
+        processingUntil: null,
         waitUntil: null,
       },
       req,
@@ -422,7 +422,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
           cancelled: true,
         },
         hasError: true,
-        processing: false,
+        processingUntil: null,
         waitUntil: null,
       },
       req,

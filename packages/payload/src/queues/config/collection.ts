@@ -139,6 +139,12 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
         virtual: true,
       },
       {
+        // The meta field can be used to store arbitrary data about the job. The scheduling system
+        // uses `scheduled: true` to indicate that it queued the job.
+        name: 'meta',
+        type: 'json',
+      },
+      {
         type: 'tabs',
         tabs: [
           {
@@ -226,13 +232,21 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
         index: true,
       },
       {
-        name: 'processing',
-        type: 'checkbox',
+        name: 'processingUntil',
+        type: 'date',
         admin: {
+          date: { pickerAppearance: 'dayAndTime' },
           position: 'sidebar',
         },
-        defaultValue: false,
         index: true,
+      },
+      {
+        name: 'processingToken',
+        type: 'text',
+        admin: {
+          hidden: true,
+          readOnly: true,
+        },
       },
       // Only add concurrencyKey field if concurrency control is enabled
       ...(jobsConfig.enableConcurrencyControl
@@ -266,7 +280,8 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
       beforeChange: [
         ({ data, originalDoc }) => {
           if (originalDoc?.error?.cancelled) {
-            data.processing = false
+            data.processingToken = null
+            data.processingUntil = null
             data.hasError = true
             delete data.completedAt
             delete data.waitUntil
@@ -279,15 +294,6 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
     versions: false,
   }
 
-  if (jobsConfig.stats) {
-    // TODO: In 4.0, this should be added by default.
-    // The meta field can be used to store arbitrary data about the job. The scheduling system uses this to store
-    // `scheduled: true` to indicate that the job was queued by the scheduling system.
-    jobsCollection.fields.push({
-      name: 'meta',
-      type: 'json',
-    })
-  }
   return jobsCollection
 }
 

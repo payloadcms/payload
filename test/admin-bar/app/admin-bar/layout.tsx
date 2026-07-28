@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { PayloadAdminBar } from '@payloadcms/admin-bar'
 import React from 'react'
 
-import './app.scss'
+import './app.css'
 
 export const metadata: Metadata = {
   description: 'Payload Admin Bar',

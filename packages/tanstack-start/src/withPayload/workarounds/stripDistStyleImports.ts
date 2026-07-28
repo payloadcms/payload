@@ -44,7 +44,7 @@ const PAYLOAD_PKG_SRC_RE = /\/packages\/[^/]+\/src\//
  *    blowing past the e2e waits. Stripping them collapses it back to ~3s.
  *
  * Safe because every one of these components' styles also ship in the global
- * `@payloadcms/ui/scss/app.scss` the admin imports, so dropping the per-module
+ * `@payloadcms/ui/css/app.css` the admin imports, so dropping the per-module
  * RSC collection here changes nothing visually (verified: diff + Nav stay
  * styled). The admin `Nav` etc. are deliberately excluded — they rely on the
  * RSC collection and a broad strip leaves them unstyled.

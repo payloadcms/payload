@@ -32,7 +32,7 @@ export type JobStats = {
 /**
  * Global config for job statistics.
  */
-export const getJobStatsGlobal: (config: Config) => GlobalConfig = (config) => {
+export const getJobStatsGlobal: () => GlobalConfig = () => {
   return {
     slug: jobStatsGlobalSlug,
     admin: {
