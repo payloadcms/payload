@@ -44,7 +44,7 @@ export type AuthSessionSyncEvent =
     }
 
 export type AuthSessionResyncOptions = {
-  isCurrent: () => boolean
+  isSessionEventStale: () => boolean
 }
 
 export type AuthSessionResyncResult<T = unknown> =
@@ -210,11 +210,11 @@ export function createAuthSessionSync({
       return
     }
 
-    const isCurrent = () => isActive && latestLifecycleOrder === notification
+    const isSessionEventStale = () => !isActive || latestLifecycleOrder !== notification
 
-    void fetchFullUser({ isCurrent })
+    void fetchFullUser({ isSessionEventStale })
       .then((result) => {
-        if (!isCurrent()) {
+        if (isSessionEventStale()) {
           return
         }
 

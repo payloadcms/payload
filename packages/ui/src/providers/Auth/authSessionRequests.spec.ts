@@ -48,11 +48,11 @@ describe('createAuthSessionRequests', () => {
   it('should discard a queued result after the session changes', async () => {
     const authRequests = createAuthSessionRequests()
     const operation = createDeferred<void>()
-    let isCurrentAfterSettlement = true
+    let isResultStaleAfterSettlement = false
 
-    const request = authRequests.queue(async ({ isCurrent }) => {
+    const request = authRequests.queue(async ({ isResultStale }) => {
       await operation.promise
-      isCurrentAfterSettlement = isCurrent()
+      isResultStaleAfterSettlement = isResultStale()
     })
 
     await Promise.resolve()
@@ -60,7 +60,7 @@ describe('createAuthSessionRequests', () => {
     operation.resolve()
     await request
 
-    expect(isCurrentAfterSettlement).toBe(false)
+    expect(isResultStaleAfterSettlement).toBe(true)
   })
 
   it('should settle a logout once and prevent refresh from committing', async () => {

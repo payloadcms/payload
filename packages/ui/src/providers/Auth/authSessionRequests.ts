@@ -3,7 +3,7 @@ import type { AuthenticatedUser } from 'payload'
 export type AuthRequestContext = {
   acceptResult: () => boolean
   invalidateWhenIdle: (invalidate: () => void) => void
-  isCurrent: () => boolean
+  isResultStale: () => boolean
 }
 
 export type AuthSessionRequests = {
@@ -56,10 +56,10 @@ export function createAuthSessionRequests(): AuthSessionRequests {
     const requestGeneration = sessionGeneration
     const requestSequence = ++authRequestSequence
     const runRequest = async (): Promise<Result> => {
-      const isCurrent = () => sessionGeneration === requestGeneration && !isLoggingOut
+      const isResultStale = () => sessionGeneration !== requestGeneration || isLoggingOut
       const result = await request({
         acceptResult: () => {
-          if (!isCurrent()) {
+          if (isResultStale()) {
             return false
           }
 
@@ -67,7 +67,7 @@ export function createAuthSessionRequests(): AuthSessionRequests {
           return true
         },
         invalidateWhenIdle: (invalidate) => {
-          if (!isCurrent()) {
+          if (isResultStale()) {
             return
           }
 
@@ -77,7 +77,7 @@ export function createAuthSessionRequests(): AuthSessionRequests {
             invalidate()
           }
         },
-        isCurrent,
+        isResultStale,
       })
 
       if (requestSequence === authRequestSequence) {

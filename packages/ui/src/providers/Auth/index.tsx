@@ -184,8 +184,8 @@ export function AuthProvider({
 
   const refreshSession = useCallback(
     ({ isActivityRefresh }: { isActivityRefresh: boolean }): Promise<AuthenticatedUser | null> => {
-      return authRequests.refresh(async ({ acceptResult, invalidateWhenIdle, isCurrent }) => {
-        if (!isCurrent()) {
+      return authRequests.refresh(async ({ acceptResult, invalidateWhenIdle, isResultStale }) => {
+        if (isResultStale()) {
           return null
         }
 
@@ -206,7 +206,7 @@ export function AuthProvider({
             },
           )
 
-          if (!isCurrent()) {
+          if (isResultStale()) {
             return null
           }
 
@@ -343,13 +343,13 @@ export function AuthProvider({
   )
 
   const fetchFullUserResult = React.useCallback(
-    ({ isCurrent }: Partial<AuthSessionResyncOptions> = {}): Promise<
+    ({ isSessionEventStale }: Partial<AuthSessionResyncOptions> = {}): Promise<
       AuthSessionResyncResult<AuthenticatedUser>
     > => {
-      return authRequests.queue(async ({ acceptResult, isCurrent: isRequestCurrent }) => {
-        const canApplyResult = () => isRequestCurrent() && (!isCurrent || isCurrent())
+      return authRequests.queue(async ({ acceptResult, isResultStale }) => {
+        const isResponseStale = () => isResultStale() || Boolean(isSessionEventStale?.())
 
-        if (!canApplyResult()) {
+        if (isResponseStale()) {
           return { status: 'indeterminate' }
         }
 
@@ -373,7 +373,7 @@ export function AuthProvider({
 
           const json: null | UserWithToken = await request.json()
 
-          if (!canApplyResult()) {
+          if (isResponseStale()) {
             return { status: 'indeterminate' }
           }
 
