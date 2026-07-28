@@ -1,11 +1,14 @@
-import type { UserWithToken } from '../types.js'
 import type {
+  CreateTabSessionSyncArgs,
+  OnExpiredSession,
+  OnLoggedOutSession,
+  OnRefreshedSession,
+  PublishStorageNotification,
+  ReconcileStorageSession,
   TabSessionEvent,
   TabSessionLifecycleOrder,
   TabSessionLogoutPublication,
   TabSessionPublication,
-  TabSessionReconciliationOptions,
-  TabSessionReconciliationResult,
   TabSessionStorageNotification,
 } from './types.js'
 
@@ -16,9 +19,12 @@ import {
   getLifecycleOrder,
   isTabSessionMessage,
   parseTabSessionStorageNotification,
+  tabSessionSyncChannelName,
+  tabSessionSyncStorageKey,
 } from './utilities.js'
 
 export type {
+  CreateTabSessionSyncArgs,
   TabSessionEvent,
   TabSessionEventType,
   TabSessionLogoutPublication,
@@ -29,9 +35,6 @@ export type {
 } from './types.js'
 
 export { TAB_SESSION_EVENT_TYPES } from './types.js'
-
-const tabSessionSyncChannelName = 'payload-auth-session-tab-sync'
-const tabSessionSyncStorageKey = 'payload:auth-session:tab-sync'
 
 /**
  * Coordinates authentication session state across browser tabs.
@@ -50,21 +53,10 @@ export function createTabSessionSync({
   onTabSessionUnauthenticated,
   reconcileSession,
   sourceTabID,
-}: {
-  getTokenExpirationMs: () => number | undefined
-  now?: () => number
-  onSessionExpired: (expiredTokenAt: number) => void
-  onSessionLoggedOut: () => void
-  onSessionRefreshed: (session: UserWithToken) => void
-  onTabSessionUnauthenticated: () => void
-  reconcileSession: (
-    options: TabSessionReconciliationOptions,
-  ) => Promise<TabSessionReconciliationResult>
-  sourceTabID: string
-}): {
+}: CreateTabSessionSyncArgs): {
+  broadcast: (event: TabSessionEvent) => TabSessionPublication
+  broadcastLogoutSettlement: (publication: TabSessionLogoutPublication) => void
   cleanup: () => void
-  publish: (event: TabSessionEvent) => TabSessionPublication
-  publishLogoutSettlement: (publication: TabSessionLogoutPublication) => void
 } {
   let channel: BroadcastChannel | undefined
   let isActive = true
@@ -72,7 +64,34 @@ export function createTabSessionSync({
   let latestLifecycleOrder: TabSessionLifecycleOrder | undefined
   let pendingStorageLifecycleOrder: TabSessionLifecycleOrder | undefined
 
-  const receiveBroadcastMessage = ({ data }: MessageEvent<unknown>) => {
+  const onExpiredSession: OnExpiredSession = ({ lifecycleOrder, message }) => {
+    const localExpirationMs = getTokenExpirationMs()
+
+    if (localExpirationMs === undefined || localExpirationMs <= message.expiredTokenAt) {
+      pendingStorageLifecycleOrder = undefined
+      latestLifecycleOrder = lifecycleOrder
+      onSessionExpired(message.expiredTokenAt)
+    }
+  }
+
+  const onLoggedOutSession: OnLoggedOutSession = ({ lifecycleOrder }) => {
+    pendingStorageLifecycleOrder = undefined
+    latestLifecycleOrder = lifecycleOrder
+    onSessionLoggedOut()
+  }
+
+  const onRefreshedSession: OnRefreshedSession = ({ lifecycleOrder, message }) => {
+    const ondExpirationMs = message.session.exp * 1000
+    const localExpirationMs = getTokenExpirationMs()
+
+    if (localExpirationMs === undefined || ondExpirationMs >= localExpirationMs) {
+      pendingStorageLifecycleOrder = undefined
+      latestLifecycleOrder = lifecycleOrder
+      onSessionRefreshed(message.session)
+    }
+  }
+
+  const handleChannelMessage = ({ data }: MessageEvent<unknown>) => {
     if (!isTabSessionMessage(data) || data.sourceTabID === sourceTabID) {
       return
     }
@@ -91,44 +110,57 @@ export function createTabSessionSync({
       return
     }
 
-    if (data.type === TAB_SESSION_EVENT_TYPES.REFRESHED) {
-      const receivedExpirationMs = data.session.exp * 1000
-      const localExpirationMs = getTokenExpirationMs()
+    switch (data.type) {
+      case TAB_SESSION_EVENT_TYPES.EXPIRED:
+        onExpiredSession({ lifecycleOrder, message: data })
+        break
 
-      if (localExpirationMs !== undefined && receivedExpirationMs < localExpirationMs) {
-        return
-      }
+      case TAB_SESSION_EVENT_TYPES.LOGGED_OUT:
+        onLoggedOutSession({ lifecycleOrder })
+        break
 
-      pendingStorageLifecycleOrder = undefined
-      latestLifecycleOrder = lifecycleOrder
-      onSessionRefreshed(data.session)
-      return
+      case TAB_SESSION_EVENT_TYPES.REFRESHED:
+        onRefreshedSession({ lifecycleOrder, message: data })
+        break
     }
-
-    if (data.type === TAB_SESSION_EVENT_TYPES.EXPIRED) {
-      const localExpirationMs = getTokenExpirationMs()
-
-      if (localExpirationMs !== undefined && localExpirationMs > data.expiredTokenAt) {
-        return
-      }
-
-      pendingStorageLifecycleOrder = undefined
-      latestLifecycleOrder = lifecycleOrder
-      onSessionExpired(data.expiredTokenAt)
-      return
-    }
-
-    pendingStorageLifecycleOrder = undefined
-    latestLifecycleOrder = lifecycleOrder
-    onSessionLoggedOut()
   }
 
-  const receiveStorageNotification = (event: StorageEvent) => {
-    if (event.key !== tabSessionSyncStorageKey || !event.newValue) {
-      return
-    }
+  const reconcileStorageSession: ReconcileStorageSession = ({ notification }) => {
+    const isTabSessionEventStale = () => !isActive || latestLifecycleOrder !== notification
 
-    const notification = parseTabSessionStorageNotification(event.newValue)
+    void reconcileSession({ isTabSessionEventStale })
+      .then((result) => {
+        if (!isTabSessionEventStale()) {
+          if (result.status === 'authenticated') {
+            pendingStorageLifecycleOrder = undefined
+            latestLifecycleOrder = {
+              type: TAB_SESSION_EVENT_TYPES.REFRESHED,
+              affectedExpirationMs: result.expirationMs,
+              refreshStartedAt:
+                notification.type === TAB_SESSION_EVENT_TYPES.REFRESHED
+                  ? notification.refreshStartedAt
+                  : notification.sentAt,
+              sentAt: notification.sentAt,
+              sourceTabID: notification.sourceTabID,
+            }
+          } else if (result.status === 'unauthenticated') {
+            pendingStorageLifecycleOrder = undefined
+            latestLifecycleOrder = {
+              type: TAB_SESSION_EVENT_TYPES.LOGGED_OUT,
+              affectedExpirationMs: 0,
+              sentAt: notification.sentAt,
+              sourceTabID: notification.sourceTabID,
+            }
+
+            onTabSessionUnauthenticated()
+          }
+        }
+      })
+      .catch(() => undefined)
+  }
+
+  const handleStorageNotification = (event: StorageEvent) => {
+    const notification = parseTabSessionStorageNotification(event)
 
     if (!notification || notification.sourceTabID === sourceTabID) {
       return
@@ -149,47 +181,72 @@ export function createTabSessionSync({
     latestLifecycleOrder = notification
 
     if (notification.type === TAB_SESSION_EVENT_TYPES.LOGGED_OUT) {
-      pendingStorageLifecycleOrder = undefined
-      onSessionLoggedOut()
+      onLoggedOutSession({ lifecycleOrder: notification })
+    } else {
+      reconcileStorageSession({ notification })
+    }
+  }
+
+  function closeChannel(channelToClose: BroadcastChannel | undefined): void {
+    if (!channelToClose) {
       return
     }
 
-    const isTabSessionEventStale = () => !isActive || latestLifecycleOrder !== notification
+    try {
+      channelToClose.removeEventListener('message', handleChannelMessage)
+    } catch {
+      // Cross-tab synchronization cleanup is best-effort.
+    }
 
-    void reconcileSession({ isTabSessionEventStale })
-      .then((result) => {
-        if (isTabSessionEventStale()) {
-          return
-        }
+    try {
+      channelToClose.close()
+    } catch {
+      // Cross-tab synchronization cleanup is best-effort.
+    }
+  }
 
-        if (result.status === 'authenticated') {
-          pendingStorageLifecycleOrder = undefined
-          latestLifecycleOrder = {
-            type: TAB_SESSION_EVENT_TYPES.REFRESHED,
-            affectedExpirationMs: result.expirationMs,
-            refreshStartedAt:
-              notification.type === TAB_SESSION_EVENT_TYPES.REFRESHED
-                ? notification.refreshStartedAt
-                : notification.sentAt,
-            sentAt: notification.sentAt,
-            sourceTabID: notification.sourceTabID,
-          }
-          return
-        }
+  function attachStorageListener(): void {
+    if (isStorageListenerInstalled) {
+      return
+    }
 
-        if (result.status === 'unauthenticated') {
-          pendingStorageLifecycleOrder = undefined
-          latestLifecycleOrder = {
-            type: TAB_SESSION_EVENT_TYPES.LOGGED_OUT,
-            affectedExpirationMs: 0,
-            sentAt: notification.sentAt,
-            sourceTabID: notification.sourceTabID,
-          }
+    try {
+      window.addEventListener('storage', handleStorageNotification)
+      isStorageListenerInstalled = true
+    } catch {
+      // Local authentication must continue when storage events are unavailable.
+    }
+  }
 
-          onTabSessionUnauthenticated()
-        }
-      })
-      .catch(() => undefined)
+  function downgradeToStorage(): void {
+    closeChannel(channel)
+    channel = undefined
+    attachStorageListener()
+  }
+
+  function getNextLifecycleTimestamp(): number {
+    const currentTime = now()
+    const latestSentAt = latestLifecycleOrder?.sentAt ?? Number.NEGATIVE_INFINITY
+
+    return currentTime > latestSentAt ? currentTime : latestSentAt + 1
+  }
+
+  const publishStorageNotification: PublishStorageNotification = ({ notification }) => {
+    const storageNotification: TabSessionStorageNotification = channel
+      ? notification
+      : { ...notification, isBroadcastChannelFallback: true }
+
+    try {
+      localStorage.setItem(tabSessionSyncStorageKey, JSON.stringify(storageNotification))
+    } catch {
+      // Local authentication must continue when storage is unavailable.
+    }
+
+    try {
+      localStorage.removeItem(tabSessionSyncStorageKey)
+    } catch {
+      // Local authentication must continue when storage is unavailable.
+    }
   }
 
   if (typeof BroadcastChannel === 'function') {
@@ -198,7 +255,7 @@ export function createTabSessionSync({
     try {
       nextChannel = new BroadcastChannel(tabSessionSyncChannelName)
 
-      nextChannel.addEventListener('message', receiveBroadcastMessage)
+      nextChannel.addEventListener('message', handleChannelMessage)
       channel = nextChannel
     } catch {
       closeChannel(nextChannel)
@@ -206,26 +263,10 @@ export function createTabSessionSync({
     }
   }
 
-  installStorageListener()
+  attachStorageListener()
 
   return {
-    cleanup: () => {
-      isActive = false
-      pendingStorageLifecycleOrder = undefined
-      closeChannel(channel)
-      channel = undefined
-
-      if (isStorageListenerInstalled) {
-        try {
-          window.removeEventListener('storage', receiveStorageNotification)
-        } catch {
-          // Cross-tab synchronization cleanup is best-effort.
-        }
-
-        isStorageListenerInstalled = false
-      }
-    },
-    publish: (event) => {
+    broadcast: (event) => {
       const sentAt = getNextLifecycleTimestamp()
       const message = createTabSessionMessage({ event, sentAt, sourceTabID })
       const lifecycleOrder = getLifecycleOrder(message)
@@ -247,7 +288,7 @@ export function createTabSessionSync({
 
       return lifecycleOrder
     },
-    publishLogoutSettlement: (publication) => {
+    broadcastLogoutSettlement: (publication) => {
       const notification: TabSessionStorageNotification = {
         ...publication,
         sentAt: getNextLifecycleTimestamp(),
@@ -258,71 +299,21 @@ export function createTabSessionSync({
       latestLifecycleOrder = notification
       publishStorageNotification({ notification })
     },
-  }
+    cleanup: () => {
+      isActive = false
+      pendingStorageLifecycleOrder = undefined
+      closeChannel(channel)
+      channel = undefined
 
-  function closeChannel(channelToClose: BroadcastChannel | undefined): void {
-    if (!channelToClose) {
-      return
-    }
+      if (isStorageListenerInstalled) {
+        try {
+          window.removeEventListener('storage', handleStorageNotification)
+        } catch {
+          // Cross-tab synchronization cleanup is best-effort.
+        }
 
-    try {
-      channelToClose.removeEventListener('message', receiveBroadcastMessage)
-    } catch {
-      // Cross-tab synchronization cleanup is best-effort.
-    }
-
-    try {
-      channelToClose.close()
-    } catch {
-      // Cross-tab synchronization cleanup is best-effort.
-    }
-  }
-
-  function downgradeToStorage(): void {
-    closeChannel(channel)
-    channel = undefined
-    installStorageListener()
-  }
-
-  function getNextLifecycleTimestamp(): number {
-    const currentTime = now()
-    const latestSentAt = latestLifecycleOrder?.sentAt ?? Number.NEGATIVE_INFINITY
-
-    return currentTime > latestSentAt ? currentTime : latestSentAt + 1
-  }
-
-  function installStorageListener(): void {
-    if (isStorageListenerInstalled) {
-      return
-    }
-
-    try {
-      window.addEventListener('storage', receiveStorageNotification)
-      isStorageListenerInstalled = true
-    } catch {
-      // Local authentication must continue when storage events are unavailable.
-    }
-  }
-
-  function publishStorageNotification({
-    notification,
-  }: {
-    notification: TabSessionStorageNotification
-  }): void {
-    const storageNotification: TabSessionStorageNotification = channel
-      ? notification
-      : { ...notification, isBroadcastChannelFallback: true }
-
-    try {
-      localStorage.setItem(tabSessionSyncStorageKey, JSON.stringify(storageNotification))
-    } catch {
-      // Local authentication must continue when storage is unavailable.
-    }
-
-    try {
-      localStorage.removeItem(tabSessionSyncStorageKey)
-    } catch {
-      // Local authentication must continue when storage is unavailable.
-    }
+        isStorageListenerInstalled = false
+      }
+    },
   }
 }

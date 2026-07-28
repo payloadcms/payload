@@ -8,6 +8,9 @@ import type {
 
 import { TAB_SESSION_EVENT_TYPES } from './types.js'
 
+export const tabSessionSyncStorageKey = 'payload:auth-session:tab-sync'
+export const tabSessionSyncChannelName = 'payload-auth-session-tab-sync'
+
 export function isTabSessionMessage(value: unknown): value is TabSessionMessage {
   if (
     !value ||
@@ -52,83 +55,59 @@ export function isTabSessionMessage(value: unknown): value is TabSessionMessage 
   return false
 }
 
+export function isTabSessionStorageNotification(
+  value: unknown,
+): value is TabSessionStorageNotification {
+  if (
+    !value ||
+    typeof value !== 'object' ||
+    !('affectedExpirationMs' in value) ||
+    typeof value.affectedExpirationMs !== 'number' ||
+    !Number.isFinite(value.affectedExpirationMs) ||
+    !('sentAt' in value) ||
+    typeof value.sentAt !== 'number' ||
+    !Number.isFinite(value.sentAt) ||
+    !('sourceTabID' in value) ||
+    typeof value.sourceTabID !== 'string' ||
+    !('type' in value) ||
+    !isTabSessionEventType(value.type) ||
+    ('isBroadcastChannelFallback' in value && value.isBroadcastChannelFallback !== true)
+  ) {
+    return false
+  }
+
+  if (value.type === TAB_SESSION_EVENT_TYPES.EXPIRED) {
+    return !('settlesSentAt' in value)
+  }
+
+  if (value.type === TAB_SESSION_EVENT_TYPES.REFRESHED) {
+    return (
+      !('settlesSentAt' in value) &&
+      'refreshStartedAt' in value &&
+      typeof value.refreshStartedAt === 'number' &&
+      Number.isFinite(value.refreshStartedAt)
+    )
+  }
+
+  return (
+    value.affectedExpirationMs === 0 &&
+    'settlesSentAt' in value &&
+    typeof value.settlesSentAt === 'number' &&
+    Number.isFinite(value.settlesSentAt)
+  )
+}
+
 export function parseTabSessionStorageNotification(
-  value: string,
+  event: StorageEvent,
 ): null | TabSessionStorageNotification {
+  if (event.key !== tabSessionSyncStorageKey || !event.newValue) {
+    return null
+  }
+
   try {
-    const notification: unknown = JSON.parse(value)
+    const notification: unknown = JSON.parse(event.newValue)
 
-    if (
-      notification &&
-      typeof notification === 'object' &&
-      'affectedExpirationMs' in notification &&
-      typeof notification.affectedExpirationMs === 'number' &&
-      Number.isFinite(notification.affectedExpirationMs) &&
-      'sentAt' in notification &&
-      typeof notification.sentAt === 'number' &&
-      Number.isFinite(notification.sentAt) &&
-      'sourceTabID' in notification &&
-      typeof notification.sourceTabID === 'string' &&
-      'type' in notification &&
-      isTabSessionEventType(notification.type)
-    ) {
-      const lifecycleOrder = {
-        affectedExpirationMs: notification.affectedExpirationMs,
-        sentAt: notification.sentAt,
-        sourceTabID: notification.sourceTabID,
-      }
-      const isBroadcastChannelFallback =
-        'isBroadcastChannelFallback' in notification &&
-        notification.isBroadcastChannelFallback === true
-          ? true
-          : undefined
-
-      if (notification.type === TAB_SESSION_EVENT_TYPES.EXPIRED) {
-        if ('settlesSentAt' in notification) {
-          return null
-        }
-
-        return {
-          type: notification.type,
-          ...lifecycleOrder,
-          isBroadcastChannelFallback,
-        }
-      }
-
-      if (notification.type === TAB_SESSION_EVENT_TYPES.REFRESHED) {
-        if (
-          'settlesSentAt' in notification ||
-          !('refreshStartedAt' in notification) ||
-          typeof notification.refreshStartedAt !== 'number' ||
-          !Number.isFinite(notification.refreshStartedAt)
-        ) {
-          return null
-        }
-
-        return {
-          type: notification.type,
-          ...lifecycleOrder,
-          isBroadcastChannelFallback,
-          refreshStartedAt: notification.refreshStartedAt,
-        }
-      }
-
-      if (
-        notification.affectedExpirationMs === 0 &&
-        'settlesSentAt' in notification &&
-        typeof notification.settlesSentAt === 'number' &&
-        Number.isFinite(notification.settlesSentAt)
-      ) {
-        return {
-          type: notification.type,
-          affectedExpirationMs: 0,
-          isBroadcastChannelFallback,
-          sentAt: notification.sentAt,
-          settlesSentAt: notification.settlesSentAt,
-          sourceTabID: notification.sourceTabID,
-        }
-      }
-    }
+    return isTabSessionStorageNotification(notification) ? notification : null
   } catch {
     // Ignore storage writes that do not belong to cross-tab session synchronization.
   }

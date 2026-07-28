@@ -6,15 +6,15 @@ import type {
   TabSessionEvent,
   TabSessionLogoutPublication,
   TabSessionPublication,
-} from './tabSessionSync/index.js'
+} from './index.js'
 
-import { createTabSessionSync } from './tabSessionSync/index.js'
+import { createTabSessionSync } from './index.js'
 
 export type TabSessionSync = {
-  /** Publishes a session lifecycle event to the other browser tabs. */
-  publish: (event: TabSessionEvent) => TabSessionPublication | undefined
+  /** Broadcasts a session lifecycle event to the other browser tabs. */
+  broadcast: (event: TabSessionEvent) => TabSessionPublication | undefined
   /** Notifies storage-fallback tabs after the server-side logout request settles. */
-  publishLogoutSettlement: (publication: TabSessionLogoutPublication) => void
+  broadcastLogoutSettlement: (publication: TabSessionLogoutPublication) => void
 }
 
 /** Connects the Auth provider to one cross-tab session coordinator for the current browser tab. */
@@ -52,15 +52,18 @@ export function useTabSessionSync(
     }
   }, [sourceTabID])
 
-  const publish = useCallback(
-    (event: TabSessionEvent) => tabSessionSyncRef.current?.publish(event),
+  const broadcast = useCallback(
+    (event: TabSessionEvent) => tabSessionSyncRef.current?.broadcast(event),
     [],
   )
-  const publishLogoutSettlement = useCallback((publication: TabSessionLogoutPublication) => {
-    tabSessionSyncRef.current?.publishLogoutSettlement(publication)
+  const broadcastLogoutSettlement = useCallback((publication: TabSessionLogoutPublication) => {
+    tabSessionSyncRef.current?.broadcastLogoutSettlement(publication)
   }, [])
 
-  return useMemo(() => ({ publish, publishLogoutSettlement }), [publish, publishLogoutSettlement])
+  return useMemo(
+    () => ({ broadcast, broadcastLogoutSettlement }),
+    [broadcast, broadcastLogoutSettlement],
+  )
 }
 
 function createTabID(): string {

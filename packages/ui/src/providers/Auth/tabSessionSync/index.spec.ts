@@ -23,11 +23,11 @@ afterEach(() => {
 })
 
 describe('createTabSessionSync', () => {
-  it('should publish refreshed sessions with source-tab and timing metadata', () => {
+  it('should broadcast refreshed sessions with source-tab and timing metadata', () => {
     const session = createSession({ expirationMs: 20_000, token: 'refreshed-token' })
     const tabSessionSync = createTestTabSessionSync({ now: () => 123 })
 
-    tabSessionSync.publish({
+    tabSessionSync.broadcast({
       refreshStartedAt: 100,
       session,
       type: TAB_SESSION_EVENT_TYPES.REFRESHED,
@@ -116,7 +116,7 @@ describe('createTabSessionSync', () => {
     expect(secondState).toBe('logged-out')
   })
 
-  it('should keep logout ahead of a refresh that started earlier and published later', () => {
+  it('should keep logout ahead of a refresh that started earlier and broadcast later', () => {
     const onSessionLoggedOut = vi.fn()
     const onSessionRefreshed = vi.fn()
     const refreshMessage = createTabSessionMessage({
@@ -250,12 +250,12 @@ describe('createTabSessionSync', () => {
       sourceTabID: 'receiving-tab',
     })
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
-    const publisher = createTestTabSessionSync({
+    const broadcaster = createTestTabSessionSync({
       now: () => 123,
-      sourceTabID: 'publishing-tab',
+      sourceTabID: 'broadcasting-tab',
     })
 
-    publisher.publish({
+    broadcaster.broadcast({
       refreshStartedAt: 100,
       session: createSession({ expirationMs: 20_000, token: 'sensitive-token' }),
       type: TAB_SESSION_EVENT_TYPES.REFRESHED,
@@ -268,7 +268,7 @@ describe('createTabSessionSync', () => {
       refreshStartedAt: 100,
       type: TAB_SESSION_EVENT_TYPES.REFRESHED,
       sentAt: 123,
-      sourceTabID: 'publishing-tab',
+      sourceTabID: 'broadcasting-tab',
     })
     expect(value).not.toContain('sensitive-token')
     expect(value).not.toContain('user')
@@ -280,7 +280,7 @@ describe('createTabSessionSync', () => {
 
     reconcileSession.mockClear()
 
-    const logoutPublication = publisher.publish({
+    const logoutPublication = broadcaster.broadcast({
       type: TAB_SESSION_EVENT_TYPES.LOGGED_OUT,
     })
 
@@ -291,7 +291,7 @@ describe('createTabSessionSync', () => {
       throw new Error('Expected a logged-out publication.')
     }
 
-    publisher.publishLogoutSettlement(logoutPublication)
+    broadcaster.broadcastLogoutSettlement(logoutPublication)
 
     const [logoutKey, logoutValue] = setItem.mock.calls[1] as [string, string]
 
@@ -300,7 +300,7 @@ describe('createTabSessionSync', () => {
       isBroadcastChannelFallback: true,
       settlesSentAt: 124,
       sentAt: 125,
-      sourceTabID: 'publishing-tab',
+      sourceTabID: 'broadcasting-tab',
       type: TAB_SESSION_EVENT_TYPES.LOGGED_OUT,
     })
     expect(logoutValue).not.toContain('sensitive-token')
@@ -322,13 +322,13 @@ describe('createTabSessionSync', () => {
     createTestTabSessionSync({ reconcileSession, sourceTabID: 'storage-peer' })
     const addEventListener = vi.spyOn(window, 'addEventListener')
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
-    const publisher = createTestTabSessionSync({ sourceTabID: 'channel-publisher' })
+    const broadcaster = createTestTabSessionSync({ sourceTabID: 'channel-broadcaster' })
     const failedChannel = getBroadcastChannel()
 
     failedChannel.postMessage.mockImplementationOnce(() => {
       throw new Error('channel closed')
     })
-    publisher.publish({
+    broadcaster.broadcast({
       refreshStartedAt: 100,
       session: createSession({ expirationMs: 20_000 }),
       type: TAB_SESSION_EVENT_TYPES.REFRESHED,

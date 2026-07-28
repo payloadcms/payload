@@ -46,10 +46,6 @@ export function useAuthSessionTimers({
   const tokenExpirationMsRef = useRef<number>(undefined)
   const callbacksRef = useRef({ onActivityRefresh, onExpire, onReminder })
 
-  useEffect(() => {
-    callbacksRef.current = { onActivityRefresh, onExpire, onReminder }
-  }, [onActivityRefresh, onExpire, onReminder])
-
   const scheduleRefresh = useCallback((forceRefresh?: boolean) => {
     if (!hasActiveSessionRef.current) {
       return
@@ -79,7 +75,7 @@ export function useAuthSessionTimers({
     [scheduleRefresh],
   )
 
-  const installActivityListeners = useCallback(() => {
+  const addActivityListeners = useCallback(() => {
     if (activityListenerCleanupRef.current) {
       return
     }
@@ -137,7 +133,7 @@ export function useAuthSessionTimers({
       }
 
       hasActiveSessionRef.current = true
-      installActivityListeners()
+      addActivityListeners()
 
       const forceLogoutBufferMs = Math.min(60_000, expiresInMs / 2)
       const refreshWindowMs = forceLogoutBufferMs * 2
@@ -170,24 +166,30 @@ export function useAuthSessionTimers({
         }
       }, expiresInMs)
     },
-    [installActivityListeners, removeActivityListeners, scheduleRefresh],
+    [addActivityListeners, removeActivityListeners, scheduleRefresh],
   )
 
   const getCurrentExpirationMs = useCallback(() => tokenExpirationMsRef.current, [])
   const getLatestExpirationMs = useCallback(() => latestExpirationMsRef.current, [])
 
   useEffect(() => {
+    callbacksRef.current = { onActivityRefresh, onExpire, onReminder }
+  }, [onActivityRefresh, onExpire, onReminder])
+
+  useEffect(() => {
     hasActiveSessionRef.current = isAuthenticated
 
     if (isAuthenticated) {
-      installActivityListeners()
+      addActivityListeners()
       return
     }
 
     removeActivityListeners()
-  }, [installActivityListeners, isAuthenticated, removeActivityListeners])
+  }, [addActivityListeners, isAuthenticated, removeActivityListeners])
 
-  useEffect(() => clear, [clear])
+  useEffect(() => {
+    return clear
+  }, [clear])
 
   return useMemo(
     () => ({

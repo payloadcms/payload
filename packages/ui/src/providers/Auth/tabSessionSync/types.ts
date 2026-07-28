@@ -60,6 +60,19 @@ export type TabSessionReconciliationResult<T = unknown> =
       status: 'unauthenticated'
     }
 
+export type CreateTabSessionSyncArgs = {
+  getTokenExpirationMs: () => number | undefined
+  now?: () => number
+  onSessionExpired: (expiredTokenAt: number) => void
+  onSessionLoggedOut: () => void
+  onSessionRefreshed: (session: UserWithToken) => void
+  onTabSessionUnauthenticated: () => void
+  reconcileSession: (
+    options: TabSessionReconciliationOptions,
+  ) => Promise<TabSessionReconciliationResult>
+  sourceTabID: string
+}
+
 export type TabSessionPublication =
   | {
       affectedExpirationMs: 0
@@ -95,3 +108,23 @@ export type TabSessionStorageNotification = {
   | Extract<TabSessionPublication, { type: typeof TAB_SESSION_EVENT_TYPES.EXPIRED }>
   | Extract<TabSessionPublication, { type: typeof TAB_SESSION_EVENT_TYPES.REFRESHED }>
 )
+
+export type PublishStorageNotification = (args: {
+  notification: TabSessionStorageNotification
+}) => void
+
+export type OnExpiredSession = (args: {
+  lifecycleOrder: TabSessionLifecycleOrder
+  message: Extract<TabSessionMessage, { type: typeof TAB_SESSION_EVENT_TYPES.EXPIRED }>
+}) => void
+
+export type OnLoggedOutSession = (args: { lifecycleOrder: TabSessionLifecycleOrder }) => void
+
+export type OnRefreshedSession = (args: {
+  lifecycleOrder: TabSessionLifecycleOrder
+  message: Extract<TabSessionMessage, { type: typeof TAB_SESSION_EVENT_TYPES.REFRESHED }>
+}) => void
+
+export type ReconcileStorageSession = (args: {
+  notification: TabSessionStorageNotification
+}) => void

@@ -22,8 +22,8 @@ import { useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 import { createAuthSessionRequests } from './authSessionRequests.js'
 import { TAB_SESSION_EVENT_TYPES } from './tabSessionSync/index.js'
+import { useTabSessionSync } from './tabSessionSync/useTabSessionSync.js'
 import { useAuthSessionTimers } from './useAuthSessionTimers.js'
-import { useTabSessionSync } from './useTabSessionSync.js'
 
 export type { AuthContext, UserWithToken } from './types.js'
 
@@ -103,7 +103,7 @@ export function AuthProvider({
   function onSessionExpiration(expirationMs: number) {
     const collection = userRef.current?.collection
 
-    tabSessionSync.publish({
+    tabSessionSync.broadcast({
       type: TAB_SESSION_EVENT_TYPES.EXPIRED,
       expiredTokenAt: expirationMs,
     })
@@ -221,7 +221,7 @@ export function AuthProvider({
             }
 
             setLocalSession(json)
-            tabSessionSync.publish({
+            tabSessionSync.broadcast({
               type: TAB_SESSION_EVENT_TYPES.REFRESHED,
               refreshStartedAt,
               session: json,
@@ -232,7 +232,7 @@ export function AuthProvider({
           if (handledUser) {
             const invalidateSession = () => {
               if (handledExpiration !== undefined) {
-                tabSessionSync.publish({
+                tabSessionSync.broadcast({
                   type: TAB_SESSION_EVENT_TYPES.EXPIRED,
                   expiredTokenAt: handledExpiration,
                 })
@@ -296,13 +296,13 @@ export function AuthProvider({
 
   const logOut = useCallback(async () => {
     const logoutEvent = { type: TAB_SESSION_EVENT_TYPES.LOGGED_OUT } as const
-    const logoutPublication = tabSessionSync.publish(logoutEvent)
+    const logoutPublication = tabSessionSync.broadcast(logoutEvent)
     const collection = userRef.current?.collection
 
     await logOutSession({ collection })
 
     if (logoutPublication?.type === TAB_SESSION_EVENT_TYPES.LOGGED_OUT) {
-      tabSessionSync.publishLogoutSettlement(logoutPublication)
+      tabSessionSync.broadcastLogoutSettlement(logoutPublication)
     }
 
     return true
