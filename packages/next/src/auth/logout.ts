@@ -1,8 +1,8 @@
 'use server'
 
-import type { LogoutArgs } from '@payloadcms/ui/auth'
+import type { LogoutArgs } from 'payload/auth'
 
-import { logout as sharedLogout } from '@payloadcms/ui/auth'
+import { logout as sharedLogout } from 'payload/auth'
 
 import { nextServerAdapter } from '../adapters/server.js'
 

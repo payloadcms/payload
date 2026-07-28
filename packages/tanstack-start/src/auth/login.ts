@@ -4,7 +4,7 @@ import {
   type LoginArgs,
   type LoginArgsWithoutServerAdapter,
   login as sharedLogin,
-} from '@payloadcms/ui/auth'
+} from 'payload/auth'
 
 import { tanstackServerAdapter } from '../utilities/serverAdapter.server.js'
 

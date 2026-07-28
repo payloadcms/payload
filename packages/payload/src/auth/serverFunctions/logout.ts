@@ -1,7 +1,10 @@
-import type { MaybePromise, SanitizedConfig, ServerAdapter } from 'payload'
+import type { ServerAdapter } from '../../admin/adapters/server.js'
+import type { SanitizedConfig } from '../../config/types.js'
+import type { MaybePromise } from '../../types/index.js'
 
-import { createLocalReq, getPayload, logoutOperation } from 'payload'
-
+import { getPayload } from '../../index.js'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
+import { logoutOperation } from '../operations/logout.js'
 import { clearAuthCookie } from './cookies.js'
 
 export type LogoutArgs = {

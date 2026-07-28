@@ -6,7 +6,7 @@ import {
   type LoginArgs,
   type LoginArgsWithoutServerAdapter,
   login as sharedLogin,
-} from '@payloadcms/ui/auth'
+} from 'payload/auth'
 
 import { nextServerAdapter } from '../adapters/server.js'
 

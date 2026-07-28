@@ -1,8 +1,8 @@
 'use server'
 
-import type { RefreshArgs } from '@payloadcms/ui/auth'
+import type { RefreshArgs } from 'payload/auth'
 
-import { refresh as sharedRefresh } from '@payloadcms/ui/auth'
+import { refresh as sharedRefresh } from 'payload/auth'
 
 import { nextServerAdapter } from '../adapters/server.js'
 

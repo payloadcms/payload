@@ -1,7 +1,11 @@
-import type { CollectionSlug, MaybePromise, SanitizedConfig, ServerAdapter } from 'payload'
+import type { ServerAdapter } from '../../admin/adapters/server.js'
+import type { SanitizedConfig } from '../../config/types.js'
+import type { CollectionSlug } from '../../index.js'
+import type { MaybePromise } from '../../types/index.js'
 
-import { createLocalReq, getPayload, refreshOperation } from 'payload'
-
+import { getPayload } from '../../index.js'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
+import { refreshOperation } from '../operations/refresh.js'
 import { getExistingAuthToken, setAuthCookie } from './cookies.js'
 
 export type RefreshArgs = {

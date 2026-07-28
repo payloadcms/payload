@@ -1,14 +1,13 @@
-import type {
-  AuthCollectionSlug,
-  LoginResult,
-  MaybePromise,
-  SanitizedConfig,
-  ServerAdapter,
-} from 'payload'
+import type { ServerAdapter } from '../../admin/adapters/server.js'
+import type { SanitizedConfig } from '../../config/types.js'
+import type { AuthCollectionSlug } from '../../index.js'
+import type { MaybePromise } from '../../types/index.js'
+import type { LoginResult } from '../operations/login.js'
 
-import { getPayload } from 'payload'
-
-import { setAuthCookie } from './cookies.js'
+import { getPayload } from '../../index.js'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
+import { loginWithCookie } from '../loginWithCookie.js'
+import { applyAuthCookie } from './cookies.js'
 
 export type LoginArgs<TSlug extends AuthCollectionSlug> = {
   collection: TSlug
@@ -75,19 +74,16 @@ export async function login<TSlug extends AuthCollectionSlug>({
     loginData = { email, password }
   }
 
-  const result = await payload.login({
-    collection,
-    data: loginData,
+  const collectionConfig = payload.collections[collection]!
+
+  const { cookie, result } = await loginWithCookie({
+    collection: collectionConfig,
+    data: loginData as Parameters<typeof loginWithCookie>[0]['data'],
+    req: await createLocalReq({}, payload),
+    returnCookieAsObject: true,
   })
 
-  if (result.token) {
-    await setAuthCookie({
-      authConfig,
-      cookiePrefix: payload.config.cookiePrefix,
-      serverAdapter,
-      token: result.token,
-    })
-  }
+  await applyAuthCookie({ cookie, serverAdapter })
 
-  return result
+  return result as LoginResult<TSlug>
 }

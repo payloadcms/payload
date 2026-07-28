@@ -1,12 +1,14 @@
-import type { Auth, CookieOptions, ServerAdapter } from 'payload'
+import type { CookieOptions } from '../../admin/adapters/cookies.js'
+import type { ServerAdapter } from '../../admin/adapters/server.js'
+import type { Auth } from '../types.js'
 
-import { generateExpiredPayloadCookie, generatePayloadCookie } from 'payload'
+import { generateExpiredPayloadCookie, generatePayloadCookie } from '../cookies.js'
 
 /**
  * Object form returned by `generatePayloadCookie`/`generateExpiredPayloadCookie`
- * when `returnCookieAsObject` is `true`. Payload does not export the type.
+ * when `returnCookieAsObject` is `true`.
  */
-type GeneratedCookie = {
+export type GeneratedCookie = {
   domain?: string
   expires?: string
   httpOnly?: boolean
@@ -36,6 +38,21 @@ type AuthCookieArgs = {
   serverAdapter: ServerAdapter
 }
 
+/** Writes an already-generated cookie through the framework's cookie API. */
+export async function applyAuthCookie({
+  cookie,
+  serverAdapter,
+}: {
+  cookie: GeneratedCookie
+  serverAdapter: ServerAdapter
+}): Promise<void> {
+  if (!cookie.value) {
+    return
+  }
+
+  await serverAdapter.setCookie(cookie.name, cookie.value, toCookieOptions(cookie))
+}
+
 /** Writes the Payload auth cookie for `token` through the framework's cookie API. */
 export async function setAuthCookie({
   authConfig,
@@ -50,11 +67,7 @@ export async function setAuthCookie({
     token,
   }) as GeneratedCookie
 
-  if (!cookie.value) {
-    return
-  }
-
-  await serverAdapter.setCookie(cookie.name, cookie.value, toCookieOptions(cookie))
+  await applyAuthCookie({ cookie, serverAdapter })
 }
 
 /**
