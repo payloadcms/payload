@@ -10,12 +10,10 @@ type Args = {
 
 export async function createFolderFromDoc({
   folderName,
-  page,
   folderType = ['Posts'],
+  page,
 }: Args): Promise<void> {
-  const addFolderButton = page.locator('.create-new-doc-in-folder__button', {
-    hasText: 'Create folder',
-  })
+  const addFolderButton = page.getByRole('button', { name: 'Create folder' })
   const drawer = page.locator('dialog .collection-edit--payload-folders')
 
   await expect(async () => {
@@ -26,9 +24,9 @@ export async function createFolderFromDoc({
   }).toPass({ timeout: 15000 })
 
   await createFolderDoc({
-    page,
     folderName,
     folderType,
+    page,
   })
 
   const folderCard = page.locator('.folder-file-card__name', { hasText: folderName }).first()

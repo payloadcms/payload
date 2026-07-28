@@ -18,7 +18,7 @@ import './index.scss'
 
 export const documentDrawerBaseClass = 'doc-drawer'
 
-const formatDocumentDrawerSlug = ({
+export const formatDocumentDrawerSlug = ({
   id,
   collectionSlug,
   depth,
