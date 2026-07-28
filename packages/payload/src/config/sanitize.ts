@@ -504,6 +504,10 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       (Array.isArray(configWithDefaults.jobs?.workflows) &&
         configWithDefaults.jobs?.workflows?.length),
   )
+  config.jobs.hasConcurrency = Boolean(
+    config.jobs.tasks?.some((task) => task.concurrency) ||
+      config.jobs.workflows?.some((workflow) => workflow.concurrency),
+  )
 
   // Need to add default jobs collection before locked documents collections
   if (config.jobs.enabled) {

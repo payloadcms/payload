@@ -110,6 +110,11 @@ export type SanitizedJobsConfig = {
    * This property is automatically set during sanitization.
    */
   enabled?: boolean
+  /**
+   * If set to `true`, at least one task or workflow uses concurrency controls.
+   * This property is automatically set during sanitization.
+   */
+  hasConcurrency?: boolean
   processingLease: Required<ProcessingLeaseConfig>
   /**
    * If set to `true`, at least one task or workflow has scheduling enabled.
