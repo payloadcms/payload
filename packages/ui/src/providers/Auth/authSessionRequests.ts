@@ -1,33 +1,32 @@
 import type { AuthenticatedUser } from 'payload'
 
 export type AuthRequestContext = {
-  canCommit: () => boolean
-  deferInvalidation: (invalidate: () => void) => void
-  hasQueuedRequest: () => boolean
+  acceptResult: () => boolean
+  invalidateWhenIdle: (invalidate: () => void) => void
+  isCurrent: () => boolean
 }
 
-export type AuthSessionRequestCoordinator = {
-  advanceSession: () => void
-  clearPendingInvalidation: () => void
-  enqueue: <Result>(request: (context: AuthRequestContext) => Promise<Result>) => Promise<Result>
-  isLogoutPending: () => boolean
-  refresh: (
-    request: (context: AuthRequestContext) => Promise<AuthenticatedUser | null>,
-  ) => Promise<AuthenticatedUser | null>
-  settleLogout: ({
+export type AuthSessionRequests = {
+  discardPendingResults: () => void
+  isLoggingOut: () => boolean
+  logOut: ({
     clearSession,
     request,
   }: {
     clearSession: () => void
     request: () => Promise<void>
   }) => Promise<void>
+  queue: <Result>(request: (context: AuthRequestContext) => Promise<Result>) => Promise<Result>
+  refresh: (
+    request: (context: AuthRequestContext) => Promise<AuthenticatedUser | null>,
+  ) => Promise<AuthenticatedUser | null>
 }
 
-export function createAuthSessionRequestCoordinator(): AuthSessionRequestCoordinator {
+export function createAuthSessionRequests(): AuthSessionRequests {
   let authRequestQueue = Promise.resolve()
   let authRequestSequence = 0
-  let explicitLogoutSettlement: Promise<void> | undefined
-  let isExplicitLogoutPending = false
+  let isLoggingOut = false
+  let logoutRequest: Promise<void> | undefined
   let pendingAuthInvalidation:
     | {
         generation: number
@@ -42,27 +41,43 @@ export function createAuthSessionRequestCoordinator(): AuthSessionRequestCoordin
     | undefined
   let sessionGeneration = 0
 
-  const clearPendingInvalidation = () => {
+  const clearPendingInvalidation = (): void => {
     pendingAuthInvalidation = undefined
   }
 
-  const advanceSession = () => {
+  const discardPendingResults = (): void => {
     sessionGeneration += 1
     clearPendingInvalidation()
   }
 
-  const enqueue = <Result>(
+  const queue = <Result>(
     request: (context: AuthRequestContext) => Promise<Result>,
   ): Promise<Result> => {
     const requestGeneration = sessionGeneration
     const requestSequence = ++authRequestSequence
     const runRequest = async (): Promise<Result> => {
+      const isCurrent = () => sessionGeneration === requestGeneration && !isLoggingOut
       const result = await request({
-        canCommit: () => sessionGeneration === requestGeneration && !isExplicitLogoutPending,
-        deferInvalidation: (invalidate) => {
-          pendingAuthInvalidation = { generation: requestGeneration, run: invalidate }
+        acceptResult: () => {
+          if (!isCurrent()) {
+            return false
+          }
+
+          clearPendingInvalidation()
+          return true
         },
-        hasQueuedRequest: () => requestSequence < authRequestSequence,
+        invalidateWhenIdle: (invalidate) => {
+          if (!isCurrent()) {
+            return
+          }
+
+          if (requestSequence < authRequestSequence) {
+            pendingAuthInvalidation = { generation: requestGeneration, run: invalidate }
+          } else {
+            invalidate()
+          }
+        },
+        isCurrent,
       })
 
       if (requestSequence === authRequestSequence) {
@@ -93,7 +108,7 @@ export function createAuthSessionRequestCoordinator(): AuthSessionRequestCoordin
     const requestGeneration = sessionGeneration
     const activeRequest = refreshRequest
 
-    if (isExplicitLogoutPending) {
+    if (isLoggingOut) {
       return Promise.resolve(null)
     }
 
@@ -101,7 +116,7 @@ export function createAuthSessionRequestCoordinator(): AuthSessionRequestCoordin
       return activeRequest.promise
     }
 
-    const refreshPromise = enqueue(request)
+    const refreshPromise = queue(request)
 
     refreshRequest = { generation: requestGeneration, promise: refreshPromise }
     void refreshPromise.then(
@@ -120,51 +135,50 @@ export function createAuthSessionRequestCoordinator(): AuthSessionRequestCoordin
     return refreshPromise
   }
 
-  const settleLogout = ({
+  const logOut = ({
     clearSession,
     request,
   }: {
     clearSession: () => void
     request: () => Promise<void>
   }): Promise<void> => {
-    if (explicitLogoutSettlement !== undefined) {
-      return explicitLogoutSettlement
+    if (logoutRequest !== undefined) {
+      return logoutRequest
     }
 
-    isExplicitLogoutPending = true
+    isLoggingOut = true
     clearSession()
 
-    const settlement = enqueue(async () => {
+    const pendingLogout = queue(async () => {
       try {
         await request()
       } finally {
-        isExplicitLogoutPending = false
+        isLoggingOut = false
       }
     })
 
-    explicitLogoutSettlement = settlement
-    void settlement.then(
+    logoutRequest = pendingLogout
+    void pendingLogout.then(
       () => {
-        if (explicitLogoutSettlement === settlement) {
-          explicitLogoutSettlement = undefined
+        if (logoutRequest === pendingLogout) {
+          logoutRequest = undefined
         }
       },
       () => {
-        if (explicitLogoutSettlement === settlement) {
-          explicitLogoutSettlement = undefined
+        if (logoutRequest === pendingLogout) {
+          logoutRequest = undefined
         }
       },
     )
 
-    return settlement
+    return pendingLogout
   }
 
   return {
-    advanceSession,
-    clearPendingInvalidation,
-    enqueue,
-    isLogoutPending: () => isExplicitLogoutPending,
+    discardPendingResults,
+    isLoggingOut: () => isLoggingOut,
+    logOut,
+    queue,
     refresh,
-    settleLogout,
   }
 }

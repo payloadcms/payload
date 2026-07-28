@@ -10,15 +10,15 @@ import type {
 
 import { createAuthSessionSync } from './sessionSync.js'
 
-export type AuthSessionSyncController = {
+export type CrossTabSessionSync = {
   publish: (event: AuthSessionSyncEvent) => AuthSessionSyncPublication | undefined
   publishStorageRefresh: (publication: AuthSessionLogoutPublication) => void
 }
 
-export function useSessionSync(
+export function useCrossTabSessionSync(
   options: Omit<Parameters<typeof createAuthSessionSync>[0], 'sourceID'>,
-): AuthSessionSyncController {
-  const [sourceID] = useState(createSessionSyncSourceID)
+): CrossTabSessionSync {
+  const [sourceID] = useState(createCrossTabSessionSourceID)
   const optionsRef = useRef(options)
   const sessionSyncRef = useRef<ReturnType<typeof createAuthSessionSync>>(undefined)
 
@@ -59,6 +59,6 @@ export function useSessionSync(
   return useMemo(() => ({ publish, publishStorageRefresh }), [publish, publishStorageRefresh])
 }
 
-function createSessionSyncSourceID(): string {
+function createCrossTabSessionSourceID(): string {
   return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
 }

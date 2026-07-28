@@ -1,19 +1,19 @@
 import { describe, expect, it } from 'vitest'
 
-import { createAuthSessionRequestCoordinator } from './sessionRequestCoordinator.js'
+import { createAuthSessionRequests } from './authSessionRequests.js'
 
-describe('createAuthSessionRequestCoordinator', () => {
-  it('should serialize auth requests in enqueue order', async () => {
-    const coordinator = createAuthSessionRequestCoordinator()
+describe('createAuthSessionRequests', () => {
+  it('should serialize auth requests in queue order', async () => {
+    const authRequests = createAuthSessionRequests()
     const first = createDeferred<void>()
     const order: string[] = []
 
-    const firstRequest = coordinator.enqueue(async () => {
+    const firstRequest = authRequests.queue(async () => {
       order.push('first:start')
       await first.promise
       order.push('first:end')
     })
-    const secondRequest = coordinator.enqueue(async () => {
+    const secondRequest = authRequests.queue(async () => {
       order.push('second')
     })
 
@@ -26,12 +26,12 @@ describe('createAuthSessionRequestCoordinator', () => {
     expect(order).toEqual(['first:start', 'first:end', 'second'])
   })
 
-  it('should share a refresh request within one session generation', async () => {
-    const coordinator = createAuthSessionRequestCoordinator()
+  it('should share a refresh while session results remain current', async () => {
+    const authRequests = createAuthSessionRequests()
     const refresh = createDeferred<null>()
     let runs = 0
     const run = () =>
-      coordinator.refresh(async () => {
+      authRequests.refresh(async () => {
         runs += 1
         return refresh.promise
       })
@@ -45,41 +45,41 @@ describe('createAuthSessionRequestCoordinator', () => {
     expect(runs).toBe(1)
   })
 
-  it('should prevent a queued auth operation from committing after the session advances', async () => {
-    const coordinator = createAuthSessionRequestCoordinator()
+  it('should discard a queued result after the session changes', async () => {
+    const authRequests = createAuthSessionRequests()
     const operation = createDeferred<void>()
-    let canCommitAfterSettlement = true
+    let isCurrentAfterSettlement = true
 
-    const request = coordinator.enqueue(async ({ canCommit }) => {
+    const request = authRequests.queue(async ({ isCurrent }) => {
       await operation.promise
-      canCommitAfterSettlement = canCommit()
+      isCurrentAfterSettlement = isCurrent()
     })
 
     await Promise.resolve()
-    coordinator.advanceSession()
+    authRequests.discardPendingResults()
     operation.resolve()
     await request
 
-    expect(canCommitAfterSettlement).toBe(false)
+    expect(isCurrentAfterSettlement).toBe(false)
   })
 
   it('should settle a logout once and prevent refresh from committing', async () => {
-    const coordinator = createAuthSessionRequestCoordinator()
+    const authRequests = createAuthSessionRequests()
     const logout = createDeferred<void>()
     let clears = 0
     let logoutRequests = 0
 
-    const first = coordinator.settleLogout({
+    const first = authRequests.logOut({
       clearSession: () => {
         clears += 1
-        coordinator.advanceSession()
+        authRequests.discardPendingResults()
       },
       request: async () => {
         logoutRequests += 1
         await logout.promise
       },
     })
-    const second = coordinator.settleLogout({
+    const second = authRequests.logOut({
       clearSession: () => {
         clears += 1
       },
@@ -89,24 +89,25 @@ describe('createAuthSessionRequestCoordinator', () => {
     })
 
     expect(first).toBe(second)
-    expect(await coordinator.refresh(async () => null)).toBeNull()
+    expect(authRequests.isLoggingOut()).toBe(true)
+    expect(await authRequests.refresh(async () => null)).toBeNull()
     logout.resolve()
     await first
     expect({ clears, logoutRequests }).toEqual({ clears: 1, logoutRequests: 1 })
   })
 
-  it('should discard a deferred invalidation after the session advances', async () => {
-    const coordinator = createAuthSessionRequestCoordinator()
+  it('should discard a deferred invalidation after the session changes', async () => {
+    const authRequests = createAuthSessionRequests()
     let invalidations = 0
 
-    const first = coordinator.refresh(async ({ deferInvalidation }) => {
-      deferInvalidation(() => {
+    const first = authRequests.refresh(async ({ invalidateWhenIdle }) => {
+      invalidateWhenIdle(() => {
         invalidations += 1
       })
       return null
     })
-    const second = coordinator.enqueue(async () => {
-      coordinator.advanceSession()
+    const second = authRequests.queue(async () => {
+      authRequests.discardPendingResults()
     })
 
     await Promise.all([first, second])

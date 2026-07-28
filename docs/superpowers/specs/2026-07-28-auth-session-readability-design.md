@@ -30,10 +30,10 @@ Rename `sessionRequestCoordinator.ts` to `authSessionRequests.ts` and
 The provider will hold the returned object as `authRequests`. Its public operations will read as:
 
 ```ts
-authRequests.runInOrder(...)
+authRequests.queue(...)
 authRequests.refresh(...)
 authRequests.logOut(...)
-authRequests.sessionChanged()
+authRequests.discardPendingResults()
 authRequests.isLoggingOut()
 ```
 
@@ -51,10 +51,9 @@ type AuthRequestContext = {
 session and logout conditions, clears obsolete delayed invalidation, and returns whether the caller
 may apply the response. It does not execute a callback.
 
-`invalidateWhenIdle()` records a failed-refresh invalidation. The request queue runs it immediately
-when no newer auth request exists, waits when a newer request is queued, and discards it when an
-accepted response changes the session. Callers will no longer inspect the queue or clear pending
-invalidation directly.
+`invalidateWhenIdle()` runs a failed-refresh invalidation immediately when no newer auth request
+exists, waits when a newer request is queued, and discards it when an accepted response changes the
+session. Callers will no longer inspect the queue or clear pending invalidation directly.
 
 ### Cross-tab session synchronization
 
@@ -110,14 +109,25 @@ return authRequests.refresh(async ({ acceptResult, invalidateWhenIdle, isCurrent
     return null
   }
 
-  applyUserResponse(session)
+  setLocalSession(session)
   crossTabSession.publish(...)
   return session.user
 })
 ```
 
-Logout will similarly read as `authRequests.logOut({ clearSession, request })`. Session changes will
-call `authRequests.sessionChanged()`.
+Logout will similarly read as `authRequests.logOut({ clearSession, request })`.
+
+Responses accepted by the current local request call `setLocalSession(session)` directly. An
+external session change, such as login, logout, or a refreshed session received from another tab,
+uses the two operations explicitly:
+
+```ts
+authRequests.discardPendingResults()
+setLocalSession(session)
+```
+
+This keeps request invalidation visible at the call site without introducing an indirect
+`replaceSession()` helper.
 
 ## Testing
 
@@ -133,7 +143,8 @@ call `authRequests.sessionChanged()`.
 
 - The provider uses `authRequests`, `crossTabSession`, and `sessionTimers`.
 - `hasQueuedRequest`, `deferInvalidation`, `clearPendingInvalidation`, `advanceSession`,
-  `coordinator`, `sessionSync`, and `sessionTiming` are absent from the provider.
+  `coordinator`, `sessionSync`, `sessionTiming`, `applyUserResponse`, and `setNewUser` are absent
+  from the provider.
 - Each module name identifies the concrete behavior it owns.
 - Request and timer bookkeeping remain private to their modules.
 - No public API or observable authentication behavior changes.

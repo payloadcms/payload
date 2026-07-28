@@ -3,11 +3,11 @@ import React, { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { SessionTimingController } from './useSessionTiming.js'
+import type { AuthSessionTimers } from './useAuthSessionTimers.js'
 
-import { useSessionTiming } from './useSessionTiming.js'
+import { useAuthSessionTimers } from './useAuthSessionTimers.js'
 
-const timingCleanups: Array<() => void> = []
+const timerCleanups: Array<() => void> = []
 
 beforeEach(() => {
   vi.useFakeTimers()
@@ -15,19 +15,19 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-  for (const cleanup of timingCleanups.splice(0)) {
+  for (const cleanup of timerCleanups.splice(0)) {
     cleanup()
   }
 
   vi.useRealTimers()
 })
 
-describe('useSessionTiming', () => {
+describe('useAuthSessionTimers', () => {
   it('should refresh at the checkpoint when activity occurred in the refresh window', () => {
     const onActivityRefresh = vi.fn()
-    const timing = renderSessionTiming({ onActivityRefresh })
+    const timers = renderAuthSessionTimers({ onActivityRefresh })
 
-    timing.applyExpiration(Date.now() + 300_000)
+    timers.setExpiration(Date.now() + 300_000)
     act(() => {
       vi.advanceTimersByTime(120_000)
       window.dispatchEvent(new MouseEvent('mousemove'))
@@ -41,10 +41,10 @@ describe('useSessionTiming', () => {
   it('should clear timers and listeners on logout', () => {
     const onActivityRefresh = vi.fn()
     const onExpire = vi.fn()
-    const timing = renderSessionTiming({ onActivityRefresh, onExpire })
+    const timers = renderAuthSessionTimers({ onActivityRefresh, onExpire })
 
-    timing.applyExpiration(Date.now() + 300_000)
-    timing.clear()
+    timers.setExpiration(Date.now() + 300_000)
+    timers.clear()
     act(() => {
       window.dispatchEvent(new MouseEvent('mousemove'))
       vi.advanceTimersByTime(300_000)
@@ -57,10 +57,10 @@ describe('useSessionTiming', () => {
   it('should schedule the reminder and expiration from the current expiration', () => {
     const onExpire = vi.fn()
     const onReminder = vi.fn()
-    const timing = renderSessionTiming({ onExpire, onReminder })
+    const timers = renderAuthSessionTimers({ onExpire, onReminder })
     const expirationMs = Date.now() + 300_000
 
-    timing.applyExpiration(expirationMs)
+    timers.setExpiration(expirationMs)
     act(() => {
       vi.advanceTimersByTime(240_000)
     })
@@ -79,7 +79,7 @@ describe('useSessionTiming', () => {
     const onActivityRefresh = vi.fn()
     const onExpire = vi.fn()
     const onReminder = vi.fn()
-    const timing = renderSessionTiming({
+    const timers = renderAuthSessionTimers({
       isAuthenticated: false,
       onActivityRefresh,
       onExpire,
@@ -87,7 +87,7 @@ describe('useSessionTiming', () => {
     })
     const expirationMs = Date.now()
 
-    timing.applyExpiration(expirationMs)
+    timers.setExpiration(expirationMs)
 
     expect(onExpire).not.toHaveBeenCalled()
 
@@ -105,7 +105,7 @@ describe('useSessionTiming', () => {
     const onActivityRefresh = vi.fn()
     const onExpire = vi.fn()
     const onReminder = vi.fn()
-    const timing = renderSessionTiming({
+    const timers = renderAuthSessionTimers({
       isAuthenticated: false,
       onActivityRefresh,
       onExpire,
@@ -113,7 +113,7 @@ describe('useSessionTiming', () => {
     })
     const expirationMs = Date.now() - 1
 
-    timing.applyExpiration(expirationMs)
+    timers.setExpiration(expirationMs)
 
     act(() => {
       vi.advanceTimersByTime(0)
@@ -130,20 +130,20 @@ describe('useSessionTiming', () => {
     (expirationMs) => {
       const onActivityRefresh = vi.fn()
       const onExpire = vi.fn()
-      const timing = renderSessionTiming({
+      const timers = renderAuthSessionTimers({
         isAuthenticated: false,
         onActivityRefresh,
         onExpire,
       })
 
-      timing.applyExpiration(expirationMs)
-      timing.refreshCookie(true)
+      timers.setExpiration(expirationMs)
+      timers.scheduleRefresh(true)
       act(() => {
         vi.advanceTimersByTime(1_000)
       })
 
-      expect(timing.getCurrentExpirationMs()).toBeUndefined()
-      expect(timing.getKnownExpirationMs()).toBeUndefined()
+      expect(timers.getCurrentExpirationMs()).toBeUndefined()
+      expect(timers.getLatestExpirationMs()).toBeUndefined()
       expect(onActivityRefresh).not.toHaveBeenCalled()
       expect(onExpire).not.toHaveBeenCalled()
     },
@@ -151,19 +151,19 @@ describe('useSessionTiming', () => {
 
   it('should synchronously activate on apply and deactivate on clear', () => {
     const onActivityRefresh = vi.fn()
-    const timing = renderSessionTiming({ isAuthenticated: false, onActivityRefresh })
+    const timers = renderAuthSessionTimers({ isAuthenticated: false, onActivityRefresh })
 
-    timing.clear()
-    timing.applyExpiration(Date.now() + 300_000)
-    timing.refreshCookie(true)
+    timers.clear()
+    timers.setExpiration(Date.now() + 300_000)
+    timers.scheduleRefresh(true)
     act(() => {
       vi.advanceTimersByTime(1_000)
     })
 
     expect(onActivityRefresh).toHaveBeenCalledOnce()
 
-    timing.clear()
-    timing.refreshCookie(true)
+    timers.clear()
+    timers.scheduleRefresh(true)
     act(() => {
       vi.advanceTimersByTime(1_000)
     })
@@ -174,17 +174,17 @@ describe('useSessionTiming', () => {
   it('should reinstall activity listeners once when clear and apply occur in the same tick', () => {
     const addEventListener = vi.spyOn(window, 'addEventListener')
     const onActivityRefresh = vi.fn()
-    const timing = renderSessionTiming({ onActivityRefresh })
+    const timers = renderAuthSessionTimers({ onActivityRefresh })
     const expirationMs = Date.now() + 300_000
 
-    timingCleanups.push(() => {
+    timerCleanups.push(() => {
       addEventListener.mockRestore()
     })
 
-    timing.applyExpiration(expirationMs)
-    timing.clear()
-    timing.applyExpiration(expirationMs)
-    timing.applyExpiration(expirationMs)
+    timers.setExpiration(expirationMs)
+    timers.clear()
+    timers.setExpiration(expirationMs)
+    timers.setExpiration(expirationMs)
 
     act(() => {
       vi.advanceTimersByTime(240_000)
@@ -202,17 +202,17 @@ describe('useSessionTiming', () => {
 
   it('should keep its controller and activity throttle across rerenders', () => {
     const onActivityRefresh = vi.fn()
-    const timing = renderSessionTiming({ onActivityRefresh })
-    const initialController = timing.getController()
+    const timers = renderAuthSessionTimers({ onActivityRefresh })
+    const initialController = timers.getController()
 
-    timing.applyExpiration(Date.now() + 300_000)
+    timers.setExpiration(Date.now() + 300_000)
     act(() => {
       vi.advanceTimersByTime(240_000)
       window.dispatchEvent(new MouseEvent('mousemove'))
     })
-    timing.rerender()
+    timers.rerender()
 
-    expect(timing.getController()).toBe(initialController)
+    expect(timers.getController()).toBe(initialController)
 
     act(() => {
       vi.advanceTimersByTime(1)
@@ -224,18 +224,18 @@ describe('useSessionTiming', () => {
   })
 
   it('should synchronously replace the current expiration', () => {
-    const timing = renderSessionTiming()
+    const timers = renderAuthSessionTimers()
     const firstExpirationMs = Date.now() + 300_000
     const replacementExpirationMs = Date.now() + 600_000
 
-    timing.applyExpiration(firstExpirationMs)
-    timing.applyExpiration(replacementExpirationMs)
+    timers.setExpiration(firstExpirationMs)
+    timers.setExpiration(replacementExpirationMs)
 
-    expect(timing.getCurrentExpirationMs()).toBe(replacementExpirationMs)
+    expect(timers.getCurrentExpirationMs()).toBe(replacementExpirationMs)
   })
 })
 
-function renderSessionTiming({
+function renderAuthSessionTimers({
   isAuthenticated = true,
   onActivityRefresh = vi.fn(),
   onExpire = vi.fn(),
@@ -245,51 +245,51 @@ function renderSessionTiming({
   onActivityRefresh?: () => void
   onExpire?: (expirationMs: number) => void
   onReminder?: () => void
-} = {}): RenderedSessionTiming {
-  let controller: SessionTimingController | undefined
+} = {}): RenderedAuthSessionTimers {
+  let controller: AuthSessionTimers | undefined
   const container = document.createElement('div')
   const root = createRoot(container)
 
-  function SessionTiming() {
-    controller = useSessionTiming({ isAuthenticated, onActivityRefresh, onExpire, onReminder })
+  function SessionTimers() {
+    controller = useAuthSessionTimers({ isAuthenticated, onActivityRefresh, onExpire, onReminder })
 
     return null
   }
 
   act(() => {
-    root.render(React.createElement(SessionTiming))
+    root.render(React.createElement(SessionTimers))
   })
 
-  timingCleanups.push(() => {
+  timerCleanups.push(() => {
     act(() => {
       root.unmount()
     })
   })
 
-  const getController = (): SessionTimingController => {
+  const getController = (): AuthSessionTimers => {
     if (!controller) {
-      throw new Error('Expected session timing controller.')
+      throw new Error('Expected auth session timers.')
     }
 
     return controller
   }
 
   return {
-    applyExpiration: (expirationMs) => getController().applyExpiration(expirationMs),
     clear: () => getController().clear(),
     getController,
     getCurrentExpirationMs: () => getController().getCurrentExpirationMs(),
-    getKnownExpirationMs: () => getController().getKnownExpirationMs(),
-    refreshCookie: (forceRefresh) => getController().refreshCookie(forceRefresh),
+    getLatestExpirationMs: () => getController().getLatestExpirationMs(),
     rerender: () => {
       act(() => {
-        root.render(React.createElement(SessionTiming))
+        root.render(React.createElement(SessionTimers))
       })
     },
+    scheduleRefresh: (forceRefresh) => getController().scheduleRefresh(forceRefresh),
+    setExpiration: (expirationMs) => getController().setExpiration(expirationMs),
   }
 }
 
-type RenderedSessionTiming = SessionTimingController & {
-  getController: () => SessionTimingController
+type RenderedAuthSessionTimers = AuthSessionTimers & {
+  getController: () => AuthSessionTimers
   rerender: () => void
 }

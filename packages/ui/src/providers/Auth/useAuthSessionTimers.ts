@@ -8,15 +8,15 @@ import {
 
 const maxTimeoutMs = 2147483647
 
-export type SessionTimingController = {
-  applyExpiration: (expirationMs: number) => void
+export type AuthSessionTimers = {
   clear: () => void
   getCurrentExpirationMs: () => number | undefined
-  getKnownExpirationMs: () => number | undefined
-  refreshCookie: (forceRefresh?: boolean) => void
+  getLatestExpirationMs: () => number | undefined
+  scheduleRefresh: (forceRefresh?: boolean) => void
+  setExpiration: (expirationMs: number) => void
 }
 
-export function useSessionTiming({
+export function useAuthSessionTimers({
   isAuthenticated,
   onActivityRefresh,
   onExpire,
@@ -26,15 +26,15 @@ export function useSessionTiming({
   onActivityRefresh: () => void
   onExpire: (expirationMs: number) => void
   onReminder: () => void
-}): SessionTimingController {
+}): AuthSessionTimers {
   const activityListenerCleanupRef = useRef<(() => void) | undefined>(undefined)
   const activityCheckpointTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
   const forceLogoutBufferMsRef = useRef(120_000)
   const forceLogOutTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
   const hasActiveSessionRef = useRef(isAuthenticated)
-  const knownExpirationMsRef = useRef<number>(undefined)
+  const latestExpirationMsRef = useRef<number>(undefined)
   const lastSessionActivityAtRef = useRef<number>(undefined)
-  const refreshTokenTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
+  const scheduledRefreshTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
   const reminderTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null)
   const tokenExpirationMsRef = useRef<number>(undefined)
   const callbacksRef = useRef({ onActivityRefresh, onExpire, onReminder })
@@ -43,7 +43,7 @@ export function useSessionTiming({
     callbacksRef.current = { onActivityRefresh, onExpire, onReminder }
   }, [onActivityRefresh, onExpire, onReminder])
 
-  const refreshCookie = useCallback((forceRefresh?: boolean) => {
+  const scheduleRefresh = useCallback((forceRefresh?: boolean) => {
     if (!hasActiveSessionRef.current) {
       return
     }
@@ -54,8 +54,8 @@ export function useSessionTiming({
       forceRefresh ||
       (tokenExpirationMsRef.current && expiresInMs <= forceLogoutBufferMsRef.current * 2)
     ) {
-      clearTimeout(refreshTokenTimeoutRef.current)
-      refreshTokenTimeoutRef.current = setTimeout(() => {
+      clearTimeout(scheduledRefreshTimeoutRef.current)
+      scheduledRefreshTimeoutRef.current = setTimeout(() => {
         callbacksRef.current.onActivityRefresh()
       }, 1000)
     }
@@ -66,10 +66,10 @@ export function useSessionTiming({
       createSessionActivityTracker({
         onActivity: (_source, occurredAt) => {
           lastSessionActivityAtRef.current = occurredAt
-          refreshCookie()
+          scheduleRefresh()
         },
       }),
-    [],
+    [scheduleRefresh],
   )
 
   const installActivityListeners = useCallback(() => {
@@ -93,7 +93,7 @@ export function useSessionTiming({
 
   const clear = useCallback(() => {
     hasActiveSessionRef.current = false
-    clearTimeout(refreshTokenTimeoutRef.current)
+    clearTimeout(scheduledRefreshTimeoutRef.current)
     clearTimeout(reminderTimeoutRef.current)
     clearTimeout(forceLogOutTimeoutRef.current)
     clearTimeout(activityCheckpointTimeoutRef.current)
@@ -102,7 +102,7 @@ export function useSessionTiming({
     tokenExpirationMsRef.current = undefined
   }, [removeActivityListeners])
 
-  const applyExpiration = useCallback(
+  const setExpiration = useCallback(
     (expirationMs: number) => {
       if (!Number.isFinite(expirationMs)) {
         return
@@ -111,9 +111,9 @@ export function useSessionTiming({
       clearTimeout(reminderTimeoutRef.current)
       clearTimeout(forceLogOutTimeoutRef.current)
       clearTimeout(activityCheckpointTimeoutRef.current)
-      clearTimeout(refreshTokenTimeoutRef.current)
+      clearTimeout(scheduledRefreshTimeoutRef.current)
       lastSessionActivityAtRef.current = undefined
-      knownExpirationMsRef.current = Math.max(knownExpirationMsRef.current ?? 0, expirationMs)
+      latestExpirationMsRef.current = Math.max(latestExpirationMsRef.current ?? 0, expirationMs)
       tokenExpirationMsRef.current = expirationMs
 
       const expiresInMs = Math.max(0, Math.min(expirationMs - Date.now(), maxTimeoutMs))
@@ -152,7 +152,7 @@ export function useSessionTiming({
             checkpointAt - lastActivityAt <= refreshWindowMs
 
           if (hasRecentActivity) {
-            refreshCookie(true)
+            scheduleRefresh(true)
           }
         },
         Math.max(expiresInMs - refreshWindowMs, 0),
@@ -163,11 +163,11 @@ export function useSessionTiming({
         }
       }, expiresInMs)
     },
-    [installActivityListeners, refreshCookie, removeActivityListeners],
+    [installActivityListeners, removeActivityListeners, scheduleRefresh],
   )
 
   const getCurrentExpirationMs = useCallback(() => tokenExpirationMsRef.current, [])
-  const getKnownExpirationMs = useCallback(() => knownExpirationMsRef.current, [])
+  const getLatestExpirationMs = useCallback(() => latestExpirationMsRef.current, [])
 
   useEffect(() => {
     hasActiveSessionRef.current = isAuthenticated
@@ -184,12 +184,12 @@ export function useSessionTiming({
 
   return useMemo(
     () => ({
-      applyExpiration,
       clear,
       getCurrentExpirationMs,
-      getKnownExpirationMs,
-      refreshCookie,
+      getLatestExpirationMs,
+      scheduleRefresh,
+      setExpiration,
     }),
-    [applyExpiration, clear, getCurrentExpirationMs, getKnownExpirationMs, refreshCookie],
+    [clear, getCurrentExpirationMs, getLatestExpirationMs, scheduleRefresh, setExpiration],
   )
 }

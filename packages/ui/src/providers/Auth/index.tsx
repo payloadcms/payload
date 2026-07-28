@@ -17,10 +17,10 @@ import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
 import { useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
-import { createAuthSessionRequestCoordinator } from './sessionRequestCoordinator.js'
+import { createAuthSessionRequests } from './authSessionRequests.js'
 import { AUTH_SESSION_SYNC_EVENT_TYPES } from './sessionSync.js'
-import { useSessionSync } from './useSessionSync.js'
-import { useSessionTiming } from './useSessionTiming.js'
+import { useAuthSessionTimers } from './useAuthSessionTimers.js'
+import { useCrossTabSessionSync } from './useCrossTabSessionSync.js'
 
 export type { AuthContext, UserWithToken } from './types.js'
 
@@ -61,7 +61,7 @@ export function AuthProvider({
   const [permissions, setPermissions] = useState<SanitizedPermissions>(initialPermissions)
   const [fetchedUserOnMount, setFetchedUserOnMount] = useState(false)
 
-  const [coordinator] = useState(createAuthSessionRequestCoordinator)
+  const [authRequests] = useState(createAuthSessionRequests)
   const userRef = React.useRef<AuthenticatedUser | null>(initialUser)
 
   const isAuthenticated = Boolean(user)
@@ -100,23 +100,23 @@ export function AuthProvider({
   function onSessionExpiration(expirationMs: number) {
     const collection = userRef.current?.collection
 
-    sessionSync.publish({
+    crossTabSession.publish({
       type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
       expiredTokenAt: expirationMs,
     })
-    void settleExplicitLogout({ collection })
+    void logOutSession({ collection })
     redirectToInactivityRoute()
   }
 
   function onSessionReminder() {
     if (autoRefresh) {
-      sessionTiming.refreshCookie()
+      sessionTimers.scheduleRefresh()
     } else {
       openModal(stayLoggedInModalSlug)
     }
   }
 
-  const sessionTiming = useSessionTiming({
+  const sessionTimers = useAuthSessionTimers({
     isAuthenticated,
     onActivityRefresh: onSessionActivityRefresh,
     onExpire: onSessionExpiration,
@@ -128,52 +128,53 @@ export function AuthProvider({
     setUserInMemory(null)
     setTokenInMemory(undefined)
     setTokenExpirationMs(undefined)
-    sessionTiming.clear()
-  }, [sessionTiming])
+    sessionTimers.clear()
+  }, [sessionTimers])
 
-  const applyUserResponse = useCallback(
-    (userResponse: null | UserWithToken) => {
-      if (userResponse?.user) {
-        const nextTokenExpirationMs = userResponse.exp * 1000
+  const setLocalSession = useCallback(
+    (session: null | UserWithToken) => {
+      if (session?.user) {
+        const nextTokenExpirationMs = session.exp * 1000
 
-        userRef.current = userResponse.user
-        setUserInMemory(userResponse.user)
-        setTokenInMemory(userResponse.token ?? userResponse.refreshedToken)
+        userRef.current = session.user
+        setUserInMemory(session.user)
+        setTokenInMemory(session.token ?? session.refreshedToken)
         setTokenExpirationMs(nextTokenExpirationMs)
-        sessionTiming.applyExpiration(nextTokenExpirationMs)
+        sessionTimers.setExpiration(nextTokenExpirationMs)
       } else {
         clearUserInMemory()
       }
     },
-    [clearUserInMemory, sessionTiming],
+    [clearUserInMemory, sessionTimers],
   )
 
-  const setNewUser = useCallback(
-    (userResponse: null | UserWithToken) => {
-      coordinator.advanceSession()
-      applyUserResponse(userResponse)
+  const setUser = useCallback(
+    (session: null | UserWithToken) => {
+      authRequests.discardPendingResults()
+      setLocalSession(session)
     },
-    [applyUserResponse, coordinator],
+    [authRequests, setLocalSession],
   )
 
-  const sessionSync = useSessionSync({
+  const crossTabSession = useCrossTabSessionSync({
     fetchFullUser: (options) => fetchFullUserResult(options),
-    getTokenExpirationMs: sessionTiming.getKnownExpirationMs,
+    getTokenExpirationMs: sessionTimers.getLatestExpirationMs,
     onSessionExpired: () => {
       const collection = userRef.current?.collection
 
-      void settleExplicitLogout({ collection })
+      void logOutSession({ collection })
       redirectToInactivityRoute()
     },
     onSessionLoggedOut: () => {
       const collection = userRef.current?.collection
 
-      void settleExplicitLogout({ collection })
+      void logOutSession({ collection })
       redirectToLoginRoute()
     },
     onSessionRefreshed: (session) => {
-      if (!coordinator.isLogoutPending()) {
-        setNewUser(session)
+      if (!authRequests.isLoggingOut()) {
+        authRequests.discardPendingResults()
+        setLocalSession(session)
       }
     },
     onSessionResyncUnauthenticated: () => {
@@ -183,12 +184,12 @@ export function AuthProvider({
 
   const refreshSession = useCallback(
     ({ isActivityRefresh }: { isActivityRefresh: boolean }): Promise<AuthenticatedUser | null> => {
-      return coordinator.refresh(async ({ canCommit, deferInvalidation, hasQueuedRequest }) => {
-        if (!canCommit()) {
+      return authRequests.refresh(async ({ acceptResult, invalidateWhenIdle, isCurrent }) => {
+        if (!isCurrent()) {
           return null
         }
 
-        const handledExpiration = sessionTiming.getCurrentExpirationMs()
+        const handledExpiration = sessionTimers.getCurrentExpirationMs()
         const handledUser = userRef.current
 
         try {
@@ -205,20 +206,19 @@ export function AuthProvider({
             },
           )
 
-          if (!canCommit()) {
+          if (!isCurrent()) {
             return null
           }
 
           if (request.status === 200) {
             const json: UserWithToken = await request.json()
 
-            if (!canCommit()) {
+            if (!acceptResult()) {
               return null
             }
 
-            coordinator.clearPendingInvalidation()
-            applyUserResponse(json)
-            sessionSync.publish({
+            setLocalSession(json)
+            crossTabSession.publish({
               type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
               refreshStartedAt,
               session: json,
@@ -229,21 +229,17 @@ export function AuthProvider({
           if (handledUser) {
             const invalidateSession = () => {
               if (handledExpiration !== undefined) {
-                sessionSync.publish({
+                crossTabSession.publish({
                   type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
                   expiredTokenAt: handledExpiration,
                 })
               }
 
-              applyUserResponse(null)
+              setLocalSession(null)
               redirectToInactivityRoute()
             }
 
-            if (hasQueuedRequest()) {
-              deferInvalidation(invalidateSession)
-            } else {
-              invalidateSession()
-            }
+            invalidateWhenIdle(invalidateSession)
           }
         } catch (e) {
           toast.error(`Refreshing token failed: ${e.message}`)
@@ -254,12 +250,12 @@ export function AuthProvider({
     },
     [
       apiRoute,
-      applyUserResponse,
-      coordinator,
+      authRequests,
+      crossTabSession,
       i18n.language,
       redirectToInactivityRoute,
-      sessionSync,
-      sessionTiming,
+      sessionTimers,
+      setLocalSession,
       userSlug,
     ],
   )
@@ -269,11 +265,12 @@ export function AuthProvider({
     [refreshSession],
   )
 
-  const settleExplicitLogout = useCallback(
+  const logOutSession = useCallback(
     ({ collection }: { collection?: string }): Promise<void> => {
-      return coordinator.settleLogout({
+      return authRequests.logOut({
         clearSession: () => {
-          setNewUser(null)
+          authRequests.discardPendingResults()
+          setLocalSession(null)
         },
         request: async () => {
           try {
@@ -291,22 +288,22 @@ export function AuthProvider({
         },
       })
     },
-    [apiRoute, coordinator, setNewUser],
+    [apiRoute, authRequests, setLocalSession],
   )
 
   const logOut = useCallback(async () => {
     const logoutEvent = { type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT } as const
-    const logoutPublication = sessionSync.publish(logoutEvent)
+    const logoutPublication = crossTabSession.publish(logoutEvent)
     const collection = userRef.current?.collection
 
-    await settleExplicitLogout({ collection })
+    await logOutSession({ collection })
 
     if (logoutPublication?.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT) {
-      sessionSync.publishStorageRefresh(logoutPublication)
+      crossTabSession.publishStorageRefresh(logoutPublication)
     }
 
     return true
-  }, [sessionSync, settleExplicitLogout])
+  }, [crossTabSession, logOutSession])
 
   const refreshPermissions = useCallback(
     async ({ locale }: { locale?: string } = {}) => {
@@ -349,8 +346,8 @@ export function AuthProvider({
     ({ isCurrent }: Partial<AuthSessionResyncOptions> = {}): Promise<
       AuthSessionResyncResult<AuthenticatedUser>
     > => {
-      return coordinator.enqueue(async ({ canCommit }) => {
-        const canApplyResult = () => canCommit() && (!isCurrent || isCurrent())
+      return authRequests.queue(async ({ acceptResult, isCurrent: isRequestCurrent }) => {
+        const canApplyResult = () => isRequestCurrent() && (!isCurrent || isCurrent())
 
         if (!canApplyResult()) {
           return { status: 'indeterminate' }
@@ -381,8 +378,11 @@ export function AuthProvider({
           }
 
           if (json?.user) {
-            coordinator.clearPendingInvalidation()
-            applyUserResponse(json)
+            if (!acceptResult()) {
+              return { status: 'indeterminate' }
+            }
+
+            setLocalSession(json)
 
             return {
               expirationMs: json.exp * 1000,
@@ -391,7 +391,7 @@ export function AuthProvider({
             }
           }
 
-          applyUserResponse(null)
+          setLocalSession(null)
 
           return { status: 'unauthenticated' }
         } catch (e) {
@@ -401,7 +401,7 @@ export function AuthProvider({
         return { status: 'indeterminate' }
       })
     },
-    [apiRoute, applyUserResponse, coordinator, i18n.language, userSlug],
+    [apiRoute, authRequests, i18n.language, setLocalSession, userSlug],
   )
 
   const fetchFullUser = React.useCallback(async (): Promise<AuthenticatedUser | null> => {
@@ -429,9 +429,9 @@ export function AuthProvider({
 
   useEffect(
     () => () => {
-      coordinator.advanceSession()
+      authRequests.discardPendingResults()
     },
-    [coordinator],
+    [authRequests],
   )
 
   if (!user && !fetchedUserOnMount) {
@@ -444,11 +444,11 @@ export function AuthProvider({
         fetchFullUser,
         logOut,
         permissions,
-        refreshCookie: sessionTiming.refreshCookie,
+        refreshCookie: sessionTimers.scheduleRefresh,
         refreshCookieAsync,
         refreshPermissions,
         setPermissions,
-        setUser: setNewUser,
+        setUser,
         token: tokenInMemory,
         tokenExpirationMs,
         user,
