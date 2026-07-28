@@ -560,13 +560,13 @@ describe('Auth', () => {
       await page.goto(formatAdminURL({ adminRoute, path: serverFunctionsPath, serverURL }))
 
       await expect(page.getByRole('heading', { name: 'Auth server functions' })).toBeVisible()
-      await expect(page.locator('#server-function-email')).toBeVisible()
-      await expect(page.locator('#server-function-password')).toBeVisible()
+      await expect(page.locator('#field-serverFunctionEmail')).toBeVisible()
+      await expect(page.locator('#field-serverFunctionPassword')).toBeVisible()
       await expect(page.getByText('Custom Refresh', { exact: true })).toBeHidden()
       await expect(page.getByText('Custom Logout', { exact: true })).toBeHidden()
 
-      await page.fill('#server-function-email', devUser.email)
-      await page.fill('#server-function-password', devUser.password)
+      await page.fill('#field-serverFunctionEmail', devUser.email)
+      await page.fill('#field-serverFunctionPassword', devUser.password)
       await page.getByText('Custom Login', { exact: true }).click()
 
       await expect.poll(() => page.url()).toBe(formatAdminURL({ adminRoute, path: '', serverURL }))
@@ -584,11 +584,11 @@ describe('Auth', () => {
     test('should display errors from login server function', async () => {
       await page.goto(formatAdminURL({ adminRoute, path: serverFunctionsPath, serverURL }))
 
-      await page.fill('#server-function-email', devUser.email)
-      await page.fill('#server-function-password', 'invalid-password')
+      await page.fill('#field-serverFunctionEmail', devUser.email)
+      await page.fill('#field-serverFunctionPassword', 'invalid-password')
       await page.getByText('Custom Login', { exact: true }).click()
 
-      await expect(page.locator('.auth-server-functions__error')).toBeVisible()
+      await expect(page.getByRole('alert')).toBeVisible()
       await expect(page).toHaveURL(
         formatAdminURL({ adminRoute, path: serverFunctionsPath, serverURL }),
       )
@@ -604,7 +604,7 @@ describe('Auth', () => {
       await page.goto(formatAdminURL({ adminRoute, path: serverFunctionsPath, serverURL }))
 
       await expect(page.getByRole('heading', { name: 'Auth server functions' })).toBeVisible()
-      await expect(page.locator('#server-function-email')).toBeHidden()
+      await expect(page.locator('#field-serverFunctionEmail')).toBeHidden()
       await expect(page.getByText('Custom Refresh', { exact: true })).toBeVisible()
       await expect(page.getByText('Custom Logout', { exact: true })).toBeVisible()
       const initialCookie = (await page.context().cookies()).find(
@@ -615,7 +615,7 @@ describe('Auth', () => {
       await wait(1000)
       await page.getByText('Custom Refresh', { exact: true }).click()
 
-      await expect(page.locator('.auth-server-functions__success')).toHaveText('Token refreshed')
+      await expect(page.getByRole('status').filter({ hasText: 'Token refreshed' })).toBeVisible()
       await expect
         .poll(async () => {
           const refreshedCookie = (await page.context().cookies()).find(

@@ -1,6 +1,10 @@
 'use client'
 
-import { type ChangeEvent, useState } from 'react'
+import type { FormState } from 'payload'
+
+import { Banner, EmailField, Form, FormSubmit, PasswordField } from '@payloadcms/ui'
+import { email } from 'payload/shared'
+import { useState } from 'react'
 
 export type LoginArgs = {
   email: string
@@ -12,13 +16,24 @@ type Props = {
   loginFunction: (args: LoginArgs) => Promise<unknown>
 }
 
+const initialState: FormState = {
+  serverFunctionEmail: {
+    initialValue: '',
+    valid: true,
+    value: '',
+  },
+  serverFunctionPassword: {
+    initialValue: '',
+    valid: true,
+    value: '',
+  },
+}
+
 export const LoginForm = ({ dashboardURL, loginFunction }: Props) => {
-  const [email, setEmail] = useState<string>('')
   const [error, setError] = useState<null | string>(null)
   const [isPending, setIsPending] = useState(false)
-  const [password, setPassword] = useState<string>('')
 
-  const handleLogin = async () => {
+  const handleLogin = async ({ email, password }: LoginArgs) => {
     setError(null)
     setIsPending(true)
 
@@ -32,39 +47,43 @@ export const LoginForm = ({ dashboardURL, loginFunction }: Props) => {
   }
 
   return (
-    <div className="auth-server-functions__login">
-      <div className="auth-server-functions__field">
-        <label htmlFor="server-function-email">Email</label>
-        <input
-          aria-label="Server function email"
-          id="server-function-email"
-          onChange={(event: ChangeEvent<HTMLInputElement>) => setEmail(event.target.value)}
-          placeholder="Email"
-          required
-          type="email"
-          value={email}
-        />
-      </div>
-      <div className="auth-server-functions__field">
-        <label htmlFor="server-function-password">Password</label>
-        <input
-          aria-label="Server function password"
-          id="server-function-password"
-          onChange={(event: ChangeEvent<HTMLInputElement>) => setPassword(event.target.value)}
-          placeholder="Password"
-          required
-          type="password"
-          value={password}
-        />
-      </div>
+    <Form
+      disabled={isPending}
+      initialState={initialState}
+      onSubmit={(_, data) => {
+        void handleLogin({
+          email: String(data.serverFunctionEmail),
+          password: String(data.serverFunctionPassword),
+        })
+      }}
+    >
+      <EmailField
+        field={{
+          name: 'serverFunctionEmail',
+          admin: {
+            autoComplete: 'email',
+          },
+          label: 'Email',
+          required: true,
+        }}
+        path="serverFunctionEmail"
+        validate={email}
+      />
+      <PasswordField
+        autoComplete="current-password"
+        field={{
+          name: 'serverFunctionPassword',
+          label: 'Password',
+          required: true,
+        }}
+        path="serverFunctionPassword"
+      />
       {error && (
-        <p className="auth-server-functions__error" role="alert">
-          {error}
-        </p>
+        <div role="alert">
+          <Banner type="danger">{error}</Banner>
+        </div>
       )}
-      <button disabled={isPending} onClick={handleLogin} type="button">
-        Custom Login
-      </button>
-    </div>
+      <FormSubmit>Custom Login</FormSubmit>
+    </Form>
   )
 }

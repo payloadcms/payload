@@ -1,5 +1,6 @@
 'use client'
 
+import { Banner, Button } from '@payloadcms/ui'
 import { useState } from 'react'
 
 type Props = {
@@ -25,14 +26,14 @@ export const LogoutButton = ({ loginURL, logoutFunction }: Props) => {
   }
 
   return (
-    <div className="auth-server-functions__action">
-      <button disabled={isPending} onClick={handleLogout} type="button">
+    <div>
+      <Button disabled={isPending} onClick={handleLogout}>
         Custom Logout
-      </button>
+      </Button>
       {error && (
-        <p className="auth-server-functions__error" role="alert">
-          {error}
-        </p>
+        <div role="alert">
+          <Banner type="danger">{error}</Banner>
+        </div>
       )}
     </div>
   )

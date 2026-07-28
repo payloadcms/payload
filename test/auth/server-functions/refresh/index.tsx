@@ -1,5 +1,6 @@
 'use client'
 
+import { Banner, Button } from '@payloadcms/ui'
 import { useState } from 'react'
 
 type Props = {
@@ -27,19 +28,19 @@ export const RefreshToken = ({ refreshFunction }: Props) => {
   }
 
   return (
-    <div className="auth-server-functions__action">
-      <button disabled={isPending} onClick={handleRefresh} type="button">
+    <div>
+      <Button disabled={isPending} onClick={handleRefresh}>
         Custom Refresh
-      </button>
+      </Button>
       {isSuccessful && (
-        <p className="auth-server-functions__success" role="status">
-          Token refreshed
-        </p>
+        <div role="status">
+          <Banner type="success">Token refreshed</Banner>
+        </div>
       )}
       {error && (
-        <p className="auth-server-functions__error" role="alert">
-          {error}
-        </p>
+        <div role="alert">
+          <Banner type="danger">{error}</Banner>
+        </div>
       )}
     </div>
   )
