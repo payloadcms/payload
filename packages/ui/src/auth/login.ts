@@ -18,6 +18,18 @@ export type LoginArgs<TSlug extends AuthCollectionSlug> = {
 } & ({ email: string; username?: never } | { email?: never; username: string })
 
 /**
+ * `LoginArgs` as the adapters expose it — they bind `serverAdapter` themselves.
+ * Distributes over the email/username union so the either-or survives; a plain
+ * `Omit` collapses the union and accepts both keys at once.
+ */
+export type LoginArgsWithoutServerAdapter<TSlug extends AuthCollectionSlug> =
+  LoginArgs<TSlug> extends infer TArgs
+    ? TArgs extends unknown
+      ? Omit<TArgs, 'serverAdapter'>
+      : never
+    : never
+
+/**
  * Logs a user in and writes the auth cookie through the supplied `serverAdapter`,
  * so the function is framework-agnostic; each adapter binds its own.
  */
