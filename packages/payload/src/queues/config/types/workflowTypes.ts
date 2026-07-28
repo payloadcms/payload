@@ -40,8 +40,8 @@ export type JobLog = {
 
 export type WorkflowSlug = StringKeyOf<TypedJobs['workflows']>
 
-// Simplified version of RunningJob that doesn't break TypeScript (TypeScript seems to stop evaluating RunningJob when it's too complex)
-export type RunningJobFromTask<TTaskSlug extends keyof TypedJobs['tasks']> = {
+// Simplified version of Job that doesn't break TypeScript (TypeScript seems to stop evaluating Job when it's too complex)
+export type JobFromTask<TTaskSlug extends keyof TypedJobs['tasks']> = {
   input: TypedJobs['tasks'][TTaskSlug]['input']
 } & TypedCollection['payload-jobs']
 

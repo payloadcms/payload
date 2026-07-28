@@ -1,4 +1,4 @@
-import type { RunningJobFromTask } from './config/types/workflowTypes.js'
+import type { JobFromTask } from './config/types/workflowTypes.js'
 
 import {
   createLocalReq,
@@ -107,7 +107,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   ): Promise<
     TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
       ? Job<TTaskOrWorkflowSlug>
-      : RunningJobFromTask<TTaskOrWorkflowSlug>
+      : JobFromTask<TTaskOrWorkflowSlug>
   > => {
     const overrideAccess = args?.overrideAccess !== false
     const req: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
@@ -207,7 +207,7 @@ export const getJobsLocalAPI = (payload: Payload) => ({
 
     type ReturnType = TTaskOrWorkflowSlug extends keyof TypedJobs['workflows']
       ? Job<TTaskOrWorkflowSlug>
-      : RunningJobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
+      : JobFromTask<TTaskOrWorkflowSlug> // Type assertion is still needed here
 
     return jobAfterRead({
       config: payload.config,
