@@ -7,7 +7,10 @@ import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import type { AuthSessionResyncOptions, AuthSessionResyncResult } from './sessionSync.js'
+import type {
+  CrossTabSessionReconciliationOptions,
+  CrossTabSessionReconciliationResult,
+} from './crossTabSessionSync.js'
 import type { AuthContext, UserWithToken } from './types.js'
 
 import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
@@ -18,7 +21,7 @@ import { useConfig } from '../Config/index.js'
 import { useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 import { createAuthSessionRequests } from './authSessionRequests.js'
-import { AUTH_SESSION_SYNC_EVENT_TYPES } from './sessionSync.js'
+import { CROSS_TAB_SESSION_EVENT_TYPES } from './crossTabSessionSync.js'
 import { useAuthSessionTimers } from './useAuthSessionTimers.js'
 import { useCrossTabSessionSync } from './useCrossTabSessionSync.js'
 
@@ -101,7 +104,7 @@ export function AuthProvider({
     const collection = userRef.current?.collection
 
     crossTabSession.publish({
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
+      type: CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED,
       expiredTokenAt: expirationMs,
     })
     void logOutSession({ collection })
@@ -157,8 +160,10 @@ export function AuthProvider({
   )
 
   const crossTabSession = useCrossTabSessionSync({
-    fetchFullUser: (options) => fetchFullUserResult(options),
     getTokenExpirationMs: sessionTimers.getLatestExpirationMs,
+    onCrossTabSessionUnauthenticated: () => {
+      redirectToInactivityRoute()
+    },
     onSessionExpired: () => {
       const collection = userRef.current?.collection
 
@@ -177,9 +182,7 @@ export function AuthProvider({
         setLocalSession(session)
       }
     },
-    onSessionResyncUnauthenticated: () => {
-      redirectToInactivityRoute()
-    },
+    reconcileSession: (options) => fetchFullUserResult(options),
   })
 
   const refreshSession = useCallback(
@@ -219,7 +222,7 @@ export function AuthProvider({
 
             setLocalSession(json)
             crossTabSession.publish({
-              type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+              type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
               refreshStartedAt,
               session: json,
             })
@@ -230,7 +233,7 @@ export function AuthProvider({
             const invalidateSession = () => {
               if (handledExpiration !== undefined) {
                 crossTabSession.publish({
-                  type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
+                  type: CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED,
                   expiredTokenAt: handledExpiration,
                 })
               }
@@ -292,14 +295,14 @@ export function AuthProvider({
   )
 
   const logOut = useCallback(async () => {
-    const logoutEvent = { type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT } as const
+    const logoutEvent = { type: CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT } as const
     const logoutPublication = crossTabSession.publish(logoutEvent)
     const collection = userRef.current?.collection
 
     await logOutSession({ collection })
 
-    if (logoutPublication?.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT) {
-      crossTabSession.publishStorageRefresh(logoutPublication)
+    if (logoutPublication?.type === CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT) {
+      crossTabSession.publishLogoutSettlement(logoutPublication)
     }
 
     return true
@@ -343,11 +346,11 @@ export function AuthProvider({
   )
 
   const fetchFullUserResult = React.useCallback(
-    ({ isSessionEventStale }: Partial<AuthSessionResyncOptions> = {}): Promise<
-      AuthSessionResyncResult<AuthenticatedUser>
+    ({ isCrossTabEventStale }: Partial<CrossTabSessionReconciliationOptions> = {}): Promise<
+      CrossTabSessionReconciliationResult<AuthenticatedUser>
     > => {
       return authRequests.queue(async ({ acceptResult, isResultStale }) => {
-        const isResponseStale = () => isResultStale() || Boolean(isSessionEventStale?.())
+        const isResponseStale = () => isResultStale() || Boolean(isCrossTabEventStale?.())
 
         if (isResponseStale()) {
           return { status: 'indeterminate' }

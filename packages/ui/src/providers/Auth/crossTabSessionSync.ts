@@ -1,53 +1,53 @@
 import type { UserWithToken } from './types.js'
 
-export const AUTH_SESSION_SYNC_EVENT_TYPES = {
+export const CROSS_TAB_SESSION_EVENT_TYPES = {
   EXPIRED: 'session-expired',
   LOGGED_OUT: 'session-logged-out',
   REFRESHED: 'session-refreshed',
 } as const
 
-export type AuthSessionSyncEventType =
-  (typeof AUTH_SESSION_SYNC_EVENT_TYPES)[keyof typeof AUTH_SESSION_SYNC_EVENT_TYPES]
+export type CrossTabSessionEventType =
+  (typeof CROSS_TAB_SESSION_EVENT_TYPES)[keyof typeof CROSS_TAB_SESSION_EVENT_TYPES]
 
-export type AuthSessionSyncMessage =
+export type CrossTabSessionMessage =
   | {
       expiredTokenAt: number
       sentAt: number
-      sourceID: string
-      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED
+      sourceTabID: string
+      type: typeof CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED
     }
   | {
       refreshStartedAt: number
       sentAt: number
       session: UserWithToken
-      sourceID: string
-      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
+      sourceTabID: string
+      type: typeof CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED
     }
   | {
       sentAt: number
-      sourceID: string
-      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
+      sourceTabID: string
+      type: typeof CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT
     }
 
-export type AuthSessionSyncEvent =
+export type CrossTabSessionEvent =
   | {
       expiredTokenAt: number
-      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED
+      type: typeof CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED
     }
   | {
       refreshStartedAt: number
       session: UserWithToken
-      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
+      type: typeof CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED
     }
   | {
-      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
+      type: typeof CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT
     }
 
-export type AuthSessionResyncOptions = {
-  isSessionEventStale: () => boolean
+export type CrossTabSessionReconciliationOptions = {
+  isCrossTabEventStale: () => boolean
 }
 
-export type AuthSessionResyncResult<T = unknown> =
+export type CrossTabSessionReconciliationResult<T = unknown> =
   | {
       expirationMs: number
       status: 'authenticated'
@@ -60,75 +60,77 @@ export type AuthSessionResyncResult<T = unknown> =
       status: 'unauthenticated'
     }
 
-const authSessionSyncChannelName = 'payload-auth-session'
-const authSessionSyncStorageKey = 'payload:auth-session:refresh'
+const crossTabSessionChannelName = 'payload-auth-session-cross-tab'
+const crossTabSessionStorageKey = 'payload:auth-session:cross-tab'
 
-export type AuthSessionSyncPublication =
+export type CrossTabSessionPublication =
   | {
       affectedExpirationMs: 0
       sentAt: number
-      sourceID: string
-      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
+      sourceTabID: string
+      type: typeof CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT
     }
   | {
       affectedExpirationMs: number
       refreshStartedAt: number
       sentAt: number
-      sourceID: string
-      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
+      sourceTabID: string
+      type: typeof CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED
     }
   | {
       affectedExpirationMs: number
       sentAt: number
-      sourceID: string
-      type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED
+      sourceTabID: string
+      type: typeof CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED
     }
 
-export type AuthSessionLogoutPublication = Extract<
-  AuthSessionSyncPublication,
-  { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT }
+export type CrossTabSessionLogoutPublication = Extract<
+  CrossTabSessionPublication,
+  { type: typeof CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT }
 >
 
-type StorageRefreshNotification = {
+type CrossTabStorageNotification = {
   isBroadcastChannelFallback?: true
 } & (
-  | ({ settlesSentAt: number } & AuthSessionLogoutPublication)
-  | Extract<AuthSessionSyncPublication, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED }>
-  | Extract<AuthSessionSyncPublication, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED }>
+  | ({ settlesSentAt: number } & CrossTabSessionLogoutPublication)
+  | Extract<CrossTabSessionPublication, { type: typeof CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED }>
+  | Extract<CrossTabSessionPublication, { type: typeof CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED }>
 )
 
-type LifecycleOrder = AuthSessionSyncPublication
+type LifecycleOrder = CrossTabSessionPublication
 
 /**
- * Synchronizes session refresh, expiration, and logout events across same-origin tabs.
+ * Coordinates authentication session state across browser tabs.
  *
  * BroadcastChannel carries complete session events when available. Transient localStorage
- * notifications carry lifecycle metadata only and allow tabs to reconcile through `fetchFullUser`
- * when BroadcastChannel is unavailable. Lifecycle ordering prevents older async work from
- * replacing a newer session state.
+ * notifications carry lifecycle metadata only and allow tabs to reconcile through
+ * `reconcileSession` when BroadcastChannel is unavailable. Lifecycle ordering prevents older async
+ * work from replacing a newer session state.
  */
-export function createAuthSessionSync({
-  fetchFullUser,
+export function createCrossTabSessionSync({
   getTokenExpirationMs,
   now = Date.now,
+  onCrossTabSessionUnauthenticated,
   onSessionExpired,
   onSessionLoggedOut,
   onSessionRefreshed,
-  onSessionResyncUnauthenticated,
-  sourceID,
+  reconcileSession,
+  sourceTabID,
 }: {
-  fetchFullUser: (options: AuthSessionResyncOptions) => Promise<AuthSessionResyncResult>
   getTokenExpirationMs: () => number | undefined
   now?: () => number
+  onCrossTabSessionUnauthenticated: () => void
   onSessionExpired: (expiredTokenAt: number) => void
   onSessionLoggedOut: () => void
   onSessionRefreshed: (session: UserWithToken) => void
-  onSessionResyncUnauthenticated: () => void
-  sourceID: string
+  reconcileSession: (
+    options: CrossTabSessionReconciliationOptions,
+  ) => Promise<CrossTabSessionReconciliationResult>
+  sourceTabID: string
 }): {
   cleanup: () => void
-  publish: (event: AuthSessionSyncEvent) => AuthSessionSyncPublication
-  publishStorageRefresh: (publication: AuthSessionLogoutPublication) => void
+  publish: (event: CrossTabSessionEvent) => CrossTabSessionPublication
+  publishLogoutSettlement: (publication: CrossTabSessionLogoutPublication) => void
 } {
   let channel: BroadcastChannel | undefined
   let isActive = true
@@ -136,8 +138,8 @@ export function createAuthSessionSync({
   let latestLifecycleOrder: LifecycleOrder | undefined
   let pendingStorageLifecycleOrder: LifecycleOrder | undefined
 
-  const receiveMessage = ({ data }: MessageEvent<unknown>) => {
-    if (!isAuthSessionSyncMessage(data) || data.sourceID === sourceID) {
+  const receiveBroadcastMessage = ({ data }: MessageEvent<unknown>) => {
+    if (!isCrossTabSessionMessage(data) || data.sourceTabID === sourceTabID) {
       return
     }
 
@@ -155,7 +157,7 @@ export function createAuthSessionSync({
       return
     }
 
-    if (data.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
+    if (data.type === CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED) {
       const receivedExpirationMs = data.session.exp * 1000
       const localExpirationMs = getTokenExpirationMs()
 
@@ -169,7 +171,7 @@ export function createAuthSessionSync({
       return
     }
 
-    if (data.type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
+    if (data.type === CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED) {
       const localExpirationMs = getTokenExpirationMs()
 
       if (localExpirationMs !== undefined && localExpirationMs > data.expiredTokenAt) {
@@ -187,14 +189,14 @@ export function createAuthSessionSync({
     onSessionLoggedOut()
   }
 
-  const receiveStorageRefresh = (event: StorageEvent) => {
-    if (event.key !== authSessionSyncStorageKey || !event.newValue) {
+  const receiveStorageNotification = (event: StorageEvent) => {
+    if (event.key !== crossTabSessionStorageKey || !event.newValue) {
       return
     }
 
-    const notification = parseStorageRefreshNotification(event.newValue)
+    const notification = parseCrossTabStorageNotification(event.newValue)
 
-    if (!notification || notification.sourceID === sourceID) {
+    if (!notification || notification.sourceTabID === sourceTabID) {
       return
     }
 
@@ -212,31 +214,31 @@ export function createAuthSessionSync({
     pendingStorageLifecycleOrder = notification
     latestLifecycleOrder = notification
 
-    if (notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT) {
+    if (notification.type === CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT) {
       pendingStorageLifecycleOrder = undefined
       onSessionLoggedOut()
       return
     }
 
-    const isSessionEventStale = () => !isActive || latestLifecycleOrder !== notification
+    const isCrossTabEventStale = () => !isActive || latestLifecycleOrder !== notification
 
-    void fetchFullUser({ isSessionEventStale })
+    void reconcileSession({ isCrossTabEventStale })
       .then((result) => {
-        if (isSessionEventStale()) {
+        if (isCrossTabEventStale()) {
           return
         }
 
         if (result.status === 'authenticated') {
           pendingStorageLifecycleOrder = undefined
           latestLifecycleOrder = {
-            type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+            type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
             affectedExpirationMs: result.expirationMs,
             refreshStartedAt:
-              notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
+              notification.type === CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED
                 ? notification.refreshStartedAt
                 : notification.sentAt,
             sentAt: notification.sentAt,
-            sourceID: notification.sourceID,
+            sourceTabID: notification.sourceTabID,
           }
           return
         }
@@ -244,13 +246,13 @@ export function createAuthSessionSync({
         if (result.status === 'unauthenticated') {
           pendingStorageLifecycleOrder = undefined
           latestLifecycleOrder = {
-            type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+            type: CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT,
             affectedExpirationMs: 0,
             sentAt: notification.sentAt,
-            sourceID: notification.sourceID,
+            sourceTabID: notification.sourceTabID,
           }
 
-          onSessionResyncUnauthenticated()
+          onCrossTabSessionUnauthenticated()
         }
       })
       .catch(() => undefined)
@@ -260,9 +262,9 @@ export function createAuthSessionSync({
     let nextChannel: BroadcastChannel | undefined
 
     try {
-      nextChannel = new BroadcastChannel(authSessionSyncChannelName)
+      nextChannel = new BroadcastChannel(crossTabSessionChannelName)
 
-      nextChannel.addEventListener('message', receiveMessage)
+      nextChannel.addEventListener('message', receiveBroadcastMessage)
       channel = nextChannel
     } catch {
       closeChannel(nextChannel)
@@ -281,9 +283,9 @@ export function createAuthSessionSync({
 
       if (isStorageListenerInstalled) {
         try {
-          window.removeEventListener('storage', receiveStorageRefresh)
+          window.removeEventListener('storage', receiveStorageNotification)
         } catch {
-          // Synchronization cleanup is best-effort.
+          // Cross-tab synchronization cleanup is best-effort.
         }
 
         isStorageListenerInstalled = false
@@ -291,7 +293,7 @@ export function createAuthSessionSync({
     },
     publish: (event) => {
       const sentAt = getNextLifecycleTimestamp()
-      const message = createAuthSessionSyncMessage({ event, sentAt, sourceID })
+      const message = createCrossTabSessionMessage({ event, sentAt, sourceTabID })
       const lifecycleOrder = getLifecycleOrder(message)
 
       pendingStorageLifecycleOrder = undefined
@@ -305,14 +307,14 @@ export function createAuthSessionSync({
         }
       }
 
-      if (lifecycleOrder.type !== AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT) {
+      if (lifecycleOrder.type !== CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT) {
         publishStorageNotification({ notification: lifecycleOrder })
       }
 
       return lifecycleOrder
     },
-    publishStorageRefresh: (publication) => {
-      const notification: StorageRefreshNotification = {
+    publishLogoutSettlement: (publication) => {
+      const notification: CrossTabStorageNotification = {
         ...publication,
         sentAt: getNextLifecycleTimestamp(),
         settlesSentAt: publication.sentAt,
@@ -330,15 +332,15 @@ export function createAuthSessionSync({
     }
 
     try {
-      channelToClose.removeEventListener('message', receiveMessage)
+      channelToClose.removeEventListener('message', receiveBroadcastMessage)
     } catch {
-      // Synchronization cleanup is best-effort.
+      // Cross-tab synchronization cleanup is best-effort.
     }
 
     try {
       channelToClose.close()
     } catch {
-      // Synchronization cleanup is best-effort.
+      // Cross-tab synchronization cleanup is best-effort.
     }
   }
 
@@ -361,7 +363,7 @@ export function createAuthSessionSync({
     }
 
     try {
-      window.addEventListener('storage', receiveStorageRefresh)
+      window.addEventListener('storage', receiveStorageNotification)
       isStorageListenerInstalled = true
     } catch {
       // Local authentication must continue when storage events are unavailable.
@@ -371,32 +373,32 @@ export function createAuthSessionSync({
   function publishStorageNotification({
     notification,
   }: {
-    notification: StorageRefreshNotification
+    notification: CrossTabStorageNotification
   }): void {
-    const storageNotification: StorageRefreshNotification = channel
+    const storageNotification: CrossTabStorageNotification = channel
       ? notification
       : { ...notification, isBroadcastChannelFallback: true }
 
     try {
-      localStorage.setItem(authSessionSyncStorageKey, JSON.stringify(storageNotification))
+      localStorage.setItem(crossTabSessionStorageKey, JSON.stringify(storageNotification))
     } catch {
       // Local authentication must continue when storage is unavailable.
     }
 
     try {
-      localStorage.removeItem(authSessionSyncStorageKey)
+      localStorage.removeItem(crossTabSessionStorageKey)
     } catch {
       // Local authentication must continue when storage is unavailable.
     }
   }
 }
 
-function isAuthSessionSyncMessage(value: unknown): value is AuthSessionSyncMessage {
+function isCrossTabSessionMessage(value: unknown): value is CrossTabSessionMessage {
   if (
     !value ||
     typeof value !== 'object' ||
-    !('sourceID' in value) ||
-    typeof value.sourceID !== 'string' ||
+    !('sourceTabID' in value) ||
+    typeof value.sourceTabID !== 'string' ||
     !('sentAt' in value) ||
     typeof value.sentAt !== 'number' ||
     !Number.isFinite(value.sentAt) ||
@@ -405,11 +407,11 @@ function isAuthSessionSyncMessage(value: unknown): value is AuthSessionSyncMessa
     return false
   }
 
-  if (value.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT) {
+  if (value.type === CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT) {
     return true
   }
 
-  if (value.type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
+  if (value.type === CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED) {
     return (
       'expiredTokenAt' in value &&
       typeof value.expiredTokenAt === 'number' &&
@@ -417,7 +419,7 @@ function isAuthSessionSyncMessage(value: unknown): value is AuthSessionSyncMessa
     )
   }
 
-  if (value.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
+  if (value.type === CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED) {
     return (
       'refreshStartedAt' in value &&
       typeof value.refreshStartedAt === 'number' &&
@@ -435,7 +437,7 @@ function isAuthSessionSyncMessage(value: unknown): value is AuthSessionSyncMessa
   return false
 }
 
-function parseStorageRefreshNotification(value: string): null | StorageRefreshNotification {
+function parseCrossTabStorageNotification(value: string): CrossTabStorageNotification | null {
   try {
     const notification: unknown = JSON.parse(value)
 
@@ -448,15 +450,15 @@ function parseStorageRefreshNotification(value: string): null | StorageRefreshNo
       'sentAt' in notification &&
       typeof notification.sentAt === 'number' &&
       Number.isFinite(notification.sentAt) &&
-      'sourceID' in notification &&
-      typeof notification.sourceID === 'string' &&
+      'sourceTabID' in notification &&
+      typeof notification.sourceTabID === 'string' &&
       'type' in notification &&
-      isAuthSessionSyncEventType(notification.type)
+      isCrossTabSessionEventType(notification.type)
     ) {
       const lifecycleOrder = {
         affectedExpirationMs: notification.affectedExpirationMs,
         sentAt: notification.sentAt,
-        sourceID: notification.sourceID,
+        sourceTabID: notification.sourceTabID,
       }
       const isBroadcastChannelFallback =
         'isBroadcastChannelFallback' in notification &&
@@ -464,7 +466,7 @@ function parseStorageRefreshNotification(value: string): null | StorageRefreshNo
           ? true
           : undefined
 
-      if (notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
+      if (notification.type === CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED) {
         if ('settlesSentAt' in notification) {
           return null
         }
@@ -476,7 +478,7 @@ function parseStorageRefreshNotification(value: string): null | StorageRefreshNo
         }
       }
 
-      if (notification.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
+      if (notification.type === CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED) {
         if (
           'settlesSentAt' in notification ||
           !('refreshStartedAt' in notification) ||
@@ -506,12 +508,12 @@ function parseStorageRefreshNotification(value: string): null | StorageRefreshNo
           isBroadcastChannelFallback,
           sentAt: notification.sentAt,
           settlesSentAt: notification.settlesSentAt,
-          sourceID: notification.sourceID,
+          sourceTabID: notification.sourceTabID,
         }
       }
     }
   } catch {
-    // Ignore storage writes that do not belong to session synchronization.
+    // Ignore storage writes that do not belong to cross-tab session synchronization.
   }
 
   return null
@@ -530,8 +532,8 @@ function compareLifecycleOrders({
   first: LifecycleOrder
   second: LifecycleOrder
 }): number {
-  const isFirstRefresh = first.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
-  const isSecondRefresh = second.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
+  const isFirstRefresh = first.type === CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED
+  const isSecondRefresh = second.type === CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED
 
   if (isFirstRefresh !== isSecondRefresh) {
     const firstOrderingFence = getLifecycleOrderingFence(first)
@@ -542,8 +544,8 @@ function compareLifecycleOrders({
     }
   }
 
-  const isFirstLogout = first.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
-  const isSecondLogout = second.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
+  const isFirstLogout = first.type === CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT
+  const isSecondLogout = second.type === CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT
 
   if (isFirstLogout !== isSecondLogout) {
     return isFirstLogout ? 1 : -1
@@ -564,18 +566,18 @@ function compareLifecycleOrders({
     return firstPrecedence - secondPrecedence
   }
 
-  return compareSourceIDs({ first: first.sourceID, second: second.sourceID })
+  return compareSourceTabIDs({ first: first.sourceTabID, second: second.sourceTabID })
 }
 
 function getLifecycleOrder(
-  event: { sentAt: number; sourceID: string } & AuthSessionSyncEvent,
+  event: { sentAt: number; sourceTabID: string } & CrossTabSessionEvent,
 ): LifecycleOrder {
   const lifecycleMetadata = {
     sentAt: event.sentAt,
-    sourceID: event.sourceID,
+    sourceTabID: event.sourceTabID,
   }
 
-  if (event.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
+  if (event.type === CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED) {
     return {
       type: event.type,
       affectedExpirationMs: event.session.exp * 1000,
@@ -584,7 +586,7 @@ function getLifecycleOrder(
     }
   }
 
-  if (event.type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
+  if (event.type === CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED) {
     return {
       type: event.type,
       affectedExpirationMs: event.expiredTokenAt,
@@ -595,33 +597,33 @@ function getLifecycleOrder(
   return { type: event.type, affectedExpirationMs: 0, ...lifecycleMetadata }
 }
 
-function createAuthSessionSyncMessage({
+function createCrossTabSessionMessage({
   event,
   sentAt,
-  sourceID,
+  sourceTabID,
 }: {
-  event: AuthSessionSyncEvent
+  event: CrossTabSessionEvent
   sentAt: number
-  sourceID: string
-}): AuthSessionSyncMessage {
-  if (event.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
+  sourceTabID: string
+}): CrossTabSessionMessage {
+  if (event.type === CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED) {
     return {
       type: event.type,
       refreshStartedAt: event.refreshStartedAt,
       sentAt,
       session: event.session,
-      sourceID,
+      sourceTabID,
     }
   }
 
-  if (event.type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
-    return { type: event.type, expiredTokenAt: event.expiredTokenAt, sentAt, sourceID }
+  if (event.type === CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED) {
+    return { type: event.type, expiredTokenAt: event.expiredTokenAt, sentAt, sourceTabID }
   }
 
-  return { type: event.type, sentAt, sourceID }
+  return { type: event.type, sentAt, sourceTabID }
 }
 
-function compareSourceIDs({ first, second }: { first: string; second: string }): number {
+function compareSourceTabIDs({ first, second }: { first: string; second: string }): number {
   if (first === second) {
     return 0
   }
@@ -631,19 +633,19 @@ function compareSourceIDs({ first, second }: { first: string; second: string }):
 
 /** Returns the point in time when a lifecycle event began affecting the session. */
 function getLifecycleOrderingFence(order: LifecycleOrder): number {
-  return order.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
+  return order.type === CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED
     ? order.refreshStartedAt
     : order.sentAt
 }
 
-function getLifecyclePrecedence(type: AuthSessionSyncEventType): number {
-  if (type === AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED) {
+function getLifecyclePrecedence(type: CrossTabSessionEventType): number {
+  if (type === CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED) {
     return 1
   }
 
-  return type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT ? 2 : 0
+  return type === CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT ? 2 : 0
 }
 
-function isAuthSessionSyncEventType(value: unknown): value is AuthSessionSyncEventType {
-  return Object.values(AUTH_SESSION_SYNC_EVENT_TYPES).some((eventType) => eventType === value)
+function isCrossTabSessionEventType(value: unknown): value is CrossTabSessionEventType {
+  return Object.values(CROSS_TAB_SESSION_EVENT_TYPES).some((eventType) => eventType === value)
 }

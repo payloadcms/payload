@@ -3,62 +3,66 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type {
-  AuthSessionLogoutPublication,
-  AuthSessionSyncEvent,
-  AuthSessionSyncPublication,
-} from './sessionSync.js'
+  CrossTabSessionEvent,
+  CrossTabSessionLogoutPublication,
+  CrossTabSessionPublication,
+} from './crossTabSessionSync.js'
 
-import { createAuthSessionSync } from './sessionSync.js'
+import { createCrossTabSessionSync } from './crossTabSessionSync.js'
 
 export type CrossTabSessionSync = {
-  publish: (event: AuthSessionSyncEvent) => AuthSessionSyncPublication | undefined
-  publishStorageRefresh: (publication: AuthSessionLogoutPublication) => void
+  /** Publishes a session lifecycle event to the other browser tabs. */
+  publish: (event: CrossTabSessionEvent) => CrossTabSessionPublication | undefined
+  /** Notifies storage-fallback tabs after the server-side logout request settles. */
+  publishLogoutSettlement: (publication: CrossTabSessionLogoutPublication) => void
 }
 
+/** Connects the Auth provider to one cross-tab session coordinator for the current browser tab. */
 export function useCrossTabSessionSync(
-  options: Omit<Parameters<typeof createAuthSessionSync>[0], 'sourceID'>,
+  options: Omit<Parameters<typeof createCrossTabSessionSync>[0], 'sourceTabID'>,
 ): CrossTabSessionSync {
-  const [sourceID] = useState(createCrossTabSessionSourceID)
+  const [sourceTabID] = useState(createTabID)
   const optionsRef = useRef(options)
-  const sessionSyncRef = useRef<ReturnType<typeof createAuthSessionSync>>(undefined)
+  const crossTabSessionRef = useRef<ReturnType<typeof createCrossTabSessionSync>>(undefined)
 
   useEffect(() => {
     optionsRef.current = options
   }, [options])
 
   useEffect(() => {
-    const sessionSync = createAuthSessionSync({
-      fetchFullUser: (resyncOptions) => optionsRef.current.fetchFullUser(resyncOptions),
+    const crossTabSession = createCrossTabSessionSync({
       getTokenExpirationMs: () => optionsRef.current.getTokenExpirationMs(),
+      onCrossTabSessionUnauthenticated: () => optionsRef.current.onCrossTabSessionUnauthenticated(),
       onSessionExpired: (expiredTokenAt) => optionsRef.current.onSessionExpired(expiredTokenAt),
       onSessionLoggedOut: () => optionsRef.current.onSessionLoggedOut(),
       onSessionRefreshed: (session) => optionsRef.current.onSessionRefreshed(session),
-      onSessionResyncUnauthenticated: () => optionsRef.current.onSessionResyncUnauthenticated(),
-      sourceID,
+      reconcileSession: (reconciliationOptions) =>
+        optionsRef.current.reconcileSession(reconciliationOptions),
+      sourceTabID,
     })
 
-    sessionSyncRef.current = sessionSync
+    crossTabSessionRef.current = crossTabSession
 
     return () => {
-      if (sessionSyncRef.current === sessionSync) {
-        sessionSyncRef.current = undefined
+      if (crossTabSessionRef.current === crossTabSession) {
+        crossTabSessionRef.current = undefined
       }
 
-      sessionSync.cleanup()
+      crossTabSession.cleanup()
     }
-  }, [sourceID])
+  }, [sourceTabID])
 
   const publish = useCallback(
-    (event: AuthSessionSyncEvent) => sessionSyncRef.current?.publish(event),
+    (event: CrossTabSessionEvent) => crossTabSessionRef.current?.publish(event),
     [],
   )
-  const publishStorageRefresh = useCallback((publication: AuthSessionLogoutPublication) => {
-    sessionSyncRef.current?.publishStorageRefresh(publication)
+  const publishLogoutSettlement = useCallback((publication: CrossTabSessionLogoutPublication) => {
+    crossTabSessionRef.current?.publishLogoutSettlement(publication)
   }, [])
 
-  return useMemo(() => ({ publish, publishStorageRefresh }), [publish, publishStorageRefresh])
+  return useMemo(() => ({ publish, publishLogoutSettlement }), [publish, publishLogoutSettlement])
 }
 
-function createCrossTabSessionSourceID(): string {
+function createTabID(): string {
   return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`
 }

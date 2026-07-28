@@ -2,18 +2,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { UserWithToken } from './index.js'
-import type { AuthSessionResyncResult, AuthSessionSyncMessage } from './sessionSync.js'
+import type {
+  CrossTabSessionMessage,
+  CrossTabSessionReconciliationResult,
+} from './crossTabSessionSync.js'
 
-import { AUTH_SESSION_SYNC_EVENT_TYPES, createAuthSessionSync } from './sessionSync.js'
+import { CROSS_TAB_SESSION_EVENT_TYPES, createCrossTabSessionSync } from './crossTabSessionSync.js'
 
-const sessionSyncCleanups: Array<() => void> = []
+const crossTabSessionCleanups: Array<() => void> = []
 
 beforeEach(() => {
   resetMockBroadcastChannels()
 })
 
 afterEach(() => {
-  for (const cleanup of sessionSyncCleanups.splice(0)) {
+  for (const cleanup of crossTabSessionCleanups.splice(0)) {
     cleanup()
   }
 
@@ -22,23 +25,23 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe('createAuthSessionSync', () => {
-  it('should publish refreshed sessions with source and timing metadata', () => {
+describe('createCrossTabSessionSync', () => {
+  it('should publish refreshed sessions with source-tab and timing metadata', () => {
     const session = createSession({ expirationMs: 20_000, token: 'refreshed-token' })
-    const sync = createSync({ now: () => 123 })
+    const crossTabSessionSync = createTestCrossTabSessionSync({ now: () => 123 })
 
-    sync.publish({
+    crossTabSessionSync.publish({
       refreshStartedAt: 100,
       session,
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
     })
 
     expect(getBroadcastChannel().postMessage).toHaveBeenCalledWith({
       refreshStartedAt: 100,
       session,
-      sourceID: 'local-tab',
+      sourceTabID: 'local-tab',
       sentAt: 123,
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
     })
   })
 
@@ -46,7 +49,7 @@ describe('createAuthSessionSync', () => {
     const onSessionExpired = vi.fn()
     const onSessionRefreshed = vi.fn()
 
-    createSync({
+    createTestCrossTabSessionSync({
       localExpirationMs: 40_000,
       onSessionExpired,
       onSessionRefreshed,
@@ -54,17 +57,17 @@ describe('createAuthSessionSync', () => {
     const channel = getBroadcastChannel()
 
     channel.emit(
-      createMessage({
+      createCrossTabMessage({
         session: createSession({ expirationMs: 30_000 }),
-        sourceID: 'stale-refresh-tab',
-        type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+        sourceTabID: 'stale-refresh-tab',
+        type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
       }),
     )
     channel.emit(
-      createMessage({
+      createCrossTabMessage({
         expiredTokenAt: 30_000,
-        sourceID: 'stale-expiration-tab',
-        type: AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED,
+        sourceTabID: 'stale-expiration-tab',
+        type: CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED,
       }),
     )
     expect(onSessionRefreshed).not.toHaveBeenCalled()
@@ -74,36 +77,36 @@ describe('createAuthSessionSync', () => {
   it('should converge on logout when equal-time events arrive in opposite orders', () => {
     let firstState = 'initial'
     let secondState = 'initial'
-    const refreshMessage = createMessage({
+    const refreshMessage = createCrossTabMessage({
       sentAt: 500,
       session: createSession({ expirationMs: 30_000, token: 'refreshed-token' }),
-      sourceID: 'refresh-tab',
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sourceTabID: 'refresh-tab',
+      type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
     })
-    const logoutMessage = createMessage({
+    const logoutMessage = createCrossTabMessage({
       sentAt: 500,
-      sourceID: 'logout-tab',
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      sourceTabID: 'logout-tab',
+      type: CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT,
     })
 
-    createSync({
+    createTestCrossTabSessionSync({
       onSessionLoggedOut: () => {
         firstState = 'logged-out'
       },
       onSessionRefreshed: () => {
         firstState = 'refreshed'
       },
-      sourceID: 'first-local-tab',
+      sourceTabID: 'first-local-tab',
     })
     const firstChannel = getBroadcastChannel()
-    createSync({
+    createTestCrossTabSessionSync({
       onSessionLoggedOut: () => {
         secondState = 'logged-out'
       },
       onSessionRefreshed: () => {
         secondState = 'refreshed'
       },
-      sourceID: 'second-local-tab',
+      sourceTabID: 'second-local-tab',
     })
     const secondChannel = getBroadcastChannel()
 
@@ -119,20 +122,24 @@ describe('createAuthSessionSync', () => {
   it('should keep logout ahead of a refresh that started earlier and published later', () => {
     const onSessionLoggedOut = vi.fn()
     const onSessionRefreshed = vi.fn()
-    const refreshMessage = createMessage({
+    const refreshMessage = createCrossTabMessage({
       refreshStartedAt: 100,
       sentAt: 300,
       session: createSession({ expirationMs: 30_000, token: 'late-refreshed-token' }),
-      sourceID: 'refresh-tab',
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sourceTabID: 'refresh-tab',
+      type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
     })
-    const logoutMessage = createMessage({
+    const logoutMessage = createCrossTabMessage({
       sentAt: 200,
-      sourceID: 'logout-tab',
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      sourceTabID: 'logout-tab',
+      type: CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT,
     })
 
-    createSync({ onSessionLoggedOut, onSessionRefreshed, sourceID: 'receiving-tab' })
+    createTestCrossTabSessionSync({
+      onSessionLoggedOut,
+      onSessionRefreshed,
+      sourceTabID: 'receiving-tab',
+    })
     const channel = getBroadcastChannel()
 
     channel.emit(logoutMessage)
@@ -147,22 +154,22 @@ describe('createAuthSessionSync', () => {
     const onSessionRefreshed = vi.fn((session: UserWithToken) => {
       appliedSession = session
     })
-    const refreshB = createMessage({
+    const refreshB = createCrossTabMessage({
       refreshStartedAt: 200,
       sentAt: 100,
       session: createSession({ expirationMs: 30_000, token: 'refresh-b' }),
-      sourceID: 'refresh-b-tab',
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sourceTabID: 'refresh-b-tab',
+      type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
     })
-    const refreshA = createMessage({
+    const refreshA = createCrossTabMessage({
       refreshStartedAt: 100,
       sentAt: 200,
       session: createSession({ expirationMs: 40_000, token: 'refresh-a' }),
-      sourceID: 'refresh-a-tab',
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      sourceTabID: 'refresh-a-tab',
+      type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
     })
 
-    createSync({ onSessionRefreshed, sourceID: 'receiving-tab' })
+    createTestCrossTabSessionSync({ onSessionRefreshed, sourceTabID: 'receiving-tab' })
     const channel = getBroadcastChannel()
 
     channel.emit(refreshB)
@@ -174,76 +181,87 @@ describe('createAuthSessionSync', () => {
   })
 
   it('should ignore storage notifications while BroadcastChannel is healthy', async () => {
-    const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' } as const)
+    const reconcileSession = vi.fn().mockResolvedValue({ status: 'indeterminate' } as const)
 
-    createSync({ fetchFullUser, sourceID: 'receiving-tab' })
+    createTestCrossTabSessionSync({ reconcileSession, sourceTabID: 'receiving-tab' })
 
     window.dispatchEvent(
       new StorageEvent('storage', {
-        key: 'payload:auth-session:refresh',
+        key: 'payload:auth-session:cross-tab',
         newValue: JSON.stringify({
           affectedExpirationMs: 30_000,
           refreshStartedAt: 100,
           sentAt: 200,
-          sourceID: 'refreshing-tab',
-          type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+          sourceTabID: 'refreshing-tab',
+          type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
         }),
       }),
     )
     await Promise.resolve()
 
-    expect(fetchFullUser).not.toHaveBeenCalled()
+    expect(reconcileSession).not.toHaveBeenCalled()
   })
 
   it('should ignore a late storage refresh whose request started before logout', () => {
     vi.stubGlobal('BroadcastChannel', undefined)
-    const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' } as const)
+    const reconcileSession = vi.fn().mockResolvedValue({ status: 'indeterminate' } as const)
     const onSessionLoggedOut = vi.fn()
 
-    createSync({ fetchFullUser, onSessionLoggedOut, sourceID: 'receiving-tab' })
+    createTestCrossTabSessionSync({
+      reconcileSession,
+      onSessionLoggedOut,
+      sourceTabID: 'receiving-tab',
+    })
 
     window.dispatchEvent(
       new StorageEvent('storage', {
-        key: 'payload:auth-session:refresh',
+        key: 'payload:auth-session:cross-tab',
         newValue: JSON.stringify({
           affectedExpirationMs: 0,
           settlesSentAt: 200,
           sentAt: 201,
-          sourceID: 'logout-tab',
-          type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+          sourceTabID: 'logout-tab',
+          type: CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT,
         }),
       }),
     )
     window.dispatchEvent(
       new StorageEvent('storage', {
-        key: 'payload:auth-session:refresh',
+        key: 'payload:auth-session:cross-tab',
         newValue: JSON.stringify({
           affectedExpirationMs: 30_000,
           refreshStartedAt: 100,
           sentAt: 300,
-          sourceID: 'refresh-tab',
-          type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+          sourceTabID: 'refresh-tab',
+          type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
         }),
       }),
     )
 
     expect(onSessionLoggedOut).toHaveBeenCalledOnce()
-    expect(fetchFullUser).not.toHaveBeenCalled()
+    expect(reconcileSession).not.toHaveBeenCalled()
   })
 
   it('should keep storage fallback notification-only while reconciling refresh and settling logout', async () => {
     vi.stubGlobal('BroadcastChannel', undefined)
-    const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' })
+    const reconcileSession = vi.fn().mockResolvedValue({ status: 'indeterminate' })
     const onSessionLoggedOut = vi.fn()
 
-    createSync({ fetchFullUser, onSessionLoggedOut, sourceID: 'receiving-tab' })
+    createTestCrossTabSessionSync({
+      reconcileSession,
+      onSessionLoggedOut,
+      sourceTabID: 'receiving-tab',
+    })
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
-    const publisher = createSync({ now: () => 123, sourceID: 'publishing-tab' })
+    const publisher = createTestCrossTabSessionSync({
+      now: () => 123,
+      sourceTabID: 'publishing-tab',
+    })
 
     publisher.publish({
       refreshStartedAt: 100,
       session: createSession({ expirationMs: 20_000, token: 'sensitive-token' }),
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
     })
     const [key, value] = setItem.mock.calls[0] as [string, string]
 
@@ -251,9 +269,9 @@ describe('createAuthSessionSync', () => {
       affectedExpirationMs: 20_000,
       isBroadcastChannelFallback: true,
       refreshStartedAt: 100,
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
       sentAt: 123,
-      sourceID: 'publishing-tab',
+      sourceTabID: 'publishing-tab',
     })
     expect(value).not.toContain('sensitive-token')
     expect(value).not.toContain('user')
@@ -261,22 +279,22 @@ describe('createAuthSessionSync', () => {
     window.dispatchEvent(new StorageEvent('storage', { key, newValue: value }))
     await Promise.resolve()
 
-    expect(fetchFullUser).toHaveBeenCalledOnce()
+    expect(reconcileSession).toHaveBeenCalledOnce()
 
-    fetchFullUser.mockClear()
+    reconcileSession.mockClear()
 
     const logoutPublication = publisher.publish({
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      type: CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT,
     })
 
     expect(setItem).toHaveBeenCalledOnce()
-    expect(logoutPublication.type).toBe(AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT)
+    expect(logoutPublication.type).toBe(CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT)
 
-    if (logoutPublication.type !== AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT) {
+    if (logoutPublication.type !== CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT) {
       throw new Error('Expected a logged-out publication.')
     }
 
-    publisher.publishStorageRefresh(logoutPublication)
+    publisher.publishLogoutSettlement(logoutPublication)
 
     const [logoutKey, logoutValue] = setItem.mock.calls[1] as [string, string]
 
@@ -285,8 +303,8 @@ describe('createAuthSessionSync', () => {
       isBroadcastChannelFallback: true,
       settlesSentAt: 124,
       sentAt: 125,
-      sourceID: 'publishing-tab',
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT,
+      sourceTabID: 'publishing-tab',
+      type: CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT,
     })
     expect(logoutValue).not.toContain('sensitive-token')
     expect(logoutValue).not.toContain('user')
@@ -294,20 +312,20 @@ describe('createAuthSessionSync', () => {
     window.dispatchEvent(new StorageEvent('storage', { key: logoutKey, newValue: logoutValue }))
 
     expect(onSessionLoggedOut).toHaveBeenCalledOnce()
-    expect(fetchFullUser).not.toHaveBeenCalled()
+    expect(reconcileSession).not.toHaveBeenCalled()
 
     await Promise.resolve()
 
-    expect(fetchFullUser).not.toHaveBeenCalled()
+    expect(reconcileSession).not.toHaveBeenCalled()
   })
 
-  it('should downgrade a failed channel and resynchronize through storage', async () => {
-    const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' })
+  it('should downgrade a failed channel and reconcile through storage', async () => {
+    const reconcileSession = vi.fn().mockResolvedValue({ status: 'indeterminate' })
 
-    createSync({ fetchFullUser, sourceID: 'storage-peer' })
+    createTestCrossTabSessionSync({ reconcileSession, sourceTabID: 'storage-peer' })
     const addEventListener = vi.spyOn(window, 'addEventListener')
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
-    const publisher = createSync({ sourceID: 'channel-publisher' })
+    const publisher = createTestCrossTabSessionSync({ sourceTabID: 'channel-publisher' })
     const failedChannel = getBroadcastChannel()
 
     failedChannel.postMessage.mockImplementationOnce(() => {
@@ -316,7 +334,7 @@ describe('createAuthSessionSync', () => {
     publisher.publish({
       refreshStartedAt: 100,
       session: createSession({ expirationMs: 20_000 }),
-      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+      type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
     })
 
     expect(failedChannel.close).toHaveBeenCalledOnce()
@@ -328,131 +346,134 @@ describe('createAuthSessionSync', () => {
     window.dispatchEvent(new StorageEvent('storage', { key, newValue }))
     await Promise.resolve()
 
-    expect(fetchFullUser).toHaveBeenCalledOnce()
+    expect(reconcileSession).toHaveBeenCalledOnce()
   })
 
-  it('should ignore a pending storage resync after cleanup', async () => {
+  it('should ignore a pending storage reconciliation after cleanup', async () => {
     vi.stubGlobal('BroadcastChannel', undefined)
-    let resolveFetchFullUser: ((result: AuthSessionResyncResult) => void) | undefined
-    const fetchFullUser = vi.fn(
+    let resolveReconciliation: ((result: CrossTabSessionReconciliationResult) => void) | undefined
+    const reconcileSession = vi.fn(
       () =>
-        new Promise<AuthSessionResyncResult>((resolve) => {
-          resolveFetchFullUser = resolve
+        new Promise<CrossTabSessionReconciliationResult>((resolve) => {
+          resolveReconciliation = resolve
         }),
     )
-    const onSessionResyncUnauthenticated = vi.fn()
-    const sync = createSync({ fetchFullUser, onSessionResyncUnauthenticated })
+    const onCrossTabSessionUnauthenticated = vi.fn()
+    const crossTabSessionSync = createTestCrossTabSessionSync({
+      reconcileSession,
+      onCrossTabSessionUnauthenticated,
+    })
 
     window.dispatchEvent(
       new StorageEvent('storage', {
-        key: 'payload:auth-session:refresh',
+        key: 'payload:auth-session:cross-tab',
         newValue: JSON.stringify({
           affectedExpirationMs: 40_000,
           refreshStartedAt: 400,
-          type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+          type: CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED,
           sentAt: 500,
-          sourceID: 'remote-tab',
+          sourceTabID: 'remote-tab',
         }),
       }),
     )
-    sync.cleanup()
-    resolveFetchFullUser?.({ status: 'unauthenticated' })
+    crossTabSessionSync.cleanup()
+    resolveReconciliation?.({ status: 'unauthenticated' })
     await Promise.resolve()
 
-    expect(onSessionResyncUnauthenticated).not.toHaveBeenCalled()
+    expect(onCrossTabSessionUnauthenticated).not.toHaveBeenCalled()
   })
 })
 
-function createSync({
-  fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' } as const),
+function createTestCrossTabSessionSync({
+  reconcileSession = vi.fn().mockResolvedValue({ status: 'indeterminate' } as const),
   localExpirationMs,
   now,
   onSessionExpired = vi.fn(),
   onSessionLoggedOut = vi.fn(),
   onSessionRefreshed = vi.fn(),
-  onSessionResyncUnauthenticated = vi.fn(),
-  sourceID = 'local-tab',
+  onCrossTabSessionUnauthenticated = vi.fn(),
+  sourceTabID = 'local-tab',
 }: {
-  fetchFullUser?: () => Promise<AuthSessionResyncResult>
+  reconcileSession?: () => Promise<CrossTabSessionReconciliationResult>
   localExpirationMs?: number
   now?: () => number
   onSessionExpired?: (expiredTokenAt: number) => void
   onSessionLoggedOut?: () => void
   onSessionRefreshed?: (session: UserWithToken) => void
-  onSessionResyncUnauthenticated?: () => void
-  sourceID?: string
+  onCrossTabSessionUnauthenticated?: () => void
+  sourceTabID?: string
 } = {}) {
-  const sync = createAuthSessionSync({
-    fetchFullUser,
+  const crossTabSessionSync = createCrossTabSessionSync({
+    reconcileSession,
     getTokenExpirationMs: () => localExpirationMs,
     now,
     onSessionExpired,
     onSessionLoggedOut,
     onSessionRefreshed,
-    onSessionResyncUnauthenticated,
-    sourceID,
+    onCrossTabSessionUnauthenticated,
+    sourceTabID,
   })
 
-  sessionSyncCleanups.push(sync.cleanup)
+  crossTabSessionCleanups.push(crossTabSessionSync.cleanup)
 
-  return sync
+  return crossTabSessionSync
 }
 
 class MockBroadcastChannel {
   static instances: MockBroadcastChannel[] = []
 
-  listeners = new Set<(event: MessageEvent<AuthSessionSyncMessage>) => void>()
+  listeners = new Set<(event: MessageEvent<CrossTabSessionMessage>) => void>()
   addEventListener = vi.fn(
-    (_type: string, listener: (event: MessageEvent<AuthSessionSyncMessage>) => void) => {
+    (_type: string, listener: (event: MessageEvent<CrossTabSessionMessage>) => void) => {
       this.listeners.add(listener)
     },
   )
   close = vi.fn()
   postMessage = vi.fn()
   removeEventListener = vi.fn(
-    (_type: string, listener: (event: MessageEvent<AuthSessionSyncMessage>) => void) => {
+    (_type: string, listener: (event: MessageEvent<CrossTabSessionMessage>) => void) => {
       this.listeners.delete(listener)
     },
   )
 
-  emit(message: AuthSessionSyncMessage): void {
+  emit(message: CrossTabSessionMessage): void {
     for (const listener of this.listeners) {
       listener(new MessageEvent('message', { data: message }))
     }
   }
 }
 
-function createMessage(
+function createCrossTabMessage(
   message:
     | ({
         sentAt?: number
       } & Omit<
-        Extract<AuthSessionSyncMessage, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.EXPIRED }>,
+        Extract<CrossTabSessionMessage, { type: typeof CROSS_TAB_SESSION_EVENT_TYPES.EXPIRED }>,
         'sentAt'
       >)
     | ({
         sentAt?: number
       } & Omit<
-        Extract<AuthSessionSyncMessage, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT }>,
+        Extract<CrossTabSessionMessage, { type: typeof CROSS_TAB_SESSION_EVENT_TYPES.LOGGED_OUT }>,
         'sentAt'
       >)
     | ({
         refreshStartedAt?: number
         sentAt?: number
       } & Omit<
-        Extract<AuthSessionSyncMessage, { type: typeof AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED }>,
+        Extract<CrossTabSessionMessage, { type: typeof CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED }>,
         'refreshStartedAt' | 'sentAt'
       >),
-): AuthSessionSyncMessage {
+): CrossTabSessionMessage {
   const { sentAt = 100, ...messageWithoutTimestamp } = message
 
-  if (messageWithoutTimestamp.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED) {
+  if (messageWithoutTimestamp.type === CROSS_TAB_SESSION_EVENT_TYPES.REFRESHED) {
     const { refreshStartedAt = sentAt, ...refreshedMessage } = messageWithoutTimestamp
 
     return { ...refreshedMessage, refreshStartedAt, sentAt }
   }
 
-  return { ...messageWithoutTimestamp, sentAt } as AuthSessionSyncMessage
+  return { ...messageWithoutTimestamp, sentAt } as CrossTabSessionMessage
 }
 
 function createSession({
