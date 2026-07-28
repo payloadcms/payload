@@ -13,7 +13,7 @@ export const serverOnlyClientSpecifiers: Array<RegExp | string> = [
   /^@payloadcms\/richtext-lexical\/rsc/,
   /^@payloadcms\/richtext-slate\/rsc/,
   '@payloadcms/ui/server',
-  /^@payloadcms\/tanstack-start\/(layouts|rsc|server|views\/server)/,
+  /^@payloadcms\/tanstack-start\/(layouts|rsc|server)/,
   'sharp',
   'busboy',
   'croner',
@@ -39,8 +39,7 @@ export function onImportProtectionViolation(violation: unknown): boolean | void 
     resolved?: string
   }
 
-  const allowedClientFileImporters =
-    /\/richtext-lexical\/.*\/exports\/client\/|\/tanstack-start\/.*\/views\/AdminView|\/ui\//
+  const allowedClientFileImporters = /\/richtext-lexical\/.*\/exports\/client\/|\/ui\//
 
   if (
     info.envType === 'server' &&
