@@ -1,7 +1,5 @@
 'use client'
-import type { I18n } from '@payloadcms/translations'
-import type { ClientCollectionConfig, SanitizedConfig } from 'payload'
-
+import { useConfig, useTranslation } from '@payloadcms/ui'
 import React from 'react'
 
 import { getRelationshipGroups } from './getRelationshipGroups.js'
@@ -10,9 +8,6 @@ import './index.css'
 const baseClass = 'import-preview-relationship'
 
 type Props = {
-  collections: ClientCollectionConfig[]
-  dateFormat: SanitizedConfig['admin']['dateFormat']
-  i18n: I18n<any, any>
   /** `field.relationTo` — an array when the field is polymorphic. */
   relationTo: string | string[]
   value: unknown
@@ -22,17 +17,17 @@ type Props = {
  * Renders a relationship or upload value for the import preview table, stacking
  * one row per target collection.
  */
-export const RelationshipCell: React.FC<Props> = ({
-  collections,
-  dateFormat,
-  i18n,
-  relationTo,
-  value,
-}) => {
-  const groups = React.useMemo(
-    () => getRelationshipGroups({ collections, dateFormat, i18n, relationTo, value }),
-    [collections, dateFormat, i18n, relationTo, value],
-  )
+export const RelationshipCell: React.FC<Props> = ({ relationTo, value }) => {
+  const { config } = useConfig()
+  const { i18n } = useTranslation()
+
+  const groups = getRelationshipGroups({
+    collections: config.collections,
+    dateFormat: config.admin.dateFormat,
+    i18n,
+    relationTo,
+    value,
+  })
 
   // The column heading already names a monomorphic field, whose collection never varies.
   const showCollectionLabels = Array.isArray(relationTo)
@@ -50,7 +45,7 @@ export const RelationshipCell: React.FC<Props> = ({
             <span className={`${baseClass}__collection`}>{label}</span>
           )}
           <div className={`${baseClass}__values`}>
-            {options.map((option) => option.label).join(', ')}
+            {options.join(', ')}
             {remaining > 0 && (
               <span className={`${baseClass}__more`}>
                 {i18n.t('fields:itemsAndMore', { count: remaining, items: '' }).trim()}

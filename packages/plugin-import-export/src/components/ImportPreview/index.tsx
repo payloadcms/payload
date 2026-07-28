@@ -24,7 +24,7 @@ import type {
 import type { ImportPreviewResponse } from '../../types.js'
 
 import { DEFAULT_PREVIEW_LIMIT, PREVIEW_LIMIT_OPTIONS } from '../../constants.js'
-import { RelationshipCell } from './RelationshipCell/index.js'
+import { RelationshipCell } from '../RelationshipCell/index.js'
 import './index.css'
 
 const baseClass = 'import-preview'
@@ -250,9 +250,6 @@ export const ImportPreview: React.FC = () => {
                   if (field.type === 'relationship' || field.type === 'upload') {
                     return (
                       <RelationshipCell
-                        collections={config.collections}
-                        dateFormat={config.admin.dateFormat}
-                        i18n={i18n}
                         key={`${fieldPath}-${rowIndex}`}
                         relationTo={field.relationTo}
                         value={value}

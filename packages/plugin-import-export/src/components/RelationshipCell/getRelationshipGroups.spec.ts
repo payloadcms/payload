@@ -27,7 +27,7 @@ const group = ({ relationTo, value }: { relationTo: string | string[]; value: un
 /** Collapses each group to `Label: value, value (+N)` so assertions stay readable. */
 const summarize = (groups: ReturnType<typeof group>) =>
   groups.map(({ label, options, remaining }) => {
-    const values = options.map((o) => o.label).join(', ')
+    const values = options.join(', ')
 
     return remaining ? `${label}: ${values} (+${remaining})` : `${label}: ${values}`
   })
@@ -38,7 +38,7 @@ describe('getRelationshipGroups', () => {
       expect(group({ relationTo: 'posts', value: 3 })).toEqual([
         {
           label: 'Posts',
-          options: [{ allowEdit: false, label: '3', relationTo: 'posts', value: 3 }],
+          options: ['3'],
           remaining: 0,
         },
       ])
@@ -197,7 +197,7 @@ describe('getRelationshipGroups', () => {
         value: { relationTo: 'posts', value: { title: 'No ID' } },
       })
 
-      expect(groups[0]?.options[0]?.label).not.toContain('[object Object]')
+      expect(groups[0]?.options[0]).not.toContain('[object Object]')
     })
   })
 })

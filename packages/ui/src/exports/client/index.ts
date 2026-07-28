@@ -297,10 +297,6 @@ export { PasswordField } from '../../fields/Password/index.js'
 export { PointField } from '../../fields/Point/index.js'
 export { RadioGroupField } from '../../fields/RadioGroup/index.js'
 export { RelationshipField, RelationshipInput } from '../../fields/Relationship/index.js'
-export type {
-  Option as RelationshipOption,
-  OptionGroup as RelationshipOptionGroup,
-} from '../../fields/Relationship/types.js'
 export { RichTextField } from '../../fields/RichText/index.js'
 export { RowField } from '../../fields/Row/index.js'
 export { formatOptions, SelectField, SelectInput } from '../../fields/Select/index.js'

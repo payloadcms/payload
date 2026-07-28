@@ -4703,7 +4703,14 @@ describe('@payloadcms/plugin-import-export', () => {
 
       afterEach(async () => {
         for (const id of createdPostIDs) {
-          await payload.delete({ collection: 'posts', id })
+          try {
+            await payload.delete({
+              collection: 'posts',
+              id,
+            })
+          } catch {
+            // Ignore cleanup errors
+          }
         }
         createdPostIDs.length = 0
       })
