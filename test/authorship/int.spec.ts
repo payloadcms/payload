@@ -4,7 +4,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import type { Admin, User } from './payload-types.js'
+import type { Admin, Post, User } from './payload-types.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
@@ -18,7 +18,7 @@ import {
   usersSlug,
 } from './slugs.js'
 
-type TestUser = { collection: string } & (Admin | User)
+type TestUser = Admin | User
 
 let payload: Payload
 
@@ -31,10 +31,10 @@ let otherUser: TestUser
 
 const createdPostIDs: (number | string)[] = []
 
-const createPost = async ({ data, user }: { data: Record<string, unknown>; user?: TestUser }) => {
+const createPost = async ({ data, user }: { data: Partial<Post>; user?: TestUser }) => {
   const doc = await payload.create({
     collection: postsSlug,
-    data: data as never,
+    data,
     depth: 0,
     user,
   })
@@ -226,11 +226,26 @@ describe('Authorship', () => {
       },
       depth: 0,
       overrideAccess: false,
-      user: user as never,
+      user,
     })
     createdPostIDs.push(created.id)
 
     // Field access denies the client value; the hook stamps the real acting user.
+    expect(created.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
+  })
+
+  it('should ignore a client-provided null createdBy (no clearing) when overrideAccess is false', async () => {
+    const created = await payload.create({
+      collection: postsSlug,
+      data: { createdBy: null, title: 'no clear create' },
+      depth: 0,
+      overrideAccess: false,
+      user,
+    })
+    createdPostIDs.push(created.id)
+
+    // Field access strips the null before the hook, so a client cannot wipe authorship;
+    // the acting user is stamped as usual.
     expect(created.createdBy).toEqual({ relationTo: usersSlug, value: user.id })
   })
 
@@ -246,7 +261,7 @@ describe('Authorship', () => {
       },
       depth: 0,
       overrideAccess: false,
-      user: user as never,
+      user,
     })
 
     expect(updated.updatedBy).toEqual({ relationTo: usersSlug, value: user.id })
@@ -290,28 +305,28 @@ describe('Authorship', () => {
   it('should not change updatedBy when a user logs in', async () => {
     const email = `login-check-${Date.now()}@x.com`
 
-    const createdUser = (await payload.create({
+    const createdUser = await payload.create({
       collection: usersSlug,
       data: { email, password: 'test' },
       depth: 0,
       user,
-    })) as never as Record<string, unknown>
+    })
 
     await payload.login({
       collection: usersSlug,
       data: { email, password: 'test' },
     })
 
-    const afterLogin = (await payload.findByID({
+    const afterLogin = await payload.findByID({
       collection: usersSlug,
-      id: createdUser.id as string,
+      id: createdUser.id,
       depth: 0,
-    })) as never as Record<string, unknown>
+    })
 
     // Session writes on login must not bump the user's authorship metadata.
     expect(afterLogin.updatedBy).toEqual(createdUser.updatedBy)
 
-    await payload.delete({ collection: usersSlug, id: createdUser.id as string }).catch(() => null)
+    await payload.delete({ collection: usersSlug, id: createdUser.id }).catch(() => null)
   })
 
   it('should not inject authorship fields when authorship is false', () => {
