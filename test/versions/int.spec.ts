@@ -894,13 +894,6 @@ describe('Versions', () => {
       })
 
       it('should restore a version via REST when a relationship field with filterOptions is set', async () => {
-        // Regression: the REST API passes a real web Request whose `headers`/`url`
-        // are getters backed by private class fields. When restoring a version of
-        // a doc with a relationship field that defines `filterOptions`, relationship
-        // validation runs `validateFilterOptions` -> `createLocalReq`, which reads
-        // `req.headers`. A broken request clone invoked that getter with the wrong
-        // receiver and threw; the error was swallowed and every selection was
-        // reported as invalid, failing the restore with a 400 ValidationError.
         const target = await payload.create({
           collection: draftCollectionSlug,
           data: { description: 'target', title: 'filter-options target' },
@@ -952,8 +945,8 @@ describe('Versions', () => {
         })
         expect(restored.relationWithFilterOptions).toStrictEqual([target.id])
 
-        await payload.delete({ collection: draftCollectionSlug, id: doc.id })
-        await payload.delete({ collection: draftCollectionSlug, id: target.id })
+        await payload.delete({ id: doc.id, collection: draftCollectionSlug })
+        await payload.delete({ id: target.id, collection: draftCollectionSlug })
       })
 
       it('should not copy current document fields into restored version', async () => {

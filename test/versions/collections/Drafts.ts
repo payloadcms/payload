@@ -124,12 +124,12 @@ const DraftPosts: CollectionConfig = {
       relationTo: draftCollectionSlug,
     },
     {
-      // `filterOptions` forces relationship validation to query the database
-      // (validateFilterOptions), which is the path that broke version restore
-      // when `req` is a real web Request. See versions int.spec restore tests.
       name: 'relationWithFilterOptions',
       type: 'relationship',
-      filterOptions: () => true,
+      filterOptions: ({ req }) => {
+        // Verify validation preserves access to native Request properties.
+        return req.payloadAPI === 'REST' ? req.method === 'POST' : true
+      },
       hasMany: true,
       relationTo: draftCollectionSlug,
     },

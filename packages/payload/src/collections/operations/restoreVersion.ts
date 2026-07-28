@@ -17,6 +17,7 @@ import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
+import { isolateObjectProperty } from '../../utilities/isolateObjectProperty.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
@@ -183,34 +184,9 @@ export const restoreVersionOperation = async <
 
     req.context.isRestoringVersion = true
 
-    // Validation runs against the default locale, so we need a request with an
-    // overridden `locale`/`fallbackLocale`. `req` is the incoming web `Request`,
-    // whose `headers` and `url` are getters backed by private class fields.
-    // Deriving an object via `Object.create(req)` leaves those getters on the
-    // prototype, so reading them later (e.g. in `createLocalReq` while validating
-    // a relationship field's `filterOptions`) invokes them with the wrong
-    // receiver and throws `Cannot read private member #... from an object whose
-    // class did not declare it`. Copy the resolved values as own data properties
-    // so they don't delegate to the private-field getters.
-    const reqWithValidationLocale = Object.assign(Object.create(req), req, {
-      fallbackLocale: null,
-      locale: validationLocale,
-    })
-
-    Object.defineProperties(reqWithValidationLocale, {
-      headers: {
-        configurable: true,
-        enumerable: true,
-        value: req.headers,
-        writable: true,
-      },
-      url: {
-        configurable: true,
-        enumerable: true,
-        value: req.url,
-        writable: true,
-      },
-    })
+    const reqWithValidationLocale = isolateObjectProperty(req, ['fallbackLocale', 'locale'])
+    reqWithValidationLocale.fallbackLocale = null
+    reqWithValidationLocale.locale = validationLocale
 
     let data = await beforeValidate({
       id: parentDocID,
