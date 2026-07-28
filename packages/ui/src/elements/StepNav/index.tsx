@@ -144,12 +144,7 @@ const StepNav: React.FC<{
                 <PopupList.ButtonGroup className={`${baseClass}__collapsed-list`}>
                   {collapsedItems.map((item, i) => (
                     <PopupList.Button href={item.url} key={i} onClick={close}>
-                      <span
-                        className={`${baseClass}__collapsed-item-label`}
-                        style={{ paddingInlineStart: `calc(var(--spacer-2) * ${i})` }}
-                      >
-                        {getTranslation(item.label, i18n)}
-                      </span>
+                      {getTranslation(item.label, i18n)}
                     </PopupList.Button>
                   ))}
                 </PopupList.ButtonGroup>
