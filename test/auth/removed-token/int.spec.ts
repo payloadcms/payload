@@ -38,6 +38,7 @@ describe('Remove token from auth responses', () => {
     })
     expect(result.token).not.toBeDefined()
     expect(result.user.email).toBeDefined()
+    expect(result.user.roles).toBeUndefined()
   })
 
   it('should not include token in response from /me', async () => {
@@ -56,7 +57,7 @@ describe('Remove token from auth responses', () => {
     expect(result.user.email).toBeDefined()
   })
 
-  it('should not include token in result from the login server function', async () => {
+  it('should preserve access-controlled fields in the framework server login result', async () => {
     const setCookies: { name: string; options?: CookieOptions; value: string }[] = []
 
     const serverAdapter: ServerAdapter = {
@@ -92,6 +93,7 @@ describe('Remove token from auth responses', () => {
 
     expect(result.token).toBeUndefined()
     expect(result.user.email).toBe(devUser.email)
+    expect(result.user.roles).toEqual(devUser.roles)
 
     // The session still has to be established via the cookie.
     expect(setCookies).toHaveLength(1)

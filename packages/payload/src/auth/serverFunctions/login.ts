@@ -79,6 +79,7 @@ export async function login<TSlug extends AuthCollectionSlug>({
   const { cookie, result } = await loginWithCookie({
     collection: collectionConfig,
     data: loginData as Parameters<typeof loginWithCookie>[0]['data'],
+    overrideAccess: true,
     req: await createLocalReq({}, payload),
     returnCookieAsObject: true,
   })

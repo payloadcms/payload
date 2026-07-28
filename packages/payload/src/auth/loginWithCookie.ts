@@ -13,6 +13,7 @@ type LoginWithCookieArgs<TReturnCookieAsObject extends boolean> = {
   collection: Collection
   data: Parameters<typeof loginOperation>[0]['data']
   depth?: number
+  overrideAccess?: boolean
   req: PayloadRequest
   /** Return the cookie as parts rather than a serialized header string. */
   returnCookieAsObject?: TReturnCookieAsObject
@@ -34,6 +35,7 @@ export const loginWithCookie = async <
   collection,
   data,
   depth,
+  overrideAccess,
   req,
   returnCookieAsObject,
 }: LoginWithCookieArgs<TReturnCookieAsObject>): Promise<{
@@ -44,6 +46,7 @@ export const loginWithCookie = async <
     collection,
     data,
     depth,
+    overrideAccess,
     req,
   })
 
