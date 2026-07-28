@@ -89,9 +89,5 @@ export async function login<TSlug extends AuthCollectionSlug>({
     })
   }
 
-  if (authConfig.removeTokenFromResponses) {
-    delete result.token
-  }
-
   return result
 }
