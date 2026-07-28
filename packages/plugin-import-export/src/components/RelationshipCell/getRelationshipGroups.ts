@@ -51,63 +51,75 @@ export const getRelationshipGroups = ({
   value,
 }: Args): RelationshipGroup[] => {
   const entries = Array.isArray(value) ? value : [value]
+  const configsBySlug = new Map(collections.map((collection) => [collection.slug, collection]))
 
-  const groups: RelationshipGroup[] = []
+  // Insertion order is the order each collection first appears, which is the order to render.
   const groupsBySlug = new Map<string, RelationshipGroup>()
 
   entries.forEach((entry) => {
-    const key = getEntrySlug({ entry, relationTo }) ?? ''
+    const { slug, target } = resolveEntry({ entry, relationTo })
 
+    const key = slug ?? ''
     let group = groupsBySlug.get(key)
 
     if (!group) {
-      const relatedConfig = collections.find((collection) => collection.slug === key)
-
       group = {
-        label: key ? getTranslation(relatedConfig?.labels?.plural || key, i18n) : '',
+        label: slug ? getTranslation(configsBySlug.get(slug)?.labels?.plural || slug, i18n) : '',
         options: [],
         remaining: 0,
       }
 
       groupsBySlug.set(key, group)
-      groups.push(group)
     }
 
     // Past the cap only the count matters, so skip the cost of titling the document.
     if (group.options.length < TOTAL_TO_SHOW) {
-      group.options.push(getOptionLabel({ collections, dateFormat, entry, i18n, relationTo }))
+      group.options.push(
+        getOptionLabel({
+          collectionConfig: slug ? configsBySlug.get(slug) : undefined,
+          dateFormat,
+          entry,
+          i18n,
+          target,
+        }),
+      )
     } else {
       group.remaining++
     }
   })
 
-  return groups
+  return [...groupsBySlug.values()]
 }
 
-/** The collection an entry targets, or `undefined` when it cannot be determined. */
-const getEntrySlug = ({
+/**
+ * Splits an entry into the collection it targets — `undefined` when that cannot be
+ * determined — and the ID or document it points at.
+ */
+const resolveEntry = ({
   entry,
   relationTo,
-}: { entry: unknown } & Pick<Args, 'relationTo'>): string | undefined => {
+}: { entry: unknown } & Pick<Args, 'relationTo'>): { slug?: string; target: unknown } => {
   if (isPolymorphicRelationship(entry)) {
-    return entry.relationTo
+    return { slug: entry.relationTo, target: entry.value }
   }
 
-  return Array.isArray(relationTo) ? undefined : relationTo
+  return { slug: Array.isArray(relationTo) ? undefined : relationTo, target: entry }
 }
 
-type GetOptionLabelArgs = { entry: unknown } & Omit<Args, 'value'>
+type GetOptionLabelArgs = {
+  collectionConfig?: ClientCollectionConfig
+  /** The original entry, kept for the JSON fallback when `target` holds no usable ID. */
+  entry: unknown
+  target: unknown
+} & Pick<Args, 'dateFormat' | 'i18n'>
 
 const getOptionLabel = ({
-  collections,
+  collectionConfig,
   dateFormat,
   entry,
   i18n,
-  relationTo,
+  target,
 }: GetOptionLabelArgs): string => {
-  const entrySlug = getEntrySlug({ entry, relationTo })
-  const target = isPolymorphicRelationship(entry) ? entry.value : entry
-
   const doc = isRecord(target) ? target : undefined
   const id = doc ? doc.id : target
 
@@ -124,7 +136,7 @@ const getOptionLabel = ({
   }
 
   return formatDocTitle({
-    collectionConfig: collections.find((collection) => collection.slug === entrySlug),
+    collectionConfig,
     data: doc as Parameters<typeof formatDocTitle>[0]['data'],
     dateFormat,
     fallback: `${i18n.t('general:untitled')} - ID: ${id}`,
