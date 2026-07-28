@@ -1,13 +1,13 @@
 'use client'
 
-import { refreshFunction } from './refreshFunction.js'
+type Props = {
+  refreshFunction: () => Promise<unknown>
+}
 
-const RefreshToken = () => {
+export const RefreshToken = ({ refreshFunction }: Props) => {
   return (
     <button onClick={() => refreshFunction()} type="button">
       Custom Refresh
     </button>
   )
 }
-
-export default RefreshToken

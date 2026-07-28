@@ -2,9 +2,16 @@
 
 import { type ChangeEvent, useState } from 'react'
 
-import { loginFunction } from './loginFunction.js'
+export type LoginArgs = {
+  email: string
+  password: string
+}
 
-const LoginForm = () => {
+type Props = {
+  loginFunction: (args: LoginArgs) => Promise<unknown>
+}
+
+export const LoginForm = ({ loginFunction }: Props) => {
   const [email, setEmail] = useState<string>('')
   const [password, setPassword] = useState<string>('')
 
@@ -36,5 +43,3 @@ const LoginForm = () => {
     </div>
   )
 }
-
-export default LoginForm

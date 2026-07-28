@@ -1,13 +1,13 @@
 'use client'
 
-import { logoutFunction } from './logoutFunction.js'
+type Props = {
+  logoutFunction: () => Promise<unknown>
+}
 
-const LogoutButton = () => {
+export const LogoutButton = ({ logoutFunction }: Props) => {
   return (
     <button onClick={() => logoutFunction()} type="button">
       Custom Logout
     </button>
   )
 }
-
-export default LogoutButton

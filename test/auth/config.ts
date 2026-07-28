@@ -2,6 +2,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const framework = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' ? 'tanstack' : 'next'
+const frameworkExport = framework === 'tanstack' ? 'TanStack' : 'Next'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
@@ -27,8 +29,14 @@ export default buildConfigWithDefaults({
     autoRefresh: true,
     components: {
       beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
-      beforeLogin: ['./BeforeLogin.js#BeforeLogin', './server-functions/login.js'],
-      header: ['./server-functions/refresh.js', './server-functions/logout.js'],
+      beforeLogin: [
+        './BeforeLogin.js#BeforeLogin',
+        `./server-functions/login.${framework}.js#${frameworkExport}LoginForm`,
+      ],
+      header: [
+        `./server-functions/refresh.${framework}.js#${frameworkExport}RefreshToken`,
+        `./server-functions/logout.${framework}.js#${frameworkExport}LogoutButton`,
+      ],
       views: {
         'create-first-user': {
           Component: './CreateFirstUser.js#CreateFirstUser',
