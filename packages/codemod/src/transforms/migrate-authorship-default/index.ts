@@ -1,4 +1,4 @@
-import { Node, SyntaxKind } from 'ts-morph'
+import { Node } from 'ts-morph'
 
 import type { Transform } from '../../types.js'
 
@@ -82,8 +82,8 @@ const resolveAuthorshipConfigObject = (node: Node) => {
   }
 
   // Form 2: { ... } satisfies CollectionConfig
-  if (node.getKind() === SyntaxKind.SatisfiesExpression) {
-    const typeNode = (node as any).getTypeNode?.()
+  if (Node.isSatisfiesExpression(node)) {
+    const typeNode = node.getTypeNode()
     if (!typeNode) {
       return undefined
     }
@@ -91,8 +91,8 @@ const resolveAuthorshipConfigObject = (node: Node) => {
     if (!isAuthorshipConfigTypeName(typeText)) {
       return undefined
     }
-    const expr = (node as any).getExpression?.()
-    if (expr && Node.isObjectLiteralExpression(expr)) {
+    const expr = node.getExpression()
+    if (Node.isObjectLiteralExpression(expr)) {
       return expr
     }
     return undefined
