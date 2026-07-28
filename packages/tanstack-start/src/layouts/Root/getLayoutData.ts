@@ -25,6 +25,7 @@ export type RootLayoutData = {
   clientConfig: ClientConfig
   dateFNSKey: I18nClient['dateFNSKey']
   fallbackLang: string
+  isEmbedded: boolean
   isNavOpen: boolean
   languageCode: string
   languageOptions: LanguageOptions
