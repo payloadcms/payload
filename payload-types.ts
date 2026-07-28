@@ -100,7 +100,8 @@ export interface Config {
     revenue: RevenueWidget;
     'page-query': PageQueryWidget;
     configurable: ConfigurableWidget;
-    collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -193,6 +194,10 @@ export interface Event {
   type: 'meeting' | 'conference' | 'workshop' | 'webinar' | 'other';
   organizer?: (string | null) | User;
   status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  details?: {
+    priority?: number | null;
+    room?: string | null;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -317,6 +322,12 @@ export interface EventsSelect<T extends boolean = true> {
   type?: T;
   organizer?: T;
   status?: T;
+  details?:
+    | T
+    | {
+        priority?: T;
+        room?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
@@ -440,13 +451,36 @@ export interface ConfigurableWidget {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "collections_widget".
+ * via the `definition` "collection-query_widget".
  */
-export interface CollectionsWidget {
+export interface CollectionQueryWidget {
   data?: {
-    [k: string]: unknown;
+    title?: string | null;
+    relatedCollection: 'tickets' | 'revenue' | 'events' | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
   };
-  width: 'full';
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?: ('tickets' | 'revenue' | 'events' | 'users')[] | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
