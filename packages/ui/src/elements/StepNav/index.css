@@ -74,7 +74,7 @@
 
   .step-nav__collapsed-toggle {
     padding: 0 var(--spacer-1);
-    color: var(--color-text-tertiary);
+    color: var(--color-text);
   }
 
   .step-nav__measurer-clip {
