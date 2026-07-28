@@ -295,9 +295,13 @@ const SelectFields: CollectionConfig = {
           value: 'three',
         },
       ],
-      filterOptions: async ({ options, data }) => {
-        // fake async lookup
-        await Promise.resolve()
+      filterOptions: async ({ options, data, req }) => {
+        // real async lookup, e.g. checking another collection to decide which options are allowed
+        await req.payload.find({
+          collection: selectFieldsSlug,
+          limit: 0,
+          req,
+        })
 
         return data.disallowOption2
           ? options.filter(

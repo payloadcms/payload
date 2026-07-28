@@ -120,6 +120,24 @@ describe('Select', () => {
     await expect(options.locator('text=One')).toBeHidden()
   })
 
+  test('should reduce options via an async, DB-backed `filterOptions`', async () => {
+    await page.goto(url.create)
+    await waitForFormReady(page)
+
+    const field = page.locator('#field-selectAsyncFilterOptions')
+    await field.click({ delay: 100 })
+    const options = page.locator('.rs__option')
+    await expect(options.locator('text=Value One')).toBeVisible()
+
+    // click the field again to close the options
+    await field.click({ delay: 100 })
+
+    await page.locator('#field-disallowOption2').click()
+    await field.click({ delay: 100 })
+    await expect(options.locator('text=Value One')).toBeHidden()
+    await expect(options.locator('text=Value Two')).toBeVisible()
+  })
+
   test('should retain search when reducing options', async () => {
     await page.goto(url.create)
     await waitForFormReady(page)
