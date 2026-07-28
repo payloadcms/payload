@@ -1,8 +1,11 @@
 import type { AuthenticatedUser } from 'payload'
 
 export type AuthRequestContext = {
+  /** Accepts the result when its session is still active and cancels any deferred invalidation. */
   acceptResult: () => boolean
+  /** Invalidates the session after newer queued auth requests have had a chance to restore it. */
   invalidateWhenIdle: (invalidate: () => void) => void
+  /** Whether the session changed or logout began after this request was queued. */
   isResultStale: () => boolean
 }
 
@@ -22,6 +25,12 @@ export type AuthSessionRequests = {
   ) => Promise<AuthenticatedUser | null>
 }
 
+/**
+ * Coordinates requests that read or update the current auth session.
+ *
+ * Requests run in order, concurrent refreshes and logouts share a promise, and outdated results can
+ * be discarded after the session changes.
+ */
 export function createAuthSessionRequests(): AuthSessionRequests {
   let authRequestQueue = Promise.resolve()
   let authRequestSequence = 0
@@ -119,18 +128,14 @@ export function createAuthSessionRequests(): AuthSessionRequests {
     const refreshPromise = queue(request)
 
     refreshRequest = { generation: requestGeneration, promise: refreshPromise }
-    void refreshPromise.then(
-      () => {
-        if (refreshRequest?.promise === refreshPromise) {
-          refreshRequest = undefined
-        }
-      },
-      () => {
-        if (refreshRequest?.promise === refreshPromise) {
-          refreshRequest = undefined
-        }
-      },
-    )
+    /** Stops sharing this refresh after it settles without clearing a newer refresh request. */
+    const clearRefreshRequest = () => {
+      if (refreshRequest?.promise === refreshPromise) {
+        refreshRequest = undefined
+      }
+    }
+
+    void refreshPromise.then(clearRefreshRequest, clearRefreshRequest)
 
     return refreshPromise
   }
@@ -158,17 +163,16 @@ export function createAuthSessionRequests(): AuthSessionRequests {
     })
 
     logoutRequest = pendingLogout
+    /** Stops sharing this logout after it settles without clearing a newer logout request. */
+    const clearLogoutRequest = () => {
+      if (logoutRequest === pendingLogout) {
+        logoutRequest = undefined
+      }
+    }
+
     void pendingLogout.then(
-      () => {
-        if (logoutRequest === pendingLogout) {
-          logoutRequest = undefined
-        }
-      },
-      () => {
-        if (logoutRequest === pendingLogout) {
-          logoutRequest = undefined
-        }
-      },
+      clearLogoutRequest, // onSuccess
+      clearLogoutRequest, // onFailure
     )
 
     return pendingLogout
