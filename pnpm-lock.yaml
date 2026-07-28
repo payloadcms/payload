@@ -178,9 +178,6 @@ importers:
       postcss:
         specifier: ^8.4.49
         version: 8.5.16
-      postcss-scss:
-        specifier: ^4.0.9
-        version: 4.0.9(postcss@8.5.16)
       prettier:
         specifier: 3.5.3
         version: 3.5.3
@@ -13262,12 +13259,6 @@ packages:
     engines: {node: '>=18.0'}
     peerDependencies:
       postcss: ^8.4.31
-
-  postcss-scss@4.0.9:
-    resolution: {integrity: sha512-AjKOeiwAitL/MXxQW2DliT28EKukvvbEWx3LBmJIRN8KfBGZbRTxNYW0kSqi1COiTZ57nZ9NW06S6ux//N1c9A==}
-    engines: {node: '>=12.0'}
-    peerDependencies:
-      postcss: ^8.4.29
 
   postcss-selector-parser@6.0.10:
     resolution: {integrity: sha512-IQ7TZdoaqbT+LCpShg46jnZVlhWD2w6iQYAcYXfHARZ7X1t/UGhhceQDs5X0cGqKvYlHNOuv7Oa1xmb0oQuA3w==}
@@ -27578,10 +27569,6 @@ snapshots:
   postcss-resolve-nested-selector@0.1.6: {}
 
   postcss-safe-parser@7.0.1(postcss@8.5.16):
-    dependencies:
-      postcss: 8.5.16
-
-  postcss-scss@4.0.9(postcss@8.5.16):
     dependencies:
       postcss: 8.5.16
 
