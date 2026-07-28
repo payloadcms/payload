@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-import-export",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-canary.14",
   "description": "Import-Export plugin for Payload",
   "keywords": [
     "payload",

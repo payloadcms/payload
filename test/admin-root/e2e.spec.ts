@@ -143,6 +143,11 @@ test.describe('Admin Panel (Root)', () => {
     await expect(page.locator('#field-theme-auto')).toBeHidden()
   })
 
+  test('ignores the ?theme= param when config.admin.theme restricts the theme', async () => {
+    await page.goto(`${url.account}?theme=light`)
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark')
+  })
+
   test('should mount custom root views', async () => {
     await page.goto(`${url.admin}/custom-view`)
     await expect(page.locator('#custom-view')).toBeVisible()

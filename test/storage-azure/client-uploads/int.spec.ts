@@ -1,5 +1,5 @@
 import type { ContainerClient } from '@azure/storage-blob'
-import type { Payload } from 'payload'
+import type { Payload, UploadInstructions } from 'payload'
 
 import { BlobServiceClient } from '@azure/storage-blob'
 import { readFile } from 'node:fs/promises'
@@ -48,9 +48,9 @@ describe('@payloadcms/storage-azure clientUploads', () => {
   })
 
   /**
-   * When a doc with the same filename already exists, the signed-URL endpoint
-   * should sanitize the filename (e.g. `duplicate-target-1.png`) so the
-   * browser PUT lands on a fresh blob instead of overwriting the existing one.
+   * When a doc with the same filename already exists, the upload-instructions
+   * endpoint should sanitize the filename (e.g. `duplicate-target-1.png`) so the
+   * browser SDK upload lands on a fresh blob instead of overwriting the existing one.
    */
   it('sanitizes the filename when a duplicate already exists', async () => {
     const dupFilename = 'duplicate-target.png'
@@ -66,16 +66,31 @@ describe('@payloadcms/storage-azure clientUploads', () => {
 
     expect(seedDoc.filename).toBe(dupFilename)
 
-    const signedURLRes = await restClient.POST('/storage-azure-generate-signed-url', {
+    const signedURLRes = await restClient.POST('/upload-instructions', {
       body: JSON.stringify({
         collectionSlug: mediaSlug,
         filename: dupFilename,
+        filesize: fileBuffer.length,
         mimeType: 'image/png',
       }),
     })
 
     expect(signedURLRes.status).toBe(200)
-    const { url: signedURL }: { url: string } = await signedURLRes.json()
+    const instructions = (await signedURLRes.json()) as UploadInstructions
+    expect(instructions.type).toBe('dispatch')
+    expect(instructions.file).toEqual({
+      uploadReference: { prefix: '' },
+      filename: 'duplicate-target-1.png',
+      mimeType: 'image/png',
+      size: fileBuffer.length,
+    })
+
+    if (instructions.type !== 'dispatch') {
+      throw new Error('Expected dispatch upload instructions')
+    }
+
+    expect(instructions.name).toBe('uploadToAzure')
+    const { url: signedURL } = instructions.data as { url: string }
 
     const blobKey = decodeURIComponent(
       new URL(signedURL).pathname.replace(`/devstoreaccount1/${TEST_CONTAINER}/`, ''),
@@ -83,7 +98,7 @@ describe('@payloadcms/storage-azure clientUploads', () => {
 
     expect(blobKey).toBe('duplicate-target-1.png')
 
-    await payload.delete({ collection: mediaSlug, id: seedDoc.id })
+    await payload.delete({ id: seedDoc.id, collection: mediaSlug })
   })
 
   it('preserves a user-defined prefix.defaultValue across the plugin', async () => {

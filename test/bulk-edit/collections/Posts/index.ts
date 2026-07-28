@@ -55,6 +55,26 @@ export const PostsCollection: CollectionConfig = {
       },
     },
     {
+      name: 'fieldWithCustomField',
+      type: 'text',
+      label: 'Field With Custom Field',
+      admin: {
+        components: {
+          Field: '/components/CustomField.js#CustomField',
+        },
+      },
+    },
+    {
+      name: 'fieldWithCustomLabel',
+      type: 'text',
+      label: 'Field With Custom Label',
+      admin: {
+        components: {
+          Label: '/components/CustomLabel.js#CustomLabel',
+        },
+      },
+    },
+    {
       name: 'defaultValueField',
       type: 'text',
       defaultValue: 'This is a default value',

@@ -630,6 +630,12 @@ export type UpdateJobsArgs = {
     }
 )
 
+/**
+ * Updates jobs matching the provided `where` condition.
+ *
+ * Job claims must only update jobs whose lease is missing or expired.
+ * When a `processingToken` is provided, only jobs updated with that token may be returned.
+ */
 export type UpdateJobs = (args: UpdateJobsArgs) => Promise<Job[] | null>
 
 export type UpsertArgs = {

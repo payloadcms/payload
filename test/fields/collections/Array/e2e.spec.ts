@@ -522,15 +522,61 @@ describe('Array', () => {
         fieldName: 'readOnly',
         page,
       })
+      const popupBtn = page
+        .locator('#field-items .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await expect(popupBtn).toBeVisible()
+      await popupBtn.click()
+      const disabledPasteBtn = page.locator(
+        '.popup__content div.popup-button-list__disabled:has-text("Paste Field")',
+      )
+      await expect(disabledPasteBtn).toBeVisible()
+    })
+
+    test('should disable paste when the clipboard is empty', async () => {
+      await page.goto(url.create)
+      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+
+      const fieldPopupBtn = page
+        .locator('#field-items .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+      ).toBeVisible()
+      await page.keyboard.press('Escape')
+
+      const rowPopupBtn = page
+        .locator('#items-row-0 .collapsible__actions button.array-actions__button')
+        .first()
+      await rowPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Row")'),
+      ).toBeVisible()
+    })
+
+    test('should enable paste after copying a compatible field', async () => {
+      await page.goto(url.create)
+      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+
+      const fieldPopupBtn = page
+        .locator('#field-items .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+      ).toBeVisible()
+      await page.keyboard.press('Escape')
+
       await copyPasteField({
         fieldName: 'items',
         page,
-        action: 'paste',
       })
-      const pasteErrorToast = page
-        .locator('.payload-toast-item.toast-error')
-        .filter({ hasText: 'Invalid clipboard data.' })
-      await expect(pasteErrorToast).toBeVisible()
+
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content .popup-button-list button:has-text("Paste Field")'),
+      ).toBeVisible()
     })
 
     test('should copy and paste array fields', async () => {
@@ -705,6 +751,84 @@ describe('Array', () => {
 
       await expect(subArrayContainer).toHaveCount(1)
       await expect(subArrayContainer2).toHaveCount(1)
+    })
+
+    test('should copy a nested array row and paste into a sibling nested array row', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-items')
+
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+
+      const rowOneText = field.locator('#field-items__0__subArray__0__text')
+      await expect(rowOneText).toBeVisible()
+
+      const textVal = 'nested row copy'
+      await rowOneText.fill(textVal)
+
+      await copyPasteField({
+        page,
+        fieldName: 'items__0__subArray',
+        rowIndex: 0,
+      })
+
+      await copyPasteField({
+        page,
+        fieldName: 'items__0__subArray',
+        rowIndex: 1,
+        action: 'paste',
+      })
+
+      const rowTwoText = field.locator('#field-items__0__subArray__1__text')
+      await expect(rowTwoText).toHaveValue(textVal)
+    })
+
+    test('should copy a nested array field and paste into a sibling nested array field', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-items')
+
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+      await addArrayRow(page, { fieldName: 'items__1__subArray' })
+
+      const sourceRows = field.locator(
+        '#field-items__0__subArray > div.array-field__draggable-rows > div',
+      )
+      const targetRows = field.locator(
+        '#field-items__1__subArray > div.array-field__draggable-rows > div',
+      )
+      await expect(sourceRows).toHaveCount(2)
+      await expect(targetRows).toHaveCount(1)
+
+      await copyPasteField({
+        page,
+        fieldName: 'items__0__subArray',
+      })
+
+      await copyPasteField({
+        page,
+        fieldName: 'items__1__subArray',
+        action: 'paste',
+      })
+
+      await expect(targetRows).toHaveCount(2)
+    })
+
+    test('should disable paste on a nested array row when the clipboard is empty', async () => {
+      await page.goto(url.create)
+      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+
+      const rowPopupBtn = page
+        .locator('#items-0-subArray-row-0 .collapsible__actions button.array-actions__button')
+        .first()
+      await rowPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Row")'),
+      ).toBeVisible()
     })
 
     test('should generate unique array IDs when pasting arrays across documents', async () => {

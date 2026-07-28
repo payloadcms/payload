@@ -175,7 +175,6 @@ async function main() {
     bump,
     dryRun,
     fromVersion,
-    openReleaseUrl: true,
     toVersion: 'HEAD',
   })
 

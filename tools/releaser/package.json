@@ -40,7 +40,6 @@
     "changelogen": "^0.6.2",
     "execa": "5.1.1",
     "minimist": "1.2.8",
-    "open": "^10.1.0",
     "p-limit": "^5.0.0",
     "prompts": "2.4.2",
     "semver": "^7.5.4",
