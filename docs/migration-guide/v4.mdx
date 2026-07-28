@@ -918,6 +918,25 @@ When jobs are enabled, Payload now always adds the `payload-jobs-stats` global a
 
 Existing projects that use sqlite/postgres and jobs may need a database migration.
 
+### Jobs: concurrency controls and parent task logging are always enabled
+
+Concurrency controls add the indexed `concurrencyKey` field to the `payload-jobs` collection. Parent task logging adds parent information to nested task logs. Task log input is also now required and is stored as an empty object when a task has no input.
+
+The `jobs.enableConcurrencyControl` and `jobs.addParentToTaskLog` options have been removed. Existing SQL projects that use jobs should generate a database migration for these schema changes.
+
+### Jobs: task and workflow types have been renamed
+
+The `TaskType` and `WorkflowTypes` exports have been renamed to `TaskSlug` and `WorkflowSlug`.
+
+```diff
+- import type { TaskType, WorkflowTypes } from 'payload'
++ import type { TaskSlug, WorkflowSlug } from 'payload'
+```
+
+The deprecated `RunningJob` and `RunningJobSimple` types have also been removed. Use `Job` instead.
+
+JSON workflow steps without a `task` must now provide an `inlineTask` handler. This removes a type escape that previously allowed an incomplete step even though it could not run.
+
 ### Jobs: custom database adapters must implement `updateJobs`
 
 Payload now uses a unique `processingToken` when claiming jobs so multiple workers cannot run the same job. This adds an internal, nullable `processingToken` field to the `payload-jobs` collection. Existing SQL databases need a migration that adds this column. MongoDB does not require a migration.

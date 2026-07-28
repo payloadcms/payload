@@ -1942,13 +1942,16 @@ describe('Queues - Payload', () => {
     })
 
     expect(jobAfterRun?.log?.[0]?.taskID).toBe('create doc 1')
-    //expect(jobAfterRun.log[0].parent.taskID).toBe('create two docs')
-    // jobAfterRun.log[0].parent should not exist
-    expect(jobAfterRun?.log?.[0]?.parent).toBeUndefined()
+    expect(jobAfterRun?.log?.[0]?.parent).toMatchObject({
+      taskID: 'create two docs',
+      taskSlug: 'inline',
+    })
 
     expect(jobAfterRun?.log?.[1]?.taskID).toBe('create doc 2')
-    //expect(jobAfterRun.log[1].parent.taskID).toBe('create two docs')
-    expect(jobAfterRun?.log?.[1]?.parent).toBeUndefined()
+    expect(jobAfterRun?.log?.[1]?.parent).toMatchObject({
+      taskID: 'create two docs',
+      taskSlug: 'inline',
+    })
 
     expect(jobAfterRun?.log?.[2]?.taskID).toBe('create two docs')
   })

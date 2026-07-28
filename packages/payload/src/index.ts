@@ -1908,18 +1908,17 @@ export type {
   TaskHandlerResults,
   TaskInput,
   TaskOutput,
-  TaskType,
+  TaskSlug,
 } from './queues/config/types/taskTypes.js'
 
 export type {
   ConcurrencyConfig,
   JobLog,
   JobTaskStatus,
-  RunningJob,
   SingleTaskStatus,
   WorkflowConfig,
   WorkflowHandler,
-  WorkflowTypes,
+  WorkflowSlug,
 } from './queues/config/types/workflowTypes.js'
 export { JobCancelledError } from './queues/errors/index.js'
 export { countRunnableOrActiveJobsForQueue } from './queues/operations/handleSchedules/countRunnableOrActiveJobsForQueue.js'
