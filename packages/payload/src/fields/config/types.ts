@@ -1171,7 +1171,7 @@ export type SelectField = {
     options: Option[]
     req: PayloadRequest
     siblingData: Data
-  }) => Option[]
+  }) => Option[] | Promise<Option[]>
   hasMany?: boolean
   /**
    * Customize generated GraphQL and Typescript schema names.
