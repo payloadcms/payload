@@ -543,6 +543,73 @@ describe('Auth', () => {
     })
   })
 
+  describe('server functions', () => {
+    beforeEach(async () => {
+      await reInitializeDB({
+        deleteOnly: false,
+        serverURL,
+        snapshotKey: 'auth',
+      })
+
+      await page.context().clearCookies()
+    })
+
+    test('should log user in from login server function', async () => {
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+
+      await expect(page.locator('#server-function-email')).toBeVisible()
+      await expect(page.locator('#server-function-password')).toBeVisible()
+
+      await page.fill('#server-function-email', devUser.email)
+      await page.fill('#server-function-password', devUser.password)
+      await page.getByText('Custom Login', { exact: true }).click()
+
+      await expect
+        .poll(async () => {
+          return (await page.context().cookies()).some((cookie) => cookie.name === 'payload-token')
+        })
+        .toBe(true)
+
+      await page.reload()
+      await page.goto(formatAdminURL({ adminRoute, path: '/account', serverURL }))
+
+      await expect(page.locator('#field-email')).toHaveValue(devUser.email)
+    })
+
+    test('should refresh user from refresh server function', async () => {
+      await login({ page, serverURL })
+
+      const initialCookie = (await page.context().cookies()).find(
+        (cookie) => cookie.name === 'payload-token',
+      )
+
+      expect(initialCookie).toBeDefined()
+      await wait(1000)
+      await page.getByText('Custom Refresh', { exact: true }).click()
+
+      await expect
+        .poll(async () => {
+          const refreshedCookie = (await page.context().cookies()).find(
+            (cookie) => cookie.name === 'payload-token',
+          )
+
+          return refreshedCookie?.expires
+        })
+        .not.toBe(initialCookie?.expires)
+    })
+
+    test('should log user out from logout server function', async () => {
+      await login({ page, serverURL })
+      await page.getByText('Custom Logout', { exact: true }).click()
+
+      await page.reload()
+      await page.goto(formatAdminURL({ adminRoute, path: '', serverURL }))
+
+      await expect(page.locator('#field-email')).toBeVisible()
+      await expect(page.locator('#field-password')).toBeVisible()
+    })
+  })
+
   describe('autoRefresh', () => {
     beforeAll(async () => {
       await reInitializeDB({

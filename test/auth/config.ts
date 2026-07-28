@@ -27,7 +27,8 @@ export default buildConfigWithDefaults({
     autoRefresh: true,
     components: {
       beforeDashboard: ['./BeforeDashboard.js#BeforeDashboard'],
-      beforeLogin: ['./BeforeLogin.js#BeforeLogin'],
+      beforeLogin: ['./BeforeLogin.js#BeforeLogin', './server-functions/login.js'],
+      header: ['./server-functions/refresh.js', './server-functions/logout.js'],
       views: {
         'create-first-user': {
           Component: './CreateFirstUser.js#CreateFirstUser',
