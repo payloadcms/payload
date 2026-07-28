@@ -1,1 +1,1 @@
-export { getBlocksToJsonMigrator, migrateJobsProcessingLease } from '@payloadcms/drizzle'
+export { getBlocksToJsonMigrator } from '@payloadcms/drizzle'
