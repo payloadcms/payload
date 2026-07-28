@@ -4,6 +4,12 @@ export type MarkSessionActivity = (source: SessionActivitySource) => boolean
 
 export const sessionActivityThrottleMs = 5_000
 
+/**
+ * Coalesces focus and mouse movement into periodic session activity.
+ *
+ * The returned function reports whether the activity was accepted. Activity inside the throttle
+ * interval is ignored and does not call `onActivity`.
+ */
 export function createSessionActivityTracker({
   now = Date.now,
   onActivity,

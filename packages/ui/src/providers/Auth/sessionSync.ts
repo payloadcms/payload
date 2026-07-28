@@ -99,6 +99,14 @@ type StorageRefreshNotification = {
 
 type LifecycleOrder = AuthSessionSyncPublication
 
+/**
+ * Synchronizes session refresh, expiration, and logout events across same-origin tabs.
+ *
+ * BroadcastChannel carries complete session events when available. Transient localStorage
+ * notifications carry lifecycle metadata only and allow tabs to reconcile through `fetchFullUser`
+ * when BroadcastChannel is unavailable. Lifecycle ordering prevents older async work from
+ * replacing a newer session state.
+ */
 export function createAuthSessionSync({
   fetchFullUser,
   getTokenExpirationMs,
@@ -509,6 +517,12 @@ function parseStorageRefreshNotification(value: string): null | StorageRefreshNo
   return null
 }
 
+/**
+ * Orders two lifecycle events from oldest to newest.
+ *
+ * A refresh is ordered from when it started rather than when its response was published. This
+ * prevents a refresh that began before a logout or expiration from restoring that older session.
+ */
 function compareLifecycleOrders({
   first,
   second,
@@ -615,6 +629,7 @@ function compareSourceIDs({ first, second }: { first: string; second: string }):
   return first > second ? 1 : -1
 }
 
+/** Returns the point in time when a lifecycle event began affecting the session. */
 function getLifecycleOrderingFence(order: LifecycleOrder): number {
   return order.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
     ? order.refreshStartedAt

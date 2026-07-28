@@ -16,6 +16,13 @@ export type AuthSessionTimers = {
   setExpiration: (expirationMs: number) => void
 }
 
+/**
+ * Manages activity-aware refresh, expiration reminders, and logout timing for the current session.
+ *
+ * Activity inside the refresh window schedules a refresh. Earlier activity is remembered until the
+ * refresh-window checkpoint so the session can still be extended without requiring another mouse
+ * movement or focus event.
+ */
 export function useAuthSessionTimers({
   isAuthenticated,
   onActivityRefresh,

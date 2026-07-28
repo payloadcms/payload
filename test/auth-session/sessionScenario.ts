@@ -45,6 +45,13 @@ export type SessionScenario = {
   waitForRefreshBarrier: (enteredCount: number) => Promise<void>
 }
 
+/**
+ * Creates an isolated browser session backed by the custom provider auth fixture.
+ *
+ * Scenario helpers use real admin navigation, cookies, and HTTP endpoints. Advancing time moves
+ * both Playwright's browser clock and the provider's server clock so expiration tests remain fast
+ * and deterministic without intercepting authentication requests.
+ */
 export async function createSessionScenario({
   browser,
   serverURL,
@@ -247,6 +254,17 @@ export async function createSessionScenario({
 
       expect(response.status()).toBe(200)
     },
+    waitForRefresh(page) {
+      return page.waitForResponse((response) => {
+        const requestURL = new URL(response.url())
+
+        return (
+          response.request().method() === 'POST' &&
+          requestURL.pathname === authSessionRefreshEndpointPathname &&
+          requestURL.searchParams.has('refresh')
+        )
+      })
+    },
     async waitForRefreshBarrier(enteredCount) {
       await expect
         .poll(async () => {
@@ -264,17 +282,6 @@ export async function createSessionScenario({
           return result?.enteredCount ?? 0
         })
         .toBe(enteredCount)
-    },
-    waitForRefresh(page) {
-      return page.waitForResponse((response) => {
-        const requestURL = new URL(response.url())
-
-        return (
-          response.request().method() === 'POST' &&
-          requestURL.pathname === authSessionRefreshEndpointPathname &&
-          requestURL.searchParams.has('refresh')
-        )
-      })
     },
   }
 }

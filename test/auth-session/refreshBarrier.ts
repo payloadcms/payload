@@ -8,6 +8,10 @@ type RefreshBarrier = {
   wait: Promise<void>
 }
 
+/**
+ * Pauses provider refresh at a selected phase so E2E tests can deterministically overlap refresh
+ * with logout, revocation, or another tab's request.
+ */
 export function createProviderRefreshBarrier() {
   let barrier: RefreshBarrier | undefined
 

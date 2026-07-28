@@ -17,6 +17,12 @@ export type ProviderSessionLookup =
       status: typeof AUTH_SESSION_TEST_STATUS.UNAUTHENTICATED
     }
 
+/**
+ * Provides the stateful custom-provider credential store used by the auth session E2E fixture.
+ *
+ * Its controllable clock lets tests expire and rotate real cookie credentials without waiting for
+ * wall-clock time. Rotating a credential revokes the previous token before issuing its replacement.
+ */
 export function createProviderSessionStore() {
   let nowMs = Date.now()
   const sessions = new Map<string, ProviderSession>()
