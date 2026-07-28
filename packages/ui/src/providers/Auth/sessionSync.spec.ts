@@ -142,6 +142,37 @@ describe('createAuthSessionSync', () => {
     expect(onSessionRefreshed).not.toHaveBeenCalled()
   })
 
+  it('should apply refreshes in publication order instead of request-start ordering for refresh-vs-refresh', () => {
+    let appliedSession: UserWithToken | undefined
+    const onSessionRefreshed = vi.fn((session: UserWithToken) => {
+      appliedSession = session
+    })
+    const refreshB = createMessage({
+      refreshStartedAt: 200,
+      sentAt: 100,
+      session: createSession({ expirationMs: 30_000, token: 'refresh-b' }),
+      sourceID: 'refresh-b-tab',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+    })
+    const refreshA = createMessage({
+      refreshStartedAt: 100,
+      sentAt: 200,
+      session: createSession({ expirationMs: 40_000, token: 'refresh-a' }),
+      sourceID: 'refresh-a-tab',
+      type: AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED,
+    })
+
+    createSync({ onSessionRefreshed, sourceID: 'receiving-tab' })
+    const channel = getBroadcastChannel()
+
+    channel.emit(refreshB)
+    channel.emit(refreshA)
+
+    expect(onSessionRefreshed).toHaveBeenCalledTimes(2)
+    expect(onSessionRefreshed).toHaveBeenLastCalledWith(refreshA.session)
+    expect(appliedSession).toBe(refreshA.session)
+  })
+
   it('should ignore a late storage refresh whose request started before logout', () => {
     vi.stubGlobal('BroadcastChannel', undefined)
     const fetchFullUser = vi.fn().mockResolvedValue({ status: 'indeterminate' } as const)

@@ -494,11 +494,16 @@ function compareLifecycleOrders({
   first: LifecycleOrder
   second: LifecycleOrder
 }): number {
-  const firstOrderingFence = getLifecycleOrderingFence(first)
-  const secondOrderingFence = getLifecycleOrderingFence(second)
+  const isFirstRefresh = first.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
+  const isSecondRefresh = second.type === AUTH_SESSION_SYNC_EVENT_TYPES.REFRESHED
 
-  if (firstOrderingFence !== secondOrderingFence) {
-    return firstOrderingFence - secondOrderingFence
+  if (isFirstRefresh !== isSecondRefresh) {
+    const firstOrderingFence = getLifecycleOrderingFence(first)
+    const secondOrderingFence = getLifecycleOrderingFence(second)
+
+    if (firstOrderingFence !== secondOrderingFence) {
+      return firstOrderingFence - secondOrderingFence
+    }
   }
 
   const isFirstLogout = first.type === AUTH_SESSION_SYNC_EVENT_TYPES.LOGGED_OUT
