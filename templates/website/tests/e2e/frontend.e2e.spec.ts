@@ -29,7 +29,7 @@ test.describe('Frontend', () => {
       await cleanupRelatedPosts()
     })
 
-    test('should render the image and category of a related post', async ({ page }) => {
+    test('should render related post cards with their image and category', async ({ page }) => {
       await page.goto(`http://localhost:3000/posts/${relatedPostsFixture.postSlug}`)
 
       await expect(page.locator('h1')).toHaveText(relatedPostsFixture.postTitle)

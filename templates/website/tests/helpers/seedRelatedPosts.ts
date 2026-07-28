@@ -13,20 +13,19 @@ const dirname = path.dirname(filename)
 const disableRevalidate = { context: { disableRevalidate: true } }
 
 export const relatedPostsFixture = {
-  categorySlug: 'depth-test-category',
-  categoryTitle: 'Depth Test Category',
-  imageAlt: 'Depth test image',
-  postSlug: 'depth-test-post',
-  postTitle: 'Depth Test Post',
-  relatedPostSlug: 'depth-test-related-post',
-  relatedPostTitle: 'Depth Test Related Post',
+  categorySlug: 'test-category',
+  categoryTitle: 'Test Category',
+  imageAlt: 'Test image',
+  postSlug: 'test-post-with-related-posts',
+  postTitle: 'Test Post With Related Posts',
+  relatedPostSlug: 'test-related-post',
+  relatedPostTitle: 'Test Related Post',
 }
 
 /**
- * Creates a published post whose single `relatedPosts` entry carries both a
- * `meta.image` upload and a category. Rendering the post therefore requires two
- * levels of population: one to reach the related post, another to reach its
- * image and category.
+ * Creates a published post that links to one related post, where the related
+ * post has both an SEO image and a category. Gives the related-post cards on
+ * the post page something to render.
  */
 export async function seedRelatedPosts(): Promise<void> {
   const payload = await getPayload({ config })
