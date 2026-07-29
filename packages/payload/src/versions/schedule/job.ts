@@ -5,7 +5,6 @@ import type { SchedulePublishTaskInput } from './types.js'
 
 import { ValidationError } from '../../errors/index.js'
 import { JobCancelledError } from '../../queues/errors/index.js'
-import { resolvePublishLocales } from '../../utilities/resolvePublishLocales.js'
 
 type Args = {
   adminUserSlug: string
@@ -69,11 +68,6 @@ export const getSchedulePublishTask = ({
       }
 
       const isPublishAllLocales = input.locale === undefined
-      const publishLocales = resolvePublishLocales({
-        locale: input.locale,
-        localization: req.payload.config.localization,
-        publishAllLocales: isPublishAllLocales,
-      })
 
       if (input.doc) {
         const collectionSlug = input.doc.relationTo
@@ -84,24 +78,6 @@ export const getSchedulePublishTask = ({
           req.payload.db?.defaultIDType ??
           'text'
         const id = idType === 'number' ? Number(input.doc.value) : input.doc.value
-
-        if (_status === 'published') {
-          const validationResult = await runWithScheduledPublishValidationErrorHandling(() =>
-            req.payload.validate({
-              id,
-              collection: collectionSlug,
-              draft: true,
-              locale: publishLocales,
-              overrideAccess: user === null,
-              req,
-              user,
-            }),
-          )
-
-          if (!validationResult.valid) {
-            throwScheduledPublishValidationError(validationResult.errors)
-          }
-        }
 
         await runWithScheduledPublishValidationErrorHandling(() =>
           req.payload.update({
@@ -122,23 +98,6 @@ export const getSchedulePublishTask = ({
 
       if (input.global) {
         const globalSlug = input.global
-
-        if (_status === 'published') {
-          const validationResult = await runWithScheduledPublishValidationErrorHandling(() =>
-            req.payload.validateGlobal({
-              slug: globalSlug,
-              draft: true,
-              locale: publishLocales,
-              overrideAccess: user === null,
-              req,
-              user,
-            }),
-          )
-
-          if (!validationResult.valid) {
-            throwScheduledPublishValidationError(validationResult.errors)
-          }
-        }
 
         await runWithScheduledPublishValidationErrorHandling(() =>
           req.payload.updateGlobal({
