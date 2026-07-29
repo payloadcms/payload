@@ -22,6 +22,27 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Default query depth reduced to `1`
+
+Queries that omit `depth` now populate one relationship level instead of two. This reduces database work and response size by default.
+
+If your application relies on two populated levels, prefer specifying `depth: 2` only on the queries that need it:
+
+```ts
+const posts = await payload.find({
+  collection: 'posts',
+  depth: 2,
+})
+```
+
+To preserve the Payload 3.x behavior application-wide, set `defaultDepth: 2`:
+
+```diff
+export default buildConfig({
++ defaultDepth: 2,
+})
+```
+
 ### Versions are now enabled by default for all collections and globals
 
 Collections and globals now have `versions: true` by default (`maxPerDoc`/`max: 100`, drafts disabled). In previous versions you had to opt in; you now opt out.
@@ -917,6 +938,25 @@ Generated workflow slugs and explicit input objects continue to work as before. 
 When jobs are enabled, Payload now always adds the `payload-jobs-stats` global and the `meta` field on the `payload-jobs` collection. Previously, these were only added when a task or workflow used a schedule.
 
 Existing projects that use sqlite/postgres and jobs may need a database migration.
+
+### Jobs: concurrency controls and parent task logging are always enabled
+
+Concurrency controls add the indexed `concurrencyKey` field to the `payload-jobs` collection. Parent task logging adds parent information to nested task logs. Task log input is also now required and is stored as an empty object when a task has no input.
+
+The `jobs.enableConcurrencyControl` and `jobs.addParentToTaskLog` options have been removed. Existing SQL projects that use jobs should generate a database migration for these schema changes.
+
+### Jobs: task and workflow types have been renamed
+
+The `TaskType` and `WorkflowTypes` exports have been renamed to `TaskSlug` and `WorkflowSlug`.
+
+```diff
+- import type { TaskType, WorkflowTypes } from 'payload'
++ import type { TaskSlug, WorkflowSlug } from 'payload'
+```
+
+The deprecated `RunningJob` and `RunningJobSimple` types have also been removed. Use `Job` instead.
+
+JSON workflow steps without a `task` must now provide an `inlineTask` handler. This removes a type escape that previously allowed an incomplete step even though it could not run.
 
 ### Jobs: custom database adapters must implement `updateJobs`
 
