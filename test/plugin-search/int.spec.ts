@@ -9,7 +9,7 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
-import { pagesSlug, postsSlug } from './shared.js'
+import { localizedStatusPostsSlug, pagesSlug, postsSlug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
@@ -56,6 +56,15 @@ describe('@payloadcms/plugin-search', () => {
       }),
       payload.delete({
         collection: pagesSlug,
+        depth: 0,
+        where: {
+          id: {
+            exists: true,
+          },
+        },
+      }),
+      payload.delete({
+        collection: localizedStatusPostsSlug,
         depth: 0,
         where: {
           id: {
@@ -760,6 +769,58 @@ describe('@payloadcms/plugin-search', () => {
 
     expect(postAfterReindex?.slug).not.toBeFalsy()
     expect(postAfterReindex?.slug).toStrictEqual(postBeforeReindex?.slug)
+  })
+
+  it('should reindex documents published only in a non-default locale when status is localized', async () => {
+    // Draft in the default locale ('en'), published only in a non-default locale ('de')
+    const post = await payload.create({
+      collection: localizedStatusPostsSlug,
+      locale: 'en',
+      data: {
+        title: 'Published in DE only',
+        _status: 'draft',
+        slug: 'de-only-en',
+      },
+    })
+
+    await payload.update({
+      collection: localizedStatusPostsSlug,
+      id: post.id,
+      locale: 'de',
+      data: {
+        _status: 'published',
+        slug: 'de-only-de',
+      },
+    })
+
+    const endpointRes = await restClient.POST(`/search/reindex`, {
+      body: JSON.stringify({
+        collections: [localizedStatusPostsSlug],
+      }),
+      headers: {
+        Authorization: `JWT ${token}`,
+      },
+    })
+
+    expect(endpointRes.status).toBe(200)
+
+    const { docs } = await payload.find({
+      collection: 'search',
+      depth: 0,
+      pagination: false,
+      locale: 'all',
+      where: {
+        doc: {
+          equals: {
+            relationTo: localizedStatusPostsSlug,
+            value: post.id,
+          },
+        },
+      },
+    })
+
+    // The document is published in 'de', so it must be indexed even though 'en' is a draft
+    expect(docs).toHaveLength(1)
   })
 
   it('should sync trashed documents correctly with search plugin', async () => {
