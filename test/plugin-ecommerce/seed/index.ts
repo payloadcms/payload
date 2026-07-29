@@ -12,6 +12,34 @@ const colorVariantOptions = [
   { label: 'White', value: 'white' },
 ]
 
+/**
+ * MongoDB cannot create the same collection namespace from two concurrent
+ * transactions. On the first write to `variantOptions` the namespace and its
+ * versions namespace do not exist yet, so creating the options in parallel
+ * makes them race and fail with a TransientTransactionError.
+ */
+const createVariantOptions = async (
+  payload: Payload,
+  variantTypeID: string,
+  options: { label: string; value: string }[],
+) => {
+  const created = []
+
+  for (const option of options) {
+    created.push(
+      await payload.create({
+        collection: 'variantOptions',
+        data: {
+          ...option,
+          variantType: variantTypeID,
+        },
+      }),
+    )
+  }
+
+  return created
+}
+
 export const seed = async (payload: Payload): Promise<boolean> => {
   payload.logger.info('Seeding data for ecommerce...')
   const req = {} as PayloadRequest
@@ -34,16 +62,10 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       },
     })
 
-    const [small, medium, large, xlarge] = await Promise.all(
-      sizeVariantOptions.map((option) => {
-        return payload.create({
-          collection: 'variantOptions',
-          data: {
-            ...option,
-            variantType: sizeVariantType.id,
-          },
-        })
-      }),
+    const [small, medium, large, xlarge] = await createVariantOptions(
+      payload,
+      sizeVariantType.id,
+      sizeVariantOptions,
     )
 
     const colorVariantType = await payload.create({
@@ -54,16 +76,10 @@ export const seed = async (payload: Payload): Promise<boolean> => {
       },
     })
 
-    const [black, white] = await Promise.all(
-      colorVariantOptions.map((option) => {
-        return payload.create({
-          collection: 'variantOptions',
-          data: {
-            ...option,
-            variantType: colorVariantType.id,
-          },
-        })
-      }),
+    const [black, white] = await createVariantOptions(
+      payload,
+      colorVariantType.id,
+      colorVariantOptions,
     )
 
     const hoodieProduct = await payload.create({
@@ -138,7 +154,9 @@ export const seed = async (payload: Payload): Promise<boolean> => {
 
     return true
   } catch (err) {
-    console.error(err)
-    return false
+    // Swallowing this leaves the collections empty and surfaces thirteen tests later
+    // as unrelated cart failures, so fail the suite where the problem actually is.
+    payload.logger.error({ err, msg: 'Seeding data for ecommerce failed' })
+    throw err
   }
 }
