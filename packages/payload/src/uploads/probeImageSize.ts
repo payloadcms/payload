@@ -17,6 +17,16 @@ import type { ProbedImageSize } from './types.js'
  * Replaces the archived `image-size` package, whose ICNS/HEIF parsers shipped
  * unpatched denial-of-service vulnerabilities (CVE-2025-71330, CVE-2025-71319).
  *
+ * Two edge cases changed behavior compared to the previous hand-rolled parser:
+ * - JPEG files using arithmetic coding or hierarchical encoding (SOF markers
+ *   5-7, 9-11, 13-15) are no longer read; `image-dimensions` only recognizes
+ *   baseline and progressive JPEG (SOF0-3). These encodings are not produced
+ *   by browsers or cameras, so this is not expected to affect real uploads.
+ * - AVIF/HEIF detection now checks the container's brand list instead of
+ *   accepting any ISO base media file with a `ftyp` box, so non-image formats
+ *   that share the same container (for example MP4/MOV) are correctly no
+ *   longer misidentified as images.
+ *
  * @throws if the buffer is not a recognized/parseable image format
  */
 export function probeImageSize(data: Buffer): ProbedImageSize {
