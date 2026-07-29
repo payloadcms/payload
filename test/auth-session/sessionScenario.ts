@@ -12,8 +12,10 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import {
   AUTH_SESSION_TEST_ADMIN_ROUTES,
   AUTH_SESSION_TEST_ROUTES,
+  authSessionAccessTokenCookieName,
   authSessionExpirationSelector,
   authSessionRefreshEndpointPathname,
+  authSessionRefreshTokenCookieName,
   authSessionUsersSlug,
   createAuthSessionAPIURL,
 } from './shared.js'
@@ -22,6 +24,11 @@ export type { LoggedOutRoute } from './shared.js'
 
 export type AuthSessionCookie = Awaited<ReturnType<BrowserContext['cookies']>>[number]
 
+export type TestOAuthCredentials = {
+  accessToken: string
+  refreshToken: string
+}
+
 export type SessionScenario = {
   advanceBy: (durationMs: number) => Promise<void>
   armRefreshBarrier: (phase: AuthSessionRefreshBarrierPhase) => Promise<void>
@@ -29,24 +36,29 @@ export type SessionScenario = {
   disableBroadcastChannel: () => Promise<void>
   expectLoggedIn: (page: Page) => Promise<void>
   expectLoggedOut: (args: { page: Page; route: LoggedOutRoute }) => Promise<void>
-  expectProviderSessionAuthenticated: (args: { token: string }) => Promise<void>
-  expectProviderSessionRevoked: (args: { token: string }) => Promise<void>
+  expectOAuthAccessTokenAuthenticated: (args: { accessToken: string }) => Promise<void>
+  expectOAuthAccessTokenRevoked: (args: { accessToken: string }) => Promise<void>
+  expectOAuthCredentialsRevoked: (args: { credentials: TestOAuthCredentials }) => Promise<void>
   login: () => Promise<Page>
   logout: (page: Page) => Promise<void>
   moveMouse: (page: Page) => Promise<void>
   openTab: () => Promise<Page>
+  readAccessTokenCookie: () => Promise<AuthSessionCookie | undefined>
   readExpiration: (page: Page) => Promise<number>
-  readRotatedProviderCredentialFromResponse: (response: APIResponse | Response) => Promise<string>
-  readTokenCookie: () => Promise<AuthSessionCookie | undefined>
-  refreshProviderSession: (args: { token: string }) => Promise<APIResponse>
+  readOAuthCredentials: () => Promise<TestOAuthCredentials>
+  readRefreshTokenCookie: () => Promise<AuthSessionCookie | undefined>
+  readRotatedOAuthCredentialsFromResponse: (
+    response: APIResponse | Response,
+  ) => Promise<TestOAuthCredentials>
+  refreshOAuthSession: (args: { credentials: TestOAuthCredentials }) => Promise<APIResponse>
   releaseRefreshBarrier: () => Promise<void>
-  revoke: () => Promise<void>
+  revokeOAuthSession: () => Promise<void>
   waitForRefresh: (page: Page) => Promise<Response>
   waitForRefreshBarrier: (enteredCount: number) => Promise<void>
 }
 
 /**
- * Creates an isolated browser session backed by the custom provider auth fixture.
+ * Creates an isolated browser session backed by the simplified OAuth test provider.
  *
  * Scenario helpers use real admin navigation, cookies, and HTTP endpoints. Advancing time moves
  * both Playwright's browser clock and the provider's server clock so expiration tests remain fast
@@ -153,10 +165,10 @@ export async function createSessionScenario({
         })
         .toBeNull()
     },
-    async expectProviderSessionAuthenticated({ token }) {
+    async expectOAuthAccessTokenAuthenticated({ accessToken }) {
       const response = await context.request.get(createAPIURL(`/${authSessionUsersSlug}/me`), {
         headers: {
-          cookie: `payload-token=${token}`,
+          cookie: `${authSessionAccessTokenCookieName}=${accessToken}`,
         },
       })
       const result = (await response.json()) as {
@@ -168,10 +180,10 @@ export async function createSessionScenario({
       expect(result.user).not.toBeNull()
       expect(result.exp).toBeGreaterThan(0)
     },
-    async expectProviderSessionRevoked({ token }) {
+    async expectOAuthAccessTokenRevoked({ accessToken }) {
       const response = await context.request.get(createAPIURL(`/${authSessionUsersSlug}/me`), {
         headers: {
-          cookie: `payload-token=${token}`,
+          cookie: `${authSessionAccessTokenCookieName}=${accessToken}`,
         },
       })
       const result = (await response.json()) as
@@ -185,6 +197,23 @@ export async function createSessionScenario({
 
       expect(response.status()).toBe(200)
       expect(result.user).toBeNull()
+    },
+    async expectOAuthCredentialsRevoked({ credentials }) {
+      const response = await context.request.post(
+        createAPIURL(`/${authSessionUsersSlug}/refresh-token`),
+        {
+          headers: {
+            cookie: [
+              `${authSessionAccessTokenCookieName}=${credentials.accessToken}`,
+              `${authSessionRefreshTokenCookieName}=${credentials.refreshToken}`,
+            ].join('; '),
+          },
+        },
+      )
+      const headers = response.headers()
+
+      expect(response.status()).toBe(403)
+      expect(headers['set-cookie']).toBeUndefined()
     },
     async login() {
       const response = await context.request.post(createAPIURL(AUTH_SESSION_TEST_ROUTES.LOGIN))
@@ -216,6 +245,11 @@ export async function createSessionScenario({
 
       return page
     },
+    async readAccessTokenCookie() {
+      return (await context.cookies()).find(
+        (cookie) => cookie.name === authSessionAccessTokenCookieName,
+      )
+    },
     async readExpiration(page) {
       const expirationMs = Number(await page.locator(authSessionExpirationSelector).textContent())
 
@@ -223,22 +257,53 @@ export async function createSessionScenario({
 
       return expirationMs
     },
-    async readRotatedProviderCredentialFromResponse(response) {
+    async readOAuthCredentials() {
+      const cookies = await context.cookies()
+      const accessToken = cookies.find(
+        (cookie) => cookie.name === authSessionAccessTokenCookieName,
+      )?.value
+      const refreshToken = cookies.find(
+        (cookie) => cookie.name === authSessionRefreshTokenCookieName,
+      )?.value
+
+      expect(accessToken).toBeDefined()
+      expect(refreshToken).toBeDefined()
+
+      return {
+        accessToken: accessToken ?? '',
+        refreshToken: refreshToken ?? '',
+      }
+    },
+    async readRefreshTokenCookie() {
+      return (await context.cookies()).find(
+        (cookie) => cookie.name === authSessionRefreshTokenCookieName,
+      )
+    },
+    async readRotatedOAuthCredentialsFromResponse(response) {
       const headers = 'allHeaders' in response ? await response.allHeaders() : response.headers()
       const setCookie = headers['set-cookie']
-      const token = setCookie?.match(/(?:^|,\s*)payload-token=([^;]+)/)?.[1]
+      const accessToken = setCookie?.match(
+        new RegExp(`${authSessionAccessTokenCookieName}=([^;]+)`),
+      )?.[1]
+      const refreshToken = setCookie?.match(
+        new RegExp(`${authSessionRefreshTokenCookieName}=([^;]+)`),
+      )?.[1]
 
-      expect(token).toBeDefined()
+      expect(accessToken).toBeDefined()
+      expect(refreshToken).toBeDefined()
 
-      return token ?? ''
+      return {
+        accessToken: accessToken ?? '',
+        refreshToken: refreshToken ?? '',
+      }
     },
-    async readTokenCookie() {
-      return (await context.cookies()).find((cookie) => cookie.name === 'payload-token')
-    },
-    refreshProviderSession({ token }) {
+    refreshOAuthSession({ credentials }) {
       return context.request.post(createAPIURL(`/${authSessionUsersSlug}/refresh-token`), {
         headers: {
-          cookie: `payload-token=${token}`,
+          cookie: [
+            `${authSessionAccessTokenCookieName}=${credentials.accessToken}`,
+            `${authSessionRefreshTokenCookieName}=${credentials.refreshToken}`,
+          ].join('; '),
         },
       })
     },
@@ -249,7 +314,7 @@ export async function createSessionScenario({
 
       expect(response.status()).toBe(200)
     },
-    async revoke() {
+    async revokeOAuthSession() {
       const response = await context.request.post(createAPIURL(AUTH_SESSION_TEST_ROUTES.REVOKE))
 
       expect(response.status()).toBe(200)

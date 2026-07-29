@@ -31,10 +31,13 @@ export type AuthSessionRefreshBarrierPhase =
 
 export type LoggedOutRoute = keyof typeof AUTH_SESSION_TEST_ADMIN_ROUTES
 
+export const authSessionAccessTokenCookieName = 'auth-session-access-token'
 export const authSessionAPIRoute = '/api'
-export const authSessionTokenLifetimeMs = 300_000
+export const authSessionAccessTokenLifetimeMs = 300_000
+export const authSessionRefreshTokenCookieName = 'auth-session-refresh-token'
+export const authSessionRefreshTokenLifetimeMs = 1_800_000
 export const authSessionUsersSlug = 'auth-session-users'
-export const authSessionStrategyName = 'test-provider'
+export const authSessionStrategyName = 'test-oauth-provider'
 export const authSessionStrategyID = `${authSessionUsersSlug}-${authSessionStrategyName}` as const
 export const createAuthSessionAPIPath = ({ path }: { path: string }): string =>
   `${authSessionAPIRoute}${path}`

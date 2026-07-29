@@ -6,9 +6,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
-import { devUser } from '../../credentials.js'
 import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
-import { collectionSlug } from './config.js'
+import { devUser } from '../../credentials.js'
+import { collectionSlug, providerCookie } from './config.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -47,10 +47,12 @@ describe('Remove token from auth responses', () => {
     expect(result.user.email).toBeDefined()
   })
 
-  it('should not include token in response from /refresh-token', async () => {
+  it('should preserve a provider cookie without including its token in the response', async () => {
     const response = await restClient.POST(`/${collectionSlug}/refresh-token`)
     const result = await response.json()
+
     expect(response.status).toBe(200)
+    expect(response.headers.get('Set-Cookie')).toContain(providerCookie)
     expect(result.refreshedToken).not.toBeDefined()
     expect(result.user.email).toBeDefined()
   })

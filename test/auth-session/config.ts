@@ -5,19 +5,18 @@ import path from 'path'
 
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import {
-  authenticateProviderSession,
-  authSessionTestEndpoints,
-  exposeProviderSessionExpiration,
-  providerSessionStore,
-  revokeProviderSessionAfterLogout,
-  rotateProviderSession,
-} from './authFixture.js'
-import {
   AUTH_SESSION_TEST_ADMIN_ROUTES,
   authSessionStrategyName,
-  authSessionTokenLifetimeMs,
   authSessionUsersSlug,
 } from './shared.js'
+import {
+  authenticateTestOAuthSession,
+  authSessionTestEndpoints,
+  exposeTestOAuthSessionExpiration,
+  revokeTestOAuthSessionAfterLogout,
+  rotateTestOAuthSession,
+  testOAuthSessionStore,
+} from './testOAuthProvider.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -32,18 +31,17 @@ const authSessionUsers: CollectionConfig = {
     removeTokenFromResponses: true,
     strategies: [
       {
-        authenticate: authenticateProviderSession,
         name: authSessionStrategyName,
+        authenticate: authenticateTestOAuthSession,
       },
     ],
-    tokenExpiration: authSessionTokenLifetimeMs / 1000,
     useSessions: false,
   },
   fields: [
     {
       name: 'name',
-      required: true,
       type: 'text',
+      required: true,
     },
     {
       name: 'sessionDebug',
@@ -56,9 +54,9 @@ const authSessionUsers: CollectionConfig = {
     },
   ],
   hooks: {
-    afterLogout: [revokeProviderSessionAfterLogout],
-    me: [exposeProviderSessionExpiration],
-    refresh: [rotateProviderSession],
+    afterLogout: [revokeTestOAuthSessionAfterLogout],
+    me: [exposeTestOAuthSessionExpiration],
+    refresh: [rotateTestOAuthSession],
   },
 }
 
@@ -89,7 +87,7 @@ export default buildConfigWithDefaults(
         })
       }
 
-      providerSessionStore.reset({ nextNowMs: Date.now() })
+      testOAuthSessionStore.reset({ nextNowMs: Date.now() })
     },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
