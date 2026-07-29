@@ -41,7 +41,7 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.cors = config.cors ?? []
   config.csrf = config.csrf ?? []
   config.custom = config.custom ?? {}
-  config.defaultDepth = config.defaultDepth ?? 2
+  config.defaultDepth = config.defaultDepth ?? 1
   config.defaultMaxTextLength = config.defaultMaxTextLength ?? 40000
   config.endpoints = config.endpoints ?? []
   config.globals = config.globals ?? []
