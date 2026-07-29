@@ -41,28 +41,42 @@ export const resolveAllFilterOptions = async ({
         'filterOptions' in field &&
         field.filterOptions
       ) {
-        const options = await resolveFilterOptions(field.filterOptions, {
-          id: undefined,
-          blockData: undefined,
-          data: {}, // use empty object to prevent breaking queries when accessing properties of `data`
-          relationTo: field.relationTo,
-          req,
-          siblingData: {}, // use empty object to prevent breaking queries when accessing properties of `siblingData`
-          user: req.user,
-        })
+        try {
+          const options = await resolveFilterOptions(field.filterOptions, {
+            id: undefined,
+            blockData: undefined,
+            data: {}, // use empty object to prevent breaking queries when accessing properties of `data`
+            relationTo: field.relationTo,
+            req,
+            siblingData: {}, // use empty object to prevent breaking queries when accessing properties of `siblingData`
+            user: req.user,
+          })
 
-        resolvedFilterOptions.set(fieldPath, options)
+          resolvedFilterOptions.set(fieldPath, options)
+        } catch (err) {
+          req.payload.logger.error({
+            err,
+            msg: `Failed to resolve filterOptions for field "${fieldPath}" in the list view filter panel, falling back to unfiltered options`,
+          })
+        }
       }
 
       if (field.type === 'select' && typeof field.filterOptions === 'function') {
-        const options = await field.filterOptions({
-          data: {}, // use empty object to prevent breaking queries when accessing properties of `data`
-          options: field.options,
-          req,
-          siblingData: {}, // use empty object to prevent breaking queries when accessing properties of `siblingData`
-        })
+        try {
+          const options = await field.filterOptions({
+            data: {}, // use empty object to prevent breaking queries when accessing properties of `data`
+            options: field.options,
+            req,
+            siblingData: {}, // use empty object to prevent breaking queries when accessing properties of `siblingData`
+          })
 
-        resolvedFilterOptions.set(fieldPath, options)
+          resolvedFilterOptions.set(fieldPath, options)
+        } catch (err) {
+          req.payload.logger.error({
+            err,
+            msg: `Failed to resolve filterOptions for field "${fieldPath}" in the list view filter panel, falling back to unfiltered options`,
+          })
+        }
       }
 
       if (fieldHasSubFields(field)) {
