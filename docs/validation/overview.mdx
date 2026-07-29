@@ -231,6 +231,9 @@ Publishing one locale validates that locale and every locale with `required: tru
 locales validates every available locale. If any locale is invalid, Payload throws a
 `ValidationError` before writing the document, version, or files.
 
+Publishing uses its normal `create` or `update` access policy; the internal validity check does not
+require separate `validate` access.
+
 The default Admin Publish controls run a preflight so editors can see locale-grouped errors before
 submission. The **Validate all locales** action uses current unsaved form data and is shown only for
 localized documents when the user has `validate` permission. If you replace the default Publish
@@ -243,7 +246,9 @@ require publish validation.
 
 ## Access control and hooks
 
-Configure `validate` access independently for collections, globals, and fields:
+Validation falls back to the corresponding `update` access function for collections, globals, and
+fields. The fallback still receives `req.operation === 'validate'`. Configure `validate` only when
+validation should use a different policy:
 
 ```ts
 import type { CollectionConfig, GlobalConfig } from 'payload'
@@ -251,14 +256,14 @@ import type { CollectionConfig, GlobalConfig } from 'payload'
 export const Posts: CollectionConfig = {
   slug: 'posts',
   access: {
-    validate: ({ req }) => Boolean(req.user),
+    update: ({ req }) => Boolean(req.user),
   },
   fields: [
     {
       name: 'internalNotes',
       type: 'textarea',
       access: {
-        validate: ({ req }) => Boolean(req.user),
+        update: ({ req }) => Boolean(req.user),
       },
     },
   ],
@@ -267,21 +272,24 @@ export const Posts: CollectionConfig = {
 export const SiteSettings: GlobalConfig = {
   slug: 'site-settings',
   access: {
+    update: ({ req }) => req.user?.collection === 'admins',
+    // Optional: let other authenticated users validate without granting updates.
     validate: ({ req }) => Boolean(req.user),
   },
   fields: [],
 }
 ```
 
-Collection, global, and field access functions all receive the first-class
+Whether configured directly or inherited from `update`, collection, global, and field access
+functions all receive the first-class
 `req.operation === 'validate'`. Field `beforeValidate` and `beforeChange` hooks, field validators,
 and collection/global `beforeValidate` and `beforeChange` hooks also receive
 `operation: 'validate'`. Payload never simulates `'create'` or `'update'` as the access operation.
 
-The validation lifecycle itself does not persist the candidate. Payload also rejects managed write
-operations that reuse the active validation request. Hooks still run, however, and can cause side
-effects through an external service, a raw database client, or a separate Payload request. Branch
-side-effecting hooks when needed:
+The validation lifecycle itself does not persist the candidate. Payload also rejects document,
+global, upload, and version writes that reuse the active validation request. Hooks still run,
+however, and can cause side effects through other Payload APIs, an external service, a raw database
+client, or a separate Payload request. Branch side-effecting hooks when needed:
 
 ```ts
 import type { CollectionBeforeChangeHook } from 'payload'
