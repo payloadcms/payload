@@ -125,7 +125,8 @@ export type SanitizedPermissions = {
  */
 export type AuthRuntimeFields = {
   /**
-   * The session ID of the current request. Present only when sessions are enabled.
+   * The session ID of the current request. May be present on request-authenticated users when
+   * sessions are enabled.
    */
   _sid?: string
   /**
@@ -141,15 +142,10 @@ export type AuthRuntimeFields = {
  */
 /**
  * The signed-in user: the read user plus the runtime auth markers (`_strategy`, `_sid`). This is
- * what `req.user`, `payload.auth()`, the `me` operation, and auth strategies return.
+ * what `req.user`, `payload.auth()`, the `me` operation, auth strategies, and `useAuth().user`
+ * return.
  */
 export type AuthenticatedUser = AuthRuntimeFields & User
-
-/**
- * The user as available on the client (`useAuth().user`). It is the authenticated user as
- * serialized to the browser: `collection` and `_strategy` are present, `_sid` is not sent.
- */
-export type ClientUser = AuthenticatedUser
 
 export type UserSession = {
   createdAt?: Date | null | string

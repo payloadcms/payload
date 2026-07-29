@@ -192,7 +192,7 @@ describe('Document View', () => {
   describe('document titles', () => {
     test('collection — should render fallback titles when creating new', async () => {
       await page.goto(postsUrl.create)
-      await checkPageTitle(page, '[Untitled]')
+      await checkPageTitle(page, 'Untitled')
       await checkBreadcrumb(page, 'Create New')
       await saveDocAndAssert(page)
     })

@@ -28,13 +28,10 @@ const runLoader = async (load: AdminLoad, splat: string, searchStr: string) => {
 }
 
 function AdminPage() {
-  // RSC Flight payload — render directly. Key by the loader-derived `routeKey`
-  // (not `location.pathname`, which updates before `useLoaderData` during a
-  // transition and would remount with the previous payload) so navigating to a
-  // different admin page remounts the view, mirroring Next route-segment
-  // semantics. Search params are excluded so search-only changes reconcile in place.
+  // Note: React key intentionally omitted here so the persistent template (nav, header) doesn't remount and flash on navigation.
+  // The per-route view key is attached server-side to the view subtree instead, via `renderRoot`'s `key` in `loadAdminPage`.
   const data = useLoaderData({ strict: false })
-  return <Fragment key={data?.routeKey}>{data?.rscPayload}</Fragment>
+  return <Fragment>{data?.rscPayload}</Fragment>
 }
 
 function AdminNotFound(props: { data?: { routeKey?: string; rscPayload?: ReactNode } }) {
@@ -45,6 +42,50 @@ function AdminNotFound(props: { data?: { routeKey?: string; rscPayload?: ReactNo
   return <Fragment key={props?.data?.routeKey}>{rscPayload}</Fragment>
 }
 
+const adminRouteOptions = ({
+  forwardNotFoundPayload,
+  load,
+  resolveSplat,
+}: {
+  /**
+   * Ships the server-rendered NotFound tree through `notFound()`'s `data` so a
+   * `notFoundComponent` can render it with the full admin chrome. Routes without
+   * one throw bare.
+   */
+  forwardNotFoundPayload: boolean
+  load: AdminLoad
+  /** The route's splat, i.e. the path after `/admin/`. */
+  resolveSplat: (params: any) => string
+}) => ({
+  component: AdminPage,
+  head: ({ loaderData }: { loaderData?: any }) => getAdminMeta(loaderData?.metadata),
+  // `staleReloadMode: 'blocking'` (a property of the loader *object*, not a
+  // sibling route option — router-core only reads it off a non-function loader)
+  // makes stale-match revalidation await the fresh loader before committing,
+  // instead of the default background SWR that flashes the pre-navigation list
+  // (e.g. a just-created doc missing) until the reload lands.
+  loader: {
+    handler: async ({ location, params }: { location: any; params: any }) => {
+      const data = await runLoader(load, resolveSplat(params), location.searchStr)
+      if (data?._notFound) {
+        // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing notFound objects
+        throw notFound(
+          forwardNotFoundPayload
+            ? { data: { routeKey: data.routeKey, rscPayload: data.rscPayload } }
+            : undefined,
+        )
+      }
+      return data
+    },
+    staleReloadMode: 'blocking',
+  },
+  // Surface query params in `loaderDeps` so `?locale=es` re-runs the loader.
+  loaderDeps: ({ search }: { search: Record<string, unknown> }) => ({
+    searchKey: JSON.stringify(search),
+  }),
+  validateSearch: (search: Record<string, unknown>) => search,
+})
+
 /**
  * Route options for the admin splat route (`/_payload/admin/$`). Renders Payload's
  * server-built NotFound page (shipped via the `notFound()` error's
@@ -53,30 +94,12 @@ function AdminNotFound(props: { data?: { routeKey?: string; rscPayload?: ReactNo
  */
 export function payloadAdminSplatRoute({ load }: { load: AdminLoad }) {
   return {
-    component: AdminPage,
-    head: ({ loaderData }: { loaderData?: any }) => getAdminMeta(loaderData?.metadata),
-    // `staleReloadMode: 'blocking'` (a property of the loader *object*, not a
-    // sibling route option — router-core only reads it off a non-function loader)
-    // makes stale-match revalidation await the fresh loader before committing,
-    // instead of the default background SWR that flashes the pre-navigation list
-    // (e.g. a just-created doc missing) until the reload lands.
-    loader: {
-      handler: async ({ location, params }: { location: any; params: any }) => {
-        const data = await runLoader(load, params._splat ?? '', location.searchStr)
-        if (data?._notFound) {
-          // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing notFound objects
-          throw notFound({ data: { routeKey: data.routeKey, rscPayload: data.rscPayload } })
-        }
-        return data
-      },
-      staleReloadMode: 'blocking',
-    },
-    // Surface query params in `loaderDeps` so `?locale=es` re-runs the loader.
-    loaderDeps: ({ search }: { search: Record<string, unknown> }) => ({
-      searchKey: JSON.stringify(search),
+    ...adminRouteOptions({
+      forwardNotFoundPayload: true,
+      load,
+      resolveSplat: (params) => params._splat ?? '',
     }),
     notFoundComponent: AdminNotFound,
-    validateSearch: (search: Record<string, unknown>) => search,
   }
 }
 
@@ -85,23 +108,9 @@ export function payloadAdminSplatRoute({ load }: { load: AdminLoad }) {
  * splat route but throws a bare `notFound()` (no rscPayload) on miss.
  */
 export function payloadAdminIndexRoute({ load }: { load: AdminLoad }) {
-  return {
-    component: AdminPage,
-    head: ({ loaderData }: { loaderData?: any }) => getAdminMeta(loaderData?.metadata),
-    loader: {
-      handler: async ({ location }: { location: any }) => {
-        const data = await runLoader(load, '', location.searchStr)
-        if (data?._notFound) {
-          // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router requires throwing notFound objects
-          throw notFound()
-        }
-        return data
-      },
-      staleReloadMode: 'blocking',
-    },
-    loaderDeps: ({ search }: { search: Record<string, unknown> }) => ({
-      searchKey: JSON.stringify(search),
-    }),
-    validateSearch: (search: Record<string, unknown>) => search,
-  }
+  return adminRouteOptions({
+    forwardNotFoundPayload: false,
+    load,
+    resolveSplat: () => '',
+  })
 }

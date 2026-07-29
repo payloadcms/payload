@@ -400,7 +400,6 @@ export function FormsManagerProvider({ children }: FormsManagerProps) {
             body: await createFormData(
               form.formState,
               overrides,
-              collectionSlug,
               getUploadHandler({ collectionSlug }),
             ),
             credentials: 'include',

@@ -100,7 +100,7 @@ export type PostgresAdapter = {
 
 declare module 'payload' {
   export interface DatabaseAdapter
-    extends Omit<Args, 'idType' | 'logger' | 'migrationDir' | 'pool'>,
+    extends Omit<Args, 'extensions' | 'idType' | 'logger' | 'migrationDir' | 'pool'>,
       DrizzleAdapter {
     afterSchemaInit: PostgresSchemaHook[]
 
@@ -114,7 +114,7 @@ declare module 'payload' {
      * Used for returning properly formed errors from unique fields
      */
     fieldConstraints: Record<string, Record<string, string>>
-    idType: Args['idType']
+    idType: NonNullable<Args['idType']>
     initializing: Promise<void>
     localesSuffix?: string
     logger: DrizzleConfig['logger']
@@ -129,13 +129,16 @@ declare module 'payload' {
       up: (args: MigrateUpArgs) => Promise<void>
     }[]
     push: boolean
+    readReplicasAfterWriteInterval: number
     rejectInitializing: () => void
     relationshipsSuffix?: string
     resolveInitializing: () => void
     schema: Record<string, unknown>
     schemaName?: Args['schemaName']
+    sessions: DrizzleAdapter['sessions']
     tableNameMap: Map<string, string>
     tablesFilter?: string[]
+    transactionOptions: PgTransactionConfig | undefined
     versionsSuffix?: string
   }
 }

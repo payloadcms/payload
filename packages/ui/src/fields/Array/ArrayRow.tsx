@@ -89,6 +89,8 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
   const { i18n } = useTranslation()
   const hasSubmitted = useFormSubmitted()
 
+  const pasteData = React.useMemo(() => ({ path, schemaFields: fields }), [path, fields])
+
   const fallbackLabel = `${getTranslation(labels.singular, i18n)} ${String(rowIndex + 1).padStart(
     2,
     '0',
@@ -126,6 +128,7 @@ export const ArrayRow: React.FC<ArrayRowProps> = ({
               index={rowIndex}
               isSortable={isSortable}
               moveRow={moveRow}
+              pasteData={pasteData}
               pasteRow={pasteRow}
               removeRow={removeRow}
               rowCount={rowCount}

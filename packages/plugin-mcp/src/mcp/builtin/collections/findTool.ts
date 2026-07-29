@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { whereSchema } from '../../../utils/whereSchema.js'
 
 const DEFAULT_DESCRIPTION =
@@ -40,7 +39,7 @@ export const findDocumentsTool = defineCollectionTool({
     draft: z
       .boolean()
       .describe(
-        'Optional: whether the document should be queried from the versions table/collection or not.',
+        'For versioned collections, true returns the latest draft version when available. False reads the main document.',
       )
       .optional(),
     fallbackLocale: z
@@ -134,8 +133,8 @@ export const findDocumentsTool = defineCollectionTool({
           id,
           collection: collectionSlug,
           depth,
+          overrideAccess: authorizedMCP.overrideAccess,
           req,
-          ...localAPIDefaults(authorizedMCP),
           ...(select && { select: select as SelectType }),
           ...(populate && { populate: populate as PopulateType }),
           ...(joins !== undefined && { joins: joins as JoinQuery }),
@@ -171,9 +170,9 @@ export const findDocumentsTool = defineCollectionTool({
       collection: collectionSlug,
       depth,
       limit,
+      overrideAccess: authorizedMCP.overrideAccess,
       page,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(select && { select: select as SelectType }),
       ...(populate && { populate: populate as PopulateType }),
       ...(joins !== undefined && { joins: joins as JoinQuery }),

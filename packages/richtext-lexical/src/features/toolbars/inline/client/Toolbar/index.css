@@ -12,7 +12,6 @@
     z-index: 2;
     opacity: 0;
     border-radius: var(--radius-medium);
-    transition: opacity 0.2s;
     will-change: transform;
     box-shadow: var(--elevation-300-tooltip);
   }

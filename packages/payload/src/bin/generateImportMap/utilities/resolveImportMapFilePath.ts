@@ -1,6 +1,8 @@
 import fs from 'fs/promises'
 import path from 'path'
 
+import { NEXT_PAYLOAD_ROUTE_GROUP, TANSTACK_PAYLOAD_DIR } from '../../frameworkConventions.js'
+
 async function pathOrFileExists(path: string): Promise<boolean> {
   try {
     await fs.access(path)
@@ -20,11 +22,11 @@ async function pathOrFileExists(path: string): Promise<boolean> {
  */
 const defaultCandidateDirectories = (rootDir: string, adminRoute: string): string[] => [
   // Next.js App Router: `(payload)` route group nested under the admin route
-  path.resolve(rootDir, `app/(payload)${adminRoute}/`),
-  path.resolve(rootDir, `src/app/(payload)${adminRoute}/`),
+  path.resolve(rootDir, `app/${NEXT_PAYLOAD_ROUTE_GROUP}${adminRoute}/`),
+  path.resolve(rootDir, `src/app/${NEXT_PAYLOAD_ROUTE_GROUP}${adminRoute}/`),
   // TanStack Start: `_payload` pathless route folder at the app root
-  path.resolve(rootDir, `app/_payload/`),
-  path.resolve(rootDir, `src/app/_payload/`),
+  path.resolve(rootDir, `app/${TANSTACK_PAYLOAD_DIR}/`),
+  path.resolve(rootDir, `src/app/${TANSTACK_PAYLOAD_DIR}/`),
 ]
 
 /**

@@ -7,6 +7,7 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
+import type { TestFileServer } from '../__helpers/shared/startTestFileServer.js'
 import type { Config } from './payload-types.js'
 
 import {
@@ -31,6 +32,7 @@ import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
+import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
@@ -68,7 +70,6 @@ import {
   withoutEnlargeSlug,
   withoutMetadataSlug,
 } from './shared.js'
-import { startMockCorsServer } from './startMockCorsServer.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -134,7 +135,6 @@ let mediaWithFieldsURL: AdminUrlUtil
 
 describe('Uploads', () => {
   let page: Page
-  let mockCorsServer: ReturnType<typeof startMockCorsServer> | undefined
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -237,12 +237,6 @@ describe('Uploads', () => {
     await client.login()
 
     await ensureCompilationIsDone({ page, serverURL })
-  })
-
-  afterAll(() => {
-    if (mockCorsServer) {
-      mockCorsServer.close()
-    }
   })
 
   test('should show upload filename in upload collection list', async () => {
@@ -523,6 +517,17 @@ describe('Uploads', () => {
     await expect(filename).toHaveValue('image.png')
 
     await saveDocAndAssert(page)
+  })
+
+  test('should show a tooltip for the remove button on an unsaved selected file', async () => {
+    await gotoAndWaitForForm(page, mediaURL.create)
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+
+    const removeButton = page.locator('.file-manager__remove')
+    await expect(removeButton).toBeVisible()
+    await removeButton.hover()
+
+    await expect(page.locator('.tooltip--show', { hasText: exactText('Cancel') })).toBeVisible()
   })
 
   test('should remove remote URL button if pasteURL is false', async () => {
@@ -1322,6 +1327,32 @@ describe('Uploads', () => {
       ).toBeVisible()
     })
 
+    test('should hide the drag and drop text based on the field container width, not the viewport', async () => {
+      await page.goto(uploadsOne.list)
+
+      const bulkUploadButton = page.locator('.list-header__title-actions button', {
+        hasText: 'Bulk Upload',
+      })
+      await bulkUploadButton.click()
+
+      await page
+        .locator('.dropzone input[type="file"]')
+        .setInputFiles(path.resolve(dirname, './image.png'))
+
+      await expect(page.locator('#field-hasManyUpload .upload__dropzoneContent')).toHaveCSS(
+        'flex-wrap',
+        'wrap',
+      )
+
+      await expect(page.locator('#field-hasManyUpload .upload__dragAndDropText')).toBeHidden()
+    })
+
+    test('should show the drag and drop text when a field has enough room outside the bulk upload drawer', async () => {
+      await gotoAndWaitForForm(page, relationURL.create)
+
+      await expect(page.locator('#field-hasManyImage .upload__dragAndDropText')).toBeVisible()
+    })
+
     test('should bulk upload non-image files without page errors', async () => {
       // Enable collection ONLY for this test
       collectErrorsFromPage()
@@ -1729,7 +1760,9 @@ describe('Uploads', () => {
       // It should already be active (no need to navigate).
 
       // Should show "A file name is required" error message
-      await expect(bulkUploadModal.locator('.field-error')).toContainText('A file name is required')
+      await expect(page.locator('[id^="field-error-filename"]')).toContainText(
+        'A file name is required',
+      )
 
       // Filename field should be empty (as we cleared it)
       await expect(bulkUploadModal.locator('#field-filemanager-filename')).toHaveValue('')
@@ -1997,13 +2030,20 @@ describe('Uploads', () => {
   })
 
   describe('remote url fetching', () => {
-    beforeAll(() => {
-      mockCorsServer = startMockCorsServer()
+    let testFileServer: TestFileServer | undefined
+
+    beforeAll(async () => {
+      testFileServer = await startTestFileServer({
+        contentType: 'image/jpeg',
+        data: readFileSync(path.resolve(dirname, 'test-image.jpg')),
+        hostname: 'localhost',
+        port: 4000,
+      })
     })
 
-    afterAll(() => {
-      if (mockCorsServer) {
-        mockCorsServer.close()
+    afterAll(async () => {
+      if (testFileServer) {
+        await testFileServer.close()
       }
     })
 
@@ -2669,6 +2709,45 @@ describe('Uploads', () => {
 
     const titleField = page.locator('#field-title')
     await expect(titleField).toHaveValue('updated title')
+  })
+
+  test('should show the file preview for the new file after saving a replaced file', async () => {
+    await gotoAndWaitForForm(page, uploadsTwo.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await page.locator('#field-prefix').fill('initial')
+    await saveDocAndAssert(page)
+
+    await page.locator('.file-toolbar__filename-btn').click()
+    await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
+    await page.setInputFiles(
+      '.file-manager input[type="file"]',
+      path.resolve(dirname, './test-image.jpg'),
+    )
+    await saveDocAndAssert(page)
+
+    await expect(page.locator('.file-toolbar__filename-btn')).toBeVisible()
+    await expect(page.locator('.file-toolbar__filename-text')).toContainText('test-image')
+    await expect(page.locator('.file-manager .dropzone')).toBeHidden()
+  })
+
+  test('should allow cancelling a replace before selecting a new file', async () => {
+    await gotoAndWaitForForm(page, uploadsTwo.create)
+
+    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await page.locator('#field-prefix').fill('initial')
+    await saveDocAndAssert(page)
+
+    await page.locator('.file-toolbar__filename-btn').click()
+    await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
+
+    await expect(page.locator('.file-manager .dropzone')).toBeVisible()
+
+    await page.locator('.file-manager__remove').click()
+
+    await expect(page.locator('.file-toolbar__filename-btn')).toBeVisible()
+    await expect(page.locator('.file-toolbar__filename-text')).toContainText('image')
+    await expect(page.locator('.file-manager .dropzone')).toBeHidden()
   })
 
   test('should show data in drawer when editing relationship to upload collection with filesRequiredOnCreate: false', async () => {

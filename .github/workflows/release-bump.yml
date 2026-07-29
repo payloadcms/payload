@@ -1,0 +1,74 @@
+name: release-bump
+
+on:
+  workflow_dispatch:
+    inputs:
+      preid:
+        description: Prerelease identifier
+        type: choice
+        # 'beta' is intentionally omitted until the beta relases start,
+        # so a contributor cannot accidentally cut a beta through this flow.
+        # TODO: re-add 'beta' to these options when beta releases begin.
+        options:
+          - canary
+        default: canary
+      bump:
+        description: Semver bump
+        type: choice
+        options:
+          - prerelease
+          - prepatch
+          - preminor
+        default: prerelease
+      dry_run:
+        description: 'Dry run: log git commands, push nothing'
+        type: boolean
+        default: false
+
+env:
+  DO_NOT_TRACK: 1 # Disable Turbopack telemetry
+  NEXT_TELEMETRY_DISABLED: 1 # Disable Next telemetry
+
+concurrency:
+  group: release-bump
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    name: release-bump
+    if: github.repository_owner == 'payloadcms'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+    steps:
+      # Guard runs before the token is minted so an unauthorized dispatch fails
+      # fast and never gains access to the App credentials.
+      - name: Authorize dispatcher
+        env:
+          ACTOR: ${{ github.actor }}
+        run: |
+          case "$ACTOR" in
+            denolfe|DanRibbens) ;;
+            *) echo "::error::$ACTOR is not authorized to dispatch release-bump"; exit 1 ;;
+          esac
+      - name: Mint App token
+        id: app-token
+        uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+        with:
+          app-id: ${{ secrets.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: main
+          fetch-depth: 0
+          token: ${{ steps.app-token.outputs.token }}
+      - name: Setup
+        uses: ./.github/actions/setup
+      - name: Bump
+        run: pnpm release-bump --preid "$PREID" --bump "$BUMP" ${DRY_RUN_FLAG:-}
+        env:
+          PREID: ${{ inputs.preid }}
+          BUMP: ${{ inputs.bump }}
+          DRY_RUN_FLAG: ${{ inputs.dry_run && '--dry-run' || '' }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}

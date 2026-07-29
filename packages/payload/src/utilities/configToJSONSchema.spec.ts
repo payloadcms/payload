@@ -129,6 +129,35 @@ describe('configToJSONSchema', () => {
     })
   })
 
+  it('should keep _status in the input schema for draft-enabled entities', async () => {
+    // @ts-expect-error partial config
+    const config: Config = {
+      collections: [
+        {
+          slug: 'posts',
+          fields: [{ name: 'title', type: 'text', required: true }],
+          versions: { drafts: true },
+        },
+      ],
+    }
+
+    const sanitizedConfig = await sanitizeConfig(config)
+    const entity = sanitizedConfig.collections[0]!
+    const schema = entityToStandaloneJSONSchema({
+      config: sanitizedConfig,
+      defaultIDType: 'text',
+      entity,
+      variant: 'input',
+    })
+
+    expect(schema.properties?._status).toMatchObject({
+      enum: ['draft', 'published'],
+    })
+    expect(schema.required).not.toContain('_status')
+    expect(schema.properties?.createdAt).toBeUndefined()
+    expect(schema.properties?.updatedAt).toBeUndefined()
+  })
+
   it('should skip input types by default and generate them when enabled', async () => {
     // @ts-expect-error partial config
     const offByDefault: Config = {

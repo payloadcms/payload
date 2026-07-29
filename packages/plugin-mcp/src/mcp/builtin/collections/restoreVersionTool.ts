@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 
 const DEFAULT_DESCRIPTION =
   'Restore a document from a previous version in any version-enabled collection.'
@@ -74,8 +73,8 @@ export const restoreVersionTool = defineCollectionTool({
       collection: collectionSlug,
       depth,
       draft,
+      overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(fallbackLocale ? { fallbackLocale } : {}),
       ...(locale ? { locale } : {}),
       ...(populate ? { populate: populate as PopulateType } : {}),

@@ -203,6 +203,7 @@ export interface Config {
   widgets: {
     collections: CollectionsWidget;
     'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -310,6 +311,7 @@ export interface DraftPost {
   select?: ('test1' | 'test2')[] | null;
   blocksField?: Block[] | null;
   relation?: (string | null) | DraftPost;
+  relationWithFilterOptions?: (string | DraftPost)[] | null;
   restrictedToUpdate?: boolean | null;
   updatedAt: string;
   createdAt: string;
@@ -1107,6 +1109,7 @@ export interface DraftPostsSelect<T extends boolean = true> {
             };
       };
   relation?: T;
+  relationWithFilterOptions?: T;
   restrictedToUpdate?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1782,6 +1785,42 @@ export interface CollectionQueryWidget {
     sortField?: string | null;
     sortDirection?: ('asc' | 'desc') | null;
     limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'disable-publish'
+          | 'posts'
+          | 'autosave-posts'
+          | 'autosave-with-draft-button-posts'
+          | 'autosave-multi-select-posts'
+          | 'autosave-with-validate-posts'
+          | 'draft-posts'
+          | 'drafts-no-read-versions'
+          | 'draft-with-max-posts'
+          | 'draft-posts-with-change-hook'
+          | 'drafts-with-custom-unpublish'
+          | 'draft-with-validate-posts'
+          | 'error-on-unpublish'
+          | 'localized-posts'
+          | 'version-posts'
+          | 'custom-ids'
+          | 'diff'
+          | 'text'
+          | 'draft-with-upload'
+          | 'draft-with-upload-cloud-storage'
+          | 'media'
+          | 'media2'
+          | 'users'
+        )[]
+      | null;
   };
   width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }

@@ -43,7 +43,6 @@ export const tgzToPkgNameMap = {
   '@payloadcms/storage-gcs': 'payloadcms-storage-gcs-*',
   '@payloadcms/storage-r2': 'payloadcms-storage-r2-*',
   '@payloadcms/storage-s3': 'payloadcms-storage-s3-*',
-  '@payloadcms/storage-uploadthing': 'payloadcms-storage-uploadthing-*',
   '@payloadcms/storage-vercel-blob': 'payloadcms-storage-vercel-blob-*',
   '@payloadcms/tanstack-start': 'payloadcms-tanstack-start-*',
   '@payloadcms/translations': 'payloadcms-translations-*',

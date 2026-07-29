@@ -25,6 +25,7 @@ import type {
   RelationshipValueSingle,
   RichTextField,
   SelectField,
+  SlugField,
   TextareaField,
   TextField,
   UploadField,
@@ -100,6 +101,14 @@ export const text: TextFieldValidation = (
 
   return true
 }
+
+export type SlugFieldValidation = Validate<string, unknown, unknown, SlugField>
+
+// A slug is always populated by the field's hooks (source-derived or the `<singular>-<N>` fallback),
+// so an empty value is never a user error — `required` only drives the admin asterisk. Uniqueness is
+// enforced in the field's `beforeChange` hook (see generateSlug) rather than here, because draft
+// saves skip validation but still run hooks.
+export const slug: SlugFieldValidation = () => true
 
 export type PasswordFieldValidation = Validate<string, unknown, unknown, TextField>
 
@@ -961,13 +970,13 @@ export type SelectFieldManyValidation = Validate<string[], unknown, unknown, Sel
 
 export type SelectFieldSingleValidation = Validate<string, unknown, unknown, SelectField>
 
-export const select: SelectFieldValidation = (
+export const select: SelectFieldValidation = async (
   value,
   { data, filterOptions, hasMany, options, req, req: { t }, required, siblingData },
 ) => {
   const filteredOptions =
     typeof filterOptions === 'function'
-      ? filterOptions({
+      ? await filterOptions({
           data,
           options,
           req,
@@ -1097,6 +1106,7 @@ export const point: PointFieldValidation = (value = ['', ''], { req: { t }, requ
  * These can be re-used in custom validations
  */
 export const validations = {
+  slug,
   array,
   blocks,
   checkbox,

@@ -12,10 +12,8 @@ export const getConfigInfoTool = defineTool({
   },
   description: 'List the Payload collection and global slugs visible to this MCP client.',
 }).handler(async ({ authorizedMCP, req }) => {
-  const user = authorizedMCP.user
-  const permissions = authorizedMCP.overrideAccess
-    ? null
-    : await getAccessResults({ req: { ...req, user } })
+  const user = req.user
+  const permissions = authorizedMCP.overrideAccess ? null : await getAccessResults({ req })
   const authorizedCollectionSlugs = new Set<string>()
   const authorizedGlobalSlugs = new Set<string>()
 

@@ -909,6 +909,7 @@ export interface DraftPostInput {
   id?: string;
   title: string;
   description: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1138,6 +1139,7 @@ export interface MenuInput {
 export interface SettingInput {
   id?: string;
   siteName?: string | null;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

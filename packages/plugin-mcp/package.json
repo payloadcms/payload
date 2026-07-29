@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/plugin-mcp",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-canary.14",
   "description": "MCP (Model Context Protocol) capabilities with Payload",
   "keywords": [
     "plugin",
@@ -66,7 +66,7 @@
     "pack:plugin": "pnpm build && pnpm pack"
   },
   "dependencies": {
-    "@modelcontextprotocol/server": "2.0.0-beta.2",
+    "@modelcontextprotocol/server": "2.0.0",
     "tsx": "4.22.4",
     "zod": "^4.2.0"
   },

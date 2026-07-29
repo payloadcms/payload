@@ -5,7 +5,6 @@ import { z } from 'zod'
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { whereSchema } from '../../../utils/whereSchema.js'
 
 const DEFAULT_DESCRIPTION =
@@ -110,9 +109,9 @@ export const findGlobalVersionsTool = defineGlobalTool({
       slug: globalSlug,
       depth,
       limit,
+      overrideAccess: authorizedMCP.overrideAccess,
       page,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(fallbackLocale ? { fallbackLocale } : {}),
       ...(locale ? { locale } : {}),
       ...(pagination !== undefined ? { pagination } : {}),

@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/ui",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-canary.14",
   "homepage": "https://payloadcms.com",
   "repository": {
     "type": "git",
@@ -17,7 +17,6 @@
     }
   ],
   "sideEffects": [
-    "*.scss",
     "*.css"
   ],
   "type": "module",
@@ -36,10 +35,6 @@
       "import": "./src/exports/layouts.ts",
       "types": "./src/exports/layouts.ts",
       "default": "./src/exports/layouts.ts"
-    },
-    "./scss": {
-      "import": "./src/scss/styles.scss",
-      "default": "./src/scss/styles.scss"
     },
     "./icons/*": {
       "import": "./src/icons/*/index.tsx",
@@ -231,6 +226,21 @@
       "types": "./src/utilities/getClientConfig.ts",
       "default": "./src/utilities/getClientConfig.ts"
     },
+    "./utilities/getLanguageDir": {
+      "import": "./src/utilities/getLanguageDir.ts",
+      "types": "./src/utilities/getLanguageDir.ts",
+      "default": "./src/utilities/getLanguageDir.ts"
+    },
+    "./utilities/getRequestEmbed": {
+      "import": "./src/utilities/getRequestEmbed.ts",
+      "types": "./src/utilities/getRequestEmbed.ts",
+      "default": "./src/utilities/getRequestEmbed.ts"
+    },
+    "./utilities/getRequestTheme": {
+      "import": "./src/utilities/getRequestTheme.ts",
+      "types": "./src/utilities/getRequestTheme.ts",
+      "default": "./src/utilities/getRequestTheme.ts"
+    },
     "./utilities/getRouteWithoutAdmin": {
       "import": "./src/utilities/getRouteWithoutAdmin.ts",
       "types": "./src/utilities/getRouteWithoutAdmin.ts",
@@ -276,7 +286,7 @@
       "types": "./src/forms/fieldSchemasToFormState/renderField.tsx",
       "default": "./src/forms/fieldSchemasToFormState/renderField.tsx"
     },
-    "./scss/app.scss": "./src/scss/app.scss",
+    "./css/app.css": "./src/css/app.css",
     "./assets": {
       "import": "./src/assets/index.ts",
       "types": "./src/assets/index.ts",
@@ -362,9 +372,10 @@
     "@dnd-kit/modifiers": "9.0.0",
     "@dnd-kit/sortable": "10.0.0",
     "@dnd-kit/utilities": "3.2.2",
-    "@faceless-ui/modal": "3.0.0",
+    "@faceless-ui/modal": "3.0.1",
     "@faceless-ui/scroll-info": "2.0.0",
     "@faceless-ui/window-info": "3.0.1",
+    "@floating-ui/dom": "1.7.6",
     "@monaco-editor/react": "4.7.0",
     "@payloadcms/translations": "workspace:*",
     "bson-objectid": "2.0.4",
@@ -427,16 +438,12 @@
         "import": "./dist/styles.css",
         "default": "./dist/styles.css"
       },
-      "./scss": {
-        "import": "./dist/scss/styles.scss",
-        "default": "./dist/scss/styles.scss"
-      },
+      "./css/app.css": "./dist/css/app.css",
       "./rsc": {
         "import": "./dist/exports/rsc/index.js",
         "types": "./dist/exports/rsc/index.d.ts",
         "default": "./dist/exports/rsc/index.js"
       },
-      "./scss/app.scss": "./dist/scss/app.scss",
       "./styles.css": "./dist/styles.css",
       "./assets": {
         "import": "./dist/assets/index.js",

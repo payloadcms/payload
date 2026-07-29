@@ -25,7 +25,7 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { postsSlug, tabsSlug } from './shared.js'
+import { postsSlug, restrictedTabsSlug, tabsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -38,12 +38,14 @@ test.describe('Bulk Edit', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
   let tabsUrl: AdminUrlUtil
+  let restrictedTabsUrl: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
     tabsUrl = new AdminUrlUtil(serverURL, tabsSlug)
+    restrictedTabsUrl = new AdminUrlUtil(serverURL, restrictedTabsSlug)
 
     context = await browser.newContext()
     page = await context.newPage()
@@ -807,6 +809,47 @@ test.describe('Bulk Edit', () => {
     await payload.delete({ collection: tabsSlug, id: originalDoc.id })
   })
 
+  test('should include named-tab fields in bulk edit when a collection has a restricted field', async () => {
+    const doc = await payload.create({
+      collection: restrictedTabsSlug,
+      data: { title: 'Restricted Tabs Doc' },
+    })
+
+    await page.goto(restrictedTabsUrl.list)
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    await addListFilter({
+      page,
+      fieldLabel: 'ID',
+      operatorLabel: 'equals',
+      value: doc.id,
+    })
+
+    await page.locator('table tbody tr.row-1 input[type="checkbox"]').check()
+    await page
+      .locator('.list-selection__actions .btn', {
+        hasText: 'Edit',
+      })
+      .click()
+
+    const bulkEditForm = page.locator('form.edit-many__form')
+    await expect(bulkEditForm).toBeVisible()
+
+    await bulkEditForm.locator('.field-select .rs__control').click()
+
+    const selectMenu = getSelectMenu({ page })
+
+    await expect(
+      selectMenu.locator('.rs__option', { hasText: exactText('Named Tab Field') }),
+    ).toBeVisible()
+
+    await expect(
+      selectMenu.locator('.rs__option', { hasText: exactText('Named Tab No Update') }),
+    ).toBeHidden()
+
+    await payload.delete({ collection: restrictedTabsSlug, id: doc.id })
+  })
+
   test('should show clean labels for fields inside label-false groups and rows', async () => {
     const doc = await payload.create({
       collection: tabsSlug,
@@ -840,6 +883,46 @@ test.describe('Bulk Edit', () => {
       hasText: exactText('Row Text'),
     })
     await expect(option).toBeVisible()
+
+    await payload.delete({ collection: tabsSlug, id: doc.id })
+  })
+
+  test('should fall back to the field name for fields with label: false', async () => {
+    const doc = await payload.create({
+      collection: tabsSlug,
+      data: { title: 'No Label Doc' },
+    })
+
+    await page.goto(tabsUrl.list)
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    await addListFilter({
+      page,
+      fieldLabel: 'ID',
+      operatorLabel: 'equals',
+      value: doc.id,
+    })
+
+    await page.locator('table tbody tr.row-1 input[type="checkbox"]').check()
+    await page
+      .locator('.list-selection__actions .btn', {
+        hasText: 'Edit',
+      })
+      .click()
+
+    const bulkEditForm = page.locator('form.edit-many__form')
+    await expect(bulkEditForm).toBeVisible()
+
+    await bulkEditForm.locator('.field-select .rs__control').click()
+
+    const menu = getSelectMenu({ page })
+
+    // The `label: false` field must render its humanized name, not an empty option
+    await expect(menu.locator('.rs__option', { hasText: exactText('No Label Text') })).toBeVisible()
+
+    // No option should render without text
+    const optionTexts = await menu.locator('.rs__option').allInnerTexts()
+    expect(optionTexts.every((text) => text.trim().length > 0)).toBe(true)
 
     await payload.delete({ collection: tabsSlug, id: doc.id })
   })
@@ -878,6 +961,70 @@ test.describe('Bulk Edit', () => {
     const beforeInputB = modal.locator('[data-testid="before-input-b"]')
     await expect(beforeInputB).toHaveCount(1)
     await expect(beforeInputB).toBeVisible()
+  })
+
+  test('should preserve custom Field and Label components of previously selected fields', async () => {
+    await deleteAllPosts()
+    await createPost({ title: 'Post 1' })
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    // Select the field with a custom `Field` component first, on its own
+    await selectInput({
+      page,
+      selectLocator: modal.locator('.field-select'),
+      options: ['Field With Custom Field'],
+      multiSelect: true,
+    })
+
+    await expect(modal.locator('[data-testid="custom-field"]')).toBeVisible()
+
+    // Selecting an additional field must not reset the first field to its default component
+    await selectInput({
+      page,
+      selectLocator: modal.locator('.field-select'),
+      clear: false,
+      options: ['Field With Custom Label'],
+      multiSelect: true,
+    })
+
+    await expect(modal.locator('[data-testid="custom-label"]')).toBeVisible()
+    await expect(modal.locator('[data-testid="custom-field"]')).toBeVisible()
+  })
+
+  test('should preserve values of previously selected fields when selecting another field', async () => {
+    await deleteAllPosts()
+    await createPost({ title: 'Post 1' })
+
+    await page.goto(postsUrl.list)
+    // Wait until page has limit in the url, to ensure it is fully loaded
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    const { modal } = await selectAllAndEditMany(page)
+
+    await selectInput({
+      page,
+      selectLocator: modal.locator('.field-select'),
+      options: ['Title'],
+      multiSelect: true,
+    })
+
+    await modal.locator('#field-title').fill('Bulk edited title')
+
+    await selectInput({
+      page,
+      selectLocator: modal.locator('.field-select'),
+      clear: false,
+      options: ['Description'],
+      multiSelect: true,
+    })
+
+    await expect(modal.locator('#field-description')).toBeVisible()
+    await expect(modal.locator('#field-title')).toHaveValue('Bulk edited title')
   })
 })
 

@@ -5,9 +5,10 @@ import { definePlugin } from 'payload'
 import { fileURLToPath } from 'url'
 import * as z from 'zod'
 
+import { testRBACPlugin } from '../__helpers/plugins/rbac/index.js'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { FieldTypes } from './collections/FieldTypes.js'
-import { Media } from './collections/Media.js'
+import { DispatchMedia, Media } from './collections/Media.js'
 import { ModifiedPrompts } from './collections/ModifiedPrompts.js'
 import { Pages } from './collections/Pages.js'
 import { Posts } from './collections/Posts.js'
@@ -37,6 +38,7 @@ export default buildConfigWithDefaults({
   collections: [
     Users,
     Media,
+    DispatchMedia,
     Posts,
     Products,
     Rolls,
@@ -57,6 +59,8 @@ export default buildConfigWithDefaults({
   globals: [SiteSettings],
   onInit: seed,
   plugins: [
+    testRBACPlugin(),
+
     // Plugin listed BEFORE mcp in the array — injects a tool via slug + options
     definePlugin({
       order: 1,
@@ -138,7 +142,6 @@ export default buildConfigWithDefaults({
                 data: { _status: 'published' },
                 req,
                 overrideAccess: authorizedMCP.overrideAccess,
-                user: authorizedMCP.user,
               })
               return {
                 content: [
@@ -153,10 +156,14 @@ export default buildConfigWithDefaults({
         },
         media: {
           description: 'This is a Payload collection with Media documents.',
-          // Partial-disable — find/update remain enabled, create/delete blocked.
+          // Partial-disable — all default tools except delete remain enabled.
+          tools: {
+            delete: false,
+          },
+        },
+        rolls: {
           tools: {
             create: false,
-            delete: false,
           },
         },
       },
@@ -223,7 +230,6 @@ export default buildConfigWithDefaults({
             req,
             draft: true,
             overrideAccess: authorizedMCP.overrideAccess,
-            user: authorizedMCP.user,
           })
 
           return {
@@ -258,7 +264,6 @@ export default buildConfigWithDefaults({
             req,
             draft: true,
             overrideAccess: false,
-            user: req.user,
           })
 
           return {
@@ -297,7 +302,6 @@ export default buildConfigWithDefaults({
               req,
               draft: true,
               overrideAccess: false,
-              user: req.user,
             })
 
             return {
@@ -329,7 +333,6 @@ export default buildConfigWithDefaults({
               req,
               draft: true,
               overrideAccess: false,
-              user: req.user,
             })
 
             return {
