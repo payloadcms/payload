@@ -141,6 +141,10 @@ export default buildConfigWithDefaults({
           Component: '/components/views/ButtonStyles/index.js#ButtonStyles',
           path: '/button-styles',
         },
+        TooltipShowcase: {
+          Component: '/components/views/TooltipShowcase/index.js#TooltipShowcase',
+          path: '/tooltip-showcase',
+        },
       },
       sidebar: {
         tabs: [

@@ -13,11 +13,11 @@ import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEnt
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { whereSchema } from '../../../utils/whereSchema.js'
 import { validateCollectionData } from '../validateEntityData.js'
-import { fileInputSchema, resolveFileInput } from './fileInput.js'
+import { fileInputSchema, resolveFile } from './fileInput.js'
 import { formatCollectionError } from './formatCollectionError.js'
 
 const DEFAULT_DESCRIPTION =
-  'Update documents in any collection by passing the collection slug and data.'
+  'Update documents. Prefer uploadReference after upload, externalURL for URLs, or base64 for small local files.'
 
 export const updateDocumentTool = defineCollectionTool({
   access: (args) =>
@@ -132,7 +132,7 @@ export const updateDocumentTool = defineCollectionTool({
     }
 
     const parsedData = transformPointDataToPayload(inputData)
-    const file = await resolveFileInput({ collectionSlug, input: fileInput, req })
+    const file = await resolveFile({ collectionSlug, input: fileInput, req })
 
     const whereClause: Where = where ?? {}
 

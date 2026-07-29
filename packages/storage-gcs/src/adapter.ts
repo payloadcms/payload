@@ -48,6 +48,7 @@ export function createGcsAdapter({
         getStorageClient,
         useCompositePrefixes,
       }),
+      useInAdmin: true,
     },
 
     handleDelete: ({ doc: { prefix: docPrefix = '' }, filename }) =>

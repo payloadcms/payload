@@ -104,6 +104,12 @@ describe('Block fields', () => {
     )
   })
 
+  test('should hide add button on readOnly blocks field', async () => {
+    await page.goto(url.create)
+
+    await expect(page.locator('#field-readOnly .blocks-field__drawer-toggler')).toBeHidden()
+  })
+
   test('should reset search state in blocks drawer on re-open', async () => {
     await page.goto(url.create)
 

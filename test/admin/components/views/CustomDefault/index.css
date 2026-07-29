@@ -1,0 +1,23 @@
+.custom-default-view__login-btn {
+  margin-right: var(--spacer-2);
+}
+
+.custom-default-view__content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacer-3);
+  color: var(--color-text-brand);
+
+  & > * {
+    margin: 0;
+  }
+}
+
+.custom-default-view__controls {
+  display: flex;
+  gap: var(--spacer-2);
+
+  & > * {
+    margin: 0;
+  }
+}

@@ -1733,7 +1733,7 @@ describe('Access Control', () => {
 
       // Read-only blocks field should not allow adding blocks
       const readOnlyBlocksField = page.locator('#field-readOnlyBlocks')
-      await expect(readOnlyBlocksField.locator('.blocks-field__drawer-toggler')).toBeDisabled()
+      await expect(readOnlyBlocksField.locator('.blocks-field__drawer-toggler')).toBeHidden()
 
       // Editable block references field should allow adding blocks
       const editableBlockRefsField = page.locator('#field-editableBlockRefs')
@@ -1741,21 +1741,19 @@ describe('Access Control', () => {
 
       // Read-only block references field should not allow adding blocks
       const readOnlyBlockRefsField = page.locator('#field-readOnlyBlockRefs')
-      await expect(readOnlyBlockRefsField.locator('.blocks-field__drawer-toggler')).toBeDisabled()
+      await expect(readOnlyBlockRefsField.locator('.blocks-field__drawer-toggler')).toBeHidden()
 
       // Tab read-only blocks field should not allow adding blocks
       const tabReadOnlyBlocksField = page.locator(
         '.field-type.tabs-field #field-tabReadOnlyTest__tabReadOnlyBlocks',
       )
-      await expect(tabReadOnlyBlocksField.locator('.blocks-field__drawer-toggler')).toBeDisabled()
+      await expect(tabReadOnlyBlocksField.locator('.blocks-field__drawer-toggler')).toBeHidden()
 
       // Tab read-only block references field should not allow adding blocks
       const tabReadOnlyBlockRefsField = page.locator(
         '.field-type.tabs-field #field-tabReadOnlyTest__tabReadOnlyBlockRefs',
       )
-      await expect(
-        tabReadOnlyBlockRefsField.locator('.blocks-field__drawer-toggler'),
-      ).toBeDisabled()
+      await expect(tabReadOnlyBlockRefsField.locator('.blocks-field__drawer-toggler')).toBeHidden()
     })
 
     test('should respect field-level access control for individual fields within blocks', async () => {

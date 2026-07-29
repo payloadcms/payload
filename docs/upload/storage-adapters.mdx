@@ -48,7 +48,7 @@ npx @payloadcms/codemod --transform migrate-storage-adapters-to-config
 
 ## Upload Instructions
 
-By default, the Admin sends a file with the normal document create or update request. When a storage adapter has `clientUploads` enabled, the Admin uses a separate upload-instructions flow instead:
+By default, the Admin includes the file in the normal document create or update request. When an adapter's upload instructions provide a better browser upload flow, the Admin uses them instead:
 
 ```text
 Admin
@@ -56,16 +56,16 @@ Admin
 
 Payload
   -> checks access and file limits
-  -> asks the collection's storage adapter to generate instructions
+  -> returns the storage adapter's instructions
 
 Admin
   -> follows the returned instructions
   -> creates or updates the document with the completed upload metadata
 ```
 
-For S3, Azure, and GCS, the browser uploads the file directly to storage instead of through Payload. Providers that need their own SDK or multipart behavior return a named instruction handled by their Admin helper. Payload then reads the stored file during document creation, so normal validation, image processing, and hooks still run.
+With `clientUploads` enabled, S3, Azure, and GCS upload directly to storage instead of through Payload. Providers that need their own SDK return a named instruction handled by their Admin helper. R2 uses the same flow to split the file into smaller requests, even though Payload still handles each chunk.
 
-If upload instructions are not enabled, the Admin sends the file through Payload with the normal create or update request.
+The upload-instructions endpoint is also available for every upload collection. Other clients, including MCP, can use it when they cannot attach a file to the document request. Without direct provider instructions, Payload returns a temporary upload URL instead. Both paths still run normal validation, image processing, and hooks during document creation.
 
 ## Vercel Blob Storage
 
@@ -445,8 +445,11 @@ export interface GeneratedAdapter {
   name: string
   onInit?: () => void
   staticHandler: StaticHandler
+  uploadInstructions?: UploadInstructionsCapability
 }
 ```
+
+When providing upload instructions, set `uploadInstructions.useInAdmin` to `true` when the Admin panel should use them instead of attaching the whole file to the document request. This is useful for direct-to-storage uploads and for flows such as chunked uploads that still pass through Payload.
 
 ```ts
 import { buildConfig } from 'payload'

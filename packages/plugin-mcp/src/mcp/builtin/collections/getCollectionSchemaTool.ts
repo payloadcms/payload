@@ -55,7 +55,11 @@ export const getCollectionSchemaTool = defineCollectionTool({
         enabled: true,
         filesRequiredOnCreate: uploadConfig.filesRequiredOnCreate !== false,
         mimeTypes: uploadConfig.mimeTypes ?? ['*/*'],
-        sources: [...(uploadConfig.pasteURL !== false ? ['url'] : []), 'base64'],
+        sources: [
+          ...(uploadConfig.pasteURL !== false ? ['externalURL'] : []),
+          'base64',
+          'uploadReference',
+        ],
         ...(typeof maxFileSize === 'number' && Number.isFinite(maxFileSize) ? { maxFileSize } : {}),
       }
     : { enabled: false }

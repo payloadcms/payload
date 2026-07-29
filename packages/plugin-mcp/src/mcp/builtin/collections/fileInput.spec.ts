@@ -2,7 +2,7 @@ import type { PayloadRequest } from 'payload'
 
 import { describe, expect, it } from 'vitest'
 
-import { fileInputSchema, resolveFileInput } from './fileInput.js'
+import { fileInputSchema, resolveFile } from './fileInput.js'
 
 describe('MCP file input', () => {
   it('should reject malformed MIME types', () => {
@@ -16,11 +16,25 @@ describe('MCP file input', () => {
     expect(result.success).toBe(false)
   })
 
+  it('should accept a prepared upload', () => {
+    const result = fileInputSchema.safeParse({
+      file: {
+        filename: 'image.png',
+        mimeType: 'image/png',
+        size: 123,
+        uploadReference: { uploadId: 'upload-id' },
+      },
+      source: 'uploadReference',
+    })
+
+    expect(result.success).toBe(true)
+  })
+
   it('should reject oversized base64 files', async () => {
     const req = createRequest({ maxFileSize: 4 })
 
     await expect(
-      resolveFileInput({
+      resolveFile({
         collectionSlug: 'media',
         input: {
           data: Buffer.from('hello').toString('base64'),
@@ -39,10 +53,10 @@ describe('MCP file input', () => {
     })
 
     await expect(
-      resolveFileInput({
+      resolveFile({
         collectionSlug: 'media',
         input: {
-          source: 'url',
+          source: 'externalURL',
           url: 'https://example.com/image.png',
         },
         req,

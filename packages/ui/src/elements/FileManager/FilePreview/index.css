@@ -1,7 +1,7 @@
 @layer payload-default {
   .file-preview {
     display: flex;
-    flex-direction: row;
+    flex-direction: column-reverse;
     flex: 1 1 0;
     min-height: 0;
     /* Visible so the mini carousel can grow past the panel as the headers scroll away. */
@@ -75,9 +75,9 @@
     min-width: 0;
   }
 
-  @container edit-main (max-width: 768px) {
+  @container edit-main (min-width: 768px) {
     .file-preview {
-      flex-direction: column-reverse;
+      flex-direction: row;
     }
   }
 }

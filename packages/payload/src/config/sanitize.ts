@@ -33,7 +33,10 @@ import { getPreferencesCollection, preferencesCollectionSlug } from '../preferen
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
-import { uploadInstructionsEndpoint } from '../uploads/endpoints/uploadInstructions.js'
+import {
+  stagedUploadEndpoints,
+  uploadInstructionsEndpoint,
+} from '../uploads/endpoints/uploadInstructions.js'
 import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
@@ -242,6 +245,12 @@ const addDefaultDashboardWidgets = async ({
 
 export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
+  const { duration, safetyBuffer } = configWithDefaults.jobs!.processingLease!
+  if (!(safetyBuffer! >= 0 && safetyBuffer! < duration!)) {
+    throw new InvalidConfiguration(
+      '`jobs.processingLease.safetyBuffer` must be non-negative and less than `jobs.processingLease.duration`.',
+    )
+  }
 
   const config: Partial<SanitizedConfig> = sanitizeAdminConfig(configWithDefaults)
 
@@ -249,12 +258,8 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
     config.endpoints = []
   }
 
-  if (
-    configWithDefaults.collections?.some(
-      ({ upload }) => typeof upload === 'object' && upload.uploadInstructions,
-    )
-  ) {
-    config.endpoints.push(uploadInstructionsEndpoint)
+  if (configWithDefaults.collections?.some(({ upload }) => upload)) {
+    config.endpoints.push(uploadInstructionsEndpoint, ...stagedUploadEndpoints)
   }
 
   for (const endpoint of authRootEndpoints) {
@@ -499,6 +504,10 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       (Array.isArray(configWithDefaults.jobs?.workflows) &&
         configWithDefaults.jobs?.workflows?.length),
   )
+  config.jobs.hasConcurrency = Boolean(
+    config.jobs.tasks?.some((task) => task.concurrency) ||
+      config.jobs.workflows?.some((workflow) => workflow.concurrency),
+  )
 
   // Need to add default jobs collection before locked documents collections
   if (config.jobs.enabled) {
@@ -510,18 +519,17 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
     if (hasScheduleProperty) {
       config.jobs.scheduling = true
-      // Add payload-jobs-stats global for tracking when a job of a specific slug was last run
-      ;(config.globals ??= []).push(
-        await sanitizeGlobal(
-          config as unknown as Config,
-          getJobStatsGlobal(config as unknown as Config),
-          richTextSanitizationPromises,
-          validRelationships,
-        ),
-      )
-
-      config.jobs.stats = true
     }
+
+    // Add payload-jobs-stats global for tracking job system metadata.
+    ;(config.globals ??= []).push(
+      await sanitizeGlobal(
+        config as unknown as Config,
+        getJobStatsGlobal(),
+        richTextSanitizationPromises,
+        validRelationships,
+      ),
+    )
 
     let defaultJobsCollection = getDefaultJobsCollection(config.jobs)
 
