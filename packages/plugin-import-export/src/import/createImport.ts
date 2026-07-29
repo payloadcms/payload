@@ -74,6 +74,12 @@ export const createImport = async ({
       collection: userCollection,
       req,
     })) as User
+
+    if (user) {
+      // `findByID` omits the runtime `collection` property; restore it so downstream
+      // writes (e.g. authorship tracking) know which auth collection the user belongs to.
+      user.collection = userCollection
+    }
   }
 
   if (!user) {

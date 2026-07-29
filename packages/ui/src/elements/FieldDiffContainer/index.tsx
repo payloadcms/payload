@@ -37,7 +37,7 @@ export const FieldDiffContainer: React.FC<{
     >
       <FieldDiffLabel>
         {locale && <span className={`${baseClass}__locale-label`}>{locale}</span>}
-        {label !== false && typeof label !== 'function' && getTranslation(label || '', i18n)}
+        {label !== false && getTranslation(label || '', i18n)}
       </FieldDiffLabel>
       <div
         className={`${baseClass}-content`}

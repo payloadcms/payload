@@ -101,6 +101,7 @@ export const getDefaultJobsCollection: (jobsConfig: SanitizedConfig['jobs']) => 
       group: 'System',
       hidden: true,
     },
+    authorship: false,
     endpoints: [runJobsEndpoint, handleSchedulesJobsEndpoint],
     fields: [
       {
