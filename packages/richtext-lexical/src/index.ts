@@ -209,7 +209,7 @@ export { getRestPopulateFn } from './features/converters/utilities/restPopulateF
 export { DebugJsxConverterFeature } from './features/debug/jsxConverter/server/index.js'
 export { TestRecorderFeature } from './features/debug/testRecorder/server/index.js'
 export { TreeViewFeature } from './features/debug/treeView/server/index.js'
-export { EXPERIMENTAL_TableFeature } from './features/experimental_table/server/index.js'
+export { TableFeature } from './features/table/server/index.js'
 export { BoldFeature } from './features/format/bold/feature.server.js'
 export { InlineCodeFeature } from './features/format/inlineCode/feature.server.js'
 

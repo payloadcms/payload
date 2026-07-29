@@ -9,7 +9,7 @@ import type {
   SerializedTableCellNode,
   SerializedTableNode,
   SerializedTableRowNode,
-} from '../features/experimental_table/server/schema.js'
+} from '../features/table/server/schema.js'
 import type { SerializedHeadingNode } from '../features/heading/server/schema.js'
 import type { SerializedHorizontalRuleNode } from '../features/horizontalRule/server/schema.js'
 import type { SerializedAutoLinkNode, SerializedLinkNode } from '../features/link/server/schema.js'
