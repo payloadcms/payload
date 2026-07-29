@@ -97,12 +97,13 @@ Each React component should have its own named folder:
 ```
 ComponentName/
 ├── index.tsx       # Component implementation
-└── index.scss      # Styles (if applicable)
+└── index.css       # Styles (if applicable)
 ```
 
-- **Do:** Create a folder per component with `index.tsx` and `index.scss`
-- **Don't:** Place multiple `ComponentName.tsx` files in a single folder with one shared `.scss` file
+- **Do:** Create a folder per component with `index.tsx` and `index.css`
+- **Don't:** Place multiple `ComponentName.tsx` files in a single folder with one shared `.css` file
 - Re-export from barrel files (`index.ts`) when grouping related components in a parent directory
+- New styles should be written in plain CSS, not SCSS - SCSS is being phased out and is no longer linted (see [Writing CSS](#writing-css))
 
 ### Running Dev Server
 
@@ -325,6 +326,35 @@ const docs = await payload.find({
   user,
 })
 ```
+
+### Writing CSS
+
+Stylelint enforces the rules below on `.css` files (SCSS is no longer linted and is being phased out). Run `pnpm run lint:css` to check, or `pnpm run lint` to run all linters.
+
+**Mobile-first media queries only - never `max-width`:**
+
+```css
+/* BAD - rejected by plugin/no-max-width-media-query */
+@media (max-width: 768px) {
+  ...;
+}
+
+/* GOOD */
+@media (min-width: 768px) {
+  ...;
+}
+```
+
+**Only the four canonical breakpoints are allowed in a media query** (`plugin/no-non-standard-breakpoints`): `400px`, `768px`, `1024px`, `1440px`. Don't invent one-off breakpoint values.
+
+**Never use `!important`** (`plugin/no-important`). Refactor selector specificity instead.
+Exceptions to this rule are when it's not possible to do so when dealing with external libraries.
+
+**No sub-pixel precision** (`plugin/no-subpixel-values`):
+
+- Pixel values may have at most one decimal place (e.g. `0.5px` is fine, `13.523px` is not).
+- Box-model and position properties - `width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`, `inset*`, `gap*`, `flex-basis`, `min-`/`max-width`/`height` - must be whole numbers with no decimals at all.
+- `font-size`, `letter-spacing`, `line-height`, and custom properties (`--*`) are exempt, since a `var()` can't be statically traced to the property it ends up on.
 
 ### RSC/Client Bundling Rules
 
