@@ -595,7 +595,6 @@ describe('Auth', () => {
       )
 
       expect(initialCookie).toBeDefined()
-      await wait(1000)
       await page.getByText('Custom Refresh', { exact: true }).click()
 
       await expect(page.getByRole('status').filter({ hasText: 'Token refreshed' })).toBeVisible()
