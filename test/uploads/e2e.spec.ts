@@ -21,7 +21,6 @@ import {
   ensureCompilationIsDone,
   exactText,
   gotoAndWaitForForm,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
@@ -33,6 +32,7 @@ import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
 import { startTestFileServer } from '../__helpers/shared/startTestFileServer.js'
+import { initPage } from '../__setup/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   adminThumbnailFunctionSlug,
@@ -183,15 +183,12 @@ describe('Uploads', () => {
 
     const context = await browser.newContext()
     await context.grantPermissions(['clipboard-read', 'clipboard-write'])
-    page = await context.newPage()
+    const initialized = await initPage({ context, ignoreCORS: true })
 
-    const { collectErrors, consoleErrors, stopCollectingErrors } = initPageConsoleErrorCatch(page, {
-      ignoreCORS: true,
-    })
-
-    consoleErrorsFromPage = consoleErrors
-    collectErrorsFromPage = collectErrors
-    stopCollectingErrorsFromPage = stopCollectingErrors
+    page = initialized.page
+    consoleErrorsFromPage = initialized.consoleErrors
+    collectErrorsFromPage = initialized.collectErrors
+    stopCollectingErrorsFromPage = initialized.stopCollectingErrors
 
     await ensureCompilationIsDone({ page, serverURL })
   })

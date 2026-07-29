@@ -12,7 +12,6 @@ import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicator
 import { addListFilter } from '../../../__helpers/e2e/filters/index.js'
 import {
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
@@ -21,6 +20,7 @@ import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.j
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { initPage } from '../../../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { numberDoc } from './shared.js'
 
@@ -48,8 +48,7 @@ describe('Number', () => {
     url = new AdminUrlUtil(serverURL, 'number-fields')
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -79,9 +78,9 @@ describe('Number', () => {
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
 
     await addListFilter({
-      page,
       fieldLabel: 'Number',
       operatorLabel: 'is greater than or equal to',
+      page,
       value: '3',
     })
 
@@ -94,9 +93,9 @@ describe('Number', () => {
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
 
     await addListFilter({
-      page,
       fieldLabel: 'Number',
       operatorLabel: 'is in',
+      page,
       value: '2',
     })
 
@@ -109,9 +108,9 @@ describe('Number', () => {
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
 
     await addListFilter({
-      page,
       fieldLabel: 'Number',
       operatorLabel: 'is not in',
+      page,
       value: '2',
     })
 
@@ -124,9 +123,9 @@ describe('Number', () => {
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
 
     await addListFilter({
-      page,
       fieldLabel: 'Has Many',
       operatorLabel: 'is in',
+      page,
       value: '5',
     })
 
@@ -139,9 +138,9 @@ describe('Number', () => {
     await expect(page.locator('table >> tbody >> tr')).toHaveCount(3)
 
     await addListFilter({
-      page,
       fieldLabel: 'Has Many',
       operatorLabel: 'is not in',
+      page,
       value: '6',
     })
 
@@ -182,8 +181,8 @@ describe('Number', () => {
     await page.keyboard.press('Enter')
     await page.click('#action-save', { delay: 100 })
     await assertToastErrors({
-      page,
       errors: ['With Min Rows'],
+      page,
     })
   })
 
@@ -206,10 +205,10 @@ describe('Number', () => {
       await page.locator('#field-number').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.document-fields__main'],
         page,
         testInfo,
-        include: ['.document-fields__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -222,8 +221,8 @@ describe('Number', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.document-fields__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

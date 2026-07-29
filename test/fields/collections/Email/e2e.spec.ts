@@ -10,13 +10,13 @@ import type { Config } from '../../payload-types.js'
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
 import {
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
 } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { initPage } from '../../../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { emailFieldsSlug } from '../../slugs.js'
 import { emailDoc } from './shared.js'
@@ -45,8 +45,7 @@ describe('Email', () => {
     url = new AdminUrlUtil(serverURL, emailFieldsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -135,10 +134,10 @@ describe('Email', () => {
       await page.locator('#field-email').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.document-fields__main'],
         page,
         testInfo,
-        include: ['.document-fields__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -150,8 +149,8 @@ describe('Email', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.document-fields__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

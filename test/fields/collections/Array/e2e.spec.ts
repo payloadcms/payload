@@ -16,7 +16,6 @@ import type { Config } from '../../payload-types.js'
 
 import {
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
@@ -24,6 +23,7 @@ import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.j
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { initPage } from '../../../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -48,8 +48,7 @@ describe('Array', () => {
     }))
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -179,8 +178,8 @@ describe('Array', () => {
 
     await page.click('#action-save', { delay: 100 })
     await assertToastErrors({
-      page,
       errors: ['Array With Min Rows'],
+      page,
     })
   })
 
@@ -335,7 +334,6 @@ describe('Array', () => {
     await payload.create({
       collection: 'array-fields',
       data: {
-        title: 'for test 1',
         items: [
           {
             text: 'test 1',
@@ -344,25 +342,25 @@ describe('Array', () => {
             text: 'test 2',
           },
         ],
+        title: 'for test 1',
       },
     })
 
     await payload.create({
       collection: 'array-fields',
       data: {
-        title: 'for test 2',
         items: [
           {
             text: 'test 3',
           },
         ],
+        title: 'for test 2',
       },
     })
 
     await payload.create({
       collection: 'array-fields',
       data: {
-        title: 'for test 3',
         items: [
           {
             text: 'test 4',
@@ -374,6 +372,7 @@ describe('Array', () => {
             text: 'test 6',
           },
         ],
+        title: 'for test 3',
       },
     })
 
@@ -455,9 +454,9 @@ describe('Array', () => {
     await expect(page.locator(`#field-collapsedArray__0__text`)).toBeHidden()
 
     await toggleBlockOrArrayRow({
+      fieldName: 'collapsedArray',
       page,
       rowIndex: 0,
-      fieldName: 'collapsedArray',
       targetState: 'open',
     })
 
@@ -589,8 +588,8 @@ describe('Array', () => {
       await rowTextInput.fill(textVal)
 
       await copyPasteField({
-        page,
         fieldName: 'items',
+        page,
       })
 
       await page.reload()
@@ -598,9 +597,9 @@ describe('Array', () => {
       await expect(rowTextInput).toHaveValue('row one')
 
       await copyPasteField({
-        page,
         action: 'paste',
         fieldName: 'items',
+        page,
       })
 
       await expect(rowTextInput).toHaveValue(textVal)
@@ -616,8 +615,8 @@ describe('Array', () => {
       await rowTextInput.fill(textVal)
 
       await copyPasteField({
-        page,
         fieldName: 'items',
+        page,
         rowIndex: 0,
       })
 
@@ -626,9 +625,9 @@ describe('Array', () => {
       await expect(rowTextInput).toHaveValue('row one')
 
       await copyPasteField({
-        page,
         action: 'paste',
         fieldName: 'items',
+        page,
         rowIndex: 0,
       })
 
@@ -639,15 +638,15 @@ describe('Array', () => {
       await page.goto(url.create)
 
       await copyPasteField({
-        page,
         fieldName: 'localized',
+        page,
         rowIndex: 0,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'disableSort',
         action: 'paste',
+        fieldName: 'disableSort',
+        page,
       })
 
       const rowsContainer = page
@@ -662,8 +661,8 @@ describe('Array', () => {
       await page.goto(url.create)
 
       await copyPasteField({
-        page,
         fieldName: 'localized',
+        page,
       })
 
       const field = page.locator('#field-disableSort')
@@ -676,7 +675,7 @@ describe('Array', () => {
       const row = field.locator('#disableSort-row-0')
       await expect(row).toBeVisible()
 
-      await copyPasteField({ page, action: 'paste', fieldName: 'disableSort' })
+      await copyPasteField({ action: 'paste', fieldName: 'disableSort', page })
 
       const rowsContainer = page
         .locator('#field-disableSort > div.array-field__draggable-rows')
@@ -700,16 +699,16 @@ describe('Array', () => {
       await textInputRowOne.fill(textInputRowOneValue)
 
       await copyPasteField({
-        page,
         fieldName: 'items',
+        page,
         rowIndex: 0,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'items',
-        rowIndex: 1,
         action: 'paste',
+        fieldName: 'items',
+        page,
+        rowIndex: 1,
       })
 
       const textInputRowTwo = field.locator('#field-items__1__subArray__0__text')
@@ -737,16 +736,16 @@ describe('Array', () => {
       await expect(subArrayContainer2).toHaveCount(1)
 
       await copyPasteField({
-        page,
         fieldName: 'items',
+        page,
         rowIndex: 1,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'items',
-        rowIndex: 0,
         action: 'paste',
+        fieldName: 'items',
+        page,
+        rowIndex: 0,
       })
 
       await expect(subArrayContainer).toHaveCount(1)
@@ -768,16 +767,16 @@ describe('Array', () => {
       await rowOneText.fill(textVal)
 
       await copyPasteField({
-        page,
         fieldName: 'items__0__subArray',
+        page,
         rowIndex: 0,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'items__0__subArray',
-        rowIndex: 1,
         action: 'paste',
+        fieldName: 'items__0__subArray',
+        page,
+        rowIndex: 1,
       })
 
       const rowTwoText = field.locator('#field-items__0__subArray__1__text')
@@ -803,14 +802,14 @@ describe('Array', () => {
       await expect(targetRows).toHaveCount(1)
 
       await copyPasteField({
-        page,
         fieldName: 'items__0__subArray',
+        page,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'items__1__subArray',
         action: 'paste',
+        fieldName: 'items__1__subArray',
+        page,
       })
 
       await expect(targetRows).toHaveCount(2)
@@ -842,17 +841,17 @@ describe('Array', () => {
       const firstDocURL = page.url()
 
       await copyPasteField({
-        page,
         fieldName: 'items',
+        page,
       })
 
       // Create second document
       await page.goto(url.create)
 
       await copyPasteField({
-        page,
         action: 'paste',
         fieldName: 'items',
+        page,
       })
 
       const pastedTextInput = page.locator('#field-items__0__text')

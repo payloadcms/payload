@@ -11,7 +11,6 @@ import type { Config } from '../../payload-types.js'
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
 import {
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   switchTab,
 } from '../../../__helpers/e2e/helpers.js'
@@ -21,6 +20,7 @@ import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { initPage } from '../../../__setup/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { tabsFieldsSlug } from '../../slugs.js'
 
@@ -48,8 +48,7 @@ describe('Tabs', () => {
     url = new AdminUrlUtil(serverURL, tabsFieldsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -222,10 +221,10 @@ describe('Tabs', () => {
       await page.locator('.tabs-field__tabs').first().waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.collection-edit__main'],
         page,
         testInfo,
-        include: ['.collection-edit__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -237,8 +236,8 @@ describe('Tabs', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.collection-edit__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

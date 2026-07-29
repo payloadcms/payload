@@ -12,11 +12,11 @@ import type { Config } from './payload-types.js'
 import {
   ensureCompilationIsDone,
   getRoutes,
-  initPageConsoleErrorCatch,
 } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
@@ -83,25 +83,24 @@ describe('Auth (Basic)', () => {
     url = new AdminUrlUtil(serverURL, 'users')
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
     const {
       routes: { admin },
     } = getRoutes({})
     adminRoute = admin
 
     await ensureCompilationIsDone({
-      page,
-      serverURL,
-      readyURL: formatAdminURL({ path: '/**', serverURL, adminRoute }),
       noAutoLogin: true,
+      page,
+      readyURL: formatAdminURL({ adminRoute, path: '/**', serverURL }),
+      serverURL,
     })
 
     // Undo onInit seeding, as we need to test this without having a user created, or testing create-first-user
     await reInitializeDB({
+      deleteOnly: true,
       serverURL,
       snapshotKey: 'auth-basic',
-      deleteOnly: true,
     })
 
     await payload.delete({
@@ -115,8 +114,8 @@ describe('Auth (Basic)', () => {
 
     await ensureCompilationIsDone({
       page,
+      readyURL: formatAdminURL({ adminRoute, path: '/create-first-user', serverURL }),
       serverURL,
-      readyURL: formatAdminURL({ path: '/create-first-user', serverURL, adminRoute }),
     })
   })
 

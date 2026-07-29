@@ -13,7 +13,6 @@ import { formatAdminURL, wait } from 'payload/shared'
 import { setTimeout } from 'timers/promises'
 
 import { POLL_TOPASS_TIMEOUT } from '../../playwright.config.js'
-import { patchPageGoToWithHydrationMarker } from './goTo.js'
 import { hideNextDevTools } from './hideNextDevTools.js'
 
 export type AdminRoutes = NonNullable<NonNullable<Config['admin']>['routes']>
@@ -26,16 +25,6 @@ const networkConditions = {
     latency: 1000,
     upload: ((750 * 1000) / 8) * 0.9,
   },
-  'Slow 3G': {
-    download: ((500 * 1000) / 8) * 0.8,
-    latency: 2500,
-    upload: ((500 * 1000) / 8) * 0.8,
-  },
-  'Slow 4G': {
-    download: ((4 * 1000 * 1000) / 8) * 0.8,
-    latency: 1000,
-    upload: ((3 * 1000 * 1000) / 8) * 0.8,
-  },
   'Fast 4G': {
     download: ((20 * 1000 * 1000) / 8) * 0.8,
     latency: 1000,
@@ -46,6 +35,16 @@ const networkConditions = {
     latency: -1,
     upload: -1,
   },
+  'Slow 3G': {
+    download: ((500 * 1000) / 8) * 0.8,
+    latency: 2500,
+    upload: ((500 * 1000) / 8) * 0.8,
+  },
+  'Slow 4G': {
+    download: ((4 * 1000 * 1000) / 8) * 0.8,
+    latency: 1000,
+    upload: ((3 * 1000 * 1000) / 8) * 0.8,
+  },
 }
 
 /**
@@ -54,13 +53,13 @@ const networkConditions = {
  * @param serverURL
  */
 export async function ensureCompilationIsDone({
+  browser,
   customAdminRoutes,
   customRoutes,
-  page: pageFromArgs,
-  serverURL,
   noAutoLogin,
-  browser,
+  page: pageFromArgs,
   readyURL,
+  serverURL,
 }: {
   /**
    * Provide a browser if you need this utility to create and close a temporary page for you.
@@ -435,103 +434,6 @@ export const openColumnControls = async (page: Page) => {
   }).toPass({ timeout: 18000 })
 }
 
-/**
- * Throws an error when browser console error messages (with some exceptions) are thrown, thus resulting
- * in the e2e test failing.
- *
- * Useful to prevent the e2e test from passing when, for example, there are react missing key prop errors
- * @param page
- * @param options
- */
-export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: boolean }) {
-  const { ignoreCORS = false } = options || {} // Default to not ignoring CORS errors
-  const consoleErrors: string[] = []
-
-  let shouldCollectErrors = false
-
-  patchPageGoToWithHydrationMarker(page)
-
-  page.on('console', (msg) => {
-    if (
-      msg.type() === 'error' &&
-      // Playwright is seemingly loading CJS files from React Select, but Next loads ESM.
-      // This leads to classnames not matching. Ignore these God-awful errors
-      // https://github.com/JedWatson/react-select/issues/3590
-      !msg.text().includes('did not match. Server:') &&
-      !msg.text().includes('Hydration failed because the server rendered HTML') &&
-      !msg.text().includes('the server responded with a status of') &&
-      !msg.text().includes('Failed to fetch RSC payload for') &&
-      !msg.text().includes('Error loading language') &&
-      !msg.text().includes('Error: NEXT_NOT_FOUND') &&
-      !msg.text().includes('Error: NEXT_REDIRECT') &&
-      // TanStack Start adapter nav control-flow contract (analogous to the
-      // NEXT_NOT_FOUND / NEXT_REDIRECT signals above). `req.server.notFound()` /
-      // `redirect()` thrown deep inside a streamed RSC view surface as these.
-      !msg.text().includes('Error: not-found') &&
-      !msg.text().includes('Error: redirect:') &&
-      !msg.text().includes('Error getting document data') &&
-      !msg.text().includes('Failed trying to load default language strings') &&
-      !msg.text().includes('TypeError: Failed to fetch') && // This happens when server actions are aborted
-      !msg.text().includes('TypeError: network error') && // Transient network errors during chunk loading
-      !msg.text().includes('der-radius: 2px  Server   Error: Error getting do') && // This is a weird error that happens in the console
-      // Expected lexical-converter warning for blocks/inline-blocks intentionally
-      // configured without an HTML converter (e.g. the `diff` test collection's
-      // `myBlock`). Logged server-side via `console.error`; harmless in Next, but
-      // the TanStack/vite-rsc adapter forwards server `console.error` to the
-      // browser console, so it would otherwise fail every diff-view test.
-      !msg.text().includes('no converter is provided') &&
-      // Conditionally ignore CORS errors based on the `ignoreCORS` option
-      !(
-        ignoreCORS &&
-        msg.text().includes('Access to fetch at') &&
-        msg.text().includes("No 'Access-Control-Allow-Origin' header is present")
-      ) &&
-      // Conditionally ignore network-related errors
-      !msg.text().includes('Failed to load resource: net::ERR_FAILED')
-    ) {
-      // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
-      // the the server responded with a status of error happens frequently. Will ignore it for now.
-      // Most importantly, this should catch react errors.
-      const { url, lineNumber, columnNumber } = msg.location() || {}
-      const locationSuffix = url ? `\n at ${url}:${lineNumber ?? 0}:${columnNumber ?? 0}` : ''
-      throw new Error(`Browser console error: ${msg.text()}${locationSuffix}`)
-    }
-
-    // Log ignored CORS-related errors for visibility
-    if (msg.type() === 'error' && msg.text().includes('Access to fetch at') && ignoreCORS) {
-      console.log(`Ignoring expected CORS-related error: ${msg.text()}`)
-    }
-
-    // Log ignored network-related errors for visibility
-    if (msg.type() === 'error' && msg.text().includes('Failed to load resource: net::ERR_FAILED')) {
-      console.log(`Ignoring expected network error: ${msg.text()}`)
-    }
-  })
-
-  // Capture uncaught errors that do not appear in the console
-  page.on('pageerror', (error) => {
-    const message = error?.message ?? String(error)
-
-    if (message.includes('Hydration failed because the server rendered HTML')) {
-      return
-    }
-
-    if (shouldCollectErrors) {
-      const stack = error?.stack
-      consoleErrors.push(`Page error: ${message}${stack ? `\n${stack}` : ''}`)
-    } else {
-      // Rethrow the original error to preserve stack, name, and other metadata
-      throw error
-    }
-  })
-
-  return {
-    consoleErrors,
-    collectErrors: () => (shouldCollectErrors = true), // Enable collection of errors for specific tests
-    stopCollectingErrors: () => (shouldCollectErrors = false), // Disable collection of errors after the test
-  }
-}
-
 export function getRoutes({
   customAdminRoutes,
   customRoutes,
@@ -583,7 +485,7 @@ export async function runJobsQueue(args: RunJobsQueueArgs) {
   const queue = args?.queue ?? 'default'
 
   return await fetch(`${serverURL}/api/payload-jobs/run?queue=${queue}`, {
-    method: 'get',
     credentials: 'include',
+    method: 'get',
   })
 }

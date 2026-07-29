@@ -22,7 +22,6 @@ import type { Config, LexicalField, Upload } from '../../../../payload-types.js'
 import { assertNetworkRequests } from '../../../../../__helpers/e2e/assertNetworkRequests.js'
 import {
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
   waitForLexicalReady,
@@ -34,6 +33,7 @@ import { assertToastErrors } from '../../../../../__helpers/shared/assertToastEr
 import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../../../__helpers/shared/rest.js'
+import { initPage } from '../../../../../__setup/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug, lexicalNestedBlocksSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
@@ -64,9 +64,8 @@ describe('lexicalBlocks', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
-    page = await context.newPage()
+    ;({ page } = await initPage({ context }))
 
-    initPageConsoleErrorCatch(page)
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -96,7 +95,6 @@ describe('lexicalBlocks', () => {
       const { richTextField } = await navigateToLexicalFields()
 
       const { newBlock: newRSCBlock } = await createBlock({
-        richTextField,
         name: 'Block R S C',
         async afterLastParagraphClick() {
           await page.keyboard.press('1')
@@ -105,6 +103,7 @@ describe('lexicalBlocks', () => {
 
           await page.keyboard.press('Enter')
         },
+        richTextField,
       })
 
       await expect(newRSCBlock.locator('.collapsible__content')).toHaveText('Data:')
@@ -186,8 +185,8 @@ describe('lexicalBlocks', () => {
     const { richTextField } = await navigateToLexicalFields()
 
     const { newBlock } = await createBlock({
-      richTextField,
       name: 'No Block Name',
+      richTextField,
     })
 
     await expect(newBlock.locator('#blockName')).toHaveCount(0)
@@ -214,8 +213,8 @@ describe('lexicalBlocks', () => {
       })
 
       const { newBlock } = await createBlock({
-        richTextField,
         name: 'Filter Options Block',
+        richTextField,
       })
 
       await saveDocAndAssert(page)
@@ -256,11 +255,11 @@ describe('lexicalBlocks', () => {
       return {
         blockGroupTextField,
         blockTextField,
-        dependsOnDocData,
         dependsOnBlockData,
+        dependsOnDocData,
         dependsOnSiblingData,
-        topLevelDocTextField,
         newBlock: reloadedBlock,
+        topLevelDocTextField,
       }
     }
 
@@ -416,8 +415,8 @@ describe('lexicalBlocks', () => {
       })
 
       const { newBlock } = await createBlock({
-        richTextField,
         name: 'Validation Block',
+        richTextField,
       })
 
       await saveDocAndAssert(page)
@@ -459,11 +458,11 @@ describe('lexicalBlocks', () => {
       return {
         blockGroupTextField,
         blockTextField,
+        dependsOnBlockData,
         dependsOnDocData,
         dependsOnSiblingData,
-        dependsOnBlockData,
-        topLevelDocTextField,
         newBlock: reloadedBlock,
+        topLevelDocTextField,
       }
     }
 
@@ -475,8 +474,8 @@ describe('lexicalBlocks', () => {
       await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
 
       await assertToastErrors({
-        page,
         errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Doc Data'],
+        page,
       })
 
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
@@ -500,11 +499,11 @@ describe('lexicalBlocks', () => {
 
       await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
       await assertToastErrors({
-        page,
         errors: [
           'Lexical With Blocks',
           'Lexical With Blocks → Group → Text Depends On Sibling Data',
         ],
+        page,
       })
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
@@ -527,8 +526,8 @@ describe('lexicalBlocks', () => {
 
       await saveDocAndAssert(page, '#action-save', 'error', { disableDismissAllToasts: true })
       await assertToastErrors({
-        page,
         errors: ['Lexical With Blocks', 'Lexical With Blocks → Group → Text Depends On Block Data'],
+        page,
       })
       await expect(page.locator('.payload-toast-container .payload-toast-item')).toBeHidden()
 
@@ -549,8 +548,8 @@ describe('lexicalBlocks', () => {
     const { richTextField } = await navigateToLexicalFields()
 
     const { newBlock } = await createBlock({
-      richTextField,
       name: 'Async Hooks Block',
+      richTextField,
     })
 
     await newBlock.locator('#field-test1').fill('text1')
@@ -882,8 +881,8 @@ describe('lexicalBlocks', () => {
       const { richTextField } = await navigateToLexicalFields()
 
       const { newBlock: newRichTextBlock, slashMenuPopover } = await createBlock({
-        richTextField,
         name: 'Rich Text',
+        richTextField,
       })
 
       // Ensure that sub-editor is empty and wait for it to be fully initialized
@@ -1768,9 +1767,9 @@ async function createInlineBlock({
 }
 
 async function createBlock({
-  richTextField,
   name,
   afterLastParagraphClick,
+  richTextField,
 }: {
   afterLastParagraphClick?: (args: { lastParagraph: Locator }) => Promise<void> | void
   name: string

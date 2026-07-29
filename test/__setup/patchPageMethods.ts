@@ -7,7 +7,7 @@ import type { Page } from '@playwright/test'
 const ADMIN_TEMPLATE_SELECTOR = '.template-default, .template-minimal'
 
 /**
- * Makes `page.goto()` / `page.reload()` return only once the admin view is interactive.
+ * Patches `page.goto()` / `page.reload()` so it only returns once the admin view is interactive.
  *
  * On the TanStack Start adapter a full document load does not hydrate the SSR'd view in
  * place. `AdminPage` renders an RSC payload fetched by the route loader, so the server
@@ -25,7 +25,7 @@ const ADMIN_TEMPLATE_SELECTOR = '.template-default, .template-minimal'
  *
  * Idempotent: calling this more than once on the same page is safe.
  */
-export function patchPageGoToWithHydrationMarker(page: Page) {
+export function patchPageMethods(page: Page) {
   if (process.env.PAYLOAD_FRAMEWORK !== 'tanstack-start') {
     return
   }

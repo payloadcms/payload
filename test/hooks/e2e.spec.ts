@@ -10,11 +10,11 @@ import type { Config } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { beforeValidateSlug } from './shared.js'
 
@@ -42,9 +42,8 @@ describe('Hooks', () => {
     beforeDeleteURL = new AdminUrlUtil(serverURL, 'before-delete-hooks')
     beforeDelete2URL = new AdminUrlUtil(serverURL, 'before-delete-2-hooks')
     const context = await browser.newContext()
-    page = await context.newPage()
+    ;({ page } = await initPage({ context }))
 
-    initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -121,8 +120,8 @@ describe('Hooks', () => {
         .toBe(1)
 
       await payload.delete({
-        collection: 'before-delete-hooks',
         id: doc.id,
+        collection: 'before-delete-hooks',
       })
     })
 
@@ -162,8 +161,8 @@ describe('Hooks', () => {
         .toBe(1)
 
       await payload.delete({
-        collection: 'before-delete-hooks',
         id: doc.id,
+        collection: 'before-delete-hooks',
       })
     })
 
@@ -192,8 +191,8 @@ describe('Hooks', () => {
       )
 
       await payload.delete({
-        collection: 'before-delete-2-hooks',
         id: doc.id,
+        collection: 'before-delete-2-hooks',
       })
     })
 
@@ -218,8 +217,8 @@ describe('Hooks', () => {
       )
 
       await payload.delete({
-        collection: 'before-delete-2-hooks',
         id: doc.id,
+        collection: 'before-delete-2-hooks',
       })
     })
   })

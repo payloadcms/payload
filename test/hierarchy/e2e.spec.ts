@@ -7,10 +7,11 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Organization } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -69,8 +70,7 @@ test.describe('Hierarchy Sidebar', () => {
     organizationsURL = new AdminUrlUtil(serverURL, 'organizations')
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -159,7 +159,7 @@ test.describe('Hierarchy Sidebar', () => {
         where: { key: { equals: 'hierarchy-tree-divisions' } },
       })
       for (const pref of prefs.docs) {
-        await payload.delete({ collection: 'payload-preferences', id: pref.id })
+        await payload.delete({ id: pref.id, collection: 'payload-preferences' })
       }
 
       await page.goto(`${serverURL}/admin`)
@@ -425,7 +425,7 @@ test.describe('Hierarchy Sidebar', () => {
         where: { key: { equals: 'hierarchy-tree-folders' } },
       })
       for (const pref of prefs.docs) {
-        await payload.delete({ collection: 'payload-preferences', id: pref.id })
+        await payload.delete({ id: pref.id, collection: 'payload-preferences' })
       }
     })
 

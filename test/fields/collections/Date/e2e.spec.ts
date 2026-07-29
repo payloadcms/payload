@@ -12,7 +12,6 @@ import { getColumnSelectorItem } from '../../../__helpers/e2e/columns/index.js'
 import { addListFilter } from '../../../__helpers/e2e/filters/addListFilter.js'
 import {
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
@@ -20,6 +19,7 @@ import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { initPage } from '../../../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { dateFieldsSlug } from '../../slugs.js'
 
@@ -68,8 +68,7 @@ describe('Date', () => {
     url = new AdminUrlUtil(serverURL, dateFieldsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -103,9 +102,9 @@ describe('Date', () => {
 
     // Add a date filter without a value — this sets up the field and operator
     const { condition } = await addListFilter({
-      page,
       fieldLabel: 'Created At',
       operatorLabel: 'is greater than',
+      page,
     })
 
     // Click the date picker input to open the calendar
@@ -182,7 +181,7 @@ describe('Date', () => {
 
     const id = page.url().split('/').pop()
 
-    const { doc } = await client.findByID({ id: id!, auth: true, slug: 'date-fields' })
+    const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
 
     await expect(() => {
       // Ensure that the time field does not contain milliseconds
@@ -214,7 +213,7 @@ describe('Date', () => {
 
     const id = page.url().split('/').pop()
 
-    const { doc } = await client.findByID({ id: id!, auth: true, slug: 'date-fields' })
+    const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
 
     await expect(() => {
       // Ensure that the time with miliseconds field contains the exact miliseconds specified
@@ -258,11 +257,11 @@ describe('Date', () => {
         const id = routeSegments.pop()
 
         // fetch the doc (need the date string from the DB)
-        const { doc } = await client.findByID({ id: id!, auth: true, slug: 'date-fields' })
+        const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
 
         await expect(() => {
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
-        }).toPass({ timeout: 10000, intervals: [100] })
+        }).toPass({ intervals: [100], timeout: 10000 })
       })
     })
 
@@ -302,11 +301,11 @@ describe('Date', () => {
         const id = routeSegments.pop()
 
         // fetch the doc (need the date string from the DB)
-        const { doc } = await client.findByID({ id: id!, auth: true, slug: 'date-fields' })
+        const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
 
         await expect(() => {
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
-        }).toPass({ timeout: 10000, intervals: [100] })
+        }).toPass({ intervals: [100], timeout: 10000 })
       })
     })
 
@@ -346,11 +345,11 @@ describe('Date', () => {
         const id = routeSegments.pop()
 
         // fetch the doc (need the date string from the DB)
-        const { doc } = await client.findByID({ id: id!, auth: true, slug: 'date-fields' })
+        const { doc } = await client.findByID({ id: id!, slug: 'date-fields', auth: true })
 
         await expect(() => {
           expect(doc.default).toEqual('2023-02-07T12:00:00.000Z')
-        }).toPass({ timeout: 10000, intervals: [100] })
+        }).toPass({ intervals: [100], timeout: 10000 })
       })
     })
   })
@@ -385,7 +384,7 @@ describe('Date', () => {
       await expect(() => {
         expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
         expect(existingDoc?.dayAndTimeWithTimezone_tz).toEqual(expectedTimezone)
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
     })
 
     test('changing the timezone should update the date to the new equivalent', async () => {
@@ -608,7 +607,7 @@ describe('Date', () => {
 
       const docID = page.url().split('/').pop()
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(docID).toBeTruthy()
 
       const {
@@ -622,7 +621,7 @@ describe('Date', () => {
         },
       })
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
     })
 
@@ -737,10 +736,10 @@ describe('Date', () => {
       await page.locator('#field-default').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.document-fields__main'],
         page,
         testInfo,
-        include: ['.document-fields__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -763,8 +762,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
       url = new AdminUrlUtil(serverURL, dateFieldsSlug)
 
       const context = await browser.newContext({ timezoneId })
-      page = await context.newPage()
-      initPageConsoleErrorCatch(page)
+      ;({ page } = await initPage({ context }))
 
       await ensureCompilationIsDone({ page, serverURL })
     })
@@ -800,7 +798,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
       await expect(() => {
         expect(result).toEqual(timezoneId)
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
 
       const dateOnlyLocator = page.locator(
         '#field-defaultWithTimezone .react-datepicker-wrapper input',
@@ -823,13 +821,13 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
       await expect(async () => {
         await expect(dateTimeLocator).toHaveText('January 31st 2025, 10:00 AM')
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
 
       const dateTimeLocatorFixed = page.locator('.cell-dayAndTimeWithTimezoneFixed').first()
 
       await expect(async () => {
         await expect(dateTimeLocatorFixed).toHaveText('October 29th 2025, 8:00 PM')
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
     })
 
     test('date field with hidden timezone column should display date correctly in list view', async () => {
@@ -842,7 +840,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         // The date is 2027-08-12T14:00:00.000Z with America/New_York timezone
         // In New York (UTC-4 in summer), this should display as 10:00 AM
         await expect(dateTimeLocator).toHaveText('August 12th 2027, 10:00 AM')
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
 
       // The timezone column should NOT be visible (hidden via disabled.column override)
       const timezoneColumnCell = page.locator('.cell-dateWithTimezoneWithDisabledColumns_tz')
@@ -890,7 +888,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
       const docID = page.url().split('/').pop()
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(docID).toBeTruthy()
 
       const {
@@ -904,7 +902,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         },
       })
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
     })
 
@@ -932,7 +930,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
       const docID = page.url().split('/').pop()
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(docID).toBeTruthy()
 
       const {
@@ -946,7 +944,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         },
       })
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
     })
 
@@ -974,7 +972,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
       const docID = page.url().split('/').pop()
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(docID).toBeTruthy()
 
       const {
@@ -988,7 +986,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         },
       })
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
     })
 
@@ -1027,7 +1025,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
       const docID = page.url().split('/').pop()
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(docID).toBeTruthy()
 
       const {
@@ -1041,7 +1039,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         },
       })
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedDateTimeUTCValue)
       expect(existingDoc?.defaultWithTimezone).toEqual(expectedDateOnlyUTCValue)
     })
@@ -1081,7 +1079,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
       const docID = page.url().split('/').pop()
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(docID).toBeTruthy()
 
       const {
@@ -1095,7 +1093,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         },
       })
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedDateTimeUTCValue)
       expect(existingDoc?.defaultWithTimezone).toEqual(expectedDateOnlyUTCValue)
     })
@@ -1216,7 +1214,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
         const docID = page.url().split('/').pop()
 
-        // eslint-disable-next-line payload/no-flaky-assertions
+         
         expect(docID).toBeTruthy()
 
         const {
@@ -1231,7 +1229,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         })
 
         // The UTC value should be identical regardless of browser timezone context
-        // eslint-disable-next-line payload/no-flaky-assertions
+         
         expect(existingDoc?.dateWithOffsetTimezone).toEqual(expectedUTCValue)
         expect(existingDoc?.dateWithOffsetTimezone_tz).toEqual(expectedTimezone)
       })
@@ -1275,7 +1273,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
         const docID = page.url().split('/').pop()
 
-        // eslint-disable-next-line payload/no-flaky-assertions
+         
         expect(docID).toBeTruthy()
 
         const {
@@ -1289,7 +1287,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
           },
         })
 
-        // eslint-disable-next-line payload/no-flaky-assertions
+         
         expect(existingDoc?.dateWithOffsetTimezone).toEqual(expectedUTCValue)
         expect(existingDoc?.dateWithOffsetTimezone_tz).toEqual(expectedTimezone)
       })
@@ -1338,7 +1336,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
         const docID = page.url().split('/').pop()
 
-        // eslint-disable-next-line payload/no-flaky-assertions
+         
         expect(docID).toBeTruthy()
 
         const {
@@ -1361,9 +1359,9 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         const doc = await payload.create({
           collection: dateFieldsSlug,
           data: {
-            default: '2025-01-01T00:00:00.000Z',
             dayAndTimeWithTimezone: '2025-01-01T01:00:00.000Z',
             dayAndTimeWithTimezone_tz: 'Asia/Tokyo',
+            default: '2025-01-01T00:00:00.000Z',
             // 2025-01-01T12:30:00.000Z with +05:30 should display as Jan 1, 2025 6:00 PM
             dateWithOffsetTimezone: '2025-01-01T12:30:00.000Z',
             dateWithOffsetTimezone_tz: '+05:30',

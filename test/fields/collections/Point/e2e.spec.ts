@@ -10,7 +10,6 @@ import type { Config } from '../../payload-types.js'
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
 import {
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
@@ -18,6 +17,7 @@ import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { initPage } from '../../../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { pointFieldsSlug } from '../../slugs.js'
 
@@ -46,8 +46,7 @@ describe('Point', () => {
     url = new AdminUrlUtil(serverURL, pointFieldsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -164,9 +163,9 @@ describe('Point', () => {
       await page.locator('#field-longitude-point').waitFor()
 
       const scanResults = await runAxeScan({
+        include: ['.document-fields__main'],
         page,
         testInfo,
-        include: ['.document-fields__main'],
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -178,8 +177,8 @@ describe('Point', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.document-fields__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)

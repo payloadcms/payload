@@ -41,7 +41,6 @@ import {
   ensureCompilationIsDone,
   exactText,
   getRoutes,
-  initPageConsoleErrorCatch,
   openDocDrawer,
   saveDocAndAssert,
   waitForFormReady,
@@ -55,6 +54,7 @@ import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSav
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { postsCollectionSlug } from '../admin/slugs.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { draftWithCustomUnpublishSlug } from './collections/DraftsWithCustomUnpublish.js'
@@ -120,14 +120,13 @@ describe('Versions', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     context = await browser.newContext()
-    page = await context.newPage()
+    ;({ page } = await initPage({ context }))
 
     const {
       routes: { admin: adminRouteFromConfig },
     } = getRoutes({})
     adminRoute = adminRouteFromConfig
 
-    initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -166,8 +165,8 @@ describe('Versions', () => {
         collection: draftCollectionSlug,
         data: {
           _status: 'published',
-          title: 'Published Document',
           description: 'This is published',
+          title: 'Published Document',
         },
       })
 
@@ -245,7 +244,7 @@ describe('Versions', () => {
       await page.goto(`${serverURL}${docHref}/versions`)
       await expect(() => {
         expect(page.url()).toMatch(/\/versions/)
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
     })
 
     test('autosave relationships - should select doc after creating from relationship field', async () => {
@@ -341,8 +340,8 @@ describe('Versions', () => {
         collection: draftCollectionSlug,
         data: {
           _status: 'published',
-          title: 'title',
           description: 'description',
+          title: 'title',
         },
         overrideAccess: true,
       })
@@ -356,16 +355,16 @@ describe('Versions', () => {
         collection: draftCollectionSlug,
         data: {
           _status: 'published',
-          title: 'title',
           description: 'description',
+          title: 'title',
         },
         overrideAccess: true,
       })
 
       // Unpublish the document
       await payload.update({
-        collection: draftCollectionSlug,
         id: publishedDoc.id,
+        collection: draftCollectionSlug,
         data: {
           _status: 'draft',
         },
@@ -445,7 +444,7 @@ describe('Versions', () => {
       await page.goto(versionsURL)
       await expect(() => {
         expect(page.url()).toMatch(/\/versions/)
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
     })
 
     test('collection - should autosave', async () => {
@@ -457,8 +456,8 @@ describe('Versions', () => {
       const { id: postID } = await payload.create({
         collection: postCollectionSlug,
         data: {
-          title: 'post title',
           description: 'post description',
+          title: 'post title',
         },
       })
 
@@ -510,17 +509,17 @@ describe('Versions', () => {
       const { id: postID } = await payload.create({
         collection: postCollectionSlug,
         data: {
-          title: 'post title',
           description: 'post description',
+          title: 'post title',
         },
       })
 
       const { id: docID } = await payload.create({
         collection: autosaveCollectionSlug,
         data: {
-          title: 'autosave title',
           description: 'autosave description',
           relationship: postID,
+          title: 'autosave title',
         },
       })
 
@@ -581,7 +580,7 @@ describe('Versions', () => {
 
       await expect(() => {
         expect(updatedDocsCount).toBe(initialDocsCount + 1)
-      }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: POLL_TOPASS_TIMEOUT })
 
       await page.goto(autosaveURL.list)
       const createNewButton = page.locator('#create-new-doc')
@@ -599,7 +598,7 @@ describe('Versions', () => {
 
       await expect(() => {
         expect(latestDocsCount).toBe(updatedDocsCount + 1)
-      }).toPass({ timeout: POLL_TOPASS_TIMEOUT, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: POLL_TOPASS_TIMEOUT })
     })
 
     test('collection - should update updatedAt', async () => {
@@ -848,8 +847,8 @@ describe('Versions', () => {
       await expect(page.getByRole('button', { name: 'Custom Unpublish' })).toBeVisible()
 
       await payload.delete({
-        collection: draftWithCustomUnpublishSlug,
         id: publishedDoc.id,
+        collection: draftWithCustomUnpublishSlug,
       })
     })
 
@@ -857,8 +856,8 @@ describe('Versions', () => {
       const doc = await payload.create({
         collection: versionCollectionSlug,
         data: {
-          title: 'No Drafts Doc',
           description: 'This collection has drafts disabled',
+          title: 'No Drafts Doc',
         },
       })
 
@@ -868,8 +867,8 @@ describe('Versions', () => {
       await expect(page.locator('#action-unpublish')).not.toBeAttached()
 
       await payload.delete({
-        collection: versionCollectionSlug,
         id: doc.id,
+        collection: versionCollectionSlug,
       })
     })
 
@@ -878,8 +877,8 @@ describe('Versions', () => {
         collection: draftCollectionSlug,
         data: {
           _status: 'published',
-          title: 'unpublish version count test',
           description: 'description',
+          title: 'unpublish version count test',
         },
       })
 
@@ -897,8 +896,8 @@ describe('Versions', () => {
       await expect.poll(() => page.locator(versionsCountSelector).textContent()).toBe(countBefore)
 
       await payload.delete({
-        collection: draftCollectionSlug,
         id: publishedDoc.id,
+        collection: draftCollectionSlug,
       })
     })
 
@@ -952,7 +951,7 @@ describe('Versions', () => {
       await expect(async () => {
         newCount1 = await page.locator(versionsCountSelector).textContent()
         expect(Number(newCount1)).toBeGreaterThan(Number(initialCount))
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
 
       await field.fill('new description 2')
       await saveDocAndAssert(page, '#action-save-draft')
@@ -962,7 +961,7 @@ describe('Versions', () => {
       await expect(async () => {
         newCount2 = await page.locator(versionsCountSelector).textContent()
         expect(Number(newCount2)).toBeGreaterThan(Number(newCount1))
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
 
       await field.fill('new description 3')
       await saveDocAndAssert(page, '#action-save-draft')
@@ -970,7 +969,7 @@ describe('Versions', () => {
       await expect(async () => {
         const newCount3 = await page.locator(versionsCountSelector).textContent()
         expect(Number(newCount3)).toBeGreaterThan(Number(newCount2))
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
     })
 
     test('collection — respects max number of versions', async () => {
@@ -1021,12 +1020,12 @@ describe('Versions', () => {
         await page.goto(`${serverURL}${docHref}/versions`)
         await expect(() => {
           expect(page.url()).toMatch(/\/versions/)
-        }).toPass({ timeout: 10000, intervals: [100] })
+        }).toPass({ intervals: [100], timeout: 10000 })
 
         const scanResults = await runAxeScan({
+          include: ['.versions'],
           page,
           testInfo,
-          include: ['.versions'],
         })
 
         expect(scanResults.violations.length).toBe(0)
@@ -1039,12 +1038,12 @@ describe('Versions', () => {
         await page.goto(`${serverURL}${docHref}/versions`)
         await expect(() => {
           expect(page.url()).toMatch(/\/versions/)
-        }).toPass({ timeout: 10000, intervals: [100] })
+        }).toPass({ intervals: [100], timeout: 10000 })
 
         const scanResults = await checkFocusIndicators({
           page,
-          testInfo,
           selector: '.versions',
+          testInfo,
         })
 
         expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
@@ -1058,7 +1057,7 @@ describe('Versions', () => {
         await page.goto(`${serverURL}${docHref}/versions`)
         await expect(() => {
           expect(page.url()).toMatch(/\/versions/)
-        }).toPass({ timeout: 10000, intervals: [100] })
+        }).toPass({ intervals: [100], timeout: 10000 })
 
         const versionLink = page.locator('.cell-updatedAt a').first()
         const versionHref = await versionLink.getAttribute('href')
@@ -1067,9 +1066,9 @@ describe('Versions', () => {
         await page.locator('.view-version').waitFor()
 
         const scanResults = await runAxeScan({
+          include: ['.view-version'],
           page,
           testInfo,
-          include: ['.view-version'],
         })
 
         expect(scanResults.violations.length).toBe(0)
@@ -1082,12 +1081,12 @@ describe('Versions', () => {
         await page.goto(`${serverURL}${docHref}/versions`)
         await expect(() => {
           expect(page.url()).toMatch(/\/versions/)
-        }).toPass({ timeout: 10000, intervals: [100] })
+        }).toPass({ intervals: [100], timeout: 10000 })
 
         const scanResults = await checkFocusIndicators({
           page,
-          testInfo,
           selector: '.versions',
+          testInfo,
         })
 
         expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
@@ -1341,7 +1340,7 @@ describe('Versions', () => {
       await page.goto(versionsURL)
       await expect(() => {
         expect(page.url()).toMatch(/\/versions/)
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
     })
 
     test('global - should show "save as draft" button when showSaveDraftButton is true', async () => {
@@ -1392,7 +1391,7 @@ describe('Versions', () => {
     test('globals — should show unpublish button after publishing', async () => {
       await payload.updateGlobal({
         slug: simpleDraftGlobalSlug,
-        data: { title: 'published global', _status: 'published' },
+        data: { _status: 'published', title: 'published global' },
       })
 
       const globalURL = new AdminUrlUtil(serverURL, simpleDraftGlobalSlug)
@@ -1405,7 +1404,7 @@ describe('Versions', () => {
     test('globals — dot menu should only contain unpublish and copy to locale options', async () => {
       await payload.updateGlobal({
         slug: simpleDraftGlobalSlug,
-        data: { title: 'published global', _status: 'published' },
+        data: { _status: 'published', title: 'published global' },
       })
 
       const globalURL = new AdminUrlUtil(serverURL, simpleDraftGlobalSlug)
@@ -1423,7 +1422,7 @@ describe('Versions', () => {
     test('globals — should not increment version count when unpublishing', async () => {
       await payload.updateGlobal({
         slug: simpleDraftGlobalSlug,
-        data: { title: 'unpublish version count test', _status: 'published' },
+        data: { _status: 'published', title: 'unpublish version count test' },
       })
 
       const globalURL = new AdminUrlUtil(serverURL, simpleDraftGlobalSlug)
@@ -1628,8 +1627,8 @@ describe('Versions', () => {
       const post = await payload.create({
         collection: draftCollectionSlug,
         data: {
-          title: 'new post',
           description: 'new description',
+          title: 'new post',
         },
       })
 
@@ -1665,7 +1664,7 @@ describe('Versions', () => {
 
       await expect(() => {
         expect(createdDate).toContain('6:00:00 PM')
-      }).toPass({ timeout: 10000, intervals: [100] })
+      }).toPass({ intervals: [100], timeout: 10000 })
 
       const {
         docs: [createdJob],
@@ -1678,10 +1677,10 @@ describe('Versions', () => {
         },
       })
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(createdJob).toBeTruthy()
 
-      // eslint-disable-next-line payload/no-flaky-assertions
+       
       expect(createdJob?.waitUntil).toEqual('2049-01-01T17:00:00.000Z')
     })
   })
@@ -1776,13 +1775,13 @@ describe('Versions', () => {
 
       // Step 2: Add a block via API (simpler and more reliable than UI interaction)
       await payload.update({
-        collection: localizedCollectionSlug,
         id,
+        collection: localizedCollectionSlug,
         data: {
           blocks: [
             {
-              blockType: 'localizedTextBlock',
               blockText: 'Block content for English',
+              blockType: 'localizedTextBlock',
             },
           ],
         },
@@ -1792,14 +1791,14 @@ describe('Versions', () => {
 
       // Step 3: Publish specific locale (English) via API
       const published = await payload.update({
-        collection: localizedCollectionSlug,
         id,
+        collection: localizedCollectionSlug,
         data: {
           _status: 'published',
           blocks: [
             {
-              blockType: 'localizedTextBlock',
               blockText: 'Block content for English',
+              blockType: 'localizedTextBlock',
             },
           ],
           text: 'english text',
@@ -2144,8 +2143,8 @@ describe('Versions', () => {
       await payload.create({
         collection: autosaveCollectionSlug,
         data: {
-          title: 'This is a test',
           description: 'some description',
+          title: 'This is a test',
         },
       })
 
@@ -2243,23 +2242,19 @@ describe('Versions', () => {
     beforeEach(async () => {
       const newPost = await payload.create({
         collection: draftCollectionSlug,
-        depth: 0,
         data: {
-          title: 'new post',
           description: 'new description',
+          title: 'new post',
         },
+        depth: 0,
       })
 
       postID = newPost.id
 
       await payload.update({
-        collection: draftCollectionSlug,
         id: postID,
-        draft: true,
-        depth: 0,
+        collection: draftCollectionSlug,
         data: {
-          title: 'current draft post title',
-          description: 'draft description',
           blocksField: [
             {
               blockName: 'block1',
@@ -2267,13 +2262,17 @@ describe('Versions', () => {
               text: 'block text',
             },
           ],
+          description: 'draft description',
+          title: 'current draft post title',
         },
+        depth: 0,
+        draft: true,
       })
 
       const versions = await payload.findVersions({
         collection: draftCollectionSlug,
-        limit: 2,
         depth: 0,
+        limit: 2,
         where: {
           parent: { equals: postID },
         },
@@ -2319,11 +2318,11 @@ describe('Versions', () => {
     async function navigateToDiffVersionView(versionID?: string) {
       await _navigateToDiffVersionView({
         adminRoute,
-        serverURL,
         collectionSlug: diffCollectionSlug,
         docID: diffID,
-        versionID: versionID ?? versionDiffID,
         page,
+        serverURL,
+        versionID: versionID ?? versionDiffID,
       })
     }
 
@@ -2645,9 +2644,9 @@ describe('Versions', () => {
 
       const draftDocs = await payload.find({
         collection: 'draft-posts',
-        sort: 'createdAt',
-        limit: 3,
         depth: 0,
+        limit: 3,
+        sort: 'createdAt',
       })
 
       await expect(
@@ -2779,9 +2778,9 @@ describe('Versions', () => {
 
       const uploadDocs = await payload.find({
         collection: 'media',
-        sort: 'createdAt',
         depth: 0,
         limit: 2,
+        sort: 'createdAt',
       })
 
       await expect(upload.locator('.html-diff__diff-old .upload-diff__info')).toHaveText(
@@ -2857,6 +2856,7 @@ describe('Versions', () => {
 
     test('diff is displayed correctly when editing 2nd block in a blocks field with 3 blocks', async () => {
       await payload.update({
+        id: diffID,
         collection: 'diff',
         data: {
           blocks: [
@@ -2871,7 +2871,6 @@ describe('Versions', () => {
             }),
           ],
         },
-        id: diffID,
       })
 
       const latestVersionDiff = (
@@ -2919,14 +2918,15 @@ describe('Versions', () => {
         },
       ]
       await payload.update({
+        id: diffID,
         collection: 'diff',
         data: {
           array: newArray,
         },
-        id: diffID,
       })
 
       await payload.update({
+        id: diffID,
         collection: 'diff',
         data: {
           array: newArray.map((arrayItem, i) => {
@@ -2939,7 +2939,6 @@ describe('Versions', () => {
             return arrayItem
           }),
         },
-        id: diffID,
       })
 
       const latestVersionDiff = (
@@ -2976,58 +2975,58 @@ describe('Versions', () => {
       })
 
       await payload.update({
+        id: diffID,
         collection: diffCollectionSlug,
         data: {
           blocks: [
             {
               blockType: 'SingleRelationshipBlock',
-              title: 'Single Block',
               relatedItem: {
                 relationTo: textCollectionSlug,
                 value: textDoc.id,
               },
+              title: 'Single Block',
             },
             {
               blockType: 'ManyRelationshipBlock',
-              title: 'Many Block',
               relatedItem: [
                 {
                   relationTo: textCollectionSlug,
                   value: textDoc.id,
                 },
               ],
+              title: 'Many Block',
             },
           ],
         },
-        id: diffID,
       })
 
       // Swap the order of the blocks
       await payload.update({
+        id: diffID,
         collection: diffCollectionSlug,
         data: {
           blocks: [
             {
               blockType: 'ManyRelationshipBlock',
-              title: 'Many Block',
               relatedItem: [
                 {
                   relationTo: textCollectionSlug,
                   value: textDoc.id,
                 },
               ],
+              title: 'Many Block',
             },
             {
               blockType: 'SingleRelationshipBlock',
-              title: 'Single Block',
               relatedItem: {
                 relationTo: textCollectionSlug,
                 value: textDoc.id,
               },
+              title: 'Single Block',
             },
           ],
         },
-        id: diffID,
       })
 
       const latestVersionDiff = (
@@ -3060,8 +3059,8 @@ describe('Versions', () => {
 
       // Update to create a version
       await payload.update({
-        collection: diffCollectionSlug,
         id: doc.id,
+        collection: diffCollectionSlug,
         data: {
           _status: 'published',
           text: '<script>alert(1)</script>',
@@ -3081,11 +3080,11 @@ describe('Versions', () => {
 
       await _navigateToDiffVersionView({
         adminRoute,
-        serverURL,
         collectionSlug: diffCollectionSlug,
         docID: doc.id,
-        versionID: versionDiff.id,
         page,
+        serverURL,
+        versionID: versionDiff.id,
       })
 
       const text = page.locator('[data-field-path="text"]')
@@ -3095,7 +3094,7 @@ describe('Versions', () => {
       await expect(text.locator('.html-diff__diff-new')).toHaveText('<script>alert(1)</script>')
 
       // Cleanup
-      await payload.delete({ collection: diffCollectionSlug, id: doc.id })
+      await payload.delete({ id: doc.id, collection: diffCollectionSlug })
     })
 
     test('correctly renders JSON fields containing HTML special characters', async () => {
@@ -3110,8 +3109,8 @@ describe('Versions', () => {
 
       // Update to create a version
       await payload.update({
-        collection: diffCollectionSlug,
         id: doc.id,
+        collection: diffCollectionSlug,
         data: {
           _status: 'published',
           json: { html: '<span onclick="alert(1)">click</span>' },
@@ -3131,11 +3130,11 @@ describe('Versions', () => {
 
       await _navigateToDiffVersionView({
         adminRoute,
-        serverURL,
         collectionSlug: diffCollectionSlug,
         docID: doc.id,
-        versionID: versionDiff.id,
         page,
+        serverURL,
+        versionID: versionDiff.id,
       })
 
       const json = page.locator('[data-field-path="json"]')
@@ -3147,7 +3146,7 @@ describe('Versions', () => {
       )
 
       // Cleanup
-      await payload.delete({ collection: diffCollectionSlug, id: doc.id })
+      await payload.delete({ id: doc.id, collection: diffCollectionSlug })
     })
   })
 })

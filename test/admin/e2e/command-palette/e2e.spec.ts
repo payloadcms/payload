@@ -9,10 +9,10 @@ import type { Config } from '../../payload-types.js'
 import {
   ensureCompilationIsDone,
   getRoutes,
-  initPageConsoleErrorCatch,
 } from '../../../__helpers/e2e/helpers.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../../../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { BASE_PATH, customAdminRoutes } from '../../shared.js'
 import { globalSlug, postsCollectionSlug } from '../../slugs.js'
@@ -54,8 +54,7 @@ test.describe('Command Palette', () => {
     }))
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 

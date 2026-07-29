@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 
 /**
  * Publishes admin-route readiness on `window.__TANSTACK_HYDRATED__`, which the Playwright
- * `goto`/`reload` wrapper installed by `initPageConsoleErrorCatch` waits for.
+ * `goto`/`reload` wrapper installed by `initPage` waits for.
  *
  * Shell hydration is not a sufficient signal. `AdminPage` renders an RSC payload fetched by
  * the route loader, so on a full document load the SSR'd view is torn down ~30ms in and

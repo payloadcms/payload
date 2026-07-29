@@ -14,12 +14,12 @@ import { logout } from '../__helpers/e2e/auth/logout.js'
 import {
   ensureCompilationIsDone,
   getRoutes,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { apiKeysSlug, BASE_PATH, slug } from './shared.js'
@@ -30,7 +30,7 @@ process.env.NEXT_BASE_PATH = BASE_PATH
 
 let payload: PayloadTestSDK<Config>
 
-const { beforeAll, beforeEach, afterAll, describe } = test
+const { afterAll, beforeAll, beforeEach, describe } = test
 
 const headers = {
   'Content-Type': 'application/json',
@@ -56,18 +56,17 @@ describe('Auth', () => {
     adminRoute = adminRouteFromConfig
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
-    await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
   })
 
   describe('create first user', () => {
     beforeEach(async () => {
       await reInitializeDB({
+        deleteOnly: true,
         serverURL,
         snapshotKey: 'create-first-user',
-        deleteOnly: true,
       })
 
       await payload.delete({
@@ -169,9 +168,9 @@ describe('Auth', () => {
   describe('non create first user', () => {
     beforeAll(async () => {
       await reInitializeDB({
+        deleteOnly: false,
         serverURL,
         snapshotKey: 'auth',
-        deleteOnly: false,
       })
 
       await login({ page, serverURL })
@@ -527,12 +526,12 @@ describe('Auth', () => {
   describe('autoRefresh', () => {
     beforeAll(async () => {
       await reInitializeDB({
+        deleteOnly: false,
         serverURL,
         snapshotKey: 'auth',
-        deleteOnly: false,
       })
 
-      await ensureCompilationIsDone({ page, serverURL, noAutoLogin: true })
+      await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
 
       url = new AdminUrlUtil(serverURL, slug)
 

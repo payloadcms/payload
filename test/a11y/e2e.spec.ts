@@ -12,11 +12,12 @@ import {
   assertNoHorizontalOverflow,
   checkHorizontalOverflow,
 } from '../__helpers/e2e/checkHorizontalOverflow.js'
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -29,7 +30,7 @@ test.describe.skip('A11y', () => {
   let serverURL: string
   let payload: PayloadTestSDK<Config>
 
-  const DEFAULT_VIEWPORT = { width: 1280, height: 720 }
+  const DEFAULT_VIEWPORT = { height: 720, width: 1280 }
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
@@ -38,8 +39,7 @@ test.describe.skip('A11y', () => {
     mediaUrl = new AdminUrlUtil(serverURL, 'media')
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -56,9 +56,9 @@ test.describe.skip('A11y', () => {
     // @TODO: Icon-only buttons are 16px (1rem) which fails target-size (needs 24px).
     // Revisit as part of the v4 redesign size token pass.
     const accessibilityScanResults = await runAxeScan({
+      exclude: ['.btn--icon-only'],
       page,
       testInfo,
-      exclude: ['.btn--icon-only'],
     })
 
     expect.soft(accessibilityScanResults.violations.length).toEqual(0)
@@ -82,9 +82,9 @@ test.describe.skip('A11y', () => {
     await expect(page.locator('.auth-fields')).toBeVisible()
 
     const accessibilityScanResults = await runAxeScan({
+      exclude: ['.react-select'],
       page,
       testInfo,
-      exclude: ['.react-select'],
     })
 
     expect.soft(accessibilityScanResults.violations.length).toBe(0)
@@ -133,9 +133,9 @@ test.describe.skip('A11y', () => {
       // Revisit as part of the v4 redesign color token pass.
       // @TODO: noListResults fails because of the font color used, exclude for now, revisit as part of accessibility considerations.
       const accessibilityScanResults = await runAxeScan({
+        exclude: ['.btn--style-primary', '.no-results__description'],
         page,
         testInfo,
-        exclude: ['.btn--style-primary', '.no-results__description'],
       })
 
       expect.soft(accessibilityScanResults.violations.length).toBe(0)
@@ -160,9 +160,9 @@ test.describe.skip('A11y', () => {
 
       await assertAllElementsHaveFocusIndicators({
         page,
+        selector: '.dashboard',
         testInfo,
         verbose: false,
-        selector: '.dashboard',
       })
     })
 
@@ -225,7 +225,7 @@ test.describe.skip('A11y', () => {
 
   test.describe('WCAG 2.1 - Reflow (320px width)', () => {
     test('Dashboard - should not have horizontal overflow at 320px', async ({}, testInfo) => {
-      await page.setViewportSize({ width: 320, height: 568 })
+      await page.setViewportSize({ height: 568, width: 320 })
       await page.goto(postsUrl.admin)
       await expect(page.locator('.dashboard')).toBeVisible()
 
@@ -233,7 +233,7 @@ test.describe.skip('A11y', () => {
     })
 
     test('Account page - should not have horizontal overflow at 320px', async ({}, testInfo) => {
-      await page.setViewportSize({ width: 320, height: 568 })
+      await page.setViewportSize({ height: 568, width: 320 })
       await page.goto(postsUrl.account)
       await expect(page.locator('.auth-fields')).toBeVisible()
 
@@ -241,7 +241,7 @@ test.describe.skip('A11y', () => {
     })
 
     test('Posts list view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
-      await page.setViewportSize({ width: 320, height: 568 })
+      await page.setViewportSize({ height: 568, width: 320 })
       await page.goto(postsUrl.list)
       await expect(page.locator('.collection-list')).toBeVisible()
 
@@ -249,7 +249,7 @@ test.describe.skip('A11y', () => {
     })
 
     test('Posts create view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
-      await page.setViewportSize({ width: 320, height: 568 })
+      await page.setViewportSize({ height: 568, width: 320 })
       await page.goto(postsUrl.create)
       await expect(page.locator('#field-title')).toBeVisible()
 
@@ -264,7 +264,7 @@ test.describe.skip('A11y', () => {
         },
       })
 
-      await page.setViewportSize({ width: 320, height: 568 })
+      await page.setViewportSize({ height: 568, width: 320 })
       await page.goto(postsUrl.edit(newDoc.id))
       await expect(page.locator('#field-title')).toBeVisible()
 
@@ -272,7 +272,7 @@ test.describe.skip('A11y', () => {
     })
 
     test('Media list view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
-      await page.setViewportSize({ width: 320, height: 568 })
+      await page.setViewportSize({ height: 568, width: 320 })
       await page.goto(mediaUrl.list)
       await expect(page.locator('.list-controls')).toBeVisible()
 
@@ -280,7 +280,7 @@ test.describe.skip('A11y', () => {
     })
 
     test('Media create view - should not have horizontal overflow at 320px', async ({}, testInfo) => {
-      await page.setViewportSize({ width: 320, height: 568 })
+      await page.setViewportSize({ height: 568, width: 320 })
       await page.goto(mediaUrl.create)
       await expect(page.locator('.file-field').first()).toBeVisible()
 
@@ -288,7 +288,7 @@ test.describe.skip('A11y', () => {
     })
 
     test('Navigation sidebar - should not have horizontal overflow at 320px', async ({}, testInfo) => {
-      await page.setViewportSize({ width: 320, height: 568 })
+      await page.setViewportSize({ height: 568, width: 320 })
       await page.goto(postsUrl.admin)
       await expect(page.locator('.nav')).toBeVisible()
 
@@ -328,7 +328,7 @@ test.describe.skip('A11y', () => {
 
           // @TODO: Icon-only buttons are 16px (1rem) which fails target-size (needs 24px).
           // Revisit as part of the v4 redesign size token pass.
-          const axeResults = await runAxeScan({ page, testInfo, exclude: ['.btn--icon-only'] })
+          const axeResults = await runAxeScan({ exclude: ['.btn--icon-only'], page, testInfo })
           expect(axeResults.violations.length).toBe(0)
         })
       }
@@ -355,7 +355,7 @@ test.describe.skip('A11y', () => {
           await expect(titleField).toBeVisible()
 
           // @TODO: Excluding field descriptions due to known issue
-          const axeResults = await runAxeScan({ page, testInfo, exclude: ['.field-description'] })
+          const axeResults = await runAxeScan({ exclude: ['.field-description'], page, testInfo })
           expect(axeResults.violations.length).toBe(0)
         })
       }
@@ -383,9 +383,9 @@ test.describe.skip('A11y', () => {
 
           // @TODO: Excluding checkbox-input and list-controls__create-new due to known issue color contrast
           const axeResults = await runAxeScan({
+            exclude: ['.checkbox-input', '.list-controls__create-new'],
             page,
             testInfo,
-            exclude: ['.checkbox-input', '.list-controls__create-new'],
           })
           expect(axeResults.violations.length).toBe(0)
         })
@@ -434,9 +434,9 @@ test.describe.skip('A11y', () => {
           // Revisit as part of the v4 redesign color token pass.
           // @TODO: .no-results__description uses --color-text-secondary (3.94:1 contrast) which fails at small font size.
           const axeResults = await runAxeScan({
+            exclude: ['.btn--style-primary', '.no-results__description'],
             page,
             testInfo,
-            exclude: ['.btn--style-primary', '.no-results__description'],
           })
           expect(axeResults.violations.length).toBe(0)
         })
@@ -465,7 +465,7 @@ test.describe.skip('A11y', () => {
 
           // @TODO: Icon-only buttons are 16px (1rem) which fails target-size (needs 24px).
           // Revisit as part of the v4 redesign size token pass.
-          const axeResults = await runAxeScan({ page, testInfo, exclude: ['.btn--icon-only'] })
+          const axeResults = await runAxeScan({ exclude: ['.btn--icon-only'], page, testInfo })
           expect(axeResults.violations.length).toBe(0)
         })
       }

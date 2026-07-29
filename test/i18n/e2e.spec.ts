@@ -15,10 +15,11 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js'
 import { getColumnSelectorItem } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 let payload: PayloadTestSDK<Config>
@@ -46,9 +47,8 @@ describe('i18n', () => {
     collection1URL = new AdminUrlUtil(serverURL, 'collection1')
 
     const context = await browser.newContext()
-    page = await context.newPage()
+    ;({ page } = await initPage({ context }))
 
-    initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
   })
   beforeEach(async () => {

@@ -14,7 +14,6 @@ import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/i
 import {
   ensureCompilationIsDone,
   exactText,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
@@ -31,6 +30,7 @@ import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../../../__setup/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
 
@@ -54,8 +54,7 @@ describe('relationship', () => {
     }))
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -86,7 +85,7 @@ describe('relationship', () => {
 
   test('should create inline relationship within field with many relations', async () => {
     await loadCreatePage()
-    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
+    await openCreateDocDrawer({ fieldSelector: '#field-relationship', page })
     await page
       .locator('.popup__content .relationship-add-new__relation-button--text-fields')
       .click()
@@ -107,7 +106,7 @@ describe('relationship', () => {
   test('should save correct relationTo when creating doc in second collection (bug #14728)', async () => {
     await loadCreatePage()
 
-    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
+    await openCreateDocDrawer({ fieldSelector: '#field-relationship', page })
 
     // Select the SECOND collection (array-fields) instead of the first (text-fields)
     await page
@@ -134,7 +133,7 @@ describe('relationship', () => {
     await loadCreatePage()
 
     // Open first modal
-    await openCreateDocDrawer({ page, fieldSelector: '#field-relationToSelf' })
+    await openCreateDocDrawer({ fieldSelector: '#field-relationToSelf', page })
 
     // Fill first modal's required relationship field
     await page.locator('[id^=doc-drawer_relationship-fields_1_] #field-relationship').click()
@@ -229,14 +228,14 @@ describe('relationship', () => {
       collection: relationshipFieldsSlug,
       data: {
         relationship: {
-          value: createdRelatedDoc.id,
           relationTo: textFieldsSlug,
+          value: createdRelatedDoc.id,
         },
       },
     })
     await payload.delete({
-      collection: textFieldsSlug,
       id: createdRelatedDoc.id,
+      collection: textFieldsSlug,
     })
 
     await page.goto(url.edit(doc.id))
@@ -327,7 +326,7 @@ describe('relationship', () => {
     await loadCreatePage()
 
     // First fill out the relationship field, as it's required
-    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
+    await openCreateDocDrawer({ fieldSelector: '#field-relationship', page })
     await page
       .locator('.popup__content .relationship-add-new__relation-button--text-fields')
       .click()
@@ -342,7 +341,7 @@ describe('relationship', () => {
 
     // Create a new doc for the `relationshipHasMany` field
     await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('create')
-    await openCreateDocDrawer({ page, fieldSelector: '#field-relationshipHasMany' })
+    await openCreateDocDrawer({ fieldSelector: '#field-relationshipHasMany', page })
     const value = 'Hello, world!'
     await page.locator('.drawer__content #field-text').fill(value)
 
@@ -435,7 +434,7 @@ describe('relationship', () => {
     await loadCreatePage()
 
     // First fill out the relationship field, as it's required
-    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
+    await openCreateDocDrawer({ fieldSelector: '#field-relationship', page })
     await page.locator('#field-relationship .value-container').click()
     await wait(500)
     // Select "Seeded text document" relationship
@@ -644,7 +643,7 @@ describe('relationship', () => {
     await loadCreatePage()
 
     // First fill out the relationship field, as it's required
-    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
+    await openCreateDocDrawer({ fieldSelector: '#field-relationship', page })
     await page.locator('#field-relationship .value-container').click()
     await page.getByText('Seeded text document', { exact: true }).click()
 
@@ -656,7 +655,7 @@ describe('relationship', () => {
     await loadCreatePage()
 
     // First fill out the relationship field, as it's required
-    await openCreateDocDrawer({ page, fieldSelector: '#field-relationship' })
+    await openCreateDocDrawer({ fieldSelector: '#field-relationship', page })
     await page.locator('#field-relationship .value-container').click()
     await page.getByText('Seeded text document', { exact: true }).click()
 
@@ -669,8 +668,8 @@ describe('relationship', () => {
 
     await page.click('#action-save', { delay: 100 })
     await assertToastErrors({
-      page,
       errors: ['Relationship With Min Rows'],
+      page,
     })
   })
 
@@ -707,15 +706,15 @@ describe('relationship', () => {
 
   test('should allow filtering by relationship field / equals', async () => {
     const textDoc = await createTextFieldDoc()
-    await createRelationshipFieldDoc({ value: textDoc.id, relationTo: 'text-fields' })
+    await createRelationshipFieldDoc({ relationTo: 'text-fields', value: textDoc.id })
 
     await page.goto(url.list)
     await wait(1000) // wait for page to load
 
     await addListFilter({
-      page,
       fieldLabel: 'Relationship',
       operatorLabel: 'equals',
+      page,
       value: 'some text',
     })
 
@@ -728,14 +727,14 @@ describe('relationship', () => {
     const textDoc3 = await createTextFieldDoc({ text: 'Text 3' })
 
     await createRelationshipFieldDoc(
-      { value: textDoc1.id, relationTo: 'text-fields' },
+      { relationTo: 'text-fields', value: textDoc1.id },
       {
         relationshipHasMany: [textDoc1.id],
       },
     )
 
     await createRelationshipFieldDoc(
-      { value: textDoc2.id, relationTo: 'text-fields' },
+      { relationTo: 'text-fields', value: textDoc2.id },
       {
         relationshipHasMany: [textDoc2.id, textDoc3.id],
       },
@@ -745,11 +744,11 @@ describe('relationship', () => {
     await wait(1000)
 
     await addListFilter({
-      page,
       fieldLabel: 'Relationship Has Many',
-      operatorLabel: 'equals',
-      value: 'Text 1',
       multiSelect: true,
+      operatorLabel: 'equals',
+      page,
+      value: 'Text 1',
     })
 
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
@@ -760,14 +759,14 @@ describe('relationship', () => {
     const textDoc2 = await createTextFieldDoc({ text: 'Poly Text 2' })
 
     await createRelationshipFieldDoc(
-      { value: textDoc1.id, relationTo: 'text-fields' },
+      { relationTo: 'text-fields', value: textDoc1.id },
       {
         relationHasManyPolymorphic: [{ relationTo: 'text-fields', value: textDoc1.id }],
       },
     )
 
     await createRelationshipFieldDoc(
-      { value: textDoc2.id, relationTo: 'text-fields' },
+      { relationTo: 'text-fields', value: textDoc2.id },
       {
         relationHasManyPolymorphic: [
           { relationTo: 'text-fields', value: textDoc1.id },
@@ -780,11 +779,11 @@ describe('relationship', () => {
     await wait(1000)
 
     await addListFilter({
-      page,
       fieldLabel: 'Relation Has Many Polymorphic',
-      operatorLabel: 'equals',
-      value: 'Poly Text 1',
       multiSelect: true,
+      operatorLabel: 'equals',
+      page,
+      value: 'Poly Text 1',
     })
 
     await expect(page.locator(tableRowLocator)).toHaveCount(1)
@@ -801,36 +800,36 @@ describe('relationship', () => {
 
     // Select relationship field
     await selectInput({
-      page,
-      selectLocator: condition.locator('.condition__field'),
       multiSelect: false,
       option: 'Relationship',
+      page,
+      selectLocator: condition.locator('.condition__field'),
     })
 
     // Select equals operator (default)
     await selectInput({
-      page,
-      selectLocator: condition.locator('.condition__operator'),
       multiSelect: false,
       option: 'equals',
+      page,
+      selectLocator: condition.locator('.condition__operator'),
     })
 
     // Select a value
     const valueLocator = condition.locator('.condition__value')
     await selectInput({
-      page,
-      selectLocator: valueLocator,
       multiSelect: false,
       option: 'Seeded text document',
+      page,
+      selectLocator: valueLocator,
       selectType: 'relationship',
     })
 
     // Switch to "is not equal to" operator
     await selectInput({
-      page,
-      selectLocator: condition.locator('.condition__operator'),
       multiSelect: false,
       option: 'is not equal to',
+      page,
+      selectLocator: condition.locator('.condition__operator'),
     })
 
     // Wait for options to reload
@@ -1114,10 +1113,10 @@ describe('relationship', () => {
       await page.locator('#field-select').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.collection-edit__main'],
         page,
         testInfo,
-        include: ['.collection-edit__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -1131,10 +1130,10 @@ describe('relationship', () => {
       await page.locator('#field-select').waitFor()
 
       const scanResults = await runAxeScan({
+        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
+        include: ['.collection-edit__main'],
         page,
         testInfo,
-        include: ['.collection-edit__main'],
-        exclude: ['.field-description'], // known issue - reported elsewhere @todo: remove this once fixed - see report https://github.com/payloadcms/payload/discussions/14489
       })
 
       expect(scanResults.violations.length).toBe(0)
@@ -1146,8 +1145,8 @@ describe('relationship', () => {
 
       const scanResults = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '.collection-edit__main',
+        testInfo,
       })
 
       expect(scanResults.totalFocusableElements).toBeGreaterThan(0)
@@ -1160,8 +1159,8 @@ async function createTextFieldDoc(overrides?: Partial<TextField>): Promise<TextF
   return payload.create({
     collection: 'text-fields',
     data: {
-      text: 'some text',
       localizedText: 'some localized text',
+      text: 'some text',
       ...overrides,
     },
   }) as unknown as Promise<TextField>

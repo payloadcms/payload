@@ -12,17 +12,17 @@ import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
 import {
   ensureCompilationIsDone,
   getRoutes,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { collectionSlugs } from './shared.js'
 
-const { beforeAll, describe, beforeEach } = test
+const { beforeAll, beforeEach, describe } = test
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -60,7 +60,7 @@ describe('Field Error States', () => {
   })
 
   beforeEach(async ({ page }) => {
-    initPageConsoleErrorCatch(page)
+    await initPage({ page })
 
     await reInitializeDB({
       serverURL,
@@ -346,9 +346,9 @@ describe('Field Error States', () => {
       await prefillBaseRequiredFields(page)
 
       await addBlock({
-        page,
         blockToSelect: 'Min Rows Block',
         fieldName: 'blocksWithMinRows',
+        page,
       })
       await saveDocAndAssert(page, '#action-save', 'error')
 

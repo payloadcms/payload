@@ -6,9 +6,10 @@ import { fileURLToPath } from 'url'
 
 import type { Config, Page as PayloadPage } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -25,27 +26,26 @@ let childID: string
 describe('Nested Docs Plugin', () => {
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    const { serverURL, payload } = await initPayloadE2ENoConfig<Config>({ dirname })
+    const { payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname })
     url = new AdminUrlUtil(serverURL, 'pages')
     const context = await browser.newContext()
-    page = await context.newPage()
+    ;({ page } = await initPage({ context }))
 
-    initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
 
     async function createPage({
       slug,
-      title = 'Title page',
-      parent,
       _status = 'published',
+      parent,
+      title = 'Title page',
     }: Partial<PayloadPage>): Promise<PayloadPage> {
       return payload.create({
         collection: 'pages',
         data: {
-          title,
           slug,
           _status,
           parent,
+          title,
         },
       }) as unknown as Promise<PayloadPage>
     }
@@ -55,8 +55,8 @@ describe('Nested Docs Plugin', () => {
 
     const childPage = await createPage({
       slug: 'child-slug',
-      title: 'Child page',
       parent: parentID,
+      title: 'Child page',
     })
     childID = childPage.id
 
@@ -65,9 +65,9 @@ describe('Nested Docs Plugin', () => {
 
     const draftChildPage = await createPage({
       slug: 'child-slug-draft',
-      title: 'Child page',
-      parent: draftParentID,
       _status: 'draft',
+      parent: draftParentID,
+      title: 'Child page',
     })
     draftChildID = draftChildPage.id
   })

@@ -4,9 +4,10 @@ import { expect, test } from '@playwright/test'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
+import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { embedCookieName, themeCookieName } from './shared.js'
 
@@ -30,8 +31,7 @@ test.describe('embed mode', () => {
     url = new AdminUrlUtil(serverURL, 'users')
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -50,12 +50,12 @@ test.describe('embed mode', () => {
     // Playwright surfaces as `partitionKey`, keyed to the top-level site).
     // Poll, since the cookie is written by a client effect after render.
     await expect.poll(getEmbedCookie).toMatchObject({
-      value: 'true',
       expires: -1, // session cookie: no Max-Age/Expires
       partitionKey: 'http://localhost',
       path: '/',
       sameSite: 'None',
       secure: true,
+      value: 'true',
     })
 
     // Navigating to a different page without the param keeps embed mode on via the cookie.

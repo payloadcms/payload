@@ -9,7 +9,6 @@ import {
   closeAllToasts,
   ensureCompilationIsDone,
   exactText,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
 } from '../../../__helpers/e2e/helpers.js'
@@ -17,6 +16,7 @@ import { getSelectMenu } from '../../../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../../../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { uploadsMultiPoly } from '../../slugs.js'
 
@@ -46,7 +46,7 @@ describe('Upload polymorphic with hasMany', () => {
       snapshotKey: 'fieldsTest',
       uploadsDir: path.resolve(dirname, './collections/Upload/uploads'),
     })
-    initPageConsoleErrorCatch(page)
+    await initPage({ page })
 
     await ensureCompilationIsDone({ page, serverURL })
   })

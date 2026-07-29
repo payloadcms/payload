@@ -14,7 +14,6 @@ import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
 import {
   changeLocale,
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   waitForFormReady,
 } from '../__helpers/e2e/helpers.js'
@@ -29,6 +28,7 @@ import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { credentials } from './credentials.js'
 import {
@@ -73,8 +73,7 @@ test.describe('Multi Tenant', () => {
     autosaveGlobalURL = new AdminUrlUtil(serverURL, autosaveGlobalSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
   })
@@ -369,9 +368,9 @@ test.describe('Multi Tenant', () => {
       await closeNav(page)
       await openAssignTenantModal({ page, payload })
       await selectInput({
-        page,
         multiSelect: false,
         option: 'Steel Cat',
+        page,
         selectLocator: page.locator('.tenantField'),
       })
 
@@ -433,9 +432,9 @@ test.describe('Multi Tenant', () => {
       await closeNav(page)
       await openAssignTenantModal({ page, payload })
       await selectInput({
-        page,
         multiSelect: false,
         option: 'Steel Cat',
+        page,
         selectLocator: page.locator('.tenantField'),
       })
 
@@ -570,9 +569,9 @@ test.describe('Multi Tenant', () => {
       await expect(editManyDrawer).toBeVisible()
 
       await selectInput({
-        page,
         multiSelect: true,
         options: ['Site'],
+        page,
         selectLocator: editManyDrawer.locator('.edit-many-bulk-uploads__form .react-select'),
       })
 
@@ -583,9 +582,9 @@ test.describe('Multi Tenant', () => {
       await expect(inlineTenantField).toBeVisible()
 
       await selectInput({
-        page,
         multiSelect: false,
         option: 'Blue Dog',
+        page,
         selectLocator: inlineTenantField,
         selectType: 'relationship',
       })
@@ -733,8 +732,8 @@ test.describe('Multi Tenant', () => {
               // Check if this is a render-list action
               if (Array.isArray(parsedPayload) && parsedPayload[0]?.name === 'render-list') {
                 renderListRequests.push({
-                  url: request.url(),
                   payload: parsedPayload,
+                  url: request.url(),
                 })
               }
             } catch (e) {
@@ -757,8 +756,8 @@ test.describe('Multi Tenant', () => {
       })
 
       await openRelationshipFieldDrawer({
-        page,
         fieldName: 'polymorphicRelationship',
+        page,
         selectRelation: 'Relationship', // select a tenant-enabled collection
       })
 
@@ -1201,7 +1200,7 @@ test.describe('Multi Tenant', () => {
       await checkbox.click()
 
       // Open the move drawer
-      const moveButton = page.getByRole('button', { exact: true, name: 'Move' })
+      const moveButton = page.getByRole('button', { name: 'Move', exact: true })
       await expect(moveButton).toBeVisible()
       await moveButton.click()
 
@@ -1444,9 +1443,9 @@ async function selectDocumentTenant({
   await closeNav(page)
   await openAssignTenantModal({ page, payload })
   await selectInput({
-    page,
     multiSelect: false,
     option: tenant,
+    page,
     selectLocator: page.locator('.tenantField'),
   })
 
@@ -1499,9 +1498,9 @@ async function setTenantFilter({
 
   await openNav(page)
   await selectInput({
-    page,
     multiSelect: false,
     option: tenant,
+    page,
     selectLocator: page.locator('.tenant-selector'),
   })
 }
@@ -1515,9 +1514,9 @@ async function switchGlobalDocTenant({
 }): Promise<void> {
   await openNav(page)
   await selectInput({
-    page,
     multiSelect: false,
     option: tenant,
+    page,
     selectLocator: page.locator('.tenant-selector'),
   })
 }

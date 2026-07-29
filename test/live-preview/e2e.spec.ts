@@ -10,7 +10,6 @@ import type { Config } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
@@ -30,6 +29,7 @@ import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSav
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -72,7 +72,7 @@ describe('Live Preview', () => {
 
   beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
-    ;({ serverURL, payload } = await initPayloadE2ENoConfig<Config>({ dirname }))
+    ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     pagesURLUtil = new AdminUrlUtil(serverURL, pagesSlug)
     postsURLUtil = new AdminUrlUtil(serverURL, postsSlug)
@@ -81,9 +81,8 @@ describe('Live Preview', () => {
     ssrAutosavePagesURLUtil = new AdminUrlUtil(serverURL, ssrAutosavePagesSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
+    ;({ page } = await initPage({ context }))
 
-    initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
 
     user = await payload
@@ -148,9 +147,9 @@ describe('Live Preview', () => {
 
   test('saves live preview state to preferences and loads it on next visit', async () => {
     await deletePreferences({
+      key: `collection-${pagesSlug}`,
       payload,
       user,
-      key: `collection-${pagesSlug}`,
     })
 
     await navigateToDoc(page, pagesURLUtil)
@@ -185,9 +184,9 @@ describe('Live Preview', () => {
     const openByDefaultURL = new AdminUrlUtil(serverURL, openByDefaultSlug)
 
     await deletePreferences({
+      key: `collection-${openByDefaultSlug}`,
       payload,
       user,
-      key: `collection-${openByDefaultSlug}`,
     })
 
     await page.goto(openByDefaultURL.create)
@@ -215,9 +214,9 @@ describe('Live Preview', () => {
 
   test('collection — defers iframe render until toggled and keeps it mounted after toggling off', async () => {
     await deletePreferences({
+      key: `collection-${pagesSlug}`,
       payload,
       user,
-      key: `collection-${pagesSlug}`,
     })
 
     await navigateToDoc(page, pagesURLUtil)
@@ -459,11 +458,11 @@ describe('Live Preview', () => {
     const testDoc = await payload.create({
       collection: pagesSlug,
       data: {
-        title: initialTitle,
         slug: 'csr-test',
         hero: {
           type: 'none',
         },
+        title: initialTitle,
       },
     })
 
@@ -601,11 +600,11 @@ describe('Live Preview', () => {
     const testDoc = await payload.create({
       collection: ssrAutosavePagesSlug,
       data: {
-        title: initialTitle,
         slug: 'ssr-test',
         hero: {
           type: 'none',
         },
+        title: initialTitle,
       },
     })
 
@@ -617,7 +616,7 @@ describe('Live Preview', () => {
 
     const titleField = page.locator('#field-title')
 
-    const { iframe, frame } = await getLivePreviewIframe(page, {
+    const { frame, iframe } = await getLivePreviewIframe(page, {
       expectIframeSrcToMatch: new RegExp(`/live-preview/${ssrAutosavePagesSlug}/${testDoc.slug}`),
     })
 
@@ -668,13 +667,13 @@ describe('Live Preview', () => {
     await expect(frame.locator(renderedPageTitleLocator)).toHaveText('For Testing: SSR Home')
 
     const newTitleValue = 'SSR Home (Edited)'
-    // eslint-disable-next-line payload/no-wait-function
+     
     await wait(1000)
 
     await titleField.clear()
     await titleField.pressSequentially(newTitleValue)
 
-    // eslint-disable-next-line payload/no-wait-function
+     
     await wait(1000)
 
     await waitForAutoSaveToRunAndComplete(page)
@@ -903,10 +902,10 @@ describe('Live Preview', () => {
         await expect.poll(async () => iframe.getAttribute('src')).toMatch(/\/live-preview/)
 
         const scanResults = await runAxeScan({
+          exclude: ['.document-fields__main'], // we don't need to test fields here
+          include: ['.collection-edit'],
           page,
           testInfo,
-          include: ['.collection-edit'],
-          exclude: ['.document-fields__main'], // we don't need to test fields here
         })
 
         expect(scanResults.violations.length).toBe(0)

@@ -20,7 +20,6 @@ import { fileURLToPath } from 'url'
 import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
 import {
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   // throttleTest,
 } from '../../../__helpers/e2e/helpers.js'
@@ -29,6 +28,7 @@ import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.j
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { initPage } from '../../../__setup/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -54,8 +54,7 @@ describe('Block fields', () => {
     }))
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -91,9 +90,9 @@ describe('Block fields', () => {
     await page.goto(url.create)
 
     await addBlock({
-      page,
-      fieldName: 'blocks',
       blockToSelect: 'Content',
+      fieldName: 'blocks',
+      page,
     })
 
     // ensure the block was appended to the rows
@@ -114,8 +113,8 @@ describe('Block fields', () => {
     await page.goto(url.create)
 
     const blocksDrawer = await openBlocksDrawer({
-      page,
       fieldName: 'blocks',
+      page,
     })
 
     const searchInput = page.locator('.block-search__input input')
@@ -141,7 +140,7 @@ describe('Block fields', () => {
   test('should open blocks drawer from block row and add below', { framework: 'rsc' }, async () => {
     await page.goto(url.create)
 
-    await addBlockBelow(page, { fieldName: 'blocks', blockToSelect: 'Content' })
+    await addBlockBelow(page, { blockToSelect: 'Content', fieldName: 'blocks' })
 
     // ensure the block was inserted beneath the first in the rows
     const addedRow = page.locator('#field-blocks #blocks-row-1')
@@ -175,9 +174,9 @@ describe('Block fields', () => {
     await page.goto(url.create)
 
     await addBlock({
-      page,
-      fieldName: 'collapsedByDefaultBlocks',
       blockToSelect: 'Localized Content',
+      fieldName: 'collapsedByDefaultBlocks',
+      page,
     })
 
     const row = page.locator(`#collapsedByDefaultBlocks-row-4`)
@@ -191,9 +190,9 @@ describe('Block fields', () => {
     await page.goto(url.create)
 
     await addBlock({
-      page,
-      fieldName: 'collapsedByDefaultBlocks',
       blockToSelect: 'Localized Content',
+      fieldName: 'collapsedByDefaultBlocks',
+      page,
     })
 
     const row = page.locator(`#collapsedByDefaultBlocks-row-4`)
@@ -203,10 +202,10 @@ describe('Block fields', () => {
     await expect(page.locator(`#field-collapsedByDefaultBlocks__4__text`)).toBeHidden()
 
     await toggleBlockOrArrayRow({
-      page,
       fieldName: 'collapsedByDefaultBlocks',
-      targetState: 'open',
+      page,
       rowIndex: 4,
+      targetState: 'open',
     })
 
     await page.locator('input#field-collapsedByDefaultBlocks__4__text').fill('Hello, world!')
@@ -223,9 +222,9 @@ describe('Block fields', () => {
     await expect(page.locator('#field-i18nBlocks .blocks-field__header')).toContainText('Block en')
 
     await addBlock({
-      page,
-      fieldName: 'i18nBlocks',
       blockToSelect: 'Text en',
+      fieldName: 'i18nBlocks',
+      page,
     })
 
     // ensure the block was appended to the rows
@@ -240,9 +239,9 @@ describe('Block fields', () => {
     await page.goto(url.create)
 
     await addBlock({
-      page,
-      fieldName: 'blocks',
       blockToSelect: 'Content',
+      fieldName: 'blocks',
+      page,
     })
 
     await expect(
@@ -256,9 +255,9 @@ describe('Block fields', () => {
     await page.goto(url.create)
 
     await addBlock({
-      page,
-      fieldName: 'blocksWithSimilarConfigs',
       blockToSelect: 'Block A',
+      fieldName: 'blocksWithSimilarConfigs',
+      page,
     })
 
     await page
@@ -275,9 +274,9 @@ describe('Block fields', () => {
     ).toHaveValue('items>0>title')
 
     await addBlock({
-      page,
-      fieldName: 'blocksWithSimilarConfigs',
       blockToSelect: 'Block B',
+      fieldName: 'blocksWithSimilarConfigs',
+      page,
     })
 
     await page
@@ -303,9 +302,9 @@ describe('Block fields', () => {
     await page.goto(url.create)
 
     await addBlock({
-      page,
-      fieldName: 'blocksWithMinRows',
       blockToSelect: 'Block With Min Row',
+      fieldName: 'blocksWithMinRows',
+      page,
     })
 
     const firstRow = page.locator('input[name="blocksWithMinRows.0.blockTitle"]')
@@ -315,8 +314,8 @@ describe('Block fields', () => {
 
     await page.click('#action-save', { delay: 100 })
     await assertToastErrors({
-      page,
       errors: ['Blocks With Min Rows'],
+      page,
     })
   })
 
@@ -372,9 +371,9 @@ describe('Block fields', () => {
         await wait(1000)
 
         await reorderBlocks({
-          page,
           fieldName: 'blocks',
           fromBlockIndex: 0,
+          page,
           toBlockIndex: 1,
         })
 
@@ -607,8 +606,8 @@ describe('Block fields', () => {
       await rowTextInput.fill(textVal)
 
       await copyPasteField({
-        page,
         fieldName: 'blocks',
+        page,
       })
 
       await page.reload()
@@ -616,9 +615,9 @@ describe('Block fields', () => {
       await expect(rowTextInput).toHaveValue('first block')
 
       await copyPasteField({
-        page,
         action: 'paste',
         fieldName: 'blocks',
+        page,
       })
 
       await expect(rowTextInput).toHaveValue(textVal)
@@ -634,8 +633,8 @@ describe('Block fields', () => {
       await rowTextInput.fill(textVal)
 
       await copyPasteField({
-        page,
         fieldName: 'blocks',
+        page,
         rowIndex: 0,
       })
 
@@ -644,9 +643,9 @@ describe('Block fields', () => {
       await expect(rowTextInput).toHaveValue('first block')
 
       await copyPasteField({
-        page,
         action: 'paste',
         fieldName: 'blocks',
+        page,
         rowIndex: 0,
       })
 
@@ -657,15 +656,15 @@ describe('Block fields', () => {
       await page.goto(url.create)
 
       await copyPasteField({
-        page,
         fieldName: 'blocks',
+        page,
         rowIndex: 1,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'duplicate',
         action: 'paste',
+        fieldName: 'duplicate',
+        page,
       })
 
       const rowsContainer = page.locator('#field-duplicate > div.blocks-field__rows').first()
@@ -685,15 +684,15 @@ describe('Block fields', () => {
       await originalInput.fill(textVal)
 
       await copyPasteField({
-        page,
         fieldName: 'blocks',
+        page,
       })
 
       const field = page.locator('#field-duplicate')
       const fieldInput = field.locator('#field-duplicate__0__text')
       await expect(fieldInput).toHaveValue('first block')
 
-      await copyPasteField({ page, action: 'paste', fieldName: 'duplicate', rowIndex: 0 })
+      await copyPasteField({ action: 'paste', fieldName: 'duplicate', page, rowIndex: 0 })
 
       const rowsContainer = page.locator('#field-duplicate > div.blocks-field__rows').first()
       await expect(rowsContainer).toBeVisible()
@@ -705,7 +704,7 @@ describe('Block fields', () => {
       await page.goto(url.create)
 
       const field = page.locator('#field-blocks')
-      await addBlock({ page, fieldName: 'blocks', blockToSelect: 'Sub Block' })
+      await addBlock({ blockToSelect: 'Sub Block', fieldName: 'blocks', page })
 
       const textInputRowOne = field.locator('#field-blocks__2__subBlocks__1__text')
       await expect(textInputRowOne).toBeVisible()
@@ -714,16 +713,16 @@ describe('Block fields', () => {
       await textInputRowOne.fill(textInputRowOneValue)
 
       await copyPasteField({
-        page,
         fieldName: 'blocks',
+        page,
         rowIndex: 2,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'blocks',
-        rowIndex: 4,
         action: 'paste',
+        fieldName: 'blocks',
+        page,
+        rowIndex: 4,
       })
 
       const textInputRowTwo = field.locator('#field-blocks__4__subBlocks__1__text')
@@ -735,9 +734,9 @@ describe('Block fields', () => {
       await page.goto(url.create)
 
       await addBlock({
-        page,
-        fieldName: 'blocks',
         blockToSelect: 'Sub Block',
+        fieldName: 'blocks',
+        page,
       })
 
       const field = page.locator('#field-blocks')
@@ -752,16 +751,16 @@ describe('Block fields', () => {
       await expect(subArrayContainer2).toHaveCount(0)
 
       await copyPasteField({
-        page,
         fieldName: 'blocks',
+        page,
         rowIndex: 4,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'blocks',
-        rowIndex: 2,
         action: 'paste',
+        fieldName: 'blocks',
+        page,
+        rowIndex: 2,
       })
 
       await expect(subArrayContainer).toHaveCount(0)
@@ -780,16 +779,16 @@ describe('Block fields', () => {
       await sourceText.fill(textVal)
 
       await copyPasteField({
-        page,
         fieldName: 'blocks__2__subBlocks',
+        page,
         rowIndex: 1,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'blocks__2__subBlocks',
-        rowIndex: 0,
         action: 'paste',
+        fieldName: 'blocks__2__subBlocks',
+        page,
+        rowIndex: 0,
       })
 
       const targetText = field.locator('#field-blocks__2__subBlocks__0__text')
@@ -801,9 +800,9 @@ describe('Block fields', () => {
       await page.goto(url.create)
 
       await addBlock({
-        page,
-        fieldName: 'blocks',
         blockToSelect: 'Sub Block',
+        fieldName: 'blocks',
+        page,
       })
 
       const field = page.locator('#field-blocks')
@@ -814,14 +813,14 @@ describe('Block fields', () => {
       await expect(targetRows).toHaveCount(0)
 
       await copyPasteField({
-        page,
         fieldName: 'blocks__2__subBlocks',
+        page,
       })
 
       await copyPasteField({
-        page,
-        fieldName: 'blocks__4__subBlocks',
         action: 'paste',
+        fieldName: 'blocks__4__subBlocks',
+        page,
       })
 
       await expect(targetRows).toHaveCount(2)
@@ -852,17 +851,17 @@ describe('Block fields', () => {
       const firstDocURL = page.url()
 
       await copyPasteField({
-        page,
         fieldName: 'blocks',
+        page,
       })
 
       // Create second document
       await page.goto(url.create)
 
       await copyPasteField({
-        page,
         action: 'paste',
         fieldName: 'blocks',
+        page,
       })
 
       const pastedTextInput = page.locator('#field-blocks__0__text')
@@ -883,7 +882,7 @@ describe('Block fields', () => {
     test('should display admin.images.thumbnail in blocks drawer', async () => {
       await page.goto(url.create)
 
-      const blocksDrawer = await openBlocksDrawer({ page, fieldName: 'blocks' })
+      const blocksDrawer = await openBlocksDrawer({ fieldName: 'blocks', page })
 
       const withIconCard = blocksDrawer
         .locator('.blocks-drawer__block')
@@ -899,7 +898,7 @@ describe('Block fields', () => {
     test('should display imageURL as thumbnail fallback in blocks drawer', async () => {
       await page.goto(url.create)
 
-      const blocksDrawer = await openBlocksDrawer({ page, fieldName: 'blocks' })
+      const blocksDrawer = await openBlocksDrawer({ fieldName: 'blocks', page })
 
       const contentCard = blocksDrawer
         .locator('.blocks-drawer__block')
@@ -976,8 +975,8 @@ describe('Block fields', () => {
           await page.locator('#field-enabledBlocks').fill('nonexistentblock')
         },
         {
-          minimumNumberOfRequests: 1,
           allowedNumberOfRequests: 2,
+          minimumNumberOfRequests: 1,
         },
       )
       await wait(200) // To be safe, wait to ensure form state has been merged back on the client-side
@@ -998,8 +997,8 @@ describe('Block fields', () => {
           await page.locator('#field-enabledBlocks').fill('blockTwo')
         },
         {
-          minimumNumberOfRequests: 1,
           allowedNumberOfRequests: 2,
+          minimumNumberOfRequests: 1,
         },
       )
       await wait(200) // To be safe, wait to ensure form state has been merged back on the client-side
@@ -1037,8 +1036,8 @@ describe('Block fields', () => {
           await page.locator('#field-enabledBlocks').fill('blockOne')
         },
         {
-          minimumNumberOfRequests: 1,
           allowedNumberOfRequests: 2,
+          minimumNumberOfRequests: 1,
         },
       )
       await wait(200) // To be safe, wait to ensure form state has been merged back on the client-side

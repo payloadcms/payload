@@ -1,7 +1,6 @@
 import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
-import { devUser } from '../credentials.js'
 import path from 'path'
 import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -12,10 +11,11 @@ import type { Config } from './payload-types.js'
 import {
   ensureCompilationIsDone,
   getRoutes,
-  initPageConsoleErrorCatch,
 } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
+import { devUser } from '../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -42,13 +42,12 @@ describe('Server Functions', () => {
     adminRoute = adminRouteFromConfig
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({
+      noAutoLogin: true,
       page,
       serverURL,
-      noAutoLogin: true,
     })
   })
 

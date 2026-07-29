@@ -2,15 +2,16 @@ import type { Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { fileURLToPath } from 'url'
 
 import type { Config } from '../../payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../../../helpers.js'
-import { AdminUrlUtil } from '../../../helpers/adminUrlUtil.js'
-import { openNav } from '../../../helpers/e2e/toggleNav.js'
-import { initPayloadE2ENoConfig } from '../../../helpers/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__helpers/e2e/helpers.js'
+import { openNav } from '../../../__helpers/e2e/toggleNav.js'
+import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../../../__setup/initPage.js'
+import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
@@ -33,9 +34,8 @@ describe('Sidebar Tabs', () => {
     adminUrl = new AdminUrlUtil(serverURL, 'admin')
 
     const context = await browser.newContext()
-    page = await context.newPage()
+    ;({ page } = await initPage({ context }))
 
-    initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
   })
 

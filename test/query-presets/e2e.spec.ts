@@ -12,7 +12,6 @@ import { addGroupBy, clearGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import {
   ensureCompilationIsDone,
   exactText,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
 import { navigateToListView } from '../__helpers/e2e/navigateToListView.js'
@@ -20,6 +19,7 @@ import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { assertURLParams } from './helpers/assertURLParams.js'
 import { openQueryPresetDrawer } from './helpers/openQueryPresetDrawer.js'
@@ -62,7 +62,7 @@ describe('Query Presets', () => {
   })
 
   beforeEach(async ({ page }) => {
-    initPageConsoleErrorCatch(page)
+    await initPage({ page })
 
     await reInitializeDB({
       serverURL,
@@ -259,9 +259,9 @@ describe('Query Presets', () => {
     page,
   }) => {
     await navigateToListView({ page, url: pagesUrl.list })
-    await checkPresetMenuOptions({ page, expectEdit: false, expectDelete: false })
+    await checkPresetMenuOptions({ expectDelete: false, expectEdit: false, page })
     await selectPreset({ page, presetTitle: seededData.everyone.title })
-    await checkPresetMenuOptions({ page, expectEdit: true, expectDelete: true })
+    await checkPresetMenuOptions({ expectDelete: true, expectEdit: true, page })
   })
 
   // eslint-disable-next-line playwright/expect-expect -- assertions are in checkPresetModifiedOptions helper
@@ -271,17 +271,17 @@ describe('Query Presets', () => {
     await navigateToListView({ page, url: pagesUrl.list })
 
     // Before selecting a preset, reset/save should not be visible in popup
-    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
+    await checkPresetModifiedOptions({ expectReset: false, expectSave: false, page })
 
     await selectPreset({ page, presetTitle: seededData.onlyMe.title })
 
     // After selecting preset but before changes, should still not show reset/save
-    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
+    await checkPresetModifiedOptions({ expectReset: false, expectSave: false, page })
 
     await toggleColumn(page, { columnLabel: 'ID' })
 
     // After making changes, reset/save should be visible
-    await checkPresetModifiedOptions({ page, expectReset: true, expectSave: true })
+    await checkPresetModifiedOptions({ expectReset: true, expectSave: true, page })
   })
 
   test('should conditionally render "update for everyone" label based on if preset is shared', async ({
@@ -343,7 +343,7 @@ describe('Query Presets', () => {
     await expect(page.locator('.icon--filter__badge')).toBeHidden()
 
     // Verify the reset/save options are hidden (no longer modified)
-    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
+    await checkPresetModifiedOptions({ expectReset: false, expectSave: false, page })
   })
 
   test('should only enter modified state when changes are made to an active preset', async ({
@@ -760,13 +760,13 @@ describe('Query Presets', () => {
     await expect(page.locator('#select-preset')).toContainText(seededData.onlyMe.title)
 
     // 3. Save button should NOT show in popup (no modifications yet)
-    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
+    await checkPresetModifiedOptions({ expectReset: false, expectSave: false, page })
 
     // 4. Make a change
     await toggleColumn(page, { columnLabel: 'ID' })
 
     // 5. Save button should show in popup
-    await checkPresetModifiedOptions({ page, expectReset: true, expectSave: true })
+    await checkPresetModifiedOptions({ expectReset: true, expectSave: true, page })
   })
 
   test('should reset groupBy when clicking reset button on modified preset', async ({ page }) => {
@@ -790,7 +790,7 @@ describe('Query Presets', () => {
     await expect(page.locator('.table-section__header').first()).toBeVisible()
 
     // Verify reset/save buttons are not visible initially (no modifications)
-    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
+    await checkPresetModifiedOptions({ expectReset: false, expectSave: false, page })
 
     // Clear the groupBy (modify the preset)
     await clearGroupBy(page)
@@ -798,7 +798,7 @@ describe('Query Presets', () => {
     await expect(page.locator('.table-section__header')).toHaveCount(0)
 
     // Verify reset button becomes visible after modification
-    await checkPresetModifiedOptions({ page, expectReset: true, expectSave: true })
+    await checkPresetModifiedOptions({ expectReset: true, expectSave: true, page })
 
     // Reset the preset changes
     await resetPresetChanges({ page })
@@ -808,7 +808,7 @@ describe('Query Presets', () => {
     await expect(page.locator('.table-section__header').first()).toBeVisible()
 
     // Verify reset button is hidden again after reset
-    await checkPresetModifiedOptions({ page, expectReset: false, expectSave: false })
+    await checkPresetModifiedOptions({ expectReset: false, expectSave: false, page })
   })
 
   test('should apply preset from URL query param', async ({ page }) => {
@@ -817,10 +817,10 @@ describe('Query Presets', () => {
 
     // Verify the where query is in the URL
     await assertURLParams({
-      page,
       columns: seededData.everyone.columns,
-      where: seededData.everyone.where,
+      page,
       preset: seededData.everyone.id,
+      where: seededData.everyone.where,
     })
 
     // Verify the preset is selected in the preset selector

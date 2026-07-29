@@ -10,12 +10,12 @@ import type { Config } from './payload-types.js'
 
 import {
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../__helpers/e2e/helpers.js'
 import { selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { documentsSlug, formsSlug, formSubmissionsSlug, mediaSlug } from './shared.js'
 
@@ -46,8 +46,7 @@ test.describe('Form Builder Plugin', () => {
     payload = payloadFromInit
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -160,9 +159,9 @@ test.describe('Form Builder Plugin', () => {
 
       const formSelect = page.locator('#field-form')
       await selectInput({
-        page,
         multiSelect: false,
         option: 'Contact Form',
+        page,
         selectLocator: formSelect,
         selectType: 'relationship',
       })

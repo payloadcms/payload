@@ -8,7 +8,6 @@ import type { Config, Geo, Post } from '../../payload-types.js'
 import {
   ensureCompilationIsDone,
   getRoutes,
-  initPageConsoleErrorCatch,
   openLocaleSelector,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
@@ -17,6 +16,7 @@ import {
 import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../../../__setup/initPage.js'
 import {
   BASE_PATH,
   customAdminRoutes,
@@ -104,8 +104,7 @@ describe('General', () => {
     uploadsTwo = new AdminUrlUtil(serverURL, uploadTwoCollectionSlug)
 
     context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
 

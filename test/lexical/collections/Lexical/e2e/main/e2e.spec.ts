@@ -17,7 +17,6 @@ import type { Config, LexicalField } from '../../../../payload-types.js'
 import {
   closeAllToasts,
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
   waitForFormReady,
@@ -30,6 +29,7 @@ import { AdminUrlUtil } from '../../../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../../../__helpers/shared/rest.js'
+import { initPage } from '../../../../../__setup/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalCustomCellSlug, lexicalFieldsSlug, richTextFieldsSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'
@@ -83,9 +83,8 @@ describe('lexicalMain', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
-    page = await context.newPage()
+    ;({ page } = await initPage({ context }))
 
-    initPageConsoleErrorCatch(page)
 
     await ensureCompilationIsDone({ page, serverURL })
   })

@@ -10,7 +10,6 @@ import type { Config } from '../../payload-types.js'
 import { openListFilters } from '../../../__helpers/e2e/filters/openListFilters.js'
 import {
   ensureCompilationIsDone,
-  initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
@@ -18,6 +17,7 @@ import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { initPage } from '../../../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { jsonFieldsSlug } from '../../slugs.js'
 import { jsonDoc } from './shared.js'
@@ -46,8 +46,7 @@ describe('JSON', () => {
     url = new AdminUrlUtil(serverURL, jsonFieldsSlug)
 
     const context = await browser.newContext()
-    page = await context.newPage()
-    initPageConsoleErrorCatch(page)
+    ;({ page } = await initPage({ context }))
 
     await ensureCompilationIsDone({ page, serverURL })
   })
@@ -75,10 +74,10 @@ describe('JSON', () => {
   test('should truncate long JSON values in list view', async () => {
     // Create a document with very long JSON (>150 chars, should truncate)
     const longJsonData = {
-      veryLongProperty:
-        'This is a very long string value that will definitely exceed the 100 character universal truth when stringified.',
       anotherProperty: 'Additional data to ensure we exceed the limit',
       nested: { deep: { value: 'More nested data' } },
+      veryLongProperty:
+        'This is a very long string value that will definitely exceed the 100 character universal truth when stringified.',
     }
 
     const longDoc = await payload.create({
@@ -252,9 +251,9 @@ describe('JSON', () => {
       await page.locator('#field-json').waitFor()
 
       const scanResults = await runAxeScan({
+        include: ['.document-fields__main'],
         page,
         testInfo,
-        include: ['.document-fields__main'],
       })
 
       expect(scanResults.violations.length).toBe(0)

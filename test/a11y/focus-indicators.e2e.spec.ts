@@ -5,13 +5,13 @@ import * as path from 'path'
 import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
+import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
 import {
   ensureCompilationIsDone,
   getRoutes,
-  initPageConsoleErrorCatch,
 } from '../__helpers/e2e/helpers.js'
-import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { initPage } from '../__setup/initPage.js'
 
 /**
  * This test suite validates the checkFocusIndicators utility against
@@ -38,9 +38,8 @@ describe('Focus Indicators Test Page', () => {
     adminRoute = adminRouteFromConfig
 
     const context = await browser.newContext()
-    page = await context.newPage()
+    ;({ page } = await initPage({ context }))
 
-    initPageConsoleErrorCatch(page)
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -73,8 +72,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-good-payload"]',
+        testInfo,
         verbose: false,
       })
 
@@ -92,8 +91,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-good-html"]',
+        testInfo,
         verbose: false,
       })
 
@@ -110,8 +109,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-good-html"]',
+        testInfo,
         verbose: false,
       })
 
@@ -133,8 +132,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-pseudo"]',
+        testInfo,
         verbose: false,
       })
 
@@ -160,8 +159,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-bad"]',
+        testInfo,
         verbose: false,
       })
 
@@ -178,8 +177,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-bad"]',
+        testInfo,
         verbose: false,
       })
 
@@ -199,8 +198,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-bad"]',
+        testInfo,
         verbose: false,
       })
 
@@ -224,8 +223,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-mixed"]',
+        testInfo,
         verbose: false,
       })
 
@@ -242,8 +241,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-mixed"]',
+        testInfo,
         verbose: false,
       })
 
@@ -266,8 +265,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-edge-cases"]',
+        testInfo,
         verbose: false,
       })
 
@@ -284,8 +283,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-edge-cases"]',
+        testInfo,
         verbose: false,
       })
 
@@ -298,8 +297,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-edge-cases"]',
+        testInfo,
         verbose: false,
       })
 
@@ -312,8 +311,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-edge-cases"]',
+        testInfo,
         verbose: false,
       })
 
@@ -326,8 +325,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-edge-cases"]',
+        testInfo,
         verbose: false,
       })
 
@@ -342,12 +341,12 @@ describe('Focus Indicators Test Page', () => {
       await page.locator('[data-testid="section-disabled"]').waitFor()
 
       const result = await checkFocusIndicators({
-        page,
-        testInfo,
-        selector: '[data-testid="section-disabled"]',
-        verbose: false,
-        minFocusableElements: 0,
         maxFocusableElements: 0,
+        minFocusableElements: 0,
+        page,
+        selector: '[data-testid="section-disabled"]',
+        testInfo,
+        verbose: false,
       })
 
       // Disabled elements should not be in the focusable elements count
@@ -362,10 +361,10 @@ describe('Focus Indicators Test Page', () => {
       await page.goto(formatAdminURL({ adminRoute, path: '/focus-indicators', serverURL }))
 
       const result = await checkFocusIndicators({
-        page,
-        testInfo,
-        selector: '[data-testid="section-good-html"]',
         maxFocusableElements: 10,
+        page,
+        selector: '[data-testid="section-good-html"]',
+        testInfo,
         verbose: false,
       })
 
@@ -378,9 +377,9 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
-        selector: '[data-testid="section-good-html"]',
         runAxeOnElements: true,
+        selector: '[data-testid="section-good-html"]',
+        testInfo,
         verbose: false,
       })
 
@@ -408,9 +407,9 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
-        selector: '[data-testid="section-bad"]',
         runAxeOnElements: true,
+        selector: '[data-testid="section-bad"]',
+        testInfo,
         verbose: false,
       })
 
@@ -432,8 +431,8 @@ describe('Focus Indicators Test Page', () => {
 
       const result = await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-bad"]',
+        testInfo,
         verbose: false,
       })
 
@@ -459,8 +458,8 @@ describe('Focus Indicators Test Page', () => {
 
       await checkFocusIndicators({
         page,
-        testInfo,
         selector: '[data-testid="section-bad"]',
+        testInfo,
         verbose: false,
       })
 
