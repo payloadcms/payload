@@ -40,6 +40,7 @@ import {
   collection1Slug,
   mixedMediaCollectionSlug,
   relationFalseFilterOptionSlug,
+  relationFilterOptionsThrowsSlug,
   relationOneSlug,
   relationRestrictedSlug,
   relationTrueFilterOptionSlug,
@@ -513,6 +514,28 @@ describe('Relationship Field', () => {
       await expect(valueOptions2).toHaveCount(2)
       await expect(valueOptions2.locator(`text=None`)).toBeVisible()
       await expect(valueOptions2.locator(`text=${idToInclude}`)).toBeVisible()
+    })
+
+    test('should fall back to unfiltered options in the list view filter panel when a relationship filterOptions function throws', async () => {
+      const filterOptionsThrowsUrl = new AdminUrlUtil(serverURL, relationFilterOptionsThrowsSlug)
+
+      await page.goto(filterOptionsThrowsUrl.list)
+      await wait(300)
+
+      const { condition } = await addListFilter({
+        page,
+        fieldLabel: 'Relationship With Throwing Filter Options',
+        operatorLabel: 'equals',
+      })
+
+      const valueInput = condition.locator('.condition__value input')
+      await valueInput.click()
+      const valueOptions = getSelectMenu({ page }).locator('.rs__option')
+
+      await expect(valueOptions).toHaveCount(3)
+      await expect(valueOptions.locator(`text=None`)).toBeVisible()
+      await expect(valueOptions.locator(`text=${relationOneDoc.id}`)).toBeVisible()
+      await expect(valueOptions.locator(`text=${anotherRelationOneDoc.id}`)).toBeVisible()
     })
 
     test('should allow usage of relationTo in `filterOptions`', async () => {
