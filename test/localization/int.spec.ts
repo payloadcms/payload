@@ -4558,6 +4558,37 @@ describe('Localization', () => {
       })
       expect(result2.totalDocs).toBe(1)
     })
+
+    it('should count global versions with query on localized field respecting locale', async () => {
+      await payload.updateGlobal({
+        slug: globalWithDraftsSlug,
+        data: { text: 'global count en', _status: 'published' },
+        locale: defaultLocale,
+      })
+
+      await payload.updateGlobal({
+        slug: globalWithDraftsSlug,
+        data: { text: 'global count es', _status: 'published' },
+        locale: spanishLocale,
+      })
+
+      const englishWhere = { 'version.text': { equals: 'global count en' } }
+
+      const inEnglish = await payload.countGlobalVersions({
+        global: globalWithDraftsSlug,
+        locale: defaultLocale,
+        where: englishWhere,
+      })
+
+      const inSpanish = await payload.countGlobalVersions({
+        global: globalWithDraftsSlug,
+        locale: spanishLocale,
+        where: englishWhere,
+      })
+
+      expect(inEnglish.totalDocs).toBeGreaterThan(0)
+      expect(inSpanish.totalDocs).toBe(0)
+    })
   })
 })
 
