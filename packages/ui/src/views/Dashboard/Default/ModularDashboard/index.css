@@ -26,21 +26,13 @@
     }
   }
 
-  .modular-dashboard .widget {
-    width: 100% !important;
-  }
-
-  .modular-dashboard .widget-wrapper__size-btn {
-    display: none;
-  }
-
-  @media (min-width: 768px) {
+  @media (max-width: 768px) {
     .modular-dashboard .widget {
-      width: revert !important;
+      width: 100% !important;
     }
 
     .modular-dashboard .widget-wrapper__size-btn {
-      display: flex;
+      display: none;
     }
   }
 
@@ -183,6 +175,7 @@
   }
 
   .widget-wrapper__size-btn {
+    display: flex;
     align-items: center;
     gap: var(--spacer-1);
     padding: var(--spacer-1) var(--spacer-2);

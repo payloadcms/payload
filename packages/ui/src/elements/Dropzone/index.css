@@ -1,14 +1,13 @@
 @layer payload-default {
   .dropzone {
     position: relative;
-    display: block;
+    display: flex;
     align-items: flex-start;
     background-color: var(--color-bg-secondary);
     border: var(--stroke-width-small) dashed var(--special-border-translucent);
     border-radius: var(--field-border-radius);
     overflow: clip;
     width: 100%;
-    text-align: center;
 
     .btn {
       margin: 0;
@@ -26,9 +25,9 @@
       }
     }
 
-    @media (min-width: 768px) {
-      display: flex;
-      text-align: unset;
+    @media (max-width: 768px) {
+      display: block;
+      text-align: center;
     }
 
     &.dropzone--style-default {

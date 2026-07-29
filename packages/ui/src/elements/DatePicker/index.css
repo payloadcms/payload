@@ -40,7 +40,7 @@
   }
 
   .react-datepicker-popper {
-    z-index: 10;
+    z-index: var(--z-portal-element);
     line-height: 0;
   }
 
@@ -883,76 +883,35 @@
     position: relative;
   }
 
-  .date-time-picker .react-datepicker {
-    flex-direction: column;
-  }
-
-  .date-time-picker .react-datepicker__month-container {
-    border-right: 0;
-  }
-
-  .date-time-picker .react-datepicker__time-container {
-    width: auto;
-    border-top: var(--stroke-width-small) solid var(--color-border);
-  }
-
-  .date-time-picker .react-datepicker__header--time {
-    background-color: transparent;
-    padding: var(--spacer-2) 0;
-    border-bottom: none;
-  }
-
-  .date-time-picker
-    .react-datepicker__time-container
-    .react-datepicker__time
-    .react-datepicker__time-box {
-    height: var(--time-column-width);
-    width: unset;
-
-    > ul {
-      height: var(--time-column-width);
-    }
-  }
-
-  .date-time-picker
-    .react-datepicker__navigation--next--with-time:not(
-      .react-datepicker__navigation--next--with-today-button
-    ) {
-    right: 0;
-  }
-
-  .date-time-picker__input-wrapper .icon {
-    top: 50%;
-    transform: translateY(-50%);
-  }
-
-  @media (min-width: 768px) {
+  @media (max-width: 768px) {
     .date-time-picker .react-datepicker {
-      flex-direction: row;
+      flex-direction: column;
     }
 
     .date-time-picker .react-datepicker__month-container {
-      border-right: revert;
+      border-right: 0;
     }
 
     .date-time-picker .react-datepicker__time-container {
-      width: var(--time-column-width);
-      border-top: none;
+      width: auto;
+      border-top: var(--stroke-width-small) solid var(--color-border);
     }
 
     .date-time-picker .react-datepicker__header--time {
-      padding: var(--spacer-2);
+      background-color: transparent;
+      padding: var(--spacer-2) 0;
+      border-bottom: none;
     }
 
     .date-time-picker
       .react-datepicker__time-container
       .react-datepicker__time
       .react-datepicker__time-box {
-      height: revert;
-      width: var(--time-column-width);
+      height: var(--time-column-width);
+      width: unset;
 
       > ul {
-        height: calc(195px + 0.85rem);
+        height: var(--time-column-width);
       }
     }
 
@@ -960,11 +919,11 @@
       .react-datepicker__navigation--next--with-time:not(
         .react-datepicker__navigation--next--with-today-button
       ) {
-      right: var(--time-column-width);
+      right: 0;
     }
 
     .date-time-picker__input-wrapper .icon {
-      top: var(--spacer-3);
+      top: 50%;
       transform: translateY(-50%);
     }
   }

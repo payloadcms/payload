@@ -8,7 +8,6 @@
     z-index: var(--z-nav);
     gap: var(--spacer-2);
     padding: var(--spacer-2-5) var(--gutter-h);
-    flex-wrap: wrap;
     border-bottom: var(--stroke-width-small) solid var(--color-border);
     background-color: var(--color-bg);
   }
@@ -18,11 +17,10 @@
     align-items: center;
     flex-grow: 1;
     gap: var(--spacer-2);
-    min-width: 0;
   }
 
   .doc-controls__before-meta {
-    display: none;
+    display: flex;
     align-items: center;
     gap: var(--spacer-2);
     flex-shrink: 0;
@@ -40,11 +38,10 @@
     list-style: none;
     padding: 0;
     color: var(--color-text);
-    gap: 0;
+    gap: var(--spacer-2);
     margin: 0;
-    width: auto;
-    overflow: visible;
-    flex-direction: column;
+    width: 100%;
+    overflow: hidden;
 
     button {
       margin: 0;
@@ -94,7 +91,6 @@
     margin: 0;
     gap: var(--spacer-2);
     position: relative;
-    margin-left: auto;
   }
 
   .doc-controls__controls {
@@ -102,11 +98,6 @@
     align-items: center;
     margin: 0;
     gap: var(--spacer-2);
-    overflow: auto;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
 
     button {
       margin: 0;
@@ -143,22 +134,6 @@
     display: none;
   }
 
-  .doc-controls__meta:has(.doc-controls__status) .doc-controls__value {
-    font-family: var(--text-body-small-font-family);
-    font-size: var(--text-body-small-font-size);
-    font-weight: var(--text-body-small-font-weight);
-    line-height: var(--text-body-small-line-height);
-    letter-spacing: var(--text-body-small-letter-spacing);
-  }
-
-  .doc-controls .autosave {
-    font-family: var(--text-body-small-font-family);
-    font-size: var(--text-body-small-font-size);
-    font-weight: var(--text-body-small-font-weight);
-    line-height: var(--text-body-small-line-height);
-    letter-spacing: var(--text-body-small-letter-spacing);
-  }
-
   /* Action buttons rendered inside the document drawer header */
   .doc-controls--drawerHeaderActions {
     position: static;
@@ -169,14 +144,14 @@
     background: transparent;
   }
 
-  @media (min-width: 1024px) {
+  @media (max-width: 1024px) {
     .doc-controls__controls-wrapper {
-      margin-left: unset;
+      margin-left: auto;
     }
 
     .doc-controls {
       gap: var(--spacer-2);
-      flex-wrap: nowrap;
+      flex-wrap: wrap;
     }
 
     .doc-controls--drawerHeaderActions {
@@ -186,41 +161,41 @@
     }
 
     .doc-controls__content {
-      min-width: unset;
+      min-width: 0;
     }
 
     .doc-controls__before-meta {
-      display: flex;
+      display: none;
     }
 
     .doc-controls__meta {
-      flex-direction: row;
-      width: 100%;
-      gap: var(--spacer-2);
-      overflow: hidden;
+      flex-direction: column;
+      width: auto;
+      gap: 0;
+      overflow: visible;
     }
 
     .doc-controls__meta:has(.doc-controls__status) .doc-controls__value {
-      font-family: var(--text-body-medium-font-family);
-      font-size: var(--text-body-medium-font-size);
-      font-weight: var(--text-body-medium-font-weight);
-      line-height: var(--text-body-medium-line-height);
-      letter-spacing: var(--text-body-medium-letter-spacing);
+      font-family: var(--text-body-small-font-family);
+      font-size: var(--text-body-small-font-size);
+      font-weight: var(--text-body-small-font-weight);
+      line-height: var(--text-body-small-line-height);
+      letter-spacing: var(--text-body-small-letter-spacing);
     }
 
     .doc-controls .autosave {
-      font-family: var(--text-body-medium-font-family);
-      font-size: var(--text-body-medium-font-size);
-      font-weight: var(--text-body-medium-font-weight);
-      line-height: var(--text-body-medium-line-height);
-      letter-spacing: var(--text-body-medium-letter-spacing);
+      font-family: var(--text-body-small-font-family);
+      font-size: var(--text-body-small-font-size);
+      font-weight: var(--text-body-small-font-weight);
+      line-height: var(--text-body-small-line-height);
+      letter-spacing: var(--text-body-small-letter-spacing);
     }
 
     .doc-controls__controls {
-      overflow: unset;
+      overflow: auto;
 
       &::-webkit-scrollbar {
-        display: unset;
+        display: none;
       }
     }
   }

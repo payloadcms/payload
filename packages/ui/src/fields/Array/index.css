@@ -39,13 +39,9 @@
       padding: 0;
     }
 
-    & > li:not(:last-child) {
-      display: none;
-    }
-
-    @media (min-width: 768px) {
+    @media (max-width: 768px) {
       & > li:not(:last-child) {
-        display: revert;
+        display: none;
       }
     }
   }

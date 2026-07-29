@@ -16,12 +16,10 @@
     height: min(720px, var(--dialog-max-height));
   }
 
-  /* The body is the column (file tree + edit view) that fills the space between the header and the
-     actions footer. Mobile stacks it; the desktop two-column row is established in the media query
-     below. */
+  /* The body is the two-column row (file tree + edit view) that fills the space between the header
+     and the actions footer. */
   .bulk-upload--file-manager__body {
     display: flex;
-    flex-direction: column-reverse;
     flex: 1 1 auto;
     min-height: 0;
     width: 100%;
@@ -40,10 +38,9 @@
     min-width: 0;
     height: 100%;
     max-height: 100%;
-    /* Mobile: the whole edit view scrolls as one column. On desktop it does not scroll — the
-       preview stays put while the fields column scrolls internally (see media query below). */
-    overflow-x: hidden;
-    overflow-y: auto;
+    /* The edit view itself does not scroll — the preview stays put while the fields column scrolls
+       internally. */
+    overflow: hidden;
   }
 
   .bulk-upload--file-manager .collection-edit__form {
@@ -51,35 +48,34 @@
     min-height: 0;
   }
 
-  /* Mobile: the fields and preview stack as a single auto-height column (no divider, no internal
-     field scroll). The desktop row, ordering and sizing are established in the media query below
-     (the bulk modal does not establish the `edit-main` container query the document edit page
-     relies on). */
+  /* Desktop: fields sit on the left and the preview on the right as a fixed-width side panel,
+     separated by a divider. The shared layout has no base flex rules of its own, so the row,
+     ordering and sizing are established here. The responsive stacking is handled by the viewport
+     media query below (the bulk modal does not establish the `edit-main` container query the
+     document edit page relies on). */
   .bulk-upload--file-manager .collection-edit__upload-layout {
     display: flex;
-    flex-direction: column;
-    height: auto;
+    flex-direction: row;
+    height: 100%;
     align-items: stretch;
   }
 
-  /* Reset the desktop flex-basis: 0 fill so the fields size to their content in the auto-height
-     stacked column instead of collapsing to zero height. */
+  /* The fields scroll within their own column so the preview stays in place. */
   .bulk-upload--file-manager .collection-edit__upload-layout .document-fields {
     order: 0;
-    flex: 0 0 auto;
+    flex: 4 1 0;
     min-width: 0;
     min-height: 0;
-    height: auto;
-    overflow-y: visible;
+    height: 100%;
+    overflow-y: auto;
   }
 
-  /* Size to content in the stacked column. The desktop fill chain uses flex-basis: 0, which
-     collapses to 0 height here (auto-height column) and lets the preview overflow the fields. */
+  /* The preview sits on the right (5fr media : 4fr content) with a divider. */
   .bulk-upload--file-manager .collection-edit__upload-layout .file-manager {
-    order: 0;
-    flex: 0 0 auto;
+    order: 1;
+    flex: 5 1 0;
     min-height: 0;
-    border-inline-start: 0;
+    border-inline-start: var(--stroke-width-small) solid var(--color-border);
   }
 
   /* Contained file manager (not the full-viewport sticky panel used on the document edit page);
@@ -89,33 +85,23 @@
     border: none;
   }
 
-  .bulk-upload--file-manager .file-manager__content {
-    flex: 0 0 auto;
-  }
-
   .bulk-upload--file-manager .file-manager__panel {
     position: static;
-    height: auto;
+    height: 100%;
     min-height: 0;
   }
 
-  /* Stack the preview above the file name and size to content. The base layout uses
-     `flex: 1 0 0`, which caps the upload at the column's available height and lets the file name
-     overflow out the bottom; `flex: 0 0 auto` lets it grow to contain both. The min-height keeps
-     the (absolutely positioned) empty-state dropzone room when no preview is present. */
   .bulk-upload--file-manager .file-manager__upload {
     padding: 0;
     justify-content: flex-start;
-    flex: 0 0 auto;
-    min-height: min(50dvh, 360px);
   }
 
   /* The preview panel bleeds to the edges, but the media itself is inset so it has breathing room. */
   .bulk-upload--file-manager .file-manager__selected-preview {
     max-width: none;
     width: 100%;
-    flex: none;
-    height: min(50dvh, 360px);
+    flex: 1;
+    height: auto;
     min-height: 0;
     padding: var(--gutter-h);
     border-radius: 0;
@@ -127,64 +113,65 @@
     padding-inline: var(--gutter-h);
   }
 
-  .bulk-upload--file-manager .document-fields__edit {
-    padding-top: var(--spacer-3);
-  }
-
-  @media (min-width: 768px) {
-    .bulk-upload--file-manager .document-fields__edit {
-      padding-top: unset;
-    }
-  }
-
-  /* Desktop: fields sit on the left and the preview on the right as a fixed-width side panel,
-     separated by a divider. The edit view does not scroll — the preview stays put while the fields
-     column scrolls internally. */
-  @media (min-width: 1024px) {
+  /* Stack on mobile — the modal is full-screen and there is no room for two columns. The whole
+     edit view scrolls as one column (no divider, no internal field scroll). */
+  @media (max-width: 1024px) {
     .bulk-upload--file-manager__body {
-      flex-direction: row;
+      flex-direction: column-reverse;
     }
 
     .bulk-upload--file-manager__editView {
-      overflow: hidden;
-    }
-
-    .bulk-upload--file-manager .collection-edit__upload-layout {
-      flex-direction: row;
-      height: 100%;
-    }
-
-    /* The fields scroll within their own column so the preview stays in place. */
-    .bulk-upload--file-manager .collection-edit__upload-layout .document-fields {
-      flex: 4 1 0;
-      height: 100%;
+      overflow-x: hidden;
       overflow-y: auto;
     }
 
-    /* The preview sits on the right (5fr media : 4fr content) with a divider. */
+    .bulk-upload--file-manager .collection-edit__upload-layout {
+      flex-direction: column;
+      height: auto;
+    }
+
     .bulk-upload--file-manager .collection-edit__upload-layout .file-manager {
-      order: 1;
-      flex: 5 1 0;
-      border-inline-start: var(--stroke-width-small) solid var(--color-border);
+      order: 0;
+      border-inline-start: 0;
+      /* Size to content in the stacked column. The desktop fill chain uses flex-basis: 0, which
+         collapses to 0 height here (auto-height column) and lets the preview overflow the fields. */
+      flex: 0 0 auto;
     }
 
     .bulk-upload--file-manager .file-manager__content {
-      flex: 1 1 0;
+      flex: 0 0 auto;
     }
 
     .bulk-upload--file-manager .file-manager__panel {
-      height: 100%;
-    }
-
-    .bulk-upload--file-manager .file-manager__upload {
-      flex: 1 0 0;
-      min-height: unset;
-    }
-
-    /* The preview fills its column and the media itself is inset so it has breathing room. */
-    .bulk-upload--file-manager .file-manager__selected-preview {
-      flex: 1;
       height: auto;
+    }
+
+    /* Stack the preview above the file name and size to content. The base layout uses
+       `flex: 1 0 0`, which caps the upload at the column's available height and lets the file name
+       overflow out the bottom; `flex: 0 0 auto` lets it grow to contain both. The min-height keeps
+       the (absolutely positioned) empty-state dropzone room when no preview is present. */
+    .bulk-upload--file-manager .file-manager__upload {
+      flex: 0 0 auto;
+      min-height: min(50dvh, 360px);
+    }
+
+    .bulk-upload--file-manager .file-manager__selected-preview {
+      flex: none;
+      height: min(50dvh, 360px);
+    }
+
+    .bulk-upload--file-manager .collection-edit__upload-layout .document-fields {
+      /* Reset the desktop flex-basis: 0 fill so the fields size to their content in the auto-height
+         stacked column instead of collapsing to zero height. */
+      flex: 0 0 auto;
+      height: auto;
+      overflow-y: visible;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .bulk-upload--file-manager .document-fields__edit {
+      padding-top: var(--spacer-3);
     }
   }
 }

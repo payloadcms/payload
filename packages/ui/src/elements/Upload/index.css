@@ -6,17 +6,9 @@
     border-radius: var(--radius-small);
   }
 
-  /* Mobile: the upload row wraps; the desktop nowrap row is restored in the media query below. */
   .file-field__upload {
     display: flex;
     position: relative;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-
-  .file-field .tooltip.error-message {
-    z-index: 3;
-    bottom: calc(100% - var(--spacer-2));
   }
 
   .file-field__file-selected {
@@ -25,8 +17,7 @@
 
   .file-field__thumbnail-wrap {
     position: relative;
-    order: 1;
-    width: 50%;
+    width: 150px;
 
     .thumbnail {
       position: relative;
@@ -41,23 +32,16 @@
     position: absolute;
     top: var(--spacer-2);
     right: var(--spacer-2);
-    margin: var(--spacer-3);
-    order: 2;
+    margin: 0;
     z-index: 1;
   }
 
   .file-field__file-adjustments {
-    order: 3;
-    border-top: 2px solid var(--color-bg-primary);
-    padding: var(--spacer-2);
+    padding: var(--spacer-3);
     width: 100%;
     display: flex;
     flex-direction: column;
-    gap: 0;
-  }
-
-  .file-field__edit {
-    display: none;
+    gap: var(--spacer-2);
   }
 
   .file-field__upload-actions {
@@ -118,23 +102,15 @@
     position: relative;
     flex: 1 0 0;
     width: 100%;
-    min-height: 400px;
+    min-height: max(500px, calc(100dvh - var(--doc-controls-height) - var(--app-header-height)));
     margin-bottom: 0;
     border-radius: 0;
     background: var(--color-bg-secondary);
   }
 
-  /* Mobile: the side panel stacks its preview above the upload; the desktop row and full-height
-     sticky panel are restored in the media query below. */
-  .file-field__side-panel {
-    position: static;
-    height: auto;
-    min-height: 400px;
-  }
-
   .file-field__side-panel__content {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     flex: 1 1 0;
     min-height: 0;
     overflow: hidden;
@@ -145,7 +121,6 @@
     flex-direction: column;
     flex: 1 0 0;
     min-width: 0;
-    height: auto;
     background: var(--color-bg-secondary);
     padding: var(--spacer-3) var(--spacer-4);
     gap: var(--spacer-3);
@@ -222,51 +197,55 @@
     }
   }
 
-  @media (min-width: 768px) {
-    .file-field__upload {
-      flex-wrap: unset;
-      justify-content: unset;
-    }
-
-    .file-field__thumbnail-wrap {
-      order: unset;
-      width: 150px;
-    }
-
-    .file-field__remove {
-      margin: 0;
-      order: unset;
-    }
-
-    .file-field__file-adjustments {
-      order: unset;
-      border-top: 0;
-      padding: var(--spacer-3);
-      gap: var(--spacer-2);
-    }
-
-    .file-field__edit {
-      display: flex;
-    }
-  }
-
-  @media (min-width: 1024px) {
+  @media (max-width: 1024px) {
     .file-field--side-panel {
-      min-height: max(500px, calc(100dvh - var(--doc-controls-height) - var(--app-header-height)));
+      min-height: 400px;
     }
 
     .file-field__side-panel {
-      position: unset;
-      height: unset;
-      min-height: unset;
+      position: static;
+      height: auto;
+      min-height: 400px;
     }
 
     .file-field__side-panel__content {
-      flex-direction: row;
+      flex-direction: column;
     }
 
     .file-field__side-panel__preview {
-      height: unset;
+      height: auto;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .file-field__upload {
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+
+    .file-field__remove {
+      margin: var(--spacer-3);
+      order: 2;
+    }
+
+    .file-field__file-adjustments {
+      order: 3;
+      border-top: 2px solid var(--color-bg-primary);
+      padding: var(--spacer-2);
+      gap: 0;
+    }
+
+    .file-field__thumbnail-wrap {
+      order: 1;
+      width: 50%;
+
+      .thumbnail {
+        width: 100%;
+      }
+    }
+
+    .file-field__edit {
+      display: none;
     }
   }
 }

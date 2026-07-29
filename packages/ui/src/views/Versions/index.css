@@ -71,31 +71,18 @@
 
   /* on mobile, extend the table all the way to the viewport edges */
   /* this is to visually indicate overflowing content */
-  .versions .table {
-    display: flex;
-    flex-direction: column;
-    max-width: unset;
-    position: relative;
-  }
-
-  .versions .table::after {
-    content: '';
-    height: var(--stroke-width-small);
-    padding-right: var(--gutter-h);
-  }
-
-  @media (min-width: 768px) {
+  @media (max-width: 768px) {
     .versions .table {
-      display: revert;
-      flex-direction: revert;
-      max-width: revert;
-      position: revert;
+      display: flex;
+      flex-direction: column;
+      max-width: unset;
+      position: relative;
     }
 
     .versions .table::after {
-      content: none;
-      height: revert;
-      padding-right: revert;
+      content: '';
+      height: var(--stroke-width-small);
+      padding-right: var(--gutter-h);
     }
   }
 }

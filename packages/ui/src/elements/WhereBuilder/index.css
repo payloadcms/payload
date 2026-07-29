@@ -3,7 +3,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacer-2);
-    padding-block: var(--spacer-2);
+    padding-block: var(--spacer-3);
     padding-inline: var(--gutter-h);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
 
@@ -31,45 +31,44 @@
   .where-builder__or-filters {
     margin: 0;
     padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: var(--spacer-2);
+    display: grid;
+    grid-template-columns: minmax(calc(var(--spacer-4) * 2), max-content) 1fr 1fr 1fr auto;
+    column-gap: var(--spacer-2);
+    row-gap: var(--spacer-2);
     align-items: center;
   }
 
   /* Flatten the condition wrappers so each cell is a direct grid item. */
   .where-builder__and-filters {
-    display: revert;
-    width: 100%;
+    display: contents;
   }
 
   /* Add Filter button sits in column 2 onward, aligned with the field input. */
   .where-builder__add-or-row {
-    grid-column: revert;
-    align-self: flex-start;
+    grid-column: 2 / -1;
   }
 
-  @media (min-width: 768px) {
-    .where-builder {
-      padding-block: var(--spacer-3);
-    }
-
+  @media (max-width: 768px) {
     .where-builder__or-filters {
-      display: grid;
-      grid-template-columns: minmax(calc(var(--spacer-4) * 2), max-content) 1fr 1fr 1fr auto;
-      column-gap: var(--spacer-2);
-      row-gap: var(--spacer-2);
-      flex-direction: unset;
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacer-2);
     }
 
     .where-builder__and-filters {
-      display: contents;
-      width: unset;
+      display: revert;
+      width: 100%;
     }
 
     .where-builder__add-or-row {
-      grid-column: 2 / -1;
-      align-self: unset;
+      grid-column: revert;
+      align-self: flex-start;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .where-builder {
+      padding-top: var(--spacer-2);
     }
   }
 }

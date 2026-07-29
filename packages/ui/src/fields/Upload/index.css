@@ -26,7 +26,6 @@
   }
 
   .upload__dragAndDropText {
-    display: none;
     flex-shrink: 0;
     margin: 0;
     text-transform: lowercase;
@@ -44,9 +43,9 @@
     border: var(--stroke-width-small) solid var(--color-border);
   }
 
-  @media (min-width: 768px) {
+  @media (max-width: 768px) {
     .upload__dragAndDropText {
-      display: revert;
+      display: none;
     }
   }
 }

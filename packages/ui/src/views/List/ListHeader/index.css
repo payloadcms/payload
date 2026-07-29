@@ -1,11 +1,11 @@
 @layer payload-default {
   .list-drawer__header {
-    margin-top: var(--spacer-5);
+    margin-top: var(--spacer-6);
     width: 100%;
   }
 
   .list-drawer__select-collection-wrap {
-    margin-top: var(--spacer-2);
+    margin-top: var(--spacer-3);
 
     .field-label {
       margin-bottom: var(--spacer-2);
@@ -13,21 +13,17 @@
     }
   }
 
-  .list-drawer .collection-list__header {
-    margin-bottom: var(--spacer-2);
-  }
-
-  @media (min-width: 768px) {
+  @media (max-width: 768px) {
     .list-drawer__header {
-      margin-top: var(--spacer-6);
+      margin-top: var(--spacer-5);
     }
 
     .list-drawer .collection-list__header {
-      margin-bottom: unset;
+      margin-bottom: var(--spacer-2);
     }
 
     .list-drawer__select-collection-wrap {
-      margin-top: var(--spacer-3);
+      margin-top: var(--spacer-2);
     }
   }
 
