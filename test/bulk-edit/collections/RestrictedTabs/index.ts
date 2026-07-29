@@ -30,6 +30,14 @@ export const RestrictedTabsCollection: CollectionConfig = {
               type: 'text',
               label: 'Named Tab Field',
             },
+            {
+              name: 'namedTabNoUpdate',
+              type: 'text',
+              label: 'Named Tab No Update',
+              access: {
+                update: () => false,
+              },
+            },
           ],
         },
       ],

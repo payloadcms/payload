@@ -837,9 +837,15 @@ test.describe('Bulk Edit', () => {
 
     await bulkEditForm.locator('.field-select .rs__control').click()
 
+    const selectMenu = getSelectMenu({ page })
+
     await expect(
-      getSelectMenu({ page }).locator('.rs__option', { hasText: exactText('Named Tab Field') }),
+      selectMenu.locator('.rs__option', { hasText: exactText('Named Tab Field') }),
     ).toBeVisible()
+
+    await expect(
+      selectMenu.locator('.rs__option', { hasText: exactText('Named Tab No Update') }),
+    ).toBeHidden()
 
     await payload.delete({ collection: restrictedTabsSlug, id: doc.id })
   })
