@@ -6,7 +6,7 @@ import { inMemoryKVAdapter } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { initPayloadInt } from '../__setup/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
 
 let payload: Payload
 

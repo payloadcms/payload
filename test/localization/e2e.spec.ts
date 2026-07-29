@@ -31,7 +31,7 @@ import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSav
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
-import { initPage } from '../__setup/initPage.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { blocksCollectionSlug } from './collections/Blocks/index.js'

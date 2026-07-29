@@ -12,7 +12,7 @@ import { saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { selectInput } from '../__helpers/e2e/selectInput.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { initPage } from '../__setup/initPage.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { documentsSlug, formsSlug, formSubmissionsSlug, mediaSlug } from './shared.js'
 

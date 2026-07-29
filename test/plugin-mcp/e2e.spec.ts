@@ -6,7 +6,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { initPage } from '../__setup/initPage.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 

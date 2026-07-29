@@ -20,7 +20,7 @@ import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
-import { initPage } from '../__setup/initPage.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { EXPECT_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   categoriesJoinRestrictedSlug,

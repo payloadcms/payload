@@ -4,9 +4,9 @@ import type { GeneratedTypes, Payload, SanitizedConfig } from 'payload'
 import path from 'path'
 import { getPayload } from 'payload'
 
-import { getSDK } from '../__helpers/shared/getSDK.js'
-import { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
-import { runInit } from '../runInit.js'
+import { runInit } from '../../runInit.js'
+import { getSDK } from './getSDK.js'
+import { NextRESTClient } from './NextRESTClient.js'
 
 /**
  * Initialize Payload configured for integration tests

@@ -22,7 +22,7 @@ import { toggleBlockOrArrayRow } from '../__helpers/e2e/toggleCollapsible.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { initPage } from '../__setup/initPage.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug, tabsSlug } from './shared.js'
 

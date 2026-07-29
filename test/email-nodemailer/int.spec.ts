@@ -6,7 +6,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
 
-import { initPayloadInt } from '../__setup/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
 
 let payload: Payload
 let mockedSendEmail: Mock

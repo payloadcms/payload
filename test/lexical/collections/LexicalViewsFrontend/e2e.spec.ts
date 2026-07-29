@@ -9,7 +9,7 @@ import type { LexicalViewsFrontendNodes } from './index.js'
 
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
-import { ensureCompilationIsDone } from '../../../__setup/ensureCompilationIsDone.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { lexicalViewsFrontendSlug, lexicalViewsSlug } from '../../slugs.js'
 

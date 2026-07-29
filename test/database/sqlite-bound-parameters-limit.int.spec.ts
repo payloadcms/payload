@@ -4,7 +4,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, expect, it } from 'vitest'
 
-import { initPayloadInt } from '../__setup/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
 import { describe } from '../__helpers/int/vitest.js'
 
 const filename = fileURLToPath(import.meta.url)

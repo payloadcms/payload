@@ -8,11 +8,11 @@ import { createLocalReq, reload } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { NextRESTClient } from '../__setup/int/NextRESTClient.js'
 import type { BlockField, GroupField } from './payload-types.js'
 
 import { it } from '../__helpers/int/vitest.js'
-import { initPayloadInt } from '../__setup/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
 import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
 import { arrayDefaultValue } from './collections/Array/index.js'

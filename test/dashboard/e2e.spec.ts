@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { ensureCompilationIsDone } from '../__setup/ensureCompilationIsDone.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { DashboardHelper } from './utils.js'
 

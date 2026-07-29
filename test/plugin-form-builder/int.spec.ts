@@ -5,14 +5,14 @@ import { ValidationError } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { NextRESTClient } from '../__setup/int/NextRESTClient.js'
 import type { Form } from './payload-types.js'
 
 import { handleUploads } from '../../packages/plugin-form-builder/src/collections/FormSubmissions/hooks/handleUploads.js'
 import { keyValuePairToHtmlTable } from '../../packages/plugin-form-builder/src/utilities/keyValuePairToHtmlTable.js'
 import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical.js'
 import { replaceDoubleCurlys } from '../../packages/plugin-form-builder/src/utilities/replaceDoubleCurlys.js'
-import { initPayloadInt } from '../__setup/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
 import { documentsSlug, formsSlug, formSubmissionsSlug, mediaSlug } from './shared.js'
 

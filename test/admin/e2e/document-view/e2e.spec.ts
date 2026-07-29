@@ -14,8 +14,8 @@ import {
 import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
-import { ensureCompilationIsDone } from '../../../__setup/ensureCompilationIsDone.js'
-import { initPage } from '../../../__setup/initPage.js'
+import { ensureCompilationIsDone } from '../../../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../../../__setup/e2e/initPage.js'
 import {
   BASE_PATH,
   customAdminRoutes,

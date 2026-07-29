@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url'
 import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
 import { getRoutes } from '../__helpers/e2e/helpers.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { initPage } from '../__setup/initPage.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 
 /**
  * This test suite validates the checkFocusIndicators utility against

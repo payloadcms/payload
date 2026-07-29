@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import { wait } from 'payload/shared'
 
-import { patchPageMethods } from '../../__setup/patchPageMethods.js'
+import { patchPageMethods } from '../../__setup/e2e/patchPageMethods.js'
 
 export type PasteMode = 'blob' | 'html'
 

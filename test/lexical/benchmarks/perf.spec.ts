@@ -9,7 +9,7 @@ import type { Config } from '../payload-types.js'
 
 import { AdminUrlUtil } from '../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../__helpers/shared/initPayloadE2ENoConfig.js'
-import { ensureCompilationIsDone } from '../../__setup/ensureCompilationIsDone.js'
+import { ensureCompilationIsDone } from '../../__setup/e2e/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../../playwright.config.js'
 import { LexicalHelpers } from '../collections/utils.js'
 import { lexicalBenchmarkSlug } from '../slugs.js'

@@ -48,8 +48,8 @@ import {
 // Diff converter
 import { LinkDiffHTMLConverterAsync } from '../../packages/richtext-lexical/src/field/Diff/converters/link.js'
 import { it } from '../__helpers/int/vitest.js'
-import { initPayloadInt } from '../__setup/initPayloadInt.js'
-import { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
+import { NextRESTClient } from '../__setup/int/NextRESTClient.js'
 import { devUser } from '../credentials.js'
 import { lexicalDocData } from './collections/Lexical/data.js'
 import { generateLexicalLocalizedRichText } from './collections/LexicalLocalized/generateLexicalRichText.js'

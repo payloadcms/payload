@@ -16,10 +16,10 @@ import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { NextRESTClient } from '../__setup/int/NextRESTClient.js'
 import type { ApiKey } from './payload-types.js'
 
-import { initPayloadInt } from '../__setup/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
   apiKeysSlug,

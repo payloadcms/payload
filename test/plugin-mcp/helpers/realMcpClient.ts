@@ -2,7 +2,7 @@ import type { ProtocolEra } from '@modelcontextprotocol/client'
 
 import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client'
 
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
+import type { NextRESTClient } from '../../__setup/int/NextRESTClient.js'
 
 /**
  * Connects a real MCP client and returns it after the initialize handshake.

@@ -1,6 +1,6 @@
 import type { Client, ProtocolEra } from '@modelcontextprotocol/client'
 
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
+import type { NextRESTClient } from '../../__setup/int/NextRESTClient.js'
 import type { McpHTTPResponse } from './realMcpClient.js'
 
 import { connectMcpClient } from './realMcpClient.js'

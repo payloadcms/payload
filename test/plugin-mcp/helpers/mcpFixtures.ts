@@ -7,10 +7,10 @@ import { fileURLToPath } from 'url'
 import { test as base, onTestFinished } from 'vitest'
 
 import type { TestRBAC } from '../../__helpers/plugins/rbac/index.js'
-import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
+import type { NextRESTClient } from '../../__setup/int/NextRESTClient.js'
 import type { McpClient } from './mcpClient.js'
 
-import { initPayloadInt } from '../../__setup/initPayloadInt.js'
+import { initPayloadInt } from '../../__setup/int/initPayloadInt.js'
 import { devUser } from '../../credentials.js'
 import { createMcpClient } from './mcpClient.js'
 

@@ -13,10 +13,10 @@ import { getEntityPermissions } from 'payload/internal'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import type { NextRESTClient } from '../__setup/int/NextRESTClient.js'
 import type { FullyRestricted, Post } from './payload-types.js'
 
-import { initPayloadInt } from '../__setup/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
 import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,

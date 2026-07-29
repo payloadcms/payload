@@ -4,7 +4,7 @@ import { describe, beforeAll, afterAll, it, expect } from 'vitest'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { initPayloadInt } from '../__setup/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
 
 let payload: Payload
 

@@ -11,7 +11,7 @@ import type { Config } from './payload-types.js'
 import { getRoutes } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { initPage } from '../__setup/initPage.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { devUser } from '../credentials.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 

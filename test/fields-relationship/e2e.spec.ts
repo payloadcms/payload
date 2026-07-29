@@ -33,8 +33,8 @@ import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
-import { ensureCompilationIsDone } from '../__setup/ensureCompilationIsDone.js'
-import { initPage } from '../__setup/initPage.js'
+import { ensureCompilationIsDone } from '../__setup/e2e/ensureCompilationIsDone.js'
+import { initPage } from '../__setup/e2e/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
   collection1Slug,

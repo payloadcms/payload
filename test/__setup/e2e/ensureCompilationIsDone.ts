@@ -4,11 +4,11 @@ import { expect } from '@playwright/test'
 import { type Config } from 'payload'
 import { formatAdminURL, wait } from 'payload/shared'
 
-import type { AdminRoutes } from '../__helpers/e2e/helpers.js'
+import type { AdminRoutes } from '../../__helpers/e2e/helpers.js'
 
-import { getRoutes } from '../__helpers/e2e/helpers.js'
-import { hideNextDevTools } from '../__helpers/e2e/hideNextDevTools.js'
-import { POLL_TOPASS_TIMEOUT } from '../playwright.config.js'
+import { getRoutes } from '../../__helpers/e2e/helpers.js'
+import { hideNextDevTools } from '../../__helpers/e2e/hideNextDevTools.js'
+import { POLL_TOPASS_TIMEOUT } from '../../playwright.config.js'
 
 /**
  * Ensure admin panel is loaded before running tests

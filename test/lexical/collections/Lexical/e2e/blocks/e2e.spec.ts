@@ -32,7 +32,7 @@ import { assertToastErrors } from '../../../../../__helpers/shared/assertToastEr
 import { reInitializeDB } from '../../../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../../../__helpers/shared/rest.js'
-import { initPage } from '../../../../../__setup/initPage.js'
+import { initPage } from '../../../../../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../../../playwright.config.js'
 import { lexicalFieldsSlug, lexicalNestedBlocksSlug } from '../../../../slugs.js'
 import { lexicalDocData } from '../../data.js'

@@ -7,7 +7,7 @@ import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import { initPayloadInt } from '../__setup/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
 import { collectionPrefix, mediaWithCompositePrefixesSlug } from './shared.js'
 import { clearTestBucket, createTestBucket } from './utils.js'
 

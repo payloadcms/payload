@@ -1,7 +1,7 @@
 import type { BrowserContext, Page } from '@playwright/test'
 import type { Config } from 'payload'
 
-import type { AdminRoutes } from '../__helpers/e2e/helpers.js'
+import type { AdminRoutes } from '../../__helpers/e2e/helpers.js'
 
 import { catchConsoleErrors } from './catchConsoleErrors.js'
 import { ensureCompilationIsDone } from './ensureCompilationIsDone.js'
