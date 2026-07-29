@@ -19,9 +19,14 @@ const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export const validationCollectionSlug = 'validation-items'
+export const validationFallbackCollectionSlug = 'validation-fallback-items'
 export const validationGlobalSlug = 'validation-settings'
+export const validationFallbackGlobalSlug = 'validation-fallback-settings'
+export const validationDeniedGlobalSlug = 'validation-denied-settings'
 export const validationDraftSourceGlobalSlug = 'validation-draft-source-settings'
 export const validationAccessSourceGlobalSlug = 'validation-access-source-settings'
+export const validationWhereCollectionSlug = 'validation-where-items'
+export const validationWriteTargetGlobalSlug = 'validation-write-target-settings'
 export const publishCollectionSlug = 'validation-publish-items'
 export const publishGlobalSlug = 'validation-publish-settings'
 export const writeTargetsSlug = 'validation-write-targets'
@@ -42,13 +47,19 @@ type HookEvent = {
 
 export const hookEvents: HookEvent[] = []
 export const accessEvents: string[] = []
+export const fallbackAccessEvents: {
+  operation: string | undefined
+  source: 'collection' | 'field' | 'global'
+}[] = []
 export const globalValidationSourceEvents: string[] = []
+export const localeFilterOperationEvents: (string | undefined)[] = []
 export const permissionOperationEvents: {
   entity: 'collection' | 'global'
   observedOperation: string | undefined
   operation: string
   source: 'entity' | 'field'
 }[] = []
+export const scheduledValidationEvents: string[] = []
 export const isolationEvents: {
   candidateMarker: unknown
   contextMarker: unknown
@@ -77,14 +88,17 @@ let maximumActiveLocalePasses = 0
 
 export function clearValidationEvents(): void {
   accessEvents.length = 0
+  fallbackAccessEvents.length = 0
   globalValidationSourceEvents.length = 0
   hookEvents.length = 0
   isolationEvents.length = 0
+  localeFilterOperationEvents.length = 0
   localePassEvents.length = 0
   localePassRequests.clear()
   activeLocalePasses = 0
   maximumActiveLocalePasses = 0
   permissionOperationEvents.length = 0
+  scheduledValidationEvents.length = 0
   validationRuntimeIdentityEvents.length = 0
 }
 
@@ -200,6 +214,36 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
       })
       break
 
+    case 'deleteMany':
+      await req.payload.delete({
+        collection: writeTargetsSlug,
+        disableTransaction: true,
+        req,
+        where: {
+          id: {
+            equals: targetID!,
+          },
+        },
+      })
+      break
+
+    case 'restoreGlobalVersion':
+      await req.payload.restoreGlobalVersion({
+        id: targetID!,
+        req,
+        slug: validationWriteTargetGlobalSlug,
+      })
+      break
+
+    case 'restoreVersion':
+      await req.payload.restoreVersion({
+        id: targetID!,
+        collection: writeTargetsSlug,
+        disableTransaction: true,
+        req,
+      })
+      break
+
     case 'update':
       await req.payload.update({
         id: targetID!,
@@ -207,6 +251,32 @@ const runWriteAttempt: CollectionBeforeChangeHook = async ({ data, operation, re
         data: { title: 'must not be updated' },
         disableTransaction: true,
         req,
+      })
+      break
+
+    case 'updateGlobal':
+      await req.payload.updateGlobal({
+        slug: validationWriteTargetGlobalSlug,
+        data: {
+          title: 'must not be updated',
+        },
+        req,
+      })
+      break
+
+    case 'updateMany':
+      await req.payload.update({
+        collection: writeTargetsSlug,
+        data: {
+          title: 'must not be updated',
+        },
+        disableTransaction: true,
+        req,
+        where: {
+          id: {
+            equals: targetID!,
+          },
+        },
       })
       break
 
@@ -355,7 +425,18 @@ const validationCollection: CollectionConfig = {
     {
       name: 'writeAttempt',
       type: 'select',
-      options: ['create', 'delete', 'update', 'upload', 'version'],
+      options: [
+        'create',
+        'delete',
+        'deleteMany',
+        'restoreGlobalVersion',
+        'restoreVersion',
+        'update',
+        'updateGlobal',
+        'updateMany',
+        'upload',
+        'version',
+      ],
     },
     {
       name: 'targetID',
@@ -628,6 +709,187 @@ const validationGlobal: GlobalConfig = {
   versions: false,
 }
 
+const validationFallbackCollection: CollectionConfig = {
+  slug: validationFallbackCollectionSlug,
+  access: {
+    create: () => true,
+    read: () => true,
+    update: ({ req }) => {
+      fallbackAccessEvents.push({
+        operation: req.operation,
+        source: 'collection',
+      })
+
+      if (req.operation === 'validate' && req.context.requireValidationUser === true) {
+        return Boolean(req.user)
+      }
+
+      return req.operation !== 'validate'
+        ? true
+        : req.payloadAPI === 'REST' || req.context.allowUpdateFallback === true
+    },
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'updateProtected',
+      type: 'text',
+      access: {
+        update: ({ req }) => {
+          fallbackAccessEvents.push({
+            operation: req.operation,
+            source: 'field',
+          })
+
+          return req.context.allowFieldUpdateFallback === true
+        },
+      },
+      validate: (value) =>
+        value === undefined || value === 'valid' ? true : 'Update-protected field is invalid',
+    },
+    {
+      name: 'explicitlyValidated',
+      type: 'text',
+      access: {
+        update: () => false,
+        validate: () => true,
+      },
+      validate: (value) =>
+        value === undefined || value === 'valid' ? true : 'Explicitly validated field is invalid',
+    },
+  ],
+}
+
+const validationWhereCollection: CollectionConfig = {
+  slug: validationWhereCollectionSlug,
+  access: {
+    create: () => true,
+    read: () => true,
+    update: ({ req }) => {
+      fallbackAccessEvents.push({
+        operation: req.operation,
+        source: 'collection',
+      })
+
+      const validationScope = req.context.validationScope
+
+      if (req.operation !== 'validate') {
+        return true
+      }
+
+      return typeof validationScope === 'string'
+        ? {
+            scope: {
+              equals: validationScope,
+            },
+          }
+        : false
+    },
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'scope',
+      type: 'text',
+      required: true,
+    },
+  ],
+}
+
+const validationFallbackGlobal: GlobalConfig = {
+  slug: validationFallbackGlobalSlug,
+  access: {
+    update: ({ req }) => {
+      fallbackAccessEvents.push({
+        operation: req.operation,
+        source: 'global',
+      })
+
+      if (req.operation === 'validate' && req.context.requireValidationUser === true) {
+        return Boolean(req.user)
+      }
+
+      return req.operation !== 'validate'
+        ? true
+        : req.payloadAPI === 'REST' || req.context.allowUpdateFallback === true
+    },
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+    {
+      name: 'updateProtected',
+      type: 'text',
+      access: {
+        update: ({ req }) => {
+          fallbackAccessEvents.push({
+            operation: req.operation,
+            source: 'field',
+          })
+
+          return req.context.allowFieldUpdateFallback === true
+        },
+      },
+      validate: (value) =>
+        value === undefined || value === 'valid'
+          ? true
+          : 'Global update-protected field is invalid',
+    },
+  ],
+}
+
+const validationDeniedGlobal: GlobalConfig = {
+  slug: validationDeniedGlobalSlug,
+  access: {
+    update: ({ req }) => req.user?.email !== 'revoked@example.com',
+    validate: () => false,
+  },
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+    },
+  ],
+  hooks: {
+    beforeValidate: [
+      ({ operation }) => {
+        if (operation === 'validate') {
+          scheduledValidationEvents.push(operation)
+        }
+      },
+    ],
+  },
+  versions: {
+    drafts: {
+      schedulePublish: true,
+      validate: false,
+    },
+  },
+}
+
+const validationWriteTargetGlobal: GlobalConfig = {
+  slug: validationWriteTargetGlobalSlug,
+  fields: [
+    {
+      name: 'title',
+      type: 'text',
+      required: true,
+    },
+  ],
+  versions: true,
+}
+
 const getValidationSourceAccess: NonNullable<GlobalConfig['access']>['validate'] = ({ req }) => {
   const validationScope = req.context.validationScope
 
@@ -707,12 +969,16 @@ const validationAccessSourceGlobal: GlobalConfig = {
 const publishCollection: CollectionConfig = {
   slug: publishCollectionSlug,
   access: {
+    update: () => true,
     validate: () => true,
   },
   fields: [
     {
       name: 'title',
       type: 'text',
+      access: {
+        validate: ({ req }) => req.context.denyPublishFieldValidation !== true,
+      },
       localized: true,
       required: true,
     },
@@ -922,6 +1188,7 @@ const validationAdminCollection: CollectionConfig = {
 const validationDeniedCollection: CollectionConfig = {
   slug: validationDeniedCollectionSlug,
   access: {
+    create: () => true,
     validate: () => false,
   },
   fields: [
@@ -931,6 +1198,11 @@ const validationDeniedCollection: CollectionConfig = {
       localized: true,
     },
   ],
+  versions: {
+    drafts: {
+      validate: false,
+    },
+  },
 }
 
 const validationNonLocalizedCollection: CollectionConfig = {
@@ -955,6 +1227,8 @@ export default buildConfigWithDefaults({
   },
   collections: [
     validationCollection,
+    validationFallbackCollection,
+    validationWhereCollection,
     publishCollection,
     validationAdminCollection,
     validationDeniedCollection,
@@ -1010,6 +1284,9 @@ export default buildConfigWithDefaults({
   ],
   globals: [
     validationGlobal,
+    validationFallbackGlobal,
+    validationDeniedGlobal,
+    validationWriteTargetGlobal,
     validationDraftSourceGlobal,
     validationAccessSourceGlobal,
     publishGlobal,
@@ -1020,6 +1297,7 @@ export default buildConfigWithDefaults({
   localization: {
     defaultLocale: 'en',
     filterAvailableLocales: ({ locales, req }) => {
+      localeFilterOperationEvents.push(req.operation)
       const availableLocaleCodes = req.context.availableLocaleCodes as string[] | undefined
 
       return availableLocaleCodes

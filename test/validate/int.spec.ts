@@ -11,27 +11,37 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { devUser } from '../credentials.js'
 import {
   accessEvents,
   clearValidationEvents,
+  fallbackAccessEvents,
   getLocalePassRequestCount,
   getMaximumActiveLocalePasses,
   globalValidationSourceEvents,
   hookEvents,
   isolationEvents,
+  localeFilterOperationEvents,
   localePassEvents,
   permissionOperationEvents,
   publishCollectionSlug,
   publishGlobalSlug,
+  scheduledValidationEvents,
   validationAccessSourceGlobalSlug,
   validationCollectionSlug,
+  validationDeniedCollectionSlug,
+  validationDeniedGlobalSlug,
   validationDraftSourceGlobalSlug,
+  validationFallbackCollectionSlug,
+  validationFallbackGlobalSlug,
   validationGlobalSlug,
   validationPublishUploadsDir,
   validationPublishUploadsSlug,
   validationRuntimeIdentityEvents,
   validationUploadsDir,
   validationUploadsSlug,
+  validationWhereCollectionSlug,
+  validationWriteTargetGlobalSlug,
   writeTargetsSlug,
 } from './config.js'
 
@@ -92,6 +102,21 @@ describe('validate Local API', () => {
         where: { id: { exists: true } },
       }),
       payload.delete({
+        collection: validationDeniedCollectionSlug,
+        disableTransaction: true,
+        where: { id: { exists: true } },
+      }),
+      payload.delete({
+        collection: validationFallbackCollectionSlug,
+        disableTransaction: true,
+        where: { id: { exists: true } },
+      }),
+      payload.delete({
+        collection: validationWhereCollectionSlug,
+        disableTransaction: true,
+        where: { id: { exists: true } },
+      }),
+      payload.delete({
         collection: validationUploadsSlug,
         disableTransaction: true,
         where: { id: { exists: true } },
@@ -121,6 +146,248 @@ describe('validate Local API', () => {
   })
 
   describe('collections', () => {
+    it('should fall back to collection update access with the validate operation', async () => {
+      await expect(
+        payload.validate({
+          collection: validationFallbackCollectionSlug,
+          context: {
+            allowUpdateFallback: true,
+          },
+          data: {
+            title: 'Candidate title',
+          },
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+
+      expect(fallbackAccessEvents).toContainEqual({
+        operation: 'validate',
+        source: 'collection',
+      })
+      expect(fallbackAccessEvents.every(({ operation }) => operation === 'validate')).toBe(true)
+    })
+
+    it('should deny collection validation when its update access fallback denies it', async () => {
+      await expect(
+        payload.validate({
+          collection: validationFallbackCollectionSlug,
+          data: {
+            title: 'Candidate title',
+          },
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+      })
+    })
+
+    it('should prefer explicit collection validate access over its update access fallback', async () => {
+      await expect(
+        payload.validate({
+          collection: validationDeniedCollectionSlug,
+          data: {
+            title: 'Candidate title',
+          },
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+      })
+    })
+
+    it('should let an explicit null user override an authenticated reused collection request', async () => {
+      const req = {
+        user: {
+          collection: validationCollectionSlug,
+          id: 'authenticated-user',
+        } as never,
+      } satisfies Partial<PayloadRequest>
+
+      await expect(
+        payload.validate({
+          collection: validationFallbackCollectionSlug,
+          context: {
+            requireValidationUser: true,
+          },
+          data: {
+            title: 'Candidate title',
+          },
+          locale: 'en',
+          overrideAccess: false,
+          req,
+          user: null,
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+      })
+      expect(req.user).toMatchObject({
+        id: 'authenticated-user',
+      })
+    })
+
+    it('should fall back to field update access with the validate operation', async () => {
+      const excludedResult = await payload.validate({
+        collection: validationFallbackCollectionSlug,
+        context: {
+          allowUpdateFallback: true,
+        },
+        data: {
+          title: 'Candidate title',
+          updateProtected: 'invalid',
+        },
+        locale: 'en',
+        overrideAccess: false,
+      })
+
+      expect(excludedResult).toEqual({
+        errors: [],
+        valid: true,
+      })
+
+      clearValidationEvents()
+
+      const includedResult = await payload.validate({
+        collection: validationFallbackCollectionSlug,
+        context: {
+          allowFieldUpdateFallback: true,
+          allowUpdateFallback: true,
+        },
+        data: {
+          title: 'Candidate title',
+          updateProtected: 'invalid',
+        },
+        locale: 'en',
+        overrideAccess: false,
+      })
+
+      expect(includedResult).toMatchObject({
+        errors: [
+          {
+            locale: 'en',
+            path: 'updateProtected',
+          },
+        ],
+        valid: false,
+      })
+      expect(fallbackAccessEvents).toContainEqual({
+        operation: 'validate',
+        source: 'field',
+      })
+    })
+
+    it('should prefer explicit field validate access over its update access fallback', async () => {
+      const result = await payload.validate({
+        collection: validationFallbackCollectionSlug,
+        context: {
+          allowUpdateFallback: true,
+        },
+        data: {
+          explicitlyValidated: 'invalid',
+          title: 'Candidate title',
+        },
+        locale: 'en',
+        overrideAccess: false,
+      })
+
+      expect(result).toMatchObject({
+        errors: [
+          {
+            locale: 'en',
+            path: 'explicitlyValidated',
+          },
+        ],
+        valid: false,
+      })
+    })
+
+    it('should expose fallback-derived entity and field validation permissions', async () => {
+      const req = await createLocalReq(
+        {
+          context: {
+            allowFieldUpdateFallback: true,
+            allowUpdateFallback: true,
+          },
+        },
+        payload,
+      )
+      const permissions = await getEntityPermissions({
+        blockReferencesPermissions: {},
+        entity: payload.collections[validationFallbackCollectionSlug]!.config,
+        entityType: 'collection',
+        fetchData: false,
+        operations: ['validate'],
+        req,
+      })
+
+      expect(permissions).toMatchObject({
+        fields: {
+          updateProtected: {
+            validate: {
+              permission: true,
+            },
+          },
+        },
+        validate: {
+          permission: true,
+        },
+      })
+      expect(fallbackAccessEvents).toContainEqual({
+        operation: 'validate',
+        source: 'collection',
+      })
+      expect(fallbackAccessEvents).toContainEqual({
+        operation: 'validate',
+        source: 'field',
+      })
+      expect(req.operation).toBeUndefined()
+    })
+
+    it('should apply update access fallback constraints to stored collection validation', async () => {
+      const stored = await payload.create({
+        collection: validationWhereCollectionSlug,
+        data: {
+          scope: 'allowed',
+          title: 'Stored title',
+        },
+      })
+
+      await expect(
+        payload.validate({
+          id: stored.id,
+          collection: validationWhereCollectionSlug,
+          context: {
+            validationScope: 'allowed',
+          },
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+
+      await expect(
+        payload.validate({
+          id: stored.id,
+          collection: validationWhereCollectionSlug,
+          context: {
+            validationScope: 'denied',
+          },
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+      })
+      expect(fallbackAccessEvents.every(({ operation }) => operation === 'validate')).toBe(true)
+    })
+
     it('should isolate operation-sensitive entity and nested field permission discovery', async () => {
       const req = await createLocalReq(
         {
@@ -366,6 +633,7 @@ describe('validate Local API', () => {
         valid: true,
       })
       expect(localePassEvents.map(({ localeAtStart }) => localeAtStart)).toEqual(['en', 'de'])
+      expect(localeFilterOperationEvents).toEqual(['validate'])
     })
 
     it('should deduplicate explicit locales in deterministic order', async () => {
@@ -857,6 +1125,183 @@ describe('validate Local API', () => {
   })
 
   describe('globals', () => {
+    it('should fall back to global update access with the validate operation', async () => {
+      await expect(
+        payload.validateGlobal({
+          slug: validationFallbackGlobalSlug,
+          context: {
+            allowUpdateFallback: true,
+          },
+          data: {
+            title: 'Candidate title',
+          },
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+
+      expect(fallbackAccessEvents).toContainEqual({
+        operation: 'validate',
+        source: 'global',
+      })
+      expect(fallbackAccessEvents.every(({ operation }) => operation === 'validate')).toBe(true)
+    })
+
+    it('should deny global validation when its update access fallback denies it', async () => {
+      await expect(
+        payload.validateGlobal({
+          slug: validationFallbackGlobalSlug,
+          data: {
+            title: 'Candidate title',
+          },
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+      })
+    })
+
+    it('should let an explicit null user override an authenticated reused global request', async () => {
+      const req = {
+        user: {
+          collection: validationCollectionSlug,
+          id: 'authenticated-user',
+        } as never,
+      } satisfies Partial<PayloadRequest>
+
+      await expect(
+        payload.validateGlobal({
+          slug: validationFallbackGlobalSlug,
+          context: {
+            requireValidationUser: true,
+          },
+          data: {
+            title: 'Candidate title',
+          },
+          locale: 'en',
+          overrideAccess: false,
+          req,
+          user: null,
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+      })
+      expect(req.user).toMatchObject({
+        id: 'authenticated-user',
+      })
+    })
+
+    it('should fall back to global field update access with the validate operation', async () => {
+      const excludedResult = await payload.validateGlobal({
+        slug: validationFallbackGlobalSlug,
+        context: {
+          allowUpdateFallback: true,
+        },
+        data: {
+          title: 'Candidate title',
+          updateProtected: 'invalid',
+        },
+        locale: 'en',
+        overrideAccess: false,
+      })
+
+      expect(excludedResult).toEqual({
+        errors: [],
+        valid: true,
+      })
+
+      clearValidationEvents()
+
+      const includedResult = await payload.validateGlobal({
+        slug: validationFallbackGlobalSlug,
+        context: {
+          allowFieldUpdateFallback: true,
+          allowUpdateFallback: true,
+        },
+        data: {
+          title: 'Candidate title',
+          updateProtected: 'invalid',
+        },
+        locale: 'en',
+        overrideAccess: false,
+      })
+
+      expect(includedResult).toMatchObject({
+        errors: [
+          {
+            locale: 'en',
+            path: 'updateProtected',
+          },
+        ],
+        valid: false,
+      })
+      expect(fallbackAccessEvents).toContainEqual({
+        operation: 'validate',
+        source: 'field',
+      })
+    })
+
+    it('should expose fallback-derived global and field validation permissions', async () => {
+      const req = await createLocalReq(
+        {
+          context: {
+            allowFieldUpdateFallback: true,
+            allowUpdateFallback: true,
+          },
+        },
+        payload,
+      )
+      const permissions = await getEntityPermissions({
+        blockReferencesPermissions: {},
+        entity: payload.globals.config.find(({ slug }) => slug === validationFallbackGlobalSlug)!,
+        entityType: 'global',
+        fetchData: false,
+        operations: ['validate'],
+        req,
+      })
+
+      expect(permissions).toMatchObject({
+        fields: {
+          updateProtected: {
+            validate: {
+              permission: true,
+            },
+          },
+        },
+        validate: {
+          permission: true,
+        },
+      })
+      expect(fallbackAccessEvents).toContainEqual({
+        operation: 'validate',
+        source: 'global',
+      })
+      expect(fallbackAccessEvents).toContainEqual({
+        operation: 'validate',
+        source: 'field',
+      })
+      expect(req.operation).toBeUndefined()
+    })
+
+    it('should prefer explicit global validate access over its update access fallback', async () => {
+      await expect(
+        payload.validateGlobal({
+          slug: validationDeniedGlobalSlug,
+          data: {
+            title: 'Candidate title',
+          },
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).rejects.toMatchObject({
+        status: 403,
+      })
+    })
+
     it('should load a draft-only global only when draft validation is requested', async () => {
       const versionsBefore = await payload.countGlobalVersions({
         global: validationDraftSourceGlobalSlug,
@@ -1059,6 +1504,7 @@ describe('validate Local API', () => {
         summary: 'stored global summary',
         title: 'Stored global title',
       })
+      expect(localeFilterOperationEvents).toEqual(['validate'])
       expect(req.operation).toBe('read')
     })
 
@@ -1223,6 +1669,61 @@ describe('validate Local API', () => {
   })
 
   describe('REST API', () => {
+    it('should use collection update access when validate access is not configured', async () => {
+      const response = await restClient.POST(
+        `/${validationFallbackCollectionSlug}/validate?locale=en`,
+        {
+          body: JSON.stringify({
+            title: 'Candidate title',
+          }),
+        },
+      )
+
+      expect(response.status).toBe(200)
+      await expect(response.json()).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+      expect(fallbackAccessEvents).toContainEqual({
+        operation: 'validate',
+        source: 'collection',
+      })
+    })
+
+    it('should use global update access when validate access is not configured', async () => {
+      const response = await restClient.POST(
+        `/globals/${validationFallbackGlobalSlug}/validate?locale=en`,
+        {
+          body: JSON.stringify({
+            title: 'Candidate title',
+          }),
+        },
+      )
+
+      expect(response.status).toBe(200)
+      await expect(response.json()).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+      expect(fallbackAccessEvents).toContainEqual({
+        operation: 'validate',
+        source: 'global',
+      })
+    })
+
+    it('should deny global REST validation when explicit validate access denies it', async () => {
+      const response = await restClient.POST(
+        `/globals/${validationDeniedGlobalSlug}/validate?locale=en`,
+        {
+          body: JSON.stringify({
+            title: 'Candidate title',
+          }),
+        },
+      )
+
+      expect(response.status).toBe(403)
+    })
+
     it('should return invalid collection create validation without creating a document', async () => {
       const response = await restClient.POST(`/${validationCollectionSlug}/validate?locale=en`, {
         body: JSON.stringify({
@@ -1304,6 +1805,14 @@ describe('validate Local API', () => {
           }),
         },
       )
+      expect(repeatedLocale.status).toBe(200)
+      await expect(repeatedLocale.json()).resolves.toEqual({
+        errors: [],
+        valid: true,
+      })
+
+      clearValidationEvents()
+
       const allLocales = await restClient.POST(`/${validationCollectionSlug}/validate?locale=all`, {
         body: JSON.stringify({
           summary: 'candidate summary',
@@ -1311,16 +1820,12 @@ describe('validate Local API', () => {
         }),
       })
 
-      expect(repeatedLocale.status).toBe(200)
-      await expect(repeatedLocale.json()).resolves.toEqual({
-        errors: [],
-        valid: true,
-      })
       expect(allLocales.status).toBe(200)
       await expect(allLocales.json()).resolves.toEqual({
         errors: [],
         valid: true,
       })
+      expect(localeFilterOperationEvents).toEqual(['validate'])
     })
 
     it('should use the latest collection draft as the REST validation base', async () => {
@@ -1482,20 +1987,15 @@ describe('validate Local API', () => {
       })
     })
 
-    it('should deny validation when access.validate returns false', async () => {
-      const collection = payload.collections[validationCollectionSlug]!
-      const validate = collection.config.access.validate
-
-      collection.config.access.validate = () => false
-
-      const response = await restClient.POST(`/${validationCollectionSlug}/validate?locale=en`, {
-        body: JSON.stringify({
-          summary: 'candidate summary',
-          title: 'Candidate title',
-        }),
-      })
-
-      collection.config.access.validate = validate
+    it('should deny collection REST validation when explicit validate access denies it', async () => {
+      const response = await restClient.POST(
+        `/${validationDeniedCollectionSlug}/validate?locale=en`,
+        {
+          body: JSON.stringify({
+            title: 'Candidate title',
+          }),
+        },
+      )
 
       expect(response.status).toBe(403)
     })
@@ -1591,6 +2091,23 @@ describe('validate Local API', () => {
       })
     })
 
+    it('should reject a bulk update that reuses the validation request before a row is written', async () => {
+      const target = await createWriteTarget()
+
+      await expect(runWriteAttempt('updateMany', target.id)).rejects.toThrow(
+        'Payload writes are not allowed during validation',
+      )
+
+      await expect(
+        payload.findByID({
+          id: target.id,
+          collection: writeTargetsSlug,
+        }),
+      ).resolves.toMatchObject({
+        title: 'stored target',
+      })
+    })
+
     it('should reject a delete that reuses the validation request before a row is removed', async () => {
       const target = await createWriteTarget()
 
@@ -1605,6 +2122,118 @@ describe('validate Local API', () => {
         }),
       ).resolves.toMatchObject({
         title: 'stored target',
+      })
+    })
+
+    it('should reject a bulk delete that reuses the validation request before a row is removed', async () => {
+      const target = await createWriteTarget()
+
+      await expect(runWriteAttempt('deleteMany', target.id)).rejects.toThrow(
+        'Payload writes are not allowed during validation',
+      )
+
+      await expect(
+        payload.findByID({
+          id: target.id,
+          collection: writeTargetsSlug,
+        }),
+      ).resolves.toMatchObject({
+        title: 'stored target',
+      })
+    })
+
+    it('should reject a global update that reuses the validation request before data is written', async () => {
+      await payload.updateGlobal({
+        slug: validationWriteTargetGlobalSlug,
+        data: {
+          title: 'stored global target',
+        },
+      })
+
+      await expect(runWriteAttempt('updateGlobal')).rejects.toThrow(
+        'Payload writes are not allowed during validation',
+      )
+
+      await expect(
+        payload.findGlobal({
+          slug: validationWriteTargetGlobalSlug,
+        }),
+      ).resolves.toMatchObject({
+        title: 'stored global target',
+      })
+    })
+
+    it('should reject a collection version restore before the document is written', async () => {
+      const target = await createWriteTarget()
+
+      await payload.update({
+        id: target.id,
+        collection: writeTargetsSlug,
+        data: {
+          title: 'latest target',
+        },
+        disableTransaction: true,
+      })
+
+      const versions = await payload.findVersions({
+        collection: writeTargetsSlug,
+        where: {
+          parent: {
+            equals: target.id,
+          },
+        },
+      })
+      const originalVersion = versions.docs.find(({ version }) => version.title === 'stored target')
+
+      expect(originalVersion).toBeDefined()
+
+      await expect(runWriteAttempt('restoreVersion', originalVersion!.id)).rejects.toThrow(
+        'Payload writes are not allowed during validation',
+      )
+
+      await expect(
+        payload.findByID({
+          id: target.id,
+          collection: writeTargetsSlug,
+        }),
+      ).resolves.toMatchObject({
+        title: 'latest target',
+      })
+    })
+
+    it('should reject a global version restore before the global is written', async () => {
+      await payload.updateGlobal({
+        slug: validationWriteTargetGlobalSlug,
+        data: {
+          title: 'stored global target',
+        },
+      })
+      await payload.updateGlobal({
+        slug: validationWriteTargetGlobalSlug,
+        data: {
+          title: 'latest global target',
+        },
+      })
+
+      const versions = await payload.findGlobalVersions({
+        slug: validationWriteTargetGlobalSlug,
+      })
+      const originalVersion = versions.docs.find(
+        ({ version }) => version.title === 'stored global target',
+      )
+
+      expect(originalVersion).toBeDefined()
+
+      await expect(runWriteAttempt('restoreGlobalVersion', originalVersion!.id)).rejects.toThrow(
+        'Payload writes are not allowed during validation',
+      )
+
+      await expect(
+        payload.findGlobal({
+          slug: validationWriteTargetGlobalSlug,
+        }),
+      ).resolves.toMatchObject({
+        title: 'latest global target',
       })
     })
 
@@ -1647,6 +2276,72 @@ describe('validate Local API', () => {
   })
 
   describe('publish enforcement', () => {
+    it('should not require validate access after collection create access succeeds', async () => {
+      await expect(
+        payload.create({
+          collection: validationDeniedCollectionSlug,
+          data: {
+            _status: 'published',
+            title: 'Published with create access',
+          },
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({
+        _status: 'published',
+        title: 'Published with create access',
+      })
+    })
+
+    it('should not require validate access after global update access succeeds', async () => {
+      await expect(
+        payload.updateGlobal({
+          slug: validationDeniedGlobalSlug,
+          data: {
+            _status: 'published',
+            title: 'Published with update access',
+          },
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).resolves.toMatchObject({
+        _status: 'published',
+        title: 'Published with update access',
+      })
+    })
+
+    it('should validate the complete publish candidate despite restrictive validate field access', async () => {
+      const draft = await seedPublishCollection({
+        de: 'German optional',
+        en: 'English title',
+        es: '',
+      })
+
+      await expect(
+        payload.update({
+          id: draft.id,
+          collection: publishCollectionSlug,
+          context: {
+            denyPublishFieldValidation: true,
+          },
+          data: {
+            _status: 'published',
+          },
+          locale: 'en',
+          overrideAccess: false,
+        }),
+      ).rejects.toMatchObject({
+        data: {
+          errors: expect.arrayContaining([
+            expect.objectContaining({
+              locale: 'es',
+              path: 'title',
+            }),
+          ]),
+        },
+      })
+    })
+
     it('should preserve upload files and persisted state when replacement publish validation fails', async () => {
       const originalFile = await getFileByPath(path.resolve(dirname, '../uploads/image.png'))
       originalFile.name = 'validation-published-original.png'
@@ -2815,6 +3510,69 @@ describe('validate Local API', () => {
         })
       })
 
+      it('should not require validate access after scheduled global update access succeeds', async () => {
+        const adminUser = await payload.create({
+          collection: 'users',
+          data: devUser,
+        })
+
+        await payload.updateGlobal({
+          slug: validationDeniedGlobalSlug,
+          data: {
+            _status: 'draft',
+            title: 'Scheduled with update access',
+          },
+          draft: true,
+          locale: 'en',
+        })
+
+        const job = await payload.jobs.queue({
+          input: {
+            global: validationDeniedGlobalSlug,
+            user: adminUser.id,
+          },
+          task: 'schedulePublish',
+        })
+
+        const result = await payload.jobs.run({ silent: true })
+
+        expect(result.jobStatus?.[job.id]?.status).toBe('success')
+        expect(scheduledValidationEvents).toEqual(['validate', 'validate', 'validate', 'validate'])
+      })
+
+      it('should check scheduled update access before running validation hooks', async () => {
+        const revokedUser = await payload.create({
+          collection: 'users',
+          data: {
+            ...devUser,
+            email: 'revoked@example.com',
+          },
+        })
+
+        await payload.updateGlobal({
+          slug: validationDeniedGlobalSlug,
+          data: {
+            _status: 'draft',
+            title: 'Must not be validated',
+          },
+          draft: true,
+          locale: 'en',
+        })
+
+        const job = await payload.jobs.queue({
+          input: {
+            global: validationDeniedGlobalSlug,
+            user: revokedUser.id,
+          },
+          task: 'schedulePublish',
+        })
+
+        const result = await payload.jobs.run({ silent: true })
+
+        expect(result.jobStatus?.[job.id]?.status).toBe('error-reached-max-retries')
+        expect(scheduledValidationEvents).toEqual([])
+      })
+
       it('should validate the current and required global locales but skip optional siblings', async () => {
         await seedPublishGlobal({
           de: '',
@@ -2965,7 +3723,17 @@ async function createWriteTarget() {
 }
 
 async function runWriteAttempt(
-  writeAttempt: 'create' | 'delete' | 'update' | 'upload' | 'version',
+  writeAttempt:
+    | 'create'
+    | 'delete'
+    | 'deleteMany'
+    | 'restoreGlobalVersion'
+    | 'restoreVersion'
+    | 'update'
+    | 'updateGlobal'
+    | 'updateMany'
+    | 'upload'
+    | 'version',
   targetID?: number | string,
 ) {
   return payload.validate({
