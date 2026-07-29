@@ -365,6 +365,8 @@ export const sanitizeField = async ({
       field.access = {}
     }
 
+    field.access.validate = field.access.validate ?? field.access.update
+
     setDefaultBeforeDuplicate(field, parentIsLocalized)
   }
 

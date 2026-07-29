@@ -263,7 +263,7 @@ export const createOperation = async <
           localization: config.localization,
           publishAllLocales,
         }),
-        overrideAccess,
+        overrideAccess: true,
         req,
         validationDataLocale:
           locale && locale !== 'all'

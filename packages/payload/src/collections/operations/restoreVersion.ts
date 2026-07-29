@@ -13,6 +13,7 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { assertNoValidationWrite } from '../../utilities/assertNoValidationWrite.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
@@ -43,6 +44,8 @@ export const restoreVersionOperation = async <
 >(
   args: Arguments,
 ): Promise<TData> => {
+  assertNoValidationWrite(args.req)
+
   const {
     id,
     collection: { config: collectionConfig },

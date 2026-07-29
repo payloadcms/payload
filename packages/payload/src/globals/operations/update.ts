@@ -288,7 +288,7 @@ export const updateOperation = async <
           localization: payload.config.localization,
           publishAllLocales,
         }),
-        overrideAccess,
+        overrideAccess: true,
         req,
         validationDataLocale:
           locale && locale !== 'all'

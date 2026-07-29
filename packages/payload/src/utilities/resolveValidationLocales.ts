@@ -101,28 +101,39 @@ export async function resolveValidationLocales({
   return locales
 }
 
+/**
+ * A request that already carries a transaction ID shares a database session with the transaction
+ * it was cloned from. Concurrent operations on one session are unsafe, so locale passes must run
+ * one at a time rather than with the default concurrency.
+ */
+export function resolveValidationConcurrency(
+  req: Partial<PayloadRequest> | undefined,
+): number | undefined {
+  return req?.transactionID ? 1 : undefined
+}
+
 export async function runValidationLocalePasses<TResult>({
+  concurrency = validationLocaleConcurrency,
   locales,
   validate,
 }: {
+  /**
+   * Maximum number of locale passes to run at once. Pass `1` when the request being validated
+   * shares a database session with an already-open transaction, since concurrent operations on
+   * one session are unsafe.
+   * @default 3
+   */
+  concurrency?: number
   locales: TypedLocale[]
   validate: (locale: TypedLocale) => Promise<TResult>
 }): Promise<TResult[]> {
-  const results = new Array<TResult>(locales.length)
-  let nextLocaleIndex = 0
+  const batchSize = Math.max(1, Math.min(concurrency, locales.length))
+  const results: TResult[] = []
 
-  const workers = Array.from(
-    { length: Math.min(validationLocaleConcurrency, locales.length) },
-    async () => {
-      while (nextLocaleIndex < locales.length) {
-        const localeIndex = nextLocaleIndex
-        nextLocaleIndex += 1
-        results[localeIndex] = await validate(locales[localeIndex]!)
-      }
-    },
-  )
-
-  await Promise.all(workers)
+  for (let batchStart = 0; batchStart < locales.length; batchStart += batchSize) {
+    const batch = locales.slice(batchStart, batchStart + batchSize)
+    results.push(...(await Promise.all(batch.map((locale) => validate(locale)))))
+  }
 
   return results
 }
@@ -152,7 +163,7 @@ export function cloneValidationRequest(
     file: cloneValidationValue(request.file),
     files: cloneValidationValue(request.files),
     hash: request.hash,
-    headers: request.headers ? new Headers(request.headers) : undefined,
+    headers: cloneValidationValue(request.headers),
     host: request.host,
     href: request.href,
     method: request.method,
@@ -162,10 +173,10 @@ export function cloneValidationRequest(
     port: request.port,
     protocol: request.protocol,
     query: cloneValidationValue(request.query ?? {}),
-    responseHeaders: request.responseHeaders ? new Headers(request.responseHeaders) : undefined,
+    responseHeaders: cloneValidationValue(request.responseHeaders),
     routeParams: cloneValidationValue(request.routeParams ?? {}),
     search: request.search,
-    searchParams: request.searchParams ? new URLSearchParams(request.searchParams) : undefined,
+    searchParams: cloneValidationValue(request.searchParams),
     signal: request.signal,
     url: request.url,
     user: cloneValidationValue(request.user),

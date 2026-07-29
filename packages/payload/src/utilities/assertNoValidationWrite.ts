@@ -3,8 +3,9 @@ import type { PayloadRequest } from '../types/index.js'
 import { APIError } from '../errors/index.js'
 
 /**
- * Prevents Payload-managed mutation entry points from writing through an active validation
- * request. Reads and writes made with a separate request are intentionally unaffected.
+ * Prevents guarded document, global, upload, and version mutation entry points from writing
+ * through an active validation request. Reads and writes made with a separate request are
+ * intentionally unaffected.
  */
 export function assertNoValidationWrite(req?: Partial<PayloadRequest>): void {
   if (req?.operation === 'validate') {

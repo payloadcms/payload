@@ -56,14 +56,16 @@ export const defaults: Partial<CollectionConfig> = {
 }
 
 export const addDefaultsToCollectionConfig = (collection: CollectionConfig): CollectionConfig => {
+  const incomingAccess = collection.access
+
   collection.access = {
     create: defaultAccess,
     delete: defaultAccess,
     read: defaultAccess,
     unlock: defaultAccess,
     update: defaultAccess,
-    validate: defaultAccess,
-    ...(collection.access || {}),
+    ...incomingAccess,
+    validate: incomingAccess?.validate ?? incomingAccess?.update ?? defaultAccess,
   }
 
   collection.admin = {

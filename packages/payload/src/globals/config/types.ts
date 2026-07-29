@@ -203,6 +203,7 @@ export type GlobalConfig<TSlug extends GlobalSlug = any> = {
     update?: Access
     /**
      * Controls on-demand validation for this global.
+     * Falls back to `update` access when omitted.
      * The access function receives `req.operation === 'validate'`.
      * @see https://payloadcms.com/docs/validation/overview#access-control-and-hooks
      */

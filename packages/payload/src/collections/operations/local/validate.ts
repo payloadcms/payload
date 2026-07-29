@@ -23,6 +23,7 @@ import { projectNonLocalizedData } from '../../../utilities/projectNonLocalizedD
 import {
   cloneValidationRequest,
   cloneValidationValue,
+  resolveValidationConcurrency,
   resolveValidationLocales,
   runValidationLocalePasses,
 } from '../../../utilities/resolveValidationLocales.js'
@@ -169,15 +170,17 @@ export async function validateLocalWithDataLocale<TSlug extends CollectionSlug>(
       context: cloneValidationValue(options.context),
       fallbackLocale: false,
       req: cloneValidationRequest(options.req),
-      user: cloneValidationValue(options.user) ?? undefined,
+      user: cloneValidationValue(options.user),
     },
     payload,
   )
+  baseReq.operation = 'validate'
   const locales = await resolveValidationLocales({
     locale,
     req: baseReq,
   })
   const results = await runValidationLocalePasses({
+    concurrency: resolveValidationConcurrency(options.req),
     locales,
     validate: async (validationLocale) => {
       const req = await createLocalReq(

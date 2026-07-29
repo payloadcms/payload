@@ -276,7 +276,7 @@ export const updateDocument = async <
         localization: config.localization,
         publishAllLocales,
       }),
-      overrideAccess,
+      overrideAccess: true,
       req,
       validationDataLocale:
         locale !== 'all'
