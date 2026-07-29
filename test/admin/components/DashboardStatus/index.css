@@ -1,0 +1,14 @@
+.dashboard-status {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.dashboard-status__badge {
+  background-color: #16a34a;
+  border-radius: 9999px;
+  color: #fff;
+  font-weight: 600;
+  padding: 2px 10px;
+}

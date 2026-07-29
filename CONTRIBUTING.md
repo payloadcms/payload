@@ -204,6 +204,33 @@ You can run the entire test suite using `pnpm test`. If you wish to only run e2e
 
 By default, `pnpm test:int` will only run int test against MongoDB. To run int tests against postgres, you can use `pnpm test:int:postgres`. You will have to have postgres installed on your system for this to work.
 
+### Visual regression testing
+
+Some e2e tests compare a screenshot of the UI against a committed baseline image instead of (or alongside) asserting on the DOM. These are opt-in: only tests tagged `@visual` run this way, and they live alongside normal e2e tests in the same `e2e.spec.ts` files rather than in a separate directory.
+
+```ts
+import { expectScreenshot } from '../__helpers/e2e/expectScreenshot.js'
+
+test('renders the posts list view', { tag: '@visual' }, async () => {
+  await page.goto(url.list)
+  await expectScreenshot({ page, name: 'posts-list-view.png' })
+})
+```
+
+Baselines are committed PNGs stored next to their spec file, at `__snapshots__/<spec-file>/<name>.png`.
+
+Baselines must be generated or updated inside the pinned Playwright Docker image, never on a bare host. Font rendering differs enough between operating systems that a baseline captured on macOS or Windows will fail the comparison on CI even when nothing visually changed.
+
+```bash
+pnpm docker:start        # MongoDB, if not already running
+pnpm test:visual         # run every suite that has an @visual-tagged test
+pnpm test:visual:update  # accept intentional visual changes and regenerate baselines
+```
+
+To view an interactive report comparing the actual, expected, and diff images for a suite, run `pnpm test:visual:preview <suite>`.
+
+On a PR, CI only runs `@visual` tests when the diff could plausibly change rendered UI (styles, components, screenshots, or the fixture config the current `@visual` tests render). If the `visual-regression` CI job fails, reproduce and inspect the diff locally with the commands above — there is no CI-posted comment, so you'll need to run the tests yourself to see what changed.
+
 ### Pull Requests
 
 For all Pull Requests, you should be extremely descriptive about both your problem and proposed solution. If there are any affected open or closed issues, please leave the issue number in your PR description.
