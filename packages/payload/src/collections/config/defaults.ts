@@ -1,4 +1,4 @@
-import type { IncomingAuthType, LoginWithUsernameOptions } from '../../auth/types.js'
+import type { Auth, IncomingAuthType, LoginWithUsernameOptions } from '../../auth/types.js'
 import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
@@ -120,16 +120,20 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
   return collection
 }
 
-export const addDefaultsToAuthConfig = (auth: IncomingAuthType): IncomingAuthType => {
+export const addDefaultsToAuthConfig = (auth: IncomingAuthType): Auth => {
   auth.cookies = {
-    sameSite: 'Lax',
-    secure: false,
     ...(auth.cookies || {}),
-  }
+    sameSite: auth.cookies?.sameSite ?? 'Lax',
+    secure: auth.cookies?.secure ?? false,
+  } satisfies Auth['cookies']
 
   auth.forgotPassword = auth.forgotPassword ?? {}
   auth.lockTime = auth.lockTime ?? 600000 // 10 minutes
-  auth.loginWithUsername = auth.loginWithUsername ?? false
+  auth.loginWithUsername = auth.loginWithUsername
+    ? addDefaultsToLoginWithUsernameConfig(
+        auth.loginWithUsername === true ? {} : auth.loginWithUsername,
+      )
+    : false
   auth.maxLoginAttempts = auth.maxLoginAttempts ?? 5
   auth.tokenExpiration = auth.tokenExpiration ?? 7200
   auth.useSessions = auth.useSessions ?? true
@@ -140,13 +144,13 @@ export const addDefaultsToAuthConfig = (auth: IncomingAuthType): IncomingAuthTyp
     auth.verify = {}
   }
 
-  return auth
+  return auth as Auth
 }
 
 /**
  * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
  */
-export const loginWithUsernameDefaults: LoginWithUsernameOptions = {
+export const loginWithUsernameDefaults: Required<LoginWithUsernameOptions> = {
   allowEmailLogin: false,
   requireEmail: false,
   requireUsername: true,
@@ -154,10 +158,12 @@ export const loginWithUsernameDefaults: LoginWithUsernameOptions = {
 
 export const addDefaultsToLoginWithUsernameConfig = (
   loginWithUsername: LoginWithUsernameOptions,
-): LoginWithUsernameOptions =>
+): Required<LoginWithUsernameOptions> =>
   ({
-    allowEmailLogin: false,
-    requireEmail: false,
-    requireUsername: true,
-    ...(loginWithUsername || {}),
-  }) as LoginWithUsernameOptions
+    ...loginWithUsername,
+    allowEmailLogin: loginWithUsername.allowEmailLogin ?? false,
+    requireEmail: loginWithUsername.requireEmail ?? false,
+    requireUsername: loginWithUsername.allowEmailLogin
+      ? (loginWithUsername.requireUsername ?? true)
+      : true,
+  }) as Required<LoginWithUsernameOptions>
