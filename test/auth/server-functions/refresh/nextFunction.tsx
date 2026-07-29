@@ -2,7 +2,7 @@
 
 import { refresh } from '@payloadcms/next/auth'
 
-import config from '../config.js'
+import config from '../../config.js'
 
 export async function refreshFunction() {
   try {

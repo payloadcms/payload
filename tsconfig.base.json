@@ -37,6 +37,7 @@
       "@payloadcms/live-preview": ["./packages/live-preview/src"],
       "@payloadcms/live-preview-react": ["./packages/live-preview-react/src/index.ts"],
       "@payloadcms/live-preview-vue": ["./packages/live-preview-vue/src/index.ts"],
+      "payload/auth": ["./packages/payload/src/exports/auth.ts"],
       "@payloadcms/ui": ["./packages/ui/src/exports/client/index.ts"],
       "@payloadcms/ui/shared": ["./packages/ui/src/exports/shared/index.ts"],
       "@payloadcms/ui/rsc": ["./packages/ui/src/exports/rsc/index.ts"],

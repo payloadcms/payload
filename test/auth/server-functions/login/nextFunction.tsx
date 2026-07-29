@@ -1,7 +1,8 @@
 'use server'
+
 import { login } from '@payloadcms/next/auth'
 
-import config from '../config.js'
+import config from '../../config.js'
 
 type LoginArgs = {
   email: string
@@ -10,7 +11,7 @@ type LoginArgs = {
 
 export async function loginFunction({ email, password }: LoginArgs) {
   try {
-    const result = await login({
+    await login({
       collection: 'users',
       config,
       email,
