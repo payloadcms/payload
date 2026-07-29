@@ -614,7 +614,7 @@ export async function validateBlocksFilterOptions({
 }
 export const blocks: BlocksFieldValidation = async (
   value,
-  { id, data, filterOptions, maxRows, minRows, req: { t }, req, required, siblingData },
+  { id, name, data, filterOptions, maxRows, minRows, req: { t }, req, required, siblingData },
 ) => {
   const lengthValidationResult = validateArrayLength(value, { maxRows, minRows, required, t })
   if (typeof lengthValidationResult === 'string') {
@@ -622,14 +622,26 @@ export const blocks: BlocksFieldValidation = async (
   }
 
   if (filterOptions) {
-    const { invalidBlockSlugs } = await validateBlocksFilterOptions({
-      id,
-      data,
-      filterOptions,
-      req,
-      siblingData,
-      value,
-    })
+    let invalidBlockSlugs: string[] | undefined
+
+    try {
+      ;({ invalidBlockSlugs } = await validateBlocksFilterOptions({
+        id,
+        data,
+        filterOptions,
+        req,
+        siblingData,
+        value,
+      }))
+    } catch (err) {
+      req.payload.logger.error({
+        err,
+        msg: `Failed to resolve filterOptions for field "${name}" during validation`,
+      })
+
+      return t('validation:invalidInput')
+    }
+
     if (invalidBlockSlugs?.length) {
       return t('validation:invalidBlocks', { blocks: invalidBlockSlugs.join(', ') })
     }
@@ -972,17 +984,27 @@ export type SelectFieldSingleValidation = Validate<string, unknown, unknown, Sel
 
 export const select: SelectFieldValidation = async (
   value,
-  { data, filterOptions, hasMany, options, req, req: { t }, required, siblingData },
+  { name, data, filterOptions, hasMany, options, req, req: { t }, required, siblingData },
 ) => {
-  const filteredOptions =
-    typeof filterOptions === 'function'
-      ? await filterOptions({
-          data,
-          options,
-          req,
-          siblingData,
-        })
-      : options
+  let filteredOptions = options
+
+  if (typeof filterOptions === 'function') {
+    try {
+      filteredOptions = await filterOptions({
+        data,
+        options,
+        req,
+        siblingData,
+      })
+    } catch (err) {
+      req.payload.logger.error({
+        err,
+        msg: `Failed to resolve filterOptions for field "${name}" during validation`,
+      })
+
+      return t('validation:invalidInput')
+    }
+  }
 
   if (
     Array.isArray(value) &&

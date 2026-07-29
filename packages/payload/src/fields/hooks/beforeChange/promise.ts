@@ -205,14 +205,24 @@ export const promise = async ({
         if (field.type === 'blocks' && field.filterOptions) {
           // Re-run filteroptions. If the validation error is due to filteroptions, we need to add error paths to all the blocks
           // that are no longer valid
-          const validationResult = await validateBlocksFilterOptions({
-            id,
-            data,
-            filterOptions: field.filterOptions,
-            req,
-            siblingData,
-            value: siblingData[field.name],
-          })
+          let validationResult: Awaited<ReturnType<typeof validateBlocksFilterOptions>> | undefined
+
+          try {
+            validationResult = await validateBlocksFilterOptions({
+              id,
+              data,
+              filterOptions: field.filterOptions,
+              req,
+              siblingData,
+              value: siblingData[field.name],
+            })
+          } catch (err) {
+            req.payload.logger.error({
+              err,
+              msg: `Failed to resolve filterOptions for field "${field.name}" during validation`,
+            })
+          }
+
           if (validationResult?.invalidBlockSlugs?.length) {
             filterOptionsError = true
             let rowIndex = -1
