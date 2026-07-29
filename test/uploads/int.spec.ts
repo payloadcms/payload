@@ -648,6 +648,32 @@ describe('Collections - Uploads', () => {
         expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
       })
 
+      it('should create documents for JPEG XL files, which sharp cannot decode', async () => {
+        const expectedPath = path.join(dirname, './with-any-image-type')
+
+        // `canResizeImage` already excludes `image/jxl` from any resize or
+        // sharp decode attempt, so only the header needs to be readable
+        const jxlFilePath = path.resolve(dirname, './test-image.jxl')
+        const fileBuffer = fs.readFileSync(jxlFilePath)
+        const doc = await payload.create({
+          collection: anyImagesSlug as CollectionSlug,
+          data: {},
+          file: {
+            data: fileBuffer,
+            mimetype: 'image/jxl',
+            name: 'test-image.jxl',
+            size: fileBuffer.length,
+          },
+        })
+
+        expect(await fileExists(path.join(expectedPath, doc.filename))).toBe(true)
+        expect(doc.mimeType).toEqual('image/jxl')
+        expect(doc.width).toEqual(800)
+        expect(doc.height).toEqual(800)
+
+        await payload.delete({ collection: anyImagesSlug as CollectionSlug, id: doc.id })
+      })
+
       it('should upload svg files', async () => {
         const expectedPath = path.join(dirname, './with-any-image-type')
 
