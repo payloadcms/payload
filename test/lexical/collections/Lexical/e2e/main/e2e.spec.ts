@@ -16,7 +16,6 @@ import type { Config, LexicalField } from '../../../../payload-types.js'
 
 import {
   closeAllToasts,
-  ensureCompilationIsDone,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
   waitForFormReady,
@@ -83,10 +82,7 @@ describe('lexicalMain', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
     /*await throttleTest({

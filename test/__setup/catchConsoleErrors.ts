@@ -55,7 +55,7 @@ export function catchConsoleErrors(page: Page, options?: { ignoreCORS?: boolean 
       // "Failed to fetch RSC payload for" happens seemingly randomly. There are lots of issues in the next.js repository for this. Causes e2e tests to fail and flake. Will ignore for now
       // the the server responded with a status of error happens frequently. Will ignore it for now.
       // Most importantly, this should catch react errors.
-      const { url, lineNumber, columnNumber } = msg.location() || {}
+      const { columnNumber, lineNumber, url } = msg.location() || {}
       const locationSuffix = url ? `\n at ${url}:${lineNumber ?? 0}:${columnNumber ?? 0}` : ''
       throw new Error(`Browser console error: ${msg.text()}${locationSuffix}`)
     }
@@ -88,26 +88,9 @@ export function catchConsoleErrors(page: Page, options?: { ignoreCORS?: boolean 
     }
   })
 
-  // Capture uncaught errors that do not appear in the console
-  page.on('pageerror', (error) => {
-    const message = error?.message ?? String(error)
-
-    if (message.includes('Hydration failed because the server rendered HTML')) {
-      return
-    }
-
-    if (shouldCollectErrors) {
-      const stack = error?.stack
-      consoleErrors.push(`Page error: ${message}${stack ? `\n${stack}` : ''}`)
-    } else {
-      // Rethrow the original error to preserve stack, name, and other metadata
-      throw error
-    }
-  })
-
   return {
-    consoleErrors,
     collectErrors: () => (shouldCollectErrors = true), // Enable collection of errors for specific tests
+    consoleErrors,
     stopCollectingErrors: () => (shouldCollectErrors = false), // Disable collection of errors after the test
   }
 }

@@ -10,7 +10,6 @@ import type { Config } from './payload-types.js'
 import { reorderColumns } from '../__helpers/e2e/columns/index.js'
 import {
   changeLocale,
-  ensureCompilationIsDone,
   exactText,
   saveDocAndAssert,
   // throttleTest,
@@ -67,8 +66,7 @@ describe('Join Field', () => {
     versionsURL = new AdminUrlUtil(serverURL, versionsSlug)
 
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
 
     //await throttleTest({ context, delay: 'Slow 4G', page })
   })
@@ -350,9 +348,9 @@ describe('Join Field', () => {
     const innerText = await thead.innerText()
 
     // expect the order of columns to be 'ID', 'Created At', 'Title'
-     
+
     expect(innerText.indexOf('ID')).toBeLessThan(innerText.indexOf('Created At'))
-     
+
     expect(innerText.indexOf('Created At')).toBeLessThan(innerText.indexOf('Title'))
   })
 

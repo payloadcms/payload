@@ -20,7 +20,7 @@ import { checkFileRestrictions } from '../../packages/payload/src/uploads/checkF
 import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   adminThumbnailSizeSlug,

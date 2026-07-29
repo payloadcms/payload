@@ -6,14 +6,10 @@ import * as qs from 'qs-esm'
 
 import type { Config, Geo, Post, Virtual } from '../../payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  exactText,
-  getRoutes,
-  openColumnControls,
-} from '../../../__helpers/e2e/helpers.js'
+import { exactText, getRoutes, openColumnControls } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/initPage.js'
 import { BASE_PATH, customAdminRoutes } from '../../shared.js'
 import {
@@ -116,9 +112,7 @@ describe('List View', () => {
     noTimestampsUrl = new AdminUrlUtil(serverURL, noTimestampsSlug)
     customFieldsUrl = new AdminUrlUtil(serverURL, customFieldsSlug)
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+    ;({ page } = await initPage({ context, customAdminRoutes, serverURL }))
 
     adminRoutes = getRoutes({ customAdminRoutes })
 

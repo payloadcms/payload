@@ -24,7 +24,6 @@ import { openCreateDocDrawer } from '../__helpers/e2e/fields/relationship/openCr
 import { addListFilter } from '../__helpers/e2e/filters/index.js'
 import { goToNextPage } from '../__helpers/e2e/goToNextPage.js'
 import {
-  ensureCompilationIsDone,
   saveDocAndAssert,
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
@@ -34,6 +33,7 @@ import { openDocDrawer } from '../__helpers/e2e/toggleDocDrawer.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../__helpers/shared/assertToastErrors.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import {
@@ -88,9 +88,7 @@ describe('Relationship Field', () => {
     versionedRelationshipFieldURL = new AdminUrlUtil(serverURL, versionedRelationshipFieldSlug)
 
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   beforeEach(async () => {

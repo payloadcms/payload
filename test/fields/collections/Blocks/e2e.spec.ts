@@ -19,7 +19,6 @@ import { fileURLToPath } from 'url'
 
 import { assertNetworkRequests } from '../../../__helpers/e2e/assertNetworkRequests.js'
 import {
-  ensureCompilationIsDone,
   saveDocAndAssert,
   // throttleTest,
 } from '../../../__helpers/e2e/helpers.js'
@@ -28,6 +27,7 @@ import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.j
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
@@ -54,9 +54,7 @@ describe('Block fields', () => {
     }))
 
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   beforeEach(async () => {

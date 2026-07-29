@@ -20,7 +20,7 @@ import { devUser } from '../credentials.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { copyDataFromLocaleHandler } from '../../packages/ui/src/utilities/copyDataFromLocale.js'
 import { idToString } from '../__helpers/shared/idToString.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { groupSlug } from './collections/Group/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'

@@ -16,18 +16,14 @@ import {
   toggleColumn,
 } from '../../../__helpers/e2e/columns/index.js'
 import { addListFilter } from '../../../__helpers/e2e/filters/index.js'
-import {
-  ensureCompilationIsDone,
-  exactText,
-  saveDocAndAssert,
-  selectTableRow,
-} from '../../../__helpers/e2e/helpers.js'
+import { exactText, saveDocAndAssert, selectTableRow } from '../../../__helpers/e2e/helpers.js'
 import { upsertPreferences } from '../../../__helpers/e2e/preferences.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { textareaFieldsSlug } from '../../slugs.js'
@@ -57,9 +53,7 @@ describe('Textarea', () => {
     url = new AdminUrlUtil(serverURL, textareaFieldsSlug)
 
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
     await reInitializeDB({

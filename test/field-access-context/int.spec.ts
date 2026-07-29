@@ -7,7 +7,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { childrenSlug, globalSlug, parentsSlug, readAccessLog, resetAccessLog } from './shared.js'
 
 let payload: Payload

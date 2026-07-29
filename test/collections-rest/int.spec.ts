@@ -12,7 +12,7 @@ import type { Relation } from './config.js'
 import type { Post } from './payload-types.js'
 
 import { getFormDataSize } from '../__helpers/shared/getFormDataSize.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { largeDocumentsCollectionSlug } from './collections/LargeDocuments.js'
 import {
   customIdNumberSlug,

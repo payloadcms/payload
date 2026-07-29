@@ -7,7 +7,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Relationship } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
   menuSlug,

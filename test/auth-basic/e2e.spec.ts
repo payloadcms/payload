@@ -9,13 +9,11 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  getRoutes,
-} from '../__helpers/e2e/helpers.js'
+import { getRoutes } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../__setup/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -82,19 +80,18 @@ describe('Auth (Basic)', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     url = new AdminUrlUtil(serverURL, 'users')
 
-    const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
     const {
       routes: { admin },
     } = getRoutes({})
     adminRoute = admin
 
-    await ensureCompilationIsDone({
+    const context = await browser.newContext()
+    ;({ page } = await initPage({
+      context,
       noAutoLogin: true,
-      page,
       readyURL: formatAdminURL({ adminRoute, path: '/**', serverURL }),
       serverURL,
-    })
+    }))
 
     // Undo onInit seeding, as we need to test this without having a user created, or testing create-first-user
     await reInitializeDB({

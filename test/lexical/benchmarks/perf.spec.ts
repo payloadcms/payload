@@ -7,9 +7,9 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../__helpers/shared/sdk/index.js'
 import type { Config } from '../payload-types.js'
 
-import { ensureCompilationIsDone } from '../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../__setup/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../../playwright.config.js'
 import { LexicalHelpers } from '../collections/utils.js'
 import { lexicalBenchmarkSlug } from '../slugs.js'
@@ -50,8 +50,8 @@ async function setupPerfInstrumentation(page: Page): Promise<void> {
     }
 
     const perfData = {
-      inputLag: [] as { charIndex: number; lagMs: number }[],
       domMutationCount: 0,
+      inputLag: [] as { charIndex: number; lagMs: number }[],
       longTaskCount: 0,
       longTaskTotalMs: 0,
     }
@@ -77,10 +77,10 @@ async function setupPerfInstrumentation(page: Page): Promise<void> {
     })
 
     observer.observe(contentEditable, {
+      attributes: true,
+      characterData: true,
       childList: true,
       subtree: true,
-      characterData: true,
-      attributes: true,
     })
 
     if ('PerformanceObserver' in window) {
@@ -157,10 +157,10 @@ function printSummary(label: string, allMetrics: IterationMetrics[]): void {
   lines.push(`  ${separator}`)
 
   const stats: Record<string, (vals: number[]) => number> = {
-    Mean: mean,
-    StdDev: stddev,
-    Min: (v) => Math.min(...v),
     Max: (v) => Math.max(...v),
+    Mean: mean,
+    Min: (v) => Math.min(...v),
+    StdDev: stddev,
   }
 
   for (const [statLabel, fn] of Object.entries(stats)) {
@@ -188,7 +188,7 @@ describe('Lexical Performance Benchmarks', () => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     url = new AdminUrlUtil(serverURL, lexicalBenchmarkSlug)
-    await ensureCompilationIsDone({ serverURL, browser })
+    await ensureCompilationIsDone({ browser, serverURL })
   })
 
   beforeEach(async ({ browser }) => {

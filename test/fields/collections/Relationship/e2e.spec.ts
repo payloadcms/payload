@@ -12,7 +12,6 @@ import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicator
 import { openCreateDocDrawer } from '../../../__helpers/e2e/fields/relationship/openCreateDocDrawer.js'
 import { addListFilter, openListFilters } from '../../../__helpers/e2e/filters/index.js'
 import {
-  ensureCompilationIsDone,
   exactText,
   saveDocAndAssert,
   saveDocHotkeyAndAssert,
@@ -30,6 +29,7 @@ import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { relationshipFieldsSlug, textFieldsSlug } from '../../slugs.js'
@@ -54,9 +54,7 @@ describe('relationship', () => {
     }))
 
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
     await reInitializeDB({

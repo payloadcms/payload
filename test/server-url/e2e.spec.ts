@@ -6,7 +6,6 @@ import { fileURLToPath } from 'url'
 
 import { login } from '../__helpers/e2e/auth/login.js'
 import { logoutViaNav } from '../__helpers/e2e/auth/logout.js'
-import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/initPage.js'
@@ -26,8 +25,7 @@ test.describe('serverURL', () => {
     url = new AdminUrlUtil(serverURL, 'posts')
 
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
+    ;({ page } = await initPage({ context, noAutoLogin: true, serverURL }))
   })
 
   test('can load admin panel', async () => {

@@ -14,11 +14,7 @@ import { login } from '../__helpers/e2e/auth/login.js'
 import { getColumnSelectorItem, openListColumns } from '../__helpers/e2e/columns/index.js'
 import { openListFilters } from '../__helpers/e2e/filters/index.js'
 import { openGroupBy } from '../__helpers/e2e/groupBy/index.js'
-import {
-  ensureCompilationIsDone,
-  exactText,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { exactText, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { openDocControls } from '../__helpers/e2e/openDocControls.js'
 import { getSelectMenu } from '../__helpers/e2e/selectInput.js'
 import { closeNav, openNav } from '../__helpers/e2e/toggleNav.js'
@@ -110,9 +106,7 @@ describe('Access Control', () => {
     restrictedTrashUrl = new AdminUrlUtil(serverURL, restrictedTrashSlug)
 
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
+    ;({ page } = await initPage({ context, noAutoLogin: true, serverURL }))
 
     await login({ page, serverURL })
   })

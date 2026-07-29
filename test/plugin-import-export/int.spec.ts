@@ -9,7 +9,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { devUser, regularUser } from '../credentials.js'
 import { clearTestBucket, createTestBucket } from '../storage-s3/test-utils.js'
 import { readCSV, readJSON } from './helpers.js'

@@ -12,7 +12,7 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { BlockField, GroupField } from './payload-types.js'
 
 import { it } from '../__helpers/int/vitest.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { devUser } from '../credentials.js'
 import { arrayDefaultValue } from './collections/Array/index.js'

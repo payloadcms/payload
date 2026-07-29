@@ -7,7 +7,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { Page } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 
 let payload: Payload
 

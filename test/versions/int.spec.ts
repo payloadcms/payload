@@ -12,7 +12,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { AutosaveMultiSelectPost, DraftPost } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import { cloudStorageDeletedFilenames } from './collections/DraftsWithUploadCloudStorage.js'
 import {

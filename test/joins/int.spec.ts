@@ -9,7 +9,7 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Category, Config, DepthJoins1, DepthJoins3, Post, Singular } from './payload-types.js'
 
 import { idToString } from '../__helpers/shared/idToString.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import {
   categoriesJoinRestrictedSlug,

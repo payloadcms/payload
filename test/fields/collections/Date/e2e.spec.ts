@@ -10,15 +10,13 @@ import type { Config } from '../../payload-types.js'
 
 import { getColumnSelectorItem } from '../../../__helpers/e2e/columns/index.js'
 import { addListFilter } from '../../../__helpers/e2e/filters/addListFilter.js'
-import {
-  ensureCompilationIsDone,
-  saveDocAndAssert,
-} from '../../../__helpers/e2e/helpers.js'
+import { saveDocAndAssert } from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { dateFieldsSlug } from '../../slugs.js'
@@ -68,9 +66,7 @@ describe('Date', () => {
     url = new AdminUrlUtil(serverURL, dateFieldsSlug)
 
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
     await reInitializeDB({
@@ -607,7 +603,6 @@ describe('Date', () => {
 
       const docID = page.url().split('/').pop()
 
-       
       expect(docID).toBeTruthy()
 
       const {
@@ -621,7 +616,6 @@ describe('Date', () => {
         },
       })
 
-       
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
     })
 
@@ -762,9 +756,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
       url = new AdminUrlUtil(serverURL, dateFieldsSlug)
 
       const context = await browser.newContext({ timezoneId })
-      ;({ page } = await initPage({ context }))
-
-      await ensureCompilationIsDone({ page, serverURL })
+      ;({ page } = await initPage({ context, serverURL }))
     })
 
     beforeEach(async () => {
@@ -888,7 +880,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
       const docID = page.url().split('/').pop()
 
-       
       expect(docID).toBeTruthy()
 
       const {
@@ -902,7 +893,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         },
       })
 
-       
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
     })
 
@@ -930,7 +920,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
       const docID = page.url().split('/').pop()
 
-       
       expect(docID).toBeTruthy()
 
       const {
@@ -944,7 +933,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         },
       })
 
-       
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
     })
 
@@ -972,7 +960,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
       const docID = page.url().split('/').pop()
 
-       
       expect(docID).toBeTruthy()
 
       const {
@@ -986,7 +973,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         },
       })
 
-       
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedUTCValue)
     })
 
@@ -1025,7 +1011,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
       const docID = page.url().split('/').pop()
 
-       
       expect(docID).toBeTruthy()
 
       const {
@@ -1039,7 +1024,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         },
       })
 
-       
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedDateTimeUTCValue)
       expect(existingDoc?.defaultWithTimezone).toEqual(expectedDateOnlyUTCValue)
     })
@@ -1079,7 +1063,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
       const docID = page.url().split('/').pop()
 
-       
       expect(docID).toBeTruthy()
 
       const {
@@ -1093,7 +1076,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         },
       })
 
-       
       expect(existingDoc?.dayAndTimeWithTimezone).toEqual(expectedDateTimeUTCValue)
       expect(existingDoc?.defaultWithTimezone).toEqual(expectedDateOnlyUTCValue)
     })
@@ -1214,7 +1196,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
         const docID = page.url().split('/').pop()
 
-         
         expect(docID).toBeTruthy()
 
         const {
@@ -1229,7 +1210,7 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
         })
 
         // The UTC value should be identical regardless of browser timezone context
-         
+
         expect(existingDoc?.dateWithOffsetTimezone).toEqual(expectedUTCValue)
         expect(existingDoc?.dateWithOffsetTimezone_tz).toEqual(expectedTimezone)
       })
@@ -1273,7 +1254,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
         const docID = page.url().split('/').pop()
 
-         
         expect(docID).toBeTruthy()
 
         const {
@@ -1287,7 +1267,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
           },
         })
 
-         
         expect(existingDoc?.dateWithOffsetTimezone).toEqual(expectedUTCValue)
         expect(existingDoc?.dateWithOffsetTimezone_tz).toEqual(expectedTimezone)
       })
@@ -1336,7 +1315,6 @@ const createTimezoneContextTests = (contextName: string, timezoneId: string) => 
 
         const docID = page.url().split('/').pop()
 
-         
         expect(docID).toBeTruthy()
 
         const {

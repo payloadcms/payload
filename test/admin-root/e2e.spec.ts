@@ -6,12 +6,12 @@ import { fileURLToPath } from 'url'
 
 import { login } from '../__helpers/e2e/auth/login.js'
 import {
-  ensureCompilationIsDone,
   saveDocAndAssert,
   // throttleTest,
 } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { adminRoute } from './shared.js'
@@ -43,16 +43,14 @@ test.describe('Admin Panel (Root)', () => {
     })
 
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({
+    ;({ page } = await initPage({
+      context,
       customRoutes: {
         admin: adminRoute,
       },
       noAutoLogin: true,
-      page,
       serverURL,
-    })
+    }))
 
     await login({ customRoutes: { admin: adminRoute }, page, serverURL })
 

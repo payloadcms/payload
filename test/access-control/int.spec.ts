@@ -16,7 +16,7 @@ import { afterAll, beforeAll, beforeEach, describe, expect, it, vitest } from 'v
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { FullyRestricted, Post } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { requestHeaders } from './getConfig.js'
 import {
   asyncParentSlug,

@@ -38,7 +38,6 @@ import { assertNetworkRequests } from '../__helpers/e2e/assertNetworkRequests.js
 import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
 import {
   changeLocale,
-  ensureCompilationIsDone,
   exactText,
   getRoutes,
   openDocDrawer,
@@ -54,6 +53,7 @@ import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSav
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../__setup/initPage.js'
 import { postsCollectionSlug } from '../admin/slugs.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -120,14 +120,12 @@ describe('Versions', () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
+    ;({ page } = await initPage({ context, serverURL }))
 
     const {
       routes: { admin: adminRouteFromConfig },
     } = getRoutes({})
     adminRoute = adminRouteFromConfig
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   beforeEach(async () => {
@@ -1677,10 +1675,8 @@ describe('Versions', () => {
         },
       })
 
-       
       expect(createdJob).toBeTruthy()
 
-       
       expect(createdJob?.waitUntil).toEqual('2049-01-01T17:00:00.000Z')
     })
   })

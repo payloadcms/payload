@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import { wait } from 'payload/shared'
 
-import { patchPageGoToWithHydrationMarker } from '../../__setup/patchPageGoToWithHydrationMarker.js'
+import { patchPageMethods } from '../../__setup/patchPageMethods.js'
 
 export type PasteMode = 'blob' | 'html'
 
@@ -36,7 +36,7 @@ export class LexicalHelpers {
   page: Page
   constructor(page: Page) {
     this.page = page
-    patchPageGoToWithHydrationMarker(page)
+    patchPageMethods(page)
   }
 
   async addLine(

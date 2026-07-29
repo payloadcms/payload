@@ -17,7 +17,7 @@ import type {
   Relation,
 } from './payload-types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { mongooseList } from '../__helpers/shared/isMongoose.js'
 import {
   chainedRelSlug,

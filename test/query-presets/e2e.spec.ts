@@ -9,16 +9,13 @@ import type { Config, PayloadQueryPreset } from './payload-types.js'
 import { clickColumnSelectorItem, toggleColumn } from '../__helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from '../__helpers/e2e/filters/index.js'
 import { addGroupBy, clearGroupBy } from '../__helpers/e2e/groupBy/index.js'
-import {
-  ensureCompilationIsDone,
-  exactText,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { exactText, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { navigateToListView } from '../__helpers/e2e/navigateToListView.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { assertURLParams } from './helpers/assertURLParams.js'
@@ -57,19 +54,15 @@ describe('Query Presets', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     pagesUrl = new AdminUrlUtil(serverURL, pagesSlug)
-
-    await ensureCompilationIsDone({ browser, serverURL })
   })
 
   beforeEach(async ({ page }) => {
-    await initPage({ page })
+    await initPage({ page, serverURL })
 
     await reInitializeDB({
       serverURL,
       snapshotKey: 'querypresets',
     })
-
-    await ensureCompilationIsDone({ page, serverURL })
 
     const allDocs = (
       await payload.find({

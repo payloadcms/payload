@@ -6,7 +6,6 @@ import { formatAdminURL, wait } from 'payload/shared'
 import type { Config, Geo, Post } from '../../payload-types.js'
 
 import {
-  ensureCompilationIsDone,
   getRoutes,
   openLocaleSelector,
   saveDocAndAssert,
@@ -16,6 +15,7 @@ import {
 import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/initPage.js'
 import {
   BASE_PATH,
@@ -104,9 +104,7 @@ describe('General', () => {
     uploadsTwo = new AdminUrlUtil(serverURL, uploadTwoCollectionSlug)
 
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+    ;({ page } = await initPage({ context, customAdminRoutes, serverURL }))
 
     adminRoutes = getRoutes({ customAdminRoutes })
     adminRoute = adminRoutes.routes.admin

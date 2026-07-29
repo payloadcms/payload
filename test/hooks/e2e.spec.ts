@@ -8,12 +8,10 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { beforeValidateSlug } from './shared.js'
@@ -42,9 +40,7 @@ describe('Hooks', () => {
     beforeDeleteURL = new AdminUrlUtil(serverURL, 'before-delete-hooks')
     beforeDelete2URL = new AdminUrlUtil(serverURL, 'before-delete-2-hooks')
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   beforeEach(async () => {

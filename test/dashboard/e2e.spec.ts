@@ -3,10 +3,10 @@ import { expect, test } from '@playwright/test'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { DashboardHelper } from './utils.js'
 

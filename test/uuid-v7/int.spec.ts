@@ -5,7 +5,7 @@ import { fileURLToPath } from 'url'
 import { validate as uuidValidate } from 'uuid'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)

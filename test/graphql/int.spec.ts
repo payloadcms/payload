@@ -10,7 +10,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { idToString } from '../__helpers/shared/idToString.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 
 let payload: Payload
 let restClient: NextRESTClient

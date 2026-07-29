@@ -4,9 +4,9 @@ import type { GeneratedTypes, Payload, SanitizedConfig } from 'payload'
 import path from 'path'
 import { getPayload } from 'payload'
 
-import { runInit } from '../../runInit.js'
-import { getSDK } from './getSDK.js'
-import { NextRESTClient } from './NextRESTClient.js'
+import { getSDK } from '../__helpers/shared/getSDK.js'
+import { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
+import { runInit } from '../runInit.js'
 
 /**
  * Initialize Payload configured for integration tests
@@ -43,5 +43,5 @@ export async function initPayloadInt<TInitializePayload extends boolean | undefi
   const restClient = new NextRESTClient(payload.config)
   console.log('initPayloadInt done')
   const sdk = getSDK(payload.config)
-  return { config: payload.config, sdk, payload, restClient } as any
+  return { config: payload.config, payload, restClient, sdk } as any
 }

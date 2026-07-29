@@ -4,7 +4,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { mediaSlug } from './shared.js'
 import { clearTestBucket, createTestBucket, verifyUploads } from './test-utils.js'
 

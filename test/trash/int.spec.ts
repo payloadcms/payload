@@ -8,7 +8,7 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { DifferentiatedTrashCollection, Post, RestrictedCollection } from './payload-types.js'
 
 import { idToString } from '../__helpers/shared/idToString.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { devUser, regularUser } from '../credentials.js'
 import { differentiatedTrashCollectionSlug } from './collections/DifferentiatedTrashCollection/index.js'
 import { pagesSlug } from './collections/Pages/index.js'

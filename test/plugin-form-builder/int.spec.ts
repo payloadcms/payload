@@ -12,7 +12,7 @@ import { handleUploads } from '../../packages/plugin-form-builder/src/collection
 import { keyValuePairToHtmlTable } from '../../packages/plugin-form-builder/src/utilities/keyValuePairToHtmlTable.js'
 import { serializeLexical } from '../../packages/plugin-form-builder/src/utilities/lexical/serializeLexical.js'
 import { replaceDoubleCurlys } from '../../packages/plugin-form-builder/src/utilities/replaceDoubleCurlys.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { createStreamableFile } from '../uploads/createStreamableFile.js'
 import { documentsSlug, formsSlug, formSubmissionsSlug, mediaSlug } from './shared.js'
 

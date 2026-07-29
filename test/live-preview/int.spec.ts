@@ -23,7 +23,7 @@ let restClient: NextRESTClient
 
 import type { CollectionPopulationRequestHandler } from '../../packages/live-preview/src/types.js'
 
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 
 const requestHandler: CollectionPopulationRequestHandler = ({ data, endpoint }) => {
   const url = `/${endpoint}`

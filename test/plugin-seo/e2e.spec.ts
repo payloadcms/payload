@@ -9,14 +9,11 @@ import { fileURLToPath } from 'url'
 import type { Config, Page as PayloadPage } from './payload-types.js'
 
 import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
-import {
-  ensureCompilationIsDone,
-  switchTab,
-  waitForFormReady,
-} from '../__helpers/e2e/helpers.js'
+import { switchTab, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { mediaSlug } from './shared.js'
@@ -41,8 +38,7 @@ describe('SEO Plugin', () => {
     url = new AdminUrlUtil(serverURL, 'pages')
 
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
 
     const filePath = path.resolve(dirname, './image-1.jpg')
     const file = await getFileByPath(filePath)

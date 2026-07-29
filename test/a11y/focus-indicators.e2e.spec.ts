@@ -6,10 +6,7 @@ import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
 import { checkFocusIndicators } from '../__helpers/e2e/checkFocusIndicators.js'
-import {
-  ensureCompilationIsDone,
-  getRoutes,
-} from '../__helpers/e2e/helpers.js'
+import { getRoutes } from '../__helpers/e2e/helpers.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/initPage.js'
 
@@ -38,9 +35,7 @@ describe('Focus Indicators Test Page', () => {
     adminRoute = adminRouteFromConfig
 
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   describe('Full Page Scan', () => {

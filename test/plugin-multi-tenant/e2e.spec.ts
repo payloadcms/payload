@@ -11,12 +11,7 @@ import type { Config } from './payload-types.js'
 import { loginClientSide } from '../__helpers/e2e/auth/login.js'
 import { openRelationshipFieldDrawer } from '../__helpers/e2e/fields/relationship/openRelationshipFieldDrawer.js'
 import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
-import {
-  changeLocale,
-  ensureCompilationIsDone,
-  saveDocAndAssert,
-  waitForFormReady,
-} from '../__helpers/e2e/helpers.js'
+import { changeLocale, saveDocAndAssert, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import {
   clearSelectInput,
   getSelectInputOptions,
@@ -73,9 +68,7 @@ test.describe('Multi Tenant', () => {
     autosaveGlobalURL = new AdminUrlUtil(serverURL, autosaveGlobalSlug)
 
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
+    ;({ page } = await initPage({ context, noAutoLogin: true, serverURL }))
   })
 
   test.beforeEach(async () => {

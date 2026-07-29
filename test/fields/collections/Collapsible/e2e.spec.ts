@@ -10,14 +10,12 @@ import type { Config } from '../../payload-types.js'
 
 import { checkFocusIndicators } from '../../../__helpers/e2e/checkFocusIndicators.js'
 import { addArrayRow } from '../../../__helpers/e2e/fields/array/index.js'
-import {
-  ensureCompilationIsDone,
-} from '../../../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../../../__helpers/e2e/runAxeScan.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { collapsibleFieldsSlug } from '../../slugs.js'
@@ -46,9 +44,7 @@ describe('Collapsibles', () => {
     url = new AdminUrlUtil(serverURL, collapsibleFieldsSlug)
 
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   beforeEach(async () => {
@@ -85,7 +81,10 @@ describe('Collapsibles', () => {
   })
 
   test('should render CollapsibleLabel using a component', async () => {
-    test.skip(process.env.PAYLOAD_FRAMEWORK === 'tanstack-start', 'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.')
+    test.skip(
+      process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+      'TanStack: known post-hydration RSC view remount detaches the view mid-interaction (see framework adapter notes); re-enable when the TanStack RSC hydration is fixed.',
+    )
     const label = 'custom row label as component'
     await page.goto(url.create)
 

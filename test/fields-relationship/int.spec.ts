@@ -8,7 +8,7 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Collection1 } from './payload-types.js'
 
 import { devUser } from '../credentials.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { collection1Slug, versionedRelationshipFieldSlug } from './slugs.js'
 
 let payload: Payload

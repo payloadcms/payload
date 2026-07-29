@@ -8,7 +8,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { devUser, regularUser } from '../credentials.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { isMongoose } from '../__helpers/shared/isMongoose.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
 import {

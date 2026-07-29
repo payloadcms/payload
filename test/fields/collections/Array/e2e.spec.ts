@@ -14,15 +14,13 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 
-import {
-  ensureCompilationIsDone,
-  saveDocAndAssert,
-} from '../../../__helpers/e2e/helpers.js'
+import { saveDocAndAssert } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { assertToastErrors } from '../../../__helpers/shared/assertToastErrors.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
+import { ensureCompilationIsDone } from '../../../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 
@@ -48,9 +46,7 @@ describe('Array', () => {
     }))
 
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
     await reInitializeDB({

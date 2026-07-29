@@ -5,7 +5,6 @@ import * as path from 'path'
 import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/initPage.js'
@@ -27,8 +26,7 @@ test.describe('Admin Bar', () => {
     serverURL = incomingServerURL
 
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-    await ensureCompilationIsDone({ page, serverURL: incomingServerURL })
+    ;({ page } = await initPage({ context, serverURL: incomingServerURL }))
   })
 
   test('should render admin bar', async () => {

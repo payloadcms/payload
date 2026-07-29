@@ -8,7 +8,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../../__setup/initPayloadInt.js'
 import {
   clearTestBucket,
   createTestBucket,

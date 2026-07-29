@@ -9,15 +9,11 @@ import type { Config } from './payload-types.js'
 
 import { addArrayRow, removeArrayRow } from '../__helpers/e2e/fields/array/index.js'
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
-import {
-  ensureCompilationIsDone,
-  getRoutes,
-  saveDocAndAssert,
-  waitForFormReady,
-} from '../__helpers/e2e/helpers.js'
+import { getRoutes, saveDocAndAssert, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { collectionSlugs } from './shared.js'
@@ -55,19 +51,15 @@ describe('Field Error States', () => {
       routes: { admin: adminRouteFromConfig },
     } = getRoutes({})
     adminRoute = adminRouteFromConfig
-
-    await ensureCompilationIsDone({ browser, serverURL })
   })
 
   beforeEach(async ({ page }) => {
-    await initPage({ page })
+    await initPage({ page, serverURL })
 
     await reInitializeDB({
       serverURL,
       snapshotKey: 'fielderrorstates',
     })
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   test('Remove row should remove error states from parent fields', async ({ page }) => {

@@ -12,7 +12,6 @@ import {
   assertNoHorizontalOverflow,
   checkHorizontalOverflow,
 } from '../__helpers/e2e/checkHorizontalOverflow.js'
-import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { runAxeScan } from '../__helpers/e2e/runAxeScan.js'
 import { openNav } from '../__helpers/e2e/toggleNav.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
@@ -39,8 +38,7 @@ test.describe.skip('A11y', () => {
     mediaUrl = new AdminUrlUtil(serverURL, 'media')
 
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   // Reset viewport before each test to ensure consistent starting state

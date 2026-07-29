@@ -12,7 +12,6 @@ import type { Config, Post } from './payload-types.js'
 import { addArrayRow } from '../__helpers/e2e/fields/array/index.js'
 import { addListFilter } from '../__helpers/e2e/filters/index.js'
 import {
-  ensureCompilationIsDone,
   exactText,
   findTableCell,
   selectTableRow,
@@ -46,8 +45,7 @@ test.describe('Bulk Edit', () => {
     tabsUrl = new AdminUrlUtil(serverURL, tabsSlug)
 
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.beforeEach(async () => {

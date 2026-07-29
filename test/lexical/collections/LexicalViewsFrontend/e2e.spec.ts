@@ -7,9 +7,9 @@ import type { PayloadTestSDK } from '../../../__helpers/shared/sdk/index.js'
 import type { Config } from '../../payload-types.js'
 import type { LexicalViewsFrontendNodes } from './index.js'
 
-import { ensureCompilationIsDone } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/ensureCompilationIsDone.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { lexicalViewsFrontendSlug, lexicalViewsSlug } from '../../slugs.js'
 
@@ -165,8 +165,8 @@ describe('Lexical Views', () => {
         ).toHaveAttribute('data-lexical-view', 'frontend')
       } finally {
         await _payload.delete({
-          collection: lexicalViewsFrontendSlug,
           id: doc.id,
+          collection: lexicalViewsFrontendSlug,
         })
       }
     })
@@ -242,8 +242,8 @@ describe('Lexical Views', () => {
         await expect(blockDecorator.locator('.custom-banner-block-component')).toBeVisible()
       } finally {
         await _payload.delete({
-          collection: lexicalViewsFrontendSlug,
           id: doc.id,
+          collection: lexicalViewsFrontendSlug,
         })
       }
     })
@@ -316,8 +316,8 @@ describe('Lexical Views', () => {
         await expect(bannerBlock).toHaveAttribute('data-banner-type', 'important')
       } finally {
         await _payload.delete({
-          collection: lexicalViewsFrontendSlug,
           id: doc.id,
+          collection: lexicalViewsFrontendSlug,
         })
       }
     })

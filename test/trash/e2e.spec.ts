@@ -8,14 +8,11 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, Post } from './payload-types.js'
 
 import { addListFilter } from '../__helpers/e2e/filters/index.js'
-import {
-  changeLocale,
-  closeAllToasts,
-  ensureCompilationIsDone,
-} from '../__helpers/e2e/helpers.js'
+import { changeLocale, closeAllToasts } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../__setup/initPage.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { pagesSlug } from './collections/Pages/index.js'
@@ -45,8 +42,6 @@ describe('Trash', () => {
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
     pagesUrl = new AdminUrlUtil(serverURL, pagesSlug)
     usersUrl = new AdminUrlUtil(serverURL, usersSlug)
-
-    await ensureCompilationIsDone({ browser, serverURL })
   })
 
   beforeEach(async ({ context, page }) => {
@@ -88,10 +83,8 @@ describe('Trash', () => {
         },
       })
     ).docs[0]!.id
-    await initPage({ page })
+    await initPage({ page, serverURL })
     //await throttleTest({ page, context, delay: 'Slow 4G' })
-
-    await ensureCompilationIsDone({ page, serverURL })
   })
 
   describe('Collection view', () => {

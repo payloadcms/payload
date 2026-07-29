@@ -19,12 +19,7 @@ import {
   removeArrayRow,
 } from '../__helpers/e2e/fields/array/index.js'
 import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
-import {
-  ensureCompilationIsDone,
-  saveDocAndAssert,
-  throttleTest,
-  waitForFormReady,
-} from '../__helpers/e2e/helpers.js'
+import { saveDocAndAssert, throttleTest, waitForFormReady } from '../__helpers/e2e/helpers.js'
 import { currentFramework, test } from '../__helpers/e2e/playwright.js'
 import { waitForAutoSaveToRunAndComplete } from '../__helpers/e2e/waitForAutoSaveToRunAndComplete.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
@@ -56,8 +51,7 @@ test.describe('Form State', () => {
     autosavePostsUrl = new AdminUrlUtil(serverURL, autosavePostsSlug)
 
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test.beforeEach(async () => {
@@ -77,18 +71,14 @@ test.describe('Form State', () => {
     await expect(page.locator('#field-title')).toBeDisabled()
   })
 
-  test(
-    'should render the create form ready to edit',
-    { framework: 'tanstack-start' },
-    async () => {
-      await page.goto(postsUrl.create)
-      // No client-init disabled phase: the RSC payload arrives with form state
-      // already initialized, so the field is immediately enabled and editable.
-      await expect(page.locator('#field-title')).toBeEnabled()
-      await page.locator('#field-title').fill(title)
-      await expect(page.locator('#field-title')).toHaveValue(title)
-    },
-  )
+  test('should render the create form ready to edit', { framework: 'tanstack-start' }, async () => {
+    await page.goto(postsUrl.create)
+    // No client-init disabled phase: the RSC payload arrives with form state
+    // already initialized, so the field is immediately enabled and editable.
+    await expect(page.locator('#field-title')).toBeEnabled()
+    await page.locator('#field-title').fill(title)
+    await expect(page.locator('#field-title')).toHaveValue(title)
+  })
 
   test('should disable fields while processing', async () => {
     const doc = await createPost()

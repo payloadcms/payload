@@ -15,7 +15,6 @@ import {
   changeLocale,
   closeAllToasts,
   closeLocaleSelector,
-  ensureCompilationIsDone,
   findTableRow,
   openLocaleSelector,
   saveDocAndAssert,
@@ -109,9 +108,7 @@ describe('Localization', () => {
     urlLocaleRestricted = new AdminUrlUtil(serverURL, localeRestrictedSlug)
 
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
 
     client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()
@@ -786,7 +783,7 @@ describe('Localization', () => {
         locale: 'all',
         where: { id: { equals: docID } },
       })
-       
+
       expect(doc.docs).toHaveLength(1)
     })
   })

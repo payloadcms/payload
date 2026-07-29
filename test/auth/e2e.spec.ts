@@ -11,14 +11,11 @@ import type { Config } from './payload-types.js'
 
 import { login } from '../__helpers/e2e/auth/login.js'
 import { logout } from '../__helpers/e2e/auth/logout.js'
-import {
-  ensureCompilationIsDone,
-  getRoutes,
-  saveDocAndAssert,
-} from '../__helpers/e2e/helpers.js'
+import { getRoutes, saveDocAndAssert } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../__setup/initPage.js'
 import { devUser } from '../credentials.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -56,9 +53,7 @@ describe('Auth', () => {
     adminRoute = adminRouteFromConfig
 
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
+    ;({ page } = await initPage({ context, noAutoLogin: true, serverURL }))
   })
 
   describe('create first user', () => {

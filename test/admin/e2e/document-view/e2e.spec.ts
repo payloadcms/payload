@@ -8,13 +8,13 @@ import type { Config, Post } from '../../payload-types.js'
 import {
   checkBreadcrumb,
   checkPageTitle,
-  ensureCompilationIsDone,
   exactText,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
 import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
+import { ensureCompilationIsDone } from '../../../__setup/ensureCompilationIsDone.js'
 import { initPage } from '../../../__setup/initPage.js'
 import {
   BASE_PATH,
@@ -103,9 +103,7 @@ describe('Document View', () => {
     localizedURL = new AdminUrlUtil(serverURL, localizedCollectionSlug)
 
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ customAdminRoutes, page, serverURL })
+    ;({ page } = await initPage({ context, customAdminRoutes, serverURL }))
   })
 
   beforeEach(async () => {

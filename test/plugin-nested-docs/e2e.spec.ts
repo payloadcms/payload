@@ -6,7 +6,6 @@ import { fileURLToPath } from 'url'
 
 import type { Config, Page as PayloadPage } from './payload-types.js'
 
-import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/initPage.js'
@@ -29,9 +28,7 @@ describe('Nested Docs Plugin', () => {
     const { payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname })
     url = new AdminUrlUtil(serverURL, 'pages')
     const context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
 
     async function createPage({
       slug,

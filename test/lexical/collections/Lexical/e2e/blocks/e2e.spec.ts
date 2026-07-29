@@ -21,7 +21,6 @@ import type { Config, LexicalField, Upload } from '../../../../payload-types.js'
 
 import { assertNetworkRequests } from '../../../../../__helpers/e2e/assertNetworkRequests.js'
 import {
-  ensureCompilationIsDone,
   saveDocAndAssert,
   waitForFormReady,
   waitForLexicalReady,
@@ -64,10 +63,7 @@ describe('lexicalBlocks', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
   beforeEach(async () => {
     // await throttleTest({

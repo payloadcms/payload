@@ -8,10 +8,8 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
-import {
-  ensureCompilationIsDone,
-  // throttleTest
-} from '../__helpers/e2e/helpers.js'
+import {} from // throttleTest
+'../__helpers/e2e/helpers.js'
 import { scrollEntirePage } from '../__helpers/e2e/scrollEntirePage.js'
 import { moveRow } from '../__helpers/e2e/sort/moveRow.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
@@ -39,13 +37,11 @@ describe('Sort functionality', () => {
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
 
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
+    ;({ page } = await initPage({ context, serverURL }))
 
     // Wait for the server to be ready before the node-side REST login: on the
     // slower TanStack prod cold-start, `client.login()` (a direct fetch, no retry)
     // can hit the server before it accepts connections → `TypeError: fetch failed`.
-    await ensureCompilationIsDone({ page, serverURL })
 
     client = new RESTClient({ defaultSlug: 'users', serverURL })
     await client.login()

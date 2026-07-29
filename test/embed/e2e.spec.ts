@@ -4,7 +4,6 @@ import { expect, test } from '@playwright/test'
 import * as path from 'path'
 import { fileURLToPath } from 'url'
 
-import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/initPage.js'
@@ -31,9 +30,7 @@ test.describe('embed mode', () => {
     url = new AdminUrlUtil(serverURL, 'users')
 
     context = await browser.newContext()
-    ;({ page } = await initPage({ context }))
-
-    await ensureCompilationIsDone({ page, serverURL })
+    ;({ page } = await initPage({ context, serverURL }))
   })
 
   test('toggles embed mode via the ?embed param and persists it in a cookie', async () => {

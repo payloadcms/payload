@@ -7,7 +7,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
 import { devUser } from '../../credentials.js'
-import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../../__setup/initPayloadInt.js'
 import { collectionSlug } from './config.js'
 
 let restClient: NextRESTClient

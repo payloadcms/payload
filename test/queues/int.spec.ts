@@ -16,7 +16,7 @@ import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vi
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { it } from '../__helpers/int/vitest.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
 import { waitUntilAutorunIsDone } from './utilities.js'

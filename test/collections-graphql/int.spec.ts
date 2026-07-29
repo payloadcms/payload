@@ -10,7 +10,7 @@ import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Post } from './payload-types.js'
 
 import { idToString } from '../__helpers/shared/idToString.js'
-import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
+import { initPayloadInt } from '../__setup/initPayloadInt.js'
 import { errorOnHookSlug, pointSlug, relationSlug, slug } from './config.js'
 
 const formatID = (id: number | string) => (typeof id === 'number' ? id : `"${id}"`)
