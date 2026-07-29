@@ -350,14 +350,49 @@ Stylelint enforces the rules below on `.css` files (SCSS is no longer linted and
 **Never use `!important`** (`plugin/no-important`). Refactor selector specificity instead.
 Exceptions to this rule are when it's not possible to do so when dealing with external libraries.
 
+**Prefer logical properties over physical properties** for RTL support:
+
+```css
+/* BAD - physical properties don't flip for RTL */
+padding-left: var(--spacer-3);
+margin-right: var(--spacer-2);
+border-left: 1px solid var(--color-border);
+left: 0;
+
+/* GOOD - logical properties adapt automatically */
+padding-inline-start: var(--spacer-3);
+margin-inline-end: var(--spacer-2);
+border-inline-start: 1px solid var(--color-border);
+inset-inline-start: 0;
+```
+
+Use `padding-inline`/`padding-block`, `margin-inline`/`margin-block`, `inset-inline`/`inset-block`, and `border-inline`/`border-block` (with their `-start`/`-end` variants) instead of the `-left`/`-right`/`-top`/`-bottom` equivalents where a direction is implied.
+
 **Prioritize design tokens over hardcoded pixel/rem values:**
 
-- Spacing (`width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`, `inset*`, `gap*`, `flex-basis`, etc.) should use a `--spacer-*` token from `packages/ui/src/css/spacing.css` (`--spacer-0` through `--spacer-6`), not a raw pixel or rem value.
+Spacing (`width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`, `inset*`, `gap*`, `flex-basis`, etc.) should use a `--spacer-*` token from `packages/ui/src/css/spacing.css`, not a raw pixel or rem value:
+
+| Token          | Pixel |
+| -------------- | ----- |
+| `--spacer-0`   | 0px   |
+| `--spacer-1`   | 4px   |
+| `--spacer-1-5` | 6px   |
+| `--spacer-2`   | 8px   |
+| `--spacer-2-5` | 12px  |
+| `--spacer-3`   | 16px  |
+| `--spacer-4`   | 24px  |
+| `--spacer-5`   | 32px  |
+| `--spacer-6`   | 40px  |
+
 - If the value needed isn't an exact token, round to the nearest `--spacer-*` token rather than hand-writing a one-off value.
 - If a niche value must be precise (not a rounding-friendly case), use `calc()` with a spacer token instead of a raw pixel/rem value, e.g. `calc(var(--spacer-1) * 2.5)` for `10px`.
-- The same principle applies to other token families - colors (`--color-*` in `colors.css`), radius (`--radius-*` in `radius.css`), typography (`--text-*` in `typography.css`) - prefer the token over a hardcoded value.
+- The same principle applies to other token families:
+  - **Colors:** use semantic `--color-*` tokens from `colors.css` (e.g. `--color-bg`, `--color-text-brand`, `--color-border`). Never reference raw `--ramp-*` palette tokens directly outside of `colors.css` as they aren't theme-aware.
+  - **Radius:** use `--radius-*` from `radius.css` (`--radius-small` 2px, `--radius-medium` 5px, `--radius-large` 13px, `--radius-full` 9999px) instead of hardcoded values.
+  - **Stroke width:** use `--stroke-width-small` (1px) / `--stroke-width-medium` (2px) from `theme.css`.
+  - **Box shadows:** use elevation tokens from `elevations.css` (`--elevation-100-canvas`, `--elevation-300-tooltip`, `--elevation-400-menu-panel`, `--elevation-500-modal-window`) instead of a hardcoded `box-shadow`/`rgba()` value - they also handle light/dark theming.
+  - **Typography:** use `--text-*` tokens from `typography.css`.
 - `1px` borders/strokes and non-standard one-off values with no sensible token (documented as such) are acceptable exceptions.
-- See the `ui4` and `ui4-review` skills for full token tables and rounding rules used when migrating existing CSS.
 
 **No sub-pixel precision** (`plugin/no-subpixel-values`) - applies to whatever raw value remains after the above (e.g. an exception case):
 
