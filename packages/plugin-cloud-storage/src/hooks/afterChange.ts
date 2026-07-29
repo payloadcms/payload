@@ -54,7 +54,14 @@ export const getAfterChangeHook =
           if (!req.context) {
             req.context = {}
           }
-          req.context.skipCloudStorage = true
+
+          // Capture the context object before the nested update. The Local API
+          // may re-bind req.context to a shallow copy, so the flag must be
+          // removed from this same reference afterwards - otherwise it would
+          // leak onto a caller-provided context object shared across Local API
+          // calls, silently skipping every subsequent upload.
+          const hookContext = req.context
+          hookContext.skipCloudStorage = true
 
           // Clear to prevent re-processing
           req.file = undefined
@@ -70,7 +77,14 @@ export const getAfterChangeHook =
               req,
             })
           } finally {
-            delete req.context.skipCloudStorage
+            delete hookContext.skipCloudStorage
+
+            // The nested update may have re-bound req.context to a copy that
+            // also carries the flag - clean it up so later writes reusing this
+            // req are not skipped.
+            if (req.context !== hookContext) {
+              delete req.context.skipCloudStorage
+            }
           }
 
           docWithMetadata = { ...doc, ...uploadMetadata }
