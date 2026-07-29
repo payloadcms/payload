@@ -177,12 +177,20 @@ describe('Auth', () => {
       })
 
       afterAll(async () => {
-        // reset password to original password
-        await page.goto(url.account)
-        await page.locator('#change-password').click()
-        await page.locator('#field-password').fill(devUser.password)
-        await page.locator('#field-confirm-password').fill(devUser.password)
-        await saveDocAndAssert(page, '#action-save')
+        // Reset the password through the API rather than the admin UI. This is cleanup, not
+        // a test, and driving the UI made it depend on the shared page still being alive at
+        // teardown — which fails with "Target page, context or browser has been closed".
+        const { docs } = await payload.find({
+          collection: slug,
+          limit: 1,
+          where: { email: { equals: devUser.email } },
+        })
+
+        await payload.update({
+          collection: slug,
+          id: docs[0]!.id,
+          data: { password: devUser.password },
+        })
       })
 
       // TODO: This test is unreliable. During development, the bundle sent to the client will include debug information.
