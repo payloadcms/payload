@@ -125,6 +125,7 @@ export const addDefaultsToAuthConfig = (auth: IncomingAuthType): IncomingAuthTyp
     ...(auth.cookies || {}),
   }
 
+  auth.depth = auth.depth ?? 0
   auth.forgotPassword = auth.forgotPassword ?? {}
   auth.lockTime = auth.lockTime ?? 600000 // 10 minutes
   auth.loginWithUsername = auth.loginWithUsername ?? false

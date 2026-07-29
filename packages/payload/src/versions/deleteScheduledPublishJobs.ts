@@ -29,8 +29,8 @@ export const deleteScheduledPublishJobs = async ({
             },
           },
           {
-            processing: {
-              equals: false,
+            processingUntil: {
+              exists: false,
             },
           },
           {

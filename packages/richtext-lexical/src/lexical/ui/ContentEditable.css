@@ -13,10 +13,6 @@
     &:focus-visible {
       outline: none !important;
     }
-
-    & > * {
-      transition: transform 0.2s ease-in-out;
-    }
   }
 
   @media (min-width: 768px) {

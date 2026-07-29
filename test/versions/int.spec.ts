@@ -893,6 +893,62 @@ describe('Versions', () => {
         expect(latestDraft.blocksField).toHaveLength(0)
       })
 
+      it('should restore a version via REST when a relationship field with filterOptions is set', async () => {
+        const target = await payload.create({
+          collection: draftCollectionSlug,
+          data: { description: 'target', title: 'filter-options target' },
+          draft: true,
+        })
+
+        const doc = await payload.create({
+          collection: draftCollectionSlug,
+          data: {
+            description: 'has relation',
+            relationWithFilterOptions: [target.id],
+            title: 'filter-options doc',
+          },
+          draft: true,
+        })
+
+        await payload.update({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          data: {
+            relationWithFilterOptions: [target.id],
+            title: 'filter-options doc updated',
+          },
+          draft: true,
+        })
+
+        const versions = await payload.findVersions({
+          collection: draftCollectionSlug,
+          where: { parent: { equals: doc.id } },
+        })
+
+        const versionToRestore = versions.docs[versions.docs.length - 1]
+        expect(versionToRestore?.version.relationWithFilterOptions).toBeDefined()
+
+        // Mimics the admin UI restore button: POST /:collection/versions/:id
+        const response = await restClient.POST(
+          `/${draftCollectionSlug}/versions/${versionToRestore!.id}`,
+        )
+        const body = await response.json()
+
+        expect(response.status).toBe(200)
+        expect(body.errors).toBeUndefined()
+
+        const restored = await payload.findByID({
+          id: doc.id,
+          collection: draftCollectionSlug,
+          depth: 0,
+          draft: true,
+        })
+        expect(restored.relationWithFilterOptions).toStrictEqual([target.id])
+
+        await payload.delete({ id: doc.id, collection: draftCollectionSlug })
+        await payload.delete({ id: target.id, collection: draftCollectionSlug })
+      })
+
       it('should not copy current document fields into restored version', async () => {
         // Create doc with a block (only text set), leaving radio/select/localized unset
         const doc = await payload.create({

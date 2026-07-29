@@ -6,7 +6,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import React from 'react'
 
-import './codeDiff.scss'
+import './codeDiff.css'
 
 import type { StoredRunResult } from '../../runResults.js'
 import type { EvalResult, SystemPromptKey } from '../../types.js'

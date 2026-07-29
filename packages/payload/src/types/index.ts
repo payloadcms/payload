@@ -166,7 +166,7 @@ export type DefaultValue =
       locale?: TypedLocale
       req: PayloadRequest
       user: PayloadRequest['user']
-    }) => SerializableValue)
+    }) => Promise<SerializableValue> | SerializableValue)
   | SerializableValue
 
 /**

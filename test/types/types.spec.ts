@@ -19,6 +19,8 @@ import type {
   GlobalBeforeValidateHook,
   GlobalConfig,
   GlobalPermission,
+  Job,
+  JobTaskStatus,
   JoinQuery,
   MeOperationResult,
   PaginatedDocs,
@@ -257,6 +259,13 @@ describe('Types testing', () => {
       }
       expect(invalidOptions).type.toBe<ValidateCollectionOptions<'pages'>>()
     })
+  })
+
+  test('should fall back when generated types do not include jobs', () => {
+    expect<Job['id']>().type.toBe<number | string>()
+    expect<Job['processingToken']>().type.toBe<null | string | undefined>()
+    expect<Job['taskStatus']>().type.toBe<JobTaskStatus>()
+    expect<'payload-jobs'>().type.not.toBeAssignableTo<CollectionSlug>()
   })
 
   describe('authenticated user', () => {

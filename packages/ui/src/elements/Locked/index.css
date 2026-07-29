@@ -25,12 +25,4 @@
       outline-color: var(--color-border-selected);
     }
   }
-
-  /* Fixed-position anchor mirroring the icon's rect, so the portaled tooltip (escaping
-   * the table's `overflow` clipping) can position against it. */
-  .locked__tooltip-anchor {
-    position: fixed;
-    z-index: var(--z-popup);
-    pointer-events: none;
-  }
 }

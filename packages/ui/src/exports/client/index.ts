@@ -437,6 +437,10 @@ export {
 } from '../../providers/RouteTransition/index.js'
 export { ConfigProvider, PageConfigProvider, useConfig } from '../../providers/Config/index.js'
 export { DocumentEventsProvider, useDocumentEvents } from '../../providers/DocumentEvents/index.js'
+export {
+  FormErrorHandlerContext,
+  useFormErrorHandler,
+} from '../../providers/FormErrorHandler/index.js'
 export { DocumentInfoProvider, useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 export { useDocumentTitle } from '../../providers/DocumentTitle/index.js'
 export type { DocumentTitleContext } from '../../providers/DocumentTitle/index.js'

@@ -1282,7 +1282,7 @@ export type Config = {
    *
    * @see https://payloadcms.com/docs/getting-started/concepts#depth
    *
-   * @default 2
+   * @default 1
    */
   defaultDepth?: number
   /**
