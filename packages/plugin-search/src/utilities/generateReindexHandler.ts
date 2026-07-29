@@ -8,6 +8,7 @@ import {
   initTransaction,
   killTransaction,
 } from 'payload'
+import { hasLocalizeStatusEnabled } from 'payload/shared'
 
 import type { SanitizedSearchPluginConfig } from '../types.js'
 
@@ -93,13 +94,29 @@ export const generateReindexHandler =
         equals: 'published',
       },
     }
+    // Localized `_status` tracks published state per-locale; match docs published in any locale.
+    function buildPublishedWhere(collection: string): Where {
+      const collectionConfig = payload.collections[collection]?.config
+      const localeCodes = payload.config.localization ? payload.config.localization.localeCodes : []
+
+      if (collectionConfig && hasLocalizeStatusEnabled(collectionConfig) && localeCodes.length) {
+        return {
+          or: localeCodes.map((localeCode) => ({
+            [`_status.${localeCode}`]: {
+              equals: 'published',
+            },
+          })),
+        }
+      }
+
+      return whereStatusPublished
+    }
     async function countDocuments(collection: string, drafts?: boolean): Promise<number> {
       const { totalDocs } = await payload.count({
         collection,
         ...defaultLocalApiProps,
-        locale: defaultLocale,
         req: undefined,
-        where: drafts ? undefined : whereStatusPublished,
+        where: drafts ? undefined : buildPublishedWhere(collection),
       })
       return totalDocs
     }
@@ -117,7 +134,11 @@ export const generateReindexHandler =
     async function reindexCollection(
       collection: string,
     ): Promise<{ docs: number; docsWithDrafts: number; errors: number }> {
-      const draftsEnabled = Boolean(payload.collections[collection]?.config.versions?.drafts)
+      const collectionConfig = payload.collections[collection]?.config
+      const draftsEnabled = Boolean(collectionConfig?.versions?.drafts)
+      const localizeStatusEnabled = collectionConfig
+        ? hasLocalizeStatusEnabled(collectionConfig)
+        : false
 
       const totalDocsWithDrafts = await countDocuments(collection, true)
       const totalDocs =
@@ -134,9 +155,10 @@ export const generateReindexHandler =
           collection,
           depth: 0,
           limit: batchSize,
-          locale: defaultLocale,
+          // Fetch all locales so each locale's `_status` is available for gating below
+          locale: localizeStatusEnabled ? 'all' : defaultLocale,
           page: i + 1,
-          where: syncDrafts || !draftsEnabled ? undefined : whereStatusPublished,
+          where: syncDrafts || !draftsEnabled ? undefined : buildPublishedWhere(collection),
           ...defaultLocalApiProps,
         })
 
@@ -172,14 +194,28 @@ export const generateReindexHandler =
               continue // Skip this locale
             }
 
+            // Skip locales that aren't published (unless syncing drafts)
+            let docToSync = doc
+            if (localizeStatusEnabled) {
+              const localeStatus = (doc as { _status?: Record<string, string> })._status?.[
+                localeToSync as string
+              ]
+
+              if (!syncDrafts && localeStatus !== 'published') {
+                continue
+              }
+
+              docToSync = { ...doc, _status: localeStatus }
+            }
+
             // Sync this locale (create first index, then update with other locales accordingly)
             const operation = firstAllowedLocale ? 'create' : 'update'
             firstAllowedLocale = false
 
             await syncDocAsSearchIndex({
               collection,
-              data: doc,
-              doc,
+              data: docToSync,
+              doc: docToSync,
               locale: localeToSync,
               onSyncError: () => operation === 'create' && localErrors++,
               operation,
