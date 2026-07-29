@@ -13,6 +13,7 @@ import { formatAdminURL, wait } from 'payload/shared'
 import { setTimeout } from 'timers/promises'
 
 import { POLL_TOPASS_TIMEOUT } from '../../playwright.config.js'
+import { patchPageGoToWithHydrationMarker } from './goTo.js'
 import { hideNextDevTools } from './hideNextDevTools.js'
 
 export type AdminRoutes = NonNullable<NonNullable<Config['admin']>['routes']>
@@ -442,134 +443,13 @@ export const openColumnControls = async (page: Page) => {
  * @param page
  * @param options
  */
-/**
- * Each `page.goto()` triggers a fresh SSR + hydration cycle, and on the
- * TanStack Start adapter (which serves a Vite dev server) hydration can lag
- * a click by 0.5-2s in CI. When that happens the click reaches the SSR'd
- * button and focuses it, but React's `onClick` handler is not attached yet
- * so the underlying state never updates and any follow-up `toBeVisible`
- * assertion times out. We patch `goto` here to wait for the hydration
- * marker that the TanStack root component installs (see
- * `app-tanstack/app/__root.tsx`). The patch is a no-op for the Next.js
- * adapter, where the marker is never set, so individual tests don't need to
- * branch on the framework.
- *
- * Idempotent: calling this more than once on the same page is safe.
- */
-export function installTanStackHydrationGotoWait(page: Page) {
-  if (process.env.PAYLOAD_FRAMEWORK !== 'tanstack-start') {
-    return
-  }
-  const patchedPage = page as unknown as {
-    __payloadGotoPatched?: boolean
-    __payloadSkipHydrationWait?: boolean
-  }
-  if (patchedPage.__payloadGotoPatched) {
-    return
-  }
-  patchedPage.__payloadGotoPatched = true
-
-  const waitForHydration = async () => {
-    if (patchedPage.__payloadSkipHydrationWait) {
-      return
-    }
-    try {
-      await page.waitForFunction(
-        () => (window as unknown as { __TANSTACK_HYDRATED__?: boolean }).__TANSTACK_HYDRATED__,
-        undefined,
-        { timeout: 15000 },
-      )
-    } catch {
-      // Best-effort. Don't fail navigation if the marker never shows up;
-      // the underlying assertion in the test will still surface the real
-      // failure.
-    }
-  }
-
-  // Non-admin URLs (e.g. `/api/<collection>` JSON endpoints used by tests that
-  // assert on the raw REST response) never mount the TanStack admin app, so
-  // `__TANSTACK_HYDRATED__` will never be set. Skip the hydration wait for
-  // those, otherwise each such navigation pays the full 15s timeout.
-  const requiresHydrationWait = (url: string | undefined): boolean => {
-    if (!url) {
-      return true
-    }
-    try {
-      const path = new URL(url, 'http://localhost').pathname
-      return !path.startsWith('/api/') && path !== '/api'
-    } catch {
-      return true
-    }
-  }
-
-  const originalGoto = page.goto.bind(page)
-  page.goto = (async (...args: Parameters<Page['goto']>) => {
-    const response = await originalGoto(...args)
-    if (requiresHydrationWait(args[0])) {
-      await waitForHydration()
-    }
-    return response
-  }) as Page['goto']
-
-  const originalReload = page.reload.bind(page)
-  page.reload = (async (...args: Parameters<Page['reload']>) => {
-    const response = await originalReload(...args)
-    if (requiresHydrationWait(page.url())) {
-      await waitForHydration()
-    }
-    return response
-  }) as Page['reload']
-}
-
-/**
- * Resolves once React has attached its internal props to `locator`'s DOM node, which is
- * the point at which its event handlers actually fire.
- *
- * `installTanStackHydrationGotoWait` waits for the admin root marker, but client
- * components streamed inside a view hydrate a few hundred ms later while their SSR'd
- * markup is in the DOM from the first byte. Interactions landing in that window are
- * silently dropped: a click focuses the element without running `onClick`, and a `fill`
- * sets the DOM value without React ever seeing the change. `toBeVisible()` is no
- * protection — the markup is already there.
- *
- * Use this for the first interaction after a navigation, in preference to a bare
- * `wait()`.
- */
-export async function waitForElementHydration(locator: Locator): Promise<void> {
-  await expect
-    .poll(
-      () =>
-        locator.evaluate((el) =>
-          Object.keys(el).some(
-            (key) => key.startsWith('__reactProps$') || key.startsWith('__reactFiber$'),
-          ),
-        ),
-      { timeout: POLL_TOPASS_TIMEOUT },
-    )
-    .toBe(true)
-}
-
-/**
- * Clicks `locator` once it has hydrated. Preferred over retrying the click until it
- * takes effect, which would double-submit forms.
- *
- * @see {@link waitForElementHydration}
- */
-export async function clickWhenHydrated(
-  locator: Locator,
-  options?: Parameters<Locator['click']>[0],
-): Promise<void> {
-  await waitForElementHydration(locator)
-  await locator.click(options)
-}
-
 export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: boolean }) {
   const { ignoreCORS = false } = options || {} // Default to not ignoring CORS errors
   const consoleErrors: string[] = []
 
   let shouldCollectErrors = false
 
-  installTanStackHydrationGotoWait(page)
+  patchPageGoToWithHydrationMarker(page)
 
   page.on('console', (msg) => {
     if (

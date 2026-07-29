@@ -5,7 +5,7 @@ import fs from 'fs'
 import path from 'path'
 import { wait } from 'payload/shared'
 
-import { installTanStackHydrationGotoWait } from '../../__helpers/e2e/helpers.js'
+import { patchPageGoToWithHydrationMarker } from '../../__helpers/e2e/goTo.js'
 
 export type PasteMode = 'blob' | 'html'
 
@@ -36,7 +36,7 @@ export class LexicalHelpers {
   page: Page
   constructor(page: Page) {
     this.page = page
-    installTanStackHydrationGotoWait(page)
+    patchPageGoToWithHydrationMarker(page)
   }
 
   async addLine(

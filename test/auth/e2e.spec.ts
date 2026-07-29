@@ -12,12 +12,10 @@ import type { Config } from './payload-types.js'
 import { login } from '../__helpers/e2e/auth/login.js'
 import { logout } from '../__helpers/e2e/auth/logout.js'
 import {
-  clickWhenHydrated,
   ensureCompilationIsDone,
   getRoutes,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
-  waitForElementHydration,
 } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -187,7 +185,7 @@ describe('Auth', () => {
       afterAll(async () => {
         // reset password to original password
         await page.goto(url.account)
-        await clickWhenHydrated(page.locator('#change-password'))
+        await page.locator('#change-password').click()
         await page.locator('#field-password').fill(devUser.password)
         await page.locator('#field-confirm-password').fill(devUser.password)
         await saveDocAndAssert(page, '#action-save')
@@ -245,7 +243,7 @@ describe('Auth', () => {
         const emailBeforeSave = await page.locator('#field-email').inputValue()
         await expect(page.locator('#force-unlock')).toBeVisible()
 
-        await clickWhenHydrated(page.locator('#change-password'))
+        await page.locator('#change-password').click()
         await page.locator('#field-password').fill('password')
 
         await expect(page.locator('#change-password')).toBeHidden()
@@ -276,9 +274,7 @@ describe('Auth', () => {
         await page.goto(url.list)
         await page.goto(url.create)
 
-        // A `fill` before hydration sets the DOM value without React seeing the change,
-        // so the field would submit empty.
-        await waitForElementHydration(page.locator('#field-email'))
+        await page.locator('#field-email').click()
 
         await page.locator('#field-email').fill('dev2@payloadcms.com')
         await page.locator('#field-password').fill('password')
@@ -329,7 +325,7 @@ describe('Auth', () => {
       test('should unlock document on logout after editing without saving', async () => {
         await page.goto(url.list)
 
-        await clickWhenHydrated(page.locator('.table .row-1 .cell-custom a'))
+        await page.locator('.table .row-1 .cell-custom a').click()
         await page.waitForURL(/\/admin\/collections\/users\/[a-zA-Z0-9]+/)
 
         const textInput = page.locator('#field-namedSaveToJWT')
@@ -386,7 +382,6 @@ describe('Auth', () => {
       test('should enable api key', async () => {
         await page.goto(url.create)
 
-        // click enable api key checkbox
         await page.locator('#field-enableAPIKey').click()
 
         // assert that the value is set
