@@ -1,18 +1,108 @@
 import { spawnSync } from 'node:child_process'
 import { createHash } from 'node:crypto'
 import fs from 'node:fs'
-import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
+import { copyFile, cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
+import type { AgentWorkspaceFile } from './types.js'
+
+import { AUDIT_LOG_PATH_ENV } from '../../__helpers/plugins/audit/index.js'
+import { MCP_EVAL_DATABASE_URL_ENV } from '../mcpDatabase.js'
+
 // Resolve the skill source relative to this file so behavior is independent of cwd.
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const FIXTURES_DIR = path.resolve(__dirname, '../fixtures')
 const SKILL_SRC = path.resolve(__dirname, '../../../tools/claude-plugin/skills/payload')
+const MCP_BIN = path.resolve(__dirname, '../../../packages/plugin-mcp/bin.js')
 
-export async function materialize({ starterConfig }: { starterConfig: string }): Promise<string> {
+export function getAuditPath(workdir: string): string {
+  return path.join(workdir, 'audit.json')
+}
+
+export async function materialize({
+  configPath,
+  exposeMcpTools,
+  mcpConfigPath,
+  mcpDatabaseURL,
+  starterConfig,
+  workspaceFiles,
+}: {
+  configPath?: string
+  /** Write agent configuration that exposes the starter config's Payload MCP tools. */
+  exposeMcpTools?: boolean
+  /** Absolute path to the frozen config booted by the parent eval process. */
+  mcpConfigPath?: string
+  mcpDatabaseURL?: string
+  starterConfig: string
+  workspaceFiles?: AgentWorkspaceFile[]
+}): Promise<string> {
+  if (exposeMcpTools && configPath && !mcpDatabaseURL) {
+    throw new Error('MCP eval workdirs require a per-case database URL')
+  }
+
+  for (const { targetPath } of workspaceFiles ?? []) {
+    const normalizedTarget = path.normalize(targetPath)
+    if (
+      path.isAbsolute(targetPath) ||
+      normalizedTarget === '.' ||
+      normalizedTarget === '..' ||
+      normalizedTarget.startsWith(`..${path.sep}`)
+    ) {
+      throw new Error(`Agent workspace file must stay inside the workdir: ${targetPath}`)
+    }
+  }
+
   const workdir = await mkdtemp(path.join(os.tmpdir(), 'payload-eval-'))
   await writeFile(path.join(workdir, 'payload.config.ts'), starterConfig, 'utf-8')
+
+  await Promise.all(
+    (workspaceFiles ?? []).map(async ({ sourcePath, targetPath }) => {
+      const destination = path.resolve(workdir, targetPath)
+      if (!destination.startsWith(`${workdir}${path.sep}`)) {
+        throw new Error(`Agent workspace file must stay inside the workdir: ${targetPath}`)
+      }
+
+      await mkdir(path.dirname(destination), { recursive: true })
+      await copyFile(sourcePath, destination)
+    }),
+  )
+
+  if (exposeMcpTools && configPath) {
+    const env = {
+      [AUDIT_LOG_PATH_ENV]: getAuditPath(workdir),
+      ...(mcpDatabaseURL ? { [MCP_EVAL_DATABASE_URL_ENV]: mcpDatabaseURL } : {}),
+      NODE_ENV: 'development',
+      PAYLOAD_CONFIG_PATH:
+        mcpConfigPath ?? path.join(FIXTURES_DIR, configPath, 'payload.config.ts'),
+      PAYLOAD_DROP_DATABASE: 'false',
+      PAYLOAD_FORCE_DRIZZLE_PUSH: 'true',
+      PAYLOAD_MCP_OVERRIDE_ACCESS: 'true',
+    }
+    const codexDir = path.join(workdir, '.codex')
+
+    await mkdir(codexDir, { recursive: true })
+    await Promise.all([
+      writeFile(
+        path.join(workdir, '.mcp.json'),
+        JSON.stringify({
+          mcpServers: { payload: { args: [MCP_BIN], command: process.execPath, env } },
+        }),
+        'utf-8',
+      ),
+      writeFile(
+        path.join(codexDir, 'config.toml'),
+        `[mcp_servers.payload]\ncommand = ${JSON.stringify(process.execPath)}\nargs = [${JSON.stringify(MCP_BIN)}]\n\n[mcp_servers.payload.env]\n${Object.entries(
+          env,
+        )
+          .map(([key, value]) => `${key} = ${JSON.stringify(value)}`)
+          .join('\n')}\n`,
+        'utf-8',
+      ),
+    ])
+  }
+
   return workdir
 }
 
@@ -51,6 +141,33 @@ export async function cleanup(workdir: string): Promise<void> {
 }
 
 let cachedSkillHash: null | string = null
+let cachedMCPEvalConfigHash: null | string = null
+
+export function getMCPEvalConfigHash(): string {
+  if (cachedMCPEvalConfigHash === null) {
+    cachedMCPEvalConfigHash = createHash('sha256')
+      .update(fs.readFileSync(path.join(FIXTURES_DIR, 'mcp', 'buildMCPEvalConfig.ts')))
+      .digest('hex')
+      .slice(0, 8)
+  }
+
+  return cachedMCPEvalConfigHash
+}
+
+export function getWorkspaceFilesHash(files?: AgentWorkspaceFile[]): string | undefined {
+  if (!files?.length) {
+    return undefined
+  }
+
+  const hash = createHash('sha256')
+  for (const file of files.slice().sort((a, b) => a.targetPath.localeCompare(b.targetPath))) {
+    hash.update(file.targetPath)
+    hash.update('\0')
+    hash.update(fs.readFileSync(file.sourcePath))
+    hash.update('\0')
+  }
+  return hash.digest('hex').slice(0, 8)
+}
 
 export function getSkillTreeHash(): string {
   if (cachedSkillHash !== null) {

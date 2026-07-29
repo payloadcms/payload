@@ -1,4 +1,4 @@
-import type { TypedUser } from 'payload'
+import type { User } from 'payload'
 
 import { formatAdminURL } from 'payload/shared'
 import * as qs from 'qs-esm'
@@ -17,7 +17,7 @@ type Args = {
   }
   route: string
   searchParams: { [key: string]: string | string[] }
-  user?: TypedUser
+  user?: User
 }
 
 /** Builds the redirect URL for unauthenticated or unauthorized admin access. */

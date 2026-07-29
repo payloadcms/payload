@@ -71,5 +71,17 @@ Important scoring guidance:
   const score = 0.6 * correctness + 0.4 * completeness
   const pass = score >= SCORE_THRESHOLD
 
-  return { ...output, completeness, correctness, pass, score, usage }
+  return {
+    ...output,
+    completeness,
+    correctness,
+    pass,
+    score,
+    usage: {
+      cachedInputTokens: usage.inputTokenDetails.cacheReadTokens ?? 0,
+      inputTokens: usage.inputTokens ?? 0,
+      outputTokens: usage.outputTokens ?? 0,
+      totalTokens: usage.totalTokens ?? 0,
+    },
+  }
 }

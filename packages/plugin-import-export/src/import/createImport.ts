@@ -1,4 +1,4 @@
-import type { PayloadRequest, TypedUser } from 'payload'
+import type { PayloadRequest, User } from 'payload'
 
 import { APIError } from 'payload'
 
@@ -66,14 +66,14 @@ export const createImport = async ({
   userCollection,
   userID,
 }: CreateImportArgs): Promise<ImportResult> => {
-  let user: TypedUser | undefined
+  let user: undefined | User
 
   if (userCollection && userID) {
     user = (await req.payload.findByID({
       id: userID,
       collection: userCollection,
       req,
-    })) as TypedUser
+    })) as User
   }
 
   if (!user) {

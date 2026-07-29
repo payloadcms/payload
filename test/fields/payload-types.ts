@@ -64,22 +64,22 @@ export type SupportedTimezones =
   | 'UTC';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_937A3078".
+ * via the `definition` "LexicalNodes_3E252BA3".
  */
-export type LexicalNodes_937A3078 =
+export type LexicalNodes_3E252BA3 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_937A3078>
+  | SerializedParagraphNode<LexicalNodes_3E252BA3>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_937A3078>
+  | SerializedHeadingNode<LexicalNodes_3E252BA3>
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_937A3078>
-  | SerializedListNode<LexicalNodes_937A3078>
-  | SerializedListItemNode<LexicalNodes_937A3078>
-  | SerializedAutoLinkNode<LexicalNodes_937A3078, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_937A3078, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_3E252BA3>
+  | SerializedListNode<LexicalNodes_3E252BA3>
+  | SerializedListItemNode<LexicalNodes_3E252BA3>
+  | SerializedAutoLinkNode<LexicalNodes_3E252BA3, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_3E252BA3, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -105,6 +105,7 @@ export type LexicalNodes_937A3078 =
       | 'relationship-fields'
       | 'select-fields'
       | 'slug-fields'
+      | 'slug-autosave'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -114,7 +115,6 @@ export type LexicalNodes_937A3078 =
       | 'uploads-multi-poly'
       | 'uploads-restricted'
       | 'ui-fields'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -122,17 +122,17 @@ export type LexicalNodes_937A3078 =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_313DC238".
+ * via the `definition` "LexicalNodes_C8D96449".
  */
-export type LexicalNodes_313DC238 =
+export type LexicalNodes_C8D96449 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_313DC238>
+  | SerializedParagraphNode<LexicalNodes_C8D96449>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'uploads'>
   | SerializedUploadNode<'uploads2'>
-  | SerializedQuoteNode<LexicalNodes_313DC238>
+  | SerializedQuoteNode<LexicalNodes_C8D96449>
   | SerializedRelationshipNode<
       | 'users'
       | 'select-versions-fields'
@@ -158,6 +158,7 @@ export type LexicalNodes_313DC238 =
       | 'relationship-fields'
       | 'select-fields'
       | 'slug-fields'
+      | 'slug-autosave'
       | 'tabs-fields-2'
       | 'tabs-fields'
       | 'text-fields'
@@ -167,17 +168,16 @@ export type LexicalNodes_313DC238 =
       | 'uploads-multi-poly'
       | 'uploads-restricted'
       | 'ui-fields'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_313DC238, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_313DC238, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_313DC238>
-  | SerializedListItemNode<LexicalNodes_313DC238>
-  | SerializedHeadingNode<LexicalNodes_313DC238>;
+  | SerializedAutoLinkNode<LexicalNodes_C8D96449, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_C8D96449, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_C8D96449>
+  | SerializedListItemNode<LexicalNodes_C8D96449>
+  | SerializedHeadingNode<LexicalNodes_C8D96449>;
 
 export interface Config {
   auth: {
@@ -213,6 +213,7 @@ export interface Config {
     'relationship-fields': RelationshipField;
     'select-fields': SelectField;
     'slug-fields': SlugField;
+    'slug-autosave': SlugAutosave;
     'tabs-fields-2': TabsFields2;
     'tabs-fields': TabsField;
     'text-fields': TextField;
@@ -225,7 +226,6 @@ export interface Config {
     'uploads-multi-poly': UploadsMultiPoly;
     'uploads-restricted': UploadsRestricted;
     'ui-fields': UiField;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -257,6 +257,7 @@ export interface Config {
     'relationship-fields': RelationshipFieldsSelect<false> | RelationshipFieldsSelect<true>;
     'select-fields': SelectFieldsSelect<false> | SelectFieldsSelect<true>;
     'slug-fields': SlugFieldsSelect<false> | SlugFieldsSelect<true>;
+    'slug-autosave': SlugAutosaveSelect<false> | SlugAutosaveSelect<true>;
     'tabs-fields-2': TabsFields2Select<false> | TabsFields2Select<true>;
     'tabs-fields': TabsFieldsSelect<false> | TabsFieldsSelect<true>;
     'text-fields': TextFieldsSelect<false> | TextFieldsSelect<true>;
@@ -269,7 +270,6 @@ export interface Config {
     'uploads-multi-poly': UploadsMultiPolySelect<false> | UploadsMultiPolySelect<true>;
     'uploads-restricted': UploadsRestrictedSelect<false> | UploadsRestrictedSelect<true>;
     'ui-fields': UiFieldsSelect<false> | UiFieldsSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -284,6 +284,8 @@ export interface Config {
   locale: 'en' | 'es';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -404,7 +406,7 @@ export interface ArrayField {
     text: string;
     anotherText?: string | null;
     localizedText?: string | null;
-    richTextField?: LexicalRichText<LexicalNodes_937A3078> | null;
+    richTextField?: LexicalRichText<LexicalNodes_3E252BA3> | null;
     subArray?:
       | {
           text?: string | null;
@@ -571,7 +573,7 @@ export interface BlockField {
  */
 export interface ContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_313DC238> | null;
+  richText?: LexicalRichText<LexicalNodes_C8D96449> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
@@ -643,7 +645,7 @@ export interface TabsBlock {
  */
 export interface LocalizedContentBlock {
   text: string;
-  richText?: LexicalRichText<LexicalNodes_313DC238> | null;
+  richText?: LexicalRichText<LexicalNodes_C8D96449> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'localizedContent';
@@ -1058,7 +1060,7 @@ export interface ConditionalLogic {
   customFieldWithHOC?: string | null;
   customClientFieldWithCondition?: string | null;
   customServerFieldWithCondition?: string | null;
-  conditionalRichText?: LexicalRichText<LexicalNodes_937A3078> | null;
+  conditionalRichText?: LexicalRichText<LexicalNodes_3E252BA3> | null;
   userConditional?: string | null;
   parentGroup?: {
     enableParentGroupFields?: boolean | null;
@@ -1728,6 +1730,8 @@ export interface SelectField {
   selectWithJsxLabelOption?: ('one' | 'two' | 'three') | null;
   disallowOption1?: boolean | null;
   selectWithFilteredOptions?: ('one' | 'two' | 'three') | null;
+  disallowOption2?: boolean | null;
+  selectAsyncFilterOptions?: ('one' | 'two' | 'three') | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1738,30 +1742,30 @@ export interface SelectField {
 export interface SlugField {
   id: string;
   title: string;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateSlug?: boolean | null;
   slug: string;
   localizedTitle?: string | null;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateCustomSlug?: boolean | null;
   customSlugify: string;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateLocalizedSlug?: boolean | null;
   localizedSlug?: string | null;
-  /**
-   * When enabled, the slug will auto-generate from the title field on save and autosave.
-   */
-  generateReadOnlySlug?: boolean | null;
+  localizedSharedSlug?: string | null;
   readOnlySlug?: string | null;
+  sourcelessSlug?: string | null;
   test?: string | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-autosave".
+ */
+export interface SlugAutosave {
+  id: string;
+  title?: string | null;
+  slug: string;
+  localizedTitle?: string | null;
+  localizedSlug: string;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -2051,31 +2055,6 @@ export interface UiField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -2195,6 +2174,10 @@ export interface PayloadLockedDocument {
         value: string | SlugField;
       } | null)
     | ({
+        relationTo: 'slug-autosave';
+        value: string | SlugAutosave;
+      } | null)
+    | ({
         relationTo: 'tabs-fields-2';
         value: string | TabsFields2;
       } | null)
@@ -2241,10 +2224,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'ui-fields';
         value: string | UiField;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -3540,6 +3519,8 @@ export interface SelectFieldsSelect<T extends boolean = true> {
   selectWithJsxLabelOption?: T;
   disallowOption1?: T;
   selectWithFilteredOptions?: T;
+  disallowOption2?: T;
+  selectAsyncFilterOptions?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -3549,18 +3530,29 @@ export interface SelectFieldsSelect<T extends boolean = true> {
  */
 export interface SlugFieldsSelect<T extends boolean = true> {
   title?: T;
-  generateSlug?: T;
   slug?: T;
   localizedTitle?: T;
-  generateCustomSlug?: T;
   customSlugify?: T;
-  generateLocalizedSlug?: T;
   localizedSlug?: T;
-  generateReadOnlySlug?: T;
+  localizedSharedSlug?: T;
   readOnlySlug?: T;
+  sourcelessSlug?: T;
   test?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "slug-autosave_select".
+ */
+export interface SlugAutosaveSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  localizedTitle?: T;
+  localizedSlug?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -3874,22 +3866,6 @@ export interface UiFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -3937,6 +3913,116 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'users'
+      | 'select-versions-fields'
+      | 'array-fields'
+      | 'block-fields'
+      | 'checkbox-fields'
+      | 'code-fields'
+      | 'collapsible-fields'
+      | 'conditional-logic'
+      | 'custom-id'
+      | 'custom-id-nested'
+      | 'custom-tab-id'
+      | 'custom-row-id'
+      | 'date-fields'
+      | 'email-fields'
+      | 'radio-fields'
+      | 'group-fields'
+      | 'row-fields'
+      | 'indexed-fields'
+      | 'json-fields'
+      | 'number-fields'
+      | 'point-fields'
+      | 'relationship-fields'
+      | 'select-fields'
+      | 'slug-fields'
+      | 'slug-autosave'
+      | 'tabs-fields-2'
+      | 'tabs-fields'
+      | 'text-fields'
+      | 'textarea-fields'
+      | 'uploads'
+      | 'uploads2'
+      | 'uploads3'
+      | 'uploads-multi'
+      | 'uploads-poly'
+      | 'uploads-multi-poly'
+      | 'uploads-restricted'
+      | 'ui-fields';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'users'
+          | 'select-versions-fields'
+          | 'array-fields'
+          | 'block-fields'
+          | 'checkbox-fields'
+          | 'code-fields'
+          | 'collapsible-fields'
+          | 'conditional-logic'
+          | 'custom-id'
+          | 'custom-id-nested'
+          | 'custom-tab-id'
+          | 'custom-row-id'
+          | 'date-fields'
+          | 'email-fields'
+          | 'radio-fields'
+          | 'group-fields'
+          | 'row-fields'
+          | 'indexed-fields'
+          | 'json-fields'
+          | 'number-fields'
+          | 'point-fields'
+          | 'relationship-fields'
+          | 'select-fields'
+          | 'slug-fields'
+          | 'slug-autosave'
+          | 'tabs-fields-2'
+          | 'tabs-fields'
+          | 'text-fields'
+          | 'textarea-fields'
+          | 'uploads'
+          | 'uploads2'
+          | 'uploads3'
+          | 'uploads-multi'
+          | 'uploads-poly'
+          | 'uploads-multi-poly'
+          | 'uploads-restricted'
+          | 'ui-fields'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -4054,7 +4140,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -4103,7 +4189,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

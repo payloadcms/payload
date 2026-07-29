@@ -7,9 +7,11 @@
  * Usage: node .github/workflows/e2e.config.ts
  */
 
+import type { TestConfig } from './utilities/e2e-matrix.ts'
+
 import { createE2EConfig } from './utilities/e2e-matrix.ts'
 
-export default createE2EConfig([
+const nextSuites: TestConfig[] = [
   { file: '_community', shards: 1 },
   { file: 'a11y', shards: 1 },
   { file: 'access-control', shards: 2 },
@@ -99,7 +101,23 @@ export default createE2EConfig([
   { file: 'queues', shards: 1 },
   { file: 'sort', shards: 1 },
   { file: 'server-url', shards: 1 },
+  { file: 'tags', shards: 1 },
   { file: 'trash', shards: 2 },
   { file: 'versions', shards: 3 },
   { file: 'uploads', shards: 3 },
-])
+]
+
+/**
+ * tanstack-start coverage is being rolled out one suite at a time.
+ * Only the `_community` suite runs for now, and it is required so its failures block the `all-green` gate.
+ *
+ * @todo as the tanstack-start adapter becomes stable, turn on the full suite matrix, one-by-one.
+ * To enable all
+ *  - Use `nextSuites.map((suite) => ({ ...suite, framework: 'tanstack-start' }))` —
+ *  - Drop the per-suite `optional` overrides and remove the `optional` default for tanstack-start in e2e matrix.
+ */
+const tanstackSuites: TestConfig[] = [
+  { file: '_community', framework: 'tanstack-start', optional: false, shards: 1 },
+]
+
+export default createE2EConfig([...nextSuites, ...tanstackSuites])

@@ -68,7 +68,6 @@ describe('defineGlobalTool input inference', () => {
       return { content: [] }
     })
   })
-
 })
 
 describe('definePrompt input inference', () => {

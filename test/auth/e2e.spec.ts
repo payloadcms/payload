@@ -13,7 +13,6 @@ import { login } from '../__helpers/e2e/auth/login.js'
 import { logout } from '../__helpers/e2e/auth/logout.js'
 import {
   ensureCompilationIsDone,
-  exactText,
   getRoutes,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
@@ -112,7 +111,7 @@ describe('Auth', () => {
       await page.locator('#field-password').fill(devUser.password)
 
       await page.locator('.form-submit > button').click()
-      await expect(page.locator('.field-type.confirm-password .field-error')).toHaveText(
+      await expect(page.locator('#field-error-confirm-password')).toHaveText(
         'This field is required.',
       )
 
@@ -122,7 +121,7 @@ describe('Auth', () => {
       await page.locator('#field-confirm-password').fill('12')
 
       await page.locator('.form-submit > button').click()
-      await expect(page.locator('.field-type.password .field-error')).toHaveText(
+      await expect(page.locator('#field-error-password')).toHaveText(
         'This value must be longer than the minimum length of 3 characters.',
       )
 
@@ -252,20 +251,16 @@ describe('Auth', () => {
         await expect(page.locator('#cancel-change-password')).toBeVisible()
         // should fail to save without confirm password
         await page.locator('#action-save').click()
-        await expect(
-          page.locator('.field-type.confirm-password .tooltip--show', {
-            hasText: exactText('This field is required.'),
-          }),
-        ).toBeVisible()
+        await expect(page.locator('#field-error-confirm-password')).toHaveText(
+          'This field is required.',
+        )
 
         // should fail to save with incorrect confirm password
         await page.locator('#field-confirm-password').fill('wrong password')
         await page.locator('#action-save').click()
-        await expect(
-          page.locator('.field-type.confirm-password .tooltip--show', {
-            hasText: exactText('Passwords do not match.'),
-          }),
-        ).toBeVisible()
+        await expect(page.locator('#field-error-confirm-password')).toHaveText(
+          'Passwords do not match.',
+        )
 
         // should succeed with matching confirm password
         await page.locator('#field-confirm-password').fill('password')
@@ -282,11 +277,9 @@ describe('Auth', () => {
         await page.locator('#field-password').fill('password')
         // should fail to save without confirm password
         await page.locator('#action-save').click({ delay: 100 })
-        await expect(
-          page.locator('.field-type.confirm-password .tooltip--show', {
-            hasText: exactText('This field is required.'),
-          }),
-        ).toBeVisible()
+        await expect(page.locator('#field-error-confirm-password')).toHaveText(
+          'This field is required.',
+        )
 
         // should succeed with matching confirm password
         await page.locator('#field-confirm-password').fill('password')
@@ -338,10 +331,21 @@ describe('Auth', () => {
         await expect(textInput).toBeVisible()
         const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
 
-        const lockDocRequest = page.waitForResponse(
-          (response) =>
-            response.request().method() === 'POST' && response.request().url() === url.edit(docID),
-        )
+        const isTanStack = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
+        const lockDocRequest = page.waitForResponse((response) => {
+          const method = response.request().method()
+          const reqUrl = response.request().url()
+          if (method !== 'POST') {
+            return false
+          }
+          // Next.js server actions POST to the admin page URL;
+          // TanStack Start server functions POST through `createServerFn`'s
+          // `/_serverFn/<base64-fn-id>` RPC (legacy `/api/server-function`
+          // accepted for backward compatibility with older snapshots).
+          return isTanStack
+            ? reqUrl.includes('/_serverFn/') || reqUrl.includes('/api/server-function')
+            : reqUrl === url.edit(docID)
+        })
         await textInput.fill('some text')
         await lockDocRequest
 

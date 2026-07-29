@@ -60,7 +60,7 @@ describe('Upload polymorphic with hasMany', () => {
     })
     await multiPolyButton.click()
 
-    const uploadModal = page.locator('#media-bulk-upload-drawer-slug-1')
+    const uploadModal = page.locator('#media-bulk-upload-modal-slug-1')
     await expect(uploadModal).toBeVisible()
 
     await uploadModal
@@ -94,7 +94,7 @@ describe('Upload polymorphic with hasMany', () => {
     // Select an option
     await options.locator('text=Upload 2').click()
 
-    await expect(uploadModal.locator('.bulk-upload--drawer-header')).toContainText('Upload 2')
+    await expect(collectionSelector.locator('.rs__single-value')).toContainText('Upload 2')
     await saveButton.click()
     await expect(page.locator('.payload-toast-container')).toContainText('Successfully')
     await closeAllToasts(page)
@@ -114,7 +114,7 @@ describe('Upload polymorphic with hasMany', () => {
     })
     await multiPolyButton.click()
 
-    const uploadModal = page.locator('#media-bulk-upload-drawer-slug-1')
+    const uploadModal = page.locator('#media-bulk-upload-modal-slug-1')
     await expect(uploadModal).toBeVisible()
 
     await uploadModal
@@ -148,7 +148,7 @@ describe('Upload polymorphic with hasMany', () => {
     // Select an option
     await options.locator('text=Upload 2').click()
 
-    await expect(uploadModal.locator('.bulk-upload--drawer-header')).toContainText('Upload 2')
+    await expect(collectionSelector.locator('.rs__single-value')).toContainText('Upload 2')
     await saveButton.click()
     await expect(page.locator('.payload-toast-container')).toContainText('Successfully')
     await closeAllToasts(page)

@@ -16,7 +16,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
   - `packages/drizzle` - Drizzle ORM integration
   - `packages/kv-redis` - Redis key-value store adapter
   - `packages/richtext-*` - Rich text editors (Lexical)
-  - `packages/storage-*` - Storage adapters (S3, Azure, GCS, Uploadthing, Vercel Blob, R2)
+  - `packages/storage-*` - Storage adapters (S3, Azure, GCS, Vercel Blob, R2)
   - `packages/email-*` - Email adapters (Nodemailer, Resend)
   - `packages/plugin-*` - Additional functionality plugins
   - `packages/graphql` - GraphQL API layer
@@ -266,7 +266,7 @@ Examples:
 - LLMS.txt: <https://payloadcms.com/llms.txt>
 - LLMS-FULL.txt: <https://payloadcms.com/llms-full.txt>
 - Node version: >=24.15.0
-- pnpm version: ^10.27.0
+- pnpm version: ^11.9.0
 
 ## Admin Panel
 

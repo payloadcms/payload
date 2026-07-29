@@ -1,4 +1,4 @@
-import type { TypedUser, User } from 'payload'
+import type { User } from 'payload'
 
 import type { PayloadTestSDK } from '../shared/sdk/index.js'
 import type { GeneratedTypes } from '../shared/sdk/types.js'
@@ -14,7 +14,7 @@ export const upsertPreferences = async <
 }: {
   key: string
   payload: PayloadTestSDK<TConfig>
-  user: TypedUser
+  user: User
   value: any
 }): Promise<TGeneratedTypes['collections']['payload-preferences']> => {
   try {

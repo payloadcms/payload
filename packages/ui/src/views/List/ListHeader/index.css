@@ -6,6 +6,11 @@
 
   .list-drawer__select-collection-wrap {
     margin-top: var(--spacer-3);
+
+    .field-label {
+      margin-bottom: var(--spacer-2);
+      display: block;
+    }
   }
 
   @media (max-width: 768px) {

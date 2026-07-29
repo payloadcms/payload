@@ -1,29 +1,23 @@
 'use client'
 
-import type { ClientCollectionConfig } from 'payload'
-
 import React from 'react'
 
 import { ChevronIcon } from '../../../icons/Chevron/index.js'
 import { useConfig } from '../../../providers/Config/index.js'
 import { useTranslation } from '../../../providers/Translation/index.js'
 import { Button } from '../../Button/index.js'
-import { EditManyBulkUploads } from '../EditMany/index.js'
+import { DialogFooter } from '../../Dialog/DialogFooter/index.js'
 import { useFormsManager } from '../FormsManager/index.js'
 import './index.css'
 
 const baseClass = 'bulk-upload--actions-bar'
 
-type Props = {
-  readonly collectionConfig: ClientCollectionConfig
-}
-
-export function ActionsBar({ collectionConfig }: Props) {
+export function ActionsBar() {
   const { activeIndex, forms, setActiveIndex } = useFormsManager()
   const { t } = useTranslation()
 
   return (
-    <div className={baseClass}>
+    <DialogFooter>
       {forms.length > 1 && (
         <div className={`${baseClass}__multipleFiles`}>
           <div className={`${baseClass}__navigation`}>
@@ -64,12 +58,11 @@ export function ActionsBar({ collectionConfig }: Props) {
               />
             </div>
           </div>
-          <EditManyBulkUploads collection={collectionConfig} />
         </div>
       )}
 
       <Actions className={`${baseClass}__saveButtons`} />
-    </div>
+    </DialogFooter>
   )
 }
 

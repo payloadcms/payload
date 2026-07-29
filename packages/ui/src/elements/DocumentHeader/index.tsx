@@ -8,7 +8,7 @@ import type {
 import React from 'react'
 
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports dir for proper client boundary
-import { Gutter, RenderTitle } from '../../exports/client/index.js'
+import { DocumentHeaderRoot, Gutter, RenderTitle } from '../../exports/client/index.js'
 import { DocumentTabs } from './Tabs/index.js'
 import './index.css'
 
@@ -28,7 +28,7 @@ export const DocumentHeader: React.FC<{
   const { AfterHeader, collectionConfig, globalConfig, hideTabs, permissions, req } = props
 
   return (
-    <div className={baseClass}>
+    <DocumentHeaderRoot>
       <RenderTitle className={`${baseClass}__title`} />
       {!hideTabs && (
         <DocumentTabs
@@ -39,6 +39,6 @@ export const DocumentHeader: React.FC<{
         />
       )}
       {AfterHeader ? <div className={`${baseClass}__after-header`}>{AfterHeader}</div> : null}
-    </div>
+    </DocumentHeaderRoot>
   )
 }

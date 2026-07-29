@@ -9,7 +9,7 @@
       outline: unset !important;
 
       .LexicalEditorTheme__inlineBlock__container {
-        box-shadow: 0 0 0 2px var(--color-border-selected);
+        box-shadow: 0 0 0 var(--stroke-width-medium) var(--color-border-selected);
         outline: none;
       }
     }
@@ -20,9 +20,9 @@
   }
 
   .LexicalEditorTheme__inlineBlock__container {
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-    margin-right: var(--spacer-1);
-    margin-left: var(--spacer-1);
+    box-shadow: var(--elevation-100-canvas);
+    margin-inline-end: var(--spacer-1);
+    margin-inline-start: var(--spacer-1);
     padding: 0;
     padding-inline-start: var(--spacer-2);
     background: var(--color-bg);
@@ -54,9 +54,9 @@
     align-items: center;
 
     & > .btn {
-      width: (var(--spacer-3));
-      height: (var(--spacer-3));
-      margin: 2px;
+      width: var(--spacer-3);
+      height: var(--spacer-3);
+      margin: calc(var(--spacer-1) / 2);
 
       &:not(:disabled):hover {
         background: var(--color-bg-hover);
@@ -70,7 +70,7 @@
 
   .LexicalEditorTheme__inlineBlock__removeButton.btn {
     padding: 0;
-    margin: 2px;
+    margin: calc(var(--spacer-1) / 2);
     color: var(--color-icon-secondary);
 
     line {

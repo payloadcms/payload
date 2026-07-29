@@ -1,6 +1,6 @@
 # Payload Plugin Development
 
-Complete guide to creating Payload CMS plugins with TypeScript patterns, package structure, and best practices from the official Payload plugin template.
+Complete guide to creating Payload plugins with TypeScript patterns, package structure, and best practices from the official Payload plugin template.
 
 ## Plugin Architecture
 
@@ -95,7 +95,7 @@ plugin-<name>/
 {
   "name": "payload-plugin-example",
   "version": "1.0.0",
-  "description": "A Payload CMS plugin",
+  "description": "A Payload plugin",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

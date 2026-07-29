@@ -61,11 +61,11 @@ export const RenderWidget: React.FC<{
             'div',
             {
               style: {
-                background: 'var(--theme-error-50)',
-                border: '1px solid var(--theme-error-200)',
-                borderRadius: '4px',
-                color: 'var(--theme-error-text)',
-                padding: '20px',
+                background: 'var(--color-bg-danger-tertiary)',
+                border: 'var(--stroke-width-small) solid var(--color-border-danger)',
+                borderRadius: 'var(--radius-medium)',
+                color: 'var(--color-text-danger)',
+                padding: 'var(--spacer-3)',
                 textAlign: 'center',
               },
             },

@@ -10,15 +10,14 @@ import type {
 } from '@modelcontextprotocol/server'
 import type {
   AuthCollectionSlug,
-  CollectionConfig,
   CollectionSlug,
-  DefaultDocumentIDType,
   GlobalSlug,
   MaybePromise,
   PayloadRequest,
-  TypedUser,
+  SanitizedPermissions,
 } from 'payload'
 
+import type { GetAuthorizedMCPArgs } from './endpoint/access.js'
 import type {
   MCPCollectionAuthToolName,
   MCPCollectionBuiltinName,
@@ -32,30 +31,10 @@ export type { JsonSchemaType, StandardSchemaWithJSON, ToolAnnotations }
 
 /**
  * What a tool's `input` (or a prompt's `argsSchema`) can be — either a raw
- * JSON Schema literal, or a Standard Schema instance (Zod, Valibot, …).
+ * JSON Schema 2020-12 literal, or a Standard Schema instance (Zod, Valibot, …).
+ * Raw schemas may omit `$schema`; when present it must declare the 2020-12 dialect.
  */
 export type ToolInputSchema = JsonSchemaType | StandardSchemaWithJSON
-
-/**
- * Serializable mirror of `SanitizedMCPPluginConfig` for client components —
- * the full sanitized config carries functions (tool handlers, etc.) that can't
- * cross the server→client boundary. Built by `sanitizeClientPluginConfig` and
- * passed to the `AccessField` component via `clientProps`.
- *
- * @internal
- */
-export type ClientMCPPluginConfig = {
-  items: Array<{
-    collectionSlug?: string
-    configKey: string
-    description?: string
-    globalSlug?: string
-    /** Admin-UI bucket for collection/global tools: built-in CRUD, auth, or custom. */
-    group?: 'auth' | 'custom' | 'operations'
-    label: string
-    type: 'collectionTool' | 'globalTool' | 'prompt' | 'resource' | 'tool'
-  }>
-}
 
 export type MCPToolResponse = {
   content: ContentBlock[]
@@ -73,6 +52,13 @@ export type MCPResponseOverride = (
   req: PayloadRequest,
 ) => MCPToolResponse
 
+export type MCPAfterToolCallHook = (args: {
+  input: unknown
+  req: PayloadRequest
+  response: MCPToolResponse
+  toolName: string
+}) => MaybePromise<MCPToolResponse>
+
 /**
  * The handler's `input` type. A specific Standard Schema (Zod, Valibot, …) gets
  * its inferred output; anything else falls back to `Record<string, unknown>`.
@@ -82,6 +68,19 @@ export type TypedInput<TSchema> = TSchema extends StandardSchemaWithJSON
     ? Record<string, unknown>
     : StandardSchemaWithJSON.InferOutput<TSchema>
   : Record<string, unknown>
+
+export type MCPAccessArgs = {
+  permissions?: SanitizedPermissions
+  req: PayloadRequest
+}
+
+export type CollectionMCPAccessArgs = {
+  collectionSlug: CollectionSlug
+} & MCPAccessArgs
+
+export type GlobalMCPAccessArgs = {
+  globalSlug: GlobalSlug
+} & MCPAccessArgs
 
 export type ToolHandlerArgs<TSchema = undefined> = {
   authorizedMCP: AuthorizedMCP
@@ -99,6 +98,12 @@ export type GlobalToolHandlerArgs<TSchema = undefined> = {
 } & ToolHandlerArgs<TSchema>
 
 export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> = {
+  /**
+   * Runs while authorizing each MCP request, before the tool is advertised or called. Return
+   * `false` to make the tool unavailable for that request. This is skipped when `overrideAccess`
+   * is enabled.
+   */
+  access?: (args: MCPAccessArgs) => MaybePromise<boolean>
   annotations?: ToolAnnotations
   description: string
   handler: (args: ToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
@@ -112,12 +117,26 @@ export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema |
 export type CollectionTool<
   TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined,
 > = {
+  /**
+   * Runs while authorizing each MCP request for this collection. Return `false` to reject calls
+   * to this tool for the collection. The shared tool is not advertised when no collections allow
+   * it, but can remain advertised when it is available for another collection. This is skipped
+   * when `overrideAccess` is enabled.
+   */
+  access?: (args: CollectionMCPAccessArgs) => MaybePromise<boolean>
   handler: (args: CollectionToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
   input?: TSchema
 } & Pick<Tool, 'annotations' | 'description' | 'overrideResponse'>
 
 export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> =
   {
+    /**
+     * Runs while authorizing each MCP request for this global. Return `false` to reject calls to
+     * this tool for the global. The shared tool is not advertised when no globals allow it, but
+     * can remain advertised when it is available for another global. This is skipped when
+     * `overrideAccess` is enabled.
+     */
+    access?: (args: GlobalMCPAccessArgs) => MaybePromise<boolean>
     handler: (args: GlobalToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
     input?: TSchema
   } & Pick<Tool, 'annotations' | 'description' | 'overrideResponse'>
@@ -127,7 +146,24 @@ export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSc
  * `handler?: never` prevents a full `CollectionTool`/`GlobalTool` (which has a
  * required handler) from being silently accepted at a built-in key slot.
  */
-export type MCPBuiltInToolOverride = {
+export type MCPBuiltInCollectionToolOverride = {
+  /**
+   * Replaces the built-in tool's access check. Return `false` to make the tool unavailable for
+   * this collection. This is skipped when `overrideAccess` is enabled.
+   */
+  access?: (args: CollectionMCPAccessArgs) => MaybePromise<boolean>
+  annotations?: ToolAnnotations
+  description?: string
+  handler?: never
+  overrideResponse?: MCPResponseOverride
+}
+
+export type MCPBuiltInGlobalToolOverride = {
+  /**
+   * Replaces the built-in tool's access check. Return `false` to make the tool unavailable for
+   * this global. This is skipped when `overrideAccess` is enabled.
+   */
+  access?: (args: GlobalMCPAccessArgs) => MaybePromise<boolean>
   annotations?: ToolAnnotations
   description?: string
   handler?: never
@@ -142,13 +178,13 @@ export type MCPBuiltInToolOverride = {
 export type MCPTopLevelToolEntry = Tool
 
 export type MCPCollectionToolsMap = {
-  [customToolName: string]: boolean | CollectionTool | MCPBuiltInToolOverride | undefined
+  [customToolName: string]: boolean | CollectionTool | MCPBuiltInCollectionToolOverride | undefined
 } & {
-  [K in MCPCollectionBuiltinName]?: false | MCPBuiltInToolOverride
+  [K in MCPCollectionBuiltinName]?: false | MCPBuiltInCollectionToolOverride
 }
 
 export type MCPAuthCollectionToolsMap = {
-  [K in MCPCollectionAuthToolName]?: MCPBuiltInToolOverride | true
+  [K in MCPCollectionAuthToolName]?: MCPBuiltInCollectionToolOverride | true
 } & MCPCollectionToolsMap
 
 /** Auth-enabled collections get auth-tool name autocomplete; others get CRUD-only. */
@@ -157,9 +193,9 @@ export type MCPToolsMapForCollection<Slug extends CollectionSlug> = Slug extends
   : MCPCollectionToolsMap
 
 export type MCPGlobalToolsMap = {
-  [customToolName: string]: boolean | GlobalTool | MCPBuiltInToolOverride | undefined
+  [customToolName: string]: boolean | GlobalTool | MCPBuiltInGlobalToolOverride | undefined
 } & {
-  [K in MCPGlobalBuiltinName]?: false | MCPBuiltInToolOverride
+  [K in MCPGlobalBuiltinName]?: false | MCPBuiltInGlobalToolOverride
 }
 
 export type MCPTopLevelToolsMap = Record<string, Tool>
@@ -171,6 +207,12 @@ export type PromptHandlerArgs<TSchema = undefined> = {
 }
 
 export type Prompt<TSchema extends ToolInputSchema = ToolInputSchema> = {
+  /**
+   * Runs while authorizing each MCP request, before the prompt is advertised or used. Return
+   * `false` to make the prompt unavailable for that request. This is skipped when
+   * `overrideAccess` is enabled.
+   */
+  access?: (args: MCPAccessArgs) => MaybePromise<boolean>
   argsSchema: TSchema
   description: string
   handler: (args: PromptHandlerArgs<TSchema>) => MaybePromise<{
@@ -188,6 +230,12 @@ export type ResourceHandlerArgs = {
 }
 
 export type Resource = {
+  /**
+   * Runs while authorizing each MCP request, before the resource is advertised or read. Return
+   * `false` to make the resource unavailable for that request. This is skipped when
+   * `overrideAccess` is enabled.
+   */
+  access?: (args: MCPAccessArgs) => MaybePromise<boolean>
   description: string
   handler: (args: ResourceHandlerArgs) => MaybePromise<{
     contents: Array<{ text: string; uri: string }>
@@ -221,34 +269,39 @@ export type MCPPluginConfig = {
   collections?: {
     [Slug in CollectionSlug]?: MCPPluginCollectionConfig<Slug>
   }
-  /** Skip MCP registration. The API key collection is still added (so DB / types stay stable). */
+  /** Skip MCP endpoint registration. */
   disabled?: boolean
   globals?: {
     [Slug in GlobalSlug]?: MCPPluginGlobalConfig
+  }
+  hooks?: {
+    /** Transform a tool response after its handler returns */
+    afterToolCall?: MCPAfterToolCallHook[]
   }
   mcp?: {
     serverOptions?: MCPServerOptions
     verboseLogs?: boolean
   }
-  overrideApiKeyCollection?: (collection: CollectionConfig) => CollectionConfig
-  /** Replace the default API-key auth with a custom resolver. */
-  overrideAuth?: (args: {
-    getAPIKeyDoc: (overrideApiKey?: string) => Promise<MCPAPIKeysDoc>
-    getAuthorizedMCP: (args: { apiKeyDoc: MCPAPIKeysDoc }) => AuthorizedMCP
-    pluginConfig: SanitizedMCPPluginConfig
-    req: PayloadRequest
-  }) => MaybePromise<AuthorizedMCP>
+  /**
+   * Replace the default MCP authorization resolver.
+   *
+   * This hook replaces the default authentication flow. It must set `req.user` to the
+   * authenticated Payload user, or to `null` for an anonymous caller, before returning.
+   */
+  overrideGetAuthorizedMCP?: (
+    args: {
+      pluginConfig: SanitizedMCPPluginConfig
+    } & GetAuthorizedMCPArgs,
+  ) => MaybePromise<AuthorizedMCP>
   prompts?: Record<string, Prompt>
   resources?: Record<string, Resource>
   /** Cross-cutting tools (not scoped to any collection or global). */
   tools?: MCPTopLevelToolsMap
-  userCollection?: CollectionSlug
 }
 
 export type SanitizedMCPPluginConfig = {
   items: MCPItem[]
-  userCollection: CollectionSlug
-} & Pick<MCPPluginConfig, 'disabled' | 'mcp' | 'overrideApiKeyCollection' | 'overrideAuth'>
+} & Pick<MCPPluginConfig, 'disabled' | 'hooks' | 'mcp' | 'overrideGetAuthorizedMCP'>
 
 export type MCPServerOptions = {
   options?: ConstructorParameters<typeof McpServer>[1]
@@ -256,52 +309,12 @@ export type MCPServerOptions = {
 }
 
 /**
- * Nested access tree as stored in the collection.
- * A `false` leaf disables that tool; missing keys defer to
- * defaults (built-in CRUD is on, opt-in tools are off).
- */
-export type MCPAPIKeysDocAccessTree = {
-  collections?: {
-    [CollectionSlug: CollectionSlug]: {
-      [ToolKey: string]: boolean
-    }
-  }
-  globals?: {
-    [GlobalSlug: GlobalSlug]: {
-      [ToolKey: string]: boolean
-    }
-  }
-  prompts?: {
-    [PromptKey: string]: boolean
-  }
-  resources?: {
-    [ResourceKey: string]: boolean
-  }
-  tools?: {
-    [ToolKey: string]: boolean
-  }
-}
-
-/**
- * Stored on `payload-mcp-api-keys` docs
- */
-export type MCPAPIKeysDoc = {
-  access: MCPAPIKeysDocAccessTree
-  apiKey?: string
-  apiKeyIndex?: string
-  id: DefaultDocumentIDType
-  lastUsed?: string
-  overrideAccess?: boolean
-  user: null | TypedUser
-}
-
-/**
- * One MCP primitive plus the metadata needed for access checks, admin UI, and
+ * One MCP primitive plus the metadata needed for config-driven filtering and
  * registration.
  *
- * - `configKey`: the config/API-key identifier, e.g. `find` or `echo`.
+ * - `configKey`: the config identifier, e.g. `find` or `echo`.
  * - `mcpName`: the MCP wire name, e.g. `findDocuments` or `echo`.
- * - `label`: human-readable admin checkbox text.
+ * - `label`: human-readable display text.
  */
 export type MCPItemBase = {
   configKey: string
@@ -338,13 +351,10 @@ export type MCPItem =
   | GlobalMCPItem
 
 /**
- * The caller's identity + the MCP items they can use for this request. Returned
- * by `getAuthorizedMCP`; denied items are simply absent from `items`. Handlers
- * receive this via `args.authorizedMCP` so they can spread
- * `localAPIDefaults(authorizedMCP)` into every local API call.
+ * The MCP items and access mode authorized for this request. The authenticated user is available
+ * as `req.user`.
  */
 export type AuthorizedMCP = {
   items: MCPItem[]
   overrideAccess: boolean
-  user: null | TypedUser
 }

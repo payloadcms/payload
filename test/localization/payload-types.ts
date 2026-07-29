@@ -62,13 +62,13 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_B43B745B".
+ * via the `definition` "LexicalNodes_3DC54BD0".
  */
-export type LexicalNodes_B43B745B =
+export type LexicalNodes_3DC54BD0 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_B43B745B>
+  | SerializedParagraphNode<LexicalNodes_3DC54BD0>
   | SerializedHorizontalRuleNode
   | {
       type: 'upload';
@@ -78,7 +78,7 @@ export type LexicalNodes_B43B745B =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_B43B745B>
+  | SerializedQuoteNode<LexicalNodes_3DC54BD0>
   | SerializedRelationshipNode<
       | 'richText'
       | 'blocks-fields'
@@ -103,17 +103,16 @@ export type LexicalNodes_B43B745B =
       | 'blocks-same-name'
       | 'localized-within-localized'
       | 'array-with-fallback-fields'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_B43B745B, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_B43B745B, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_B43B745B>
-  | SerializedListItemNode<LexicalNodes_B43B745B>
-  | SerializedHeadingNode<LexicalNodes_B43B745B>;
+  | SerializedAutoLinkNode<LexicalNodes_3DC54BD0, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_3DC54BD0, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_3DC54BD0>
+  | SerializedListItemNode<LexicalNodes_3DC54BD0>
+  | SerializedHeadingNode<LexicalNodes_3DC54BD0>;
 
 export interface Config {
   auth: {
@@ -144,7 +143,6 @@ export interface Config {
     'blocks-same-name': BlocksSameName;
     'localized-within-localized': LocalizedWithinLocalized;
     'array-with-fallback-fields': ArrayWithFallbackField;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -175,7 +173,6 @@ export interface Config {
     'blocks-same-name': BlocksSameNameSelect<false> | BlocksSameNameSelect<true>;
     'localized-within-localized': LocalizedWithinLocalizedSelect<false> | LocalizedWithinLocalizedSelect<true>;
     'array-with-fallback-fields': ArrayWithFallbackFieldsSelect<false> | ArrayWithFallbackFieldsSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -234,7 +231,7 @@ export interface UserAuthOperations {
  */
 export interface RichText {
   id: string;
-  lexical?: LexicalRichText<LexicalNodes_B43B745B> | null;
+  lexical?: LexicalRichText<LexicalNodes_3DC54BD0> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -946,31 +943,6 @@ export interface ArrayWithFallbackField {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1084,10 +1056,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'array-with-fallback-fields';
         value: string | ArrayWithFallbackField;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -1817,22 +1785,6 @@ export interface ArrayWithFallbackFieldsSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -2022,7 +1974,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -2037,7 +1989,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

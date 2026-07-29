@@ -23,8 +23,8 @@ export const transformColumnsToPreferences = (
   if (typeof columns === 'string') {
     try {
       columnsToTransform = JSON.parse(columns)
-    } catch (e) {
-      console.error('Error parsing columns', columns, e) // eslint-disable-line no-console
+    } catch {
+      columnsToTransform = columns.includes(',') ? columns.split(',') : [columns]
     }
   }
 

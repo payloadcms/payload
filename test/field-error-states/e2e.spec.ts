@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url'
 import type { Config } from './payload-types.js'
 
 import { addArrayRow, removeArrayRow } from '../__helpers/e2e/fields/array/index.js'
+import { addBlock } from '../__helpers/e2e/fields/blocks/index.js'
 import {
   ensureCompilationIsDone,
   getRoutes,
@@ -33,6 +34,7 @@ describe('Field Error States', () => {
   let prevValue: AdminUrlUtil
   let prevValueRelation: AdminUrlUtil
   let errorFieldsURL: AdminUrlUtil
+  let tabErrorReset: AdminUrlUtil
   let adminRoute: string
 
   beforeAll(async ({ browser }, testInfo) => {
@@ -47,6 +49,7 @@ describe('Field Error States', () => {
     prevValue = new AdminUrlUtil(serverURL, collectionSlugs.prevValue!)
     prevValueRelation = new AdminUrlUtil(serverURL, collectionSlugs.prevValueRelation!)
     errorFieldsURL = new AdminUrlUtil(serverURL, collectionSlugs.errorFields!)
+    tabErrorReset = new AdminUrlUtil(serverURL, collectionSlugs.tabErrorReset!)
 
     const {
       routes: { admin: adminRouteFromConfig },
@@ -313,6 +316,90 @@ describe('Field Error States', () => {
       await page.locator('#field-unnamedRequiredArray__0__arrayText').fill('Test')
 
       // error badge should disappear
+      await expect(tabErrorBadge).toBeHidden()
+    })
+
+    test('array error pill should show for minRows errors before child edits', async ({ page }) => {
+      await page.goto(errorFieldsURL.create)
+      await waitForFormReady(page)
+      await prefillBaseRequiredFields(page)
+
+      await addArrayRow(page, { fieldName: 'arrayWithMinRows' })
+      await saveDocAndAssert(page, '#action-save', 'error')
+
+      const arrayErrorPill = page.locator(
+        '#field-arrayWithMinRows .array-field__header .error-pill',
+      )
+      await expect(arrayErrorPill).toBeVisible()
+      await expect(arrayErrorPill).toContainText('1 error')
+      await expect(
+        page.locator('#field-arrayWithMinRows .banner.banner--type-danger'),
+      ).toBeVisible()
+      await expect(page.locator('.field-error')).toHaveCount(0)
+    })
+
+    test('blocks error pill should show for minRows errors before child edits', async ({
+      page,
+    }) => {
+      await page.goto(errorFieldsURL.create)
+      await waitForFormReady(page)
+      await prefillBaseRequiredFields(page)
+
+      await addBlock({
+        page,
+        blockToSelect: 'Min Rows Block',
+        fieldName: 'blocksWithMinRows',
+      })
+      await saveDocAndAssert(page, '#action-save', 'error')
+
+      const blocksErrorPill = page.locator(
+        '#field-blocksWithMinRows .blocks-field__header .error-pill',
+      )
+      await expect(blocksErrorPill).toBeVisible()
+      await expect(blocksErrorPill).toContainText('1 error')
+      await expect(
+        page.locator('#field-blocksWithMinRows .banner.banner--type-danger'),
+      ).toBeVisible()
+      await expect(page.locator('.field-error')).toHaveCount(0)
+    })
+  })
+
+  describe('tab error badge reset', () => {
+    test('should clear tab error badge after fixing a child field and re-saving', async ({
+      page,
+    }) => {
+      // Create a valid document so we land on the edit view (no redirect on subsequent saves).
+      await page.goto(tabErrorReset.create)
+      await waitForFormReady(page)
+      await page.locator('#field-title').fill('Reset badge')
+      await page.locator('#field-errorTab__requiredInTab').fill('valid')
+      await saveDocAndAssert(page, '#action-save')
+
+      // Clear the required child field and save -> the tab shows an error badge.
+      await page.locator('#field-errorTab__requiredInTab').fill('')
+      await saveDocAndAssert(page, '#action-save', 'error')
+
+      const tabErrorBadge = page.locator('.tabs-field__tab-button--active .error-pill')
+      await expect(tabErrorBadge).toBeVisible()
+      await expect(tabErrorBadge).toContainText('1')
+
+      // Fix the field and save in the same tick. This coalesces the throttled error
+      // recompute with the successful-save state transition (submitted -> false), which
+      // previously left the tab badge stranded because the recompute was gated on the
+      // submitted flag still being true.
+      await page.evaluate(() => {
+        const input = document.querySelector<HTMLInputElement>('#field-errorTab__requiredInTab')!
+        const nativeSetter = Object.getOwnPropertyDescriptor(
+          window.HTMLInputElement.prototype,
+          'value',
+        )!.set!
+        nativeSetter.call(input, 'fixed')
+        input.dispatchEvent(new Event('input', { bubbles: true }))
+        document.querySelector<HTMLButtonElement>('#action-save')!.click()
+      })
+
+      // The save succeeds and the field-level error clears, so the tab badge must clear too.
+      await expect(page.locator('.payload-toast-container')).toContainText('successfully')
       await expect(tabErrorBadge).toBeHidden()
     })
   })

@@ -27,12 +27,15 @@ export default buildConfigWithDefaults({
       read: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
       update: ({ req: { user } }) => Boolean(user?.roles?.length && !user?.roles?.includes('user')),
     },
-    filterConstraints: ({ req, options }) =>
-      !req.user?.roles?.includes('admin')
+    filterConstraints: async ({ req, options }) => {
+      await Promise.resolve()
+
+      return !req.user?.roles?.includes('admin')
         ? options.filter(
             (option) => (typeof option === 'string' ? option : option.value) !== 'onlyAdmins',
           )
-        : options,
+        : options
+    },
     constraints: {
       read: [
         {

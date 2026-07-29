@@ -10,7 +10,7 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
-import { getFieldsToSign } from 'payload'
+import { createLocalReq, Forbidden, getFieldsToSign, refreshOperation } from 'payload'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
@@ -231,6 +231,7 @@ describe('Auth', () => {
         expect(typeof data.exp).toBe('number')
         expect(response.status).toBe(200)
         expect(data.user.email).toBeDefined()
+        expect(data.user._strategy).toBe('local-jwt')
       })
 
       it('should have fields saved to JWT', () => {
@@ -1791,6 +1792,40 @@ describe('Auth', () => {
       expect(new Date(matchedSession?.expiresAt as unknown as string).getTime()).toBeLessThan(
         new Date(matchedRefreshedSession?.expiresAt as unknown as string).getTime(),
       )
+    })
+
+    it('should reject a refresh when its session is revoked after authentication', async () => {
+      const authenticated = await payload.login({
+        collection: slug,
+        data: {
+          email: devUser.email,
+          password: devUser.password,
+        },
+      })
+      const { sid } = jwtDecode<{ sid: string }>(String(authenticated.token))
+
+      const logoutResponse = await restClient.POST(`/${slug}/logout`, {
+        headers: {
+          Authorization: `JWT ${authenticated.token}`,
+        },
+      })
+      const req = await createLocalReq(
+        {
+          user: {
+            ...authenticated.user,
+            _sid: sid,
+          },
+        },
+        payload,
+      )
+
+      expect(logoutResponse.status).toBe(200)
+      await expect(
+        refreshOperation({
+          collection: payload.collections[slug],
+          req,
+        }),
+      ).rejects.toBeInstanceOf(Forbidden)
     })
 
     it('should not authenticate a user who has a JWT but its session has been terminated', async () => {

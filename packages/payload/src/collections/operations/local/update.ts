@@ -6,9 +6,9 @@ import type {
   Payload,
   RequestContext,
   TypedLocale,
+  User,
 } from '../../../index.js'
 import type {
-  Document,
   PayloadRequest,
   PopulateType,
   SelectType,
@@ -128,11 +128,10 @@ export type BaseOptions<TSlug extends CollectionSlug, TSelect extends SelectType
    * and the collection has localized fields.
    */
   unpublishAllLocales?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
 } & Pick<FindOptions<TSlug, TSelect>, 'select'>
 
 export type ByIDOptions<

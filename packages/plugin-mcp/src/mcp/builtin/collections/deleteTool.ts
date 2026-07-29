@@ -1,14 +1,16 @@
 import { z } from 'zod'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { whereSchema } from '../../../utils/whereSchema.js'
 
 const DEFAULT_DESCRIPTION =
   'Delete documents in any collection by passing the collection slug and ID or where clause.'
 
 export const deleteDocumentsTool = defineCollectionTool({
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.collections?.[args.collectionSlug]?.delete),
   annotations: {
     destructiveHint: true,
     idempotentHint: false,
@@ -66,8 +68,8 @@ export const deleteDocumentsTool = defineCollectionTool({
     const deleteOptions: Record<string, unknown> = {
       collection: collectionSlug,
       depth,
+      overrideAccess: authorizedMCP.overrideAccess,
       req,
-      ...localAPIDefaults(authorizedMCP),
       ...(locale && { locale }),
       ...(fallbackLocale && { fallbackLocale }),
     }

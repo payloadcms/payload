@@ -9,7 +9,7 @@ import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
-import { UploadMarkdownTransformer } from './markdownTransformer.js'
+import { PAYLOAD_UPLOAD } from './markdownTransformer.js'
 import { UploadServerNode } from './nodes/UploadNode.js'
 import { createUploadNodeJSONSchema } from './schema.js'
 import { uploadValidation } from './validate.js'
@@ -123,7 +123,7 @@ export const UploadFeature = createServerFeature<
         return schemaMap
       },
       i18n,
-      markdownTransformers: [UploadMarkdownTransformer],
+      markdownTransformers: [PAYLOAD_UPLOAD],
       nodes: [
         createNode({
           getSubFields: ({ node, req }) => {

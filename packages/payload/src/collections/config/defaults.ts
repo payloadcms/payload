@@ -114,23 +114,6 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
   return collection
 }
 
-/**
- * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
- */
-export const authDefaults: IncomingAuthType = {
-  cookies: {
-    sameSite: 'Lax',
-    secure: false,
-  },
-  forgotPassword: {},
-  lockTime: 600000, // 10 minutes
-  loginWithUsername: false,
-  maxLoginAttempts: 5,
-  tokenExpiration: 7200,
-  useSessions: true,
-  verify: false,
-}
-
 export const addDefaultsToAuthConfig = (auth: IncomingAuthType): IncomingAuthType => {
   auth.cookies = {
     sameSite: 'Lax',

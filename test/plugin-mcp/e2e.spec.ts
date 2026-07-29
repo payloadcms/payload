@@ -39,31 +39,19 @@ test.describe('MCP Plugin', () => {
     const token = loginData.token
     const userId = loginData.user.id
 
-    // Create an API key with permissions to call tools/list
-    const createKeyRes = await request.post(`${serverURL}/api/payload-mcp-api-keys`, {
+    apiKey = randomUUID()
+
+    // Enable a user API key for MCP authentication
+    const updateUserRes = await request.patch(`${serverURL}/api/users/${userId}`, {
       data: {
-        access: {
-          collections: {
-            posts: {
-              create: true,
-              delete: true,
-              find: true,
-              update: true,
-            },
-            products: { find: true },
-          },
-        },
-        apiKey: randomUUID(),
-        label: 'E2E Test Key',
-        user: userId,
+        apiKey,
+        enableAPIKey: true,
       },
       headers: {
         Authorization: `JWT ${token}`,
       },
     })
-    expect(createKeyRes.ok()).toBeTruthy()
-    const keyData = await createKeyRes.json()
-    apiKey = keyData.doc.apiKey
+    expect(updateUserRes.ok()).toBeTruthy()
   })
 
   test('should not poison the Next.js runtime after MCP requests', async ({ request }) => {
@@ -81,7 +69,7 @@ test.describe('MCP Plugin', () => {
 
     const mcpHeaders = {
       Accept: 'application/json, text/event-stream',
-      Authorization: `Bearer ${apiKey}`,
+      Authorization: `users API-Key ${apiKey}`,
       'Content-Type': 'application/json',
     }
 

@@ -14,7 +14,7 @@ import type { ClientProps } from '../client/index.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
-import { createLinkMarkdownTransformer } from '../markdownTransformer.js'
+import { createPayloadLinkTransformer } from '../markdownTransformer.js'
 import { AutoLinkNode } from '../nodes/AutoLinkNode.js'
 import { LinkNode } from '../nodes/LinkNode.js'
 import { linkPopulationPromiseHOC } from './graphQLPopulationPromise.js'
@@ -170,7 +170,7 @@ export const LinkFeature = createServerFeature<
       },
       i18n,
       markdownTransformers: [
-        createLinkMarkdownTransformer({ internalDocToHref: props.internalDocToHref }),
+        createPayloadLinkTransformer({ internalDocToHref: props.internalDocToHref }),
       ],
       nodes: [
         props?.disableAutoLinks === true

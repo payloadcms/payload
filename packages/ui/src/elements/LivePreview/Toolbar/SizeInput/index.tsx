@@ -1,7 +1,7 @@
 'use client'
 import React, { useCallback, useEffect } from 'react'
 
-import { InputStepper } from '../../../../elements/InputStepper/index.js'
+import { NumberInput } from '../../../../fields/Number/index.js'
 import { useLivePreviewContext } from '../../../../providers/LivePreview/context.js'
 import { useTranslation } from '../../../../providers/Translation/index.js'
 import './index.css'
@@ -25,8 +25,8 @@ export const PreviewFrameSizeInput: React.FC<{
   // when the input is changed manually, we need to set the breakpoint as `custom`
   // this will then allow us to set an explicit width and height
   const handleChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      let newValue = Number(e.target.value)
+    (value: string) => {
+      let newValue = Number(value)
 
       if (newValue < 0) {
         newValue = 0
@@ -88,23 +88,17 @@ export const PreviewFrameSizeInput: React.FC<{
   }, [breakpoint, axis, measuredDeviceSize, size, zoom])
 
   return (
-    <div className={`${baseClass}__group`}>
-      <span className={`${baseClass}__prefix`}>{axis === 'x' ? 'W' : 'H'}</span>
-      <input
-        aria-label={axis === 'x' ? t('upload:width') : t('upload:height')}
-        className={baseClass}
-        min={0}
-        name={axis === 'x' ? 'live-preview-width' : 'live-preview-height'}
-        onChange={handleChange}
-        onWheel={(e) => {
-          // @ts-expect-error - blur() exists on input elements but not typed on EventTarget
-          e.target.blur()
-        }}
-        step={1}
-        type="number"
-        value={internalState || 0}
-      />
-      <InputStepper onDecrement={() => handleStep('down')} onIncrement={() => handleStep('up')} />
-    </div>
+    <NumberInput
+      ariaLabel={axis === 'x' ? t('upload:width') : t('upload:height')}
+      className={baseClass}
+      min={0}
+      onChange={(e) => handleChange(e.target.value)}
+      onStep={handleStep}
+      path={axis === 'x' ? 'live-preview-width' : 'live-preview-height'}
+      prefix={axis === 'x' ? 'W' : 'H'}
+      size="medium"
+      step={1}
+      value={internalState || 0}
+    />
   )
 }

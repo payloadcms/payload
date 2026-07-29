@@ -1,9 +1,8 @@
 import { decodeJwt } from 'jose'
 
 import type { Collection } from '../../collections/config/types.js'
-import type { TypedUser } from '../../index.js'
+import type { AuthenticatedUser } from '../../index.js'
 import type { JoinQuery, PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
-import type { ClientUser } from '../types.js'
 
 export type MeOperationResult = {
   collection?: string
@@ -16,7 +15,7 @@ export type MeOperationResult = {
    */
   strategy?: string
   token?: string
-  user?: ClientUser
+  user?: AuthenticatedUser | null
 }
 
 export type Arguments = {
@@ -58,7 +57,7 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
       req,
       select,
       showHiddenFields: false,
-    })) as TypedUser
+    })) as AuthenticatedUser
 
     if (user) {
       user.collection = collection.config.slug

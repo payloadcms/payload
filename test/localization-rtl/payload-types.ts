@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_4AD70FC8".
+ * via the `definition` "LexicalNodes_4C38692C".
  */
-export type LexicalNodes_4AD70FC8 =
+export type LexicalNodes_4C38692C =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_4AD70FC8>
+  | SerializedParagraphNode<LexicalNodes_4C38692C>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_4AD70FC8>
+  | SerializedHeadingNode<LexicalNodes_4C38692C>
   | {
       type: 'upload';
       /**
@@ -79,19 +79,13 @@ export type LexicalNodes_4AD70FC8 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_4AD70FC8>
-  | SerializedListNode<LexicalNodes_4AD70FC8>
-  | SerializedListItemNode<LexicalNodes_4AD70FC8>
-  | SerializedAutoLinkNode<LexicalNodes_4AD70FC8, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_4AD70FC8, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_4C38692C>
+  | SerializedListNode<LexicalNodes_4C38692C>
+  | SerializedListItemNode<LexicalNodes_4C38692C>
+  | SerializedAutoLinkNode<LexicalNodes_4C38692C, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_4C38692C, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
-      | 'users'
-      | 'posts'
-      | 'payload-mcp-api-keys'
-      | 'payload-kv'
-      | 'payload-locked-documents'
-      | 'payload-preferences'
-      | 'payload-migrations'
+      'users' | 'posts' | 'payload-kv' | 'payload-locked-documents' | 'payload-preferences' | 'payload-migrations'
     >;
 
 export interface Config {
@@ -102,7 +96,6 @@ export interface Config {
   collections: {
     users: User;
     posts: Post;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -112,7 +105,6 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -187,32 +179,7 @@ export interface Post {
   id: string;
   title?: string | null;
   description?: string | null;
-  content?: LexicalRichText<LexicalNodes_4AD70FC8> | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
+  content?: LexicalRichText<LexicalNodes_4C38692C> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -247,10 +214,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'posts';
         value: string | Post;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -324,22 +287,6 @@ export interface PostsSelect<T extends boolean = true> {
   title?: T;
   description?: T;
   content?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -509,7 +456,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -558,7 +505,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

@@ -69,6 +69,7 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
+    'dispatch-media': DispatchMedia;
     posts: Post;
     products: Product;
     rolls: Roll;
@@ -76,7 +77,6 @@ export interface Config {
     'returned-resources': ReturnedResource;
     pages: Page;
     'field-types': FieldType;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -86,6 +86,7 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
+    'dispatch-media': DispatchMediaSelect<false> | DispatchMediaSelect<true>;
     posts: PostsSelect<false> | PostsSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
     rolls: RollsSelect<false> | RollsSelect<true>;
@@ -93,7 +94,6 @@ export interface Config {
     'returned-resources': ReturnedResourcesSelect<false> | ReturnedResourcesSelect<true>;
     pages: PagesSelect<false> | PagesSelect<true>;
     'field-types': FieldTypesSelect<false> | FieldTypesSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -112,6 +112,8 @@ export interface Config {
   locale: 'en' | 'es' | 'fr';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -143,6 +145,15 @@ export interface UserAuthOperations {
  */
 export interface User {
   id: string;
+  rbac?:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
   updatedAt: string;
   createdAt: string;
   enableAPIKey?: boolean | null;
@@ -172,6 +183,24 @@ export interface User {
 export interface Media {
   id: string;
   alt?: string | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "dispatch-media".
+ */
+export interface DispatchMedia {
+  id: string;
   updatedAt: string;
   createdAt: string;
   url?: string | null;
@@ -422,35 +451,6 @@ export interface FieldType {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
-  /**
-   * This field added by overrideApiKeyCollection
-   */
-  override?: string | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -482,6 +482,10 @@ export interface PayloadLockedDocument {
         value: string | Media;
       } | null)
     | ({
+        relationTo: 'dispatch-media';
+        value: string | DispatchMedia;
+      } | null)
+    | ({
         relationTo: 'posts';
         value: string | Post;
       } | null)
@@ -508,10 +512,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'field-types';
         value: string | FieldType;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -560,6 +560,7 @@ export interface PayloadMigration {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  rbac?: T;
   updatedAt?: T;
   createdAt?: T;
   enableAPIKey?: T;
@@ -586,6 +587,23 @@ export interface UsersSelect<T extends boolean = true> {
  */
 export interface MediaSelect<T extends boolean = true> {
   alt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "dispatch-media_select".
+ */
+export interface DispatchMediaSelect<T extends boolean = true> {
   updatedAt?: T;
   createdAt?: T;
   url?: T;
@@ -729,23 +747,6 @@ export interface FieldTypesSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  override?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -831,6 +832,62 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'users'
+      | 'media'
+      | 'dispatch-media'
+      | 'posts'
+      | 'products'
+      | 'rolls'
+      | 'modified-prompts'
+      | 'returned-resources'
+      | 'pages'
+      | 'field-types';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'users'
+          | 'media'
+          | 'dispatch-media'
+          | 'posts'
+          | 'products'
+          | 'rolls'
+          | 'modified-prompts'
+          | 'returned-resources'
+          | 'pages'
+          | 'field-types'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

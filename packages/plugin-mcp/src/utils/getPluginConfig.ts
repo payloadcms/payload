@@ -5,7 +5,7 @@ import type { SanitizedMCPPluginConfig } from '../types.js'
 /**
  * Returns the sanitized plugin config — the form produced by
  * `sanitizeMCPConfig` and stashed back on the plugin's `options` during init.
- * Callers downstream of plugin init can rely on `items`, `userCollection`, etc.
+ * Callers downstream of plugin init can rely on `items` and other defaults
  * being fully resolved.
  */
 export const getPluginConfig: (args: { config: SanitizedConfig }) => SanitizedMCPPluginConfig = ({

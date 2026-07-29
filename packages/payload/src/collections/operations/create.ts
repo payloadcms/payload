@@ -20,6 +20,7 @@ import { executeAccess } from '../../auth/executeAccess.js'
 import { sendVerificationEmail } from '../../auth/sendVerificationEmail.js'
 import { registerLocalStrategy } from '../../auth/strategies/local/register.js'
 import { getDuplicateDocumentData } from '../../duplicateDocument/index.js'
+import { fillEmptyLocalizedSlugs } from '../../fields/baseFields/slug/fillEmptyLocalizedSlugs.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
@@ -274,6 +275,12 @@ export const createOperation = async <
       for (const localeCode of accessibleLocaleCodes) {
         dataWithLocales._status[localeCode] = 'published'
       }
+    }
+
+    // Fill every locale of a localized slug so switching locales never lands on an empty slug. The
+    // slug field hook only sees the active locale, so the rest are seeded here on create.
+    if (config.localization) {
+      await fillEmptyLocalizedSlugs({ collection: collectionConfig, data: dataWithLocales, req })
     }
 
     // /////////////////////////////////////

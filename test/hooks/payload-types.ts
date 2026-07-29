@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_3CBD56AD".
+ * via the `definition` "LexicalNodes_464B7BF4".
  */
-export type LexicalNodes_3CBD56AD =
+export type LexicalNodes_464B7BF4 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_3CBD56AD>
-  | SerializedAutoLinkNode<LexicalNodes_3CBD56AD, LexicalLinkFields_11D2ED94>
-  | SerializedLinkNode<LexicalNodes_3CBD56AD, LexicalLinkFields_11D2ED94>
+  | SerializedParagraphNode<LexicalNodes_464B7BF4>
+  | SerializedAutoLinkNode<LexicalNodes_464B7BF4, LexicalLinkFields_11D2ED94>
+  | SerializedLinkNode<LexicalNodes_464B7BF4, LexicalLinkFields_11D2ED94>
   | SerializedBlockNode<NestedBlock>
   | SerializedHorizontalRuleNode
   | {
@@ -81,7 +81,7 @@ export type LexicalNodes_3CBD56AD =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_3CBD56AD>
+  | SerializedQuoteNode<LexicalNodes_464B7BF4>
   | SerializedRelationshipNode<
       | 'beforeOperation'
       | 'before-change-hooks'
@@ -101,15 +101,14 @@ export type LexicalNodes_3CBD56AD =
       | 'value-hooks'
       | 'after-read'
       | 'override-access-hooks'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedListNode<LexicalNodes_3CBD56AD>
-  | SerializedListItemNode<LexicalNodes_3CBD56AD>
-  | SerializedHeadingNode<LexicalNodes_3CBD56AD>;
+  | SerializedListNode<LexicalNodes_464B7BF4>
+  | SerializedListItemNode<LexicalNodes_464B7BF4>
+  | SerializedHeadingNode<LexicalNodes_464B7BF4>;
 
 export interface Config {
   auth: {
@@ -135,7 +134,6 @@ export interface Config {
     'value-hooks': ValueHook;
     'after-read': AfterRead;
     'override-access-hooks': OverrideAccessHook;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -161,7 +159,6 @@ export interface Config {
     'value-hooks': ValueHooksSelect<false> | ValueHooksSelect<true>;
     'after-read': AfterReadSelect<false> | AfterReadSelect<true>;
     'override-access-hooks': OverrideAccessHooksSelect<false> | OverrideAccessHooksSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -343,7 +340,7 @@ export interface NestedAfterChangeHook {
         }[]
       | null;
   };
-  lexical?: LexicalRichText<LexicalNodes_3CBD56AD> | null;
+  lexical?: LexicalRichText<LexicalNodes_464B7BF4> | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -458,31 +455,6 @@ export interface OverrideAccessHook {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | HooksUser;
-  overrideAccess?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -576,10 +548,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'override-access-hooks';
         value: string | OverrideAccessHook;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -854,22 +822,6 @@ export interface OverrideAccessHooksSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -1087,7 +1039,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -1102,7 +1054,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

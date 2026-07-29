@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { test } from '__helpers/e2e/playwright.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -12,8 +13,8 @@ import {
   initPageConsoleErrorCatch,
 } from '../../../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
-import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { reInitializeDB } from '../../../__helpers/shared/clearAndSeed/reInitializeDB.js'
+import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../../../__helpers/shared/rest.js'
 import { TEST_TIMEOUT_LONG } from '../../../playwright.config.js'
 import { uiSlug } from '../../slugs.js'
@@ -62,7 +63,7 @@ describe('Radio', () => {
     await ensureCompilationIsDone({ page, serverURL })
   })
 
-  test('should show custom: client configuration', async () => {
+  test('should show custom: client configuration', { framework: 'rsc' }, async () => {
     await page.goto(url.create)
 
     const uiField = page.locator('#uiCustomClient')

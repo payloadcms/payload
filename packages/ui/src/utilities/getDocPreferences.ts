@@ -1,4 +1,4 @@
-import type { DocumentPreferences, Payload, TypedUser } from 'payload'
+import type { DocumentPreferences, Payload, User } from 'payload'
 
 import { sanitizeID } from '../utilities/sanitizeID.js'
 
@@ -7,7 +7,7 @@ type Args = {
   globalSlug?: string
   id?: number | string
   payload: Payload
-  user: TypedUser
+  user: User
 }
 
 export const getDocPreferences = async ({

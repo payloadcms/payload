@@ -23,10 +23,15 @@ const baseClass = 'user-menu'
 
 type UserMenuProps = {
   CustomAvatar?: React.ReactNode
+  CustomLogoutButton?: React.ReactNode
   settingsItemGroups?: UserMenuSettingsGroup[]
 }
 
-export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItemGroups = [] }) => {
+export const UserMenu: React.FC<UserMenuProps> = ({
+  CustomAvatar,
+  CustomLogoutButton,
+  settingsItemGroups = [],
+}) => {
   const { user } = useAuth()
   const { languageOptions, t } = useTranslation()
   const {
@@ -171,9 +176,11 @@ export const UserMenu: React.FC<UserMenuProps> = ({ CustomAvatar, settingsItemGr
 
           {/* Account actions */}
           <PopupList.MenuItem>
-            <PopupList.Button href={logoutHref} icon={<LogOutIcon />}>
-              {t('authentication:logOut')}
-            </PopupList.Button>
+            {CustomLogoutButton ?? (
+              <PopupList.Button href={logoutHref} icon={<LogOutIcon />}>
+                {t('authentication:logOut')}
+              </PopupList.Button>
+            )}
           </PopupList.MenuItem>
         </>
       )}

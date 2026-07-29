@@ -40,6 +40,7 @@ describe('Lexical: collection slug equals top-level field name', () => {
     const url = new AdminUrlUtil(serverURL, lexicalSlugFieldNameCollisionSlug)
     lexical = new LexicalHelpers(page)
     await page.goto(url.create)
+    await expect(lexical.editor.first()).toBeVisible()
     await lexical.editor.first().focus()
   })
 

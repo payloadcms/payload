@@ -40,11 +40,13 @@
       "@payloadcms/ui": ["./packages/ui/src/exports/client/index.ts"],
       "@payloadcms/ui/shared": ["./packages/ui/src/exports/shared/index.ts"],
       "@payloadcms/ui/rsc": ["./packages/ui/src/exports/rsc/index.ts"],
+      "@payloadcms/ui/server": ["./packages/ui/src/exports/server.ts"],
       "@payloadcms/ui/views/*/metadata": ["./packages/ui/src/views/*/metadata.ts"],
       "@payloadcms/ui/views/*": ["./packages/ui/src/views/*/index.tsx"],
-      "@payloadcms/ui/scss": ["./packages/ui/src/scss.scss"],
-      "@payloadcms/ui/scss/app.scss": ["./packages/ui/src/scss/app.scss"],
+      "@payloadcms/ui/css/app.css": ["./packages/ui/src/css/app.css"],
       "@payloadcms/next/*": ["./packages/next/src/exports/*.ts"],
+      "@payloadcms/tanstack-start": ["./packages/tanstack-start/src/index.ts"],
+      "@payloadcms/tanstack-start/*": ["./packages/tanstack-start/src/exports/*.ts"],
       "@payloadcms/richtext-lexical/client": [
         "./packages/richtext-lexical/src/exports/client/index.ts"
       ],
@@ -58,6 +60,12 @@
       "@payloadcms/plugin-search/client": ["./packages/plugin-search/src/exports/client.ts"],
       "@payloadcms/plugin-form-builder/client": [
         "./packages/plugin-form-builder/src/exports/client.ts"
+      ],
+      "@payloadcms/plugin-form-builder/translations/languages/all": [
+        "./packages/plugin-form-builder/src/translations/index.ts"
+      ],
+      "@payloadcms/plugin-form-builder/translations/languages/*": [
+        "./packages/plugin-form-builder/src/translations/languages/*.ts"
       ],
       "@payloadcms/plugin-import-export/rsc": [
         "./packages/plugin-import-export/src/exports/rsc.ts"
@@ -88,12 +96,9 @@
         "./packages/storage-vercel-blob/src/exports/client.ts"
       ],
       "@payloadcms/storage-gcs/client": ["./packages/storage-gcs/src/exports/client.ts"],
-      "@payloadcms/storage-uploadthing/client": [
-        "./packages/storage-uploadthing/src/exports/client.ts"
-      ],
       "@payloadcms/storage-r2/client": ["./packages/storage-r2/src/exports/client.ts"]
     }
   },
-  "include": ["${configDir}/src"],
+  "include": ["${configDir}/src", "tools/assets.d.ts"],
   "exclude": ["${configDir}/dist", "${configDir}/build", "${configDir}/temp", "**/*.spec.ts"]
 }

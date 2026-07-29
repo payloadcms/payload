@@ -6,6 +6,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { v4 as uuid } from 'uuid'
 
 import { Drawer } from '../../../../elements/Drawer/index.js'
+import { Gutter } from '../../../../elements/Gutter/index.js'
 import { useModal } from '../../../../elements/Modal/index.js'
 import { ShimmerEffect } from '../../../../elements/ShimmerEffect/index.js'
 import { Form } from '../../../../forms/Form/index.js'
@@ -125,33 +126,35 @@ export function WidgetConfigDrawer({
 
   return (
     <Drawer slug={drawerSlug} title={`${t('general:edit')} ${widgetLabel}`}>
-      {initialState === false ? (
-        <ShimmerEffect height="250px" />
-      ) : (
-        <OperationProvider operation="update">
-          <Form
-            fields={fields}
-            initialState={initialState}
-            onChange={[onChange]}
-            onSubmit={(_, data) => {
-              onSave(mergeLocaleData(widgetData ?? {}, data, localeCode, fields))
-              closeModal(drawerSlug)
-            }}
-            uuid={formUUID}
-          >
-            <RenderFields
+      <Gutter className="widget-config-drawer__content">
+        {initialState === false ? (
+          <ShimmerEffect height="250px" />
+        ) : (
+          <OperationProvider operation="update">
+            <Form
               fields={fields}
-              forceRender
-              parentIndexPath=""
-              parentPath=""
-              parentSchemaPath={widget.slug}
-              permissions={true}
-              readOnly={false}
-            />
-            <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
-          </Form>
-        </OperationProvider>
-      )}
+              initialState={initialState}
+              onChange={[onChange]}
+              onSubmit={(_, data) => {
+                onSave(mergeLocaleData(widgetData ?? {}, data, localeCode, fields))
+                closeModal(drawerSlug)
+              }}
+              uuid={formUUID}
+            >
+              <RenderFields
+                fields={fields}
+                forceRender
+                parentIndexPath=""
+                parentPath=""
+                parentSchemaPath={widget.slug}
+                permissions={true}
+                readOnly={false}
+              />
+              <FormSubmit>{t('fields:saveChanges')}</FormSubmit>
+            </Form>
+          </OperationProvider>
+        )}
+      </Gutter>
     </Drawer>
   )
 }

@@ -86,26 +86,25 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
     }
   }
 
-  if (!totalPages || totalPages <= 1) {
-    return null
-  }
+  const isSinglePage = !totalPages || totalPages <= 1
 
   return (
     <div className={baseClass}>
       <ClickableArrow
         direction="left"
-        isDisabled={!hasPrevPage}
+        isDisabled={isSinglePage || !hasPrevPage}
         updatePage={() => updatePage(prevPage ?? Math.max(1, currentPage - 1))}
       />
       <ClickableArrow
         direction="right"
-        isDisabled={!hasNextPage}
+        isDisabled={isSinglePage || !hasNextPage}
         updatePage={() => updatePage(nextPage ?? currentPage + 1)}
       />
       <div className={`${baseClass}__page-input-wrapper`}>
         <input
           aria-label="Go to page"
           className={`${baseClass}__page-input`}
+          disabled={isSinglePage}
           inputMode="numeric"
           max={totalPages}
           min={1}
@@ -116,7 +115,7 @@ export const Pagination: React.FC<PaginationProps> = (props) => {
           type="text"
           value={inputValue}
         />
-        <span className={`${baseClass}__page-total`}>of {totalPages}</span>
+        <span className={`${baseClass}__page-total`}>of {isSinglePage ? 1 : totalPages}</span>
       </div>
     </div>
   )

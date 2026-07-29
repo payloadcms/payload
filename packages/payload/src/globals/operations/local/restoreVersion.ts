@@ -1,5 +1,5 @@
-import type { GlobalSlug, Payload, RequestContext, TypedLocale } from '../../../index.js'
-import type { Document, PayloadRequest, PopulateType } from '../../../types/index.js'
+import type { GlobalSlug, Payload, RequestContext, TypedLocale, User } from '../../../index.js'
+import type { PayloadRequest, PopulateType } from '../../../types/index.js'
 import type { CreateLocalReqOptions } from '../../../utilities/createLocalReq.js'
 import type { DataFromGlobalSlug } from '../../config/types.js'
 
@@ -55,11 +55,10 @@ export type Options<TSlug extends GlobalSlug> = {
    * the Global slug to operate against.
    */
   slug: TSlug
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
 }
 
 export async function restoreGlobalVersionLocal<TSlug extends GlobalSlug>(

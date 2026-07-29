@@ -261,6 +261,7 @@ type RichTextAdapterBase<
       | 'i18n'
       | 'interfaceNameDefinitions'
       | 'typeStringDefinitions'
+      | 'variant'
     >,
   ) => JSONSchema4
   /**

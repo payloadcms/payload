@@ -1,9 +1,8 @@
-import type { Config, Payload } from 'payload'
+import { addDefaultsToConfig, type Config, type Payload } from 'payload'
 import { describe, beforeAll, beforeEach, it, expect, test, vitest, Mock } from 'vitest'
 
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import nodemailer from 'nodemailer'
-import { defaults } from 'payload'
 
 // TO-DO: this would be needed for the TO-DO tests below.
 // maybe we have to use jest.unstable_mockModule? (already tried)
@@ -258,8 +257,9 @@ function assertNoCloudStorage(config: Config) {
 }
 
 function createConfig(overrides?: Partial<Config>): Config {
-  return {
-    ...defaults,
+  return addDefaultsToConfig({
+    db: { defaultIDType: 'text', init: () => ({}) as any },
+    secret: '',
     ...overrides,
-  } as Config
+  })
 }

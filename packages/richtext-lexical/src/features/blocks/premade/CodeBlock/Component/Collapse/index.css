@@ -20,7 +20,7 @@
   }
 
   &:focus-visible {
-    outline: 1px solid var(--color-border-brand-strong);
+    outline: var(--stroke-width-small) solid var(--color-border-brand-strong);
     outline-offset: calc(var(--stroke-width-small) / -1);
   }
 }

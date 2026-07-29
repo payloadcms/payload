@@ -5,6 +5,7 @@ import type {
   PaymentAdapter,
   ProductsValidation,
   SanitizedEcommercePluginConfig,
+  UserWithCart,
 } from '../types/index.js'
 
 import { defaultProductsValidation } from '../utilities/defaultProductsValidation.js'
@@ -64,11 +65,11 @@ export const initiatePaymentHandler: InitiatePayment =
     await addDataAndFileToRequest(req)
     const data = req.data
     const payload = req.payload
-    const user = req.user
+    const user = req.user as null | UserWithCart
 
     let currency: string = currenciesConfig.defaultCurrency
     let cartID: DefaultDocumentIDType = data?.cartID
-    let cart = undefined
+    let cart: any = undefined
     const billingAddress = data?.billingAddress
     const shippingAddress = data?.shippingAddress
     const cartSecret = data?.secret

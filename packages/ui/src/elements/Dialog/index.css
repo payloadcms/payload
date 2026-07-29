@@ -38,7 +38,7 @@
   }
 
   .dialog--large {
-    --dialog-width: 640px;
+    --dialog-width: 970px;
   }
 
   .dialog__header {
@@ -49,6 +49,12 @@
     padding: var(--spacer-2) var(--spacer-3);
     border-bottom: var(--stroke-width-small) solid var(--color-border);
     flex-shrink: 0;
+  }
+
+  .dialog__header-end {
+    margin-inline-start: auto;
+    display: flex;
+    gap: var(--spacer-2);
   }
 
   .dialog__header--has-close {

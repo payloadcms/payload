@@ -127,7 +127,6 @@ export const GroupByPopup: React.FC<GroupByPopupProps> = ({
                   <ChevronIcon direction={active ? 'up' : 'down'} size={16} />
                 </button>
               )}
-              size="medium"
               verticalAlign="bottom"
             />
           </div>

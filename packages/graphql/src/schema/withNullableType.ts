@@ -2,6 +2,7 @@ import type { GraphQLType } from 'graphql'
 import type { FieldAffectingData } from 'payload'
 
 import { GraphQLNonNull } from 'graphql'
+import { fieldIsVirtual } from 'payload/shared'
 
 export const withNullableType = ({
   type,
@@ -17,6 +18,9 @@ export const withNullableType = ({
   const hasReadAccessControl = field.access && field.access.read
   const condition = field.admin && field.admin.condition
   const isTimestamp = field.name === 'createdAt' || field.name === 'updatedAt'
+  // Virtual fields are computed (by hooks or from a linked relationship), so they must
+  // not be non-null in the GraphQL schema even when marked required.
+  const isVirtual = fieldIsVirtual(field)
 
   if (
     !forceNullable &&
@@ -25,7 +29,8 @@ export const withNullableType = ({
     (!field.localized || parentIsLocalized) &&
     !condition &&
     !hasReadAccessControl &&
-    !isTimestamp
+    !isTimestamp &&
+    !isVirtual
   ) {
     return new GraphQLNonNull(type)
   }

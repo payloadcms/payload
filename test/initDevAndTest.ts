@@ -19,10 +19,20 @@ export async function initDevAndTest(
   skipGenImportMap: string,
   configFile?: string,
 ): Promise<void> {
-  const importMapPath: string = path.resolve(
-    getNextRootDir(testSuiteArg).rootDir,
-    './app/(payload)/admin/importMap.js',
-  )
+  const framework = process.env.PAYLOAD_FRAMEWORK || 'next'
+
+  // A test suite that ships its own standalone TanStack app
+  // (`test/<suite>/app-tanstack`) generates its importMap there; everyone else
+  // falls back to the shippable root app. Mirrors the per-suite app dir model.
+  const tanstackSuiteAppDir = path.resolve(dirname, testSuiteArg, 'app-tanstack')
+  const tanstackAppDir = fs.existsSync(tanstackSuiteAppDir)
+    ? tanstackSuiteAppDir
+    : path.resolve(dirname, 'app-tanstack')
+
+  const importMapPath: string =
+    framework === 'tanstack-start'
+      ? path.resolve(tanstackAppDir, 'app/_payload/importMap.js')
+      : path.resolve(getNextRootDir(testSuiteArg).rootDir, './app/(payload)/admin/importMap.js')
 
   try {
     fs.writeFileSync(importMapPath, 'export const importMap = {}')
@@ -48,7 +58,13 @@ export async function initDevAndTest(
   const configUrl = pathToFileURL(path.resolve(testDir, configFile ?? 'config.ts')).href
   const config: SanitizedConfig = await (await import(configUrl)).default
 
-  process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
+  if (framework === 'tanstack-start') {
+    // ROOT_DIR drives import map auto-discovery; point it at the app that owns the
+    // generated importMap so the `app/_payload/` convention resolves on its own.
+    process.env.ROOT_DIR = tanstackAppDir
+  } else {
+    process.env.ROOT_DIR = getNextRootDir(testSuiteArg).rootDir
+  }
 
   await generateImportMap(config, { log: true, force: true })
 

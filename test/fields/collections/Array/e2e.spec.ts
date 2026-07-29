@@ -1,11 +1,12 @@
 /* eslint-disable playwright/no-wait-for-selector */
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
-import { copyPasteField } from '../../../__helpers/e2e/copyPasteField.js'
-import { addArrayRow, duplicateArrayRow, removeArrayRow } from '../../../__helpers/e2e/fields/array/index.js'
-import { scrollEntirePage } from '../../../__helpers/e2e/scrollEntirePage.js'
-import { toggleBlockOrArrayRow } from '../../../__helpers/e2e/toggleCollapsible.js'
+import { expect } from '@playwright/test'
+import { copyPasteField } from '__helpers/e2e/copyPasteField.js'
+import { addArrayRow, duplicateArrayRow, removeArrayRow } from '__helpers/e2e/fields/array/index.js'
+import { test } from '__helpers/e2e/playwright.js'
+import { scrollEntirePage } from '__helpers/e2e/scrollEntirePage.js'
+import { toggleBlockOrArrayRow } from '__helpers/e2e/toggleCollapsible.js'
 import path from 'path'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
@@ -88,7 +89,7 @@ describe('Array', () => {
     await expect(page.locator('#field-readOnly .array-field__add-row')).toBeHidden()
   })
 
-  test('should render RowLabel using a component', async () => {
+  test('should render RowLabel using a component', { framework: 'rsc' }, async () => {
     const label = 'custom row label as component'
     await loadCreatePage()
     await addArrayRow(page, { fieldName: 'rowLabelAsComponent' })
@@ -117,38 +118,42 @@ describe('Array', () => {
     await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
   })
 
-  test('should render custom RowLabel after duplicating array item', async () => {
-    const label = 'test custom row label'
-    const updatedLabel = 'updated custom row label'
-    await loadCreatePage()
-    await addArrayRow(page, { fieldName: 'rowLabelAsComponent' })
+  test(
+    'should render custom RowLabel after duplicating array item',
+    { framework: 'rsc' },
+    async () => {
+      const label = 'test custom row label'
+      const updatedLabel = 'updated custom row label'
+      await loadCreatePage()
+      await addArrayRow(page, { fieldName: 'rowLabelAsComponent' })
 
-    await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
+      await page.locator('#field-rowLabelAsComponent__0__title').fill(label)
 
-    const customRowLabel = page.locator(
-      '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("test custom row label")',
-    )
+      const customRowLabel = page.locator(
+        '#rowLabelAsComponent-row-0 >> .array-field__row-header > :text("test custom row label")',
+      )
 
-    await expect(customRowLabel).toBeVisible()
-    await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
+      await expect(customRowLabel).toBeVisible()
+      await expect(customRowLabel).toHaveCSS('text-transform', 'uppercase')
 
-    await duplicateArrayRow(page, { fieldName: 'rowLabelAsComponent' })
+      await duplicateArrayRow(page, { fieldName: 'rowLabelAsComponent' })
 
-    await expect(page.locator('#rowLabelAsComponent-row-1')).toBeVisible()
-    await expect(
-      page.locator(
-        '#rowLabelAsComponent-row-1 >> .array-field__row-header > :text("test custom row label")',
-      ),
-    ).toBeVisible()
+      await expect(page.locator('#rowLabelAsComponent-row-1')).toBeVisible()
+      await expect(
+        page.locator(
+          '#rowLabelAsComponent-row-1 >> .array-field__row-header > :text("test custom row label")',
+        ),
+      ).toBeVisible()
 
-    await page.locator('#field-rowLabelAsComponent__1__title').fill(updatedLabel)
-    const duplicatedRowLabel = page.locator(
-      '#rowLabelAsComponent-row-1 >> .array-field__row-header > :text("updated custom row label")',
-    )
+      await page.locator('#field-rowLabelAsComponent__1__title').fill(updatedLabel)
+      const duplicatedRowLabel = page.locator(
+        '#rowLabelAsComponent-row-1 >> .array-field__row-header > :text("updated custom row label")',
+      )
 
-    await expect(duplicatedRowLabel).toBeVisible()
-    await expect(duplicatedRowLabel).toHaveCSS('text-transform', 'uppercase')
-  })
+      await expect(duplicatedRowLabel).toBeVisible()
+      await expect(duplicatedRowLabel).toHaveCSS('text-transform', 'uppercase')
+    },
+  )
 
   test('should render default array field within custom component', async () => {
     await loadCreatePage()
@@ -416,11 +421,15 @@ describe('Array', () => {
     )
   })
 
-  test('should externally update array rows and render custom fields', async () => {
-    await loadCreatePage()
-    await page.locator('#updateArrayExternally').click()
-    await expect(page.locator('#custom-text-field')).toBeVisible()
-  })
+  test(
+    'should externally update array rows and render custom fields',
+    { framework: 'rsc' },
+    async () => {
+      await loadCreatePage()
+      await page.locator('#updateArrayExternally').click()
+      await expect(page.locator('#custom-text-field')).toBeVisible()
+    },
+  )
 
   test('should initialize array rows with collapsed state', async () => {
     await page.goto(url.create)
@@ -513,15 +522,61 @@ describe('Array', () => {
         fieldName: 'readOnly',
         page,
       })
+      const popupBtn = page
+        .locator('#field-items .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await expect(popupBtn).toBeVisible()
+      await popupBtn.click()
+      const disabledPasteBtn = page.locator(
+        '.popup__content div.popup-button-list__disabled:has-text("Paste Field")',
+      )
+      await expect(disabledPasteBtn).toBeVisible()
+    })
+
+    test('should disable paste when the clipboard is empty', async () => {
+      await page.goto(url.create)
+      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+
+      const fieldPopupBtn = page
+        .locator('#field-items .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+      ).toBeVisible()
+      await page.keyboard.press('Escape')
+
+      const rowPopupBtn = page
+        .locator('#items-row-0 .collapsible__actions button.array-actions__button')
+        .first()
+      await rowPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Row")'),
+      ).toBeVisible()
+    })
+
+    test('should enable paste after copying a compatible field', async () => {
+      await page.goto(url.create)
+      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+
+      const fieldPopupBtn = page
+        .locator('#field-items .popup.clipboard-action__popup button.popup-button')
+        .first()
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Field")'),
+      ).toBeVisible()
+      await page.keyboard.press('Escape')
+
       await copyPasteField({
         fieldName: 'items',
         page,
-        action: 'paste',
       })
-      const pasteErrorToast = page
-        .locator('.payload-toast-item.toast-error')
-        .filter({ hasText: 'Invalid clipboard data.' })
-      await expect(pasteErrorToast).toBeVisible()
+
+      await fieldPopupBtn.click()
+      await expect(
+        page.locator('.popup__content .popup-button-list button:has-text("Paste Field")'),
+      ).toBeVisible()
     })
 
     test('should copy and paste array fields', async () => {
@@ -698,6 +753,84 @@ describe('Array', () => {
       await expect(subArrayContainer2).toHaveCount(1)
     })
 
+    test('should copy a nested array row and paste into a sibling nested array row', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-items')
+
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+
+      const rowOneText = field.locator('#field-items__0__subArray__0__text')
+      await expect(rowOneText).toBeVisible()
+
+      const textVal = 'nested row copy'
+      await rowOneText.fill(textVal)
+
+      await copyPasteField({
+        page,
+        fieldName: 'items__0__subArray',
+        rowIndex: 0,
+      })
+
+      await copyPasteField({
+        page,
+        fieldName: 'items__0__subArray',
+        rowIndex: 1,
+        action: 'paste',
+      })
+
+      const rowTwoText = field.locator('#field-items__0__subArray__1__text')
+      await expect(rowTwoText).toHaveValue(textVal)
+    })
+
+    test('should copy a nested array field and paste into a sibling nested array field', async () => {
+      await page.goto(url.create)
+
+      const field = page.locator('#field-items')
+
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+      await addArrayRow(page, { fieldName: 'items__1__subArray' })
+
+      const sourceRows = field.locator(
+        '#field-items__0__subArray > div.array-field__draggable-rows > div',
+      )
+      const targetRows = field.locator(
+        '#field-items__1__subArray > div.array-field__draggable-rows > div',
+      )
+      await expect(sourceRows).toHaveCount(2)
+      await expect(targetRows).toHaveCount(1)
+
+      await copyPasteField({
+        page,
+        fieldName: 'items__0__subArray',
+      })
+
+      await copyPasteField({
+        page,
+        fieldName: 'items__1__subArray',
+        action: 'paste',
+      })
+
+      await expect(targetRows).toHaveCount(2)
+    })
+
+    test('should disable paste on a nested array row when the clipboard is empty', async () => {
+      await page.goto(url.create)
+      await page.evaluate(() => localStorage.removeItem('_payloadClipboard'))
+
+      await addArrayRow(page, { fieldName: 'items__0__subArray' })
+
+      const rowPopupBtn = page
+        .locator('#items-0-subArray-row-0 .collapsible__actions button.array-actions__button')
+        .first()
+      await rowPopupBtn.click()
+      await expect(
+        page.locator('.popup__content div.popup-button-list__disabled:has-text("Paste Row")'),
+      ).toBeVisible()
+    })
+
     test('should generate unique array IDs when pasting arrays across documents', async () => {
       await page.goto(url.create)
 
@@ -735,14 +868,18 @@ describe('Array', () => {
       await expect(textInput).toHaveValue('Unique content for first document')
     })
   })
-  test('should return empty array from getDataByPath for array fields without rows', async () => {
-    await page.goto(url.create)
+  test(
+    'should return empty array from getDataByPath for array fields without rows',
+    { framework: 'rsc' },
+    async () => {
+      await page.goto(url.create)
 
-    // Wait for the test component to render
-    await page.waitForSelector('#getDataByPath-test')
+      // Wait for the test component to render
+      await page.waitForSelector('#getDataByPath-test')
 
-    // Check that getDataByPath returned an empty array, not 0
-    await expect(page.locator('#empty-array-result')).toHaveText('ARRAY')
-    await expect(page.locator('#empty-array-length')).toHaveText('0')
-  })
+      // Check that getDataByPath returned an empty array, not 0
+      await expect(page.locator('#empty-array-result')).toHaveText('ARRAY')
+      await expect(page.locator('#empty-array-length')).toHaveText('0')
+    },
+  )
 })

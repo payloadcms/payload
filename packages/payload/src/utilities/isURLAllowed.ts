@@ -1,5 +1,7 @@
 import type { AllowList } from '../uploads/types.js'
 
+import { escapeRegExp } from './escapeRegExp.js'
+
 export const isURLAllowed = (url: string, allowList: AllowList): boolean => {
   try {
     const parsedUrl = new URL(url)
@@ -16,10 +18,15 @@ export const isURLAllowed = (url: string, allowList: AllowList): boolean => {
         }
 
         if (key === 'pathname') {
-          // Convert wildcards to a regex
-          const regexPattern = value
-            .replace(/\*\*/g, '.*') // Match any path
-            .replace(/\*/g, '[^/]*') // Match any part of a path segment
+          // Translate a small glob syntax to a regex. The pattern is escaped
+          // first so that metacharacters in the configured value (e.g. `.`)
+          // match literally and cannot broaden what the allow-list accepts.
+          // Wildcards become `\*` once escaped, so they are restored afterwards
+          // — translating `**` before `*` is safe because the resulting `.*`
+          // no longer contains an escaped `\*` for the next replace to match.
+          const regexPattern = escapeRegExp(value)
+            .replace(/\\\*\\\*/g, '.*') // `**` → match any path
+            .replace(/\\\*/g, '[^/]*') // `*` → match any part of a path segment
             .replace(/\/$/, '(/)?') // Allow optional trailing slash
           const regex = new RegExp(`^${regexPattern}$`)
           return regex.test(parsedUrl.pathname)

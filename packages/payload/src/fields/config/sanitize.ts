@@ -22,6 +22,8 @@ import { formatLabels, toWords } from '../../utilities/formatLabels.js'
 import { validateTimezones } from '../../utilities/validateTimezones.js'
 import { baseBlockFields } from '../baseFields/baseBlockFields.js'
 import { baseIDField } from '../baseFields/baseIDField.js'
+import { generateSlug } from '../baseFields/slug/generateSlug.js'
+import { generateSlugBeforeDuplicate } from '../baseFields/slug/generateSlugBeforeDuplicate.js'
 import { baseTimezoneField } from '../baseFields/timezone/baseField.js'
 import { defaultTimezones } from '../baseFields/timezone/defaultTimezones.js'
 import { getFieldPaths } from '../getFieldPaths.js'
@@ -272,6 +274,61 @@ export const sanitizeField = async ({
         ...field.admin,
       }
     }
+  }
+
+  // Slug field: apply defaults, attach generation hook, expose slugify to the server fn.
+  if (field.type === 'slug') {
+    const useAsSlug = field.useAsSlug
+
+    // Required by default so the admin marks the slug as required. The value is always populated by
+    // the field hooks (source or id fallback), and validations.slug permits empty so the fallback
+    // isn't blocked before it runs.
+    if (typeof field.required === 'undefined') {
+      field.required = true
+    }
+
+    if (typeof field.unique === 'undefined') {
+      field.unique = true
+    }
+
+    if (typeof field.index === 'undefined') {
+      field.index = true
+    }
+
+    field.admin = {
+      position: 'sidebar',
+      ...field.admin,
+    }
+
+    // The slugifyHandler server function resolves the custom slugify by field path.
+    if (field.slugify) {
+      field.custom = {
+        ...field.custom,
+        slugify: field.slugify,
+      }
+    }
+
+    if (!field.hooks) {
+      field.hooks = {}
+    }
+
+    field.hooks.beforeChange = [
+      generateSlug({
+        name: field.name,
+        localized: field.localized,
+        slugify: field.slugify,
+        useAsSlug,
+      }),
+      ...(field.hooks.beforeChange || []),
+    ]
+
+    // Own the slug on duplicate — the copy takes a fresh `<singular>-<N>` fallback rather than the
+    // generic ` - Copy` default, which isn't collision-safe across repeated duplicates of the same
+    // source. Runs per-locale for a localized slug.
+    field.hooks.beforeDuplicate = [
+      generateSlugBeforeDuplicate({ name: field.name }),
+      ...(field.hooks.beforeDuplicate || []),
+    ]
   }
 
   // Array ID field

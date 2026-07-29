@@ -6,7 +6,7 @@ import type {
   SelectMode,
   SelectType,
   TabAsField,
-  TypedUser,
+  User,
 } from 'payload'
 
 import { getBlockSelect, getDefaultValue, stripUnselectedFields } from 'payload'
@@ -23,7 +23,7 @@ type Args<T> = {
   select?: SelectType
   selectMode?: SelectMode
   siblingData: Data
-  user: TypedUser
+  user: User
 }
 
 // TODO: Make this works for rich text subfields

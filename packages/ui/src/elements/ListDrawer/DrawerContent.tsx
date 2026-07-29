@@ -193,7 +193,7 @@ export const ListDrawerContent: React.FC<ListDrawerProps> = ({
       DocumentDrawerToggler={DocumentDrawerToggler}
       drawerSlug={drawerSlug}
       enabledCollections={collectionSlugs}
-      onBulkSelect={onBulkSelect}
+      onBulkSelect={(selected) => onBulkSelect?.(selected, selectedOption.value)}
       onQueryChange={onQueryChange}
       onSelect={onSelect}
       refresh={refreshSelf}

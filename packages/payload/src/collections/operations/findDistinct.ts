@@ -131,7 +131,10 @@ export const findDistinctOperation = async (
     }
 
     if (fieldResult.field.access?.read) {
-      const hasAccess = await fieldResult.field.access.read({ req })
+      const hasAccess = await fieldResult.field.access.read({
+        collection: collectionConfig,
+        req,
+      })
       if (!hasAccess) {
         throw new Forbidden(req.t)
       }

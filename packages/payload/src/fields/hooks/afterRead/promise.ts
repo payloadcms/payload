@@ -192,6 +192,7 @@ export const promise = async ({
 
       if (fallbackValue) {
         switch (field.type) {
+          case 'slug':
           case 'text':
           case 'textarea': {
             if (value === '' || isNullOrUndefined) {
@@ -374,14 +375,27 @@ export const promise = async ({
     if (triggerAccessControl && field.access && field.access.read) {
       const canReadField = overrideAccess
         ? true
-        : await field.access.read({
-            id: doc.id as number | string,
-            blockData,
-            data: doc,
-            doc,
-            req,
-            siblingData: siblingDoc,
-          })
+        : await field.access.read(
+            collection
+              ? {
+                  id: doc.id as number | string,
+                  blockData,
+                  collection,
+                  data: doc,
+                  doc,
+                  req,
+                  siblingData: siblingDoc,
+                }
+              : {
+                  id: doc.id as number | string,
+                  blockData,
+                  data: doc,
+                  doc,
+                  global: global!,
+                  req,
+                  siblingData: siblingDoc,
+                },
+          )
 
       if (!canReadField) {
         allowDefaultValue = false

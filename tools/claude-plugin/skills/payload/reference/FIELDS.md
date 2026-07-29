@@ -1,4 +1,4 @@
-# Payload CMS Field Types Reference
+# Payload Field Types Reference
 
 Complete reference for all Payload field types with examples.
 
@@ -26,32 +26,24 @@ const textField: TextField = {
 }
 ```
 
-### Slug Field Helper
+> **When to use `position: 'sidebar'`:** Reserve the sidebar for short fields that
+> give quick insight into the content — status, category, author, publish date,
+> slug. Avoid it for fields that need horizontal space to be useful, like a
+> description, rich text content, or long text — those belong in the main document
+> area. (`title` above is shown in the sidebar only to demonstrate the option.)
 
-Built-in helper for auto-generating slugs:
+### Slug Field
+
+Use the native `slug` field type for slugs — never hand-roll a
+`{ type: 'text', unique: true }` field. `useAsSlug` is **required** (names the
+source field; there is no `'title'` default). Defaults to `required`, `unique`,
+`index`, `position: 'sidebar'`. Optional server-side `slugify` fn.
 
 ```ts
-import { slugField } from 'payload'
-import type { CollectionConfig } from 'payload'
-
-export const Pages: CollectionConfig = {
-  slug: 'pages',
-  fields: [
-    { name: 'title', type: 'text', required: true },
-    slugField({
-      name: 'slug', // defaults to 'slug'
-      useAsSlug: 'title', // defaults to 'title'
-      checkboxName: 'generateSlug', // defaults to 'generateSlug'
-      localized: true,
-      required: true,
-      overrides: (defaultField) => {
-        // Customize the generated fields if needed
-        return defaultField
-      },
-    }),
-  ],
-}
+{ name: 'slug', type: 'slug', useAsSlug: 'title' }
 ```
+
+Full prop reference: <https://payloadcms.com/docs/fields/slug>
 
 ## Rich Text (Lexical)
 
@@ -264,14 +256,17 @@ const blocksField: BlocksField = {
 ```ts
 import type { SelectField } from 'payload'
 
+// Use select for genuine taxonomy. For publish state, enable versions.drafts
+// and rely on the auto-injected _status field instead of a custom select.
 const selectField: SelectField = {
-  name: 'status',
+  name: 'priority',
   type: 'select',
   options: [
-    { label: 'Draft', value: 'draft' },
-    { label: 'Published', value: 'published' },
+    { label: 'Low', value: 'low' },
+    { label: 'Medium', value: 'medium' },
+    { label: 'High', value: 'high' },
   ],
-  defaultValue: 'draft',
+  defaultValue: 'medium',
   required: true,
 }
 

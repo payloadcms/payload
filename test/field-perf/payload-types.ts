@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_F8A02B48".
+ * via the `definition` "LexicalNodes_6040EEFC".
  */
-export type LexicalNodes_F8A02B48 =
+export type LexicalNodes_6040EEFC =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_F8A02B48>
+  | SerializedParagraphNode<LexicalNodes_6040EEFC>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_F8A02B48>
+  | SerializedHeadingNode<LexicalNodes_6040EEFC>
   | {
       type: 'upload';
       /**
@@ -79,16 +79,15 @@ export type LexicalNodes_F8A02B48 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_F8A02B48>
-  | SerializedListNode<LexicalNodes_F8A02B48>
-  | SerializedListItemNode<LexicalNodes_F8A02B48>
-  | SerializedAutoLinkNode<LexicalNodes_F8A02B48, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_F8A02B48, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_6040EEFC>
+  | SerializedListNode<LexicalNodes_6040EEFC>
+  | SerializedListItemNode<LexicalNodes_6040EEFC>
+  | SerializedAutoLinkNode<LexicalNodes_6040EEFC, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_6040EEFC, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'blocks-collection'
-      | 'users'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
+      | 'users'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
@@ -101,9 +100,8 @@ export interface Config {
   blocks: {};
   collections: {
     'blocks-collection': BlocksCollection;
-    users: User;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
+    users: User;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
     'payload-migrations': PayloadMigration;
@@ -111,9 +109,8 @@ export interface Config {
   collectionsJoins: {};
   collectionsSelect: {
     'blocks-collection': BlocksCollectionSelect<false> | BlocksCollectionSelect<true>;
-    users: UsersSelect<false> | UsersSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
+    users: UsersSelect<false> | UsersSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
@@ -167,7 +164,7 @@ export interface BlocksCollection {
  * via the `definition` "Content".
  */
 export interface Content {
-  richText?: LexicalRichText<LexicalNodes_F8A02B48> | null;
+  richText?: LexicalRichText<LexicalNodes_6040EEFC> | null;
   field1?: string | null;
   field2?: string | null;
   field3?: string | null;
@@ -180,6 +177,23 @@ export interface Content {
   id?: string | null;
   blockName?: string | null;
   blockType: 'content';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -208,48 +222,6 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv".
- */
-export interface PayloadKv {
-  id: string;
-  key: string;
-  data:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
@@ -262,10 +234,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'users';
         value: string | User;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -339,6 +307,14 @@ export interface BlocksCollectionSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
@@ -358,30 +334,6 @@ export interface UsersSelect<T extends boolean = true> {
         createdAt?: T;
         expiresAt?: T;
       };
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-kv_select".
- */
-export interface PayloadKvSelect<T extends boolean = true> {
-  key?: T;
-  data?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -541,7 +493,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -590,7 +542,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

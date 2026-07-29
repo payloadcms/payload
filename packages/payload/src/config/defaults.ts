@@ -1,85 +1,7 @@
-import type { JobsConfig } from '../queues/config/types/index.js'
 import type { Config } from './types.js'
 
 import { defaultAccess } from '../auth/defaultAccess.js'
 import { databaseKVAdapter } from '../kv/adapters/DatabaseKVAdapter.js'
-
-/**
- * @deprecated - remove in 4.0. This is error-prone, as mutating this object will affect any objects that use the defaults as a base.
- */
-export const defaults: Omit<Config, 'db' | 'editor' | 'secret'> = {
-  admin: {
-    avatar: 'gravatar',
-    components: {},
-    custom: {},
-    dateFormat: 'MMMM do yyyy, h:mm a',
-    dependencies: {},
-    importMap: {
-      baseDir: `${typeof process?.cwd === 'function' ? process.cwd() : ''}`,
-    },
-    meta: {
-      defaultOGImageType: 'dynamic',
-      robots: 'noindex, nofollow',
-      titleSuffix: '- Payload',
-    },
-    routes: {
-      account: '/account',
-      createFirstUser: '/create-first-user',
-      forgot: '/forgot',
-      inactivity: '/logout-inactivity',
-      login: '/login',
-      logout: '/logout',
-      reset: '/reset',
-      unauthorized: '/unauthorized',
-    },
-    theme: 'all',
-  },
-  auth: {
-    jwtOrder: ['JWT', 'Bearer', 'cookie'],
-  },
-  bin: [],
-  collections: [],
-  cookiePrefix: 'payload',
-  cors: [],
-  csrf: [],
-  custom: {},
-  defaultDepth: 2,
-  defaultMaxTextLength: 40000,
-  endpoints: [],
-  globals: [],
-  graphQL: {
-    disablePlaygroundInProduction: true,
-    maxComplexity: 1000,
-    schemaOutputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,
-  },
-  hooks: {},
-  i18n: {},
-  jobs: {
-    access: {
-      cancel: defaultAccess,
-      queue: defaultAccess,
-      run: defaultAccess,
-    },
-    deleteJobOnComplete: true,
-    depth: 0,
-  } as JobsConfig,
-
-  localization: false,
-  maxDepth: 10,
-  routes: {
-    admin: '/admin',
-    api: '/api',
-    graphQL: '/graphql',
-    graphQLPlayground: '/graphql-playground',
-  },
-  serverURL: '',
-  telemetry: true,
-  typescript: {
-    autoGenerate: true,
-    outputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
-  },
-  upload: {},
-}
 
 export const addDefaultsToConfig = (config: Config): Config => {
   config.admin = {
@@ -134,7 +56,6 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.i18n = config.i18n ?? {}
   config.jobs = {
     deleteJobOnComplete: true,
-    depth: 0,
     ...(config.jobs || {}),
     access: {
       cancel: defaultAccess,
@@ -142,7 +63,11 @@ export const addDefaultsToConfig = (config: Config): Config => {
       run: defaultAccess,
       ...(config.jobs?.access || {}),
     },
-  } as JobsConfig
+    processingLease: {
+      duration: config.jobs?.processingLease?.duration ?? 20 * 60 * 1000,
+      safetyBuffer: config.jobs?.processingLease?.safetyBuffer ?? 30 * 1000,
+    },
+  }
   config.localization = config.localization ?? false
   config.maxDepth = config.maxDepth ?? 10
   config.routes = {
