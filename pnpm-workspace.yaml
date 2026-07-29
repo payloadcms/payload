@@ -57,3 +57,6 @@ allowBuilds:
 
 minimumReleaseAgeExclude:
   - '@faceless-ui/modal@3.0.1'
+  - '@modelcontextprotocol/client@2.0.0'
+  - '@modelcontextprotocol/core@2.0.0'
+  - '@modelcontextprotocol/server@2.0.0'

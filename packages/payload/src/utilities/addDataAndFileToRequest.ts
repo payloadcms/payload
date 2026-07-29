@@ -1,7 +1,9 @@
 import type { PayloadRequest } from '../types/index.js'
+import type { UploadInstructions } from '../uploads/types.js'
 
 import { APIError } from '../errors/APIError.js'
 import { processMultipartFormdata } from '../uploads/fetchAPI-multipart/index.js'
+import { getFileFromUploadInstructions } from '../uploads/getFileFromUploadInstructions.js'
 
 type AddDataAndFileToRequest = (req: PayloadRequest) => Promise<void>
 
@@ -58,64 +60,29 @@ export const addDataAndFileToRequest: AddDataAndFileToRequest = async (req) => {
       }
 
       if (!req.file && fields?.file && typeof fields?.file === 'string') {
-        let clientUploadContext, collectionSlug, filename, mimeType, size
+        let uploadedFile: UploadInstructions['file']
         try {
-          ;({ clientUploadContext, collectionSlug, filename, mimeType, size } = JSON.parse(
-            fields.file,
-          ))
+          uploadedFile = JSON.parse(fields.file)
         } catch {
           throw new APIError('A file name is required.', 400)
         }
-        const uploadConfig = req.payload.collections[collectionSlug]!.config.upload
+        const collectionSlug =
+          typeof req.routeParams?.collection === 'string'
+            ? req.routeParams.collection
+            : uploadedFile.collectionSlug
+        const uploadConfig = collectionSlug
+          ? req.payload.collections[collectionSlug]?.config.upload
+          : undefined
 
-        if (!uploadConfig.handlers) {
-          throw new APIError('uploadConfig.handlers is not present for ' + collectionSlug)
+        if (!collectionSlug || !uploadConfig) {
+          throw new APIError('Invalid upload collection.', 400)
         }
 
-        let response: null | Response = null
-        let error: unknown
-
-        for (const handler of uploadConfig.handlers) {
-          try {
-            const result = await handler(req, {
-              doc: null!,
-              params: {
-                clientUploadContext, // Pass additional specific to adapters context returned from UploadHandler, then staticHandler can use them.
-                collection: collectionSlug,
-                filename,
-              },
-            })
-            if (result) {
-              response = result
-            }
-            // If we couldn't get the file from that handler, save the error and try other.
-          } catch (err) {
-            error = err
-          }
-        }
-
-        if (!response) {
-          if (error) {
-            payload.logger.error(error)
-          }
-
-          throw new APIError('Expected response from the upload handler.')
-        }
-
-        if (response.status >= 300 && response.status < 400) {
-          const redirectUrl = response.headers.get('Location')
-          if (redirectUrl) {
-            response = await fetch(redirectUrl)
-          }
-        }
-
-        req.file = {
-          name: filename,
-          clientUploadContext,
-          data: Buffer.from(await response.arrayBuffer()),
-          mimetype: response.headers.get('Content-Type') || mimeType,
-          size,
-        }
+        req.file = await getFileFromUploadInstructions({
+          collectionSlug,
+          file: uploadedFile,
+          req,
+        })
       }
     }
   }

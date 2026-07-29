@@ -1271,7 +1271,7 @@ describe('lexicalBlocks', () => {
       )
       await wait(300)
 
-      const requiredTooltip = conditionalArrayBlock
+      const requiredTooltip = page
         .locator('.tooltip-content:has-text("This field is required.")')
         .first()
       await wait(300)

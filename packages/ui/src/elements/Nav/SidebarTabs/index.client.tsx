@@ -58,7 +58,13 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   }, [initialTabContents])
 
   const loadTabContent = useCallback(
-    async (tabSlug: string, { revalidate = false }: { revalidate?: boolean } = {}) => {
+    async (
+      tabSlug: string,
+      {
+        revalidate = false,
+        serverArgs,
+      }: { revalidate?: boolean; serverArgs?: Partial<RenderTabServerFnArgs> } = {},
+    ) => {
       const hasCachedContent = Boolean(tabContentRef.current[tabSlug])
 
       // Skip if already loaded (unless revalidating) or currently loading
@@ -75,7 +81,7 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
       try {
         const result = (await serverFunction({
           name: 'render-tab',
-          args: { tabSlug } as RenderTabServerFnArgs,
+          args: { ...serverArgs, tabSlug } as RenderTabServerFnArgs,
         })) as RenderTabServerFnReturnType
 
         const newContent = {
@@ -94,12 +100,13 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
         const errorMessage = error instanceof Error ? error.message : 'Unknown error'
 
         const handleRetry = () => {
-          // Clear the error and retry loading
+          // Clear the error and retry loading, threading the original serverArgs through so the
+          // retry doesn't silently fall back to req.query-based rendering (the stale-tree bug).
           const clearedContent = { ...tabContentRef.current }
           delete clearedContent[tabSlug]
           tabContentRef.current = clearedContent
           setTabContent(clearedContent)
-          void loadTabContent(tabSlug)
+          void loadTabContent(tabSlug, { serverArgs })
         }
 
         const newContent = {
@@ -118,14 +125,14 @@ export const SidebarTabsClient: React.FC<SidebarTabsClientProps> = ({
   )
 
   const reloadTabContent = useCallback(
-    (tabSlug: string) => {
+    (tabSlug: string, serverArgs?: Partial<RenderTabServerFnArgs>) => {
       // Clear cached content to force reload
       const clearedContent = { ...tabContentRef.current }
       delete clearedContent[tabSlug]
       tabContentRef.current = clearedContent
       setTabContent(clearedContent)
 
-      void loadTabContent(tabSlug)
+      void loadTabContent(tabSlug, { serverArgs })
     },
     [loadTabContent],
   )

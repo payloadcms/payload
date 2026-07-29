@@ -1,6 +1,6 @@
 {
   "name": "@payloadcms/richtext-lexical",
-  "version": "4.0.0-beta.0",
+  "version": "4.0.0-canary.14",
   "description": "The officially supported Lexical richtext adapter for Payload",
   "homepage": "https://payloadcms.com",
   "repository": {
@@ -18,7 +18,6 @@
     }
   ],
   "sideEffects": [
-    "*.scss",
     "*.css"
   ],
   "type": "module",
@@ -414,7 +413,6 @@
   "peerDependencies": {
     "@faceless-ui/modal": "3.0.1",
     "@faceless-ui/scroll-info": "2.0.0",
-    "@payloadcms/next": "workspace:*",
     "payload": "workspace:*",
     "react": "^19.0.1 || ^19.1.2 || ^19.2.1",
     "react-dom": "^19.0.1 || ^19.1.2 || ^19.2.1"

@@ -46,13 +46,11 @@
       border-radius: 0 0 var(--radius-medium) var(--radius-medium) !important;
 
       > .editor-scroller > .editor {
+        --content-editable-padding-block-start: var(--spacer-2);
+
         > .ContentEditable__root {
           padding-top: var(--spacer-2);
         }
-      }
-
-      > .editor-scroller > .editor > div > .LexicalEditorTheme__placeholder {
-        top: var(--spacer-4);
       }
     }
   }

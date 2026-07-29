@@ -36,6 +36,7 @@ export function payloadLayoutRoute({
         <RootProvider
           config={data.clientConfig}
           dateFNSKey={data.dateFNSKey}
+          embed={data.isEmbedded}
           fallbackLang={data.fallbackLang}
           highContrastMode={false}
           isNavOpen={data.isNavOpen}
