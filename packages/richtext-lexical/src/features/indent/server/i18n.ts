@@ -73,6 +73,10 @@ export const i18n: Partial<GenericLanguages> = {
     decreaseLabel: '들여쓰기 줄이기',
     increaseLabel: '들여쓰기 늘리기',
   },
+  ms: {
+    decreaseLabel: 'Kurangkan inden',
+    increaseLabel: 'Tambah inden',
+  },
   my: {
     decreaseLabel: 'Kurangkan Inden',
     increaseLabel: 'Tingkatkan Inden',

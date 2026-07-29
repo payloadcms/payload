@@ -55,6 +55,9 @@ export const i18n: Partial<GenericLanguages> = {
   ko: {
     label: '주문된 목록',
   },
+  ms: {
+    label: 'Senarai bernombor',
+  },
   my: {
     label: 'စီစဉ်ထားသော စာရင်း',
   },
