@@ -635,9 +635,9 @@ The deprecated `isHTMLElement` utility has been removed from `@payloadcms/richte
 
 `lexical`'s built-in `isHTMLElement` is the canonical implementation and narrows against the node's owning-document `HTMLElement`, so it is also safe across iframes and other realms.
 
-### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.45.0`
+### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.48.0`
 
-`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.45.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
+`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.48.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
 
 Most projects use markdown through the editor or through `convertMarkdownToLexical` / `convertLexicalToMarkdown` and need no changes. You are only affected if you import from `@payloadcms/richtext-lexical/lexical/markdown` directly.
 
@@ -659,9 +659,9 @@ Most projects use markdown through the editor or through `convertMarkdownToLexic
 
 If you keep calling `$convertFromMarkdownString` directly, pass `editorConfig.features.markdownTransformers` as the second argument. Enable `payload/no-conflicting-lexical-markdown-imports` (included in `@payloadcms/eslint-config`) to catch imports and calls that rely on these mismatching defaults.
 
-**Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical `0.45` upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
+**Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
 
-If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.45.0`. None of them require action for typical Payload usage.
+If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.48.0`. None of them require action for typical Payload usage.
 
 ### Field `typescriptSchema` renamed to `jsonSchema`
 
