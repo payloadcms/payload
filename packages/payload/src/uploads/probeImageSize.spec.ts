@@ -59,6 +59,39 @@ describe('probeImageSize', () => {
     expect(() => probeImageSize(Buffer.from('not an image'))).toThrow()
   })
 
+  it('should read dimensions for a BMP file', () => {
+    const bmp = Buffer.alloc(54)
+    bmp.write('BM', 0, 'ascii')
+    bmp.writeUInt32LE(54, 10) // pixel data offset
+    bmp.writeUInt32LE(40, 14) // BITMAPINFOHEADER size
+    bmp.writeInt32LE(64, 18) // width
+    bmp.writeInt32LE(-48, 22) // height stored negative for a top-down bitmap
+
+    expect(probeImageSize(bmp)).toEqual({ height: 48, width: 64 })
+  })
+
+  it('should read dimensions for an ICO file, picking the largest embedded image', () => {
+    const ico = Buffer.alloc(24)
+    ico.writeUInt16LE(1, 2) // type: 1 = icon
+    ico.writeUInt16LE(2, 4) // image count
+    ico[6] = 16 // entry 0: 16x16
+    ico[7] = 16
+    ico[22] = 32 // entry 1: 32x32
+    ico[23] = 32
+
+    expect(probeImageSize(ico)).toEqual({ height: 32, width: 32 })
+  })
+
+  it('should read dimensions for a CUR file', () => {
+    const cur = Buffer.alloc(22)
+    cur.writeUInt16LE(2, 2) // type: 2 = cursor
+    cur.writeUInt16LE(1, 4) // image count
+    cur[6] = 24
+    cur[7] = 24
+
+    expect(probeImageSize(cur)).toEqual({ height: 24, width: 24 })
+  })
+
   it('should not hang on a malformed HEIF buffer with a zero-size box', () => {
     // Reproduces the CVE-2025-71319 trigger: an ISO-BMFF box whose size field is
     // zero inside a container would loop forever in the unpatched `image-size`.
