@@ -104,10 +104,17 @@ export const reduceFieldOptions = ({
         ...field.tabs.reduce((tabFields, tab) => {
           if ('fields' in tab) {
             const isNamedTab = 'name' in tab && tab.name
-            const tabPermissions =
+
+            const namedTabPermissions =
               isNamedTab && fieldPermissions && fieldPermissions !== true
-                ? (fieldPermissions[tab.name] ?? fieldPermissions)
-                : fieldPermissions
+                ? fieldPermissions[tab.name]
+                : undefined
+
+            const tabPermissions = isNamedTab
+              ? namedTabPermissions === true
+                ? true
+                : (namedTabPermissions?.fields ?? fieldPermissions)
+              : fieldPermissions
 
             return [
               ...tabFields,

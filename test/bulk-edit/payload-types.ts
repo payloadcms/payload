@@ -197,6 +197,7 @@ export interface RestrictedTab {
   noUpdate?: string | null;
   namedTab?: {
     namedTabText?: string | null;
+    namedTabNoUpdate?: string | null;
   };
   updatedAt: string;
   createdAt: string;
@@ -392,6 +393,7 @@ export interface RestrictedTabsSelect<T extends boolean = true> {
     | T
     | {
         namedTabText?: T;
+        namedTabNoUpdate?: T;
       };
   updatedAt?: T;
   createdAt?: T;
