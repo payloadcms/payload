@@ -350,7 +350,16 @@ Stylelint enforces the rules below on `.css` files (SCSS is no longer linted and
 **Never use `!important`** (`plugin/no-important`). Refactor selector specificity instead.
 Exceptions to this rule are when it's not possible to do so when dealing with external libraries.
 
-**No sub-pixel precision** (`plugin/no-subpixel-values`):
+**Prioritize design tokens over hardcoded pixel/rem values:**
+
+- Spacing (`width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`, `inset*`, `gap*`, `flex-basis`, etc.) should use a `--spacer-*` token from `packages/ui/src/css/spacing.css` (`--spacer-0` through `--spacer-6`), not a raw pixel or rem value.
+- If the value needed isn't an exact token, round to the nearest `--spacer-*` token rather than hand-writing a one-off value.
+- If a niche value must be precise (not a rounding-friendly case), use `calc()` with a spacer token instead of a raw pixel/rem value, e.g. `calc(var(--spacer-1) * 2.5)` for `10px`.
+- The same principle applies to other token families - colors (`--color-*` in `colors.css`), radius (`--radius-*` in `radius.css`), typography (`--text-*` in `typography.css`) - prefer the token over a hardcoded value.
+- `1px` borders/strokes and non-standard one-off values with no sensible token (documented as such) are acceptable exceptions.
+- See the `ui4` and `ui4-review` skills for full token tables and rounding rules used when migrating existing CSS.
+
+**No sub-pixel precision** (`plugin/no-subpixel-values`) - applies to whatever raw value remains after the above (e.g. an exception case):
 
 - Pixel values may have at most one decimal place (e.g. `0.5px` is fine, `13.523px` is not).
 - Box-model and position properties - `width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`, `inset*`, `gap*`, `flex-basis`, `min-`/`max-width`/`height` - must be whole numbers with no decimals at all.
