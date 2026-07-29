@@ -1,5 +1,4 @@
 @layer payload-default {
-  /* stylelint-disable plugin/no-important -- neutralizes HTMLDiff's pill highlighting, whose compound :not() selectors outrank these on specificity */
   .date-diff[data-match-type] {
     background-color: unset !important;
     border-radius: unset !important;
@@ -17,7 +16,6 @@
       background-color: unset !important;
     }
   }
-  /* stylelint-enable plugin/no-important */
 
   .field-diff-content .date-diff {
     display: contents;
