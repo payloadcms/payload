@@ -200,5 +200,40 @@ describe('getImageSize', () => {
       expect(counters.bytesReadFromDisk).toBeLessThan(500 * 1024)
       expect(counters.bytesReadFromDisk).toBeLessThan(largeFile.length)
     })
+
+    it.each(cases.filter(({ file }) => file !== 'image.svg'))(
+      'should read $file dimensions via imageDimensionsFromStream when streamed from a tempFilePath',
+      async ({ file, height, width }) => {
+        const tempFilePath = path.join(tempDir, file)
+        writeFileSync(tempFilePath, readFileSync(path.join(fixturesDir, file)))
+
+        const streamedFile = {
+          mimetype: 'image/test',
+          name: file,
+          tempFilePath,
+        } as PayloadRequest['file']
+
+        expect(await getImageSize({ file: streamedFile })).toEqual({ height, width })
+      },
+    )
+
+    it('should read GIF dimensions when streamed from a tempFilePath', async () => {
+      // No GIF fixture lives in this directory; `image-dimensions` only needs
+      // the 6-byte signature plus the 4-byte width/height fields that follow it
+      const header = Buffer.concat([Buffer.from('GIF89a', 'ascii'), Buffer.alloc(4)])
+      header.writeUInt16LE(64, 6)
+      header.writeUInt16LE(48, 8)
+
+      const tempFilePath = path.join(tempDir, 'test.gif')
+      writeFileSync(tempFilePath, header)
+
+      const file = {
+        mimetype: 'image/gif',
+        name: 'test.gif',
+        tempFilePath,
+      } as PayloadRequest['file']
+
+      expect(await getImageSize({ file })).toEqual({ height: 48, width: 64 })
+    })
   })
 })
