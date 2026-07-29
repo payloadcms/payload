@@ -6,7 +6,9 @@ desc: Learn to use Local API operations with Server Functions in Payload to mana
 keywords: server functions, local API, Payload, CMS, server-side logic, custom workflows, data management, headless CMS, TypeScript, Node.js, backend
 ---
 
-In Next.js, **server functions** (previously called **server actions**) are special functions that run exclusively on the server, enabling secure backend logic execution while being callable from the frontend. These functions bridge the gap between client and server, allowing frontend components to perform backend operations without exposing sensitive logic.
+**Server functions** are special functions that run exclusively on the server, enabling secure backend logic execution while being callable from the frontend. These functions bridge the gap between client and server, allowing frontend components to perform backend operations without exposing sensitive logic.
+
+Both supported Admin Panel frameworks provide them: Next.js calls them server functions (previously **server actions**), declared with the `'use server'` directive, while TanStack Start defines them with `createServerFn` from `@tanstack/react-start`. The examples below use the Next.js `'use server'` syntax; on TanStack Start the body is identical — only the function declaration differs.
 
 ### Why Use Server Functions?
 
@@ -158,7 +160,7 @@ export const UpdatePostForm: React.FC = () => {
 
 In this example, we will check if a user is authenticated using Payload's authentication system. Here's how it works:
 
-- First, we use the headers function from `next/headers` to retrieve the request headers.
+- First, we use the headers function from `next/headers` to retrieve the request headers. On TanStack Start, get them from the request instead: `const headers = new Headers(getRequest().headers)`, where `getRequest` is imported from `@tanstack/react-start/server`.
 - Next, we pass these headers to `payload.auth()` to fetch the user's authentication details.
 - If the user is authenticated, their information is returned. If not, handle the unauthenticated case accordingly.
 
@@ -311,6 +313,12 @@ export const PostForm: React.FC = () => {
 ## Reusable Payload Server Functions
 
 Managing authentication with the Local API can be tricky as you have to handle cookies and tokens yourself, and there aren't built-in logout or refresh functions since these only modify cookies. To make this easier, we provide `login`, `logout`, and `refresh` as ready-to-use server functions. They take care of the underlying complexity so you don't have to.
+
+<Banner type="info">
+  The examples below import these helpers from `@payloadcms/next/auth`. On
+  TanStack Start, import the same `login`, `logout`, and `refresh` functions
+  from `@payloadcms/tanstack-start/server` instead.
+</Banner>
 
 ### Login
 

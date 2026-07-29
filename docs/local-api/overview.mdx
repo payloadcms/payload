@@ -19,7 +19,7 @@ Here are some common examples of how you can use the Local API:
 
 - Fetching Payload data within React Server Components
 - Seeding data via Node seed scripts that you write and maintain
-- Opening custom Next.js route handlers which feature additional functionality but still rely on Payload
+- Opening custom Next.js route handlers (or TanStack Start server functions) which feature additional functionality but still rely on Payload
 - Within [Access Control](../access-control/overview) and [Hooks](../hooks/overview)
 
 ## Accessing Payload
@@ -55,7 +55,7 @@ const payload = await getPayload({ config })
 
 If you're working in Next.js' development mode, Payload will work with Hot Module Replacement (HMR), and as you make changes to your Payload Config, your usage of Payload will always be in sync with your changes. In production, `getPayload` simply disables all HMR functionality so you don't need to write your code any differently. We handle optimization for you in production mode.
 
-If you are accessing Payload via function arguments or `req.payload`, HMR is automatically supported if you are using it within Next.js.
+If you are accessing Payload via function arguments or `req.payload`, HMR is automatically supported if you are using it within Next.js (and TanStack Start).
 
 For more information about using Payload outside of Next.js, [click here](./outside-nextjs).
 
