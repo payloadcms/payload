@@ -17,17 +17,11 @@
     position: relative;
   }
 
-  .file-details .thumbnail {
-    width: 50%;
-    order: 1;
-  }
-
   .file-details__remove {
     position: absolute;
     margin: 0;
     top: var(--spacer-4);
     right: var(--spacer-4);
-    order: 2;
   }
 
   .file-details__remove .btn__icon {
@@ -46,8 +40,8 @@
   }
 
   .file-details__main-detail {
-    padding: var(--spacer-4);
-    width: 100%;
+    padding: var(--spacer-3) var(--spacer-4);
+    width: auto;
     flex-grow: 1;
     min-width: 280px;
     max-width: 100%;
@@ -56,7 +50,6 @@
     justify-content: space-between;
     align-self: stretch;
     gap: var(--spacer-1);
-    order: 3;
   }
 
   .file-details__toggle-more-info {
@@ -75,15 +68,15 @@
 
   .file-details__sizes {
     margin: 0;
-    padding: var(--spacer-4) var(--spacer-4) var(--spacer-2);
+    padding: var(--spacer-5) var(--spacer-4) 0;
     list-style: none;
-    display: block;
+    display: flex;
     flex-wrap: wrap;
   }
 
   .file-details__sizes li {
-    width: 100%;
-    padding: 0;
+    width: 50%;
+    padding: 0 var(--spacer-2);
     margin-bottom: var(--spacer-4);
   }
 
@@ -109,35 +102,39 @@
     background-color: var(--theme-elevation-100);
   }
 
-  @media (min-width: 1024px) {
-    .file-details .thumbnail {
-      width: calc(var(--spacer-6) * 3.5);
-      order: 0;
-    }
-
-    .file-details__remove {
-      order: 0;
-    }
-
+  @media (max-width: 1440px) {
     .file-details__main-detail {
-      width: auto;
-      order: 0;
-    }
-  }
-
-  @media (min-width: 1440px) {
-    .file-details__main-detail {
-      padding: var(--spacer-3) var(--spacer-4);
+      padding: var(--spacer-4);
     }
 
     .file-details__sizes {
-      display: flex;
-      padding: var(--spacer-5) var(--spacer-4) 0;
+      display: block;
+      padding: var(--spacer-4) var(--spacer-4) var(--spacer-2);
     }
 
     .file-details__sizes li {
+      padding: 0;
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    .file-details header {
+      flex-wrap: wrap;
+    }
+
+    .file-details .thumbnail {
       width: 50%;
-      padding: 0 var(--spacer-2);
+      order: 1;
+    }
+
+    .file-details__remove {
+      order: 2;
+    }
+
+    .file-details__main-detail {
+      order: 3;
+      width: 100%;
     }
   }
 }
