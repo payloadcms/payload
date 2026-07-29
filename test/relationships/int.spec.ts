@@ -963,6 +963,14 @@ describe('Relationships', () => {
       })
 
       describe('depth', () => {
+        it('should populate one level by default', async () => {
+          const doc = await restClient.GET(`/${slug}/${post.id}`).then((res) => res.json())
+          const chainedRel = doc?.chainedRelation as EasierChained
+
+          expect(chainedRel.id).toEqual(chained.id)
+          expect(chainedRel.relation).toEqual(chained2.id)
+        })
+
         it('should populate to depth', async () => {
           const doc = await restClient
             .GET(`/${slug}/${post.id}`, {
@@ -1081,12 +1089,10 @@ describe('Relationships', () => {
 
             const doc = result.docs[0]
 
-            // Default depth should apply, not depth: 0 from req.query
-            // So relationships should be populated (not just IDs)
             const chainedRel = doc?.chainedRelation as EasierChained
 
-            expect(chainedRel).toHaveProperty('id')
             expect(chainedRel.id).toEqual(chained.id)
+            expect(chainedRel.relation).toEqual(chained2.id)
           })
         })
       })

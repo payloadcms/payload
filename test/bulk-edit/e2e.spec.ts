@@ -24,7 +24,7 @@ import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { initPage } from '../__setup/e2e/initPage.js'
 import { POLL_TOPASS_TIMEOUT, TEST_TIMEOUT_LONG } from '../playwright.config.js'
-import { postsSlug, tabsSlug } from './shared.js'
+import { postsSlug, restrictedTabsSlug, tabsSlug } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -37,12 +37,14 @@ test.describe('Bulk Edit', () => {
   let page: Page
   let postsUrl: AdminUrlUtil
   let tabsUrl: AdminUrlUtil
+  let restrictedTabsUrl: AdminUrlUtil
 
   test.beforeAll(async ({ browser }, testInfo) => {
     testInfo.setTimeout(TEST_TIMEOUT_LONG)
     ;({ payload, serverURL } = await initPayloadE2ENoConfig<Config>({ dirname }))
     postsUrl = new AdminUrlUtil(serverURL, postsSlug)
     tabsUrl = new AdminUrlUtil(serverURL, tabsSlug)
+    restrictedTabsUrl = new AdminUrlUtil(serverURL, restrictedTabsSlug)
 
     context = await browser.newContext()
     ;({ page } = await initPage({ context, serverURL }))
@@ -802,6 +804,47 @@ test.describe('Bulk Edit', () => {
       .toEqual('updated value')
 
     await payload.delete({ id: originalDoc.id, collection: tabsSlug })
+  })
+
+  test('should include named-tab fields in bulk edit when a collection has a restricted field', async () => {
+    const doc = await payload.create({
+      collection: restrictedTabsSlug,
+      data: { title: 'Restricted Tabs Doc' },
+    })
+
+    await page.goto(restrictedTabsUrl.list)
+    await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).toContain('limit=')
+
+    await addListFilter({
+      page,
+      fieldLabel: 'ID',
+      operatorLabel: 'equals',
+      value: doc.id,
+    })
+
+    await page.locator('table tbody tr.row-1 input[type="checkbox"]').check()
+    await page
+      .locator('.list-selection__actions .btn', {
+        hasText: 'Edit',
+      })
+      .click()
+
+    const bulkEditForm = page.locator('form.edit-many__form')
+    await expect(bulkEditForm).toBeVisible()
+
+    await bulkEditForm.locator('.field-select .rs__control').click()
+
+    const selectMenu = getSelectMenu({ page })
+
+    await expect(
+      selectMenu.locator('.rs__option', { hasText: exactText('Named Tab Field') }),
+    ).toBeVisible()
+
+    await expect(
+      selectMenu.locator('.rs__option', { hasText: exactText('Named Tab No Update') }),
+    ).toBeHidden()
+
+    await payload.delete({ collection: restrictedTabsSlug, id: doc.id })
   })
 
   test('should show clean labels for fields inside label-false groups and rows', async () => {

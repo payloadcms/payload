@@ -1341,4 +1341,35 @@ describe('Form State', () => {
     expect(state.array).toBeDefined()
     expect(state?.array?.rows).toEqual([]) // should be [] not undefined
   })
+
+  it('should resolve a promise-returning `filterOptions` on a select field into `selectFilterOptions`', async () => {
+    const req = await createLocalReq({ user }, payload)
+
+    const postData = await payload.create({
+      collection: postsSlug,
+      data: {
+        title: 'Test Post',
+      },
+    })
+
+    const { state } = await buildFormState({
+      mockRSCs: true,
+      id: postData.id,
+      collectionSlug: postsSlug,
+      data: postData,
+      docPermissions: undefined,
+      docPreferences: {
+        fields: {},
+      },
+      documentFormState: undefined,
+      operation: 'update',
+      renderAllFields: false,
+      req,
+      schemaPath: postsSlug,
+    })
+
+    expect(state.selectWithAsyncFilterOptions?.selectFilterOptions).toStrictEqual(['allowed'])
+
+    await payload.delete({ collection: postsSlug, id: postData.id })
+  })
 })

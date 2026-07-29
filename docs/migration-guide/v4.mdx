@@ -22,6 +22,29 @@ The codemod is idempotent and safe to run on a partially-migrated project.
 
 ## Breaking Changes
 
+### Default query depth reduced to `1`
+
+Queries that omit `depth` now populate one relationship level instead of two. This reduces database work and response size by default.
+
+If your application relies on two populated levels, prefer specifying `depth: 2` only on the queries that need it:
+
+```ts
+const posts = await payload.find({
+  collection: 'posts',
+  depth: 2,
+})
+```
+
+To preserve the Payload 3.x behavior application-wide, set `defaultDepth: 2`:
+
+```diff
+export default buildConfig({
++ defaultDepth: 2,
+})
+```
+
+One place inherits `defaultDepth` without naming it: when localization is enabled, `@payloadcms/plugin-search` refetches the document without an explicit depth before handing `originalDoc` to your `beforeSync` hook. Read only first-level relationships there, or refetch yourself with the depth you need.
+
 ### Versions are now enabled by default for all collections and globals
 
 Collections and globals now have `versions: true` by default (`maxPerDoc`/`max: 100`, drafts disabled). In previous versions you had to opt in; you now opt out.
@@ -184,6 +207,30 @@ Several types and utilities that were re-exported from `@payloadcms/ui` and `@pa
 ```
 
 Run `npx @payloadcms/codemod --transform migrate-aliased-exports` to migrate automatically. Renamed types are imported using an `as` alias (e.g. `import type { CollectionPreferences as ListPreferences } from 'payload'`) so existing usages keep compiling — drop the alias and rename usages manually if you want to fully commit to the new name.
+
+### `DefaultValue` function variant is now typed to allow returning a `Promise` ([#17522](https://github.com/payloadcms/payload/pull/17522))
+
+The exported `DefaultValue` type's function variant previously declared a synchronous-only return type (`SerializableValue`), even though Payload has always awaited the result of a `defaultValue` function at runtime. The type now correctly reflects this and allows `Promise<SerializableValue> | SerializableValue`.
+
+**What changes:**
+
+- Field-level `defaultValue` functions can now be typed as `async` without a TypeScript error. This was always safe at runtime — only the type was too strict.
+- If you import `DefaultValue` to type your own function or variable and then call it synchronously assuming the result is never a `Promise`, you'll need to update that code to handle the `Promise` branch.
+
+```diff
+import type { DefaultValue } from 'payload'
+
+- const resolveDefault = (fn: DefaultValue, args: Args) => {
+-   const value = fn(args)
+-   return value.toString()
+- }
++ const resolveDefault = async (fn: DefaultValue, args: Args) => {
++   const value = await fn(args)
++   return value.toString()
++ }
+```
+
+If you only use `DefaultValue` to type a `defaultValue` property passed into a Collection, Global, or Field config, no changes are needed.
 
 ### User types consolidated into `User` and `AuthenticatedUser`
 
@@ -588,9 +635,9 @@ The deprecated `isHTMLElement` utility has been removed from `@payloadcms/richte
 
 `lexical`'s built-in `isHTMLElement` is the canonical implementation and narrows against the node's owning-document `HTMLElement`, so it is also safe across iframes and other realms.
 
-### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.45.0`
+### Lexical: vendored `@lexical/markdown` fork removed and lexical upgraded to `0.48.0`
 
-`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.45.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
+`@payloadcms/richtext-lexical` no longer ships a vendored copy of `@lexical/markdown`. The package is now a direct dependency, every `@lexical/*` package was upgraded from `0.41.0` to `0.48.0`, and `@payloadcms/richtext-lexical/lexical/markdown` is a pure passthrough of `@lexical/markdown`.
 
 Most projects use markdown through the editor or through `convertMarkdownToLexical` / `convertLexicalToMarkdown` and need no changes. You are only affected if you import from `@payloadcms/richtext-lexical/lexical/markdown` directly.
 
@@ -612,9 +659,9 @@ Most projects use markdown through the editor or through `convertMarkdownToLexic
 
 If you keep calling `$convertFromMarkdownString` directly, pass `editorConfig.features.markdownTransformers` as the second argument. Enable `payload/no-conflicting-lexical-markdown-imports` (included in `@payloadcms/eslint-config`) to catch imports and calls that rely on these mismatching defaults.
 
-**Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical `0.45` upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
+**Whitespace-only markdown table cells now import as an empty paragraph** instead of a text node of padding spaces. This comes from the lexical upgrade, not Payload's own code. No action is required unless you assert on those padding spaces in stored content.
 
-If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.45.0`. None of them require action for typical Payload usage.
+If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.48.0`. None of them require action for typical Payload usage.
 
 ### Field `typescriptSchema` renamed to `jsonSchema`
 
@@ -893,6 +940,25 @@ Generated workflow slugs and explicit input objects continue to work as before. 
 When jobs are enabled, Payload now always adds the `payload-jobs-stats` global and the `meta` field on the `payload-jobs` collection. Previously, these were only added when a task or workflow used a schedule.
 
 Existing projects that use sqlite/postgres and jobs may need a database migration.
+
+### Jobs: concurrency controls and parent task logging are always enabled
+
+Concurrency controls add the indexed `concurrencyKey` field to the `payload-jobs` collection. Parent task logging adds parent information to nested task logs. Task log input is also now required and is stored as an empty object when a task has no input.
+
+The `jobs.enableConcurrencyControl` and `jobs.addParentToTaskLog` options have been removed. Existing SQL projects that use jobs should generate a database migration for these schema changes.
+
+### Jobs: task and workflow types have been renamed
+
+The `TaskType` and `WorkflowTypes` exports have been renamed to `TaskSlug` and `WorkflowSlug`.
+
+```diff
+- import type { TaskType, WorkflowTypes } from 'payload'
++ import type { TaskSlug, WorkflowSlug } from 'payload'
+```
+
+The deprecated `RunningJob` and `RunningJobSimple` types have also been removed. Use `Job` instead.
+
+JSON workflow steps without a `task` must now provide an `inlineTask` handler. This removes a type escape that previously allowed an incomplete step even though it could not run.
 
 ### Jobs: custom database adapters must implement `updateJobs`
 

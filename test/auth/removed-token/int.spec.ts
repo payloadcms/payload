@@ -1,14 +1,15 @@
-import type { Payload } from 'payload'
+import type { AuthCollectionSlug, CookieOptions, Payload, ServerAdapter } from 'payload'
 
 import path from 'path'
+import { login } from 'payload/auth'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../../__setup/int/NextRESTClient.js'
 
-import { devUser } from '../../credentials.js'
 import { initPayloadInt } from '../../__setup/int/initPayloadInt.js'
-import { collectionSlug } from './config.js'
+import { devUser } from '../../credentials.js'
+import config, { collectionSlug } from './config.js'
 
 let restClient: NextRESTClient
 let payload: Payload
@@ -37,6 +38,7 @@ describe('Remove token from auth responses', () => {
     })
     expect(result.token).not.toBeDefined()
     expect(result.user.email).toBeDefined()
+    expect(result.user.roles).toBeUndefined()
   })
 
   it('should not include token in response from /me', async () => {
@@ -53,6 +55,49 @@ describe('Remove token from auth responses', () => {
     expect(response.status).toBe(200)
     expect(result.refreshedToken).not.toBeDefined()
     expect(result.user.email).toBeDefined()
+  })
+
+  it('should preserve access-controlled fields in the framework server login result', async () => {
+    const setCookies: { name: string; options?: CookieOptions; value: string }[] = []
+
+    const serverAdapter: ServerAdapter = {
+      forbidden: () => {
+        throw new Error('forbidden')
+      },
+      getCookies: () => ({ get: () => undefined, getAll: () => [] }),
+      getHeaders: () => new Headers(),
+      notFound: () => {
+        throw new Error('notFound')
+      },
+      permanentRedirect: () => {
+        throw new Error('permanentRedirect')
+      },
+      redirect: () => {
+        throw new Error('redirect')
+      },
+      setCookie: (name, value, options) => {
+        setCookies.push({ name, options, value })
+      },
+      unauthorized: () => {
+        throw new Error('unauthorized')
+      },
+    }
+
+    const result = await login({
+      collection: collectionSlug as AuthCollectionSlug,
+      config,
+      email: devUser.email,
+      password: devUser.password,
+      serverAdapter,
+    })
+
+    expect(result.token).toBeUndefined()
+    expect(result.user.email).toBe(devUser.email)
+    expect(result.user.roles).toEqual(devUser.roles)
+
+    // The session still has to be established via the cookie.
+    expect(setCookies).toHaveLength(1)
+    expect(setCookies[0]?.value).not.toBe('')
   })
 
   it('should not include token in response from /reset-password', async () => {
