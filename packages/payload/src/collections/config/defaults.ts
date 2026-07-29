@@ -1,5 +1,5 @@
 import type { IncomingAuthType, LoginWithUsernameOptions } from '../../auth/types.js'
-import type { CollectionConfig } from './types.js'
+import type { CollectionConfig, SanitizedCollectionConfig } from './types.js'
 
 import { defaultAccess } from '../../auth/defaultAccess.js'
 
@@ -32,6 +32,7 @@ export const defaults: Partial<CollectionConfig> = {
   hooks: {
     afterChange: [],
     afterDelete: [],
+    afterError: [],
     afterForgotPassword: [],
     afterLogin: [],
     afterLogout: [],
@@ -55,14 +56,16 @@ export const defaults: Partial<CollectionConfig> = {
 }
 
 export const addDefaultsToCollectionConfig = (collection: CollectionConfig): CollectionConfig => {
+  const access = collection.access
+
   collection.access = {
-    create: defaultAccess,
-    delete: defaultAccess,
-    read: defaultAccess,
-    unlock: defaultAccess,
-    update: defaultAccess,
-    ...(collection.access || {}),
-  }
+    ...access,
+    create: access?.create ?? defaultAccess,
+    delete: access?.delete ?? defaultAccess,
+    read: access?.read ?? defaultAccess,
+    unlock: access?.unlock ?? defaultAccess,
+    update: access?.update ?? defaultAccess,
+  } satisfies SanitizedCollectionConfig['access']
 
   collection.admin = {
     components: {},
@@ -84,26 +87,29 @@ export const addDefaultsToCollectionConfig = (collection: CollectionConfig): Col
   collection.fields = collection.fields ?? []
   collection.hierarchy = collection.hierarchy ?? false
 
+  const hooks = collection.hooks
+
   collection.hooks = {
-    afterChange: [],
-    afterDelete: [],
-    afterForgotPassword: [],
-    afterLogin: [],
-    afterLogout: [],
-    afterMe: [],
-    afterOperation: [],
-    afterRead: [],
-    afterRefresh: [],
-    beforeChange: [],
-    beforeDelete: [],
-    beforeLogin: [],
-    beforeOperation: [],
-    beforeRead: [],
-    beforeValidate: [],
-    me: [],
-    refresh: [],
-    ...(collection.hooks || {}),
-  }
+    ...hooks,
+    afterChange: hooks?.afterChange ?? [],
+    afterDelete: hooks?.afterDelete ?? [],
+    afterError: hooks?.afterError ?? [],
+    afterForgotPassword: hooks?.afterForgotPassword ?? [],
+    afterLogin: hooks?.afterLogin ?? [],
+    afterLogout: hooks?.afterLogout ?? [],
+    afterMe: hooks?.afterMe ?? [],
+    afterOperation: hooks?.afterOperation ?? [],
+    afterRead: hooks?.afterRead ?? [],
+    afterRefresh: hooks?.afterRefresh ?? [],
+    beforeChange: hooks?.beforeChange ?? [],
+    beforeDelete: hooks?.beforeDelete ?? [],
+    beforeLogin: hooks?.beforeLogin ?? [],
+    beforeOperation: hooks?.beforeOperation ?? [],
+    beforeRead: hooks?.beforeRead ?? [],
+    beforeValidate: hooks?.beforeValidate ?? [],
+    me: hooks?.me ?? [],
+    refresh: hooks?.refresh ?? [],
+  } satisfies SanitizedCollectionConfig['hooks']
 
   collection.timestamps = collection.timestamps ?? true
   collection.upload = collection.upload ?? false
