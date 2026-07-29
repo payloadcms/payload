@@ -101,10 +101,10 @@ const registerExportHandler = (
       const ids = value.map((val) =>
         typeof val === 'object' && val ? (val as { id: unknown }).id : val,
       )
-      // A dangling reference cannot be imported back, so it is dropped rather than
-      // exported as a null the import would reject as an invalid relationship.
+      // A dangling reference is kept as null rather than dropped, so JSON preserves the same
+      // length and positions as CSV, which pins each entry to its own column.
       if (format === 'json') {
-        return ids.filter((id) => id !== undefined && id !== null)
+        return ids.map((id) => id ?? null)
       }
       ids.forEach((id, i) => {
         siblingData[`${fullKey}_${i}_id`] = id
@@ -129,7 +129,13 @@ const registerExportHandler = (
     })
 
     if (format === 'json') {
-      return rels.map((rel) => ({ relationTo: rel.relationTo, value: rel.id }))
+      // Each entry stays at its source index, leaving a null where one could not be resolved,
+      // so JSON preserves the same length and positions as CSV.
+      const jsonRels: unknown[] = new Array(value.length).fill(null)
+      rels.forEach(({ id, index, relationTo }) => {
+        jsonRels[index] = { relationTo, value: id }
+      })
+      return jsonRels
     }
     rels.forEach(({ id, index, relationTo }) => {
       siblingData[`${fullKey}_${index}_id`] = id

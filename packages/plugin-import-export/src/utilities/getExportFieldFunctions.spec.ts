@@ -3,6 +3,7 @@ import type { FlattenedField, PayloadRequest } from 'payload'
 import { describe, expect, it, vi } from 'vitest'
 
 import { applyFieldHooks } from './applyFieldHooks.js'
+import { flattenObject } from './flattenObject.js'
 import { getExportFieldFunctions } from './getExportFieldFunctions.js'
 
 const mockReq = {
@@ -58,8 +59,10 @@ describe('hasMany polymorphic CSV columns', () => {
       } as unknown as FlattenedField,
     ]
 
-    const result = applyFieldHooks({
-      type: 'beforeExport',
+    // Real CSV export never calls applyFieldHooks — it goes through flattenObject,
+    // which (unlike applyFieldHooks) drops the key entirely when an array hook
+    // returns null instead of writing a literal `rel: null`.
+    const result = flattenObject({
       // Exports populate at depth 1, so `value: null` is an orphaned reference —
       // the target doc was deleted out from under it.
       data: {
@@ -68,17 +71,15 @@ describe('hasMany polymorphic CSV columns', () => {
           { relationTo: 'posts', value: 'p1' },
         ],
       },
-      fieldHooks: getExportFieldFunctions({ fields }),
-      fields,
+      exportFieldHooks: getExportFieldFunctions({ fields }),
       format: 'csv',
-      operation: 'export',
       req: mockReq,
     })
 
     // The surviving entry stays at index 1 — shifting it to 0 would silently
-    // rewrite column names for every consumer of the CSV.
+    // rewrite column names for every consumer of the CSV. There is no bare `rel`
+    // column: a hasMany field never gets one, orphaned or not.
     expect(result).toEqual({
-      rel: null,
       rel_1_id: 'p1',
       rel_1_relationTo: 'posts',
     })
@@ -86,7 +87,7 @@ describe('hasMany polymorphic CSV columns', () => {
 })
 
 describe('dangling references in JSON exports', () => {
-  it('should drop an orphaned entry from a hasMany array rather than exporting a null', () => {
+  it('should keep an orphaned hasMany entry as null so the array stays index-aligned with CSV', () => {
     const fields: FlattenedField[] = [
       {
         name: 'rel',
@@ -98,8 +99,7 @@ describe('dangling references in JSON exports', () => {
 
     const result = applyFieldHooks({
       type: 'beforeExport',
-      // Population resolves a soft-deleted target to null, which import rejects as an
-      // invalid relationship — failing the whole row rather than the one dead reference.
+      // Population resolves a soft-deleted target to null.
       data: { rel: [null, 'p1'] },
       fieldHooks: getExportFieldFunctions({ fields }),
       fields,
@@ -108,7 +108,37 @@ describe('dangling references in JSON exports', () => {
       req: mockReq,
     })
 
-    expect(result).toEqual({ rel: ['p1'] })
+    expect(result).toEqual({ rel: [null, 'p1'] })
+  })
+
+  it('should keep an orphaned hasMany polymorphic entry as null at its source index', () => {
+    const fields: FlattenedField[] = [
+      {
+        name: 'rel',
+        type: 'relationship',
+        hasMany: true,
+        relationTo: ['posts', 'users'],
+      } as unknown as FlattenedField,
+    ]
+
+    const result = applyFieldHooks({
+      type: 'beforeExport',
+      data: {
+        rel: [
+          { relationTo: 'users', value: null },
+          { relationTo: 'posts', value: 'p1' },
+        ],
+      },
+      fieldHooks: getExportFieldFunctions({ fields }),
+      fields,
+      format: 'json',
+      operation: 'export',
+      req: mockReq,
+    })
+
+    expect(result).toEqual({
+      rel: [null, { relationTo: 'posts', value: 'p1' }],
+    })
   })
 
   it('should clear an orphaned single polymorphic reference', () => {

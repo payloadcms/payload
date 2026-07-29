@@ -441,6 +441,22 @@ describe('unflattenObject', () => {
 
         expect(unflattenObject({ data, fields: hasManyFields, req: mockReq })).toEqual(expected)
       })
+
+      it('should absorb a gap strictly between two present entries', () => {
+        const data = {
+          rels_0_id: 'p1',
+          rels_0_relationTo: 'posts',
+          rels_2_id: 'p2',
+          rels_2_relationTo: 'pages',
+        }
+
+        expect(unflattenObject({ data, fields: hasManyFields, req: mockReq })).toEqual({
+          rels: [
+            { relationTo: 'posts', value: 'p1' },
+            { relationTo: 'pages', value: 'p2' },
+          ],
+        })
+      })
     })
 
     it('should skip polymorphic relationships with undefined values', () => {
