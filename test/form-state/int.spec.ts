@@ -1,17 +1,18 @@
-import type { FieldState, FormState, Payload, User } from 'payload'
+import type { FieldState, FormState, Payload, User, ValidationError } from 'payload'
 import type React from 'react'
 
 import { buildFormState } from '@payloadcms/ui/utilities/buildFormState'
 import path from 'path'
 import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import { conditionsSlug } from './collections/Conditions/index.js'
+import { filterOptionsThrowsSlug } from './collections/FilterOptionsThrows/index.js'
 import { postsSlug } from './collections/Posts/index.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
@@ -1371,5 +1372,144 @@ describe('Form State', () => {
     expect(state.selectWithAsyncFilterOptions?.selectFilterOptions).toStrictEqual(['allowed'])
 
     await payload.delete({ collection: postsSlug, id: postData.id })
+  })
+
+  describe('filterOptions throwing', () => {
+    it('should fall back to unfiltered options in form state when a relationship field filterOptions function throws', async () => {
+      const req = await createLocalReq({ user }, payload)
+      const loggerErrorSpy = vi.spyOn(req.payload.logger, 'error')
+
+      const { state } = await buildFormState({
+        mockRSCs: true,
+        collectionSlug: filterOptionsThrowsSlug,
+        data: {},
+        docPermissions: undefined,
+        docPreferences: {
+          fields: {},
+        },
+        documentFormState: undefined,
+        operation: 'create',
+        renderAllFields: false,
+        req,
+        schemaPath: filterOptionsThrowsSlug,
+      })
+
+      expect(state.relationshipWithThrowingFilterOptions?.filterOptions).toBeUndefined()
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          msg: expect.stringContaining('relationshipWithThrowingFilterOptions'),
+        }),
+      )
+
+      loggerErrorSpy.mockRestore()
+    })
+
+    it('should fall back to unfiltered options in form state when a select field filterOptions function throws', async () => {
+      const req = await createLocalReq({ user }, payload)
+      const loggerErrorSpy = vi.spyOn(req.payload.logger, 'error')
+
+      const { state } = await buildFormState({
+        mockRSCs: true,
+        collectionSlug: filterOptionsThrowsSlug,
+        data: {},
+        docPermissions: undefined,
+        docPreferences: {
+          fields: {},
+        },
+        documentFormState: undefined,
+        operation: 'create',
+        renderAllFields: false,
+        req,
+        schemaPath: filterOptionsThrowsSlug,
+      })
+
+      expect(state.selectWithThrowingFilterOptions?.selectFilterOptions).toBeUndefined()
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          msg: expect.stringContaining('selectWithThrowingFilterOptions'),
+        }),
+      )
+
+      loggerErrorSpy.mockRestore()
+    })
+
+    it('should fall back to unfiltered options in form state when a blocks field filterOptions function throws', async () => {
+      const req = await createLocalReq({ user }, payload)
+      const loggerErrorSpy = vi.spyOn(req.payload.logger, 'error')
+
+      const { state } = await buildFormState({
+        mockRSCs: true,
+        collectionSlug: filterOptionsThrowsSlug,
+        data: {},
+        docPermissions: undefined,
+        docPreferences: {
+          fields: {},
+        },
+        documentFormState: undefined,
+        operation: 'create',
+        renderAllFields: false,
+        req,
+        schemaPath: filterOptionsThrowsSlug,
+      })
+
+      expect(state.blocksWithThrowingFilterOptions?.blocksFilterOptions).toBeUndefined()
+      expect(loggerErrorSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          msg: expect.stringContaining('blocksWithThrowingFilterOptions'),
+        }),
+      )
+
+      loggerErrorSpy.mockRestore()
+    })
+
+    it('should fail validation instead of crashing when a select field filterOptions function throws on create', async () => {
+      let error: undefined | ValidationError
+
+      try {
+        await payload.create({
+          collection: filterOptionsThrowsSlug,
+          data: {
+            title: 'Test',
+          },
+        })
+      } catch (e) {
+        error = e as ValidationError
+      }
+
+      expect(error?.data?.errors).toContainEqual(
+        expect.objectContaining({
+          path: 'selectWithThrowingFilterOptions',
+          message: 'This field has an invalid input.',
+        }),
+      )
+    })
+
+    it('should fail validation instead of crashing when a blocks field filterOptions function throws on create', async () => {
+      let error: undefined | ValidationError
+
+      try {
+        await payload.create({
+          collection: filterOptionsThrowsSlug,
+          data: {
+            title: 'Test',
+            blocksWithThrowingFilterOptions: [
+              {
+                blockType: 'textBlock',
+                text: 'hello',
+              },
+            ],
+          },
+        })
+      } catch (e) {
+        error = e as ValidationError
+      }
+
+      expect(error?.data?.errors).toContainEqual(
+        expect.objectContaining({
+          path: 'blocksWithThrowingFilterOptions',
+          message: 'This field has an invalid input.',
+        }),
+      )
+    })
   })
 })
