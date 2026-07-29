@@ -43,6 +43,8 @@ export default buildConfig({
 })
 ```
 
+One place inherits `defaultDepth` without naming it: when localization is enabled, `@payloadcms/plugin-search` refetches the document without an explicit depth before handing `originalDoc` to your `beforeSync` hook. Read only first-level relationships there, or refetch yourself with the depth you need.
+
 ### Versions are now enabled by default for all collections and globals
 
 Collections and globals now have `versions: true` by default (`maxPerDoc`/`max: 100`, drafts disabled). In previous versions you had to opt in; you now opt out.
