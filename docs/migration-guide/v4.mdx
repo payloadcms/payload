@@ -663,6 +663,22 @@ If you keep calling `$convertFromMarkdownString` directly, pass `editorConfig.fe
 
 If you import lexical APIs directly through `@payloadcms/richtext-lexical/lexical/*`, also review the [lexical breaking changes](https://github.com/facebook/lexical/releases) between `0.41.0` and `0.48.0`. None of them require action for typical Payload usage.
 
+### Lexical: `EXPERIMENTAL_TableFeature` renamed to `TableFeature`
+
+The table feature is no longer experimental, so it drops its prefix.
+
+```diff
+- import { EXPERIMENTAL_TableFeature } from '@payloadcms/richtext-lexical'
++ import { TableFeature } from '@payloadcms/richtext-lexical'
+
+  editor: lexicalEditor({
+-   features: ({ rootFeatures }) => [...rootFeatures, EXPERIMENTAL_TableFeature()],
++   features: ({ rootFeatures }) => [...rootFeatures, TableFeature()],
+  })
+```
+
+Stored content is unaffected.
+
 ### Field `typescriptSchema` renamed to `jsonSchema`
 
 `typescriptSchema` accepted JSON Schema, not TypeScript, so the name lied. Renamed to `jsonSchema`. Same shape, same array of transforms. The underlying schema is now also consumed by the MCP plugin for runtime validation, not just type generation.

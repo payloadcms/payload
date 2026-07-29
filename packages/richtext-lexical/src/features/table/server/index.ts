@@ -29,7 +29,7 @@ const fields: Field[] = [
   },
 ]
 
-export const EXPERIMENTAL_TableFeature = createServerFeature({
+export const TableFeature = createServerFeature({
   feature: async ({ config, isRoot, parentIsLocalized }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []
 
@@ -68,5 +68,5 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
       ],
     }
   },
-  key: 'experimental_table',
+  key: 'table',
 })
