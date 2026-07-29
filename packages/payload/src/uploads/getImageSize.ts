@@ -1,10 +1,8 @@
-import fs from 'fs/promises'
-
 import type { SharpDependency } from '../config/types.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { ProbedImageSize } from './types.js'
 
-import { probeImageSize } from './probeImageSize.js'
+import { probeImageSize, probeImageSizeFromPath } from './probeImageSize.js'
 
 type Args = {
   file: PayloadRequest['file']
@@ -32,7 +30,9 @@ export async function getImageSize({ file, sharp }: Args): Promise<ProbedImageSi
     }
   }
 
-  const data = tempFilePath ? await fs.readFile(tempFilePath) : file!.data
+  if (tempFilePath) {
+    return probeImageSizeFromPath(tempFilePath)
+  }
 
-  return probeImageSize(data)
+  return probeImageSize(file!.data)
 }

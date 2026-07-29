@@ -10,6 +10,78 @@ const fixturesDir = path.resolve(dirname, '../../../../test/uploads')
 
 const readFixture = (name: string) => readFileSync(path.join(fixturesDir, name))
 
+// Packs `{ length, value }` fields into a little-endian, LSB-first bitstream,
+// matching the JPEG XL `SizeHeader` bit layout.
+const packJXLBits = (fields: Array<{ length: number; value: number }>): Buffer => {
+  const bits: number[] = []
+  for (const { length, value } of fields) {
+    for (let i = 0; i < length; i++) {
+      bits.push((value >> i) & 1)
+    }
+  }
+
+  const bytes = Buffer.alloc(Math.ceil(bits.length / 8))
+  bits.forEach((bit, i) => {
+    if (bit) {
+      bytes[Math.floor(i / 8)]! |= 1 << i % 8
+    }
+  })
+
+  return bytes
+}
+
+// Encodes a non-small `SizeHeader` dimension: a 2-bit size class selecting
+// how many extra bits follow, then `value - 1` in that many bits.
+const packJXLDimension = (value: number): Array<{ length: number; value: number }> => {
+  const n = value - 1
+  const sizeClasses = [9, 13, 18, 30]
+  const classIndex = sizeClasses.findIndex((extraBits) => n < 2 ** extraBits)
+
+  return [
+    { length: 2, value: classIndex },
+    { length: sizeClasses[classIndex]!, value: n },
+  ]
+}
+
+const encodeJXLCodestream = (width: number, height: number): Buffer => {
+  const body = packJXLBits([
+    { length: 1, value: 0 }, // isSmallImage = false
+    ...packJXLDimension(height),
+    { length: 3, value: 0 }, // widthMode = 0 (explicit dimension)
+    ...packJXLDimension(width),
+  ])
+
+  return Buffer.concat([Buffer.from([0xff, 0x0a]), body])
+}
+
+const encodeSmallJXLCodestream = (width: number, height: number): Buffer => {
+  const body = packJXLBits([
+    { length: 1, value: 1 }, // isSmallImage = true
+    { length: 5, value: height / 8 - 1 },
+    { length: 3, value: 0 }, // widthMode = 0 (explicit dimension)
+    { length: 5, value: width / 8 - 1 },
+  ])
+
+  return Buffer.concat([Buffer.from([0xff, 0x0a]), body])
+}
+
+const jxlBox = (type: string, payload: Buffer): Buffer => {
+  const box = Buffer.alloc(8 + payload.length)
+  box.writeUInt32BE(box.length, 0)
+  box.write(type, 4, 'ascii')
+  payload.copy(box, 8)
+  return box
+}
+
+// The fixed 12-byte JXL container signature box
+const jxlSignatureBox = Buffer.from([
+  0x00, 0x00, 0x00, 0x0c, 0x4a, 0x58, 0x4c, 0x20, 0x0d, 0x0a, 0x87, 0x0a,
+])
+const jxlFtypBox = jxlBox(
+  'ftyp',
+  Buffer.concat([Buffer.from('jxl '), Buffer.alloc(4), Buffer.from('jxl ')]),
+)
+
 describe('probeImageSize', () => {
   // Expected dimensions verified against the previous `image-size` implementation
   const cases: Array<{ file: string; height: number; width: number }> = [
@@ -109,5 +181,54 @@ describe('probeImageSize', () => {
     const malformed = Buffer.concat([ftyp, meta])
 
     expect(() => probeImageSize(malformed)).toThrow()
+  })
+
+  it('should read dimensions for a bare JPEG XL codestream', () => {
+    expect(probeImageSize(encodeJXLCodestream(1920, 1080))).toEqual({ height: 1080, width: 1920 })
+  })
+
+  it('should read dimensions for a small bare JPEG XL codestream', () => {
+    expect(probeImageSize(encodeSmallJXLCodestream(64, 48))).toEqual({ height: 48, width: 64 })
+  })
+
+  it('should read dimensions for a JPEG XL container with a single jxlc box', () => {
+    const jxlc = jxlBox('jxlc', encodeJXLCodestream(640, 480))
+    const container = Buffer.concat([jxlSignatureBox, jxlFtypBox, jxlc])
+
+    expect(probeImageSize(container)).toEqual({ height: 480, width: 640 })
+  })
+
+  it('should reassemble a JPEG XL codestream split across jxlp boxes', () => {
+    const codestream = encodeJXLCodestream(800, 600)
+    const splitPoint = 3
+    // Each jxlp payload is prefixed with a 4-byte partial-codestream index
+    const jxlp0 = jxlBox(
+      'jxlp',
+      Buffer.concat([Buffer.from([0, 0, 0, 0]), codestream.subarray(0, splitPoint)]),
+    )
+    const jxlp1 = jxlBox(
+      'jxlp',
+      Buffer.concat([Buffer.from([0, 0, 0, 1]), codestream.subarray(splitPoint)]),
+    )
+    const container = Buffer.concat([jxlSignatureBox, jxlFtypBox, jxlp0, jxlp1])
+
+    expect(probeImageSize(container)).toEqual({ height: 600, width: 800 })
+  })
+
+  it('should throw rather than hang on a JPEG XL container with a truncated jxlc box', () => {
+    const truncatedJxlc = Buffer.alloc(8)
+    truncatedJxlc.write('jxlc', 4, 'ascii') // size field left as 0: extends to end of buffer, no payload left
+    const container = Buffer.concat([jxlSignatureBox, jxlFtypBox, truncatedJxlc])
+
+    expect(() => probeImageSize(container)).toThrow()
+  })
+
+  it('should not hang on a JPEG XL container with thousands of unrelated boxes', () => {
+    const unrelatedBoxes = Buffer.concat(
+      Array.from({ length: 5000 }, () => jxlBox('free', Buffer.alloc(0))),
+    )
+    const container = Buffer.concat([jxlSignatureBox, jxlFtypBox, unrelatedBoxes])
+
+    expect(() => probeImageSize(container)).toThrow()
   })
 })
