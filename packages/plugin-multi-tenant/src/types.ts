@@ -270,7 +270,7 @@ type AllAccessKeysT<T extends readonly string[]> = T[number] extends keyof Omit<
   : never
 
 export type AllAccessKeys = AllAccessKeysT<
-  ['create', 'read', 'update', 'delete', 'readVersions', 'unlock']
+  ['create', 'read', 'update', 'delete', 'readVersions', 'unlock', 'validate']
 >
 
 export type CollectionAccessResultOverride = ({
