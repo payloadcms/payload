@@ -54,7 +54,7 @@ const TYPOGRAPHY_PROPERTIES = new Set(['font-size', 'letter-spacing', 'line-heig
 
 const messages = stylelint.utils.ruleMessages(ruleName, {
   rejectedLayoutDecimal: (value, prop) =>
-    `Unexpected decimal pixel value "${value}" on layout property "${prop}". Layout properties should generally be whole numbers unless explicitly justified.`,
+    `Unexpected decimal pixel value "${value}" on layout property "${prop}". Use a "--spacer" token (e.g. var(--spacer-2)) instead of a hardcoded pixel value.`,
   rejectedPrecision: (value) =>
     `Unexpected sub-pixel value "${value}". Pixel values may contain at most one decimal place.`,
 })
