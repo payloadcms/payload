@@ -435,6 +435,7 @@ export const svTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Skriv över befintlig fältdata',
     pageNotFound: 'Sidan hittas inte',
     password: 'Lösenord',
+    pasteBelow: 'Klistra in nedan',
     pasteField: 'Klistra in fält',
     pasteRow: 'Klistra in rad',
     payloadSettings: 'Systeminställningar',
@@ -449,6 +450,7 @@ export const svTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Ladda om dokumentet',
     remove: 'Ta bort',
     rename: 'Byt namn',
+    replaceRow: 'Ersätt rad',
     reset: 'Återställ',
     resetPreferences: 'Återställ preferenser',
     resetPreferencesDescription:

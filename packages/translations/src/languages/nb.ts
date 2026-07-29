@@ -436,6 +436,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Overskriv eksisterende feltdata',
     pageNotFound: 'Siden ble ikke funnet',
     password: 'Passord',
+    pasteBelow: 'Lim inn nedenfor',
     pasteField: 'Lim inn felt',
     pasteRow: 'Lim inn rad',
     payloadSettings: 'Payload-innstillinger',
@@ -450,6 +451,7 @@ export const nbTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Last inn dokument',
     remove: 'Fjern',
     rename: 'Endre navn',
+    replaceRow: 'Erstatt rad',
     reset: 'Tilbakestill',
     resetPreferences: 'Tilbakestill preferanser',
     resetPreferencesDescription:

@@ -441,6 +441,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     overwriteExistingData: 'Overschrijf bestaande veldgegevens',
     pageNotFound: 'Pagina niet gevonden',
     password: 'Wachtwoord',
+    pasteBelow: 'Plak hieronder',
     pasteField: 'Veld plakken',
     pasteRow: 'Rij plakken',
     payloadSettings: 'Payload Instellingen',
@@ -455,6 +456,7 @@ export const nlTranslations: DefaultTranslationsObject = {
     reloadDocument: 'Document opnieuw laden',
     remove: 'Verwijderen',
     rename: 'Hernoemen',
+    replaceRow: 'Rij vervangen',
     reset: 'Resetten',
     resetPreferences: 'Voorkeuren resetten',
     resetPreferencesDescription:
