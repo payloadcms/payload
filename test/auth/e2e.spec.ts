@@ -2,7 +2,7 @@ import type { BrowserContext, Page } from '@playwright/test'
 
 import { expect, test } from '@playwright/test'
 import path from 'path'
-import { formatAdminURL, wait } from 'payload/shared'
+import { formatAdminURL } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
 
@@ -12,10 +12,12 @@ import type { Config } from './payload-types.js'
 import { login } from '../__helpers/e2e/auth/login.js'
 import { logout } from '../__helpers/e2e/auth/logout.js'
 import {
+  clickWhenHydrated,
   ensureCompilationIsDone,
   getRoutes,
   initPageConsoleErrorCatch,
   saveDocAndAssert,
+  waitForElementHydration,
 } from '../__helpers/e2e/helpers.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { reInitializeDB } from '../__helpers/shared/clearAndSeed/reInitializeDB.js'
@@ -185,7 +187,7 @@ describe('Auth', () => {
       afterAll(async () => {
         // reset password to original password
         await page.goto(url.account)
-        await page.locator('#change-password').click()
+        await clickWhenHydrated(page.locator('#change-password'))
         await page.locator('#field-password').fill(devUser.password)
         await page.locator('#field-confirm-password').fill(devUser.password)
         await saveDocAndAssert(page, '#action-save')
@@ -243,7 +245,7 @@ describe('Auth', () => {
         const emailBeforeSave = await page.locator('#field-email').inputValue()
         await expect(page.locator('#force-unlock')).toBeVisible()
 
-        await page.locator('#change-password').click()
+        await clickWhenHydrated(page.locator('#change-password'))
         await page.locator('#field-password').fill('password')
 
         await expect(page.locator('#change-password')).toBeHidden()
@@ -273,6 +275,11 @@ describe('Auth', () => {
       test('should prevent new user creation without confirm password', async () => {
         await page.goto(url.list)
         await page.goto(url.create)
+
+        // A `fill` before hydration sets the DOM value without React seeing the change,
+        // so the field would submit empty.
+        await waitForElementHydration(page.locator('#field-email'))
+
         await page.locator('#field-email').fill('dev2@payloadcms.com')
         await page.locator('#field-password').fill('password')
         // should fail to save without confirm password
@@ -322,40 +329,25 @@ describe('Auth', () => {
       test('should unlock document on logout after editing without saving', async () => {
         await page.goto(url.list)
 
-        // Wait for hydration
-        await wait(1000)
-        await page.locator('.table .row-1 .cell-custom a').click()
+        await clickWhenHydrated(page.locator('.table .row-1 .cell-custom a'))
         await page.waitForURL(/\/admin\/collections\/users\/[a-zA-Z0-9]+/)
 
         const textInput = page.locator('#field-namedSaveToJWT')
         await expect(textInput).toBeVisible()
-        const docID = (await page.locator('.render-title').getAttribute('data-doc-id')) as string
 
-        const isTanStack = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
-        const lockDocRequest = page.waitForResponse((response) => {
-          const method = response.request().method()
-          const reqUrl = response.request().url()
-          if (method !== 'POST') {
-            return false
-          }
-          // Next.js server actions POST to the admin page URL;
-          // TanStack Start server functions POST through `createServerFn`'s
-          // `/_serverFn/<base64-fn-id>` RPC (legacy `/api/server-function`
-          // accepted for backward compatibility with older snapshots).
-          return isTanStack
-            ? reqUrl.includes('/_serverFn/') || reqUrl.includes('/api/server-function')
-            : reqUrl === url.edit(docID)
-        })
+        const countLockedDocs = async () => {
+          const lockedDocs = await payload.find({
+            collection: 'payload-locked-documents',
+            limit: 1,
+            pagination: false,
+          })
+
+          return lockedDocs.docs.length
+        }
+
         await textInput.fill('some text')
-        await lockDocRequest
 
-        const lockedDocs = await payload.find({
-          collection: 'payload-locked-documents',
-          limit: 1,
-          pagination: false,
-        })
-
-        await expect.poll(() => lockedDocs.docs.length).toBe(1)
+        await expect.poll(countLockedDocs, { timeout: POLL_TOPASS_TIMEOUT }).toBe(1)
 
         await page.locator('.user-menu__trigger').click()
         await page.locator('a[href$="/logout"]').click()
@@ -369,13 +361,7 @@ describe('Auth', () => {
 
         await expect(page.locator('.login')).toBeVisible()
 
-        const unlockedDocs = await payload.find({
-          collection: 'payload-locked-documents',
-          limit: 1,
-          pagination: false,
-        })
-
-        await expect.poll(() => unlockedDocs.docs.length).toBe(0)
+        await expect.poll(countLockedDocs, { timeout: POLL_TOPASS_TIMEOUT }).toBe(0)
 
         // added so tests after this do not need to re-login
         await login({ page, serverURL })

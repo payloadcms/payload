@@ -521,6 +521,48 @@ export function installTanStackHydrationGotoWait(page: Page) {
   }) as Page['reload']
 }
 
+/**
+ * Resolves once React has attached its internal props to `locator`'s DOM node, which is
+ * the point at which its event handlers actually fire.
+ *
+ * `installTanStackHydrationGotoWait` waits for the admin root marker, but client
+ * components streamed inside a view hydrate a few hundred ms later while their SSR'd
+ * markup is in the DOM from the first byte. Interactions landing in that window are
+ * silently dropped: a click focuses the element without running `onClick`, and a `fill`
+ * sets the DOM value without React ever seeing the change. `toBeVisible()` is no
+ * protection — the markup is already there.
+ *
+ * Use this for the first interaction after a navigation, in preference to a bare
+ * `wait()`.
+ */
+export async function waitForElementHydration(locator: Locator): Promise<void> {
+  await expect
+    .poll(
+      () =>
+        locator.evaluate((el) =>
+          Object.keys(el).some(
+            (key) => key.startsWith('__reactProps$') || key.startsWith('__reactFiber$'),
+          ),
+        ),
+      { timeout: POLL_TOPASS_TIMEOUT },
+    )
+    .toBe(true)
+}
+
+/**
+ * Clicks `locator` once it has hydrated. Preferred over retrying the click until it
+ * takes effect, which would double-submit forms.
+ *
+ * @see {@link waitForElementHydration}
+ */
+export async function clickWhenHydrated(
+  locator: Locator,
+  options?: Parameters<Locator['click']>[0],
+): Promise<void> {
+  await waitForElementHydration(locator)
+  await locator.click(options)
+}
+
 export function initPageConsoleErrorCatch(page: Page, options?: { ignoreCORS?: boolean }) {
   const { ignoreCORS = false } = options || {} // Default to not ignoring CORS errors
   const consoleErrors: string[] = []
