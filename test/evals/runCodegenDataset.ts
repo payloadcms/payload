@@ -466,7 +466,7 @@ function createLazyPayload({
         }
 
         try {
-          const { initPayloadInt } = await import('../__setup/int/initPayloadInt.js')
+          const { initPayloadInt } = await import('../__helpers/shared/initPayloadInt.js')
           payload = (
             await initPayloadInt(configDir, suiteName, undefined, configFile, {
               payloadKey: configFile,

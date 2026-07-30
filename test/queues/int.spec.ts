@@ -13,10 +13,10 @@ import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
-import type { NextRESTClient } from '../__setup/int/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
 import { it } from '../__helpers/int/vitest.js'
-import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
 import { waitUntilAutorunIsDone } from './utilities.js'

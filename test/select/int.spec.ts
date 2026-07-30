@@ -7,7 +7,7 @@ import { assert } from 'ts-essentials'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../__setup/int/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
   Config,
   DeepPost,
@@ -19,7 +19,7 @@ import type {
   VersionedPost,
 } from './payload-types.js'
 
-import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 
 let payload: Payload

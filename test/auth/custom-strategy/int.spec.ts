@@ -4,9 +4,9 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../../__setup/int/NextRESTClient.js'
+import type { NextRESTClient } from '../../__helpers/shared/NextRESTClient.js'
 
-import { initPayloadInt } from '../../__setup/int/initPayloadInt.js'
+import { initPayloadInt } from '../../__helpers/shared/initPayloadInt.js'
 import { usersSlug } from './shared.js'
 
 let payload: Payload

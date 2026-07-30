@@ -5,7 +5,7 @@ import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../__setup/int/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
   BlocksField,
   LocalizedPost,
@@ -20,7 +20,7 @@ import { devUser } from '../credentials.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { copyDataFromLocaleHandler } from '../../packages/ui/src/utilities/copyDataFromLocale.js'
 import { idToString } from '../__helpers/shared/idToString.js'
-import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { arrayCollectionSlug } from './collections/Array/index.js'
 import { groupSlug } from './collections/Group/index.js'
 import { nestedToArrayAndBlockCollectionSlug } from './collections/NestedToArrayAndBlock/index.js'

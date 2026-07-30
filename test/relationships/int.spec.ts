@@ -5,7 +5,7 @@ import path from 'path'
 import { fileURLToPath } from 'url'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../__setup/int/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
   ChainedRelation,
   CustomIdNumberRelation,
@@ -17,7 +17,7 @@ import type {
   Relation,
 } from './payload-types.js'
 
-import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { mongooseList } from '../__helpers/shared/isMongoose.js'
 import {
   chainedRelSlug,

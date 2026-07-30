@@ -11,10 +11,10 @@ import shelljs from 'shelljs'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import type { NextRESTClient } from '../__setup/int/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Config } from './payload-types.js'
 
-import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import {
   mediaSlug,
   mediaWithCustomURLSlug,

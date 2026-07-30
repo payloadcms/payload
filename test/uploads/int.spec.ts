@@ -11,7 +11,7 @@ import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vitest } from 'vitest'
 
-import type { NextRESTClient } from '../__setup/int/NextRESTClient.js'
+import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type { Enlarge, Media } from './payload-types.js'
 
 // eslint-disable-next-line payload/no-relative-monorepo-imports
@@ -20,7 +20,7 @@ import { checkFileRestrictions } from '../../packages/payload/src/uploads/checkF
 import { getExternalFile } from '../../packages/payload/src/uploads/getExternalFile.js'
 // eslint-disable-next-line payload/no-relative-monorepo-imports
 import { tempFileHandler } from '../../packages/payload/src/uploads/fetchAPI-multipart/handlers.js'
-import { initPayloadInt } from '../__setup/int/initPayloadInt.js'
+import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { createStreamableFile } from './createStreamableFile.js'
 import {
   adminThumbnailSizeSlug,
