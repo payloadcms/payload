@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import type { Config, Field } from 'payload'
 
 import { lexicalEditor } from '@payloadcms/richtext-lexical'
@@ -37,7 +38,7 @@ console.log(`  Warmups: ${options.warmups}`)
 console.log(`  Measured iterations: ${options.iterations}`)
 
 for (let iteration = 0; iteration < options.warmups; iteration++) {
-  const duration = await runIteration({ copies: options.copies })
+  const duration = runIteration({ copies: options.copies })
 
   console.log(`  Warmup ${iteration + 1}/${options.warmups}: ${formatMilliseconds(duration)}`)
 }
@@ -45,7 +46,7 @@ for (let iteration = 0; iteration < options.warmups; iteration++) {
 const durations: number[] = []
 
 for (let iteration = 0; iteration < options.iterations; iteration++) {
-  const duration = await runIteration({ copies: options.copies })
+  const duration = runIteration({ copies: options.copies })
 
   durations.push(duration)
   console.log(`  Iteration ${iteration + 1}/${options.iterations}: ${formatMilliseconds(duration)}`)
@@ -62,11 +63,11 @@ console.log(`  Max: ${formatMilliseconds(summary.maxMs)}`)
 console.log(`  Standard deviation: ${formatMilliseconds(summary.standardDeviationMs)}`)
 console.log(`  Throughput: ${(1000 / summary.meanMs).toFixed(2)} sanitizations/second`)
 
-async function runIteration({ copies }: { copies: number }): Promise<number> {
+function runIteration({ copies }: { copies: number }): number {
   const config = createHugeFieldsConfig({ copies })
   const inputCollectionCount = config.collections!.length
   const start = performance.now()
-  const sanitizedConfig = await sanitizeConfig(config)
+  const sanitizedConfig = sanitizeConfig(config)
   const duration = performance.now() - start
 
   if (sanitizedConfig.collections.length < inputCollectionCount) {
@@ -106,27 +107,27 @@ function getBenchmarkOptions(): BenchmarkOptions {
   const { values } = parseArgs({
     options: {
       copies: {
-        default: String(DEFAULT_COPIES),
         type: 'string',
+        default: String(DEFAULT_COPIES),
       },
       iterations: {
+        type: 'string',
         default: String(DEFAULT_ITERATIONS),
         short: 'i',
-        type: 'string',
       },
       warmups: {
+        type: 'string',
         default: String(DEFAULT_WARMUPS),
         short: 'w',
-        type: 'string',
       },
     },
     strict: true,
   })
 
   return {
-    copies: parseInteger({ minimum: 1, name: 'copies', value: values.copies }),
-    iterations: parseInteger({ minimum: 1, name: 'iterations', value: values.iterations }),
-    warmups: parseInteger({ minimum: 0, name: 'warmups', value: values.warmups }),
+    copies: parseInteger({ name: 'copies', minimum: 1, value: values.copies }),
+    iterations: parseInteger({ name: 'iterations', minimum: 1, value: values.iterations }),
+    warmups: parseInteger({ name: 'warmups', minimum: 0, value: values.warmups }),
   }
 }
 
@@ -181,8 +182,8 @@ function countFields({ fields }: { fields: Field[] }): number {
 }
 
 function parseInteger({
-  minimum,
   name,
+  minimum,
   value,
 }: {
   minimum: number

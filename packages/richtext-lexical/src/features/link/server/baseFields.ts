@@ -32,7 +32,9 @@ export const getBaseFields = (
       .map(({ slug }) => slug)
   } else {
     enabledRelations = config.collections
-      .filter(({ admin: { enableRichTextLink, hidden } }) => {
+      .filter(({ admin }) => {
+        const { enableRichTextLink = true, hidden } = admin ?? {}
+
         if (typeof hidden !== 'function' && hidden) {
           return false
         }

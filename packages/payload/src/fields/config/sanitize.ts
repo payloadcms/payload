@@ -75,11 +75,6 @@ type SanitizeFieldsArgs = {
    */
   requireFieldLevelRichTextEditor?: boolean
   /**
-   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
-   * so that you can sanitize them together, after the config has been sanitized.
-   */
-  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>
-  /**
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
    * This validation will be skipped if validRelationships is null.
    */
@@ -114,7 +109,6 @@ export type SanitizeFieldArgs = {
   parentSchemaPath: string
   polymorphicJoins?: SanitizedJoin[]
   requireFieldLevelRichTextEditor: boolean
-  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>
   validRelationships: null | string[]
 }
 
@@ -134,7 +128,7 @@ type SanitizeFieldResult = {
  *
  * @returns Result containing any fields to insert after this one
  */
-export const sanitizeField = async ({
+export const sanitizeField = ({
   collectionConfig,
   config,
   existingFieldNames,
@@ -150,9 +144,8 @@ export const sanitizeField = async ({
   parentSchemaPath,
   polymorphicJoins,
   requireFieldLevelRichTextEditor,
-  richTextSanitizationPromises,
   validRelationships,
-}: SanitizeFieldArgs): Promise<SanitizeFieldResult> => {
+}: SanitizeFieldArgs): SanitizeFieldResult => {
   const result: SanitizeFieldResult = {}
 
   if ('_sanitized' in field && field._sanitized === true) {
@@ -392,28 +385,20 @@ export const sanitizeField = async ({
 
   // Make sure that the richText field has an editor
   if (field.type === 'richText') {
-    const sanitizeRichText = async (_config: SanitizedConfig) => {
-      if (!field.editor) {
-        if (_config.editor && !requireFieldLevelRichTextEditor) {
-          // config.editor should be sanitized at this point
-          field.editor = _config.editor
-        } else {
-          throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
-        }
-      }
-
-      if (typeof field.editor === 'function') {
-        field.editor = await field.editor({
-          config: _config,
-          isRoot: requireFieldLevelRichTextEditor,
-          parentIsLocalized: (parentIsLocalized || field.localized)!,
-        })
+    if (!field.editor) {
+      if (config.editor && !requireFieldLevelRichTextEditor) {
+        field.editor = config.editor
+      } else {
+        throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
       }
     }
-    if (richTextSanitizationPromises) {
-      richTextSanitizationPromises.push(sanitizeRichText)
-    } else {
-      await sanitizeRichText(config as unknown as SanitizedConfig)
+
+    if (typeof field.editor === 'function') {
+      field.editor = field.editor({
+        config: config as unknown as SanitizedConfig,
+        isRoot: requireFieldLevelRichTextEditor,
+        parentIsLocalized: (parentIsLocalized || field.localized)!,
+      })
     }
   }
 
@@ -441,7 +426,7 @@ export const sanitizeField = async ({
       block.fields = block.fields.concat(baseBlockFields)
       block.labels = !block.labels ? formatLabels(block.slug) : block.labels
 
-      block.fields = await sanitizeFields({
+      block.fields = sanitizeFields({
         collectionConfig,
         config,
         existingFieldNames: new Set(),
@@ -451,14 +436,13 @@ export const sanitizeField = async ({
         parentIsLocalized: (parentIsLocalized || field.localized)!,
         parentSchemaPath: schemaPath + '.' + block.slug,
         requireFieldLevelRichTextEditor,
-        richTextSanitizationPromises,
         validRelationships,
       })
     }
   }
 
   if ('fields' in field && field.fields) {
-    field.fields = await sanitizeFields({
+    field.fields = sanitizeFields({
       collectionConfig,
       config,
       existingFieldNames: fieldAffectsData ? new Set() : existingFieldNames,
@@ -472,7 +456,6 @@ export const sanitizeField = async ({
       parentSchemaPath: schemaPath,
       polymorphicJoins,
       requireFieldLevelRichTextEditor,
-      richTextSanitizationPromises,
       validRelationships,
     })
   }
@@ -503,7 +486,7 @@ export const sanitizeField = async ({
         tab.id = tabSchemaPath
       }
 
-      tab.fields = await sanitizeFields({
+      tab.fields = sanitizeFields({
         collectionConfig,
         config,
         existingFieldNames: isNamedTab ? new Set() : existingFieldNames,
@@ -517,7 +500,6 @@ export const sanitizeField = async ({
         parentSchemaPath: tabSchemaPath,
         polymorphicJoins,
         requireFieldLevelRichTextEditor,
-        richTextSanitizationPromises,
         validRelationships,
       })
 
@@ -645,7 +627,7 @@ export const sanitizeField = async ({
   return result
 }
 
-export const sanitizeFields = async ({
+export const sanitizeFields = ({
   collectionConfig,
   config,
   existingFieldNames = new Set(),
@@ -660,9 +642,8 @@ export const sanitizeFields = async ({
   parentSchemaPath = '',
   polymorphicJoins,
   requireFieldLevelRichTextEditor = false,
-  richTextSanitizationPromises,
   validRelationships,
-}: SanitizeFieldsArgs): Promise<Field[]> => {
+}: SanitizeFieldsArgs): Field[] => {
   if (!fields) {
     return []
   }
@@ -670,7 +651,7 @@ export const sanitizeFields = async ({
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]!
 
-    const result = await sanitizeField({
+    const result = sanitizeField({
       collectionConfig,
       config,
       existingFieldNames,
@@ -686,7 +667,6 @@ export const sanitizeFields = async ({
       parentSchemaPath,
       polymorphicJoins,
       requireFieldLevelRichTextEditor,
-      richTextSanitizationPromises,
       validRelationships,
     })
 

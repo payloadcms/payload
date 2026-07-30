@@ -101,15 +101,13 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
   return sanitizedConfig as unknown as Partial<SanitizedConfig>
 }
 
-const addDefaultDashboardWidgets = async ({
+const addDefaultDashboardWidgets = ({
   config,
-  richTextSanitizationPromises,
   validRelationships,
 }: {
   config: Partial<SanitizedConfig>
-  richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>>
   validRelationships: string[]
-}) => {
+}): void => {
   const collectionQueryFields: NonNullable<Widget['fields']> = [
     {
       name: 'title',
@@ -211,12 +209,11 @@ const addDefaultDashboardWidgets = async ({
   dashboard.widgets.push({
     slug: 'collection-query',
     Component: '@payloadcms/ui/rsc#CollectionQueryWidget',
-    fields: await sanitizeFields({
+    fields: sanitizeFields({
       config: config as unknown as Config,
       existingFieldNames: new Set(),
       fields: collectionQueryFields,
       parentIsLocalized: false,
-      richTextSanitizationPromises,
       validRelationships,
     }),
     minWidth: 'x-small',
@@ -224,12 +221,11 @@ const addDefaultDashboardWidgets = async ({
   dashboard.widgets.push({
     slug: 'activity',
     Component: '@payloadcms/ui/rsc#RecentlyViewedWidget',
-    fields: await sanitizeFields({
+    fields: sanitizeFields({
       config: config as unknown as Config,
       existingFieldNames: new Set(),
       fields: recentlyViewedFields,
       parentIsLocalized: false,
-      richTextSanitizationPromises,
       validRelationships,
     }),
     label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
@@ -243,7 +239,7 @@ const addDefaultDashboardWidgets = async ({
   ]
 }
 
-export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedConfig> => {
+export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   const configWithDefaults = addDefaultsToConfig(incomingConfig)
   const { duration, safetyBuffer } = configWithDefaults.jobs!.processingLease!
   if (!(safetyBuffer! >= 0 && safetyBuffer! < duration!)) {
@@ -324,7 +320,13 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   config.i18n = i18nConfig
 
-  const richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>> = []
+  if (typeof incomingConfig.editor === 'function') {
+    config.editor = incomingConfig.editor({
+      config: config as SanitizedConfig,
+      isRoot: true,
+      parentIsLocalized: false,
+    })
+  }
 
   const schedulePublishCollections: CollectionSlug[] = []
 
@@ -345,12 +347,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   for (const widget of dashboardWidgets) {
     if (widget.fields?.length) {
-      widget.fields = await sanitizeFields({
+      widget.fields = sanitizeFields({
         config: config as unknown as Config,
         existingFieldNames: new Set(),
         fields: widget.fields,
         parentIsLocalized: false,
-        richTextSanitizationPromises,
         validRelationships,
       })
     }
@@ -377,12 +378,11 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         ? formatLabels(sanitizedBlock.slug)
         : sanitizedBlock.labels
 
-      sanitizedBlock.fields = await sanitizeFields({
+      sanitizedBlock.fields = sanitizeFields({
         config: config as unknown as Config,
         existingFieldNames: new Set(),
         fields: sanitizedBlock.fields,
         parentIsLocalized: false,
-        richTextSanitizationPromises,
         validRelationships,
       })
 
@@ -416,10 +416,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
       }
     }
 
-    config.collections![i] = await sanitizeCollection(
+    config.collections![i] = sanitizeCollection(
       config as unknown as Config,
       config.collections![i]!,
-      richTextSanitizationPromises,
       validRelationships,
       orderableJoins,
     )
@@ -456,7 +455,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   // Add fields, hooks, and update flattenedFields
   for (const [collection, orderableFields] of fieldsToAdd) {
-    await addOrderableFieldsAndHook(
+    addOrderableFieldsAndHook(
       collection,
       config as unknown as Config,
       orderableFields,
@@ -477,10 +476,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         schedulePublishGlobals.push(config.globals![i]!.slug)
       }
 
-      config.globals![i] = await sanitizeGlobal(
+      config.globals![i] = sanitizeGlobal(
         config as unknown as Config,
         config.globals![i]!,
-        richTextSanitizationPromises,
         validRelationships,
       )
     }
@@ -523,12 +521,7 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
     // Add payload-jobs-stats global for tracking job system metadata.
     ;(config.globals ??= []).push(
-      await sanitizeGlobal(
-        config as unknown as Config,
-        getJobStatsGlobal(),
-        richTextSanitizationPromises,
-        validRelationships,
-      ),
+      sanitizeGlobal(config as unknown as Config, getJobStatsGlobal(), validRelationships),
     )
 
     let defaultJobsCollection = getDefaultJobsCollection(config.jobs)
@@ -538,10 +531,9 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
         defaultJobsCollection,
       })
     }
-    const sanitizedJobsCollection = await sanitizeCollection(
+    const sanitizedJobsCollection = sanitizeCollection(
       config as unknown as Config,
       defaultJobsCollection,
-      richTextSanitizationPromises,
       validRelationships,
     )
 
@@ -552,28 +544,25 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   if (lockedDocumentsCollection) {
     configWithDefaults.collections!.push(
-      await sanitizeCollection(
+      sanitizeCollection(
         config as unknown as Config,
         lockedDocumentsCollection,
-        richTextSanitizationPromises,
         validRelationships,
       ),
     )
   }
 
   configWithDefaults.collections!.push(
-    await sanitizeCollection(
+    sanitizeCollection(
       config as unknown as Config,
       getPreferencesCollection(config as unknown as Config),
-      richTextSanitizationPromises,
       validRelationships,
     ),
   )
 
-  const migrations = await sanitizeCollection(
+  const migrations = sanitizeCollection(
     config as unknown as Config,
     migrationsCollection,
-    richTextSanitizationPromises,
     validRelationships,
   )
 
@@ -590,18 +579,16 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
 
   if (queryPresetsCollections.length > 0) {
     configWithDefaults.collections!.push(
-      await sanitizeCollection(
+      sanitizeCollection(
         config as unknown as Config,
         getQueryPresetsConfig(config as unknown as Config),
-        richTextSanitizationPromises,
         validRelationships,
       ),
     )
   }
 
-  await addDefaultDashboardWidgets({
+  addDefaultDashboardWidgets({
     config,
-    richTextSanitizationPromises,
     validRelationships,
   })
 
@@ -625,25 +612,6 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   if (incomingConfig.email) {
     config.email = incomingConfig.email
   }
-
-  /*
-    Execute richText sanitization
-   */
-  if (typeof incomingConfig.editor === 'function') {
-    config.editor = await incomingConfig.editor({
-      config: config as SanitizedConfig,
-      isRoot: true,
-      parentIsLocalized: false,
-    })
-  }
-
-  const promises: Promise<void>[] = []
-
-  for (const sanitizeFunction of richTextSanitizationPromises) {
-    promises.push(sanitizeFunction(config as SanitizedConfig))
-  }
-
-  await Promise.all(promises)
 
   return config as SanitizedConfig
 }
