@@ -27,10 +27,10 @@ export const MyPointField: Field = {
 ```
 
 <Banner type="warning">
-  **Important:** The Point Field currently is not supported in SQLite. When
-  using Postgres, enable the PostGIS extension via the database adapter's
-  [`extensions`](../database/postgres#postgis) option (for example `extensions:
-  ['postgis']`).
+  **Important:** The Point Field currently is not supported in SQLite. On
+  Postgres, Payload enables [PostGIS](../database/postgres#postgis)
+  automatically when a Point field is present. Your database must have PostGIS
+  available, and the connecting role must be able to create extensions.
 </Banner>
 
 ## Config

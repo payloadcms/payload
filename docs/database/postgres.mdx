@@ -87,7 +87,9 @@ export default buildConfig({
 
 ## PostGIS
 
-To use the [Point field](../fields/point) with Postgres, enable the [PostGIS](https://postgis.net/) extension via the `extensions` option on your database adapter. Your Postgres instance must have PostGIS available (installed on the server or included in your database image).
+The [Point field](../fields/point) requires the [PostGIS](https://postgis.net/) extension on Postgres. Payload enables it automatically whenever a Point field is present, running `CREATE EXTENSION IF NOT EXISTS "postgis"` on connect. Your Postgres instance must have PostGIS available (installed on the server or included in your database image), and the connecting role must have privileges to create extensions.
+
+You can also enable PostGIS (or other extensions) explicitly with the `extensions` option on `@payloadcms/db-postgres` or `@payloadcms/db-vercel-postgres`:
 
 ```ts
 import { postgresAdapter } from '@payloadcms/db-postgres'
@@ -101,8 +103,6 @@ export default buildConfig({
   }),
 })
 ```
-
-The same `extensions` option is available on `@payloadcms/db-vercel-postgres`.
 
 ## Access to Drizzle
 
