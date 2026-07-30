@@ -54,7 +54,7 @@ export async function initReq({
 
   const headers = await serverAdapter.getHeaders()
   const cookies = parseCookies(headers)
-  const partialFactory = async (): Promise<InitReqPartialResult> => {
+  const createPartialResult = async (): Promise<InitReqPartialResult> => {
     const config = await configPromise
     const payload = await getPayload({ config, cron: true, importMap })
     const languageCode = getRequestLanguage({
@@ -81,8 +81,10 @@ export async function initReq({
       user,
     }
   }
-  const partialResult = cache ? await cache.getPartial(partialFactory) : await partialFactory()
-  const requestFactory = async (): Promise<InitReqResult> => {
+  const partialResult = cache
+    ? await cache.getPartial(createPartialResult)
+    : await createPartialResult()
+  const createRequestResult = async (): Promise<InitReqResult> => {
     const { i18n, languageCode, payload, responseHeaders, user } = partialResult
     const { req: reqOverrides, ...optionsOverrides } = overrides || {}
     const requestDefaults = getRequestDefaults({ requestURL })
@@ -117,7 +119,9 @@ export async function initReq({
       req,
     }
   }
-  const result = cache ? await cache.getRequest(requestFactory, key!) : await requestFactory()
+  const result = cache
+    ? await cache.getRequest(createRequestResult, key!)
+    : await createRequestResult()
 
   return {
     ...result,
