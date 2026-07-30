@@ -6,12 +6,7 @@ import { sendTelemetryEvent } from 'payload/internal'
 
 import type { MCPItem, MCPToolResponse } from '../types.js'
 
-import {
-  COLLECTION_AUTH_BUILTINS,
-  COLLECTION_BUILTINS,
-  GLOBAL_BUILTINS,
-  TOOL_BUILTINS,
-} from '../mcp/builtinTools.js'
+import { MCP_TOOL_TELEMETRY_MARKER } from '../types.js'
 import { getMcpErrorType, type MCPErrorType } from './errorType.js'
 
 type ModernRequestEnvelope = {
@@ -86,13 +81,5 @@ export const createMcpServerTelemetry = ({
 }
 
 // Do not send user-defined tool names to telemetry.
-const getTelemetryToolName = (item: MCPItem): string => {
-  const isBuiltin =
-    item.type === 'tool'
-      ? item.configKey in TOOL_BUILTINS
-      : item.type === 'collectionTool'
-        ? item.configKey in COLLECTION_BUILTINS || item.configKey in COLLECTION_AUTH_BUILTINS
-        : item.configKey in GLOBAL_BUILTINS
-
-  return isBuiltin ? item.mcpName : 'custom'
-}
+export const getTelemetryToolName = (item: MCPItem): string =>
+  'tool' in item && item.tool[MCP_TOOL_TELEMETRY_MARKER] === true ? item.mcpName : 'custom'

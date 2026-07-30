@@ -18,6 +18,7 @@ import type {
 } from '../types.js'
 
 import { defaultAccess } from '../defaultAccess.js'
+import { MCP_TOOL_TELEMETRY_MARKER } from '../types.js'
 import {
   COLLECTION_AUTH_BUILTIN_ENTRIES,
   COLLECTION_AUTH_BUILTINS,
@@ -61,7 +62,11 @@ export const sanitizeMCPConfig = ({
       configKey,
       label: tool.annotations?.title ?? configKey,
       mcpName,
-      tool: { ...tool, access: tool.access ?? defaultAccess },
+      tool: {
+        ...tool,
+        access: tool.access ?? defaultAccess,
+        [MCP_TOOL_TELEMETRY_MARKER]: true,
+      },
     })
   }
 
@@ -155,6 +160,7 @@ const sanitizeCollectionConfig = ({
         access: override?.access ?? tool.access ?? defaultAccess,
         annotations,
         description: override?.description ?? tool.description,
+        [MCP_TOOL_TELEMETRY_MARKER]: true,
         overrideResponse:
           override?.overrideResponse ??
           collectionPluginConfig?.overrideResponse ??
@@ -183,6 +189,7 @@ const sanitizeCollectionConfig = ({
           access: override?.access ?? tool.access ?? defaultAccess,
           annotations,
           description: override?.description ?? tool.description,
+          [MCP_TOOL_TELEMETRY_MARKER]: true,
           overrideResponse:
             override?.overrideResponse ??
             collectionPluginConfig?.overrideResponse ??
@@ -249,6 +256,7 @@ const sanitizeGlobalConfig = ({
         access: override?.access ?? tool.access ?? defaultAccess,
         annotations,
         description: override?.description ?? tool.description,
+        [MCP_TOOL_TELEMETRY_MARKER]: true,
         overrideResponse:
           override?.overrideResponse ??
           globalPluginConfig?.overrideResponse ??

@@ -30,6 +30,13 @@ export type { MCPCollectionAuthToolName, MCPCollectionBuiltinName, MCPGlobalBuil
 export type { JsonSchemaType, StandardSchemaWithJSON, ToolAnnotations }
 
 /**
+ * Marks first-party tools whose names may be included in telemetry.
+ *
+ * @internal
+ */
+export const MCP_TOOL_TELEMETRY_MARKER = Symbol('mcpToolTelemetry')
+
+/**
  * What a tool's `input` (or a prompt's `argsSchema`) can be — either a raw
  * JSON Schema 2020-12 literal, or a Standard Schema instance (Zod, Valibot, …).
  * Raw schemas may omit `$schema`; when present it must declare the 2020-12 dialect.
@@ -108,6 +115,7 @@ export type Tool<TSchema extends ToolInputSchema | undefined = ToolInputSchema |
   description: string
   handler: (args: ToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
   input?: TSchema
+  [MCP_TOOL_TELEMETRY_MARKER]?: true
   /**
    * Override the return value of the tool handler
    */
@@ -126,7 +134,10 @@ export type CollectionTool<
   access?: (args: CollectionMCPAccessArgs) => MaybePromise<boolean>
   handler: (args: CollectionToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
   input?: TSchema
-} & Pick<Tool, 'annotations' | 'description' | 'overrideResponse'>
+} & Pick<
+  Tool,
+  'annotations' | 'description' | 'overrideResponse' | typeof MCP_TOOL_TELEMETRY_MARKER
+>
 
 export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSchema | undefined> =
   {
@@ -139,7 +150,10 @@ export type GlobalTool<TSchema extends ToolInputSchema | undefined = ToolInputSc
     access?: (args: GlobalMCPAccessArgs) => MaybePromise<boolean>
     handler: (args: GlobalToolHandlerArgs<TSchema>) => MaybePromise<MCPToolResponse>
     input?: TSchema
-  } & Pick<Tool, 'annotations' | 'description' | 'overrideResponse'>
+  } & Pick<
+    Tool,
+    'annotations' | 'description' | 'overrideResponse' | typeof MCP_TOOL_TELEMETRY_MARKER
+  >
 
 /**
  * Configures (or disables) a built-in tool without replacing it.
