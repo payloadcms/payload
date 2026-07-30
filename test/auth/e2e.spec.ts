@@ -187,8 +187,8 @@ describe('Auth', () => {
         })
 
         await payload.update({
-          collection: slug,
           id: docs[0]!.id,
+          collection: slug,
           data: { password: devUser.password },
         })
       })
