@@ -5,8 +5,6 @@ export const maxIdentifierLength = 63
 
 /**
  * Throws if a table or enum identifier exceeds the Postgres 63-char limit.
- * Covers companion table names (_locales, _rels, _texts, _numbers) that are built by
- * concatenation outside createTableName and would otherwise be silently truncated by Postgres.
  */
 export const validateIdentifierLength = (name: string): string => {
   if (name.length > maxIdentifierLength) {
