@@ -18,8 +18,10 @@ import React, { startTransition, useCallback, useEffect, useOptimistic, useRef }
  * )
  */
 export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ children }) => {
-  const [isTransitioning, setIsTransitioning] = useOptimistic(false)
+  const [isOptimisticallyTransitioning, setIsOptimisticallyTransitioning] = useOptimistic(false)
+  const [activeRouteTransitions, setActiveRouteTransitions] = React.useState(0)
   const [transitionProgress, setTransitionProgress] = React.useState<number>(0)
+  const isTransitioning = isOptimisticallyTransitioning || activeRouteTransitions > 0
 
   const transitionProgressRef = useRef(transitionProgress)
 
@@ -63,18 +65,40 @@ export const RouteTransitionProvider: React.FC<RouteTransitionProps> = ({ childr
   const startRouteTransition: StartRouteTransition = useCallback(
     (callback?: () => void) => {
       startTransition(() => {
-        setIsTransitioning(true)
+        setIsOptimisticallyTransitioning(true)
 
         if (typeof callback === 'function') {
           callback()
         }
       })
     },
-    [setIsTransitioning],
+    [setIsOptimisticallyTransitioning],
   )
 
+  const beginRouteTransition = useCallback(() => {
+    let hasEnded = false
+
+    setActiveRouteTransitions((count) => count + 1)
+
+    return () => {
+      if (hasEnded) {
+        return
+      }
+
+      hasEnded = true
+      setActiveRouteTransitions((count) => Math.max(0, count - 1))
+    }
+  }, [])
+
   return (
-    <RouteTransitionContext value={{ isTransitioning, startRouteTransition, transitionProgress }}>
+    <RouteTransitionContext
+      value={{
+        beginRouteTransition,
+        isTransitioning,
+        startRouteTransition,
+        transitionProgress,
+      }}
+    >
       {children}
     </RouteTransitionContext>
   )
@@ -87,12 +111,15 @@ type RouteTransitionProps = {
 type StartRouteTransition = (callback?: () => void) => void
 
 type RouteTransitionContextValue = {
+  /** Keeps the route transition active until the returned function is called. */
+  beginRouteTransition: () => () => void
   isTransitioning: boolean
   startRouteTransition: StartRouteTransition
   transitionProgress: number
 }
 
 const RouteTransitionContext = React.createContext<RouteTransitionContextValue>({
+  beginRouteTransition: () => () => undefined,
   isTransitioning: false,
   // Default implementation: just call the callback directly (no transition animation)
   startRouteTransition: (callback) => {

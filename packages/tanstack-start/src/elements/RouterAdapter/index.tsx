@@ -3,10 +3,16 @@
 import type { RouterAdapterContextValue } from '@payloadcms/ui'
 import type { LinkAdapterProps, RouterAdapterComponent } from 'payload'
 
-import { RouterAdapterContext } from '@payloadcms/ui'
-import { Link as TanStackLink, useLocation, useParams, useRouter } from '@tanstack/react-router'
+import { RouterAdapterContext, useRouteTransition } from '@payloadcms/ui'
+import {
+  Link as TanStackLink,
+  useLocation,
+  useParams,
+  useRouter,
+  useRouterState,
+} from '@tanstack/react-router'
 import * as qs from 'qs-esm'
-import React, { useCallback, useMemo } from 'react'
+import React, { useCallback, useEffect, useMemo } from 'react'
 
 const normalizeNavigationTarget = ({
   path,
@@ -60,6 +66,16 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
   const router = useRouter()
   const location = useLocation()
   const params = useParams({ strict: false })
+  const isRouterLoading = useRouterState({ select: (state) => state.isLoading })
+  const { beginRouteTransition } = useRouteTransition()
+
+  useEffect(() => {
+    if (!isRouterLoading) {
+      return
+    }
+
+    return beginRouteTransition()
+  }, [beginRouteTransition, isRouterLoading])
 
   const adaptedParams = useMemo(() => {
     const adapted: Record<string, string | string[]> = { ...params }

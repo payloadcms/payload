@@ -1,4 +1,4 @@
-import { expect } from '@playwright/test'
+import { expect, type Page } from '@playwright/test'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -11,16 +11,65 @@ import { postsSlug } from './collections/Posts.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const clientChunkPattern = /\/assets\/[^/]+\.js(?:\?.*)?$/
+const serverFunctionPattern = /\/_serverFn\//
 
 let releaseClientChunk: (() => void) | undefined
 let pendingClientChunk: Promise<void> | undefined
+let releaseServerFunction: (() => void) | undefined
+let pendingServerFunction: Promise<void> | undefined
+
+const blockNextClientChunk = async (page: Page) => {
+  let isClientChunkBlocked = false
+  const clientChunkGate = new Promise<void>((resolve) => {
+    releaseClientChunk = resolve
+  })
+
+  await page.route(
+    clientChunkPattern,
+    async (route) => {
+      isClientChunkBlocked = true
+      pendingClientChunk = (async () => {
+        await clientChunkGate
+        await route.continue()
+      })()
+      await pendingClientChunk
+    },
+    { times: 1 },
+  )
+
+  return () => isClientChunkBlocked
+}
+
+const expectVisibleRouteProgress = async (page: Page) => {
+  await expect
+    .poll(async () => {
+      return page.locator('.progress-bar').evaluateAll((elements) => {
+        return elements.some((element) => {
+          const progress = element.querySelector('.progress-bar__progress')
+          const progressWidth = progress?.getBoundingClientRect().width ?? 0
+
+          return (
+            getComputedStyle(element).opacity !== '0' &&
+            progressWidth > 1 &&
+            progressWidth < window.innerWidth
+          )
+        })
+      })
+    })
+    .toBe(true)
+}
 
 test.afterEach(async ({ page }) => {
   releaseClientChunk?.()
+  releaseServerFunction?.()
   await pendingClientChunk
+  await pendingServerFunction
   releaseClientChunk = undefined
   pendingClientChunk = undefined
+  releaseServerFunction = undefined
+  pendingServerFunction = undefined
   await page.unroute(clientChunkPattern)
+  await page.unroute(serverFunctionPattern)
 })
 
 test(
@@ -38,26 +87,10 @@ test(
     await ensureCompilationIsDone({ page, serverURL })
     await page.goto(postsURL.admin)
 
-    let isClientChunkBlocked = false
-    const clientChunkGate = new Promise<void>((resolve) => {
-      releaseClientChunk = resolve
-    })
-
-    await page.route(
-      clientChunkPattern,
-      async (route) => {
-        isClientChunkBlocked = true
-        pendingClientChunk = (async () => {
-          await clientChunkGate
-          await route.continue()
-        })()
-        await pendingClientChunk
-      },
-      { times: 1 },
-    )
+    const isClientChunkBlocked = await blockNextClientChunk(page)
 
     await page.locator(`#card-${postsSlug} .card__actions a`).click()
-    await expect.poll(() => isClientChunkBlocked).toBe(true)
+    await expect.poll(isClientChunkBlocked).toBe(true)
 
     await expect(page.locator('.template-default')).toBeVisible()
     await expect(page.locator(`#card-${postsSlug}`)).toBeVisible()
@@ -67,5 +100,60 @@ test(
 
     await expect(page).toHaveURL(postsURL.create)
     await expect(page.locator('#field-title')).toBeVisible()
+  },
+)
+
+test(
+  'should show route progress until the next admin view is ready',
+  { framework: 'tanstack-start' },
+  async ({ page }) => {
+    test.skip(
+      process.env.PAYLOAD_TEST_PROD !== 'true',
+      'Production client chunks are required to suspend the next RSC payload.',
+    )
+
+    const { serverURL } = await initPayloadE2ENoConfig({ dirname })
+    const postsURL = new AdminUrlUtil(serverURL, postsSlug)
+
+    await ensureCompilationIsDone({ page, serverURL })
+    await page.goto(postsURL.admin)
+    await expect(page.locator('.progress-bar')).toBeHidden()
+
+    const isClientChunkBlocked = await blockNextClientChunk(page)
+
+    let isServerFunctionBlocked = false
+    const serverFunctionGate = new Promise<void>((resolve) => {
+      releaseServerFunction = resolve
+    })
+
+    await page.route(
+      serverFunctionPattern,
+      async (route) => {
+        isServerFunctionBlocked = true
+        pendingServerFunction = (async () => {
+          await serverFunctionGate
+          await route.continue()
+        })()
+        await pendingServerFunction
+      },
+      { times: 1 },
+    )
+
+    await page.locator(`#card-${postsSlug} .card__actions a`).click()
+    await expect.poll(() => isServerFunctionBlocked).toBe(true)
+    await expectVisibleRouteProgress(page)
+
+    releaseServerFunction?.()
+    releaseServerFunction = undefined
+
+    await expect.poll(isClientChunkBlocked).toBe(true)
+    await expectVisibleRouteProgress(page)
+
+    releaseClientChunk?.()
+    releaseClientChunk = undefined
+
+    await expect(page).toHaveURL(postsURL.create)
+    await expect(page.locator('#field-title')).toBeVisible()
+    await expect(page.locator('.progress-bar')).toBeHidden()
   },
 )
