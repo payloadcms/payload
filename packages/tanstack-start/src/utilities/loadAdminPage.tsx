@@ -2,12 +2,13 @@ import type { ImportMap, MetaConfig, SanitizedConfig } from 'payload'
 
 import { getViewportContent } from '@payloadcms/ui/shared'
 import { renderServerComponent } from '@tanstack/react-start/rsc'
+import { getRequest } from '@tanstack/react-start/server'
+import { initReq } from 'payload'
 
 import type { AdminPageMetadata } from './meta.js'
 
 import { getRequestI18n } from './getRequestI18n.server.js'
-import { initReq } from './initReq.server.js'
-import { createPageRenderServerAdapter } from './serverAdapter.server.js'
+import { createPageRenderServerAdapter, tanstackServerAdapter } from './serverAdapter.server.js'
 
 export type LoadAdminPageArgs = {
   config: SanitizedConfig
@@ -165,6 +166,7 @@ export async function loadAdminPage({
   // redirect lands on a clean `/admin/login`.
   const segments = splatSegments.length > 0 ? splatSegments : undefined
   const searchParams = search ?? {}
+  const requestURL = getRequest().url
 
   // Records navigation requested via `req.server.*` (including throws swallowed
   // by RSC streaming deep inside view components). Read after the render.
@@ -181,6 +183,7 @@ export async function loadAdminPage({
       configPromise: args.configPromise,
       importMap: args.importMap,
       overrides: args.overrides,
+      requestURL,
       serverAdapter: pageServerAdapter,
     })
     userAgent = result.headers.get('user-agent') ?? undefined
@@ -211,6 +214,8 @@ export async function loadAdminPage({
           configPromise: args.configPromise,
           importMap: args.importMap,
           overrides: args.overrides,
+          requestURL,
+          serverAdapter: tanstackServerAdapter,
         }),
       params: Promise.resolve({ segments: splatSegments }),
       searchParams: Promise.resolve(searchParams),
