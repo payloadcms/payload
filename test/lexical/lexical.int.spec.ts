@@ -1305,7 +1305,7 @@ describe('Lexical block interface generation', () => {
         ],
       } as unknown as Config
 
-      const sanitizedConfig = await sanitizeConfig(config)
+      const sanitizedConfig = sanitizeConfig(config)
       const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
       const defs = jsonSchema.$defs!
 
@@ -1353,7 +1353,7 @@ describe('Lexical link fields interface generation', () => {
         ],
       } as unknown as Config
 
-      const sanitizedConfig = await sanitizeConfig(config)
+      const sanitizedConfig = sanitizeConfig(config)
       const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
       const defs = jsonSchema.$defs!
 
@@ -1397,7 +1397,7 @@ describe('Lexical upload node type generation', () => {
       ],
     } as unknown as Config
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     // `generateTypes` only needs the ID type - avoid standing up a DB adapter.
     ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
       defaultIDType: 'text',
@@ -1436,7 +1436,7 @@ describe('Lexical inline block node type generation', () => {
       ],
     } as unknown as Config
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     // `generateTypes` only needs the ID type - avoid standing up a DB adapter.
     ;(sanitizedConfig as unknown as { db: { defaultIDType: string } }).db = {
       defaultIDType: 'text',

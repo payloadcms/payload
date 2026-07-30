@@ -8,7 +8,7 @@ import { configToJSONSchema, entityToStandaloneJSONSchema } from './configToJSON
 import type { Block, BlocksField, RichTextField } from '../fields/config/types.js'
 
 describe('configToJSONSchema', () => {
-  it('should handle optional arrays with required fields', async () => {
+  it('should handle optional arrays with required fields', () => {
     // @ts-expect-error
     const config: Config = {
       collections: [
@@ -33,7 +33,7 @@ describe('configToJSONSchema', () => {
       ],
     }
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     expect(schema?.$defs?.test).toStrictEqual({
@@ -65,7 +65,7 @@ describe('configToJSONSchema', () => {
     })
   })
 
-  it('should generate separate input types when generateInputTypes is enabled', async () => {
+  it('should generate separate input types when generateInputTypes is enabled', () => {
     // @ts-expect-error partial config
     const config: Config = {
       collections: [
@@ -90,7 +90,7 @@ describe('configToJSONSchema', () => {
       typescript: { generateInputTypes: true },
     }
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     // Output (read) shape is unchanged: relationships may be populated, managed fields are present,
@@ -129,7 +129,7 @@ describe('configToJSONSchema', () => {
     })
   })
 
-  it('should keep _status in the input schema for draft-enabled entities', async () => {
+  it('should keep _status in the input schema for draft-enabled entities', () => {
     // @ts-expect-error partial config
     const config: Config = {
       collections: [
@@ -141,7 +141,7 @@ describe('configToJSONSchema', () => {
       ],
     }
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     const entity = sanitizedConfig.collections[0]!
     const schema = entityToStandaloneJSONSchema({
       config: sanitizedConfig,
@@ -158,15 +158,12 @@ describe('configToJSONSchema', () => {
     expect(schema.properties?.updatedAt).toBeUndefined()
   })
 
-  it('should skip input types by default and generate them when enabled', async () => {
+  it('should skip input types by default and generate them when enabled', () => {
     // @ts-expect-error partial config
     const offByDefault: Config = {
       collections: [{ slug: 'posts', fields: [{ name: 'title', type: 'text' }] }],
     }
-    const { jsonSchema: defaultSchema } = configToJSONSchema(
-      await sanitizeConfig(offByDefault),
-      'text',
-    )
+    const { jsonSchema: defaultSchema } = configToJSONSchema(sanitizeConfig(offByDefault), 'text')
     expect(defaultSchema?.$defs?.posts_input).toBeUndefined()
     expect(defaultSchema?.properties?.collectionsInput).toBeUndefined()
 
@@ -175,15 +172,12 @@ describe('configToJSONSchema', () => {
       collections: [{ slug: 'posts', fields: [{ name: 'title', type: 'text' }] }],
       typescript: { generateInputTypes: true },
     }
-    const { jsonSchema: enabledSchema } = configToJSONSchema(
-      await sanitizeConfig(enabled),
-      'text',
-    )
+    const { jsonSchema: enabledSchema } = configToJSONSchema(sanitizeConfig(enabled), 'text')
     expect(enabledSchema?.$defs?.posts_input).toBeDefined()
     expect(enabledSchema?.properties?.collectionsInput).toBeDefined()
   })
 
-  it('should generate Input-suffixed definitions for named interfaces and blocks', async () => {
+  it('should generate Input-suffixed definitions for named interfaces and blocks', () => {
     // @ts-expect-error partial config
     const config: Config = {
       collections: [
@@ -216,7 +210,7 @@ describe('configToJSONSchema', () => {
       typescript: { generateInputTypes: true },
     }
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     // Read-shaped named interface keeps the populated-doc union...
@@ -237,7 +231,7 @@ describe('configToJSONSchema', () => {
     })
   })
 
-  it('passes the variant to field-level jsonSchema transforms', async () => {
+  it('passes the variant to field-level jsonSchema transforms', () => {
     // @ts-expect-error partial config
     const config: Config = {
       collections: [
@@ -255,14 +249,14 @@ describe('configToJSONSchema', () => {
       typescript: { generateInputTypes: true },
     }
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     expect((schema?.$defs?.posts as JSONSchema4).properties!.custom.description).toBe('output')
     expect((schema?.$defs?.posts_input as JSONSchema4).properties!.custom.description).toBe('input')
   })
 
-  it('should handle block fields with no blocks', async () => {
+  it('should handle block fields with no blocks', () => {
     // @ts-expect-error
     const config: Config = {
       collections: [
@@ -318,7 +312,7 @@ describe('configToJSONSchema', () => {
       ],
     }
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     expect(schema?.$defs?.test).toStrictEqual({
@@ -354,7 +348,7 @@ describe('configToJSONSchema', () => {
     })
   })
 
-  it('keeps the first block interface name clean and content-hashes the colliding one', async () => {
+  it('keeps the first block interface name clean and content-hashes the colliding one', () => {
     // @ts-expect-error - partial config for testing
     const config: Config = {
       collections: [
@@ -389,7 +383,7 @@ describe('configToJSONSchema', () => {
       ],
     }
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
     const defs = schema.$defs!
 
@@ -429,7 +423,7 @@ describe('configToJSONSchema', () => {
     )
   })
 
-  it('should handle tabs and named tabs with required fields', async () => {
+  it('should handle tabs and named tabs with required fields', () => {
     // @ts-expect-error
     const config: Config = {
       collections: [
@@ -478,7 +472,7 @@ describe('configToJSONSchema', () => {
       ],
     }
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     expect(schema?.$defs?.test).toStrictEqual({
@@ -517,7 +511,7 @@ describe('configToJSONSchema', () => {
     })
   })
 
-  it('should handle custom typescript schema and JSON field schema', async () => {
+  it('should handle custom typescript schema and JSON field schema', () => {
     const customSchema: JSONSchema4 = {
       type: 'object',
       properties: {
@@ -554,7 +548,7 @@ describe('configToJSONSchema', () => {
       ],
     }
 
-    const sanitizedConfig = await sanitizeConfig(config as Config)
+    const sanitizedConfig = sanitizeConfig(config as Config)
     const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     expect(schema?.$defs?.test).toStrictEqual({
@@ -572,7 +566,7 @@ describe('configToJSONSchema', () => {
     })
   })
 
-  it('should handle same block object being referenced in both collection and config.blocks', async () => {
+  it('should handle same block object being referenced in both collection and config.blocks', () => {
     const sharedBlock: Block = {
       slug: 'sharedBlock',
       interfaceName: 'SharedBlock',
@@ -612,7 +606,7 @@ describe('configToJSONSchema', () => {
     }
 
     // Ensure both rich text editor are sanitized
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     expect(typeof (sanitizedConfig?.blocks?.[0]?.fields?.[0] as RichTextField)?.editor).toBe(
       'object',
     )
@@ -663,7 +657,7 @@ describe('configToJSONSchema', () => {
     expect(schema?.$defs?.SharedBlock).toStrictEqual(expectedBlockSchema)
   })
 
-  it('content-hashes a colliding explicit interfaceName instead of overwriting it', async () => {
+  it('content-hashes a colliding explicit interfaceName instead of overwriting it', () => {
     // Two different blocks both set `interfaceName: 'Hero'` - each must keep its own definition.
     const config: Config = {
       collections: [
@@ -693,7 +687,7 @@ describe('configToJSONSchema', () => {
       ],
     } as unknown as Config
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
     const defs = jsonSchema.$defs!
 
@@ -709,7 +703,7 @@ describe('configToJSONSchema', () => {
     expect(shapeOf(heroNames[0]!)).not.toBe(shapeOf(heroNames[1]!))
   })
 
-  it('reuses one definition when the same block is registered more than once', async () => {
+  it('reuses one definition when the same block is registered more than once', () => {
     // Reusing one block across fields registers an identical schema each time, so it dedupes.
     const heroBlock = {
       slug: 'hero',
@@ -730,14 +724,14 @@ describe('configToJSONSchema', () => {
       ],
     } as unknown as Config
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     const { jsonSchema } = configToJSONSchema(sanitizedConfig, 'text')
 
     const heroNames = Object.keys(jsonSchema.$defs!).filter((k) => /^Hero(_[0-9A-F]{8})?$/.test(k))
     expect(heroNames).toEqual(['Hero'])
   })
 
-  it('should allow overriding required to false', async () => {
+  it('should allow overriding required to false', () => {
     // @ts-expect-error
     const config: Config = {
       collections: [
@@ -763,14 +757,14 @@ describe('configToJSONSchema', () => {
       ],
     }
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     const { jsonSchema: schema } = configToJSONSchema(sanitizedConfig, 'text')
 
     // @ts-expect-error
     expect(schema.$defs.test.properties.title.required).toStrictEqual(false)
   })
 
-  it('should propagate forceInlineBlocks to nested fields (array, group, tab)', async () => {
+  it('should propagate forceInlineBlocks to nested fields (array, group, tab)', () => {
     const namedBlock: Block = {
       slug: 'myBlock',
       interfaceName: 'MyBlock',
@@ -800,7 +794,7 @@ describe('configToJSONSchema', () => {
       ],
     }
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
 
     // Without forceInlineBlocks: blocks field uses $ref
     const { jsonSchema: schemaDefault } = configToJSONSchema(sanitizedConfig, 'text')
@@ -824,7 +818,7 @@ describe('configToJSONSchema', () => {
     expect(grpBlocksInline.properties?.blockType).toStrictEqual({ const: 'myBlock' })
   })
 
-  it('entityToStandaloneJSONSchema bundles only the definitions an entity references', async () => {
+  it('entityToStandaloneJSONSchema bundles only the definitions an entity references', () => {
     const sharedBlock: Block = {
       slug: 'sharedBlock',
       interfaceName: 'SharedBlock',
@@ -861,7 +855,7 @@ describe('configToJSONSchema', () => {
       ],
     }
 
-    const sanitizedConfig = await sanitizeConfig(config)
+    const sanitizedConfig = sanitizeConfig(config)
     const entity = sanitizedConfig.collections.find(
       (collection) => collection.slug === 'with-refs',
     )!
