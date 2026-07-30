@@ -483,6 +483,8 @@ export const azTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Üzr istəyirik - sizin tələbinizə uyğun heç nə yoxdur.',
     sort: 'Sırala',
     sortByLabelDirection: '{{label}} {{direction}} ilə sırala',
+    sortByOrderToReorder:
+      'Sətirlərin sırasını dəyişdirmək üçün əvvəlcə onları "Order" sütununa görə çeşidləməlisiniz.',
     stayOnThisPage: 'Bu səhifədə qal',
     submissionSuccessful: 'Təqdimat uğurlu oldu.',
     submit: 'Təqdim et',

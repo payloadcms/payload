@@ -479,6 +479,8 @@ export const daTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Beklager—der er intet, der svarer til din handling.',
     sort: 'Sorter',
     sortByLabelDirection: 'Sorter efter {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'For at omarrangere rækkerne skal du først sortere dem efter kolonnen "Order".',
     stayOnThisPage: 'Forbliv på siden',
     submissionSuccessful: 'Indsendt.',
     submit: 'Send',

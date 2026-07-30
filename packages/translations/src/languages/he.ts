@@ -464,6 +464,7 @@ export const heTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'מצטערים - אין תוצאות התואמות את הבקשה.',
     sort: 'מיין',
     sortByLabelDirection: 'מיין לפי {{label}} {{direction}}',
+    sortByOrderToReorder: 'כדי לשנות את סדר השורות, עליך תחילה למיין אותן לפי עמודת "Order".',
     stayOnThisPage: 'הישאר בדף זה',
     submissionSuccessful: 'נשלח בהצלחה.',
     submit: 'שלח',

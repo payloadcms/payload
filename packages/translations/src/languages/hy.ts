@@ -481,6 +481,8 @@ export const hyTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Ներողություն, Ձեր հարցմանը համապատասխան ոչինչ չկա։',
     sort: 'Տեսակավորել',
     sortByLabelDirection: 'Տեսակավորել ըստ {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Տողերը վերադասավորելու համար նախ անհրաժեշտ է դրանք դասավորել "Order" սյան միջոցով:',
     stayOnThisPage: 'Մնալ այս էջում',
     submissionSuccessful: 'Հայտը հաջողությամբ ուղարկվել է։',
     submit: 'Հաստատել',
