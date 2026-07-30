@@ -1,7 +1,10 @@
 import type { CollectionSlug, PayloadRequest } from 'payload'
 
+import { ValidationError } from 'payload'
+
 import type { MCPToolResponse } from '../../../types.js'
 
+import { withMcpErrorType } from '../../../telemetry/errorType.js'
 import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 
 const getValidationErrors = (error: unknown): undefined | unknown[] => {
@@ -63,7 +66,7 @@ export const formatCollectionError = ({
     ? `\n\nUse this schema for data:\n\`\`\`json\n${JSON.stringify(schema)}\n\`\`\``
     : ''
 
-  return {
+  const response: MCPToolResponse = {
     content: [
       {
         type: 'text',
@@ -81,4 +84,8 @@ export const formatCollectionError = ({
         }
       : {}),
   }
+
+  return error instanceof ValidationError
+    ? withMcpErrorType({ errorType: 'validation', response })
+    : response
 }

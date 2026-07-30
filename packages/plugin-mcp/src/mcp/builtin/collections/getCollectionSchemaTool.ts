@@ -2,6 +2,7 @@ import { getAccessResults } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
+import { withMcpErrorType } from '../../../telemetry/errorType.js'
 import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
 
 export const getCollectionSchemaTool = defineCollectionTool({
@@ -24,15 +25,18 @@ export const getCollectionSchemaTool = defineCollectionTool({
     : (await getAccessResults({ req })).collections?.[collectionSlug]
 
   if (!authorizedMCP.overrideAccess && !permissions?.create && !permissions?.update) {
-    return {
-      content: [
-        {
-          type: 'text',
-          text: `Error: MCP access to "getCollectionSchema" is not enabled for collection "${collectionSlug}"`,
-        },
-      ],
-      isError: true,
-    }
+    return withMcpErrorType({
+      errorType: 'access',
+      response: {
+        content: [
+          {
+            type: 'text',
+            text: `Error: MCP access to "getCollectionSchema" is not enabled for collection "${collectionSlug}"`,
+          },
+        ],
+        isError: true,
+      },
+    })
   }
 
   const inputSchema = getCollectionInputSchema({
@@ -42,10 +46,13 @@ export const getCollectionSchemaTool = defineCollectionTool({
   })
 
   if (!inputSchema) {
-    return {
-      content: [{ type: 'text', text: `Error: Collection "${collectionSlug}" not found` }],
-      isError: true,
-    }
+    return withMcpErrorType({
+      errorType: 'bad-request',
+      response: {
+        content: [{ type: 'text', text: `Error: Collection "${collectionSlug}" not found` }],
+        isError: true,
+      },
+    })
   }
 
   const uploadConfig = req.payload.collections[collectionSlug]?.config.upload

@@ -13,6 +13,8 @@ import type {
   ToolInputSchema,
 } from '../types.js'
 
+import { withMcpErrorType } from '../telemetry/errorType.js'
+import { createMcpServerTelemetry } from '../telemetry/index.js'
 import { getLogger } from '../utils/getLogger.js'
 import { toStandardSchema } from '../utils/toStandardSchema.js'
 
@@ -66,6 +68,8 @@ export const buildMcpServer = ({
     return rest
   }
 
+  const wrapToolHandler = createMcpServerTelemetry({ req, server })
+
   /**
    * Runs a collection/global tool call:
    * - reads `collectionSlug` / `globalSlug` from the input
@@ -87,15 +91,18 @@ export const buildMcpServer = ({
     const slug = toolInput[slugKey] as string | undefined
 
     if (!slug) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error: "${item.mcpName}" requires ${slugKey}. Use getConfigInfo to inspect ${entity} slugs.`,
-          },
-        ],
-        isError: true,
-      }
+      return withMcpErrorType({
+        errorType: 'bad-request',
+        response: {
+          content: [
+            {
+              type: 'text',
+              text: `Error: "${item.mcpName}" requires ${slugKey}. Use getConfigInfo to inspect ${entity} slugs.`,
+            },
+          ],
+          isError: true,
+        },
+      })
     }
 
     const match = authorizedMCP.items.find(
@@ -108,15 +115,18 @@ export const buildMcpServer = ({
     )
 
     if (!match) {
-      return {
-        content: [
-          {
-            type: 'text',
-            text: `Error: MCP access to "${item.mcpName}" is not enabled for ${entity} "${slug}"`,
-          },
-        ],
-        isError: true,
-      }
+      return withMcpErrorType({
+        errorType: 'access',
+        response: {
+          content: [
+            {
+              type: 'text',
+              text: `Error: MCP access to "${item.mcpName}" is not enabled for ${entity} "${slug}"`,
+            },
+          ],
+          isError: true,
+        },
+      })
     }
 
     const handlerArgs = {
@@ -161,8 +171,9 @@ export const buildMcpServer = ({
               description: item.tool.description,
               inputSchema: toStandardSchema(inputSchema),
             },
-            async (input: unknown, ctx: ServerContext) =>
+            wrapToolHandler(item, async (input, ctx) =>
               callEntityTool({ input, item, serverContext: ctx }),
+            ),
           )
           logger.info(`✅ Tool: ${item.mcpName} Registered.`)
           break
@@ -218,7 +229,7 @@ export const buildMcpServer = ({
               description: tool.description,
               inputSchema: tool.input ? toStandardSchema(tool.input) : undefined,
             },
-            async (input: unknown, ctx: ServerContext) => {
+            wrapToolHandler(item, async (input, ctx) => {
               const toolInput = (input ?? {}) as Record<string, unknown>
               const response = await tool.handler({
                 authorizedMCP,
@@ -232,7 +243,7 @@ export const buildMcpServer = ({
                 response,
                 toolName: item.mcpName,
               })
-            },
+            }),
           )
           logger.info(`✅ Tool: ${item.mcpName} Registered.`)
           break
