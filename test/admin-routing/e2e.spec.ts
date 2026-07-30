@@ -11,10 +11,14 @@ import { postsSlug } from './collections/Posts.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 const clientChunkPattern = /\/assets\/[^/]+\.js(?:\?.*)?$/
+const isPostsListRSCRequest = (url: URL) =>
+  url.pathname.endsWith(`/admin/collections/${postsSlug}`) && url.searchParams.has('_rsc')
 const serverFunctionPattern = /\/_serverFn\//
 
 let releaseClientChunk: (() => void) | undefined
 let pendingClientChunk: Promise<void> | undefined
+let releaseNextRSCRequest: (() => void) | undefined
+let pendingNextRSCRequest: Promise<void> | undefined
 let releaseServerFunction: (() => void) | undefined
 let pendingServerFunction: Promise<void> | undefined
 
@@ -61,14 +65,19 @@ const expectVisibleRouteProgress = async (page: Page) => {
 
 test.afterEach(async ({ page }) => {
   releaseClientChunk?.()
+  releaseNextRSCRequest?.()
   releaseServerFunction?.()
   await pendingClientChunk
+  await pendingNextRSCRequest
   await pendingServerFunction
   releaseClientChunk = undefined
   pendingClientChunk = undefined
+  releaseNextRSCRequest = undefined
+  pendingNextRSCRequest = undefined
   releaseServerFunction = undefined
   pendingServerFunction = undefined
   await page.unroute(clientChunkPattern)
+  await page.unroute(isPostsListRSCRequest)
   await page.unroute(serverFunctionPattern)
 })
 
@@ -157,3 +166,45 @@ test(
     await expect(page.locator('.progress-bar')).toBeHidden()
   },
 )
+
+test('should show progress bar on page navigation', { framework: 'next' }, async ({ page }) => {
+  test.skip(
+    process.env.PAYLOAD_TEST_PROD !== 'true',
+    'A production RSC request is required to hold the route transition open.',
+  )
+
+  const { serverURL } = await initPayloadE2ENoConfig({ dirname })
+  const postsURL = new AdminUrlUtil(serverURL, postsSlug)
+
+  let isNextRSCRequestBlocked = false
+  const nextRSCRequestGate = new Promise<void>((resolve) => {
+    releaseNextRSCRequest = resolve
+  })
+
+  await page.route(
+    isPostsListRSCRequest,
+    async (route) => {
+      isNextRSCRequestBlocked = true
+      pendingNextRSCRequest = (async () => {
+        await nextRSCRequestGate
+        await route.continue()
+      })()
+      await pendingNextRSCRequest
+    },
+    { times: 1 },
+  )
+
+  await ensureCompilationIsDone({ page, serverURL })
+  await page.goto(postsURL.admin)
+  await expect(page.locator('.progress-bar')).toBeHidden()
+  await page.locator('.collections__card-list .card').first().click()
+  await expect.poll(() => isNextRSCRequestBlocked).toBe(true)
+  await expectVisibleRouteProgress(page)
+
+  releaseNextRSCRequest?.()
+  releaseNextRSCRequest = undefined
+
+  await expect(page.locator('.list-header')).toBeVisible()
+  expect(page.url()).toContain(postsURL.list)
+  await expect(page.locator('.progress-bar')).toBeHidden()
+})
