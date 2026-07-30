@@ -479,6 +479,7 @@ export const enTranslations = {
     sorryNotFound: 'Sorry—there is nothing to correspond with your request.',
     sort: 'Sort',
     sortByLabelDirection: 'Sort by {{label}} {{direction}}',
+    sortByOrderToReorder: 'To reorder the rows you must first sort them by the "Order" column.',
     stayOnThisPage: 'Stay on this page',
     submissionSuccessful: 'Submission Successful.',
     submit: 'Submit',

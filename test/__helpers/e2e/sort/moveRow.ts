@@ -4,7 +4,7 @@ import { expect } from '@playwright/test'
 
 import { closeAllToasts } from '../helpers.js'
 
-const mustSortByOrderMessage = 'To reorder the rows you must first sort them by the "Order" column'
+const mustSortByOrderMessage = 'To reorder the rows you must first sort them by the "Order" column.'
 
 export async function moveRow(
   page: Page,
