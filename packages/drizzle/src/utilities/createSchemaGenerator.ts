@@ -43,6 +43,7 @@ export const createSchemaGenerator = ({
   corePackageSuffix,
   defaultOutputFile,
   enumImport,
+  extraConfigReturnType,
   schemaImport,
   tableImport,
 }: {
@@ -50,6 +51,7 @@ export const createSchemaGenerator = ({
   corePackageSuffix: string
   defaultOutputFile?: string
   enumImport?: string
+  extraConfigReturnType?: string
   schemaImport?: string
   tableImport: string
 }): GenerateSchema => {
@@ -106,6 +108,9 @@ export const createSchemaGenerator = ({
     addImport(corePackage, 'index')
     addImport(corePackage, 'uniqueIndex')
     addImport(corePackage, 'foreignKey')
+    if (extraConfigReturnType) {
+      addImport(corePackage, `type ${extraConfigReturnType}`)
+    }
 
     addImport(`${this.packageName}/drizzle`, 'sql')
     addImport(`${this.packageName}/drizzle`, 'relations')
@@ -157,6 +162,21 @@ export const createSchemaGenerator = ({
 
     for (const tableName in this.rawTables) {
       const table = this.rawTables[tableName]
+
+      // Promote column-level references with custom FK names to table-level foreignKeys
+      for (const [key, column] of Object.entries(table.columns)) {
+        if (column.reference?.foreignKeyName) {
+          if (!table.foreignKeys) {
+            table.foreignKeys = {}
+          }
+          table.foreignKeys[`${key}_col_fk`] = {
+            name: column.reference.foreignKeyName,
+            columns: [key],
+            foreignColumns: [{ name: column.reference.name, table: column.reference.table }],
+            onDelete: column.reference.onDelete,
+          }
+        }
+      }
 
       const extrasDeclarations: string[] = []
 
@@ -212,7 +232,7 @@ ${Object.entries(table.columns)
   .join('\n')}
 }${
         extrasDeclarations.length
-          ? `, (columns) => [
+          ? `, (columns)${extraConfigReturnType ? `: ${extraConfigReturnType}[]` : ''} => [
     ${extrasDeclarations.join(' ')}
 ]`
           : ''

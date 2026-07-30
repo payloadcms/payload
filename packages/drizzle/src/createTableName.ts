@@ -1,12 +1,11 @@
 import type { DBIdentifierName } from 'payload'
 
-import { APIError } from 'payload'
 import toSnakeCase from 'to-snake-case'
 
 import type { DrizzleAdapter } from './types.js'
 
 type Args = {
-  adapter: Pick<DrizzleAdapter, 'tableNameMap' | 'versionsSuffix'>
+  adapter: Pick<DrizzleAdapter, 'getIdentifier' | 'tableNameMap' | 'versionsSuffix'>
   /** The collection, global or field config **/
   config: {
     dbName?: DBIdentifierName
@@ -20,7 +19,12 @@ type Args = {
   prefix?: string
   /** For tables based on fields that could have both enumName and dbName (ie: select with hasMany), default: 'dbName' */
   target?: 'dbName' | 'enumName'
-  /** Throws error if true for postgres when table and enum names exceed 63 characters */
+  /**
+   * @deprecated No longer enforced. `adapter.getIdentifier` emits warnings for
+   * user-provided `dbName` / `enumName` values exceeding the database's max
+   * identifier length, and compresses segment-derived names when
+   * `shouldCompressIdentifiers` is enabled.
+   */
   throwValidationError?: boolean
   /** Adds the versions suffix to the default table name - should only be used on the base collection to avoid duplicate suffixing */
   versions?: boolean
@@ -39,7 +43,6 @@ export const createTableName = ({
   parentTableName,
   prefix = '',
   target = 'dbName',
-  throwValidationError = false,
   versions = false,
   versionsCustomName = false,
 }: Args): string => {
@@ -51,7 +54,7 @@ export const createTableName = ({
     defaultTableName = `_${defaultTableName}${adapter.versionsSuffix}`
   }
 
-  let customTableNameResult: string
+  let customTableNameResult: string | undefined
 
   if (!customNameDefinition && target === 'enumName') {
     customNameDefinition = config['dbName']
@@ -68,21 +71,14 @@ export const createTableName = ({
     }
   }
 
-  const result = customTableNameResult || defaultTableName
+  const type: 'enum' | 'table' = target === 'enumName' ? 'enum' : 'table'
+
+  const result =
+    customTableNameResult !== undefined
+      ? adapter.getIdentifier({ type, customName: customTableNameResult })
+      : adapter.getIdentifier({ type, segments: [defaultTableName] })
 
   adapter.tableNameMap.set(defaultTableName, result)
-
-  if (!throwValidationError) {
-    return result
-  }
-
-  if (result.length > 63) {
-    throw new APIError(
-      `Exceeded max identifier length for table or enum name of 63 characters. Invalid name: ${result}.
-Tip: You can use the dbName property to reduce the table name length.
-      `,
-    )
-  }
 
   return result
 }

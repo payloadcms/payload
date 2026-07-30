@@ -74,6 +74,12 @@ export type Args = {
    * @experimental This only works when there are not other tables or enums of the same name in the database under a different schema. Awaiting fix from Drizzle.
    */
   schemaName?: string
+  /**
+   * Pass `true` to enable identifier compression for indices, foreign keys, constraints, etc.
+   * This is required if you have long collection or field names that would cause the generated index or foreign key names to exceed PostgreSQL's 63 character limit.
+   * @default false
+   */
+  shouldCompressIdentifiers?: boolean
   tablesFilter?: string[]
   transactionOptions?: false | PgTransactionConfig
   versionsSuffix?: string

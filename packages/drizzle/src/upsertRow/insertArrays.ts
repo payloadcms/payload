@@ -96,7 +96,11 @@ export const insertArrays = async ({
     }
 
     // Insert locale rows
-    if (adapter.tables[`${tableName}${adapter.localesSuffix}`] && row.locales.length > 0) {
+    const localeTableName = adapter.getIdentifier({
+      type: 'table',
+      segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
+    })
+    if (adapter.tables[localeTableName] && row.locales.length > 0) {
       if (!row.locales[0]._parentID) {
         row.locales = row.locales.map((localeRow) => {
           if (typeof localeRow._getParentID === 'function') {
@@ -108,7 +112,7 @@ export const insertArrays = async ({
       }
       await adapter.insert({
         db,
-        tableName: `${tableName}${adapter.localesSuffix}`,
+        tableName: localeTableName,
         values: row.locales,
       })
     }

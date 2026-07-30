@@ -16,8 +16,6 @@ import type {
 } from '../types.js'
 
 import { createTableName } from '../createTableName.js'
-import { buildForeignKeyName } from '../utilities/buildForeignKeyName.js'
-import { buildIndexName } from '../utilities/buildIndexName.js'
 import { isUUIDType } from '../utilities/isUUIDType.js'
 import { traverseFields } from './traverseFields.js'
 
@@ -188,7 +186,10 @@ export const buildTable = ({
   adapter.rawTables[tableName] = table
 
   if (hasLocalizedField || localizedRelations.size) {
-    const localeTableName = `${tableName}${adapter.localesSuffix}`
+    const localeTableName = adapter.getIdentifier({
+      type: 'table',
+      segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
+    })
     adapter.rawTables[localeTableName] = localesTable
 
     localesColumns.id = {
@@ -211,10 +212,9 @@ export const buildTable = ({
     }
 
     localesIndexes._localeParent = {
-      name: buildIndexName({
-        name: `${localeTableName}_locale_parent_id_unique`,
-        adapter,
-        appendSuffix: false,
+      name: adapter.getIdentifier({
+        type: 'index',
+        segments: [localeTableName, 'locale_parent_id_unique'],
       }),
       on: ['_locale', '_parentID'],
       unique: true,
@@ -225,7 +225,12 @@ export const buildTable = ({
       columns: localesColumns,
       foreignKeys: {
         _parentIdFk: {
-          name: buildForeignKeyName({ name: `${localeTableName}_parent_id`, adapter }),
+          name: adapter.getIdentifier({
+            type: 'fk',
+            parentTable: localeTableName,
+            segments: [localeTableName, 'parent_id'],
+            suffix: '_fk',
+          }),
           columns: ['_parentID'],
           foreignColumns: [
             {
@@ -321,13 +326,18 @@ export const buildTable = ({
         columns.push('_locale')
       }
 
-      let name = columns.join('_')
-      // truncate against the limit, buildIndexName will handle collisions
-      if (name.length > 63) {
-        name = 'compound_index'
-      }
-
-      const indexName = buildIndexName({ name, adapter })
+      const legacyRaw = columns.join('_')
+      const indexName = adapter.shouldCompressIdentifiers
+        ? adapter.getIdentifier({
+            type: 'index',
+            segments: [tableName, ...columns],
+            suffix: '_idx',
+          })
+        : adapter.getIdentifier({
+            type: 'index',
+            segments: [legacyRaw.length > 63 ? 'compound_index' : legacyRaw],
+            suffix: '_idx',
+          })
 
       getTableToUse().indexes[indexName] = {
         name: indexName,
@@ -339,7 +349,10 @@ export const buildTable = ({
 
   if (isRoot) {
     if (hasManyTextField) {
-      const textsTableName = `${rootTableName}_texts`
+      const textsTableName = adapter.getIdentifier({
+        type: 'table',
+        segments: [rootTableName, 'texts'],
+      })
       adapter.rawTables[textsTableName] = textsTable
 
       const columns: Record<string, RawColumn> = {
@@ -380,10 +393,9 @@ export const buildTable = ({
 
       const textsTableIndexes: Record<string, RawIndex> = {
         orderParentIdx: {
-          name: buildIndexName({
-            name: `${textsTableName}_order_parent`,
-            adapter,
-            appendSuffix: false,
+          name: adapter.getIdentifier({
+            type: 'index',
+            segments: [textsTableName, 'order_parent'],
           }),
           on: ['order', 'parent'],
         },
@@ -391,17 +403,20 @@ export const buildTable = ({
 
       if (hasManyTextField === 'index') {
         textsTableIndexes.text_idx = {
-          name: buildIndexName({ name: `${textsTableName}_text`, adapter }),
+          name: adapter.getIdentifier({
+            type: 'index',
+            segments: [textsTableName, 'text'],
+            suffix: '_idx',
+          }),
           on: 'text',
         }
       }
 
       if (hasLocalizedManyTextField) {
         textsTableIndexes.localeParent = {
-          name: buildIndexName({
-            name: `${textsTableName}_locale_parent`,
-            adapter,
-            appendSuffix: false,
+          name: adapter.getIdentifier({
+            type: 'index',
+            segments: [textsTableName, 'locale_parent'],
           }),
           on: ['locale', 'parent'],
         }
@@ -412,7 +427,12 @@ export const buildTable = ({
         columns,
         foreignKeys: {
           parentFk: {
-            name: buildForeignKeyName({ name: `${textsTableName}_parent`, adapter }),
+            name: adapter.getIdentifier({
+              type: 'fk',
+              parentTable: textsTableName,
+              segments: [textsTableName, 'parent'],
+              suffix: '_fk',
+            }),
             columns: ['parent'],
             foreignColumns: [
               {
@@ -445,7 +465,10 @@ export const buildTable = ({
     }
 
     if (hasManyNumberField) {
-      const numbersTableName = `${rootTableName}_numbers`
+      const numbersTableName = adapter.getIdentifier({
+        type: 'table',
+        segments: [rootTableName, 'numbers'],
+      })
       adapter.rawTables[numbersTableName] = numbersTable
       const columns: Record<string, RawColumn> = {
         id: {
@@ -484,24 +507,31 @@ export const buildTable = ({
 
       const numbersTableIndexes: Record<string, RawIndex> = {
         orderParentIdx: {
-          name: buildIndexName({ name: `${numbersTableName}_order_parent`, adapter }),
+          name: adapter.getIdentifier({
+            type: 'index',
+            segments: [numbersTableName, 'order_parent'],
+            suffix: '_idx',
+          }),
           on: ['order', 'parent'],
         },
       }
 
       if (hasManyNumberField === 'index') {
         numbersTableIndexes.numberIdx = {
-          name: buildIndexName({ name: `${numbersTableName}_number`, adapter }),
+          name: adapter.getIdentifier({
+            type: 'index',
+            segments: [numbersTableName, 'number'],
+            suffix: '_idx',
+          }),
           on: 'number',
         }
       }
 
       if (hasLocalizedManyNumberField) {
         numbersTableIndexes.localeParent = {
-          name: buildIndexName({
-            name: `${numbersTableName}_locale_parent`,
-            adapter,
-            appendSuffix: false,
+          name: adapter.getIdentifier({
+            type: 'index',
+            segments: [numbersTableName, 'locale_parent'],
           }),
           on: ['locale', 'parent'],
         }
@@ -512,7 +542,12 @@ export const buildTable = ({
         columns,
         foreignKeys: {
           parentFk: {
-            name: buildForeignKeyName({ name: `${numbersTableName}_parent`, adapter }),
+            name: adapter.getIdentifier({
+              type: 'fk',
+              parentTable: numbersTableName,
+              segments: [numbersTableName, 'parent'],
+              suffix: '_fk',
+            }),
             columns: ['parent'],
             foreignColumns: [
               {
@@ -575,33 +610,57 @@ export const buildTable = ({
         }
       }
 
-      const relationshipsTableName = `${tableName}${adapter.relationshipsSuffix}`
+      const relationshipsTableName = adapter.getIdentifier({
+        type: 'table',
+        segments: [tableName, (adapter.relationshipsSuffix ?? '_rels').replace(/^_/, '')],
+      })
 
       const relationshipIndexes: Record<string, RawIndex> = {
         order: {
-          name: buildIndexName({ name: `${relationshipsTableName}_order`, adapter }),
+          name: adapter.getIdentifier({
+            type: 'index',
+            segments: [relationshipsTableName, 'order'],
+            suffix: '_idx',
+          }),
           on: 'order',
         },
         parentIdx: {
-          name: buildIndexName({ name: `${relationshipsTableName}_parent`, adapter }),
+          name: adapter.getIdentifier({
+            type: 'index',
+            segments: [relationshipsTableName, 'parent'],
+            suffix: '_idx',
+          }),
           on: 'parent',
         },
         pathIdx: {
-          name: buildIndexName({ name: `${relationshipsTableName}_path`, adapter }),
+          name: adapter.getIdentifier({
+            type: 'index',
+            segments: [relationshipsTableName, 'path'],
+            suffix: '_idx',
+          }),
           on: 'path',
         },
       }
 
       if (hasLocalizedRelationshipField) {
         relationshipIndexes.localeIdx = {
-          name: buildIndexName({ name: `${relationshipsTableName}_locale`, adapter }),
+          name: adapter.getIdentifier({
+            type: 'index',
+            segments: [relationshipsTableName, 'locale'],
+            suffix: '_idx',
+          }),
           on: 'locale',
         }
       }
 
       const relationshipForeignKeys: Record<string, RawForeignKey> = {
         parentFk: {
-          name: buildForeignKeyName({ name: `${relationshipsTableName}_parent`, adapter }),
+          name: adapter.getIdentifier({
+            type: 'fk',
+            parentTable: relationshipsTableName,
+            segments: [relationshipsTableName, 'parent'],
+            suffix: '_fk',
+          }),
           columns: ['parent'],
           foreignColumns: [
             {
@@ -641,9 +700,11 @@ export const buildTable = ({
         }
 
         relationshipForeignKeys[`${relationTo}IdFk`] = {
-          name: buildForeignKeyName({
-            name: `${relationshipsTableName}_${toSnakeCase(relationTo)}`,
-            adapter,
+          name: adapter.getIdentifier({
+            type: 'fk',
+            parentTable: relationshipsTableName,
+            segments: [relationshipsTableName, toSnakeCase(relationTo)],
+            suffix: '_fk',
           }),
           columns: [colName],
           foreignColumns: [
@@ -666,9 +727,10 @@ export const buildTable = ({
           indexColumns.push('locale')
         }
 
-        const indexName = buildIndexName({
-          name: `${relationshipsTableName}_${formattedRelationTo}_id`,
-          adapter,
+        const indexName = adapter.getIdentifier({
+          type: 'index',
+          segments: [relationshipsTableName, formattedRelationTo, 'id'],
+          suffix: '_idx',
         })
 
         relationshipIndexes[indexName] = {

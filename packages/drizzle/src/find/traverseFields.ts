@@ -213,7 +213,10 @@ export const traverseFields = ({
           }
         }
 
-        const arrayTableNameWithLocales = `${arrayTableName}${adapter.localesSuffix}`
+        const arrayTableNameWithLocales = adapter.getIdentifier({
+          type: 'table',
+          segments: [arrayTableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
+        })
 
         if (adapter.tables[arrayTableNameWithLocales]) {
           withArray.with._locales = {
@@ -353,7 +356,11 @@ export const traverseFields = ({
               }
             }
 
-            if (adapter.tables[`${tableName}${adapter.localesSuffix}`]) {
+            const blockLocalesTableName = adapter.getIdentifier({
+              type: 'table',
+              segments: [tableName, (adapter.localesSuffix ?? '_locales').replace(/^_/, '')],
+            })
+            if (adapter.tables[blockLocalesTableName]) {
               withBlock.with._locales = {
                 with: {},
               }
