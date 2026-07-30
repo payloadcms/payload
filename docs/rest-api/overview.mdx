@@ -667,6 +667,19 @@ export const Orders: CollectionConfig = {
   [Hooks](../hooks/overview).
 </Banner>
 
+#### Root-level routes
+
+Custom endpoints defined in your Payload Config are always mounted under your configured `routes.api` subpath (default: `/api`). If you need a route that is not behind this subpath, add a Next.js [Route Handler](https://nextjs.org/docs/app/api-reference/file-conventions/route) directly in your app folder, outside of the `(payload)` route group. You can still use the Local API inside it:
+
+```ts
+// src/app/my-route/route.ts
+export const GET = async (request: Request) => {
+  return Response.json({
+    message: 'This is an example of a custom route.',
+  })
+}
+```
+
 #### Helpful tips
 
 `req.data`
