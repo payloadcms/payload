@@ -1,5 +1,5 @@
 @layer payload-default {
-  .session-debug {
+  .auth-session-debug {
     background: rgba(20, 20, 24, 0.92);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 8px;
@@ -18,31 +18,31 @@
     z-index: 1000;
   }
 
-  .session-debug__activity {
+  .auth-session-debug__activity {
     align-items: center;
     display: flex;
     gap: 8px;
   }
 
-  .session-debug__activity-indicator {
+  .auth-session-debug__activity-indicator {
     border-radius: 50%;
     height: 8px;
     width: 8px;
   }
 
-  .session-debug__activity--waiting .session-debug__activity-indicator {
+  .auth-session-debug__activity--waiting .auth-session-debug__activity-indicator {
     background: #a1a1aa;
   }
 
-  .session-debug__activity--tracking .session-debug__activity-indicator {
+  .auth-session-debug__activity--tracking .auth-session-debug__activity-indicator {
     background: #f59e0b;
   }
 
-  .session-debug__activity--will-refresh .session-debug__activity-indicator {
+  .auth-session-debug__activity--will-refresh .auth-session-debug__activity-indicator {
     background: #22c55e;
   }
 
-  .session-debug__activity--closed .session-debug__activity-indicator {
+  .auth-session-debug__activity--closed .auth-session-debug__activity-indicator {
     background: #ef4444;
   }
 }

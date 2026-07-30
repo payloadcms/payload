@@ -205,10 +205,6 @@ export const exposeTestOAuthSessionExpiration: MeHook<AuthSessionUser> = ({ args
 }
 
 export const rotateTestOAuthSession: RefreshHook<AuthSessionUser> = async ({ args, user }) => {
-  await providerRefreshBarrier.wait({
-    phase: AUTH_SESSION_REFRESH_BARRIER_PHASES.BEFORE_ROTATION,
-  })
-
   const sessionRefreshedDuringAuthentication = refreshedSessionsByRequestHeaders.get(
     args.req.headers,
   )

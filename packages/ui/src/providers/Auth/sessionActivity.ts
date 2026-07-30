@@ -1,13 +1,18 @@
-export type SessionActivitySource = 'focus' | 'mousemove'
+export type SessionActivitySource = 'focus' | 'keydown' | 'mousemove' | 'route'
 
 export type MarkSessionActivity = (source: SessionActivitySource) => boolean
+
+export type SessionActivityTracker = {
+  record: MarkSessionActivity
+  reset: () => void
+}
 
 export const sessionActivityThrottleMs = 5_000
 
 /**
- * Coalesces focus and mouse movement into periodic session activity.
+ * Coalesces browser and route activity into periodic session activity.
  *
- * The returned function reports whether the activity was accepted. Activity inside the throttle
+ * The tracker reports whether the activity was accepted. Activity inside the throttle
  * interval is ignored and does not call `onActivity`.
  */
 export function createSessionActivityTracker({
@@ -18,20 +23,25 @@ export function createSessionActivityTracker({
   now?: () => number
   onActivity: (source: SessionActivitySource, occurredAt: number) => void
   throttleMs?: number
-}): MarkSessionActivity {
+}): SessionActivityTracker {
   let lastActivityAt: number | undefined
 
-  return (source) => {
-    const occurredAt = now()
+  return {
+    record: (source) => {
+      const occurredAt = now()
 
-    if (lastActivityAt !== undefined && occurredAt - lastActivityAt < throttleMs) {
-      return false
-    }
+      if (lastActivityAt !== undefined && occurredAt - lastActivityAt < throttleMs) {
+        return false
+      }
 
-    lastActivityAt = occurredAt
-    onActivity(source, occurredAt)
+      lastActivityAt = occurredAt
+      onActivity(source, occurredAt)
 
-    return true
+      return true
+    },
+    reset: () => {
+      lastActivityAt = undefined
+    },
   }
 }
 
@@ -43,14 +53,17 @@ export function registerSessionActivityListeners({
   window: Window
 }): () => void {
   const focusListener = () => markActivity('focus')
+  const keydownListener = () => markActivity('keydown')
   const mousemoveListener = () => markActivity('mousemove')
   const mousemoveListenerOptions = { capture: true, passive: true }
 
   window.addEventListener('focus', focusListener, true)
+  window.addEventListener('keydown', keydownListener, true)
   window.addEventListener('mousemove', mousemoveListener, mousemoveListenerOptions)
 
   return () => {
     window.removeEventListener('focus', focusListener, true)
+    window.removeEventListener('keydown', keydownListener, true)
     window.removeEventListener('mousemove', mousemoveListener, mousemoveListenerOptions)
   }
 }

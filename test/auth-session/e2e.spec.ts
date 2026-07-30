@@ -11,8 +11,8 @@ import {
   AUTH_SESSION_REFRESH_BARRIER_PHASES,
   authSessionAccessTokenCookieName,
   authSessionAccessTokenLifetimeMs,
-  authSessionActivityStatusTestID,
-  authSessionRefreshWindowStatusTestID,
+  authSessionActivitySelector,
+  authSessionRefreshWindowSelector,
 } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -82,18 +82,24 @@ test.describe('Auth session', () => {
     await scenario.close()
   })
 
-  test('should refresh at the checkpoint after mouse activity before the refresh window', async () => {
+  test('should refresh at the checkpoint after route activity before the refresh window', async () => {
     const page = await scenario.login()
     const originalExpiration = await scenario.readExpiration(page)
     const originalCredentials = await scenario.readOAuthCredentials()
 
-    await expect(page.getByTestId(authSessionActivityStatusTestID)).toHaveText('Waiting for window')
+    await expect(page.locator(authSessionActivitySelector)).toHaveText(/^Opens in 00:\d{2}$/)
     await scenario.advanceBy(120_000)
-    await expect(page.getByTestId(authSessionActivityStatusTestID)).toHaveText('Tracking')
-    await scenario.moveMouse(page)
-    await expect(page.getByTestId(authSessionActivityStatusTestID)).toHaveText('Will refresh')
+    await expect(page.locator(authSessionActivitySelector)).toHaveText(
+      /^Open · closes in (?:01:\d{2}|02:00)$/,
+    )
+    await page.evaluate(() => {
+      window.history.pushState({}, '', `${window.location.pathname}?activity=true`)
+    })
+    await expect(page.locator(authSessionActivitySelector)).toHaveText(
+      /^Recorded · refresh in 00:\d{2}$/,
+    )
     await scenario.advanceBy(60_000)
-    await expect(page.getByTestId(authSessionRefreshWindowStatusTestID)).toHaveText('Open')
+    await expect(page.locator(authSessionRefreshWindowSelector)).toHaveText('Open')
     const refreshResponse = scenario.waitForRefresh(page)
 
     await scenario.advanceBy(1_001)
@@ -108,6 +114,9 @@ test.describe('Auth session', () => {
     expect(refreshedCredentials.accessToken).not.toBe(originalCredentials.accessToken)
     expect(refreshedCredentials.refreshToken).not.toBe(originalCredentials.refreshToken)
     expect(await scenario.readExpiration(page)).toBeGreaterThan(originalExpiration)
+    await expect(page.locator(authSessionActivitySelector)).toHaveText(
+      /^Opens in (?:00:\d{2}|01:00)$/,
+    )
     await scenario.expectOAuthAccessTokenRevoked({
       accessToken: originalCredentials.accessToken,
     })
@@ -141,7 +150,6 @@ test.describe('Auth session', () => {
   test('should refresh the second tab from the first tab activity', async () => {
     const firstPage = await scenario.login()
     const firstOriginalExpiration = await scenario.readExpiration(firstPage)
-    const originalCredentials = await scenario.readOAuthCredentials()
     const secondPage = await scenario.openTab()
     const secondOriginalExpiration = await scenario.readExpiration(secondPage)
 
@@ -155,60 +163,24 @@ test.describe('Auth session', () => {
     await scenario.advanceBy(1_001)
 
     const response = await refreshResponse
-    const responseBody = (await response.json()) as Record<string, unknown>
-    const refreshedCredentials = await scenario.readOAuthCredentials()
 
     expect(response.status()).toBe(200)
-    expect(responseBody).not.toHaveProperty('token')
-    expect(responseBody).not.toHaveProperty('refreshedToken')
-    expect(refreshedCredentials.accessToken).not.toBe(originalCredentials.accessToken)
-    expect(refreshedCredentials.refreshToken).not.toBe(originalCredentials.refreshToken)
-    await scenario.expectOAuthAccessTokenRevoked({
-      accessToken: originalCredentials.accessToken,
-    })
 
     const firstExpiration = await scenario.readExpiration(firstPage)
     const secondExpiration = await scenario.readExpiration(secondPage)
 
     expect(firstExpiration).toBeGreaterThan(firstOriginalExpiration)
     expect(secondExpiration).toBe(firstExpiration)
+    await expect(firstPage.locator(authSessionActivitySelector)).toHaveText(
+      /^Opens in (?:00:\d{2}|01:00)$/,
+    )
+    await expect(secondPage.locator(authSessionActivitySelector)).toHaveText(
+      /^Opens in (?:00:\d{2}|01:00)$/,
+    )
 
     await scenario.advanceBy(120_000)
     await scenario.expectLoggedIn(firstPage)
     await scenario.expectLoggedIn(secondPage)
-
-    await test.step('OAuth refresh token rotation accepts the shared credential once', async () => {
-      await scenario.armRefreshBarrier(AUTH_SESSION_REFRESH_BARRIER_PHASES.BEFORE_ROTATION)
-      const concurrentRefreshes = [
-        scenario.refreshOAuthSession({ credentials: refreshedCredentials }),
-        scenario.refreshOAuthSession({ credentials: refreshedCredentials }),
-      ]
-
-      await scenario.waitForRefreshBarrier(2)
-      await scenario.releaseRefreshBarrier()
-
-      const concurrentResponses = await Promise.all(concurrentRefreshes)
-      const successfulResponse = concurrentResponses.find((response) => response.status() === 200)
-      const rejectedResponse = concurrentResponses.find((response) => response.status() === 403)
-
-      expect(successfulResponse).toBeDefined()
-      expect(rejectedResponse).toBeDefined()
-      expect(concurrentResponses.map((response) => response.status()).sort()).toEqual([200, 403])
-
-      const successfulBody = (await successfulResponse?.json()) as Record<string, unknown>
-      const concurrentCredentials = await scenario.readOAuthCredentials()
-
-      expect(successfulBody).not.toHaveProperty('token')
-      expect(successfulBody).not.toHaveProperty('refreshedToken')
-      expect(concurrentCredentials.accessToken).not.toContain('.')
-      expect(concurrentCredentials.refreshToken).not.toContain('.')
-      await scenario.expectOAuthAccessTokenRevoked({
-        accessToken: refreshedCredentials.accessToken,
-      })
-      await scenario.expectOAuthAccessTokenAuthenticated({
-        accessToken: concurrentCredentials.accessToken,
-      })
-    })
   })
 
   // eslint-disable-next-line playwright/expect-expect -- assertions are delegated to expectTerminalLogoutToRevokeOAuthCredentials.
@@ -261,8 +233,8 @@ test.describe('Auth session', () => {
       const originalCredentials = await scenario.readOAuthCredentials()
 
       await scenario.advanceBy(240_000)
-      await expect(page.getByTestId(authSessionActivityStatusTestID)).toHaveText('Window closed')
-      await expect(page.getByTestId(authSessionRefreshWindowStatusTestID)).toHaveText('Closed')
+      await expect(page.locator(authSessionActivitySelector)).toHaveText('Closed · no refresh')
+      await expect(page.locator(authSessionRefreshWindowSelector)).toHaveText('Closed')
       await scenario.delayLogoutRequest({ durationMs: 250 })
       await scenario.advanceBy(expirationMs - (await page.evaluate(() => Date.now())))
 

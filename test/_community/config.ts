@@ -15,6 +15,14 @@ export default buildConfigWithDefaults({
   // ...extend config here
   collections: [PostsCollection, MediaCollection],
   admin: {
+    autoLogin: {
+      email: devUser.email,
+      password: devUser.password,
+      prefillOnly: true,
+    },
+    components: {
+      providers: ['@payloadcms/ui#AuthSessionDebug'],
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },

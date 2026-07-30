@@ -81,14 +81,9 @@ export function createTabSessionSync({
   }
 
   const onRefreshedSession: OnRefreshedSession = ({ lifecycleOrder, message }) => {
-    const ondExpirationMs = message.session.exp * 1000
-    const localExpirationMs = getTokenExpirationMs()
-
-    if (localExpirationMs === undefined || ondExpirationMs >= localExpirationMs) {
-      pendingStorageLifecycleOrder = undefined
-      latestLifecycleOrder = lifecycleOrder
-      onSessionRefreshed(message.session)
-    }
+    pendingStorageLifecycleOrder = undefined
+    latestLifecycleOrder = lifecycleOrder
+    onSessionRefreshed(message.session)
   }
 
   const handleChannelMessage = ({ data }: MessageEvent<unknown>) => {

@@ -42,24 +42,37 @@ describe('createTabSessionSync', () => {
     })
   })
 
-  it('should ignore refresh and expiration events for older sessions', () => {
-    const onSessionExpired = vi.fn()
+  it('should apply a newer refresh when the provider shortens the token lifetime', () => {
     const onSessionRefreshed = vi.fn()
+    const session = createSession({ expirationMs: 30_000 })
 
     createTestTabSessionSync({
       localExpirationMs: 40_000,
-      onSessionExpired,
       onSessionRefreshed,
     })
     const channel = getBroadcastChannel()
 
     channel.emit(
       createTabSessionMessage({
-        session: createSession({ expirationMs: 30_000 }),
-        sourceTabID: 'stale-refresh-tab',
+        sentAt: 100,
+        session,
+        sourceTabID: 'refresh-tab',
         type: TAB_SESSION_EVENT_TYPES.REFRESHED,
       }),
     )
+
+    expect(onSessionRefreshed).toHaveBeenCalledWith(session)
+  })
+
+  it('should ignore expiration events for older sessions', () => {
+    const onSessionExpired = vi.fn()
+
+    createTestTabSessionSync({
+      localExpirationMs: 40_000,
+      onSessionExpired,
+    })
+    const channel = getBroadcastChannel()
+
     channel.emit(
       createTabSessionMessage({
         expiredTokenAt: 30_000,
@@ -67,7 +80,7 @@ describe('createTabSessionSync', () => {
         type: TAB_SESSION_EVENT_TYPES.EXPIRED,
       }),
     )
-    expect(onSessionRefreshed).not.toHaveBeenCalled()
+
     expect(onSessionExpired).not.toHaveBeenCalled()
   })
 

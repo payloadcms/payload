@@ -11,21 +11,21 @@ import type {
   TabSessionReconciliationOptions,
   TabSessionReconciliationResult,
 } from './tabSessionSync/index.js'
-import type { AuthContext, UserWithToken } from './types.js'
+import type { AuthContext, AuthSession, UserWithToken } from './types.js'
 
 import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
 import { useEffectEvent } from '../../hooks/useEffectEvent.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { requests } from '../../utilities/api.js'
 import { useConfig } from '../Config/index.js'
-import { useRouter } from '../RouterAdapter/index.js'
+import { usePathname, useRouter, useSearchParams } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 import { createAuthSessionRequests } from './authSessionRequests.js'
 import { TAB_SESSION_EVENT_TYPES } from './tabSessionSync/index.js'
 import { useTabSessionSync } from './tabSessionSync/useTabSessionSync.js'
 import { useAuthSessionTimers } from './useAuthSessionTimers.js'
 
-export type { AuthContext, UserWithToken } from './types.js'
+export type { AuthContext, AuthSession, UserWithToken } from './types.js'
 
 const Context = createContext({} as AuthContext)
 
@@ -40,7 +40,10 @@ export function AuthProvider({
   permissions: initialPermissions,
   user: initialUser,
 }: Props) {
+  const pathname = usePathname()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const route = `${pathname}?${searchParams.toString()}`
 
   const { config } = useConfig()
 
@@ -60,7 +63,7 @@ export function AuthProvider({
 
   const [user, setUserInMemory] = useState<AuthenticatedUser | null>(initialUser)
   const [tokenInMemory, setTokenInMemory] = useState<string>()
-  const [tokenExpirationMs, setTokenExpirationMs] = useState<number>()
+  const [authSession, setAuthSession] = useState<AuthSession>()
   const [permissions, setPermissions] = useState<SanitizedPermissions>(initialPermissions)
   const [fetchedUserOnMount, setFetchedUserOnMount] = useState(false)
 
@@ -96,6 +99,19 @@ export function AuthProvider({
     closeAllModals()
   }, [adminRoute, closeAllModals, loginRoute, router, startRouteTransition])
 
+  function onSessionActivity() {
+    setAuthSession((currentAuthSession) => {
+      if (!currentAuthSession || currentAuthSession.activityRecorded) {
+        return currentAuthSession
+      }
+
+      return {
+        ...currentAuthSession,
+        activityRecorded: true,
+      }
+    })
+  }
+
   function onSessionActivityRefresh() {
     void refreshSession({ isActivityRefresh: true })
   }
@@ -120,16 +136,21 @@ export function AuthProvider({
 
   const sessionTimers = useAuthSessionTimers({
     isAuthenticated,
+    onActivity: onSessionActivity,
     onActivityRefresh: onSessionActivityRefresh,
     onExpire: onSessionExpiration,
     onReminder: onSessionReminder,
   })
 
+  useEffect(() => {
+    sessionTimers.recordActivity('route')
+  }, [route, sessionTimers])
+
   const clearUserInMemory = useCallback(() => {
     userRef.current = null
     setUserInMemory(null)
     setTokenInMemory(undefined)
-    setTokenExpirationMs(undefined)
+    setAuthSession(undefined)
     sessionTimers.clear()
   }, [sessionTimers])
 
@@ -137,12 +158,19 @@ export function AuthProvider({
     (session: null | UserWithToken) => {
       if (session?.user) {
         const nextTokenExpirationMs = session.exp * 1000
+        const nextSessionTiming = sessionTimers.setExpiration(nextTokenExpirationMs)
 
-        userRef.current = session.user
-        setUserInMemory(session.user)
-        setTokenInMemory(session.token ?? session.refreshedToken)
-        setTokenExpirationMs(nextTokenExpirationMs)
-        sessionTimers.setExpiration(nextTokenExpirationMs)
+        if (nextSessionTiming) {
+          userRef.current = session.user
+          setUserInMemory(session.user)
+          setTokenInMemory(session.token ?? session.refreshedToken)
+          setAuthSession({
+            ...nextSessionTiming,
+            activityRecorded: false,
+          })
+        } else {
+          clearUserInMemory()
+        }
       } else {
         clearUserInMemory()
       }
@@ -159,7 +187,7 @@ export function AuthProvider({
   )
 
   const tabSessionSync = useTabSessionSync({
-    getTokenExpirationMs: sessionTimers.getLatestExpirationMs,
+    getTokenExpirationMs: sessionTimers.getCurrentExpirationMs,
     onSessionExpired: () => {
       const collection = userRef.current?.collection
 
@@ -441,6 +469,7 @@ export function AuthProvider({
   return (
     <Context
       value={{
+        authSession,
         fetchFullUser,
         logOut,
         permissions,
@@ -450,7 +479,6 @@ export function AuthProvider({
         setPermissions,
         setUser,
         token: tokenInMemory,
-        tokenExpirationMs,
         user,
       }}
     >

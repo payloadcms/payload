@@ -13,7 +13,8 @@ import {
   AUTH_SESSION_TEST_ADMIN_ROUTES,
   AUTH_SESSION_TEST_ROUTES,
   authSessionAccessTokenCookieName,
-  authSessionExpirationSelector,
+  authSessionDebugSelector,
+  authSessionExpirationAttribute,
   authSessionLoginButtonLabel,
   authSessionRefreshEndpointPathname,
   authSessionRefreshTokenCookieName,
@@ -82,6 +83,10 @@ export async function createSessionScenario({
 
   const createPage = (): Promise<Page> => context.newPage()
   const createAPIURL = (path: string): string => createAuthSessionAPIURL({ path, serverURL })
+  const readSessionExpiration = async (page: Page): Promise<number> =>
+    Number(
+      await page.locator(authSessionDebugSelector).getAttribute(authSessionExpirationAttribute),
+    )
 
   const resetResponse = await context.request.post(createAPIURL(AUTH_SESSION_TEST_ROUTES.RESET), {
     data: { nowMs },
@@ -229,9 +234,7 @@ export async function createSessionScenario({
       await page.goto(url.login)
       await page.getByRole('button', { name: authSessionLoginButtonLabel }).click()
       await expect(page).toHaveURL(url.admin)
-      await expect
-        .poll(async () => Number(await page.locator(authSessionExpirationSelector).textContent()))
-        .toBeGreaterThan(0)
+      await expect.poll(() => readSessionExpiration(page)).toBeGreaterThan(0)
 
       return page
     },
@@ -247,9 +250,7 @@ export async function createSessionScenario({
       const page = await createPage()
 
       await page.goto(url.admin)
-      await expect
-        .poll(async () => Number(await page.locator(authSessionExpirationSelector).textContent()))
-        .toBeGreaterThan(0)
+      await expect.poll(() => readSessionExpiration(page)).toBeGreaterThan(0)
 
       return page
     },
@@ -259,7 +260,7 @@ export async function createSessionScenario({
       )
     },
     async readExpiration(page) {
-      const expirationMs = Number(await page.locator(authSessionExpirationSelector).textContent())
+      const expirationMs = await readSessionExpiration(page)
 
       expect(expirationMs).toBeGreaterThan(0)
 

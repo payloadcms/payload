@@ -57,7 +57,7 @@ export default buildConfigWithDefaults(
       autoRefresh: false,
       components: {
         beforeLogin: ['./TestOAuthLogin/index.js#TestOAuthLogin'],
-        providers: ['./SessionDebug/index.js#SessionDebug'],
+        providers: ['@payloadcms/ui#AuthSessionDebug'],
       },
       importMap: {
         baseDir: path.resolve(dirname),

@@ -1,5 +1,14 @@
 import type { AuthenticatedUser, SanitizedPermissions } from 'payload'
 
+export type AuthSession = {
+  /** Whether qualifying activity has been recorded for the current token. */
+  readonly activityRecorded: boolean
+  readonly activityTrackingStartsAt: number
+  readonly expiresAt: number
+  readonly refreshStartsAt: number
+  readonly reminderStartsAt: number
+}
+
 export type UserWithToken<T = AuthenticatedUser> = {
   /** seconds until expiration */
   exp: number
@@ -9,6 +18,8 @@ export type UserWithToken<T = AuthenticatedUser> = {
 }
 
 export type AuthContext<T = AuthenticatedUser> = {
+  /** Lifecycle state for the current auth session. */
+  authSession?: AuthSession
   fetchFullUser: () => Promise<null | T>
   logOut: () => Promise<boolean>
   /**
@@ -53,6 +64,5 @@ export type AuthContext<T = AuthenticatedUser> = {
   setUser: (user: null | UserWithToken<T>) => void
   strategy?: string
   token?: string
-  tokenExpirationMs?: number
   user?: null | T
 }
