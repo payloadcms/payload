@@ -3,7 +3,7 @@ import type { Payload, User, Where } from 'payload'
 import path from 'path'
 import { createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 import type {
@@ -64,6 +64,60 @@ describe('Localization', () => {
 
   afterAll(async () => {
     await payload.destroy()
+  })
+
+  describe('count with localized field query', () => {
+    const createdIDs: Array<number | string> = []
+
+    afterEach(async () => {
+      for (const id of createdIDs) {
+        await payload.delete({ collection: localizedPostsSlug, id })
+      }
+      createdIDs.length = 0
+    })
+
+    it('should respect the requested locale and agree with find', async () => {
+      const doc = await payload.create({
+        collection: localizedPostsSlug,
+        data: { title: 'count-en' },
+        locale: englishLocale,
+      })
+      createdIDs.push(doc.id)
+
+      await payload.update({
+        id: doc.id,
+        collection: localizedPostsSlug,
+        data: { title: 'count-es' },
+        locale: spanishLocale,
+      })
+
+      const englishWhere = { title: { equals: 'count-en' } }
+
+      const { totalDocs: countEn } = await payload.count({
+        collection: localizedPostsSlug,
+        locale: englishLocale,
+        where: englishWhere,
+      })
+
+      const { docs: findEn } = await payload.find({
+        collection: localizedPostsSlug,
+        locale: englishLocale,
+        where: englishWhere,
+      })
+
+      // count must agree with find for a localized-field query
+      expect(countEn).toBe(findEn.length)
+      expect(countEn).toBe(1)
+
+      // The same value must not match in a locale where the field holds a different value
+      const { totalDocs: countEsForEnglishTitle } = await payload.count({
+        collection: localizedPostsSlug,
+        locale: spanishLocale,
+        where: englishWhere,
+      })
+
+      expect(countEsForEnglishTitle).toBe(0)
+    })
   })
 
   describe('Localization with fallback true', () => {
@@ -4557,6 +4611,37 @@ describe('Localization', () => {
         },
       })
       expect(result2.totalDocs).toBe(1)
+    })
+
+    it('should count global versions with query on localized field respecting locale', async () => {
+      await payload.updateGlobal({
+        slug: globalWithDraftsSlug,
+        data: { text: 'global count en', _status: 'published' },
+        locale: defaultLocale,
+      })
+
+      await payload.updateGlobal({
+        slug: globalWithDraftsSlug,
+        data: { text: 'global count es', _status: 'published' },
+        locale: spanishLocale,
+      })
+
+      const englishWhere = { 'version.text': { equals: 'global count en' } }
+
+      const inEnglish = await payload.countGlobalVersions({
+        global: globalWithDraftsSlug,
+        locale: defaultLocale,
+        where: englishWhere,
+      })
+
+      const inSpanish = await payload.countGlobalVersions({
+        global: globalWithDraftsSlug,
+        locale: spanishLocale,
+        where: englishWhere,
+      })
+
+      expect(inEnglish.totalDocs).toBeGreaterThan(0)
+      expect(inSpanish.totalDocs).toBe(0)
     })
   })
 })

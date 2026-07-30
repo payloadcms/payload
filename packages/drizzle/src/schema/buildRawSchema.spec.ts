@@ -107,4 +107,69 @@ describe('buildRawSchema', () => {
     expect(adapter.rawTables.posts_blocks_headline_2).toBeUndefined()
     expect(adapter.rawTables.posts_blocks_headline_2_locales).toBeUndefined()
   })
+
+  it('should throw when a localized field pushes the _locales companion table past 63 chars', async () => {
+    // Base table name (61 chars) is under the limit, but `${base}_locales` (69) overflows it.
+    const longSlug = `localized_collection_${'x'.repeat(40)}`
+
+    const config = await sanitizeConfig({
+      collections: [
+        {
+          slug: longSlug,
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              localized: true,
+            },
+          ],
+          timestamps: false,
+        },
+      ],
+      localization: {
+        defaultLocale: 'en',
+        locales: ['en', 'de'],
+      },
+    } as Config)
+
+    const adapter = createAdapter(config)
+
+    expect(() =>
+      buildRawSchema({
+        adapter,
+        setColumnID,
+      }),
+    ).toThrow('Exceeded max identifier length')
+  })
+
+  it('should not throw for a localized field whose _locales companion table fits within 63 chars', async () => {
+    const config = await sanitizeConfig({
+      collections: [
+        {
+          slug: 'short_localized',
+          fields: [
+            {
+              name: 'title',
+              type: 'text',
+              localized: true,
+            },
+          ],
+          timestamps: false,
+        },
+      ],
+      localization: {
+        defaultLocale: 'en',
+        locales: ['en', 'de'],
+      },
+    } as Config)
+
+    const adapter = createAdapter(config)
+
+    buildRawSchema({
+      adapter,
+      setColumnID,
+    })
+
+    expect(adapter.rawTables.short_localized_locales).toBeDefined()
+  })
 })
