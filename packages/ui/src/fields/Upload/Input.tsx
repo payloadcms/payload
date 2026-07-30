@@ -123,6 +123,7 @@ export function UploadInput(props: UploadInputProps) {
   const {
     modalSlug: drawerSlug,
     setCollectionSlug,
+    setCurrentActivePath,
     setInitialFiles,
     setMaxFiles,
     setOnSuccess,
@@ -394,6 +395,7 @@ export function UploadInput(props: UploadInputProps) {
         setMaxFiles(maxRows)
       }
 
+      setCurrentActivePath(path)
       openModal(drawerSlug)
     },
     [
@@ -408,6 +410,8 @@ export function UploadInput(props: UploadInputProps) {
       setInitialFiles,
       setSelectableCollections,
       setMaxFiles,
+      path,
+      setCurrentActivePath,
     ],
   )
 
@@ -637,7 +641,7 @@ export function UploadInput(props: UploadInputProps) {
   }, [populateDocs, value, relationTo])
 
   useEffect(() => {
-    setOnSuccess(onUploadSuccess)
+    setOnSuccess(path, onUploadSuccess)
   }, [value, path, onUploadSuccess, setOnSuccess])
 
   const showDropzone =
