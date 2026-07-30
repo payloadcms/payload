@@ -7,10 +7,7 @@ import * as qs from 'qs-esm'
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import type {
-  TabSessionReconciliationOptions,
-  TabSessionReconciliationResult,
-} from './tabSessionSync/index.js'
+import type { TabSessionReconciliationOptions } from './tabSessionSync/index.js'
 import type { AuthContext, AuthSession, UserWithToken } from './types.js'
 
 import { stayLoggedInModalSlug } from '../../elements/StayLoggedIn/index.js'
@@ -32,6 +29,26 @@ const Context = createContext({} as AuthContext)
 type Props = {
   children: React.ReactNode
   permissions?: SanitizedPermissions
+  user?: AuthenticatedUser | null
+}
+
+type FetchFullUserResult =
+  | {
+      expirationMs?: number
+      status: 'authenticated'
+      user: AuthenticatedUser
+    }
+  | {
+      status: 'indeterminate'
+    }
+  | {
+      status: 'unauthenticated'
+    }
+
+type UserResponse = {
+  exp?: number
+  refreshedToken?: string
+  token?: string
   user?: AuthenticatedUser | null
 }
 
@@ -155,21 +172,24 @@ export function AuthProvider({
   }, [sessionTimers])
 
   const setLocalSession = useCallback(
-    (session: null | UserWithToken) => {
+    (session: null | UserResponse) => {
       if (session?.user) {
-        const nextTokenExpirationMs = session.exp * 1000
-        const nextSessionTiming = sessionTimers.setExpiration(nextTokenExpirationMs)
+        const expirationMs =
+          typeof session.exp === 'number' && Number.isFinite(session.exp)
+            ? session.exp * 1000
+            : undefined
+        const nextSessionTiming =
+          expirationMs !== undefined ? sessionTimers.setExpiration(expirationMs) : undefined
+
+        userRef.current = session.user
+        setUserInMemory(session.user)
+        setTokenInMemory(session.token ?? session.refreshedToken)
 
         if (nextSessionTiming) {
-          userRef.current = session.user
-          setUserInMemory(session.user)
-          setTokenInMemory(session.token ?? session.refreshedToken)
           setAuthSession({
             ...nextSessionTiming,
             activityRecorded: false,
           })
-        } else {
-          clearUserInMemory()
         }
       } else {
         clearUserInMemory()
@@ -207,7 +227,23 @@ export function AuthProvider({
     onTabSessionUnauthenticated: () => {
       redirectToInactivityRoute()
     },
-    reconcileSession: (options) => fetchFullUserResult(options),
+    reconcileSession: async (options) => {
+      const result = await fetchFullUserResult(options)
+
+      if (result.status === 'authenticated' && result.expirationMs !== undefined) {
+        return {
+          expirationMs: result.expirationMs,
+          status: result.status,
+          user: result.user,
+        }
+      }
+
+      if (result.status === 'unauthenticated') {
+        return result
+      }
+
+      return { status: 'indeterminate' }
+    },
   })
 
   const refreshSession = useCallback(
@@ -371,9 +407,9 @@ export function AuthProvider({
   )
 
   const fetchFullUserResult = React.useCallback(
-    ({ isTabSessionEventStale }: Partial<TabSessionReconciliationOptions> = {}): Promise<
-      TabSessionReconciliationResult<AuthenticatedUser>
-    > => {
+    ({
+      isTabSessionEventStale,
+    }: Partial<TabSessionReconciliationOptions> = {}): Promise<FetchFullUserResult> => {
       return authRequests.queue(async ({ acceptResult, isResultStale }) => {
         const isResponseStale = () => isResultStale() || Boolean(isTabSessionEventStale?.())
 
@@ -399,7 +435,7 @@ export function AuthProvider({
             return { status: 'indeterminate' }
           }
 
-          const json: null | UserWithToken = await request.json()
+          const json: null | UserResponse = await request.json()
 
           if (isResponseStale()) {
             return { status: 'indeterminate' }
@@ -413,7 +449,10 @@ export function AuthProvider({
             setLocalSession(json)
 
             return {
-              expirationMs: json.exp * 1000,
+              expirationMs:
+                typeof json.exp === 'number' && Number.isFinite(json.exp)
+                  ? json.exp * 1000
+                  : sessionTimers.getCurrentExpirationMs(),
               status: 'authenticated',
               user: json.user,
             }
@@ -429,7 +468,7 @@ export function AuthProvider({
         return { status: 'indeterminate' }
       })
     },
-    [apiRoute, authRequests, i18n.language, setLocalSession, userSlug],
+    [apiRoute, authRequests, i18n.language, sessionTimers, setLocalSession, userSlug],
   )
 
   const fetchFullUser = React.useCallback(async (): Promise<AuthenticatedUser | null> => {
