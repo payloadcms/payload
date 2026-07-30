@@ -205,7 +205,17 @@ export const generateReindexHandler =
                 continue
               }
 
-              docToSync = { ...doc, _status: localeStatus }
+              // The batch was fetched with `locale: 'all'`, so localized fields are locale maps.
+              // Re-fetch scoped to this locale so `syncDocAsSearchIndex` receives per-locale scalars.
+              docToSync =
+                (await payload.findByID({
+                  id: doc.id,
+                  collection,
+                  depth: 0,
+                  disableErrors: true,
+                  locale: localeToSync,
+                  ...defaultLocalApiProps,
+                })) ?? doc
             }
 
             // Sync this locale (create first index, then update with other locales accordingly)
