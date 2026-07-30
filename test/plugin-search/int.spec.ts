@@ -821,6 +821,16 @@ describe('@payloadcms/plugin-search', () => {
 
     // The document is published in 'de', so it must be indexed even though 'en' is a draft
     expect(docs).toHaveLength(1)
+
+    // The indexed 'de' locale must hold that locale's scalar value, not the whole `locale: 'all'` map
+    const deSearchDoc = await payload.findByID({
+      collection: 'search',
+      id: docs[0]!.id,
+      depth: 0,
+      locale: 'de',
+    })
+
+    expect(deSearchDoc.slug).toBe('de-only-de')
   })
 
   it('should sync trashed documents correctly with search plugin', async () => {
