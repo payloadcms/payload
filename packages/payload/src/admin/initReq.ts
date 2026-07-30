@@ -54,6 +54,7 @@ export async function initReq({
 
   const headers = await serverAdapter.getHeaders()
   const cookies = parseCookies(headers)
+
   const createPartialResult = async (): Promise<InitReqPartialResult> => {
     const config = await configPromise
     const payload = await getPayload({ config, cron: true, importMap })
@@ -62,11 +63,13 @@ export async function initReq({
       cookies,
       headers,
     })
+
     const i18n = await initI18n({
       config: config.i18n,
       context: 'client',
       language: languageCode,
     })
+
     const { responseHeaders, user } = await executeAuthStrategies({
       canSetHeaders,
       headers,
@@ -81,13 +84,16 @@ export async function initReq({
       user,
     }
   }
+
   const partialResult = cache
     ? await cache.getPartial(createPartialResult)
     : await createPartialResult()
+
   const createRequestResult = async (): Promise<InitReqResult> => {
     const { i18n, languageCode, payload, responseHeaders, user } = partialResult
     const { req: reqOverrides, ...optionsOverrides } = overrides || {}
     const requestDefaults = getRequestDefaults({ requestURL })
+
     const req = await createLocalReq(
       {
         req: {
@@ -104,6 +110,7 @@ export async function initReq({
       },
       payload,
     )
+
     const locale = await getRequestLocale({ req })
 
     req.locale = locale?.code
@@ -119,6 +126,7 @@ export async function initReq({
       req,
     }
   }
+
   const result = cache
     ? await cache.getRequest(createRequestResult, key!)
     : await createRequestResult()
