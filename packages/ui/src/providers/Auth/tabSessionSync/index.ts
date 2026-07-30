@@ -3,13 +3,13 @@ import type {
   OnExpiredSession,
   OnLoggedOutSession,
   OnRefreshedSession,
-  PublishStorageNotification,
   ReconcileStorageSession,
   TabSessionEvent,
   TabSessionLifecycleOrder,
   TabSessionLogoutPublication,
   TabSessionPublication,
   TabSessionStorageNotification,
+  WriteStorageNotification,
 } from './types.js'
 
 import { TAB_SESSION_EVENT_TYPES } from './types.js'
@@ -231,7 +231,7 @@ export function createTabSessionSync({
     return currentTime > latestSentAt ? currentTime : latestSentAt + 1
   }
 
-  const publishStorageNotification: PublishStorageNotification = ({ notification }) => {
+  const writeStorageNotification: WriteStorageNotification = ({ notification }) => {
     const storageNotification: TabSessionStorageNotification = channel
       ? notification
       : { ...notification, isBroadcastChannelFallback: true }
@@ -283,7 +283,7 @@ export function createTabSessionSync({
       }
 
       if (lifecycleOrder.type !== TAB_SESSION_EVENT_TYPES.LOGGED_OUT) {
-        publishStorageNotification({ notification: lifecycleOrder })
+        writeStorageNotification({ notification: lifecycleOrder })
       }
 
       return lifecycleOrder
@@ -297,7 +297,7 @@ export function createTabSessionSync({
 
       pendingStorageLifecycleOrder = undefined
       latestLifecycleOrder = notification
-      publishStorageNotification({ notification })
+      writeStorageNotification({ notification })
     },
     cleanup: () => {
       isActive = false

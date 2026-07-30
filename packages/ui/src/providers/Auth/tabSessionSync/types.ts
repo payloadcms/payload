@@ -109,7 +109,7 @@ export type TabSessionStorageNotification = {
   | Extract<TabSessionPublication, { type: typeof TAB_SESSION_EVENT_TYPES.REFRESHED }>
 )
 
-export type PublishStorageNotification = (args: {
+export type WriteStorageNotification = (args: {
   notification: TabSessionStorageNotification
 }) => void
 
