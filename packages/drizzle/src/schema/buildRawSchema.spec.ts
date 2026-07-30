@@ -181,6 +181,7 @@ describe('buildRawSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
       localization: {
@@ -212,6 +213,7 @@ describe('buildRawSchema', () => {
             },
           ],
           timestamps: false,
+          versions: false,
         },
       ],
       localization: {
