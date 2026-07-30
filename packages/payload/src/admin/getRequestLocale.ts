@@ -33,7 +33,9 @@ export async function getRequestLocale({
           user: req.user,
         })
       : undefined
-  const localeCode = localeFromParams || (preference?.value as string | undefined)
+  const localeCode = req.user
+    ? localeFromParams || (preference?.value as string | undefined)
+    : undefined
 
   return (
     findLocaleFromCode({ localeCode, localization }) ??

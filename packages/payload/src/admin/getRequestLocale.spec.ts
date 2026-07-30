@@ -86,6 +86,14 @@ describe('getRequestLocale', () => {
     await expect(getRequestLocale({ req: createRequest() })).resolves.toMatchObject({ code: 'en' })
   })
 
+  it('should ignore a query locale for an anonymous request', async () => {
+    await expect(
+      getRequestLocale({ req: createRequest({ locale: 'es', user: false }) }),
+    ).resolves.toMatchObject({ code: 'en' })
+    expect(findPreference).not.toHaveBeenCalled()
+    expect(updatePreference).not.toHaveBeenCalled()
+  })
+
   it('should return undefined when localization is disabled', async () => {
     await expect(
       getRequestLocale({ req: createRequest({ isLocalized: false }) }),
