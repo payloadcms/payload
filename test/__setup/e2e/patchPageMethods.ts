@@ -28,15 +28,11 @@ const ADMIN_SHELL_SELECTOR = '.payload__modal-container'
  * `test/__helpers/components/HydrationMarker`) for the loader settling, then React
  * ownership of the view for the commit that follows it 60-135ms later.
  *
- * No-op for Next.js, where the marker is never set, so tests don't branch on framework.
+ * No-op for Next.js, which never renders the marker, so tests don't branch on framework.
  *
  * Idempotent: calling this more than once on the same page is safe.
  */
 export function patchPageMethods(page: Page) {
-  if (process.env.PAYLOAD_FRAMEWORK !== 'tanstack-start') {
-    return
-  }
-
   const patchedPage = page as unknown as {
     __payloadGotoPatched?: boolean
     __payloadSkipHydrationWait?: boolean
@@ -48,8 +44,27 @@ export function patchPageMethods(page: Page) {
 
   patchedPage.__payloadGotoPatched = true
 
+  /**
+   * Asked of the page rather than the environment. `PAYLOAD_FRAMEWORK` is set by the CLI runner
+   * but not by editor test runners, and gating on it there silently disabled every wait below
+   * while the tests still ran against the TanStack server.
+   *
+   * Reads server-rendered markup, not a global: `window.__TANSTACK_*` is only assigned once
+   * hydration runs, which is well after `goto` resolves and therefore too late to decide with.
+   */
+  const isTanStackApp = () =>
+    page
+      .locator('[data-tanstack-app]')
+      .count()
+      .then((count) => count > 0)
+      .catch(() => false)
+
   const waitForHydration = async () => {
     if (patchedPage.__payloadSkipHydrationWait) {
+      return
+    }
+
+    if (!(await isTanStackApp())) {
       return
     }
 

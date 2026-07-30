@@ -31,5 +31,10 @@ export function HydrationMarker() {
     ;(window as unknown as { __TANSTACK_HYDRATED__?: boolean }).__TANSTACK_HYDRATED__ = isReady
   }, [isReady])
 
-  return null
+  // Rendered rather than set on `window` so it is in the server HTML from the first byte. The
+  // Playwright wrapper needs to know it is driving the TanStack app *before* any script has
+  // run, since that is precisely when it has to decide whether to wait. Only the TanStack test
+  // apps render this, so it also stands in for `PAYLOAD_FRAMEWORK`, which the CLI runner sets
+  // but editor test runners do not.
+  return <div data-tanstack-app hidden />
 }
