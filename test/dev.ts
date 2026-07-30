@@ -68,7 +68,7 @@ if (['admin-root'].includes(testSuiteArg)) {
 // framework name. Resolved value is written back to the env var so downstream helpers
 // and spawned child processes (which read PAYLOAD_FRAMEWORK) stay in sync.
 const frameworkFromFlag = Object.keys(args)
-  .find((arg) => arg.startsWith('framework-'))
+  .find((arg) => arg.startsWith('framework-') && args[arg] === true)
   ?.slice('framework-'.length)
 
 const framework = frameworkFromFlag || process.env.PAYLOAD_FRAMEWORK || 'next'

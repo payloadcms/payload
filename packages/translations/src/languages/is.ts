@@ -476,6 +476,8 @@ export const isTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Því miður, það er ekkert sem samsvarar beiðninni þinni.',
     sort: 'Raða',
     sortByLabelDirection: 'Raða eftir {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Til að endurraða röðunum þarftu fyrst að raða þeim eftir dálkinum „Order“.',
     stayOnThisPage: 'Áfram á þessari síðu',
     submissionSuccessful: 'Sending tókst.',
     submit: 'Senda',

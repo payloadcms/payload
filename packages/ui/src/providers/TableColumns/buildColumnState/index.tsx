@@ -188,6 +188,7 @@ export const buildColumnState = (args: BuildColumnStateArgs): Column[] => {
         serverField &&
         'admin' in serverField &&
         'components' in serverField.admin &&
+        serverField.admin.components &&
         'Label' in serverField.admin.components &&
         serverField.admin.components.Label !== undefined // let it return `null`
           ? serverField.admin.components.Label

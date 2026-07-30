@@ -490,6 +490,8 @@ export const deTranslations: DefaultTranslationsObject = {
       'Es tut uns leid, aber wir haben nichts gefunden, was deiner Anfrage entspricht.',
     sort: 'Sortieren',
     sortByLabelDirection: 'Sortieren nach {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Um die Zeilen neu anzuordnen, müssen Sie sie zunächst nach der Spalte „Reihenfolge“ sortieren.',
     stayOnThisPage: 'Auf dieser Seite bleiben',
     submissionSuccessful: 'Übermittlung erfolgreich.',
     submit: 'Senden',

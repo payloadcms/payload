@@ -15,3 +15,20 @@ export const Media: CollectionConfig = {
   },
   versions: false,
 }
+
+export const DispatchMedia: CollectionConfig = {
+  slug: 'dispatch-media',
+  fields: [],
+  upload: {
+    uploadInstructions: {
+      generate: ({ filename, filesize, mimeType }) => ({
+        name: 'uploadToTestProvider',
+        type: 'dispatch',
+        data: { token: 'test-token' },
+        file: { filename, mimeType, size: filesize, uploadReference: {} },
+      }),
+      useInAdmin: true,
+    },
+  },
+  versions: false,
+}

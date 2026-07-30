@@ -481,6 +481,8 @@ export const ltTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Atsiprašau - nėra nieko, atitinkančio jūsų užklausą.',
     sort: 'Rūšiuoti',
     sortByLabelDirection: 'Rūšiuoti pagal {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Norėdami pertvarkyti eilutes, pirmiausia turite jas surikiuoti pagal „Order“ stulpelį.',
     stayOnThisPage: 'Likite šiame puslapyje',
     submissionSuccessful: 'Pateikimas sėkmingas.',
     submit: 'Pateikti',

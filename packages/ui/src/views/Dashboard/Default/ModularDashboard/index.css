@@ -66,7 +66,6 @@
 
   .widget-wrapper__controls {
     opacity: 0;
-    transition: opacity 0.2s ease;
   }
 
   .widget:focus-visible .widget-wrapper__controls,

@@ -5,13 +5,13 @@ import type { Block, BlockSlug, CollectionConfig } from 'payload'
 import {
   BlocksFeature,
   defaultEditorFeatures,
-  EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   getEnabledNodes,
   HeadingFeature,
   lexicalEditor,
   LinkFeature,
   sanitizeServerEditorConfig,
+  TableFeature,
   TreeViewFeature,
   UploadFeature,
 } from '@payloadcms/richtext-lexical'
@@ -283,7 +283,7 @@ export const getLexicalFieldsCollection: (args: {
         blocks,
         inlineBlocks,
       }),
-      EXPERIMENTAL_TableFeature(),
+      TableFeature(),
     ],
   }
   return {

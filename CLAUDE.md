@@ -16,7 +16,7 @@ Payload is a monorepo structured around Next.js, containing the core CMS platfor
   - `packages/drizzle` - Drizzle ORM integration
   - `packages/kv-redis` - Redis key-value store adapter
   - `packages/richtext-*` - Rich text editors (Lexical)
-  - `packages/storage-*` - Storage adapters (S3, Azure, GCS, Uploadthing, Vercel Blob, R2)
+  - `packages/storage-*` - Storage adapters (S3, Azure, GCS, Vercel Blob, R2)
   - `packages/email-*` - Email adapters (Nodemailer, Resend)
   - `packages/plugin-*` - Additional functionality plugins
   - `packages/graphql` - GraphQL API layer
@@ -97,12 +97,13 @@ Each React component should have its own named folder:
 ```
 ComponentName/
 ├── index.tsx       # Component implementation
-└── index.scss      # Styles (if applicable)
+└── index.css       # Styles (if applicable)
 ```
 
-- **Do:** Create a folder per component with `index.tsx` and `index.scss`
-- **Don't:** Place multiple `ComponentName.tsx` files in a single folder with one shared `.scss` file
+- **Do:** Create a folder per component with `index.tsx` and `index.css`
+- **Don't:** Place multiple `ComponentName.tsx` files in a single folder with one shared `.css` file
 - Re-export from barrel files (`index.ts`) when grouping related components in a parent directory
+- New styles should be written in plain CSS, not SCSS - SCSS is being phased out and is no longer linted (see [Writing CSS](#writing-css))
 
 ### Running Dev Server
 
@@ -325,6 +326,78 @@ const docs = await payload.find({
   user,
 })
 ```
+
+### Writing CSS
+
+Stylelint enforces the rules below on `.css` files (SCSS is no longer linted and is being phased out). Run `pnpm run lint:css` to check, or `pnpm run lint` to run all linters.
+
+**Mobile-first media queries only - never `max-width`:**
+
+```css
+/* BAD - rejected by plugin/no-max-width-media-query */
+@media (max-width: 768px) {
+  ...;
+}
+
+/* GOOD */
+@media (min-width: 768px) {
+  ...;
+}
+```
+
+**Only the four canonical breakpoints are allowed in a media query** (`plugin/no-non-standard-breakpoints`): `400px`, `768px`, `1024px`, `1440px`. Don't invent one-off breakpoint values.
+
+**Never use `!important`** (`plugin/no-important`). Refactor selector specificity instead.
+Exceptions to this rule are when it's not possible to do so when dealing with external libraries.
+
+**Prefer logical properties over physical properties** for RTL support:
+
+```css
+/* BAD - physical properties don't flip for RTL */
+padding-left: var(--spacer-3);
+margin-right: var(--spacer-2);
+border-left: 1px solid var(--color-border);
+left: 0;
+
+/* GOOD - logical properties adapt automatically */
+padding-inline-start: var(--spacer-3);
+margin-inline-end: var(--spacer-2);
+border-inline-start: var(--stroke-width-small) solid var(--color-border);
+inset-inline-start: 0;
+```
+
+Use `padding-inline`/`padding-block`, `margin-inline`/`margin-block`, `inset-inline`/`inset-block`, and `border-inline`/`border-block` (with their `-start`/`-end` variants) instead of the `-left`/`-right`/`-top`/`-bottom` equivalents where a direction is implied.
+
+**Prioritize design tokens over hardcoded pixel/rem values:**
+
+Spacing (`width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`, `inset*`, `gap*`, `flex-basis`, etc.) should use a `--spacer-*` token from `packages/ui/src/css/spacing.css`, not a raw pixel or rem value:
+
+| Token          | Pixel |
+| -------------- | ----- |
+| `--spacer-0`   | 0px   |
+| `--spacer-1`   | 4px   |
+| `--spacer-1-5` | 6px   |
+| `--spacer-2`   | 8px   |
+| `--spacer-2-5` | 12px  |
+| `--spacer-3`   | 16px  |
+| `--spacer-4`   | 24px  |
+| `--spacer-5`   | 32px  |
+| `--spacer-6`   | 40px  |
+
+- If the value needed isn't an exact token, round to the nearest `--spacer-*` token rather than hand-writing a one-off value.
+- If a niche value must be precise (not a rounding-friendly case), use `calc()` with a spacer token instead of a raw pixel/rem value, e.g. `calc(var(--spacer-1) * 2.5)` for `10px`.
+- The same principle applies to other token families:
+  - **Colors:** use semantic `--color-*` tokens from `colors.css` (e.g. `--color-bg`, `--color-text-brand`, `--color-border`). Never reference raw `--ramp-*` palette tokens directly outside of `colors.css` as they aren't theme-aware.
+  - **Radius:** use `--radius-*` from `radius.css` (`--radius-small` 2px, `--radius-medium` 5px, `--radius-large` 13px, `--radius-full` 9999px) instead of hardcoded values.
+  - **Stroke width:** use `--stroke-width-small` (1px) / `--stroke-width-medium` (2px) from `theme.css`.
+  - **Box shadows:** use elevation tokens from `elevations.css` (`--elevation-100-canvas`, `--elevation-300-tooltip`, `--elevation-400-menu-panel`, `--elevation-500-modal-window`) instead of a hardcoded `box-shadow`/`rgba()` value - they also handle light/dark theming.
+  - **Typography:** use `--text-*` tokens from `typography.css`.
+
+**No sub-pixel precision** (`plugin/no-subpixel-values`) - applies to whatever raw value remains after the above (e.g. an exception case):
+
+- Pixel values may have at most one decimal place (e.g. `0.5px` is fine, `13.523px` is not).
+- Box-model and position properties - `width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`, `inset*`, `gap*`, `flex-basis`, `min-`/`max-width`/`height` - must be whole numbers with no decimals at all.
+- `font-size`, `letter-spacing`, `line-height`, and custom properties (`--*`) are exempt, since a `var()` can't be statically traced to the property it ends up on.
 
 ### RSC/Client Bundling Rules
 

@@ -14,7 +14,7 @@ import {
   // throttleTest
 } from '../__helpers/e2e/helpers.js'
 import { scrollEntirePage } from '../__helpers/e2e/scrollEntirePage.js'
-import { moveRow } from '../__helpers/e2e/sort/moveRow.js'
+import { attemptKeyboardReorder, moveRow } from '../__helpers/e2e/sort/moveRow.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
@@ -120,13 +120,22 @@ describe('Sort functionality', () => {
 
     await page.getByLabel('Sort by Title Ascending').click()
     await page.waitForURL(/sort=title/, { timeout: 2000 })
+    await assertRows(['A', 'B', 'C', 'D'])
 
-    // Expect a warning because not sorted by order first
+    // Dragging the handle with the mouse should not start a drag when not sorted by order
     await moveRow(page, {
       fromIndex: 0,
       toIndex: 2,
-      expected: 'warning',
+      expected: 'disabled',
     })
+
+    await assertRows(['A', 'B', 'C', 'D'])
+
+    // Pressing Space on the handle should warn instead of letting the user reorder with arrow keys
+    // Pressing it repeatedly should not stack multiple toasts
+    await attemptKeyboardReorder(page, { index: 0, presses: 3 })
+
+    await assertRows(['A', 'B', 'C', 'D'])
   })
 
   test('Orderable join fields', async () => {
