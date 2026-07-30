@@ -6,16 +6,12 @@ import type {
   SanitizedConfig,
 } from 'payload'
 
-import { initReq } from '@payloadcms/ui/utilities/initReq'
 import { renderNotFoundPage } from '@payloadcms/ui/views/NotFound/page'
 import { renderRoot } from '@payloadcms/ui/views/Root'
 import { defaultAdminViews } from '@payloadcms/ui/views/Root/adminViews'
 import { notFound, redirect } from 'next/navigation.js'
 
-import { nextServerAdapter } from './server.js'
-
-const boundInitReq: Parameters<typeof renderRoot>[0]['initReq'] = (args) =>
-  initReq({ ...args, serverAdapter: nextServerAdapter })
+import { initReq } from '../utilities/initReq.js'
 
 export const adminViews: AdminViewAdapter<AdminViewServerProps, MetaConfig> = defaultAdminViews
 
@@ -31,7 +27,6 @@ type PageProps = {
 }
 
 export const RootPage = (props: PageProps) =>
-  renderRoot({ ...props, adminViews, initReq: boundInitReq, notFound, redirect })
+  renderRoot({ ...props, adminViews, initReq, notFound, redirect })
 
-export const NotFoundPage = (props: PageProps) =>
-  renderNotFoundPage({ ...props, initReq: boundInitReq })
+export const NotFoundPage = (props: PageProps) => renderNotFoundPage({ ...props, initReq })

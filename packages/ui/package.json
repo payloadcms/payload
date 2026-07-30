@@ -266,11 +266,6 @@
       "types": "./src/utilities/getPreferences.ts",
       "default": "./src/utilities/getPreferences.ts"
     },
-    "./utilities/initReq": {
-      "import": "./src/utilities/initReq.ts",
-      "types": "./src/utilities/initReq.ts",
-      "default": "./src/utilities/initReq.ts"
-    },
     "./utilities/buildFieldSchemaMap/traverseFields": {
       "import": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
       "types": "./src/utilities/buildFieldSchemaMap/traverseFields.ts",
