@@ -28,9 +28,11 @@
     "build": "tsc",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "list-published": "tsx src/lib/getPackageRegistryVersions.ts",
+    "list-published": "tsx src/list-published.ts",
     "publish-prerelease": "tsx src/publish-prerelease.ts",
     "release": "tsx src/release.ts",
+    "release-bump": "tsx src/release-bump.ts",
+    "release-ci": "tsx src/release-ci.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {

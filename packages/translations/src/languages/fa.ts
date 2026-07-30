@@ -470,6 +470,8 @@ export const faTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'متأسفانه، موردی مطابق با درخواست شما پیدا نشد.',
     sort: 'مرتب‌سازی',
     sortByLabelDirection: 'مرتب‌سازی بر اساس {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'برای تغییر ترتیب ردیف‌ها ابتدا باید آن‌ها را بر اساس ستون "Order" مرتب‌سازی کنید.',
     stayOnThisPage: 'در همین صفحه بمان',
     submissionSuccessful: 'با موفقیت ارسال شد.',
     submit: 'ارسال',

@@ -481,6 +481,8 @@ export const idTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Maaf—tidak ada yang sesuai dengan permintaan Anda.',
     sort: 'Urutkan',
     sortByLabelDirection: 'Urutkan berdasarkan {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Untuk mengubah urutan baris, Anda harus terlebih dahulu mengurutkannya berdasarkan kolom "Order".',
     stayOnThisPage: 'Tetap di halaman ini',
     submissionSuccessful: 'Pengiriman Berhasil.',
     submit: 'Kirim',

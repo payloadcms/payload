@@ -480,6 +480,8 @@ export const viTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Xin lỗi, không có kết quả nào tương ứng với yêu cầu của bạn.',
     sort: 'Sắp xếp',
     sortByLabelDirection: 'Sắp xếp theo {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Để sắp xếp lại các hàng, trước tiên bạn phải sắp xếp chúng theo cột "Order".',
     stayOnThisPage: 'Ở lại trang này',
     submissionSuccessful: 'Gửi thành công.',
     submit: 'Gửi',

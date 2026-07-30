@@ -39,6 +39,9 @@ export default buildConfigWithDefaults({
         {
           name: 'roles',
           type: 'select',
+          access: {
+            read: () => false,
+          },
           defaultValue: ['user'],
           hasMany: true,
           label: 'Role',

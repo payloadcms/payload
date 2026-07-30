@@ -1,15 +1,21 @@
-import type { Job, TaskHandlerResult, TypedJobs } from '../../../index.js'
-import type { RetryConfig, TaskHandlerArgsNoInput } from './taskTypes.js'
+import type { Job, TypedJobs } from '../../../index.js'
+import type { MaybePromise } from '../../../types/index.js'
+import type {
+  RetryConfig,
+  TaskHandlerArgsNoInput,
+  TaskHandlerResult,
+  TaskInputOutput,
+} from './taskTypes.js'
 
 export type WorkflowStep<
   TTaskSlug extends keyof TypedJobs['tasks'],
-  TWorkflowSlug extends false | keyof TypedJobs['workflows'] = false,
+  TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object = object,
 > = {
   /**
    * If this step is completed, the workflow will be marked as completed
    */
   completesJob?: boolean
-  condition?: (args: { job: Job<TWorkflowSlug> }) => boolean
+  condition?: (args: { job: Job<TWorkflowSlugOrInput> }) => boolean
   /**
    * Each task needs to have a unique ID to track its status
    */
@@ -22,21 +28,21 @@ export type WorkflowStep<
   retries?: number | RetryConfig
 } & (
   | {
-      inlineTask?: (
-        args: TWorkflowSlug extends keyof TypedJobs['workflows']
-          ? TaskHandlerArgsNoInput<TypedJobs['workflows'][TWorkflowSlug]['input']>
-          : TaskHandlerArgsNoInput,
-      ) => Promise<TaskHandlerResult<TTaskSlug>> | TaskHandlerResult<TTaskSlug>
+      inlineTask: (
+        args: TaskHandlerArgsNoInput<TWorkflowSlugOrInput>,
+      ) => MaybePromise<TaskHandlerResult<TaskInputOutput>>
     }
   | {
-      input: (args: { job: Job<TWorkflowSlug> }) => TypedJobs['tasks'][TTaskSlug]['input']
+      input: (args: { job: Job<TWorkflowSlugOrInput> }) => TypedJobs['tasks'][TTaskSlug]['input']
       task: TTaskSlug
     }
 )
 
-type AllWorkflowSteps<TWorkflowSlug extends false | keyof TypedJobs['workflows'] = false> = {
-  [TTaskSlug in keyof TypedJobs['tasks']]: WorkflowStep<TTaskSlug, TWorkflowSlug>
-}[keyof TypedJobs['tasks']]
+type AllWorkflowSteps<TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object = object> =
+  {
+    [TTaskSlug in keyof TypedJobs['tasks']]: WorkflowStep<TTaskSlug, TWorkflowSlugOrInput>
+  }[keyof TypedJobs['tasks']]
 
-export type WorkflowJSON<TWorkflowSlug extends false | keyof TypedJobs['workflows'] = false> =
-  Array<AllWorkflowSteps<TWorkflowSlug>>
+export type WorkflowJSON<
+  TWorkflowSlugOrInput extends keyof TypedJobs['workflows'] | object = object,
+> = Array<AllWorkflowSteps<TWorkflowSlugOrInput>>

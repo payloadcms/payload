@@ -315,8 +315,8 @@ export const EditManyDrawerContent: React.FC<EditManyDrawerContentProps> = (prop
       })
 
       dispatchFields({
-        type: 'UPDATE_MANY',
-        formState: state,
+        type: 'MERGE_SERVER_STATE',
+        serverState: state,
       })
 
       setIsInitializing(false)

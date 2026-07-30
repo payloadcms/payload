@@ -476,6 +476,8 @@ export const skTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Je nám ľúto, ale neexistuje nič, čo by zodpovedalo vášmu požiadavku.',
     sort: 'Zoradiť',
     sortByLabelDirection: 'Zoradiť podľa {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Ak chcete zmeniť poradie riadkov, musíte ich najprv zoradiť podľa stĺpca "Order".',
     stayOnThisPage: 'Zostať na tejto stránke',
     submissionSuccessful: 'Odoslanie úspešné.',
     submit: 'Odoslať',

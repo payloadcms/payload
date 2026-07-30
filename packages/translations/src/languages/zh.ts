@@ -456,6 +456,7 @@ export const zhTranslations: DefaultTranslationsObject = {
     sorryNotFound: '对不起，没有与您的请求相对应的东西。',
     sort: '排序',
     sortByLabelDirection: '按 {{label}} {{direction}} 排序',
+    sortByOrderToReorder: '要重新排序行，您必须首先按照“Order”列进行排序。',
     stayOnThisPage: '停留在此页面',
     submissionSuccessful: '提交成功。',
     submit: '提交',

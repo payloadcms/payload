@@ -2,6 +2,8 @@ import { fileURLToPath } from 'node:url'
 import path from 'path'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const framework = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start' ? 'tanstack' : 'next'
+const frameworkExport = framework === 'tanstack' ? 'TanStack' : 'Next'
 import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { seed } from './seed.js'
@@ -33,6 +35,10 @@ export default buildConfigWithDefaults({
           Component: './CreateFirstUser.js#CreateFirstUser',
           path: '/create-first-user',
           exact: true,
+        },
+        serverFunctions: {
+          Component: `./server-functions/view/${framework}.js#${frameworkExport}ServerFunctionsView`,
+          path: '/server-functions',
         },
       },
     },

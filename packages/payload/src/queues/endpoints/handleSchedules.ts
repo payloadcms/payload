@@ -35,7 +35,7 @@ export const handleSchedulesJobsEndpoint: Endpoint = {
     }
 
     if (!jobsConfig.scheduling) {
-      // There is no reason to call the handleSchedules endpoint if the stats global is not enabled (= no schedules defined)
+      // There is no reason to call the handleSchedules endpoint when no schedules are defined.
       return Response.json(
         {
           message:

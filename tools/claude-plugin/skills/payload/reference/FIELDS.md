@@ -76,7 +76,6 @@ const richTextField: RichTextField = {
 ```ts
 import {
   BoldFeature,
-  EXPERIMENTAL_TableFeature,
   FixedToolbarFeature,
   HeadingFeature,
   IndentFeature,
@@ -84,6 +83,7 @@ import {
   ItalicFeature,
   LinkFeature,
   OrderedListFeature,
+  TableFeature,
   UnderlineFeature,
   UnorderedListFeature,
   lexicalEditor,
@@ -122,7 +122,7 @@ export default buildConfig({
           },
         }),
         IndentFeature(),
-        EXPERIMENTAL_TableFeature(),
+        TableFeature(),
       ]
     },
   }),
