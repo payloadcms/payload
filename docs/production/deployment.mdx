@@ -213,7 +213,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
 # Install dependencies based on the preferred package manager
-COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
+COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* .yarnrc* ./
 RUN \
   if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
   elif [ -f package-lock.json ]; then npm ci; \
@@ -272,6 +272,18 @@ ENV PORT 3000
 # https://nextjs.org/docs/pages/api-reference/next-config-js/output
 CMD HOSTNAME="0.0.0.0" node server.js
 ```
+
+The `.npmrc*` and `.yarnrc*` globs ensure your package manager config is available before dependencies are installed. This matters because projects created with `create-payload-app` ship an `.npmrc` containing `legacy-peer-deps=true`, which `npm ci` needs in order to install against the generated lockfile. The globs are optional matches, so the build still works if those files are absent.
+
+<Banner type="warning">
+  **Security:** The default `.npmrc` only contains `legacy-peer-deps=true` and
+  is safe to copy. However, if your `.npmrc` or `.yarnrc` contains private
+  registry tokens, do not copy it into an image layer where it can be recovered
+  by inspecting the image. Instead, use a [BuildKit secret
+  mount](https://docs.docker.com/build/building/secrets/) (for example `RUN
+  --mount=type=secret,id=npmrc ...`) so the credentials are never persisted in
+  the final image.
+</Banner>
 
 ## Docker Compose
 
