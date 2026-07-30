@@ -1,4 +1,4 @@
-import type { PayloadHandler, Where } from 'payload'
+import type { JsonObject, PayloadHandler, TypeWithID, Where } from 'payload'
 
 import {
   addLocalesToRequestFromData,
@@ -155,9 +155,12 @@ export const generateReindexHandler =
           collection,
           depth: 0,
           limit: batchSize,
-          // Fetch all locales so each locale's `_status` is available for gating below
+          // Fetch all locales so each locale's `_status` is available for gating below.
           locale: localizeStatusEnabled ? 'all' : defaultLocale,
           page: i + 1,
+          // Only `_status` is needed here; per-locale content is loaded scoped inside the loop.
+          // If that per-locale re-fetch is ever removed, widen this select to the indexed fields.
+          select: localizeStatusEnabled ? { _status: true } : undefined,
           where: syncDrafts || !draftsEnabled ? undefined : buildPublishedWhere(collection),
           ...defaultLocalApiProps,
         })
@@ -172,13 +175,37 @@ export const generateReindexHandler =
           // Loop through all locales and check each one
           let firstAllowedLocale = true
           for (const localeToSync of allLocales) {
+            // For localized status, skip locales that aren't published (unless syncing drafts),
+            // then load the doc scoped to this locale so downstream sees per-locale scalars
+            // (the batch only selected `_status`).
+            let docToSync: JsonObject & TypeWithID = doc
+            if (localizeStatusEnabled) {
+              const localeStatus = (doc as { _status?: Record<string, string> })._status?.[
+                localeToSync as string
+              ]
+
+              if (!syncDrafts && localeStatus !== 'published') {
+                continue
+              }
+
+              docToSync =
+                (await payload.findByID({
+                  id: doc.id,
+                  collection,
+                  depth: 0,
+                  disableErrors: true,
+                  locale: localeToSync,
+                  ...defaultLocalApiProps,
+                })) ?? doc
+            }
+
             // Check if we should skip this locale for this document
             let shouldSkip = false
             if (typeof pluginConfig.skipSync === 'function') {
               try {
                 shouldSkip = await pluginConfig.skipSync({
                   collectionSlug: collection,
-                  doc,
+                  doc: docToSync,
                   locale: localeToSync,
                   req,
                 })
@@ -192,30 +219,6 @@ export const generateReindexHandler =
 
             if (shouldSkip) {
               continue // Skip this locale
-            }
-
-            // Skip locales that aren't published (unless syncing drafts)
-            let docToSync = doc
-            if (localizeStatusEnabled) {
-              const localeStatus = (doc as { _status?: Record<string, string> })._status?.[
-                localeToSync as string
-              ]
-
-              if (!syncDrafts && localeStatus !== 'published') {
-                continue
-              }
-
-              // The batch was fetched with `locale: 'all'`, so localized fields are locale maps.
-              // Re-fetch scoped to this locale so `syncDocAsSearchIndex` receives per-locale scalars.
-              docToSync =
-                (await payload.findByID({
-                  id: doc.id,
-                  collection,
-                  depth: 0,
-                  disableErrors: true,
-                  locale: localeToSync,
-                  ...defaultLocalApiProps,
-                })) ?? doc
             }
 
             // Sync this locale (create first index, then update with other locales accordingly)
