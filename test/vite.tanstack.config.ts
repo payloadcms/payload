@@ -52,6 +52,16 @@ const testSuite = process.env.PAYLOAD_TEST_SUITE || '_community'
 const suiteDir = path.resolve(__dirname, testSuite, 'app-tanstack')
 const srcDirectory = fs.existsSync(suiteDir) ? path.relative(__dirname, suiteDir) : 'app-tanstack'
 
+// A suite that defines its own `createServerFn`s puts them in
+// `test/<suite>/tanstackServerFunctions.ts`, which the base app's `_payload` route imports
+// for its registration side effect. Route modules are the only ones reached early enough
+// for the RSC environment's resolver manifest to pick the functions up, and that manifest
+// is what serves the server-function RPC. Suites with none resolve to an empty stub.
+const suiteServerFunctions = path.resolve(__dirname, testSuite, 'tanstackServerFunctions.ts')
+const suiteServerFunctionsPath = fs.existsSync(suiteServerFunctions)
+  ? suiteServerFunctions
+  : path.resolve(__dirname, '__helpers/tanstack/noSuiteServerFunctions.ts')
+
 export default withPayload(
   ({ pluginOptions }) => ({
     plugins: [
@@ -62,6 +72,9 @@ export default withPayload(
     // Keep build output out of the app dirs (they ship as pure source); the
     // repo root already ignores `dist`.
     build: { outDir: path.resolve(repoRoot, 'dist/app-tanstack') },
+    resolve: {
+      alias: { '@payload-suite-server-functions': suiteServerFunctionsPath },
+    },
     optimizeDeps: {
       include: [
         // `recharts` is only reached through the dashboard suite's Revenue
