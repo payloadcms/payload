@@ -118,6 +118,7 @@ const nextSuites: TestConfig[] = [
  */
 const tanstackSuites: TestConfig[] = [
   { file: '_community', framework: 'tanstack-start', optional: false, shards: 1 },
+  { file: 'admin-routing', framework: 'tanstack-start', optional: false, shards: 1 },
 ]
 
 export default createE2EConfig([...nextSuites, ...tanstackSuites])
