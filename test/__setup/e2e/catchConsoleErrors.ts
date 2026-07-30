@@ -1,6 +1,21 @@
 import type { Page } from '@playwright/test'
 
 /**
+ * Hydration-mismatch errors, which the unminified filters below already ignore by message.
+ * A production build only ever reports the code, so matching on prose silently stopped
+ * covering them and every navigation in a prod run failed its test instead.
+ *
+ * 418 server/client markup mismatch, 422 and 423 errors while hydrating, 425 text content
+ * mismatch.
+ *
+ * @see https://react.dev/errors
+ */
+const REACT_HYDRATION_ERROR_CODES = [418, 422, 423, 425]
+
+const isReactHydrationError = (message: string): boolean =>
+  REACT_HYDRATION_ERROR_CODES.some((code) => message.includes(`Minified React error #${code}`))
+
+/**
  * Throws an error when browser console error messages (with some exceptions) are thrown, thus resulting
  * in the e2e test failing.
  *
@@ -22,6 +37,7 @@ export function catchConsoleErrors(page: Page, options?: { ignoreCORS?: boolean 
       // https://github.com/JedWatson/react-select/issues/3590
       !msg.text().includes('did not match. Server:') &&
       !msg.text().includes('Hydration failed because the server rendered HTML') &&
+      !isReactHydrationError(msg.text()) &&
       !msg.text().includes('the server responded with a status of') &&
       !msg.text().includes('Failed to fetch RSC payload for') &&
       !msg.text().includes('Error loading language') &&
@@ -75,7 +91,10 @@ export function catchConsoleErrors(page: Page, options?: { ignoreCORS?: boolean 
   page.on('pageerror', (error) => {
     const message = error?.message ?? String(error)
 
-    if (message.includes('Hydration failed because the server rendered HTML')) {
+    if (
+      message.includes('Hydration failed because the server rendered HTML') ||
+      isReactHydrationError(message)
+    ) {
       return
     }
 
