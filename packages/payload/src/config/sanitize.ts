@@ -22,9 +22,10 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
+import { sanitizeFields } from '../fields/config/sanitize.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { resolveHierarchyCollections } from '../hierarchy/resolveHierarchyCollections.js'
-import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
+import { baseBlockFields, formatLabels } from '../index.js'
 import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
@@ -106,7 +107,7 @@ const addDefaultDashboardWidgets = ({
   validRelationships,
 }: {
   config: Partial<SanitizedConfig>
-  validRelationships: string[]
+  validRelationships: Set<string>
 }): void => {
   const collectionQueryFields: NonNullable<Widget['fields']> = [
     {
@@ -336,12 +337,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   const collectionSlugs = new Set<CollectionSlug>()
 
-  const validRelationships = [
-    ...(config.collections?.map((c) => c.slug) ?? []),
+  const validRelationships = new Set([
     jobsCollectionSlug,
     lockedDocumentsCollectionSlug,
     preferencesCollectionSlug,
-  ]
+    ...(config.collections?.map((c) => c.slug) ?? []),
+  ])
 
   const dashboardWidgets = config.admin?.dashboard?.widgets ?? ([] as Widget[])
 
@@ -411,8 +412,8 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     if (config.collections![i]!.enableQueryPresets) {
       queryPresetsCollections.push(config.collections![i]!.slug)
 
-      if (!validRelationships.includes(queryPresetsCollectionSlug)) {
-        validRelationships.push(queryPresetsCollectionSlug)
+      if (!validRelationships.has(queryPresetsCollectionSlug)) {
+        validRelationships.add(queryPresetsCollectionSlug)
       }
     }
 

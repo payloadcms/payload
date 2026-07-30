@@ -38,5 +38,15 @@ describe('formatLabels', () => {
     it('should allow no separator (used for building GraphQL label from name)', () => {
       expect(toWords('myGraphField', true)).toBe('MyGraphField')
     })
+
+    it.each([
+      ['', false, ''],
+      ['  my  slug  ', false, 'My Slug'],
+      ['my-URLValue', false, 'My U R L Value'],
+      ['my-slug', true, 'MySlug'],
+      ['my\u2003slug', false, 'My Slug'],
+    ])('should convert %j with joinWords=%s', (input, joinWords, expected) => {
+      expect(toWords(input, joinWords)).toBe(expected)
+    })
   })
 })

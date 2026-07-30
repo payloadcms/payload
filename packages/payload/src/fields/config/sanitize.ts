@@ -38,6 +38,8 @@ import {
 import { sanitizeJoinField } from './sanitizeJoinField.js'
 import { fieldAffectsData as _fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
 
+export type ValidRelationships = null | ReadonlySet<string> | string[]
+
 type SanitizeFieldsArgs = {
   collectionConfig?: CollectionConfig
   config: Config
@@ -78,7 +80,7 @@ type SanitizeFieldsArgs = {
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
    * This validation will be skipped if validRelationships is null.
    */
-  validRelationships: null | string[]
+  validRelationships: ValidRelationships
 }
 
 export type SanitizeFieldArgs = {
@@ -109,7 +111,7 @@ export type SanitizeFieldArgs = {
   parentSchemaPath: string
   polymorphicJoins?: SanitizedJoin[]
   requireFieldLevelRichTextEditor: boolean
-  validRelationships: null | string[]
+  validRelationships: ValidRelationships
 }
 
 type SanitizeFieldResult = {
@@ -128,7 +130,7 @@ type SanitizeFieldResult = {
  *
  * @returns Result containing any fields to insert after this one
  */
-export const sanitizeField = ({
+const sanitizeFieldInternal = ({
   collectionConfig,
   config,
   existingFieldNames,
@@ -145,11 +147,11 @@ export const sanitizeField = ({
   polymorphicJoins,
   requireFieldLevelRichTextEditor,
   validRelationships,
-}: SanitizeFieldArgs): SanitizeFieldResult => {
-  const result: SanitizeFieldResult = {}
+}: SanitizeFieldArgs): SanitizeFieldResult | undefined => {
+  let fieldsToInsert: Field[] | undefined
 
   if ('_sanitized' in field && field._sanitized === true) {
-    return result
+    return
   }
 
   if ('_sanitized' in field) {
@@ -252,7 +254,11 @@ export const sanitizeField = ({
       const relationships = Array.isArray(field.relationTo) ? field.relationTo : [field.relationTo]
 
       relationships.forEach((relationship: string) => {
-        if (!validRelationships.includes(relationship)) {
+        const isValidRelationship = Array.isArray(validRelationships)
+          ? validRelationships.includes(relationship)
+          : validRelationships.has(relationship)
+
+        if (!isValidRelationship) {
           throw new InvalidFieldRelationship(field, relationship)
         }
       })
@@ -569,7 +575,7 @@ export const sanitizeField = ({
         ? field.timezone.override({ baseField })
         : baseField
 
-    result.fieldsToInsert = [timezoneField]
+    fieldsToInsert = [timezoneField]
   }
 
   // Virtual field handling
@@ -624,7 +630,13 @@ export const sanitizeField = ({
     }
   }
 
-  return result
+  if (fieldsToInsert) {
+    return { fieldsToInsert }
+  }
+}
+
+export const sanitizeField = (args: SanitizeFieldArgs): SanitizeFieldResult => {
+  return sanitizeFieldInternal(args) ?? {}
 }
 
 export const sanitizeFields = ({
@@ -648,31 +660,34 @@ export const sanitizeFields = ({
     return []
   }
 
+  const fieldSanitizationArgs: SanitizeFieldArgs = {
+    collectionConfig,
+    config,
+    existingFieldNames,
+    field: fields[0]!,
+    globalConfig,
+    index: 0,
+    isTopLevelField,
+    joinPath,
+    joins,
+    orderableJoins,
+    parentIndexPath,
+    parentIsLocalized,
+    parentSchemaPath,
+    polymorphicJoins,
+    requireFieldLevelRichTextEditor,
+    validRelationships,
+  }
+
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i]!
 
-    const result = sanitizeField({
-      collectionConfig,
-      config,
-      existingFieldNames,
-      field,
-      globalConfig,
-      index: i,
-      isTopLevelField,
-      joinPath,
-      joins,
-      orderableJoins,
-      parentIndexPath,
-      parentIsLocalized,
-      parentSchemaPath,
-      polymorphicJoins,
-      requireFieldLevelRichTextEditor,
-      validRelationships,
-    })
+    fieldSanitizationArgs.field = field
+    fieldSanitizationArgs.index = i
 
-    fields[i] = field
+    const result = sanitizeFieldInternal(fieldSanitizationArgs)
 
-    if (result.fieldsToInsert?.length) {
+    if (result?.fieldsToInsert?.length) {
       fields.splice(i + 1, 0, ...result.fieldsToInsert)
       i += result.fieldsToInsert.length
     }

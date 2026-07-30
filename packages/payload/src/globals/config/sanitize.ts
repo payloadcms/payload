@@ -1,4 +1,5 @@
 import type { Config } from '../../config/types.js'
+import type { ValidRelationships } from '../../fields/config/sanitize.js'
 import type { SanitizedDrafts } from '../../versions/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
@@ -15,7 +16,7 @@ import { defaultGlobalEndpoints } from '../endpoints/index.js'
 export const sanitizeGlobal = (
   config: Config,
   global: GlobalConfig,
-  _validRelationships?: string[],
+  _validRelationships?: Exclude<ValidRelationships, null>,
 ): SanitizedGlobalConfig => {
   if (global._sanitized) {
     return global as SanitizedGlobalConfig
