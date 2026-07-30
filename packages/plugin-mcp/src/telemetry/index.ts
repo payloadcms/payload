@@ -1,7 +1,6 @@
-import type { Implementation, McpServer, ServerContext } from '@modelcontextprotocol/server'
+import type { ServerContext } from '@modelcontextprotocol/server'
 import type { PayloadRequest } from 'payload'
 
-import { CLIENT_INFO_META_KEY, PROTOCOL_VERSION_META_KEY } from '@modelcontextprotocol/server'
 import { sendTelemetryEvent } from 'payload/internal'
 
 import type { MCPItem, MCPToolResponse } from '../types.js'
@@ -9,18 +8,7 @@ import type { MCPItem, MCPToolResponse } from '../types.js'
 import { MCP_TOOL_TELEMETRY_MARKER } from '../types.js'
 import { getMcpErrorType, type MCPErrorType } from './errorType.js'
 
-type ModernRequestEnvelope = {
-  [CLIENT_INFO_META_KEY]?: Implementation
-  [PROTOCOL_VERSION_META_KEY]?: string
-}
-
-export const createMcpServerTelemetry = ({
-  req,
-  server,
-}: {
-  req: PayloadRequest
-  server: McpServer
-}) => {
+export const createMcpServerTelemetry = ({ req }: { req: PayloadRequest }) => {
   const reportToolCall = ({
     ctx,
     errorType,
@@ -30,22 +18,13 @@ export const createMcpServerTelemetry = ({
     errorType: MCPErrorType | null
     tool: string
   }): void => {
-    const envelope = ctx.mcpReq.envelope as ModernRequestEnvelope | undefined
-    const clientInfo = envelope?.[CLIENT_INFO_META_KEY] ?? server.server.getClientVersion()
-
     void sendTelemetryEvent({
       event: {
         type: 'mcp-tool-call',
         authenticated: Boolean(req.user),
-        clientName: clientInfo?.name ?? null,
-        clientVersion: clientInfo?.version ?? null,
         errorType,
         isError: errorType !== null,
-        protocolPath: envelope ? 'modern' : 'legacy',
-        protocolVersion:
-          envelope?.[PROTOCOL_VERSION_META_KEY] ??
-          server.server.getNegotiatedProtocolVersion() ??
-          null,
+        protocolPath: ctx.mcpReq.envelope ? 'modern' : 'legacy',
         tool,
         transport: ctx.http?.req ? 'http' : 'stdio',
       },

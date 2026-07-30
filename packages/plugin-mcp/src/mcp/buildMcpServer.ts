@@ -68,7 +68,7 @@ export const buildMcpServer = ({
     return rest
   }
 
-  const wrapToolHandler = createMcpServerTelemetry({ req, server })
+  const wrapToolHandler = createMcpServerTelemetry({ req })
 
   /**
    * Runs a collection/global tool call:
