@@ -147,7 +147,7 @@ export function PublishButton({
       return
     }
 
-    const isValid = await validateBeforePublish({ isPublishAll: true })
+    const isValid = await validateBeforePublish({ isPublishAll: localizeStatusEnabled })
 
     if (!isValid) {
       return
