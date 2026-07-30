@@ -3,26 +3,30 @@
 import { useAuth } from '@payloadcms/ui'
 import React from 'react'
 
-import { authSessionExpirationTestID, authSessionRefreshWindowMs } from '../shared.js'
+import {
+  authSessionActivityStatusTestID,
+  authSessionExpirationTestID,
+  authSessionRefreshWindowMs,
+  authSessionRefreshWindowStatusTestID,
+} from '../shared.js'
+import './index.css'
 
-const overlayStyle: React.CSSProperties = {
-  background: 'rgba(20, 20, 24, 0.92)',
-  border: '1px solid rgba(255, 255, 255, 0.2)',
-  borderRadius: '8px',
-  bottom: '16px',
-  boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
-  color: '#fff',
-  display: 'grid',
-  fontFamily: 'monospace',
-  fontSize: '13px',
-  gap: '6px',
-  lineHeight: 1.4,
-  padding: '12px 14px',
-  pointerEvents: 'none',
-  position: 'fixed',
-  right: '16px',
-  zIndex: 1000,
+type ActivityStatus = 'closed' | 'tracking' | 'waiting' | 'will-refresh'
+
+type GetActivityStatusArgs = {
+  expiresInMs: number
+  hasActivityInTrackingWindow: boolean
 }
+
+const activityTrackingWindowMs = authSessionRefreshWindowMs * 2
+const reminderWindowMs = authSessionRefreshWindowMs / 2
+
+const activityStatusLabels = {
+  closed: 'Window closed',
+  tracking: 'Tracking',
+  waiting: 'Waiting for window',
+  'will-refresh': 'Will refresh',
+} satisfies Record<ActivityStatus, string>
 
 const formatCountdown = (durationMs: number): string => {
   const totalSeconds = Math.max(0, Math.ceil(durationMs / 1000))
@@ -32,9 +36,66 @@ const formatCountdown = (durationMs: number): string => {
   return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }
 
+const getActivityStatus = ({
+  expiresInMs,
+  hasActivityInTrackingWindow,
+}: GetActivityStatusArgs): ActivityStatus => {
+  if (expiresInMs <= reminderWindowMs) {
+    return 'closed'
+  }
+
+  if (hasActivityInTrackingWindow) {
+    return 'will-refresh'
+  }
+
+  if (expiresInMs <= activityTrackingWindowMs) {
+    return 'tracking'
+  }
+
+  return 'waiting'
+}
+
+const getRefreshWindowStatus = (expiresInMs: number): string => {
+  if (expiresInMs <= reminderWindowMs) {
+    return 'Closed'
+  }
+
+  if (expiresInMs <= authSessionRefreshWindowMs) {
+    return 'Open'
+  }
+
+  return `Opens in ${formatCountdown(expiresInMs - authSessionRefreshWindowMs)}`
+}
+
 export const SessionDebug: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { tokenExpirationMs, user } = useAuth()
+  const [hasActivityInTrackingWindow, setHasActivityInTrackingWindow] = React.useState(false)
   const [nowMs, setNowMs] = React.useState<number>()
+
+  React.useEffect(() => {
+    setHasActivityInTrackingWindow(false)
+  }, [tokenExpirationMs])
+
+  React.useEffect(() => {
+    const recordActivity = () => {
+      const expiresInMs = Math.max(0, (tokenExpirationMs ?? 0) - Date.now())
+      const isTrackingWindowOpen =
+        expiresInMs <= activityTrackingWindowMs && expiresInMs > reminderWindowMs
+
+      if (isTrackingWindowOpen) {
+        setHasActivityInTrackingWindow(true)
+      }
+    }
+    const mousemoveListenerOptions = { capture: true, passive: true }
+
+    window.addEventListener('focus', recordActivity, true)
+    window.addEventListener('mousemove', recordActivity, mousemoveListenerOptions)
+
+    return () => {
+      window.removeEventListener('focus', recordActivity, true)
+      window.removeEventListener('mousemove', recordActivity, mousemoveListenerOptions)
+    }
+  }, [tokenExpirationMs])
 
   React.useEffect(() => {
     const updateCountdown = () => setNowMs(Date.now())
@@ -46,13 +107,8 @@ export const SessionDebug: React.FC<{ children?: React.ReactNode }> = ({ childre
   }, [])
 
   const expiresInMs = Math.max(0, (tokenExpirationMs ?? 0) - (nowMs ?? 0))
-  const refreshWindowBeginsInMs = Math.max(0, expiresInMs - authSessionRefreshWindowMs)
-  const status =
-    expiresInMs === 0
-      ? 'Expired'
-      : refreshWindowBeginsInMs === 0
-        ? 'Refresh window open'
-        : 'Waiting for refresh window'
+  const activityStatus = getActivityStatus({ expiresInMs, hasActivityInTrackingWindow })
+  const refreshWindowStatus = getRefreshWindowStatus(expiresInMs)
 
   return (
     <>
@@ -63,11 +119,20 @@ export const SessionDebug: React.FC<{ children?: React.ReactNode }> = ({ childre
       </output>
 
       {user && tokenExpirationMs && nowMs !== undefined ? (
-        <aside aria-label="Auth session countdown" style={overlayStyle}>
+        <aside aria-label="Auth session countdown" className="session-debug">
           <strong>Auth session</strong>
           <span>Access expires in: {formatCountdown(expiresInMs)}</span>
-          <span>Refresh window in: {formatCountdown(refreshWindowBeginsInMs)}</span>
-          <span>Status: {status}</span>
+          <span>
+            Refresh window:{' '}
+            <span data-testid={authSessionRefreshWindowStatusTestID}>{refreshWindowStatus}</span>
+          </span>
+          <span className={`session-debug__activity session-debug__activity--${activityStatus}`}>
+            <span aria-hidden className="session-debug__activity-indicator" />
+            Activity:{' '}
+            <span data-testid={authSessionActivityStatusTestID}>
+              {activityStatusLabels[activityStatus]}
+            </span>
+          </span>
         </aside>
       ) : null}
     </>

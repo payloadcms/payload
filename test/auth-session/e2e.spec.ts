@@ -11,6 +11,8 @@ import {
   AUTH_SESSION_REFRESH_BARRIER_PHASES,
   authSessionAccessTokenCookieName,
   authSessionAccessTokenLifetimeMs,
+  authSessionActivityStatusTestID,
+  authSessionRefreshWindowStatusTestID,
 } from './shared.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -85,9 +87,13 @@ test.describe('Auth session', () => {
     const originalExpiration = await scenario.readExpiration(page)
     const originalCredentials = await scenario.readOAuthCredentials()
 
+    await expect(page.getByTestId(authSessionActivityStatusTestID)).toHaveText('Waiting for window')
     await scenario.advanceBy(120_000)
+    await expect(page.getByTestId(authSessionActivityStatusTestID)).toHaveText('Tracking')
     await scenario.moveMouse(page)
+    await expect(page.getByTestId(authSessionActivityStatusTestID)).toHaveText('Will refresh')
     await scenario.advanceBy(60_000)
+    await expect(page.getByTestId(authSessionRefreshWindowStatusTestID)).toHaveText('Open')
     const refreshResponse = scenario.waitForRefresh(page)
 
     await scenario.advanceBy(1_001)
@@ -253,7 +259,10 @@ test.describe('Auth session', () => {
       const page = await scenario.login()
       const originalCredentials = await scenario.readOAuthCredentials()
 
-      await scenario.advanceBy(authSessionAccessTokenLifetimeMs + 1)
+      await scenario.advanceBy(240_000)
+      await expect(page.getByTestId(authSessionActivityStatusTestID)).toHaveText('Window closed')
+      await expect(page.getByTestId(authSessionRefreshWindowStatusTestID)).toHaveText('Closed')
+      await scenario.advanceBy(authSessionAccessTokenLifetimeMs - 240_000 + 1)
 
       await scenario.expectLoggedOut({ page, route: 'inactivity' })
       await expect.poll(async () => scenario.readAccessTokenCookie()).toBeUndefined()
