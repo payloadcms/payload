@@ -16,12 +16,10 @@ import { getClientConfig } from '@payloadcms/ui/utilities/getClientConfig'
 import { getRequestEmbed } from '@payloadcms/ui/utilities/getRequestEmbed'
 import { getRequestTheme } from '@payloadcms/ui/utilities/getRequestTheme'
 import { Outlet } from '@tanstack/react-router'
-import { getRequest } from '@tanstack/react-start/server'
-import { initReq } from 'payload'
 import { applyLocaleFiltering } from 'payload/shared'
 import { createElement } from 'react'
 
-import { tanstackServerAdapter } from '../../utilities/serverAdapter.server.js'
+import { initReq } from '../../utilities/initReq.server.js'
 
 export type RootLayoutData = {
   clientConfig: ClientConfig
@@ -70,8 +68,6 @@ export async function getLayoutData({
   } = await initReq({
     configPromise,
     importMap,
-    requestURL: getRequest().url,
-    serverAdapter: tanstackServerAdapter,
   })
 
   const theme = getRequestTheme({ config, cookies, headers })
