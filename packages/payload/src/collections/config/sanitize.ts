@@ -1,4 +1,5 @@
 import type { Config } from '../../config/types.js'
+import type { ValidRelationships } from '../../fields/config/sanitize.js'
 import type { OrderableJoinInfo } from '../../fields/config/sanitizeJoinField.js'
 import type { SanitizedDrafts } from '../../versions/types.js'
 import type {
@@ -64,7 +65,7 @@ export const warnOnInvalidCustomViews = (collection: CollectionConfig): void => 
 export const sanitizeCollection = (
   config: Config,
   collection: CollectionConfig,
-  _validRelationships?: string[],
+  _validRelationships?: Exclude<ValidRelationships, null>,
   /**
    * Tracker for orderable join fields - populated during sanitization
    */

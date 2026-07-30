@@ -5,6 +5,7 @@ import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones
 
 // Pre-computed Set of default timezone values - skip validation for these
 const defaultTimezoneValues = new Set(defaultTimezones.map((tz) => tz.value))
+const timezoneSupportCache = new Map<string, boolean>()
 
 type ValidateTimezonesArgs = {
   /**
@@ -54,33 +55,38 @@ const isValidUtcOffset = (value: string): boolean => {
  * For UTC offsets: Uses native Date API to validate (±HH:mm format only)
  */
 const isTimezoneSupported = (timezoneValue: string): boolean => {
+  const cachedResult = timezoneSupportCache.get(timezoneValue)
+
+  if (cachedResult !== undefined) {
+    return cachedResult
+  }
+
+  let isSupported = false
+
   // UTC is always supported
   if (timezoneValue === 'UTC') {
-    return true
-  }
+    isSupported = true
+  } else if (timezoneValue.startsWith('+') || timezoneValue.startsWith('-')) {
+    // Check if it's a UTC offset format (starts with + or -)
+    isSupported = isValidUtcOffset(timezoneValue)
+  } else {
+    // For IANA timezone names, use Intl.DateTimeFormat as primary check
+    try {
+      new Intl.DateTimeFormat('en-US', { timeZone: timezoneValue })
+      isSupported = true
+    } catch {
+      // DateTimeFormat failed, timezone is not supported
+    }
 
-  // Check if it's a UTC offset format (starts with + or -)
-  if (timezoneValue.startsWith('+') || timezoneValue.startsWith('-')) {
-    return isValidUtcOffset(timezoneValue)
-  }
-
-  // For IANA timezone names, use Intl.DateTimeFormat as primary check
-  try {
-    new Intl.DateTimeFormat('en-US', { timeZone: timezoneValue })
-    return true
-  } catch {
-    // DateTimeFormat failed, timezone is not supported
-  }
-
-  // Secondary check: verify against supportedValuesOf if available
-  if (typeof Intl.supportedValuesOf === 'function') {
-    const supportedTimezones = Intl.supportedValuesOf('timeZone')
-    if (supportedTimezones.includes(timezoneValue)) {
-      return true
+    // Secondary check: verify against supportedValuesOf if available
+    if (!isSupported && typeof Intl.supportedValuesOf === 'function') {
+      const supportedTimezones = Intl.supportedValuesOf('timeZone')
+      isSupported = supportedTimezones.includes(timezoneValue)
     }
   }
 
-  return false
+  timezoneSupportCache.set(timezoneValue, isSupported)
+  return isSupported
 }
 
 /**
