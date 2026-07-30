@@ -389,9 +389,9 @@ Spacing (`width`/`height`, `margin*`, `padding*`, `top`/`right`/`bottom`/`left`,
 - The same principle applies to other token families:
   - **Colors:** use semantic `--color-*` tokens from `colors.css` (e.g. `--color-bg`, `--color-text-brand`, `--color-border`). Never reference raw `--ramp-*` palette tokens directly outside of `colors.css` as they aren't theme-aware.
   - **Radius:** use `--radius-*` from `radius.css` (`--radius-small` 2px, `--radius-medium` 5px, `--radius-large` 13px, `--radius-full` 9999px) instead of hardcoded values.
+  - **Stroke width:** use `--stroke-width-small` (1px) / `--stroke-width-medium` (2px) from `theme.css`.
   - **Box shadows:** use elevation tokens from `elevations.css` (`--elevation-100-canvas`, `--elevation-300-tooltip`, `--elevation-400-menu-panel`, `--elevation-500-modal-window`) instead of a hardcoded `box-shadow`/`rgba()` value - they also handle light/dark theming.
   - **Typography:** use `--text-*` tokens from `typography.css`.
-- `1px` borders/strokes and non-standard one-off values with no sensible token (documented as such) are acceptable exceptions.
 
 **No sub-pixel precision** (`plugin/no-subpixel-values`) - applies to whatever raw value remains after the above (e.g. an exception case):
 
