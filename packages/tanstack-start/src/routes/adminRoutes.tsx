@@ -2,7 +2,7 @@
 
 import { NotFoundClient } from '@payloadcms/ui'
 import { notFound, redirect, useLoaderData } from '@tanstack/react-router'
-import { Fragment, type ReactNode } from 'react'
+import { Fragment, type ReactNode, useDeferredValue } from 'react'
 
 import { getAdminMeta } from '../utilities/meta.js'
 
@@ -31,7 +31,16 @@ function AdminPage() {
   // Note: React key intentionally omitted here so the persistent template (nav, header) doesn't remount and flash on navigation.
   // The per-route view key is attached server-side to the view subtree instead, via `renderRoot`'s `key` in `loadAdminPage`.
   const data = useLoaderData({ strict: false })
-  return <Fragment>{data?.rscPayload}</Fragment>
+
+  // The loader resolves as soon as the RSC wire data lands, but rendering the payload then
+  // suspends while its client references are imported — code-split chunks in a production build.
+  // Router state lives in an external store, so the transition TanStack wraps the commit in
+  // de-opts to a synchronous render and that suspension hits the nearest fallback, which is
+  // `null` unless a `pendingComponent` is configured — blanking the page. Deferring the payload
+  // keeps the previous view painted until the new one is renderable, then swaps.
+  const rscPayload = useDeferredValue(data?.rscPayload)
+
+  return <Fragment>{rscPayload}</Fragment>
 }
 
 function AdminNotFound(props: { data?: { routeKey?: string; rscPayload?: ReactNode } }) {
