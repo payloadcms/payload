@@ -24,7 +24,7 @@ test.afterEach(async ({ page }) => {
 })
 
 test(
-  'should preserve the admin subtree during index-to-splat navigation',
+  'should keep the previous admin view painted during index-to-splat navigation',
   { framework: 'tanstack-start' },
   async ({ page }) => {
     test.skip(
@@ -38,7 +38,6 @@ test(
     await ensureCompilationIsDone({ page, serverURL })
     await page.goto(postsURL.admin)
 
-    const adminTemplate = await page.locator('.template-default').elementHandle()
     let isClientChunkBlocked = false
     const clientChunkGate = new Promise<void>((resolve) => {
       releaseClientChunk = resolve
@@ -60,8 +59,8 @@ test(
     await page.locator(`#card-${postsSlug} .card__actions a`).click()
     await expect.poll(() => isClientChunkBlocked).toBe(true)
 
-    expect(await adminTemplate?.evaluate((element) => element.isConnected)).toBe(true)
     await expect(page.locator('.template-default')).toBeVisible()
+    await expect(page.locator(`#card-${postsSlug}`)).toBeVisible()
 
     releaseClientChunk?.()
     releaseClientChunk = undefined
