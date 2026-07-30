@@ -290,7 +290,7 @@ describe('Versions', () => {
       await waitForFormReady(page)
       await page.locator('#field-title').fill('v1')
       await page.locator('#field-description').fill('hello')
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#publish-locale')
       await page.locator('#field-title').fill('v2')
       await saveDocAndAssert(page, '#action-save-draft')
       const savedDocURL = page.url()
@@ -311,10 +311,10 @@ describe('Versions', () => {
       await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#field-title').fill('v2')
       await page.locator('#field-description').fill('restore me as draft')
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#publish-locale')
       await page.locator('#field-title').fill('v3')
       await page.locator('#field-description').fill('published')
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#publish-locale')
 
       const savedDocURL = page.url()
       await page.goto(`${savedDocURL}/versions`)
@@ -608,7 +608,7 @@ describe('Versions', () => {
       // fill out doc in english
       await page.locator('#field-title').fill('title')
       await page.locator('#field-description').fill('initial description')
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#publish-locale')
 
       const updatedAtWrapper = page.locator(
         '.doc-controls .doc-controls__content .doc-controls__value-wrap',
@@ -619,7 +619,7 @@ describe('Versions', () => {
       await wait(1000)
 
       await page.locator('#field-description').fill('changed description')
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#publish-locale')
 
       await expect(async () => {
         const newTitle = updatedAtWrapper
@@ -687,14 +687,14 @@ describe('Versions', () => {
       // fill out doc in english
       await page.locator('#field-title').fill(englishTitle)
       await page.locator('#field-description').fill('unchanged description')
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#publish-locale')
 
       // change locale to spanish
       await changeLocale(page, es)
 
       // fill out doc in spanish
       await page.locator('#field-title').fill(spanishTitle)
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#publish-locale')
 
       // wait for the page to load with the new version
       await expect
@@ -723,14 +723,14 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('first post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('first post description')
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#publish-locale')
       await page.goto(autosaveURL.create)
       await wait(500)
       await expect(page.locator('#field-title')).toBeEnabled()
       await page.locator('#field-title').fill('second post title')
       await expect(page.locator('#field-description')).toBeEnabled()
       await page.locator('#field-description').fill('second post description')
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#publish-locale')
       await page.locator('#field-title').fill('updated second post title')
       await page.locator('#field-description').fill('updated second post description')
       await waitForAutoSaveToRunAndComplete(page)
@@ -1525,7 +1525,7 @@ describe('Versions', () => {
       await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#schedule-publish-button').click()
 
       // drawer should open
@@ -1558,7 +1558,7 @@ describe('Versions', () => {
       await expect(page.locator('#schedule-publish-button')).toBeHidden()
 
       // save draft then try to schedule publish
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#schedule-publish-button').click()
 
       // drawer should open
@@ -1586,7 +1586,7 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('scheduled publish positioning')
       await page.locator('#field-description').fill('scheduled publish positioning description')
 
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#action-save-draft')
       await page.locator('#schedule-publish-button').click()
 
       await expect(page.locator('.drawer__header')).toBeVisible()
@@ -1611,7 +1611,7 @@ describe('Versions', () => {
       await page.locator('#field-title').fill('scheduled publish')
       await page.locator('#field-description').fill('scheduled publish description')
 
-      await saveDocAndAssert(page)
+      await saveDocAndAssert(page, '#publish-locale')
 
       await page.locator('#field-title').fill('scheduled publish updated')
 
