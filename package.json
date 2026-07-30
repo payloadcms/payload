@@ -8,6 +8,7 @@
     "test/*"
   ],
   "scripts": {
+    "benchmark:config-sanitization": "pnpm runts ./test/fields/benchmarks/sanitizeConfig.ts",
     "bf": "pnpm run build:force",
     "build": "pnpm run build:core",
     "build:admin-bar": "turbo build --filter \"@payloadcms/admin-bar\"",
