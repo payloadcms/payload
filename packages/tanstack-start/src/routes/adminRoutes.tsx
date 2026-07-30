@@ -114,12 +114,23 @@ export function payloadAdminSplatRoute({ load }: { load: AdminLoad }) {
 
 /**
  * Route options for the admin index route (`/_payload/admin/`). Same loader as the
- * splat route but throws a bare `notFound()` (no rscPayload) on miss.
+ * splat route but throws a bare `notFound()` (no rscPayload) on miss, so
+ * `AdminNotFound` falls through to the bare client view.
+ *
+ * `notFoundComponent` must be set here even though the payload is never forwarded:
+ * TanStack picks the boundary component from its presence (`routeNotFoundComponent ?
+ * CatchNotFound : SafeFragment`), so leaving it off gives this route a different
+ * component type than the splat route at the same position in the tree. Navigating
+ * between the two would then unmount the whole admin subtree and remount it —
+ * blanking the page for as long as the new view takes to render.
  */
 export function payloadAdminIndexRoute({ load }: { load: AdminLoad }) {
-  return adminRouteOptions({
-    forwardNotFoundPayload: false,
-    load,
-    resolveSplat: () => '',
-  })
+  return {
+    ...adminRouteOptions({
+      forwardNotFoundPayload: false,
+      load,
+      resolveSplat: () => '',
+    }),
+    notFoundComponent: AdminNotFound,
+  }
 }
