@@ -206,12 +206,7 @@ export async function loadAdminPage({
     const notFoundNode = await renderNotFoundPage({
       config: Promise.resolve(config),
       importMap,
-      initReq: (args) =>
-        initReq({
-          configPromise: args.configPromise,
-          importMap: args.importMap,
-          overrides: args.overrides,
-        }),
+      initReq,
       params: Promise.resolve({ segments: splatSegments }),
       searchParams: Promise.resolve(searchParams),
     })
