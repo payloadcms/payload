@@ -257,14 +257,17 @@ test.describe('Auth session', () => {
 
     await test.step('idle expiration without an active refresh', async () => {
       const page = await scenario.login()
+      const expirationMs = await scenario.readExpiration(page)
       const originalCredentials = await scenario.readOAuthCredentials()
 
       await scenario.advanceBy(240_000)
       await expect(page.getByTestId(authSessionActivityStatusTestID)).toHaveText('Window closed')
       await expect(page.getByTestId(authSessionRefreshWindowStatusTestID)).toHaveText('Closed')
-      await scenario.advanceBy(authSessionAccessTokenLifetimeMs - 240_000 + 1)
+      await scenario.delayLogoutRequest({ durationMs: 250 })
+      await scenario.advanceBy(expirationMs - (await page.evaluate(() => Date.now())))
 
       await scenario.expectLoggedOut({ page, route: 'inactivity' })
+      await expect(page.getByRole('link', { name: 'Log back in' })).toBeVisible()
       await expect.poll(async () => scenario.readAccessTokenCookie()).toBeUndefined()
       await expect.poll(async () => scenario.readRefreshTokenCookie()).toBeUndefined()
       await scenario.expectOAuthCredentialsRevoked({ credentials: originalCredentials })
@@ -286,7 +289,6 @@ test.describe('Auth session', () => {
       await scenario.advanceBy(1_001)
       await scenario.waitForRefreshBarrier(1)
       await scenario.advanceBy(authSessionAccessTokenLifetimeMs - 181_001 + 1)
-      await scenario.expectLoggedOut({ page, route: 'inactivity' })
       await scenario.releaseRefreshBarrier()
 
       const settledRefreshResponse = await refreshResponse
@@ -294,6 +296,7 @@ test.describe('Auth session', () => {
         await scenario.readRotatedOAuthCredentialsFromResponse(settledRefreshResponse)
 
       expect(settledRefreshResponse.status()).toBe(200)
+      await scenario.expectLoggedOut({ page, route: 'inactivity' })
       await expect.poll(async () => scenario.readAccessTokenCookie()).toBeUndefined()
       await expect.poll(async () => scenario.readRefreshTokenCookie()).toBeUndefined()
       await scenario.expectOAuthAccessTokenRevoked({

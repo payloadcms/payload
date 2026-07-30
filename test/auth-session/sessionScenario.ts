@@ -34,6 +34,7 @@ export type SessionScenario = {
   advanceBy: (durationMs: number) => Promise<void>
   armRefreshBarrier: (phase: AuthSessionRefreshBarrierPhase) => Promise<void>
   close: () => Promise<void>
+  delayLogoutRequest: (args: { durationMs: number }) => Promise<void>
   disableBroadcastChannel: () => Promise<void>
   expectLoggedIn: (page: Page) => Promise<void>
   expectLoggedOut: (args: { page: Page; route: LoggedOutRoute }) => Promise<void>
@@ -74,7 +75,7 @@ export async function createSessionScenario({
 }): Promise<SessionScenario> {
   const context = await browser.newContext()
   const url = new AdminUrlUtil(serverURL, authSessionUsersSlug)
-  let nowMs = Date.now()
+  let nowMs = Math.floor(Date.now() / 1000) * 1000 + 500
   let isMouseAtFirstPosition = false
 
   await context.clock.install({ time: nowMs })
@@ -110,6 +111,12 @@ export async function createSessionScenario({
     },
     async close() {
       await context.close()
+    },
+    async delayLogoutRequest({ durationMs }) {
+      await context.route(`**/${authSessionUsersSlug}/logout`, async (route) => {
+        await new Promise((resolve) => setTimeout(resolve, durationMs))
+        await route.continue()
+      })
     },
     async disableBroadcastChannel() {
       await context.addInitScript(() => {

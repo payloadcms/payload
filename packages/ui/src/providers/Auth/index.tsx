@@ -107,8 +107,7 @@ export function AuthProvider({
       type: TAB_SESSION_EVENT_TYPES.EXPIRED,
       expiredTokenAt: expirationMs,
     })
-    void logOutSession({ collection })
-    redirectToInactivityRoute()
+    void logOutSession({ collection }).then(redirectToInactivityRoute)
   }
 
   function onSessionReminder() {
@@ -164,14 +163,12 @@ export function AuthProvider({
     onSessionExpired: () => {
       const collection = userRef.current?.collection
 
-      void logOutSession({ collection })
-      redirectToInactivityRoute()
+      void logOutSession({ collection }).then(redirectToInactivityRoute)
     },
     onSessionLoggedOut: () => {
       const collection = userRef.current?.collection
 
-      void logOutSession({ collection })
-      redirectToLoginRoute()
+      void logOutSession({ collection }).then(redirectToLoginRoute)
     },
     onSessionRefreshed: (session) => {
       if (!authRequests.isLoggingOut()) {
