@@ -50,8 +50,19 @@ export default defineConfig({
           },
         },
         test: {
+          exclude: ['packages/next/**/*.rsc.spec.ts'],
           include: ['packages/**/*.spec.ts', 'tools/**/*.spec.ts'],
           name: 'unit',
+          environment: 'node',
+        },
+      },
+      {
+        resolve: {
+          conditions: ['react-server'],
+        },
+        test: {
+          include: ['packages/next/**/*.rsc.spec.ts'],
+          name: 'rsc',
           environment: 'node',
         },
       },
