@@ -34,9 +34,10 @@ type StoredOAuthSession = {
  * logout racing with refresh can revoke credentials that were rotated but not yet returned.
  */
 export function createTestOAuthSessionStore() {
-  let nowMs = Date.now()
+  let controlledNowMs: number | undefined
   const sessionIDsByToken = new Map<string, string>()
   const sessions = new Map<string, StoredOAuthSession>()
+  const getNowMs = (): number => controlledNowMs ?? Date.now()
 
   const createSession = ({
     id = randomUUID(),
@@ -45,6 +46,7 @@ export function createTestOAuthSessionStore() {
     id?: string
     userID: number | string
   }): StoredOAuthSession => {
+    const nowMs = getNowMs()
     const session = {
       id,
       accessToken: randomUUID(),
@@ -73,7 +75,7 @@ export function createTestOAuthSessionStore() {
     const sessionID = token ? sessionIDsByToken.get(token) : undefined
     const session = sessionID ? sessions.get(sessionID) : undefined
 
-    if (!session || session[tokenType] !== token || expiresAt(session) <= nowMs) {
+    if (!session || session[tokenType] !== token || expiresAt(session) <= getNowMs()) {
       return { status: AUTH_SESSION_TEST_STATUS.UNAUTHENTICATED }
     }
 
@@ -82,8 +84,8 @@ export function createTestOAuthSessionStore() {
 
   return {
     advanceBy({ durationMs }: { durationMs: number }): number {
-      nowMs += durationMs
-      return nowMs
+      controlledNowMs = getNowMs() + durationMs
+      return controlledNowMs
     },
     create({ userID }: { userID: number | string }): TestOAuthSession {
       return createSession({ userID })
@@ -96,10 +98,16 @@ export function createTestOAuthSessionStore() {
       })
     },
     reset({ nextNowMs }: { nextNowMs: number }): number {
-      nowMs = nextNowMs
+      controlledNowMs = nextNowMs
       sessionIDsByToken.clear()
       sessions.clear()
-      return nowMs
+      return controlledNowMs
+    },
+    resetToRealTime(): number {
+      controlledNowMs = undefined
+      sessionIDsByToken.clear()
+      sessions.clear()
+      return Date.now()
     },
     revoke({
       accessToken,

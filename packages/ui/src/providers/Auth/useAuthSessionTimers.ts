@@ -151,6 +151,8 @@ export function useAuthSessionTimers({
         forceLogoutBufferMsRef.current = forceLogoutBufferMs
         reminderTimeoutRef.current = setTimeout(
           () => {
+            clearTimeout(scheduledRefreshTimeoutRef.current)
+            removeActivityListeners()
             callbacksRef.current.onReminder()
           },
           Math.max(expiresInMs - forceLogoutBufferMs, 0),

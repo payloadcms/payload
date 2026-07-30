@@ -14,6 +14,7 @@ import {
   AUTH_SESSION_TEST_ROUTES,
   authSessionAccessTokenCookieName,
   authSessionExpirationSelector,
+  authSessionLoginButtonLabel,
   authSessionRefreshEndpointPathname,
   authSessionRefreshTokenCookieName,
   authSessionUsersSlug,
@@ -216,14 +217,14 @@ export async function createSessionScenario({
       expect(headers['set-cookie']).toBeUndefined()
     },
     async login() {
-      const response = await context.request.post(createAPIURL(AUTH_SESSION_TEST_ROUTES.LOGIN))
-
-      expect(response.status()).toBe(200)
-
       const page = await createPage()
 
-      await page.goto(url.account)
-      await expect(page.locator(authSessionExpirationSelector)).toBeVisible()
+      await page.goto(url.login)
+      await page.getByRole('button', { name: authSessionLoginButtonLabel }).click()
+      await expect(page).toHaveURL(url.admin)
+      await expect
+        .poll(async () => Number(await page.locator(authSessionExpirationSelector).textContent()))
+        .toBeGreaterThan(0)
 
       return page
     },
@@ -238,7 +239,7 @@ export async function createSessionScenario({
     async openTab() {
       const page = await createPage()
 
-      await page.goto(url.account)
+      await page.goto(url.admin)
       await expect
         .poll(async () => Number(await page.locator(authSessionExpirationSelector).textContent()))
         .toBeGreaterThan(0)

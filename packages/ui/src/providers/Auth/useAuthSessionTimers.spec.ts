@@ -38,6 +38,25 @@ describe('useAuthSessionTimers', () => {
     expect(onActivityRefresh).toHaveBeenCalledTimes(1)
   })
 
+  it('should ignore activity once the expiration reminder opens', () => {
+    const onActivityRefresh = vi.fn()
+    const onReminder = vi.fn()
+    const timers = renderAuthSessionTimers({ onActivityRefresh, onReminder })
+
+    timers.setExpiration(Date.now() + 300_000)
+    act(() => {
+      vi.advanceTimersByTime(239_500)
+      window.dispatchEvent(new MouseEvent('mousemove'))
+      vi.advanceTimersByTime(500)
+      vi.advanceTimersByTime(5_000)
+      window.dispatchEvent(new MouseEvent('mousemove'))
+      vi.advanceTimersByTime(1_000)
+    })
+
+    expect(onReminder).toHaveBeenCalledOnce()
+    expect(onActivityRefresh).not.toHaveBeenCalled()
+  })
+
   it('should clear timers and listeners on logout', () => {
     const onActivityRefresh = vi.fn()
     const onExpire = vi.fn()
@@ -216,7 +235,7 @@ describe('useAuthSessionTimers', () => {
     timers.setExpiration(expirationMs)
 
     act(() => {
-      vi.advanceTimersByTime(240_000)
+      vi.advanceTimersByTime(238_000)
       window.dispatchEvent(new MouseEvent('mousemove'))
       vi.advanceTimersByTime(1_000)
     })
@@ -236,7 +255,7 @@ describe('useAuthSessionTimers', () => {
 
     timers.setExpiration(Date.now() + 300_000)
     act(() => {
-      vi.advanceTimersByTime(240_000)
+      vi.advanceTimersByTime(238_000)
       window.dispatchEvent(new MouseEvent('mousemove'))
     })
     timers.rerender()

@@ -43,15 +43,6 @@ const authSessionUsers: CollectionConfig = {
       type: 'text',
       required: true,
     },
-    {
-      name: 'sessionDebug',
-      type: 'ui',
-      admin: {
-        components: {
-          Field: './SessionDebug/index.js#SessionDebug',
-        },
-      },
-    },
   ],
   hooks: {
     afterLogout: [revokeTestOAuthSessionAfterLogout],
@@ -64,6 +55,10 @@ export default buildConfigWithDefaults(
   {
     admin: {
       autoRefresh: false,
+      components: {
+        beforeLogin: ['./TestOAuthLogin/index.js#TestOAuthLogin'],
+        providers: ['./SessionDebug/index.js#SessionDebug'],
+      },
       importMap: {
         baseDir: path.resolve(dirname),
       },
@@ -87,7 +82,7 @@ export default buildConfigWithDefaults(
         })
       }
 
-      testOAuthSessionStore.reset({ nextNowMs: Date.now() })
+      testOAuthSessionStore.resetToRealTime()
     },
     typescript: {
       outputFile: path.resolve(dirname, 'payload-types.ts'),
