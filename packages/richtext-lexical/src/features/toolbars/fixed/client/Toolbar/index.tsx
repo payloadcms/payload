@@ -233,7 +233,7 @@ function FixedToolbar({
       ref={currentToolbarRef}
     >
       {isEditable && (
-        <React.Fragment>
+        <div className="fixed-toolbar__scroll">
           {editorConfig?.features &&
             editorConfig.features?.toolbarFixed?.groups.map((group, i) => {
               return (
@@ -248,7 +248,7 @@ function FixedToolbar({
                 />
               )
             })}
-        </React.Fragment>
+        </div>
       )}
     </div>
   )
