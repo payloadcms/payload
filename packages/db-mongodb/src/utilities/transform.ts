@@ -180,6 +180,11 @@ const sanitizeRelationship = ({
 
   if (Array.isArray(value)) {
     result = value.map((val) => {
+      // safety check in the case of base
+      if (val === null || typeof val === 'undefined') {
+        return val
+      }
+
       // Handle has many - polymorphic
       if (isValidRelationObject(val)) {
         const relatedCollectionForSingleValue = config.collections?.find(
@@ -355,6 +360,13 @@ const stripFields = ({
             let hasNull = false
             for (let i = 0; i < localeData.length; i++) {
               const data = localeData[i]
+
+              if (!data || typeof data !== 'object') {
+                localeData[i] = null
+                hasNull = true
+                continue
+              }
+
               let fields: FlattenedField[] | null = null
 
               if (field.type === 'array') {
@@ -429,6 +441,13 @@ const stripFields = ({
 
         for (let i = 0; i < fieldData.length; i++) {
           const data = fieldData[i]
+
+          if (!data || typeof data !== 'object') {
+            fieldData[i] = null
+            hasNull = true
+            continue
+          }
+
           let fields: FlattenedField[] | null = null
 
           if (field.type === 'array') {
