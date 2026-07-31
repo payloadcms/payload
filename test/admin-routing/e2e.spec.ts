@@ -2,7 +2,10 @@ import { expect, type Page } from '@playwright/test'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
+import {
+  ensureCompilationIsDone,
+  installTanStackHydrationGotoWait,
+} from '../__helpers/e2e/helpers.js'
 import { test } from '../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
@@ -26,6 +29,7 @@ describe('Admin routing', () => {
     const context = await browser.newContext()
     page = await context.newPage()
 
+    installTanStackHydrationGotoWait(page)
     await ensureCompilationIsDone({ page, serverURL })
   })
 
@@ -62,6 +66,28 @@ describe('Admin routing', () => {
       )
 
       return () => isClientChunkBlocked
+    }
+
+    const blockNextServerFunction = async (page: Page) => {
+      let isServerFunctionBlocked = false
+      const serverFunctionGate = new Promise<void>((resolve) => {
+        releaseServerFunction = resolve
+      })
+
+      await page.route(
+        serverFunctionPattern,
+        async (route) => {
+          isServerFunctionBlocked = true
+          pendingServerFunction = (async () => {
+            await serverFunctionGate
+            await route.continue()
+          })()
+          await pendingServerFunction
+        },
+        { times: 1 },
+      )
+
+      return () => isServerFunctionBlocked
     }
 
     const expectVisibleRouteProgress = async (page: Page) => {
@@ -129,6 +155,28 @@ describe('Admin routing', () => {
     )
 
     test(
+      'should show route progress during navigation',
+      { framework: 'tanstack-start' },
+      async () => {
+        await page.goto(postsURL.admin)
+        await expect(page.locator('.progress-bar')).toBeHidden()
+
+        const isServerFunctionBlocked = await blockNextServerFunction(page)
+
+        await page.locator(`#card-${postsSlug} .card__actions a`).click()
+        await expect.poll(isServerFunctionBlocked).toBe(true)
+        await expectVisibleRouteProgress(page)
+
+        releaseServerFunction?.()
+        releaseServerFunction = undefined
+
+        await expect(page).toHaveURL(postsURL.create)
+        await expect(page.locator('#field-title')).toBeVisible()
+        await expect(page.locator('.progress-bar')).toBeHidden()
+      },
+    )
+
+    test(
       'should show route progress until the next admin view is ready',
       { framework: 'tanstack-start' },
       async () => {
@@ -141,27 +189,10 @@ describe('Admin routing', () => {
         await expect(page.locator('.progress-bar')).toBeHidden()
 
         const isClientChunkBlocked = await blockNextClientChunk(page)
-
-        let isServerFunctionBlocked = false
-        const serverFunctionGate = new Promise<void>((resolve) => {
-          releaseServerFunction = resolve
-        })
-
-        await page.route(
-          serverFunctionPattern,
-          async (route) => {
-            isServerFunctionBlocked = true
-            pendingServerFunction = (async () => {
-              await serverFunctionGate
-              await route.continue()
-            })()
-            await pendingServerFunction
-          },
-          { times: 1 },
-        )
+        const isServerFunctionBlocked = await blockNextServerFunction(page)
 
         await page.locator(`#card-${postsSlug} .card__actions a`).click()
-        await expect.poll(() => isServerFunctionBlocked).toBe(true)
+        await expect.poll(isServerFunctionBlocked).toBe(true)
         await expectVisibleRouteProgress(page)
 
         releaseServerFunction?.()
@@ -180,11 +211,6 @@ describe('Admin routing', () => {
     )
 
     test('should show progress bar on page navigation', { framework: 'next' }, async () => {
-      test.skip(
-        process.env.PAYLOAD_TEST_PROD !== 'true',
-        'A production RSC request is required to hold the route transition open.',
-      )
-
       let isNextRSCRequestBlocked = false
       const nextRSCRequestGate = new Promise<void>((resolve) => {
         releaseNextRSCRequest = resolve
