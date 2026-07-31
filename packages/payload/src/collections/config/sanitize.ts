@@ -25,11 +25,7 @@ import { traverseForLocalizedFields } from '../../utilities/traverseForLocalized
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
 import { defaultCollectionEndpoints } from '../endpoints/index.js'
-import {
-  addDefaultsToAuthConfig,
-  addDefaultsToCollectionConfig,
-  addDefaultsToLoginWithUsernameConfig,
-} from './defaults.js'
+import { addDefaultsToAuthConfig, addDefaultsToCollectionConfig } from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
 
@@ -329,24 +325,6 @@ export const sanitizeCollection = (
 
     // disable duplicate for auth enabled collections by default
     sanitized.disableDuplicate = sanitized.disableDuplicate ?? true
-
-    if (sanitized.auth.loginWithUsername) {
-      if (sanitized.auth.loginWithUsername === true) {
-        sanitized.auth.loginWithUsername = addDefaultsToLoginWithUsernameConfig({})
-      } else {
-        const loginWithUsernameWithDefaults = addDefaultsToLoginWithUsernameConfig(
-          sanitized.auth.loginWithUsername,
-        )
-
-        // if allowEmailLogin is false, requireUsername must be true
-        if (loginWithUsernameWithDefaults.allowEmailLogin === false) {
-          loginWithUsernameWithDefaults.requireUsername = true
-        }
-        sanitized.auth.loginWithUsername = loginWithUsernameWithDefaults
-      }
-    } else {
-      sanitized.auth.loginWithUsername = false
-    }
 
     if (!collection?.admin?.useAsTitle) {
       sanitized.admin!.useAsTitle = sanitized.auth.loginWithUsername ? 'username' : 'email'

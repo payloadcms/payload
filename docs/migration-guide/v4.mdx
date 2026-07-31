@@ -232,6 +232,19 @@ import type { DefaultValue } from 'payload'
 
 If you only use `DefaultValue` to type a `defaultValue` property passed into a Collection, Global, or Field config, no changes are needed.
 
+### Sanitized collection and auth config types now match runtime defaults
+
+`SanitizedCollectionConfig` and its auth type no longer use `DeepRequired`. This reduces TypeScript checker work and makes optionality match runtime defaults.
+
+Properties Payload does not default, such as `access.readVersions`, `auth.cookies.domain`, `auth.useAPIKey`, and `auth.depth`, now require undefined handling:
+
+```ts
+if (collection.access.readVersions) await collection.access.readVersions(args)
+const useAPIKey = collection.auth.useAPIKey ?? false
+```
+
+Properties sanitization does fill, including standard access functions, hook arrays, cookie defaults, and normalized auth options, are now required. Use `CollectionConfig` or `IncomingAuthType` for input and `SanitizedCollectionConfig` after sanitization.
+
 ### User types consolidated into `User` and `AuthenticatedUser`
 
 Payload's user types have been consolidated so each one has a clear job. This completes a cleanup already planned in 3.x: `UntypedUser` was deprecated for removal in 4.0, and `TypedUser` was marked to be renamed to `User` in 4.0.
