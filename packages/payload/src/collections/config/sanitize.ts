@@ -1,4 +1,5 @@
-import type { Config, SanitizedConfig } from '../../config/types.js'
+import type { Config } from '../../config/types.js'
+import type { RichTextSanitizer } from '../../fields/config/sanitize.js'
 import type { OrderableJoinInfo } from '../../fields/config/sanitizeJoinField.js'
 import type { SanitizedDrafts } from '../../versions/types.js'
 import type {
@@ -61,20 +62,16 @@ export const warnOnInvalidCustomViews = (collection: CollectionConfig): void => 
   }
 }
 
-export const sanitizeCollection = async (
+export const sanitizeCollection = (
   config: Config,
   collection: CollectionConfig,
-  /**
-   * If this property is set, RichText fields won't be sanitized immediately. Instead, they will be added to this array as promises
-   * so that you can sanitize them together, after the config has been sanitized.
-   */
-  richTextSanitizationPromises?: Array<(config: SanitizedConfig) => Promise<void>>,
+  richTextSanitizers?: RichTextSanitizer[],
   _validRelationships?: string[],
   /**
    * Tracker for orderable join fields - populated during sanitization
    */
   orderableJoins?: OrderableJoinInfo[],
-): Promise<SanitizedCollectionConfig> => {
+): SanitizedCollectionConfig => {
   if (collection._sanitized) {
     return collection as SanitizedCollectionConfig
   }
@@ -143,7 +140,7 @@ export const sanitizeCollection = async (
 
   const polymorphicJoins: SanitizedJoin[] = []
 
-  sanitized.fields = await sanitizeFields({
+  sanitized.fields = sanitizeFields({
     collectionConfig: sanitized,
     config,
     fields: sanitized.fields,
@@ -152,7 +149,7 @@ export const sanitizeCollection = async (
     orderableJoins,
     parentIsLocalized: false,
     polymorphicJoins,
-    richTextSanitizationPromises,
+    richTextSanitizers,
     validRelationships,
   })
 

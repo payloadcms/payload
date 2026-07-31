@@ -445,7 +445,7 @@ If you authored a custom rich-text adapter that returned an `i18n` object, move 
 ```diff
 // my-richtext-adapter/index.ts
 export const myRichTextAdapter = (): RichTextAdapterProvider => {
-  return async ({ config }) => {
+  return ({ config }) => {
     const myTranslations = { en: { myKey: 'My translation' } }
 
 -   return {
@@ -459,6 +459,39 @@ export const myRichTextAdapter = (): RichTextAdapterProvider => {
   }
 }
 ```
+
+### Config and rich-text sanitization are now synchronous
+
+Config and field sanitizers now return their result directly instead of returning a promise. This affects projects that call `sanitizeConfig`, `sanitizeField`, or `sanitizeFields` from `payload` directly:
+
+```diff
+- const sanitizedConfig = await sanitizeConfig(config)
++ const sanitizedConfig = sanitizeConfig(config)
+```
+
+The same change applies to `sanitizeServerEditorConfig` and the methods on `editorConfigFactory` from `@payloadcms/richtext-lexical`. Remove `await`, and replace any `.then()` or `.catch()` usage with a direct call and `try`/`catch`.
+
+The optional `richTextSanitizationPromises` argument on the field sanitizers has been renamed to `richTextSanitizers`. Its callbacks are now synchronous:
+
+```diff
+- richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>>
++ richTextSanitizers: Array<(config: SanitizedConfig) => void>
+```
+
+Custom rich-text adapter providers and Lexical server feature callbacks must also return their value synchronously:
+
+```diff
+export const MyFeature = createServerFeature({
+  key: 'my-feature',
+-  feature: async () => ({
++  feature: () => ({
+    ClientFeature: '@my-package/client#MyFeature',
+    sanitizedServerFeatureProps: null,
+  }),
+})
+```
+
+If an affected adapter or feature performs asynchronous work, move that work to an asynchronous plugin before config sanitization or to a runtime hook. Projects that only use `buildConfig(...)` and `lexicalEditor(...)` normally are not affected; `buildConfig` remains asynchronous.
 
 ### `transactionIDPromise` removed from `PayloadRequest`
 
