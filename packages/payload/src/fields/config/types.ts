@@ -2152,11 +2152,11 @@ export function fieldShouldBeLocalized({
   field: ClientField | ClientTab | Field | Tab
   parentIsLocalized: boolean
 }): boolean {
-  return (
+  return Boolean(
     'localized' in field &&
-    field.localized! &&
-    (!parentIsLocalized ||
-      process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true')
+      field.localized &&
+      (!parentIsLocalized ||
+        process.env.NEXT_PUBLIC_PAYLOAD_COMPATIBILITY_allowLocalizedWithinLocalized === 'true'),
   )
 }
 
