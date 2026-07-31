@@ -48,6 +48,7 @@ The slug is static: it fills once while empty and is preserved thereafter, so ed
 
 - On create, an empty slug is derived from the `useAsSlug` source field, if any. With no source value (or no `useAsSlug` configured), it falls back to `<singular>-<N>`, where `N` is the first available integer (e.g. `posts-1`). The slug is therefore always present the moment the document is created.
 - An explicit value always wins and is normalized through [`slugify`](#custom-slugify-function) (e.g. `Hello World` → `hello-world`). It must be unique — a collision is rejected rather than silently changed.
+- The default slugify is Unicode-preserving: letters and numbers from any script are kept (`正念餅乾` stays `正念餅乾`, `Café Pläne` becomes `café-pläne`) rather than transliterated. Input is NFKC-normalized, so full-width characters fold to their ASCII forms (`ＡＢＣ` → `abc`). Whitespace and dashes become hyphens, and invisible characters — zero-width joiners, bidi controls, variation selectors — are removed, so two slugs never differ by a character a reader cannot see. Lowercasing is not locale-aware — Turkish `I` folds to `i`, never dotless `ı`.
 - Once set, the slug is never regenerated automatically. Editors can unlock the field to edit it directly, or re-generate it on-demand from the Admin Panel.
 - Generated values are deduped against existing documents so two never claim the same slug.
 
@@ -59,7 +60,7 @@ A localized slug is unique per locale: the same value can be reused across a doc
 
 ## Custom Slugify Function
 
-You can override the default slugify function of the Slug Field. This is necessary if the slug requires special treatment, such as character encoding, additional language support, etc.
+You can override the default slugify function of the Slug Field. The default preserves Unicode letters as-is, so an override is only necessary for special treatment such as transliteration (e.g. `正念餅乾` → `zheng-nian-bing-gan`), locale-aware casing, or custom character encoding.
 
 This function receives the value of the `useAsSlug` field as `valueToSlugify` and must return a string.
 
