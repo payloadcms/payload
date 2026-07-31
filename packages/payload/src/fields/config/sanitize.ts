@@ -393,7 +393,7 @@ export const sanitizeField = ({
 
   // Make sure that the richText field has an editor
   if (field.type === 'richText') {
-    const sanitizeRichText = (sanitizedConfig: SanitizedConfig): void => {
+    const sanitizeRichText: RichTextSanitizer = (sanitizedConfig) => {
       if (!field.editor) {
         if (sanitizedConfig.editor && !requireFieldLevelRichTextEditor) {
           field.editor = sanitizedConfig.editor
