@@ -1610,7 +1610,7 @@ describe('Collections - Uploads', () => {
       expect(hasCropRectField(preserveCropSlug as CollectionSlug)).toBe(true)
     })
 
-    it('should persist crop and focal point edits through file generation', async () => {
+    it('should not persist a crop rectangle after applying it in transform mode', async () => {
       const file = await getFileByPath(filePath)
       const doc = await payload.create({
         collection: mediaSlug,
@@ -1629,26 +1629,22 @@ describe('Collections - Uploads', () => {
         req,
       })
 
-      expect((updated as { cropRect?: Crop } & typeof updated).cropRect).toEqual(cropRect)
+      expect((updated as { cropRect?: Crop } & typeof updated).cropRect).toEqual({
+        height: null,
+        unit: null,
+        width: null,
+        x: null,
+        y: null,
+      })
       expect(updated.focalX).toBe(25)
       expect(updated.focalY).toBe(75)
       expect(updated.height).toBe(heightInPixels)
       expect(updated.width).toBe(widthInPixels)
 
-      const updateWithoutCrop = await payload.update({
-        id: doc.id,
-        collection: mediaSlug,
-        data: {
-          alt: 'Updated alt text',
-        },
-      })
-
-      expect((updateWithoutCrop as { cropRect?: Crop } & typeof updated).cropRect).toEqual(cropRect)
-
       await payload.delete({ id: doc.id, collection: mediaSlug })
     })
 
-    it('should preserve the original image dimensions in preserve mode', async () => {
+    it('should persist the crop rectangle and preserve original dimensions in preserve mode', async () => {
       const collection = preserveCropSlug as CollectionSlug
       const doc = (await payload.create({
         collection,
@@ -1672,6 +1668,16 @@ describe('Collections - Uploads', () => {
       expect(updated.focalY).toBe(75)
       expect(updated.height).toBe(doc.height)
       expect(updated.width).toBe(doc.width)
+
+      const updateWithoutCrop = (await payload.update({
+        id: doc.id,
+        collection,
+        data: {
+          alt: 'Updated alt text',
+        },
+      })) as unknown as { cropRect?: Crop } & Media
+
+      expect(updateWithoutCrop.cropRect).toEqual(cropRect)
 
       await payload.delete({ id: doc.id, collection })
     })
