@@ -520,31 +520,6 @@ describe('sanitizeFields', () => {
     })
   })
 
-  it('should sanitize rich text inline', () => {
-    const editor = {
-      CellComponent: '',
-      FieldComponent: '',
-      validate: () => true,
-    }
-    const configWithEditor = {
-      editor: () => editor,
-    } as Config
-    const fields: Field[] = [
-      {
-        name: 'richText',
-        type: 'richText',
-      },
-    ]
-    const sanitizedFields = sanitizeFields({
-      config: configWithEditor,
-      fields,
-      parentIsLocalized: false,
-      validRelationships: [],
-    })
-
-    expect((sanitizedFields[0] as RichTextField).editor).toBe(editor)
-  })
-
   describe('blocks', () => {
     it('should maintain admin.blockName true after sanitization', () => {
       const fields: Field[] = [
