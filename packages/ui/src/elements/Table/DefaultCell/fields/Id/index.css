@@ -1,0 +1,30 @@
+@layer payload-default {
+  .id-cell {
+    --id-cell-letter-spacing: -0.032px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--spacer-1);
+    padding: var(--spacer-1) var(--spacer-2);
+    background: var(--color-bg-secondary);
+    border-radius: var(--radius-medium);
+    font-family: var(--text-body-large-font-family);
+    font-size: var(--text-body-large-font-size);
+    font-weight: var(--text-body-large-font-weight);
+    line-height: var(--text-body-medium-line-height);
+    letter-spacing: var(--id-cell-letter-spacing);
+    white-space: nowrap;
+
+    &:hover {
+      background: var(--color-bg-secondary-hover);
+    }
+  }
+
+  .id-cell__prefix {
+    color: var(--color-text-secondary);
+  }
+
+  .id-cell__value {
+    color: var(--color-text);
+  }
+}

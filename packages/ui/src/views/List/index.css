@@ -35,6 +35,11 @@
     }
   }
 
+  /* The ID cell renders its own pill with a hover background instead of an underline */
+  .collection-list .table table td.cell--linked > :is(a, button):has(.id-cell) {
+    text-decoration-line: none;
+  }
+
   .collection-list .table table [class^='cell']:not(.cell--linked) > p,
   .collection-list .table table [class^='cell']:not(.cell--linked) > span,
   .collection-list .table table [class^='cell']:not(.cell--linked) > a {
