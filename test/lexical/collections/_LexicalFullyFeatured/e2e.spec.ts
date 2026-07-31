@@ -177,6 +177,26 @@ describe('Lexical Fully Featured', () => {
     }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
   })
 
+  test('fixed toolbar scrolls horizontally in response to vertical mouse wheel input', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ height: 667, width: 375 })
+
+    const fixedToolbarScroll = page.locator('.fixed-toolbar__scroll').first()
+    await expect(fixedToolbarScroll).toBeVisible()
+
+    const box = (await fixedToolbarScroll.boundingBox())!
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+
+    const initialScrollLeft = await fixedToolbarScroll.evaluate((el) => el.scrollLeft)
+    await page.mouse.wheel(0, 200)
+
+    await expect(async () => {
+      const scrollLeft = await fixedToolbarScroll.evaluate((el) => el.scrollLeft)
+      expect(scrollLeft).toBeGreaterThan(initialScrollLeft)
+    }).toPass({ timeout: POLL_TOPASS_TIMEOUT })
+  })
+
   test('ensure opening relationship field with appearance: "drawer" inside rich text inline block does not close drawer', async ({
     page,
   }) => {
