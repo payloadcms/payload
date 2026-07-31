@@ -6,7 +6,7 @@ import {
   ensureCompilationIsDone,
   installTanStackHydrationGotoWait,
 } from '../__helpers/e2e/helpers.js'
-import { test } from '../__helpers/e2e/playwright.js'
+import { currentFramework, test } from '../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
@@ -35,16 +35,17 @@ describe('Admin routing', () => {
 
   describe('Route transitions', () => {
     const clientChunkPattern = /\/assets\/[^/]+\.js(?:\?.*)?$/
-    const isPostsListRSCRequest = (url: URL) =>
-      url.pathname.endsWith(`/admin/collections/${postsSlug}`) && url.searchParams.has('_rsc')
+    const isPostsCreateRSCRequest = (url: URL) =>
+      url.pathname.endsWith(`/admin/collections/${postsSlug}/create`) &&
+      url.searchParams.has('_rsc')
     const serverFunctionPattern = /\/_serverFn\//
+    const routeLoadPattern =
+      currentFramework === 'tanstack-start' ? serverFunctionPattern : isPostsCreateRSCRequest
 
     let releaseClientChunk: (() => void) | undefined
     let pendingClientChunk: Promise<void> | undefined
-    let releaseNextRSCRequest: (() => void) | undefined
-    let pendingNextRSCRequest: Promise<void> | undefined
-    let releaseServerFunction: (() => void) | undefined
-    let pendingServerFunction: Promise<void> | undefined
+    let releaseRouteLoad: (() => void) | undefined
+    let pendingRouteLoad: Promise<void> | undefined
 
     const blockNextClientChunk = async (page: Page) => {
       let isClientChunkBlocked = false
@@ -68,26 +69,26 @@ describe('Admin routing', () => {
       return () => isClientChunkBlocked
     }
 
-    const blockNextServerFunction = async (page: Page) => {
-      let isServerFunctionBlocked = false
-      const serverFunctionGate = new Promise<void>((resolve) => {
-        releaseServerFunction = resolve
+    const blockNextRouteLoad = async (page: Page) => {
+      let isRouteLoadBlocked = false
+      const routeLoadGate = new Promise<void>((resolve) => {
+        releaseRouteLoad = resolve
       })
 
       await page.route(
-        serverFunctionPattern,
+        routeLoadPattern,
         async (route) => {
-          isServerFunctionBlocked = true
-          pendingServerFunction = (async () => {
-            await serverFunctionGate
+          isRouteLoadBlocked = true
+          pendingRouteLoad = (async () => {
+            await routeLoadGate
             await route.continue()
           })()
-          await pendingServerFunction
+          await pendingRouteLoad
         },
         { times: 1 },
       )
 
-      return () => isServerFunctionBlocked
+      return () => isRouteLoadBlocked
     }
 
     const expectVisibleRouteProgress = async (page: Page) => {
@@ -111,20 +112,15 @@ describe('Admin routing', () => {
 
     test.afterEach(async () => {
       releaseClientChunk?.()
-      releaseNextRSCRequest?.()
-      releaseServerFunction?.()
+      releaseRouteLoad?.()
       await pendingClientChunk
-      await pendingNextRSCRequest
-      await pendingServerFunction
+      await pendingRouteLoad
       releaseClientChunk = undefined
       pendingClientChunk = undefined
-      releaseNextRSCRequest = undefined
-      pendingNextRSCRequest = undefined
-      releaseServerFunction = undefined
-      pendingServerFunction = undefined
+      releaseRouteLoad = undefined
+      pendingRouteLoad = undefined
       await page.unroute(clientChunkPattern)
-      await page.unroute(isPostsListRSCRequest)
-      await page.unroute(serverFunctionPattern)
+      await page.unroute(routeLoadPattern)
     })
 
     test(
@@ -154,27 +150,23 @@ describe('Admin routing', () => {
       },
     )
 
-    test(
-      'should show route progress during navigation',
-      { framework: 'tanstack-start' },
-      async () => {
-        await page.goto(postsURL.admin)
-        await expect(page.locator('.progress-bar')).toBeHidden()
+    test('should show route progress during navigation', async () => {
+      await page.goto(postsURL.admin)
+      await expect(page.locator('.progress-bar')).toBeHidden()
 
-        const isServerFunctionBlocked = await blockNextServerFunction(page)
+      const isRouteLoadBlocked = await blockNextRouteLoad(page)
 
-        await page.locator(`#card-${postsSlug} .card__actions a`).click()
-        await expect.poll(isServerFunctionBlocked).toBe(true)
-        await expectVisibleRouteProgress(page)
+      await page.locator(`#card-${postsSlug} .card__actions a`).click()
+      await expect.poll(isRouteLoadBlocked).toBe(true)
+      await expectVisibleRouteProgress(page)
 
-        releaseServerFunction?.()
-        releaseServerFunction = undefined
+      releaseRouteLoad?.()
+      releaseRouteLoad = undefined
 
-        await expect(page).toHaveURL(postsURL.create)
-        await expect(page.locator('#field-title')).toBeVisible()
-        await expect(page.locator('.progress-bar')).toBeHidden()
-      },
-    )
+      await expect(page).toHaveURL(postsURL.create)
+      await expect(page.locator('#field-title')).toBeVisible()
+      await expect(page.locator('.progress-bar')).toBeHidden()
+    })
 
     test(
       'should show route progress until the next admin view is ready',
@@ -189,14 +181,14 @@ describe('Admin routing', () => {
         await expect(page.locator('.progress-bar')).toBeHidden()
 
         const isClientChunkBlocked = await blockNextClientChunk(page)
-        const isServerFunctionBlocked = await blockNextServerFunction(page)
+        const isRouteLoadBlocked = await blockNextRouteLoad(page)
 
         await page.locator(`#card-${postsSlug} .card__actions a`).click()
-        await expect.poll(isServerFunctionBlocked).toBe(true)
+        await expect.poll(isRouteLoadBlocked).toBe(true)
         await expectVisibleRouteProgress(page)
 
-        releaseServerFunction?.()
-        releaseServerFunction = undefined
+        releaseRouteLoad?.()
+        releaseRouteLoad = undefined
 
         await expect.poll(isClientChunkBlocked).toBe(true)
         await expectVisibleRouteProgress(page)
@@ -209,38 +201,5 @@ describe('Admin routing', () => {
         await expect(page.locator('.progress-bar')).toBeHidden()
       },
     )
-
-    test('should show progress bar on page navigation', { framework: 'next' }, async () => {
-      let isNextRSCRequestBlocked = false
-      const nextRSCRequestGate = new Promise<void>((resolve) => {
-        releaseNextRSCRequest = resolve
-      })
-
-      await page.route(
-        isPostsListRSCRequest,
-        async (route) => {
-          isNextRSCRequestBlocked = true
-          pendingNextRSCRequest = (async () => {
-            await nextRSCRequestGate
-            await route.continue()
-          })()
-          await pendingNextRSCRequest
-        },
-        { times: 1 },
-      )
-
-      await page.goto(postsURL.admin)
-      await expect(page.locator('.progress-bar')).toBeHidden()
-      await page.locator('.collections__card-list .card').first().click()
-      await expect.poll(() => isNextRSCRequestBlocked).toBe(true)
-      await expectVisibleRouteProgress(page)
-
-      releaseNextRSCRequest?.()
-      releaseNextRSCRequest = undefined
-
-      await expect(page.locator('.list-header')).toBeVisible()
-      expect(page.url()).toContain(postsURL.list)
-      await expect(page.locator('.progress-bar')).toBeHidden()
-    })
   })
 })
