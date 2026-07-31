@@ -354,7 +354,9 @@ describe('Lexical Link Feature', () => {
 
     const linkDrawer = page.locator('.lexical-link-edit-drawer')
     const assetLabelField = linkDrawer.locator('#field-hyperlink__0__label')
+    const finalizedURL = 'https://example.com/finalized'
 
+    await linkDrawer.locator('#field-url').fill(finalizedURL)
     await linkDrawer.getByRole('button', { name: 'Add Hyperlink' }).click()
     await page.locator('.blocks-drawer__block').filter({ hasText: 'Asset Link Block' }).click()
     await assetLabelField.fill('Client asset')
@@ -377,6 +379,20 @@ describe('Lexical Link Feature', () => {
 
     await expect(uploadDocumentDrawer).toBeVisible()
     await expect(uploadDocumentDrawer.locator('#field-text')).toBeVisible()
+    await expect(linkDrawer.locator('.blocks-field__row')).toHaveCount(1)
+    await expect(assetLabelField).toHaveValue('Client asset')
+    await expect(selectedFilename).toHaveText(/payload(?:-\d+)?\.jpg/)
+
+    await uploadDocumentDrawer.getByRole('button', { name: 'Close' }).first().click()
+    await expect(uploadDocumentDrawer).toBeHidden()
+    await lexical.save('drawer')
+
+    const createdLink = lexical.editor.getByRole('link', { name: 'custom link' })
+
+    await expect(createdLink).toHaveAttribute('href', finalizedURL)
+    await createdLink.dispatchEvent('mouseover')
+    await page.locator('.link-edit').click()
+    await expect(linkDrawer).toBeVisible()
     await expect(linkDrawer.locator('.blocks-field__row')).toHaveCount(1)
     await expect(assetLabelField).toHaveValue('Client asset')
     await expect(selectedFilename).toHaveText(/payload(?:-\d+)?\.jpg/)

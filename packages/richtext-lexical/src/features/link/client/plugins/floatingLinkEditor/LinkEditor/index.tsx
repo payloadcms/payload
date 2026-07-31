@@ -220,9 +220,11 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       }
     }
 
-    setStateData(data)
     setIsLink(true)
-    setSelectedNodes(selection ? selection?.getNodes() : [])
+    if (!isDrawerOpenRef.current) {
+      setStateData(data)
+      setSelectedNodes(selection ? selection?.getNodes() : [])
+    }
 
     if ($isAutoLinkNode(focusLinkParent)) {
       setIsAutoLink(true)
