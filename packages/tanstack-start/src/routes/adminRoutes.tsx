@@ -36,7 +36,7 @@ function AdminPage() {
   // on code-split client references can reveal the router's null fallback.
   // Keep the current payload painted until the next one is renderable.
   const rscPayload = useDeferredValue(data?.rscPayload)
-  const { beginRouteTransition } = useRouteTransition()
+  const { holdRouteTransition } = useRouteTransition()
   const isRscPayloadDeferred = rscPayload !== data?.rscPayload
 
   useEffect(() => {
@@ -44,8 +44,8 @@ function AdminPage() {
       return
     }
 
-    return beginRouteTransition()
-  }, [beginRouteTransition, isRscPayloadDeferred])
+    return holdRouteTransition()
+  }, [holdRouteTransition, isRscPayloadDeferred])
 
   return <Fragment>{rscPayload}</Fragment>
 }
