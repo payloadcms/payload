@@ -179,7 +179,11 @@ export const generateFileData = async <T>({
   const cropData =
     typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
-  if (cropData && collectionConfig.upload.crop !== false) {
+  if (
+    cropData &&
+    collectionConfig.upload.crop !== false &&
+    collectionConfig.upload.cropMode === 'preserve'
+  ) {
     fileData.cropRect = cropData
   }
 
