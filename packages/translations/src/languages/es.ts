@@ -577,6 +577,7 @@ export const esTranslations: DefaultTranslationsObject = {
     addFile: 'Añadir archivo',
     addFiles: 'Añadir archivos',
     bulkUpload: 'Subida en lotes',
+    copyLinkToFile: 'Copiar enlace al archivo',
     crop: 'Recortar',
     cropToolDescription:
       'Arrastra las esquinas del área seleccionada, dibuja un nuevo área o ajusta los valores a continuación.',

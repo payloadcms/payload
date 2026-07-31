@@ -561,6 +561,7 @@ export const thTranslations: DefaultTranslationsObject = {
     addFile: 'เพิ่มไฟล์',
     addFiles: 'เพิ่มไฟล์',
     bulkUpload: 'อัปโหลดจำนวนมาก',
+    copyLinkToFile: 'คัดลอกลิงก์ไปยังไฟล์',
     crop: 'พืชผล',
     cropToolDescription: 'ลากมุมของพื้นที่ที่เลือก, วาดพื้นที่ใหม่หรือปรับค่าด้านล่าง',
     download: 'ดาวน์โหลด',
