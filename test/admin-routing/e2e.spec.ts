@@ -125,8 +125,13 @@ describe('Admin routing', () => {
 
     test(
       'should keep the previous admin view painted during index-to-splat navigation',
-      { framework: 'tanstack-start', server: 'prod' },
+      { framework: 'tanstack-start' },
       async () => {
+        test.skip(
+          process.env.PAYLOAD_TEST_PROD !== 'true',
+          'Production client chunks are required to suspend the next RSC payload.',
+        )
+
         await page.goto(postsURL.admin)
 
         const isClientChunkBlocked = await blockNextClientChunk(page)
@@ -164,9 +169,14 @@ describe('Admin routing', () => {
     })
 
     test(
-      'should keep route progress visible while the next RSC payload is deferred',
-      { framework: 'tanstack-start', server: 'prod' },
+      'should show route progress until the next admin view is ready',
+      { framework: 'tanstack-start' },
       async () => {
+        test.skip(
+          process.env.PAYLOAD_TEST_PROD !== 'true',
+          'Production client chunks are required to suspend the next RSC payload.',
+        )
+
         await page.goto(postsURL.admin)
         await expect(page.locator('.progress-bar')).toBeHidden()
 
