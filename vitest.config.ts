@@ -5,7 +5,9 @@ import { defineConfig } from 'vitest/config'
 
 // Use process.cwd() to be safe in both CJS and ESM contexts within Vitest
 const ROOT_DIR = process.cwd()
-const figmaPath = path.resolve(ROOT_DIR, '../enterprise-plugins/packages/figma/src/index.ts')
+const figmaPath =
+  process.env.PAYLOAD_FIGMA_PLUGIN_PATH ??
+  path.resolve(ROOT_DIR, '../figma/payload/payload-plugin/src/index.ts')
 const hasFigma = fs.existsSync(figmaPath)
 const evalFixturesDir = path.resolve(ROOT_DIR, 'test/evals/fixtures')
 
