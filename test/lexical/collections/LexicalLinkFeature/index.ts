@@ -7,10 +7,16 @@ import {
   TreeViewFeature,
 } from '@payloadcms/richtext-lexical'
 
-import { lexicalLinkFeatureSlug, uploadsSlug } from '../../slugs.js'
+import { lexicalLinkFeatureAutosaveSlug, lexicalLinkFeatureSlug, uploadsSlug } from '../../slugs.js'
 
-export const LexicalLinkFeature: CollectionConfig = {
-  slug: lexicalLinkFeatureSlug,
+const createLexicalLinkFeature = ({
+  slug,
+  versions,
+}: {
+  slug: string
+  versions?: CollectionConfig['versions']
+}): CollectionConfig => ({
+  slug,
   labels: {
     singular: 'Lexical Link Feature',
     plural: 'Lexical Link Feature',
@@ -69,4 +75,20 @@ export const LexicalLinkFeature: CollectionConfig = {
       }),
     },
   ],
-}
+  versions,
+})
+
+export const LexicalLinkFeature = createLexicalLinkFeature({
+  slug: lexicalLinkFeatureSlug,
+})
+
+export const LexicalLinkFeatureAutosave = createLexicalLinkFeature({
+  slug: lexicalLinkFeatureAutosaveSlug,
+  versions: {
+    drafts: {
+      autosave: {
+        interval: 8000,
+      },
+    },
+  },
+})

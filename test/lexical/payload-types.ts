@@ -90,6 +90,7 @@ export interface Config {
     'lexical-fully-featured': LexicalFullyFeatured;
     'lexical-autosave': LexicalAutosave;
     'lexical-link-feature': LexicalLinkFeature;
+    'lexical-link-feature-autosave': LexicalLinkFeatureAutosave;
     'lexical-lists-features': LexicalListsFeature;
     'lexical-heading-feature': LexicalHeadingFeature;
     'lexical-jsx-converter': LexicalJsxConverter;
@@ -129,6 +130,7 @@ export interface Config {
     'lexical-fully-featured': LexicalFullyFeaturedSelect<false> | LexicalFullyFeaturedSelect<true>;
     'lexical-autosave': LexicalAutosaveSelect<false> | LexicalAutosaveSelect<true>;
     'lexical-link-feature': LexicalLinkFeatureSelect<false> | LexicalLinkFeatureSelect<true>;
+    'lexical-link-feature-autosave': LexicalLinkFeatureAutosaveSelect<false> | LexicalLinkFeatureAutosaveSelect<true>;
     'lexical-lists-features': LexicalListsFeaturesSelect<false> | LexicalListsFeaturesSelect<true>;
     'lexical-heading-feature': LexicalHeadingFeatureSelect<false> | LexicalHeadingFeatureSelect<true>;
     'lexical-jsx-converter': LexicalJsxConverterSelect<false> | LexicalJsxConverterSelect<true>;
@@ -322,6 +324,31 @@ export interface LexicalLinkFeature {
   } | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-link-feature-autosave".
+ */
+export interface LexicalLinkFeatureAutosave {
+  id: number;
+  richText?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1431,6 +1458,10 @@ export interface PayloadLockedDocument {
         value: number | LexicalLinkFeature;
       } | null)
     | ({
+        relationTo: 'lexical-link-feature-autosave';
+        value: number | LexicalLinkFeatureAutosave;
+      } | null)
+    | ({
         relationTo: 'lexical-lists-features';
         value: number | LexicalListsFeature;
       } | null)
@@ -1626,6 +1657,16 @@ export interface LexicalLinkFeatureSelect<T extends boolean = true> {
   richText?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "lexical-link-feature-autosave_select".
+ */
+export interface LexicalLinkFeatureAutosaveSelect<T extends boolean = true> {
+  richText?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -8,6 +8,7 @@ import {
   RenderFields,
   useDocumentForm,
   useDocumentInfo,
+  useEffectEvent,
   useServerFunctions,
   useTranslation,
 } from '@payloadcms/ui'
@@ -50,34 +51,36 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
 
   const fields: any = fieldMapOverride ?? featureClientSchemaMap[featureKey]?.[schemaFieldsPath] // Field Schema
 
+  // Parent form state changes after autosave. Read its latest value when initializing without
+  // reinitializing this drawer and discarding its unsaved form state after every parent update.
+  const getInitialState = useEffectEvent(async (controller: AbortController) => {
+    const { state } = await getFormState({
+      id,
+      collectionSlug,
+      data: data ?? {},
+      docPermissions: {
+        fields: true,
+      },
+      docPreferences: await getDocPreferences(),
+      documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
+        excludeFiles: true,
+      }),
+      globalSlug,
+      initialBlockData: data,
+      operation: 'update',
+      readOnly: !isEditable,
+      renderAllFields: true,
+      schemaPath: schemaFieldsPath,
+      signal: controller.signal,
+    })
+
+    setInitialState(state)
+  })
+
   useEffect(() => {
     const controller = new AbortController()
 
-    const awaitInitialState = async () => {
-      const { state } = await getFormState({
-        id,
-        collectionSlug,
-        data: data ?? {},
-        docPermissions: {
-          fields: true,
-        },
-        docPreferences: await getDocPreferences(),
-        documentFormState: deepCopyObjectSimpleWithoutReactComponents(parentDocumentFields, {
-          excludeFiles: true,
-        }),
-        globalSlug,
-        initialBlockData: data,
-        operation: 'update',
-        readOnly: !isEditable,
-        renderAllFields: true,
-        schemaPath: schemaFieldsPath,
-        signal: controller.signal,
-      })
-
-      setInitialState(state)
-    }
-
-    void awaitInitialState()
+    void getInitialState(controller)
 
     return () => {
       abortAndIgnore(controller)
@@ -91,7 +94,6 @@ export const DrawerContent: React.FC<Omit<FieldsDrawerProps, 'drawerSlug' | 'dra
     isEditable,
     globalSlug,
     getDocPreferences,
-    parentDocumentFields,
   ])
 
   const onChange = useCallback(
