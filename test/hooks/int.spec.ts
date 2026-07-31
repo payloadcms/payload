@@ -1,15 +1,15 @@
 import type { Payload } from 'payload'
 
 import path from 'path'
-import { AuthenticationError } from 'payload'
+import { AuthenticationError, createLocalReq } from 'payload'
 import { fileURLToPath } from 'url'
 import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
-import { devUser, regularUser } from '../credentials.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { isMongoose } from '../__helpers/shared/isMongoose.js'
+import { devUser, regularUser } from '../credentials.js'
 import { afterOperationSlug } from './collections/AfterOperation/index.js'
 import {
   beforeOperationSlug,
@@ -27,6 +27,10 @@ import {
 } from './collections/NestedAfterReadHooks/index.js'
 import { relationsSlug } from './collections/Relations/index.js'
 import { transformSlug } from './collections/Transform/index.js'
+import {
+  clearAfterPasswordResetHookCalls,
+  getAfterPasswordResetHookCalls,
+} from './collections/Users/afterPasswordResetHook.js'
 import { hooksUsersSlug } from './collections/Users/index.js'
 import { HooksConfig } from './config.js'
 import { dataHooksGlobalSlug } from './globals/Data/index.js'
@@ -476,8 +480,19 @@ describe('Hooks', () => {
   })
 
   describe('auth collection hooks', () => {
+    const createdUserIDs: Array<number | string> = []
     let hookUser
     let hookUserToken
+
+    afterEach(async () => {
+      clearAfterPasswordResetHookCalls()
+
+      for (const id of createdUserIDs) {
+        await payload.delete({ id, collection: hooksUsersSlug })
+      }
+
+      createdUserIDs.length = 0
+    })
 
     beforeAll(async () => {
       const email = 'dontrefresh@payloadcms.com'
@@ -560,6 +575,67 @@ describe('Hooks', () => {
       })
 
       expect(result.afterLoginHook).toStrictEqual(true)
+    })
+
+    it('should call afterPasswordReset with the reset user and request context', async () => {
+      const resetUser = await payload.create({
+        collection: hooksUsersSlug,
+        data: {
+          email: 'after-password-reset@payloadcms.com',
+          password: devUser.password,
+          roles: ['admin'],
+        },
+      })
+      const context = { source: 'after-password-reset-test' }
+      const req = await createLocalReq({ context }, payload)
+
+      createdUserIDs.push(resetUser.id)
+
+      const token = await payload.forgotPassword({
+        collection: hooksUsersSlug,
+        data: {
+          email: resetUser.email,
+        },
+        disableEmail: true,
+        req,
+      })
+
+      await payload.resetPassword({
+        collection: hooksUsersSlug,
+        data: {
+          password: 'newPassword123',
+          token,
+        },
+        overrideAccess: true,
+        req,
+      })
+
+      const hookCalls = getAfterPasswordResetHookCalls()
+
+      expect(hookCalls).toHaveLength(1)
+      expect(hookCalls[0]?.collection.slug).toBe(hooksUsersSlug)
+      expect(hookCalls[0]?.context).toStrictEqual(context)
+      expect(hookCalls[0]?.context).toBe(hookCalls[0]?.req.context)
+      expect(hookCalls[0]?.req).toBe(req)
+      expect(hookCalls[0]?.user).toMatchObject({
+        id: resetUser.id,
+        email: resetUser.email,
+      })
+    })
+
+    it('should not call afterPasswordReset when the reset fails', async () => {
+      await expect(
+        payload.resetPassword({
+          collection: hooksUsersSlug,
+          data: {
+            password: 'newPassword123',
+            token: 'invalid-token',
+          },
+          overrideAccess: true,
+        }),
+      ).rejects.toThrow('Token is either invalid or has expired.')
+
+      expect(getAfterPasswordResetHookCalls()).toHaveLength(0)
     })
 
     it('deny user login', async () => {
