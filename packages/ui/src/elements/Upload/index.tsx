@@ -2,8 +2,8 @@
 import type { FormState, SanitizedCollectionConfig, UploadEdits } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
-import { formatAdminURL, isImage } from 'payload/shared'
-import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react'
+import { formatAdminURL, isImage, validateMimeType } from 'payload/shared'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 
 import { FieldError } from '../../fields/FieldError/index.js'
@@ -17,7 +17,7 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { UploadControlsProvider, useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
-import { getFilesFromClipboard } from '../../utilities/getFilesFromClipboard.js'
+import { getFileOrUrlFromClipboard } from '../../utilities/getFilesFromClipboard.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -234,19 +234,6 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
     [handleFileChange],
   )
 
-  const handlePasteFromClipboard = useCallback(async () => {
-    try {
-      const files = await getFilesFromClipboard()
-      if (!files) {
-        toast.error('No file found in clipboard.')
-        return
-      }
-      handleFileSelection(files)
-    } catch (_err) {
-      toast.error('Unable to read from clipboard.')
-    }
-  }, [handleFileSelection])
-
   const handleFileRemoval = useCallback(() => {
     setRemovedFile(true)
     handleFileChange({ file: null })
@@ -274,77 +261,150 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
 
   const isValidUrl = Boolean(fileUrl && URL.canParse(fileUrl))
 
-  const handleUrlSubmit = useCallback(async () => {
-    if (!fileUrl || !URL.canParse(fileUrl) || uploadConfig?.pasteURL === false) {
-      return
-    }
+  const handleUrlSubmit = useCallback(
+    async (urlOverride?: string): Promise<boolean> => {
+      const urlToFetch = urlOverride ?? fileUrl
 
-    setUploadStatus('uploading')
-    try {
-      // Attempt client-side fetch
-      const clientResponse = await fetch(fileUrl)
-
-      if (!clientResponse.ok) {
-        throw new Error(`Fetch failed with status: ${clientResponse.status}`)
+      if (!urlToFetch || !URL.canParse(urlToFetch) || uploadConfig?.pasteURL === false) {
+        return false
       }
 
-      const blob = await clientResponse.blob()
-      const rawSegment = fileUrl.split('/').pop() || ''
-      const fileName = uploadControlFileName || decodeURIComponent(rawSegment.split('?')[0])
-      const file = new File([blob], fileName, { type: blob.type })
+      setUploadStatus('uploading')
+      try {
+        // Attempt client-side fetch
+        const clientResponse = await fetch(urlToFetch)
 
-      handleFileChange({ file })
-      setUploadStatus('idle')
-      closeModal(pasteURLDrawerSlug)
-      setFileUrl('')
-      return // Exit if client-side fetch succeeds
-    } catch (_clientError) {
-      if (!useServerSideFetch) {
-        // If server-side fetch is not enabled, show client-side error
-        toast.error('Failed to fetch the file.')
+        if (!clientResponse.ok) {
+          throw new Error(`Fetch failed with status: ${clientResponse.status}`)
+        }
+
+        const blob = await clientResponse.blob()
+        if (
+          uploadConfig?.mimeTypes?.length &&
+          !validateMimeType(blob.type, uploadConfig.mimeTypes)
+        ) {
+          toast.error(t('error:invalidFileType'))
+          setUploadStatus('failed')
+          return false
+        }
+        const rawSegment = urlToFetch.split('/').pop() || ''
+        const fileName = uploadControlFileName || decodeURIComponent(rawSegment.split('?')[0])
+        const file = new File([blob], fileName, { type: blob.type })
+
+        handleFileChange({ file })
+        setUploadStatus('idle')
+        closeModal(pasteURLDrawerSlug)
+        setFileUrl('')
+        return true // Exit if client-side fetch succeeds
+      } catch (_clientError) {
+        if (!useServerSideFetch) {
+          // If server-side fetch is not enabled, show client-side error
+          toast.error('Failed to fetch the file.')
+          setUploadStatus('failed')
+          return false
+        }
+      }
+
+      // Attempt server-side fetch if client-side fetch fails and useServerSideFetch is true
+      try {
+        const pasteURL: `/${string}` = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(urlToFetch)}`
+        const serverResponse = await fetch(
+          formatAdminURL({
+            apiRoute: api,
+            path: pasteURL,
+          }),
+        )
+
+        if (!serverResponse.ok) {
+          throw new Error(`Fetch failed with status: ${serverResponse.status}`)
+        }
+
+        const blob = await serverResponse.blob()
+        if (
+          uploadConfig?.mimeTypes?.length &&
+          !validateMimeType(blob.type, uploadConfig.mimeTypes)
+        ) {
+          toast.error(t('error:invalidFileType'))
+          setUploadStatus('failed')
+          return false
+        }
+        const rawSegment = urlToFetch.split('/').pop() || ''
+        const fileName = decodeURIComponent(rawSegment.split('?')[0])
+        const file = new File([blob], fileName, { type: blob.type })
+
+        handleFileChange({ file })
+        setUploadStatus('idle')
+        closeModal(pasteURLDrawerSlug)
+        setFileUrl('')
+        return true
+      } catch (_serverError) {
+        toast.error('The provided URL is not allowed.')
         setUploadStatus('failed')
+        return false
+      }
+    },
+    [
+      api,
+      closeModal,
+      collectionSlug,
+      fileUrl,
+      handleFileChange,
+      id,
+      setUploadStatus,
+      t,
+      uploadConfig,
+      uploadControlFileName,
+      useServerSideFetch,
+    ],
+  )
+
+  const handlePasteFromClipboard = useCallback(async () => {
+    try {
+      const result = await getFileOrUrlFromClipboard()
+
+      if (result?.type === 'file') {
+        const [pastedFile] = result.files
+        if (
+          uploadConfig?.mimeTypes?.length &&
+          !validateMimeType(pastedFile.type, uploadConfig.mimeTypes)
+        ) {
+          toast.error(t('error:invalidFileType'))
+          return
+        }
+        handleFileSelection(result.files)
         return
       }
-    }
 
-    // Attempt server-side fetch if client-side fetch fails and useServerSideFetch is true
-    try {
-      const pasteURL: `/${string}` = `/${collectionSlug}/paste-url${id ? `/${id}?` : '?'}src=${encodeURIComponent(fileUrl)}`
-      const serverResponse = await fetch(
-        formatAdminURL({
-          apiRoute: api,
-          path: pasteURL,
-        }),
-      )
-
-      if (!serverResponse.ok) {
-        throw new Error(`Fetch failed with status: ${serverResponse.status}`)
+      if (uploadConfig?.pasteURL === false) {
+        toast.error('No file found in clipboard.')
+        return
       }
 
-      const blob = await serverResponse.blob()
-      const rawSegment = fileUrl.split('/').pop() || ''
-      const fileName = decodeURIComponent(rawSegment.split('?')[0])
-      const file = new File([blob], fileName, { type: blob.type })
+      if (result?.type === 'url') {
+        setFileUrl(result.url)
+        const didFetchSucceed = await handleUrlSubmit(result.url)
+        if (!didFetchSucceed) {
+          openModal(pasteURLDrawerSlug)
+        }
+        return
+      }
 
-      handleFileChange({ file })
-      setUploadStatus('idle')
-      closeModal(pasteURLDrawerSlug)
-      setFileUrl('')
-    } catch (_serverError) {
-      toast.error('The provided URL is not allowed.')
-      setUploadStatus('failed')
+      openModal(pasteURLDrawerSlug)
+      setUploadControlFileUrl('')
+      setUploadControlFile(null)
+      setUploadControlFileName(null)
+    } catch (_err) {
+      toast.error('Unable to read from clipboard.')
     }
   }, [
-    api,
-    closeModal,
-    collectionSlug,
-    fileUrl,
-    handleFileChange,
-    id,
-    setUploadStatus,
+    handleFileSelection,
+    handleUrlSubmit,
+    openModal,
+    setUploadControlFile,
+    setUploadControlFileName,
+    setUploadControlFileUrl,
+    t,
     uploadConfig,
-    uploadControlFileName,
-    useServerSideFetch,
   ])
 
   useEffect(() => {
@@ -490,24 +550,6 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
                     ref={inputRef}
                     type="file"
                   />
-                  {uploadConfig?.pasteURL !== false && (
-                    <Fragment>
-                      <span className={`${baseClass}__orText`}>{t('general:or')}</span>
-                      <Button
-                        buttonStyle="pill"
-                        onClick={() => {
-                          openModal(pasteURLDrawerSlug)
-                          setUploadControlFileUrl('')
-                          setUploadControlFile(null)
-                          setUploadControlFileName(null)
-                        }}
-                        size="medium"
-                      >
-                        {t('upload:pasteURL')}
-                      </Button>
-                    </Fragment>
-                  )}
-
                   <span className={`${baseClass}__orText`}>{t('general:or')}</span>
                   <Button
                     buttonStyle="pill"
@@ -515,7 +557,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
                     icon="clipboard"
                     onClick={handlePasteFromClipboard}
                     size="medium"
-                    tooltip={t('upload:pasteFromClipboard')}
+                    tooltip={t('upload:pasteURL')}
                   />
 
                   {UploadControls ? UploadControls : null}
