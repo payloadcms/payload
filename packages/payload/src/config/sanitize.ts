@@ -2,7 +2,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
 
-import type { RichTextSanitizationTask } from '../fields/config/sanitize.js'
+import type { RichTextSanitizer } from '../fields/config/sanitize.js'
 import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
 import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
@@ -23,7 +23,6 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
-import { sanitizeRichTextField } from '../fields/config/sanitize.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { resolveHierarchyCollections } from '../hierarchy/resolveHierarchyCollections.js'
 import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
@@ -105,11 +104,11 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 
 const addDefaultDashboardWidgets = ({
   config,
-  richTextSanitizationTasks,
+  richTextSanitizers,
   validRelationships,
 }: {
   config: Partial<SanitizedConfig>
-  richTextSanitizationTasks: RichTextSanitizationTask[]
+  richTextSanitizers: RichTextSanitizer[]
   validRelationships: string[]
 }): void => {
   const collectionQueryFields: NonNullable<Widget['fields']> = [
@@ -218,7 +217,7 @@ const addDefaultDashboardWidgets = ({
       existingFieldNames: new Set(),
       fields: collectionQueryFields,
       parentIsLocalized: false,
-      richTextSanitizationTasks,
+      richTextSanitizers,
       validRelationships,
     }),
     minWidth: 'x-small',
@@ -231,7 +230,7 @@ const addDefaultDashboardWidgets = ({
       existingFieldNames: new Set(),
       fields: recentlyViewedFields,
       parentIsLocalized: false,
-      richTextSanitizationTasks,
+      richTextSanitizers,
       validRelationships,
     }),
     label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
@@ -326,7 +325,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   config.i18n = i18nConfig
 
-  const richTextSanitizationTasks: RichTextSanitizationTask[] = []
+  const richTextSanitizers: RichTextSanitizer[] = []
 
   const schedulePublishCollections: CollectionSlug[] = []
 
@@ -352,7 +351,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
         existingFieldNames: new Set(),
         fields: widget.fields,
         parentIsLocalized: false,
-        richTextSanitizationTasks,
+        richTextSanitizers,
         validRelationships,
       })
     }
@@ -384,7 +383,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
         existingFieldNames: new Set(),
         fields: sanitizedBlock.fields,
         parentIsLocalized: false,
-        richTextSanitizationTasks,
+        richTextSanitizers,
         validRelationships,
       })
 
@@ -421,7 +420,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     config.collections![i] = sanitizeCollection(
       config as unknown as Config,
       config.collections![i]!,
-      richTextSanitizationTasks,
+      richTextSanitizers,
       validRelationships,
       orderableJoins,
     )
@@ -482,7 +481,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       config.globals![i] = sanitizeGlobal(
         config as unknown as Config,
         config.globals![i]!,
-        richTextSanitizationTasks,
+        richTextSanitizers,
         validRelationships,
       )
     }
@@ -528,7 +527,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       sanitizeGlobal(
         config as unknown as Config,
         getJobStatsGlobal(),
-        richTextSanitizationTasks,
+        richTextSanitizers,
         validRelationships,
       ),
     )
@@ -543,7 +542,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     const sanitizedJobsCollection = sanitizeCollection(
       config as unknown as Config,
       defaultJobsCollection,
-      richTextSanitizationTasks,
+      richTextSanitizers,
       validRelationships,
     )
 
@@ -557,7 +556,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       sanitizeCollection(
         config as unknown as Config,
         lockedDocumentsCollection,
-        richTextSanitizationTasks,
+        richTextSanitizers,
         validRelationships,
       ),
     )
@@ -567,7 +566,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     sanitizeCollection(
       config as unknown as Config,
       getPreferencesCollection(config as unknown as Config),
-      richTextSanitizationTasks,
+      richTextSanitizers,
       validRelationships,
     ),
   )
@@ -575,7 +574,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   const migrations = sanitizeCollection(
     config as unknown as Config,
     migrationsCollection,
-    richTextSanitizationTasks,
+    richTextSanitizers,
     validRelationships,
   )
 
@@ -595,7 +594,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       sanitizeCollection(
         config as unknown as Config,
         getQueryPresetsConfig(config as unknown as Config),
-        richTextSanitizationTasks,
+        richTextSanitizers,
         validRelationships,
       ),
     )
@@ -603,7 +602,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   addDefaultDashboardWidgets({
     config,
-    richTextSanitizationTasks,
+    richTextSanitizers,
     validRelationships,
   })
 
@@ -636,8 +635,8 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     })
   }
 
-  for (const richTextSanitizationTask of richTextSanitizationTasks) {
-    sanitizeRichTextField(richTextSanitizationTask)
+  for (const sanitizeRichText of richTextSanitizers) {
+    sanitizeRichText(config as SanitizedConfig)
   }
 
   return config as SanitizedConfig

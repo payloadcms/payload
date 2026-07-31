@@ -6,7 +6,7 @@ import type {
 import type { Config, SanitizedConfig } from '../../config/types.js'
 import type { GlobalConfig } from '../../globals/config/types.js'
 import type { OrderableJoinInfo } from './sanitizeJoinField.js'
-import type { Field, RichTextField } from './types.js'
+import type { Field } from './types.js'
 
 import {
   DuplicateFieldName,
@@ -38,12 +38,7 @@ import {
 import { sanitizeJoinField } from './sanitizeJoinField.js'
 import { fieldAffectsData as _fieldAffectsData, fieldIsLocalized, tabHasName } from './types.js'
 
-export type RichTextSanitizationTask = {
-  config: SanitizedConfig
-  field: RichTextField
-  isRoot: boolean
-  parentIsLocalized: boolean
-}
+export type RichTextSanitizer = (config: SanitizedConfig) => void
 
 type SanitizeFieldsArgs = {
   collectionConfig?: CollectionConfig
@@ -84,7 +79,7 @@ type SanitizeFieldsArgs = {
   /**
    * When provided, rich text editor resolution is deferred until the config tree is sanitized.
    */
-  richTextSanitizationTasks?: RichTextSanitizationTask[]
+  richTextSanitizers?: RichTextSanitizer[]
   /**
    * If not null, will validate that upload and relationship fields do not relate to a collection that is not in this array.
    * This validation will be skipped if validRelationships is null.
@@ -120,7 +115,7 @@ export type SanitizeFieldArgs = {
   parentSchemaPath: string
   polymorphicJoins?: SanitizedJoin[]
   requireFieldLevelRichTextEditor: boolean
-  richTextSanitizationTasks?: RichTextSanitizationTask[]
+  richTextSanitizers?: RichTextSanitizer[]
   validRelationships: null | string[]
 }
 
@@ -129,31 +124,6 @@ type SanitizeFieldResult = {
    * Fields to insert after this field (e.g., timezone field)
    */
   fieldsToInsert?: Field[]
-}
-
-export const sanitizeRichTextField = ({
-  config,
-  field,
-  isRoot,
-  parentIsLocalized,
-}: RichTextSanitizationTask): RichTextField => {
-  if (!field.editor) {
-    if (config.editor && !isRoot) {
-      field.editor = config.editor
-    } else {
-      throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
-    }
-  }
-
-  if (typeof field.editor === 'function') {
-    field.editor = field.editor({
-      config,
-      isRoot,
-      parentIsLocalized,
-    })
-  }
-
-  return field
 }
 
 /**
@@ -181,7 +151,7 @@ export const sanitizeField = ({
   parentSchemaPath,
   polymorphicJoins,
   requireFieldLevelRichTextEditor,
-  richTextSanitizationTasks,
+  richTextSanitizers,
   validRelationships,
 }: SanitizeFieldArgs): SanitizeFieldResult => {
   const result: SanitizeFieldResult = {}
@@ -423,17 +393,28 @@ export const sanitizeField = ({
 
   // Make sure that the richText field has an editor
   if (field.type === 'richText') {
-    const richTextSanitizationTask: RichTextSanitizationTask = {
-      config: config as unknown as SanitizedConfig,
-      field,
-      isRoot: requireFieldLevelRichTextEditor,
-      parentIsLocalized: Boolean(parentIsLocalized || field.localized),
+    const sanitizeRichText = (sanitizedConfig: SanitizedConfig): void => {
+      if (!field.editor) {
+        if (sanitizedConfig.editor && !requireFieldLevelRichTextEditor) {
+          field.editor = sanitizedConfig.editor
+        } else {
+          throw new MissingEditorProp(field) // while we allow disabling editor functionality, you should not have any richText fields defined if you do not have an editor
+        }
+      }
+
+      if (typeof field.editor === 'function') {
+        field.editor = field.editor({
+          config: sanitizedConfig,
+          isRoot: requireFieldLevelRichTextEditor,
+          parentIsLocalized: (parentIsLocalized || field.localized)!,
+        })
+      }
     }
 
-    if (richTextSanitizationTasks) {
-      richTextSanitizationTasks.push(richTextSanitizationTask)
+    if (richTextSanitizers) {
+      richTextSanitizers.push(sanitizeRichText)
     } else {
-      sanitizeRichTextField(richTextSanitizationTask)
+      sanitizeRichText(config as unknown as SanitizedConfig)
     }
   }
 
@@ -471,7 +452,7 @@ export const sanitizeField = ({
         parentIsLocalized: (parentIsLocalized || field.localized)!,
         parentSchemaPath: schemaPath + '.' + block.slug,
         requireFieldLevelRichTextEditor,
-        richTextSanitizationTasks,
+        richTextSanitizers,
         validRelationships,
       })
     }
@@ -492,7 +473,7 @@ export const sanitizeField = ({
       parentSchemaPath: schemaPath,
       polymorphicJoins,
       requireFieldLevelRichTextEditor,
-      richTextSanitizationTasks,
+      richTextSanitizers,
       validRelationships,
     })
   }
@@ -537,7 +518,7 @@ export const sanitizeField = ({
         parentSchemaPath: tabSchemaPath,
         polymorphicJoins,
         requireFieldLevelRichTextEditor,
-        richTextSanitizationTasks,
+        richTextSanitizers,
         validRelationships,
       })
 
@@ -680,7 +661,7 @@ export const sanitizeFields = ({
   parentSchemaPath = '',
   polymorphicJoins,
   requireFieldLevelRichTextEditor = false,
-  richTextSanitizationTasks,
+  richTextSanitizers,
   validRelationships,
 }: SanitizeFieldsArgs): Field[] => {
   if (!fields) {
@@ -706,7 +687,7 @@ export const sanitizeFields = ({
       parentSchemaPath,
       polymorphicJoins,
       requireFieldLevelRichTextEditor,
-      richTextSanitizationTasks,
+      richTextSanitizers,
       validRelationships,
     })
 
