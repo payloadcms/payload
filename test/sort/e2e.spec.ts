@@ -112,8 +112,12 @@ describe('Sort functionality', () => {
 
     await assertRows(['A', 'C', 'D', 'B'])
 
-    // Note: Clicking the sort button again should not change the order
-    // In previous versions we allowed ascending and descending order.
+    // Clicking the sort button again should toggle to descending order
+    await page.locator('button.sort-header').nth(0).click()
+    await page.waitForURL(/sort=-_order/, { timeout: 2000 })
+    await assertRows(['B', 'D', 'C', 'A'])
+
+    // Clicking the sort button again should toggle back to ascending order
     await page.locator('button.sort-header').nth(0).click()
     await page.waitForURL(/sort=_order/, { timeout: 2000 })
     await assertRows(['A', 'C', 'D', 'B'])
