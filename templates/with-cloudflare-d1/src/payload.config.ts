@@ -48,7 +48,7 @@ const cloudflareLogger = {
   warn: createLog('warn', console.warn),
   error: createLog('error', console.error),
   fatal: createLog('fatal', console.error),
-  silent: () => {},
+  silent: () => { },
 } as any // Use PayloadLogger type when it's exported
 
 const cloudflare =
@@ -85,7 +85,7 @@ function getCloudflareContextFromWrangler(): Promise<CloudflareContext> {
     ({ getPlatformProxy }) =>
       getPlatformProxy({
         environment: process.env.CLOUDFLARE_ENV,
-        remoteBindings: false,
+        remoteBindings: true,
       } satisfies GetPlatformProxyOptions),
   )
 }
