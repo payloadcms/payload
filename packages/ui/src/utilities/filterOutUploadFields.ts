@@ -11,6 +11,7 @@ export const filterOutUploadFields = (fields: FieldWithPathClient[]): FieldWithP
     'filesize',
     'filename',
     'url',
+    'cropRect',
     'focalX',
     'focalY',
     'sizes',

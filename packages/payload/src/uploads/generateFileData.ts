@@ -179,6 +179,10 @@ export const generateFileData = async <T>({
   const cropData =
     typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
+  if (cropData && collectionConfig.upload.crop !== false) {
+    fileData.cropRect = cropData
+  }
+
   try {
     const fileSupportsResize = canResizeImage(file.mimetype)
     let fsSafeName: string
@@ -279,7 +283,7 @@ export const generateFileData = async <T>({
 
     let fileForResize = file
 
-    if (cropData && sharp) {
+    if (cropData && sharp && collectionConfig.upload.cropMode !== 'preserve') {
       const { data: croppedImage, info } = await cropImage({
         cropData,
         dimensions: dimensions!,
@@ -394,13 +398,14 @@ export const generateFileData = async <T>({
 
       const { sizeData, sizesToSave } = await createImageSizes({
         config: collectionConfig,
-        dimensions: !cropData
-          ? dimensions!
-          : {
-              ...dimensions,
-              height: fileData.height!,
-              width: fileData.width!,
-            },
+        dimensions:
+          !cropData || collectionConfig.upload.cropMode === 'preserve'
+            ? dimensions!
+            : {
+                ...dimensions,
+                height: fileData.height!,
+                width: fileData.width!,
+              },
         file: fileForResize,
         focalPoint,
         mimeType: fileData.mimeType,

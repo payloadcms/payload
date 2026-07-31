@@ -169,6 +169,40 @@ export const getBaseUploadFields = ({ collection, config }: Options): Field[] =>
     height,
   ]
 
+  if (uploadOptions.crop !== false) {
+    uploadFields.push({
+      name: 'cropRect',
+      type: 'group',
+      admin: {
+        disabled: { column: true, filter: true, groupBy: true },
+        hidden: true,
+      },
+      fields: [
+        {
+          name: 'x',
+          type: 'number',
+        },
+        {
+          name: 'y',
+          type: 'number',
+        },
+        {
+          name: 'width',
+          type: 'number',
+        },
+        {
+          name: 'height',
+          type: 'number',
+        },
+        {
+          name: 'unit',
+          type: 'select',
+          options: ['%', 'px'],
+        },
+      ],
+    })
+  }
+
   // Add focal point fields if not disabled
   if (
     uploadOptions.focalPoint !== false ||

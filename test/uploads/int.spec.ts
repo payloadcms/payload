@@ -1,12 +1,17 @@
 import type { AddressInfo } from 'net'
-import type { CollectionSlug, Payload, PayloadRequest, UploadInstructions } from 'payload'
+import type { CollectionSlug, Crop, Payload, PayloadRequest, UploadInstructions } from 'payload'
 
 import { randomUUID } from 'crypto'
 import fs from 'fs'
 import { createServer } from 'http'
 import os from 'os'
 import path from 'path'
-import { _internal_safeFetchGlobal, createPayloadRequest, getFileByPath } from 'payload'
+import {
+  _internal_safeFetchGlobal,
+  createLocalReq,
+  createPayloadRequest,
+  getFileByPath,
+} from 'payload'
 import { fileURLToPath } from 'url'
 import { promisify } from 'util'
 import { afterAll, afterEach, beforeAll, describe, expect, it, vitest } from 'vitest'
@@ -35,6 +40,7 @@ import {
   noRestrictFileTypesSlug,
   pdfOnlySlug,
   prefixMediaSlug,
+  preserveCropSlug,
   reduceSlug,
   relationSlug,
   restrictedMimeTypesSlug,
@@ -1548,6 +1554,126 @@ describe('Collections - Uploads', () => {
       expect(doc.focalY).toEqual(50)
 
       await payload.delete({ collection: focalNoSizesSlug, id: doc.id })
+    })
+  })
+
+  describe('crop rectangle', () => {
+    const cropRect = {
+      height: 40,
+      unit: '%',
+      width: 50,
+      x: 10,
+      y: 15,
+    } satisfies Crop
+    const filePath = path.resolve(dirname, './image.png')
+
+    const createCropEditRequest = ({
+      heightInPixels,
+      widthInPixels,
+    }: {
+      heightInPixels: number
+      widthInPixels: number
+    }) =>
+      createLocalReq(
+        {
+          req: {
+            query: {
+              uploadEdits: {
+                crop: {
+                  height: String(cropRect.height),
+                  unit: cropRect.unit,
+                  width: String(cropRect.width),
+                  x: String(cropRect.x),
+                  y: String(cropRect.y),
+                },
+                focalPoint: {
+                  x: '25',
+                  y: '75',
+                },
+                heightInPixels,
+                widthInPixels,
+              },
+            },
+          },
+        },
+        payload,
+      )
+
+    it('should add the crop rectangle field only when cropping is enabled', () => {
+      const hasCropRectField = (collectionSlug: CollectionSlug) =>
+        payload.collections[collectionSlug].config.fields.some(
+          (field) => 'name' in field && field.name === 'cropRect',
+        )
+
+      expect(hasCropRectField(mediaSlug)).toBe(true)
+      expect(hasCropRectField(focalOnlySlug)).toBe(false)
+      expect(hasCropRectField(preserveCropSlug as CollectionSlug)).toBe(true)
+    })
+
+    it('should persist crop and focal point edits through file generation', async () => {
+      const file = await getFileByPath(filePath)
+      const doc = await payload.create({
+        collection: mediaSlug,
+        data: {},
+        file,
+      })
+      const heightInPixels = Math.round((doc.height! * cropRect.height) / 100)
+      const widthInPixels = Math.round((doc.width! * cropRect.width) / 100)
+      const req = await createCropEditRequest({ heightInPixels, widthInPixels })
+
+      const updated = await payload.update({
+        id: doc.id,
+        collection: mediaSlug,
+        data: {},
+        file: await getFileByPath(filePath),
+        req,
+      })
+
+      expect((updated as { cropRect?: Crop } & typeof updated).cropRect).toEqual(cropRect)
+      expect(updated.focalX).toBe(25)
+      expect(updated.focalY).toBe(75)
+      expect(updated.height).toBe(heightInPixels)
+      expect(updated.width).toBe(widthInPixels)
+
+      const updateWithoutCrop = await payload.update({
+        id: doc.id,
+        collection: mediaSlug,
+        data: {
+          alt: 'Updated alt text',
+        },
+      })
+
+      expect((updateWithoutCrop as { cropRect?: Crop } & typeof updated).cropRect).toEqual(cropRect)
+
+      await payload.delete({ id: doc.id, collection: mediaSlug })
+    })
+
+    it('should preserve the original image dimensions in preserve mode', async () => {
+      const collection = preserveCropSlug as CollectionSlug
+      const doc = (await payload.create({
+        collection,
+        data: {},
+        file: await getFileByPath(filePath),
+      })) as unknown as Media
+      const heightInPixels = Math.round((doc.height! * cropRect.height) / 100)
+      const widthInPixels = Math.round((doc.width! * cropRect.width) / 100)
+      const req = await createCropEditRequest({ heightInPixels, widthInPixels })
+
+      const updated = (await payload.update({
+        id: doc.id,
+        collection,
+        data: {},
+        file: await getFileByPath(filePath),
+        req,
+      })) as unknown as { cropRect?: Crop } & Media
+
+      expect(updated.cropRect).toEqual(cropRect)
+      expect(updated.focalX).toBe(25)
+      expect(updated.focalY).toBe(75)
+      expect(updated.height).toBe(doc.height)
+      expect(updated.width).toBe(doc.width)
+
+      await payload.delete({ id: doc.id, collection })
     })
   })
 
