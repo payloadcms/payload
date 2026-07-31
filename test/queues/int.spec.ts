@@ -1,3 +1,4 @@
+import { spawn } from 'node:child_process'
 import path from 'path'
 import {
   _internal_jobSystemGlobals,
@@ -10,10 +11,11 @@ import {
 } from 'payload'
 import { wait } from 'payload/shared'
 import { fileURLToPath } from 'url'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect } from 'vitest'
 
 import type { NextRESTClient } from '../__helpers/shared/NextRESTClient.js'
 
+import { it } from '../__helpers/int/vitest.js'
 import { initPayloadInt } from '../__helpers/shared/initPayloadInt.js'
 import { devUser } from '../credentials.js'
 import { clearAndSeedEverything } from './seed.js'
@@ -25,6 +27,10 @@ const dirname = path.dirname(filename)
 
 describe('Queues - Payload', () => {
   let payload: Payload
+  let processingLeaseDefaults: {
+    duration: number
+    safetyBuffer: number
+  }
   let restClient: NextRESTClient
   let token: string
   let user: User
@@ -32,6 +38,7 @@ describe('Queues - Payload', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
     ;({ payload, restClient } = await initPayloadInt(dirname))
+    processingLeaseDefaults = { ...payload.config.jobs.processingLease }
   })
 
   afterAll(async () => {
@@ -48,6 +55,7 @@ describe('Queues - Payload', () => {
 
   afterEach(() => {
     _internal_resetJobSystemGlobals()
+    Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
   })
 
   beforeEach(async () => {
@@ -71,6 +79,21 @@ describe('Queues - Payload', () => {
     payload.config.jobs.deleteJobOnComplete = true
     _internal_jobSystemGlobals.shouldAutoRun = true
     _internal_jobSystemGlobals.shouldAutoSchedule = true
+  })
+
+  describe('default config', () => {
+    it('should always add the jobs stats global and job metadata field', () => {
+      const jobsCollection = payload.config.collections.find(({ slug }) => slug === 'payload-jobs')
+      const jobsStatsGlobal = payload.config.globals.find(
+        ({ slug }) => slug === 'payload-jobs-stats',
+      )
+      const metaField = jobsCollection?.fields.find(
+        (field) => 'name' in field && field.name === 'meta',
+      )
+
+      expect(jobsStatsGlobal).toBeDefined()
+      expect(metaField).toBeDefined()
+    })
   })
 
   describe('access control', () => {
@@ -747,6 +770,80 @@ describe('Queues - Payload', () => {
     expect(durations[3]).toBeGreaterThan(2400)
   })
 
+  it('should run a job only once when multiple workers poll the same queue', async () => {
+    _internal_jobSystemGlobals.shouldAutoRun = false
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const message = 'run once with multiple workers'
+    const job = await payload.jobs.queue({
+      input: {
+        message,
+      },
+      queue: 'multi-worker',
+      task: 'CreateSimple',
+    })
+
+    const workerCount = 10
+    const results = await Promise.all(
+      Array.from({ length: workerCount }, () =>
+        payload.jobs.run({
+          queue: 'multi-worker',
+          silent: true,
+          limit: 1,
+        }),
+      ),
+    )
+
+    const createdDocuments = await payload.find({
+      collection: 'simple',
+      where: {
+        title: {
+          equals: message,
+        },
+      },
+    })
+    expect(createdDocuments.totalDocs).toBe(1)
+
+    const workersThatRanTheJob = results.filter((result) => result.jobStatus?.[job.id])
+    expect(workersThatRanTheJob).toHaveLength(1)
+  })
+
+  it('should run a job only once when multiple workers run the same job by ID', async () => {
+    _internal_jobSystemGlobals.shouldAutoRun = false
+    payload.config.jobs.deleteJobOnComplete = false
+
+    const message = 'run once by ID with multiple workers'
+    const job = await payload.jobs.queue({
+      input: {
+        message,
+      },
+      task: 'CreateSimple',
+    })
+
+    const workerCount = 10
+    const results = await Promise.all(
+      Array.from({ length: workerCount }, () =>
+        payload.jobs.runByID({
+          id: job.id,
+          silent: true,
+        }),
+      ),
+    )
+
+    const createdDocuments = await payload.find({
+      collection: 'simple',
+      where: {
+        title: {
+          equals: message,
+        },
+      },
+    })
+    expect(createdDocuments.totalDocs).toBe(1)
+
+    const workersThatRanTheJob = results.filter((result) => result.jobStatus?.[job.id])
+    expect(workersThatRanTheJob).toHaveLength(1)
+  })
+
   it('ensure jobs run in FIFO order by default', async () => {
     await payload.jobs.queue({
       workflow: 'inlineTaskTestDelayed',
@@ -899,6 +996,8 @@ describe('Queues - Payload', () => {
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(after?.id).toBe(id)
+    expect(after?.processingUntil).toBeFalsy()
+    expect(after?.processingToken).toBeFalsy()
   })
 
   it('should respect deleteJobOnComplete false configuration', async () => {
@@ -917,6 +1016,8 @@ describe('Queues - Payload', () => {
 
     const after = await payload.findByID({ collection: 'payload-jobs', id, disableErrors: true })
     expect(after?.id).toBe(id)
+    expect(after?.processingUntil).toBeFalsy()
+    expect(after?.processingToken).toBeFalsy()
   })
 
   it('can queue single tasks', async () => {
@@ -970,7 +1071,7 @@ describe('Queues - Payload', () => {
       })
 
       expect(jobAfterRun.hasError).toBe(true)
-      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.processingUntil).toBeFalsy()
       expect(jobAfterRun.totalTried).toBe(1)
     })
 
@@ -994,7 +1095,7 @@ describe('Queues - Payload', () => {
       })
 
       expect(jobAfterRun.hasError).toBe(true)
-      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.processingUntil).toBeFalsy()
       expect(jobAfterRun.totalTried).toBe(1)
     })
   })
@@ -1015,7 +1116,7 @@ describe('Queues - Payload', () => {
     })
 
     expect(jobAfterRun.hasError).toBe(true)
-    expect(jobAfterRun.processing).toBe(false)
+    expect(jobAfterRun.processingUntil).toBeFalsy()
     expect(jobAfterRun.totalTried).toBe(1)
   })
 
@@ -1044,7 +1145,321 @@ describe('Queues - Payload', () => {
     // so the loop naturally bounds at exactly 2 attempts.
     expect(jobAfterRun.totalTried).toBe(2)
     expect(jobAfterRun.hasError).toBe(true)
-    expect(jobAfterRun.processing).toBe(false)
+    expect(jobAfterRun.processingUntil).toBeFalsy()
+  })
+
+  describe('worker recovery', () => {
+    // The child process can share the file-backed SQLite test database.
+    it(
+      'should recover a job after its worker process is killed',
+      { db: (type) => type.startsWith('sqlite') },
+      async () => {
+        _internal_jobSystemGlobals.shouldAutoRun = false
+        payload.config.jobs.deleteJobOnComplete = false
+
+        const postTitle = 'created after a worker process crash'
+        const job = await payload.jobs.queue({
+          input: {
+            postTitle,
+          },
+          workflow: 'longRunning',
+        })
+
+        const worker = spawn(
+          process.execPath,
+          [
+            '--no-deprecation',
+            '--import',
+            '@swc-node/register/esm-register',
+            path.resolve(dirname, 'crashWorker.ts'),
+            JSON.stringify(job.id),
+          ],
+          {
+            cwd: path.resolve(dirname, '../..'),
+            env: {
+              ...process.env,
+              CRASH_WORKER_LEASE_DURATION: '1000',
+              CRASH_WORKER_LEASE_SAFETY_BUFFER: '100',
+              PAYLOAD_DROP_DATABASE: 'false',
+              SEED_IN_CONFIG_ONINIT: 'false',
+            },
+            stdio: ['ignore', 'ignore', 'pipe'],
+          },
+        )
+
+        let workerErrorOutput = ''
+
+        worker.stderr.on('data', (data) => {
+          workerErrorOutput += data.toString()
+        })
+
+        const workerExit = new Promise<{
+          code: null | number
+          signal: NodeJS.Signals | null
+        }>((resolve) => {
+          worker.once('exit', (code, signal) => {
+            resolve({ code, signal })
+          })
+        })
+
+        try {
+          let processingUntil: null | string | undefined
+
+          for (let attempt = 0; attempt < 200 && !processingUntil; attempt += 1) {
+            if (worker.exitCode !== null || worker.signalCode !== null) {
+              throw new Error(`Worker exited before claiming the job.\n${workerErrorOutput}`)
+            }
+
+            try {
+              const currentJob = await payload.findByID({
+                id: job.id,
+                collection: 'payload-jobs',
+              })
+
+              processingUntil = currentJob.processingUntil
+            } catch (error) {
+              const cause = error instanceof Error ? error.cause : undefined
+              const isDatabaseLocked =
+                (error instanceof Error && error.message.includes('database is locked')) ||
+                (cause instanceof Error && cause.message.includes('database is locked'))
+
+              if (!isDatabaseLocked) {
+                throw error
+              }
+            }
+
+            await wait(50)
+          }
+
+          expect(processingUntil).toBeTruthy()
+          expect(worker.kill('SIGKILL')).toBe(true)
+          expect((await workerExit).signal).toBe('SIGKILL')
+
+          const millisecondsUntilRecovery = new Date(processingUntil!).getTime() - Date.now() + 100
+          await wait(Math.max(millisecondsUntilRecovery, 0))
+
+          const replacementWorkerResult = await payload.jobs.runByID({
+            id: job.id,
+            silent: true,
+          })
+          const completedJob = await payload.findByID({
+            id: job.id,
+            collection: 'payload-jobs',
+          })
+          const createdPosts = await payload.find({
+            collection: 'posts',
+            where: { title: { equals: postTitle } },
+          })
+
+          expect(replacementWorkerResult.jobStatus?.[job.id]?.status).toBe('success')
+          expect(createdPosts.totalDocs).toBe(1)
+          expect(completedJob.completedAt).toBeTruthy()
+          expect(completedJob.hasError).toBe(false)
+          expect(completedJob.totalTried).toBe(1)
+        } finally {
+          if (worker.exitCode === null && worker.signalCode === null) {
+            worker.kill('SIGKILL')
+            await workerExit
+          }
+        }
+      },
+    )
+
+    it('should let only one replacement worker recover a job after its original worker stops responding', async () => {
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      payload.config.jobs.deleteJobOnComplete = false
+      // Short lease (shorter than 500ms task delay in longRunning workflow) to simulate lease expiry
+      payload.config.jobs.processingLease.duration = 300
+      payload.config.jobs.processingLease.safetyBuffer = 250
+
+      const postTitle = 'created by the replacement worker'
+      const job = await payload.jobs.queue({
+        input: { postTitle },
+        queue: 'worker-recovery',
+        workflow: 'longRunning',
+      })
+      const originalWorker = payload.jobs.run({
+        queue: 'worker-recovery',
+        silent: true,
+      })
+
+      // Wait until the first worker starts, then let its short lease expire as if it stopped.
+      await expect
+        .poll(
+          async () =>
+            (
+              await payload.findByID({
+                id: job.id,
+                collection: 'payload-jobs',
+              })
+            ).processingToken,
+        )
+        .toBeTruthy()
+      await wait(350)
+      // Give the replacement worker the normal lease so it can finish the long-running job.
+      Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
+
+      const replacementWorkers = await Promise.all(
+        Array.from({ length: 10 }, () =>
+          payload.jobs.run({
+            limit: 1,
+            queue: 'worker-recovery',
+            silent: true,
+          }),
+        ),
+      )
+      const originalWorkerResult = await originalWorker
+
+      const completedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+      const createdPosts = await payload.find({
+        collection: 'posts',
+        where: { title: { equals: postTitle } },
+      })
+      const workersThatRecoveredTheJob = replacementWorkers.filter(
+        (result) => result.jobStatus?.[job.id],
+      )
+
+      expect(originalWorkerResult.jobStatus?.[job.id]).toBeUndefined()
+      expect(workersThatRecoveredTheJob).toHaveLength(1)
+      expect(workersThatRecoveredTheJob[0]?.jobStatus?.[job.id]?.status).toBe('success')
+      expect(createdPosts.totalDocs).toBe(1)
+      expect(completedJob.completedAt).toBeTruthy()
+      expect(completedJob.hasError).toBe(false)
+      expect(completedJob.totalTried).toBe(1)
+    })
+
+    it('should not let another worker pick up a healthy long-running job', async () => {
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      expect(payload.config.jobs.processingLease.duration).toBe(20 * 60 * 1000)
+      expect(payload.config.jobs.processingLease.safetyBuffer).toBe(30_000)
+      payload.config.jobs.deleteJobOnComplete = false
+      payload.config.jobs.processingLease.duration = 600
+      payload.config.jobs.processingLease.safetyBuffer = 50
+
+      const postTitle = 'created by the healthy worker'
+      const job = await payload.jobs.queue({
+        input: { postTitle },
+        workflow: 'longRunning',
+      })
+      const firstWorker = payload.jobs.run({ silent: true })
+
+      await expect
+        .poll(
+          async () =>
+            (
+              await payload.findByID({
+                id: job.id,
+                collection: 'payload-jobs',
+              })
+            ).processingToken,
+        )
+        .toBeTruthy()
+      // Wait longer than the original lease. Heartbeats must keep the first worker active.
+      await wait(900)
+
+      const secondWorkerResult = await payload.jobs.run({ silent: true })
+      const firstWorkerResult = await firstWorker
+      const completedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+      const createdPosts = await payload.find({
+        collection: 'posts',
+        where: { title: { equals: postTitle } },
+      })
+      Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
+
+      expect(secondWorkerResult.jobStatus?.[job.id]).toBeUndefined()
+      expect(firstWorkerResult.jobStatus?.[job.id]?.status).toBe('success')
+      expect(createdPosts.totalDocs).toBe(1)
+      expect(completedJob.completedAt).toBeTruthy()
+      expect(completedJob.totalTried).toBe(1)
+    })
+
+    it('should recover an interrupted job without consuming a retry', async () => {
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      payload.config.jobs.deleteJobOnComplete = false
+      payload.config.jobs.processingLease.duration = 300
+      payload.config.jobs.processingLease.safetyBuffer = 250
+
+      const postTitle = 'created after retry-free recovery'
+      const job = await payload.jobs.queue({
+        input: { postTitle },
+        workflow: 'longRunning',
+      })
+
+      const unresponsiveWorkerResult = await payload.jobs.run({ silent: true })
+      // Give the replacement worker the normal lease so it can finish the long-running job.
+      Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
+      const replacementWorkerResult = await payload.jobs.run({ silent: true })
+
+      const completedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+      const createdPosts = await payload.find({
+        collection: 'posts',
+        where: { title: { equals: postTitle } },
+      })
+
+      expect(unresponsiveWorkerResult.jobStatus?.[job.id]).toBeUndefined()
+      expect(replacementWorkerResult.jobStatus?.[job.id]?.status).toBe('success')
+      expect(createdPosts.totalDocs).toBe(1)
+      expect(completedJob.completedAt).toBeTruthy()
+      expect(completedJob.hasError).toBe(false)
+      expect(completedJob.totalTried).toBe(1)
+    })
+
+    it('should ignore task results from a timed-out worker after another worker recovers the job', async () => {
+      _internal_jobSystemGlobals.shouldAutoRun = false
+      payload.config.jobs.deleteJobOnComplete = false
+      payload.config.jobs.processingLease.duration = 300
+      payload.config.jobs.processingLease.safetyBuffer = 250
+
+      const postTitle = 'created after ignoring stale task results'
+      const job = await payload.jobs.queue({
+        input: { postTitle },
+        workflow: 'longRunning',
+      })
+      const timedOutWorker = payload.jobs.run({ silent: true })
+
+      await expect
+        .poll(
+          async () =>
+            (
+              await payload.findByID({
+                id: job.id,
+                collection: 'payload-jobs',
+              })
+            ).processingToken,
+        )
+        .toBeTruthy()
+      await wait(350)
+      // Give the replacement worker the normal lease so it can finish the long-running job.
+      Object.assign(payload.config.jobs.processingLease, processingLeaseDefaults)
+
+      const replacementWorkerResult = await payload.jobs.run({ silent: true })
+      const timedOutWorkerResult = await timedOutWorker
+      const completedJob = await payload.findByID({
+        id: job.id,
+        collection: 'payload-jobs',
+      })
+      const createdPosts = await payload.find({
+        collection: 'posts',
+        where: { title: { equals: postTitle } },
+      })
+
+      expect(timedOutWorkerResult.jobStatus?.[job.id]).toBeUndefined()
+      expect(replacementWorkerResult.jobStatus?.[job.id]?.status).toBe('success')
+      expect(createdPosts.totalDocs).toBe(1)
+      expect(completedJob.log).toHaveLength(4)
+      expect(new Set(completedJob.log?.map(({ taskID }) => taskID)).size).toBe(4)
+      expect(completedJob.completedAt).toBeTruthy()
+      expect(completedJob.hasError).toBe(false)
+    })
   })
 
   it('can queue and run via the endpoint single tasks without workflows', async () => {
@@ -1101,7 +1516,7 @@ describe('Queues - Payload', () => {
           input: {
             message: 'Number ' + i + ' Update 1',
           },
-          processing: true,
+          processingUntil: new Date(Date.now() + 60_000).toISOString(),
           taskSlug: 'CreateSimple',
         },
       })
@@ -1123,7 +1538,7 @@ describe('Queues - Payload', () => {
           input: {
             message: 'Number ' + i + ' Update 2',
           },
-          processing: true,
+          processingUntil: new Date(Date.now() + 60_000).toISOString(),
           taskSlug: 'CreateSimple',
         },
       })
@@ -1144,7 +1559,7 @@ describe('Queues - Payload', () => {
           input: {
             message: 'Number ' + i + ' Update 3',
           },
-          processing: true,
+          processingUntil: new Date(Date.now() + 60_000).toISOString(),
           taskSlug: 'CreateSimple',
         },
       })
@@ -1163,7 +1578,7 @@ describe('Queues - Payload', () => {
           input: {
             message: 'Number ' + i + ' Update 4',
           },
-          processing: true,
+          processingUntil: new Date(Date.now() + 60_000).toISOString(),
           taskSlug: 'CreateSimple',
         },
       })
@@ -1219,10 +1634,15 @@ describe('Queues - Payload', () => {
       })
     }
 
-    await payload.jobs.run({
-      silent: true,
-      limit: numberOfTasks,
-    })
+    // Content API caps bulk updates at 100 documents, and jobs.run claims the batch with updateJobs.
+    const maxTasksPerRun = payload.db.name === 'content-api' ? 100 : numberOfTasks
+
+    for (let offset = 0; offset < numberOfTasks; offset += maxTasksPerRun) {
+      await payload.jobs.run({
+        limit: Math.min(maxTasksPerRun, numberOfTasks - offset),
+        silent: true,
+      })
+    }
 
     const allSimples = await payload.find({
       collection: 'simple',
@@ -1527,13 +1947,16 @@ describe('Queues - Payload', () => {
     })
 
     expect(jobAfterRun?.log?.[0]?.taskID).toBe('create doc 1')
-    //expect(jobAfterRun.log[0].parent.taskID).toBe('create two docs')
-    // jobAfterRun.log[0].parent should not exist
-    expect(jobAfterRun?.log?.[0]?.parent).toBeUndefined()
+    expect(jobAfterRun?.log?.[0]?.parent).toMatchObject({
+      taskID: 'create two docs',
+      taskSlug: 'inline',
+    })
 
     expect(jobAfterRun?.log?.[1]?.taskID).toBe('create doc 2')
-    //expect(jobAfterRun.log[1].parent.taskID).toBe('create two docs')
-    expect(jobAfterRun?.log?.[1]?.parent).toBeUndefined()
+    expect(jobAfterRun?.log?.[1]?.parent).toMatchObject({
+      taskID: 'create two docs',
+      taskSlug: 'inline',
+    })
 
     expect(jobAfterRun?.log?.[2]?.taskID).toBe('create two docs')
   })
@@ -1593,7 +2016,8 @@ describe('Queues - Payload', () => {
       id: job.id,
       depth: 0,
     })
-    expect(jobAfterRunProcessing.processing).toBe(true)
+    expect(jobAfterRunProcessing.processingUntil).toBeTruthy()
+    expect(jobAfterRunProcessing.processingToken).toBeTruthy()
 
     // Should be in processing - cancel job
     await payload.jobs.cancelByID({
@@ -1616,7 +2040,8 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.hasError).toBe(true)
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
-    expect(jobAfterRun.processing).toBe(false)
+    expect(jobAfterRun.processingToken).toBeFalsy()
+    expect(jobAfterRun.processingUntil).toBeFalsy()
 
     // Ensure job is not retried
     const runResponse = await payload.jobs.run({ silent: true })
@@ -1659,7 +2084,8 @@ describe('Queues - Payload', () => {
     expect(jobAfterRun.hasError).toBe(true)
     // @ts-expect-error error is not typed
     expect(jobAfterRun.error?.cancelled).toBe(true)
-    expect(jobAfterRun.processing).toBe(false)
+    expect(jobAfterRun.processingToken).toBeFalsy()
+    expect(jobAfterRun.processingUntil).toBeFalsy()
   })
 
   it('ensure jobs can cancel themselves by throwing a JobCancelledError in workflow handler', async () => {
@@ -1741,7 +2167,7 @@ describe('Queues - Payload', () => {
       expect(jobAfterRun.hasError).toBe(true)
       // @ts-expect-error error is not typed
       expect(jobAfterRun.error?.cancelled).toBe(true)
-      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.processingUntil).toBeFalsy()
 
       // Run again to ensure the job is not retried
       const runResponse2 = await payload.jobs.run({ silent: true })
@@ -1840,7 +2266,7 @@ describe('Queues - Payload', () => {
       expect(jobAfterRun.hasError).toBe(true)
       // @ts-expect-error error is not typed
       expect(jobAfterRun.error?.cancelled).toBe(true)
-      expect(jobAfterRun.processing).toBe(false)
+      expect(jobAfterRun.processingUntil).toBeFalsy()
 
       // Run again to ensure the job is not retried
       const runResponse2 = await payload.jobs.run({ silent: true })
@@ -2075,7 +2501,7 @@ describe('Queues - Payload', () => {
       expect(job1After.completedAt).toBeDefined()
       // Second job should still be pending (not yet run due to exclusive lock)
       expect(job2After.completedAt).toBeFalsy()
-      expect(job2After.processing).toBe(false)
+      expect(job2After.processingUntil).toBeFalsy()
 
       // Run jobs again - now the second job should complete
       await payload.jobs.run({ silent: true, limit: 10 })
@@ -2404,7 +2830,7 @@ describe('Queues - Payload', () => {
       })
 
       expect(pendingJobStatus.completedAt).toBeFalsy()
-      expect(pendingJobStatus.processing).toBe(false)
+      expect(pendingJobStatus.processingUntil).toBeFalsy()
 
       // Wait for original job to complete
       await runPromise
@@ -2533,7 +2959,7 @@ describe('Queues - Payload', () => {
         })
 
         expect(runningJobAfter).not.toBeNull()
-        expect(runningJobAfter.processing).toBe(true)
+        expect(runningJobAfter.processingUntil).toBeTruthy()
 
         // The new job should exist
         const newJobAfter = await payload.findByID({
@@ -2669,12 +3095,12 @@ describe('Queues - Payload', () => {
         })
 
         // Running job should still exist and be processing
-        expect(runningJobCheck.processing).toBe(true)
+        expect(runningJobCheck.processingUntil).toBeTruthy()
         // Middle job should be deleted (superseded)
         expect(middleJobCheck).toBeNull()
         // Latest job should exist and be pending
         expect(latestJobCheck).not.toBeNull()
-        expect(latestJobCheck.processing).toBe(false)
+        expect(latestJobCheck.processingUntil).toBeFalsy()
 
         // Wait for running job to complete
         await runPromise

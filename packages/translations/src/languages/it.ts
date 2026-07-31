@@ -485,6 +485,8 @@ export const itTranslations: DefaultTranslationsObject = {
     sorryNotFound: "Siamo spiacenti, non c'è nulla che corrisponda alla tua richiesta.",
     sort: 'Ordina',
     sortByLabelDirection: 'Ordina per {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Per riordinare le righe è necessario prima ordinarle in base alla colonna "Ordine".',
     stayOnThisPage: 'Rimani su questa pagina',
     submissionSuccessful: 'Invio riuscito.',
     submit: 'Invia',

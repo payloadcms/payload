@@ -482,6 +482,8 @@ export const ruTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'К сожалению, ничего подходящего под ваш запрос нет.',
     sort: 'Сортировать',
     sortByLabelDirection: 'Сортировать по {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Чтобы изменить порядок строк, сначала отсортируйте их по столбцу «Порядок».',
     stayOnThisPage: 'Остаться на этой странице',
     submissionSuccessful: 'Успешно отправлено.',
     submit: 'Отправить',

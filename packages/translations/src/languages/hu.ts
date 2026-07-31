@@ -485,6 +485,8 @@ export const huTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Sajnáljuk – nincs semmi, ami megfelelne a kérésének.',
     sort: 'Rendezés',
     sortByLabelDirection: 'Rendezés {{label}} {{direction}} szerint',
+    sortByOrderToReorder:
+      'A sorok átrendezéséhez először az "Order" oszlop szerint kell rendezni őket.',
     stayOnThisPage: 'Maradjon ezen az oldalon',
     submissionSuccessful: 'Beküldés sikeres.',
     submit: 'Beküldés',

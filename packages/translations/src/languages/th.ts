@@ -471,6 +471,7 @@ export const thTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'ขออภัย ไม่สามารถทำตามคำขอของคุณได้',
     sort: 'เรียง',
     sortByLabelDirection: 'เรียงลำดับตาม {{label}} {{direction}}',
+    sortByOrderToReorder: 'ในการจัดลำดับแถวใหม่ คุณต้องจัดเรียงแถวเหล่านั้นตามคอลัมน์ "Order" ก่อน',
     stayOnThisPage: 'อยู่หน้านี้ต่อ',
     submissionSuccessful: 'ส่งสำเร็จ',
     submit: 'ส่ง',

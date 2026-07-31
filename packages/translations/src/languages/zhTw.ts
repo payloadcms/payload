@@ -454,6 +454,7 @@ export const zhTwTranslations: DefaultTranslationsObject = {
     sorryNotFound: '很抱歉，找不到符合條件的內容。',
     sort: '排序',
     sortByLabelDirection: '依 {{label}} {{direction}} 排序',
+    sortByOrderToReorder: '若要重新排序列，您必須先以「Order」欄位進行排序。',
     stayOnThisPage: '留在此頁面',
     submissionSuccessful: '送出成功。',
     submit: '送出',

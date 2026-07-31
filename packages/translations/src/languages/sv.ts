@@ -481,6 +481,8 @@ export const svTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Tyvärr, det finns inget som motsvarar din begäran.',
     sort: 'Sortera',
     sortByLabelDirection: 'Sortera efter {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'För att omordna raderna måste du först sortera dem efter kolumnen "Order".',
     stayOnThisPage: 'Stanna på denna sida',
     submissionSuccessful: 'Skickat',
     submit: 'Skicka',

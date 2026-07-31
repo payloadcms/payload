@@ -469,6 +469,7 @@ export const arTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'عذرًا - لا يوجد شيء يتوافق مع طلبك.',
     sort: 'ترتيب',
     sortByLabelDirection: 'رتّب حسب {{label}} {{direction}}',
+    sortByOrderToReorder: 'لإعادة ترتيب الصفوف، يجب أولاً فرزها وفقاً لعمود "Order".',
     stayOnThisPage: 'البقاء على هذه الصفحة',
     submissionSuccessful: 'تمت الإرسال بنجاح.',
     submit: 'إرسال',

@@ -44,6 +44,17 @@ export type RenderRootArgs = {
   config: Promise<SanitizedConfig>
   importMap: ImportMap
   initReq: InitReqFn
+  /**
+   * Optional React `key` applied to the rendered view (not the surrounding admin
+   * template/nav). Adapters whose router reconciles a single RSC payload in place
+   * across navigations (e.g. TanStack Start) pass a per-route key here so the
+   * *view* remounts on route change — resetting view-scoped client providers like
+   * `DocumentInfoProvider` that hold uncontrolled `useState` from the prior
+   * document — while the persistent nav/template reconciles in place (no flash).
+   * Left `undefined` by Next.js, whose App Router already remounts the page
+   * segment while its layout (nav) persists.
+   */
+  key?: string
   /** Framework notFound implementation (e.g. next/navigation notFound). Called before req is available. */
   notFound: () => never
   params: Promise<{ segments: string[] }>
@@ -57,6 +68,7 @@ export const renderRoot = async ({
   config: configPromise,
   importMap,
   initReq,
+  key,
   notFound,
   params: paramsPromise,
   redirect,
@@ -336,11 +348,16 @@ export const renderRoot = async ({
     } satisfies AdminViewServerPropsOnly,
   })
 
+  // Wrap the view in a keyed boundary so it remounts on route change while the
+  // surrounding template/nav reconciles in place. `key={undefined}` (Next.js) is
+  // a no-op, preserving prior behavior.
+  const KeyedView = <React.Fragment key={key}>{RenderedView}</React.Fragment>
+
   return (
     <PageConfigProvider config={clientConfig}>
-      {!templateType && <React.Fragment>{RenderedView}</React.Fragment>}
+      {!templateType && <React.Fragment>{KeyedView}</React.Fragment>}
       {templateType === 'minimal' && (
-        <MinimalTemplate className={templateClassName}>{RenderedView}</MinimalTemplate>
+        <MinimalTemplate className={templateClassName}>{KeyedView}</MinimalTemplate>
       )}
       {templateType === 'default' && (
         <DefaultTemplate
@@ -365,7 +382,7 @@ export const renderRoot = async ({
             globals: visibleEntities?.globals,
           }}
         >
-          {RenderedView}
+          {KeyedView}
         </DefaultTemplate>
       )}
     </PageConfigProvider>

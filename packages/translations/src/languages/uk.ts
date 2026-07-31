@@ -475,6 +475,8 @@ export const ukTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Вибачте, немає нічого, що відповідало б Вашому запиту.',
     sort: 'Сортувати',
     sortByLabelDirection: 'Сортувати за {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Щоб змінити порядок рядків, спочатку потрібно відсортувати їх за стовпцем "Order".',
     stayOnThisPage: 'Залишитись на цій сторінці',
     submissionSuccessful: 'Успішно відправлено.',
     submit: 'Відправити',

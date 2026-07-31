@@ -131,8 +131,8 @@ export const EditManyBulkUploadsDrawerContent: React.FC<
       })
 
       dispatchFields({
-        type: 'UPDATE_MANY',
-        formState: state,
+        type: 'MERGE_SERVER_STATE',
+        serverState: state,
       })
 
       setIsInitializing(false)

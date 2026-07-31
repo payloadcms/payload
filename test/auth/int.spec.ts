@@ -1086,6 +1086,12 @@ describe('Auth', () => {
     })
   })
 
+  describe('config defaults', () => {
+    it('should default auth.depth to 0 when the collection does not set it', () => {
+      expect(payload.collections[publicUsersSlug]?.config.auth.depth).toBe(0)
+    })
+  })
+
   describe('disableLocalStrategy', () => {
     it('should allow create of a user with disableLocalStrategy', async () => {
       const email = 'test@example.com'

@@ -482,6 +482,8 @@ export const nbTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Beklager, det er ingenting som samsvarer med forespørselen din.',
     sort: 'Sortér',
     sortByLabelDirection: 'Sorter etter {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'For å endre rekkefølgen på radene må du først sortere dem etter "Order"-kolonnen.',
     stayOnThisPage: 'Bli på denne siden',
     submissionSuccessful: 'Innsending vellykket.',
     submit: 'Send inn',

@@ -478,6 +478,8 @@ export const rsTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Нажалост, не постоји ништа што одговара вашем захтеву.',
     sort: 'Сортирај',
     sortByLabelDirection: 'Сортирај према {{label}} {{дирецтион}}',
+    sortByOrderToReorder:
+      'Da biste preuredili redove, prvo ih morate sortirati prema koloni „Redosled”.',
     stayOnThisPage: 'Остани на овој страници',
     submissionSuccessful: 'Успешно слање',
     submit: 'Потврди',

@@ -477,6 +477,8 @@ export const slTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Oprostite - ničesar ni mogoče najti, kar bi ustrezalo vaši zahtevi.',
     sort: 'Razvrsti',
     sortByLabelDirection: 'Razvrsti po {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Za ponovno razvrstitev vrstic jih morate najprej razvrstiti po stolpcu "Order".',
     stayOnThisPage: 'Ostani na tej strani',
     submissionSuccessful: 'Oddaja uspešna.',
     submit: 'Oddaj',

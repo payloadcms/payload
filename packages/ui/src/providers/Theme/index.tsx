@@ -2,8 +2,10 @@
 import React, { createContext, use, useCallback, useEffect, useState } from 'react'
 
 import { useConfig } from '../Config/index.js'
+import { useSearchParams } from '../RouterAdapter/index.js'
+import { defaultTheme, type Theme } from './shared.js'
 
-export type Theme = 'dark' | 'light'
+export { defaultTheme, type Theme }
 
 export type ThemeContext = {
   autoMode: boolean
@@ -71,7 +73,8 @@ const detectHighContrastMode = (cookieKey: string): boolean => {
   return isHighContrast
 }
 
-export const defaultTheme: Theme = 'light'
+const isValidThemeParam = (value: null | string): value is 'auto' | Theme =>
+  value === 'auto' || value === 'light' || value === 'dark'
 
 /**
  * Provides theme context to its children.
@@ -83,6 +86,9 @@ export const defaultTheme: Theme = 'light'
  * scoped visual  the `theme` prop sets the local theme, but setThemeoverride
  * and setHighContrastMode bubble up through each level to the root provider so
  * mutations always affect the global user preference.
+ *
+ * The ThemeProvider also reads the `?theme=light|dark|auto` query parameter and
+ * persists it to the theme cookie using the same mechanism as manual theme selection.
  */
 export const ThemeProvider: React.FC<{
   children?: React.ReactNode
@@ -97,34 +103,13 @@ export const ThemeProvider: React.FC<{
   const themeCookieKey = `${config.cookiePrefix || 'payload'}-theme`
   const contrastCookieKey = `${config.cookiePrefix || 'payload'}-high-contrast-mode`
 
+  const themeParam = useSearchParams().get('theme')?.toLowerCase()
+
   const [theme, setThemeState] = useState<Theme>(themeOverride ?? defaultTheme)
   const [autoMode, setAutoMode] = useState<boolean>(!isScoped)
   const [highContrastMode, setHighContrastModeState] = useState<boolean>(
     isScoped ? (outerContext.highContrastMode ?? false) : (initialHighContrastMode ?? false),
   )
-
-  // Keep highContrastMode in sync with the outer provider when scoped.
-  useEffect(() => {
-    if (isScoped) {
-      setHighContrastModeState(outerContext.highContrastMode)
-    }
-  }, [isScoped, outerContext?.highContrastMode])
-
-  useEffect(() => {
-    if (isScoped || preselectedTheme !== 'all') {
-      return
-    }
-    const { isAutoMode, theme: detectedTheme } = detectTheme(themeCookieKey)
-    setThemeState(detectedTheme)
-    setAutoMode(isAutoMode)
-  }, [isScoped, preselectedTheme, themeCookieKey])
-
-  useEffect(() => {
-    if (isScoped) {
-      return
-    }
-    setHighContrastModeState(detectHighContrastMode(contrastCookieKey))
-  }, [isScoped, contrastCookieKey])
 
   // Setters bubble up to the root provider by default. Pass { scoped: true }
   // to update only the local (scoped) theme without affecting global state.
@@ -170,6 +155,36 @@ export const ThemeProvider: React.FC<{
     },
     [isScoped, outerContext, contrastCookieKey],
   )
+
+  // Keep highContrastMode in sync with the outer provider when scoped.
+  useEffect(() => {
+    if (isScoped) {
+      setHighContrastModeState(outerContext.highContrastMode)
+    }
+  }, [isScoped, outerContext?.highContrastMode])
+
+  // Resolve the root theme: a valid `?theme` param wins (applied via setTheme so
+  // it persists to the theme cookie exactly like a manual selection; otherwise
+  // fall back to the cookie or OS preference.
+  useEffect(() => {
+    if (isScoped || preselectedTheme !== 'all') {
+      return
+    }
+    if (isValidThemeParam(themeParam)) {
+      setTheme(themeParam)
+      return
+    }
+    const { isAutoMode, theme: detectedTheme } = detectTheme(themeCookieKey)
+    setThemeState(detectedTheme)
+    setAutoMode(isAutoMode)
+  }, [isScoped, preselectedTheme, themeCookieKey, themeParam, setTheme])
+
+  useEffect(() => {
+    if (isScoped) {
+      return
+    }
+    setHighContrastModeState(detectHighContrastMode(contrastCookieKey))
+  }, [isScoped, contrastCookieKey])
 
   return (
     <Context

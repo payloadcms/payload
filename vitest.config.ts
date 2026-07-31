@@ -50,7 +50,7 @@ export default defineConfig({
           },
         },
         test: {
-          include: ['packages/**/*.spec.ts'],
+          include: ['packages/**/*.spec.ts', 'tools/**/*.spec.ts'],
           name: 'unit',
           environment: 'node',
         },

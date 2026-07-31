@@ -475,6 +475,8 @@ export const etTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Vabandust - teie päringule vastavat sisu ei leitud.',
     sort: 'Sorteeri',
     sortByLabelDirection: 'Sorteeri {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Ridade ümberjärjestamiseks peate esmalt need sorteerima veeru "Order" järgi.',
     stayOnThisPage: 'Jää sellele lehele',
     submissionSuccessful: 'Esitamine õnnestus.',
     submit: 'Esita',

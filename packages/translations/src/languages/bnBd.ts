@@ -486,6 +486,8 @@ export const bnBdTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'দুঃখিত—আপনার অনুরোধের সাথে মিলে এমন কিছুই নেই।',
     sort: 'সাজান',
     sortByLabelDirection: '{{label}} দ্বারা {{direction}} সাজান',
+    sortByOrderToReorder:
+      'সারিগুলিকে পুনরায় সাজানোর জন্য আপনাকে প্রথমে "Order" কলাম অনুযায়ী সেগুলোকে ছাঁটাই করতে হবে।',
     stayOnThisPage: 'এই পৃষ্ঠায় থাকুন',
     submissionSuccessful: 'জমা সফল হয়েছে।',
     submit: 'জমা দিন',

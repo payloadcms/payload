@@ -111,6 +111,12 @@
       vertical-align: middle;
     }
 
+    .cell-_dragHandle > div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
     tbody tr {
       position: relative;
       border-top: var(--stroke-width-small) solid var(--color-border);
@@ -142,6 +148,7 @@
 
   /* Condensed appearance */
   .table--appearance-condensed {
+    border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
     scrollbar-width: thin;
     scrollbar-color: var(--scrollbar-color) transparent;

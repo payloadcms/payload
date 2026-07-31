@@ -478,6 +478,8 @@ export const plTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Przepraszamy — nie ma nic, co odpowiadałoby twojemu zapytaniu.',
     sort: 'Sortuj',
     sortByLabelDirection: 'Sortuj według {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Aby zmienić kolejność wierszy, należy najpierw posortować je według kolumny "Order".',
     stayOnThisPage: 'Pozostań na stronie',
     submissionSuccessful: 'Zgłoszenie zakończone powodzeniem.',
     submit: 'Zatwierdź',

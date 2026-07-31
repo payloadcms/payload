@@ -40,6 +40,33 @@ describe('workdir helpers', () => {
     )
   })
 
+  it('should copy declared files into the agent workspace', async () => {
+    const sourcePath = path.resolve(import.meta.dirname, '../../uploads/image.jpg')
+    const workdir = await materialize({
+      starterConfig: 'export default {} as any',
+      workspaceFiles: [{ sourcePath, targetPath: 'assets/checklist.jpg' }],
+    })
+    created.push(workdir)
+
+    expect(await readFile(path.join(workdir, 'assets/checklist.jpg'))).toEqual(
+      await readFile(sourcePath),
+    )
+  })
+
+  it('should reject workspace files outside the agent workspace', async () => {
+    await expect(
+      materialize({
+        starterConfig: 'export default {} as any',
+        workspaceFiles: [
+          {
+            sourcePath: path.resolve(import.meta.dirname, '../../uploads/image.jpg'),
+            targetPath: '../checklist.jpg',
+          },
+        ],
+      }),
+    ).rejects.toThrow('must stay inside the workdir')
+  })
+
   it('configures one audit.json for the agent and MCP server', async () => {
     const mcpDatabaseURL = 'file:///tmp/payload-mcp-eval-case-123/database.sqlite'
     const workdir = await materialize({

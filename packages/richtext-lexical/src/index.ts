@@ -23,7 +23,7 @@ import { richTextValidateHOC } from './validate/index.js'
 
 let checkedDependencies = false
 
-export const lexicalTargetVersion = '0.45.0'
+export const lexicalTargetVersion = '0.48.0'
 
 export function lexicalEditor(args?: LexicalEditorProps): LexicalRichTextAdapterProvider {
   if (
@@ -209,32 +209,30 @@ export { getRestPopulateFn } from './features/converters/utilities/restPopulateF
 export { DebugJsxConverterFeature } from './features/debug/jsxConverter/server/index.js'
 export { TestRecorderFeature } from './features/debug/testRecorder/server/index.js'
 export { TreeViewFeature } from './features/debug/treeView/server/index.js'
-export { EXPERIMENTAL_TableFeature } from './features/experimental_table/server/index.js'
 export { BoldFeature } from './features/format/bold/feature.server.js'
 export { InlineCodeFeature } from './features/format/inlineCode/feature.server.js'
-
 export { ItalicFeature } from './features/format/italic/feature.server.js'
+
 export { StrikethroughFeature } from './features/format/strikethrough/feature.server.js'
 export { SubscriptFeature } from './features/format/subscript/feature.server.js'
 export { SuperscriptFeature } from './features/format/superscript/feature.server.js'
 export { UnderlineFeature } from './features/format/underline/feature.server.js'
 export { HeadingFeature, type HeadingFeatureProps } from './features/heading/server/index.js'
 export { HorizontalRuleFeature } from './features/horizontalRule/server/index.js'
-
 export { IndentFeature } from './features/indent/server/index.js'
+
 export {
   $createAutoLinkNode,
   $isAutoLinkNode,
   AutoLinkNode,
 } from './features/link/nodes/AutoLinkNode.js'
 export { $createLinkNode, $isLinkNode, LinkNode } from './features/link/nodes/LinkNode.js'
-
 export { LinkFeature, type LinkFeatureServerProps } from './features/link/server/index.js'
+
 export type { LinkFields } from './features/link/server/schema.js'
-
 export { ChecklistFeature } from './features/lists/checklist/server/index.js'
-export { OrderedListFeature } from './features/lists/orderedList/server/index.js'
 
+export { OrderedListFeature } from './features/lists/orderedList/server/index.js'
 export { UnorderedListFeature } from './features/lists/unorderedList/server/index.js'
 
 export { ParagraphFeature } from './features/paragraph/server/index.js'
@@ -245,7 +243,9 @@ export {
 } from './features/relationship/server/index.js'
 
 export { RelationshipServerNode } from './features/relationship/server/nodes/RelationshipNode.js'
+
 export type { RelationshipData } from './features/relationship/server/schema.js'
+export { TableFeature } from './features/table/server/index.js'
 export { defaultColors } from './features/textState/defaultColors.js'
 export { TextStateFeature } from './features/textState/feature.server.js'
 

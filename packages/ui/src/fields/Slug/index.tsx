@@ -4,6 +4,7 @@ import type { SlugFieldClient } from 'payload'
 
 import { getTranslation } from '@payloadcms/translations'
 import React, { useCallback, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Button } from '../../elements/Button/index.js'
 import { FieldDescription } from '../../fields/FieldDescription/index.js'
@@ -16,6 +17,7 @@ import { LockIcon } from '../../icons/Lock/index.js'
 import { LockOpenIcon } from '../../icons/LockOpen/index.js'
 import { RefreshIcon } from '../../icons/Refresh/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
+import { useLocale } from '../../providers/Locale/index.js'
 import { useServerFunctions } from '../../providers/ServerFunctions/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import './index.css'
@@ -36,9 +38,11 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
 
   const { i18n, t } = useTranslation()
 
-  const { collectionSlug, globalSlug } = useDocumentInfo()
+  const { id, collectionSlug, globalSlug } = useDocumentInfo()
 
   const { slugify } = useServerFunctions()
+
+  const { code: locale } = useLocale()
 
   const {
     path: fieldPath,
@@ -59,18 +63,28 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
     async (e: React.MouseEvent<Element>) => {
       e.preventDefault()
 
-      const valueToSlugify = getDataByPath(useAsSlug)
+      const valueToSlugify = useAsSlug ? getDataByPath(useAsSlug) : undefined
 
-      const formattedSlug = await slugify({
-        collectionSlug,
-        data: getData(),
-        globalSlug,
-        path: fieldPath,
-        valueToSlugify,
-      })
+      let formattedSlug: null | string | undefined
 
-      if (formattedSlug === null || formattedSlug === undefined) {
-        setValue('')
+      try {
+        formattedSlug = await slugify({
+          id: id ?? undefined,
+          collectionSlug,
+          data: getData(),
+          globalSlug,
+          locale,
+          path: fieldPath,
+          valueToSlugify,
+        })
+      } catch (_err) {
+        toast.error(t('error:unspecific'))
+        return
+      }
+
+      // Empty only comes back for globals (no counter fallback) — keep the current value. For
+      // collections the server returns the `<singular>-N` fallback when there's no source.
+      if (formattedSlug === null || formattedSlug === undefined || formattedSlug === '') {
         return
       }
 
@@ -88,9 +102,12 @@ const SlugFieldComponent: React.FC<SlugFieldProps> = ({ field, path }) => {
       getData,
       slugify,
       getDataByPath,
+      id,
       collectionSlug,
       globalSlug,
+      locale,
       fieldPath,
+      t,
     ],
   )
 

@@ -485,6 +485,8 @@ export const roTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Ne pare rău - nu există nimic care să corespundă cu cererea dvs.',
     sort: 'Sortează',
     sortByLabelDirection: 'Sortează după {{etichetă}} {{direcţie}}',
+    sortByOrderToReorder:
+      'Pentru a reordona rândurile, trebuie mai întâi să le sortați după coloana „Order”.',
     stayOnThisPage: 'Rămâneți pe această pagină',
     submissionSuccessful: 'Trimitere cu succes.',
     submit: 'Trimite',

@@ -402,6 +402,7 @@ export const clientTranslationKeys = createClientTranslationKeys([
   'general:sorryNotFound',
   'general:sort',
   'general:sortByLabelDirection',
+  'general:sortByOrderToReorder',
   'general:stayOnThisPage',
   'general:submissionSuccessful',
   'general:submit',

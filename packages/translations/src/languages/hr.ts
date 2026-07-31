@@ -478,6 +478,8 @@ export const hrTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Nažalost, ne postoji ništa što odgovara vašem zahtjevu.',
     sort: 'Sortiraj',
     sortByLabelDirection: 'Sortiraj prema {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Da biste promijenili redoslijed redova, prvo ih morate sortirati prema stupcu "Order".',
     stayOnThisPage: 'Ostani na ovoj stranici',
     submissionSuccessful: 'Uspješno slanje',
     submit: 'Podnesi',

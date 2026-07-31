@@ -483,6 +483,8 @@ export const caTranslations: DefaultTranslationsObject = {
     sorryNotFound: "Ho sento, no s'ha trobat la pàgina que busques.",
     sort: 'Ordena',
     sortByLabelDirection: 'Ordena per {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Per reordenar les files, primer les heu d\'ordenar per la columna "Order".',
     stayOnThisPage: 'Permaneix en aquesta pàgina',
     submissionSuccessful: 'Enviament exitós',
     submit: 'Envia',

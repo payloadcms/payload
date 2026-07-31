@@ -490,6 +490,8 @@ export const frTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Désolé, rien ne correspond à votre demande.',
     sort: 'Trier',
     sortByLabelDirection: 'Trier par {{label}} {{direction}}',
+    sortByOrderToReorder:
+      "Pour réorganiser les lignes, vous devez d'abord les trier selon la colonne « Ordre ».",
     stayOnThisPage: 'Rester sur cette page',
     submissionSuccessful: 'Soumission réussie.',
     submit: 'Soumettre',

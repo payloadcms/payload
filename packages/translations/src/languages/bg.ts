@@ -479,6 +479,8 @@ export const bgTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Съжаляваме-няма нищо, което да отговаря на търсенето ти.',
     sort: 'Сортирай',
     sortByLabelDirection: 'Сортирай по {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'За да пренаредите редовете, първо трябва да ги сортирате по колоната "Order".',
     stayOnThisPage: 'Остани на тази страница',
     submissionSuccessful: 'Успешно подаване.',
     submit: 'Подай',

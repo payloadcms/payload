@@ -1,4 +1,4 @@
-import type { ClientUser, PaginatedDocs } from 'payload'
+import type { PaginatedDocs, User } from 'payload'
 import type React from 'react'
 
 export type RelatedGroup = {
@@ -16,7 +16,7 @@ export type TableRow = {
   _hasChildren?: boolean
   _hierarchyIcon?: React.ReactNode
   _isLocked?: boolean
-  _userEditing?: ClientUser
+  _userEditing?: User
   id: number | string
 }
 

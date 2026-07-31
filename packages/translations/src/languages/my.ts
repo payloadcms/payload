@@ -485,6 +485,8 @@ export const myTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'ဝမ်းနည်းပါသည်။ သင်ရှာနေတဲ့ဟာ ဒီမှာမရှိပါ။',
     sort: 'အစဉ်လိုက်',
     sortByLabelDirection: 'အစဉ်အလိုက် စီမံခန့်ခွဲထားသည် {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'အတန်းတန်းများကို ပြန်စီရန်အတွက် မူရင်းအားဖြင့် "Order" column ကို အရင်ဆုံး စီတန်းရပါမည်။',
     stayOnThisPage: 'ဒီမှာပဲ ဆက်နေမည်။',
     submissionSuccessful: 'သိမ်းဆည်းမှု အောင်မြင်ပါသည်။',
     submit: 'သိမ်းဆည်းမည်။',

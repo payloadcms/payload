@@ -480,6 +480,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     sorryNotFound: '申し訳ありません。リクエストに対応する内容が見つかりませんでした。',
     sort: '並び替え',
     sortByLabelDirection: '{{label}}により並べ替え {{direction}}',
+    sortByOrderToReorder: '行を並べ替えるには、まず「Order」列でソートする必要があります。',
     stayOnThisPage: 'この画面にとどまる',
     submissionSuccessful: '送信が成功しました。',
     submit: '送信',

@@ -19,7 +19,6 @@
     border-radius: var(--radius-medium);
     cursor: pointer;
     position: relative;
-    transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
     min-width: calc(var(--spacer-4) + var(--spacer-2-5));
 
     &:disabled {
@@ -83,7 +82,6 @@
       all: unset;
       cursor: pointer;
       color: var(--color-text);
-      transition: background-color 0.15s cubic-bezier(0, 0.2, 0.2, 1);
       position: relative;
       font-family: var(--text-body-medium-font-family);
       font-size: var(--text-body-medium-font-size);

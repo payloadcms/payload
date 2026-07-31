@@ -477,6 +477,7 @@ export const koTranslations: DefaultTranslationsObject = {
     sorryNotFound: '죄송합니다. 요청과 일치하는 항목이 없습니다.',
     sort: '정렬',
     sortByLabelDirection: '{{label}} {{direction}}으로 정렬',
+    sortByOrderToReorder: '행의 순서를 변경하려면 먼저 "Order" 열을 기준으로 정렬해야 합니다.',
     stayOnThisPage: '이 페이지에 머무르기',
     submissionSuccessful: '제출이 완료되었습니다.',
     submit: '제출',
