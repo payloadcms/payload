@@ -6,21 +6,26 @@ import { ensureCompilationIsDone } from '../__helpers/e2e/helpers.js'
 import { test } from '../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
+import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 import { postsSlug } from './collections/Posts.js'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
+const { beforeAll, describe } = test
 const clientChunkPattern = /\/assets\/[^/]+\.js(?:\?.*)?$/
 const isPostsListRSCRequest = (url: URL) =>
   url.pathname.endsWith(`/admin/collections/${postsSlug}`) && url.searchParams.has('_rsc')
 const serverFunctionPattern = /\/_serverFn\//
 
+let page: Page
+let postsURL: AdminUrlUtil
 let releaseClientChunk: (() => void) | undefined
 let pendingClientChunk: Promise<void> | undefined
 let releaseNextRSCRequest: (() => void) | undefined
 let pendingNextRSCRequest: Promise<void> | undefined
 let releaseServerFunction: (() => void) | undefined
 let pendingServerFunction: Promise<void> | undefined
+let serverURL: string
 
 const blockNextClientChunk = async (page: Page) => {
   let isClientChunkBlocked = false
@@ -63,148 +68,149 @@ const expectVisibleRouteProgress = async (page: Page) => {
     .toBe(true)
 }
 
-test.afterEach(async ({ page }) => {
-  releaseClientChunk?.()
-  releaseNextRSCRequest?.()
-  releaseServerFunction?.()
-  await pendingClientChunk
-  await pendingNextRSCRequest
-  await pendingServerFunction
-  releaseClientChunk = undefined
-  pendingClientChunk = undefined
-  releaseNextRSCRequest = undefined
-  pendingNextRSCRequest = undefined
-  releaseServerFunction = undefined
-  pendingServerFunction = undefined
-  await page.unroute(clientChunkPattern)
-  await page.unroute(isPostsListRSCRequest)
-  await page.unroute(serverFunctionPattern)
-})
+describe('Admin routing', () => {
+  beforeAll(async ({ browser }, testInfo) => {
+    testInfo.setTimeout(TEST_TIMEOUT_LONG)
+    ;({ serverURL } = await initPayloadE2ENoConfig({ dirname }))
+    postsURL = new AdminUrlUtil(serverURL, postsSlug)
 
-test(
-  'should keep the previous admin view painted during index-to-splat navigation',
-  { framework: 'tanstack-start' },
-  async ({ page }) => {
-    test.skip(
-      process.env.PAYLOAD_TEST_PROD !== 'true',
-      'Production client chunks are required to suspend the next RSC payload.',
-    )
-
-    const { serverURL } = await initPayloadE2ENoConfig({ dirname })
-    const postsURL = new AdminUrlUtil(serverURL, postsSlug)
+    const context = await browser.newContext()
+    page = await context.newPage()
 
     await ensureCompilationIsDone({ page, serverURL })
-    await page.goto(postsURL.admin)
+  })
 
-    const isClientChunkBlocked = await blockNextClientChunk(page)
-
-    await page.locator(`#card-${postsSlug} .card__actions a`).click()
-    await expect.poll(isClientChunkBlocked).toBe(true)
-
-    await expect(page.locator('.template-default')).toBeVisible()
-    await expect(page.locator(`#card-${postsSlug}`)).toBeVisible()
-
+  test.afterEach(async () => {
     releaseClientChunk?.()
+    releaseNextRSCRequest?.()
+    releaseServerFunction?.()
+    await pendingClientChunk
+    await pendingNextRSCRequest
+    await pendingServerFunction
     releaseClientChunk = undefined
+    pendingClientChunk = undefined
+    releaseNextRSCRequest = undefined
+    pendingNextRSCRequest = undefined
+    releaseServerFunction = undefined
+    pendingServerFunction = undefined
+    await page.unroute(clientChunkPattern)
+    await page.unroute(isPostsListRSCRequest)
+    await page.unroute(serverFunctionPattern)
+  })
 
-    await expect(page).toHaveURL(postsURL.create)
-    await expect(page.locator('#field-title')).toBeVisible()
-  },
-)
+  test(
+    'should keep the previous admin view painted during index-to-splat navigation',
+    { framework: 'tanstack-start' },
+    async () => {
+      test.skip(
+        process.env.PAYLOAD_TEST_PROD !== 'true',
+        'Production client chunks are required to suspend the next RSC payload.',
+      )
 
-test(
-  'should show route progress until the next admin view is ready',
-  { framework: 'tanstack-start' },
-  async ({ page }) => {
+      await page.goto(postsURL.admin)
+
+      const isClientChunkBlocked = await blockNextClientChunk(page)
+
+      await page.locator(`#card-${postsSlug} .card__actions a`).click()
+      await expect.poll(isClientChunkBlocked).toBe(true)
+
+      await expect(page.locator('.template-default')).toBeVisible()
+      await expect(page.locator(`#card-${postsSlug}`)).toBeVisible()
+
+      releaseClientChunk?.()
+      releaseClientChunk = undefined
+
+      await expect(page).toHaveURL(postsURL.create)
+      await expect(page.locator('#field-title')).toBeVisible()
+    },
+  )
+
+  test(
+    'should show route progress until the next admin view is ready',
+    { framework: 'tanstack-start' },
+    async () => {
+      test.skip(
+        process.env.PAYLOAD_TEST_PROD !== 'true',
+        'Production client chunks are required to suspend the next RSC payload.',
+      )
+
+      await page.goto(postsURL.admin)
+      await expect(page.locator('.progress-bar')).toBeHidden()
+
+      const isClientChunkBlocked = await blockNextClientChunk(page)
+
+      let isServerFunctionBlocked = false
+      const serverFunctionGate = new Promise<void>((resolve) => {
+        releaseServerFunction = resolve
+      })
+
+      await page.route(
+        serverFunctionPattern,
+        async (route) => {
+          isServerFunctionBlocked = true
+          pendingServerFunction = (async () => {
+            await serverFunctionGate
+            await route.continue()
+          })()
+          await pendingServerFunction
+        },
+        { times: 1 },
+      )
+
+      await page.locator(`#card-${postsSlug} .card__actions a`).click()
+      await expect.poll(() => isServerFunctionBlocked).toBe(true)
+      await expectVisibleRouteProgress(page)
+
+      releaseServerFunction?.()
+      releaseServerFunction = undefined
+
+      await expect.poll(isClientChunkBlocked).toBe(true)
+      await expectVisibleRouteProgress(page)
+
+      releaseClientChunk?.()
+      releaseClientChunk = undefined
+
+      await expect(page).toHaveURL(postsURL.create)
+      await expect(page.locator('#field-title')).toBeVisible()
+      await expect(page.locator('.progress-bar')).toBeHidden()
+    },
+  )
+
+  test('should show progress bar on page navigation', { framework: 'next' }, async () => {
     test.skip(
       process.env.PAYLOAD_TEST_PROD !== 'true',
-      'Production client chunks are required to suspend the next RSC payload.',
+      'A production RSC request is required to hold the route transition open.',
     )
 
-    const { serverURL } = await initPayloadE2ENoConfig({ dirname })
-    const postsURL = new AdminUrlUtil(serverURL, postsSlug)
-
-    await ensureCompilationIsDone({ page, serverURL })
-    await page.goto(postsURL.admin)
-    await expect(page.locator('.progress-bar')).toBeHidden()
-
-    const isClientChunkBlocked = await blockNextClientChunk(page)
-
-    let isServerFunctionBlocked = false
-    const serverFunctionGate = new Promise<void>((resolve) => {
-      releaseServerFunction = resolve
+    let isNextRSCRequestBlocked = false
+    const nextRSCRequestGate = new Promise<void>((resolve) => {
+      releaseNextRSCRequest = resolve
     })
 
     await page.route(
-      serverFunctionPattern,
+      isPostsListRSCRequest,
       async (route) => {
-        isServerFunctionBlocked = true
-        pendingServerFunction = (async () => {
-          await serverFunctionGate
+        isNextRSCRequestBlocked = true
+        pendingNextRSCRequest = (async () => {
+          await nextRSCRequestGate
           await route.continue()
         })()
-        await pendingServerFunction
+        await pendingNextRSCRequest
       },
       { times: 1 },
     )
 
-    await page.locator(`#card-${postsSlug} .card__actions a`).click()
-    await expect.poll(() => isServerFunctionBlocked).toBe(true)
-    await expectVisibleRouteProgress(page)
-
-    releaseServerFunction?.()
-    releaseServerFunction = undefined
-
-    await expect.poll(isClientChunkBlocked).toBe(true)
-    await expectVisibleRouteProgress(page)
-
-    releaseClientChunk?.()
-    releaseClientChunk = undefined
-
-    await expect(page).toHaveURL(postsURL.create)
-    await expect(page.locator('#field-title')).toBeVisible()
+    await page.goto(postsURL.admin)
     await expect(page.locator('.progress-bar')).toBeHidden()
-  },
-)
+    await page.locator('.collections__card-list .card').first().click()
+    await expect.poll(() => isNextRSCRequestBlocked).toBe(true)
+    await expectVisibleRouteProgress(page)
 
-test('should show progress bar on page navigation', { framework: 'next' }, async ({ page }) => {
-  test.skip(
-    process.env.PAYLOAD_TEST_PROD !== 'true',
-    'A production RSC request is required to hold the route transition open.',
-  )
+    releaseNextRSCRequest?.()
+    releaseNextRSCRequest = undefined
 
-  const { serverURL } = await initPayloadE2ENoConfig({ dirname })
-  const postsURL = new AdminUrlUtil(serverURL, postsSlug)
-
-  let isNextRSCRequestBlocked = false
-  const nextRSCRequestGate = new Promise<void>((resolve) => {
-    releaseNextRSCRequest = resolve
+    await expect(page.locator('.list-header')).toBeVisible()
+    expect(page.url()).toContain(postsURL.list)
+    await expect(page.locator('.progress-bar')).toBeHidden()
   })
-
-  await page.route(
-    isPostsListRSCRequest,
-    async (route) => {
-      isNextRSCRequestBlocked = true
-      pendingNextRSCRequest = (async () => {
-        await nextRSCRequestGate
-        await route.continue()
-      })()
-      await pendingNextRSCRequest
-    },
-    { times: 1 },
-  )
-
-  await ensureCompilationIsDone({ page, serverURL })
-  await page.goto(postsURL.admin)
-  await expect(page.locator('.progress-bar')).toBeHidden()
-  await page.locator('.collections__card-list .card').first().click()
-  await expect.poll(() => isNextRSCRequestBlocked).toBe(true)
-  await expectVisibleRouteProgress(page)
-
-  releaseNextRSCRequest?.()
-  releaseNextRSCRequest = undefined
-
-  await expect(page.locator('.list-header')).toBeVisible()
-  expect(page.url()).toContain(postsURL.list)
-  await expect(page.locator('.progress-bar')).toBeHidden()
 })
