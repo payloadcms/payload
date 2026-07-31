@@ -471,6 +471,13 @@ Config and field sanitizers now return their result directly instead of returnin
 
 The same change applies to `sanitizeServerEditorConfig` and the methods on `editorConfigFactory` from `@payloadcms/richtext-lexical`. Remove `await`, and replace any `.then()` or `.catch()` usage with a direct call and `try`/`catch`.
 
+The optional `richTextSanitizationPromises` argument on the field sanitizers has been renamed to `richTextSanitizers`. Its callbacks are now synchronous:
+
+```diff
+- richTextSanitizationPromises: Array<(config: SanitizedConfig) => Promise<void>>
++ richTextSanitizers: Array<(config: SanitizedConfig) => void>
+```
+
 Custom rich-text adapter providers and Lexical server feature callbacks must also return their value synchronously:
 
 ```diff
