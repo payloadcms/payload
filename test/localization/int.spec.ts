@@ -3067,6 +3067,7 @@ describe('Localization', () => {
 
     describe('Copying To Locale', () => {
       let user: User
+      const createdDocs: { collection: string; id: number | string }[] = []
 
       beforeAll(async () => {
         user = (
@@ -3081,6 +3082,13 @@ describe('Localization', () => {
         ).docs[0] as unknown as User
 
         user['collection'] = 'users'
+      })
+
+      afterEach(async () => {
+        for (const { collection, id } of createdDocs) {
+          await payload.delete({ id, collection })
+        }
+        createdDocs.length = 0
       })
 
       it('should copy to locale', async () => {
@@ -3264,25 +3272,19 @@ describe('Localization', () => {
           },
           locale: 'en',
         })
+        createdDocs.push({ collection: arrayCollectionSlug, id: doc.id })
 
-        try {
-          const req = await createLocalReq({ user }, payload)
+        const req = await createLocalReq({ user }, payload)
 
-          const res = (await copyDataFromLocaleHandler({
-            collectionSlug: arrayCollectionSlug,
-            docID: doc.id,
-            fromLocale: 'en',
-            req,
-            toLocale: 'es',
-          })) as ArrayField
+        const res = (await copyDataFromLocaleHandler({
+          collectionSlug: arrayCollectionSlug,
+          docID: doc.id,
+          fromLocale: 'en',
+          req,
+          toLocale: 'es',
+        })) as ArrayField
 
-          expect(res.items?.[0]?.nestedItems?.[0]?.text).toBe('nested text')
-        } finally {
-          await payload.delete({
-            id: doc.id,
-            collection: arrayCollectionSlug,
-          })
-        }
+        expect(res.items?.[0]?.nestedItems?.[0]?.text).toBe('nested text')
       })
 
       it('should copy to locale without losing data when autosave and drafts are enabled', async () => {
