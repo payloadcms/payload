@@ -2,6 +2,7 @@ import type { AcceptedLanguages } from '@payloadcms/translations'
 
 import { en } from '@payloadcms/translations/languages/en'
 
+import type { RichTextSanitizationTask } from '../fields/config/sanitize.js'
 import type { OrderableJoinInfo } from '../fields/config/sanitizeJoinField.js'
 import type { CollectionSlug, GlobalSlug, SanitizedCollectionConfig } from '../index.js'
 import type { SanitizedJobsConfig } from '../queues/config/types/index.js'
@@ -22,6 +23,7 @@ import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
 import { defaultTimezones } from '../fields/baseFields/timezone/defaultTimezones.js'
+import { sanitizeRichTextField } from '../fields/config/sanitize.js'
 import { sanitizeGlobal } from '../globals/config/sanitize.js'
 import { resolveHierarchyCollections } from '../hierarchy/resolveHierarchyCollections.js'
 import { baseBlockFields, formatLabels, sanitizeFields } from '../index.js'
@@ -103,9 +105,11 @@ const sanitizeAdminConfig = (configToSanitize: Config): Partial<SanitizedConfig>
 
 const addDefaultDashboardWidgets = ({
   config,
+  richTextSanitizationTasks,
   validRelationships,
 }: {
   config: Partial<SanitizedConfig>
+  richTextSanitizationTasks: RichTextSanitizationTask[]
   validRelationships: string[]
 }): void => {
   const collectionQueryFields: NonNullable<Widget['fields']> = [
@@ -214,6 +218,7 @@ const addDefaultDashboardWidgets = ({
       existingFieldNames: new Set(),
       fields: collectionQueryFields,
       parentIsLocalized: false,
+      richTextSanitizationTasks,
       validRelationships,
     }),
     minWidth: 'x-small',
@@ -226,6 +231,7 @@ const addDefaultDashboardWidgets = ({
       existingFieldNames: new Set(),
       fields: recentlyViewedFields,
       parentIsLocalized: false,
+      richTextSanitizationTasks,
       validRelationships,
     }),
     label: ({ t }) => t('dashboard:widgetRecentlyViewedTitle'),
@@ -320,13 +326,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   config.i18n = i18nConfig
 
-  if (typeof incomingConfig.editor === 'function') {
-    config.editor = incomingConfig.editor({
-      config: config as SanitizedConfig,
-      isRoot: true,
-      parentIsLocalized: false,
-    })
-  }
+  const richTextSanitizationTasks: RichTextSanitizationTask[] = []
 
   const schedulePublishCollections: CollectionSlug[] = []
 
@@ -352,6 +352,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
         existingFieldNames: new Set(),
         fields: widget.fields,
         parentIsLocalized: false,
+        richTextSanitizationTasks,
         validRelationships,
       })
     }
@@ -383,6 +384,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
         existingFieldNames: new Set(),
         fields: sanitizedBlock.fields,
         parentIsLocalized: false,
+        richTextSanitizationTasks,
         validRelationships,
       })
 
@@ -419,6 +421,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     config.collections![i] = sanitizeCollection(
       config as unknown as Config,
       config.collections![i]!,
+      richTextSanitizationTasks,
       validRelationships,
       orderableJoins,
     )
@@ -479,6 +482,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       config.globals![i] = sanitizeGlobal(
         config as unknown as Config,
         config.globals![i]!,
+        richTextSanitizationTasks,
         validRelationships,
       )
     }
@@ -521,7 +525,12 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
     // Add payload-jobs-stats global for tracking job system metadata.
     ;(config.globals ??= []).push(
-      sanitizeGlobal(config as unknown as Config, getJobStatsGlobal(), validRelationships),
+      sanitizeGlobal(
+        config as unknown as Config,
+        getJobStatsGlobal(),
+        richTextSanitizationTasks,
+        validRelationships,
+      ),
     )
 
     let defaultJobsCollection = getDefaultJobsCollection(config.jobs)
@@ -534,6 +543,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     const sanitizedJobsCollection = sanitizeCollection(
       config as unknown as Config,
       defaultJobsCollection,
+      richTextSanitizationTasks,
       validRelationships,
     )
 
@@ -547,6 +557,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       sanitizeCollection(
         config as unknown as Config,
         lockedDocumentsCollection,
+        richTextSanitizationTasks,
         validRelationships,
       ),
     )
@@ -556,6 +567,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
     sanitizeCollection(
       config as unknown as Config,
       getPreferencesCollection(config as unknown as Config),
+      richTextSanitizationTasks,
       validRelationships,
     ),
   )
@@ -563,6 +575,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   const migrations = sanitizeCollection(
     config as unknown as Config,
     migrationsCollection,
+    richTextSanitizationTasks,
     validRelationships,
   )
 
@@ -582,6 +595,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
       sanitizeCollection(
         config as unknown as Config,
         getQueryPresetsConfig(config as unknown as Config),
+        richTextSanitizationTasks,
         validRelationships,
       ),
     )
@@ -589,6 +603,7 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
 
   addDefaultDashboardWidgets({
     config,
+    richTextSanitizationTasks,
     validRelationships,
   })
 
@@ -611,6 +626,18 @@ export const sanitizeConfig = (incomingConfig: Config): SanitizedConfig => {
   // Pass through the email config as is so adapters don't break
   if (incomingConfig.email) {
     config.email = incomingConfig.email
+  }
+
+  if (typeof incomingConfig.editor === 'function') {
+    config.editor = incomingConfig.editor({
+      config: config as SanitizedConfig,
+      isRoot: true,
+      parentIsLocalized: false,
+    })
+  }
+
+  for (const richTextSanitizationTask of richTextSanitizationTasks) {
+    sanitizeRichTextField(richTextSanitizationTask)
   }
 
   return config as SanitizedConfig

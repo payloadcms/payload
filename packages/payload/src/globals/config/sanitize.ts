@@ -1,4 +1,5 @@
 import type { Config } from '../../config/types.js'
+import type { RichTextSanitizationTask } from '../../fields/config/sanitize.js'
 import type { SanitizedDrafts } from '../../versions/types.js'
 import type { GlobalConfig, SanitizedGlobalConfig } from './types.js'
 
@@ -15,6 +16,7 @@ import { defaultGlobalEndpoints } from '../endpoints/index.js'
 export const sanitizeGlobal = (
   config: Config,
   global: GlobalConfig,
+  richTextSanitizationTasks?: RichTextSanitizationTask[],
   _validRelationships?: string[],
 ): SanitizedGlobalConfig => {
   if (global._sanitized) {
@@ -79,6 +81,7 @@ export const sanitizeGlobal = (
     fields: global.fields,
     globalConfig: global,
     parentIsLocalized: false,
+    richTextSanitizationTasks,
     validRelationships,
   })
 

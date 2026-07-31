@@ -2,12 +2,13 @@ import type {
   SerializedEditorState,
   SerializedParagraphNode,
 } from '@payloadcms/richtext-lexical/lexical'
-import type { Config, PaginatedDocs, Payload } from 'payload'
+import type { Block, BlocksField, BlockSlug, Config, PaginatedDocs, Payload } from 'payload'
 
 import {
   BlocksFeature,
   buildEditorState,
   type DefaultNodeTypes,
+  type LexicalRichTextAdapter,
   lexicalEditor,
   LinkFeature,
   type SerializedBlockNode,
@@ -1271,6 +1272,42 @@ describe('Lexical', () => {
       expect(result).toContain('href="https://example.com/page"')
       expect(result).toContain('data-fields-hash=')
     })
+  })
+})
+
+describe('Lexical root editor sanitization', () => {
+  vitestIt('should resolve referenced blocks after their fields are sanitized', () => {
+    const config = {
+      blocks: [
+        {
+          slug: 'rootBlock',
+          fields: [{ name: 'title', type: 'text' }],
+        },
+      ],
+      collections: [
+        {
+          slug: 'articles',
+          fields: [{ name: 'content', type: 'richText' }],
+        },
+      ],
+      editor: lexicalEditor({
+        features: [BlocksFeature({ blocks: ['rootBlock' as BlockSlug] })],
+      }),
+    } as unknown as Config
+
+    const sanitizedConfig = sanitizeConfig(config)
+    const editor = sanitizedConfig.editor as LexicalRichTextAdapter
+    const blocksFeature = editor.editorConfig.resolvedFeatureMap.get('blocks')!
+    const [blocksField] = blocksFeature.nodes![0]!.getSubFields!({})!
+    const [block] = (blocksField as BlocksField).blocks as Block[]
+
+    expect(block!.fields).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ name: 'title' }),
+        expect.objectContaining({ name: 'id' }),
+        expect.objectContaining({ name: 'blockName' }),
+      ]),
+    )
   })
 })
 

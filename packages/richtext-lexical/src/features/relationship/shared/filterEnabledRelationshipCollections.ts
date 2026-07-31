@@ -34,17 +34,16 @@ export const filterEnabledRelationshipCollections = <TCollection extends Collect
 
   return collections.filter((collection) => {
     const { slug, admin, upload } = collection
-    const enableRichTextRelationship = admin?.enableRichTextRelationship ?? true
 
     if (visibleSlugs && !visibleSlugs.includes(slug)) {
       return false
     }
 
     if (uploads) {
-      if (!enableRichTextRelationship || !upload) {
+      if (!admin?.enableRichTextRelationship || !upload) {
         return false
       }
-    } else if (upload || !enableRichTextRelationship) {
+    } else if (upload || !admin?.enableRichTextRelationship) {
       return false
     }
 

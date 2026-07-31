@@ -1,4 +1,5 @@
 import type { Config } from '../../config/types.js'
+import type { RichTextSanitizationTask } from '../../fields/config/sanitize.js'
 import type { OrderableJoinInfo } from '../../fields/config/sanitizeJoinField.js'
 import type { SanitizedDrafts } from '../../versions/types.js'
 import type {
@@ -64,6 +65,7 @@ export const warnOnInvalidCustomViews = (collection: CollectionConfig): void => 
 export const sanitizeCollection = (
   config: Config,
   collection: CollectionConfig,
+  richTextSanitizationTasks?: RichTextSanitizationTask[],
   _validRelationships?: string[],
   /**
    * Tracker for orderable join fields - populated during sanitization
@@ -147,6 +149,7 @@ export const sanitizeCollection = (
     orderableJoins,
     parentIsLocalized: false,
     polymorphicJoins,
+    richTextSanitizationTasks,
     validRelationships,
   })
 
