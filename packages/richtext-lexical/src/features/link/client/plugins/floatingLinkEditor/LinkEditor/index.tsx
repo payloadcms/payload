@@ -14,6 +14,7 @@ import {
   useConfig,
   useEditDepth,
   useLocale,
+  useModal,
   useTranslation,
 } from '@payloadcms/ui'
 import { requests } from '@payloadcms/ui/shared'
@@ -86,6 +87,9 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
     depth: editDepth,
   })
 
+  const { modalState } = useModal()
+  const isDrawerOpenRef = useRef(false)
+  isDrawerOpenRef.current = Boolean(modalState[drawerSlug]?.isOpen)
   const { toggleDrawer } = useLexicalDrawer(drawerSlug)
 
   const setNotLink = useCallback(() => {
@@ -95,11 +99,15 @@ export function LinkEditor({ anchorElem }: { anchorElem: HTMLElement }): React.R
       editorRef.current.style.transform = 'translate(-10000px, -10000px)'
     }
     setIsAutoLink(false)
-    setLinkUrl(null)
-    setLinkLabel(null)
-    setSelectedNodes([])
-    setStateData(undefined)
-  }, [setIsLink, setLinkUrl, setLinkLabel, setSelectedNodes])
+    // Nested fields can temporarily move selection away from the editor. Keep the backing form
+    // state until the drawer closes so those interactions cannot reset or unmount its fields.
+    if (!isDrawerOpenRef.current) {
+      setLinkUrl(null)
+      setLinkLabel(null)
+      setSelectedNodes([])
+      setStateData(undefined)
+    }
+  }, [])
 
   const $updateLinkEditor = useCallback(() => {
     const selection = $getSelection()

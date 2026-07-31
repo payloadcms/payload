@@ -7,7 +7,7 @@ import {
   TreeViewFeature,
 } from '@payloadcms/richtext-lexical'
 
-import { lexicalLinkFeatureSlug } from '../../slugs.js'
+import { lexicalLinkFeatureSlug, uploadsSlug } from '../../slugs.js'
 
 export const LexicalLinkFeature: CollectionConfig = {
   slug: lexicalLinkFeatureSlug,
@@ -33,7 +33,35 @@ export const LexicalLinkFeature: CollectionConfig = {
                 return field
               })
 
-              return [...modifiedFields, { type: 'text', name: 'someText' }]
+              return [
+                ...modifiedFields,
+                { name: 'someText', type: 'text' },
+                {
+                  name: 'hyperlink',
+                  type: 'blocks',
+                  blocks: [
+                    {
+                      slug: 'assetLink',
+                      fields: [
+                        {
+                          name: 'label',
+                          type: 'text',
+                        },
+                        {
+                          name: 'asset',
+                          type: 'upload',
+                          relationTo: uploadsSlug,
+                        },
+                      ],
+                      labels: {
+                        plural: 'Asset Link Blocks',
+                        singular: 'Asset Link Block',
+                      },
+                    },
+                  ],
+                  maxRows: 1,
+                },
+              ]
             },
           }),
           FixedToolbarFeature(),

@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { lexicalLinkFeatureSlug } from 'lexical/slugs.js'
+import { lexicalLinkFeatureSlug, uploadsSlug } from 'lexical/slugs.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -341,5 +341,44 @@ describe('Lexical Link Feature', () => {
         return tooltipRect.width < editorWidth * 0.5
       })
       .toBe(true)
+  })
+
+  test('should preserve link form state while editing a nested upload document', async ({
+    page,
+  }) => {
+    const lexical = new LexicalHelpers(page)
+
+    await lexical.editor.fill('custom link')
+    await lexical.editor.selectText()
+    await lexical.inlineToolbar.locator('.toolbar-popup__button-link').click()
+
+    const linkDrawer = page.locator('.lexical-link-edit-drawer')
+    const assetLabelField = linkDrawer.locator('#field-hyperlink__0__label')
+
+    await linkDrawer.getByRole('button', { name: 'Add Hyperlink' }).click()
+    await page.locator('.blocks-drawer__block').filter({ hasText: 'Asset Link Block' }).click()
+    await assetLabelField.fill('Client asset')
+    await linkDrawer.getByRole('button', { name: 'Choose from existing' }).click()
+
+    const uploadListDrawer = page.locator('dialog[id^=list-drawer_2_]').first()
+
+    await uploadListDrawer
+      .getByText(/payload(?:-\d+)?\.jpg/)
+      .first()
+      .click()
+
+    const selectedFilename = linkDrawer.locator('.upload-relationship-details__filename')
+
+    await expect(selectedFilename).toHaveText(/payload(?:-\d+)?\.jpg/)
+
+    await linkDrawer.locator('.upload-relationship-details__edit').click()
+
+    const uploadDocumentDrawer = page.locator(`dialog[id^=doc-drawer_${uploadsSlug}_2_]`).first()
+
+    await expect(uploadDocumentDrawer).toBeVisible()
+    await expect(uploadDocumentDrawer.locator('#field-text')).toBeVisible()
+    await expect(linkDrawer.locator('.blocks-field__row')).toHaveCount(1)
+    await expect(assetLabelField).toHaveValue('Client asset')
+    await expect(selectedFilename).toHaveText(/payload(?:-\d+)?\.jpg/)
   })
 })
