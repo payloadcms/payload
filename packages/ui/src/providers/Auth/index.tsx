@@ -66,7 +66,6 @@ export type AuthContext<T = AuthenticatedUser> = {
   refreshPermissions: () => Promise<void>
   setPermissions: (permissions: SanitizedPermissions) => void
   setUser: (user: null | UserWithToken<T>) => void
-  strategy?: string
   token?: string
   tokenExpirationMs?: number
   user?: null | T
