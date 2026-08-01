@@ -1,15 +1,11 @@
-import type {
-  DataFromGlobalSlug,
-  GlobalSlug,
-  PayloadRequest,
-  SanitizedGlobalConfig,
-  SelectType,
-} from 'payload'
+import type { DataFromGlobalSlug, GlobalSlug, PayloadRequest, SanitizedGlobalConfig } from 'payload'
 import type { DeepPartial } from 'ts-essentials'
 
-import { isolateObjectProperty, updateOperationGlobal } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 type Resolver<TSlug extends GlobalSlug> = (
   _: unknown,
@@ -37,16 +33,17 @@ export function update<TSlug extends GlobalSlug>(
 
     const { slug } = globalConfig
 
+    const req = isolateObjectProperty(context.req, 'transactionID')
     const options = {
       slug,
       data: args.data,
       depth: 0,
       draft: args.draft,
-      globalConfig,
-      req: isolateObjectProperty(context.req, 'transactionID'),
+      overrideAccess: false,
+      req,
     }
 
-    const result = await updateOperationGlobal<TSlug, SelectType>(options)
+    const result = await invokeGraphQLOperation(req, 'global', 'update', options)
     return result
   }
 }

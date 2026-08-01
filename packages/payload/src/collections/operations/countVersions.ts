@@ -1,17 +1,30 @@
+import { z } from 'zod'
+
 import type { AccessResult } from '../../config/types.js'
+import type { CollectionSlug, Payload, RequestContext, TypedLocale, User } from '../../index.js'
+import type { LocalAPIOptions } from '../../operations/localAPI.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
+import type { CreateLocalReqOptions } from '../../utilities/createLocalReq.js'
 import type { Collection } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { combineQueries } from '../../database/combineQueries.js'
 import { validateQueryPaths } from '../../database/queryValidation/validateQueryPaths.js'
 import { sanitizeWhereQuery } from '../../database/sanitizeWhereQuery.js'
-import { buildVersionCollectionFields, type CollectionSlug } from '../../index.js'
+import { APIError } from '../../errors/index.js'
+import { buildVersionCollectionFields } from '../../index.js'
+import { defineLocalAPI, defineOperation } from '../../operations/defineOperation.js'
+import {
+  collectionSchema,
+  localeSchema,
+  operationWhereSchema,
+} from '../../operations/schemaFields.js'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 
-export type Arguments = {
+type CountDocumentVersionsArgs = {
   collection: Collection
   disableErrors?: boolean
   overrideAccess?: boolean
@@ -20,8 +33,8 @@ export type Arguments = {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const countVersionsOperation = async <TSlug extends CollectionSlug>(
-  incomingArgs: Arguments,
+export const countDocumentVersions = async <TSlug extends CollectionSlug>(
+  incomingArgs: CountDocumentVersionsArgs,
 ): Promise<{ totalDocs: number }> => {
   let args = incomingArgs
 
@@ -112,3 +125,61 @@ export const countVersionsOperation = async <TSlug extends CollectionSlug>(
     throw error
   }
 }
+
+export type CountVersionsOptions<TSlug extends CollectionSlug> = {
+  collection: TSlug
+  context?: RequestContext
+  disableErrors?: boolean
+  locale?: TypedLocale
+  overrideAccess?: boolean
+  req?: Partial<PayloadRequest>
+  user?: null | User
+  where?: Where
+}
+
+type CountVersionsLocalMethod = <TSlug extends CollectionSlug>(
+  options: LocalAPIOptions<CountVersionsOptions<TSlug>>,
+) => Promise<{ totalDocs: number }>
+
+const countVersionsSchema = z.looseObject({
+  collection: collectionSchema,
+  locale: localeSchema,
+  where: operationWhereSchema.optional(),
+})
+
+export const countVersionsLocalAPI = defineLocalAPI<CountVersionsLocalMethod>()({
+  name: 'countVersions',
+})
+
+export const countVersions = defineOperation({
+  action: 'countVersions',
+  expose: {
+    local: countVersionsLocalAPI,
+    mcp: { name: 'countVersions' },
+  },
+  handler: async <TSlug extends CollectionSlug>(
+    payload: Payload,
+    options: CountVersionsOptions<TSlug>,
+  ) => {
+    const { collection: collectionSlug, disableErrors, overrideAccess = true, where } = options
+    const collection = payload.collections[collectionSlug]
+
+    if (!collection) {
+      throw new APIError(
+        `The collection with slug ${String(
+          collectionSlug,
+        )} can't be found. Count Versions Operation.`,
+      )
+    }
+
+    return countDocumentVersions<TSlug>({
+      collection,
+      disableErrors,
+      overrideAccess,
+      req: await createLocalReq(options as CreateLocalReqOptions, payload),
+      where,
+    })
+  },
+  input: countVersionsSchema,
+  target: 'collection',
+})

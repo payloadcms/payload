@@ -1,20 +1,14 @@
-import type { SelectType, Where } from 'payload'
-
+import { getPayloadOperation, invokeOperation, type SelectType, type Where } from 'payload'
 import { z } from 'zod'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import {
-  getCollectionVirtualFieldNames,
-  stripVirtualFields,
-} from '../../../utils/getVirtualFieldNames.js'
 import { getCollectionInputSchema } from '../../../utils/schemaConversion/getEntityInputSchema.js'
-import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
-import { whereSchema } from '../../../utils/whereSchema.js'
-import { validateCollectionData } from '../validateEntityData.js'
 import { fileInputSchema, resolveFile } from './fileInput.js'
 import { formatCollectionError } from './formatCollectionError.js'
+
+const updateOperation = getPayloadOperation('collection', 'update')
 
 const DEFAULT_DESCRIPTION =
   'Update documents. Prefer uploadReference after upload, externalURL for URLs, or base64 for small local files.'
@@ -30,64 +24,24 @@ export const updateDocumentTool = defineCollectionTool({
     title: 'Update Document',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    id: z.union([z.string(), z.number()]).describe('The ID of the document to update').optional(),
-    data: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'The fields to update. Only include fields permitted by the schema returned by getCollectionSchema.',
-      ),
-    depth: z
-      .number()
-      .describe('How many levels deep to populate relationships')
-      .optional()
-      .default(0),
-    draft: z
-      .boolean()
-      .describe(
-        'Only if getCollectionSchema includes _status; otherwise _status does not exist. true saves only a draft version; false updates main and versions. data._status: "published" overrides true.',
-      )
-      .optional()
-      .default(false),
-    fallbackLocale: z
-      .string()
-      .describe('Optional: fallback locale code to use when requested locale is not available')
-      .optional(),
-    file: fileInputSchema.optional(),
-    locale: z
-      .string()
-      .describe(
-        'Optional: locale code to update the document in (e.g., "en", "es"). Defaults to the default locale',
-      )
-      .optional(),
-    overrideLock: z
-      .boolean()
-      .describe('Whether to override document locks')
-      .optional()
-      .default(true),
-    overwriteExistingFiles: z
-      .boolean()
-      .describe('Whether to overwrite existing files')
-      .optional()
-      .default(false),
-    publishAllLocales: z
-      .boolean()
-      .describe(
-        'For collections with localized publishing status, whether publishing should affect every locale. Set false with locale to publish only that locale.',
-      )
-      .optional(),
-    select: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"title": true}',
-      )
-      .optional(),
-    where: whereSchema
-      .describe(
-        'Where clause to update multiple documents. Use field names with Payload operators, and/or arrays for grouping. Example: {"title":{"contains":"test"}}',
-      )
-      .optional(),
-  }),
+  input: z
+    .looseObject({
+      id: updateOperation.input.shape.id,
+      data: updateOperation.input.shape.data,
+      depth: updateOperation.input.shape.depth,
+      draft: updateOperation.input.shape.draft,
+      fallbackLocale: updateOperation.input.shape.fallbackLocale,
+      locale: updateOperation.input.shape.locale,
+      overrideLock: updateOperation.input.shape.overrideLock,
+      overwriteExistingFiles: updateOperation.input.shape.overwriteExistingFiles,
+      publishAllLocales: updateOperation.input.shape.publishAllLocales,
+      select: updateOperation.input.shape.select,
+      where: updateOperation.input.shape.where,
+    })
+    .extend({ file: fileInputSchema.optional() })
+    .refine(({ id, where }) => id !== undefined || where !== undefined, {
+      message: 'Either id or where must be provided',
+    }),
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
@@ -118,40 +72,29 @@ export const updateDocumentTool = defineCollectionTool({
       }
     }
 
-    const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
-    const inputData = stripVirtualFields(data, virtualFieldNames)
-    const validationError = validateCollectionData({
-      collectionSlug,
-      data: inputData,
-      partial: true,
-      req,
-    })
-
-    if (validationError) {
-      return validationError
-    }
-
-    const parsedData = transformPointDataToPayload(inputData)
     const file = await resolveFile({ collectionSlug, input: fileInput, req })
 
     const whereClause: Where = where ?? {}
 
     if (id) {
-      const result = await payload.update({
-        id,
-        collection: collectionSlug,
-        data: parsedData,
-        depth,
-        draft,
-        overrideAccess: authorizedMCP.overrideAccess,
-        overrideLock,
-        req,
-        ...(file ? { file } : {}),
-        ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
-        ...(publishAllLocales !== undefined ? { publishAllLocales } : {}),
-        ...(locale ? { locale } : {}),
-        ...(fallbackLocale ? { fallbackLocale } : {}),
-        ...(select ? { select: select as SelectType } : {}),
+      const result = await invokeOperation(updateOperation, {
+        context: payload,
+        input: {
+          id,
+          collection: collectionSlug,
+          data,
+          depth,
+          draft,
+          overrideAccess: authorizedMCP.overrideAccess,
+          overrideLock,
+          req,
+          ...(file ? { file } : {}),
+          ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
+          ...(publishAllLocales !== undefined ? { publishAllLocales } : {}),
+          ...(locale ? { locale } : {}),
+          ...(fallbackLocale ? { fallbackLocale } : {}),
+          ...(select ? { select: select as SelectType } : {}),
+        },
       })
 
       return {
@@ -165,21 +108,24 @@ export const updateDocumentTool = defineCollectionTool({
       }
     }
 
-    const result = await payload.update({
-      collection: collectionSlug,
-      data: parsedData,
-      depth,
-      draft,
-      overrideAccess: authorizedMCP.overrideAccess,
-      overrideLock,
-      req,
-      where: whereClause,
-      ...(file ? { file } : {}),
-      ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
-      ...(publishAllLocales !== undefined ? { publishAllLocales } : {}),
-      ...(locale ? { locale } : {}),
-      ...(fallbackLocale ? { fallbackLocale } : {}),
-      ...(select ? { select: select as SelectType } : {}),
+    const result = await invokeOperation(updateOperation, {
+      context: payload,
+      input: {
+        collection: collectionSlug,
+        data,
+        depth,
+        draft,
+        overrideAccess: authorizedMCP.overrideAccess,
+        overrideLock,
+        req,
+        where: whereClause,
+        ...(file ? { file } : {}),
+        ...(overwriteExistingFiles ? { overwriteExistingFiles } : {}),
+        ...(publishAllLocales !== undefined ? { publishAllLocales } : {}),
+        ...(locale ? { locale } : {}),
+        ...(fallbackLocale ? { fallbackLocale } : {}),
+        ...(select ? { select: select as SelectType } : {}),
+      },
     })
 
     const docs = result.docs || []

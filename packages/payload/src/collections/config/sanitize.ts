@@ -8,7 +8,6 @@ import type {
   SanitizedJoins,
 } from './types.js'
 
-import { authCollectionEndpoints } from '../../auth/endpoints/index.js'
 import { getBaseAuthFields } from '../../auth/getAuthFields.js'
 import { TimestampsRequired } from '../../errors/TimestampsRequired.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
@@ -16,14 +15,14 @@ import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
 import { buildFoldersHierarchy, buildTagsHierarchy } from '../../hierarchy/presets.js'
 import { sanitizeHierarchyCollection } from '../../hierarchy/sanitizeHierarchyCollection.js'
-import { uploadCollectionEndpoints } from '../../uploads/endpoints/index.js'
+import { payloadOperations } from '../../operations/index.js'
+import { operationsToRESTEndpoints } from '../../operations/rest.js'
 import { getBaseUploadFields } from '../../uploads/getBaseFields.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { formatLabels } from '../../utilities/formatLabels.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
-import { defaultCollectionEndpoints } from '../endpoints/index.js'
 import {
   addDefaultsToAuthConfig,
   addDefaultsToCollectionConfig,
@@ -162,20 +161,14 @@ export const sanitizeCollection = async (
     }
 
     if (sanitized.auth) {
-      for (const endpoint of authCollectionEndpoints) {
-        sanitized.endpoints.push(endpoint)
-      }
+      sanitized.endpoints.push(...operationsToRESTEndpoints(payloadOperations, 'auth'))
     }
 
     if (sanitized.upload) {
-      for (const endpoint of uploadCollectionEndpoints) {
-        sanitized.endpoints.push(endpoint)
-      }
+      sanitized.endpoints.push(...operationsToRESTEndpoints(payloadOperations, 'uploadCollection'))
     }
 
-    for (const endpoint of defaultCollectionEndpoints) {
-      sanitized.endpoints.push(endpoint)
-    }
+    sanitized.endpoints.push(...operationsToRESTEndpoints(payloadOperations, 'collection'))
   }
 
   if (sanitized.timestamps !== false) {

@@ -1,9 +1,11 @@
+import { getPayloadOperation, invokeOperation } from 'payload'
 import { z } from 'zod'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { whereSchema } from '../../../utils/whereSchema.js'
+
+const deleteOperation = getPayloadOperation('collection', 'delete')
 
 const DEFAULT_DESCRIPTION =
   'Delete documents in any collection by passing the collection slug and ID or where clause.'
@@ -19,35 +21,17 @@ export const deleteDocumentsTool = defineCollectionTool({
     title: 'Delete Documents',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    id: z
-      .union([z.string(), z.number()])
-      .describe('Optional: specific document ID to delete')
-      .optional(),
-    depth: z
-      .number()
-      .int()
-      .min(0)
-      .max(10)
-      .describe('Depth of population for relationships in response')
-      .optional()
-      .default(0),
-    fallbackLocale: z
-      .string()
-      .describe('Optional: fallback locale code to use when requested locale is not available')
-      .optional(),
-    locale: z
-      .string()
-      .describe(
-        'Optional: locale code for the operation (e.g., "en", "es"). Defaults to the default locale',
-      )
-      .optional(),
-    where: whereSchema
-      .describe(
-        'Optional: where clause to delete multiple documents. Use field names with Payload operators, and/or arrays for grouping. Example: {"title":{"contains":"test"}}',
-      )
-      .optional(),
-  }),
+  input: z
+    .looseObject({
+      id: deleteOperation.input.shape.id,
+      depth: deleteOperation.input.shape.depth,
+      fallbackLocale: deleteOperation.input.shape.fallbackLocale,
+      locale: deleteOperation.input.shape.locale,
+      where: deleteOperation.input.shape.where,
+    })
+    .refine(({ id, where }) => id !== undefined || where !== undefined, {
+      message: 'Either id or where must be provided',
+    }),
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
@@ -65,22 +49,20 @@ export const deleteDocumentsTool = defineCollectionTool({
       }
     }
 
-    const deleteOptions: Record<string, unknown> = {
+    const deleteOptions = {
       collection: collectionSlug,
       depth,
       overrideAccess: authorizedMCP.overrideAccess,
       req,
       ...(locale && { locale }),
       ...(fallbackLocale && { fallbackLocale }),
+      ...(id !== undefined ? { id } : { where: where! }),
     }
 
-    if (id) {
-      deleteOptions.id = id
-    } else {
-      deleteOptions.where = where
-    }
-
-    const result = await payload.delete(deleteOptions as Parameters<typeof payload.delete>[0])
+    const result = await invokeOperation(deleteOperation, {
+      context: payload,
+      input: deleteOptions,
+    })
 
     if (id) {
       return {

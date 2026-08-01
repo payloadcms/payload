@@ -1,10 +1,11 @@
 import type { SanitizedConfig } from 'payload'
 
-import { accessOperation, isolateObjectProperty } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
 import { formatName } from '../../utilities/formatName.js'
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 const formatConfigNames = (results, configs) => {
   const formattedResults = { ...results }
 
@@ -23,7 +24,7 @@ export function accessResolver(config: SanitizedConfig) {
       req: isolateObjectProperty<any>(context.req, 'transactionID'),
     }
 
-    const accessResults = await accessOperation(options)
+    const accessResults = await invokeGraphQLOperation(options.req, 'root', 'access', options)
 
     return {
       ...accessResults,

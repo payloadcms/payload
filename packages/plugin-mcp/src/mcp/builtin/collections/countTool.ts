@@ -1,9 +1,10 @@
-import { z } from 'zod'
+import { getPayloadOperation, invokeOperation } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { whereSchema } from '../../../utils/whereSchema.js'
+
+const countOperation = getPayloadOperation('collection', 'count')
 
 const DEFAULT_DESCRIPTION =
   'Count documents in any collection by passing the collection slug and optional where clause.'
@@ -19,18 +20,7 @@ export const countDocumentsTool = defineCollectionTool({
     title: 'Count Documents',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    locale: z.string().describe('Optional: locale code to count documents in').optional(),
-    trash: z
-      .boolean()
-      .describe('Optional: include soft-deleted documents when trash is enabled on the collection')
-      .optional(),
-    where: whereSchema
-      .describe(
-        'Optional: where clause for filtering. Use field names with Payload operators, and/or arrays for grouping. Example: {"title":{"contains":"test"}}',
-      )
-      .optional(),
-  }),
+  input: countOperation.input.omit({ collection: true }),
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
@@ -39,13 +29,16 @@ export const countDocumentsTool = defineCollectionTool({
   logger.info(`Counting documents in collection: ${collectionSlug}`)
 
   try {
-    const result = await payload.count({
-      collection: collectionSlug,
-      overrideAccess: authorizedMCP.overrideAccess,
-      req,
-      ...(locale ? { locale } : {}),
-      ...(trash !== undefined ? { trash } : {}),
-      ...(where ? { where } : {}),
+    const result = await invokeOperation(countOperation, {
+      context: payload,
+      input: {
+        collection: collectionSlug,
+        overrideAccess: authorizedMCP.overrideAccess,
+        req,
+        ...(locale ? { locale } : {}),
+        ...(trash !== undefined ? { trash } : {}),
+        ...(where ? { where } : {}),
+      },
     })
 
     return {

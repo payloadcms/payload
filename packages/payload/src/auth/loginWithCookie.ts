@@ -2,16 +2,16 @@ import type { Collection } from '../collections/config/types.js'
 import type { AuthCollectionSlug } from '../index.js'
 import type { PayloadRequest } from '../types/index.js'
 import type { generateCookie } from './cookies.js'
-import type { LoginResult } from './operations/login.js'
+import type { LoginOptions, LoginResult } from './operations/login.js'
 
+import { getPayloadOperation, invokeOperation } from '../operations/index.js'
 import { generatePayloadCookie } from './cookies.js'
-import { loginOperation } from './operations/login.js'
 
 type CookieObject = Extract<ReturnType<typeof generateCookie<true>>, { name: string }>
 
 type LoginWithCookieArgs<TReturnCookieAsObject extends boolean> = {
   collection: Collection
-  data: Parameters<typeof loginOperation>[0]['data']
+  data: LoginOptions<AuthCollectionSlug>['data']
   depth?: number
   overrideAccess?: boolean
   req: PayloadRequest
@@ -42,12 +42,16 @@ export const loginWithCookie = async <
   cookie: TReturnCookieAsObject extends true ? CookieObject : string
   result: LoginResult<TSlug>
 }> => {
-  const result = await loginOperation({
-    collection,
-    data,
-    depth,
-    overrideAccess,
-    req,
+  const result = await invokeOperation(getPayloadOperation('auth', 'login'), {
+    context: req.payload,
+    input: {
+      collection: collection.config.slug as TSlug,
+      data,
+      depth,
+      overrideAccess: overrideAccess ?? false,
+      req,
+    },
+    validate: false,
   })
 
   const cookie = generatePayloadCookie({

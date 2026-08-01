@@ -1,6 +1,7 @@
 import { v4 as uuid } from 'uuid'
+import { z } from 'zod'
 
-import type { Job } from '../../../index.js'
+import type { Job, Payload } from '../../../index.js'
 import type { PayloadRequest, Sort, Where } from '../../../types/index.js'
 import type { WorkflowJSON } from '../../config/types/workflowJSONTypes.js'
 import type { WorkflowConfig, WorkflowHandler } from '../../config/types/workflowTypes.js'
@@ -8,11 +9,14 @@ import type { RunJobsSilent } from '../../localAPI.js'
 import type { RunJobResult } from './runJob/index.js'
 
 import { Forbidden } from '../../../errors/Forbidden.js'
+import { defineOperation } from '../../../operations/defineOperation.js'
+import { idSchema, operationWhereSchema, requestSchema } from '../../../operations/schemaFields.js'
 import { isolateObjectProperty } from '../../../utilities/isolateObjectProperty.js'
 import { jobsCollectionSlug } from '../../config/collection.js'
 import { JobCancelledError, JobRunAbortedError } from '../../errors/index.js'
 import { getCurrentDate } from '../../utilities/getCurrentDate.js'
 import { updateJobs } from '../../utilities/updateJob.js'
+import { configHasJobs } from '../configHasJobs.js'
 import { startProcessingLeaseHeartbeat } from './heartbeat.js'
 import { getUpdateJobFunction } from './runJob/getUpdateJobFunction.js'
 import { importHandlerPath } from './runJob/importHandlerPath.js'
@@ -82,7 +86,7 @@ export type RunJobsResult = {
   remainingJobsFromQueried: number
 }
 
-export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
+const processJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
   const {
     id,
     allQueues = false,
@@ -578,3 +582,115 @@ export const runJobs = async (args: RunJobsArgs): Promise<RunJobsResult> => {
     remainingJobsFromQueried,
   }
 }
+
+const runJobsSchema = z.looseObject({
+  id: idSchema.optional(),
+  allQueues: z.boolean().optional().default(false),
+  limit: z.number().int().positive().optional().default(10),
+  overrideAccess: z.boolean().optional().default(false),
+  processingOrder: z.union([z.string(), z.array(z.string())]).optional(),
+  queue: z.string().optional(),
+  req: requestSchema,
+  sequential: z.boolean().optional(),
+  silent: z
+    .union([
+      z.boolean(),
+      z.object({
+        error: z.boolean().optional(),
+        info: z.boolean().optional(),
+      }),
+    ])
+    .optional(),
+  where: operationWhereSchema.optional(),
+})
+
+export const run = defineOperation({
+  action: 'run',
+  expose: {
+    rest: [
+      {
+        handler: async ({ invoke, req }) => {
+          const jobsConfig = req.payload.config.jobs
+
+          if (!configHasJobs(jobsConfig)) {
+            return Response.json({ message: 'No jobs to run.' }, { status: 200 })
+          }
+
+          const accessFn = jobsConfig.access?.run ?? (() => true)
+          if (!(await accessFn({ req }))) {
+            return Response.json({ message: req.i18n.t('error:unauthorized') }, { status: 401 })
+          }
+
+          const { allQueues, disableScheduling, limit, queue, silent } = req.query as {
+            allQueues?: 'false' | 'true'
+            disableScheduling?: 'false' | 'true'
+            limit?: number
+            queue?: string
+            silent?: string
+          }
+          const runAllQueues = Boolean(allQueues && allQueues !== 'false')
+
+          if (disableScheduling !== 'true' && jobsConfig.scheduling) {
+            await req.payload.jobs.handleSchedules({
+              allQueues: runAllQueues,
+              queue,
+              req,
+            })
+          }
+
+          const input: RunJobsArgs = {
+            allQueues: runAllQueues,
+            overrideAccess: true,
+            queue,
+            req,
+            silent: silent === 'true',
+          }
+          const parsedLimit = Number(limit)
+          if (!isNaN(parsedLimit)) {
+            input.limit = parsedLimit
+          }
+
+          let remainingJobsFromQueried = 0
+
+          try {
+            const result = await invoke({
+              context: req.payload,
+              input,
+              validate: false,
+            })
+            remainingJobsFromQueried = result.remainingJobsFromQueried
+
+            return Response.json(
+              {
+                message: req.i18n.t('general:success'),
+                noJobsRemaining: Boolean(result.noJobsRemaining),
+                remainingJobsFromQueried,
+              },
+              { status: 200 },
+            )
+          } catch (error) {
+            req.payload.logger.error({
+              err: error,
+              msg: 'There was an error running jobs:',
+              queue: input.queue,
+            })
+
+            return Response.json(
+              {
+                message: req.i18n.t('error:unknown'),
+                noJobsRemaining: true,
+                remainingJobsFromQueried,
+              },
+              { status: 500 },
+            )
+          }
+        },
+        method: 'get',
+        path: '/run',
+      },
+    ],
+  },
+  handler: (_payload: Payload, input: RunJobsArgs) => processJobs(input),
+  input: runJobsSchema,
+  target: 'jobs',
+})

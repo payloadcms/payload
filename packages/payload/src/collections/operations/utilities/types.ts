@@ -1,50 +1,48 @@
-import type { forgotPasswordOperation } from '../../../auth/operations/forgotPassword.js'
-import type { loginOperation } from '../../../auth/operations/login.js'
-import type { refreshOperation } from '../../../auth/operations/refresh.js'
-import type { resetPasswordOperation } from '../../../auth/operations/resetPassword.js'
-import type { unlockOperation } from '../../../auth/operations/unlock.js'
-import type { CollectionSlug, RequestContext, restoreVersionOperation } from '../../../index.js'
+import type { sendForgotPasswordEmail } from '../../../auth/operations/forgotPassword.js'
+import type { logInUser } from '../../../auth/operations/login.js'
+import type { refreshSession } from '../../../auth/operations/refresh.js'
+import type { resetUserPassword } from '../../../auth/operations/resetPassword.js'
+import type { unlockUser } from '../../../auth/operations/unlock.js'
+import type { CollectionSlug, RequestContext } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { SanitizedCollectionConfig, SelectFromCollectionSlug } from '../../config/types.js'
-import type { countOperation } from '../count.js'
-import type { countVersionsOperation } from '../countVersions.js'
-import type { createOperation } from '../create.js'
-import type { deleteOperation } from '../delete.js'
-import type { deleteByIDOperation } from '../deleteByID.js'
-import type { findOperation } from '../find.js'
-import type { findByIDOperation } from '../findByID.js'
-import type { findDistinctOperation } from '../findDistinct.js'
-import type { findVersionByIDOperation } from '../findVersionByID.js'
-import type { findVersionsOperation } from '../findVersions.js'
-import type { updateOperation } from '../update.js'
-import type { updateByIDOperation } from '../updateByID.js'
+import type { countDocuments } from '../count.js'
+import type { countDocumentVersions } from '../countVersions.js'
+import type { createDocument } from '../create.js'
+import type { deleteDocuments } from '../delete.js'
+import type { deleteDocument } from '../deleteByID.js'
+import type { findDocuments } from '../find.js'
+import type { findDocumentByID } from '../findByID.js'
+import type { findDistinctValues } from '../findDistinct.js'
+import type { findDocumentVersionByID } from '../findVersionByID.js'
+import type { findDocumentVersions } from '../findVersions.js'
+import type { restoreDocumentVersion } from '../restoreVersion.js'
+import type { updateDocuments } from '../update.js'
+import type { updateDocumentByID } from '../updateByID.js'
 
 export type OperationMap<TOperationGeneric extends CollectionSlug> = {
-  count: typeof countOperation<TOperationGeneric>
-  countVersions: typeof countVersionsOperation<TOperationGeneric>
-  create: typeof createOperation<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
-  delete: typeof deleteOperation<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
-  deleteByID: typeof deleteByIDOperation<
-    TOperationGeneric,
-    SelectFromCollectionSlug<TOperationGeneric>
-  >
-  find: typeof findOperation<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
-  findByID: typeof findByIDOperation<
+  count: typeof countDocuments<TOperationGeneric>
+  countVersions: typeof countDocumentVersions<TOperationGeneric>
+  create: typeof createDocument<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
+  delete: typeof deleteDocuments<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
+  deleteByID: typeof deleteDocument<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
+  find: typeof findDocuments<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
+  findByID: typeof findDocumentByID<
     TOperationGeneric,
     boolean,
     SelectFromCollectionSlug<TOperationGeneric>
   >
-  findDistinct: typeof findDistinctOperation
-  findVersionByID: typeof findVersionByIDOperation
-  findVersions: typeof findVersionsOperation
-  forgotPassword: typeof forgotPasswordOperation
-  login: typeof loginOperation<TOperationGeneric>
-  refresh: typeof refreshOperation
-  resetPassword: typeof resetPasswordOperation<TOperationGeneric>
-  restoreVersion: typeof restoreVersionOperation
-  unlock: typeof unlockOperation<TOperationGeneric>
-  update: typeof updateOperation<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
-  updateByID: typeof updateByIDOperation<
+  findDistinct: typeof findDistinctValues
+  findVersionByID: typeof findDocumentVersionByID
+  findVersions: typeof findDocumentVersions
+  forgotPassword: typeof sendForgotPasswordEmail
+  login: typeof logInUser<TOperationGeneric>
+  refresh: typeof refreshSession
+  resetPassword: typeof resetUserPassword<TOperationGeneric>
+  restoreVersion: typeof restoreDocumentVersion
+  unlock: typeof unlockUser<TOperationGeneric>
+  update: typeof updateDocuments<TOperationGeneric, SelectFromCollectionSlug<TOperationGeneric>>
+  updateByID: typeof updateDocumentByID<
     TOperationGeneric,
     SelectFromCollectionSlug<TOperationGeneric>
   >

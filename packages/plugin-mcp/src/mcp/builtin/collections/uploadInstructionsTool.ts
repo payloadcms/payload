@@ -1,8 +1,9 @@
-import { getUploadInstructions as getPayloadUploadInstructions } from 'payload/internal'
-import { z } from 'zod'
+import { getPayloadOperation, invokeOperation } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
+
+const getUploadInstructionsOperation = getPayloadOperation('upload', 'getInstructions')
 
 export const getUploadInstructionsTool = defineCollectionTool({
   access: (args) =>
@@ -20,19 +21,21 @@ export const getUploadInstructionsTool = defineCollectionTool({
   },
   description:
     'Prepare uploads for createDocuments or updateDocument. This does not upload bytes; finish the returned action before use.',
-  input: z.object({
-    docPrefix: z.string().describe('Optional document folder or prefix').optional(),
-    filename: z.string().describe('The original file name'),
-    filesize: z.number().int().nonnegative().describe('The file size in bytes'),
-    mimeType: z.string().describe('The file MIME type'),
+  input: getUploadInstructionsOperation.input.omit({
+    collectionSlug: true,
+    overrideAccess: true,
+    req: true,
   }),
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   try {
-    const instructions = await getPayloadUploadInstructions({
-      ...input,
-      collectionSlug,
-      overrideAccess: authorizedMCP.overrideAccess,
-      req,
+    const instructions = await invokeOperation(getUploadInstructionsOperation, {
+      context: req.payload,
+      input: {
+        ...input,
+        collectionSlug,
+        overrideAccess: authorizedMCP.overrideAccess,
+        req,
+      },
     })
 
     const nextStep =

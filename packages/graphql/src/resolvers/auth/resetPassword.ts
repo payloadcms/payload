@@ -1,8 +1,10 @@
 import type { Collection } from 'payload'
 
-import { generatePayloadCookie, isolateObjectProperty, resetPasswordOperation } from 'payload'
+import { generatePayloadCookie, isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 export function resetPassword(collection: Collection): any {
   async function resolver(_, args, context: Context) {
@@ -15,13 +17,14 @@ export function resetPassword(collection: Collection): any {
 
     const options = {
       api: 'GraphQL',
-      collection,
+      collection: collection.config.slug,
       data: args,
       depth: 0,
+      overrideAccess: false,
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
-    const result = await resetPasswordOperation(options)
+    const result = await invokeGraphQLOperation(options.req, 'auth', 'resetPassword', options)
     const cookie = generatePayloadCookie({
       collectionAuthConfig: collection.config.auth,
       cookiePrefix: context.req.payload.config.cookiePrefix,

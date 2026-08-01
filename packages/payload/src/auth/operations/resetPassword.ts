@@ -1,16 +1,24 @@
 import { status as httpStatus } from 'http-status'
+import { z } from 'zod'
 
 import type { Collection, DataFromCollectionSlug } from '../../collections/config/types.js'
-import type { AuthCollectionSlug, User } from '../../index.js'
+import type { AuthCollectionSlug, Payload, RequestContext, User } from '../../index.js'
+import type { LocalAPIOptions } from '../../operations/localAPI.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { APIError, Forbidden } from '../../errors/index.js'
+import { defineLocalAPI, defineOperation } from '../../operations/defineOperation.js'
+import { collectionSchema, depthSchema } from '../../operations/schemaFields.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
+import { getRequestCollection } from '../../utilities/getRequestEntity.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { generatePayloadCookie } from '../cookies.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
 import { addSessionToUser, revokeSession } from '../sessions.js'
@@ -22,7 +30,94 @@ export type Result = {
   user: Record<string, unknown>
 }
 
-export type Arguments = {
+type ResetPasswordLocalMethod = <TSlug extends AuthCollectionSlug>(
+  options: LocalAPIOptions<ResetPasswordOptions<TSlug>>,
+) => Promise<Result>
+
+const resetPasswordSchema = z.looseObject({
+  collection: collectionSchema,
+  data: z.object({
+    password: z.string(),
+    token: z.string(),
+  }),
+  depth: depthSchema,
+})
+
+export const resetPasswordLocalAPI = defineLocalAPI<ResetPasswordLocalMethod>()({
+  name: 'resetPassword',
+  afterHandler: ({
+    context: payload,
+    input,
+    result,
+  }: {
+    context: { collections: Record<string, Collection> }
+    input: { collection: string }
+    result: Result
+  }) => {
+    if (payload.collections[input.collection]?.config.auth.removeTokenFromResponses) {
+      delete result.token
+    }
+
+    return result
+  },
+})
+
+export const resetPassword = defineOperation({
+  action: 'resetPassword',
+  expose: {
+    local: resetPasswordLocalAPI,
+    mcp: { name: 'resetPassword' },
+    rest: [
+      {
+        handler: async ({ invoke, req }) => {
+          const collection = getRequestCollection(req)
+          const depth = req.searchParams.get('depth')
+          const result = await invoke({
+            context: req.payload,
+            input: {
+              collection: collection.config.slug,
+              data: {
+                password: typeof req.data?.password === 'string' ? req.data.password : '',
+                token: typeof req.data?.token === 'string' ? req.data.token : '',
+              },
+              depth: depth ? Number(depth) : undefined,
+              overrideAccess: false,
+              req,
+            },
+            validate: false,
+          })
+          const cookie = generatePayloadCookie({
+            collectionAuthConfig: collection.config.auth,
+            cookiePrefix: req.payload.config.cookiePrefix,
+            token: result.token!,
+          })
+
+          if (collection.config.auth.removeTokenFromResponses) {
+            delete result.token
+          }
+
+          return Response.json(
+            { message: req.t('authentication:passwordResetSuccessfully'), ...result },
+            {
+              headers: headersWithCors({
+                headers: new Headers({ 'Set-Cookie': cookie }),
+                req,
+              }),
+              status: httpStatus.OK,
+            },
+          )
+        },
+        method: 'post',
+        path: '/reset-password',
+      },
+    ],
+  },
+  handler: resetPasswordHandler,
+  input: resetPasswordSchema,
+  target: 'auth',
+})
+
+export type ResetPasswordArgs = {
   collection: Collection
   data: {
     password: string
@@ -33,8 +128,8 @@ export type Arguments = {
   req: PayloadRequest
 }
 
-export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
-  args: Arguments,
+export const resetUserPassword = async <TSlug extends AuthCollectionSlug>(
+  args: ResetPasswordArgs,
 ): Promise<Result> => {
   const {
     collection: { config: collectionConfig },
@@ -255,4 +350,43 @@ export const resetPasswordOperation = async <TSlug extends AuthCollectionSlug>(
     await killTransaction(req)
     throw error
   }
+}
+
+export type ResetPasswordOptions<TSlug extends AuthCollectionSlug> = {
+  collection: TSlug
+  context?: RequestContext
+  data: {
+    password: string
+    token: string
+  }
+  depth?: number
+  overrideAccess: boolean
+  req?: Partial<PayloadRequest>
+}
+
+async function resetPasswordHandler<TSlug extends AuthCollectionSlug>(
+  payload: Payload,
+  options: ResetPasswordOptions<TSlug>,
+): Promise<Result> {
+  const { collection: collectionSlug, data, depth, overrideAccess } = options
+
+  const collection = payload.collections[collectionSlug]
+
+  if (!collection) {
+    throw new APIError(
+      `The collection with slug ${String(
+        collectionSlug,
+      )} can't be found. Reset Password Operation.`,
+    )
+  }
+
+  const result = await resetUserPassword<TSlug>({
+    collection,
+    data,
+    depth,
+    overrideAccess,
+    req: await createLocalReq(options, payload),
+  })
+
+  return result
 }

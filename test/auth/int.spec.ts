@@ -10,7 +10,13 @@ import type {
 import crypto from 'crypto'
 import { jwtDecode } from 'jwt-decode'
 import path from 'path'
-import { createLocalReq, Forbidden, getFieldsToSign, refreshOperation } from 'payload'
+import {
+  createLocalReq,
+  Forbidden,
+  getFieldsToSign,
+  getPayloadOperation,
+  invokeOperation,
+} from 'payload'
 import { email as emailValidation } from 'payload/shared'
 import { fileURLToPath } from 'url'
 import { v4 as uuid } from 'uuid'
@@ -1827,9 +1833,10 @@ describe('Auth', () => {
 
       expect(logoutResponse.status).toBe(200)
       await expect(
-        refreshOperation({
-          collection: payload.collections[slug],
-          req,
+        invokeOperation(getPayloadOperation('auth', 'refresh'), {
+          context: payload,
+          input: { collection: slug, req },
+          validate: false,
         }),
       ).rejects.toBeInstanceOf(Forbidden)
     })

@@ -1,6 +1,10 @@
-import type { AuthenticatedUser, SanitizedPermissions } from '../../index.js'
+import { z } from 'zod'
+
+import type { AuthenticatedUser, Payload, SanitizedPermissions } from '../../index.js'
+import type { LocalAPIOptions } from '../../operations/localAPI.js'
 import type { PayloadRequest } from '../../types/index.js'
 
+import { defineLocalAPI, defineOperation } from '../../operations/defineOperation.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { executeAuthStrategies } from '../executeAuthStrategies.js'
 import { getAccessResults } from '../getAccessResults.js'
@@ -20,7 +24,7 @@ export type AuthResult = {
   user: AuthenticatedUser | null
 }
 
-export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
+const authenticateRequest = async (args: Required<AuthArgs>): Promise<AuthResult> => {
   const { canSetHeaders, headers } = args
   const req = args.req as PayloadRequest
   const { payload } = req
@@ -49,3 +53,27 @@ export const auth = async (args: Required<AuthArgs>): Promise<AuthResult> => {
     throw error
   }
 }
+
+type AuthLocalMethod = (options: LocalAPIOptions<AuthArgs>) => Promise<AuthResult>
+
+const authSchema = z.looseObject({
+  headers: z.unknown().describe('Authentication request headers'),
+})
+
+export const authLocalAPI = defineLocalAPI<AuthLocalMethod>()({ name: 'auth' })
+
+export const auth = defineOperation({
+  action: 'auth',
+  expose: { local: authLocalAPI, mcp: { name: 'auth' } },
+  handler: async (_payload: Payload, options: AuthArgs) => {
+    const req = options.req as PayloadRequest
+
+    return authenticateRequest({
+      canSetHeaders: options.canSetHeaders ?? true,
+      headers: options.headers,
+      req,
+    })
+  },
+  input: authSchema,
+  target: 'auth',
+})

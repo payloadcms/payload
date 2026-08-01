@@ -17,7 +17,6 @@ import type {
 } from './types.js'
 
 import { defaultUserCollection } from '../auth/defaultUser.js'
-import { authRootEndpoints } from '../auth/endpoints/index.js'
 import { sanitizeCollection } from '../collections/config/sanitize.js'
 import { migrationsCollection } from '../database/migrations/migrationsCollection.js'
 import { DuplicateCollection, InvalidConfiguration } from '../errors/index.js'
@@ -29,14 +28,12 @@ import {
   getLockedDocumentsCollection,
   lockedDocumentsCollectionSlug,
 } from '../locked-documents/config.js'
+import { payloadOperations } from '../operations/index.js'
+import { operationsToRESTEndpoints } from '../operations/rest.js'
 import { getPreferencesCollection, preferencesCollectionSlug } from '../preferences/config.js'
 import { getQueryPresetsConfig, queryPresetsCollectionSlug } from '../query-presets/config.js'
 import { getDefaultJobsCollection, jobsCollectionSlug } from '../queues/config/collection.js'
 import { getJobStatsGlobal } from '../queues/config/global.js'
-import {
-  stagedUploadEndpoints,
-  uploadInstructionsEndpoint,
-} from '../uploads/endpoints/uploadInstructions.js'
 import { flattenAllFields, flattenBlock } from '../utilities/flattenAllFields.js'
 import { hasScheduledPublishEnabled } from '../utilities/getVersionsConfig.js'
 import { validateTimezones } from '../utilities/validateTimezones.js'
@@ -259,12 +256,10 @@ export const sanitizeConfig = async (incomingConfig: Config): Promise<SanitizedC
   }
 
   if (configWithDefaults.collections?.some(({ upload }) => upload)) {
-    config.endpoints.push(uploadInstructionsEndpoint, ...stagedUploadEndpoints)
+    config.endpoints.push(...operationsToRESTEndpoints(payloadOperations, 'upload'))
   }
 
-  for (const endpoint of authRootEndpoints) {
-    config.endpoints.push(endpoint)
-  }
+  config.endpoints.push(...operationsToRESTEndpoints(payloadOperations, 'root'))
 
   if (config.localization && config.localization.locales?.length > 0) {
     // clone localization config so to not break everything

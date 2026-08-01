@@ -6,12 +6,13 @@ import { defaultAccess } from '../../auth/defaultAccess.js'
 import { sanitizeFields } from '../../fields/config/sanitize.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
 import { mergeBaseFields } from '../../fields/mergeBaseFields.js'
+import { payloadOperations } from '../../operations/index.js'
+import { operationsToRESTEndpoints } from '../../operations/rest.js'
 import { flattenAllFields } from '../../utilities/flattenAllFields.js'
 import { toWords } from '../../utilities/formatLabels.js'
 import { traverseForLocalizedFields } from '../../utilities/traverseForLocalizedFields.js'
 import { baseVersionFields } from '../../versions/baseFields.js'
 import { versionDefaults } from '../../versions/defaults.js'
-import { defaultGlobalEndpoints } from '../endpoints/index.js'
 export const sanitizeGlobal = async (
   config: Config,
   global: GlobalConfig,
@@ -93,9 +94,7 @@ export const sanitizeGlobal = async (
       global.endpoints = []
     }
 
-    for (const endpoint of defaultGlobalEndpoints) {
-      global.endpoints.push(endpoint)
-    }
+    global.endpoints.push(...operationsToRESTEndpoints(payloadOperations, 'global'))
   }
 
   global.versions = global.versions ?? true

@@ -1,4 +1,6 @@
 import type { JobFromTask } from './config/types/workflowTypes.js'
+import type { HandleSchedulesResult } from './operations/handleSchedules/index.js'
+import type { RunJobsResult } from './operations/runJobs/index.js'
 
 import {
   createLocalReq,
@@ -10,9 +12,8 @@ import {
   type TypedJobs,
   type Where,
 } from '../index.js'
+import { getPayloadOperation, invokeOperation } from '../operations/index.js'
 import { jobAfterRead, jobsCollectionSlug } from './config/collection.js'
-import { handleSchedules, type HandleSchedulesResult } from './operations/handleSchedules/index.js'
-import { runJobs } from './operations/runJobs/index.js'
 import { updateJob, updateJobs } from './utilities/updateJob.js'
 
 export type RunJobsSilent =
@@ -43,10 +44,10 @@ export const getJobsLocalAPI = (payload: Payload) => ({
   }): Promise<HandleSchedulesResult> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
 
-    return await handleSchedules({
-      allQueues: args?.allQueues,
-      queue: args?.queue,
-      req: newReq,
+    return invokeOperation(getPayloadOperation('jobs', 'handleSchedules'), {
+      context: payload,
+      input: { allQueues: args?.allQueues, queue: args?.queue, req: newReq },
+      validate: false,
     })
   },
   queue: async <
@@ -270,19 +271,23 @@ export const getJobsLocalAPI = (payload: Payload) => ({
      */
     silent?: RunJobsSilent
     where?: Where
-  }): Promise<ReturnType<typeof runJobs>> => {
+  }): Promise<RunJobsResult> => {
     const newReq: PayloadRequest = args?.req ?? (await createLocalReq({}, payload))
 
-    return await runJobs({
-      allQueues: args?.allQueues,
-      limit: args?.limit,
-      overrideAccess: args?.overrideAccess !== false,
-      processingOrder: args?.processingOrder,
-      queue: args?.queue,
-      req: newReq,
-      sequential: args?.sequential,
-      silent: args?.silent,
-      where: args?.where,
+    return invokeOperation(getPayloadOperation('jobs', 'run'), {
+      context: payload,
+      input: {
+        allQueues: args?.allQueues,
+        limit: args?.limit,
+        overrideAccess: args?.overrideAccess !== false,
+        processingOrder: args?.processingOrder,
+        queue: args?.queue,
+        req: newReq,
+        sequential: args?.sequential,
+        silent: args?.silent,
+        where: args?.where,
+      },
+      validate: false,
     })
   },
 
@@ -307,14 +312,18 @@ export const getJobsLocalAPI = (payload: Payload) => ({
      * @default false
      */
     silent?: RunJobsSilent
-  }): Promise<ReturnType<typeof runJobs>> => {
+  }): Promise<RunJobsResult> => {
     const newReq: PayloadRequest = args.req ?? (await createLocalReq({}, payload))
 
-    return await runJobs({
-      id: args.id,
-      overrideAccess: args.overrideAccess !== false,
-      req: newReq,
-      silent: args.silent,
+    return invokeOperation(getPayloadOperation('jobs', 'run'), {
+      context: payload,
+      input: {
+        id: args.id,
+        overrideAccess: args.overrideAccess !== false,
+        req: newReq,
+        silent: args.silent,
+      },
+      validate: false,
     })
   },
 

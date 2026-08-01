@@ -34,7 +34,7 @@ import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
 import { updateDocument } from './utilities/update.js'
 
-export type Arguments<TSlug extends CollectionSlug> = {
+export type UpdateDocumentArgs<TSlug extends CollectionSlug> = {
   autosave?: boolean
   collection: Collection
   data: DeepPartial<RequiredDataFromCollectionSlug<TSlug>>
@@ -54,11 +54,11 @@ export type Arguments<TSlug extends CollectionSlug> = {
   unpublishAllLocales?: boolean
 } & Pick<FindOptions<TSlug, SelectType>, 'select'>
 
-export const updateByIDOperation = async <
+export const updateDocumentByID = async <
   TSlug extends CollectionSlug,
   TSelect extends SelectFromCollectionSlug<TSlug> = SelectType,
 >(
-  incomingArgs: Arguments<TSlug>,
+  incomingArgs: UpdateDocumentArgs<TSlug>,
 ): Promise<TransformCollectionWithSelect<TSlug, TSelect>> => {
   let args = incomingArgs
 
@@ -133,7 +133,10 @@ export const updateByIDOperation = async <
 
     if (isTrashAttempt && !overrideAccess) {
       // Pass data so access function can check data.deletedAt to know it's a trash attempt
-      const deleteAccessResult = await executeAccess({ id, data, req }, collectionConfig.access.delete)
+      const deleteAccessResult = await executeAccess(
+        { id, data, req },
+        collectionConfig.access.delete,
+      )
       fullWhere = combineQueries(fullWhere, deleteAccessResult)
     }
 

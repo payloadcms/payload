@@ -3,9 +3,9 @@ import type { GraphQLInputObjectType, GraphQLNonNull, GraphQLObjectType } from '
 import type { DeepRequired, IsAny, MarkOptional } from 'ts-essentials'
 
 import type { CustomUpload, ViewTypes } from '../../admin/types.js'
-import type { Arguments as MeArguments } from '../../auth/operations/me.js'
+import type { MeArgs as MeArguments } from '../../auth/operations/me.js'
 import type {
-  Arguments as RefreshArguments,
+  RefreshArgs as RefreshArguments,
   Result as RefreshResult,
 } from '../../auth/operations/refresh.js'
 import type { Auth, IncomingAuthType } from '../../auth/types.js'

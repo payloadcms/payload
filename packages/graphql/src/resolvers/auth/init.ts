@@ -1,6 +1,8 @@
-import { initOperation, isolateObjectProperty } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 export function init(collection: string) {
   async function resolver(_, args, context: Context) {
@@ -9,7 +11,7 @@ export function init(collection: string) {
       req: isolateObjectProperty(context.req, 'transactionID'),
     }
 
-    return initOperation(options)
+    return invokeGraphQLOperation(options.req, 'auth', 'init', options)
   }
 
   return resolver

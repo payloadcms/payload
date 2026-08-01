@@ -1,9 +1,10 @@
-import { z } from 'zod'
+import { getPayloadOperation, invokeOperation } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { whereSchema } from '../../../utils/whereSchema.js'
+
+const countGlobalVersionsOperation = getPayloadOperation('global', 'countVersions')
 
 const DEFAULT_DESCRIPTION =
   'Count global versions in any version-enabled global by passing the global slug and optional where clause.'
@@ -19,14 +20,7 @@ export const countGlobalVersionsTool = defineGlobalTool({
     title: 'Count Global Versions',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    locale: z.string().describe('Optional: locale code to count versions in').optional(),
-    where: whereSchema
-      .describe(
-        'Optional: where clause for filtering versions. Version document fields are usually under "version". Example: {"version.siteName":{"contains":"test"}}',
-      )
-      .optional(),
-  }),
+  input: countGlobalVersionsOperation.input.omit({ global: true }),
 }).handler(async ({ authorizedMCP, globalSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
@@ -35,12 +29,15 @@ export const countGlobalVersionsTool = defineGlobalTool({
   logger.info(`Counting versions for global: ${globalSlug}`)
 
   try {
-    const result = await payload.countGlobalVersions({
-      global: globalSlug,
-      overrideAccess: authorizedMCP.overrideAccess,
-      req,
-      ...(locale ? { locale } : {}),
-      ...(where ? { where } : {}),
+    const result = await invokeOperation(countGlobalVersionsOperation, {
+      context: payload,
+      input: {
+        global: globalSlug,
+        overrideAccess: authorizedMCP.overrideAccess,
+        req,
+        ...(locale ? { locale } : {}),
+        ...(where ? { where } : {}),
+      },
     })
 
     return {

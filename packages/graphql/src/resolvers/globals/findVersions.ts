@@ -1,11 +1,12 @@
 import type { GraphQLResolveInfo } from 'graphql'
 import type { Document, SanitizedGlobalConfig, Where } from 'payload'
 
-import { findVersionsOperationGlobal, isolateObjectProperty } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
 import { buildSelectForCollectionMany } from '../../utilities/select.js'
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 export type Resolver = (
   _: unknown,
@@ -39,9 +40,10 @@ export function findVersions(globalConfig: SanitizedGlobalConfig): Resolver {
     const { sort } = args
 
     const options = {
+      slug: globalConfig.slug,
       depth: 0,
-      globalConfig,
       limit: args.limit,
+      overrideAccess: false,
       page: args.page,
       pagination: args.pagination,
       req,
@@ -50,7 +52,7 @@ export function findVersions(globalConfig: SanitizedGlobalConfig): Resolver {
       where: args.where,
     }
 
-    const result = await findVersionsOperationGlobal(options)
+    const result = await invokeGraphQLOperation(req, 'global', 'findVersions', options)
     return result
   }
 }

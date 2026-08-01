@@ -1,16 +1,11 @@
-import type { SelectType } from 'payload'
-
+import { getPayloadOperation, invokeOperation, type SelectType } from 'payload'
 import { z } from 'zod'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import {
-  getGlobalVirtualFieldNames,
-  stripVirtualFields,
-} from '../../../utils/getVirtualFieldNames.js'
-import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
-import { validateGlobalData } from '../validateEntityData.js'
+
+const updateGlobalOperation = getPayloadOperation('global', 'update')
 
 const DEFAULT_DESCRIPTION = 'Update any Payload global by passing the global slug and data.'
 
@@ -25,34 +20,14 @@ export const updateGlobalTool = defineGlobalTool({
     title: 'Update Global',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    data: z.record(z.string(), z.unknown()).describe('The global fields to update'),
-    depth: z
-      .number()
-      .describe('Optional: Depth of relationships to populate')
-      .optional()
-      .default(0),
-    draft: z
-      .boolean()
-      .describe('Optional: Whether to save as draft (default: false)')
-      .optional()
-      .default(false),
-    fallbackLocale: z
-      .string()
-      .describe('Optional: fallback locale code to use when requested locale is not available')
-      .optional(),
-    locale: z
-      .string()
-      .describe(
-        'Optional: locale code to update data in (e.g., "en", "es"). Use "all" to update all locales for localized fields',
-      )
-      .optional(),
-    select: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"siteName": true}',
-      )
-      .optional(),
+  input: z.looseObject({
+    data: updateGlobalOperation.input.shape.data,
+    depth: updateGlobalOperation.input.shape.depth,
+    draft: updateGlobalOperation.input.shape.draft,
+    fallbackLocale: updateGlobalOperation.input.shape.fallbackLocale,
+    locale: updateGlobalOperation.input.shape.locale,
+    populate: updateGlobalOperation.input.shape.populate,
+    select: updateGlobalOperation.input.shape.select,
   }),
 }).handler(async ({ authorizedMCP, globalSlug, input, req }) => {
   const payload = req.payload
@@ -65,19 +40,9 @@ export const updateGlobalTool = defineGlobalTool({
   )
 
   try {
-    const virtualFieldNames = getGlobalVirtualFieldNames(payload.config, globalSlug)
-    const inputData = stripVirtualFields(data, virtualFieldNames)
-    const validationError = validateGlobalData({ data: inputData, globalSlug, req })
-
-    if (validationError) {
-      return validationError
-    }
-
-    const parsedData = transformPointDataToPayload(inputData)
-
     const updateOptions: Parameters<typeof payload.updateGlobal>[0] = {
       slug: globalSlug,
-      data: parsedData,
+      data,
       depth,
       draft,
       overrideAccess: authorizedMCP.overrideAccess,
@@ -94,7 +59,10 @@ export const updateGlobalTool = defineGlobalTool({
       updateOptions.select = select as SelectType
     }
 
-    const result = await payload.updateGlobal(updateOptions)
+    const result = await invokeOperation(updateGlobalOperation, {
+      context: payload,
+      input: updateOptions as never,
+    })
 
     return {
       content: [

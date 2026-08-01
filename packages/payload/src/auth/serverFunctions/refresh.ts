@@ -4,8 +4,8 @@ import type { CollectionSlug } from '../../index.js'
 import type { MaybePromise } from '../../types/index.js'
 
 import { getPayload } from '../../index.js'
+import { getPayloadOperation, invokeOperation } from '../../operations/index.js'
 import { createLocalReq } from '../../utilities/createLocalReq.js'
-import { refreshOperation } from '../operations/refresh.js'
 import { getExistingAuthToken, setAuthCookie } from './cookies.js'
 
 export type RefreshArgs = {
@@ -48,9 +48,10 @@ export async function refresh({
 
   const req = await createLocalReq({ user: result.user }, payload)
 
-  const refreshResult = await refreshOperation({
-    collection: collectionConfig,
-    req,
+  const refreshResult = await invokeOperation(getPayloadOperation('auth', 'refresh'), {
+    context: payload,
+    input: { collection: collectionConfig.config.slug, req },
+    validate: false,
   })
 
   if (!refreshResult) {

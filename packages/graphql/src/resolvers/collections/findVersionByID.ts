@@ -1,11 +1,12 @@
 import type { GraphQLResolveInfo } from 'graphql'
 import type { Collection, TypeWithID, TypeWithVersion } from 'payload'
 
-import { findVersionByIDOperation, isolateObjectProperty } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
 import { buildSelectForCollection } from '../../utilities/select.js'
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 export type Resolver<T extends TypeWithID = any> = (
   _: unknown,
@@ -22,8 +23,12 @@ export type Resolver<T extends TypeWithID = any> = (
 
 export function findVersionByIDResolver(collection: Collection): Resolver {
   return async function resolver(_, args, context, info) {
-    const req = context.req = isolateObjectProperty(context.req, ['locale', 'fallbackLocale', 'transactionID'])
-    const select = context.select = args.select ? buildSelectForCollection(info) : undefined
+    const req = (context.req = isolateObjectProperty(context.req, [
+      'locale',
+      'fallbackLocale',
+      'transactionID',
+    ]))
+    const select = (context.select = args.select ? buildSelectForCollection(info) : undefined)
 
     req.locale = args.locale || req.locale
     req.fallbackLocale = args.fallbackLocale || req.fallbackLocale
@@ -31,14 +36,15 @@ export function findVersionByIDResolver(collection: Collection): Resolver {
 
     const options = {
       id: args.id,
-      collection,
+      collection: collection.config.slug,
       depth: 0,
+      overrideAccess: false,
       req,
       select,
       trash: args.trash,
     }
 
-    const result = await findVersionByIDOperation(options)
+    const result = await invokeGraphQLOperation(req, 'collection', 'findVersionByID', options)
     return result
   }
 }

@@ -1,15 +1,26 @@
+import { status as httpStatus } from 'http-status'
+import { z } from 'zod'
+
 import type {
   AuthOperationsFromCollectionSlug,
   Collection,
   DataFromCollectionSlug,
 } from '../../collections/config/types.js'
-import type { AuthCollectionSlug, AuthenticatedUser, User } from '../../index.js'
+import type {
+  AuthCollectionSlug,
+  AuthenticatedUser,
+  Payload,
+  RequestContext,
+  User,
+} from '../../index.js'
+import type { LocalAPIOptions } from '../../operations/localAPI.js'
 import type { PayloadRequest, Where } from '../../types/index.js'
 import type { AuthRuntimeFields } from '../types.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import {
+  APIError,
   AuthenticationError,
   LockedAuth,
   UnverifiedEmail,
@@ -17,9 +28,22 @@ import {
 } from '../../errors/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { commitTransaction, Forbidden, initTransaction } from '../../index.js'
+import { defineLocalAPI, defineOperation } from '../../operations/defineOperation.js'
+import {
+  authIdentifierSchema,
+  collectionSchema,
+  depthSchema,
+  fallbackLocaleSchema,
+  localeSchema,
+} from '../../operations/schemaFields.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
+import { getRequestCollection } from '../../utilities/getRequestEntity.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { isNumber } from '../../utilities/isNumber.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
 import { sanitizeInternalFields } from '../../utilities/sanitizeInternalFields.js'
+import { generatePayloadCookie } from '../cookies.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { getLoginOptions } from '../getLoginOptions.js'
 import { isUserLocked } from '../isUserLocked.js'
@@ -35,7 +59,105 @@ export type LoginResult<TSlug extends AuthCollectionSlug> = {
   user?: AuthRuntimeFields & DataFromCollectionSlug<TSlug>
 }
 
-export type Arguments<TSlug extends AuthCollectionSlug> = {
+type LoginLocalMethod = <TSlug extends AuthCollectionSlug>(
+  options: LocalAPIOptions<LoginOptions<TSlug>>,
+) => Promise<LoginResult<TSlug>>
+
+const loginSchema = z.looseObject({
+  collection: collectionSchema,
+  data: z.looseObject({
+    ...authIdentifierSchema,
+    password: z.string().describe('The user password'),
+  }),
+  depth: depthSchema,
+  fallbackLocale: fallbackLocaleSchema,
+  locale: localeSchema,
+  showHiddenFields: z.boolean().optional().default(false),
+})
+
+export const loginLocalAPI = defineLocalAPI<LoginLocalMethod>()({
+  name: 'login',
+  afterHandler: ({
+    context: payload,
+    input,
+    result,
+  }: {
+    context: { collections: Record<string, Collection> }
+    input: { collection: string }
+    result: LoginResult<AuthCollectionSlug>
+  }) => {
+    if (payload.collections[input.collection]?.config.auth.removeTokenFromResponses) {
+      delete result.token
+    }
+
+    return result
+  },
+})
+
+export const login = defineOperation({
+  action: 'login',
+  expose: {
+    local: loginLocalAPI,
+    mcp: { name: 'login' },
+    rest: [
+      {
+        handler: async ({ invoke, req }) => {
+          const collection = getRequestCollection(req)
+          const depth = req.searchParams.get('depth')
+          const authData =
+            collection.config.auth?.loginWithUsername !== false
+              ? {
+                  email: typeof req.data?.email === 'string' ? req.data.email : '',
+                  password: typeof req.data?.password === 'string' ? req.data.password : '',
+                  username: typeof req.data?.username === 'string' ? req.data.username : '',
+                }
+              : {
+                  email: typeof req.data?.email === 'string' ? req.data.email : '',
+                  password: typeof req.data?.password === 'string' ? req.data.password : '',
+                }
+          const result = await invoke({
+            context: req.payload,
+            input: {
+              collection: collection.config.slug,
+              data: authData,
+              depth: isNumber(depth) ? Number(depth) : undefined,
+              overrideAccess: false,
+              req,
+            },
+            validate: false,
+          })
+          const cookie = generatePayloadCookie({
+            collectionAuthConfig: collection.config.auth,
+            cookiePrefix: req.payload.config.cookiePrefix,
+            token: result.token!,
+          })
+
+          if (collection.config.auth.removeTokenFromResponses) {
+            delete result.token
+          }
+
+          return Response.json(
+            { message: req.t('authentication:passed'), ...result },
+            {
+              headers: headersWithCors({
+                headers: new Headers({ 'Set-Cookie': cookie }),
+                req,
+              }),
+              status: httpStatus.OK,
+            },
+          )
+        },
+        method: 'post',
+        path: '/login',
+      },
+    ],
+  },
+  handler: loginHandler,
+  input: loginSchema,
+  target: 'auth',
+})
+
+export type LoginArgs<TSlug extends AuthCollectionSlug> = {
   collection: Collection
   data: AuthOperationsFromCollectionSlug<TSlug>['login']
   depth?: number
@@ -69,8 +191,8 @@ export const checkLoginPermission = <TSlug extends AuthCollectionSlug>({
   }
 }
 
-export const loginOperation = async <TSlug extends AuthCollectionSlug>(
-  incomingArgs: Arguments<TSlug>,
+export const logInUser = async <TSlug extends AuthCollectionSlug>(
+  incomingArgs: LoginArgs<TSlug>,
 ): Promise<LoginResult<TSlug>> => {
   let args = incomingArgs
 
@@ -422,4 +544,51 @@ export const loginOperation = async <TSlug extends AuthCollectionSlug>(
     await killTransaction(args.req)
     throw error
   }
+}
+
+export type LoginOptions<TSlug extends AuthCollectionSlug> = {
+  collection: TSlug
+  context?: RequestContext
+  data: AuthOperationsFromCollectionSlug<TSlug>['login']
+  depth?: number
+  fallbackLocale?: string
+  locale?: string
+  overrideAccess?: boolean
+  req?: Partial<PayloadRequest>
+  showHiddenFields?: boolean
+  trash?: boolean
+}
+
+async function loginHandler<TSlug extends AuthCollectionSlug>(
+  payload: Payload,
+  options: LoginOptions<TSlug>,
+): Promise<LoginResult<TSlug>> {
+  const {
+    collection: collectionSlug,
+    data,
+    depth,
+    overrideAccess = true,
+    showHiddenFields,
+  } = options
+
+  const collection = payload.collections[collectionSlug]
+
+  if (!collection) {
+    throw new APIError(
+      `The collection with slug ${String(collectionSlug)} can't be found. Login Operation.`,
+    )
+  }
+
+  const args = {
+    collection,
+    data,
+    depth,
+    overrideAccess,
+    req: await createLocalReq(options, payload),
+    showHiddenFields,
+  }
+
+  const result = await logInUser<TSlug>(args)
+
+  return result
 }

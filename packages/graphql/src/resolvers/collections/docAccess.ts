@@ -5,9 +5,11 @@ import type {
   SanitizedGlobalPermission,
 } from 'payload'
 
-import { docAccessOperation, isolateObjectProperty } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 export type Resolver = (
   _: unknown,
@@ -21,10 +23,11 @@ export type Resolver = (
 
 export function docAccessResolver(collection: Collection): Resolver {
   async function resolver(_, args, context: Context) {
-    return docAccessOperation({
+    const req = isolateObjectProperty(context.req, 'transactionID')
+    return invokeGraphQLOperation(req, 'collection', 'docAccess', {
       id: args.id,
-      collection,
-      req: isolateObjectProperty(context.req, 'transactionID'),
+      collection: collection.config.slug,
+      req,
     })
   }
 

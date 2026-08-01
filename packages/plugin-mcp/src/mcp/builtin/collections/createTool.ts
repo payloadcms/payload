@@ -1,18 +1,18 @@
-import type { SelectType } from 'payload'
-
+import {
+  getPayloadOperation,
+  invokeOperation,
+  OperationValidationError,
+  type SelectType,
+} from 'payload'
 import { z } from 'zod'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import {
-  getCollectionVirtualFieldNames,
-  stripVirtualFields,
-} from '../../../utils/getVirtualFieldNames.js'
-import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
-import { validateCollectionData } from '../validateEntityData.js'
 import { fileInputSchema, resolveFile } from './fileInput.js'
 import { formatCollectionError } from './formatCollectionError.js'
+
+const createOperation = getPayloadOperation('collection', 'create')
 
 const DEFAULT_DESCRIPTION =
   'Create one or more documents. Each can have different data or a file. Prefer uploadReference after upload, externalURL for URLs, or base64 for small local files.'
@@ -28,51 +28,21 @@ export const createDocumentsTool = defineCollectionTool({
     title: 'Create Documents',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    depth: z
-      .number()
-      .int()
-      .min(0)
-      .max(10)
-      .describe('How many levels deep to populate relationships in response')
-      .optional()
-      .default(0),
+  input: z.looseObject({
+    depth: createOperation.input.shape.depth,
     documents: z
       .array(
         z.object({
-          data: z
-            .record(z.string(), z.unknown())
-            .describe(
-              'The document fields to create. Only include fields permitted by the schema returned by getCollectionSchema.',
-            ),
+          data: createOperation.input.shape.data,
           file: fileInputSchema.optional(),
         }),
       )
       .min(1)
       .describe('The documents to create, in order'),
-    draft: z
-      .boolean()
-      .describe(
-        'Only if getCollectionSchema includes _status; otherwise _status does not exist. true forces data._status to "draft"; with false, data._status controls draft or published.',
-      )
-      .optional()
-      .default(false),
-    fallbackLocale: z
-      .string()
-      .describe('Optional: fallback locale code to use when requested locale is not available')
-      .optional(),
-    locale: z
-      .string()
-      .describe(
-        'Optional: locale code to create the documents in (e.g., "en", "es"). Defaults to the default locale',
-      )
-      .optional(),
-    select: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'Optional: define exactly which fields you\'d like to return, e.g., {"title": true}',
-      )
-      .optional(),
+    draft: createOperation.input.shape.draft,
+    fallbackLocale: createOperation.input.shape.fallbackLocale,
+    locale: createOperation.input.shape.locale,
+    select: createOperation.input.shape.select,
   }),
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
@@ -82,55 +52,36 @@ export const createDocumentsTool = defineCollectionTool({
   logger.info(`Creating ${documents.length} documents in collection: ${collectionSlug}`)
 
   try {
-    const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
     const docs: Array<{ doc: Record<string, unknown>; index: number }> = []
     const errors: Array<{ index: number; message: string }> = []
     let validationSchema: Record<string, unknown> | undefined
 
     for (const [index, document] of documents.entries()) {
       try {
-        const inputData = stripVirtualFields(document.data, virtualFieldNames)
-        const validationError = validateCollectionData({ collectionSlug, data: inputData, req })
-
-        if (validationError) {
-          const firstContent = validationError.content[0]
-          const validationContent = validationError.structuredContent as
-            | Record<string, unknown>
-            | undefined
-          const schema = validationContent?.schema
-
-          if (!validationSchema && schema && typeof schema === 'object') {
-            validationSchema = schema as Record<string, unknown>
-          }
-
-          errors.push({
-            index,
-            message:
-              firstContent?.type === 'text'
-                ? (firstContent.text.split('\n\nUse this schema')[0] ?? 'Invalid document data')
-                : 'Invalid document data',
-          })
-          continue
-        }
-
-        const parsedData = transformPointDataToPayload(inputData)
         const file = await resolveFile({ collectionSlug, input: document.file, req })
-        const result = await payload.create({
-          collection: collectionSlug,
-          data: parsedData,
-          depth,
-          draft,
-          overrideAccess: authorizedMCP.overrideAccess,
-          req,
-          ...(file ? { file } : {}),
-          ...(locale ? { locale } : {}),
-          ...(fallbackLocale ? { fallbackLocale } : {}),
-          ...(select ? { select: select as SelectType } : {}),
+        const result = await invokeOperation(createOperation, {
+          context: payload,
+          input: {
+            collection: collectionSlug,
+            data: document.data,
+            depth,
+            draft,
+            overrideAccess: authorizedMCP.overrideAccess,
+            req,
+            ...(file ? { file } : {}),
+            ...(locale ? { locale } : {}),
+            ...(fallbackLocale ? { fallbackLocale } : {}),
+            ...(select ? { select: select as SelectType } : {}),
+          },
         })
 
         docs.push({ doc: result as Record<string, unknown>, index })
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Unknown error'
+
+        if (error instanceof OperationValidationError && !validationSchema) {
+          validationSchema = error.schema
+        }
 
         logger.error(`Error creating document at index ${index} in ${collectionSlug}: ${message}`)
         errors.push({ index, message })

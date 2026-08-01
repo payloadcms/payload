@@ -14,7 +14,6 @@ import type { Metadata } from 'next'
 import type { DestinationStream, Level, LoggerOptions } from 'pino'
 import type React from 'react'
 import type { default as sharp } from 'sharp'
-import type { DeepRequired } from 'ts-essentials'
 
 import type { ComponentRenderer } from '../admin/adapters/render.js'
 import type { ServerAdapter } from '../admin/adapters/server.js'
@@ -271,8 +270,8 @@ export type OGImageConfig = {
 
 /**
  * @todo find a way to remove the deep clone here.
- * It can probably be removed after the `DeepRequired` from `Config` to `SanitizedConfig` is removed.
- * Same with `CollectionConfig` to `SanitizedCollectionConfig`.
+ * It can probably be removed after the `DeepRequired` from `CollectionConfig` to
+ * `SanitizedCollectionConfig` is removed.
  */
 type DeepClone<T> = T extends object ? { [K in keyof T]: DeepClone<T[K]> } : T
 
@@ -1666,37 +1665,71 @@ export type Config = {
   upload?: FetchAPIFileUploadOptions
 }
 
-/**
- * @todo remove the `DeepRequired` in v4.
- * We don't actually guarantee that all properties are set when sanitizing configs.
- */
 export type SanitizedConfig = {
   admin: {
-    /**
-     * `Required` (shallow) marks the top-level dashboard props as required, mainly `defaultLayout`,
-     * which sanitizing always fills in. Do not switch this to the `DeepRequired` used below: it
-     * recurses into the widgets and re-expands the whole `Field` type (a large self-referencing
-     * union), which is very expensive to check. Never run a `Field`-bearing type through
-     * `DeepRequired`.
-     */
     dashboard: Required<NonNullable<NonNullable<Config['admin']>['dashboard']>>
+    importMap: Omit<NonNullable<NonNullable<Config['admin']>['importMap']>, 'baseDir'> &
+      Required<Pick<NonNullable<NonNullable<Config['admin']>['importMap']>, 'baseDir'>>
+    meta: Omit<
+      NonNullable<NonNullable<Config['admin']>['meta']>,
+      'defaultOGImageType' | 'robots' | 'titleSuffix'
+    > &
+      Required<
+        Pick<
+          NonNullable<NonNullable<Config['admin']>['meta']>,
+          'defaultOGImageType' | 'robots' | 'titleSuffix'
+        >
+      >
+    routes: Required<NonNullable<NonNullable<Config['admin']>['routes']>>
     timezones: SanitizedTimezoneConfig
-  } & DeepRequired<Omit<NonNullable<Config['admin']>, 'dashboard'>>
-  blocks?: FlattenedBlock[]
+  } & Omit<
+    NonNullable<Config['admin']>,
+    | 'avatar'
+    | 'components'
+    | 'custom'
+    | 'dashboard'
+    | 'dateFormat'
+    | 'dependencies'
+    | 'importMap'
+    | 'meta'
+    | 'routes'
+    | 'theme'
+    | 'timezones'
+    | 'user'
+  > &
+    Required<
+      Pick<
+        NonNullable<Config['admin']>,
+        'avatar' | 'components' | 'custom' | 'dateFormat' | 'dependencies' | 'theme' | 'user'
+      >
+    >
+  blocks: FlattenedBlock[]
   collections: SanitizedCollectionConfig[]
   /** Default richtext editor to use for richText fields */
   editor?: RichTextAdapter<any, any, any>
-  endpoints: Endpoint[]
   globals: SanitizedGlobalConfig[]
+  graphQL: Omit<
+    NonNullable<Config['graphQL']>,
+    | 'disableIntrospectionInProduction'
+    | 'disablePlaygroundInProduction'
+    | 'maxComplexity'
+    | 'schemaOutputFile'
+  > &
+    Required<
+      Pick<
+        NonNullable<Config['graphQL']>,
+        | 'disableIntrospectionInProduction'
+        | 'disablePlaygroundInProduction'
+        | 'maxComplexity'
+        | 'schemaOutputFile'
+      >
+    >
   i18n: Required<I18nOptions>
   jobs: SanitizedJobsConfig
   localization: false | SanitizedLocalizationConfig
-  paths: {
-    config: string
-    configDir: string
-    rawConfig: string
-  }
-  storage: StorageAdapter[]
+  routes: Required<NonNullable<Config['routes']>>
+  typescript: Omit<NonNullable<Config['typescript']>, 'autoGenerate' | 'outputFile'> &
+    Required<Pick<NonNullable<Config['typescript']>, 'autoGenerate' | 'outputFile'>>
   upload: {
     /**
      * Deduped list of adapters used in the project
@@ -1704,22 +1737,57 @@ export type SanitizedConfig = {
     adapters: string[]
   } & FetchAPIFileUploadOptions
 } & Omit<
-  // TODO: DeepRequired breaks certain, advanced TypeScript types / certain type information is lost. We should remove it when possible.
-  // E.g. in packages/ui/src/graphics/Account/index.tsx in getComponent, if avatar.Component is casted to what it's supposed to be,
-  // the result type is different
-  DeepRequired<Config>,
+  Config,
   | 'admin'
+  | 'auth'
+  | 'bin'
   | 'blocks'
   | 'collections'
+  | 'cookiePrefix'
+  | 'cors'
+  | 'csrf'
+  | 'custom'
+  | 'defaultDepth'
+  | 'defaultMaxTextLength'
   | 'editor'
-  | 'endpoint'
+  | 'endpoints'
   | 'globals'
+  | 'graphQL'
+  | 'hooks'
   | 'i18n'
   | 'jobs'
+  | 'kv'
   | 'localization'
+  | 'loggingLevels'
+  | 'maxDepth'
+  | 'routes'
+  | 'serverURL'
   | 'storage'
+  | 'telemetry'
+  | 'typescript'
   | 'upload'
->
+> &
+  Required<
+    Pick<
+      Config,
+      | 'auth'
+      | 'bin'
+      | 'cookiePrefix'
+      | 'cors'
+      | 'csrf'
+      | 'custom'
+      | 'defaultDepth'
+      | 'defaultMaxTextLength'
+      | 'endpoints'
+      | 'hooks'
+      | 'kv'
+      | 'loggingLevels'
+      | 'maxDepth'
+      | 'serverURL'
+      | 'storage'
+      | 'telemetry'
+    >
+  >
 
 export type EditConfig = EditConfigWithoutRoot | EditConfigWithRoot
 

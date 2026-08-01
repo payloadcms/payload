@@ -1,11 +1,12 @@
 import type { GraphQLResolveInfo } from 'graphql'
 import type { Document, SanitizedGlobalConfig } from 'payload'
 
-import { findOneOperation, isolateObjectProperty } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
 import { buildSelectForCollection } from '../../utilities/select.js'
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 export type Resolver = (
   _: unknown,
@@ -17,13 +18,17 @@ export type Resolver = (
     select?: boolean
   },
   context: Context,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => Promise<Document>
 
 export function findOne(globalConfig: SanitizedGlobalConfig): Resolver {
   return async function resolver(_, args, context, info) {
-    const req = context.req = isolateObjectProperty(context.req, ['locale', 'fallbackLocale', 'transactionID'])
-    const select = context.select = args.select ? buildSelectForCollection(info) : undefined
+    const req = (context.req = isolateObjectProperty(context.req, [
+      'locale',
+      'fallbackLocale',
+      'transactionID',
+    ]))
+    const select = (context.select = args.select ? buildSelectForCollection(info) : undefined)
     const { slug } = globalConfig
 
     req.locale = args.locale || req.locale
@@ -34,12 +39,12 @@ export function findOne(globalConfig: SanitizedGlobalConfig): Resolver {
       slug,
       depth: 0,
       draft: args.draft,
-      globalConfig,
+      overrideAccess: false,
       req,
       select,
     }
 
-    const result = await findOneOperation(options)
+    const result = await invokeGraphQLOperation(req, 'global', 'find', options)
     return result
   }
 }

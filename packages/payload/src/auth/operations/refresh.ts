@@ -1,16 +1,25 @@
+import { status as httpStatus } from 'http-status'
+import { z } from 'zod'
+
 import type { Collection } from '../../collections/config/types.js'
-import type { AuthenticatedUser } from '../../index.js'
+import type { AuthenticatedUser, Payload } from '../../index.js'
 import type { Document, PayloadRequest } from '../../types/index.js'
 
 import { buildAfterOperation } from '../../collections/operations/utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from '../../collections/operations/utilities/buildBeforeOperation.js'
 import { Forbidden } from '../../errors/index.js'
+import { defineOperation } from '../../operations/defineOperation.js'
+import { collectionSchema, requestSchema } from '../../operations/schemaFields.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { getRequestCollection } from '../../utilities/getRequestEntity.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { generatePayloadCookie } from '../cookies.js'
 import { getFieldsToSign } from '../getFieldsToSign.js'
 import { jwtSign } from '../jwt.js'
 import { removeExpiredSessions } from '../sessions.js'
+import { getAuthCollection } from './getAuthCollection.js'
 
 export type Result = {
   exp: number
@@ -26,12 +35,12 @@ export type Result = {
   user: Document
 }
 
-export type Arguments = {
+export type RefreshArgs = {
   collection: Collection
   req: PayloadRequest
 }
 
-export const refreshOperation = async (incomingArgs: Arguments): Promise<Result> => {
+export const refreshSession = async (incomingArgs: RefreshArgs): Promise<Result> => {
   let args = incomingArgs
 
   try {
@@ -208,3 +217,57 @@ export const refreshOperation = async (incomingArgs: Arguments): Promise<Result>
     throw error
   }
 }
+
+const refreshSchema = z.looseObject({
+  collection: collectionSchema,
+  req: requestSchema,
+})
+
+export const refresh = defineOperation({
+  action: 'refresh',
+  expose: {
+    rest: [
+      {
+        handler: async ({ invoke, req }) => {
+          const collection = getRequestCollection(req)
+          const headers = headersWithCors({ headers: new Headers(), req })
+          const result = await invoke({
+            context: req.payload,
+            input: { collection: collection.config.slug, req },
+            validate: false,
+          })
+
+          if (result.setCookie) {
+            headers.set(
+              'Set-Cookie',
+              generatePayloadCookie({
+                collectionAuthConfig: collection.config.auth,
+                cookiePrefix: req.payload.config.cookiePrefix,
+                token: result.refreshedToken,
+              }),
+            )
+
+            if (collection.config.auth.removeTokenFromResponses) {
+              // @ts-expect-error -- removeTokenFromResponses intentionally removes this required field
+              delete result.refreshedToken
+            }
+          }
+
+          return Response.json(
+            { message: req.t('authentication:tokenRefreshSuccessful'), ...result },
+            { headers, status: httpStatus.OK },
+          )
+        },
+        method: 'post',
+        path: '/refresh-token',
+      },
+    ],
+  },
+  handler: (payload: Payload, input: { collection: string; req: PayloadRequest }) =>
+    refreshSession({
+      collection: getAuthCollection(payload, input.collection),
+      req: input.req,
+    }),
+  input: refreshSchema,
+  target: 'auth',
+})

@@ -5,34 +5,39 @@ import { databaseKVAdapter } from '../kv/adapters/DatabaseKVAdapter.js'
 
 export const addDefaultsToConfig = (config: Config): Config => {
   config.admin = {
-    avatar: 'gravatar',
-    components: {},
-    custom: {},
-    dateFormat: 'MMMM do yyyy, h:mm a',
-    dependencies: {},
-    theme: 'all',
     ...(config.admin || {}),
+    avatar: config.admin?.avatar ?? 'gravatar',
+    components: config.admin?.components ?? {},
+    custom: config.admin?.custom ?? {},
+    dateFormat: config.admin?.dateFormat ?? 'MMMM do yyyy, h:mm a',
+    dependencies: config.admin?.dependencies ?? {},
     importMap: {
-      baseDir: `${typeof process?.cwd === 'function' ? process.cwd() : ''}`,
       ...(config?.admin?.importMap || {}),
+      baseDir:
+        config.admin?.importMap?.baseDir ??
+        `${typeof process?.cwd === 'function' ? process.cwd() : ''}`,
     },
     meta: {
-      defaultOGImageType: 'dynamic',
-      robots: 'noindex, nofollow',
-      titleSuffix: '- Payload',
       ...(config?.admin?.meta || {}),
+      defaultOGImageType: config.admin?.meta?.defaultOGImageType ?? 'dynamic',
+      robots:
+        typeof config.admin?.meta?.robots === 'undefined'
+          ? 'noindex, nofollow'
+          : config.admin.meta.robots,
+      titleSuffix: config.admin?.meta?.titleSuffix ?? '- Payload',
     },
     routes: {
-      account: '/account',
-      createFirstUser: '/create-first-user',
-      forgot: '/forgot',
-      inactivity: '/logout-inactivity',
-      login: '/login',
-      logout: '/logout',
-      reset: '/reset',
-      unauthorized: '/unauthorized',
       ...(config?.admin?.routes || {}),
+      account: config.admin?.routes?.account ?? '/account',
+      createFirstUser: config.admin?.routes?.createFirstUser ?? '/create-first-user',
+      forgot: config.admin?.routes?.forgot ?? '/forgot',
+      inactivity: config.admin?.routes?.inactivity ?? '/logout-inactivity',
+      login: config.admin?.routes?.login ?? '/login',
+      logout: config.admin?.routes?.logout ?? '/logout',
+      reset: config.admin?.routes?.reset ?? '/reset',
+      unauthorized: config.admin?.routes?.unauthorized ?? '/unauthorized',
     },
+    theme: config.admin?.theme ?? 'all',
   }
 
   config.bin = config.bin ?? []
@@ -46,11 +51,13 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.endpoints = config.endpoints ?? []
   config.globals = config.globals ?? []
   config.graphQL = {
-    disableIntrospectionInProduction: true,
-    disablePlaygroundInProduction: true,
-    maxComplexity: 1000,
-    schemaOutputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,
     ...(config.graphQL || {}),
+    disableIntrospectionInProduction: config.graphQL?.disableIntrospectionInProduction ?? true,
+    disablePlaygroundInProduction: config.graphQL?.disablePlaygroundInProduction ?? true,
+    maxComplexity: config.graphQL?.maxComplexity ?? 1000,
+    schemaOutputFile:
+      config.graphQL?.schemaOutputFile ??
+      `${typeof process?.cwd === 'function' ? process.cwd() : ''}/schema.graphql`,
   }
   config.hooks = config.hooks ?? {}
   config.i18n = config.i18n ?? {}
@@ -71,18 +78,20 @@ export const addDefaultsToConfig = (config: Config): Config => {
   config.localization = config.localization ?? false
   config.maxDepth = config.maxDepth ?? 10
   config.routes = {
-    admin: '/admin',
-    api: '/api',
-    graphQL: '/graphql',
-    graphQLPlayground: '/graphql-playground',
     ...(config.routes || {}),
+    admin: config.routes?.admin ?? '/admin',
+    api: config.routes?.api ?? '/api',
+    graphQL: config.routes?.graphQL ?? '/graphql',
+    graphQLPlayground: config.routes?.graphQLPlayground ?? '/graphql-playground',
   }
   config.serverURL = config.serverURL ?? ''
   config.telemetry = config.telemetry ?? true
   config.typescript = {
-    autoGenerate: true,
-    outputFile: `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
     ...(config.typescript || {}),
+    autoGenerate: config.typescript?.autoGenerate ?? true,
+    outputFile:
+      config.typescript?.outputFile ??
+      `${typeof process?.cwd === 'function' ? process.cwd() : ''}/payload-types.ts`,
   }
   config.upload = config.upload ?? {}
 

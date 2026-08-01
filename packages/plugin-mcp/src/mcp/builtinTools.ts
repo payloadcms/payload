@@ -1,3 +1,7 @@
+import type { PayloadOperationAction, PayloadOperationTarget } from 'payload'
+
+import { getPayloadOperation } from 'payload'
+
 import type { CollectionTool, GlobalTool, Tool } from '../types.js'
 
 import {
@@ -44,6 +48,22 @@ type GlobalBuiltin = {
   tool: GlobalTool
 }
 
+const getMCPName = <
+  TTarget extends PayloadOperationTarget,
+  TAction extends PayloadOperationAction<TTarget>,
+>(
+  target: TTarget,
+  action: TAction,
+): string => {
+  const exposure = getPayloadOperation(target, action).expose.mcp
+
+  if (!exposure || exposure === true) {
+    return action
+  }
+
+  return exposure.name
+}
+
 export const TOOL_BUILTINS = {
   getConfigInfo: { mcpName: 'getConfigInfo', tool: getConfigInfoTool },
 } satisfies Record<string, { mcpName: string; tool: Tool }>
@@ -54,31 +74,46 @@ export const TOOL_BUILTINS = {
  * automatically.
  */
 export const COLLECTION_BUILTINS = {
-  count: { mcpName: 'countDocuments', tool: countDocumentsTool },
-  countVersions: { mcpName: 'countVersions', requiresVersions: true, tool: countVersionsTool },
-  create: { mcpName: 'createDocuments', tool: createDocumentsTool },
-  delete: { mcpName: 'deleteDocuments', tool: deleteDocumentsTool },
+  count: { mcpName: getMCPName('collection', 'count'), tool: countDocumentsTool },
+  countVersions: {
+    mcpName: getMCPName('collection', 'countVersions'),
+    requiresVersions: true,
+    tool: countVersionsTool,
+  },
+  create: { mcpName: getMCPName('collection', 'create'), tool: createDocumentsTool },
+  delete: { mcpName: getMCPName('collection', 'delete'), tool: deleteDocumentsTool },
   duplicate: {
-    mcpName: 'duplicateDocument',
+    mcpName: getMCPName('collection', 'duplicate'),
     requiresDuplicateEnabled: true,
     tool: duplicateDocumentTool,
   },
-  find: { mcpName: 'findDocuments', tool: findDocumentsTool },
-  findDistinct: { mcpName: 'findDistinct', tool: findDistinctTool },
+  find: { mcpName: getMCPName('collection', 'find'), tool: findDocumentsTool },
+  findDistinct: {
+    mcpName: getMCPName('collection', 'findDistinct'),
+    tool: findDistinctTool,
+  },
   findVersionByID: {
-    mcpName: 'findVersionByID',
+    mcpName: getMCPName('collection', 'findVersionByID'),
     requiresVersions: true,
     tool: findVersionByIDTool,
   },
-  findVersions: { mcpName: 'findVersions', requiresVersions: true, tool: findVersionsTool },
+  findVersions: {
+    mcpName: getMCPName('collection', 'findVersions'),
+    requiresVersions: true,
+    tool: findVersionsTool,
+  },
   getCollectionSchema: { mcpName: 'getCollectionSchema', tool: getCollectionSchemaTool },
   getUploadInstructions: {
-    mcpName: 'getUploadInstructions',
+    mcpName: getMCPName('upload', 'getInstructions'),
     requiresUpload: true,
     tool: getUploadInstructionsTool,
   },
-  restoreVersion: { mcpName: 'restoreVersion', requiresVersions: true, tool: restoreVersionTool },
-  update: { mcpName: 'updateDocument', tool: updateDocumentTool },
+  restoreVersion: {
+    mcpName: getMCPName('collection', 'restoreVersion'),
+    requiresVersions: true,
+    tool: restoreVersionTool,
+  },
+  update: { mcpName: getMCPName('collection', 'update'), tool: updateDocumentTool },
 } satisfies Record<string, CollectionBuiltin>
 
 /**
@@ -86,18 +121,18 @@ export const COLLECTION_BUILTINS = {
  * source of truth for `MCPCollectionAuthToolName`.
  */
 export const COLLECTION_AUTH_BUILTINS = {
-  auth: { mcpName: 'auth', tool: authCollectionTool },
+  auth: { mcpName: getMCPName('auth', 'auth'), tool: authCollectionTool },
   forgotPassword: {
-    mcpName: 'forgotPassword',
+    mcpName: getMCPName('auth', 'forgotPassword'),
     tool: forgotPasswordCollectionTool,
   },
-  login: { mcpName: 'login', tool: loginCollectionTool },
+  login: { mcpName: getMCPName('auth', 'login'), tool: loginCollectionTool },
   resetPassword: {
-    mcpName: 'resetPassword',
+    mcpName: getMCPName('auth', 'resetPassword'),
     tool: resetPasswordCollectionTool,
   },
-  unlock: { mcpName: 'unlock', tool: unlockCollectionTool },
-  verify: { mcpName: 'verify', tool: verifyCollectionTool },
+  unlock: { mcpName: getMCPName('auth', 'unlock'), tool: unlockCollectionTool },
+  verify: { mcpName: getMCPName('auth', 'verifyEmail'), tool: verifyCollectionTool },
 } satisfies Record<string, { mcpName: string; tool: CollectionTool }>
 
 /**
@@ -106,28 +141,28 @@ export const COLLECTION_AUTH_BUILTINS = {
  */
 export const GLOBAL_BUILTINS = {
   countGlobalVersions: {
-    mcpName: 'countGlobalVersions',
+    mcpName: getMCPName('global', 'countVersions'),
     requiresVersions: true,
     tool: countGlobalVersionsTool,
   },
-  find: { mcpName: 'findGlobal', tool: findGlobalTool },
+  find: { mcpName: getMCPName('global', 'find'), tool: findGlobalTool },
   findGlobalVersionByID: {
-    mcpName: 'findGlobalVersionByID',
+    mcpName: getMCPName('global', 'findVersionByID'),
     requiresVersions: true,
     tool: findGlobalVersionByIDTool,
   },
   findGlobalVersions: {
-    mcpName: 'findGlobalVersions',
+    mcpName: getMCPName('global', 'findVersions'),
     requiresVersions: true,
     tool: findGlobalVersionsTool,
   },
   getGlobalSchema: { mcpName: 'getGlobalSchema', tool: getGlobalSchemaTool },
   restoreGlobalVersion: {
-    mcpName: 'restoreGlobalVersion',
+    mcpName: getMCPName('global', 'restoreVersion'),
     requiresVersions: true,
     tool: restoreGlobalVersionTool,
   },
-  update: { mcpName: 'updateGlobal', tool: updateGlobalTool },
+  update: { mcpName: getMCPName('global', 'update'), tool: updateGlobalTool },
 } satisfies Record<string, GlobalBuiltin>
 
 export type MCPCollectionBuiltinName = keyof typeof COLLECTION_BUILTINS

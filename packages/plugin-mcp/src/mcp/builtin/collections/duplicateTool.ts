@@ -1,16 +1,12 @@
-import type { PopulateType, SelectType } from 'payload'
-
+import { getPayloadOperation, invokeOperation, type PopulateType, type SelectType } from 'payload'
 import { z } from 'zod'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import {
-  getCollectionVirtualFieldNames,
-  stripVirtualFields,
-} from '../../../utils/getVirtualFieldNames.js'
-import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { formatCollectionError } from './formatCollectionError.js'
+
+const duplicateOperation = getPayloadOperation('collection', 'duplicate')
 
 const DEFAULT_DESCRIPTION =
   'Duplicate a document in any collection by passing the collection slug and source document ID.'
@@ -26,55 +22,17 @@ export const duplicateDocumentTool = defineCollectionTool({
     title: 'Duplicate Document',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    id: z.union([z.string(), z.number()]).describe('The ID of the document to duplicate'),
-    data: z
-      .record(z.string(), z.unknown())
-      .describe('Optional: fields to override on the duplicated document')
-      .optional(),
-    depth: z
-      .number()
-      .int()
-      .min(0)
-      .max(10)
-      .describe('How many levels deep to populate relationships in response')
-      .optional()
-      .default(0),
-    draft: z
-      .boolean()
-      .describe('Whether to create the duplicate as a draft')
-      .optional()
-      .default(false),
-    fallbackLocale: z
-      .string()
-      .describe('Optional: fallback locale code to use when requested locale is not available')
-      .optional(),
-    locale: z
-      .string()
-      .describe(
-        'Optional: locale code to duplicate in (e.g., "en", "es"). Defaults to the default locale',
-      )
-      .optional(),
-    populate: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'Optional: control which fields to include from populated relationship or upload documents.',
-      )
-      .optional(),
-    select: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"title": true}',
-      )
-      .optional(),
-    selectedLocales: z
-      .array(z.string())
-      .describe('Optional: localized field locales to include in the duplicated document')
-      .optional(),
-    showHiddenFields: z
-      .boolean()
-      .describe('Optional: include hidden fields in the duplicated document response')
-      .optional(),
+  input: z.looseObject({
+    id: duplicateOperation.input.shape.id,
+    data: duplicateOperation.input.shape.data,
+    depth: duplicateOperation.input.shape.depth,
+    draft: duplicateOperation.input.shape.draft,
+    fallbackLocale: duplicateOperation.input.shape.fallbackLocale,
+    locale: duplicateOperation.input.shape.locale,
+    populate: duplicateOperation.input.shape.populate,
+    select: duplicateOperation.input.shape.select,
+    selectedLocales: duplicateOperation.input.shape.selectedLocales,
+    showHiddenFields: duplicateOperation.input.shape.showHiddenFields,
   }),
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
@@ -95,24 +53,23 @@ export const duplicateDocumentTool = defineCollectionTool({
   logger.info(`Duplicating document in collection: ${collectionSlug} with ID: ${id}`)
 
   try {
-    const virtualFieldNames = getCollectionVirtualFieldNames(payload.config, collectionSlug)
-    const inputData = data ? stripVirtualFields(data, virtualFieldNames) : undefined
-    const parsedData = inputData ? transformPointDataToPayload(inputData) : undefined
-
-    const result = await payload.duplicate({
-      id,
-      collection: collectionSlug,
-      depth,
-      draft,
-      overrideAccess: authorizedMCP.overrideAccess,
-      req,
-      ...(parsedData ? { data: parsedData } : {}),
-      ...(locale ? { locale } : {}),
-      ...(fallbackLocale ? { fallbackLocale } : {}),
-      ...(populate ? { populate: populate as PopulateType } : {}),
-      ...(select ? { select: select as SelectType } : {}),
-      ...(selectedLocales ? { selectedLocales } : {}),
-      ...(showHiddenFields !== undefined ? { showHiddenFields } : {}),
+    const result = await invokeOperation(duplicateOperation, {
+      context: payload,
+      input: {
+        id,
+        collection: collectionSlug,
+        depth,
+        draft,
+        overrideAccess: authorizedMCP.overrideAccess,
+        req,
+        ...(data ? { data } : {}),
+        ...(locale ? { locale } : {}),
+        ...(fallbackLocale ? { fallbackLocale } : {}),
+        ...(populate ? { populate: populate as PopulateType } : {}),
+        ...(select ? { select: select as SelectType } : {}),
+        ...(selectedLocales ? { selectedLocales } : {}),
+        ...(showHiddenFields !== undefined ? { showHiddenFields } : {}),
+      },
     })
 
     logger.info(`Successfully duplicated document in ${collectionSlug} from ID: ${id}`)

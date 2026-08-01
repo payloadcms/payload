@@ -1,8 +1,10 @@
 import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
 
-import { isolateObjectProperty, updateByIDOperation } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
@@ -50,16 +52,17 @@ export function updateResolver<TSlug extends CollectionSlug>(
     const options = {
       id: args.id,
       autosave: args.autosave,
-      collection,
+      collection: collection.config.slug,
       data: args.data as any,
       depth: 0,
       draft: args.draft,
+      overrideAccess: false,
       req: isolateObjectProperty(req, 'transactionID'),
       trash: args.trash,
     }
 
-    const result = await updateByIDOperation<TSlug>(options)
+    const result = await invokeGraphQLOperation(req, 'collection', 'update', options)
 
-    return result
+    return result as DataFromCollectionSlug<TSlug>
   }
 }

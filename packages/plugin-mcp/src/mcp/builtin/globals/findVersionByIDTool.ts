@@ -1,10 +1,10 @@
-import type { PopulateType, SelectType } from 'payload'
-
-import { z } from 'zod'
+import { getPayloadOperation, invokeOperation, type PopulateType, type SelectType } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
+
+const findGlobalVersionByIDOperation = getPayloadOperation('global', 'findVersionByID')
 
 const DEFAULT_DESCRIPTION =
   'Find a specific global version in any version-enabled global by passing the global slug and version ID.'
@@ -20,43 +20,7 @@ export const findGlobalVersionByIDTool = defineGlobalTool({
     title: 'Find Global Version By ID',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    id: z.string().describe('The ID of the global version to retrieve'),
-    depth: z
-      .number()
-      .int()
-      .min(0)
-      .max(10)
-      .describe('How many levels deep to populate relationships in the global version document')
-      .optional()
-      .default(0),
-    fallbackLocale: z
-      .string()
-      .describe('Optional: fallback locale code to use when requested locale is not available')
-      .optional(),
-    locale: z
-      .string()
-      .describe(
-        'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
-      )
-      .optional(),
-    populate: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'Optional: control which fields to include from populated relationship or upload documents.',
-      )
-      .optional(),
-    select: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"version.siteName": true}',
-      )
-      .optional(),
-    showHiddenFields: z
-      .boolean()
-      .describe('Optional: include hidden fields in the returned global version document')
-      .optional(),
-  }),
+  input: findGlobalVersionByIDOperation.input.omit({ slug: true }),
 }).handler(async ({ authorizedMCP, globalSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
@@ -65,17 +29,20 @@ export const findGlobalVersionByIDTool = defineGlobalTool({
   logger.info(`Finding version for global: ${globalSlug} with ID: ${id}`)
 
   try {
-    const result = await payload.findGlobalVersionByID({
-      id,
-      slug: globalSlug,
-      depth,
-      overrideAccess: authorizedMCP.overrideAccess,
-      req,
-      ...(fallbackLocale ? { fallbackLocale } : {}),
-      ...(locale ? { locale } : {}),
-      ...(populate ? { populate: populate as PopulateType } : {}),
-      ...(select ? { select: select as SelectType } : {}),
-      ...(showHiddenFields !== undefined ? { showHiddenFields } : {}),
+    const result = await invokeOperation(findGlobalVersionByIDOperation, {
+      context: payload,
+      input: {
+        id,
+        slug: globalSlug,
+        depth,
+        overrideAccess: authorizedMCP.overrideAccess,
+        req,
+        ...(fallbackLocale ? { fallbackLocale } : {}),
+        ...(locale ? { locale } : {}),
+        ...(populate ? { populate: populate as PopulateType } : {}),
+        ...(select ? { select: select as SelectType } : {}),
+        ...(showHiddenFields !== undefined ? { showHiddenFields } : {}),
+      },
     })
 
     return {

@@ -1,9 +1,10 @@
-import { z } from 'zod'
+import { getPayloadOperation, invokeOperation } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import { whereSchema } from '../../../utils/whereSchema.js'
+
+const countVersionsOperation = getPayloadOperation('collection', 'countVersions')
 
 const DEFAULT_DESCRIPTION =
   'Count document versions in any version-enabled collection by passing the collection slug and optional where clause.'
@@ -20,14 +21,7 @@ export const countVersionsTool = defineCollectionTool({
     title: 'Count Versions',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    locale: z.string().describe('Optional: locale code to count versions in').optional(),
-    where: whereSchema
-      .describe(
-        'Optional: where clause for filtering versions. Version document fields are usually under "version". Example: {"version.title":{"contains":"test"}}',
-      )
-      .optional(),
-  }),
+  input: countVersionsOperation.input.omit({ collection: true }),
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
@@ -36,12 +30,15 @@ export const countVersionsTool = defineCollectionTool({
   logger.info(`Counting versions in collection: ${collectionSlug}`)
 
   try {
-    const result = await payload.countVersions({
-      collection: collectionSlug,
-      overrideAccess: authorizedMCP.overrideAccess,
-      req,
-      ...(locale ? { locale } : {}),
-      ...(where ? { where } : {}),
+    const result = await invokeOperation(countVersionsOperation, {
+      context: payload,
+      input: {
+        collection: collectionSlug,
+        overrideAccess: authorizedMCP.overrideAccess,
+        req,
+        ...(locale ? { locale } : {}),
+        ...(where ? { where } : {}),
+      },
     })
 
     return {

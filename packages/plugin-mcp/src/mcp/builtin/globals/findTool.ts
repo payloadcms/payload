@@ -1,10 +1,10 @@
-import type { PopulateType, SelectType } from 'payload'
-
-import { z } from 'zod'
+import { getPayloadOperation, invokeOperation, type PopulateType, type SelectType } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
+
+const findGlobalOperation = getPayloadOperation('global', 'find')
 
 const DEFAULT_DESCRIPTION = 'Find any Payload global by passing the global slug.'
 
@@ -19,38 +19,7 @@ export const findGlobalTool = defineGlobalTool({
     title: 'Find Global',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    depth: z
-      .number()
-      .int()
-      .min(0)
-      .max(10)
-      .describe('Depth of population for relationships')
-      .optional()
-      .default(0),
-    fallbackLocale: z
-      .string()
-      .describe('Optional: fallback locale code to use when requested locale is not available')
-      .optional(),
-    locale: z
-      .string()
-      .describe(
-        'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
-      )
-      .optional(),
-    populate: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'Optional: control which fields to include from populated relationship or upload documents.',
-      )
-      .optional(),
-    select: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"title": true}',
-      )
-      .optional(),
-  }),
+  input: findGlobalOperation.input.omit({ slug: true }),
 }).handler(async ({ authorizedMCP, globalSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
@@ -82,7 +51,10 @@ export const findGlobalTool = defineGlobalTool({
       findOptions.populate = populate as PopulateType
     }
 
-    const result = await payload.findGlobal(findOptions)
+    const result = await invokeOperation(findGlobalOperation, {
+      context: payload,
+      input: findOptions as never,
+    })
 
     return {
       content: [

@@ -1,11 +1,12 @@
 import type { GraphQLResolveInfo } from 'graphql'
 import type { Document, SanitizedGlobalConfig } from 'payload'
 
-import { findVersionByIDOperationGlobal, isolateObjectProperty } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
 
 import { buildSelectForCollection } from '../../utilities/select.js'
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 export type Resolver = (
   _: unknown,
@@ -17,13 +18,17 @@ export type Resolver = (
     select?: boolean
   },
   context: Context,
-  info: GraphQLResolveInfo
+  info: GraphQLResolveInfo,
 ) => Promise<Document>
 
 export function findVersionByID(globalConfig: SanitizedGlobalConfig): Resolver {
   return async function resolver(_, args, context, info) {
-    const req = context.req = isolateObjectProperty(context.req, ['locale', 'fallbackLocale', 'transactionID'])
-    const select = context.select = args.select ? buildSelectForCollection(info) : undefined
+    const req = (context.req = isolateObjectProperty(context.req, [
+      'locale',
+      'fallbackLocale',
+      'transactionID',
+    ]))
+    const select = (context.select = args.select ? buildSelectForCollection(info) : undefined)
 
     req.locale = args.locale || req.locale
     req.fallbackLocale = args.fallbackLocale || req.fallbackLocale
@@ -31,14 +36,15 @@ export function findVersionByID(globalConfig: SanitizedGlobalConfig): Resolver {
 
     const options = {
       id: args.id,
+      slug: globalConfig.slug,
       depth: 0,
       draft: args.draft,
-      globalConfig,
+      overrideAccess: false,
       req,
       select,
     }
 
-    const result = await findVersionByIDOperationGlobal(options)
+    const result = await invokeGraphQLOperation(req, 'global', 'findVersionByID', options)
     return result
   }
 }

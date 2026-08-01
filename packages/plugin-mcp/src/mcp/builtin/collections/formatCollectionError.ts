@@ -1,4 +1,4 @@
-import type { CollectionSlug, PayloadRequest } from 'payload'
+import { type CollectionSlug, OperationValidationError, type PayloadRequest } from 'payload'
 
 import type { MCPToolResponse } from '../../../types.js'
 
@@ -18,6 +18,9 @@ const getValidationErrors = (error: unknown): undefined | unknown[] => {
 }
 
 const isSchemaError = (error: unknown, message: string): boolean => {
+  if (error instanceof OperationValidationError) {
+    return true
+  }
   if (getValidationErrors(error)) {
     return true
   }

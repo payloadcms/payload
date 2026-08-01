@@ -5,15 +5,13 @@ import type { Payload } from '../types/index.js'
 export const logError = ({ err, payload }: { err: unknown; payload: Payload }): void => {
   let level: false | pino.Level = 'error'
 
-  if (
-    err &&
-    typeof err === 'object' &&
-    'name' in err &&
-    typeof err.name === 'string' &&
-    typeof payload.config.loggingLevels[err.name as keyof typeof payload.config.loggingLevels] !==
-      'undefined'
-  ) {
-    level = payload.config.loggingLevels[err.name as keyof typeof payload.config.loggingLevels]
+  if (err && typeof err === 'object' && 'name' in err && typeof err.name === 'string') {
+    const configuredLevel =
+      payload.config.loggingLevels[err.name as keyof typeof payload.config.loggingLevels]
+
+    if (typeof configuredLevel !== 'undefined') {
+      level = configuredLevel
+    }
   }
 
   if (level) {

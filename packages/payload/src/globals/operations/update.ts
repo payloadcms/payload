@@ -1,7 +1,19 @@
+import type { I18n } from '@payloadcms/translations'
 import type { DeepPartial } from 'ts-essentials'
 
-import type { FindOptions } from '../../collections/operations/local/find.js'
-import type { GlobalSlug, JsonObject } from '../../index.js'
+import { z } from 'zod'
+
+import type { SanitizedGlobalPermission } from '../../auth/types.js'
+import type { FindOptions } from '../../collections/operations/find.js'
+import type {
+  GlobalSlug,
+  JsonObject,
+  Payload,
+  RequestContext,
+  TypedLocale,
+  User,
+} from '../../index.js'
+import type { LocalAPIOptions } from '../../operations/localAPI.js'
 import type {
   Operation,
   PayloadRequest,
@@ -10,20 +22,31 @@ import type {
   TransformGlobalWithSelect,
   Where,
 } from '../../types/index.js'
+import type { CreateLocalReqOptions } from '../../utilities/createLocalReq.js'
 import type {
   DataFromGlobalSlug,
+  DraftFlagFromGlobalSlug,
   SanitizedGlobalConfig,
   SelectFromGlobalSlug,
 } from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { APIError } from '../../errors/index.js'
 import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
 import { deepCopyObjectSimple } from '../../index.js'
+import { defineLocalAPI, defineOperation } from '../../operations/defineOperation.js'
+import {
+  getGlobalOperationInputSchema,
+  validateGlobalOperationData,
+} from '../../operations/entitySchema.js'
+import { prepareGlobalOperationData } from '../../operations/prepareData.js'
+import { dataSchema, globalInput } from '../../operations/schemaFields.js'
 import { checkDocumentLockStatus } from '../../utilities/checkDocumentLockStatus.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import {
   hasDraftsEnabled,
@@ -37,6 +60,7 @@ import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { buildLocalizedPublishData } from '../../versions/buildSingleLocalePublishData.js'
 import { getLatestGlobalVersion } from '../../versions/getLatestGlobalVersion.js'
 import { saveVersion } from '../../versions/saveVersion.js'
+
 type Args<TSlug extends GlobalSlug> = {
   autosave?: boolean
   data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
@@ -52,9 +76,9 @@ type Args<TSlug extends GlobalSlug> = {
   showHiddenFields?: boolean
   slug: string
   unpublishAllLocales?: boolean
-} & Pick<FindOptions<string, SelectType>, 'select'>
+} & Pick<FindOptions<string, TSelect>, 'select'>
 
-export const updateOperation = async <
+const updateGlobalDocument = async <
   TSlug extends GlobalSlug,
   TSelect extends SelectFromGlobalSlug<TSlug>,
 >(
@@ -498,4 +522,197 @@ export const updateOperation = async <
     await killTransaction(req)
     throw error
   }
+}
+
+type UpdateGlobalLocalMethod = <
+  TSlug extends GlobalSlug,
+  TSelect extends SelectFromGlobalSlug<TSlug>,
+>(
+  options: LocalAPIOptions<UpdateGlobalOptions<TSlug, TSelect>>,
+) => Promise<TransformGlobalWithSelect<TSlug, TSelect>>
+
+const updateGlobalSchema = z
+  .looseObject({
+    ...globalInput,
+    autosave: z.boolean().optional(),
+    data: dataSchema.describe('Global data'),
+    draft: z.boolean().describe('Save the global as a draft').optional().default(false),
+  })
+  .overwrite((input) => {
+    const payload = (input.req as PayloadRequest | undefined)?.payload
+
+    if (!payload) {
+      return input
+    }
+
+    const data = prepareGlobalOperationData({
+      config: payload.config,
+      data: input.data,
+      global: input.slug,
+    })
+
+    validateGlobalOperationData({
+      data,
+      global: input.slug,
+      i18n: (input.req as { i18n?: I18n } | undefined)?.i18n,
+      payload,
+    })
+
+    return { ...input, data }
+  })
+
+export const updateGlobalLocalAPI = defineLocalAPI<UpdateGlobalLocalMethod>()({
+  name: 'updateGlobal',
+})
+
+export const update = defineOperation({
+  action: 'update',
+  expose: {
+    local: updateGlobalLocalAPI,
+    mcp: { name: 'updateGlobal' },
+    rest: [
+      {
+        method: 'post',
+        path: '/',
+      },
+    ],
+  },
+  getDataSchema: ({ context: payload, input, permissions }) =>
+    getGlobalOperationInputSchema({
+      global: input.slug,
+      i18n: (input.req as { i18n?: I18n } | undefined)?.i18n,
+      payload,
+      permissions: permissions as SanitizedGlobalPermission | undefined,
+    }),
+  handler: updateGlobalHandler,
+  input: updateGlobalSchema,
+  target: 'global',
+})
+
+type UpdateGlobalOptionsBase<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+  /**
+   * Whether the current update should be marked as from autosave.
+   * `versions.drafts.autosave` should be specified.
+   */
+  autosave?: boolean
+  /**
+   * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
+   * which can be read by hooks. Useful if you want to pass additional information to the hooks which
+   * shouldn't be necessarily part of the document, for example a `triggerBeforeChange` option which can be read by the BeforeChange hook
+   * to determine if it should run or not.
+   */
+  context?: RequestContext
+  /**
+   * The global data to update.
+   */
+  data: DeepPartial<Omit<DataFromGlobalSlug<TSlug>, 'id'>>
+  /**
+   * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
+   */
+  depth?: number
+  /**
+   * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
+   */
+  fallbackLocale?: false | TypedLocale
+  /**
+   * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
+   */
+  locale?: 'all' | TypedLocale
+  /**
+   * Skip access control.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
+   * @default true
+   */
+  overrideAccess?: boolean
+  /**
+   * If you are uploading a file and would like to replace
+   * the existing file instead of generating a new filename,
+   * you can set the following property to `true`
+   */
+  overrideLock?: boolean
+  /**
+   * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
+   */
+  populate?: PopulateType
+  /**
+   * Publish the document / documents in all locales. Only applies when localization is enabled
+   * and the global has localized fields.
+   *
+   * @default undefined
+   */
+  publishAllLocales?: boolean
+  /**
+   * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
+   * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
+   */
+  req?: Partial<PayloadRequest>
+  /**
+   * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
+   * @default false
+   */
+  showHiddenFields?: boolean
+  /**
+   * the Global slug to operate against.
+   */
+  slug: TSlug
+  /**
+   * Unpublish the document / documents in all locales. Only applies when localization is enabled
+   * and the global has localized fields.
+   */
+  unpublishAllLocales?: boolean
+  /**
+   * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
+   */
+  user?: null | User
+} & Pick<FindOptions<string, SelectType>, 'select'>
+
+export type UpdateGlobalOptions<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectType,
+> = DraftFlagFromGlobalSlug<TSlug> & UpdateGlobalOptionsBase<TSlug, TSelect>
+
+async function updateGlobalHandler<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectFromGlobalSlug<TSlug>,
+>(
+  payload: Payload,
+  options: UpdateGlobalOptions<TSlug, TSelect>,
+): Promise<TransformGlobalWithSelect<TSlug, TSelect>> {
+  const {
+    slug: globalSlug,
+    autosave,
+    data,
+    depth,
+    draft,
+    overrideAccess = true,
+    overrideLock,
+    populate,
+    publishAllLocales,
+    select,
+    showHiddenFields,
+    unpublishAllLocales,
+  } = options
+
+  const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
+
+  if (!globalConfig) {
+    throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
+  }
+
+  return updateGlobalDocument<TSlug, TSelect>({
+    slug: globalSlug as string,
+    autosave,
+    data: deepCopyObjectSimple(data), // Ensure mutation of data in create operation hooks doesn't affect the original data
+    depth,
+    draft,
+    globalConfig,
+    overrideAccess,
+    overrideLock,
+    populate,
+    publishAllLocales,
+    req: await createLocalReq(options as CreateLocalReqOptions, payload),
+    select,
+    showHiddenFields,
+    unpublishAllLocales,
+  })
 }

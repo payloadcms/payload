@@ -6,9 +6,11 @@ import type {
   RequiredDataFromCollectionSlug,
 } from 'payload'
 
-import { createOperation, isolateObjectProperty } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
@@ -30,12 +32,14 @@ export function createResolver<TSlug extends CollectionSlug>(
       context.req.locale = args.locale
     }
 
-    const result = await createOperation({
-      collection,
+    const req = isolateObjectProperty(context.req, 'transactionID')
+    const result = await invokeGraphQLOperation(req, 'collection', 'create', {
+      collection: collection.config.slug,
       data: args.data,
       depth: 0,
       draft: args.draft,
-      req: isolateObjectProperty(context.req, 'transactionID'),
+      overrideAccess: false,
+      req,
     })
 
     return result

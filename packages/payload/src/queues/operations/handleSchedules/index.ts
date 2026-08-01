@@ -1,10 +1,14 @@
 import { Cron } from 'croner'
+import { z } from 'zod'
 
-import type { Job, TaskConfig, WorkflowConfig } from '../../../index.js'
+import type { Job, Payload, TaskConfig, WorkflowConfig } from '../../../index.js'
 import type { PayloadRequest } from '../../../types/index.js'
 import type { BeforeScheduleFn, Queueable, ScheduleConfig } from '../../config/types/index.js'
 
+import { defineOperation } from '../../../operations/defineOperation.js'
+import { requestSchema } from '../../../operations/schemaFields.js'
 import { type JobStats, jobStatsGlobalSlug } from '../../config/global.js'
+import { configHasJobs } from '../configHasJobs.js'
 import { defaultAfterSchedule } from './defaultAfterSchedule.js'
 import { defaultBeforeSchedule } from './defaultBeforeSchedule.js'
 import { getQueuesWithSchedules } from './getQueuesWithSchedules.js'
@@ -22,7 +26,7 @@ export type HandleSchedulesResult = {
  * The benefit of doing it like this instead of a separate endpoint is that we can run jobs immediately
  * after they are scheduled
  */
-export async function handleSchedules({
+async function scheduleJobs({
   allQueues = false,
   queue: _queue,
   req,
@@ -121,6 +125,68 @@ export async function handleSchedules({
     skipped,
   }
 }
+
+const handleSchedulesSchema = z.looseObject({
+  allQueues: z.boolean().optional().default(false),
+  queue: z.string().optional(),
+  req: requestSchema,
+})
+
+export const handleSchedules = defineOperation({
+  action: 'handleSchedules',
+  expose: {
+    rest: [
+      {
+        handler: async ({ invoke, req }) => {
+          const jobsConfig = req.payload.config.jobs
+
+          if (!configHasJobs(jobsConfig)) {
+            return Response.json({ message: 'No jobs to schedule.' }, { status: 200 })
+          }
+
+          const accessFn = jobsConfig.access?.run ?? (() => true)
+          if (!(await accessFn({ req }))) {
+            return Response.json({ message: req.i18n.t('error:unauthorized') }, { status: 401 })
+          }
+
+          if (!jobsConfig.scheduling) {
+            return Response.json(
+              {
+                message:
+                  'Cannot handle schedules because no tasks or workflows with schedules are defined.',
+              },
+              { status: 500 },
+            )
+          }
+
+          const { allQueues, queue } = req.query as {
+            allQueues?: 'false' | 'true'
+            queue?: string
+          }
+          const result = await invoke({
+            context: req.payload,
+            input: {
+              allQueues: Boolean(allQueues && allQueues !== 'false'),
+              queue,
+              req,
+            },
+            validate: false,
+          })
+
+          return Response.json(
+            { ...result, message: req.i18n.t('general:success') },
+            { status: 200 },
+          )
+        },
+        method: 'get',
+        path: '/handle-schedules',
+      },
+    ],
+  },
+  handler: (_payload: Payload, input: Parameters<typeof scheduleJobs>[0]) => scheduleJobs(input),
+  input: handleSchedulesSchema,
+  target: 'jobs',
+})
 
 export function checkQueueableTimeConstraints({
   queue,

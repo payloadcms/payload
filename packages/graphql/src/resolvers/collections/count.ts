@@ -1,8 +1,10 @@
 import type { Collection, PayloadRequest, Where } from 'payload'
 
-import { countOperation, isolateObjectProperty } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 export type Resolver = (
   _: unknown,
@@ -29,13 +31,14 @@ export function countResolver(collection: Collection): Resolver {
     context.req = req
 
     const options = {
-      collection,
+      collection: collection.config.slug,
+      overrideAccess: false,
       req: isolateObjectProperty(req, 'transactionID'),
       trash: args.trash,
       where: args.where,
     }
 
-    const results = await countOperation(options)
+    const results = await invokeGraphQLOperation(req, 'collection', 'count', options)
     return results
   }
 }

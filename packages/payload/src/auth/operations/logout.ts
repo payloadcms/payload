@@ -1,21 +1,29 @@
 import { status as httpStatus } from 'http-status'
+import { z } from 'zod'
 
 import type { Collection } from '../../collections/config/types.js'
+import type { Payload } from '../../index.js'
 import type { PayloadRequest } from '../../types/index.js'
 
 import { APIError } from '../../errors/index.js'
+import { defineOperation } from '../../operations/defineOperation.js'
+import { collectionSchema, requestSchema } from '../../operations/schemaFields.js'
 import { appendNonTrashedFilter } from '../../utilities/appendNonTrashedFilter.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { getRequestCollection } from '../../utilities/getRequestEntity.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
+import { generateExpiredPayloadCookie } from '../cookies.js'
+import { getAuthCollection } from './getAuthCollection.js'
 
-export type Arguments = {
+export type LogoutArgs = {
   allSessions?: boolean
   collection: Collection
   req: PayloadRequest
 }
 
-export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean> => {
+const logOutUser = async (incomingArgs: LogoutArgs): Promise<boolean> => {
   let args = incomingArgs
   const {
     allSessions,
@@ -101,3 +109,59 @@ export const logoutOperation = async (incomingArgs: Arguments): Promise<boolean>
     throw error
   }
 }
+
+const logoutSchema = z.looseObject({
+  allSessions: z.boolean().optional(),
+  collection: collectionSchema,
+  req: requestSchema,
+})
+
+export const logout = defineOperation({
+  action: 'logout',
+  expose: {
+    rest: [
+      {
+        handler: async ({ invoke, req }) => {
+          const collection = getRequestCollection(req)
+          const result = await invoke({
+            context: req.payload,
+            input: {
+              allSessions: req.searchParams.get('allSessions') === 'true',
+              collection: collection.config.slug,
+              req,
+            },
+            validate: false,
+          })
+          const headers = headersWithCors({ headers: new Headers(), req })
+
+          if (!result) {
+            return Response.json(
+              { message: req.t('error:logoutFailed') },
+              { headers, status: httpStatus.BAD_REQUEST },
+            )
+          }
+
+          headers.set(
+            'Set-Cookie',
+            generateExpiredPayloadCookie({
+              collectionAuthConfig: collection.config.auth,
+              config: req.payload.config,
+              cookiePrefix: req.payload.config.cookiePrefix,
+            }),
+          )
+
+          return Response.json(
+            { message: req.t('authentication:logoutSuccessful') },
+            { headers, status: httpStatus.OK },
+          )
+        },
+        method: 'post',
+        path: '/logout',
+      },
+    ],
+  },
+  handler: (payload: Payload, input: { collection: string } & Omit<LogoutArgs, 'collection'>) =>
+    logOutUser({ ...input, collection: getAuthCollection(payload, input.collection) }),
+  input: logoutSchema,
+  target: 'auth',
+})

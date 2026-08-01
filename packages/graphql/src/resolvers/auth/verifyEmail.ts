@@ -1,8 +1,10 @@
 import type { Collection } from 'payload'
 
-import { isolateObjectProperty, verifyEmailOperation } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 export function verifyEmail(collection: Collection) {
   async function resolver(_, args, context: Context) {
@@ -15,12 +17,12 @@ export function verifyEmail(collection: Collection) {
 
     const options = {
       api: 'GraphQL',
-      collection,
+      collection: collection.config.slug,
       req: isolateObjectProperty(context.req, 'transactionID'),
       token: args.token,
     }
 
-    const success = await verifyEmailOperation(options)
+    const success = await invokeGraphQLOperation(options.req, 'auth', 'verifyEmail', options)
     return success
   }
 

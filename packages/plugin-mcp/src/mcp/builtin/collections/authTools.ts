@@ -1,9 +1,17 @@
+import { getPayloadOperation, invokeOperation } from 'payload'
 import { z } from 'zod'
 
 import type { MCPToolResponse } from '../../../types.js'
 
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
+
+const authOperation = getPayloadOperation('auth', 'auth')
+const forgotPasswordOperation = getPayloadOperation('auth', 'forgotPassword')
+const loginOperation = getPayloadOperation('auth', 'login')
+const resetPasswordOperation = getPayloadOperation('auth', 'resetPassword')
+const unlockOperation = getPayloadOperation('auth', 'unlock')
+const verifyEmailOperation = getPayloadOperation('auth', 'verifyEmail')
 
 /**
  * Auth tools surfaced under `collections.<auth-collection>.tools`. Opt-in: they
@@ -53,7 +61,12 @@ export const authCollectionTool = defineCollectionTool({
     if (input.headers) {
       authHeaders = new Headers(input.headers)
     }
-    const result = await req.payload.auth({ headers: authHeaders })
+    const result = await invokeOperation(authOperation, {
+      context: req.payload,
+      input: {
+        headers: authHeaders,
+      },
+    })
     return {
       content: [
         {
@@ -90,10 +103,13 @@ export const forgotPasswordCollectionTool = defineCollectionTool({
 }).handler(async ({ collectionSlug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
-    const result = await req.payload.forgotPassword({
-      collection: collectionSlug,
-      data: { email: input.email },
-      disableEmail: input.disableEmail,
+    const result = await invokeOperation(forgotPasswordOperation, {
+      context: req.payload,
+      input: {
+        collection: collectionSlug,
+        data: { email: input.email },
+        disableEmail: input.disableEmail,
+      },
     })
     return {
       content: [
@@ -140,12 +156,18 @@ export const loginCollectionTool = defineCollectionTool({
 }).handler(async ({ collectionSlug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
-    const result = await req.payload.login({
-      collection: collectionSlug,
-      data: { email: input.email, password: input.password },
-      depth: input.depth,
-      showHiddenFields: input.showHiddenFields,
+    const result = await invokeOperation(loginOperation, {
+      context: req.payload,
+      input: {
+        collection: collectionSlug,
+        data: { email: input.email, password: input.password },
+        depth: input.depth,
+        showHiddenFields: input.showHiddenFields,
+      },
     })
+    if (req.payload.collections[collectionSlug]?.config.auth.removeTokenFromResponses) {
+      delete result.token
+    }
     return {
       content: [
         {
@@ -178,11 +200,17 @@ export const resetPasswordCollectionTool = defineCollectionTool({
 }).handler(async ({ collectionSlug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
-    const result = await req.payload.resetPassword({
-      collection: collectionSlug,
-      data: { password: input.password, token: input.token },
-      overrideAccess: true,
+    const result = await invokeOperation(resetPasswordOperation, {
+      context: req.payload,
+      input: {
+        collection: collectionSlug,
+        data: { password: input.password, token: input.token },
+        overrideAccess: true,
+      },
     })
+    if (req.payload.collections[collectionSlug]?.config.auth.removeTokenFromResponses) {
+      delete result.token
+    }
     return {
       content: [
         {
@@ -212,10 +240,13 @@ export const unlockCollectionTool = defineCollectionTool({
 }).handler(async ({ collectionSlug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
-    const result = await req.payload.unlock({
-      collection: collectionSlug,
-      data: { email: input.email },
-      overrideAccess: true,
+    const result = await invokeOperation(unlockOperation, {
+      context: req.payload,
+      input: {
+        collection: collectionSlug,
+        data: { email: input.email },
+        overrideAccess: true,
+      },
     })
     return {
       content: [
@@ -248,9 +279,12 @@ export const verifyCollectionTool = defineCollectionTool({
 }).handler(async ({ collectionSlug, input, req }) => {
   const logger = getLogger({ payload: req.payload })
   try {
-    const result = await req.payload.verifyEmail({
-      collection: collectionSlug,
-      token: input.token,
+    const result = await invokeOperation(verifyEmailOperation, {
+      context: req.payload,
+      input: {
+        collection: collectionSlug,
+        token: input.token,
+      },
     })
     return {
       content: [

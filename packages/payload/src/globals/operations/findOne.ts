@@ -1,7 +1,17 @@
-import { ar } from '@payloadcms/translations/languages/ar'
+import { z } from 'zod'
 
-import type { FindOptions } from '../../collections/operations/local/find.js'
+import type { FindOptions } from '../../collections/operations/find.js'
 import type { AccessResult } from '../../config/types.js'
+import type {
+  GlobalSlug,
+  Payload,
+  RequestContext,
+  TransformGlobalWithSelect,
+  TypedFallbackLocale,
+  TypedLocale,
+  User,
+} from '../../index.js'
+import type { LocalAPIOptions } from '../../operations/localAPI.js'
 import type {
   JsonObject,
   PayloadRequest,
@@ -9,12 +19,21 @@ import type {
   SelectType,
   Where,
 } from '../../types/index.js'
-import type { SanitizedGlobalConfig } from '../config/types.js'
+import type { CreateLocalReqOptions } from '../../utilities/createLocalReq.js'
+import type {
+  DraftFlagFromGlobalSlug,
+  SanitizedGlobalConfig,
+  SelectFromGlobalSlug,
+} from '../config/types.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
+import { APIError } from '../../errors/index.js'
 import { NotFound } from '../../errors/NotFound.js'
 import { afterRead, type AfterReadArgs } from '../../fields/hooks/afterRead/index.js'
 import { lockedDocumentsCollectionSlug } from '../../locked-documents/config.js'
+import { defineLocalAPI, defineOperation } from '../../operations/defineOperation.js'
+import { globalInput } from '../../operations/schemaFields.js'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
 import { getSelectMode } from '../../utilities/getSelectMode.js'
 import { hasDraftsEnabled } from '../../utilities/getVersionsConfig.js'
 import { killTransaction } from '../../utilities/killTransaction.js'
@@ -22,7 +41,7 @@ import { resolveSelect } from '../../utilities/resolveSelect.js'
 import { sanitizeSelect } from '../../utilities/sanitizeSelect.js'
 import { replaceWithDraftIfAvailable } from '../../versions/drafts/replaceWithDraftIfAvailable.js'
 
-export type GlobalFindOneArgs = {
+type FindGlobalDocumentArgs = {
   /**
    * You may pass the document data directly which will skip the `db.findOne` database query.
    * This is useful if you want to use this endpoint solely for running hooks and populating data.
@@ -39,10 +58,10 @@ export type GlobalFindOneArgs = {
   showHiddenFields?: boolean
   slug: string
 } & Pick<AfterReadArgs<JsonObject>, 'flattenLocales'> &
-  Pick<FindOptions<string, SelectType>, 'select'>
+  Pick<FindOptions<string, TSelect>, 'select'>
 
-export const findOneOperation = async <T extends Record<string, unknown>>(
-  args: GlobalFindOneArgs,
+const findGlobalDocument = async <T extends Record<string, unknown>>(
+  args: FindGlobalDocumentArgs,
 ): Promise<T> => {
   const {
     slug,
@@ -285,3 +304,143 @@ export const findOneOperation = async <T extends Record<string, unknown>>(
     throw error
   }
 }
+
+type FindGlobalLocalMethod = <
+  TSlug extends GlobalSlug,
+  TSelect extends SelectFromGlobalSlug<TSlug>,
+>(
+  options: LocalAPIOptions<FindGlobalOptions<TSlug, TSelect>>,
+) => Promise<TransformGlobalWithSelect<TSlug, TSelect>>
+
+const findGlobalSchema = z.looseObject(globalInput)
+
+export const findGlobalLocalAPI = defineLocalAPI<FindGlobalLocalMethod>()({ name: 'findGlobal' })
+
+export const find = defineOperation({
+  action: 'find',
+  expose: {
+    local: findGlobalLocalAPI,
+    mcp: { name: 'findGlobal' },
+    rest: [
+      {
+        method: 'get',
+        path: '/',
+      },
+    ],
+  },
+  handler: async <TSlug extends GlobalSlug, TSelect extends SelectFromGlobalSlug<TSlug>>(
+    payload: Payload,
+    options: FindGlobalOptions<TSlug, TSelect>,
+  ): Promise<TransformGlobalWithSelect<TSlug, TSelect>> => {
+    const {
+      slug: globalSlug,
+      data,
+      depth,
+      disableErrors,
+      draft = false,
+      flattenLocales,
+      includeLockStatus,
+      overrideAccess = true,
+      populate,
+      select,
+      showHiddenFields,
+    } = options
+
+    const globalConfig = payload.globals.config.find((config) => config.slug === globalSlug)
+
+    if (!globalConfig) {
+      throw new APIError(`The global with slug ${String(globalSlug)} can't be found.`)
+    }
+
+    return findGlobalDocument({
+      slug: globalSlug as string,
+      data,
+      depth,
+      disableErrors,
+      draft,
+      flattenLocales,
+      globalConfig,
+      includeLockStatus,
+      overrideAccess,
+      populate,
+      req: await createLocalReq(options as CreateLocalReqOptions, payload),
+      select,
+      showHiddenFields,
+    })
+  },
+  input: findGlobalSchema,
+  target: 'global',
+})
+
+type FindGlobalOptionsBase<TSlug extends GlobalSlug, TSelect extends SelectType> = {
+  /**
+   * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
+   * which can be read by hooks. Useful if you want to pass additional information to the hooks which
+   * shouldn't be necessarily part of the document, for example a `triggerBeforeChange` option which can be read by the BeforeChange hook
+   * to determine if it should run or not.
+   */
+  context?: RequestContext
+  /**
+   * You may pass the document data directly which will skip the `db.findOne` database query.
+   * This is useful if you want to use this endpoint solely for running hooks and populating data.
+   */
+  data?: Record<string, unknown>
+  /**
+   * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
+   */
+  depth?: number
+  /**
+   * When set to `true`, errors will not be thrown.
+   */
+  disableErrors?: boolean
+  /**
+   * Whether the document should be queried from the versions table/collection or not. [More](https://payloadcms.com/docs/versions/drafts#draft-api)
+   */
+  draft?: boolean
+  /**
+   * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
+   */
+  fallbackLocale?: TypedFallbackLocale
+  /**
+   * Include info about the lock status to the result with fields: `_isLocked` and `_userEditing`
+   */
+  includeLockStatus?: boolean
+  /**
+   * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
+   */
+  locale?: 'all' | TypedLocale
+  /**
+   * Skip access control.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
+   * @default true
+   */
+  overrideAccess?: boolean
+  /**
+   * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
+   */
+  populate?: PopulateType
+  /**
+   * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
+   * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
+   */
+  req?: Partial<PayloadRequest>
+  /**
+   * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
+   * @default false
+   */
+  showHiddenFields?: boolean
+  /**
+   * the Global slug to operate against.
+   */
+  slug: TSlug
+  /**
+   * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
+   */
+  user?: null | User
+} & Pick<FindGlobalDocumentArgs, 'flattenLocales'> &
+  Pick<FindOptions<string, SelectType>, 'select'>
+
+export type FindGlobalOptions<
+  TSlug extends GlobalSlug,
+  TSelect extends SelectType,
+> = DraftFlagFromGlobalSlug<TSlug> & FindGlobalOptionsBase<TSlug, TSelect>

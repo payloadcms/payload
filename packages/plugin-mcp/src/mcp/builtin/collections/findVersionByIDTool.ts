@@ -1,10 +1,10 @@
-import type { PopulateType, SelectType } from 'payload'
-
-import { z } from 'zod'
+import { getPayloadOperation, invokeOperation, type PopulateType, type SelectType } from 'payload'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
+
+const findVersionByIDOperation = getPayloadOperation('collection', 'findVersionByID')
 
 const DEFAULT_DESCRIPTION =
   'Find a specific document version in any version-enabled collection by passing the collection slug and version ID.'
@@ -21,47 +21,7 @@ export const findVersionByIDTool = defineCollectionTool({
     title: 'Find Version By ID',
   },
   description: DEFAULT_DESCRIPTION,
-  input: z.object({
-    id: z.string().describe('The ID of the version to retrieve'),
-    depth: z
-      .number()
-      .int()
-      .min(0)
-      .max(10)
-      .describe('How many levels deep to populate relationships in the version document')
-      .optional()
-      .default(0),
-    fallbackLocale: z
-      .string()
-      .describe('Optional: fallback locale code to use when requested locale is not available')
-      .optional(),
-    locale: z
-      .string()
-      .describe(
-        'Optional: locale code to retrieve data in (e.g., "en", "es"). Use "all" to retrieve all locales for localized fields',
-      )
-      .optional(),
-    populate: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'Optional: control which fields to include from populated relationship or upload documents.',
-      )
-      .optional(),
-    select: z
-      .record(z.string(), z.unknown())
-      .describe(
-        'Optional: define exactly which fields you\'d like to return in the response, e.g., {"version.title": true}',
-      )
-      .optional(),
-    showHiddenFields: z
-      .boolean()
-      .describe('Optional: include hidden fields in the returned version document')
-      .optional(),
-    trash: z
-      .boolean()
-      .describe('Optional: include soft-deleted version documents when trash is enabled')
-      .optional(),
-  }),
+  input: findVersionByIDOperation.input.omit({ collection: true }),
 }).handler(async ({ authorizedMCP, collectionSlug, input, req }) => {
   const payload = req.payload
   const logger = getLogger({ payload })
@@ -70,18 +30,21 @@ export const findVersionByIDTool = defineCollectionTool({
   logger.info(`Finding version in collection: ${collectionSlug} with ID: ${id}`)
 
   try {
-    const result = await payload.findVersionByID({
-      id,
-      collection: collectionSlug,
-      depth,
-      overrideAccess: authorizedMCP.overrideAccess,
-      req,
-      ...(fallbackLocale ? { fallbackLocale } : {}),
-      ...(locale ? { locale } : {}),
-      ...(populate ? { populate: populate as PopulateType } : {}),
-      ...(select ? { select: select as SelectType } : {}),
-      ...(showHiddenFields !== undefined ? { showHiddenFields } : {}),
-      ...(trash !== undefined ? { trash } : {}),
+    const result = await invokeOperation(findVersionByIDOperation, {
+      context: payload,
+      input: {
+        id,
+        collection: collectionSlug,
+        depth,
+        overrideAccess: authorizedMCP.overrideAccess,
+        req,
+        ...(fallbackLocale ? { fallbackLocale } : {}),
+        ...(locale ? { locale } : {}),
+        ...(populate ? { populate: populate as PopulateType } : {}),
+        ...(select ? { select: select as SelectType } : {}),
+        ...(showHiddenFields !== undefined ? { showHiddenFields } : {}),
+        ...(trash !== undefined ? { trash } : {}),
+      },
     })
 
     return {

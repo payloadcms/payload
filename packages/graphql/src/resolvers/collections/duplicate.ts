@@ -1,8 +1,10 @@
 import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
 
-import { duplicateOperation, isolateObjectProperty } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 export type Resolver<TData> = (
   _: unknown,
@@ -29,13 +31,15 @@ export function duplicateResolver<TSlug extends CollectionSlug>(
     req.fallbackLocale = args.fallbackLocale || fallbackLocale
     context.req = req
 
-    const result = await duplicateOperation({
+    const operationReq = isolateObjectProperty(req, 'transactionID')
+    const result = await invokeGraphQLOperation(operationReq, 'collection', 'duplicate', {
       id: args.id,
-      collection,
+      collection: collection.config.slug,
       data: args.data,
       depth: 0,
       draft: args.draft,
-      req: isolateObjectProperty(req, 'transactionID'),
+      overrideAccess: false,
+      req: operationReq,
     })
 
     return result

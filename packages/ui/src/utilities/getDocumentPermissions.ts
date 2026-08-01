@@ -6,7 +6,7 @@ import type {
   SanitizedGlobalConfig,
 } from 'payload'
 
-import { docAccessOperation, docAccessOperationGlobal, logError } from 'payload'
+import { getPayloadOperation, invokeOperation, logError } from 'payload'
 import { hasDraftsEnabled } from 'payload/shared'
 
 import { hasSavePermission as getHasSavePermission } from './hasSavePermission.js'
@@ -35,32 +35,41 @@ export const getDocumentPermissions = async (args: {
   let hasTrashPermission = false
   let hasDeletePermission = false
 
+  const getCollectionPermissions = (permissionData: Data) =>
+    invokeOperation(getPayloadOperation('collection', 'docAccess'), {
+      context: req.payload,
+      input: {
+        id,
+        collection: collectionConfig.slug,
+        data: permissionData,
+        req,
+      },
+      validate: false,
+    })
+
+  const getGlobalPermissions = (permissionData: Data) =>
+    invokeOperation(getPayloadOperation('global', 'docAccess'), {
+      context: req.payload,
+      input: {
+        data: permissionData,
+        global: globalConfig.slug,
+        req,
+      },
+      validate: false,
+    })
+
   if (collectionConfig) {
     try {
-      docPermissions = await docAccessOperation({
-        id,
-        collection: {
-          config: collectionConfig,
-        },
-        data: {
-          ...data,
-          _status: 'draft',
-        },
-        req,
+      docPermissions = await getCollectionPermissions({
+        ...data,
+        _status: 'draft',
       })
 
       if (hasDraftsEnabled(collectionConfig)) {
         hasPublishPermission = (
-          await docAccessOperation({
-            id,
-            collection: {
-              config: collectionConfig,
-            },
-            data: {
-              ...data,
-              _status: 'published',
-            },
-            req,
+          await getCollectionPermissions({
+            ...data,
+            _status: 'published',
           })
         ).update
       }
@@ -69,25 +78,11 @@ export const getDocumentPermissions = async (args: {
         const { deletedAt: _, ...dataWithoutDeletedAt } = data || {}
 
         const [trashPermissionResult, deletePermissionResult] = await Promise.all([
-          docAccessOperation({
-            id,
-            collection: {
-              config: collectionConfig,
-            },
-            data: {
-              ...data,
-              deletedAt: new Date().toISOString(),
-            },
-            req,
+          getCollectionPermissions({
+            ...data,
+            deletedAt: new Date().toISOString(),
           }),
-          docAccessOperation({
-            id,
-            collection: {
-              config: collectionConfig,
-            },
-            data: dataWithoutDeletedAt,
-            req,
-          }),
+          getCollectionPermissions(dataWithoutDeletedAt),
         ])
 
         hasTrashPermission = trashPermissionResult.delete
@@ -104,21 +99,13 @@ export const getDocumentPermissions = async (args: {
 
   if (globalConfig) {
     try {
-      docPermissions = await docAccessOperationGlobal({
-        data,
-        globalConfig,
-        req,
-      })
+      docPermissions = await getGlobalPermissions(data)
 
       if (hasDraftsEnabled(globalConfig)) {
         hasPublishPermission = (
-          await docAccessOperationGlobal({
-            data: {
-              ...data,
-              _status: 'published',
-            },
-            globalConfig,
-            req,
+          await getGlobalPermissions({
+            ...data,
+            _status: 'published',
           })
         ).update
       }

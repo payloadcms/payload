@@ -1,20 +1,23 @@
 import {
   type CollectionSlug,
-  entityToStandaloneJSONSchema,
-  type FlattenedField,
+  getPayloadOperation,
   type GlobalSlug,
   type PayloadRequest,
-  type SanitizedCollectionConfig,
   type SanitizedCollectionPermission,
-  type SanitizedGlobalConfig,
   type SanitizedGlobalPermission,
 } from 'payload'
 
 import type { JsonSchemaType } from '../../types.js'
 
-import { filterFieldsByAccess } from './filterFieldsByAccess.js'
 import { sanitizeEntitySchema } from './sanitizeEntitySchema.js'
 
+const createOperation = getPayloadOperation('collection', 'create')
+const updateGlobalOperation = getPayloadOperation('global', 'update')
+
+/**
+ * MCP applies presentation-only schema compaction after asking the core operation layer for the
+ * canonical entity input schema.
+ */
 export const getCollectionInputSchema = ({
   collectionSlug,
   permissions,
@@ -24,24 +27,19 @@ export const getCollectionInputSchema = ({
   permissions?: SanitizedCollectionPermission
   req: PayloadRequest
 }): JsonSchemaType | null => {
-  const collection = req.payload.collections[collectionSlug]?.config
-
-  if (!collection) {
-    return null
-  }
-
-  if (!permissions) {
-    return buildEntityInputSchema({ entity: collection, req })
-  }
-
-  const fieldsAllowedByAccess = filterFieldsByAccess({
-    blocks: req.payload.config.blocks,
-    fields: collection.flattenedFields,
+  const schema = createOperation.getDataSchema!({
+    context: req.payload,
+    input: {
+      collection: collectionSlug,
+      data: {},
+      depth: 0,
+      draft: false,
+      req,
+    },
     permissions,
-    shouldExcludeField: ({ create, update }) => !create && !update,
   })
 
-  return buildEntityInputSchema({ entity: collection, fields: fieldsAllowedByAccess, req })
+  return schema ? sanitizeEntitySchema(schema as JsonSchemaType) : null
 }
 
 export const getGlobalInputSchema = ({
@@ -53,44 +51,17 @@ export const getGlobalInputSchema = ({
   permissions?: SanitizedGlobalPermission
   req: PayloadRequest
 }): JsonSchemaType | null => {
-  const global = req.payload.config.globals.find((globalConfig) => globalConfig.slug === globalSlug)
-
-  if (!global) {
-    return null
-  }
-
-  if (!permissions) {
-    return buildEntityInputSchema({ entity: global, req })
-  }
-
-  const fieldsAllowedByAccess = filterFieldsByAccess({
-    blocks: req.payload.config.blocks,
-    fields: global.flattenedFields,
+  const schema = updateGlobalOperation.getDataSchema!({
+    context: req.payload,
+    input: {
+      slug: globalSlug,
+      data: {},
+      depth: 0,
+      draft: false,
+      req,
+    },
     permissions,
-    shouldExcludeField: ({ create, update }) => !create && !update,
   })
 
-  return buildEntityInputSchema({ entity: global, fields: fieldsAllowedByAccess, req })
-}
-
-const buildEntityInputSchema = ({
-  entity,
-  fields = entity.flattenedFields,
-  req,
-}: {
-  entity: SanitizedCollectionConfig | SanitizedGlobalConfig
-  fields?: FlattenedField[]
-  req: PayloadRequest
-}): JsonSchemaType => {
-  // The core schema generator reads flattenedFields from the entity and has no fields argument.
-  const entityForSchema = { ...entity, flattenedFields: fields }
-  const schema = entityToStandaloneJSONSchema({
-    config: req.payload.config,
-    defaultIDType: req.payload.db.defaultIDType,
-    entity: entityForSchema,
-    i18n: req.i18n,
-    variant: 'input',
-  }) as unknown as JsonSchemaType
-
-  return sanitizeEntitySchema(schema)
+  return schema ? sanitizeEntitySchema(schema as JsonSchemaType) : null
 }

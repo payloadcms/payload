@@ -1,8 +1,10 @@
 import type { Collection, CollectionSlug, DataFromCollectionSlug, PayloadRequest } from 'payload'
 
-import { deleteByIDOperation, isolateObjectProperty } from 'payload'
+import { isolateObjectProperty } from 'payload'
 
 import type { Context } from '../types.js'
+
+import { invokeGraphQLOperation } from '../invokeOperation.js'
 
 export type Resolver<TSlug extends CollectionSlug> = (
   _: unknown,
@@ -47,14 +49,15 @@ export function getDeleteResolver<TSlug extends CollectionSlug>(
 
     const options = {
       id: args.id,
-      collection,
+      collection: collection.config.slug,
       depth: 0,
+      overrideAccess: false,
       req: isolateObjectProperty(req, 'transactionID'),
       trash: args.trash,
     }
 
-    const result = await deleteByIDOperation(options)
+    const result = await invokeGraphQLOperation(req, 'collection', 'delete', options)
 
-    return result
+    return result as DataFromCollectionSlug<TSlug>
   }
 }

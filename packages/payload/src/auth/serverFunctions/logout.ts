@@ -3,8 +3,8 @@ import type { SanitizedConfig } from '../../config/types.js'
 import type { MaybePromise } from '../../types/index.js'
 
 import { getPayload } from '../../index.js'
+import { getPayloadOperation, invokeOperation } from '../../operations/index.js'
 import { createLocalReq } from '../../utilities/createLocalReq.js'
-import { logoutOperation } from '../operations/logout.js'
 import { clearAuthCookie } from './cookies.js'
 
 export type LogoutArgs = {
@@ -38,10 +38,10 @@ export async function logout({
     return { message: 'Collection not found', success: false }
   }
 
-  const logoutResult = await logoutOperation({
-    allSessions,
-    collection,
-    req,
+  const logoutResult = await invokeOperation(getPayloadOperation('auth', 'logout'), {
+    context: payload,
+    input: { allSessions, collection: collection.config.slug, req },
+    validate: false,
   })
 
   if (!logoutResult) {

@@ -1,9 +1,20 @@
 import { status as httpStatus } from 'http-status'
+import { z } from 'zod'
 
 import type { FindOneArgs } from '../../database/types.js'
+import type {
+  CollectionSlug,
+  DataFromCollectionSlug,
+  Payload,
+  RequestContext,
+  TypedLocale,
+  User,
+} from '../../index.js'
+import type { LocalAPIOptions } from '../../operations/localAPI.js'
 import type { JsonObject, PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
-import type { Collection, TypeWithID } from '../config/types.js'
-import type { FindOptions } from './local/find.js'
+import type { CreateLocalReqOptions } from '../../utilities/createLocalReq.js'
+import type { Collection, DraftFlagFromCollectionSlug, TypeWithID } from '../config/types.js'
+import type { FindOptions } from './find.js'
 
 import { executeAccess } from '../../auth/executeAccess.js'
 import { hasWhereAccessResult } from '../../auth/types.js'
@@ -13,7 +24,10 @@ import { afterChange } from '../../fields/hooks/afterChange/index.js'
 import { afterRead } from '../../fields/hooks/afterRead/index.js'
 import { beforeChange } from '../../fields/hooks/beforeChange/index.js'
 import { beforeValidate } from '../../fields/hooks/beforeValidate/index.js'
+import { defineLocalAPI, defineOperation } from '../../operations/defineOperation.js'
+import { collectionInput } from '../../operations/schemaFields.js'
 import { commitTransaction } from '../../utilities/commitTransaction.js'
+import { createLocalReq } from '../../utilities/createLocalReq.js'
 import { deepCopyObjectSimple } from '../../utilities/deepCopyObject.js'
 import { hasDraftValidationEnabled } from '../../utilities/getVersionsConfig.js'
 import { initTransaction } from '../../utilities/initTransaction.js'
@@ -25,7 +39,8 @@ import { getLatestCollectionVersion } from '../../versions/getLatestCollectionVe
 import { saveVersion } from '../../versions/saveVersion.js'
 import { buildAfterOperation } from './utilities/buildAfterOperation.js'
 import { buildBeforeOperation } from './utilities/buildBeforeOperation.js'
-export type Arguments = {
+
+type RestoreDocumentVersionArgs = {
   collection: Collection
   currentDepth?: number
   depth?: number
@@ -39,10 +54,10 @@ export type Arguments = {
   showHiddenFields?: boolean
 } & Pick<FindOptions<string, SelectType>, 'select'>
 
-export const restoreVersionOperation = async <
+export const restoreDocumentVersion = async <
   TData extends JsonObject & TypeWithID = JsonObject & TypeWithID,
 >(
-  args: Arguments,
+  args: RestoreDocumentVersionArgs,
 ): Promise<TData> => {
   const {
     id,
@@ -393,3 +408,126 @@ export const restoreVersionOperation = async <
     throw error
   }
 }
+
+type RestoreVersionLocalMethod = <TSlug extends CollectionSlug>(
+  options: LocalAPIOptions<RestoreVersionOptions<TSlug>>,
+) => Promise<DataFromCollectionSlug<TSlug>>
+
+const restoreVersionSchema = z.looseObject({
+  ...collectionInput,
+  id: z.string().describe('The version ID to restore'),
+  draft: z.boolean().describe('Restore the version as a draft').optional().default(false),
+  showHiddenFields: z.boolean().optional(),
+})
+
+export const restoreVersionLocalAPI = defineLocalAPI<RestoreVersionLocalMethod>()({
+  name: 'restoreVersion',
+})
+
+export const restoreVersion = defineOperation({
+  action: 'restoreVersion',
+  expose: {
+    local: restoreVersionLocalAPI,
+    mcp: { name: 'restoreVersion' },
+    rest: [
+      {
+        method: 'post',
+        path: '/versions/:id',
+      },
+    ],
+  },
+  handler: async <TSlug extends CollectionSlug>(
+    payload: Payload,
+    options: RestoreVersionOptions<TSlug>,
+  ): Promise<DataFromCollectionSlug<TSlug>> => {
+    const {
+      id,
+      collection: collectionSlug,
+      depth,
+      overrideAccess = true,
+      populate,
+      select,
+      showHiddenFields,
+    } = options
+
+    const collection = payload.collections[collectionSlug]
+
+    if (!collection) {
+      throw new APIError(
+        `The collection with slug ${String(
+          collectionSlug,
+        )} can't be found. Restore Version Operation.`,
+      )
+    }
+
+    return restoreDocumentVersion({
+      id,
+      collection,
+      depth,
+      overrideAccess,
+      populate,
+      req: await createLocalReq(options as CreateLocalReqOptions, payload),
+      select,
+      showHiddenFields,
+    })
+  },
+  input: restoreVersionSchema,
+  target: 'collection',
+})
+
+type RestoreVersionOptionsBase<TSlug extends CollectionSlug> = {
+  /**
+   * the Collection slug to operate against.
+   */
+  collection: TSlug
+  /**
+   * [Context](https://payloadcms.com/docs/hooks/context), which will then be passed to `context` and `req.context`,
+   * which can be read by hooks. Useful if you want to pass additional information to the hooks which
+   * shouldn't be necessarily part of the document, for example a `triggerBeforeChange` option which can be read by the BeforeChange hook
+   * to determine if it should run or not.
+   */
+  context?: RequestContext
+  /**
+   * [Control auto-population](https://payloadcms.com/docs/queries/depth) of nested relationship and upload fields.
+   */
+  depth?: number
+  /**
+   * Specify a [fallback locale](https://payloadcms.com/docs/configuration/localization) to use for any returned documents.
+   */
+  fallbackLocale?: false | TypedLocale
+  /**
+   * The ID of the version to restore.
+   */
+  id: number | string
+  /**
+   * Specify [locale](https://payloadcms.com/docs/configuration/localization) for any returned documents.
+   */
+  locale?: TypedLocale
+  /**
+   * Skip access control.
+   * Set to `false` if you want to respect Access Control for the operation, for example when fetching data for the front-end.
+   * @default true
+   */
+  overrideAccess?: boolean
+  /**
+   * Specify [populate](https://payloadcms.com/docs/queries/select#populate) to control which fields to include to the result from populated documents.
+   */
+  populate?: PopulateType
+  /**
+   * The `PayloadRequest` object. You can pass it to thread the current [transaction](https://payloadcms.com/docs/database/transactions), user and locale to the operation.
+   * Recommended to pass when using the Local API from hooks, as usually you want to execute the operation within the current transaction.
+   */
+  req?: Partial<PayloadRequest>
+  /**
+   * Opt-in to receiving hidden fields. By default, they are hidden from returned documents in accordance to your config.
+   * @default false
+   */
+  showHiddenFields?: boolean
+  /**
+   * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
+   */
+  user?: null | User
+} & Pick<FindOptions<TSlug, SelectType>, 'select'>
+
+export type RestoreVersionOptions<TSlug extends CollectionSlug> = DraftFlagFromCollectionSlug<TSlug> &
+  RestoreVersionOptionsBase<TSlug>

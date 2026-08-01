@@ -1,9 +1,28 @@
+import { status as httpStatus } from 'http-status'
 import { decodeJwt } from 'jose'
+import { z } from 'zod'
 
 import type { Collection } from '../../collections/config/types.js'
-import type { AuthenticatedUser } from '../../index.js'
+import type { AuthenticatedUser, Payload } from '../../index.js'
 import type { JoinQuery, PayloadRequest, PopulateType, SelectType } from '../../types/index.js'
+import type { JoinParams } from '../../utilities/sanitizeJoinParams.js'
 
+import { defineOperation } from '../../operations/defineOperation.js'
+import {
+  collectionSchema,
+  depthSchema,
+  populateSchema,
+  requestSchema,
+  selectSchema,
+} from '../../operations/schemaFields.js'
+import { getRequestCollection } from '../../utilities/getRequestEntity.js'
+import { headersWithCors } from '../../utilities/headersWithCors.js'
+import { isNumber } from '../../utilities/isNumber.js'
+import { sanitizeJoinParams } from '../../utilities/sanitizeJoinParams.js'
+import { sanitizePopulateParam } from '../../utilities/sanitizePopulateParam.js'
+import { sanitizeSelectParam } from '../../utilities/sanitizeSelectParam.js'
+import { extractJWT } from '../extractJWT.js'
+import { getAuthCollection } from './getAuthCollection.js'
 export type MeOperationResult = {
   collection?: string
   exp?: number
@@ -18,7 +37,7 @@ export type MeOperationResult = {
   user?: AuthenticatedUser | null
 }
 
-export type Arguments = {
+export type MeArgs = {
   collection: Collection
   currentToken?: string
   depth?: number
@@ -29,7 +48,7 @@ export type Arguments = {
   select?: SelectType
 }
 
-export const meOperation = async (args: Arguments): Promise<MeOperationResult> => {
+const getCurrentUser = async (args: MeArgs): Promise<MeOperationResult> => {
   const { collection, currentToken, depth, draft, joins, populate, req, select } = args
 
   let result: MeOperationResult = {
@@ -121,3 +140,76 @@ export const meOperation = async (args: Arguments): Promise<MeOperationResult> =
 
   return result
 }
+
+const meSchema = z.looseObject({
+  collection: collectionSchema,
+  currentToken: z.string().optional(),
+  depth: depthSchema,
+  draft: z.boolean().optional(),
+  joins: z.union([z.record(z.string(), z.unknown()), z.literal(false)]).optional(),
+  populate: populateSchema,
+  req: requestSchema,
+  select: selectSchema,
+})
+
+export const me = defineOperation({
+  action: 'me',
+  expose: {
+    rest: [
+      {
+        handler: async ({ invoke, req }) => {
+          const collection = getRequestCollection(req)
+          const depthFromSearchParams = req.searchParams.get('depth')
+          const draftFromSearchParams = req.searchParams.get('depth')
+          const {
+            depth: depthFromQuery,
+            draft: draftFromQuery,
+            joins,
+            populate,
+            select,
+          } = req.query as {
+            depth?: string
+            draft?: string
+            joins?: JoinParams
+            populate?: Record<string, unknown>
+            select?: Record<string, unknown>
+          }
+          const depth = depthFromQuery || depthFromSearchParams
+          const draft = draftFromQuery || draftFromSearchParams
+          const result = await invoke({
+            context: req.payload,
+            input: {
+              collection: collection.config.slug,
+              currentToken: extractJWT(req) ?? undefined,
+              depth: isNumber(depth) ? Number(depth) : undefined,
+              draft: draft === 'true',
+              joins: sanitizeJoinParams(joins),
+              populate: sanitizePopulateParam(populate),
+              req,
+              select: sanitizeSelectParam(select),
+            },
+            validate: false,
+          })
+
+          if (collection.config.auth.removeTokenFromResponses) {
+            delete result.token
+          }
+
+          return Response.json(
+            { ...result, message: req.t('authentication:account') },
+            {
+              headers: headersWithCors({ headers: new Headers(), req }),
+              status: httpStatus.OK,
+            },
+          )
+        },
+        method: 'get',
+        path: '/me',
+      },
+    ],
+  },
+  handler: (payload: Payload, input: { collection: string } & Omit<MeArgs, 'collection'>) =>
+    getCurrentUser({ ...input, collection: getAuthCollection(payload, input.collection) }),
+  input: meSchema,
+  target: 'auth',
+})
