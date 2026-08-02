@@ -577,6 +577,7 @@ export const trTranslations: DefaultTranslationsObject = {
     addFile: 'Dosya ekle',
     addFiles: 'Dosya Ekle',
     bulkUpload: 'Toplu Yükleme',
+    copyLinkToFile: 'Dosyanın bağlantısını kopyala',
     crop: 'Mahsulat',
     cropToolDescription:
       'Seçilen alanın köşelerini sürükleyin, yeni bir alan çizin ya da aşağıdaki değerleri ayarlayın.',

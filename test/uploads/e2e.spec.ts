@@ -369,6 +369,27 @@ describe('Uploads', () => {
     expect(clipbaordContent).toBe(mediaDoc?.url)
   })
 
+  test('should show the link icon and "Copy link to file" tooltip on the copy link button', async () => {
+    const mediaDoc = (
+      await payload.find({
+        collection: mediaSlug,
+        depth: 0,
+        limit: 1,
+        pagination: false,
+      })
+    ).docs[0]
+
+    await page.goto(mediaURL.edit(mediaDoc!.id))
+
+    const copyLinkButton = page.locator('.file-toolbar .copy-to-clipboard')
+    await expect(copyLinkButton.locator('.icon--link')).toBeVisible()
+
+    await copyLinkButton.hover()
+    await expect(
+      page.locator('.tooltip--show', { hasText: exactText('Copy link to file') }),
+    ).toBeVisible()
+  })
+
   test('should show side-by-side layout for upload collection document with file', async () => {
     const mediaDoc = (
       await payload.find({
