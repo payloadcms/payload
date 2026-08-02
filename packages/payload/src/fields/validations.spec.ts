@@ -243,6 +243,36 @@ describe('Field Validations', () => {
       const result = point(val, pointOptions)
       expect(result).not.toBe(true)
     })
+    it('should validate zero coordinates', () => {
+      const val: PointFieldValue = [0, 0]
+      const result = point(val, pointOptions)
+      expect(result).toBe(true)
+    })
+    it('should handle empty strings not required', () => {
+      const val: PointFieldValue = ['', '']
+      const result = point(val, pointOptions)
+      expect(result).toBe(true)
+    })
+    it('should prevent zero longitude with a missing latitude', () => {
+      const val = [0, null]
+      const result = point(val, pointOptions)
+      expect(result).toBe('validation:invalidInput')
+    })
+    it('should prevent zero latitude with a missing longitude', () => {
+      const val = [null, 0]
+      const result = point(val, pointOptions)
+      expect(result).toBe('validation:invalidInput')
+    })
+    it('should prevent zero latitude with an empty longitude', () => {
+      const val: PointFieldValue = ['', 0]
+      const result = point(val, pointOptions)
+      expect(result).toBe('validation:invalidInput')
+    })
+    it('should prevent zero longitude with a text latitude', () => {
+      const val: PointFieldValue = [0, 'bad']
+      const result = point(val, pointOptions)
+      expect(result).toBe('validation:invalidInput')
+    })
     it('should validate longitude within bounds', () => {
       const val: PointFieldValue = ['180', '0']
       const result = point(val, pointOptions)
