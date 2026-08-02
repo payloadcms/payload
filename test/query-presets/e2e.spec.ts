@@ -317,6 +317,52 @@ describe('Query Presets', () => {
     await expect(column).toHaveClass(/pill-selector__pill--selected/)
   })
 
+  test('should reset filter inputs when clicking reset button on modified preset', async ({
+    page,
+  }) => {
+    await page.goto(pagesUrl.list)
+    await selectPreset({ page, presetTitle: seededData.everyone.title })
+
+    await openListFilters(page, {})
+
+    const conditionValue = page.locator(
+      '.where-builder .condition__value input.condition-value-text',
+    )
+
+    // the seeded preset filters on `text equals 'example page'`
+    await expect(conditionValue).toHaveValue('example page')
+
+    await conditionValue.fill('modified value')
+    await expect(page).toHaveURL(/modified/)
+
+    await expect(page.locator('#reset-preset')).toBeVisible()
+    await page.locator('#reset-preset').click()
+
+    // the URL resets back to the preset's own filters
+    await expect(page).not.toHaveURL(/modified/)
+
+    // the filter UI must re-sync with the reset query, without a page reload
+    await expect(conditionValue).toHaveValue('example page')
+  })
+
+  test('should overwrite existing filter inputs when selecting a preset', async ({ page }) => {
+    await page.goto(pagesUrl.list)
+
+    await addListFilter({
+      fieldLabel: 'Text',
+      operatorLabel: 'equals',
+      page,
+      value: 'my own filter',
+    })
+
+    // selecting a preset replaces the filter that is already there
+    await selectPreset({ page, presetTitle: seededData.everyone.title })
+
+    await expect(
+      page.locator('.where-builder .condition__value input.condition-value-text'),
+    ).toHaveValue('example page')
+  })
+
   test.skip('should only enter modified state when changes are made to an active preset', async ({
     page,
   }) => {

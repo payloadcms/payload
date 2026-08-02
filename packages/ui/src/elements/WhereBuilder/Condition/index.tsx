@@ -91,6 +91,16 @@ export const Condition: React.FC<Props> = (props) => {
     void updateValue(debouncedValue)
   }, [debouncedValue])
 
+  /**
+   * Re-sync the input when the query changes from outside this condition, e.g. a query preset is
+   * selected or reset. `WhereBuilder` keys conditions by their position and by `and.length`, so it
+   * only remounts them when the *shape* of the query changes. A change that replaces values while
+   * keeping the shape leaves this component mounted, and without this its state goes stale.
+   */
+  useEffect(() => {
+    setInternalValue(value)
+  }, [value])
+
   const disabled =
     (!reducedField?.value && typeof reducedField?.value !== 'number') ||
     reducedField?.field?.admin?.disableListFilter
