@@ -1,6 +1,7 @@
 import {
   buildEditorState,
   type DefaultNodeTypes,
+  type RichTextNodes,
   type SerializedInlineBlockNode,
 } from '@payloadcms/richtext-lexical'
 import { expect, type Page, test } from '@playwright/test'
@@ -22,6 +23,9 @@ import { LexicalHelpers, type PasteMode } from '../../utils.js'
 const filename = fileURLToPath(import.meta.url)
 const currentFolder = path.dirname(filename)
 const dirname = path.resolve(currentFolder, '../../../')
+
+type FullyFeaturedNode = RichTextNodes<Config['collections']['lexical-fully-featured']['richText']>
+type PastedTextBlockNode = Extract<FullyFeaturedNode, { type: 'heading' | 'paragraph' }>
 
 let payload: PayloadTestSDK<Config>
 let serverURL: string
@@ -129,16 +133,16 @@ describe('Lexical Fully Featured - database', () => {
       })
       const richText = lexicalFullyFeatured?.docs?.[0]?.richText
 
-      const headingNode = richText?.root?.children[0] as
-        | { children?: { text?: string }[] }
-        | undefined
-      expect(headingNode).toBeDefined()
-      // Where the browser places the interchange `<br>` it appends to a copied selection varies, and a
-      // leading one imports as a linebreak node that shifts every sibling. Assert on the block's combined
-      // text rather than a fixed child index.
-      expect(headingNode?.children?.map((child) => child.text ?? '').join('')).toBe(
-        'This is an image:',
-      )
+      const pastedTextBlock = richText?.root.children[0] as PastedTextBlockNode | undefined
+      expect(pastedTextBlock).toBeDefined()
+
+      // Browser clipboard serialization can insert a leading linebreak node.
+      // Assert the combined text instead of a fixed child index.
+      const combinedText = pastedTextBlock?.children
+        .map((child) => ('text' in child ? child.text : ''))
+        .join('')
+
+      expect(combinedText).toBe('This is an image:')
 
       const uploadNode = richText?.root?.children?.[1]?.children?.[0]
       // @ts-expect-error unsafe access is fine in tests
