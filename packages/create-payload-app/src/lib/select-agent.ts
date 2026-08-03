@@ -5,15 +5,16 @@ import type { AgentType, CliArgs } from '../types.js'
 type AgentChoice = {
   /** File to write at project root pointing agents to the skill */
   configFile: 'AGENTS.md' | 'CLAUDE.md'
+  /** Heading written at the top of the generated config file */
+  configHeading: string
   label: string
-  skillsDir: string
   value: AgentType
 }
 
 export const agentChoices: AgentChoice[] = [
-  { configFile: 'CLAUDE.md', label: 'Claude Code', skillsDir: '.claude/skills', value: 'claude' },
-  { configFile: 'AGENTS.md', label: 'Codex', skillsDir: '.agents/skills', value: 'codex' },
-  { configFile: 'AGENTS.md', label: 'Cursor', skillsDir: '.agents/skills', value: 'cursor' },
+  { configFile: 'CLAUDE.md', configHeading: 'Claude Code', label: 'Claude Code', value: 'claude' },
+  { configFile: 'AGENTS.md', configHeading: 'Agents', label: 'Codex', value: 'codex' },
+  { configFile: 'AGENTS.md', configHeading: 'Agents', label: 'Cursor', value: 'cursor' },
 ]
 
 const validAgentValues = agentChoices.map((c) => c.value)
@@ -24,10 +25,6 @@ export function getAgentChoice(agentType: AgentType): AgentChoice {
     throw new Error(`Unknown agent type: ${agentType}`)
   }
   return choice
-}
-
-export function getSkillsDir(agentType: AgentType): string {
-  return getAgentChoice(agentType).skillsDir
 }
 
 export async function selectAgent(args: { cliArgs: CliArgs }): Promise<AgentType | undefined> {
@@ -51,7 +48,7 @@ export async function selectAgent(args: { cliArgs: CliArgs }): Promise<AgentType
     { label: string; value: 'none' | AgentType }[],
     'none' | AgentType
   >({
-    message: 'Select a coding agent to install the Payload skill for',
+    message: 'Select a coding agent to configure',
     options: [
       ...agentChoices.map((choice) => ({
         label: choice.label,

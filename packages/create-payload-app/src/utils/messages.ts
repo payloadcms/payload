@@ -40,9 +40,9 @@ export function helpMessage(): void {
 
       -a     {underline agent_name}             Set coding agent (claude, codex, cursor)
 
-        {dim Installs the Payload skill for the selected agent}
+        {dim Writes an agent config file pointing at the Payload skill}
 
-      --no-agent                    Skip agent skill installation
+      --no-agent                    Skip writing the agent config file
       --use-npm                     Use npm to install dependencies
       --use-yarn                    Use yarn to install dependencies
       --use-pnpm                    Use pnpm to install dependencies
