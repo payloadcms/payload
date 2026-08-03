@@ -1515,13 +1515,13 @@ describe('Versions', () => {
       day,
       month,
       page,
-      time,
+      timeOptions,
       year,
     }: {
       day: number
       month: string
       page: Page
-      time: string
+      timeOptions?: string[]
       year: string
     }) => {
       const dateInput = page.locator('.date-time-picker__input-wrapper input')
@@ -1541,12 +1541,25 @@ describe('Versions', () => {
         .first()
         .click()
 
-      await popper
-        .locator('.react-datepicker__time-list-item', {
-          hasText: time,
-        })
-        .first()
-        .click()
+      if (timeOptions?.length) {
+        let hasSelectedTime = false
+
+        for (const timeOption of timeOptions) {
+          const timeLocator = popper.locator('.react-datepicker__time-list-item', {
+            hasText: timeOption,
+          })
+
+          if ((await timeLocator.count()) > 0) {
+            await timeLocator.first().click()
+            hasSelectedTime = true
+            break
+          }
+        }
+
+        if (!hasSelectedTime) {
+          throw new Error('Could not find matching time option in schedule publish date picker')
+        }
+      }
     }
 
     beforeAll(() => {
@@ -1571,12 +1584,11 @@ describe('Versions', () => {
       // nothing in scheduled
       await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
 
-      // set date and time via picker controls
+      // set a future date using picker controls
       await selectScheduleDateTime({
         day: 21,
         month: '1', // February
         page,
-        time: '12:00 AM',
         year: '2050',
       })
 
@@ -1692,12 +1704,12 @@ describe('Versions', () => {
       await dropdownControlSelector.click()
       await getSelectMenu({ page: localPage }).locator('.rs__option', { hasText: 'Paris' }).click()
 
-      // Use picker controls to set Jan 1, 2049 at 6:00 PM in the selected timezone.
+      // Set Jan 1, 2049 at 6 PM in the selected timezone. Time format can be 24h or 12h.
       await selectScheduleDateTime({
         day: 1,
         month: '0', // January
         page: localPage,
-        time: '6:00 PM',
+        timeOptions: ['18:00', '6:00 PM'],
         year: '2049',
       })
 
@@ -1959,7 +1971,8 @@ describe('Versions', () => {
       await saveDocAndAssert(page, '#action-save-draft', 'error')
 
       const parentFieldType = page.locator('.field-type:has(#field-title)')
-      await expect(parentFieldType.locator('.tooltip--show')).toBeVisible()
+
+      await expect(page.locator('.tooltip--show')).toBeVisible()
       await expect(parentFieldType).toHaveClass(/error/)
 
       await titleField.fill('New title')
