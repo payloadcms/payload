@@ -28,6 +28,7 @@ import { defaultCollectionEndpoints } from '../endpoints/index.js'
 import { addDefaultsToAuthConfig, addDefaultsToCollectionConfig } from './defaults.js'
 import { sanitizeCompoundIndexes } from './sanitizeCompoundIndexes.js'
 import { validateUseAsTitle } from './useAsTitle.js'
+import { validateListSearchableFields } from './validateListSearchableFields.js'
 
 /**
  * Warns at startup when custom collection views are misconfigured with a missing `path`.
@@ -338,6 +339,8 @@ export const sanitizeCollection = (
   }
 
   validateUseAsTitle(sanitized)
+
+  validateListSearchableFields(sanitized)
 
   const sanitizedConfig = sanitized as SanitizedCollectionConfig
 
