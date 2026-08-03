@@ -1,95 +1,16 @@
-:root {
-  --font-mono: 'Roboto Mono', monospace;
+body:has(.home) {
+  background: rgb(0, 0, 0);
+  margin: 0;
 }
 
-* {
+.home,
+.home * {
   box-sizing: border-box;
 }
 
-html {
-  font-size: 18px;
-  line-height: 32px;
-
-  background: rgb(0, 0, 0);
-  -webkit-font-smoothing: antialiased;
-}
-
-html,
-body,
-#app {
-  height: 100%;
-}
-
-body {
-  font-family: system-ui;
-  font-size: 18px;
-  line-height: 32px;
-
-  margin: 0;
-  color: rgb(1000, 1000, 1000);
-
-  @media (max-width: 1024px) {
-    font-size: 15px;
-    line-height: 24px;
-  }
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-h1 {
-  margin: 40px 0;
-  font-size: 64px;
-  line-height: 70px;
-  font-weight: bold;
-
-  @media (max-width: 1024px) {
-    margin: 24px 0;
-    font-size: 42px;
-    line-height: 42px;
-  }
-
-  @media (max-width: 768px) {
-    font-size: 38px;
-    line-height: 38px;
-  }
-
-  @media (max-width: 400px) {
-    font-size: 32px;
-    line-height: 32px;
-  }
-}
-
-p {
-  margin: 24px 0;
-
-  @media (max-width: 1024px) {
-    margin: var(--spacer-3) 0;
-  }
-}
-
-a {
-  color: currentColor;
-
-  &:focus {
-    opacity: 0.8;
-    outline: none;
-  }
-
-  &:active {
-    opacity: 0.7;
-    outline: none;
-  }
-}
-
-svg {
-  vertical-align: middle;
-}
-
 .home {
+  --font-mono: 'Roboto Mono', monospace;
+
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -99,9 +20,75 @@ svg {
   max-width: 1024px;
   margin: 0 auto;
   overflow: hidden;
+  background: rgb(0, 0, 0);
+  color: rgb(1000, 1000, 1000);
+  font-family: system-ui;
+  font-size: 18px;
+  line-height: 32px;
+  -webkit-font-smoothing: antialiased;
+
+  @media (max-width: 1024px) {
+    font-size: 15px;
+    line-height: 24px;
+  }
 
   @media (max-width: 400px) {
     padding: 24px;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  h1 {
+    margin: 40px 0;
+    font-size: 64px;
+    font-weight: bold;
+    line-height: 70px;
+
+    @media (max-width: 1024px) {
+      margin: 24px 0;
+      font-size: 42px;
+      line-height: 42px;
+    }
+
+    @media (max-width: 768px) {
+      font-size: 38px;
+      line-height: 38px;
+    }
+
+    @media (max-width: 400px) {
+      font-size: 32px;
+      line-height: 32px;
+    }
+  }
+
+  p {
+    margin: 24px 0;
+
+    @media (max-width: 1024px) {
+      margin: var(--spacer-3) 0;
+    }
+  }
+
+  a {
+    color: currentColor;
+
+    &:focus {
+      opacity: 0.8;
+      outline: none;
+    }
+
+    &:active {
+      opacity: 0.7;
+      outline: none;
+    }
+  }
+
+  svg {
+    vertical-align: middle;
   }
 
   .content {
