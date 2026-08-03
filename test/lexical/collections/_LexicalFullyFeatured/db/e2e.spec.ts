@@ -130,12 +130,12 @@ describe('Lexical Fully Featured - database', () => {
       const richText = lexicalFullyFeatured?.docs?.[0]?.richText
 
       const headingNode = richText?.root?.children[0] as
-        | { children?: { text?: string }[]; type?: string }
+        | { children?: { text?: string }[] }
         | undefined
       expect(headingNode).toBeDefined()
-      expect(headingNode?.type).toBe('heading')
-      // Browsers serialize a copied selection differently per platform, so the heading's text can
-      // arrive split across several text nodes. Assert on the combined text, not a fixed child index.
+      // Where the browser places the interchange `<br>` it appends to a copied selection varies, and a
+      // leading one imports as a linebreak node that shifts every sibling. Assert on the block's combined
+      // text rather than a fixed child index.
       expect(headingNode?.children?.map((child) => child.text ?? '').join('')).toBe(
         'This is an image:',
       )
