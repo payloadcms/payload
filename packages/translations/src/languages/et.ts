@@ -566,6 +566,7 @@ export const etTranslations: DefaultTranslationsObject = {
     addFile: 'Lisa fail',
     addFiles: 'Lisa failid',
     bulkUpload: 'Massiüleslaadimine',
+    copyLinkToFile: 'Kopeeri faili link',
     crop: 'Kärbi',
     cropToolDescription:
       'Lohista valitud ala nurki, joonista uus ala või kohanda väärtusi allpool.',

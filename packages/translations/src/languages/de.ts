@@ -583,6 +583,7 @@ export const deTranslations: DefaultTranslationsObject = {
     addFile: 'Datei hinzufügen',
     addFiles: 'Dateien hinzufügen',
     bulkUpload: 'Mehrere Dateien hochladen',
+    copyLinkToFile: 'Link zum Datei kopieren',
     crop: 'Zuschneiden',
     cropToolDescription:
       'Ziehe die Ecken des ausgewählten Bereichs, zeichne einen neuen Bereich oder passe die Werte unten an.',

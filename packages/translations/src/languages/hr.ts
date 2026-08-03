@@ -569,6 +569,7 @@ export const hrTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteku',
     addFiles: 'Dodaj datoteke',
     bulkUpload: 'Masovno dodavanje',
+    copyLinkToFile: 'Kopirajte poveznicu na datoteku',
     crop: 'Izreži',
     cropToolDescription:
       'Povucite kutove odabranog područja, nacrtajte novo područje ili prilagodite vrijednosti ispod.',

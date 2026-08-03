@@ -1,5 +1,3 @@
-import type { DeepRequired } from 'ts-essentials'
-
 import type { CollectionSlug, GlobalSlug, Payload, User } from '../index.js'
 import type { PayloadRequest, Where } from '../types/index.js'
 
@@ -216,15 +214,17 @@ export type LoginWithUsernameOptions =
       requireUsername?: boolean
     }
 
+type AuthCookies = {
+  domain?: string
+  sameSite?: 'Lax' | 'None' | 'Strict' | boolean
+  secure?: boolean
+}
+
 export interface IncomingAuthType {
   /**
    * Set cookie options, including secure, sameSite, and domain. For advanced users.
    */
-  cookies?: {
-    domain?: string
-    sameSite?: 'Lax' | 'None' | 'Strict' | boolean
-    secure?: boolean
-  }
+  cookies?: AuthCookies
   /**
    * How many levels deep a user document should be populated when creating the JWT and binding the user to the req. Defaults to 0 and should only be modified if absolutely necessary, as this will affect performance.
    * @default 0
@@ -316,14 +316,32 @@ export type VerifyConfig = {
 }
 
 export interface Auth
-  extends Omit<DeepRequired<IncomingAuthType>, 'forgotPassword' | 'loginWithUsername' | 'verify'> {
-  forgotPassword?: {
-    expiration?: number
-    generateEmailHTML?: GenerateForgotPasswordEmailHTML
-    generateEmailSubject?: GenerateForgotPasswordEmailSubject
-  }
-  loginWithUsername: false | LoginWithUsernameOptions
-  verify?: boolean | VerifyConfig
+  extends Omit<
+      IncomingAuthType,
+      | 'cookies'
+      | 'forgotPassword'
+      | 'lockTime'
+      | 'loginWithUsername'
+      | 'maxLoginAttempts'
+      | 'strategies'
+      | 'tokenExpiration'
+      | 'useSessions'
+      | 'verify'
+    >,
+    Required<
+      Pick<
+        IncomingAuthType,
+        | 'forgotPassword'
+        | 'lockTime'
+        | 'maxLoginAttempts'
+        | 'strategies'
+        | 'tokenExpiration'
+        | 'useSessions'
+        | 'verify'
+      >
+    > {
+  cookies: Pick<AuthCookies, 'domain'> & Required<Pick<AuthCookies, 'sameSite' | 'secure'>>
+  loginWithUsername: false | Required<LoginWithUsernameOptions>
 }
 
 export function hasWhereAccessResult(result: boolean | Where): result is Where {

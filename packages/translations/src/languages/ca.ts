@@ -574,6 +574,7 @@ export const caTranslations: DefaultTranslationsObject = {
     addFile: 'Afegir fitxer',
     addFiles: 'Afegir fitxers',
     bulkUpload: 'Carregar arxius massius',
+    copyLinkToFile: "Copia l'enllaç al fitxer",
     crop: 'Retallar',
     cropToolDescription:
       'Arrossega les cantonades de l’àrea seleccionada, dibuixa una nova àrea o ajusta els valors a continuació.',

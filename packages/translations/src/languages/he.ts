@@ -553,6 +553,7 @@ export const heTranslations: DefaultTranslationsObject = {
     addFile: 'הוסף קובץ',
     addFiles: 'הוסף קבצים',
     bulkUpload: 'העלאה בתפוצה רחבה',
+    copyLinkToFile: 'העתק קישור לקובץ',
     crop: 'חתוך',
     cropToolDescription: 'גרור את הפינות של האזור שנבחר, צייר אזור חדש או התאם את הערכים למטה.',
     download: 'הורדה',
