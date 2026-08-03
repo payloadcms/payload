@@ -349,7 +349,7 @@ function useDraggableBlockMenu(
           const highlightElem = document.createElement('div')
           highlightElem.className = 'lexical-block-highlighter'
 
-          highlightElem.style.backgroundColor = 'var(--theme-elevation-1000'
+          highlightElem.style.backgroundColor = 'var(--color-bg-inverse)'
           highlightElem.style.transition = 'opacity 0.5s ease-in-out'
           highlightElem.style.zIndex = '1'
           highlightElem.style.pointerEvents = 'none'

@@ -3,6 +3,7 @@ import type {
   DocumentSlots,
   EditMenuItemsServerPropsOnly,
   Locale,
+  PayloadComponent,
   PayloadRequest,
   PreviewButtonServerPropsOnly,
   PublishButtonServerPropsOnly,
@@ -15,11 +16,12 @@ import type {
   ServerProps,
   StaticDescription,
   UnpublishButtonServerPropsOnly,
+  UploadFilePreviewClientProps,
   ViewDescriptionClientProps,
   ViewDescriptionServerPropsOnly,
 } from 'payload'
 
-import { hasDraftsEnabled } from 'payload/shared'
+import { hasDraftsEnabled, matchMimeType } from 'payload/shared'
 
 import { RenderServerComponent } from '../../elements/RenderServerComponent/index.js'
 // eslint-disable-next-line payload/no-imports-from-exports-dir -- Server component must reference exports/client bundle for proper client boundary in prod builds
@@ -28,6 +30,7 @@ import { getDocumentPermissions } from '../../utilities/getDocumentPermissions.j
 
 export const renderDocumentSlots: (args: {
   collectionConfig?: SanitizedCollectionConfig
+  doc?: Record<string, unknown>
   globalConfig?: SanitizedGlobalConfig
   hasSavePermission: boolean
   id?: number | string
@@ -35,7 +38,8 @@ export const renderDocumentSlots: (args: {
   permissions: SanitizedPermissions
   req: PayloadRequest
 }) => DocumentSlots = (args) => {
-  const { id, collectionConfig, globalConfig, hasSavePermission, locale, permissions, req } = args
+  const { id, collectionConfig, doc, globalConfig, hasSavePermission, locale, permissions, req } =
+    args
 
   const components: DocumentSlots = {} as DocumentSlots
 
@@ -222,6 +226,40 @@ export const renderDocumentSlots: (args: {
     })
   }
 
+  const filePreviewConfig = collectionConfig?.upload?.admin?.components?.filePreview
+  if (collectionConfig?.upload && filePreviewConfig) {
+    const mimeType = (doc?.mimeType as string) ?? ''
+    let filePreviewComponent: PayloadComponent | undefined
+
+    if (
+      typeof filePreviewConfig === 'string' ||
+      (typeof filePreviewConfig === 'object' && 'path' in filePreviewConfig)
+    ) {
+      filePreviewComponent = filePreviewConfig as PayloadComponent
+    } else {
+      filePreviewComponent = matchMimeType(
+        filePreviewConfig as Record<string, PayloadComponent>,
+        mimeType,
+      )
+    }
+
+    if (filePreviewComponent) {
+      components.UploadFilePreview = RenderServerComponent({
+        clientProps: {
+          filename: doc?.filename,
+          filesize: doc?.filesize,
+          fileSrc: doc?.url,
+          height: doc?.height,
+          mimeType,
+          width: doc?.width,
+        } as UploadFilePreviewClientProps,
+        Component: filePreviewComponent,
+        importMap: req.payload.importMap,
+        serverProps,
+      })
+    }
+  }
+
   return components
 }
 
@@ -244,9 +282,30 @@ export const renderDocumentSlotsHandler: ServerFunction<{
     req,
   })
 
+  let doc: Record<string, unknown> | undefined
+  if (id && collectionConfig.upload) {
+    const result = await req.payload.findByID({
+      id,
+      collection: collectionSlug,
+      depth: 0,
+      overrideAccess: false,
+      req,
+      select: {
+        filename: true,
+        filesize: true,
+        height: true,
+        mimeType: true,
+        url: true,
+        width: true,
+      },
+    })
+    doc = result as Record<string, unknown>
+  }
+
   return renderDocumentSlots({
     id,
     collectionConfig,
+    doc,
     hasSavePermission,
     locale,
     permissions,

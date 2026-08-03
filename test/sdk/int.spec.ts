@@ -65,6 +65,16 @@ describe('@payloadcms/sdk', () => {
     await payload.delete({ collection: 'posts', where: { id: { in: ids } } })
   })
 
+  it('should return no docs for an empty array in `in` condition', async () => {
+    const result = await sdk.find({
+      collection: 'posts',
+      where: { id: { in: [] } },
+    })
+
+    expect(result.docs).toHaveLength(0)
+    expect(result.totalDocs).toBe(0)
+  })
+
   it('should execute find with trash', async () => {
     const pairWhere = { id: { in: [post.id, postTrash.id] } }
 

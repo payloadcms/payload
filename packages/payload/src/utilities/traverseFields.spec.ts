@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { traverseFields } from './traverseFields.js'
-import { Field } from '../fields/config/types.js'
+import type { Field } from '../fields/config/types.js'
 
 describe('traverseFields', () => {
   const tabsField: Field = {
@@ -47,6 +47,127 @@ describe('traverseFields', () => {
           }
         },
       })
+    })
+  })
+
+  describe('parent localization', () => {
+    it('should preserve parent localization through tabs', () => {
+      const fields: Field[] = [
+        {
+          name: 'group',
+          type: 'group',
+          localized: true,
+          fields: [
+            {
+              type: 'tabs',
+              tabs: [
+                {
+                  label: 'Tab',
+                  fields: [
+                    {
+                      name: 'text',
+                      type: 'text',
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ]
+      let textParentIsLocalized: boolean | undefined
+
+      traverseFields({
+        fields,
+        callback: ({ field, parentIsLocalized }) => {
+          if (field.type === 'text') {
+            textParentIsLocalized = parentIsLocalized
+          }
+        },
+      })
+
+      expect(textParentIsLocalized).toBe(true)
+    })
+
+    it('should traverse localized tabs within localized parents', () => {
+      let textParentIsLocalized: boolean | undefined
+
+      traverseFields({
+        callback: ({ field, parentIsLocalized }) => {
+          if (field.type === 'text') {
+            textParentIsLocalized = parentIsLocalized
+          }
+        },
+        fields: [
+          {
+            name: 'group',
+            type: 'group',
+            localized: true,
+            fields: [
+              {
+                type: 'tabs',
+                tabs: [
+                  {
+                    name: 'tab',
+                    localized: true,
+                    fields: [
+                      {
+                        name: 'text',
+                        type: 'text',
+                      },
+                    ],
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+        ref: {
+          group: {
+            en: {
+              tab: {
+                text: 'value',
+              },
+            },
+          },
+        },
+      })
+
+      expect(textParentIsLocalized).toBe(true)
+    })
+
+    it('should preserve parent localization through collapsibles', () => {
+      const fields: Field[] = [
+        {
+          name: 'group',
+          type: 'group',
+          localized: true,
+          fields: [
+            {
+              type: 'collapsible',
+              label: 'Collapsible',
+              fields: [
+                {
+                  name: 'text',
+                  type: 'text',
+                },
+              ],
+            },
+          ],
+        },
+      ]
+      let textParentIsLocalized: boolean | undefined
+
+      traverseFields({
+        fields,
+        callback: ({ field, parentIsLocalized }) => {
+          if (field.type === 'text') {
+            textParentIsLocalized = parentIsLocalized
+          }
+        },
+      })
+
+      expect(textParentIsLocalized).toBe(true)
     })
   })
 })

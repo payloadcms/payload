@@ -184,7 +184,7 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
   return (
     <EntityVisibilityProvider visibleEntities={visibleEntities}>
       <CommandPalette />
-      <BulkUploadProvider drawerSlugPrefix={collectionSlug}>
+      <BulkUploadProvider modalSlugPrefix={collectionSlug}>
         <ActionsProvider Actions={Actions}>
           {RenderServerComponent({
             clientProps,
@@ -201,6 +201,16 @@ export const DefaultTemplate: React.FC<DefaultTemplateProps> = ({
                     avatar !== 'gravatar' && avatar !== 'default'
                       ? RenderServerComponent({
                           Component: avatar.Component,
+                          importMap: payload.importMap,
+                          serverProps,
+                        })
+                      : undefined
+                  }
+                  CustomLogoutButton={
+                    components?.logout?.Button
+                      ? RenderServerComponent({
+                          clientProps,
+                          Component: components.logout.Button,
                           importMap: payload.importMap,
                           serverProps,
                         })

@@ -1,0 +1,5 @@
+@layer payload-default {
+  .icon--download {
+    /* Icon uses fill="currentColor" inline */
+  }
+}

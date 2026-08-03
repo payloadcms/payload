@@ -28,7 +28,8 @@
       }
     ],
     "paths": {
-      "@payload-config": ["./tags/config.ts"]
+      "@payload-config": ["./tags/config.ts"],
+      "__helpers/*": ["./__helpers/*"]
     }
   },
   "exclude": [

@@ -585,6 +585,7 @@ export type DocumentSlots = {
   UnpublishButton?: React.ReactNode
   Upload?: React.ReactNode
   UploadControls?: React.ReactNode
+  UploadFilePreview?: React.ReactNode
 }
 
 export type {
@@ -726,6 +727,6 @@ export type DocumentEvent = {
   drawerSlug?: string
   entitySlug: string
   id?: number | string
-  operation: 'create' | 'update'
+  operation: 'create' | 'delete' | 'update'
   updatedAt: string
 }

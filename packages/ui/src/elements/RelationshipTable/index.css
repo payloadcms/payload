@@ -39,13 +39,10 @@
   .relationship-table .table {
     margin-bottom: 0;
     background: var(--color-bg);
-    border: var(--stroke-width-small) solid var(--color-border);
-    border-radius: var(--radius-medium);
-    overflow: hidden;
+    overflow: auto;
 
     table {
       width: 100%;
-      overflow: auto;
     }
 
     &:not(.table--appearance-condensed) table {

@@ -12,7 +12,7 @@
 
   .dropdown-indicator__icon {
     .stroke {
-      stroke-width: 1px;
+      stroke-width: var(--stroke-width-small);
     }
   }
 }

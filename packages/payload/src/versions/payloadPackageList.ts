@@ -36,7 +36,6 @@ export const PAYLOAD_PACKAGE_LIST = [
   '@payloadcms/storage-gcs',
   '@payloadcms/storage-r2',
   '@payloadcms/storage-s3',
-  '@payloadcms/storage-uploadthing',
   '@payloadcms/storage-vercel-blob',
   '@payloadcms/translations',
   '@payloadcms/ui/shared',

@@ -7,10 +7,10 @@ import type {
   SelectType,
   TypedFallbackLocale,
   TypedLocale,
+  User,
 } from '../../../index.js'
 import type {
   ApplyDisableErrors,
-  Document,
   PayloadRequest,
   PopulateType,
   TransformCollectionWithSelect,
@@ -107,11 +107,10 @@ type BaseFindByIDOptions<
    * @default false
    */
   trash?: boolean
-  // TODO: Strongly type User as TypedUser (= User in v4.0)
   /**
    * If you set `overrideAccess` to `false`, you can pass a user to use against the access control checks.
    */
-  user?: Document
+  user?: null | User
 } & Pick<FindByIDArgs, 'flattenLocales'> &
   Pick<FindOptions<TSlug, TSelect>, 'select'>
 

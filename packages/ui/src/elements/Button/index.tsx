@@ -11,6 +11,7 @@ import { SpinnerIcon } from '../../icons/Spinner/index.js'
 import { SwapIcon } from '../../icons/Swap/index.js'
 import { WriteIcon } from '../../icons/Write/index.js'
 import { XIcon } from '../../icons/X/index.js'
+import { useTranslation } from '../../providers/Translation/index.js'
 import { Link } from '../Link/index.js'
 import { Popup } from '../Popup/index.js'
 import './index.css'
@@ -89,6 +90,7 @@ export const Button: React.FC<Props> = (props) => {
   } = props
 
   const [showTooltip, setShowTooltip] = React.useState(false)
+  const { t } = useTranslation()
 
   // Explicit `=== true` check preserves `false` for aria-disabled attribute.
   // Using `disabled || loading` would treat `false` as falsy, omitting the attribute entirely.
@@ -208,6 +210,7 @@ export const Button: React.FC<Props> = (props) => {
         {buttonElement}
         <Popup
           button={<ChevronIcon size={popupIconSize} />}
+          buttonAriaLabel={t('general:moreOptions')}
           buttonSize={size}
           className={disabled && !enableSubMenu ? `${baseClass}--popup-disabled` : ''}
           disabled={disabled && !enableSubMenu}

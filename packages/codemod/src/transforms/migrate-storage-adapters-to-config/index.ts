@@ -7,7 +7,6 @@ const STORAGE_ADAPTER_FACTORIES = new Set([
   'gcsStorage',
   'r2Storage',
   's3Storage',
-  'uploadthingStorage',
   'vercelBlobStorage',
 ])
 
@@ -86,5 +85,5 @@ export const migrateStorageAdaptersToConfig: Transform = {
     return { filesChanged: Array.from(filesChanged) }
   },
   description:
-    'Move storage adapter factory calls (s3Storage, gcsStorage, azureStorage, r2Storage, vercelBlobStorage, uploadthingStorage) from `plugins` to the top-level `storage` array. Removes `plugins` if it becomes empty after the move.',
+    'Move storage adapter factory calls (s3Storage, gcsStorage, azureStorage, r2Storage, vercelBlobStorage) from `plugins` to the top-level `storage` array. Removes `plugins` if it becomes empty after the move.',
 }

@@ -1,0 +1,9 @@
+@layer payload-default {
+  .dialog-title {
+    flex: 1 0 0;
+    min-width: 0;
+    margin: 0;
+    font-weight: var(--text-body-medium-strong-font-weight);
+    letter-spacing: var(--text-body-medium-letter-spacing);
+  }
+}

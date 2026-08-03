@@ -7,8 +7,8 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
-import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
 import { login } from '../__helpers/e2e/auth/login.js'
+import { ensureCompilationIsDone, initPageConsoleErrorCatch } from '../__helpers/e2e/helpers.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { TEST_TIMEOUT_LONG } from '../playwright.config.js'
 
@@ -31,7 +31,11 @@ describe('Queues', () => {
     const context = await browser.newContext()
     page = await context.newPage()
     initPageConsoleErrorCatch(page)
-    await ensureCompilationIsDone({ page, serverURL })
+    // This suite logs in explicitly (no auto-login), so `/admin` redirects to
+    // `/admin/login`. Pass `noAutoLogin` so the compilation poll waits for the
+    // login URL instead of the dashboard URL that never loads — otherwise it
+    // loops until the beforeAll times out on TanStack (server-side 307 redirect).
+    await ensureCompilationIsDone({ noAutoLogin: true, page, serverURL })
 
     await login({ page, serverURL })
 
@@ -62,6 +66,14 @@ describe('Queues', () => {
      * We have the samee tests in int.spec.ts. This is to ensure that the external workflow handlers work correctly in the Next.js bundled environment.
      */
     test('can queue and run external workflow with external task handler within Next.js', async () => {
+      // This case specifically verifies external-handler dynamic imports in the
+      // Next.js bundled environment; the framework-agnostic behaviour is covered
+      // by int.spec.ts. The TanStack/Vite bundle resolves dynamic imports
+      // differently, so this Next.js-specific e2e does not apply.
+      test.skip(
+        process.env.PAYLOAD_FRAMEWORK === 'tanstack-start',
+        'Next.js-bundled-environment specific; generic behaviour covered by int.spec.ts.',
+      )
       // Queue a job using the externalWorkflow which uses file path handlers
       // This tests that dynamic imports work correctly in the Next.js bundled environment
       await payload.create({

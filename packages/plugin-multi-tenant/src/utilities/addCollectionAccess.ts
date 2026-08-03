@@ -13,23 +13,21 @@ export const collectionAccessKeys: AllAccessKeys = [
   'unlock',
 ] as const
 
-type Args<ConfigType> = {
-  accessResultCallback?: MultiTenantPluginConfig<ConfigType>['usersAccessResultOverride']
+type Args = {
+  accessResultCallback?: MultiTenantPluginConfig['usersAccessResultOverride']
   adminUsersSlug: string
   collection: CollectionConfig
   fieldName: string
   tenantsArrayFieldName?: string
   tenantsArrayTenantFieldName?: string
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }
 
 /**
  * Adds tenant access constraint to collection
  * - constrains access a users assigned tenants
  */
-export const addCollectionAccess = <ConfigType>({
+export const addCollectionAccess = ({
   accessResultCallback,
   adminUsersSlug,
   collection,
@@ -37,12 +35,12 @@ export const addCollectionAccess = <ConfigType>({
   tenantsArrayFieldName,
   tenantsArrayTenantFieldName,
   userHasAccessToAllTenants,
-}: Args<ConfigType>): void => {
+}: Args): void => {
   collectionAccessKeys.forEach((key) => {
     if (!collection.access) {
       collection.access = {}
     }
-    collection.access[key] = withTenantAccess<ConfigType>({
+    collection.access[key] = withTenantAccess({
       accessFunction: collection.access?.[key],
       accessKey: key,
       accessResultCallback,

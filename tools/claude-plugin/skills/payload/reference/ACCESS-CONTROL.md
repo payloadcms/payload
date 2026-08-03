@@ -1,4 +1,4 @@
-# Payload CMS Access Control Reference
+# Payload Access Control Reference
 
 Complete reference for access control patterns across collections, fields, and globals.
 
@@ -85,7 +85,6 @@ export const Posts: CollectionConfig = {
   },
   fields: [
     { name: 'title', type: 'text' },
-    { name: 'status', type: 'select', options: ['draft', 'published'] },
     { name: 'author', type: 'relationship', relationTo: 'users' },
   ],
 }

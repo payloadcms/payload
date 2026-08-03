@@ -6,7 +6,7 @@
     align-items: center;
     position: relative;
 
-    --field-min-height: var(--text-body-medium-line-height);
+    --field-min-height-large: var(--text-body-medium-line-height);
 
     .shimmer-effect {
       max-width: calc(2 * var(--spacer-4));

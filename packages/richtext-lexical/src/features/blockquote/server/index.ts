@@ -1,8 +1,8 @@
+import { QUOTE } from '@lexical/markdown'
 import { QuoteNode } from '@lexical/rich-text'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
-import { MarkdownTransformer } from '../markdownTransformer.js'
 import { i18n } from './i18n.js'
 import { quoteNodeJSONSchema } from './schema.js'
 
@@ -13,7 +13,7 @@ export const BlockquoteFeature = createServerFeature({
     ClientFeature: '@payloadcms/richtext-lexical/client#BlockquoteFeatureClient',
     clientFeatureProps: null,
     i18n,
-    markdownTransformers: [MarkdownTransformer],
+    markdownTransformers: [QUOTE],
     nodes: [
       createNode({
         jsonSchema: quoteNodeJSONSchema,

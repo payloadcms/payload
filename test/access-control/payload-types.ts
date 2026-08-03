@@ -62,15 +62,15 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_74BE97BC".
+ * via the `definition` "LexicalNodes_2332B802".
  */
-export type LexicalNodes_74BE97BC =
+export type LexicalNodes_2332B802 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_74BE97BC>
+  | SerializedParagraphNode<LexicalNodes_2332B802>
   | SerializedBlockNode<MyBlock>
-  | SerializedHeadingNode<LexicalNodes_74BE97BC>
+  | SerializedHeadingNode<LexicalNodes_2332B802>
   | {
       type: 'upload';
       /**
@@ -79,11 +79,11 @@ export type LexicalNodes_74BE97BC =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_74BE97BC>
-  | SerializedListNode<LexicalNodes_74BE97BC>
-  | SerializedListItemNode<LexicalNodes_74BE97BC>
-  | SerializedAutoLinkNode<LexicalNodes_74BE97BC, LexicalLinkFields_0A7E9EC0>
-  | SerializedLinkNode<LexicalNodes_74BE97BC, LexicalLinkFields_0A7E9EC0>
+  | SerializedQuoteNode<LexicalNodes_2332B802>
+  | SerializedListNode<LexicalNodes_2332B802>
+  | SerializedListItemNode<LexicalNodes_2332B802>
+  | SerializedAutoLinkNode<LexicalNodes_2332B802, LexicalLinkFields_0A7E9EC0>
+  | SerializedLinkNode<LexicalNodes_2332B802, LexicalLinkFields_0A7E9EC0>
   | SerializedRelationshipNode<
       | 'users'
       | 'public-users'
@@ -117,7 +117,6 @@ export type LexicalNodes_74BE97BC =
       | 'where-cache-same'
       | 'where-cache-unique'
       | 'async-parent'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
@@ -125,13 +124,13 @@ export type LexicalNodes_74BE97BC =
     >;
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_3CC4B7D0".
+ * via the `definition` "LexicalNodes_ACB93F89".
  */
-export type LexicalNodes_3CC4B7D0 =
+export type LexicalNodes_ACB93F89 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_3CC4B7D0>
+  | SerializedParagraphNode<LexicalNodes_ACB93F89>
   | SerializedHorizontalRuleNode
   | {
       type: 'upload';
@@ -141,7 +140,7 @@ export type LexicalNodes_3CC4B7D0 =
       version: number;
       [k: string]: unknown;
     }
-  | SerializedQuoteNode<LexicalNodes_3CC4B7D0>
+  | SerializedQuoteNode<LexicalNodes_ACB93F89>
   | SerializedRelationshipNode<
       | 'users'
       | 'public-users'
@@ -175,17 +174,16 @@ export type LexicalNodes_3CC4B7D0 =
       | 'where-cache-same'
       | 'where-cache-unique'
       | 'async-parent'
-      | 'payload-mcp-api-keys'
       | 'payload-kv'
       | 'payload-locked-documents'
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedAutoLinkNode<LexicalNodes_3CC4B7D0, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_3CC4B7D0, LexicalLinkFields>
-  | SerializedListNode<LexicalNodes_3CC4B7D0>
-  | SerializedListItemNode<LexicalNodes_3CC4B7D0>
-  | SerializedHeadingNode<LexicalNodes_3CC4B7D0>;
+  | SerializedAutoLinkNode<LexicalNodes_ACB93F89, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_ACB93F89, LexicalLinkFields>
+  | SerializedListNode<LexicalNodes_ACB93F89>
+  | SerializedListItemNode<LexicalNodes_ACB93F89>
+  | SerializedHeadingNode<LexicalNodes_ACB93F89>;
 
 export interface Config {
   auth: {
@@ -229,7 +227,6 @@ export interface Config {
     'where-cache-same': WhereCacheSame;
     'where-cache-unique': WhereCacheUnique;
     'async-parent': AsyncParent;
-    'payload-mcp-api-keys': PayloadMcpApiKey;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -269,7 +266,6 @@ export interface Config {
     'where-cache-same': WhereCacheSameSelect<false> | WhereCacheSameSelect<true>;
     'where-cache-unique': WhereCacheUniqueSelect<false> | WhereCacheUniqueSelect<true>;
     'async-parent': AsyncParentSelect<false> | AsyncParentSelect<true>;
-    'payload-mcp-api-keys': PayloadMcpApiKeysSelect<false> | PayloadMcpApiKeysSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -704,7 +700,7 @@ export interface RichText {
  * via the `definition` "RichText".
  */
 export interface RichText1 {
-  richText?: LexicalRichText<LexicalNodes_74BE97BC> | null;
+  richText?: LexicalRichText<LexicalNodes_2332B802> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'richText';
@@ -716,24 +712,24 @@ export interface RichText1 {
 export interface Regression1 {
   id: string;
   group1?: {
-    richText1?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+    richText1?: LexicalRichText<LexicalNodes_ACB93F89> | null;
     text?: string | null;
   };
   tab1?: {
-    richText2?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
-    blocks2?: MyBlock_C0B6048C[] | null;
+    richText2?: LexicalRichText<LexicalNodes_ACB93F89> | null;
+    blocks2?: MyBlock_80E55F5A[] | null;
   };
-  richText4?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+  richText4?: LexicalRichText<LexicalNodes_ACB93F89> | null;
   blocks3?: MyBlock2[] | null;
   array?:
     | {
-        art?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+        art?: LexicalRichText<LexicalNodes_ACB93F89> | null;
         id?: string | null;
       }[]
     | null;
   arrayWithAccessFalse?:
     | {
-        richText6?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+        richText6?: LexicalRichText<LexicalNodes_ACB93F89> | null;
         id?: string | null;
       }[]
     | null;
@@ -745,10 +741,10 @@ export interface Regression1 {
  * Multiple blocks resolve to the `MyBlock` interface with different fields, so a content hash is appended to keep the generated types stable and unambiguous. Set a unique `interfaceName` on the block to choose the name yourself. See https://payloadcms.com/docs/typescript/generating-types#block-interface-name-collisions
  *
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "MyBlock_C0B6048C".
+ * via the `definition` "MyBlock_80E55F5A".
  */
-export interface MyBlock_C0B6048C {
-  richText3?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+export interface MyBlock_80E55F5A {
+  richText3?: LexicalRichText<LexicalNodes_ACB93F89> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'myBlock';
@@ -758,7 +754,7 @@ export interface MyBlock_C0B6048C {
  * via the `definition` "MyBlock2".
  */
 export interface MyBlock2 {
-  richText5?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+  richText5?: LexicalRichText<LexicalNodes_ACB93F89> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'myBlock2';
@@ -768,7 +764,7 @@ export interface MyBlock2 {
  * via the `definition` "MyBlock3".
  */
 export interface MyBlock3 {
-  richText7?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+  richText7?: LexicalRichText<LexicalNodes_ACB93F89> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'myBlock3';
@@ -780,12 +776,12 @@ export interface MyBlock3 {
 export interface Regression2 {
   id: string;
   group?: {
-    richText1?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+    richText1?: LexicalRichText<LexicalNodes_ACB93F89> | null;
     text?: string | null;
   };
   array?:
     | {
-        richText2?: LexicalRichText<LexicalNodes_3CC4B7D0> | null;
+        richText2?: LexicalRichText<LexicalNodes_ACB93F89> | null;
         id?: string | null;
       }[]
     | null;
@@ -970,31 +966,6 @@ export interface AsyncParent {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys".
- */
-export interface PayloadMcpApiKey {
-  id: string;
-  apiKey: string;
-  apiKeyIndex: string;
-  access?:
-    | {
-        [k: string]: unknown;
-      }
-    | unknown[]
-    | string
-    | number
-    | boolean
-    | null;
-  label?: string | null;
-  description?: string | null;
-  lastUsed?: string | null;
-  user: string | User;
-  overrideAccess?: boolean | null;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
@@ -1144,10 +1115,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'async-parent';
         value: string | AsyncParent;
-      } | null)
-    | ({
-        relationTo: 'payload-mcp-api-keys';
-        value: string | PayloadMcpApiKey;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1809,22 +1776,6 @@ export interface AsyncParentSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "payload-mcp-api-keys_select".
- */
-export interface PayloadMcpApiKeysSelect<T extends boolean = true> {
-  apiKey?: T;
-  apiKeyIndex?: T;
-  access?: T;
-  label?: T;
-  description?: T;
-  lastUsed?: T;
-  user?: T;
-  overrideAccess?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-kv_select".
  */
 export interface PayloadKvSelect<T extends boolean = true> {
@@ -2087,7 +2038,7 @@ export type SerializedUploadNode<TSlugs extends keyof Config['collections'], TFi
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 
@@ -2136,7 +2087,7 @@ export type SerializedRelationshipNode<TSlugs extends keyof Config['collections'
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
   };
 }[TSlugs];
 

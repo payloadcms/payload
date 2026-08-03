@@ -49,16 +49,30 @@
     }
 
     /* Linked cells: move padding to the anchor/button for full-cell clickability */
-    .cell--linked {
+    td.cell--linked {
       padding: 0;
+
+      &:first-child,
+      &:last-child {
+        padding: 0;
+      }
 
       > :is(a, button) {
         display: flex;
         align-items: center;
+        width: 100%;
         padding: var(--spacer-2) var(--spacer-2-5);
         min-height: calc(var(--spacer-4) * 2);
         cursor: pointer;
       }
+
+      &:first-child > :is(a, button) {
+        padding-inline-start: var(--gutter-h);
+      }
+    }
+
+    .drawer & td.cell--linked:first-child > :is(a, button) {
+      padding-inline-start: var(--spacer-3);
     }
 
     #heading-_select,
@@ -68,6 +82,18 @@
       padding-inline-end: var(--spacer-2);
       padding-block: var(--spacer-2);
       text-align: center;
+    }
+
+    /* Size the locked-row lock icon to the checkbox's 16px box (keeping the column
+     * width stable) and center it like the checkbox; the larger icon overflows. */
+    .cell-_select .locked {
+      display: flex;
+      height: var(--spacer-3);
+      width: var(--spacer-3);
+
+      svg {
+        flex-shrink: 0;
+      }
     }
 
     #heading-_dragHandle {
@@ -83,6 +109,12 @@
       padding: var(--spacer-2) 0;
       text-align: center;
       vertical-align: middle;
+    }
+
+    .cell-_dragHandle > div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     tbody tr {
@@ -116,7 +148,10 @@
 
   /* Condensed appearance */
   .table--appearance-condensed {
+    border: var(--stroke-width-small) solid var(--color-border);
     border-radius: var(--radius-medium);
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-color) transparent;
 
     table {
       border-collapse: collapse;
@@ -178,16 +213,27 @@
     }
 
     /* Linked cells: move padding to the anchor/button for full-cell clickability */
-    .cell--linked {
+    td.cell--linked {
       padding: 0;
 
-      > :is(a, button) {
+      &:first-child,
+      &:last-child {
+        padding: 0;
+      }
+
+      > :is(a, button, .drawer-link) {
+        display: flex;
+        align-items: center;
+        width: 100%;
         padding: 0 var(--spacer-2-5);
         min-height: var(--spacer-5);
+      }
+
+      > :is(a, button) {
         cursor: pointer;
       }
 
-      &:first-child > :is(a, button) {
+      &:first-child > :is(a, button, .drawer-link) {
         padding-inline-start: var(--spacer-2-5);
       }
     }

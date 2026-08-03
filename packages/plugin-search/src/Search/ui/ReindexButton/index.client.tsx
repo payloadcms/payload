@@ -125,7 +125,6 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
   return (
     <div>
       <Popup
-        button={<ReindexButtonLabel />}
         render={({ close }) => (
           <PopupList.ButtonGroup>
             {searchCollections.map((collectionSlug) => (
@@ -141,6 +140,7 @@ export const ReindexButtonClient: React.FC<ReindexButtonProps> = ({
             </PopupList.Button>
           </PopupList.ButtonGroup>
         )}
+        renderButton={(buttonProps) => <ReindexButtonLabel {...buttonProps} />}
         showScrollbar
         size="large"
         verticalAlign="bottom"

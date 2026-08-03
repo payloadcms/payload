@@ -1,6 +1,6 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
 import { wait } from 'payload/shared'
 
 import type { Config, Post } from '../../payload-types.js'
@@ -13,6 +13,7 @@ import {
   initPageConsoleErrorCatch,
   saveDocAndAssert,
 } from '../../../__helpers/e2e/helpers.js'
+import { test } from '../../../__helpers/e2e/playwright.js'
 import { AdminUrlUtil } from '../../../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../../../__helpers/shared/initPayloadE2ENoConfig.js'
 import {
@@ -191,7 +192,7 @@ describe('Document View', () => {
   describe('document titles', () => {
     test('collection — should render fallback titles when creating new', async () => {
       await page.goto(postsUrl.create)
-      await checkPageTitle(page, '[Untitled]')
+      await checkPageTitle(page, 'Untitled')
       await checkBreadcrumb(page, 'Create New')
       await saveDocAndAssert(page)
     })
@@ -272,7 +273,7 @@ describe('Document View', () => {
   })
 
   describe('custom document views', () => {
-    test('collection — should render custom tab view', async () => {
+    test('collection — should render custom tab view', { framework: 'rsc' }, async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
@@ -283,7 +284,7 @@ describe('Document View', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customTabViewTitle)
     })
 
-    test('collection — should render custom nested tab view', async () => {
+    test('collection — should render custom nested tab view', { framework: 'rsc' }, async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
@@ -297,7 +298,7 @@ describe('Document View', () => {
       await expect(page.locator('h1#custom-view-title')).toContainText(customNestedTabViewTitle)
     })
 
-    test('collection — should render custom tab label', async () => {
+    test('collection — should render custom tab label', { framework: 'rsc' }, async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
@@ -309,19 +310,23 @@ describe('Document View', () => {
       await expect(editTab).toBeVisible()
     })
 
-    test('collection - should allow to override the tab for the default view', async () => {
-      await page.goto(customViewsURL.create)
-      await page.locator('#field-title').fill('Test')
-      await saveDocAndAssert(page)
+    test(
+      'collection - should allow to override the tab for the default view',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(customViewsURL.create)
+        await page.locator('#field-title').fill('Test')
+        await saveDocAndAssert(page)
 
-      const customTab = page.locator(
-        `.custom-doc-tab a:has-text("${overriddenDefaultRouteTabLabel}")`,
-      )
+        const customTab = page.locator(
+          `.custom-doc-tab a:has-text("${overriddenDefaultRouteTabLabel}")`,
+        )
 
-      await expect(customTab).toBeVisible()
-    })
+        await expect(customTab).toBeVisible()
+      },
+    )
 
-    test('collection — should render custom tab component', async () => {
+    test('collection — should render custom tab component', { framework: 'rsc' }, async () => {
       await page.goto(customViewsURL.create)
       await page.locator('#field-title').fill('Test')
       await saveDocAndAssert(page)
@@ -331,7 +336,7 @@ describe('Document View', () => {
       await expect(customTab).toBeVisible()
     })
 
-    test('global — should render custom tab label', async () => {
+    test('global — should render custom tab label', { framework: 'rsc' }, async () => {
       await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-view')
 
       const title = page.locator('#custom-view-title')
@@ -342,7 +347,7 @@ describe('Document View', () => {
       await expect(title).toContainText('Custom Tab Label View')
     })
 
-    test('global — should render custom tab component', async () => {
+    test('global — should render custom tab component', { framework: 'rsc' }, async () => {
       await page.goto(globalURL.global(customGlobalViews2GlobalSlug) + '/custom-tab-component')
       const title = page.locator('#custom-view-title')
 
@@ -353,15 +358,19 @@ describe('Document View', () => {
       await expect(title).toContainText('Custom View With Tab Component')
     })
 
-    test('global — should allow to override the tab for the default view', async () => {
-      await page.goto(globalURL.global(customGlobalViews2GlobalSlug))
+    test(
+      'global — should allow to override the tab for the default view',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(globalURL.global(customGlobalViews2GlobalSlug))
 
-      const customTab = page.locator(
-        `.custom-doc-tab a:has-text("${overriddenDefaultRouteTabLabel}")`,
-      )
+        const customTab = page.locator(
+          `.custom-doc-tab a:has-text("${overriddenDefaultRouteTabLabel}")`,
+        )
 
-      await expect(customTab).toBeVisible()
-    })
+        await expect(customTab).toBeVisible()
+      },
+    )
   })
 
   describe('drawers', () => {
@@ -591,19 +600,27 @@ describe('Document View', () => {
       await expect(page.locator('#field-customTextClientField')).toBeVisible()
     })
 
-    test('renders custom label component', async () => {
+    test('renders custom client label component', async () => {
       await page.goto(customFieldsURL.create)
       await expect(page.locator('#custom-client-field-label')).toBeVisible()
+    })
+
+    test('renders custom server label component', { framework: 'rsc' }, async () => {
+      await page.goto(customFieldsURL.create)
       await expect(page.locator('#custom-server-field-label')).toBeVisible()
     })
 
-    test('renders custom field description text', async () => {
+    test('renders custom client field description text', async () => {
       await page.goto(customFieldsURL.create)
       await expect(page.locator('#custom-client-field-description')).toBeVisible()
+    })
+
+    test('renders custom server field description text', { framework: 'rsc' }, async () => {
+      await page.goto(customFieldsURL.create)
       await expect(page.locator('#custom-server-field-description')).toBeVisible()
     })
 
-    test('custom server components should receive field props', async () => {
+    test('custom server components should receive field props', { framework: 'rsc' }, async () => {
       await page.goto(customFieldsURL.create)
       await expect(
         page.locator('#custom-server-field-label', {
@@ -785,21 +802,29 @@ describe('Document View', () => {
   })
 
   describe('custom document controls', () => {
-    test('should show custom elements in document controls in collection', async () => {
-      await page.goto(postsUrl.create)
-      const customDraftButton = page.locator('#custom-draft-button')
-      const customSaveButton = page.locator('#custom-save-button')
+    test(
+      'should show custom elements in document controls in collection',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(postsUrl.create)
+        const customDraftButton = page.locator('#custom-draft-button')
+        const customSaveButton = page.locator('#custom-save-button')
 
-      await expect(customDraftButton).toBeVisible()
-      await expect(customSaveButton).toBeVisible()
-    })
+        await expect(customDraftButton).toBeVisible()
+        await expect(customSaveButton).toBeVisible()
+      },
+    )
 
-    test('should show custom elements in document controls in global', async () => {
-      await page.goto(globalURL.global(globalSlug))
-      const customDraftButton = page.locator('#custom-draft-button')
+    test(
+      'should show custom elements in document controls in global',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(globalURL.global(globalSlug))
+        const customDraftButton = page.locator('#custom-draft-button')
 
-      await expect(customDraftButton).toBeVisible()
-    })
+        await expect(customDraftButton).toBeVisible()
+      },
+    )
   })
 
   describe('reordering tabs', () => {
@@ -815,7 +840,7 @@ describe('Document View', () => {
       await expect(firstTab).toContainText('API')
     })
 
-    test('collection — should show edit as third tab', async () => {
+    test('collection — should show edit as third tab', { framework: 'rsc' }, async () => {
       const tabs = page.locator('.doc-tabs__tabs-container .doc-tab')
       const secondTab = tabs.nth(2)
       await expect(secondTab).toContainText('Edit')
@@ -839,7 +864,7 @@ describe('Document View', () => {
       await expect(customEditMenuItem).toBeVisible()
     })
 
-    test('should render custom editMenuItems server component', async () => {
+    test('should render custom editMenuItems server component', { framework: 'rsc' }, async () => {
       await page.goto(editMenuItemsURL.create)
       await page.locator('#field-title')?.fill(title)
       await saveDocAndAssert(page)
@@ -858,31 +883,35 @@ describe('Document View', () => {
       await expect(customEditMenuItem).toBeVisible()
     })
 
-    test('should render doc id in href of custom editMenuItems server component link', async () => {
-      await page.goto(editMenuItemsURL.create)
-      await page.locator('#field-title')?.fill(title)
-      await saveDocAndAssert(page)
+    test(
+      'should render doc id in href of custom editMenuItems server component link',
+      { framework: 'rsc' },
+      async () => {
+        await page.goto(editMenuItemsURL.create)
+        await page.locator('#field-title')?.fill(title)
+        await saveDocAndAssert(page)
 
-      const threeDotMenu = page.getByRole('main').locator('.doc-controls__popup')
-      await expect(threeDotMenu).toBeVisible()
-      await threeDotMenu.click()
+        const threeDotMenu = page.getByRole('main').locator('.doc-controls__popup')
+        await expect(threeDotMenu).toBeVisible()
+        await threeDotMenu.click()
 
-      const popup = page.locator('.popup__content')
-      await expect(popup).toBeVisible()
+        const popup = page.locator('.popup__content')
+        await expect(popup).toBeVisible()
 
-      const customEditMenuItem = popup.getByRole('link', {
-        name: 'Custom Edit Menu Item (Server)',
-      })
+        const customEditMenuItem = popup.getByRole('link', {
+          name: 'Custom Edit Menu Item (Server)',
+        })
 
-      await expect(customEditMenuItem).toBeVisible()
+        await expect(customEditMenuItem).toBeVisible()
 
-      // Extract the document id from the edit page URL (last path segment)
-      const editPath = new URL(page.url()).pathname
-      const docId = editPath.split('/').filter(Boolean).pop()!
+        // Extract the document id from the edit page URL (last path segment)
+        const editPath = new URL(page.url()).pathname
+        const docId = editPath.split('/').filter(Boolean).pop()!
 
-      // Assert the href contains the same id
-      await expect(customEditMenuItem).toHaveAttribute('href', `/custom-action?id=${docId}`)
-    })
+        // Assert the href contains the same id
+        await expect(customEditMenuItem).toHaveAttribute('href', `/custom-action?id=${docId}`)
+      },
+    )
   })
 
   describe('save before leaving modal', () => {

@@ -1,6 +1,6 @@
 @layer payload-default {
   .lexical-diff .lexical-unknown-diff {
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--elevation-100-canvas);
     max-width: fit-content;
     display: flex;
     align-items: center;

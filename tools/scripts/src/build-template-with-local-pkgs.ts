@@ -4,6 +4,8 @@ import { execSync, spawn } from 'child_process'
 import fs from 'fs/promises'
 import path from 'path'
 
+import { mapTarballsToFileSpecs } from './local-package-tarballs.js'
+
 main().catch((error) => {
   console.error(error)
   process.exit(1)
@@ -33,17 +35,7 @@ async function main() {
 
   // Map every packed .tgz (produced by `script:pack --all`) to its package name and a local
   // `file:` spec, e.g. `@payloadcms/translations` -> `file:./payloadcms-translations-4.0.0.tgz`.
-  const allFiles = await fs.readdir(templatePath, { withFileTypes: true })
-  const fileSpecByPackageName = Object.fromEntries(
-    allFiles
-      .filter(
-        (file) =>
-          file.isFile() &&
-          file.name.endsWith('.tgz') &&
-          (file.name.startsWith('payload-') || file.name.startsWith('payloadcms-')),
-      )
-      .map((file) => [tgzToPackageName(file.name), `file:./${file.name}`]),
-  )
+  const fileSpecByPackageName = await mapTarballsToFileSpecs(templatePath)
 
   if (Object.keys(fileSpecByPackageName).length === 0) {
     throw new Error(
@@ -59,7 +51,6 @@ async function main() {
   const packageJsonObj = JSON.parse(await fs.readFile(packageJsonPath, 'utf-8')) as {
     dependencies?: Record<string, string>
     devDependencies?: Record<string, string>
-    pnpm?: { overrides?: Record<string, string> }
   }
 
   // Point every workspace dependency the template declares at its local tarball. This also
@@ -76,17 +67,24 @@ async function main() {
     }
   }
 
-  // Force the local tarballs across the entire dependency tree via overrides. Without this, the
-  // packed tarballs request their sibling @payloadcms packages at the in-repo version (e.g. a beta
-  // that is not published to npm), and the install fails with ERR_PNPM_NO_MATCHING_VERSION.
-  packageJsonObj.pnpm = {
-    ...packageJsonObj.pnpm,
-    overrides: { ...packageJsonObj.pnpm?.overrides, ...fileSpecByPackageName },
-  }
-
   await fs.writeFile(packageJsonPath, JSON.stringify(packageJsonObj, null, 2))
 
-  execSync('pnpm install --no-frozen-lockfile --ignore-workspace', execOpts)
+  /*
+   * Make the template its own workspace root (no `--ignore-workspace`, which v11 uses to skip this
+   * file entirely). `allowBuilds` is a per-package map honored by v10 and v11; we enumerate instead
+   * of `dangerouslyAllowAllBuilds` because the latter conflicts with the templates' package.json
+   * `onlyBuiltDependencies` (ERR_PNPM_CONFIG_CONFLICT_BUILT_DEPENDENCIES on the pnpm@10-pinned ones).
+   */
+  await fs.writeFile(
+    path.join(templatePath, 'pnpm-workspace.yaml'),
+    toWorkspaceYaml({
+      // sharp/esbuild/unrs-resolver: all templates; mongodb-memory-server/@swc/core: plugin template.
+      allowBuilds: ['esbuild', 'sharp', 'unrs-resolver', 'mongodb-memory-server', '@swc/core'],
+      overrides: fileSpecByPackageName,
+    }),
+  )
+
+  execSync('pnpm install --no-frozen-lockfile', execOpts)
   await fs.writeFile(
     path.resolve(templatePath, '.env'),
     // Populate POSTGRES_URL just in case it's needed
@@ -95,13 +93,6 @@ DATABASE_URL=${databaseConnection}
 POSTGRES_URL=${databaseConnection}
 BLOB_READ_WRITE_TOKEN=vercel_blob_rw_TEST_asdf`,
   )
-  // Important: run generate:types and generate:importmap first
-  if (templateName !== 'plugin') {
-    // TODO: fix in a separate PR - these commands currently fail in the plugin template
-    execSync('pnpm --ignore-workspace run generate:types', execOpts)
-    execSync('pnpm --ignore-workspace run generate:importmap', execOpts)
-  }
-
   await runBuildWithWarningsCheck({ cwd: templatePath, allowWarnings })
 
   header(`\n🎉 Done!`)
@@ -127,7 +118,7 @@ async function runBuildWithWarningsCheck(args: {
   const { allowWarnings, cwd } = args
 
   return new Promise((resolve, reject) => {
-    const buildProcess = spawn('pnpm', ['--ignore-workspace', 'run', 'build'], {
+    const buildProcess = spawn('pnpm', ['run', 'build'], {
       cwd,
       shell: true,
     })
@@ -166,14 +157,23 @@ async function runBuildWithWarningsCheck(args: {
 }
 
 /**
- * Derives a package name from a `pnpm pack` tarball filename, e.g.
- * `payload-4.0.0.tgz` -> `payload` and `payloadcms-db-mongodb-4.0.0.tgz` -> `@payloadcms/db-mongodb`.
- * pnpm names scoped tarballs `<scope>-<name>-<version>.tgz`, so the version is the first
- * hyphen-delimited segment that starts with a digit.
+ * Serializes the standalone pnpm-workspace.yaml. Omitting `packages` makes the template a
+ * single-package workspace root; `verifyDepsBeforeRun: false` stops v11 re-installing before
+ * the later `pnpm run` commands. Keys/values are quoted so scoped names and file: specs stay valid.
  */
-export function tgzToPackageName(tgzFileName: string): string {
-  const nameWithoutVersion = tgzFileName.replace(/-\d.*\.tgz$/, '')
-  return nameWithoutVersion === 'payload'
-    ? 'payload'
-    : `@payloadcms/${nameWithoutVersion.replace(/^payloadcms-/, '')}`
+function toWorkspaceYaml(args: {
+  allowBuilds: string[]
+  overrides: Record<string, string>
+}): string {
+  const { allowBuilds, overrides } = args
+
+  const lines = ['verifyDepsBeforeRun: false', 'overrides:']
+  for (const [name, spec] of Object.entries(overrides)) {
+    lines.push(`  '${name}': '${spec}'`)
+  }
+  lines.push('allowBuilds:')
+  for (const name of allowBuilds) {
+    lines.push(`  '${name}': true`)
+  }
+  return `${lines.join('\n')}\n`
 }

@@ -337,7 +337,7 @@ export const BlockComponent: React.FC<BlockComponentProps> = (props) => {
 
   const blocksField: BlocksFieldClient | undefined = clientSchemaMap?.[
     componentMapRenderedBlockPath
-  ]?.[0] as BlocksFieldClient
+  ]?.[0] as BlocksFieldClient | undefined
 
   const blockOrSlug = blocksField?.blocks?.[0]
   const clientBlock: ClientBlock | undefined =

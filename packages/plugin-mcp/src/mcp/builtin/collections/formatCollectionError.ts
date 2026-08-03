@@ -38,7 +38,7 @@ export const formatCollectionError = ({
   error,
   req,
 }: {
-  action: 'creating' | 'updating'
+  action: 'creating' | 'duplicating' | 'updating'
   collectionSlug: CollectionSlug
   error: unknown
   req: PayloadRequest

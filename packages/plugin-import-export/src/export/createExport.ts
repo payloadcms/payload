@@ -1,5 +1,5 @@
 /* eslint-disable perfectionist/sort-objects */
-import type { PayloadRequest, Sort, TypedUser, Where } from 'payload'
+import type { PayloadRequest, Sort, User, Where } from 'payload'
 
 import { stringify } from 'csv-stringify/sync'
 import { APIError } from 'payload'
@@ -42,8 +42,8 @@ export type Export = {
   name: string
   page?: number
   sort?: Sort
-  userCollection: string
-  userID: number | string
+  userCollection?: string
+  userID?: number | string
   where?: Where
 }
 
@@ -99,18 +99,18 @@ export const createExport = async (args: CreateExportArgs) => {
     throw new APIError(`Collection with slug ${collectionSlug} not found.`)
   }
 
-  let user: TypedUser | undefined
+  let user: undefined | User
 
   if (userCollection && userID) {
     user = (await req.payload.findByID({
       id: userID,
       collection: userCollection,
       overrideAccess: true,
-    })) as TypedUser
+    })) as User
   }
 
   if (!user && req.user) {
-    user = req?.user?.id ? req.user : req?.user?.user
+    user = req.user
   }
 
   if (!user) {

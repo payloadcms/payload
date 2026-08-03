@@ -1,6 +1,7 @@
 import type { JSONSchema4 } from 'json-schema'
 import type {
   DataFromCollectionSlug,
+  IDTypeForCollectionSlug,
   JsonObject,
   TypedUploadCollection,
   UploadCollectionSlug,
@@ -23,7 +24,7 @@ export type UploadData<TFields extends JsonObject = JsonObject> = {
     id: string
     relationTo: TCollectionSlug
     /** Either the document ID or the full populated document. */
-    value: DataFromCollectionSlug<TCollectionSlug> | number | string
+    value: DataFromCollectionSlug<TCollectionSlug> | IDTypeForCollectionSlug<TCollectionSlug>
   }
 }[UploadCollectionSlug]
 
@@ -47,7 +48,7 @@ export type UploadDataImproved<TFields extends JsonObject = JsonObject> = {
     fields: TFields
     id: string
     relationTo: TCollectionSlug
-    value: number | string | TypedUploadCollection[TCollectionSlug]
+    value: IDTypeForCollectionSlug<TCollectionSlug> | TypedUploadCollection[TCollectionSlug]
   }
 }[UploadCollectionSlug]
 
@@ -57,7 +58,7 @@ export type SerializedUploadNode<
 > = {
   [TSlug in TSlugs]: {
     relationTo: TSlug
-    value: DataFromCollectionSlug<TSlug> | number | string
+    value: DataFromCollectionSlug<TSlug> | IDTypeForCollectionSlug<TSlug>
   }
 }[TSlugs] & {
   fields: TFields
@@ -77,7 +78,21 @@ const SERIALIZED_UPLOAD_NODE_TS = `export type SerializedUploadNode<TSlugs exten
 } & {
   [TSlug in TSlugs]: {
     relationTo: TSlug;
-    value: number | string | Config['collections'][TSlug];
+    value: Config['collections'][TSlug]['id'] | Config['collections'][TSlug];
+  };
+}[TSlugs];`
+
+/** Input variant of `SerializedUploadNode`: `value` is ID-only (you only ever write an ID). */
+const SERIALIZED_UPLOAD_NODE_INPUT_TS = `export type SerializedUploadNodeInput<TSlugs extends keyof Config['collections'], TFields = { [k: string]: unknown }> = {
+  type: 'upload';
+  format: LexicalElementFormat;
+  id: string;
+  version: number;
+  fields: TFields;
+} & {
+  [TSlug in TSlugs]: {
+    relationTo: TSlug;
+    value: Config['collections'][TSlug]['id'];
   };
 }[TSlugs];`
 
@@ -86,8 +101,16 @@ const hashUploadFields = (schema: JSONSchema4): string =>
 
 export const createUploadNodeJSONSchema =
   (props: undefined | UploadFeatureProps): JSONSchemaFn =>
-  ({ collectionIDFieldTypes, config, i18n, interfaceNameDefinitions, typeStringDefinitions }) => {
-    typeStringDefinitions.add(SERIALIZED_UPLOAD_NODE_TS)
+  ({
+    collectionIDFieldTypes,
+    config,
+    i18n,
+    interfaceNameDefinitions,
+    typeStringDefinitions,
+    variant,
+  }) => {
+    const isInput = variant === 'input'
+    typeStringDefinitions.add(isInput ? SERIALIZED_UPLOAD_NODE_INPUT_TS : SERIALIZED_UPLOAD_NODE_TS)
     const enabledCollections = config?.collections
       ? filterEnabledRelationshipCollections(config.collections, {
           disabledCollections: props?.disabledCollections,
@@ -118,6 +141,7 @@ export const createUploadNodeJSONSchema =
               i18n,
               interfaceNameDefinitions,
               typeStringDefinitions,
+              variant,
             })
           : { properties: {}, required: [] }
 
@@ -134,10 +158,11 @@ export const createUploadNodeJSONSchema =
         fieldsSchema = { $ref: `#/$defs/${fieldsTypeName}` }
       }
 
+      const uploadTsName = isInput ? 'SerializedUploadNodeInput' : 'SerializedUploadNode'
       perCollectionTsTypes.push(
         fieldsTypeName
-          ? `SerializedUploadNode<'${slug}', ${fieldsTypeName}>`
-          : `SerializedUploadNode<'${slug}'>`,
+          ? `${uploadTsName}<'${slug}', ${fieldsTypeName}>`
+          : `${uploadTsName}<'${slug}'>`,
       )
 
       return {
@@ -149,11 +174,13 @@ export const createUploadNodeJSONSchema =
           fields: fieldsSchema,
           format: formatSchema,
           relationTo: { type: 'string', const: slug },
-          value: {
-            description:
-              'The uploaded file by ID (string or number). Populated to the full upload document when read at depth > 0.',
-            oneOf: [{ type: idType }, { $ref: `#/$defs/${slug}` }],
-          },
+          value: isInput
+            ? { type: idType, description: 'The uploaded file ID.' }
+            : {
+                description:
+                  'The uploaded file by ID (string or number). Populated to the full upload document when read at depth > 0.',
+                oneOf: [{ type: idType }, { $ref: `#/$defs/${slug}` }],
+              },
           version: versionSchema,
         },
         required: ['fields', 'format', 'id', 'relationTo', 'type', 'value', 'version'],

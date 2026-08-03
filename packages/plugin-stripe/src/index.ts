@@ -1,4 +1,6 @@
-import type { Config, Endpoint } from 'payload'
+import type { Endpoint } from 'payload'
+
+import { definePlugin } from 'payload'
 
 import type { SanitizedStripePluginConfig, StripePluginConfig } from './types.js'
 
@@ -11,9 +13,9 @@ import { stripeWebhooks } from './routes/webhooks.js'
 
 export { stripeProxy } from './utilities/stripeProxy.js'
 
-export const stripePlugin =
-  (incomingStripeConfig: StripePluginConfig) =>
-  (config: Config): Config => {
+export const stripePlugin = definePlugin<StripePluginConfig>({
+  slug: '@payloadcms/plugin-stripe',
+  plugin: ({ config, options: incomingStripeConfig }) => {
     const { collections } = config
 
     // set config defaults here
@@ -110,4 +112,5 @@ export const stripePlugin =
     config.endpoints = endpoints
 
     return config
-  }
+  },
+})

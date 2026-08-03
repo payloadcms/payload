@@ -12,7 +12,7 @@
 
   .collection-list__sub-header {
     flex-basis: 100%;
-    padding-top: var(--spacer-3);
+    padding-top: var(--spacer-2-5);
   }
 
   .collection-list .table table {

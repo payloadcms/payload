@@ -3,7 +3,7 @@ import type {
   SanitizedCollectionConfig,
   SanitizedDocumentPermissions,
   SanitizedGlobalConfig,
-  TypedUser,
+  User,
 } from 'payload'
 
 import { combineQueries, extractAccessFromPermission } from 'payload'
@@ -26,7 +26,7 @@ type Args = {
   id?: number | string
   locale?: string
   payload: Payload
-  user: TypedUser
+  user: User
 }
 
 type Result = Promise<{

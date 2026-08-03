@@ -261,6 +261,7 @@ type RichTextAdapterBase<
       | 'i18n'
       | 'interfaceNameDefinitions'
       | 'typeStringDefinitions'
+      | 'variant'
     >,
   ) => JSONSchema4
   /**
@@ -317,6 +318,4 @@ export type RichTextAdapterProvider<
    */
   isRoot?: boolean
   parentIsLocalized: boolean
-}) =>
-  | Promise<RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>>
-  | RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>
+}) => RichTextAdapter<Value, AdapterProps, ExtraFieldProperties>

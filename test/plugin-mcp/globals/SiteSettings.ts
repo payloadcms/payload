@@ -34,5 +34,5 @@ export const SiteSettings: GlobalConfig = {
       },
     },
   ],
-  versions: false,
+  versions: true,
 }

@@ -42,6 +42,12 @@ export const addBlock = async ({
     `#field-${fieldName} > .blocks-field__rows > div > .blocks-field__row`,
   )
 
+  // Ensure the form has finished its initial render before counting existing
+  // rows. TanStack Start renders the document form client-side after navigation
+  // (unlike Next's SSR), so measuring immediately would under-count the field's
+  // default rows and break the post-add `numberOfPrevRows + 1` assertion.
+  await expect(page.locator('[data-form-ready="true"]').first()).toBeVisible()
+
   const numberOfPrevRows = await rowLocator.count()
 
   const blocksDrawer = await openBlocksDrawer({ page, fieldName })
@@ -80,6 +86,12 @@ export const addBlockBelow = async (
   const rowLocator = page.locator(
     `#field-${fieldName} > .blocks-field__rows > div > .blocks-field__row`,
   )
+
+  // Ensure the form has finished its initial render before counting existing
+  // rows. TanStack Start renders the document form client-side after navigation
+  // (unlike Next's SSR), so measuring immediately would under-count the field's
+  // default rows and break the post-add `numberOfPrevRows + 1` assertion.
+  await expect(page.locator('[data-form-ready="true"]').first()).toBeVisible()
 
   const numberOfPrevRows = await rowLocator.count()
 

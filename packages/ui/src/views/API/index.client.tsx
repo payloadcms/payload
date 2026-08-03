@@ -10,8 +10,8 @@ import { CheckboxField } from '../../fields/Checkbox/index.js'
 import { NumberField } from '../../fields/Number/index.js'
 import { TextInput } from '../../fields/Text/Input.js'
 import { Form } from '../../forms/Form/index.js'
-import { ExternalLinkIcon } from '../../icons/ExternalLink/index.js'
 import { MinimizeMaximizeIcon } from '../../icons/MinimizeMaximize/index.js'
+import { NewTabIcon } from '../../icons/NewTab/index.js'
 import { useConfig } from '../../providers/Config/index.js'
 import { useDocumentInfo } from '../../providers/DocumentInfo/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
@@ -228,7 +228,7 @@ export const APIViewClient: React.FC = () => {
                 buttonStyle="secondary"
                 className={`${baseClass}__api-url-open-button`}
                 el="anchor"
-                icon={<ExternalLinkIcon size={16} />}
+                icon={<NewTabIcon size={16} />}
                 margin={false}
                 newTab
                 size="large"

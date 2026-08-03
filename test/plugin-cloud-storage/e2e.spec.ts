@@ -13,6 +13,13 @@ import { mediaSlug } from './shared.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+async function selectFile(page: Page, filePath: string) {
+  await expect(async () => {
+    await page.setInputFiles('input[type="file"]', filePath)
+    await expect(page.locator('#field-filemanager-filename')).toBeVisible({ timeout: 2000 })
+  }).toPass({ intervals: [1000], timeout: 15000 })
+}
+
 test.describe('Cloud Storage Plugin', () => {
   let page: Page
   let mediaURL: AdminUrlUtil
@@ -29,9 +36,9 @@ test.describe('Cloud Storage Plugin', () => {
 
   test('should create file upload', async () => {
     await page.goto(mediaURL.create)
-    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await selectFile(page, path.resolve(dirname, './image.png'))
 
-    const filename = page.locator('.file-field__filename')
+    const filename = page.locator('#field-filemanager-filename')
 
     await expect(filename).toHaveValue('image.png')
 
@@ -40,9 +47,9 @@ test.describe('Cloud Storage Plugin', () => {
 
   test('should update an existing upload', async () => {
     await page.goto(mediaURL.create)
-    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
+    await selectFile(page, path.resolve(dirname, './image.png'))
 
-    const filename = page.locator('.file-field__filename')
+    const filename = page.locator('#field-filemanager-filename')
 
     await expect(filename).toHaveValue('image.png')
 
@@ -64,12 +71,12 @@ test.describe('Cloud Storage Plugin', () => {
     })
 
     await page.goto(mediaURL.create)
-    await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'))
-    await expect(page.locator('.file-field__filename')).toHaveValue('image.png')
+    await selectFile(page, path.resolve(dirname, './image.png'))
+    await expect(page.locator('#field-filemanager-filename')).toHaveValue('image.png')
     await saveDocAndAssert(page)
 
-    await page.locator('button').filter({ hasText: 'Edit' }).click()
-    await page.locator('.drawer[id*="edit-upload"]').waitFor({ state: 'visible', timeout: 10000 })
+    await page.locator('button[aria-label="Edit Image"]').click()
+    await page.locator('.edit-upload__dialog').waitFor({ state: 'visible', timeout: 10000 })
 
     const focalPointArea = page.locator('.edit-upload__focalPoint')
     await focalPointArea.waitFor({ state: 'visible' })
@@ -77,11 +84,8 @@ test.describe('Cloud Storage Plugin', () => {
     await expect.poll(() => box).not.toBeNull()
     await page.mouse.click(box!.x + box!.width * 0.3, box!.y + box!.height * 0.7)
 
-    await page
-      .locator('.drawer[id*="edit-upload"] button')
-      .filter({ hasText: 'Apply changes' })
-      .click()
-    await page.locator('.drawer[id*="edit-upload"]').waitFor({ state: 'hidden', timeout: 10000 })
+    await page.locator('.edit-upload__dialog button').filter({ hasText: 'Apply changes' }).click()
+    await page.locator('.edit-upload__dialog').waitFor({ state: 'hidden', timeout: 10000 })
 
     await page.locator('#action-save').click()
     await expect(page.locator('.payload-toast-container .toast-success')).toBeVisible({

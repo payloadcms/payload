@@ -3,17 +3,18 @@ import React, { useEffect, useRef, useState } from 'react'
 
 import type { UserMenuSettingsGroup } from '../UserMenu/SettingsMenu/index.js'
 
+import { useElementHeightVariable } from '../../hooks/useElementHeightVariable.js'
 import { ChevronIcon } from '../../icons/Chevron/index.js'
 import { LanguageIcon } from '../../icons/Language/index.js'
 import { SidebarIcon } from '../../icons/Sidebar/index.js'
 import { useActions } from '../../providers/Actions/index.js'
 import { useConfig } from '../../providers/Config/index.js'
+import { useEmbed } from '../../providers/Embed/index.js'
 import { useLocale } from '../../providers/Locale/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { Button } from '../Button/index.js'
 import { Localizer } from '../Localizer/index.js'
 import { useNav } from '../Nav/context.js'
-import { NavToggler } from '../Nav/NavToggler/index.js'
 import { StepNav } from '../StepNav/index.js'
 import { UserMenu } from '../UserMenu/index.js'
 import './index.css'
@@ -22,11 +23,13 @@ const baseClass = 'app-header'
 
 type Props = {
   CustomAvatar?: React.ReactNode
+  CustomLogoutButton?: React.ReactNode
   settingsItemGroups?: UserMenuSettingsGroup[]
 }
-export function AppHeader({ CustomAvatar, settingsItemGroups }: Props) {
+export function AppHeader({ CustomAvatar, CustomLogoutButton, settingsItemGroups }: Props) {
   const { t } = useTranslation()
   const locale = useLocale()
+  const { isEmbedded } = useEmbed()
 
   const { Actions } = useActions()
 
@@ -36,8 +39,11 @@ export function AppHeader({ CustomAvatar, settingsItemGroups }: Props) {
     config: { localization },
   } = useConfig()
 
+  const headerRef = useRef<HTMLElement>(null)
   const customControlsRef = useRef<HTMLDivElement>(null)
   const [isScrollable, setIsScrollable] = useState(false)
+
+  useElementHeightVariable({ cssVar: '--app-header-height', ref: headerRef })
 
   useEffect(() => {
     const checkIsScrollable = () => {
@@ -59,10 +65,12 @@ export function AppHeader({ CustomAvatar, settingsItemGroups }: Props) {
   const ActionComponents = Actions ? Object.values(Actions) : []
 
   return (
-    <header className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}>
+    <header
+      className={[baseClass, navOpen && `${baseClass}--nav-open`].filter(Boolean).join(' ')}
+      ref={headerRef}
+    >
       <div className={`${baseClass}__content`}>
         <div className={`${baseClass}__wrapper`}>
-          <NavToggler className={`${baseClass}__mobile-nav-toggler`} tabIndex={-1} />
           <div className={`${baseClass}__controls-wrapper`}>
             <div className={`${baseClass}__step-nav-wrapper`}>
               <Button
@@ -116,8 +124,14 @@ export function AppHeader({ CustomAvatar, settingsItemGroups }: Props) {
                 )}
               />
             )}
-            <UserMenu CustomAvatar={CustomAvatar} settingsItemGroups={settingsItemGroups} />
           </div>
+          {!isEmbedded && (
+            <UserMenu
+              CustomAvatar={CustomAvatar}
+              CustomLogoutButton={CustomLogoutButton}
+              settingsItemGroups={settingsItemGroups}
+            />
+          )}
         </div>
       </div>
     </header>

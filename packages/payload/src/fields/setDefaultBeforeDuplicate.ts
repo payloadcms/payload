@@ -20,7 +20,7 @@ export const setDefaultBeforeDuplicate = (
     if (field.unique) {
       if (['email', 'number', 'point', 'relationship', 'select', 'upload'].includes(field.type)) {
         field.hooks!.beforeDuplicate = [() => undefined]
-      } else if (['code', 'json', 'text', 'textarea'].includes(field.type)) {
+      } else if (['code', 'json', 'slug', 'text', 'textarea'].includes(field.type)) {
         field.hooks!.beforeDuplicate = fieldShouldBeLocalized({ field, parentIsLocalized })
           ? [localizedUnique]
           : [unique]

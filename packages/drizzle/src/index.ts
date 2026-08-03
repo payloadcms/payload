@@ -11,7 +11,6 @@ export { deleteOne } from './deleteOne.js'
 export { deleteVersions } from './deleteVersions.js'
 export { destroy } from './destroy.js'
 export { find } from './find.js'
-export { chainMethods } from './find/chainMethods.js'
 export { findDistinct } from './findDistinct.js'
 export { findGlobal } from './findGlobal.js'
 export { findGlobalVersions } from './findGlobalVersions.js'
@@ -38,7 +37,6 @@ export type {
   BlocksToJsonMigrator,
   BuildDrizzleTable,
   BuildQueryJoinAliases,
-  ChainedMethods,
   ColumnToCodeConverter,
   CountDistinct,
   CreateJSONQueryArgs,

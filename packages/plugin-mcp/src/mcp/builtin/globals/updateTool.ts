@@ -2,19 +2,21 @@ import type { SelectType } from 'payload'
 
 import { z } from 'zod'
 
+import { defaultAccess } from '../../../defaultAccess.js'
 import { defineGlobalTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
 import {
   getGlobalVirtualFieldNames,
   stripVirtualFields,
 } from '../../../utils/getVirtualFieldNames.js'
-import { localAPIDefaults } from '../../../utils/localAPIDefaults.js'
 import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { validateGlobalData } from '../validateEntityData.js'
 
 const DEFAULT_DESCRIPTION = 'Update any Payload global by passing the global slug and data.'
 
 export const updateGlobalTool = defineGlobalTool({
+  access: (args) =>
+    defaultAccess(args) && Boolean(args.permissions?.globals?.[args.globalSlug]?.update),
   annotations: {
     destructiveHint: true,
     idempotentHint: false,
@@ -78,7 +80,8 @@ export const updateGlobalTool = defineGlobalTool({
       data: parsedData,
       depth,
       draft,
-      ...localAPIDefaults(authorizedMCP),
+      overrideAccess: authorizedMCP.overrideAccess,
+      req,
     }
 
     if (locale) {

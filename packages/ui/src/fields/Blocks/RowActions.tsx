@@ -4,6 +4,8 @@ import type { ClientBlock, ClientField, Labels } from 'payload'
 import { useModal } from '@faceless-ui/modal'
 import React from 'react'
 
+import type { ClipboardPasteEligibilityArgs } from '../../elements/ClipboardAction/types.js'
+
 import { ArrayAction } from '../../elements/ArrayAction/index.js'
 import { useDrawerSlug } from '../../elements/Drawer/useDrawerSlug.js'
 import { BlocksDrawer } from './BlocksDrawer/index.js'
@@ -19,6 +21,7 @@ export const RowActions: React.FC<{
   readonly isSortable?: boolean
   readonly labels: Labels
   readonly moveRow: (fromIndex: number, toIndex: number) => void
+  readonly pasteData: ClipboardPasteEligibilityArgs
   readonly pasteRow: (rowIndex: number) => void
   readonly removeRow: (rowIndex: number) => void
   readonly rowCount: number
@@ -34,6 +37,7 @@ export const RowActions: React.FC<{
     isSortable,
     labels,
     moveRow,
+    pasteData,
     pasteRow,
     removeRow,
     rowCount,
@@ -70,6 +74,7 @@ export const RowActions: React.FC<{
         index={rowIndex}
         isSortable={isSortable}
         moveRow={moveRow}
+        pasteData={pasteData}
         pasteRow={pasteRow}
         removeRow={removeRow}
         rowCount={rowCount}

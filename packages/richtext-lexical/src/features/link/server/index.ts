@@ -14,7 +14,7 @@ import type { ClientProps } from '../client/index.js'
 
 import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
-import { createLinkMarkdownTransformer } from '../markdownTransformer.js'
+import { createPayloadLinkTransformer } from '../markdownTransformer.js'
 import { AutoLinkNode } from '../nodes/AutoLinkNode.js'
 import { LinkNode } from '../nodes/LinkNode.js'
 import { linkPopulationPromiseHOC } from './graphQLPopulationPromise.js'
@@ -92,7 +92,7 @@ export const LinkFeature = createServerFeature<
   LinkFeatureServerProps,
   ClientProps
 >({
-  feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
+  feature: ({ config: _config, isRoot, parentIsLocalized, props }) => {
     if (!props) {
       props = {}
     }
@@ -106,7 +106,7 @@ export const LinkFeature = createServerFeature<
       props.maxDepth,
     )
 
-    const sanitizedFields = await sanitizeFields({
+    const sanitizedFields = sanitizeFields({
       config: _config as unknown as Config,
       fields: _transformedFields,
       parentIsLocalized,
@@ -170,7 +170,7 @@ export const LinkFeature = createServerFeature<
       },
       i18n,
       markdownTransformers: [
-        createLinkMarkdownTransformer({ internalDocToHref: props.internalDocToHref }),
+        createPayloadLinkTransformer({ internalDocToHref: props.internalDocToHref }),
       ],
       nodes: [
         props?.disableAutoLinks === true

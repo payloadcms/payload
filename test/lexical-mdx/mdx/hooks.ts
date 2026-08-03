@@ -123,7 +123,13 @@ export function mdxToEditorJSON({
 
   headlessEditor.update(
     () => {
-      $convertFromMarkdownString(mdx, editorConfig.features.markdownTransformers)
+      $convertFromMarkdownString(
+        mdx,
+        editorConfig.features.markdownTransformers,
+        undefined,
+        false,
+        true,
+      )
     },
     { discrete: true },
   )

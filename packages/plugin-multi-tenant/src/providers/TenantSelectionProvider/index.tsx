@@ -1,11 +1,11 @@
-import type { Payload, ServerAdapter, TypedUser } from 'payload'
+import type { Payload, ServerAdapter, User } from 'payload'
 
 import type { MultiTenantPluginConfig } from '../../types.js'
 
 import { getTenantOptions } from '../../utilities/getTenantOptions.js'
 import { TenantSelectionProviderClient } from './index.client.js'
 
-type Args<ConfigType> = {
+type Args = {
   children: React.ReactNode
   payload: Payload
   server?: ServerAdapter
@@ -13,10 +13,8 @@ type Args<ConfigType> = {
   tenantsArrayTenantFieldName: string
   tenantsCollectionSlug: string
   useAsTitle: string
-  user: TypedUser
-  userHasAccessToAllTenants: Required<
-    MultiTenantPluginConfig<ConfigType>
-  >['userHasAccessToAllTenants']
+  user: User
+  userHasAccessToAllTenants: Required<MultiTenantPluginConfig>['userHasAccessToAllTenants']
 }
 
 export const TenantSelectionProvider = async ({
@@ -29,7 +27,7 @@ export const TenantSelectionProvider = async ({
   useAsTitle,
   user,
   userHasAccessToAllTenants,
-}: Args<any>) => {
+}: Args) => {
   if (!server) {
     throw new Error(
       'TenantSelectionProvider requires `server` in ServerProps. Ensure your framework adapter (e.g. @payloadcms/next) populates ServerProps.server.',

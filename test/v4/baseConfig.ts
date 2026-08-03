@@ -161,6 +161,7 @@ export const baseConfig: Partial<Config> = {
         './components/HeaderAction.tsx#HeaderAction2',
       ],
       beforeNavLinks: ['./views/Components/NavLink.js#ComponentsNavLink'],
+      settingsMenu: ['./components/SettingsMenuItem.tsx#SettingsMenuItem'],
       userMenuSettingsItems: [
         {
           group: 'Developer Tools',

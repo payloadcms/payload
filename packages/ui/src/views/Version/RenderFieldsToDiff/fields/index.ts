@@ -20,6 +20,7 @@ export const diffComponents: Record<
   FieldTypes,
   React.ComponentType<FieldDiffClientProps | FieldDiffServerProps>
 > = {
+  slug: Text,
   array: Iterable,
   blocks: Iterable,
   checkbox: Checkbox,

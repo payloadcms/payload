@@ -1,6 +1,7 @@
 import type { Page } from '@playwright/test'
 
-import { expect, test } from '@playwright/test'
+import { expect } from '@playwright/test'
+import { test } from '__helpers/e2e/playwright.js'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
@@ -81,7 +82,7 @@ describe('Select', () => {
     await expect(field.locator('.rs__value-container')).toContainText('One')
   })
 
-  test('should show custom JSX option label in edit', async () => {
+  test('should show custom JSX option label in edit', { framework: 'next' }, async () => {
     await page.goto(url.create)
 
     const svgLocator = page.locator('#field-selectWithJsxLabelOption svg#payload-logo')
@@ -89,7 +90,7 @@ describe('Select', () => {
     await expect(svgLocator).toBeVisible()
   })
 
-  test('should show custom JSX option label in list', async () => {
+  test('should show custom JSX option label in list', { framework: 'next' }, async () => {
     await page.goto(url.list)
 
     const { columnContainer } = await openListColumns(page)
@@ -117,6 +118,24 @@ describe('Select', () => {
     await page.locator('#field-disallowOption1').click()
     await field.click({ delay: 100 })
     await expect(options.locator('text=One')).toBeHidden()
+  })
+
+  test('should reduce options via an async, DB-backed `filterOptions`', async () => {
+    await page.goto(url.create)
+    await waitForFormReady(page)
+
+    const field = page.locator('#field-selectAsyncFilterOptions')
+    await field.click({ delay: 100 })
+    const options = page.locator('.rs__option')
+    await expect(options.locator('text=Value One')).toBeVisible()
+
+    // click the field again to close the options
+    await field.click({ delay: 100 })
+
+    await page.locator('#field-disallowOption2').click()
+    await field.click({ delay: 100 })
+    await expect(options.locator('text=Value One')).toBeHidden()
+    await expect(options.locator('text=Value Two')).toBeVisible()
   })
 
   test('should retain search when reducing options', async () => {

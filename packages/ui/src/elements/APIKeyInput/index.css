@@ -35,8 +35,8 @@
     outline: none;
     color: var(--color-text);
     font-family: var(--font-family-mono);
-    font-size: var(--text-body-large-font-size);
-    line-height: var(--text-body-large-line-height);
+    font-size: var(--text-body-medium-font-size);
+    line-height: var(--text-body-medium-line-height);
   }
 
   .api-key-input__field:focus,
@@ -47,8 +47,8 @@
 
   .api-key-input__field[type='password'] {
     font-family: var(--font-family-sans);
-    font-size: var(--text-body-large-font-size);
-    font-weight: var(--text-body-large-strong-font-weight);
+    font-size: var(--text-body-medium-font-size);
+    font-weight: var(--text-body-medium-strong-font-weight);
     letter-spacing: 0.025rem;
   }
 

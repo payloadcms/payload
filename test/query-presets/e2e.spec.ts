@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config, PayloadQueryPreset } from './payload-types.js'
 
-import { clickPillSelectorItem, toggleColumn } from '../__helpers/e2e/columns/index.js'
+import { clickColumnSelectorItem, toggleColumn } from '../__helpers/e2e/columns/index.js'
 import { addListFilter, openListFilters } from '../__helpers/e2e/filters/index.js'
 import { addGroupBy, clearGroupBy } from '../__helpers/e2e/groupBy/index.js'
 import {
@@ -125,10 +125,16 @@ describe('Query Presets', () => {
     await expect(whereField).toBeVisible()
     await expect(whereField.locator('.where-builder')).toBeVisible()
 
-    // Verify the Columns field is visible and has 4 selected pills (same as default columns in list view)
+    // Verify the Columns field opens a selector with 4 active columns (same as default columns in list view)
     const columnsField = editModal.locator('.query-preset-columns-field')
     await expect(columnsField).toBeVisible()
-    await expect(columnsField.locator('.chip--selected')).toHaveCount(4)
+    await columnsField.locator('.columns-button__button').click()
+    const columnSelector = page.locator('.popup__content .column-selector')
+    await expect(columnSelector).toBeVisible()
+    await expect(
+      columnSelector.locator('.column-selector__item:not(.column-selector__item--inactive)'),
+    ).toHaveCount(4)
+    await columnsField.locator('.columns-button__button').click()
 
     await editModal.locator('button.doc-drawer__header-close').click()
     await expect(editModal).toBeHidden()
@@ -571,9 +577,19 @@ describe('Query Presets', () => {
     // Verify groupBy field displays the current groupBy value (from initialData)
     const groupByField = modal.locator('.query-preset-group-by-field')
     await expect(groupByField).toBeVisible()
-    await expect(groupByField.locator('.group-by-builder')).toBeVisible()
-    await expect(groupByField).toContainText('Text')
-    await expect(groupByField).toContainText(/ascending/i)
+    const groupByTrigger = groupByField.locator('#toggle-group-by')
+    await expect(groupByTrigger).toContainText('Text')
+
+    // Open the control to verify the saved field and ascending sort direction
+    await groupByTrigger.click()
+    const groupByPopup = page.locator('.group-by-control__popup')
+    await expect(groupByPopup).toBeVisible()
+    await expect(groupByPopup).toContainText('Text')
+    await expect(groupByPopup).toContainText(/ascending/i)
+
+    // Close the control before saving
+    await groupByTrigger.click()
+    await expect(groupByPopup).toBeHidden()
 
     await saveDocAndAssert(page)
     await expect(modal).toBeHidden()
@@ -677,6 +693,9 @@ describe('Query Presets', () => {
     const postsUrl = new AdminUrlUtil(serverURL, 'posts')
     await navigateToListView({ page, url: postsUrl.list })
 
+    // Apply groupBy on the list view so it flows into the new preset
+    await addGroupBy(page, { fieldLabel: 'Text', fieldPath: 'text' })
+
     await openCreatePreset({ page })
     const modal = page.locator('[id^=doc-drawer_payload-query-presets_0_]')
     await expect(modal).toBeVisible()
@@ -686,21 +705,27 @@ describe('Query Presets', () => {
 
     const columnsField = modal.locator('.query-preset-columns-field')
     await expect(columnsField).toBeVisible()
-    let selectedCount = await columnsField.locator('.chip--selected').count()
-    while (selectedCount > 0) {
-      await columnsField.locator('.chip--selected').first().locator('.chip__action').click()
-      selectedCount = await columnsField.locator('.chip--selected').count()
-    }
-    await clickPillSelectorItem({ container: columnsField, label: 'Text' })
-    await clickPillSelectorItem({ container: columnsField, label: 'ID' })
+    await columnsField.locator('.columns-button__button').click()
+    const columnSelector = page.locator('.popup__content .column-selector')
+    await expect(columnSelector).toBeVisible()
 
+    // Turn off every active column, then enable only Text and ID
+    const activeColumns = columnSelector.locator(
+      '.column-selector__item:not(.column-selector__item--inactive)',
+    )
+    let activeCount = await activeColumns.count()
+    while (activeCount > 0) {
+      await activeColumns.first().locator('.switch').click()
+      activeCount = await activeColumns.count()
+    }
+    await clickColumnSelectorItem({ container: columnSelector, label: 'Text' })
+    await clickColumnSelectorItem({ container: columnSelector, label: 'ID' })
+    await columnsField.locator('.columns-button__button').click()
+
+    // The groupBy applied on the list view should carry into the drawer
     const groupByField = modal.locator('.query-preset-group-by-field')
     await expect(groupByField).toBeVisible()
-    await groupByField.locator('#group-by--field-select').click()
-    await page
-      .locator('.rs__option', { hasText: exactText('Text') })
-      .first()
-      .click()
+    await expect(groupByField.locator('#toggle-group-by')).toContainText('Text')
 
     await saveDocAndAssert(page)
     // Close modal if it did not close automatically after save

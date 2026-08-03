@@ -1,4 +1,4 @@
-import type { Payload } from 'payload'
+import type { AuthenticatedUser, Payload } from 'payload'
 
 import path from 'path'
 import { fileURLToPath } from 'url'
@@ -13,7 +13,7 @@ import { postsWithFieldHooksSlug } from './shared.js'
 
 let payload: Payload
 let restClient: NextRESTClient
-let user: any
+let user: AuthenticatedUser
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -21,10 +21,12 @@ const dirname = path.dirname(filename)
 describe('@payloadcms/plugin-import-export — field-level hooks', () => {
   beforeAll(async () => {
     ;({ payload, restClient } = await initPayloadInt(dirname))
-    user = await payload.login({
+    const loginResult = await payload.login({
       collection: 'users',
       data: { email: devUser.email, password: devUser.password },
     })
+
+    user = loginResult.user!
   })
 
   afterAll(async () => {

@@ -9,7 +9,7 @@ import { createServerFeature } from '../../../utilities/createServerFeature.js'
 import { createNode } from '../../typeUtilities.js'
 import { uploadPopulationPromiseHOC } from './graphQLPopulationPromise.js'
 import { i18n } from './i18n.js'
-import { UploadMarkdownTransformer } from './markdownTransformer.js'
+import { PAYLOAD_UPLOAD } from './markdownTransformer.js'
 import { UploadServerNode } from './nodes/UploadNode.js'
 import { createUploadNodeJSONSchema } from './schema.js'
 import { uploadValidation } from './validate.js'
@@ -63,7 +63,7 @@ export const UploadFeature = createServerFeature<
   UploadFeatureProps,
   UploadFeaturePropsClient
 >({
-  feature: async ({ config: _config, isRoot, parentIsLocalized, props }) => {
+  feature: ({ config: _config, isRoot, parentIsLocalized, props }) => {
     if (!props) {
       props = { collections: {} }
     }
@@ -91,7 +91,7 @@ export const UploadFeature = createServerFeature<
     for (const collectionKey in props.collections) {
       const collection = props.collections[collectionKey]!
       if (collection.fields?.length) {
-        collection.fields = await sanitizeFields({
+        collection.fields = sanitizeFields({
           config: _config as unknown as Config,
           fields: collection.fields,
           parentIsLocalized,
@@ -123,7 +123,7 @@ export const UploadFeature = createServerFeature<
         return schemaMap
       },
       i18n,
-      markdownTransformers: [UploadMarkdownTransformer],
+      markdownTransformers: [PAYLOAD_UPLOAD],
       nodes: [
         createNode({
           getSubFields: ({ node, req }) => {

@@ -22,30 +22,65 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
     {
       name: 'title',
       type: 'text',
+      admin: {
+        className: 'query-preset-title',
+      },
       required: true,
     },
     {
-      name: 'isShared',
-      type: 'checkbox',
-      defaultValue: false,
-      validate: (isShared, { data }) => {
-        const typedData = data as QueryPreset
-
-        // ensure the `isShared` is only true if all constraints are 'onlyMe'
-        if (typedData?.access) {
-          const someOperationsAreShared = Object.values(typedData.access).some(
-            (operation) => operation.constraint !== 'onlyMe',
-          )
-
-          if (!isShared && someOperationsAreShared) {
-            return 'If any constraint is not "onlyMe", the preset must be shared'
-          }
-        }
-
-        return true
+      type: 'row',
+      admin: {
+        className: 'query-preset-controls-row',
       },
+      fields: [
+        {
+          name: 'presetsHeading',
+          type: 'ui',
+          admin: {
+            components: {
+              Field: {
+                clientProps: {
+                  i18nKey: 'general:presets',
+                },
+                path: '@payloadcms/ui#QueryPresetsHeading',
+              },
+            },
+          },
+        },
+        {
+          name: 'groupBy',
+          type: 'text',
+          admin: {
+            components: {
+              Cell: '@payloadcms/ui#QueryPresetsGroupByCell',
+              Field: '@payloadcms/ui#QueryPresetsGroupByField',
+            },
+          },
+          label: 'Group By',
+        },
+        {
+          name: 'columns',
+          type: 'json',
+          admin: {
+            components: {
+              Cell: '@payloadcms/ui#QueryPresetsColumnsCell',
+              Field: '@payloadcms/ui#QueryPresetsColumnField',
+            },
+          },
+          validate: (value) => {
+            if (value) {
+              try {
+                JSON.parse(JSON.stringify(value))
+              } catch {
+                return 'Invalid JSON'
+              }
+            }
+
+            return true
+          },
+        },
+      ],
     },
-    getConstraints(config),
     {
       name: 'where',
       type: 'json',
@@ -74,37 +109,41 @@ export const getQueryPresetsConfig = (config: Config): CollectionConfig => ({
       label: 'Filters',
     },
     {
-      name: 'columns',
-      type: 'json',
+      name: 'accessHeading',
+      type: 'ui',
       admin: {
         components: {
-          Cell: '@payloadcms/ui#QueryPresetsColumnsCell',
-          Field: '@payloadcms/ui#QueryPresetsColumnField',
+          Field: {
+            clientProps: {
+              i18nKey: 'general:access',
+            },
+            path: '@payloadcms/ui#QueryPresetsHeading',
+          },
         },
       },
-      validate: (value) => {
-        if (value) {
-          try {
-            JSON.parse(JSON.stringify(value))
-          } catch {
-            return 'Invalid JSON'
+    },
+    {
+      name: 'isShared',
+      type: 'checkbox',
+      defaultValue: false,
+      validate: (isShared, { data }) => {
+        const typedData = data as QueryPreset
+
+        // ensure the `isShared` is only true if all constraints are 'onlyMe'
+        if (typedData?.access) {
+          const someOperationsAreShared = Object.values(typedData.access).some(
+            (operation) => operation.constraint !== 'onlyMe',
+          )
+
+          if (!isShared && someOperationsAreShared) {
+            return 'If any constraint is not "onlyMe", the preset must be shared'
           }
         }
 
         return true
       },
     },
-    {
-      name: 'groupBy',
-      type: 'text',
-      admin: {
-        components: {
-          Cell: '@payloadcms/ui#QueryPresetsGroupByCell',
-          Field: '@payloadcms/ui#QueryPresetsGroupByField',
-        },
-      },
-      label: 'Group By',
-    },
+    getConstraints(config),
     {
       name: 'relatedCollection',
       type: 'select',

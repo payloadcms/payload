@@ -87,6 +87,7 @@ const buildBlockFieldsSchema = (
         i18n: args.i18n,
         interfaceNameDefinitions: args.interfaceNameDefinitions,
         typeStringDefinitions: args.typeStringDefinitions,
+        variant: args.variant,
       })
     : { properties: {}, required: [] }
 
@@ -94,7 +95,7 @@ const buildBlockFieldsSchema = (
     id: _stripId,
     blockName: _stripBlockName,
     ...userOnlyProperties
-  } = (userFieldsSchema.properties ?? {}) as { [k: string]: JSONSchema4 }
+  } = userFieldsSchema.properties ?? {}
   const userOnlyRequired = (userFieldsSchema.required ?? []).filter(
     (r) => r !== 'id' && r !== 'blockName',
   )
@@ -117,7 +118,7 @@ const buildBlockFieldsSchema = (
     required,
   }
 
-  return registerBlockInterface(block, fieldsSchema, args.interfaceNameDefinitions)
+  return registerBlockInterface(block, fieldsSchema, args.interfaceNameDefinitions, args.variant)
 }
 
 export const createBlockNodeJSONSchema =

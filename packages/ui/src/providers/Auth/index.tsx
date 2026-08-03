@@ -1,5 +1,5 @@
 'use client'
-import type { ClientUser, SanitizedPermissions, TypedUser } from 'payload'
+import type { AuthenticatedUser, SanitizedPermissions } from 'payload'
 
 import { useModal } from '@faceless-ui/modal'
 import { formatAdminURL } from 'payload/shared'
@@ -15,7 +15,7 @@ import { useConfig } from '../Config/index.js'
 import { usePathname, useRouter } from '../RouterAdapter/index.js'
 import { useRouteTransition } from '../RouteTransition/index.js'
 
-export type UserWithToken<T = ClientUser> = {
+export type UserWithToken<T = AuthenticatedUser> = {
   /** seconds until expiration */
   exp: number
   refreshedToken?: string
@@ -23,8 +23,8 @@ export type UserWithToken<T = ClientUser> = {
   user: T
 }
 
-export type AuthContext<T = ClientUser> = {
-  fetchFullUser: () => Promise<null | TypedUser>
+export type AuthContext<T = AuthenticatedUser> = {
+  fetchFullUser: () => Promise<null | T>
   logOut: () => Promise<boolean>
   /**
    * These are the permissions for the current user from a global scope.
@@ -62,7 +62,7 @@ export type AuthContext<T = ClientUser> = {
    */
   permissions?: SanitizedPermissions
   refreshCookie: (forceRefresh?: boolean) => void
-  refreshCookieAsync: () => Promise<ClientUser>
+  refreshCookieAsync: () => Promise<null | T>
   refreshPermissions: () => Promise<void>
   setPermissions: (permissions: SanitizedPermissions) => void
   setUser: (user: null | UserWithToken<T>) => void
@@ -79,7 +79,7 @@ const maxTimeoutMs = 2147483647
 type Props = {
   children: React.ReactNode
   permissions?: SanitizedPermissions
-  user?: ClientUser | null
+  user?: AuthenticatedUser | null
 }
 
 export function AuthProvider({
@@ -106,7 +106,7 @@ export function AuthProvider({
   const { closeAllModals, openModal } = useModal()
   const { startRouteTransition } = useRouteTransition()
 
-  const [user, setUserInMemory] = useState<ClientUser | null>(initialUser)
+  const [user, setUserInMemory] = useState<AuthenticatedUser | null>(initialUser)
   const [tokenInMemory, setTokenInMemory] = useState<string>()
   const [tokenExpirationMs, setTokenExpirationMs] = useState<number>()
   const [permissions, setPermissions] = useState<SanitizedPermissions>(initialPermissions)
@@ -235,7 +235,7 @@ export function AuthProvider({
   )
 
   const refreshCookieAsync = useCallback(
-    async (skipSetUser?: boolean): Promise<ClientUser> => {
+    async (skipSetUser?: boolean): Promise<AuthenticatedUser | null> => {
       try {
         const request = await requests.post(
           formatAdminURL({
@@ -408,4 +408,4 @@ export function AuthProvider({
   )
 }
 
-export const useAuth = <T = ClientUser,>(): AuthContext<T> => use(Context) as AuthContext<T>
+export const useAuth = <T = AuthenticatedUser,>(): AuthContext<T> => use(Context) as AuthContext<T>

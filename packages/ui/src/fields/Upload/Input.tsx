@@ -121,7 +121,7 @@ export function UploadInput(props: UploadInputProps) {
 
   const { openModal } = useModal()
   const {
-    drawerSlug,
+    modalSlug: drawerSlug,
     setCollectionSlug,
     setInitialFiles,
     setMaxFiles,
@@ -413,8 +413,9 @@ export function UploadInput(props: UploadInputProps) {
 
   // only hasMany can bulk select
   const onListBulkSelect = React.useCallback<NonNullable<ListDrawerProps['onBulkSelect']>>(
-    async (docs) => {
+    async (docs, collectionSlug) => {
       const isPoly = Array.isArray(relationTo)
+      const relationToUse = isPoly ? collectionSlug || activeRelationTo : activeRelationTo
       const selectedDocIDs = []
 
       for (const [id, isSelected] of docs) {
@@ -424,7 +425,7 @@ export function UploadInput(props: UploadInputProps) {
       }
 
       const itemsToLoad = selectedDocIDs.map((id) => ({
-        relationTo: activeRelationTo,
+        relationTo: relationToUse,
         value: id,
       }))
 
@@ -434,7 +435,7 @@ export function UploadInput(props: UploadInputProps) {
       }
 
       const newValues = selectedDocIDs.map((id) =>
-        isPoly ? { relationTo: activeRelationTo, value: id } : id,
+        isPoly ? { relationTo: relationToUse, value: id } : id,
       )
       // Normalize existing values before merging
       const normalizedExisting = Array.isArray(value) ? value.map(normalizeValue) : []

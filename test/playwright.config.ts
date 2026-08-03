@@ -10,6 +10,7 @@ dotenv.config({ path: path.resolve(dirname, 'test.env') })
 dotenv.config({ path: path.resolve(dirname, '..', '.env') })
 
 const CI = process.env.CI === 'true'
+const isTanStack = process.env.PAYLOAD_FRAMEWORK === 'tanstack-start'
 
 let multiplier = CI ? 4 : 1
 let smallMultiplier = CI ? 3 : 1
@@ -38,8 +39,8 @@ export default defineConfig({
     timeout: EXPECT_TIMEOUT,
   },
   workers: 16,
-  maxFailures: CI ? undefined : undefined,
-  retries: CI ? 5 : undefined,
+  maxFailures: CI && isTanStack ? 30 : undefined,
+  retries: CI ? (isTanStack ? 2 : 5) : undefined,
   reporter: CI ? [['list', { printSteps: true }], ['json']] : [['list', { printSteps: true }]],
   projects: [
     {

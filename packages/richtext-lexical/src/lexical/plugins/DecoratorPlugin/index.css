@@ -5,7 +5,7 @@
   }
 
   .decorator-selected {
-    box-shadow: 0 0 0 2px var(--color-border-selected) !important;
+    box-shadow: 0 0 0 var(--stroke-width-medium) var(--color-border-selected) !important;
     outline: none !important;
   }
 }

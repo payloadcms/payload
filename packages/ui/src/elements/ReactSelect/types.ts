@@ -9,7 +9,7 @@ import type {
 
 import type { DocumentDrawerProps } from '../DocumentDrawer/types.js'
 
-type CustomSelectProps = {
+export type CustomSelectProps = {
   disableKeyDown?: boolean
   disableMouseDown?: boolean
   draggableProps?: any
@@ -68,6 +68,7 @@ export type OptionGroup = {
 }
 
 export type ReactSelectAdapterProps = {
+  'aria-label'?: string
   backspaceRemovesValue?: boolean
   blurInputOnSelect?: boolean
   captureMenuScroll?: boolean

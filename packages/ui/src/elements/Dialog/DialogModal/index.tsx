@@ -2,7 +2,7 @@
 import type { ComponentProps } from 'react'
 
 import { Modal } from '@faceless-ui/modal'
-import React, { useEffect, useState } from 'react'
+import React, { createContext, use, useEffect, useState } from 'react'
 
 import { drawerZBase, useDrawerDepth } from '../../Drawer/index.js'
 import { DialogContext } from '../context.js'
@@ -35,6 +35,7 @@ export const DialogModal: React.FC<DialogModalProps> = ({
 }) => {
   const [isConfirming, setConfirming] = useState(false)
   const drawerDepth = useDrawerDepth()
+  const dialogDepth = useDialogDepth()
 
   useEffect(() => {
     if (closeOnEsc) {
@@ -54,20 +55,33 @@ export const DialogModal: React.FC<DialogModalProps> = ({
   }, [closeOnEsc])
 
   return (
-    <DialogContext value={{ slug, isConfirming, setConfirming }}>
-      <Modal
-        closeOnBlur={closeOnBlur}
-        focusTrapOptions={focusTrapOptions}
-        slug={slug}
-        style={{ zIndex: drawerZBase + drawerDepth + 1 }}
-      >
-        <div
-          className={[baseClass, `${baseClass}--${size}`, className].filter(Boolean).join(' ')}
-          role="document"
+    <DialogDepthProvider>
+      <DialogContext value={{ slug, isConfirming, setConfirming }}>
+        <Modal
+          closeOnBlur={closeOnBlur}
+          focusTrapOptions={focusTrapOptions}
+          slug={slug}
+          style={{ zIndex: drawerZBase + drawerDepth + dialogDepth + 1 }}
         >
-          {children}
-        </div>
-      </Modal>
-    </DialogContext>
+          <div
+            className={[baseClass, `${baseClass}--${size}`, className].filter(Boolean).join(' ')}
+            role="document"
+          >
+            {children}
+          </div>
+        </Modal>
+      </DialogContext>
+    </DialogDepthProvider>
   )
+}
+
+export const DialogDepthContext = createContext(0)
+
+export const useDialogDepth = (): number => use(DialogDepthContext)
+
+export const DialogDepthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const parentDepth = useDialogDepth()
+  const depth = parentDepth + 1
+
+  return <DialogDepthContext value={depth}>{children}</DialogDepthContext>
 }

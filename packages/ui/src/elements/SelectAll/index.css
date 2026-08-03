@@ -1,5 +1,7 @@
 @layer payload-default {
   .select-all__checkbox {
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }

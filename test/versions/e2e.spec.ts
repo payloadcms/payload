@@ -488,6 +488,24 @@ describe('Versions', () => {
       await expect(drawer.locator('.id-label')).toBeVisible()
     })
 
+    test('collection - autosave - should redirect from create to edit URL after first save', async () => {
+      await page.goto(autosaveURL.list)
+      await page.locator('#create-new-doc').click()
+
+      await page.locator('#field-title').fill('autosave redirect title')
+      await waitForAutoSaveToRunAndComplete(page)
+
+      await expect.poll(() => page.url(), { timeout: POLL_TOPASS_TIMEOUT }).not.toContain('/create')
+
+      const editURLPattern = new RegExp(`/collections/${autosaveCollectionSlug}/[^/]+$`)
+      await expect
+        .poll(() => new URL(page.url()).pathname, { timeout: POLL_TOPASS_TIMEOUT })
+        .toMatch(editURLPattern)
+
+      // value should persist across the redirect, confirming it's the same doc
+      await expect(page.locator('#field-title')).toHaveValue('autosave redirect title')
+    })
+
     test('collection - should autosave using proper depth', async () => {
       const { id: postID } = await payload.create({
         collection: postCollectionSlug,
@@ -1151,7 +1169,8 @@ describe('Versions', () => {
 
       // The file input is only rendered once the existing file is removed.
       // Click the remove button on the current file to reveal the file input.
-      await page.locator('.file-details__remove').click()
+      await page.locator('.file-toolbar__filename-btn').click()
+      await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
       await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'), {
         force: true,
       })
@@ -1185,7 +1204,8 @@ describe('Versions', () => {
 
       // The file input is only rendered once the existing file is removed.
       // Click the remove button on the current file to reveal the file input.
-      await page.locator('.file-details__remove').click()
+      await page.locator('.file-toolbar__filename-btn').click()
+      await page.locator('.popup-button-list__button', { hasText: 'Replace file' }).click()
       await page.setInputFiles('input[type="file"]', path.resolve(dirname, './image.png'), {
         force: true,
       })
@@ -1561,6 +1581,31 @@ describe('Versions', () => {
       })
     })
 
+    test('should not clip the calendar popup inside the schedule publish drawer', async () => {
+      await page.goto(url.create)
+      await page.locator('#field-title').fill('scheduled publish positioning')
+      await page.locator('#field-description').fill('scheduled publish positioning description')
+
+      await saveDocAndAssert(page)
+      await page.locator('#schedule-publish-button').click()
+
+      await expect(page.locator('.drawer__header')).toBeVisible()
+
+      await page.locator('.date-time-picker input').click()
+
+      const popper = page.locator('.react-datepicker-popper')
+      await expect(popper).toBeVisible()
+
+      const portalInfo = await popper.evaluate((el) => ({
+        isInsideDrawerScroll: el.closest('.drawer__content-children') !== null,
+        isInsidePortal: el.closest('#date-time-picker-portal') !== null,
+      }))
+      expect(portalInfo.isInsideDrawerScroll).toBe(false)
+      expect(portalInfo.isInsidePortal).toBe(true)
+
+      await expect(popper).toBeInViewport()
+    })
+
     test('can still schedule publish once autosave is triggered', async () => {
       await page.goto(autosaveURL.create)
       await page.locator('#field-title').fill('scheduled publish')
@@ -1869,7 +1914,8 @@ describe('Versions', () => {
       await saveDocAndAssert(page, '#action-save-draft', 'error')
 
       const parentFieldType = page.locator('.field-type:has(#field-title)')
-      await expect(parentFieldType.locator('.tooltip--show')).toBeVisible()
+
+      await expect(page.locator('.tooltip--show')).toBeVisible()
       await expect(parentFieldType).toHaveClass(/error/)
 
       await titleField.fill('New title')

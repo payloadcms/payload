@@ -3,6 +3,7 @@
 // Keep perfectionist/sort-switch-case disabled - it incorrectly messes up the ordering of the switch cases, causing it to break
 import type { ClientTranslationKeys, I18nClient, TFunction } from '@payloadcms/translations'
 
+import type { ImportMap } from '../../bin/generateImportMap/index.js'
 import type { LabelFunction } from '../../config/types.js'
 import type {
   AdminClient,
@@ -27,7 +28,7 @@ import type { Payload } from '../../types/index.js'
 import { getFromImportMap } from '../../bin/generateImportMap/utilities/getFromImportMap.js'
 import { MissingEditorProp } from '../../errors/MissingEditorProp.js'
 import { fieldAffectsData } from '../../fields/config/types.js'
-import { flattenTopLevelFields, type ImportMap } from '../../index.js'
+import { flattenTopLevelFields } from '../../utilities/flattenTopLevelFields.js'
 
 // Should not be used - ClientField should be used instead. This is why we don't export ClientField, we don't want people
 // to accidentally use it instead of ClientField and get confused
@@ -42,6 +43,7 @@ export type ServerOnlyFieldProperties =
   | 'graphQL'
   | 'jsonSchema'
   | 'label'
+  | 'slugify' // This is a `slug` only property — a function, cannot cross the RSC boundary
   | 'validate'
   | keyof Pick<FieldBase, 'access' | 'custom' | 'defaultValue' | 'hooks'>
 
@@ -63,6 +65,7 @@ const serverOnlyFieldProperties: Partial<ServerOnlyFieldProperties>[] = [
   'dbName', // can be a function
   'enumName', // can be a function
   'graphQL', // client does not need graphQL
+  'slugify', // `slug` field — a function, cannot cross the RSC boundary (server resolves it via `custom.slugify`)
   // the following props are handled separately (see below):
   // `label`
   // `fields`
