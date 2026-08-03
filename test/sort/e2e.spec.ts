@@ -117,10 +117,33 @@ describe('Sort functionality', () => {
     await page.waitForURL(/sort=-_order/, { timeout: 2000 })
     await assertRows(['B', 'D', 'C', 'A'])
 
+    await moveRow(page, {
+      fromIndex: 0,
+      toIndex: 2,
+    })
+
+    await assertRows(['D', 'C', 'B', 'A'])
+
+    // Move to top
+    await moveRow(page, {
+      fromIndex: 2,
+      toIndex: 0,
+    })
+
+    await assertRows(['B', 'D', 'C', 'A'])
+
+    // Move to bottom
+    await moveRow(page, {
+      fromIndex: 0,
+      toIndex: 3,
+    })
+
+    await assertRows(['D', 'C', 'A', 'B'])
+
     // Clicking the sort button again should toggle back to ascending order
     await page.locator('button.sort-header').nth(0).click()
     await page.waitForURL(/sort=_order/, { timeout: 2000 })
-    await assertRows(['A', 'C', 'D', 'B'])
+    await assertRows(['B', 'A', 'C', 'D'])
 
     await page.getByLabel('Sort by Title Ascending').click()
     await page.waitForURL(/sort=title/, { timeout: 2000 })
