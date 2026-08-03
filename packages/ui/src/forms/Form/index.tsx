@@ -165,6 +165,7 @@ export const Form: React.FC<FormProps> = (props) => {
   const contextRef = useRef({} as FormContextType)
   const abortResetFormRef = useRef<AbortController>(null)
   const isFirstRenderRef = useRef(true)
+  const lastAppliedInitialStateRef = useRef<FormState>(null)
 
   const fieldsReducer = useReducer(fieldReducer, {}, () => initialState)
 
@@ -799,15 +800,29 @@ export const Form: React.FC<FormProps> = (props) => {
   }, [submittedFromProps])
 
   useEffect(() => {
-    if (initialState) {
-      contextRef.current = { ...initContextState } as FormContextType
-      dispatchFields({
-        type: 'REPLACE_STATE',
-        optimize: false,
-        sanitize: true,
-        state: initialState,
-      })
+    if (!initialState) {
+      return
     }
+
+    // Applying the very same object a second time would discard every change
+    // made since it was first applied, so only react to a state we have not
+    // seen yet. The ref lives on this instance, so a genuine remount — where
+    // the reducer is re-initialized from `initialState` anyway — still applies
+    // it. Guarding on identity rather than deep equality keeps a caller free to
+    // hand over a structurally equal but newly built state to force a reset.
+    if (lastAppliedInitialStateRef.current === initialState) {
+      return
+    }
+
+    lastAppliedInitialStateRef.current = initialState
+
+    contextRef.current = { ...initContextState } as FormContextType
+    dispatchFields({
+      type: 'REPLACE_STATE',
+      optimize: false,
+      sanitize: true,
+      state: initialState,
+    })
   }, [initialState, dispatchFields])
 
   useThrottledEffect(
