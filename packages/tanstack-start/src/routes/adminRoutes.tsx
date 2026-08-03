@@ -44,7 +44,9 @@ function AdminPage() {
       return
     }
 
-    return holdRouteTransition()
+    const releaseRouteTransition = holdRouteTransition()
+
+    return () => releaseRouteTransition()
   }, [holdRouteTransition, isRscPayloadDeferred])
 
   return <Fragment>{rscPayload}</Fragment>

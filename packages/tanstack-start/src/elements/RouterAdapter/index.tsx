@@ -74,7 +74,9 @@ export const TanStackRouterAdapter: RouterAdapterComponent = ({ children }) => {
       return
     }
 
-    return holdRouteTransition()
+    const releaseRouteTransition = holdRouteTransition()
+
+    return () => releaseRouteTransition()
   }, [holdRouteTransition, isRouterLoading])
 
   const adaptedParams = useMemo(() => {
