@@ -129,9 +129,16 @@ describe('Lexical Fully Featured - database', () => {
       })
       const richText = lexicalFullyFeatured?.docs?.[0]?.richText
 
-      const headingNode = richText?.root?.children[0]
+      const headingNode = richText?.root?.children[0] as
+        | { children?: { text?: string }[]; type?: string }
+        | undefined
       expect(headingNode).toBeDefined()
-      expect(headingNode?.children?.[1]?.text).toBe('This is an image:')
+      expect(headingNode?.type).toBe('heading')
+      // Browsers serialize a copied selection differently per platform, so the heading's text can
+      // arrive split across several text nodes. Assert on the combined text, not a fixed child index.
+      expect(headingNode?.children?.map((child) => child.text ?? '').join('')).toBe(
+        'This is an image:',
+      )
 
       const uploadNode = richText?.root?.children?.[1]?.children?.[0]
       // @ts-expect-error unsafe access is fine in tests
