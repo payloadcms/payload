@@ -1511,6 +1511,44 @@ describe('Versions', () => {
       timezoneId: londonTimezone,
     })
 
+    const selectScheduleDateTime = async ({
+      day,
+      month,
+      page,
+      time,
+      year,
+    }: {
+      day: number
+      month: string
+      page: Page
+      time: string
+      year: string
+    }) => {
+      const dateInput = page.locator('.date-time-picker__input-wrapper input')
+      await dateInput.click()
+
+      const popper = page.locator('.react-datepicker-popper')
+      await expect(popper).toBeVisible()
+
+      await popper.locator('.react-datepicker__year-select').selectOption(year)
+      await popper.locator('.react-datepicker__month-select').selectOption(month)
+
+      const dayClass = String(day).padStart(3, '0')
+      await popper
+        .locator(
+          `.react-datepicker__day--${dayClass}:not(.react-datepicker__day--outside-month):not(.react-datepicker__day--disabled)`,
+        )
+        .first()
+        .click()
+
+      await popper
+        .locator('.react-datepicker__time-list-item', {
+          hasText: time,
+        })
+        .first()
+        .click()
+    }
+
     beforeAll(() => {
       url = new AdminUrlUtil(serverURL, draftCollectionSlug)
       autosaveURL = new AdminUrlUtil(serverURL, autosaveCollectionSlug)
@@ -1533,9 +1571,14 @@ describe('Versions', () => {
       // nothing in scheduled
       await expect(page.locator('.drawer__content')).toContainText('No upcoming events scheduled.')
 
-      // set date and time
-      await page.locator('.date-time-picker input').fill('Feb 21, 2050 12:00 AM')
-      await page.keyboard.press('Enter')
+      // set date and time via picker controls
+      await selectScheduleDateTime({
+        day: 21,
+        month: '1', // February
+        page,
+        time: '12:00 AM',
+        year: '2050',
+      })
 
       // save the scheduled publish
       await page.locator('#scheduled-publish-save').click()
@@ -1649,12 +1692,14 @@ describe('Versions', () => {
       await dropdownControlSelector.click()
       await getSelectMenu({ page: localPage }).locator('.rs__option', { hasText: 'Paris' }).click()
 
-      const dateInput = drawerContent.locator('.date-time-picker__input-wrapper input')
-      // Create a date for 2049-01-01 18:00:00 UTC, so it is timezone-invariant across CI environments
-      const date = new Date(Date.UTC(2049, 0, 1, 18, 0))
-
-      await dateInput.fill(date.toISOString())
-      await localPage.keyboard.press('Enter') // formats the date to the correct format
+      // Use picker controls to set Jan 1, 2049 at 6:00 PM in the selected timezone.
+      await selectScheduleDateTime({
+        day: 1,
+        month: '0', // January
+        page: localPage,
+        time: '6:00 PM',
+        year: '2049',
+      })
 
       const saveButton = drawerContent.locator('.schedule-publish__actions button')
 
