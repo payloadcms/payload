@@ -40,7 +40,6 @@ import {
   noRestrictFileTypesSlug,
   pdfOnlySlug,
   prefixMediaSlug,
-  preserveCropSlug,
   reduceSlug,
   relationSlug,
   restrictedMimeTypesSlug,
@@ -1607,10 +1606,9 @@ describe('Collections - Uploads', () => {
 
       expect(hasCropRectField(mediaSlug)).toBe(true)
       expect(hasCropRectField(focalOnlySlug)).toBe(false)
-      expect(hasCropRectField(preserveCropSlug as CollectionSlug)).toBe(true)
     })
 
-    it('should not persist a crop rectangle after applying it in transform mode', async () => {
+    it('should persist an applied crop and clear it when the file is replaced', async () => {
       const file = await getFileByPath(filePath)
       const doc = await payload.create({
         collection: mediaSlug,
@@ -1629,49 +1627,15 @@ describe('Collections - Uploads', () => {
         req,
       })
 
-      expect((updated as { cropRect?: Crop } & typeof updated).cropRect).toEqual({
-        height: null,
-        unit: null,
-        width: null,
-        x: null,
-        y: null,
-      })
+      expect((updated as { cropRect?: Crop } & typeof updated).cropRect).toEqual(cropRect)
       expect(updated.focalX).toBe(25)
       expect(updated.focalY).toBe(75)
       expect(updated.height).toBe(heightInPixels)
       expect(updated.width).toBe(widthInPixels)
 
-      await payload.delete({ id: doc.id, collection: mediaSlug })
-    })
-
-    it('should persist the crop rectangle and preserve original dimensions in preserve mode', async () => {
-      const collection = preserveCropSlug as CollectionSlug
-      const doc = (await payload.create({
-        collection,
-        data: {},
-        file: await getFileByPath(filePath),
-      })) as unknown as Media
-      const heightInPixels = Math.round((doc.height! * cropRect.height) / 100)
-      const widthInPixels = Math.round((doc.width! * cropRect.width) / 100)
-      const req = await createCropEditRequest({ heightInPixels, widthInPixels })
-
-      const updated = (await payload.update({
-        id: doc.id,
-        collection,
-        data: {},
-        file: await getFileByPath(filePath),
-        req,
-      })) as unknown as { cropRect?: Crop } & Media
-
-      expect(updated.cropRect).toEqual(cropRect)
-      expect(updated.focalX).toBe(25)
-      expect(updated.focalY).toBe(75)
-      expect(updated.height).toBe(doc.height)
-      expect(updated.width).toBe(doc.width)
-
       const updateWithoutCrop = (await payload.update({
         id: doc.id,
-        collection,
+        collection: mediaSlug,
         data: {
           alt: 'Updated alt text',
         },
@@ -1679,7 +1643,54 @@ describe('Collections - Uploads', () => {
 
       expect(updateWithoutCrop.cropRect).toEqual(cropRect)
 
-      await payload.delete({ id: doc.id, collection })
+      const replacement = (await payload.update({
+        id: doc.id,
+        collection: mediaSlug,
+        data: {},
+        file: await getFileByPath(filePath),
+      })) as unknown as { cropRect?: Crop } & Media
+
+      expect(replacement.cropRect).toEqual({
+        height: null,
+        unit: null,
+        width: null,
+        x: null,
+        y: null,
+      })
+
+      await payload.delete({ id: doc.id, collection: mediaSlug })
+    })
+
+    it('should persist crop and focal metadata without retrieving the file when sharp is absent', async () => {
+      const doc = await payload.create({
+        collection: unstoredMediaSlug,
+        data: {},
+        file: await getFileByPath(filePath),
+      })
+      const heightInPixels = Math.round((doc.height! * cropRect.height) / 100)
+      const widthInPixels = Math.round((doc.width! * cropRect.width) / 100)
+      const req = await createCropEditRequest({ heightInPixels, widthInPixels })
+      const originalSharp = payload.config.sharp
+
+      payload.config.sharp = undefined
+
+      try {
+        const updated = (await payload.update({
+          id: doc.id,
+          collection: unstoredMediaSlug,
+          data: {},
+          req,
+        })) as unknown as { cropRect?: Crop } & Media
+
+        expect(updated.cropRect).toEqual(cropRect)
+        expect(updated.focalX).toBe(25)
+        expect(updated.focalY).toBe(75)
+        expect(updated.height).toBe(doc.height)
+        expect(updated.width).toBe(doc.width)
+      } finally {
+        payload.config.sharp = originalSharp
+        await payload.delete({ id: doc.id, collection: unstoredMediaSlug })
+      }
     })
   })
 

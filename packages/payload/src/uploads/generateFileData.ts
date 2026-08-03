@@ -42,8 +42,9 @@ type Result<T> = Promise<{
 const shouldReupload = (
   uploadEdits: UploadEdits,
   fileData: Record<string, unknown> | undefined,
+  hasSharp: boolean,
 ) => {
-  if (!fileData) {
+  if (!fileData || !hasSharp) {
     return false
   }
 
@@ -87,6 +88,7 @@ export const generateFileData = async <T>({
   const { serverURL, sharp } = req.payload.config
 
   let file = isDuplicating ? undefined : req.file
+  const hasIncomingFile = Boolean(file)
 
   const uploadEdits = parseUploadEditsFromReqOrIncomingData({
     data,
@@ -115,7 +117,8 @@ export const generateFileData = async <T>({
 
   if (
     !file &&
-    (isDuplicating || shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>))
+    (isDuplicating ||
+      shouldReupload(uploadEdits, incomingFileData as Record<string, unknown>, Boolean(sharp)))
   ) {
     const { filename, url } = incomingFileData as unknown as FileData
     if (filename && (filename.includes('../') || filename.includes('..\\'))) {
@@ -179,12 +182,14 @@ export const generateFileData = async <T>({
   const cropData =
     typeof uploadEdits === 'object' && 'crop' in uploadEdits ? uploadEdits.crop : undefined
 
-  if (
-    cropData &&
-    collectionConfig.upload.crop !== false &&
-    collectionConfig.upload.cropMode === 'preserve'
-  ) {
-    fileData.cropRect = cropData
+  if (hasIncomingFile && operation === 'update' && !cropData) {
+    fileData.cropRect = {
+      height: null,
+      unit: null,
+      width: null,
+      x: null,
+      y: null,
+    }
   }
 
   try {
@@ -287,7 +292,7 @@ export const generateFileData = async <T>({
 
     let fileForResize = file
 
-    if (cropData && sharp && collectionConfig.upload.cropMode !== 'preserve') {
+    if (cropData && sharp) {
       const { data: croppedImage, info } = await cropImage({
         cropData,
         dimensions: dimensions!,
@@ -402,14 +407,13 @@ export const generateFileData = async <T>({
 
       const { sizeData, sizesToSave } = await createImageSizes({
         config: collectionConfig,
-        dimensions:
-          !cropData || collectionConfig.upload.cropMode === 'preserve'
-            ? dimensions!
-            : {
-                ...dimensions,
-                height: fileData.height!,
-                width: fileData.width!,
-              },
+        dimensions: !cropData
+          ? dimensions!
+          : {
+              ...dimensions,
+              height: fileData.height!,
+              width: fileData.width!,
+            },
         file: fileForResize,
         focalPoint,
         mimeType: fileData.mimeType,
