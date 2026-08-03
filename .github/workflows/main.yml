@@ -447,6 +447,9 @@ jobs:
           - template: blank
             database: mongodb
 
+          - template: blank-tanstack
+            database: mongodb
+
           - template: website
             database: mongodb
 
