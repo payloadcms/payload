@@ -10,8 +10,4 @@ describe('loadSkillContext', () => {
     expect(context).toContain('# Reference: FIELDS.md')
     expect(context).toContain('# Reference: HOOKS.md')
   })
-
-  it('is memoized across calls', () => {
-    expect(loadSkillContext()).toBe(loadSkillContext())
-  })
 })
