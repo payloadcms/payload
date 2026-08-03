@@ -1,5 +1,5 @@
 /**
- * Transforms incoming MCP tool data from object format to tuple array format.
+ * Transforms incoming data from object format to tuple array format.
  * Converts { longitude: number, latitude: number } back to [longitude, latitude]
  * for Payload's internal point field representation.
  */

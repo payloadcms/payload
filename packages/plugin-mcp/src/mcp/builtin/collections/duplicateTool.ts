@@ -1,15 +1,15 @@
 import type { PopulateType, SelectType } from 'payload'
 
+import {
+  getCollectionVirtualFieldNames,
+  stripVirtualFields,
+  transformPointDataToPayload,
+} from 'payload'
 import { z } from 'zod'
 
 import { defaultAccess } from '../../../defaultAccess.js'
 import { defineCollectionTool } from '../../../defineTool.js'
 import { getLogger } from '../../../utils/getLogger.js'
-import {
-  getCollectionVirtualFieldNames,
-  stripVirtualFields,
-} from '../../../utils/getVirtualFieldNames.js'
-import { transformPointDataToPayload } from '../../../utils/transformPointDataToPayload.js'
 import { formatCollectionError } from './formatCollectionError.js'
 
 const DEFAULT_DESCRIPTION =
