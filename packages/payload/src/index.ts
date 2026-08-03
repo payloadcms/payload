@@ -24,6 +24,7 @@ import type {
   TypeWithID,
 } from './collections/config/types.js'
 
+import { getRegisteredDevReloadStrategy } from './admin/adapters/devReload.js'
 import {
   forgotPasswordLocal,
   type Options as ForgotPasswordOptions,
@@ -38,7 +39,11 @@ import {
   verifyEmailLocal,
   type Options as VerifyEmailOptions,
 } from './auth/operations/local/verifyEmail.js'
-export type * from './admin/adapters/index.js'
+export {
+  DEV_RELOAD_STRATEGY_GLOBAL_KEY,
+  getRegisteredDevReloadStrategy,
+  registerDevReloadStrategy,
+} from './admin/adapters/devReload.js'
 import type { InitOptions, SanitizedConfig } from './config/types.js'
 import type { BaseDatabaseAdapter, PaginatedDistinctDocs, PaginatedDocs } from './database/types.js'
 import type { InitializedEmailAdapter } from './email/types.js'
@@ -120,14 +125,10 @@ import {
   updateGlobalLocal,
   type Options as UpdateGlobalOptions,
 } from './globals/operations/local/update.js'
+export type * from './admin/adapters/index.js'
 export type { FieldState } from './admin/forms/Form.js'
 export type * from './admin/types.js'
 export { EntityType } from './admin/views/dashboard.js'
-/**
- * Export of all base fields that could potentially be
- * useful as users wish to extend built-in fields with custom logic
- */
-export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
 import type { SupportedLanguages } from '@payloadcms/translations'
 
 import { Cron } from 'croner'
@@ -157,21 +158,25 @@ import { getLogger } from './utilities/logger.js'
 import { serverInit as serverInitTelemetry } from './utilities/telemetry/events/serverInit.js'
 import { traverseFields } from './utilities/traverseFields.js'
 
+/**
+ * Export of all base fields that could potentially be
+ * useful as users wish to extend built-in fields with custom logic
+ */
+export { accountLockFields as baseAccountLockFields } from './auth/baseFields/accountLock.js'
 export { createAPIKeyFields } from './auth/baseFields/apiKey.js'
 export { baseAuthFields } from './auth/baseFields/auth.js'
 export { emailFieldConfig as baseEmailField } from './auth/baseFields/email.js'
 export { sessionsFieldConfig as baseSessionsField } from './auth/baseFields/sessions.js'
 export { usernameFieldConfig as baseUsernameField } from './auth/baseFields/username.js'
 export { verificationFields as baseVerificationFields } from './auth/baseFields/verification.js'
-export { defaultUserCollection } from './auth/defaultUser.js'
 
+export { defaultUserCollection } from './auth/defaultUser.js'
 export { executeAccess } from './auth/executeAccess.js'
 export { executeAuthStrategies } from './auth/executeAuthStrategies.js'
 export { extractAccessFromPermission } from './auth/extractAccessFromPermission.js'
 export { getAccessResults } from './auth/getAccessResults.js'
 export { getFieldsToSign } from './auth/getFieldsToSign.js'
 export { getLoginOptions } from './auth/getLoginOptions.js'
-export * from './auth/index.js'
 
 /**
  * Shape constraint for PayloadTypes.
@@ -1350,7 +1355,13 @@ export const getPayload = async (
       process.env.NODE_ENV !== 'test' &&
       process.env.DISABLE_PAYLOAD_HMR !== 'true'
     ) {
-      const strategy = options.devReloadStrategy ?? defaultNextJsDevReloadStrategy()
+      // Without the registered strategy, adapters only reach the `getPayload`
+      // calls they make themselves; internal ones like `createPayloadRequest`
+      // would fall through to the Next.js websocket and never see a reload.
+      const strategy =
+        options.devReloadStrategy ??
+        getRegisteredDevReloadStrategy() ??
+        defaultNextJsDevReloadStrategy()
 
       if (strategy) {
         try {
@@ -1388,6 +1399,7 @@ interface RequestContext {
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 export interface DatabaseAdapter extends BaseDatabaseAdapter {}
 export type { Payload, RequestContext }
+export * from './auth/index.js'
 export { jwtSign } from './auth/jwt.js'
 export { accessOperation } from './auth/operations/access.js'
 export { forgotPasswordOperation } from './auth/operations/forgotPassword.js'

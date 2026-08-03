@@ -15,6 +15,7 @@ import {
 } from './config/external.js'
 import { optimizeDepsExcludeDefaults, optimizeDepsIncludeDefaults } from './config/optimizeDeps.js'
 import { payloadScssImporters } from './config/scss.js'
+import { payloadDevConfigReload } from './devConfigReload.js'
 import {
   defaultImportProtectionIgnoreImporters,
   onImportProtectionViolation,
@@ -207,6 +208,7 @@ export function withPayload(
         reactDomServerInRsc(),
         stubPrettierInClient(),
         payloadDevTransforms(),
+        payloadDevConfigReload({ payloadConfigPath }),
       ],
       resolve: {
         alias: [{ find: '@payload-config', replacement: path.resolve(payloadConfigPath) }],
