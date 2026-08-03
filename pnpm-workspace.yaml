@@ -27,13 +27,14 @@ savePrefix: ''
 verifyDepsBeforeRun: false
 
 overrides:
+  '@hono/node-server@<2.0.5': '>=2.0.5' # GHSA-frvp-7c67-39w9: no patched 1.x exists
   '@types/request>form-data': '^2.5.6'
   'amazon-cognito-identity-js>js-cookie': '^3.0.7'
   copyfiles: 'catalog:'
   cross-env: 'catalog:'
   dotenv: 'catalog:'
   graphql: '16.8.1'
-  'mcp-handler>@modelcontextprotocol/sdk': '1.27.1'
+  'mcp-handler>@modelcontextprotocol/sdk': '1.30.0'
   react: 'catalog:'
   react-dom: 'catalog:'
   typescript: 'catalog:'
