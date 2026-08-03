@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "mongoose": "8.22.1",
-    "mongoose-paginate-v2": "1.9.4",
+    "mongoose-paginate-v2": "1.9.5",
     "prompts": "2.4.2",
     "uuid": "14.0.0"
   },

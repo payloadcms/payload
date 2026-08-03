@@ -3,7 +3,9 @@ import type { MongooseAdapter } from '@payloadcms/db-mongodb'
 import type { PostgresAdapter } from '@payloadcms/db-postgres'
 import type { Table } from 'drizzle-orm'
 import type {
+  CollectionSlug,
   DataFromCollectionSlug,
+  PaginatedDocs,
   Payload,
   PayloadRequest,
   TypeWithID,
@@ -2170,6 +2172,118 @@ describe('database', () => {
   })
 
   describe('transactions', () => {
+    describe('pagination', { db: 'mongo' }, () => {
+      const createdDocs: { collection: CollectionSlug; id: number | string }[] = []
+
+      const trackCreatedDoc = (collection: CollectionSlug, id: number | string) => {
+        createdDocs.push({ collection, id })
+      }
+
+      afterEach(async () => {
+        for (const { collection, id } of [...createdDocs].reverse()) {
+          await payload.delete({ collection, id })
+        }
+
+        createdDocs.length = 0
+      })
+
+      it('should run paginated find operations inside a transaction session', async () => {
+        const uniqueTitle = `transaction pagination ${randomUUID()}`
+
+        const simpleOne = await payload.create({
+          collection: 'simple',
+          data: { text: `${uniqueTitle} simple one` },
+        })
+        trackCreatedDoc('simple', simpleOne.id)
+
+        const simpleTwo = await payload.create({
+          collection: 'simple',
+          data: { text: `${uniqueTitle} simple two` },
+        })
+        trackCreatedDoc('simple', simpleTwo.id)
+
+        const categoryOne = await payload.create({
+          collection: 'categories',
+          data: { title: `${uniqueTitle} category one` },
+        })
+        trackCreatedDoc('categories', categoryOne.id)
+
+        const categoryTwo = await payload.create({
+          collection: 'categories',
+          data: { title: `${uniqueTitle} category two` },
+        })
+        trackCreatedDoc('categories', categoryTwo.id)
+
+        const postOne = await payload.create({
+          collection: postsSlug,
+          data: {
+            category: categoryOne.id,
+            title: `${uniqueTitle} post one`,
+          },
+        })
+        trackCreatedDoc(postsSlug, postOne.id)
+
+        const postTwo = await payload.create({
+          collection: postsSlug,
+          data: {
+            category: categoryTwo.id,
+            title: `${uniqueTitle} post two`,
+          },
+        })
+        trackCreatedDoc(postsSlug, postTwo.id)
+
+        const req = {
+          payload,
+          user,
+        } as unknown as PayloadRequest
+
+        await initTransaction(req)
+
+        let aggregatePaginatedResult!: PaginatedDocs<unknown>
+        let modelPaginatedResult!: PaginatedDocs<unknown>
+
+        try {
+          modelPaginatedResult = await payload.find({
+            collection: 'simple',
+            limit: 1,
+            page: 1,
+            req,
+            where: {
+              text: {
+                contains: uniqueTitle,
+              },
+            },
+          })
+
+          aggregatePaginatedResult = await payload.find({
+            collection: postsSlug,
+            limit: 1,
+            page: 1,
+            req,
+            sort: 'category.title',
+            where: {
+              title: {
+                contains: uniqueTitle,
+              },
+            },
+          })
+
+          await commitTransaction(req)
+        } catch (error) {
+          await killTransaction(req)
+          throw error
+        }
+
+        expect(modelPaginatedResult.totalDocs).toBe(2)
+        expect(modelPaginatedResult.docs).toHaveLength(1)
+        expect(modelPaginatedResult.hasNextPage).toBe(true)
+
+        expect(aggregatePaginatedResult.totalDocs).toBe(2)
+        expect(aggregatePaginatedResult.docs).toHaveLength(1)
+        expect(aggregatePaginatedResult.hasNextPage).toBe(true)
+      })
+    })
+
     describe('local api', () => {
       // sqlite cannot handle concurrent write transactions
       if (
