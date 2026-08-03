@@ -27,10 +27,16 @@ export type Crop = {
   y: number
 }
 
-export type CropMode = 'preserve' | 'transform'
+export type CropRect = {
+  height: null | number
+  unit: '%' | 'px' | null
+  width: null | number
+  x: null | number
+  y: null | number
+}
 
 export type FileData = {
-  cropRect?: Crop
+  cropRect?: CropRect | null
   filename: string
   filesize: number
   focalX?: number
@@ -233,12 +239,6 @@ export type UploadConfig = {
    * @default true
    */
   crop?: boolean
-  /**
-   * Controls whether Payload applies crop edits to the uploaded file or preserves the file and
-   * stores the crop rectangle as metadata for an external image processor.
-   * @default 'transform'
-   */
-  cropMode?: CropMode
   /**
    * Disable the ability to save files to disk.
    * @default false

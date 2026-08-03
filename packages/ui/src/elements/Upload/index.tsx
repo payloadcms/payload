@@ -17,7 +17,6 @@ import { EditDepthProvider } from '../../providers/EditDepth/index.js'
 import { useTranslation } from '../../providers/Translation/index.js'
 import { UploadControlsProvider, useUploadControls } from '../../providers/UploadControls/index.js'
 import { useUploadEdits } from '../../providers/UploadEdits/index.js'
-import { getInitialCrop } from '../../utilities/getInitialCrop.js'
 import { Button } from '../Button/index.js'
 import { Drawer } from '../Drawer/index.js'
 import { Dropzone } from '../Dropzone/index.js'
@@ -399,11 +398,7 @@ const UploadComponent: React.FC<UploadComponentProps> = (props) => {
             fileName={value?.name || data?.filename}
             fileSrc={data?.url || fileSrc}
             imageCacheTag={imageCacheTag}
-            initialCrop={getInitialCrop({
-              cropMode: uploadConfig.cropMode,
-              data,
-              uploadEdits,
-            })}
+            initialCrop={uploadEdits?.crop ?? undefined}
             initialFocalPoint={{
               x: uploadEdits?.focalPoint?.x || data?.focalX || 50,
               y: uploadEdits?.focalPoint?.y || data?.focalY || 50,

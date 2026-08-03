@@ -3,7 +3,6 @@ import type {
   AuthenticatedUser,
   BulkOperationResult,
   CollectionSlug,
-  CropMode,
   CustomDocumentViewConfig,
   DefaultDocumentViewConfig,
   GeneratedTypes,
@@ -18,7 +17,6 @@ import type {
   TypedCollectionSelect,
   TypeWithVersion,
   UntypedPayloadTypes,
-  UploadConfig,
   Where,
 } from 'payload'
 
@@ -83,11 +81,6 @@ import type {
 } from './payload-types.js'
 
 describe('Types testing', () => {
-  test('should type crop mode', () => {
-    expect<CropMode>().type.toBe<'preserve' | 'transform'>()
-    expect<UploadConfig['cropMode']>().type.toBe<CropMode | undefined>()
-  })
-
   test('should fall back when generated types do not include jobs', () => {
     expect<Job['id']>().type.toBe<number | string>()
     expect<Job['processingToken']>().type.toBe<null | string | undefined>()
