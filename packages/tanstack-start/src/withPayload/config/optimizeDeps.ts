@@ -31,6 +31,21 @@ export const optimizeDepsExcludeDefaults: string[] = [
   '@aws-sdk/client-s3',
   '@aws-sdk/s3-request-presigner',
   '@google-cloud/storage',
+  // Plugins that ship `'use client'` components. Pre-bundling one puts its client
+  // components in the optimized dep chunk *and* in the `rsc` environment as client
+  // references, which `@vitejs/plugin-rsc` warns about ("client component
+  // dependency is inconsistently optimized") once per component. Only shows up in
+  // published installs; workspace source is never pre-bundled.
+  '@payloadcms/plugin-cloud-storage',
+  '@payloadcms/plugin-ecommerce',
+  '@payloadcms/plugin-form-builder',
+  '@payloadcms/plugin-import-export',
+  '@payloadcms/plugin-mcp',
+  '@payloadcms/plugin-multi-tenant',
+  '@payloadcms/plugin-search',
+  '@payloadcms/plugin-sentry',
+  '@payloadcms/plugin-seo',
+  '@payloadcms/plugin-stripe',
 ]
 
 /**
