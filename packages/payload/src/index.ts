@@ -179,6 +179,7 @@ export * from './auth/index.js'
  *
  * By defining the actual shape, we can use simple property access (T['collections'])
  * instead of conditional types throughout the codebase.
+ * (Enhancement: explicit shape definitions)
  */
 export interface PayloadTypesShape {
   auth: Record<string, unknown>
