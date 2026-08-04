@@ -230,9 +230,14 @@ export const sanitizeQueryValue = ({
         })
       } else {
         if (idType === 'number') {
-          formattedValue = Number(val)
-        }
-        if (idType === 'text') {
+          const numericVal = Number(val)
+
+          if (Number.isNaN(numericVal)) {
+            return null
+          }
+
+          formattedValue = numericVal
+        } else if (idType === 'text') {
           formattedValue = String(val)
         }
       }
