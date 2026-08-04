@@ -3,6 +3,7 @@ import type { PayloadRequest } from 'payload'
 import { getSafeFileName } from 'payload/internal'
 
 import { getFileKey } from './getFileKey.js'
+import { sanitizeUploadFilename } from './sanitizeUploadFilename.js'
 
 type Args = {
   collectionPrefix?: string
@@ -29,9 +30,13 @@ export async function resolveSignedURLKey({
   req,
   useCompositePrefixes = false,
 }: Args) {
-  const sanitizedFilename = await getSafeFileName({
+  // Sanitize with the same logic used by `generateFileData.ts` so the
+  // storage key matches the DB filename for clientUploads.
+  const sanitized = sanitizeUploadFilename(filename)
+
+  const dedupedFilename = await getSafeFileName({
     collectionSlug,
-    desiredFilename: filename,
+    desiredFilename: sanitized,
     prefix: docPrefix,
     req,
   })
@@ -39,9 +44,9 @@ export async function resolveSignedURLKey({
   const { fileKey, sanitizedDocPrefix } = getFileKey({
     collectionPrefix,
     docPrefix,
-    filename: sanitizedFilename,
+    filename: dedupedFilename,
     useCompositePrefixes,
   })
 
-  return { fileKey, sanitizedDocPrefix, sanitizedFilename }
+  return { fileKey, sanitizedDocPrefix, sanitizedFilename: dedupedFilename }
 }
