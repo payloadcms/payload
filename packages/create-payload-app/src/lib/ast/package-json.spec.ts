@@ -54,6 +54,44 @@ describe('updatePackageJson', () => {
     expect(updated.dependencies.sharp).toBeUndefined()
   })
 
+  it('should remove selected packages from dependencies and devDependencies', () => {
+    const pkgPath = path.join(tempDir, 'package.json')
+    const originalPkg = {
+      name: 'test-app',
+      scripts: {
+        dev: 'vite',
+      },
+      dependencies: {
+        '@tanstack/router-plugin': '^1.0.0',
+        payload: '^4.0.0',
+      },
+      devDependencies: {
+        '@tanstack/router-plugin': '^1.0.0',
+        typescript: '^6.0.0',
+      },
+    }
+    fs.writeFileSync(pkgPath, JSON.stringify(originalPkg, null, 2))
+
+    updatePackageJson(pkgPath, {
+      removeDependencies: ['@tanstack/router-plugin'],
+    })
+
+    const updated = JSON.parse(fs.readFileSync(pkgPath, 'utf-8'))
+
+    expect(updated).toEqual({
+      name: 'test-app',
+      scripts: {
+        dev: 'vite',
+      },
+      dependencies: {
+        payload: '^4.0.0',
+      },
+      devDependencies: {
+        typescript: '^6.0.0',
+      },
+    })
+  })
+
   it('updates package name', () => {
     const pkgPath = path.join(tempDir, 'package.json')
     const originalPkg = {

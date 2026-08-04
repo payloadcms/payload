@@ -9,6 +9,7 @@ import { ALL_DATABASE_ADAPTERS, ALL_STORAGE_ADAPTERS } from './types.js'
 type PackageJsonTransformOptions = {
   databaseAdapter?: DatabaseAdapter
   packageName?: string
+  removeDependencies?: string[]
   removeSharp?: boolean
   storageAdapter?: StorageAdapter
 }
@@ -121,6 +122,19 @@ function transformPackageJson(
       debug('[AST] Removed sharp dependency')
     } else {
       debug('[AST] Sharp dependency not found (already absent)')
+    }
+  }
+
+  if (options.removeDependencies) {
+    for (const dependencyGroup of ['dependencies', 'devDependencies'] as const) {
+      if (!transformed[dependencyGroup]) {
+        continue
+      }
+
+      transformed[dependencyGroup] = { ...transformed[dependencyGroup] }
+      for (const packageName of options.removeDependencies) {
+        delete transformed[dependencyGroup][packageName]
+      }
     }
   }
 
