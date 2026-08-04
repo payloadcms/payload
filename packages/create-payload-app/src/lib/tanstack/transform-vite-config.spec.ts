@@ -27,6 +27,41 @@ function expectSuccessfulTransform(result: ReturnType<typeof transformTanStackVi
   return result
 }
 
+function getWrappedConfig({
+  imports = `import { withPayload } from '@payloadcms/tanstack-start'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import viteReact from '@vitejs/plugin-react'
+import rsc from '@vitejs/plugin-rsc'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { defineConfig } from 'vite'`,
+  options = `{
+      payloadConfigPath: path.resolve(__dirname, 'src', 'payload.config.ts'),
+      routesDirectory: 'routes',
+    }`,
+  plugins = `[
+        rsc(pluginOptions.rsc),
+        tanstackStart(pluginOptions.tanstackStart),
+        viteReact(pluginOptions.react),
+      ]`,
+}: {
+  imports?: string
+  options?: string
+  plugins?: string
+} = {}) {
+  return `${imports}
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+export default defineConfig(
+  withPayload(
+    ({ pluginOptions }) => ({ plugins: ${plugins} }),
+    ${options},
+  ),
+)
+`
+}
+
 describe('transformTanStackViteConfig', () => {
   it('should transform the official TanStack Start Vite config shape', () => {
     const content = `import { tanstackStart } from '@tanstack/react-start/plugin/vite'
@@ -192,6 +227,207 @@ export default defineConfig({ plugins: [tanstackStart(), viteReact()] })
     )
 
     expect(secondResult).toEqual({ content: firstResult.content, modified: false, success: true })
+  })
+
+  it('should reject config object spreads that can override the transformed plugins', () => {
+    const content = `import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import viteReact from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  plugins: [tanstackStart(), viteReact()],
+  ...sharedConfig,
+})
+`
+
+    const result = transformTanStackViteConfig({ appDetails: getAppDetails('start'), content })
+
+    expect(result).toEqual({
+      success: false,
+      reason: 'Config object spreads cannot be transformed safely.',
+    })
+  })
+
+  it.each([
+    {
+      binding: `const withPayload = (config: unknown) => config`,
+      kind: 'start' as const,
+      name: 'withPayload',
+    },
+    {
+      binding: `const { withPayload } = pluginFactories`,
+      kind: 'start' as const,
+      name: 'withPayload',
+    },
+    {
+      binding: `const tanstackStart = () => ({ name: 'other' })`,
+      frameworkImport: `import { tanstackRouter } from '@tanstack/router-plugin/vite'`,
+      frameworkPlugin: 'tanstackRouter()',
+      kind: 'router-only' as const,
+      name: 'tanstackStart',
+    },
+    {
+      binding: `const rsc = () => ({ name: 'other' })`,
+      kind: 'start' as const,
+      name: 'rsc',
+    },
+    {
+      binding: `const path = { resolve: () => '/wrong' }`,
+      kind: 'start' as const,
+      name: 'path',
+    },
+    {
+      binding: `const fileURLToPath = () => '/wrong'`,
+      kind: 'start' as const,
+      name: 'fileURLToPath',
+    },
+    {
+      binding: `function __dirname() { return '/wrong' }`,
+      kind: 'start' as const,
+      name: '__dirname',
+    },
+  ])(
+    'should reject an incompatible $name destination binding',
+    ({
+      binding,
+      frameworkImport = `import { tanstackStart } from '@tanstack/react-start/plugin/vite'`,
+      frameworkPlugin = 'tanstackStart()',
+      kind,
+      name,
+    }) => {
+      const content = `${frameworkImport}
+import viteReact from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
+
+${binding}
+
+export default defineConfig({ plugins: [${frameworkPlugin}, viteReact()] })
+`
+
+      const result = transformTanStackViteConfig({ appDetails: getAppDetails(kind), content })
+
+      expect(result).toEqual({
+        success: false,
+        reason: `Identifier "${name}" is already bound incompatibly.`,
+      })
+    },
+  )
+
+  it('should preserve an aliased React default import', () => {
+    const content = `import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
+
+export default defineConfig({ plugins: [tanstackStart(), react()] })
+`
+
+    const firstResult = expectSuccessfulTransform(
+      transformTanStackViteConfig({ appDetails: getAppDetails('start'), content }),
+    )
+    const secondResult = expectSuccessfulTransform(
+      transformTanStackViteConfig({
+        appDetails: getAppDetails('start'),
+        content: firstResult.content,
+      }),
+    )
+
+    expect(firstResult.content).toContain('react(pluginOptions.react)')
+    expect(firstResult.content).not.toContain('viteReact(')
+    expect(secondResult.modified).toBe(false)
+  })
+
+  it.each([
+    {
+      content: getWrappedConfig({
+        plugins: `[
+        rsc(pluginOptions.rsc),
+        rsc(pluginOptions.rsc),
+        tanstackStart(pluginOptions.tanstackStart),
+        viteReact(pluginOptions.react),
+      ]`,
+      }),
+      name: 'duplicate generated plugin calls',
+    },
+    {
+      content: getWrappedConfig({
+        plugins: `[
+        tanstackStart(pluginOptions.tanstackStart),
+        rsc(pluginOptions.rsc),
+        viteReact(pluginOptions.react),
+      ]`,
+      }),
+      name: 'generated plugin calls in the wrong order',
+    },
+    {
+      content: getWrappedConfig({
+        plugins: `[
+        rsc(pluginOptions.rsc),
+        tanstackStart(pluginOptions.tanstackStart, { extra: true }),
+        viteReact(pluginOptions.react),
+      ]`,
+      }),
+      name: 'generated plugin calls with extra arguments',
+    },
+    {
+      content: getWrappedConfig({
+        options: `{
+      payloadConfigPath: path.resolve(__dirname, 'src', 'payload.config.ts'),
+      routesDirectory: 'routes',
+      debug: true,
+    }`,
+      }),
+      name: 'extra withPayload options',
+    },
+    {
+      content: getWrappedConfig({
+        imports: `import { withPayload } from 'not-payload'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import viteReact from '@vitejs/plugin-react'
+import rsc from '@vitejs/plugin-rsc'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import { defineConfig } from 'vite'`,
+      }),
+      name: 'withPayload imported from the wrong module',
+    },
+    {
+      content: getWrappedConfig({
+        imports: `import { withPayload } from '@payloadcms/tanstack-start'
+import { tanstackStart } from 'not-tanstack-start'
+import viteReact from 'not-vite-react'
+import rsc from 'not-vite-rsc'
+import path from 'not-node-path'
+import { fileURLToPath } from 'not-node-url'
+import { defineConfig } from 'vite'`,
+      }),
+      name: 'generated identifiers imported from the wrong modules',
+    },
+  ])('should reject an existing wrapper with $name', ({ content }) => {
+    const result = transformTanStackViteConfig({ appDetails: getAppDetails('start'), content })
+
+    expect(result).toEqual({
+      success: false,
+      reason: 'The existing withPayload() call does not match the supported configuration.',
+    })
+  })
+
+  it('should reject unrelated plugins interleaved between framework and React calls', () => {
+    const content = `import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import viteReact from '@vitejs/plugin-react'
+import { defineConfig } from 'vite'
+import inspect from 'vite-plugin-inspect'
+
+export default defineConfig({
+  plugins: [tanstackStart(), inspect(), viteReact()],
+})
+`
+
+    const result = transformTanStackViteConfig({ appDetails: getAppDetails('start'), content })
+
+    expect(result).toEqual({
+      success: false,
+      reason: 'Framework and React plugin calls must be adjacent and ordered.',
+    })
   })
 
   it.each([

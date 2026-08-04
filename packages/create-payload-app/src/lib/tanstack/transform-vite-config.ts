@@ -1,7 +1,9 @@
 import type {
   ArrayLiteralExpression,
   CallExpression,
+  Expression,
   ImportDeclaration,
+  Node as MorphNode,
   SourceFile,
 } from 'ts-morph'
 
@@ -12,6 +14,17 @@ import type { TanStackAppDetails } from '../../types.js'
 export type TextTransformResult =
   | { content: string; modified: boolean; success: true }
   | { reason: string; success: false }
+
+type LocalBinding =
+  | {
+      declaration: ImportDeclaration
+      importedName?: string
+      importKind: 'default' | 'named' | 'namespace'
+      isTypeOnly: boolean
+      kind: 'import'
+      moduleSpecifier: string
+    }
+  | { kind: 'other' | 'variable' }
 
 const PAYLOAD_CONFIG_PATH = "path.resolve(__dirname, 'src', 'payload.config.ts')"
 
@@ -36,13 +49,17 @@ export function transformTanStackViteConfig({
   }
 
   const defineConfigCall = defineConfigCalls[0]!
+  if (defineConfigCall.getArguments().length !== 1) {
+    return failure('defineConfig() must receive exactly one argument.')
+  }
+
   const configArgument = defineConfigCall.getArguments()[0]
 
   if (
     Node.isCallExpression(configArgument) &&
     configArgument.getExpression().getText() === 'withPayload'
   ) {
-    if (isCompatiblePayloadConfig(configArgument)) {
+    if (isCompatiblePayloadConfig({ sourceFile, withPayloadCall: configArgument })) {
       return { content, modified: false, success: true }
     }
 
@@ -53,8 +70,16 @@ export function transformTanStackViteConfig({
     return failure('defineConfig() must receive an object literal.')
   }
 
-  const pluginsProperty = configArgument.getProperty('plugins')
-  if (!Node.isPropertyAssignment(pluginsProperty)) {
+  if (configArgument.getProperties().some(Node.isSpreadAssignment)) {
+    return failure('Config object spreads cannot be transformed safely.')
+  }
+
+  const pluginsProperties = configArgument
+    .getProperties()
+    .filter(Node.isPropertyAssignment)
+    .filter((property) => property.getName() === 'plugins')
+  const pluginsProperty = pluginsProperties[0]
+  if (pluginsProperties.length !== 1 || !pluginsProperty) {
     return failure('The Vite config must contain a plugins array.')
   }
 
@@ -72,10 +97,10 @@ export function transformTanStackViteConfig({
     return failure('Could not identify the TanStack framework plugin import.')
   }
 
-  const reactImport = sourceFile
-    .getImportDeclarations()
-    .find((declaration) => declaration.getModuleSpecifierValue() === '@vitejs/plugin-react')
-  const reactPluginName = reactImport?.getDefaultImport()?.getText()
+  const reactPluginName = getDefaultImportLocalName({
+    moduleSpecifier: '@vitejs/plugin-react',
+    sourceFile,
+  })
 
   if (!reactPluginName) {
     return failure('Could not identify the React plugin import.')
@@ -102,10 +127,20 @@ export function transformTanStackViteConfig({
   const frameworkIndex = pluginCalls.indexOf(frameworkCalls[0]!)
   const reactIndex = pluginCalls.indexOf(reactCalls[0]!)
 
+  if (reactIndex !== frameworkIndex + 1) {
+    return failure('Framework and React plugin calls must be adjacent and ordered.')
+  }
+
+  const destinationValidation = validateDestinationBindings({ sourceFile })
+  if (!destinationValidation.success) {
+    return destinationValidation
+  }
+
   replacePluginCalls({
     frameworkIndex,
     pluginsArray,
     reactIndex,
+    reactPluginName,
   })
 
   const transformedConfig = configArgument.getText()
@@ -141,9 +176,9 @@ export function transformTanStackViteConfig({
     moduleSpecifier: '@vitejs/plugin-rsc',
     sourceFile,
   })
-  ensureDefaultImport({ defaultImport: 'path', moduleSpecifier: 'node:path', sourceFile })
+  ensurePathImport(sourceFile)
 
-  if (!hasDirnameDeclaration(sourceFile)) {
+  if (destinationValidation.shouldAddDirname) {
     ensureNamedImport({
       importedName: 'fileURLToPath',
       moduleSpecifier: 'node:url',
@@ -212,8 +247,292 @@ function ensureNamedImport({
   }
 }
 
+function ensurePathImport(sourceFile: SourceFile) {
+  const hasCompatibleImport = sourceFile.getImportDeclarations().some((declaration) => {
+    if (declaration.getModuleSpecifierValue() !== 'node:path') {
+      return false
+    }
+
+    return (
+      declaration.getDefaultImport()?.getText() === 'path' ||
+      declaration.getNamespaceImport()?.getText() === 'path'
+    )
+  })
+
+  if (!hasCompatibleImport) {
+    sourceFile.addImportDeclaration({ defaultImport: 'path', moduleSpecifier: 'node:path' })
+  }
+}
+
 function failure(reason: string): TextTransformResult {
   return { reason, success: false }
+}
+
+function getLocalBindings({
+  localName,
+  sourceFile,
+}: {
+  localName: string
+  sourceFile: SourceFile
+}): LocalBinding[] {
+  const bindings: LocalBinding[] = []
+
+  for (const declaration of sourceFile.getImportDeclarations()) {
+    const moduleSpecifier = declaration.getModuleSpecifierValue()
+    const defaultImport = declaration.getDefaultImport()
+    if (defaultImport?.getText() === localName) {
+      bindings.push({
+        declaration,
+        importKind: 'default',
+        isTypeOnly: declaration.isTypeOnly(),
+        kind: 'import',
+        moduleSpecifier,
+      })
+    }
+
+    const namespaceImport = declaration.getNamespaceImport()
+    if (namespaceImport?.getText() === localName) {
+      bindings.push({
+        declaration,
+        importKind: 'namespace',
+        isTypeOnly: declaration.isTypeOnly(),
+        kind: 'import',
+        moduleSpecifier,
+      })
+    }
+
+    for (const namedImport of declaration.getNamedImports()) {
+      const namedImportLocalName = namedImport.getAliasNode()?.getText() ?? namedImport.getName()
+      if (namedImportLocalName === localName) {
+        bindings.push({
+          declaration,
+          importedName: namedImport.getName(),
+          importKind: 'named',
+          isTypeOnly: declaration.isTypeOnly() || namedImport.isTypeOnly(),
+          kind: 'import',
+          moduleSpecifier,
+        })
+      }
+    }
+  }
+
+  for (const declaration of sourceFile.getVariableDeclarations()) {
+    if (bindingNameIncludes({ localName, node: declaration.getNameNode() })) {
+      bindings.push({ kind: 'variable' })
+    }
+  }
+
+  const hasOtherDeclaration = [
+    ...sourceFile.getClasses(),
+    ...sourceFile.getEnums(),
+    ...sourceFile.getFunctions(),
+    ...sourceFile.getModules(),
+  ].some((declaration) => declaration.getName() === localName)
+
+  if (hasOtherDeclaration) {
+    bindings.push({ kind: 'other' })
+  }
+
+  return bindings
+}
+
+function bindingNameIncludes({ localName, node }: { localName: string; node: MorphNode }): boolean {
+  if (Node.isIdentifier(node)) {
+    return node.getText() === localName
+  }
+
+  if (Node.isArrayBindingPattern(node) || Node.isObjectBindingPattern(node)) {
+    return node
+      .getElements()
+      .some(
+        (element) =>
+          Node.isBindingElement(element) &&
+          bindingNameIncludes({ localName, node: element.getNameNode() }),
+      )
+  }
+
+  return false
+}
+
+function getNamedPluginCalls({
+  elements,
+  localName,
+}: {
+  elements: Expression[]
+  localName: string
+}): CallExpression[] {
+  return elements.filter(
+    (element): element is CallExpression =>
+      Node.isCallExpression(element) && element.getExpression().getText() === localName,
+  )
+}
+
+function hasCompatibleDirnameBinding(sourceFile: SourceFile): boolean {
+  const bindings = getLocalBindings({ localName: '__dirname', sourceFile })
+
+  return bindings.length === 1 && bindings[0]?.kind === 'variable'
+}
+
+function hasOnlyCompatibleBinding({
+  localName,
+  predicate,
+  sourceFile,
+}: {
+  localName: string
+  predicate: (binding: LocalBinding) => boolean
+  sourceFile: SourceFile
+}): boolean {
+  const bindings = getLocalBindings({ localName, sourceFile })
+
+  return bindings.length === 1 && predicate(bindings[0]!)
+}
+
+function isCompatiblePathBinding(binding: LocalBinding): boolean {
+  return (
+    binding.kind === 'import' &&
+    !binding.isTypeOnly &&
+    binding.moduleSpecifier === 'node:path' &&
+    (binding.importKind === 'default' || binding.importKind === 'namespace')
+  )
+}
+
+function isExactPluginCall({
+  call,
+  expectedArgument,
+}: {
+  call: CallExpression
+  expectedArgument: string
+}): boolean {
+  return call.getArguments().length === 1 && call.getArguments()[0]?.getText() === expectedArgument
+}
+
+function isImportBinding({
+  binding,
+  importedName,
+  importKind,
+  moduleSpecifier,
+}: {
+  binding: LocalBinding
+  importedName?: string
+  importKind: 'default' | 'named' | 'namespace'
+  moduleSpecifier: string
+}): boolean {
+  return (
+    binding.kind === 'import' &&
+    !binding.isTypeOnly &&
+    binding.importKind === importKind &&
+    binding.moduleSpecifier === moduleSpecifier &&
+    (importedName === undefined || binding.importedName === importedName)
+  )
+}
+
+function validateDestinationBindings({
+  sourceFile,
+}: {
+  sourceFile: SourceFile
+}): { reason: string; success: false } | { shouldAddDirname: boolean; success: true } {
+  const destinations: Array<{
+    localName: string
+    predicate: (binding: LocalBinding) => boolean
+  }> = [
+    {
+      localName: 'withPayload',
+      predicate: (binding) =>
+        isImportBinding({
+          binding,
+          importedName: 'withPayload',
+          importKind: 'named',
+          moduleSpecifier: '@payloadcms/tanstack-start',
+        }),
+    },
+    {
+      localName: 'tanstackStart',
+      predicate: (binding) =>
+        isImportBinding({
+          binding,
+          importedName: 'tanstackStart',
+          importKind: 'named',
+          moduleSpecifier: '@tanstack/react-start/plugin/vite',
+        }),
+    },
+    {
+      localName: 'rsc',
+      predicate: (binding) =>
+        isImportBinding({
+          binding,
+          importKind: 'default',
+          moduleSpecifier: '@vitejs/plugin-rsc',
+        }),
+    },
+    { localName: 'path', predicate: isCompatiblePathBinding },
+  ]
+
+  for (const destination of destinations) {
+    const bindings = getLocalBindings({ localName: destination.localName, sourceFile })
+    if (bindings.length > 0 && (bindings.length !== 1 || !destination.predicate(bindings[0]!))) {
+      return {
+        reason: `Identifier "${destination.localName}" is already bound incompatibly.`,
+        success: false,
+      }
+    }
+  }
+
+  const dirnameBindings = getLocalBindings({ localName: '__dirname', sourceFile })
+  if (
+    dirnameBindings.length > 0 &&
+    (dirnameBindings.length !== 1 || dirnameBindings[0]?.kind !== 'variable')
+  ) {
+    return { reason: 'Identifier "__dirname" is already bound incompatibly.', success: false }
+  }
+
+  const shouldAddDirname = dirnameBindings.length === 0
+  if (shouldAddDirname) {
+    const fileURLToPathBindings = getLocalBindings({ localName: 'fileURLToPath', sourceFile })
+    if (
+      fileURLToPathBindings.length > 0 &&
+      (fileURLToPathBindings.length !== 1 ||
+        !isImportBinding({
+          binding: fileURLToPathBindings[0]!,
+          importedName: 'fileURLToPath',
+          importKind: 'named',
+          moduleSpecifier: 'node:url',
+        }))
+    ) {
+      return {
+        reason: 'Identifier "fileURLToPath" is already bound incompatibly.',
+        success: false,
+      }
+    }
+  }
+
+  return { shouldAddDirname, success: true }
+}
+
+function getDefaultImportLocalName({
+  moduleSpecifier,
+  sourceFile,
+}: {
+  moduleSpecifier: string
+  sourceFile: SourceFile
+}): string | undefined {
+  const imports = sourceFile
+    .getImportDeclarations()
+    .filter((declaration) => declaration.getModuleSpecifierValue() === moduleSpecifier)
+    .map((declaration) => declaration.getDefaultImport()?.getText())
+    .filter((name): name is string => Boolean(name))
+
+  if (imports.length !== 1) {
+    return undefined
+  }
+
+  const localName = imports[0]!
+  return hasOnlyCompatibleBinding({
+    localName,
+    predicate: (binding) => isImportBinding({ binding, importKind: 'default', moduleSpecifier }),
+    sourceFile,
+  })
+    ? localName
+    : undefined
 }
 
 function getFrameworkImport({
@@ -247,24 +566,48 @@ function getFrameworkImport({
   }
 }
 
-function hasDirnameDeclaration(sourceFile: SourceFile): boolean {
-  return sourceFile
-    .getDescendantsOfKind(SyntaxKind.VariableDeclaration)
-    .some((declaration) => declaration.getName() === '__dirname')
-}
+function isCompatiblePayloadConfig({
+  sourceFile,
+  withPayloadCall,
+}: {
+  sourceFile: SourceFile
+  withPayloadCall: CallExpression
+}): boolean {
+  if (
+    withPayloadCall.getArguments().length !== 2 ||
+    !hasOnlyCompatibleBinding({
+      localName: 'withPayload',
+      predicate: (binding) =>
+        isImportBinding({
+          binding,
+          importedName: 'withPayload',
+          importKind: 'named',
+          moduleSpecifier: '@payloadcms/tanstack-start',
+        }),
+      sourceFile,
+    })
+  ) {
+    return false
+  }
 
-function isCompatiblePayloadConfig(withPayloadCall: CallExpression): boolean {
   const [callback, options] = withPayloadCall.getArguments()
 
   if (!Node.isArrowFunction(callback) || !Node.isObjectLiteralExpression(options)) {
     return false
   }
 
-  const callbackParameter = callback.getParameters()[0]
+  const callbackParameters = callback.getParameters()
+  const callbackParameter = callbackParameters[0]
+  const callbackBinding = callbackParameter?.getNameNode()
   if (
-    callback.getParameters().length !== 1 ||
+    callbackParameters.length !== 1 ||
     !callbackParameter ||
-    callbackParameter.getNameNode().getText() !== '{ pluginOptions }'
+    !Node.isObjectBindingPattern(callbackBinding) ||
+    callbackBinding.getElements().length !== 1 ||
+    callbackBinding.getElements()[0]?.getName() !== 'pluginOptions' ||
+    callbackBinding.getElements()[0]?.getPropertyNameNode() ||
+    callbackBinding.getElements()[0]?.getInitializer() ||
+    callbackBinding.getElements()[0]?.getDotDotDotToken()
   ) {
     return false
   }
@@ -278,44 +621,125 @@ function isCompatiblePayloadConfig(withPayloadCall: CallExpression): boolean {
     return false
   }
 
-  const pluginsProperty = configObject.getProperty('plugins')
-  const pluginsArray = Node.isPropertyAssignment(pluginsProperty)
-    ? pluginsProperty.getInitializer()
-    : undefined
-
-  if (!Node.isArrayLiteralExpression(pluginsArray)) {
+  if (configObject.getProperties().some(Node.isSpreadAssignment)) {
     return false
   }
 
-  const requiredCalls = new Map([
-    ['rsc', 'pluginOptions.rsc'],
-    ['tanstackStart', 'pluginOptions.tanstackStart'],
-    ['viteReact', 'pluginOptions.react'],
-  ])
+  const pluginsProperties = configObject
+    .getProperties()
+    .filter(Node.isPropertyAssignment)
+    .filter((property) => property.getName() === 'plugins')
+  const pluginsArray = pluginsProperties[0]?.getInitializer()
 
-  for (const element of pluginsArray.getElements()) {
-    if (!Node.isCallExpression(element)) {
-      continue
-    }
-
-    const expectedArgument = requiredCalls.get(element.getExpression().getText())
-    if (expectedArgument && element.getArguments()[0]?.getText() === expectedArgument) {
-      requiredCalls.delete(element.getExpression().getText())
-    }
-  }
-
-  if (requiredCalls.size > 0) {
+  if (
+    pluginsProperties.length !== 1 ||
+    !Node.isArrayLiteralExpression(pluginsArray) ||
+    pluginsArray.getElements().some(Node.isSpreadElement)
+  ) {
     return false
   }
 
-  const payloadConfigPath = options.getProperty('payloadConfigPath')
-  const routesDirectory = options.getProperty('routesDirectory')
+  const reactPluginName = getDefaultImportLocalName({
+    moduleSpecifier: '@vitejs/plugin-react',
+    sourceFile,
+  })
+  if (
+    !reactPluginName ||
+    !hasOnlyCompatibleBinding({
+      localName: 'rsc',
+      predicate: (binding) =>
+        isImportBinding({
+          binding,
+          importKind: 'default',
+          moduleSpecifier: '@vitejs/plugin-rsc',
+        }),
+      sourceFile,
+    }) ||
+    !hasOnlyCompatibleBinding({
+      localName: 'tanstackStart',
+      predicate: (binding) =>
+        isImportBinding({
+          binding,
+          importedName: 'tanstackStart',
+          importKind: 'named',
+          moduleSpecifier: '@tanstack/react-start/plugin/vite',
+        }),
+      sourceFile,
+    }) ||
+    !hasOnlyCompatibleBinding({
+      localName: 'path',
+      predicate: isCompatiblePathBinding,
+      sourceFile,
+    }) ||
+    !hasCompatibleDirnameBinding(sourceFile)
+  ) {
+    return false
+  }
+
+  const dirnameInitializer = sourceFile
+    .getVariableDeclaration('__dirname')
+    ?.getInitializer()
+    ?.getText()
+  if (
+    dirnameInitializer === 'path.dirname(fileURLToPath(import.meta.url))' &&
+    !hasOnlyCompatibleBinding({
+      localName: 'fileURLToPath',
+      predicate: (binding) =>
+        isImportBinding({
+          binding,
+          importedName: 'fileURLToPath',
+          importKind: 'named',
+          moduleSpecifier: 'node:url',
+        }),
+      sourceFile,
+    })
+  ) {
+    return false
+  }
+
+  const elements = pluginsArray.getElements()
+  const rscCalls = getNamedPluginCalls({ elements, localName: 'rsc' })
+  const frameworkCalls = getNamedPluginCalls({ elements, localName: 'tanstackStart' })
+  const reactCalls = getNamedPluginCalls({ elements, localName: reactPluginName })
+
+  if (
+    rscCalls.length !== 1 ||
+    frameworkCalls.length !== 1 ||
+    reactCalls.length !== 1 ||
+    !isExactPluginCall({ call: rscCalls[0]!, expectedArgument: 'pluginOptions.rsc' }) ||
+    !isExactPluginCall({
+      call: frameworkCalls[0]!,
+      expectedArgument: 'pluginOptions.tanstackStart',
+    }) ||
+    !isExactPluginCall({ call: reactCalls[0]!, expectedArgument: 'pluginOptions.react' })
+  ) {
+    return false
+  }
+
+  const rscIndex = elements.indexOf(rscCalls[0]!)
+  const frameworkIndex = elements.indexOf(frameworkCalls[0]!)
+  const reactIndex = elements.indexOf(reactCalls[0]!)
+  if (frameworkIndex !== rscIndex + 1 || reactIndex !== frameworkIndex + 1) {
+    return false
+  }
+
+  const optionProperties = options.getProperties().filter(Node.isPropertyAssignment)
+  if (optionProperties.length !== 2 || options.getProperties().length !== 2) {
+    return false
+  }
+
+  const payloadConfigPath = optionProperties.find(
+    (property) => property.getName() === 'payloadConfigPath',
+  )
+  const routesDirectory = optionProperties.find(
+    (property) => property.getName() === 'routesDirectory',
+  )
+  const routesDirectoryInitializer = routesDirectory?.getInitializer()
 
   return (
-    Node.isPropertyAssignment(payloadConfigPath) &&
-    payloadConfigPath.getInitializer()?.getText() === PAYLOAD_CONFIG_PATH &&
-    Node.isPropertyAssignment(routesDirectory) &&
-    routesDirectory.getInitializer()?.getText() === "'routes'"
+    payloadConfigPath?.getInitializer()?.getText() === PAYLOAD_CONFIG_PATH &&
+    Node.isStringLiteral(routesDirectoryInitializer) &&
+    routesDirectoryInitializer.getLiteralValue() === 'routes'
   )
 }
 
@@ -345,10 +769,12 @@ function replacePluginCalls({
   frameworkIndex,
   pluginsArray,
   reactIndex,
+  reactPluginName,
 }: {
   frameworkIndex: number
   pluginsArray: ArrayLiteralExpression
   reactIndex: number
+  reactPluginName: string
 }) {
   const retainedPlugins = pluginsArray
     .getElements()
@@ -361,7 +787,7 @@ function replacePluginCalls({
     0,
     'rsc(pluginOptions.rsc)',
     'tanstackStart(pluginOptions.tanstackStart)',
-    'viteReact(pluginOptions.react)',
+    `${reactPluginName}(pluginOptions.react)`,
   )
 
   pluginsArray.replaceWithText(`[${retainedPlugins.join(', ')}]`)
