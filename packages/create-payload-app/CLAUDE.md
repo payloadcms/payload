@@ -60,6 +60,7 @@ No comment markers needed - AST finds structure by code patterns.
 ### Package Management Flows
 
 create-payload-app has three distinct flows for handling package installation:
+The CLI uses the selected npm, Yarn, pnpm, or Bun package manager for each flow.
 
 #### Flow 1: Next.js Integration
 
@@ -73,8 +74,8 @@ sequenceDiagram
 
     CLI->>initNext: Detected project with dbType
     initNext->>FS: Copy template files
-    initNext->>PM: pnpm add payload @payloadcms/next @payloadcms/db-{type}
-    PM->>FS: Install packages to node_modules
+    initNext->>PM: Add Payload, Next.js integration, and database packages
+    PM-->>initNext: Dependencies installed
     initNext->>AST: configurePayloadConfig(filePath, {db})
     AST->>FS: Update payload.config.ts (imports/config)
     AST->>FS: Update package.json (dependencies)
@@ -83,9 +84,9 @@ sequenceDiagram
 
 **Key points:**
 
-- Uses `pnpm add` to install specific packages
+- Uses the selected package manager to add specific packages
 - Packages installed before AST modifications
-- No final `pnpm install` step
+- No final dependency install step
 
 #### Flow 2: TanStack Integration
 
@@ -134,22 +135,22 @@ sequenceDiagram
     createProject->>AST: configurePayloadConfig(projectDir, {db})
     AST->>FS: Update payload.config.ts (imports/config)
     AST->>FS: Update package.json (dependencies)
-    createProject->>PM: pnpm install
-    PM->>FS: Install packages from package.json
+    createProject->>PM: Install dependencies from package.json
+    PM-->>createProject: Dependencies installed
     createProject->>CLI: ✓ Project ready
 ```
 
 **Key points:**
 
 - Updates package.json first
-- Single `pnpm install` at end installs all dependencies
+- A single install at the end installs all dependencies
 - Package manager resolves dependencies from package.json
 
 **Package Operations:**
 
 - **Install**: Runs the selected package manager's add command for existing Next.js and TanStack projects, or install command for template/example creation
 - **Package removal**: AST removes imports and updates package.json (orphaned packages cleaned up on next install)
-- No explicit `pnpm remove` - package.json modifications only
+- No explicit package-manager remove command - package.json modifications only
 
 ### Existing Payload Upgrades
 
