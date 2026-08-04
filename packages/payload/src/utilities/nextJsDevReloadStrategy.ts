@@ -19,36 +19,15 @@ const firstModernHMRPathVersion = '16.3.0'
  */
 export const defaultNextJsDevReloadStrategy = (): DevReloadStrategy | null => {
   try {
-    const urls = getHMRURLs()
+    const url = getHMRURL()
 
     return {
       connect(onReload) {
-        const sockets = urls.map((url) => new WebSocket(url))
+        const ws = new WebSocket(url)
 
-        let openSocket: null | WebSocket = null
-
-        for (const socket of sockets) {
-          // Next.js answers only on the path its own version serves, and leaves an
-          // upgrade request to any other path open and unanswered, so that a custom
-          // WebSocket server can claim it. That means a wrong path never errors and
-          // never closes - the only reliable signal is which socket opens.
-          socket.onopen = () => {
-            openSocket = socket
-
-            for (const otherSocket of sockets) {
-              if (otherSocket !== socket) {
-                otherSocket.close()
-              }
-            }
-          }
-
-          socket.onmessage = (event) => {
-            if (socket !== openSocket || typeof event.data !== 'string') {
-              return
-            }
-
+        ws.onmessage = (event) => {
+          if (typeof event.data === 'string') {
             const data = JSON.parse(event.data)
-
             if (
               data.type === 'serverComponentChanges' ||
               data.action === 'serverComponentChanges'
@@ -56,16 +35,14 @@ export const defaultNextJsDevReloadStrategy = (): DevReloadStrategy | null => {
               onReload()
             }
           }
+        }
 
-          socket.onerror = () => {
-            // swallow any websocket connection error
-          }
+        ws.onerror = () => {
+          // swallow any websocket connection error
         }
 
         return () => {
-          for (const socket of sockets) {
-            socket.close()
-          }
+          ws.close()
         }
       },
     }
@@ -74,17 +51,9 @@ export const defaultNextJsDevReloadStrategy = (): DevReloadStrategy | null => {
   }
 }
 
-/**
- * Returns every HMR URL to connect to. Normally this is the single URL that the installed
- * Next.js version serves. If that version cannot be read, both known paths are returned and
- * raced instead, so that HMR still works rather than depending on a correct guess.
- *
- * A `PAYLOAD_HMR_URL_OVERRIDE` is used verbatim and on its own, as it states exactly
- * which endpoint to connect to.
- */
-const getHMRURLs = (): string[] => {
+const getHMRURL = (): string => {
   if (process.env.PAYLOAD_HMR_URL_OVERRIDE) {
-    return [process.env.PAYLOAD_HMR_URL_OVERRIDE]
+    return process.env.PAYLOAD_HMR_URL_OVERRIDE
   }
 
   const port = process.env.PORT || '3000'
@@ -92,26 +61,24 @@ const getHMRURLs = (): string[] => {
   const protocol = hasHTTPS ? 'wss' : 'ws'
   const prefix = process.env.__NEXT_ASSET_PREFIX ?? ''
 
-  return getHMRPaths().map((hmrPath) => `${protocol}://localhost:${port}${prefix}${hmrPath}`)
+  return `${protocol}://localhost:${port}${prefix}${getHMRPath()}`
 }
 
-const getHMRPaths = (): string[] => {
+/**
+ * Pre-release identifiers are ignored, so that a `16.3.0-canary` build maps to the 16.3 path.
+ * An unreadable version uses the current path, as Payload being unable to resolve Next.js
+ * normally means it is not running under Next.js, where this strategy does not apply.
+ */
+const getHMRPath = (): string => {
   const nextVersion = getNextVersion()
 
   if (!nextVersion) {
-    return [modernHMRPath, legacyHMRPath]
+    return modernHMRPath
   }
 
-  const { parts, preReleases } = parseVersion(nextVersion)
-  const mainVersion = parts.join('.')
-
-  // The rename landed partway through the pre-releases of `firstModernHMRPathVersion`, so
-  // its pre-releases serve either path. Race both rather than guess which one.
-  if (preReleases.length && mainVersion === firstModernHMRPathVersion) {
-    return [modernHMRPath, legacyHMRPath]
-  }
+  const mainVersion = parseVersion(nextVersion).parts.join('.')
 
   return compareVersions(mainVersion, firstModernHMRPathVersion) === 'lower'
-    ? [legacyHMRPath]
-    : [modernHMRPath]
+    ? legacyHMRPath
+    : modernHMRPath
 }
