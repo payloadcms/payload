@@ -508,6 +508,14 @@ const point: FieldSchemaGenerator<PointField> = (
   buildSchemaOptions,
   parentIsLocalized,
 ): void => {
+  // Point fields build their per-locale schema by hand instead of going through
+  // `formatBaseSchema`/`localizeSchema`'s shared suppression, so `unique` localized
+  // fields need the same default suppression applied here directly.
+  const suppressDefault =
+    !buildSchemaOptions.disableUnique &&
+    field.unique &&
+    fieldShouldBeLocalized({ field, parentIsLocalized })
+
   const baseSchema: SchemaTypeOptions<unknown> = {
     type: {
       type: String,
@@ -518,7 +526,7 @@ const point: FieldSchemaGenerator<PointField> = (
     },
     coordinates: {
       type: [Number],
-      default: formatDefaultValue(field),
+      default: suppressDefault ? undefined : formatDefaultValue(field),
       required: false,
     },
   }

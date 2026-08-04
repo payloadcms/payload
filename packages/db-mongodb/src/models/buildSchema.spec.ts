@@ -106,6 +106,42 @@ describe('buildSchema unique + localized defaultValue', () => {
     expect(schema.path('uniqueLocalizedHasManySelect.es').options.type[0].default).toBeUndefined()
   })
 
+  it('does not carry the static defaultValue on a unique localized point field', () => {
+    const schema = buildSchema({
+      buildSchemaOptions: {},
+      configFields: [
+        {
+          name: 'uniqueLocalizedPoint',
+          type: 'point',
+          defaultValue: [0, 0],
+          localized: true,
+          unique: true,
+        },
+      ],
+      payload,
+    })
+
+    expect(schema.path('uniqueLocalizedPoint.en.coordinates').options.default).toBeUndefined()
+    expect(schema.path('uniqueLocalizedPoint.es.coordinates').options.default).toBeUndefined()
+  })
+
+  it('still applies the static defaultValue on a non-unique localized point field', () => {
+    const schema = buildSchema({
+      buildSchemaOptions: {},
+      configFields: [
+        {
+          name: 'localizedPoint',
+          type: 'point',
+          defaultValue: [0, 0],
+          localized: true,
+        },
+      ],
+      payload,
+    })
+
+    expect(schema.path('localizedPoint.en.coordinates').options.default).toEqual([0, 0])
+  })
+
   it('still applies the static defaultValue on a non-unique localized relationship field', () => {
     const schema = buildSchema({
       buildSchemaOptions: {},
