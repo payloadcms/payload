@@ -7,6 +7,7 @@ import { getDbPackageName, getStoragePackageName } from './adapter-config.js'
 import { ALL_DATABASE_ADAPTERS, ALL_STORAGE_ADAPTERS } from './types.js'
 
 type PackageJsonTransformOptions = {
+  addDependencies?: Record<string, string>
   databaseAdapter?: DatabaseAdapter
   packageName?: string
   removeDependencies?: string[]
@@ -132,6 +133,13 @@ function transformPackageJson(
       debug('[AST] Removed sharp dependency')
     } else {
       debug('[AST] Sharp dependency not found (already absent)')
+    }
+  }
+
+  if (options.addDependencies) {
+    transformed.dependencies = {
+      ...transformed.dependencies,
+      ...options.addDependencies,
     }
   }
 

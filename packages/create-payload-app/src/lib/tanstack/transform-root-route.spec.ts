@@ -275,6 +275,47 @@ import { Scripts } from '@tanstack/react-router'`,
     ['start' as const, getStartRoot()],
     ['router-only' as const, getRouterOnlyRoot()],
   ])(
+    'should validate an aliased wrapper call against its local import in a transformed %s root',
+    (kind, content) => {
+      const firstResult = expectSuccessfulTransform(transformTanStackRootRoute({ content, kind }))
+      const aliasedContent = firstResult.content
+        .replace(
+          "import { withPayloadRoot } from '@payloadcms/tanstack-start/client'",
+          "import { withPayloadRoot as payloadRoot } from '@payloadcms/tanstack-start/client'",
+        )
+        .replace('withPayloadRoot(RootDocument)', 'payloadRoot(RootDocument)')
+
+      const result = transformTanStackRootRoute({ content: aliasedContent, kind })
+
+      expect(result).toEqual({ content: aliasedContent, modified: false, success: true })
+    },
+  )
+
+  it.each([
+    ['start' as const, getStartRoot()],
+    ['router-only' as const, getRouterOnlyRoot()],
+  ])(
+    'should reject a transformed %s root whose canonical wrapper call has only an aliased import',
+    (kind, content) => {
+      const firstResult = expectSuccessfulTransform(transformTanStackRootRoute({ content, kind }))
+      const malformedContent = firstResult.content.replace(
+        "import { withPayloadRoot } from '@payloadcms/tanstack-start/client'",
+        "import { withPayloadRoot as payloadRoot } from '@payloadcms/tanstack-start/client'",
+      )
+
+      const result = transformTanStackRootRoute({ content: malformedContent, kind })
+
+      expect(result).toEqual({
+        reason: 'The existing shellComponent cannot be transformed safely.',
+        success: false,
+      })
+    },
+  )
+
+  it.each([
+    ['start' as const, getStartRoot()],
+    ['router-only' as const, getRouterOnlyRoot()],
+  ])(
     'should reject a transformed %s root with the stylesheet after HeadContent',
     (kind, content) => {
       const firstResult = expectSuccessfulTransform(transformTanStackRootRoute({ content, kind }))

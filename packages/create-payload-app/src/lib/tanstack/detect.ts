@@ -43,11 +43,21 @@ export async function getTanStackAppDetails({
   }
 
   const kind: TanStackAppKind = hasReactStart ? 'start' : 'router-only'
-  const viteConfigPath = await findFirstFile({
+  const viteConfigPaths = await findFiles({
     cwd: absoluteProjectDir,
     pattern: `vite.config.@(${FILE_EXTENSIONS})`,
   })
+  if (viteConfigPaths.length > 1) {
+    return incompatible(
+      getAmbiguousFilesReason({
+        filePaths: viteConfigPaths,
+        projectDir: absoluteProjectDir,
+        role: 'Vite config',
+      }),
+    )
+  }
 
+  const viteConfigPath = viteConfigPaths[0]
   if (!viteConfigPath) {
     return incompatible('Could not find a Vite config file.')
   }
@@ -60,10 +70,21 @@ export async function getTanStackAppDetails({
 
   const sourceDir = path.join(absoluteProjectDir, 'src')
   const routesDir = path.join(sourceDir, 'routes')
-  const routerPath = await findFirstFile({
+  const routerPaths = await findFiles({
     cwd: sourceDir,
     pattern: `router.@(${FILE_EXTENSIONS})`,
   })
+  if (routerPaths.length > 1) {
+    return incompatible(
+      getAmbiguousFilesReason({
+        filePaths: routerPaths,
+        projectDir: absoluteProjectDir,
+        role: 'router',
+      }),
+    )
+  }
+
+  const routerPath = routerPaths[0]
   if (!routerPath) {
     return incompatible(`Could not find src/router.* in ${absoluteProjectDir}.`)
   }
@@ -73,10 +94,21 @@ export async function getTanStackAppDetails({
     return incompatible(`Could not find getRouter in ${routerPath}.`)
   }
 
-  const rootRoutePath = await findFirstFile({
+  const rootRoutePaths = await findFiles({
     cwd: routesDir,
     pattern: `__root.@(${FILE_EXTENSIONS})`,
   })
+  if (rootRoutePaths.length > 1) {
+    return incompatible(
+      getAmbiguousFilesReason({
+        filePaths: rootRoutePaths,
+        projectDir: absoluteProjectDir,
+        role: 'root route',
+      }),
+    )
+  }
+
+  const rootRoutePath = rootRoutePaths[0]
   if (!rootRoutePath) {
     return incompatible(`Could not find src/routes/__root.* in ${absoluteProjectDir}.`)
   }
@@ -99,14 +131,26 @@ function incompatible(reason: string): TanStackDetectionResult {
   return { compatible: false, detected: true, reason }
 }
 
-async function findFirstFile({ cwd, pattern }: { cwd: string; pattern: string }) {
-  return (
-    await globby(pattern, {
-      absolute: true,
-      cwd,
-      onlyFiles: true,
-    })
-  )[0]
+function getAmbiguousFilesReason({
+  filePaths,
+  projectDir,
+  role,
+}: {
+  filePaths: string[]
+  projectDir: string
+  role: string
+}): string {
+  const relativePaths = filePaths.map((filePath) => path.relative(projectDir, filePath)).sort()
+
+  return `Found multiple supported ${role} files: ${relativePaths.join(', ')}.`
+}
+
+async function findFiles({ cwd, pattern }: { cwd: string; pattern: string }): Promise<string[]> {
+  return globby(pattern, {
+    absolute: true,
+    cwd,
+    onlyFiles: true,
+  })
 }
 
 async function getPackageJson({ projectDir }: { projectDir: string }): Promise<PackageJson> {

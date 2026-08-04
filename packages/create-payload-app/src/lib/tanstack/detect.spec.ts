@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { getTanStackAppDetails } from './detect.js'
 
 type Fixture = {
+  additionalFiles?: Record<string, string>
   dependencies?: Record<string, string>
   devDependencies?: Record<string, string>
   hasRootRoute?: boolean
@@ -26,6 +27,7 @@ describe('getTanStackAppDetails', () => {
   })
 
   function writeFixture({
+    additionalFiles,
     dependencies,
     devDependencies,
     hasRootRoute = true,
@@ -48,6 +50,9 @@ describe('getTanStackAppDetails', () => {
     }
     if (vite) {
       fse.writeFileSync(path.join(projectDir, 'vite.config.ts'), vite)
+    }
+    for (const [relativePath, content] of Object.entries(additionalFiles ?? {})) {
+      fse.outputFileSync(path.join(projectDir, relativePath), content)
     }
   }
 
@@ -169,6 +174,43 @@ describe('getTanStackAppDetails', () => {
       compatible: false,
       detected: true,
       reason: expect.stringContaining('Next.js'),
+    })
+  })
+
+  it.each([
+    {
+      additionalFiles: {
+        'vite.config.mts':
+          'export default defineConfig({ plugins: [tanstackStart(), viteReact()] })',
+      },
+      reason: 'Found multiple supported Vite config files: vite.config.mts, vite.config.ts.',
+      role: 'Vite config',
+    },
+    {
+      additionalFiles: { 'src/router.ts': 'export function getRouter() {}' },
+      reason: 'Found multiple supported router files: src/router.ts, src/router.tsx.',
+      role: 'router',
+    },
+    {
+      additionalFiles: { 'src/routes/__root.ts': 'export {}' },
+      reason:
+        'Found multiple supported root route files: src/routes/__root.ts, src/routes/__root.tsx.',
+      role: 'root route',
+    },
+  ])('should reject multiple supported $role candidates', async ({ additionalFiles, reason }) => {
+    writeFixture({
+      additionalFiles,
+      dependencies: {
+        '@tanstack/react-router': 'latest',
+        '@tanstack/react-start': 'latest',
+      },
+      vite: 'export default defineConfig({ plugins: [tanstackStart(), viteReact()] })',
+    })
+
+    await expect(getTanStackAppDetails({ projectDir })).resolves.toEqual({
+      compatible: false,
+      detected: true,
+      reason,
     })
   })
 })

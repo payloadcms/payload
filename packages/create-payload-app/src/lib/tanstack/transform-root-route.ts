@@ -423,9 +423,11 @@ function getRootHeadLinks(
 function getShellState({
   expectedComponent,
   rootObject,
+  withPayloadRootLocalName,
 }: {
   expectedComponent?: string
   rootObject: ObjectLiteralExpression
+  withPayloadRootLocalName: string
 }):
   | { componentName: string; isWrapped: boolean; property?: PropertyAssignment; success: true }
   | { reason: string; success: false } {
@@ -467,7 +469,7 @@ function getShellState({
 
   if (
     Node.isCallExpression(initializer) &&
-    initializer.getExpression().getText() === 'withPayloadRoot' &&
+    initializer.getExpression().getText() === withPayloadRootLocalName &&
     initializer.getArguments().length === 1 &&
     Node.isIdentifier(initializer.getArguments()[0]) &&
     (!expectedComponent || initializer.getArguments()[0]!.getText() === expectedComponent)
@@ -522,7 +524,13 @@ function transformRouterOnlyRoot({
   rootObject: ObjectLiteralExpression
   sourceFile: SourceFile
 }): TextTransformResult {
-  const shellState = getShellState({ rootObject })
+  const withPayloadRootImport = getNamedImport({
+    importedName: 'withPayloadRoot',
+    moduleSpecifier: PAYLOAD_CLIENT_MODULE,
+    sourceFile,
+  })
+  const withPayloadRootLocalName = withPayloadRootImport?.localName ?? 'withPayloadRoot'
+  const shellState = getShellState({ rootObject, withPayloadRootLocalName })
   if (!shellState.success) {
     return shellState
   }
@@ -551,6 +559,7 @@ function transformRouterOnlyRoot({
   const destinationValidation = validateRouterOnlyDestinations({
     isAlreadyWrapped: shellState.isWrapped,
     sourceFile,
+    withPayloadRootLocalName,
   })
   if (!destinationValidation.success) {
     return destinationValidation
@@ -572,13 +581,7 @@ function transformRouterOnlyRoot({
       return failure('The existing Payload root shell does not match the supported configuration.')
     }
 
-    const hasWithPayloadImport = Boolean(
-      getNamedImport({
-        importedName: 'withPayloadRoot',
-        moduleSpecifier: PAYLOAD_CLIENT_MODULE,
-        sourceFile,
-      }),
-    )
+    const hasWithPayloadImport = Boolean(withPayloadRootImport)
     const hasAllRequiredImports =
       hasWithPayloadImport && headContentImport.isPresent && scriptsImport.isPresent
 
@@ -630,13 +633,15 @@ function transformRouterOnlyRoot({
   stylesheetImport.setModuleSpecifier(`${stylesheetImport.getModuleSpecifierValue()}?url`)
   rootObject.addPropertyAssignment({
     name: 'shellComponent',
-    initializer: 'withPayloadRoot(RootDocument)',
+    initializer: `${withPayloadRootLocalName}(RootDocument)`,
   })
-  ensureNamedImport({
-    importedName: 'withPayloadRoot',
-    moduleSpecifier: PAYLOAD_CLIENT_MODULE,
-    sourceFile,
-  })
+  if (!withPayloadRootImport) {
+    ensureNamedImport({
+      importedName: 'withPayloadRoot',
+      moduleSpecifier: PAYLOAD_CLIENT_MODULE,
+      sourceFile,
+    })
+  }
   if (!headContentImport.isPresent) {
     ensureNamedImport({ importedName: 'HeadContent', moduleSpecifier: ROUTER_MODULE, sourceFile })
   }
@@ -676,7 +681,17 @@ function transformStartRoot({
     return failure('Side-effect stylesheet imports cannot be isolated from admin.')
   }
 
-  const shellState = getShellState({ expectedComponent: undefined, rootObject })
+  const withPayloadRootImport = getNamedImport({
+    importedName: 'withPayloadRoot',
+    moduleSpecifier: PAYLOAD_CLIENT_MODULE,
+    sourceFile,
+  })
+  const withPayloadRootLocalName = withPayloadRootImport?.localName ?? 'withPayloadRoot'
+  const shellState = getShellState({
+    expectedComponent: undefined,
+    rootObject,
+    withPayloadRootLocalName,
+  })
   if (!shellState.success || !shellState.property) {
     return shellState.success
       ? failure('The existing shellComponent cannot be transformed safely.')
@@ -685,20 +700,14 @@ function transformStartRoot({
 
   const withPayloadValidation = validateNamedDestination({
     importedName: 'withPayloadRoot',
-    localName: 'withPayloadRoot',
+    localName: withPayloadRootLocalName,
     moduleSpecifier: PAYLOAD_CLIENT_MODULE,
     sourceFile,
   })
   if (!withPayloadValidation.success) {
     return withPayloadValidation
   }
-  const hasWithPayloadImport = Boolean(
-    getNamedImport({
-      importedName: 'withPayloadRoot',
-      moduleSpecifier: PAYLOAD_CLIENT_MODULE,
-      sourceFile,
-    }),
-  )
+  const hasWithPayloadImport = Boolean(withPayloadRootImport)
 
   const headContentImport = getNamedImport({
     importedName: 'HeadContent',
@@ -797,13 +806,15 @@ function transformStartRoot({
     )
   }
   if (!shellState.isWrapped) {
-    shellState.property.setInitializer(`withPayloadRoot(${shellState.componentName})`)
+    shellState.property.setInitializer(`${withPayloadRootLocalName}(${shellState.componentName})`)
   }
-  ensureNamedImport({
-    importedName: 'withPayloadRoot',
-    moduleSpecifier: PAYLOAD_CLIENT_MODULE,
-    sourceFile,
-  })
+  if (!withPayloadRootImport) {
+    ensureNamedImport({
+      importedName: 'withPayloadRoot',
+      moduleSpecifier: PAYLOAD_CLIENT_MODULE,
+      sourceFile,
+    })
+  }
   sourceFile.formatText({ indentSize: 2 })
 
   return { content: sourceFile.getFullText(), modified: true, success: true }
@@ -893,14 +904,16 @@ function validateNamedDestination({
 function validateRouterOnlyDestinations({
   isAlreadyWrapped,
   sourceFile,
+  withPayloadRootLocalName,
 }: {
   isAlreadyWrapped: boolean
   sourceFile: SourceFile
+  withPayloadRootLocalName: string
 }): { reason: string; success: false } | { success: true } {
   const destinations = [
     {
       importedName: 'withPayloadRoot',
-      localName: 'withPayloadRoot',
+      localName: withPayloadRootLocalName,
       moduleSpecifier: PAYLOAD_CLIENT_MODULE,
     },
   ]

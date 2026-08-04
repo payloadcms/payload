@@ -1,11 +1,18 @@
 import fse from 'fs-extra'
 import os from 'node:os'
 import path from 'node:path'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { TanStackAppDetails } from '../types.js'
 
 import { initTanStack } from './init-tanstack.js'
+
+const mocks = vi.hoisted(() => ({ resolvePackageVersion: vi.fn() }))
+
+vi.mock('../utils/resolvePackageVersion.js', async (importOriginal) => ({
+  ...(await importOriginal()),
+  resolvePackageVersion: mocks.resolvePackageVersion,
+}))
 
 const routerContent = `import { createRouter } from '@tanstack/react-router'
 
@@ -48,9 +55,18 @@ describe('initTanStack default template', () => {
   let projectDir: string
 
   beforeEach(() => {
+    vi.clearAllMocks()
+    mocks.resolvePackageVersion.mockResolvedValue('4.2.0')
     projectDir = fse.mkdtempSync(path.join(os.tmpdir(), 'cpa-init-tanstack-default-'))
     writeFiles({
       files: {
+        'package.json': JSON.stringify({
+          dependencies: {
+            '@tanstack/react-router': '^1.200.0',
+            '@tanstack/react-start': '^1.200.0',
+          },
+          name: 'start-app',
+        }),
         'src/router.tsx': routerContent,
         'src/routes/__root.tsx': rootRouteContent,
         'tsconfig.json': '{"compilerOptions":{"baseUrl":"."}}\n',
@@ -94,6 +110,22 @@ describe('initTanStack default template', () => {
     })
     expect(fse.readFileSync(path.join(projectDir, 'src/routes/_payload.tsx'), 'utf8')).toBe(
       fse.readFileSync(rawPayloadLayoutPath, 'utf8'),
+    )
+  })
+
+  it('should copy a Payload layout whose foundation CSS import does not require a host alias', async () => {
+    const result = await initTanStack({
+      '--no-deps': true,
+      '--payload-version': '4.2.0',
+      appDetails,
+      dbType: 'mongodb',
+      packageManager: 'pnpm',
+      projectDir,
+    })
+
+    expect(result.success).toBe(true)
+    expect(fse.readFileSync(path.join(projectDir, 'src/routes/_payload.tsx'), 'utf8')).toContain(
+      "import '../payload-foundation.css'",
     )
   })
 })

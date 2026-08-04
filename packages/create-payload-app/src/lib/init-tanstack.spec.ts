@@ -126,15 +126,15 @@ describe('initTanStack', () => {
     expect(mocks.installPackages).toHaveBeenCalledWith({
       packageManager: 'npm',
       packagesToInstall: [
-        'payload@4.2.0',
+        '@payloadcms/plugin-mcp@4.2.0',
+        '@payloadcms/richtext-lexical@4.2.0',
         '@payloadcms/tanstack-start@4.2.0',
         '@payloadcms/ui@4.2.0',
-        '@payloadcms/richtext-lexical@4.2.0',
-        '@payloadcms/plugin-mcp@4.2.0',
+        '@vitejs/plugin-rsc@^0.5.21',
         databasePackage,
         'graphql@^16.8.1',
+        'payload@4.2.0',
         'sharp@0.34.2',
-        '@vitejs/plugin-rsc@^0.5.21',
       ],
       projectDir,
     })
@@ -191,15 +191,15 @@ describe('initTanStack', () => {
     expect(mocks.installPackages).toHaveBeenCalledWith({
       packageManager: 'yarn',
       packagesToInstall: [
-        'payload@4.2.0',
+        '@payloadcms/plugin-mcp@4.2.0',
+        '@payloadcms/richtext-lexical@4.2.0',
         '@payloadcms/tanstack-start@4.2.0',
         '@payloadcms/ui@4.2.0',
-        '@payloadcms/richtext-lexical@4.2.0',
-        '@payloadcms/plugin-mcp@4.2.0',
+        '@vitejs/plugin-rsc@^0.5.21',
         '@payloadcms/db-mongodb@4.2.0',
         'graphql@^16.8.1',
+        'payload@4.2.0',
         'sharp@0.34.2',
-        '@vitejs/plugin-rsc@^0.5.21',
         '@tanstack/react-start@^1.168.26',
       ],
       projectDir,
@@ -230,22 +230,106 @@ describe('initTanStack', () => {
     expect(mocks.installPackages).not.toHaveBeenCalled()
   })
 
-  it('should skip version resolution and package installation with --no-deps', async () => {
-    const result = await initTanStack({
-      '--no-deps': true,
-      appDetails,
-      dbType: 'postgres',
-      packageManager: 'pnpm',
-      projectDir,
-      templateRoot,
-    })
+  it.each([
+    {
+      existingDependencies: {
+        '@tanstack/react-router': '^1.200.0',
+        '@tanstack/react-start': '^1.200.0',
+        react: '^19.0.0',
+      },
+      existingDevDependencies: { vite: '^7.0.0' },
+      expectedDependencies: {
+        '@payloadcms/db-postgres': '4.2.0',
+        '@payloadcms/plugin-mcp': '4.2.0',
+        '@payloadcms/richtext-lexical': '4.2.0',
+        '@payloadcms/tanstack-start': '4.2.0',
+        '@payloadcms/ui': '4.2.0',
+        '@tanstack/react-router': '^1.200.0',
+        '@tanstack/react-start': '^1.200.0',
+        '@vitejs/plugin-rsc': '^0.5.21',
+        graphql: '^16.8.1',
+        payload: '4.2.0',
+        react: '^19.0.0',
+        sharp: '0.34.2',
+      },
+      expectedDevDependencies: { vite: '^7.0.0' },
+      kind: 'start' as const,
+    },
+    {
+      existingDependencies: {
+        '@tanstack/react-router': '^1.200.0',
+        react: '^19.0.0',
+      },
+      existingDevDependencies: {
+        '@tanstack/router-plugin': '^1.200.0',
+        vite: '^7.0.0',
+      },
+      expectedDependencies: {
+        '@payloadcms/db-postgres': '4.2.0',
+        '@payloadcms/plugin-mcp': '4.2.0',
+        '@payloadcms/richtext-lexical': '4.2.0',
+        '@payloadcms/tanstack-start': '4.2.0',
+        '@payloadcms/ui': '4.2.0',
+        '@tanstack/react-router': '^1.200.0',
+        '@tanstack/react-start': '^1.168.26',
+        '@vitejs/plugin-rsc': '^0.5.21',
+        graphql: '^16.8.1',
+        payload: '4.2.0',
+        react: '^19.0.0',
+        sharp: '0.34.2',
+      },
+      expectedDevDependencies: { vite: '^7.0.0' },
+      kind: 'router-only' as const,
+    },
+  ])(
+    'should record required dependencies without installing them for a $kind project with --no-deps',
+    async ({
+      existingDependencies,
+      existingDevDependencies,
+      expectedDependencies,
+      expectedDevDependencies,
+      kind,
+    }) => {
+      appDetails = createAppDetails({ kind, projectDir })
+      const packageJsonPath = path.join(projectDir, 'package.json')
+      fse.writeJsonSync(packageJsonPath, {
+        dependencies: existingDependencies,
+        devDependencies: existingDevDependencies,
+        name: `${kind}-app`,
+      })
 
-    expect(result.success).toBe(true)
-    expect(mocks.resolvePackageVersion).not.toHaveBeenCalled()
-    expect(mocks.ensurePnpmBuildApprovals).not.toHaveBeenCalled()
-    expect(mocks.installPackages).not.toHaveBeenCalled()
-    expect(mocks.configurePayloadTsConfig).toHaveBeenCalledOnce()
-  })
+      const result = await initTanStack({
+        '--no-deps': true,
+        appDetails,
+        dbType: 'postgres',
+        packageManager: 'pnpm',
+        projectDir,
+        templateRoot,
+      })
+
+      expect(result.success).toBe(true)
+      expect(mocks.resolvePackageVersion).toHaveBeenCalledWith({
+        debug: undefined,
+        packageName: 'payload',
+        versionOrTag: 'canary',
+      })
+      expect(mocks.ensurePnpmBuildApprovals).not.toHaveBeenCalled()
+      expect(mocks.installPackages).not.toHaveBeenCalled()
+      expect(mocks.configurePayloadTsConfig).toHaveBeenCalledOnce()
+
+      const appliedWrites = mocks.applyPreparedWrites.mock.calls[0]?.[0].writes as Array<{
+        content: string
+        filePath: string
+      }>
+      const packageJsonWrite = appliedWrites.find(({ filePath }) => filePath === packageJsonPath)
+
+      expect(JSON.parse(packageJsonWrite?.content ?? '{}')).toEqual({
+        dependencies: expectedDependencies,
+        devDependencies: expectedDevDependencies,
+        name: `${kind}-app`,
+      })
+    },
+  )
 
   it('should return the preparation failure without applying writes', async () => {
     mocks.prepareTanStackInit.mockResolvedValue({ reason: 'unsafe host transform', success: false })

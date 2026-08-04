@@ -52,12 +52,26 @@ export async function initTanStack(args: InitTanStackArgs): Promise<InitTanStack
     return prepared
   }
 
+  const payloadVersion = await resolvePackageVersion({
+    debug: args['--debug'],
+    packageName: 'payload',
+    versionOrTag: args['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG,
+  })
+  const requiredDependencies = getRequiredDependencies({
+    appDetails,
+    dbType: args.dbType,
+    payloadVersion,
+  })
   let writes = prepared.writes
-  if (appDetails.kind === 'router-only') {
+  if (appDetails.kind === 'router-only' || args['--no-deps']) {
     try {
       const packageJsonWrite = preparePackageJson({
         filePath: path.join(args.projectDir, 'package.json'),
-        options: { removeDependencies: ['@tanstack/router-plugin'] },
+        options: {
+          addDependencies: args['--no-deps'] ? requiredDependencies : undefined,
+          removeDependencies:
+            appDetails.kind === 'router-only' ? ['@tanstack/router-plugin'] : undefined,
+        },
       })
       writes = [...writes, packageJsonWrite]
     } catch (error) {
@@ -71,16 +85,9 @@ export async function initTanStack(args: InitTanStackArgs): Promise<InitTanStack
   await applyPreparedWrites({ writes })
 
   if (!args['--no-deps']) {
-    const payloadVersion = await resolvePackageVersion({
-      debug: args['--debug'],
-      packageName: 'payload',
-      versionOrTag: args['--payload-version'] ?? DEFAULT_PAYLOAD_VERSION_TAG,
-    })
-    const packagesToInstall = getPackagesToInstall({
-      appDetails,
-      dbType: args.dbType,
-      payloadVersion,
-    })
+    const packagesToInstall = Object.entries(requiredDependencies).map(
+      ([packageName, version]) => `${packageName}@${version}`,
+    )
 
     await ensurePnpmBuildApprovals({
       packageManager: args.packageManager,
@@ -132,7 +139,7 @@ async function detectAppDetails({
   return { details: detection.details, success: true }
 }
 
-function getPackagesToInstall({
+function getRequiredDependencies({
   appDetails,
   dbType,
   payloadVersion,
@@ -140,27 +147,24 @@ function getPackagesToInstall({
   appDetails: TanStackAppDetails
   dbType: DbType
   payloadVersion: string
-}): string[] {
-  const packages = [
-    'payload',
-    '@payloadcms/tanstack-start',
-    '@payloadcms/ui',
-    '@payloadcms/richtext-lexical',
-    '@payloadcms/plugin-mcp',
-  ].map((packageName) => `${packageName}@${payloadVersion}`)
-
-  packages.push(
-    `${getDbPackageName(dbType)}@${payloadVersion}`,
-    'graphql@^16.8.1',
-    'sharp@0.34.2',
-    '@vitejs/plugin-rsc@^0.5.21',
-  )
-
-  if (appDetails.kind === 'router-only') {
-    packages.push('@tanstack/react-start@^1.168.26')
+}): Record<string, string> {
+  const dependencies: Record<string, string> = {
+    '@payloadcms/plugin-mcp': payloadVersion,
+    '@payloadcms/richtext-lexical': payloadVersion,
+    '@payloadcms/tanstack-start': payloadVersion,
+    '@payloadcms/ui': payloadVersion,
+    '@vitejs/plugin-rsc': '^0.5.21',
+    [getDbPackageName(dbType)]: payloadVersion,
+    graphql: '^16.8.1',
+    payload: payloadVersion,
+    sharp: '0.34.2',
   }
 
-  return packages
+  if (appDetails.kind === 'router-only') {
+    dependencies['@tanstack/react-start'] = '^1.168.26'
+  }
+
+  return dependencies
 }
 
 function resolveTemplateRoot(): string {
