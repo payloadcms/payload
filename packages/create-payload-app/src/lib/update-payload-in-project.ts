@@ -130,12 +130,23 @@ async function performPayloadPackageUpdate({
 }): Promise<PackageUpdateResult> {
   const packageObj = (await fse.readJson(path.resolve(projectDir, 'package.json'))) as {
     dependencies?: Record<string, string>
+    devDependencies?: Record<string, string>
   }
-  if (!packageObj?.dependencies) {
+  if (!packageObj.dependencies && !packageObj.devDependencies) {
     throw new Error('No package.json found in this project')
   }
 
-  const payloadVersion = packageObj.dependencies.payload
+  const dependencyGroups = [packageObj.dependencies, packageObj.devDependencies].filter(
+    (dependencies): dependencies is Record<string, string> => Boolean(dependencies),
+  )
+  const payloadPackageEntries = dependencyGroups.flatMap((dependencies) =>
+    Object.entries(dependencies).filter(
+      ([packageName]) => packageName === 'payload' || packageName.startsWith('@payloadcms/'),
+    ),
+  )
+  const payloadVersion = payloadPackageEntries.find(
+    ([packageName]) => packageName === 'payload',
+  )?.[1]
   if (!payloadVersion) {
     throw new Error('Payload is not installed in this project')
   }
@@ -143,7 +154,7 @@ async function performPayloadPackageUpdate({
   const packageManager = await getPackageManager({ projectDir })
   const latestPayloadVersion = await resolvePackageVersion({ packageName: 'payload', versionOrTag })
 
-  if (payloadVersion === latestPayloadVersion) {
+  if (payloadPackageEntries.every(([, version]) => version === latestPayloadVersion)) {
     return {
       isUpdated: false,
       message: `Payload v${payloadVersion} is already up to date.`,
@@ -151,10 +162,10 @@ async function performPayloadPackageUpdate({
     }
   }
 
-  const payloadPackages = Object.keys(packageObj.dependencies).filter((dependency) =>
-    dependency.startsWith('@payloadcms/'),
-  )
-  const packageNames = ['payload', ...payloadPackages]
+  const payloadPackages = payloadPackageEntries
+    .map(([packageName]) => packageName)
+    .filter((packageName) => packageName.startsWith('@payloadcms/'))
+  const packageNames = ['payload', ...new Set(payloadPackages)]
   const packagesToUpdate = packageNames.map(
     (packageName) => `${packageName}@${latestPayloadVersion}`,
   )

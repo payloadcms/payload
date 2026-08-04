@@ -77,6 +77,46 @@ describe('Payload project updates', () => {
     })
   })
 
+  it('should update a stale Payload package when payload is already at the target version', async () => {
+    fse.writeJsonSync(path.join(projectDir, 'package.json'), {
+      dependencies: {
+        '@payloadcms/ui': '4.1.0',
+        payload: '4.2.0',
+      },
+    })
+
+    const result = await updatePayloadPackages({ projectDir, versionOrTag: 'beta' })
+
+    expect(result).toEqual({ message: 'Payload updated successfully.', success: true })
+    expect(mocks.installPackages).toHaveBeenCalledWith({
+      packageManager: 'pnpm',
+      packagesToInstall: ['payload@4.2.0', '@payloadcms/ui@4.2.0'],
+      projectDir,
+    })
+  })
+
+  it('should update Payload packages installed as development dependencies', async () => {
+    fse.writeJsonSync(path.join(projectDir, 'package.json'), {
+      dependencies: {
+        '@payloadcms/ui': '4.1.0',
+        payload: '4.1.0',
+      },
+      devDependencies: {
+        '@payloadcms/graphql': '4.1.0',
+        vitest: '^4.0.0',
+      },
+    })
+
+    const result = await updatePayloadPackages({ projectDir, versionOrTag: 'beta' })
+
+    expect(result).toEqual({ message: 'Payload updated successfully.', success: true })
+    expect(mocks.installPackages).toHaveBeenCalledWith({
+      packageManager: 'pnpm',
+      packagesToInstall: ['payload@4.2.0', '@payloadcms/ui@4.2.0', '@payloadcms/graphql@4.2.0'],
+      projectDir,
+    })
+  })
+
   it('should refresh Next Payload routes without overwriting custom CSS', async () => {
     writeProjectPackage(projectDir)
     const nextConfigPath = path.join(projectDir, 'next.config.ts')
