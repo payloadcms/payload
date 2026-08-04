@@ -1,7 +1,7 @@
 import type { SQL, Table } from 'drizzle-orm'
 import type { FlattenedField, Operator, Sort, Where } from 'payload'
 
-import { and, getTableName, isNotNull, isNull, ne, notInArray, or, sql } from 'drizzle-orm'
+import { and, getTableName, isNotNull, isNull, ne, not, notInArray, or, sql } from 'drizzle-orm'
 import { PgUUID } from 'drizzle-orm/pg-core'
 import { APIError, QueryError } from 'payload'
 import { validOperatorSet } from 'payload/shared'
@@ -54,11 +54,13 @@ export function parseParams({
     for (const relationOrPath of Object.keys(where)) {
       if (relationOrPath) {
         const condition = where[relationOrPath]
-        let conditionOperator: typeof and | typeof or
+        let conditionOperator: typeof and | typeof not | typeof or
         if (relationOrPath.toLowerCase() === 'and') {
           conditionOperator = and
         } else if (relationOrPath.toLowerCase() === 'or') {
           conditionOperator = or
+        } else if (relationOrPath.toLowerCase() === 'not') {
+          conditionOperator = not
         }
         if (Array.isArray(condition)) {
           const builtConditions = buildAndOrConditions({
@@ -75,7 +77,24 @@ export function parseParams({
             where: condition,
           })
           if (builtConditions.length > 0) {
-            result = conditionOperator(...builtConditions)
+            result = (conditionOperator as typeof and | typeof or)(...builtConditions)
+          }
+        } else if (conditionOperator === not && typeof condition === 'object') {
+          const builtCondition = parseParams({
+            adapter,
+            aliasTable,
+            context,
+            fields,
+            joins,
+            locale,
+            parentIsLocalized,
+            selectFields,
+            selectLocale,
+            tableName,
+            where: condition as Where,
+          })
+          if (builtCondition) {
+            result = not(builtCondition)
           }
         } else {
           // It's a path - and there can be multiple comparisons on a single path.
