@@ -124,6 +124,7 @@ const tanstackSuites: TestConfig[] = [
   { file: 'admin-bar', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'server-url', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'field-paths', framework: 'tanstack-start', optional: false, shards: 1 },
+  { file: 'auth-basic', framework: 'tanstack-start', optional: false, shards: 1 },
 ]
 
 export default createE2EConfig([...nextSuites, ...tanstackSuites])

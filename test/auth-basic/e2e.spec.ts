@@ -62,6 +62,7 @@ const createFirstUser = async ({
   await page.locator('#field-email').fill(devUser.email)
   await page.locator('#field-password').fill(devUser.password)
   await page.locator('#field-confirm-password').fill(devUser.password)
+  await expect(page.locator('#field-error-password')).toBeHidden()
   await page.locator('.form-submit > button').click()
 
   await expect
