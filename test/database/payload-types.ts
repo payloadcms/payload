@@ -215,6 +215,8 @@ export interface Config {
   locale: 'en' | 'es' | 'uk';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -1732,6 +1734,96 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'noTimeStamps'
+      | 'categories'
+      | 'simple'
+      | 'simple-localized'
+      | 'categories-custom-id'
+      | 'posts'
+      | 'error-on-unnamed-fields'
+      | 'default-values'
+      | 'relation-a'
+      | 'relation-b'
+      | 'pg-migrations'
+      | 'custom-schema'
+      | 'places'
+      | 'virtual-relations'
+      | 'fields-persistance'
+      | 'custom-ids'
+      | 'fake-custom-ids'
+      | 'relationships-migration'
+      | 'compound-indexes'
+      | 'aliases'
+      | 'blocks-docs'
+      | 'unique-fields'
+      | 'select-has-many'
+      | 'virtual-linked-tenants'
+      | 'virtual-linked-roles'
+      | 'virtual-linked-projects'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'noTimeStamps'
+          | 'categories'
+          | 'simple'
+          | 'simple-localized'
+          | 'categories-custom-id'
+          | 'posts'
+          | 'error-on-unnamed-fields'
+          | 'default-values'
+          | 'relation-a'
+          | 'relation-b'
+          | 'pg-migrations'
+          | 'custom-schema'
+          | 'places'
+          | 'virtual-relations'
+          | 'fields-persistance'
+          | 'custom-ids'
+          | 'fake-custom-ids'
+          | 'relationships-migration'
+          | 'compound-indexes'
+          | 'aliases'
+          | 'blocks-docs'
+          | 'unique-fields'
+          | 'select-has-many'
+          | 'virtual-linked-tenants'
+          | 'virtual-linked-roles'
+          | 'virtual-linked-projects'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

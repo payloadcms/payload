@@ -61,6 +61,11 @@ const collection = postsSlug
 const title = 'title'
 process.env.PAYLOAD_CONFIG_PATH = path.join(dirname, 'config.ts')
 
+// The mongoose adapter can be configured with `idType: 'uuid'`, in which case default
+// `_id`s are UUIDs rather than ObjectIds (see PAYLOAD_DATABASE=mongodb-uuid).
+const isMongooseUUIDIDType = () =>
+  payload.db.name === 'mongoose' && (payload.db as MongooseAdapter).idType === 'uuid'
+
 describe('database', () => {
   beforeAll(async () => {
     process.env.SEED_IN_CONFIG_ONINIT = 'false' // Makes it so the payload config onInit seed is not run. Otherwise, the seed would be run unnecessarily twice for the initial test run - once for beforeEach and once for onInit
@@ -901,7 +906,9 @@ describe('database', () => {
 
     it('local API - accepts ID on create', async () => {
       let id: any = null
-      if (payload.db.name === 'mongoose') {
+      if (isMongooseUUIDIDType()) {
+        id = randomUUID()
+      } else if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
       } else if (payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7') {
         id = randomUUID()
@@ -916,7 +923,9 @@ describe('database', () => {
 
     it('rEST API - accepts ID on create', async () => {
       let id: any = null
-      if (payload.db.name === 'mongoose') {
+      if (isMongooseUUIDIDType()) {
+        id = randomUUID()
+      } else if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
       } else if (payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7') {
         id = randomUUID()
@@ -938,7 +947,9 @@ describe('database', () => {
 
     it('graphQL - accepts ID on create', async () => {
       let id: any = null
-      if (payload.db.name === 'mongoose') {
+      if (isMongooseUUIDIDType()) {
+        id = randomUUID()
+      } else if (payload.db.name === 'mongoose') {
         id = new mongoose.Types.ObjectId().toHexString()
       } else if (payload.db.idType === 'uuid' || payload.db.idType === 'uuidv7') {
         id = randomUUID()
@@ -1962,6 +1973,12 @@ describe('database', () => {
 
     it('mongoose - should execute migrateRelationshipsV2_V3', async () => {
       if (payload.db.name !== 'mongoose') {
+        return
+      }
+
+      // This legacy migration converts string relationships to ObjectIds and is not
+      // applicable when the adapter uses a UUID id type.
+      if (isMongooseUUIDIDType()) {
         return
       }
 
@@ -4330,7 +4347,10 @@ describe('database', () => {
     }
 
     const arrItemID = randomUUID()
+    // Match the adapter's default `_id` type so `findByID` can locate the raw-inserted doc.
+    const customIDValue = isMongooseUUIDIDType() ? new mongoose.Types.UUID() : undefined
     const res = await payload.db.collections[postsSlug]?.collection.insertOne({
+      ...(customIDValue ? { _id: customIDValue } : {}),
       arrayWithIDs: [
         {
           id: arrItemID,
@@ -4341,12 +4361,16 @@ describe('database', () => {
       SECRET_FIELD: 'secret data',
     })
 
+    const insertedIDString = customIDValue
+      ? customIDValue.toString()
+      : res!.insertedId.toHexString()
+
     let payloadRes: any = await payload.findByID({
-      id: res!.insertedId.toHexString(),
+      id: insertedIDString,
       collection: postsSlug,
     })
 
-    expect(payloadRes.id).toBe(res!.insertedId.toHexString())
+    expect(payloadRes.id).toBe(insertedIDString)
     expect(payloadRes['SECRET_FIELD']).toBeUndefined()
     expect(payloadRes.arrayWithIDs).toBeDefined()
     expect(payloadRes.arrayWithIDs[0].id).toBe(arrItemID)
@@ -4357,11 +4381,11 @@ describe('database', () => {
     payload.db.allowAdditionalKeys = true
 
     payloadRes = await payload.findByID({
-      id: res!.insertedId.toHexString(),
+      id: insertedIDString,
       collection: postsSlug,
     })
 
-    expect(payloadRes.id).toBe(res!.insertedId.toHexString())
+    expect(payloadRes.id).toBe(insertedIDString)
     expect(payloadRes['SECRET_FIELD']).toBe('secret data')
     expect(payloadRes.arrayWithIDs[0].additionalKeyInArray).toBe('true')
 
@@ -4597,7 +4621,9 @@ describe('database', () => {
 
   it('should allow creating docs with payload.db.create with custom ID', async () => {
     if (payload.db.name === 'mongoose') {
-      const customId = new mongoose.Types.ObjectId().toHexString()
+      const customId = isMongooseUUIDIDType()
+        ? randomUUID()
+        : new mongoose.Types.ObjectId().toHexString()
       const res = await payload.db.create({
         collection: 'simple',
         customID: customId,
@@ -5775,7 +5801,10 @@ describe('database', () => {
       return
     }
 
+    // Match the adapter's default `_id` type so `findByID` can locate the raw-inserted doc.
+    const customIDValue = isMongooseUUIDIDType() ? new mongoose.Types.UUID() : undefined
     const res = await payload.db.collections['blocks-docs']?.collection.insertOne({
+      ...(customIDValue ? { _id: customIDValue } : {}),
       testBlocks: [
         {
           id: '1',
@@ -5805,7 +5834,7 @@ describe('database', () => {
     })
 
     const doc = await payload.findByID({
-      id: res?.insertedId?.toHexString() as string,
+      id: (customIDValue ? customIDValue.toString() : res?.insertedId?.toHexString()) as string,
       collection: 'blocks-docs',
       locale: 'en',
     })
