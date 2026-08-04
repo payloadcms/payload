@@ -62,18 +62,18 @@ export type SupportedTimezones =
   | 'Pacific/Fiji';
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "LexicalNodes_E51C3FCC".
+ * via the `definition` "LexicalNodes_FB6C5546".
  */
-export type LexicalNodes_E51C3FCC =
+export type LexicalNodes_FB6C5546 =
   | SerializedTextNode
   | SerializedTabNode
   | SerializedLineBreakNode
-  | SerializedParagraphNode<LexicalNodes_E51C3FCC>
-  | SerializedAutoLinkNode<LexicalNodes_E51C3FCC, LexicalLinkFields>
-  | SerializedLinkNode<LexicalNodes_E51C3FCC, LexicalLinkFields>
+  | SerializedParagraphNode<LexicalNodes_FB6C5546>
+  | SerializedAutoLinkNode<LexicalNodes_FB6C5546, LexicalLinkFields>
+  | SerializedLinkNode<LexicalNodes_FB6C5546, LexicalLinkFields>
   | SerializedHorizontalRuleNode
   | SerializedUploadNode<'upload'>
-  | SerializedQuoteNode<LexicalNodes_E51C3FCC>
+  | SerializedQuoteNode<LexicalNodes_FB6C5546>
   | SerializedRelationshipNode<
       | 'posts'
       | 'localized-posts'
@@ -84,6 +84,7 @@ export type LexicalNodes_E51C3FCC =
       | 'force-select'
       | 'rels'
       | 'relationships-blocks'
+      | 'relationships-array'
       | 'custom-ids'
       | 'users'
       | 'payload-kv'
@@ -91,9 +92,9 @@ export type LexicalNodes_E51C3FCC =
       | 'payload-preferences'
       | 'payload-migrations'
     >
-  | SerializedListNode<LexicalNodes_E51C3FCC>
-  | SerializedListItemNode<LexicalNodes_E51C3FCC>
-  | SerializedHeadingNode<LexicalNodes_E51C3FCC>;
+  | SerializedListNode<LexicalNodes_FB6C5546>
+  | SerializedListItemNode<LexicalNodes_FB6C5546>
+  | SerializedHeadingNode<LexicalNodes_FB6C5546>;
 
 export interface Config {
   auth: {
@@ -111,6 +112,7 @@ export interface Config {
     upload: Upload;
     rels: Rel;
     'relationships-blocks': RelationshipsBlock;
+    'relationships-array': RelationshipsArray;
     'custom-ids': CustomId;
     users: User;
     'payload-kv': PayloadKv;
@@ -130,6 +132,7 @@ export interface Config {
     upload: UploadSelect<false> | UploadSelect<true>;
     rels: RelsSelect<false> | RelsSelect<true>;
     'relationships-blocks': RelationshipsBlocksSelect<false> | RelationshipsBlocksSelect<true>;
+    'relationships-array': RelationshipsArraySelect<false> | RelationshipsArraySelect<true>;
     'custom-ids': CustomIdsSelect<false> | CustomIdsSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -152,6 +155,8 @@ export interface Config {
   locale: 'en' | 'de';
   widgets: {
     collections: CollectionsWidget;
+    'collection-query': CollectionQueryWidget;
+    activity: ActivityWidget;
   };
   user: User;
   jobs: {
@@ -446,7 +451,7 @@ export interface Introduction {
       | null;
     label: string;
   };
-  richTextLexical?: LexicalRichText<LexicalNodes_E51C3FCC> | null;
+  richTextLexical?: LexicalRichText<LexicalNodes_FB6C5546> | null;
   id?: string | null;
   blockName?: string | null;
   blockType: 'introduction';
@@ -511,6 +516,22 @@ export interface Block_421D958C {
   id?: string | null;
   blockName?: string | null;
   blockType: 'block';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-array".
+ */
+export interface RelationshipsArray {
+  id: string;
+  array?:
+    | {
+        hasMany?: (string | Rel)[] | null;
+        hasOne?: (string | null) | Rel;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -612,6 +633,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'relationships-blocks';
         value: string | RelationshipsBlock;
+      } | null)
+    | ({
+        relationTo: 'relationships-array';
+        value: string | RelationshipsArray;
       } | null)
     | ({
         relationTo: 'custom-ids';
@@ -995,6 +1020,21 @@ export interface RelationshipsBlocksSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "relationships-array_select".
+ */
+export interface RelationshipsArraySelect<T extends boolean = true> {
+  array?:
+    | T
+    | {
+        hasMany?: T;
+        hasOne?: T;
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "custom-ids_select".
  */
 export interface CustomIdsSelect<T extends boolean = true> {
@@ -1122,6 +1162,68 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collection-query_widget".
+ */
+export interface CollectionQueryWidget {
+  data?: {
+    title?: string | null;
+    relatedCollection:
+      | 'posts'
+      | 'localized-posts'
+      | 'versioned-posts'
+      | 'deep-posts'
+      | 'pages'
+      | 'points'
+      | 'force-select'
+      | 'upload'
+      | 'rels'
+      | 'relationships-blocks'
+      | 'relationships-array'
+      | 'custom-ids'
+      | 'users';
+    where?:
+      | {
+          [k: string]: unknown;
+        }
+      | unknown[]
+      | string
+      | number
+      | boolean
+      | null;
+    sortField?: string | null;
+    sortDirection?: ('asc' | 'desc') | null;
+    limit?: number | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "activity_widget".
+ */
+export interface ActivityWidget {
+  data?: {
+    excludedCollections?:
+      | (
+          | 'posts'
+          | 'localized-posts'
+          | 'versioned-posts'
+          | 'deep-posts'
+          | 'pages'
+          | 'points'
+          | 'force-select'
+          | 'upload'
+          | 'rels'
+          | 'relationships-blocks'
+          | 'relationships-array'
+          | 'custom-ids'
+          | 'users'
+        )[]
+      | null;
+  };
+  width: 'x-small' | 'small' | 'medium' | 'large' | 'x-large' | 'full';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
