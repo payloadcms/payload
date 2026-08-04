@@ -104,7 +104,7 @@ export const DiffCollapser: React.FC<Props> = ({
     <div className={baseClass}>
       <FieldDiffLabel>
         <button
-          aria-label={isCollapsed ? 'Expand' : 'Collapse'}
+          aria-label={isCollapsed ? t('general:expand') : t('general:collapse')}
           className={`${baseClass}__toggle-button`}
           onClick={() => setIsCollapsed(!isCollapsed)}
           type="button"
