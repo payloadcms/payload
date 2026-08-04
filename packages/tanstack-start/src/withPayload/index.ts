@@ -8,6 +8,7 @@ import rsc from '@vitejs/plugin-rsc'
 import path from 'node:path'
 import { createLogger, mergeConfig } from 'vite'
 
+import { resolveCjsDependencies } from './config/autoExternalCjs.js'
 import {
   buildExternalPackages,
   payloadNoExternalPatterns,
@@ -166,7 +167,21 @@ export function withPayload(
     // externalizes the package boundaries (`buildExternalPackages`) and drops
     // `pluralize` so it bundles — leaving it in `ssr.external` here would win over
     // `noExternal` and re-emit the bare specifier.
-    const ssrExternal = isBuild ? buildExternalPackages : ssrExternalPackages
+    // Dev serve also externalizes the app's own CJS-only dependencies; the build
+    // needs none of it, since Rollup bundles CJS correctly.
+    const ssrExternal = isBuild
+      ? buildExternalPackages
+      : [
+          ...ssrExternalPackages,
+          ...resolveCjsDependencies({
+            exclude: [
+              ...ssrExternalPackages,
+              ...optimizeDepsIncludeDefaults,
+              ...optimizeDepsExcludeDefaults,
+            ],
+            root: process.cwd(),
+          }),
+        ]
 
     const base: UserConfig = {
       build: {
