@@ -24,9 +24,9 @@
       "require": "./src/types.ts"
     },
     "./commands": {
-      "import": "./src/lib/init-next.ts",
-      "require": "./src/lib/init-next.ts",
-      "types": "./src/lib/init-next.ts"
+      "import": "./src/commands.ts",
+      "require": "./src/commands.ts",
+      "types": "./src/commands.ts"
     },
     "./lib/*": {
       "import": "./src/lib/*",

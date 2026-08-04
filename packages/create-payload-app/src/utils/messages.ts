@@ -20,7 +20,7 @@ export function helpMessage(): void {
   console.log(chalk`
   {bold USAGE}
 
-      {dim Inside of an existing Next.js project}
+      {dim Inside of an existing Next.js or TanStack project}
 
       {dim $} {bold npx create-payload-app}
 
@@ -79,6 +79,14 @@ ${header('Documentation:')}
 }
 
 export function successfulNextInit(): string {
+  return successfulFrameworkInit()
+}
+
+export function successfulTanStackInit(): string {
+  return successfulFrameworkInit()
+}
+
+function successfulFrameworkInit(): string {
   return `- ${createTerminalLink(
     'Getting Started',
     'https://payloadcms.com/docs/getting-started/what-is-payload',
