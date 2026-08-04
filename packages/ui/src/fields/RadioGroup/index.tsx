@@ -94,6 +94,10 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
         />
       </div>
       <div className={`${fieldBaseClass}__wrap`}>
+        <RenderCustomComponent
+          CustomComponent={Description}
+          Fallback={<FieldDescription description={description} path={path} />}
+        />
         {BeforeInput}
         <ul className={`${baseClass}--group`} id={`field-${path.replace(/\./g, '__')}`}>
           {options.map((option) => {
@@ -133,10 +137,6 @@ const RadioGroupFieldComponent: RadioFieldClientComponent = (props) => {
           })}
         </ul>
         {AfterInput}
-        <RenderCustomComponent
-          CustomComponent={Description}
-          Fallback={<FieldDescription description={description} path={path} />}
-        />
       </div>
     </div>
   )
