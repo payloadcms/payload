@@ -513,7 +513,8 @@ export const Form: React.FC<FormProps> = (props) => {
             })
 
             nonFieldErrors.forEach((err) => {
-              if (onNonFieldError?.(err)) {
+              // Pass overridesFromArgs (not the computed overrides) so a retry re-evaluates any function overrides against current fields.
+              if (onNonFieldError?.(err, () => void submit({ overrides: overridesFromArgs }))) {
                 return
               }
               errorToast(<FieldErrorsToast errorMessage={err.message || t('error:unknown')} />)
