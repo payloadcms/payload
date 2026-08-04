@@ -68,8 +68,28 @@ export function transformTanStackRouter({ content }: { content: string }): TextT
     return failure('The router must contain exactly one routeTree option.')
   }
 
+  if (!isGeneratedRouteTreeProperty({ property: routeTreeProperties[0]!, sourceFile })) {
+    return failure('The routeTree option must reference the generated route tree import.')
+  }
+
+  const parseImport = resolvePayloadSearchImport({
+    importedName: 'payloadParseSearch',
+    sourceFile,
+  })
+  if (!parseImport.success) {
+    return parseImport
+  }
+
+  const stringifyImport = resolvePayloadSearchImport({
+    importedName: 'payloadStringifySearch',
+    sourceFile,
+  })
+  if (!stringifyImport.success) {
+    return stringifyImport
+  }
+
   const parseValidation = validateSearchProperty({
-    expectedIdentifier: 'payloadParseSearch',
+    expectedIdentifier: parseImport.localName,
     propertyName: 'parseSearch',
     routerObject,
   })
@@ -78,7 +98,7 @@ export function transformTanStackRouter({ content }: { content: string }): TextT
   }
 
   const stringifyValidation = validateSearchProperty({
-    expectedIdentifier: 'payloadStringifySearch',
+    expectedIdentifier: stringifyImport.localName,
     propertyName: 'stringifySearch',
     routerObject,
   })
@@ -86,26 +106,11 @@ export function transformTanStackRouter({ content }: { content: string }): TextT
     return stringifyValidation
   }
 
-  for (const localName of ['payloadParseSearch', 'payloadStringifySearch']) {
-    const validation = validateDestinationBinding({ localName, sourceFile })
-    if (!validation.success) {
-      return validation
-    }
-  }
-
-  const hasPayloadParseSearchImport = hasCompatiblePayloadBinding({
-    localName: 'payloadParseSearch',
-    sourceFile,
-  })
-  const hasPayloadStringifySearchImport = hasCompatiblePayloadBinding({
-    localName: 'payloadStringifySearch',
-    sourceFile,
-  })
   if (
     parseValidation.isConfigured &&
     stringifyValidation.isConfigured &&
-    hasPayloadParseSearchImport &&
-    hasPayloadStringifySearchImport
+    parseImport.isPresent &&
+    stringifyImport.isPresent
   ) {
     return { content, modified: false, success: true }
   }
@@ -114,7 +119,7 @@ export function transformTanStackRouter({ content }: { content: string }): TextT
   if (!parseValidation.isConfigured) {
     routerObject.insertPropertyAssignment(routeTreeIndex, {
       name: 'parseSearch',
-      initializer: 'payloadParseSearch',
+      initializer: parseImport.localName,
     })
   }
 
@@ -124,11 +129,16 @@ export function transformTanStackRouter({ content }: { content: string }): TextT
   if (!stringifyValidation.isConfigured) {
     routerObject.insertPropertyAssignment(currentRouteTreeIndex + 1, {
       name: 'stringifySearch',
-      initializer: 'payloadStringifySearch',
+      initializer: stringifyImport.localName,
     })
   }
 
-  ensurePayloadSearchImport(sourceFile)
+  ensurePayloadSearchImports({
+    importedNames: [parseImport, stringifyImport]
+      .filter((resolvedImport) => !resolvedImport.isPresent)
+      .map((resolvedImport) => resolvedImport.importedName),
+    sourceFile,
+  })
   sourceFile.formatText({ indentSize: 2 })
 
   return { content: sourceFile.getFullText(), modified: true, success: true }
@@ -152,7 +162,17 @@ function bindingNameIncludes({ localName, node }: { localName: string; node: Mor
   return false
 }
 
-function ensurePayloadSearchImport(sourceFile: SourceFile) {
+function ensurePayloadSearchImports({
+  importedNames,
+  sourceFile,
+}: {
+  importedNames: string[]
+  sourceFile: SourceFile
+}) {
+  if (importedNames.length === 0) {
+    return
+  }
+
   const declaration = sourceFile
     .getImportDeclarations()
     .find(
@@ -161,19 +181,12 @@ function ensurePayloadSearchImport(sourceFile: SourceFile) {
         !candidate.isTypeOnly() &&
         !candidate.getNamespaceImport(),
     )
-  const importedNames = new Set(
-    declaration?.getNamedImports().map((namedImport) => namedImport.getName()) ?? [],
-  )
-  const missingNames = ['payloadParseSearch', 'payloadStringifySearch'].filter(
-    (name) => !importedNames.has(name),
-  )
-
   if (declaration) {
-    declaration.addNamedImports(missingNames)
+    declaration.addNamedImports(importedNames)
   } else {
     sourceFile.addImportDeclaration({
       moduleSpecifier: PAYLOAD_SEARCH_MODULE,
-      namedImports: missingNames,
+      namedImports: importedNames,
     })
   }
 }
@@ -302,46 +315,109 @@ function getPropertyName(node: MorphNode): string | undefined {
   }
 }
 
+function isGeneratedRouteTreeProperty({
+  property,
+  sourceFile,
+}: {
+  property: MorphNode
+  sourceFile: SourceFile
+}): boolean {
+  const initializer = Node.isShorthandPropertyAssignment(property)
+    ? property.getName()
+    : Node.isPropertyAssignment(property) && Node.isIdentifier(property.getInitializer())
+      ? property.getInitializer()!.getText()
+      : undefined
+
+  if (!initializer) {
+    return false
+  }
+
+  const generatedImports = sourceFile.getImportDeclarations().flatMap((declaration) => {
+    const moduleSpecifier = declaration.getModuleSpecifierValue()
+    if (
+      declaration.isTypeOnly() ||
+      !/^\.\/routeTree\.gen(?:\.(?:js|jsx|ts|tsx|mjs|cjs|mts|cts))?$/.test(moduleSpecifier)
+    ) {
+      return []
+    }
+
+    return declaration
+      .getNamedImports()
+      .filter(
+        (namedImport) =>
+          !namedImport.isTypeOnly() &&
+          namedImport.getName() === 'routeTree' &&
+          (namedImport.getAliasNode()?.getText() ?? namedImport.getName()) === initializer,
+      )
+      .map(() => moduleSpecifier)
+  })
+
+  if (generatedImports.length !== 1) {
+    return false
+  }
+
+  const bindings = getLocalBindings({ localName: initializer, sourceFile })
+  const binding = bindings[0]
+
+  return (
+    bindings.length === 1 &&
+    binding?.kind === 'import' &&
+    binding.importKind === 'named' &&
+    binding.importedName === 'routeTree' &&
+    !binding.isTypeOnly &&
+    binding.moduleSpecifier === generatedImports[0]
+  )
+}
+
 function isCompatiblePayloadBinding({
   binding,
-  localName,
+  importedName,
 }: {
   binding: LocalBinding
-  localName: string
+  importedName: string
 }) {
   return (
     binding.kind === 'import' &&
     binding.importKind === 'named' &&
     !binding.isTypeOnly &&
-    binding.importedName === localName &&
+    binding.importedName === importedName &&
     binding.moduleSpecifier === PAYLOAD_SEARCH_MODULE
   )
 }
 
-function hasCompatiblePayloadBinding({
-  localName,
+function resolvePayloadSearchImport({
+  importedName,
   sourceFile,
 }: {
-  localName: string
+  importedName: 'payloadParseSearch' | 'payloadStringifySearch'
   sourceFile: SourceFile
-}): boolean {
-  const bindings = getLocalBindings({ localName, sourceFile })
+}):
+  | { importedName: string; isPresent: boolean; localName: string; success: true }
+  | { reason: string; success: false } {
+  const matchingImports = sourceFile.getImportDeclarations().flatMap((declaration) =>
+    declaration.getModuleSpecifierValue() === PAYLOAD_SEARCH_MODULE && !declaration.isTypeOnly()
+      ? declaration
+          .getNamedImports()
+          .filter(
+            (namedImport) => namedImport.getName() === importedName && !namedImport.isTypeOnly(),
+          )
+          .map((namedImport) => namedImport.getAliasNode()?.getText() ?? namedImport.getName())
+      : [],
+  )
 
-  return bindings.length === 1 && isCompatiblePayloadBinding({ binding: bindings[0]!, localName })
-}
+  if (matchingImports.length > 1) {
+    return {
+      reason: `The Payload search module imports ${importedName} more than once.`,
+      success: false,
+    }
+  }
 
-function validateDestinationBinding({
-  localName,
-  sourceFile,
-}: {
-  localName: string
-  sourceFile: SourceFile
-}): { reason: string; success: false } | { success: true } {
+  const localName = matchingImports[0] ?? importedName
   const bindings = getLocalBindings({ localName, sourceFile })
 
   if (
     bindings.length > 0 &&
-    (bindings.length !== 1 || !isCompatiblePayloadBinding({ binding: bindings[0]!, localName }))
+    (bindings.length !== 1 || !isCompatiblePayloadBinding({ binding: bindings[0]!, importedName }))
   ) {
     return {
       reason: `Identifier "${localName}" is already bound incompatibly.`,
@@ -349,7 +425,7 @@ function validateDestinationBinding({
     }
   }
 
-  return { success: true }
+  return { importedName, isPresent: matchingImports.length === 1, localName, success: true }
 }
 
 function validateSearchProperty({

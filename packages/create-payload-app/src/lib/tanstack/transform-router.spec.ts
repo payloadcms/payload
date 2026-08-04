@@ -1,3 +1,4 @@
+import { Project } from 'ts-morph'
 import { describe, expect, it } from 'vitest'
 
 import { transformTanStackRouter } from './transform-router.js'
@@ -40,6 +41,24 @@ declare module '@tanstack/react-router' {
   }
 }
 `
+}
+
+function getPayloadSearchImports(content: string) {
+  const project = new Project({ useInMemoryFileSystem: true })
+  const sourceFile = project.createSourceFile('router.tsx', content)
+
+  return sourceFile
+    .getImportDeclarations()
+    .filter(
+      (declaration) =>
+        declaration.getModuleSpecifierValue() === '@payloadcms/tanstack-start/shared',
+    )
+    .flatMap((declaration) =>
+      declaration.getNamedImports().map((namedImport) => ({
+        importedName: namedImport.getName(),
+        localName: namedImport.getAliasNode()?.getText() ?? namedImport.getName(),
+      })),
+    )
 }
 
 describe('transformTanStackRouter', () => {
@@ -126,6 +145,44 @@ import { routeTree } from './routeTree.gen'`,
     )
   })
 
+  it('should reuse aliased Payload search imports as the configured identifiers', () => {
+    const content = getRouterContent({
+      imports: `import { payloadParseSearch as parseWithPayload } from '@payloadcms/tanstack-start/shared'
+import { payloadStringifySearch as stringifyWithPayload } from '@payloadcms/tanstack-start/shared'
+import { createRouter as createTanStackRouter } from '@tanstack/react-router'
+
+import { routeTree } from './routeTree.gen'`,
+    })
+
+    const result = expectSuccessfulTransform(transformTanStackRouter({ content }))
+
+    expect(result.content).toContain('parseSearch: parseWithPayload')
+    expect(result.content).toContain('stringifySearch: stringifyWithPayload')
+    expect(getPayloadSearchImports(result.content)).toEqual([
+      { importedName: 'payloadParseSearch', localName: 'parseWithPayload' },
+      { importedName: 'payloadStringifySearch', localName: 'stringifyWithPayload' },
+    ])
+  })
+
+  it('should preserve split Payload search imports without duplicating bindings', () => {
+    const content = getRouterContent({
+      imports: `import { payloadParseSearch } from '@payloadcms/tanstack-start/shared'
+import { payloadStringifySearch } from '@payloadcms/tanstack-start/shared'
+import { createRouter as createTanStackRouter } from '@tanstack/react-router'
+
+import { routeTree } from './routeTree.gen'`,
+    })
+
+    const result = expectSuccessfulTransform(transformTanStackRouter({ content }))
+
+    expect(getPayloadSearchImports(result.content)).toEqual([
+      { importedName: 'payloadParseSearch', localName: 'payloadParseSearch' },
+      { importedName: 'payloadStringifySearch', localName: 'payloadStringifySearch' },
+    ])
+    expect(result.content).toContain('parseSearch: payloadParseSearch')
+    expect(result.content).toContain('stringifySearch: payloadStringifySearch')
+  })
+
   it.each(['parseSearch', 'stringifySearch'])(
     'should reject an existing non-Payload %s option',
     (name) => {
@@ -192,6 +249,21 @@ import { routeTree } from './routeTree.gen'`,
 
     expect(result).toEqual({
       reason: 'Router object spreads cannot be transformed safely.',
+      success: false,
+    })
+  })
+
+  it('should reject a locally constructed route tree', () => {
+    const content = getRouterContent({
+      imports: `import { createRouter as createTanStackRouter } from '@tanstack/react-router'
+
+const routeTree = createRouteTree()`,
+    })
+
+    const result = transformTanStackRouter({ content })
+
+    expect(result).toEqual({
+      reason: 'The routeTree option must reference the generated route tree import.',
       success: false,
     })
   })

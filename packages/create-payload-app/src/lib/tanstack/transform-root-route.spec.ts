@@ -1,3 +1,4 @@
+import { Project } from 'ts-morph'
 import { describe, expect, it } from 'vitest'
 
 import { transformTanStackRootRoute } from './transform-root-route.js'
@@ -89,7 +90,26 @@ function RootComponent() {
     </AuthProvider>
   )
 }
+
 `
+}
+
+function getRouterNamedImports(content: string, importedNames: string[]) {
+  const project = new Project({ useInMemoryFileSystem: true })
+  const sourceFile = project.createSourceFile('__root.tsx', content)
+
+  return sourceFile
+    .getImportDeclarations()
+    .filter((declaration) => declaration.getModuleSpecifierValue() === '@tanstack/react-router')
+    .flatMap((declaration) =>
+      declaration
+        .getNamedImports()
+        .filter((namedImport) => importedNames.includes(namedImport.getName()))
+        .map((namedImport) => ({
+          importedName: namedImport.getName(),
+          localName: namedImport.getAliasNode()?.getText() ?? namedImport.getName(),
+        })),
+    )
 }
 
 describe('transformTanStackRootRoute', () => {
@@ -160,6 +180,42 @@ describe('transformTanStackRootRoute', () => {
     )
     expect(result.content).toContain('notFoundComponent: NotFound')
     expect(result.content).toContain('<main data-layout="custom">')
+  })
+
+  it('should reuse aliased HeadContent and Scripts imports from split declarations', () => {
+    const result = expectSuccessfulTransform(
+      transformTanStackRootRoute({
+        content: getRouterOnlyRoot({
+          extraImports: `import { HeadContent as RouterHeadContent } from '@tanstack/react-router'
+import { Scripts as RouterScripts } from '@tanstack/react-router'`,
+        }),
+        kind: 'router-only',
+      }),
+    )
+
+    expect(result.content).toContain('<RouterHeadContent />')
+    expect(result.content).toContain('<RouterScripts />')
+    expect(getRouterNamedImports(result.content, ['HeadContent', 'Scripts'])).toEqual([
+      { importedName: 'HeadContent', localName: 'RouterHeadContent' },
+      { importedName: 'Scripts', localName: 'RouterScripts' },
+    ])
+  })
+
+  it('should preserve split HeadContent and Scripts imports without duplicating bindings', () => {
+    const result = expectSuccessfulTransform(
+      transformTanStackRootRoute({
+        content: getRouterOnlyRoot({
+          extraImports: `import { HeadContent } from '@tanstack/react-router'
+import { Scripts } from '@tanstack/react-router'`,
+        }),
+        kind: 'router-only',
+      }),
+    )
+
+    expect(getRouterNamedImports(result.content, ['HeadContent', 'Scripts'])).toEqual([
+      { importedName: 'HeadContent', localName: 'HeadContent' },
+      { importedName: 'Scripts', localName: 'Scripts' },
+    ])
   })
 
   it('should not add withPayloadRoot to an unrelated type-only client import', () => {
@@ -280,6 +336,32 @@ export const OtherRoute = createAppRoot({ shellComponent: RootDocument })
 
     expect(result).toEqual({
       reason: 'The app stylesheet link cannot be relocated safely.',
+      success: false,
+    })
+  })
+
+  it('should reject a Start root with an additional side-effect stylesheet import', () => {
+    const result = transformTanStackRootRoute({
+      content: getStartRoot({ extraImports: `import '../legacy.css'` }),
+      kind: 'start',
+    })
+
+    expect(result).toEqual({
+      reason: 'Side-effect stylesheet imports cannot be isolated from admin.',
+      success: false,
+    })
+  })
+
+  it('should reject a transformed Router-only root retaining side-effect CSS', () => {
+    const firstResult = expectSuccessfulTransform(
+      transformTanStackRootRoute({ content: getRouterOnlyRoot(), kind: 'router-only' }),
+    )
+    const content = `${firstResult.content}\nimport '../legacy.css'\n`
+
+    const result = transformTanStackRootRoute({ content, kind: 'router-only' })
+
+    expect(result).toEqual({
+      reason: 'Side-effect stylesheet imports cannot be isolated from admin.',
       success: false,
     })
   })

@@ -305,6 +305,65 @@ function getNamedImport({
   return imported
 }
 
+function resolveRouterNamedImport({
+  importedName,
+  sourceFile,
+}: {
+  importedName: 'HeadContent' | 'Scripts'
+  sourceFile: SourceFile
+}):
+  | { importedName: string; isPresent: boolean; localName: string; success: true }
+  | { reason: string; success: false } {
+  const matchingImports = sourceFile.getImportDeclarations().flatMap((declaration) =>
+    declaration.getModuleSpecifierValue() === ROUTER_MODULE && !declaration.isTypeOnly()
+      ? declaration
+          .getNamedImports()
+          .filter(
+            (namedImport) => namedImport.getName() === importedName && !namedImport.isTypeOnly(),
+          )
+          .map((namedImport) => namedImport.getAliasNode()?.getText() ?? namedImport.getName())
+      : [],
+  )
+
+  if (matchingImports.length > 1) {
+    return {
+      reason: `The TanStack router module imports ${importedName} more than once.`,
+      success: false,
+    }
+  }
+
+  const localName = matchingImports[0] ?? importedName
+  const bindings = getLocalBindings({ localName, sourceFile })
+  const binding = bindings[0]
+  const isCompatible =
+    binding?.kind === 'import' &&
+    binding.importKind === 'named' &&
+    binding.importedName === importedName &&
+    !binding.isTypeOnly &&
+    binding.moduleSpecifier === ROUTER_MODULE
+
+  if (bindings.length > 0 && (bindings.length !== 1 || !isCompatible)) {
+    return {
+      reason: `Identifier "${localName}" is already bound incompatibly.`,
+      success: false,
+    }
+  }
+
+  return { importedName, isPresent: matchingImports.length === 1, localName, success: true }
+}
+
+function getSideEffectStylesheetImports(sourceFile: SourceFile): ImportDeclaration[] {
+  return sourceFile
+    .getImportDeclarations()
+    .filter(
+      (declaration) =>
+        /\.css$/.test(declaration.getModuleSpecifierValue()) &&
+        !declaration.getDefaultImport() &&
+        !declaration.getNamespaceImport() &&
+        declaration.getNamedImports().length === 0,
+    )
+}
+
 function getPropertyName(node: MorphNode): string | undefined {
   if (
     Node.isPropertyAssignment(node) ||
@@ -472,6 +531,23 @@ function transformRouterOnlyRoot({
     return failure('The existing shellComponent cannot be transformed safely.')
   }
 
+  if (shellState.isWrapped && getSideEffectStylesheetImports(sourceFile).length > 0) {
+    return failure('Side-effect stylesheet imports cannot be isolated from admin.')
+  }
+
+  const headContentImport = resolveRouterNamedImport({
+    importedName: 'HeadContent',
+    sourceFile,
+  })
+  if (!headContentImport.success) {
+    return headContentImport
+  }
+
+  const scriptsImport = resolveRouterNamedImport({ importedName: 'Scripts', sourceFile })
+  if (!scriptsImport.success) {
+    return scriptsImport
+  }
+
   const destinationValidation = validateRouterOnlyDestinations({
     isAlreadyWrapped: shellState.isWrapped,
     sourceFile,
@@ -489,25 +565,44 @@ function transformRouterOnlyRoot({
       !rootDocument ||
       !hasValidAppStylesheetLink({
         functionDeclaration: rootDocument,
-        headContentLocalName: 'HeadContent',
+        headContentLocalName: headContentImport.localName,
         localName: 'appCss',
       })
     ) {
       return failure('The existing Payload root shell does not match the supported configuration.')
     }
 
-    const requiredImports = [
-      { importedName: 'withPayloadRoot', moduleSpecifier: PAYLOAD_CLIENT_MODULE },
-      { importedName: 'HeadContent', moduleSpecifier: ROUTER_MODULE },
-      { importedName: 'Scripts', moduleSpecifier: ROUTER_MODULE },
-    ]
-    const hasAllRequiredImports = requiredImports.every((requiredImport) =>
-      getNamedImport({ ...requiredImport, sourceFile }),
+    const hasWithPayloadImport = Boolean(
+      getNamedImport({
+        importedName: 'withPayloadRoot',
+        moduleSpecifier: PAYLOAD_CLIENT_MODULE,
+        sourceFile,
+      }),
     )
+    const hasAllRequiredImports =
+      hasWithPayloadImport && headContentImport.isPresent && scriptsImport.isPresent
 
     if (!hasAllRequiredImports) {
-      for (const requiredImport of requiredImports) {
-        ensureNamedImport({ ...requiredImport, sourceFile })
+      if (!hasWithPayloadImport) {
+        ensureNamedImport({
+          importedName: 'withPayloadRoot',
+          moduleSpecifier: PAYLOAD_CLIENT_MODULE,
+          sourceFile,
+        })
+      }
+      if (!headContentImport.isPresent) {
+        ensureNamedImport({
+          importedName: 'HeadContent',
+          moduleSpecifier: ROUTER_MODULE,
+          sourceFile,
+        })
+      }
+      if (!scriptsImport.isPresent) {
+        ensureNamedImport({
+          importedName: 'Scripts',
+          moduleSpecifier: ROUTER_MODULE,
+          sourceFile,
+        })
       }
       sourceFile.formatText({ indentSize: 2 })
 
@@ -517,15 +612,7 @@ function transformRouterOnlyRoot({
     return { content, modified: false, success: true }
   }
 
-  const sideEffectStylesheets = sourceFile.getImportDeclarations().filter((declaration) => {
-    const moduleSpecifier = declaration.getModuleSpecifierValue()
-    return (
-      /\.css$/.test(moduleSpecifier) &&
-      !declaration.getDefaultImport() &&
-      !declaration.getNamespaceImport() &&
-      declaration.getNamedImports().length === 0
-    )
-  })
+  const sideEffectStylesheets = getSideEffectStylesheetImports(sourceFile)
 
   if (sideEffectStylesheets.length !== 1) {
     return failure('Expected exactly one side-effect stylesheet import.')
@@ -550,19 +637,23 @@ function transformRouterOnlyRoot({
     moduleSpecifier: PAYLOAD_CLIENT_MODULE,
     sourceFile,
   })
-  ensureNamedImport({ importedName: 'HeadContent', moduleSpecifier: ROUTER_MODULE, sourceFile })
-  ensureNamedImport({ importedName: 'Scripts', moduleSpecifier: ROUTER_MODULE, sourceFile })
+  if (!headContentImport.isPresent) {
+    ensureNamedImport({ importedName: 'HeadContent', moduleSpecifier: ROUTER_MODULE, sourceFile })
+  }
+  if (!scriptsImport.isPresent) {
+    ensureNamedImport({ importedName: 'Scripts', moduleSpecifier: ROUTER_MODULE, sourceFile })
+  }
   sourceFile.addStatements(`
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <link href={appCss} rel="stylesheet" />
-        <HeadContent />
+        <${headContentImport.localName} />
       </head>
       <body>
         {children}
-        <Scripts />
+        <${scriptsImport.localName} />
       </body>
     </html>
   )
@@ -581,6 +672,10 @@ function transformStartRoot({
   rootObject: ObjectLiteralExpression
   sourceFile: SourceFile
 }): TextTransformResult {
+  if (getSideEffectStylesheetImports(sourceFile).length > 0) {
+    return failure('Side-effect stylesheet imports cannot be isolated from admin.')
+  }
+
   const shellState = getShellState({ expectedComponent: undefined, rootObject })
   if (!shellState.success || !shellState.property) {
     return shellState.success
@@ -808,8 +903,6 @@ function validateRouterOnlyDestinations({
       localName: 'withPayloadRoot',
       moduleSpecifier: PAYLOAD_CLIENT_MODULE,
     },
-    { importedName: 'HeadContent', localName: 'HeadContent', moduleSpecifier: ROUTER_MODULE },
-    { importedName: 'Scripts', localName: 'Scripts', moduleSpecifier: ROUTER_MODULE },
   ]
 
   for (const destination of destinations) {
