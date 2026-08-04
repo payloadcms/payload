@@ -84,7 +84,7 @@ export type S3StorageOptions = {
    */
   enabled?: boolean
   /**
-   * Use pre-signed URLs for files downloading. Can be overriden per-collection.
+   * Use pre-signed URLs for files downloading. Can be overridden per-collection.
    */
   signedDownloads?: SignedDownloadsConfig
   /**

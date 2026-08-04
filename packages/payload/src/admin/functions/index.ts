@@ -76,7 +76,7 @@ export type ServerFunctionHandler = (
      *    },
      *   }))
      *
-     *   // Do someting with the result
+     *   // Do something with the result
      *  }
      *
      *  void call()
