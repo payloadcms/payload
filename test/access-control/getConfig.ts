@@ -30,6 +30,7 @@ import {
   hiddenAccessCountSlug,
   hiddenAccessSlug,
   hiddenFieldsSlug,
+  inheritedReadVersionsSlug,
   nonAdminEmail,
   publicUserEmail,
   publicUsersSlug,
@@ -622,6 +623,11 @@ export const getConfig: () => Partial<Config> = () => ({
     {
       slug: 'fields-and-top-access',
       access: {
+        readVersions: () => ({
+          'version.secret': {
+            equals: 'will-success-access-read',
+          },
+        }),
         read: () => ({
           secret: {
             equals: 'will-success-access-read',
@@ -636,6 +642,23 @@ export const getConfig: () => Partial<Config> = () => ({
           access: { read: () => false },
         },
       ],
+    },
+    {
+      slug: inheritedReadVersionsSlug,
+      access: {
+        read: () => ({
+          secret: {
+            equals: 'allowed',
+          },
+        }),
+      },
+      fields: [
+        {
+          name: 'secret',
+          type: 'text',
+        },
+      ],
+      versions: true,
     },
     BlocksFieldAccess,
     Disabled,

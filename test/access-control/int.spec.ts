@@ -26,6 +26,7 @@ import {
   hiddenAccessSlug,
   hiddenFieldsSlug,
   hooksSlug,
+  inheritedReadVersionsSlug,
   publicUserEmail,
   publicUsersSlug,
   relyOnRequestHeadersSlug,
@@ -658,7 +659,7 @@ describe('Access Control', () => {
       expect(res).toBeTruthy()
     })
 
-    it('should inherit collection read access when readVersions is not configured', async () => {
+    it('should ignore false access in versions on query constraint added by top collection level access control', async () => {
       // clean up
       await payload.delete({ collection: 'fields-and-top-access', where: {} })
 
@@ -685,13 +686,6 @@ describe('Access Control', () => {
       const version = resFind.docs[0]
       expect(version.parent).toBe(hitID)
 
-      const resCount = await payload.countVersions({
-        collection: 'fields-and-top-access',
-        overrideAccess: false,
-      })
-
-      expect(resCount.totalDocs).toBe(1)
-
       // Assert findVersionByID
       const res = await payload.findVersionByID({
         id: version.id,
@@ -700,14 +694,42 @@ describe('Access Control', () => {
       })
 
       expect(res).toBeTruthy()
+    })
+
+    it('should inherit collection read access when readVersions is not configured', async () => {
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
+
+      await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'denied' },
+      })
+      const { id: allowedID } = await payload.create({
+        collection: inheritedReadVersionsSlug,
+        data: { secret: 'allowed' },
+      })
+
+      const allowedVersions = await payload.findVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: false,
+      })
+
+      expect(allowedVersions.docs).toHaveLength(1)
+      expect(allowedVersions.docs[0].parent).toBe(allowedID)
+
+      const allowedVersionsCount = await payload.countVersions({
+        collection: inheritedReadVersionsSlug,
+        overrideAccess: false,
+      })
+
+      expect(allowedVersionsCount.totalDocs).toBe(1)
 
       const deniedVersions = await payload.findVersions({
-        collection: 'fields-and-top-access',
+        collection: inheritedReadVersionsSlug,
         limit: 1,
         overrideAccess: true,
         where: {
           'version.secret': {
-            equals: 'will-fail-access-read',
+            equals: 'denied',
           },
         },
       })
@@ -715,13 +737,13 @@ describe('Access Control', () => {
       await expect(
         payload.findVersionByID({
           id: deniedVersions.docs[0].id,
-          collection: 'fields-and-top-access',
+          collection: inheritedReadVersionsSlug,
           disableErrors: true,
           overrideAccess: false,
         }),
       ).resolves.toBeNull()
 
-      await payload.delete({ collection: 'fields-and-top-access', where: {} })
+      await payload.delete({ collection: inheritedReadVersionsSlug, where: {} })
     })
   })
 
