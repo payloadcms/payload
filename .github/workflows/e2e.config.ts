@@ -130,6 +130,7 @@ const tanstackSuites: TestConfig[] = [
   { file: 'sort', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'hooks', framework: 'tanstack-start', optional: false, shards: 1 },
   { file: 'form-state', framework: 'tanstack-start', optional: false, shards: 1 },
+  { file: 'field-error-states', framework: 'tanstack-start', optional: false, shards: 1 },
 ]
 
 export default createE2EConfig([...nextSuites, ...tanstackSuites])
