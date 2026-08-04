@@ -19,14 +19,6 @@ export type FileSizes = {
   [size: string]: FileSize
 }
 
-export type Crop = {
-  height: number
-  unit: '%' | 'px'
-  width: number
-  x: number
-  y: number
-}
-
 export type CropRect = {
   height: null | number
   unit: '%' | 'px' | null
@@ -464,6 +456,14 @@ export type FileToSave = {
    * The path to save the file.
    */
   path: string
+}
+
+type Crop = {
+  height: number
+  unit: '%' | 'px'
+  width: number
+  x: number
+  y: number
 }
 
 export type FocalPoint = {

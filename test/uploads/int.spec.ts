@@ -1,5 +1,11 @@
 import type { AddressInfo } from 'net'
-import type { CollectionSlug, Crop, Payload, PayloadRequest, UploadInstructions } from 'payload'
+import type {
+  CollectionSlug,
+  Payload,
+  PayloadRequest,
+  UploadEdits,
+  UploadInstructions,
+} from 'payload'
 
 import { randomUUID } from 'crypto'
 import fs from 'fs'
@@ -1563,7 +1569,7 @@ describe('Collections - Uploads', () => {
       width: 50,
       x: 10,
       y: 15,
-    } satisfies Crop
+    } satisfies NonNullable<UploadEdits['crop']>
     const filePath = path.resolve(dirname, './image.png')
 
     const createCropEditRequest = ({
