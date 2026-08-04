@@ -27,16 +27,26 @@ type PackageJsonStructure = {
 export function updatePackageJson(filePath: string, options: PackageJsonTransformOptions): void {
   debug(`[AST] Updating package.json: ${filePath}`)
 
-  // Phase 1: Detection
-  const pkg = parsePackageJson(filePath)
-
-  // Phase 2: Transformation
-  const transformed = transformPackageJson(pkg, options)
-
-  // Phase 3: Modification
-  writePackageJson(filePath, transformed)
+  const prepared = preparePackageJson({ filePath, options })
+  fs.writeFileSync(prepared.filePath, prepared.content)
 
   debug('[AST] ✓ package.json updated successfully')
+}
+
+export function preparePackageJson({
+  filePath,
+  options,
+}: {
+  filePath: string
+  options: PackageJsonTransformOptions
+}): { content: string; filePath: string } {
+  const pkg = parsePackageJson(filePath)
+  const transformed = transformPackageJson(pkg, options)
+
+  return {
+    content: `${JSON.stringify(transformed, null, 2)}\n`,
+    filePath,
+  }
 }
 
 // Helper functions
@@ -145,8 +155,4 @@ function transformPackageJson(
   }
 
   return transformed
-}
-
-function writePackageJson(filePath: string, pkg: PackageJsonStructure): void {
-  fs.writeFileSync(filePath, JSON.stringify(pkg, null, 2) + '\n')
 }

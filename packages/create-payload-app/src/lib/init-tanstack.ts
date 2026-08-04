@@ -9,7 +9,7 @@ import {
   resolvePackageVersion,
 } from '../utils/resolvePackageVersion.js'
 import { getDbPackageName } from './ast/adapter-config.js'
-import { updatePackageJson } from './ast/package-json.js'
+import { preparePackageJson } from './ast/package-json.js'
 import { configurePayloadTsConfig } from './configure-payload-tsconfig.js'
 import { ensurePnpmBuildApprovals } from './configure-pnpm-builds.js'
 import { installPackages } from './install-packages.js'
@@ -52,13 +52,23 @@ export async function initTanStack(args: InitTanStackArgs): Promise<InitTanStack
     return prepared
   }
 
-  await applyPreparedWrites({ writes: prepared.writes })
-
+  let writes = prepared.writes
   if (appDetails.kind === 'router-only') {
-    updatePackageJson(path.join(args.projectDir, 'package.json'), {
-      removeDependencies: ['@tanstack/router-plugin'],
-    })
+    try {
+      const packageJsonWrite = preparePackageJson({
+        filePath: path.join(args.projectDir, 'package.json'),
+        options: { removeDependencies: ['@tanstack/router-plugin'] },
+      })
+      writes = [...writes, packageJsonWrite]
+    } catch (error) {
+      return {
+        reason: `Could not prepare package.json: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        success: false,
+      }
+    }
   }
+
+  await applyPreparedWrites({ writes })
 
   if (!args['--no-deps']) {
     const payloadVersion = await resolvePackageVersion({
@@ -77,11 +87,16 @@ export async function initTanStack(args: InitTanStackArgs): Promise<InitTanStack
       projectDir: args.projectDir,
     })
 
-    const installation = await installPackages({
-      packageManager: args.packageManager,
-      packagesToInstall,
-      projectDir: args.projectDir,
-    })
+    let installation: { success: boolean }
+    try {
+      installation = await installPackages({
+        packageManager: args.packageManager,
+        packagesToInstall,
+        projectDir: args.projectDir,
+      })
+    } catch {
+      return { reason: 'Failed to install dependencies', success: false }
+    }
     if (!installation.success) {
       return { reason: 'Failed to install dependencies', success: false }
     }

@@ -1,5 +1,7 @@
+import fse from 'fs-extra'
+import os from 'node:os'
 import path from 'node:path'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { DbType, TanStackAppDetails } from '../types.js'
 
@@ -13,16 +15,11 @@ const mocks = vi.hoisted(() => ({
   installPackages: vi.fn(),
   prepareTanStackInit: vi.fn(),
   resolvePackageVersion: vi.fn(),
-  updatePackageJson: vi.fn(),
 }))
 
 vi.mock('../utils/resolvePackageVersion.js', async (importOriginal) => ({
   ...(await importOriginal()),
   resolvePackageVersion: mocks.resolvePackageVersion,
-}))
-
-vi.mock('./ast/package-json.js', () => ({
-  updatePackageJson: mocks.updatePackageJson,
 }))
 
 vi.mock('./configure-payload-tsconfig.js', () => ({
@@ -47,19 +44,21 @@ vi.mock('./tanstack/prepare.js', () => ({
 }))
 
 describe('initTanStack', () => {
-  const projectDir = '/tmp/tanstack-project'
   const templateRoot = '/tmp/tanstack-template'
-  const preparedWrites = [
-    {
-      content: 'export default {}\n',
-      filePath: path.join(projectDir, 'src/payload.config.ts'),
-    },
-  ]
   let appDetails: TanStackAppDetails
+  let preparedWrites: Array<{ content: string; filePath: string }>
+  let projectDir: string
 
   beforeEach(() => {
     vi.clearAllMocks()
+    projectDir = fse.mkdtempSync(path.join(os.tmpdir(), 'cpa-init-tanstack-'))
     appDetails = createAppDetails({ kind: 'start', projectDir })
+    preparedWrites = [
+      {
+        content: 'export default {}\n',
+        filePath: path.join(projectDir, 'src/payload.config.ts'),
+      },
+    ]
     mocks.prepareTanStackInit.mockResolvedValue({ success: true, writes: preparedWrites })
     mocks.applyPreparedWrites.mockResolvedValue(undefined)
     mocks.ensurePnpmBuildApprovals.mockResolvedValue(undefined)
@@ -71,6 +70,10 @@ describe('initTanStack', () => {
       details: appDetails,
       detected: true,
     })
+  })
+
+  afterEach(() => {
+    fse.removeSync(projectDir)
   })
 
   it('should prepare, apply, install, and configure in order', async () => {
@@ -139,6 +142,22 @@ describe('initTanStack', () => {
 
   it('should replace Router-only plugin package metadata', async () => {
     appDetails = createAppDetails({ kind: 'router-only', projectDir })
+    const packageJsonPath = path.join(projectDir, 'package.json')
+    const originalPackageContent = `{
+  "name": "router-app",
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {
+    "@tanstack/router-plugin": "^1.0.0",
+    "payload": "^4.0.0"
+  },
+  "devDependencies": {
+    "@tanstack/router-plugin": "^1.0.0",
+    "typescript": "^6.0.0"
+  }
+}`
+    fse.writeFileSync(packageJsonPath, originalPackageContent)
 
     await initTanStack({
       appDetails,
@@ -148,10 +167,27 @@ describe('initTanStack', () => {
       templateRoot,
     })
 
-    expect(mocks.updatePackageJson).toHaveBeenCalledWith(path.join(projectDir, 'package.json'), {
-      removeDependencies: ['@tanstack/router-plugin'],
+    expect(mocks.applyPreparedWrites).toHaveBeenCalledWith({
+      writes: [
+        ...preparedWrites,
+        {
+          content: `{
+  "name": "router-app",
+  "scripts": {
+    "dev": "vite"
+  },
+  "dependencies": {
+    "payload": "^4.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^6.0.0"
+  }
+}\n`,
+          filePath: packageJsonPath,
+        },
+      ],
     })
-    expect(mocks.updatePackageJson).toHaveBeenCalledBefore(mocks.installPackages)
+    expect(fse.readFileSync(packageJsonPath, 'utf8')).toBe(originalPackageContent)
     expect(mocks.installPackages).toHaveBeenCalledWith({
       packageManager: 'yarn',
       packagesToInstall: [
@@ -168,6 +204,30 @@ describe('initTanStack', () => {
       ],
       projectDir,
     })
+  })
+
+  it('should reject malformed Router package metadata before applying host writes', async () => {
+    appDetails = createAppDetails({ kind: 'router-only', projectDir })
+    const packageJsonPath = path.join(projectDir, 'package.json')
+    const malformedPackageContent = '{ "dependencies": {'
+    fse.writeFileSync(packageJsonPath, malformedPackageContent)
+
+    const result = await initTanStack({
+      appDetails,
+      dbType: 'mongodb',
+      packageManager: 'pnpm',
+      projectDir,
+      templateRoot,
+    })
+
+    expect(result.success).toBe(false)
+    if (result.success) {
+      throw new Error('Expected malformed package metadata to fail preparation.')
+    }
+    expect(result.reason).toContain('Could not prepare package.json')
+    expect(fse.readFileSync(packageJsonPath, 'utf8')).toBe(malformedPackageContent)
+    expect(mocks.applyPreparedWrites).not.toHaveBeenCalled()
+    expect(mocks.installPackages).not.toHaveBeenCalled()
   })
 
   it('should skip version resolution and package installation with --no-deps', async () => {
@@ -203,8 +263,8 @@ describe('initTanStack', () => {
     expect(mocks.installPackages).not.toHaveBeenCalled()
   })
 
-  it('should return a failure when dependency installation fails', async () => {
-    mocks.installPackages.mockResolvedValue({ success: false })
+  it('should return a failure when dependency installation rejects', async () => {
+    mocks.installPackages.mockRejectedValue(new Error('Command failed with exit code 1'))
 
     const result = await initTanStack({
       appDetails,
