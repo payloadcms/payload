@@ -485,6 +485,8 @@ export const trTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Üzgünüz, isteğinizle eşleşen bir sonuç bulunamadı.',
     sort: 'Sırala',
     sortByLabelDirection: '{{label}} göre sırala {{direction}}',
+    sortByOrderToReorder:
+      'Satırları yeniden sıralamak için önce "Order" sütununa göre sıralama yapmalısınız.',
     stayOnThisPage: 'Bu sayfada kal',
     submissionSuccessful: 'Gönderme başarılı',
     submit: 'Gönder',
@@ -575,6 +577,7 @@ export const trTranslations: DefaultTranslationsObject = {
     addFile: 'Dosya ekle',
     addFiles: 'Dosya Ekle',
     bulkUpload: 'Toplu Yükleme',
+    copyLinkToFile: 'Dosyanın bağlantısını kopyala',
     crop: 'Mahsulat',
     cropToolDescription:
       'Seçilen alanın köşelerini sürükleyin, yeni bir alan çizin ya da aşağıdaki değerleri ayarlayın.',

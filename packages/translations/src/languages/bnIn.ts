@@ -485,6 +485,8 @@ export const bnInTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'দুঃখিত—আপনার অনুরোধের সাথে মিলে এমন কিছুই নেই।',
     sort: 'সাজান',
     sortByLabelDirection: '{{label}} দ্বারা {{direction}} সাজান',
+    sortByOrderToReorder:
+      'সারিগুলিকে পুনরায় সাজাতে হলে আপনাকে প্রথমে "Order" কলাম অনুযায়ী সেগুলি সাজাতে হবে।',
     stayOnThisPage: 'এই পৃষ্ঠায় থাকুন',
     submissionSuccessful: 'জমা সফল হয়েছে।',
     submit: 'জমা দিন',
@@ -576,6 +578,7 @@ export const bnInTranslations: DefaultTranslationsObject = {
     addFile: 'ফাইল যোগ করুন',
     addFiles: 'ফাইলগুলি যোগ করুন',
     bulkUpload: 'বাল্ক আপলোড',
+    copyLinkToFile: 'ফাইলের লিঙ্ক অনুলিপি করুন',
     crop: 'ক্রপ করুন',
     cropToolDescription:
       'নির্বাচিত অঞ্চলের কোণগুলি টানুন, একটি নতুন অঞ্চল আঁকুন বা নিচের মানগুলি সামঞ্জস্য করুন।',

@@ -475,6 +475,8 @@ export const etTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Vabandust - teie päringule vastavat sisu ei leitud.',
     sort: 'Sorteeri',
     sortByLabelDirection: 'Sorteeri {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Ridade ümberjärjestamiseks peate esmalt need sorteerima veeru "Order" järgi.',
     stayOnThisPage: 'Jää sellele lehele',
     submissionSuccessful: 'Esitamine õnnestus.',
     submit: 'Esita',
@@ -564,6 +566,7 @@ export const etTranslations: DefaultTranslationsObject = {
     addFile: 'Lisa fail',
     addFiles: 'Lisa failid',
     bulkUpload: 'Massiüleslaadimine',
+    copyLinkToFile: 'Kopeeri faili link',
     crop: 'Kärbi',
     cropToolDescription:
       'Lohista valitud ala nurki, joonista uus ala või kohanda väärtusi allpool.',

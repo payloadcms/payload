@@ -29,11 +29,11 @@ const fields: Field[] = [
   },
 ]
 
-export const EXPERIMENTAL_TableFeature = createServerFeature({
-  feature: async ({ config, isRoot, parentIsLocalized }) => {
+export const TableFeature = createServerFeature({
+  feature: ({ config, isRoot, parentIsLocalized }) => {
     const validRelationships = config.collections.map((c) => c.slug) || []
 
-    const sanitizedFields = await sanitizeFields({
+    const sanitizedFields = sanitizeFields({
       config: config as unknown as Config,
       fields,
       parentIsLocalized,
@@ -68,5 +68,5 @@ export const EXPERIMENTAL_TableFeature = createServerFeature({
       ],
     }
   },
-  key: 'experimental_table',
+  key: 'table',
 })

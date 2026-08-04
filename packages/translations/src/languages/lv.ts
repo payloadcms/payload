@@ -478,6 +478,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Atvainojiet — jūsu pieprasījumam neatbilst nekas.',
     sort: 'Kārtot',
     sortByLabelDirection: 'Kārtot pēc {{label}} {{direction}}',
+    sortByOrderToReorder: 'Lai pārkārtotu rindas, vispirms tās jāšķiro pēc kolonnas "Order".',
     stayOnThisPage: 'Palikt šajā lapā',
     submissionSuccessful: 'Iesniegšana veiksmīga.',
     submit: 'Iesniegt',
@@ -567,6 +568,7 @@ export const lvTranslations: DefaultTranslationsObject = {
     addFile: 'Pievienot failu',
     addFiles: 'Pievienot failus',
     bulkUpload: 'Masveida augšupielāde',
+    copyLinkToFile: 'Kopēt saiti uz failu',
     crop: 'Apgriezt',
     cropToolDescription:
       'Velciet atlasītā apgabala stūrus, uzzīmējiet jaunu apgabalu vai pielāgojiet vērtības zemāk.',

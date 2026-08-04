@@ -479,6 +479,8 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     sorryNotFound: 'Nažalost, ne postoji ništa što odgovara vašem zahtevu.',
     sort: 'Sortiraj',
     sortByLabelDirection: 'Sortiraj prema {{label}} {{direction}}',
+    sortByOrderToReorder:
+      'Da biste promenili redosled redova, prvo ih morate sortirati prema koloni „Redosled“.',
     stayOnThisPage: 'Ostani na ovoj stranici',
     submissionSuccessful: 'Uspešno slanje',
     submit: 'Potvrdi',
@@ -568,6 +570,7 @@ export const rsLatinTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj datoteku',
     addFiles: 'Dodaj Datoteke',
     bulkUpload: 'Masovno otpremanje',
+    copyLinkToFile: 'Kopiraj link ka fajlu',
     crop: 'Isecite sliku',
     cropToolDescription:
       'Prevucite uglove izabranog područja, nacrtajte novo područje ili prilagodite vrednosti ispod.',

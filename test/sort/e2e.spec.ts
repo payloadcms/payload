@@ -8,10 +8,8 @@ import type { PayloadTestSDK } from '../__helpers/shared/sdk/index.js'
 import type { Config } from './payload-types.js'
 
 import { goToListDoc } from '../__helpers/e2e/goToListDoc.js'
-import {} from // throttleTest
-'../__helpers/e2e/helpers.js'
 import { scrollEntirePage } from '../__helpers/e2e/scrollEntirePage.js'
-import { moveRow } from '../__helpers/e2e/sort/moveRow.js'
+import { attemptKeyboardReorder, moveRow } from '../__helpers/e2e/sort/moveRow.js'
 import { AdminUrlUtil } from '../__helpers/shared/adminUrlUtil.js'
 import { initPayloadE2ENoConfig } from '../__helpers/shared/initPayloadE2ENoConfig.js'
 import { RESTClient } from '../__helpers/shared/rest.js'
@@ -48,8 +46,6 @@ describe('Sort functionality', () => {
   })
 
   test.beforeEach(async () => {
-    // await throttleTest({ page, context, delay: 'Fast 4G' })
-
     // The prod server may still be cold-starting in CI, so the first requests can
     // be refused (`fetch failed`). Poll the seed endpoint until it responds 200.
     await expect
@@ -115,13 +111,22 @@ describe('Sort functionality', () => {
 
     await page.getByLabel('Sort by Title Ascending').click()
     await page.waitForURL(/sort=title/, { timeout: 2000 })
+    await assertRows(['A', 'B', 'C', 'D'])
 
-    // Expect a warning because not sorted by order first
+    // Dragging the handle with the mouse should not start a drag when not sorted by order
     await moveRow(page, {
-      expected: 'warning',
       fromIndex: 0,
       toIndex: 2,
+      expected: 'disabled',
     })
+
+    await assertRows(['A', 'B', 'C', 'D'])
+
+    // Pressing Space on the handle should warn instead of letting the user reorder with arrow keys
+    // Pressing it repeatedly should not stack multiple toasts
+    await attemptKeyboardReorder(page, { index: 0, presses: 3 })
+
+    await assertRows(['A', 'B', 'C', 'D'])
   })
 
   test('Orderable join fields', async () => {

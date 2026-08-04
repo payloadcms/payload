@@ -3,6 +3,7 @@ packages:
   - 'tools/*'
   - 'test'
   - 'templates/blank'
+  - 'templates/blank-tanstack'
   - 'templates/website'
   - 'templates/ecommerce'
 

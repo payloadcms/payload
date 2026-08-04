@@ -2121,7 +2121,7 @@ export function fieldShouldBeLocalized({
   field: ClientField | ClientTab | Field | Tab
   parentIsLocalized: boolean
 }): boolean {
-  return 'localized' in field && field.localized! && !parentIsLocalized
+  return Boolean('localized' in field && field.localized && !parentIsLocalized)
 }
 
 export function fieldIsVirtual(field: Field | Tab): boolean {
