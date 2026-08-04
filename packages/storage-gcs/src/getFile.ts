@@ -99,21 +99,58 @@ export async function getFile({
     }
 
     // Manually create a ReadableStream for the web from a Node.js stream.
+    // The GCS download must stop when the consumer cancels the response body
+    // (a client aborting a download, HEAD-style handling that discards the
+    // body, etc.): without a cancel() handler the node stream keeps emitting
+    // after the controller is closed, and the next 'data' event throws an
+    // uncaught "TypeError: Invalid state: Controller is already closed"
+    // (ERR_INVALID_STATE) at process level while the download keeps running.
+    let nodeStream: null | ReturnType<typeof file.createReadStream> = null
+    let settled = false
+
     const readableStream = new ReadableStream({
+      cancel() {
+        settled = true
+        nodeStream?.destroy()
+      },
       start(controller) {
         const streamOptions =
           rangeResult.type === 'partial'
             ? { end: rangeResult.rangeEnd, start: rangeResult.rangeStart }
             : {}
-        const nodeStream = file.createReadStream(streamOptions)
+        nodeStream = file.createReadStream(streamOptions)
         nodeStream.on('data', (chunk) => {
-          controller.enqueue(new Uint8Array(chunk))
+          if (settled) {
+            return
+          }
+          try {
+            controller.enqueue(new Uint8Array(chunk))
+          } catch {
+            settled = true
+            nodeStream?.destroy()
+          }
         })
         nodeStream.on('end', () => {
-          controller.close()
+          if (settled) {
+            return
+          }
+          settled = true
+          try {
+            controller.close()
+          } catch {
+            // consumer already gone
+          }
         })
         nodeStream.on('error', (err) => {
-          controller.error(err)
+          if (settled) {
+            return
+          }
+          settled = true
+          try {
+            controller.error(err)
+          } catch {
+            // consumer already gone
+          }
         })
       },
     })
