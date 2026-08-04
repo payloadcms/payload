@@ -1,10 +1,10 @@
 import fse from 'fs-extra'
-import globby from 'globby'
 import path from 'node:path'
 
 import type { TanStackAppDetails } from '../../types.js'
 import type { TextTransformResult } from './transform-vite-config.js'
 
+import { TANSTACK_TEMPLATE_FILES } from './template-files.js'
 import { transformTanStackRootRoute } from './transform-root-route.js'
 import { transformTanStackRouter } from './transform-router.js'
 import { transformTanStackViteConfig } from './transform-vite-config.js'
@@ -19,13 +19,9 @@ export type PreparedWrite = {
 type PrepareResult = { reason: string; success: false } | { success: true; writes: PreparedWrite[] }
 
 type TemplateFile = {
-  destinationRoot: string
-  relativePath: string
-  sourceRoot: string
+  filePath: string
+  templatePath: string
 }
-
-const REQUIRED_TEMPLATE_FILES = ['src/payload.config.ts', 'src/payload-foundation.css']
-const REQUIRED_ROUTE_FILES = ['routes/_payload.tsx']
 
 export async function prepareTanStackInit({
   appDetails,
@@ -45,9 +41,7 @@ export async function prepareTanStackInit({
         fse.readFile(appDetails.viteConfigPath, 'utf8'),
         fse.readFile(appDetails.routerPath, 'utf8'),
         fse.readFile(appDetails.rootRoutePath, 'utf8'),
-        ...templateFilesResult.files.map(({ relativePath, sourceRoot }) =>
-          fse.readFile(path.join(sourceRoot, relativePath), 'utf8'),
-        ),
+        ...templateFilesResult.files.map(({ templatePath }) => fse.readFile(templatePath, 'utf8')),
       ])
 
     const transformedFiles: Array<{
@@ -82,7 +76,7 @@ export async function prepareTanStackInit({
 
     for (const [index, templateFile] of templateFilesResult.files.entries()) {
       const content = templateContents[index]!
-      const filePath = path.join(templateFile.destinationRoot, templateFile.relativePath)
+      const { filePath } = templateFile
 
       if (await fse.pathExists(filePath)) {
         const existingContent = await fse.readFile(filePath, 'utf8')
@@ -119,60 +113,25 @@ async function getTemplateFiles({
   appDetails: TanStackAppDetails
   templateRoot: string
 }): Promise<{ files: TemplateFile[]; success: true } | { reason: string; success: false }> {
-  for (const relativePath of [...REQUIRED_TEMPLATE_FILES, ...REQUIRED_ROUTE_FILES]) {
-    const filePath = path.join(templateRoot, relativePath)
-    if (!(await fse.pathExists(filePath))) {
-      return { reason: `Required TanStack template file is missing: ${filePath}.`, success: false }
+  const files: TemplateFile[] = []
+
+  for (const { destination, relativePath } of TANSTACK_TEMPLATE_FILES) {
+    const templatePath = path.join(templateRoot, destination, relativePath)
+    if (!(await fse.pathExists(templatePath))) {
+      return {
+        reason: `Required TanStack template file is missing: ${templatePath}.`,
+        success: false,
+      }
     }
-  }
 
-  const [collectionFiles, payloadRouteFiles] = await Promise.all([
-    globby('collections/**/*', {
-      cwd: path.join(templateRoot, 'src'),
-      onlyFiles: true,
-    }),
-    globby('_payload/**/*', {
-      cwd: path.join(templateRoot, 'routes'),
-      onlyFiles: true,
-    }),
-  ])
-
-  if (collectionFiles.length === 0) {
-    return {
-      reason: `Required TanStack template directory has no files: ${path.join(templateRoot, 'src/collections')}.`,
-      success: false,
-    }
-  }
-
-  if (payloadRouteFiles.length === 0) {
-    return {
-      reason: `Required TanStack template directory has no files: ${path.join(templateRoot, 'routes/_payload')}.`,
-      success: false,
-    }
-  }
-
-  const sourceFiles = [
-    ...REQUIRED_TEMPLATE_FILES.map((file) => path.relative('src', file)),
-    ...collectionFiles,
-  ]
-  const routeFiles = [
-    ...REQUIRED_ROUTE_FILES.map((file) => path.relative('routes', file)),
-    ...payloadRouteFiles,
-  ]
-
-  return {
-    files: [
-      ...sourceFiles.sort().map((relativePath) => ({
-        destinationRoot: appDetails.sourceDir,
+    files.push({
+      filePath: path.join(
+        destination === 'src' ? appDetails.sourceDir : appDetails.routesDir,
         relativePath,
-        sourceRoot: path.join(templateRoot, 'src'),
-      })),
-      ...routeFiles.sort().map((relativePath) => ({
-        destinationRoot: appDetails.routesDir,
-        relativePath,
-        sourceRoot: path.join(templateRoot, 'routes'),
-      })),
-    ],
-    success: true,
+      ),
+      templatePath,
+    })
   }
+
+  return { files, success: true }
 }

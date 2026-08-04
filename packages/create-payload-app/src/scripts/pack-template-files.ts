@@ -2,6 +2,9 @@ import fs from 'fs'
 import fsp from 'fs/promises'
 import { fileURLToPath } from 'node:url'
 import path from 'path'
+
+import { TANSTACK_TEMPLATE_FILES } from '../lib/tanstack/template-files.js'
+
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
@@ -39,36 +42,18 @@ async function main() {
     throw new Error(`Source path does not exist: ${tanStackSourcePath}`)
   }
 
+  await Promise.all(
+    TANSTACK_TEMPLATE_FILES.map(({ sourcePath }) =>
+      fsp.access(path.join(tanStackSourcePath, sourcePath)),
+    ),
+  )
   await fsp.rm(tanStackOutputPath, { force: true, recursive: true })
+  await Promise.all(
+    TANSTACK_TEMPLATE_FILES.map(async ({ destination, relativePath, sourcePath }) => {
+      const outputFilePath = path.join(tanStackOutputPath, destination, relativePath)
 
-  const tanStackDistSrcPath = path.join(tanStackOutputPath, 'src')
-  const tanStackDistRoutesPath = path.join(tanStackOutputPath, 'routes')
-  await Promise.all([
-    fsp.mkdir(tanStackDistSrcPath, { recursive: true }),
-    fsp.mkdir(tanStackDistRoutesPath, { recursive: true }),
-  ])
-  await Promise.all([
-    fsp.cp(
-      path.join(tanStackSourcePath, 'collections'),
-      path.join(tanStackDistSrcPath, 'collections'),
-      { recursive: true },
-    ),
-    fsp.copyFile(
-      path.join(tanStackSourcePath, 'payload-foundation.css'),
-      path.join(tanStackDistSrcPath, 'payload-foundation.css'),
-    ),
-    fsp.copyFile(
-      path.join(tanStackSourcePath, 'payload.config.ts'),
-      path.join(tanStackDistSrcPath, 'payload.config.ts'),
-    ),
-    fsp.cp(
-      path.join(tanStackSourcePath, 'app/_payload'),
-      path.join(tanStackDistRoutesPath, '_payload'),
-      { recursive: true },
-    ),
-    fsp.copyFile(
-      path.join(tanStackSourcePath, 'app/_payload.tsx'),
-      path.join(tanStackDistRoutesPath, '_payload.tsx'),
-    ),
-  ])
+      await fsp.mkdir(path.dirname(outputFilePath), { recursive: true })
+      await fsp.copyFile(path.join(tanStackSourcePath, sourcePath), outputFilePath)
+    }),
+  )
 }

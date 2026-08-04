@@ -62,7 +62,14 @@ export default defineConfig({
 
 const templateFiles = {
   'routes/_payload.tsx': 'export const payloadLayout = true\n',
+  'routes/_payload/admin.$.tsx': 'export const payloadAdminSplat = true\n',
+  'routes/_payload/admin.index.tsx': 'export const payloadAdminIndex = true\n',
   'routes/_payload/api.$.ts': 'export const payloadApi = true\n',
+  'routes/_payload/importMap.js': 'export const importMap = {}\n',
+  'routes/_payload/server.functions.ts': 'export const payloadServerFunctions = true\n',
+  'src/collections/Folders.ts': "export const Folders = { slug: 'folders' }\n",
+  'src/collections/Media.ts': "export const Media = { slug: 'media' }\n",
+  'src/collections/Tags.ts': "export const Tags = { slug: 'tags' }\n",
   'src/collections/Users.ts': "export const Users = { slug: 'users' }\n",
   'src/payload-foundation.css': '@layer payload-default, payload;\n',
   'src/payload.config.ts': 'export default { collections: [] }\n',
@@ -118,13 +125,20 @@ describe('prepareTanStackInit', () => {
 
     expect(result.writes.map(({ filePath }) => path.relative(projectDir, filePath)).sort()).toEqual(
       [
+        'src/collections/Folders.ts',
+        'src/collections/Media.ts',
+        'src/collections/Tags.ts',
         'src/collections/Users.ts',
         'src/payload-foundation.css',
         'src/payload.config.ts',
         'src/router.tsx',
         'src/routes/__root.tsx',
         'src/routes/_payload.tsx',
+        'src/routes/_payload/admin.$.tsx',
+        'src/routes/_payload/admin.index.tsx',
         'src/routes/_payload/api.$.ts',
+        'src/routes/_payload/importMap.js',
+        'src/routes/_payload/server.functions.ts',
         'vite.config.ts',
       ],
     )
@@ -179,6 +193,34 @@ describe('prepareTanStackInit', () => {
 
     expect(result).toEqual({
       reason: `Required TanStack template file is missing: ${path.join(templateRoot, 'src/payload.config.ts')}.`,
+      success: false,
+    })
+    expect(snapshotDirectory(projectDir)).toEqual(before)
+  })
+
+  it('should reject a missing nested Payload route without writing to disk', async () => {
+    const missingFilePath = path.join(templateRoot, 'routes/_payload/server.functions.ts')
+    fse.removeSync(missingFilePath)
+    const before = snapshotDirectory(projectDir)
+
+    const result = await prepareTanStackInit({ appDetails, templateRoot })
+
+    expect(result).toEqual({
+      reason: `Required TanStack template file is missing: ${missingFilePath}.`,
+      success: false,
+    })
+    expect(snapshotDirectory(projectDir)).toEqual(before)
+  })
+
+  it('should reject a missing collection without writing to disk', async () => {
+    const missingFilePath = path.join(templateRoot, 'src/collections/Folders.ts')
+    fse.removeSync(missingFilePath)
+    const before = snapshotDirectory(projectDir)
+
+    const result = await prepareTanStackInit({ appDetails, templateRoot })
+
+    expect(result).toEqual({
+      reason: `Required TanStack template file is missing: ${missingFilePath}.`,
       success: false,
     })
     expect(snapshotDirectory(projectDir)).toEqual(before)
