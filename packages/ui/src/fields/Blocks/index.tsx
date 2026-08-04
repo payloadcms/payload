@@ -476,8 +476,10 @@ const BlocksFieldComponent: BlocksFieldClientComponent = (props) => {
                       {...draggableSortableItemProps}
                       addRow={addRow}
                       block={blockConfig}
-                      // Pass all blocks, not just clientBlocksAfterFilter, as existing blocks should still be displayed even if they don't match the new filter
-                      blocks={clientBlocks}
+                      // Only allow choosing filtered blocks in the "Add Below" drawer. The row's own
+                      // current block is rendered from `block` above, not from this `blocks` list, so
+                      // filtering here does not affect the display of existing rows.
+                      blocks={clientBlocksAfterFilter}
                       copyRow={copyRow}
                       duplicateRow={duplicateRow}
                       errorCount={rowErrorCount}
