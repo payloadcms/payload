@@ -67,12 +67,11 @@ describe('Sort functionality', () => {
   // eslint-disable-next-line playwright/expect-expect
   test('Orderable collection', async () => {
     const url = new AdminUrlUtil(serverURL, orderableSlug)
-    await page.goto(url.list)
-
     const joinFieldResolvePromise = page.waitForResponse(
       (response) => response.url().includes('/api/orderable-join') && response.status() === 200,
     )
 
+    await page.goto(url.list)
     await joinFieldResolvePromise
     await page.goto(`${url.list}?sort=-_order`)
 
