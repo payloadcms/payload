@@ -72,7 +72,7 @@ interface Template {
   type: ProjectTemplate['type']
 }
 
-export type PackageManager = 'bun' | 'npm' | 'pnpm' | 'yarn'
+export type PackageManager = 'bun' | 'npm' | 'nub' | 'pnpm' | 'yarn'
 
 export type DbType = (typeof ALL_DATABASE_ADAPTERS)[number]
 

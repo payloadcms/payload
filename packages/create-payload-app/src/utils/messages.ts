@@ -65,7 +65,7 @@ export function successMessage(projectDir: string, packageManager: PackageManage
 ${header('Launch Application:')}
 
   - cd ./${relativePath}
-  - ${packageManager === 'npm' ? 'npm run' : packageManager} dev or follow directions in README.md
+  - ${['npm', 'nub'].includes(packageManager) ? `${packageManager} run` : packageManager} dev or follow directions in README.md
 
 ${header('Documentation:')}
 
