@@ -622,11 +622,6 @@ export const getConfig: () => Partial<Config> = () => ({
     {
       slug: 'fields-and-top-access',
       access: {
-        readVersions: () => ({
-          'version.secret': {
-            equals: 'will-success-access-read',
-          },
-        }),
         read: () => ({
           secret: {
             equals: 'will-success-access-read',

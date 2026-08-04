@@ -658,7 +658,7 @@ describe('Access Control', () => {
       expect(res).toBeTruthy()
     })
 
-    it('should ignore false access in versions on query constraint added by top collection level access control', async () => {
+    it('should inherit collection read access when readVersions is not configured', async () => {
       // clean up
       await payload.delete({ collection: 'fields-and-top-access', where: {} })
 
@@ -685,6 +685,13 @@ describe('Access Control', () => {
       const version = resFind.docs[0]
       expect(version.parent).toBe(hitID)
 
+      const resCount = await payload.countVersions({
+        collection: 'fields-and-top-access',
+        overrideAccess: false,
+      })
+
+      expect(resCount.totalDocs).toBe(1)
+
       // Assert findVersionByID
       const res = await payload.findVersionByID({
         id: version.id,
@@ -693,6 +700,28 @@ describe('Access Control', () => {
       })
 
       expect(res).toBeTruthy()
+
+      const deniedVersions = await payload.findVersions({
+        collection: 'fields-and-top-access',
+        limit: 1,
+        overrideAccess: true,
+        where: {
+          'version.secret': {
+            equals: 'will-fail-access-read',
+          },
+        },
+      })
+
+      await expect(
+        payload.findVersionByID({
+          id: deniedVersions.docs[0].id,
+          collection: 'fields-and-top-access',
+          disableErrors: true,
+          overrideAccess: false,
+        }),
+      ).resolves.toBeNull()
+
+      await payload.delete({ collection: 'fields-and-top-access', where: {} })
     })
   })
 
