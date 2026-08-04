@@ -569,6 +569,7 @@ export const enTranslations = {
     addFile: 'Add file',
     addFiles: 'Add files',
     bulkUpload: 'Bulk Upload',
+    copyLinkToFile: 'Copy link to file',
     crop: 'Crop',
     cropToolDescription:
       'Drag the corners of the selected area, draw a new area or adjust the values below.',

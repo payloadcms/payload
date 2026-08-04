@@ -573,6 +573,7 @@ export const ptTranslations: DefaultTranslationsObject = {
     addFile: 'Adicionar arquivo',
     addFiles: 'Adicionar Arquivos',
     bulkUpload: 'Upload em Massa',
+    copyLinkToFile: 'Copiar link para o arquivo',
     crop: 'Cultura',
     cropToolDescription:
       'Arraste as bordas da área selecionada, desenhe uma nova área ou ajuste os valores abaixo.',

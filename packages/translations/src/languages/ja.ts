@@ -570,6 +570,7 @@ export const jaTranslations: DefaultTranslationsObject = {
     addFile: 'ファイルを追加',
     addFiles: 'ファイルを追加する',
     bulkUpload: '一括アップロード',
+    copyLinkToFile: 'ファイルへのリンクをコピー',
     crop: 'クロップ',
     cropToolDescription:
       '選択したエリアのコーナーをドラッグしたり、新たなエリアを描画したり、下記の値を調整してください。',

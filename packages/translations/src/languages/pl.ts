@@ -569,6 +569,7 @@ export const plTranslations: DefaultTranslationsObject = {
     addFile: 'Dodaj plik',
     addFiles: 'Dodaj pliki',
     bulkUpload: 'Załaduj masowo',
+    copyLinkToFile: 'Kopiuj link do pliku',
     crop: 'Przytnij',
     cropToolDescription:
       'Przeciągnij narożniki wybranego obszaru, narysuj nowy obszar lub dostosuj poniższe wartości.',

@@ -570,6 +570,7 @@ export const bgTranslations: DefaultTranslationsObject = {
     addFile: 'Добавяне на файл',
     addFiles: 'Добави файлове',
     bulkUpload: 'Масово Качване',
+    copyLinkToFile: 'Копиране на връзка към файла',
     crop: 'Изрязване',
     cropToolDescription:
       'Плъзни ъглите на избраната област, избери нова област или коригирай стойностите по-долу.',
