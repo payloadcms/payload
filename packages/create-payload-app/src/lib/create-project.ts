@@ -33,6 +33,12 @@ import { getAgentChoice } from './select-agent.js'
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
+const NEXTJS_AGENT_RULES = `<!-- BEGIN:nextjs-agent-rules -->
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in \`node_modules/next/dist/docs/\` before writing any code. Heed deprecation notices.
+<!-- END:nextjs-agent-rules -->`
+
 async function createOrFindProjectDir(projectDir: string): Promise<void> {
   const pathExists = await fse.pathExists(projectDir)
   if (!pathExists) {
@@ -183,13 +189,19 @@ export async function createProject(
         projectDir,
       })
 
-      const { configFile, skillsDir } = getAgentChoice(agentType)
+      const { configFile, heading, skillsDir } = getAgentChoice(agentType)
       const skillPath = `${skillsDir}/payload`
-      const configContent =
-        configFile === 'CLAUDE.md'
-          ? `# Claude Code\n\nThis project uses the Payload CMS skill at \`${skillPath}/\`.\nStart with \`${skillPath}/SKILL.md\` for a quick reference, then see \`${skillPath}/reference/\` for detailed docs.\n`
-          : `# Agents\n\nThis project uses the Payload CMS skill at \`${skillPath}/\`.\nStart with \`${skillPath}/SKILL.md\` for a quick reference, then see \`${skillPath}/reference/\` for detailed docs.\n`
-      await fse.writeFile(path.resolve(projectDir, configFile), configContent)
+      const configContent = [
+        heading,
+        '',
+        `This project uses the Payload CMS skill at \`${skillPath}/\`.`,
+        `Start with \`${skillPath}/SKILL.md\` for a quick reference, then see \`${skillPath}/reference/\` for detailed docs.`,
+        '',
+        NEXTJS_AGENT_RULES,
+        '',
+      ].join('\n')
+      // outputFile creates intermediate directories (e.g. .github/) automatically
+      await fse.outputFile(path.resolve(projectDir, configFile), configContent)
     } catch (err) {
       if (cliArgs['--debug'] && err instanceof Error) {
         debug(`Failed to download skill: ${err.message}`)
