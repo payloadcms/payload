@@ -34,7 +34,7 @@ export async function getTanStackAppDetails({
     return incompatible('TanStack Solid projects are not supported.')
   }
 
-  if (packages.next) {
+  if (hasReactStart && packages.next) {
     return incompatible('TanStack Start and Next.js markers are both present.')
   }
 

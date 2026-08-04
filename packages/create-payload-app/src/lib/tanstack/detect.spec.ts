@@ -89,6 +89,23 @@ describe('getTanStackAppDetails', () => {
     })
   })
 
+  it('should detect a Router-only project that also depends on Next.js', async () => {
+    writeFixture({
+      dependencies: {
+        '@tanstack/react-router': 'latest',
+        next: 'latest',
+      },
+      devDependencies: { '@tanstack/router-plugin': 'latest' },
+      vite: `const config = defineConfig({ plugins: [tanstackRouter({ target: 'react' }), viteReact()] })\nexport default config`,
+    })
+
+    await expect(getTanStackAppDetails({ projectDir })).resolves.toMatchObject({
+      compatible: true,
+      detected: true,
+      details: { kind: 'router-only' },
+    })
+  })
+
   it('should ignore projects that only use TanStack Query', async () => {
     writeFixture({ dependencies: { '@tanstack/react-query': 'latest' } })
 
