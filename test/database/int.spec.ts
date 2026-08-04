@@ -15,6 +15,7 @@ import {
   migrateVersionsV1_V2,
 } from '@payloadcms/db-mongodb/migration-utils'
 import { randomUUID } from 'crypto'
+import { inArray } from 'drizzle-orm'
 import * as drizzlePg from 'drizzle-orm/pg-core'
 import * as drizzleSqlite from 'drizzle-orm/sqlite-core'
 import fs from 'fs'
@@ -2469,27 +2470,65 @@ describe('database', () => {
       }
     })
 
-    it('should bulk delete with bulkOperationsSingleTransaction: true', async () => {
-      const originalValue = payload.db.bulkOperationsSingleTransaction
-      payload.db.bulkOperationsSingleTransaction = true
+    it(
+      'should bulk delete every matched document in default transaction mode',
+      { db: (adapterType) => adapterType === 'postgres' },
+      async () => {
+        const originalValue = payload.db.bulkOperationsSingleTransaction
+        const docsPerIteration = 25
+        const iterationCount = 10
+        const testPrefix = `bulk-delete-${Date.now()}-${randomUUID()}`
 
-      try {
-        const posts = await Promise.all([
-          payload.create({ collection, data: { title: 'toDelete1' } }),
-          payload.create({ collection, data: { title: 'toDelete2' } }),
-        ])
+        payload.db.bulkOperationsSingleTransaction = false
 
-        const result = await payload.delete({
-          collection,
-          where: { id: { in: posts.map((p) => p.id) } },
-        })
+        try {
+          for (let iteration = 0; iteration < iterationCount; iteration++) {
+            const iterationPrefix = `${testPrefix}-${iteration}`
 
-        expect(result.docs).toHaveLength(2)
-        expect(result.errors).toHaveLength(0)
-      } finally {
-        payload.db.bulkOperationsSingleTransaction = originalValue
-      }
-    })
+            const docs = await Promise.all(
+              Array.from({ length: docsPerIteration }, (_, index) =>
+                payload.create({
+                  collection: 'simple',
+                  data: {
+                    number: index,
+                    text: `${iterationPrefix}-${index}`,
+                  },
+                }),
+              ),
+            )
+
+            const ids = docs.map((doc) => doc.id)
+
+            const result = await payload.delete({
+              collection: 'simple',
+              where: { id: { in: ids } },
+            })
+
+            const remainingRows = await payload.db.drizzle
+              .select({
+                id: payload.db.tables.simple.id,
+              })
+              .from(payload.db.tables.simple)
+              .where(inArray(payload.db.tables.simple.id, ids))
+
+            expect(result.docs).toHaveLength(docsPerIteration)
+            expect(result.errors).toHaveLength(0)
+            expect(remainingRows).toHaveLength(0)
+          }
+        } finally {
+          payload.db.bulkOperationsSingleTransaction = originalValue
+
+          await payload.delete({
+            collection: 'simple',
+            where: {
+              text: {
+                contains: testPrefix,
+              },
+            },
+          })
+        }
+      },
+    )
 
     it('should CRUD point field', async () => {
       const result = await payload.create({
