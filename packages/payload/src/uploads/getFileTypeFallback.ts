@@ -13,6 +13,7 @@ const extensionMap: {
   js: 'application/javascript',
   json: 'application/json',
   md: 'text/markdown',
+  pdf: 'application/pdf',
   svg: 'image/svg+xml',
   xml: 'application/xml',
   yml: 'application/x-yaml',
