@@ -74,6 +74,51 @@ describe('Collapsibles', () => {
     await expect(collapsedCollapsible).toBeVisible()
   })
 
+  test('should persist collapsed state by default when revisiting a document', async () => {
+    const doc = await payload.create({
+      collection: collapsibleFieldsSlug,
+      data: {
+        text: 'test',
+      },
+    })
+
+    await page.goto(url.edit(doc.id))
+
+    const collapsibleToggle = page.locator('#field-collapsible-_index-0 .collapsible__toggle')
+
+    await expect(collapsibleToggle).toHaveClass(/collapsible__toggle--open/)
+    await collapsibleToggle.click()
+    await expect(collapsibleToggle).toHaveClass(/collapsible__toggle--collapsed/)
+
+    await page.goto(url.list)
+    await page.goto(url.edit(doc.id))
+
+    await expect(collapsibleToggle).toHaveClass(/collapsible__toggle--collapsed/)
+  })
+
+  test('should reset collapsed state when persistCollapsedState is false', async () => {
+    const doc = await payload.create({
+      collection: collapsibleFieldsSlug,
+      data: {
+        noPersistText: 'test',
+        text: 'test',
+      },
+    })
+
+    await page.goto(url.edit(doc.id))
+
+    const collapsibleToggle = page.locator('#field-collapsible-_index-5 .collapsible__toggle')
+
+    await expect(collapsibleToggle).toHaveClass(/collapsible__toggle--open/)
+    await collapsibleToggle.click()
+    await expect(collapsibleToggle).toHaveClass(/collapsible__toggle--collapsed/)
+
+    await page.goto(url.list)
+    await page.goto(url.edit(doc.id))
+
+    await expect(collapsibleToggle).toHaveClass(/collapsible__toggle--open/)
+  })
+
   test('should render CollapsibleLabel using a function', async () => {
     const label = 'custom row label'
     await page.goto(url.create)
