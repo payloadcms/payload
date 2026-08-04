@@ -336,6 +336,8 @@ The following arguments are provided to the `unlock` function:
 
 If the Collection has [Versions](../versions/overview) enabled, the `readVersions` Access Control function determines whether or not the currently logged in user can access the version history of a Document.
 
+If `readVersions` is not configured, Payload uses the Collection's `read` Access Control. Boolean results are preserved, and query constraints are automatically adjusted to target fields within the stored version document.
+
 To add Read Versions Access Control to a Collection, use the `readVersions` property in the [Collection Config](../configuration/collections):
 
 ```ts
@@ -354,9 +356,10 @@ export const CollectionWithVersionsAccess: CollectionConfig = {
 ```
 
 <Banner type="warning">
-  **Note:** Returning a [Query](../queries/overview) will apply the constraint
-  to the [`versions` collection](../versions/overview#database-impact), not the
-  original Collection.
+  **Note:** When you explicitly configure `readVersions`, returning a
+  [Query](../queries/overview) will apply the constraint to the [`versions`
+  collection](../versions/overview#database-impact), not the original
+  Collection.
 </Banner>
 
 The following arguments are provided to the `readVersions` function:
