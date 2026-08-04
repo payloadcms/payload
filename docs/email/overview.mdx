@@ -31,7 +31,7 @@ An email adapter will require at least the following fields:
 
 | Name       | Package                                                                                    | Description                                                                                                                                                                                     |
 | ---------- | ------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Nodemailer | [@payloadcms/email-nodemailer](https://www.npmjs.com/package/@payloadcms/email-nodemailer) | Use any [Nodemailer transport](https://nodemailer.com/transports), including SMTP, Resend, SendGrid, and more. This was provided by default in Payload 2.x. This is the easiest migration path. |
+| Nodemailer | [@payloadcms/email-nodemailer](https://www.npmjs.com/package/@payloadcms/email-nodemailer) | Use any [Nodemailer transport](https://nodemailer.com/transports), including SMTP, Resend, SendGrid, SuperSend TX, and more. This was provided by default in Payload 2.x. This is the easiest migration path. |
 | Resend     | [@payloadcms/email-resend](https://www.npmjs.com/package/@payloadcms/email-resend)         | Resend email via their REST API. This is preferred for serverless platforms such as Vercel because it is much more lightweight than the nodemailer adapter.                                     |
 
 ## Nodemailer Configuration
@@ -108,6 +108,29 @@ export default buildConfig({
     transportOptions: nodemailerSendgrid({
       apiKey: process.env.SENDGRID_API_KEY,
     }),
+  }),
+})
+```
+
+**Custom Transport with SuperSend TX:**
+
+You can also use a custom Nodemailer transport such as [SuperSend TX](https://docs.supersendtx.com/guides/payload) for transactional email over their HTTP API:
+
+```ts
+import { buildConfig } from 'payload'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
+import nodemailer from 'nodemailer'
+import { createSuperSendTXTransport } from 'supersendtx-nodemailer'
+
+export default buildConfig({
+  email: nodemailerAdapter({
+    defaultFromAddress: 'info@payloadcms.com',
+    defaultFromName: 'Payload',
+    transport: nodemailer.createTransport(
+      createSuperSendTXTransport({
+        apiKey: process.env.SUPERSENDTX_API_KEY,
+      }),
+    ),
   }),
 })
 ```
