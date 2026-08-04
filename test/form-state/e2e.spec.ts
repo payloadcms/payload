@@ -508,8 +508,14 @@ test.describe('Form State', () => {
     await expect(computedTitleField).toHaveValue('Test Title - Edited')
 
     // but then when editing another field, the computed field should update
+    const autosaveResponse = page.waitForResponse(
+      (response) =>
+        response.request().method() === 'PATCH' &&
+        response.url().includes(`/api/${autosavePostsSlug}/`) &&
+        response.ok(),
+    )
     await titleField.fill('Test Title 2')
-    await waitForAutoSaveToRunAndComplete(page)
+    await autosaveResponse
     await expect(computedTitleField).toHaveValue('Test Title 2')
   })
 
