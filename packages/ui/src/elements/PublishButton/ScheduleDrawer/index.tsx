@@ -306,11 +306,6 @@ export const ScheduleDrawer: React.FC<Props> = ({
             minDate={new Date()}
             minTime={minTime}
             onChange={(e) => onChangeDate(e)}
-            overrides={{
-              onChangeRaw: (event) => {
-                event?.preventDefault()
-              },
-            }}
             pickerAppearance="dayAndTime"
             readOnly={processing}
             timeFormat={schedulePublishConfig?.timeFormat}
