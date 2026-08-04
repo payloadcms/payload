@@ -300,10 +300,10 @@ describe('create-payload-app', () => {
       const preservedPaths = ['index.html', 'src/main.tsx', 'src/routes/index.tsx']
       const originalContents = new Map(
         await Promise.all(
-          preservedPaths.map(async (relativePath) => [
-            relativePath,
-            await readFile(path.join(projectDir, relativePath), 'utf8'),
-          ]),
+          preservedPaths.map(
+            async (relativePath) =>
+              [relativePath, await readFile(path.join(projectDir, relativePath), 'utf8')] as const,
+          ),
         ),
       )
       const detection = await getTanStackAppDetails({ projectDir })
