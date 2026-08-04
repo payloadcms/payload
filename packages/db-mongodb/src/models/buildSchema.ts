@@ -112,11 +112,26 @@ const localizeSchema = (
     localization &&
     Array.isArray(localization.locales)
   ) {
+    // Non-unique fields intentionally rely on the field-level `default` being applied
+    // independently to every locale (e.g. draft/publish status defaulting each untouched
+    // locale to 'draft'), so only suppress it for `unique` fields: reusing a static default
+    // across every locale there would make Mongoose silently write the same value into
+    // locales Payload left untouched, which then collides with any other document that also
+    // left that locale at its default.
+    // `hasMany` fields pass `schema` as a one-element array (e.g. `[baseSchema]`), so the
+    // suppression has to happen on the wrapped element to preserve the array type.
+    const suppressUniqueDefault = (schemaOptions: SchemaTypeOptions<any>) =>
+      schemaOptions.unique ? { ...schemaOptions, default: undefined } : schemaOptions
+
+    const localeSchema = Array.isArray(schema)
+      ? [suppressUniqueDefault(schema[0])]
+      : suppressUniqueDefault(schema)
+
     return {
       type: localization.localeCodes.reduce(
-        (localeSchema, locale) => ({
-          ...localeSchema,
-          [locale]: schema,
+        (localesType, locale) => ({
+          ...localesType,
+          [locale]: localeSchema,
         }),
         {
           _id: false,
