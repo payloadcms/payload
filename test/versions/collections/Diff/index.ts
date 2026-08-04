@@ -99,6 +99,28 @@ export const Diff: CollectionConfig = {
           ],
         },
         {
+          // Block with multiple unnamed layout containers (groups/rows) at the top level.
+          // Used to test that version diff rendering correctly resolves schema paths when a block is newly added between versions.
+          // Specifically, when the block contains multiple unnamed fields at the top level.
+          slug: 'GroupsBlock',
+          fields: [
+            {
+              type: 'group',
+              label: 'Section A',
+              fields: [{ name: 'fieldA', type: 'text' }],
+            },
+            {
+              type: 'group',
+              label: 'Section B',
+              fields: [{ name: 'fieldB', type: 'text' }],
+            },
+            {
+              type: 'row',
+              fields: [{ name: 'fieldC', type: 'number' }],
+            },
+          ],
+        },
+        {
           slug: 'TabsBlock',
           fields: [
             {
