@@ -260,6 +260,10 @@ export const generateFileData = async <T>({
     }
     fileData.mimeType = mime
 
+    // Keep in sync with `sanitizeUploadFilename` (payload/internal), which
+    // mirrors this base-name + ext rejoin for the cloud-storage client-upload
+    // path. `ext` here may come from `file-type` for images, so the shared
+    // helper cannot be used directly.
     const baseFilename = sanitize(file.name.substring(0, file.name.lastIndexOf('.')) || file.name)
     fsSafeName = `${baseFilename}${ext ? `.${ext}` : ''}`
 
