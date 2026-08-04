@@ -41,7 +41,14 @@ async function setHierarchyFilter({
     el.classList.contains('popup-button-list__button--selected'),
   )
   if (isCurrentlyChecked !== checked) {
+    const preferenceUpdate = page.waitForResponse(
+      (response) =>
+        response.url().includes('/api/payload-preferences/hierarchy-tree-') &&
+        response.request().method() === 'POST' &&
+        response.ok(),
+    )
     await filterButton.click()
+    await preferenceUpdate
   }
 
   await page.keyboard.press('Escape')
@@ -369,7 +376,14 @@ test.describe('Hierarchy Sidebar', () => {
       await page.goto(organizationsURL.list)
       await openNav(page)
 
+      const preferenceUpdate = page.waitForResponse(
+        (response) =>
+          response.url().endsWith('/api/payload-preferences/nav-sidebar-active-tab') &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
       await page.getByRole('tab', { name: 'Organizations' }).click()
+      await preferenceUpdate
 
       // Find and use search input
       const searchInput = page.getByPlaceholder('Search Organizations')
@@ -389,7 +403,14 @@ test.describe('Hierarchy Sidebar', () => {
       await page.goto(organizationsURL.list)
       await openNav(page)
 
+      const preferenceUpdate = page.waitForResponse(
+        (response) =>
+          response.url().endsWith('/api/payload-preferences/nav-sidebar-active-tab') &&
+          response.request().method() === 'POST' &&
+          response.ok(),
+      )
       await page.getByRole('tab', { name: 'Organizations' }).click()
+      await preferenceUpdate
 
       const searchInput = page.getByPlaceholder('Search Organizations')
 
