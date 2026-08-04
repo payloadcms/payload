@@ -26,7 +26,7 @@ const nextCreateCommands: Record<NextCmdKey, string> = {
   srcDir: `pnpm create next-app@latest . ${commonNextCreateParams} --src-dir`,
   noSrcDir: `pnpm create next-app@latest . ${commonNextCreateParams} --no-src-dir`,
   srcDirCanary: `pnpm create next-app@canary . ${commonNextCreateParams} --src-dir`,
-  noSrcDirCanary: `pnpm create next-app@latest . ${commonNextCreateParams} --no-src-dir`,
+  noSrcDirCanary: `pnpm create next-app@canary . ${commonNextCreateParams} --no-src-dir`,
 }
 
 const tanStackCreateArgs = [
