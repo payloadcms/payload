@@ -1,25 +1,19 @@
-import type {
-  Column,
-  ColumnBaseConfig,
-  ColumnDataType,
-  DrizzleConfig,
-  ExtractTablesWithRelations,
-  Relation,
-  Relations,
-  SQL,
-  TableRelationalConfig,
-} from 'drizzle-orm'
+import type { AnyRelations, Column, DrizzleConfig, SQL, TableRelationalConfig } from 'drizzle-orm'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type { NodePgDatabase, NodePgQueryResultHKT } from 'drizzle-orm/node-postgres'
 import type {
+  PgAsyncTransaction,
   PgColumn,
   PgTable,
-  PgTransaction,
   Precision,
   UpdateDeleteAction,
 } from 'drizzle-orm/pg-core'
-import type { SQLiteColumn, SQLiteTable, SQLiteTransaction } from 'drizzle-orm/sqlite-core'
-import type { Result } from 'drizzle-orm/sqlite-core/session'
+import type {
+  Result,
+  SQLiteAsyncTransaction,
+  SQLiteColumn,
+  SQLiteTable,
+} from 'drizzle-orm/sqlite-core'
 import type {
   BaseDatabaseAdapter,
   FlattenedField,
@@ -33,22 +27,23 @@ import type { BuildQueryJoinAliases } from './queries/buildQuery.js'
 export { BuildQueryJoinAliases }
 
 import type { ResultSet } from '@libsql/client'
-import type { DrizzleSnapshotJSON } from 'drizzle-kit/api'
 import type { SQLiteRaw } from 'drizzle-orm/sqlite-core/query-builders/raw'
 import type { QueryResult } from 'pg'
 
 import type { Operators } from './queries/operatorMap.js'
 
-export type PostgresDB = NodePgDatabase<Record<string, unknown>>
+/**
+ * In drizzle-kit v1 the snapshot shape is dialect-specific and no longer exported
+ * from a shared `drizzle-kit/api` entry. Payload only passes snapshots through the
+ * drizzle-kit programmatic API, so a structural passthrough type is sufficient.
+ */
+export type DrizzleSnapshotJSON = Record<string, any>
 
-export type SQLiteDB = LibSQLDatabase<
-  Record<string, GenericRelation | GenericTable> & Record<string, unknown>
->
+export type PostgresDB = NodePgDatabase<AnyRelations>
 
-export type GenericPgColumn = PgColumn<
-  ColumnBaseConfig<ColumnDataType, string>,
-  Record<string, unknown>
->
+export type SQLiteDB = LibSQLDatabase<AnyRelations>
+
+export type GenericPgColumn = PgColumn
 
 export type GenericColumns<T> = {
   [x: string]: T
@@ -72,19 +67,17 @@ export type GenericColumn = GenericPgColumn | SQLiteColumn
 
 export type GenericTable = GenericPgTable | GenericSQLiteTable
 
-export type GenericRelation = Relations<string, Record<string, Relation<string>>>
+/**
+ * Drizzle v1 (RQB v2) relational config for a single table, produced by `defineRelations`.
+ */
+export type GenericRelation = TableRelationalConfig
 
-export type TransactionSQLite = SQLiteTransaction<
+export type TransactionSQLite = SQLiteAsyncTransaction<
   'async',
   Result<'async', unknown>,
-  Record<string, unknown>,
-  { tsName: TableRelationalConfig }
+  AnyRelations
 >
-export type TransactionPg = PgTransaction<
-  NodePgQueryResultHKT,
-  Record<string, unknown>,
-  ExtractTablesWithRelations<Record<string, unknown>>
->
+export type TransactionPg = PgAsyncTransaction<NodePgQueryResultHKT, AnyRelations>
 
 export type DrizzleTransaction = TransactionPg | TransactionSQLite
 
@@ -121,18 +114,35 @@ export type Insert = (args: {
   values: Record<string, unknown> | Record<string, unknown>[]
 }) => Promise<Record<string, unknown>[]>
 
+/**
+ * drizzle-kit v1 replaced the separate `filterSchema`/`tablesFilter`/`extensionsFilter`
+ * push arguments with a single entities-filter config, and `pushSchema` now returns
+ * `hints` instead of `warnings`/`hasDataLoss`.
+ */
+export type EntitiesFilterConfig = {
+  entities?: unknown
+  extensions?: string[]
+  schemas?: string | string[]
+  tables?: string | string[]
+}
+
 export type RequireDrizzleKit = () => {
   generateDrizzleJson: (
     args: Record<string, unknown>,
+    prevId?: string,
+    schemaFilters?: string[],
   ) => DrizzleSnapshotJSON | Promise<DrizzleSnapshotJSON>
   generateMigration: (prev: DrizzleSnapshotJSON, cur: DrizzleSnapshotJSON) => Promise<string[]>
   pushSchema: (
     schema: Record<string, unknown>,
     drizzle: DrizzleAdapter['drizzle'],
-    filterSchema?: string[],
-    tablesFilter?: string[],
-    extensionsFilter?: string[],
-  ) => Promise<{ apply; hasDataLoss; warnings }>
+    entitiesConfig?: EntitiesFilterConfig,
+    migrationsConfig?: { schema?: string; table?: string },
+  ) => Promise<{
+    apply: () => Promise<void>
+    hints: { hint: string; statement?: string }[]
+    sqlStatements: string[]
+  }>
   upSnapshot?: (snapshot: Record<string, unknown>) => DrizzleSnapshotJSON
 }
 

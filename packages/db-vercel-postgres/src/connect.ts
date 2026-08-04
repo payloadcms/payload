@@ -44,7 +44,7 @@ export const connect: Connect = async function connect(
     this.drizzle = drizzle({
       client: client as pg.Pool,
       logger,
-      schema: this.schema,
+      relations: this.relations,
     })
 
     if (this.readReplicaOptions) {
@@ -55,7 +55,7 @@ export const connect: Connect = async function connect(
           connectionString,
         }
         const pool = new VercelPool(options)
-        return drizzle({ client: pool as unknown as pg.Pool, logger, schema: this.schema })
+        return drizzle({ client: pool as unknown as pg.Pool, logger, relations: this.relations })
       })
       const myReplicas = withReplicas(this.drizzle, readReplicas as any)
       this.drizzle = myReplicas

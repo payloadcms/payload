@@ -8,7 +8,7 @@ import type {
   PostgresSchemaHook,
 } from '@payloadcms/drizzle/postgres'
 import type { VercelPool, VercelPostgresPoolConfig } from '@vercel/postgres'
-import type { DrizzleConfig } from 'drizzle-orm'
+import type { AnyRelations, DrizzleConfig } from 'drizzle-orm'
 import type { NodePgDatabase } from 'drizzle-orm/node-postgres'
 import type { PgSchema, PgTableFn, PgTransactionConfig } from 'drizzle-orm/pg-core'
 
@@ -89,7 +89,7 @@ export type Args = {
 }
 
 export interface GeneratedDatabaseSchema {
-  schemaUntyped: Record<string, unknown>
+  schemaUntyped: AnyRelations
 }
 
 type ResolveSchemaType<T> = 'schema' extends keyof T

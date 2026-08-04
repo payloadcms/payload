@@ -54,7 +54,7 @@
   "dependencies": {
     "console-table-printer": "2.15.0",
     "dequal": "2.0.3",
-    "drizzle-orm": "0.45.2",
+    "drizzle-orm": "1.0.0-rc.4",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "14.0.0"

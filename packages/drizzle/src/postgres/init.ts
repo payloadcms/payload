@@ -39,7 +39,6 @@ export const init: Init = async function init(this: BasePostgresAdapter) {
   this.schema = {
     pgSchema: this.pgSchema,
     ...this.tables,
-    ...this.relations,
     ...this.enums,
   }
 }

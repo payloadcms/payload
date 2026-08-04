@@ -59,7 +59,7 @@ export const connect: Connect = async function connect(
     }
 
     const logger = this.logger || false
-    this.drizzle = drizzle({ client: this.pool, logger, schema: this.schema })
+    this.drizzle = drizzle({ client: this.pool, logger, relations: this.relations })
 
     if (this.readReplicaOptions) {
       this.primaryDrizzle = this.drizzle as any
@@ -73,7 +73,7 @@ export const connect: Connect = async function connect(
           adapter: this,
           pool,
         })
-        return drizzle({ client: pool, logger, schema: this.schema })
+        return drizzle({ client: pool, logger, relations: this.relations })
       })
       const myReplicas = withReplicas(this.drizzle, readReplicas as any)
       this.drizzle = myReplicas

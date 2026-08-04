@@ -24,11 +24,12 @@ type BuildFindQueryArgs = {
   versions?: boolean
 }
 
+// Payload builds the relational query config dynamically, including sub-table relations
+// (`_locales`, `_rels`, `_texts`, `_numbers`) whose keys aren't known to the static
+// `with` type, so `with` is intentionally loosened here.
 export type Result = {
-  with?: {
-    _locales?: DBQueryConfig<'many', true, any, any>
-  } & DBQueryConfig<'many', true, any, any>
-} & DBQueryConfig<'many', true, any, any>
+  with?: Record<string, any>
+} & Omit<DBQueryConfig<'many', any, any>, 'with'>
 
 // Generate the Drizzle query for findMany based on
 // a collection field structure

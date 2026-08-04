@@ -70,8 +70,8 @@
     "@libsql/client": "0.14.0",
     "@payloadcms/drizzle": "workspace:*",
     "console-table-printer": "2.15.0",
-    "drizzle-kit": "0.31.7",
-    "drizzle-orm": "0.45.2",
+    "drizzle-kit": "1.0.0-rc.4",
+    "drizzle-orm": "1.0.0-rc.4",
     "prompts": "2.4.2",
     "to-snake-case": "1.0.0",
     "uuid": "14.0.0"

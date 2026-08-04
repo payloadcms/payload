@@ -1,7 +1,7 @@
 import type { ResultSet } from '@libsql/client'
 import type { BuildQueryJoinAliases, DrizzleAdapter, extendDrizzleTable } from '@payloadcms/drizzle'
 import type { BaseSQLiteAdapter, BaseSQLiteArgs } from '@payloadcms/drizzle/sqlite'
-import type { DrizzleConfig, Relation, Relations, SQL } from 'drizzle-orm'
+import type { AnyRelations, DrizzleConfig, SQL, TableRelationalConfig } from 'drizzle-orm'
 import type { AnyD1Database, DrizzleD1Database } from 'drizzle-orm/d1'
 import type { LibSQLDatabase } from 'drizzle-orm/libsql'
 import type {
@@ -49,7 +49,7 @@ export type GenericTable = SQLiteTableWithColumns<{
   schema: string
 }>
 
-export type GenericRelation = Relations<string, Record<string, Relation<string>>>
+export type GenericRelation = TableRelationalConfig
 
 export type CountDistinct = (args: {
   db: LibSQLDatabase
@@ -95,7 +95,7 @@ type SQLiteDrizzleAdapter = Omit<
 >
 
 export interface GeneratedDatabaseSchema {
-  schemaUntyped: Record<string, unknown>
+  schemaUntyped: AnyRelations
 }
 
 type ResolveSchemaType<T> = 'schema' extends keyof T

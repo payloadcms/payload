@@ -40,6 +40,5 @@ export const init: Init = async function init(this: BaseSQLiteAdapter) {
 
   this.schema = {
     ...this.tables,
-    ...this.relations,
   }
 }
