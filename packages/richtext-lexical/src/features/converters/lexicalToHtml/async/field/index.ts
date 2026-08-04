@@ -9,6 +9,12 @@ import { convertLexicalToHTMLAsync } from '../index.js'
 type Args = {
   converters?: HTMLConvertersAsync | HTMLConvertersFunctionAsync
   /**
+   * Whether the lexicalHTML field should appear in the list view filter options.
+   *
+   * @default true
+   */
+  disableListColumn?: boolean
+  /**
    * Whether the lexicalHTML field should be hidden in the admin panel
    *
    * @default true
@@ -36,11 +42,19 @@ type Args = {
  * @todo will be renamed to lexicalHTML in 4.0, replacing the deprecated `lexicalHTML` converter
  */
 export const lexicalHTMLField: (args: Args) => Field = (args) => {
-  const { converters, hidden = true, htmlFieldName, lexicalFieldName, storeInDB = false } = args
+  const {
+    converters,
+    disableListColumn = true,
+    hidden = true,
+    htmlFieldName,
+    lexicalFieldName,
+    storeInDB = false,
+  } = args
   const field: Field = {
     name: htmlFieldName,
     type: 'code',
     admin: {
+      disableListColumn,
       editorOptions: {
         language: 'html',
       },
